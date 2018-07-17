@@ -26,9 +26,11 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.function.Consumer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
 import javax.sql.DataSource;
 
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
@@ -53,7 +55,37 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel Sagenschneider
  */
-public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManagedObjectSource.Dependencies, None> {
+public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed, None> {
+
+	/**
+	 * {@link Property} to specify the dependency type for the
+	 * {@link EntityManager}.
+	 */
+	public static final String PROPERTY_DEPENDENCY_TYPE = "persistence.dependency";
+
+	/**
+	 * Dependency type.
+	 */
+	public static enum DependencyType {
+
+		/**
+		 * Value for {{@link #PROPERTY_DEPENDENCY_TYPE} indicating depending on
+		 * {@link Connection}.
+		 */
+		connection,
+
+		/**
+		 * Value for {@link #PROPERTY_DEPENDENCY_TYPE} indicating depending on
+		 * {@link DataSource}.
+		 */
+		datasource,
+
+		/**
+		 * Value for {@link #PROPERTY_DEPENDENCY_TYPE} indicating the
+		 * {@link EntityManager} will manage connectivity.
+		 */
+		managed
+	}
 
 	/**
 	 * {@link Property} for the name of the persistence unit.
@@ -65,13 +97,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	 * {@link PersistenceFactory}.
 	 */
 	public static final String PROPERTY_PERSISTENCE_FACTORY = "persistence.factory";
-
-	/**
-	 * Dependencies.
-	 */
-	public static enum Dependencies {
-		CONNECTION
-	}
 
 	/**
 	 * <p>
@@ -88,7 +113,9 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		 * 
 		 * @param persistenceUnitName Persistence Unit name.
 		 * @param dataSource          {@link DataSource} to use for the
-		 *                            {@link EntityManagerFactory}.
+		 *                            {@link EntityManagerFactory}. <code>null</code> if
+		 *                            {@link EntityManagerFactory} to create and manage
+		 *                            the {@link DataSource}.
 		 * @param properties          Existing properties configured to the
 		 *                            {@link JpaManagedObjectSource}.
 		 * @return Configuration for the {@link EntityManagerFactory} to use the
@@ -97,6 +124,36 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		 */
 		EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, DataSource dataSource,
 				Properties properties) throws Exception;
+	}
+
+	/**
+	 * Extracts the {@link Connection}.
+	 */
+	@FunctionalInterface
+	public static interface JpaConnectionFactory {
+
+		/**
+		 * Obtains the {@link Connection}.
+		 * 
+		 * @param registry {@link ObjectRegistry}.
+		 * @return {@link Connection}.
+		 */
+		Connection createConnection(ObjectRegistry<Indexed> registry);
+	}
+
+	/**
+	 * Extracts the {@link DataSource}.
+	 */
+	@FunctionalInterface
+	public static interface JpaDataSourceFactory {
+
+		/**
+		 * Obtains the {@link DataSource}.
+		 * 
+		 * @param registry {@link ObjectRegistry}.
+		 * @return {@link DataSource}.
+		 */
+		DataSource createDataSource(ObjectRegistry<Indexed> registry);
 	}
 
 	/**
@@ -121,9 +178,14 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	private final ThreadLocal<Connection> dataSourceConnection = new ThreadLocal<>();
 
 	/**
-	 * {@link DataSource}.
+	 * {@link JpaConnectionFactory}.
 	 */
-	private DataSource dataSource;
+	private JpaConnectionFactory jpaConnectionFactory;
+
+	/**
+	 * {@link JpaDataSourceFactory}.
+	 */
+	private JpaDataSourceFactory jpaDataSourceFactory;
 
 	/**
 	 * Persistence unit name.
@@ -138,12 +200,17 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	/**
 	 * {@link PersistenceFactory}.
 	 */
-	private PersistenceFactory persistenceFactory;
+	private volatile PersistenceFactory persistenceFactory;
 
 	/**
 	 * {@link EntityManagerFactory}.
 	 */
 	private EntityManagerFactory entityManagerFactory;
+
+	/**
+	 * Setup for the {@link EntityManager}.
+	 */
+	private Consumer<JpaManagedObject> entityManagerSetup;
 
 	/**
 	 * {@link EntityManagerWrapperFactory}.
@@ -173,7 +240,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	 * @return {@link PersistenceFactory}.
 	 * @throws Exception If fails to create the {@link PersistenceFactory}.
 	 */
-	protected PersistenceFactory getPersistenceFactory(MetaDataContext<Dependencies, None> context) throws Exception {
+	protected PersistenceFactory getPersistenceFactory(MetaDataContext<Indexed, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Obtain the class name
@@ -181,6 +248,16 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 
 		// Create instance and return
 		return (PersistenceFactory) mosContext.loadClass(className).getDeclaredConstructor().newInstance();
+	}
+
+	/**
+	 * Indicates if required to run within {@link EntityTransaction}.
+	 * 
+	 * @return <code>true</code> if required to run within
+	 *         {@link EntityTransaction}.
+	 */
+	protected boolean isRunWithinTransaction() {
+		return true;
 	}
 
 	/*
@@ -198,13 +275,12 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
+	protected void loadMetaData(MetaDataContext<Indexed, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Load the meta-data
 		context.setObjectClass(EntityManager.class);
 		context.setManagedObjectClass(JpaManagedObject.class);
-		context.addDependency(Dependencies.CONNECTION, Connection.class);
 		context.addManagedObjectExtension(EntityManager.class,
 				(managedObject) -> ((JpaManagedObject) managedObject).entityManager);
 		context.getManagedObjectSourceContext().getRecycleFunction(new RecycleFunction()).linkParameter(0,
@@ -215,84 +291,146 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		this.properties = mosContext.getProperties();
 		ClassLoader classLoader = mosContext.getClassLoader();
 
+		// Obtain the dependency type
+		String dependencyTypeName = mosContext.getProperty(PROPERTY_DEPENDENCY_TYPE, DependencyType.managed.name());
+		DependencyType dependencyType;
+		try {
+			dependencyType = DependencyType.valueOf(dependencyTypeName.toLowerCase());
+		} catch (IllegalArgumentException ex) {
+			throw new Exception("Unknown " + PROPERTY_DEPENDENCY_TYPE + " property value '" + dependencyTypeName + "'");
+		}
+
+		// Determine the means to access data source
+		switch (dependencyType) {
+
+		case connection:
+			// Add dependency on connection
+			context.addDependency(Connection.class).setLabel(Connection.class.getSimpleName());
+
+			// Setup entity manager by making connection available
+			this.entityManagerSetup = (mo) -> this.dataSourceConnection.set(mo.connection);
+
+			// Obtain the connection
+			this.jpaConnectionFactory = (registry) -> (Connection) registry.getObject(0);
+
+			// Determine compiler available
+			OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+			if (compiler == null) {
+
+				// Fall back to proxy for data source wrapper
+				DataSource dataSource = (DataSource) Proxy.newProxyInstance(classLoader,
+						new Class[] { DataSource.class }, (proxy, method, args) -> {
+							switch (method.getName()) {
+							case "getConnection":
+								return this.dataSourceConnection.get();
+							}
+							throw new UnsupportedOperationException("Method " + method.getName()
+									+ " not available from JPA proxy " + DataSource.class.getSimpleName());
+						});
+				this.jpaDataSourceFactory = (registry) -> dataSource;
+
+			} else {
+				// Use compiled implementation of data source
+				StringWriter sourceBuffer = new StringWriter();
+				PrintWriter source = new PrintWriter(sourceBuffer);
+
+				// Obtain wrapper class name
+				ClassName className = compiler.createClassName(DataSource.class.getName());
+
+				// Write declaration
+				source.println("package " + className.getPackageName() + ";");
+				source.println("@" + compiler.getSourceName(SuppressWarnings.class) + "(\"unchecked\")");
+				source.println("public class " + className.getClassName() + " implements "
+						+ compiler.getSourceName(DataSource.class) + "{");
+
+				// Write constructor
+				compiler.writeConstructor(source, className.getClassName(),
+						compiler.createField(JpaManagedObjectSource.class, "mos"));
+
+				// Write the methods
+				for (Method method : DataSource.class.getMethods()) {
+
+					// Write the method signature
+					source.print("  public ");
+					compiler.writeMethodSignature(source, method);
+					source.println(" {");
+
+					// Write the implementation
+					switch (method.getName()) {
+					case "getConnection":
+						source.println("    return this.mos.getConnection();");
+						break;
+					default:
+						source.println("    throw new " + compiler.getSourceName(SQLFeatureNotSupportedException.class)
+								+ "();");
+						break;
+					}
+
+					// Complete the method
+					source.println("  }");
+				}
+
+				// Complete class
+				source.println("}");
+				source.flush();
+
+				// Compile the data source
+				Class<?> dataSourceClass = compiler.addSource(className, sourceBuffer.toString()).compile();
+				DataSource dataSource = (DataSource) dataSourceClass.getConstructor(JpaManagedObjectSource.class)
+						.newInstance(this);
+				this.jpaDataSourceFactory = (registry) -> dataSource;
+			}
+			break;
+
+		case datasource:
+			// Add dependency on data source
+			context.addDependency(DataSource.class).setLabel(DataSource.class.getSimpleName());
+
+			// No setup for entity manager
+			this.entityManagerSetup = (mo) -> {
+			};
+
+			// No connection (as provided directly via data source)
+			this.jpaConnectionFactory = (registry) -> null;
+
+			// Obtain the data source
+			this.jpaDataSourceFactory = (registry) -> (DataSource) registry.getObject(0);
+			break;
+
+		case managed:
+			// No dependencies as data source managed by entity manager
+			this.entityManagerSetup = (mo) -> {
+			};
+			this.jpaConnectionFactory = (registry) -> null;
+			this.jpaDataSourceFactory = (registry) -> null;
+			break;
+
+		default:
+			throw new IllegalArgumentException(
+					"Unknown " + PROPERTY_DEPENDENCY_TYPE + " configuration value '" + dependencyType + "'");
+		}
+
 		// Determine compiler available
 		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
 		if (compiler == null) {
-
-			// Fall back to proxy for data source wrapper
-			this.dataSource = (DataSource) Proxy.newProxyInstance(classLoader, new Class[] { DataSource.class },
-					(proxy, method, args) -> {
-						switch (method.getName()) {
-						case "getConnection":
-							return this.dataSourceConnection.get();
-						}
-						throw new UnsupportedOperationException("Method " + method.getName()
-								+ " not available from JPA proxy " + DataSource.class.getSimpleName());
-					});
 
 			// Create fall back proxy entity manager wrapper
 			Class<?>[] interfaces = new Class[] { EntityManager.class };
 			this.wrapperFactory = (mo) -> (EntityManager) Proxy.newProxyInstance(classLoader, interfaces, mo);
 
 		} else {
-			// Use compiled implementation of data source
-			StringWriter sourceBuffer = new StringWriter();
-			PrintWriter source = new PrintWriter(sourceBuffer);
-
-			// Obtain wrapper class name
-			ClassName className = compiler.createClassName(DataSource.class.getName());
-
-			// Write declaration
-			source.println("package " + className.getPackageName() + ";");
-			source.println("@" + compiler.getSourceName(SuppressWarnings.class) + "(\"unchecked\")");
-			source.println("public class " + className.getClassName() + " implements "
-					+ compiler.getSourceName(DataSource.class) + "{");
-
-			// Write constructor
-			compiler.writeConstructor(source, className.getClassName(),
-					compiler.createField(JpaManagedObjectSource.class, "mos"));
-
-			// Write the methods
-			for (Method method : DataSource.class.getMethods()) {
-
-				// Write the method signature
-				source.print("  public ");
-				compiler.writeMethodSignature(source, method);
-				source.println(" {");
-
-				// Write the implementation
-				switch (method.getName()) {
-				case "getConnection":
-					source.println("    return this.mos.getConnection();");
-					break;
-				default:
-					source.println(
-							"    throw new " + compiler.getSourceName(SQLFeatureNotSupportedException.class) + "();");
-					break;
-				}
-
-				// Complete the method
-				source.println("  }");
-			}
-
-			// Complete class
-			source.println("}");
-			source.flush();
-
-			// Compile the data source
-			Class<?> dataSourceClass = compiler.addSource(className, sourceBuffer.toString()).compile();
-			this.dataSource = (DataSource) dataSourceClass.getConstructor(JpaManagedObjectSource.class)
-					.newInstance(this);
-
 			// Use compiled implementation of entity manager wrapper
 			Class<?> wrapperClass = compiler.addWrapper(EntityManager.class, JpaManagedObject.class,
 					"this.delegate.getEntityManager()", (wrapperContext) -> {
 						switch (wrapperContext.getMethod().getName()) {
 						case "getTransaction":
-							wrapperContext.write("    throw new " + compiler.getSourceName(IllegalStateException.class)
-									+ "(\"" + compiler.getSourceName(EntityManager.class)
-									+ ".getTransaction() may not be invoked as transaction managed by "
-									+ compiler.getSourceName(OfficeFloor.class) + "\");");
+							if (this.isRunWithinTransaction()) {
+								wrapperContext
+										.write("    throw new " + compiler.getSourceName(IllegalStateException.class)
+												+ "(\"" + compiler.getSourceName(EntityManager.class)
+												+ ".getTransaction() may not be invoked as transaction managed by "
+												+ compiler.getSourceName(OfficeFloor.class) + "\");");
+							}
 							break;
 
 						case "close":
@@ -309,7 +447,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 
 		// Obtain the persistence factory
 		this.persistenceFactory = this.getPersistenceFactory(context);
-
 	}
 
 	@Override
@@ -320,7 +457,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 	/**
 	 * JPA {@link ManagedObject}.
 	 */
-	public class JpaManagedObject implements CoordinatingManagedObject<Dependencies>, InvocationHandler {
+	public class JpaManagedObject implements CoordinatingManagedObject<Indexed>, InvocationHandler {
 
 		/**
 		 * {@link Connection}.
@@ -344,9 +481,8 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		 */
 		public EntityManager getEntityManager() {
 
-			// Specify the connection
-			// All entity manager operations synchronous so will use
-			JpaManagedObjectSource.this.dataSourceConnection.set(this.connection);
+			// Setup the entity manager for use
+			JpaManagedObjectSource.this.entityManagerSetup.accept(this);
 
 			// Return the entity manager
 			return this.entityManager;
@@ -357,16 +493,13 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 		 */
 
 		@Override
-		public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
-
-			// Obtain the connection
-			this.connection = (Connection) registry.getObject(Dependencies.CONNECTION);
+		public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
 
 			// Easy access to managed object source
 			JpaManagedObjectSource mos = JpaManagedObjectSource.this;
 
-			// Specify connection for setup of entity manager factory and entity manager
-			mos.dataSourceConnection.set(this.connection);
+			// Obtain the possible connection
+			this.connection = mos.jpaConnectionFactory.createConnection(registry);
 
 			// If still reference to persistence factory (then likely factory not created)
 			if (mos.persistenceFactory != null) {
@@ -375,9 +508,15 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 				synchronized (mos) {
 					if (mos.entityManagerFactory == null) {
 
+						// Obtain the data source
+						DataSource dataSource = mos.jpaDataSourceFactory.createDataSource(registry);
+
+						// Setup for entity manager creation
+						mos.entityManagerSetup.accept(this);
+
 						// Create the entity manager factory
 						mos.entityManagerFactory = mos.persistenceFactory
-								.createEntityManagerFactory(mos.persistenceUnitName, mos.dataSource, mos.properties);
+								.createEntityManagerFactory(mos.persistenceUnitName, dataSource, mos.properties);
 					}
 
 					// Factory created (so indicate no need to create anymore)
@@ -386,11 +525,13 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 			}
 
 			// Create the entity manager
-			EntityManagerFactory factory = JpaManagedObjectSource.this.entityManagerFactory;
-			this.entityManager = factory.createEntityManager();
+			this.entityManager = mos.entityManagerFactory.createEntityManager();
 
 			// Run entity manager within managed transaction
-			this.entityManager.getTransaction().begin();
+			if (mos.isRunWithinTransaction()) {
+				mos.entityManagerSetup.accept(this);
+				this.entityManager.getTransaction().begin();
+			}
 
 			// Provide proxy entity manager (to specify connection)
 			this.proxy = mos.wrapperFactory.wrap(this);
@@ -443,14 +584,19 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<JpaManag
 			EntityManager entityManager = recycle.getManagedObject().entityManager;
 			try {
 
-				// If no escalations, then commit changes
-				CleanupEscalation[] escalations = recycle.getCleanupEscalations();
-				if ((escalations != null) && (escalations.length > 0)) {
-					// Escalations, so rollback transaction
-					entityManager.getTransaction().rollback();
-				} else {
-					// No escalations, so commit the transaction
-					entityManager.getTransaction().commit();
+				// Handle possible transaction
+				EntityTransaction transaction = entityManager.getTransaction();
+				if ((transaction != null) && (transaction.isActive())) {
+
+					// If no escalations, then commit changes
+					CleanupEscalation[] escalations = recycle.getCleanupEscalations();
+					if ((escalations != null) && (escalations.length > 0)) {
+						// Escalations, so rollback transaction
+						entityManager.getTransaction().rollback();
+					} else {
+						// No escalations, so commit the transaction
+						entityManager.getTransaction().commit();
+					}
 				}
 
 			} finally {

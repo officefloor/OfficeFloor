@@ -27,6 +27,7 @@ import javax.sql.DataSource;
 
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.PersistenceFactory;
@@ -43,7 +44,7 @@ public class EclipseLinkJpaManagedObjectSource extends JpaManagedObjectSource im
 	 */
 
 	@Override
-	protected PersistenceFactory getPersistenceFactory(MetaDataContext<Dependencies, None> context) throws Exception {
+	protected PersistenceFactory getPersistenceFactory(MetaDataContext<Indexed, None> context) throws Exception {
 		return this;
 	}
 
@@ -56,7 +57,9 @@ public class EclipseLinkJpaManagedObjectSource extends JpaManagedObjectSource im
 	public EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, DataSource dataSource,
 			Properties properties) throws Exception {
 		Map configuration = new HashMap<>(properties);
-		configuration.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, dataSource);
+		if (dataSource != null) {
+			configuration.put(PersistenceUnitProperties.NON_JTA_DATASOURCE, dataSource);
+		}
 		return Persistence.createEntityManagerFactory(persistenceUnitName, configuration);
 	}
 
