@@ -48,10 +48,12 @@ import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 import net.officefloor.jpa.JpaManagedObjectSource;
+import net.officefloor.jpa.JpaManagedObjectSource.DependencyType;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -200,7 +202,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		// Indicate connection
 		properties.add(JpaManagedObjectSource.PROPERTY_DEPENDENCY_TYPE);
-		properties.add(JpaManagedObjectSource.DEPENDENCY_TYPE_CONNECTION);
+		properties.add(DependencyType.connection.name());
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getJpaManagedObjectSourceClass(),
@@ -227,7 +229,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		// Indicate connection
 		properties.add(JpaManagedObjectSource.PROPERTY_DEPENDENCY_TYPE);
-		properties.add(JpaManagedObjectSource.DEPENDENCY_TYPE_DATA_SOURCE);
+		properties.add(DependencyType.datasource.name());
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getJpaManagedObjectSourceClass(),
@@ -253,7 +255,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		// Indicate connection
 		properties.add(JpaManagedObjectSource.PROPERTY_DEPENDENCY_TYPE);
-		properties.add(JpaManagedObjectSource.DEPENDENCY_TYPE_MANGAED);
+		properties.add(DependencyType.managed.name());
 
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getJpaManagedObjectSourceClass(),
@@ -287,10 +289,10 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testReadWithCompiler() throws Throwable {
+	public void testConnectionReadWithCompiler() throws Throwable {
 		assertNotNull("Invalid test as java compiler is not available",
 				OfficeFloorJavaCompiler.newInstance(AbstractJpaTestCase.class.getClassLoader()));
-		this.doReadTest();
+		this.doReadTest(true);
 	}
 
 	/**
@@ -298,16 +300,27 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
-	public void testReadWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doReadTest());
+	public void testConnectionReadWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doReadTest(true));
+	}
+
+	/**
+	 * Ensure able to read entry via {@link DataSource}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testDataSourceRead() throws Throwable {
+		this.doReadTest(false);
 	}
 
 	/**
 	 * Ensure able to read entry from database.
 	 * 
+	 * @param isConnection Indicates if {@link Connection} otherwise
+	 *                     {@link DataSource}.
 	 * @throws Throwable On test failure.
 	 */
-	public void doReadTest() throws Throwable {
+	public void doReadTest(boolean isConnection) throws Throwable {
 
 		// Add entry to database
 		try (Statement statement = this.connection.createStatement()) {
@@ -315,7 +328,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(false, (context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isConnection, false, (context) -> {
 			context.addSection("READ", ReadSection.class);
 		});
 
@@ -354,7 +367,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testInsertWithCompiler() throws Throwable {
-		this.doInsertTest();
+		this.doInsertTest(true);
 	}
 
 	/**
@@ -363,18 +376,29 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testInsertWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertTest());
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertTest(true));
+	}
+
+	/**
+	 * Ensure able to insert entry via {@link DataSource}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testInsertDataSource() throws Throwable {
+		this.doInsertTest(false);
 	}
 
 	/**
 	 * Ensure able to insert entry into database.
 	 * 
+	 * @param isConnection Indicates if {@link Connection} otherwise
+	 *                     {@link DataSource}.
 	 * @throws Throwable On test failure.
 	 */
-	public void doInsertTest() throws Throwable {
+	public void doInsertTest(boolean isConnection) throws Throwable {
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(false, (context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isConnection, false, (context) -> {
 			context.addSection("INSERT", InsertSection.class);
 		});
 
@@ -409,7 +433,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testUpdateWithCompiler() throws Throwable {
-		this.doUpdateTest();
+		this.doUpdateTest(true);
 	}
 
 	/**
@@ -418,15 +442,26 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testUpdateWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doUpdateTest());
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doUpdateTest(true));
+	}
+
+	/**
+	 * Ensure able to update entry via {@link DataSource}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testUpdateDataSource() throws Throwable {
+		this.doUpdateTest(false);
 	}
 
 	/**
 	 * Ensure able to update entry into database.
 	 * 
+	 * @param isConnection Indicates if {@link Connection} otherwise
+	 *                     {@link DataSource}.
 	 * @throws Throwable On test failure.
 	 */
-	public void doUpdateTest() throws Throwable {
+	public void doUpdateTest(boolean isConnection) throws Throwable {
 
 		// Add entry to database
 		try (Statement statement = this.connection.createStatement()) {
@@ -434,7 +469,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(false, (context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isConnection, false, (context) -> {
 			context.addSection("UPDATE", UpdateSection.class);
 		});
 
@@ -468,7 +503,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testDeleteWithCompiler() throws Throwable {
-		this.doDeleteTest();
+		this.doDeleteTest(true);
 	}
 
 	/**
@@ -477,15 +512,26 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testDeleteWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doDeleteTest());
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doDeleteTest(true));
+	}
+
+	/**
+	 * Ensure able to delete entry via {@link DataSource}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testDeleteDataSource() throws Throwable {
+		this.doDeleteTest(false);
 	}
 
 	/**
 	 * Ensure able to delete entry from database.
 	 * 
+	 * @param isConnection Indicates if {@link Connection} otherwise
+	 *                     {@link DataSource}.
 	 * @throws Throwable On test failure.
 	 */
-	public void doDeleteTest() throws Throwable {
+	public void doDeleteTest(boolean isConnection) throws Throwable {
 
 		// Add entry to database
 		try (Statement statement = this.connection.createStatement()) {
@@ -493,7 +539,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(false, (context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isConnection, false, (context) -> {
 			context.addSection("DELETE", DeleteSection.class);
 		});
 
@@ -524,7 +570,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testStressInsertWithCompiler() throws Throwable {
-		this.doStressInsertTest(false);
+		this.doStressInsertTest(true, false);
 	}
 
 	/**
@@ -533,7 +579,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testStressInsertWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressInsertTest(false));
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressInsertTest(true, false));
 	}
 
 	/**
@@ -542,7 +588,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testStressInsertPooledConnectionsWithCompiler() throws Throwable {
-		this.doStressInsertTest(true);
+		this.doStressInsertTest(true, true);
 	}
 
 	/**
@@ -551,26 +597,39 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testStressInsertPooledConnectionsWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressInsertTest(true));
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressInsertTest(true, true));
+	}
+
+	/**
+	 * Undertake stress insert test with {@link DataSource}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testStressInsertDataSource() throws Throwable {
+		this.doStressInsertTest(false, false);
 	}
 
 	/**
 	 * Undertakes the stress insert test.
 	 * 
+	 * @param isConnection      Indicates if {@link Connection} otherwise
+	 *                          {@link DataSource}.
 	 * @param isPoolConnections Indicates whether to pool connections.
 	 */
-	private void doStressInsertTest(boolean isPoolConnections) throws Throwable {
+	private void doStressInsertTest(boolean isConnection, boolean isPoolConnections) throws Throwable {
 
 		final int RUN_COUNT = 10000;
 		final int WARM_UP = RUN_COUNT / 10;
 		final long TIMEOUT = 10000;
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isPoolConnections, (context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isConnection, isPoolConnections, (context) -> {
 			context.addSection("StressInsert", StressInsertSection.class);
 		});
 
 		// Undertake warm up
+		System.out.println("==== " + this.getClass().getSimpleName() + " ====");
+		System.out.println(this.getName());
 		int warmupProgress = WARM_UP / 10;
 		for (int i = 0; i < WARM_UP; i++) {
 			if ((i % warmupProgress) == 0) {
@@ -594,8 +653,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		System.out.println();
 		long runTime = System.currentTimeMillis() - startTime;
 		long requestsPerSecond = (int) ((RUN_COUNT * 2) / (((float) runTime) / 1000.0));
-		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance " + requestsPerSecond
-				+ " inserts/sec " + (isPoolConnections ? " (pooled)" : ""));
+		System.out.println(requestsPerSecond + " inserts/sec " + (isPoolConnections ? " (pooled)" : ""));
+		System.out.println();
 
 		// Ensure inserted all rows
 		try (PreparedStatement statement = this.connection
@@ -640,7 +699,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testStressSelectWithCompiler() throws Throwable {
-		this.doStressSelectTest(false);
+		this.doStressSelectTest(true, false);
 	}
 
 	/**
@@ -649,7 +708,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testStressSelectWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressSelectTest(false));
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressSelectTest(true, false));
 	}
 
 	/**
@@ -658,7 +717,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testStressSelectPooledConnectionsWithCompiler() throws Throwable {
-		this.doStressSelectTest(true);
+		this.doStressSelectTest(true, true);
 	}
 
 	/**
@@ -667,15 +726,26 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testStressSelectPooledConnectionsWithDynamicProxy() throws Throwable {
-		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressSelectTest(true));
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressSelectTest(true, true));
+	}
+
+	/**
+	 * Ensure stress select with {@link DataSource}.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testStressSelectDataSource() throws Throwable {
+		this.doStressSelectTest(false, false);
 	}
 
 	/**
 	 * Undertakes the stress select test.
 	 * 
+	 * @param isConnection        Indicates if {@link Connection} otherwise
+	 *                            {@link DataSource}.
 	 * @param isPooledConnections Indicates if pool connections.
 	 */
-	private void doStressSelectTest(boolean isPooledConnections) throws Throwable {
+	private void doStressSelectTest(boolean isConnection, boolean isPooledConnections) throws Throwable {
 
 		final int RUN_COUNT = 10000;
 		final int WARM_UP = RUN_COUNT / 10;
@@ -691,11 +761,13 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		}
 
 		// Configure the application
-		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isPooledConnections, (context) -> {
+		OfficeFloor officeFloor = this.compileAndOpenOfficeFloor(isConnection, isPooledConnections, (context) -> {
 			context.addSection("StressSelect", StressSelectSection.class);
 		});
 
 		// Undertake warm up
+		System.out.println("==== " + this.getClass().getSimpleName() + " ====");
+		System.out.println(this.getName());
 		int warmupProgress = WARM_UP / 10;
 		for (int i = 0; i < WARM_UP; i++) {
 			if ((i % warmupProgress) == 0) {
@@ -721,8 +793,8 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		long runTime = System.currentTimeMillis() - startTime;
 		long requestsPerSecond = (int) ((RUN_COUNT * StressSelectSection.THREAD_COUNT * 2)
 				/ (((float) runTime) / 1000.0));
-		System.out.println(this.getClass().getSimpleName() + " " + this.getName() + ": performance "
-				+ +requestsPerSecond + " selects/sec");
+		System.out.println(requestsPerSecond + " selects/sec");
+		System.out.println();
 		assertTrue("Should be complete", StressSelectSection.isCompleted);
 
 		// Complete
@@ -793,14 +865,16 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	/**
 	 * Compiles and opens the {@link OfficeFloor} for testing.
 	 * 
+	 * @param isConnection      Indicates if {@link Connection} otherwise
+	 *                          {@link DataSource}.
 	 * @param isPoolConnections Indicates whether to pool connections.
 	 * @param extension         {@link CompileOfficeExtension} for test specific
 	 *                          configuration.
 	 * @return Open {@link OfficeFloor}.
 	 * @throws Exception If fails to compile and open the {@link OfficeFloor}.
 	 */
-	private OfficeFloor compileAndOpenOfficeFloor(boolean isPoolConnections, CompileOfficeExtension extension)
-			throws Exception {
+	private OfficeFloor compileAndOpenOfficeFloor(boolean isConnection, boolean isPoolConnections,
+			CompileOfficeExtension extension) throws Exception {
 
 		// Configure the application
 		CompileOfficeFloor compile = new CompileOfficeFloor();
@@ -814,23 +888,35 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 			context.getOfficeArchitect().enableAutoWireTeams();
 			context.addManagedObject("tag", NewThread.class, ManagedObjectScope.THREAD);
 
-			// Create the connection
-			OfficeManagedObjectSource connectionMos = context.getOfficeArchitect()
-					.addOfficeManagedObjectSource("connection", ConnectionManagedObjectSource.class.getName());
-			this.loadDatabaseProperties(connectionMos);
-			connectionMos.addOfficeManagedObject("connection", ManagedObjectScope.THREAD);
+			// Provide connection to database
+			if (isConnection) {
+				// Create the connection
+				OfficeManagedObjectSource connectionMos = context.getOfficeArchitect()
+						.addOfficeManagedObjectSource("connection", ConnectionManagedObjectSource.class.getName());
+				this.loadDatabaseProperties(connectionMos);
+				connectionMos.addOfficeManagedObject("connection", ManagedObjectScope.THREAD);
 
-			// Determine if pool connections
-			if (isPoolConnections) {
-				OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
-						ThreadLocalJdbcConnectionPoolSource.class.getName());
-				context.getOfficeArchitect().link(connectionMos, pool);
+				// Determine if pool connections
+				if (isPoolConnections) {
+					OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
+							ThreadLocalJdbcConnectionPoolSource.class.getName());
+					context.getOfficeArchitect().link(connectionMos, pool);
+				}
+
+			} else {
+				// Create the data source
+				OfficeManagedObjectSource dataSourceMos = context.getOfficeArchitect()
+						.addOfficeManagedObjectSource("dataSource", DataSourceManagedObjectSource.class.getName());
+				this.loadDatabaseProperties(dataSourceMos);
+				dataSourceMos.addOfficeManagedObject("dataSource", ManagedObjectScope.THREAD);
 			}
 
 			// Add JPA
 			OfficeManagedObjectSource jpaMos = context.getOfficeArchitect().addOfficeManagedObjectSource("JPA",
 					this.getJpaManagedObjectSourceClass().getName());
 			this.loadJpaProperties(jpaMos);
+			jpaMos.addProperty(JpaManagedObjectSource.PROPERTY_DEPENDENCY_TYPE,
+					isConnection ? DependencyType.connection.name() : DependencyType.datasource.name());
 			jpaMos.addOfficeManagedObject("JPA", ManagedObjectScope.THREAD);
 
 			// Configure specific test functionality
