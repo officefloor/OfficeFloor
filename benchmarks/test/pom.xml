@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor.benchmarks</groupId>
@@ -15,6 +16,7 @@
 	<modules>
 		<module>woof_test</module>
 		<module>woof_benchmark_test</module>
+		<module>woof_tpr_test</module>
 		<module>woof_micro_test</module>
 		<module>woof_raw_test</module>
 		<module>woof_netty_test</module>
@@ -62,6 +64,11 @@
 			<dependency>
 				<groupId>net.officefloor.benchmarks</groupId>
 				<artifactId>woof_benchmark</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.benchmarks</groupId>
+				<artifactId>woof_tpr</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
