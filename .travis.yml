@@ -1,18 +1,6 @@
 language: java
 
-sudo: true
-
-services:
-  - docker
-
-cache:
-  directories:
-    - $HOME/.m2
-
 jdk: 
   - oraclejdk10
-
-os:
-  - linux
 
 before_install: cd officefloor
