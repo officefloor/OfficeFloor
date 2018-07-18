@@ -231,13 +231,6 @@ public class HttpServerSocketManagedObjectSource
 	 */
 	public static SocketManager createSocketManager() throws IOException {
 
-		// TODO fix up socket listeners based on CPUs (without hyperthreading)
-		int availableProcessors = Runtime.getRuntime().availableProcessors();
-		if (availableProcessors >= 2) {
-			// Assume hyper threading
-			availableProcessors = availableProcessors / 2;
-		}
-
 		/*
 		 * Obtain configuration of socket manager.
 		 * 
@@ -250,6 +243,7 @@ public class HttpServerSocketManagedObjectSource
 		 * 
 		 * - 8 * 8192 = 65536 to fill a TCP packet, with 4 TCP packet buffer.
 		 */
+		int availableProcessors = Runtime.getRuntime().availableProcessors();
 		int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT, availableProcessors);
 		int streamBufferSize = getSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 8192);
 		int maxReadsOnSelect = getSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 8 * 4);
