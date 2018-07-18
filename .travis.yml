@@ -1,6 +1,5 @@
 language: java
-
-jdk: 
-  - oraclejdk10
-
+jdk: oraclejdk10
+sudo: required
+services: docker
 before_install: cd officefloor
