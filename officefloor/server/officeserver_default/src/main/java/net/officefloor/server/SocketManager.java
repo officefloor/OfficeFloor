@@ -144,6 +144,7 @@ public class SocketManager {
 			try {
 				throw cause;
 			} catch (CancelledKeyException | ClosedChannelException ex) {
+				// terminating, so ignore already closed
 			} catch (IOException ex) {
 				// Issue with connection, clean up and continue
 				String message = ex.getMessage();
@@ -159,16 +160,11 @@ public class SocketManager {
 			}
 		}
 
-		// Determine if already closed
-		boolean isAlreadyClosed = selectionKey.isValid();
-
 		// Terminate the connection
 		try {
-			if (!isAlreadyClosed) {
-				selectionKey.channel().close();
-			}
+			selectionKey.channel().close();
 		} catch (IOException ex) {
-			// Consider closed
+			// consider already closed
 		} finally {
 			try {
 				// Ensure cancel the key
