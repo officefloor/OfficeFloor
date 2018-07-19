@@ -83,8 +83,8 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 	}
 
 	/**
-	 * Ensure can service pipeline requests with {@link RequestServicer}
-	 * executing on another {@link Thread}.
+	 * Ensure can service pipeline requests with {@link RequestServicer} executing
+	 * on another {@link Thread}.
 	 */
 	public void testPipelineThreaded() throws Exception {
 
@@ -232,7 +232,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		}
 
 		@Override
-		public void service(StreamBuffer<ByteBuffer> readBuffer, boolean isNewBuffer) {
+		public void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer) {
 
 			// Setup for reading
 			int position = readBuffer.pooledBuffer.position();
