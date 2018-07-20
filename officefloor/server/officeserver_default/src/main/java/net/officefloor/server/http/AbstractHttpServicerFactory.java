@@ -104,12 +104,9 @@ public abstract class AbstractHttpServicerFactory
 	/**
 	 * Services the {@link ProcessAwareServerHttpConnectionManagedObject}.
 	 * 
-	 * @param connection
-	 *            {@link ProcessAwareServerHttpConnectionManagedObject}.
-	 * @throws IOException
-	 *             If IO failure.
-	 * @throws HttpException
-	 *             If HTTP failure.
+	 * @param connection {@link ProcessAwareServerHttpConnectionManagedObject}.
+	 * @throws IOException   If IO failure.
+	 * @throws HttpException If HTTP failure.
 	 */
 	protected abstract void service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
 			throws IOException, HttpException;
@@ -135,23 +132,20 @@ public abstract class AbstractHttpServicerFactory
 	/**
 	 * Instantiate.
 	 * 
-	 * @param serverLocation
-	 *            {@link HttpServerLocation}.
-	 * @param isSecure
-	 *            Indicates if over secure {@link Socket}.
-	 * @param serviceBufferPool
-	 *            {@link StreamBufferPool} used to service requests.
-	 * @param metaData
-	 *            {@link HttpRequestParserMetaData}.
-	 * @param throttleActiveRequestThreshold
-	 *            Threshold of active requests to start throttling new requests.
-	 * @param serverName
-	 *            <code>Server</code> {@link HttpHeaderValue}.
-	 * @param dateHttpHeaderClock
-	 *            {@link DateHttpHeaderClock}.
-	 * @param isIncludeEscalationStackTrace
-	 *            Indicates whether to include the {@link Escalation} stack trace in
-	 *            {@link HttpResponse}.
+	 * @param serverLocation                 {@link HttpServerLocation}.
+	 * @param isSecure                       Indicates if over secure
+	 *                                       {@link Socket}.
+	 * @param serviceBufferPool              {@link StreamBufferPool} used to
+	 *                                       service requests.
+	 * @param metaData                       {@link HttpRequestParserMetaData}.
+	 * @param throttleActiveRequestThreshold Threshold of active requests to start
+	 *                                       throttling new requests.
+	 * @param serverName                     <code>Server</code>
+	 *                                       {@link HttpHeaderValue}.
+	 * @param dateHttpHeaderClock            {@link DateHttpHeaderClock}.
+	 * @param isIncludeEscalationStackTrace  Indicates whether to include the
+	 *                                       {@link Escalation} stack trace in
+	 *                                       {@link HttpResponse}.
 	 */
 	public AbstractHttpServicerFactory(HttpServerLocation serverLocation, boolean isSecure,
 			HttpRequestParserMetaData metaData, StreamBufferPool<ByteBuffer> serviceBufferPool,
@@ -191,8 +185,7 @@ public abstract class AbstractHttpServicerFactory
 		/**
 		 * Instantiate.
 		 * 
-		 * @param requestHandler
-		 *            {@link RequestHandler}.
+		 * @param requestHandler {@link RequestHandler}.
 		 */
 		private HttpServicer(RequestHandler<HttpRequestParser> requestHandler) {
 			super(AbstractHttpServicerFactory.this.metaData);
@@ -204,7 +197,7 @@ public abstract class AbstractHttpServicerFactory
 		 */
 
 		@Override
-		public void service(StreamBuffer<ByteBuffer> readBuffer, boolean isNewBuffer) {
+		public void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer) {
 
 			// Add the buffer
 			this.appendStreamBuffer(readBuffer);
