@@ -204,7 +204,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		final String PROPERTY_NAME = "officefloor.skip.stress.tests";
 		String value = System.getProperty(PROPERTY_NAME);
 		if (value == null) {
-			value = System.getenv(PROPERTY_NAME);
+			value = System.getenv(PROPERTY_NAME.replace('.', '_'));
 		}
 		return value == null ? false : Boolean.parseBoolean(value);
 	}
