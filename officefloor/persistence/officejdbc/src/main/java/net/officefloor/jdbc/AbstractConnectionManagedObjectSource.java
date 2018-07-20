@@ -19,6 +19,8 @@ package net.officefloor.jdbc;
 
 import java.sql.Connection;
 
+import javax.sql.DataSource;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -41,6 +43,12 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	 * implementation.
 	 */
 	public static final String PROPERTY_DATA_SOURCE_FACTORY = "datasource.factory";
+
+	/**
+	 * {@link Property} name to specify the SQL to run to validate the
+	 * {@link DataSource} is configured correctly.
+	 */
+	public static final String PROPERTY_DATA_SOURCE_VALIDATE_SQL = "datasource.validate.sql";
 
 	/**
 	 * Allows overriding to configure a different {@link DataSourceFactory}.
@@ -92,12 +100,55 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	}
 
 	/**
+	 * Loads validation of connectivity on start up.
+	 * 
+	 * @param context {@link MetaDataContext}.
+	 * @throws Exception If fails to load validation.
+	 */
+	protected void loadValidateConnectivity(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
+
+		// Provide start up function to ensure can connect
+		String validateSql = mosContext.getProperty(PROPERTY_DATA_SOURCE_VALIDATE_SQL, null);
+		final String validateFunctionName = "confirm";
+		mosContext.addManagedFunction(validateFunctionName, () -> (functionContext) -> {
+			this.validateConnectivity(validateSql);
+			return null;
+		});
+		mosContext.addStartupFunction(validateFunctionName);
+	}
+
+	/**
 	 * Enables overriding to load further meta-data.
 	 * 
 	 * @param context {@link MetaDataContext}.
 	 * @throws Exception If fails to loader further meta-data.
 	 */
 	protected abstract void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception;
+
+	/**
+	 * Validates connectivity.
+	 * 
+	 * @param sql Optional SQL to be executed against the {@link Connection}. May be
+	 *            <code>null</code>.
+	 * @throws Exception If fails connectivity.
+	 */
+	protected abstract void validateConnectivity(String sql) throws Exception;
+
+	/**
+	 * Convenience method to undertake the validation of connectivity.
+	 * 
+	 * @param dataSource {@link DataSource}.
+	 * @param sql        Optional SQL to execute.
+	 * @throws Exception If fails connectivity validation.
+	 */
+	protected void doValidateConnectivity(DataSource dataSource, String sql) throws Exception {
+		try (Connection connection = dataSource.getConnection()) {
+			if (sql != null) {
+				connection.createStatement().execute(sql);
+			}
+		}
+	}
 
 	/*
 	 * ================== AbstractManagedObjectSource ===================
@@ -122,6 +173,9 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 		// Create further meta-data
 		this.loadFurtherMetaData(context);
+
+		// Ensure connected on startup
+		this.loadValidateConnectivity(context);
 	}
 
 }

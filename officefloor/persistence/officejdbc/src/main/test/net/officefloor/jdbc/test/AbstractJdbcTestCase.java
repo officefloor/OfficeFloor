@@ -48,6 +48,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.jdbc.AbstractConnectionManagedObjectSource;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
@@ -407,6 +408,43 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 				statement.execute("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
 			}
 		}
+	}
+
+	/**
+	 * Ensure can validate the {@link DataSource} on start up.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testValidateDataSource() throws Throwable {
+
+		// Setup table
+		try (Statement statement = this.connection.createStatement()) {
+			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+		}
+
+		// Run connectivity to create table and add row
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+					this.getConnectionManagedObjectSourceClass().getName());
+			this.loadConnectionProperties(mos);
+			mos.addProperty(AbstractConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_VALIDATE_SQL,
+					"INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+
+		// Ensure row in database
+		try (PreparedStatement statement = this.connection
+				.prepareStatement("SELECT NAME FROM OFFICE_FLOOR_JDBC_TEST WHERE ID = ?")) {
+			statement.setInt(1, 1);
+			ResultSet resultSet = statement.executeQuery();
+			assertTrue("Should have row in database", resultSet.next());
+			assertEquals("Incorrect row in database", "test", resultSet.getString("NAME"));
+		}
+
+		// Close
+		officeFloor.closeOfficeFloor();
 	}
 
 	/**

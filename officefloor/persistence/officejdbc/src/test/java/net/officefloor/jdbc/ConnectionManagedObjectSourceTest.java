@@ -152,7 +152,7 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 			MockSection.connection = connection;
 		}
 	}
-
+	
 	/**
 	 * Ensures able to configure {@link DataSourceFactory}.
 	 */

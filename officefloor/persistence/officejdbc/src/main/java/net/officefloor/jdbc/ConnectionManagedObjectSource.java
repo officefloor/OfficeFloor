@@ -151,6 +151,11 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	}
 
 	@Override
+	protected void validateConnectivity(String sql) throws Exception {
+		this.doValidateConnectivity(this.dataSource, sql);
+	}
+
+	@Override
 	protected ManagedObject getManagedObject() {
 		return new ConnectionManagedObject();
 	}
