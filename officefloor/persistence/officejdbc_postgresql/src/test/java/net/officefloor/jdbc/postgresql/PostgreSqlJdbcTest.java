@@ -118,9 +118,7 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 			// Bind container port to host port
 			final String[] ports = { "5432" };
 			final Map<String, List<PortBinding>> portBindings = new HashMap<>();
-			for (String port : ports) {
-				portBindings.put(port, Arrays.asList(PortBinding.of("0.0.0.0", port)));
-			}
+			portBindings.put("5432", Arrays.asList(PortBinding.of("0.0.0.0", "5433")));
 			final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
 			final ContainerConfig containerConfig = ContainerConfig.builder().hostConfig(hostConfig).image(IMAGE_NAME)
 					.exposedPorts(ports).env("POSTGRES_USER=testuser", "POSTGRES_PASSWORD=testpassword").build();
@@ -161,14 +159,14 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	@Override
 	protected void loadConnectionProperties(PropertyConfigurable mos) {
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5432");
+		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5433");
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, "testuser");
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PASSWORD, "testpassword");
 	}
 
 	@Override
 	protected void loadOptionalConnectionSpecification(Properties properties) {
-		properties.setProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5432");
+		properties.setProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5433");
 	}
 
 	@Override
