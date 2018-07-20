@@ -171,8 +171,9 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 
 	@Override
 	protected void loadDataSourceProperties(PropertyConfigurable mos) {
+		new PGSimpleDataSource();
 		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, HikariDataSource.class.getName());
-		mos.addProperty("dataSourceClassName", PGSimpleDataSource.class.getName());
+		mos.addProperty("jdbcUrl", "jdbc:postgresql://localhost:5433/");
 		mos.addProperty("username", "testuser");
 		mos.addProperty("password", "testpassword");
 	}
