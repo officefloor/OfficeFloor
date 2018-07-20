@@ -142,7 +142,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		// Determine if run the stress test
 		if (isStressTest) {
-			if (this.isIgnoreStressTests()) {
+			if (isSkipStressTests()) {
 				System.out.println("NOT RUNNING STRESS TEST " + this.getClass().getSimpleName() + "." + this.getName());
 				return;
 			}
@@ -185,6 +185,28 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				}
 			}
 		}
+	}
+
+	/**
+	 * <p>
+	 * Indicates if not to run stress tests.
+	 * <p>
+	 * Stress tests should normally be run, but in cases of quick unit testing
+	 * running for functionality the stress tests can reduce turn around time and
+	 * subsequently the effectiveness of the tests. This is therefore provided to
+	 * maintain effectiveness of unit tests.
+	 * <p>
+	 * Furthermore, builds time out on Travis so avoid running.
+	 * 
+	 * @return <code>true</code> to ignore doing a stress test.
+	 */
+	public static boolean isSkipStressTests() {
+		final String PROPERTY_NAME = "officefloor.skip.stress.tests";
+		String value = System.getProperty(PROPERTY_NAME);
+		if (value == null) {
+			value = System.getenv(PROPERTY_NAME);
+		}
+		return value == null ? false : Boolean.parseBoolean(value);
 	}
 
 	/**
@@ -1694,21 +1716,6 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	protected boolean isPrintMessages() {
 		return Boolean.parseBoolean(System.getProperty("print.messages", Boolean.FALSE.toString())) || this.isVerbose;
-	}
-
-	/**
-	 * <p>
-	 * Indicates if not to run stress tests.
-	 * <p>
-	 * Stress tests should normally be run, but in cases of quick unit testing
-	 * running for functionality the stress tests can reduce turn around time and
-	 * subsequently the effectiveness of the tests. This is therefore provided to
-	 * maintain effectiveness of unit tests.
-	 * 
-	 * @return <code>true</code> to ignore doing a stress test.
-	 */
-	private boolean isIgnoreStressTests() {
-		return Boolean.parseBoolean(System.getProperty("ignore.stress.tests", Boolean.FALSE.toString()));
 	}
 
 	/**

@@ -52,6 +52,7 @@ import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 import net.officefloor.frame.impl.spi.team.WorkerPerJobTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Abstract stress {@link TestCase}
@@ -531,6 +532,12 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 
 	@Override
 	protected void runTest() throws Throwable {
+
+		// Determine if ignoring stress tests
+		if (OfficeFrameTestCase.isSkipStressTests()) {
+			System.out.println("Skipping stress test " + this.getName());
+			return;
+		}
 
 		// Sleep some time to allow previous test to complete
 		Thread.sleep(500);
