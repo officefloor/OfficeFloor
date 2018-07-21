@@ -46,6 +46,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.DataSourceManagedObjectSource;
@@ -282,6 +283,38 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		// Validate type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, this.getJpaManagedObjectSourceClass(),
 				properties.toArray(new String[properties.size()]));
+	}
+
+	/**
+	 * Ensure if {@link EntityManager} is managing the {@link DataSource} that it is
+	 * validated on start up.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testManagedConnectivity() throws Throwable {
+
+		// Configure without data source
+		Closure<Throwable> closure = new Closure<>();
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			OfficeManagedObjectSource jpaMos = context.getOfficeArchitect().addOfficeManagedObjectSource("JPA",
+					this.getJpaManagedObjectSourceClass().getName());
+			this.loadJpaProperties(jpaMos);
+		});
+		compile.getOfficeFloorCompiler().setEscalationHandler((escalation) -> {
+			closure.value = escalation;
+		});
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+		assertNotNull("No connectivity should not prevent running (data source may be temporarily unavailable)",
+				officeFloor);
+
+		// Ensure start up failure
+		assertNotNull("Should have start up failure", closure.value);
+		assertEquals("Incorrect start up failure", "Failing to connect EntityManager", closure.value.getMessage());
+		assertNotNull("Should indicate cause", closure.value.getCause());
+
+		// Close
+		officeFloor.closeOfficeFloor();
 	}
 
 	/**
