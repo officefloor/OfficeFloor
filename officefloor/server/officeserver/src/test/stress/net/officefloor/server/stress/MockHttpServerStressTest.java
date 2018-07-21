@@ -71,8 +71,7 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 	/**
 	 * Starts the {@link OfficeFloor}.
 	 * 
-	 * @param servicerClass
-	 *            {@link Class} of the servicer.
+	 * @param servicerClass {@link Class} of the servicer.
 	 */
 	private void startServer(Class<?> servicerClass) throws Exception {
 
@@ -148,6 +147,7 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can service on same {@link Thread}.
 	 */
+	@StressTest
 	public void testServicePipeline() throws Exception {
 
 		// Start server
@@ -163,6 +163,7 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can service multiple clients.
 	 */
+	@StressTest
 	public void testMultipleClients() throws Exception {
 
 		// Start server
@@ -189,13 +190,14 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 		// Wait for completion
 		long startTime = System.currentTimeMillis();
 		for (TestThread client : clients) {
-			client.waitForCompletion(startTime, 30);
+			client.waitForCompletion(startTime, 120);
 		}
 	}
 
 	/**
 	 * Ensure can service with {@link ThreadedServicer}.
 	 */
+	@StressTest
 	public void testServiceThreadedPipeline() throws Exception {
 
 		// Start server
@@ -211,6 +213,7 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can service multiple clients with {@link ThreadedServicer}.
 	 */
+	@StressTest
 	public void testMultipleClientsWithThreadedServicer() throws Exception {
 
 		// Start server
@@ -237,17 +240,15 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 		// Wait for completion
 		long startTime = System.currentTimeMillis();
 		for (TestThread client : clients) {
-			client.waitForCompletion(startTime, 10);
+			client.waitForCompletion(startTime, 60);
 		}
 	}
 
 	/**
 	 * Undertakes the pipeline run.
 	 * 
-	 * @param prefix
-	 *            Prefix for results.
-	 * @param requestCount
-	 *            Number of requests.
+	 * @param prefix       Prefix for results.
+	 * @param requestCount Number of requests.
 	 */
 	private void doPipelineRun(String prefix, int requestCount) throws InterruptedException {
 
