@@ -37,6 +37,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
@@ -411,11 +412,50 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can validate the {@link DataSource} on start up.
+	 * Ensure correct type for writable {@link Connection}.
 	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testWritableValidateConnectivity() throws Exception {
+		this.doValidateConnectivityTest(this.getConnectionManagedObjectSourceClass(), false);
+	}
+
+	/**
+	 * Ensure correct type for writable {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testPooledWritableValidateConnectivity() throws Exception {
+		this.doValidateConnectivityTest(this.getConnectionManagedObjectSourceClass(), true);
+	}
+
+	/**
+	 * Ensure correct type for read-only {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testReadOnlyValidateConnectivity() throws Exception {
+		this.doValidateConnectivityTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false);
+	}
+
+	/**
+	 * Ensure correct type for {@link DataSource}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testDataSourceValidateConnectivity() throws Exception {
+		this.doValidateConnectivityTest(this.getDataSourceManagedObjectSourceClass(), false);
+	}
+
+	/**
+	 * Ensure can validate the connectivity on start up.
+	 * 
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
+	 * @param isPooled                 Indicates if should pool.
 	 * @throws Throwable On test failure.
 	 */
-	public void testValidateDataSource() throws Throwable {
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doValidateConnectivityTest(
+			Class<MS> managedObjectSourceClass, boolean isPooled) throws Exception {
 
 		// Setup table
 		try (Statement statement = this.connection.createStatement()) {
@@ -425,14 +465,47 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		// Run connectivity to create table and add row
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.office((context) -> {
-			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					this.getConnectionManagedObjectSourceClass().getName());
-			this.loadConnectionProperties(mos);
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Add the connection
+			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("mo",
+					managedObjectSourceClass.getName());
+			if (managedObjectSourceClass == this.getDataSourceManagedObjectSourceClass()) {
+				this.loadDataSourceProperties(mos);
+			} else {
+				this.loadConnectionProperties(mos);
+			}
 			mos.addProperty(AbstractConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_VALIDATE_SQL,
 					"INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Provide pooling
+			if (isPooled) {
+				architect.link(mos,
+						architect.addManagedObjectPool("POOL", ThreadLocalJdbcConnectionPoolSource.class.getName()));
+			}
 		});
-		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+
+		OfficeFloor officeFloor;
+
+		// Ensure no error on start up
+		final PrintStream original = System.err;
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		PrintStream stream = new PrintStream(buffer);
+		System.setErr(stream);
+		try {
+
+			// Open the OfficeFloor
+			officeFloor = compiler.compileAndOpenOfficeFloor();
+
+		} finally {
+			System.setErr(original);
+		}
+
+		// Ensure no errors
+		stream.flush();
+		String errors = buffer.toString();
+		assertEquals("Should be no errors\n\n" + errors, 0, errors.length());
 
 		// Ensure row in database
 		try (PreparedStatement statement = this.connection

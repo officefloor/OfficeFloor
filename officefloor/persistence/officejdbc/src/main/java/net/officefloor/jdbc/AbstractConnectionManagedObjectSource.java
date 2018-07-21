@@ -18,6 +18,7 @@
 package net.officefloor.jdbc;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
@@ -100,6 +101,33 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	}
 
 	/**
+	 * Enables overriding to load further meta-data.
+	 * 
+	 * @param context {@link MetaDataContext}.
+	 * @throws Exception If fails to loader further meta-data.
+	 */
+	protected abstract void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception;
+
+	/**
+	 * {@link ConnectivityFactory}.
+	 */
+	private ConnectivityFactory connectivityFactory;
+
+	/**
+	 * Factory for {@link Connection} in confirming connectivity.
+	 */
+	@FunctionalInterface
+	public static interface ConnectivityFactory {
+
+		/**
+		 * Obtains the {@link Connection} for connectivity.
+		 * 
+		 * @throws SQLException If fails to obtain connectivity.
+		 */
+		Connection createConnectivity() throws SQLException;
+	}
+
+	/**
 	 * Loads validation of connectivity on start up.
 	 * 
 	 * @param context {@link MetaDataContext}.
@@ -119,12 +147,13 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	}
 
 	/**
-	 * Enables overriding to load further meta-data.
+	 * Specifies {@link ConnectivityFactory} for validating connectivity on startup.
 	 * 
-	 * @param context {@link MetaDataContext}.
-	 * @throws Exception If fails to loader further meta-data.
+	 * @param connectivityFactory {@link ConnectivityFactory}.
 	 */
-	protected abstract void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception;
+	public void setConnectivity(ConnectivityFactory connectivityFactory) {
+		this.connectivityFactory = connectivityFactory;
+	}
 
 	/**
 	 * Validates connectivity.
@@ -133,17 +162,15 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	 *            <code>null</code>.
 	 * @throws Exception If fails connectivity.
 	 */
-	protected abstract void validateConnectivity(String sql) throws Exception;
+	protected void validateConnectivity(String sql) throws Exception {
 
-	/**
-	 * Convenience method to undertake the validation of connectivity.
-	 * 
-	 * @param dataSource {@link DataSource}.
-	 * @param sql        Optional SQL to execute.
-	 * @throws Exception If fails connectivity validation.
-	 */
-	protected void doValidateConnectivity(DataSource dataSource, String sql) throws Exception {
-		try (Connection connection = dataSource.getConnection()) {
+		// Ensure have connectivity
+		if (this.connectivityFactory == null) {
+			throw new SQLException("Must specify " + ConnectivityFactory.class.getName());
+		}
+
+		// Undertake connectivity
+		try (Connection connection = this.connectivityFactory.createConnectivity()) {
 			if (sql != null) {
 				connection.createStatement().execute(sql);
 			}

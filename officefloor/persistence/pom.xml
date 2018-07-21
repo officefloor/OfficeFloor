@@ -37,5 +37,10 @@
 			<artifactId>easymock</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-nop</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

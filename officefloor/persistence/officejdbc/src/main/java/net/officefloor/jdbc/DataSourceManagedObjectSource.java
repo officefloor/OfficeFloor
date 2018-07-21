@@ -63,12 +63,8 @@ public class DataSourceManagedObjectSource extends AbstractConnectionManagedObje
 		this.dataSource = factory.createDataSource(mosContext);
 
 		// Validate connectivity
+		this.setConnectivity(() -> this.dataSource.getConnection());
 		this.loadValidateConnectivity(context);
-	}
-
-	@Override
-	protected void validateConnectivity(String sql) throws Exception {
-		this.doValidateConnectivity(this.dataSource, sql);
 	}
 
 	@Override
