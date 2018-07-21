@@ -53,6 +53,11 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 	public static final int DEFAULT_JMX_PORT = 7777;
 
 	/**
+	 * Default time out in seconds to start {@link OfficeFloor}.
+	 */
+	private static final int DEFAULT_TIMEOUT = 60;
+
+	/**
 	 * {@link MavenProject}.
 	 */
 	@Component
@@ -69,6 +74,12 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 	 */
 	@Parameter(required = false, defaultValue = "" + DEFAULT_JMX_PORT)
 	private int jmxPort = DEFAULT_JMX_PORT;
+
+	/**
+	 * Time out in seconds for starting {@link OfficeFloor}.
+	 */
+	@Parameter(required = false, defaultValue = "" + DEFAULT_TIMEOUT)
+	private int timeout = DEFAULT_TIMEOUT;
 
 	/**
 	 * {@link Process} running {@link OfficeFloor}.
@@ -184,10 +195,8 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		/**
 		 * Initiate.
 		 * 
-		 * @param input
-		 *            {@link InputStream} to gobble.
-		 * @param isError
-		 *            Indicates if error.
+		 * @param input   {@link InputStream} to gobble.
+		 * @param isError Indicates if error.
 		 */
 		private StreamGobbler(InputStream input, boolean isError) {
 			this.input = new BufferedReader(new InputStreamReader(input));
@@ -203,8 +212,7 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		/**
 		 * Handles the output line.
 		 * 
-		 * @param outputLine
-		 *            Output line.
+		 * @param outputLine Output line.
 		 */
 		protected void handleOutputLine(String outputLine) {
 			if (this.isError) {
@@ -217,8 +225,7 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		/**
 		 * Handles end of stream.
 		 * 
-		 * @param ex
-		 *            Possible failure of stream.
+		 * @param ex Possible failure of stream.
 		 */
 		protected void streamEnd(Throwable ex) {
 		}
@@ -267,9 +274,9 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		/**
 		 * Waits for the output line.
 		 * 
-		 * @throws MojoExecutionException
-		 *             If error in waiting on output line. @throws MojoFailureException
-		 *             If times out waiting on output line..
+		 * @throws MojoExecutionException If error in waiting on output line. @throws
+		 *                                MojoFailureException If times out waiting on
+		 *                                output line..
 		 */
 		private synchronized void waitForOutputLine() throws MojoExecutionException, MojoFailureException {
 
@@ -283,8 +290,8 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 							this.failure);
 				}
 
-				// Determine if time out (10 seconds)
-				if ((startTime + 10000) < System.currentTimeMillis()) {
+				// Determine if time out
+				if ((startTime + (OpenOfficeFloorMojo.this.timeout * 1000)) < System.currentTimeMillis()) {
 					throw new MojoFailureException(
 							"Timed out waiting on " + OfficeFloor.class.getSimpleName() + " to start");
 				}
@@ -303,10 +310,8 @@ public class OpenOfficeFloorMojo extends AbstractMojo {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param input
-		 *            {@link InputStream} to stdout to gobble.
-		 * @param waitLine
-		 *            Line to wait on to indicate ready.
+		 * @param input    {@link InputStream} to stdout to gobble.
+		 * @param waitLine Line to wait on to indicate ready.
 		 */
 		private StdOutStreamGobbler(InputStream input, String waitLine) {
 			super(input, false);
