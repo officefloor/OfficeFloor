@@ -29,6 +29,7 @@ import java.util.concurrent.Executor;
 import javax.net.ssl.SSLContext;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.ssl.SslSocketServicerFactory;
 import net.officefloor.server.stream.StreamBuffer;
@@ -61,8 +62,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	/**
 	 * Creates the {@link StreamBufferPool}.
 	 * 
-	 * @param bufferSize
-	 *            Size of the pooled {@link StreamBuffer}.
+	 * @param bufferSize Size of the pooled {@link StreamBuffer}.
 	 * @return {@link StreamBufferPool}.
 	 */
 	protected abstract StreamBufferPool<ByteBuffer> createStreamBufferPool(int bufferSize);
@@ -80,8 +80,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	/**
 	 * Creates a client {@link Socket}.
 	 * 
-	 * @param port
-	 *            Port of the {@link ServerSocket}.
+	 * @param port Port of the {@link ServerSocket}.
 	 * @return Client {@link Socket}.
 	 */
 	protected Socket createClient(int port) throws IOException {
@@ -102,12 +101,9 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	/**
 	 * Adapts the {@link SocketServicerFactory}.
 	 * 
-	 * @param socketServicerFactory
-	 *            {@link SocketServicerFactory}.
-	 * @param requestServicerFactory
-	 *            {@link RequestServicerFactory}.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param socketServicerFactory  {@link SocketServicerFactory}.
+	 * @param requestServicerFactory {@link RequestServicerFactory}.
+	 * @param bufferPool             {@link StreamBufferPool}.
 	 * @return Adapted {@link SocketServicerFactory}.
 	 */
 	protected <R> SocketServicerFactory<R> adaptSocketServicerFactory(SocketServicerFactory<R> socketServicerFactory,
@@ -144,8 +140,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	/**
 	 * Adapts the {@link RequestServicerFactory}.
 	 * 
-	 * @param requestServicerFactory
-	 *            {@link RequestServicerFactory}.
+	 * @param requestServicerFactory {@link RequestServicerFactory}.
 	 * @return Adapted {@link RequestServicerFactory}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -168,8 +163,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	 * Allows overriding to handle completion (such as checking all
 	 * {@link StreamBuffer} instances have been released).
 	 * 
-	 * @param bufferPool
-	 *            {@link StreamBufferPool} used by the {@link SocketManager}.
+	 * @param bufferPool {@link StreamBufferPool} used by the {@link SocketManager}.
 	 */
 	protected void handleCompletion(StreamBufferPool<ByteBuffer> bufferPool) {
 		// By default do nothing
@@ -219,8 +213,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param listenerCount
-		 *            Number of {@link SocketListener} instances.
+		 * @param listenerCount Number of {@link SocketListener} instances.
 		 */
 		protected SocketManagerTester(int listenerCount) throws IOException {
 
@@ -240,16 +233,11 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		/**
 		 * Binds the {@link ServerSocket}.
 		 * 
-		 * @param port
-		 *            Port for the {@link ServerSocket}.
-		 * @param serverSocketDecorator
-		 *            {@link ServerSocketDecorator}.
-		 * @param acceptedSocketDecorator
-		 *            {@link AcceptedSocketDecorator}.
-		 * @param socketServicerFactory
-		 *            {@link SocketServicerFactory}.
-		 * @param requestServicerFactory
-		 *            {@link RequestServicerFactory}.
+		 * @param port                    Port for the {@link ServerSocket}.
+		 * @param serverSocketDecorator   {@link ServerSocketDecorator}.
+		 * @param acceptedSocketDecorator {@link AcceptedSocketDecorator}.
+		 * @param socketServicerFactory   {@link SocketServicerFactory}.
+		 * @param requestServicerFactory  {@link RequestServicerFactory}.
 		 */
 		protected <R> void bindServerSocket(ServerSocketDecorator serverSocketDecorator,
 				AcceptedSocketDecorator acceptedSocketDecorator, SocketServicerFactory<R> socketServicerFactory,
@@ -275,15 +263,14 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		 */
 		protected Socket getClient() throws IOException {
 			Socket socket = AbstractSocketManagerTester.this.createClient(DEFAULT_PORT);
-			socket.setSoTimeout(10 * 1000); // ensure timeout tests
+			socket.setSoTimeout(HttpClientTestUtil.getClientTimeout());
 			return socket;
 		}
 
 		/**
 		 * Creates a {@link StreamBuffer} with bytes.
 		 * 
-		 * @param bytes
-		 *            Bytes to write to the {@link StreamBuffer}.
+		 * @param bytes Bytes to write to the {@link StreamBuffer}.
 		 * @return {@link StreamBuffer} for the bytes.
 		 */
 		protected StreamBuffer<ByteBuffer> createStreamBuffer(int... bytes) {
@@ -332,8 +319,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		/**
 		 * Executes logic.
 		 * 
-		 * @throws T
-		 *             Possible {@link Throwable}.
+		 * @throws T Possible {@link Throwable}.
 		 */
 		void run() throws T;
 	}
@@ -346,22 +332,17 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		/**
 		 * Waits for completion of the {@link Thread}.
 		 * 
-		 * @param startTime
-		 *            Start time.
-		 * @param secondsToRun
-		 *            Seconds to wait.
-		 * @throws Exception
-		 *             If failure in {@link Thread} logic.
+		 * @param startTime    Start time.
+		 * @param secondsToRun Seconds to wait.
+		 * @throws Exception If failure in {@link Thread} logic.
 		 */
 		void waitForCompletion(long startTime, int secondsToRun) throws Exception;
 
 		/**
 		 * Waits for completion of the {@link Thread}.
 		 * 
-		 * @param startTime
-		 *            Start time.
-		 * @throws Exception
-		 *             If failure in {@link Thread} logic.
+		 * @param startTime Start time.
+		 * @throws Exception If failure in {@link Thread} logic.
 		 */
 		void waitForCompletion(long startTime) throws Exception;
 	}
@@ -370,8 +351,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	 * Delays running.
 	 * 
 	 * @return {@link Future}.
-	 * @param runnable
-	 *            {@link FailableRunnable}.
+	 * @param runnable {@link FailableRunnable}.
 	 */
 	protected <T extends Throwable> Future delay(FailableRunnable<T> runnable) {
 		return this.thread(() -> {
@@ -391,8 +371,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	 * Runs in another {@link Thread}.
 	 * 
 	 * @return {@link Future}.
-	 * @param runnable
-	 *            {@link FailableRunnable}.
+	 * @param runnable {@link FailableRunnable}.
 	 */
 	protected <T extends Throwable> Future thread(FailableRunnable<Throwable> runnable) {
 		TestThread thread = new TestThread(runnable);

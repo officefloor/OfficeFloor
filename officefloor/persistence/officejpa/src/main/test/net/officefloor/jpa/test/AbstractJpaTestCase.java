@@ -569,6 +569,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testStressInsertWithCompiler() throws Throwable {
 		this.doStressInsertTest(true, false);
 	}
@@ -578,6 +579,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testStressInsertWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressInsertTest(true, false));
 	}
@@ -587,6 +589,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testStressInsertPooledConnectionsWithCompiler() throws Throwable {
 		this.doStressInsertTest(true, true);
 	}
@@ -596,6 +599,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testStressInsertPooledConnectionsWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressInsertTest(true, true));
 	}
@@ -605,6 +609,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testStressInsertDataSource() throws Throwable {
 		this.doStressInsertTest(false, false);
 	}
@@ -698,6 +703,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testStressSelectWithCompiler() throws Throwable {
 		this.doStressSelectTest(true, false);
 	}
@@ -707,6 +713,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testStressSelectWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressSelectTest(true, false));
 	}
@@ -716,6 +723,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testStressSelectPooledConnectionsWithCompiler() throws Throwable {
 		this.doStressSelectTest(true, true);
 	}
@@ -725,6 +733,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testStressSelectPooledConnectionsWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doStressSelectTest(true, true));
 	}
@@ -734,6 +743,7 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testStressSelectDataSource() throws Throwable {
 		this.doStressSelectTest(false, false);
 	}

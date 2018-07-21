@@ -452,6 +452,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testInsertConnectionStressWithCompiler() throws Throwable {
 		this.doInsertStressTest(false, this.getConnectionManagedObjectSourceClass(), true,
 				InsertConnectionSection.class);
@@ -462,6 +463,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testInsertConnectionStressWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertStressTest(false,
 				this.getConnectionManagedObjectSourceClass(), true, InsertConnectionSection.class));
@@ -473,6 +475,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testInsertConnectionTransactionStressWithCompiler() throws Throwable {
 		this.doInsertStressTest(true, this.getConnectionManagedObjectSourceClass(), true,
 				InsertConnectionSection.class);
@@ -483,6 +486,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testInsertConnectionTransactionStressWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this.doInsertStressTest(true,
 				this.getConnectionManagedObjectSourceClass(), true, InsertConnectionSection.class));
@@ -493,6 +497,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testInsertDataSourceStress() throws Throwable {
 		this.doInsertStressTest(false, this.getDataSourceManagedObjectSourceClass(), false,
 				InsertDataSourceSection.class);
@@ -660,6 +665,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testWritableSelectStressWithCompiler() throws Throwable {
 		this.doSelectStressTest(this.getConnectionManagedObjectSourceClass(), true, SelectConnectionSection.class);
 	}
@@ -669,6 +675,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testWritableSelectStressWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> this
 				.doSelectStressTest(this.getConnectionManagedObjectSourceClass(), true, SelectConnectionSection.class));
@@ -680,6 +687,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testReadOnlySelectStressWithCompiler() throws Throwable {
 		this.doSelectStressTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false,
 				SelectConnectionSection.class);
@@ -690,6 +698,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testReadOnlySelectStressWithDynamicProxy() throws Throwable {
 		OfficeFloorJavaCompiler
 				.runWithoutCompiler(() -> this.doSelectStressTest(this.getReadOnlyConnectionManagedObjectSourceClass(),
@@ -701,6 +710,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * 
 	 * @throws Throwable On test failure.
 	 */
+	@StressTest
 	public void testDataSourceSelectStress() throws Throwable {
 		this.doSelectStressTest(this.getDataSourceManagedObjectSourceClass(), false, SelectDataSourceSection.class);
 	}
