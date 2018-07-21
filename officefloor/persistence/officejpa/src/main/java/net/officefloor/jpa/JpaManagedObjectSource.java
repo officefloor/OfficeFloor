@@ -323,7 +323,11 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 						new Class[] { DataSource.class }, (proxy, method, args) -> {
 							switch (method.getName()) {
 							case "getConnection":
-								return this.dataSourceConnection.get();
+								Connection connection = this.dataSourceConnection.get();
+								if (this.isRunWithinTransaction() && connection.getAutoCommit()) {
+									connection.setAutoCommit(false);
+								}
+								return connection;
 							}
 							throw new UnsupportedOperationException("Method " + method.getName()
 									+ " not available from JPA proxy " + DataSource.class.getSimpleName());
@@ -359,7 +363,14 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 					// Write the implementation
 					switch (method.getName()) {
 					case "getConnection":
-						source.println("    return this.mos.getConnection();");
+						source.println("    " + compiler.getSourceName(Connection.class)
+								+ " connection = this.mos.getConnection();");
+						if (this.isRunWithinTransaction()) {
+							source.println("    if (connection.getAutoCommit()) {");
+							source.println("      connection.setAutoCommit(false);");
+							source.println("    }");
+						}
+						source.println("    return connection;");
 						break;
 					default:
 						source.println("    throw new " + compiler.getSourceName(SQLFeatureNotSupportedException.class)

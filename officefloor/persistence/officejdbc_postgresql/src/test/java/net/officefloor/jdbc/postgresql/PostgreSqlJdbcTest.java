@@ -46,9 +46,19 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	private static final int PORT = 5433;
 
 	/**
+	 * Username to connect to PostgreSql.
+	 */
+	private static final String USERNAME = "testuser";
+
+	/**
+	 * Password to connect to PostgreSql.
+	 */
+	private static final String PASSWORD = "testpassword";
+
+	/**
 	 * {@link PostgreSqlRule} to run PostgreSql.
 	 */
-	private PostgreSqlRule server = new PostgreSqlRule(PORT);
+	private PostgreSqlRule server = new PostgreSqlRule(PORT, USERNAME, PASSWORD);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -69,7 +79,7 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 		// Complete tear down
 		super.tearDown();
 	}
-
+	
 	@Override
 	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
 		return PostgreSqlConnectionManagedObjectSource.class;
@@ -84,8 +94,8 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	protected void loadConnectionProperties(PropertyConfigurable mos) {
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, String.valueOf(PORT));
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, "testuser");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PASSWORD, "testpassword");
+		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, USERNAME);
+		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PASSWORD, PASSWORD);
 	}
 
 	@Override
@@ -98,8 +108,8 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 		new PGSimpleDataSource();
 		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, HikariDataSource.class.getName());
 		mos.addProperty("jdbcUrl", "jdbc:postgresql://localhost:" + String.valueOf(PORT) + "/");
-		mos.addProperty("username", "testuser");
-		mos.addProperty("password", "testpassword");
+		mos.addProperty("username", USERNAME);
+		mos.addProperty("password", PASSWORD);
 	}
 
 	@Override

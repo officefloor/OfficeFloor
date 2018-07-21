@@ -177,6 +177,11 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 				// Obtain the connection
 				this.connection = ConnectionManagedObjectSource.this.dataSource.getConnection();
 
+				// Ensure within transaction
+				if (this.connection.getAutoCommit()) {
+					this.connection.setAutoCommit(false);
+				}
+
 				// Create proxy around connection
 				this.proxy = ConnectionManagedObjectSource.this.wrapperFactory.wrap(this.connection);
 			}

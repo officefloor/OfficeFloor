@@ -173,51 +173,28 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		// Ignore errors in trying to start
-		PrintStream stdout = System.out;
-		PrintStream stderr = System.err;
-		System.setOut(new PrintStream(new ByteArrayOutputStream()));
-		System.setErr(new PrintStream(new ByteArrayOutputStream()));
-		try {
+		// Obtain connection
+		this.connection = DataSourceRule.waitForDatabaseAvailable(() -> {
 
-			// Try until time out (as may take time for database to come up)
-			final int MAX_SETUP_TIME = 30000; // milliseconds
-			long startTimestamp = System.currentTimeMillis();
-			NEXT_TRY: for (;;) {
-				try {
+			// Obtain the connection
+			this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
+					(mos) -> this.loadConnectionProperties(mos));
 
-					// Obtain connection
-					// Must keep reference to keep potential in memory databases active
-					this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
-							(mos) -> this.loadConnectionProperties(mos));
+			// Clean database
+			this.cleanDatabase(this.connection);
 
-					// Clean database
-					this.cleanDatabase(this.connection);
+			// Return the connection
+			return connection;
+		});
 
-					// Successful setup
-					return;
+	}
 
-				} catch (Throwable ex) {
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
 
-					// Failed setup, determine if try again
-					long currentTimestamp = System.currentTimeMillis();
-					if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
-						throw new RuntimeException("Timed out setting up JDBC test ("
-								+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
-
-					} else {
-						// Try again in a little
-						Thread.sleep(100);
-						continue NEXT_TRY;
-					}
-				}
-			}
-
-		} finally {
-			// Reinstate standard out / error
-			System.setOut(stdout);
-			System.setErr(stderr);
-		}
+		// Close connection
+		this.connection.close();
 	}
 
 	/**
@@ -369,15 +346,45 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testWritableConnectivity() throws Throwable {
+		this.doWritableConnectivityTest(false);
+	}
+
+	/**
+	 * Ensure can connect to database.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testPooledWritableConnectivity() throws Throwable {
+		this.doWritableConnectivityTest(true);
+	}
+
+	/**
+	 * Ensure can connect to database.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	private void doWritableConnectivityTest(boolean isPooled) throws Throwable {
+
+		// Pooled connections not within transaction (by default)
+		ConnectivitySection.isAutoCommit = isPooled;
 
 		// Run connectivity to create table and add row
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Add connection
 			context.addSection("SECTION", ConnectivitySection.class);
-			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("mo",
 					this.getConnectionManagedObjectSourceClass().getName());
 			this.loadConnectionProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Provide pooling
+			if (isPooled) {
+				architect.link(mos,
+						architect.addManagedObjectPool("POOL", ThreadLocalJdbcConnectionPoolSource.class.getName()));
+			}
 		});
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.checkConnectivity", null);
@@ -393,15 +400,22 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		}
 
 		// As no pooling, should close the connection
-		assertTrue("Connection should be closed", ConnectivitySection.connection.isClosed());
+		if (!isPooled) {
+			assertTrue("Connection should be closed", ConnectivitySection.connection.isClosed());
+		}
 	}
 
 	public static class ConnectivitySection {
 
 		private static Connection connection;
 
+		private static boolean isAutoCommit;
+
 		public void checkConnectivity(Connection connection) throws SQLException {
 			ConnectivitySection.connection = connection;
+
+			// Ensure connection within transaction
+			assertEquals("Incorrect transaction state", isAutoCommit, connection.getAutoCommit());
 
 			// Create table with row
 			try (Statement statement = connection.createStatement()) {
