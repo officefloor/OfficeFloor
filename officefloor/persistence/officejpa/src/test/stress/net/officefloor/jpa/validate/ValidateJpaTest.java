@@ -62,7 +62,9 @@ public class ValidateJpaTest extends AbstractJpaTestCase {
 		public EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, DataSource dataSource,
 				Properties properties) throws Exception {
 			Map configuration = new HashMap<>(properties);
-			configuration.put("hibernate.connection.datasource", dataSource);
+			if (dataSource != null) {
+				configuration.put("hibernate.connection.datasource", dataSource);
+			}
 			return Persistence.createEntityManagerFactory(persistenceUnitName, configuration);
 		}
 	}

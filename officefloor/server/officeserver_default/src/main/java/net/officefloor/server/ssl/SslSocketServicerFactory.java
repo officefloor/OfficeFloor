@@ -87,16 +87,12 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 	/**
 	 * Instantiate.
 	 * 
-	 * @param sslContext
-	 *            {@link SSLContext}.
-	 * @param delegateSocketServicerFactory
-	 *            Delegate {@link SocketServicerFactory}.
-	 * @param delegateRequestServicerFactory
-	 *            Delegate {@link RequestServicerFactory}.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
-	 * @param executor
-	 *            {@link Executor}.
+	 * @param sslContext                     {@link SSLContext}.
+	 * @param delegateSocketServicerFactory  Delegate {@link SocketServicerFactory}.
+	 * @param delegateRequestServicerFactory Delegate
+	 *                                       {@link RequestServicerFactory}.
+	 * @param bufferPool                     {@link StreamBufferPool}.
+	 * @param executor                       {@link Executor}.
 	 */
 	public SslSocketServicerFactory(SSLContext sslContext, SocketServicerFactory<R> delegateSocketServicerFactory,
 			RequestServicerFactory<R> delegateRequestServicerFactory, StreamBufferPool<ByteBuffer> bufferPool,
@@ -167,32 +163,29 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		private final RequestServicer<R> delegateRequestServicer;
 
 		/**
-		 * {@link ByteBuffer} instances containing the read data from the
-		 * {@link Socket} to be unwrapped to the application.
+		 * {@link ByteBuffer} instances containing the read data from the {@link Socket}
+		 * to be unwrapped to the application.
 		 */
 		private final Deque<ByteBuffer> socketToUnwrapBuffers = new LinkedList<>();
 
 		/**
-		 * Limit of the current {@link Socket} data to unwrap
-		 * {@link ByteBuffer}.
+		 * Limit of the current {@link Socket} data to unwrap {@link ByteBuffer}.
 		 */
 		private int currentSocketToUnwrapLimit = 0;
 
 		/**
-		 * {@link StreamBuffer} instance containing the unwrap to application
-		 * data.
+		 * {@link StreamBuffer} instance containing the unwrap to application data.
 		 */
 		private StreamBuffer<ByteBuffer> currentUnwrapToAppBuffer = null;
 
 		/**
-		 * Head {@link StreamBuffer} to linked list of {@link StreamBuffer}
-		 * instances to release on servicing the request.
+		 * Head {@link StreamBuffer} to linked list of {@link StreamBuffer} instances to
+		 * release on servicing the request.
 		 */
 		private StreamBuffer<ByteBuffer> previousRequestBuffers = null;
 
 		/**
-		 * {@link StreamBuffer} instance containing the application to wrap
-		 * data.
+		 * {@link StreamBuffer} instance containing the application to wrap data.
 		 */
 		private StreamBuffer<ByteBuffer> currentAppToWrapBuffer = null;
 
@@ -214,14 +207,10 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		/**
 		 * Instantiate.
 		 * 
-		 * @param engine
-		 *            {@link SSLEngine}.
-		 * @param requestHandler
-		 *            {@link RequestHandler}.
-		 * @param delegateSocketServicer
-		 *            Delegate {@link SocketServicer}.
-		 * @param delegateRequestServicer
-		 *            Delegate {@link RequestServicer}.
+		 * @param engine                  {@link SSLEngine}.
+		 * @param requestHandler          {@link RequestHandler}.
+		 * @param delegateSocketServicer  Delegate {@link SocketServicer}.
+		 * @param delegateRequestServicer Delegate {@link RequestServicer}.
 		 */
 		private SslSocketServicer(SSLEngine engine, RequestHandler<R> requestHandler,
 				SocketServicer<R> delegateSocketServicer, RequestServicer<R> delegateRequestServicer) {
@@ -236,7 +225,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		 */
 
 		@Override
-		public synchronized void service(StreamBuffer<ByteBuffer> readBuffer, boolean isNewBuffer) {
+		public synchronized void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer) {
 
 			// Include the read data
 			ByteBuffer buffer = readBuffer.pooledBuffer.duplicate();
@@ -378,8 +367,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		/**
 		 * Processes the data.
 		 * 
-		 * @param responseWriter
-		 *            {@link ResponseWriter} to use in sending the response.
+		 * @param responseWriter {@link ResponseWriter} to use in sending the response.
 		 */
 		private void process(ResponseWriter responseWriter) {
 
@@ -560,7 +548,8 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 										: new ServiceUnpooledStreamBuffer(this.currentUnwrapToAppBuffer);
 
 								// Service the request
-								this.delegateSocketServicer.service(serviceStreamBuffer, isNewBuffer);
+								this.delegateSocketServicer.service(serviceStreamBuffer,
+										serviceStreamBuffer.pooledBuffer.remaining(), isNewBuffer);
 
 							} else {
 								// Release the unused buffer
@@ -810,8 +799,8 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 		/**
 		 * Head {@link StreamBuffer} to the linked list of {@link StreamBuffer}
-		 * instances containing request {@link StreamBuffer} instances to
-		 * release on response. May be <code>null</code>.
+		 * instances containing request {@link StreamBuffer} instances to release on
+		 * response. May be <code>null</code>.
 		 */
 		private final StreamBuffer<ByteBuffer> releaseRequestBuffers;
 
@@ -834,13 +823,11 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		/**
 		 * Instantiate.
 		 * 
-		 * @param releaseRequestBuffers
-		 *            Head {@link StreamBuffer} to the linked list of
-		 *            {@link StreamBuffer} instances containing request
-		 *            {@link StreamBuffer} instances to release on response. May
-		 *            be <code>null</code>.
-		 * @param reponseWriter
-		 *            {@link ResponseWriter}.
+		 * @param releaseRequestBuffers Head {@link StreamBuffer} to the linked list of
+		 *                              {@link StreamBuffer} instances containing
+		 *                              request {@link StreamBuffer} instances to
+		 *                              release on response. May be <code>null</code>.
+		 * @param reponseWriter         {@link ResponseWriter}.
 		 */
 		private SslRequest(StreamBuffer<ByteBuffer> releaseRequestBuffers, ResponseWriter reponseWriter) {
 			this.releaseRequestBuffers = releaseRequestBuffers;
@@ -866,10 +853,8 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		/**
 		 * Initiate.
 		 * 
-		 * @param task
-		 *            SSL task to be run.
-		 * @param sslSocketServicer
-		 *            {@link SslSocketServicer}.
+		 * @param task              SSL task to be run.
+		 * @param sslSocketServicer {@link SslSocketServicer}.
 		 */
 		private SslRunnable(Runnable task, SslSocketServicerFactory<?>.SslSocketServicer sslSocketServicer) {
 			this.task = task;
@@ -906,8 +891,8 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 	}
 
 	/**
-	 * Need to adapt unpooled {@link StreamBuffer} to pooled
-	 * {@link StreamBuffer} to service.
+	 * Need to adapt unpooled {@link StreamBuffer} to pooled {@link StreamBuffer} to
+	 * service.
 	 */
 	private static class ServiceUnpooledStreamBuffer extends StreamBuffer<ByteBuffer> {
 
@@ -919,8 +904,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		/**
 		 * Instantiate.
 		 * 
-		 * @param unpooledStreamBuffer
-		 *            Unpooled {@link StreamBuffer}.
+		 * @param unpooledStreamBuffer Unpooled {@link StreamBuffer}.
 		 */
 		public ServiceUnpooledStreamBuffer(StreamBuffer<ByteBuffer> unpooledStreamBuffer) {
 			super(unpooledStreamBuffer.unpooledByteBuffer, null, null);

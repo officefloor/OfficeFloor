@@ -572,6 +572,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testMultipleIndividualRequests() throws Exception {
 		this.startHttpServer(Servicer.class);
 		for (int i = 0; i < 100; i++) {
@@ -585,6 +586,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testMultipleIndividualSecureRequests() throws Exception {
 		this.startHttpServer(Servicer.class);
 		for (int i = 0; i < 100; i++) {
@@ -726,6 +728,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testRawPipelining() throws Exception {
 		this.doPipeliningTest(null);
 	}
@@ -736,6 +739,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testBytesPipelining() throws Exception {
 		this.doPipeliningTest(BytesServicer.class);
 	}
@@ -746,6 +750,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testBufferPipelining() throws Exception {
 		this.doPipeliningTest(BufferServicer.class);
 	}
@@ -756,6 +761,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testFilePipelining() throws Exception {
 		this.doPipeliningTest(FileServicer.class);
 	}
@@ -791,6 +797,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testRawThreadedHandler() throws Exception {
 		this.doThreadedHandlerTest(null);
 	}
@@ -801,6 +808,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testBytesThreadedHandler() throws Exception {
 		this.doThreadedHandlerTest(BytesServicer.class);
 	}
@@ -811,6 +819,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testBufferThreadedHandler() throws Exception {
 		this.doThreadedHandlerTest(BufferServicer.class);
 	}
@@ -821,6 +830,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testFileThreadedHandler() throws Exception {
 		this.doThreadedHandlerTest(FileServicer.class);
 	}
@@ -856,6 +866,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testRawHeavyLoad() throws Exception {
 		this.doHeavyLoadTest(null);
 	}
@@ -866,6 +877,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testBytesHeavyLoad() throws Exception {
 		this.doHeavyLoadTest(BytesServicer.class);
 	}
@@ -876,6 +888,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testBufferHeavyLoad() throws Exception {
 		this.doHeavyLoadTest(BufferServicer.class);
 	}
@@ -886,6 +899,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testFileHeavyLoad() throws Exception {
 		this.doHeavyLoadTest(FileServicer.class);
 	}
@@ -911,6 +925,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testRawOverLoad() throws Exception {
 		this.doOverLoadTest(null);
 	}
@@ -921,6 +936,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testBytesOverLoad() throws Exception {
 		this.doOverLoadTest(BytesServicer.class);
 	}
@@ -931,6 +947,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testBufferOverLoad() throws Exception {
 		this.doOverLoadTest(BufferServicer.class);
 	}
@@ -941,6 +958,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception
 	 *             If test failure.
 	 */
+	@StressTest
 	public void testFileOverLoad() throws Exception {
 		this.doOverLoadTest(FileServicer.class);
 	}

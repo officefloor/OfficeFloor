@@ -25,6 +25,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.PersistenceFactory;
@@ -41,8 +42,13 @@ public class DataNucleusJpaManagedObjectSource extends JpaManagedObjectSource im
 	 */
 
 	@Override
-	protected PersistenceFactory getPersistenceFactory(MetaDataContext<Dependencies, None> context) throws Exception {
+	protected PersistenceFactory getPersistenceFactory(MetaDataContext<Indexed, None> context) throws Exception {
 		return this;
+	}
+
+	@Override
+	protected boolean isRunWithinTransaction() {
+		return false;
 	}
 
 	/*
@@ -54,7 +60,9 @@ public class DataNucleusJpaManagedObjectSource extends JpaManagedObjectSource im
 	public EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, DataSource dataSource,
 			Properties properties) throws Exception {
 		Map configuration = new HashMap<>(properties);
-		configuration.put("datanucleus.ConnectionFactory", dataSource);
+		if (dataSource != null) {
+			configuration.put("datanucleus.ConnectionFactory", dataSource);
+		}
 		return Persistence.createEntityManagerFactory(persistenceUnitName, configuration);
 	}
 

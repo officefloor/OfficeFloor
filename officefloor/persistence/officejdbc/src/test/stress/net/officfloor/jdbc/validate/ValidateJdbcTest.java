@@ -24,6 +24,8 @@ import java.util.Properties;
 
 import org.h2.jdbcx.JdbcDataSource;
 
+import com.zaxxer.hikari.HikariDataSource;
+
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
@@ -37,6 +39,8 @@ import net.officefloor.jdbc.test.AbstractJdbcTestCase;
  */
 public class ValidateJdbcTest extends AbstractJdbcTestCase {
 
+	private static final String JDBC_URL = "jdbc:h2:mem:test";
+
 	@Override
 	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
 		return ConnectionManagedObjectSource.class;
@@ -48,14 +52,20 @@ public class ValidateJdbcTest extends AbstractJdbcTestCase {
 	}
 
 	@Override
-	protected void loadOptionalSpecification(Properties properties) {
-		this.loadProperties((name, value) -> properties.setProperty(name, value));
+	protected void loadOptionalConnectionSpecification(Properties properties) {
+		this.loadConnectionProperties((name, value) -> properties.setProperty(name, value));
 	}
 
 	@Override
-	protected void loadProperties(PropertyConfigurable mos) {
+	protected void loadConnectionProperties(PropertyConfigurable mos) {
 		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, JdbcDataSource.class.getName());
-		mos.addProperty("uRL", "jdbc:h2:mem:test");
+		mos.addProperty("uRL", JDBC_URL);
+	}
+
+	@Override
+	protected void loadDataSourceProperties(PropertyConfigurable mos) {
+		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, HikariDataSource.class.getName());
+		mos.addProperty("jdbcUrl", JDBC_URL);
 	}
 
 	@Override

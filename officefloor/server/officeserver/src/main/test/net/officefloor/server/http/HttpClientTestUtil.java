@@ -66,17 +66,25 @@ public class HttpClientTestUtil {
 	 * @return <code>true</code> to allow timing out the {@link HttpClient}.
 	 */
 	private static boolean isTimeoutClient() {
-		return !("true".equalsIgnoreCase(System.getProperty(PROPERTY_NO_TIMEOUT)));
+		String value = System.getProperty(PROPERTY_NO_TIMEOUT);
+		return !("true".equalsIgnoreCase(value));
+	}
+
+	/**
+	 * Obtains the client time out.
+	 * 
+	 * @return Client time out.
+	 */
+	public static int getClientTimeout() {
+		return isTimeoutClient() ? 10000 : 0;
 	}
 
 	/**
 	 * Obtains the {@link HttpEntity} content.
 	 * 
-	 * @param response
-	 *            {@link HttpResponse}.
+	 * @param response {@link HttpResponse}.
 	 * @return Content of {@link HttpEntity}.
-	 * @throws IOException
-	 *             If fails to obtain content.
+	 * @throws IOException If fails to obtain content.
 	 */
 	public static String entityToString(HttpResponse response) throws IOException {
 		return entityToString(response, ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
@@ -85,13 +93,10 @@ public class HttpClientTestUtil {
 	/**
 	 * Obtains the {@link HttpEntity} content.
 	 * 
-	 * @param response
-	 *            {@link HttpResponse}.
-	 * @param charset
-	 *            {@link Charset}.
+	 * @param response {@link HttpResponse}.
+	 * @param charset  {@link Charset}.
 	 * @return Content of {@link HttpEntity}.
-	 * @throws IOException
-	 *             If fails to obtain content.
+	 * @throws IOException If fails to obtain content.
 	 */
 	public static String entityToString(HttpResponse response, Charset charset) throws IOException {
 
@@ -117,8 +122,7 @@ public class HttpClientTestUtil {
 	/**
 	 * Creates a {@link CloseableHttpClient} ready for use.
 	 * 
-	 * @param isSecure
-	 *            Indicate if require secure connection.
+	 * @param isSecure Indicate if require secure connection.
 	 * @return {@link CloseableHttpClient}.
 	 */
 	public static CloseableHttpClient createHttpClient(boolean isSecure) {
@@ -127,7 +131,7 @@ public class HttpClientTestUtil {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 
 		// Provide timeout of requests (10 sec or no timeout)
-		final int timeout = isTimeoutClient() ? 10000 : 0;
+		final int timeout = getClientTimeout();
 		RequestConfig.Builder requestConfig = RequestConfig.custom();
 		requestConfig.setSocketTimeout(timeout);
 		requestConfig.setConnectTimeout(timeout);
@@ -156,8 +160,7 @@ public class HttpClientTestUtil {
 	/**
 	 * Configures the {@link HttpClientBuilder} for HTTPS.
 	 * 
-	 * @param builder
-	 *            {@link HttpClientBuilder}.
+	 * @param builder {@link HttpClientBuilder}.
 	 */
 	public static void configureHttps(HttpClientBuilder builder) {
 		try {
@@ -172,8 +175,7 @@ public class HttpClientTestUtil {
 	/**
 	 * Configures no redirects for the {@link HttpClientBuilder}.
 	 * 
-	 * @param builder
-	 *            {@link HttpClientBuilder}.
+	 * @param builder {@link HttpClientBuilder}.
 	 */
 	public static void configureNoRedirects(HttpClientBuilder builder) {
 		builder.setRedirectStrategy(new RedirectStrategy() {
@@ -196,16 +198,11 @@ public class HttpClientTestUtil {
 	/**
 	 * Configures {@link CredentialsProvider} for the {@link HttpClientBuilder}.
 	 * 
-	 * @param builder
-	 *            {@link HttpClientBuilder}.
-	 * @param realm
-	 *            Security realm.
-	 * @param scheme
-	 *            Security scheme.
-	 * @param username
-	 *            User name.
-	 * @param password
-	 *            Password.
+	 * @param builder  {@link HttpClientBuilder}.
+	 * @param realm    Security realm.
+	 * @param scheme   Security scheme.
+	 * @param username User name.
+	 * @param password Password.
 	 * @return {@link CredentialsProvider}.
 	 */
 	public static CredentialsProvider configureCredentials(HttpClientBuilder builder, String realm, String scheme,

@@ -227,6 +227,11 @@
 				<artifactId>officejpa_eclipselink</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officejpa_postgresql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- Eclipse -->
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
@@ -407,6 +412,11 @@
 				<version>1.10</version>
 			</dependency>
 			<dependency>
+				<groupId>com.zaxxer</groupId>
+				<artifactId>HikariCP</artifactId>
+				<version>3.2.0</version>
+			</dependency>
+			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
 				<version>1.4.197</version>
@@ -439,6 +449,11 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-simple</artifactId>
+				<version>1.7.7</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-nop</artifactId>
 				<version>1.7.7</version>
 			</dependency>
 			<dependency>

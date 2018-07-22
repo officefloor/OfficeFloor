@@ -21,9 +21,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.zaxxer.hikari.HikariDataSource;
+
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
+import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 
 /**
@@ -32,6 +35,8 @@ import net.officefloor.jdbc.test.AbstractJdbcTestCase;
  * @author Daniel Sagenschneider
  */
 public class H2JdbcTest extends AbstractJdbcTestCase {
+
+	private static final String JDBC_URL = "jdbc:h2:mem:test";
 
 	@Override
 	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
@@ -44,9 +49,17 @@ public class H2JdbcTest extends AbstractJdbcTestCase {
 	}
 
 	@Override
-	protected void loadProperties(PropertyConfigurable mos) {
-		mos.addProperty("url", "jdbc:h2:mem:test");
+	protected void loadConnectionProperties(PropertyConfigurable mos) {
+		mos.addProperty("url", JDBC_URL);
 		mos.addProperty("user", "test");
+		mos.addProperty("password", "test");
+	}
+
+	@Override
+	protected void loadDataSourceProperties(PropertyConfigurable mos) {
+		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, HikariDataSource.class.getName());
+		mos.addProperty("jdbcUrl", JDBC_URL);
+		mos.addProperty("username", "test");
 		mos.addProperty("password", "test");
 	}
 

@@ -21,6 +21,7 @@
 		<module>officejpa_hibernate</module>
 		<!-- <module>officejpa_eclipselink</module> -->
 		<module>officejpa_datanucleus</module>
+		<module>officejpa_postgresql</module>
 	</modules>
 	<dependencies>
 		<dependency>
@@ -35,6 +36,11 @@
 		<dependency>
 			<groupId>easymock</groupId>
 			<artifactId>easymock</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-nop</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

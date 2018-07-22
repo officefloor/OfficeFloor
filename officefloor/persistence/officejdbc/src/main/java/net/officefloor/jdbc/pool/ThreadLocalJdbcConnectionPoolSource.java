@@ -85,6 +85,11 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 		// Obtain the pooled data source
 		ConnectionPoolDataSource dataSource = connectionManagedObjectSource.getConnectionPoolDataSource();
 
+		// Configure connectivity
+		connectionManagedObjectSource.setConnectivity(() -> {
+			return dataSource.getPooledConnection().getConnection();
+		});
+
 		// Create and return the pool
 		return new ThreadLocalJdbcConnectionPool(dataSource, this.wrapperFactory);
 	}

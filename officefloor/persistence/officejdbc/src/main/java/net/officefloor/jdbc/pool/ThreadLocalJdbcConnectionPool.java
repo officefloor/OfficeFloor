@@ -194,6 +194,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				case "close":
 					break; // no operation
 				case "setAutoCommit":
+					source.println("    this.context.setAutoCommit(this.context.getConnectionReference(), p0);");
 					break;
 				case "setClientInfo":
 					source.println("    throw new " + compiler.getSourceName(SQLClientInfoException.class)
@@ -441,9 +442,18 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 				// If no valid pooled connection, create a new connection
 				if (reference == null) {
+
+					// Obtain the connection
 					PooledConnection pooledConnection = ThreadLocalJdbcConnectionPool.this.dataSource
 							.getPooledConnection();
 					Connection connection = pooledConnection.getConnection();
+
+					// Ensure not within transaction
+					if (!connection.getAutoCommit()) {
+						connection.setAutoCommit(true);
+					}
+
+					// Create reference to the connection
 					reference = new ConnectionReferenceImpl(connection, pooledConnection);
 				}
 

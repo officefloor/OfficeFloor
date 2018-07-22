@@ -78,13 +78,13 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		// Wait for clients to finish
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < clients.length; i++) {
-			clients[i].waitForCompletion(startTime, 30);
+			clients[i].waitForCompletion(startTime, 120);
 		}
 	}
 
 	/**
-	 * Ensure can service pipeline requests with {@link RequestServicer}
-	 * executing on another {@link Thread}.
+	 * Ensure can service pipeline requests with {@link RequestServicer} executing
+	 * on another {@link Thread}.
 	 */
 	public void testPipelineThreaded() throws Exception {
 
@@ -116,7 +116,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		// Wait for clients to finish
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < clients.length; i++) {
-			clients[i].waitForCompletion(startTime, 30);
+			clients[i].waitForCompletion(startTime, 120);
 		}
 	}
 
@@ -232,7 +232,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		}
 
 		@Override
-		public void service(StreamBuffer<ByteBuffer> readBuffer, boolean isNewBuffer) {
+		public void service(StreamBuffer<ByteBuffer> readBuffer, long bytesRead, boolean isNewBuffer) {
 
 			// Setup for reading
 			int position = readBuffer.pooledBuffer.position();

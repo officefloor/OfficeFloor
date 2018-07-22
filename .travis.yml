@@ -1,3 +1,6 @@
 language: java
 jdk: oraclejdk10
+sudo: required
+services: docker
+env: officefloor_skip_stress_tests=true
 before_install: cd officefloor
