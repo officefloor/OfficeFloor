@@ -78,7 +78,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		// Wait for clients to finish
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < clients.length; i++) {
-			clients[i].waitForCompletion(startTime, 30);
+			clients[i].waitForCompletion(startTime, 120);
 		}
 	}
 
@@ -116,7 +116,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		// Wait for clients to finish
 		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < clients.length; i++) {
-			clients[i].waitForCompletion(startTime, 30);
+			clients[i].waitForCompletion(startTime, 120);
 		}
 	}
 
