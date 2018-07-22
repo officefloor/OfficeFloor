@@ -194,6 +194,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				case "close":
 					break; // no operation
 				case "setAutoCommit":
+					source.println("    this.context.setAutoCommit(this.context.getConnectionReference(), p0);");
 					break;
 				case "setClientInfo":
 					source.println("    throw new " + compiler.getSourceName(SQLClientInfoException.class)
