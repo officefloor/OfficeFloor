@@ -21,6 +21,7 @@
 		<module>officejpa_hibernate</module>
 		<!-- <module>officejpa_eclipselink</module> -->
 		<module>officejpa_datanucleus</module>
+		<module>officejpa_postgresql</module>
 	</modules>
 	<dependencies>
 		<dependency>

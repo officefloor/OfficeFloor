@@ -633,8 +633,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			try {
 
 				// Handle possible transaction
-				EntityTransaction transaction = entityManager.getTransaction();
-				if ((transaction != null) && (transaction.isActive())) {
+				if (entityManager.isJoinedToTransaction()) {
 
 					// If no escalations, then commit changes
 					CleanupEscalation[] escalations = recycle.getCleanupEscalations();
