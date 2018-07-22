@@ -65,6 +65,19 @@ public class DataSourceRule implements TestRule {
 	 * @throws Exception If failed waiting on database or {@link Connection} issue.
 	 */
 	public static Connection waitForDatabaseAvailable(ConnectionFactory connectionFactory) throws Exception {
+		return waitForDatabaseAvailable(null, connectionFactory);
+	}
+
+	/**
+	 * Waits for the database to be available.
+	 * 
+	 * @param lock              To wait on to allow locking setup.
+	 * @param connectionFactory {@link ConnectionFactory}.
+	 * @return {@link Connection}.
+	 * @throws Exception If failed waiting on database or {@link Connection} issue.
+	 */
+	public static Connection waitForDatabaseAvailable(Object lock, ConnectionFactory connectionFactory)
+			throws Exception {
 
 		// Ignore output
 		OutputStream devNull = new OutputStream() {
@@ -100,7 +113,11 @@ public class DataSourceRule implements TestRule {
 
 					} else {
 						// Try again in a little
-						Thread.sleep(100);
+						if (lock == null) {
+							Thread.sleep(100);
+						} else {
+							lock.wait(100);
+						}
 						continue NEXT_TRY;
 					}
 				}

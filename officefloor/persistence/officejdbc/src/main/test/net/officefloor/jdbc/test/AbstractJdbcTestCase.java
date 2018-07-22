@@ -171,30 +171,33 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		super.setUp();
+		synchronized (AbstractJdbcTestCase.class) {
+			super.setUp();
 
-		// Obtain connection
-		this.connection = DataSourceRule.waitForDatabaseAvailable(() -> {
+			// Obtain connection
+			this.connection = DataSourceRule.waitForDatabaseAvailable(AbstractJdbcTestCase.class, () -> {
 
-			// Obtain the connection
-			this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
-					(mos) -> this.loadConnectionProperties(mos));
+				// Obtain the connection
+				this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
+						(mos) -> this.loadConnectionProperties(mos));
 
-			// Clean database
-			this.cleanDatabase(this.connection);
+				// Clean database
+				this.cleanDatabase(this.connection);
 
-			// Return the connection
-			return connection;
-		});
-
+				// Return the connection
+				return connection;
+			});
+		}
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
-		super.tearDown();
+		synchronized (AbstractJdbcTestCase.class) {
+			super.tearDown();
 
-		// Close connection
-		this.connection.close();
+			// Close connection
+			this.connection.close();
+		}
 	}
 
 	/**

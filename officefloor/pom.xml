@@ -227,6 +227,11 @@
 				<artifactId>officejpa_eclipselink</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officejpa_postgresql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- Eclipse -->
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
