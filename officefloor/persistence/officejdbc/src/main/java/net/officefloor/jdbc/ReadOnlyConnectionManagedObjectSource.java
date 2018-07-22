@@ -80,13 +80,16 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 		// Obtain the data source
 		DataSourceFactory dataSourceFactory = this.getDataSourceFactory(mosContext);
 		this.dataSource = dataSourceFactory.createDataSource(mosContext);
+
+		// Validate connectivity
+		this.setConnectivity(() -> this.dataSource.getConnection());
 	}
 
 	@Override
 	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
 
 		// Create the re-usable connection
-		this.connection = ((DataSource) this.dataSource).getConnection();
+		this.connection = this.dataSource.getConnection();
 		this.connection.setReadOnly(true);
 
 		// Wrap connection to avoid changing

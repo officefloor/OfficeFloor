@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.function.Consumer;
@@ -205,7 +206,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	/**
 	 * {@link EntityManagerFactory}.
 	 */
-	private EntityManagerFactory entityManagerFactory;
+	private volatile EntityManagerFactory entityManagerFactory;
 
 	/**
 	 * Setup for the {@link EntityManager}.
@@ -322,7 +323,11 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 						new Class[] { DataSource.class }, (proxy, method, args) -> {
 							switch (method.getName()) {
 							case "getConnection":
-								return this.dataSourceConnection.get();
+								Connection connection = this.dataSourceConnection.get();
+								if (this.isRunWithinTransaction() && connection.getAutoCommit()) {
+									connection.setAutoCommit(false);
+								}
+								return connection;
 							}
 							throw new UnsupportedOperationException("Method " + method.getName()
 									+ " not available from JPA proxy " + DataSource.class.getSimpleName());
@@ -358,7 +363,14 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 					// Write the implementation
 					switch (method.getName()) {
 					case "getConnection":
-						source.println("    return this.mos.getConnection();");
+						source.println("    " + compiler.getSourceName(Connection.class)
+								+ " connection = this.mos.getConnection();");
+						if (this.isRunWithinTransaction()) {
+							source.println("    if (connection.getAutoCommit()) {");
+							source.println("      connection.setAutoCommit(false);");
+							source.println("    }");
+						}
+						source.println("    return connection;");
 						break;
 					default:
 						source.println("    throw new " + compiler.getSourceName(SQLFeatureNotSupportedException.class)
@@ -403,6 +415,24 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			};
 			this.jpaConnectionFactory = (registry) -> null;
 			this.jpaDataSourceFactory = (registry) -> null;
+
+			// Connection/DataSource handles connectivity validation.
+			// Therefore if managed need to check connectivity on start up.
+			final String validateFunctionName = "confirm";
+			mosContext.addManagedFunction(validateFunctionName, () -> (functionContext) -> {
+				try {
+					// Create entity manager factory
+					EntityManagerFactory factory = this.getEntityManagerFactory(null, null);
+
+					// Ensure connectivity by creating entity manager
+					factory.createEntityManager().close();
+				} catch (Throwable ex) {
+					throw new SQLException("Failing to connect " + EntityManager.class.getSimpleName(), ex);
+				}
+				return null;
+			});
+			mosContext.addStartupFunction(validateFunctionName);
+
 			break;
 
 		default:
@@ -455,6 +485,44 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	}
 
 	/**
+	 * Obtains the {@link EntityManagerFactory}.
+	 * 
+	 * @param managedObject {@link JpaManagedObject}.
+	 * @param registry      {@link ObjectRegistry}.
+	 * @return {@link EntityManagerFactory}.
+	 * @throws Exception If fails to create the {@link EntityManagerFactory}.
+	 */
+	public EntityManagerFactory getEntityManagerFactory(JpaManagedObject managedObject,
+			ObjectRegistry<Indexed> registry) throws Exception {
+
+		// If still reference to persistence factory (then likely factory not created)
+		if (this.persistenceFactory != null) {
+
+			// Attempt to ensure only one factory created
+			synchronized (this) {
+				if (this.entityManagerFactory == null) {
+
+					// Obtain the data source
+					DataSource dataSource = this.jpaDataSourceFactory.createDataSource(registry);
+
+					// Setup for entity manager creation
+					this.entityManagerSetup.accept(managedObject);
+
+					// Create the entity manager factory
+					this.entityManagerFactory = this.persistenceFactory
+							.createEntityManagerFactory(this.persistenceUnitName, dataSource, this.properties);
+				}
+
+				// Factory created (so indicate no need to create anymore)
+				this.persistenceFactory = null;
+			}
+		}
+
+		// Return the entity manager factory
+		return this.entityManagerFactory;
+	}
+
+	/**
 	 * JPA {@link ManagedObject}.
 	 */
 	public class JpaManagedObject implements CoordinatingManagedObject<Indexed>, InvocationHandler {
@@ -501,31 +569,11 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			// Obtain the possible connection
 			this.connection = mos.jpaConnectionFactory.createConnection(registry);
 
-			// If still reference to persistence factory (then likely factory not created)
-			if (mos.persistenceFactory != null) {
-
-				// Attempt to ensure only one factory created
-				synchronized (mos) {
-					if (mos.entityManagerFactory == null) {
-
-						// Obtain the data source
-						DataSource dataSource = mos.jpaDataSourceFactory.createDataSource(registry);
-
-						// Setup for entity manager creation
-						mos.entityManagerSetup.accept(this);
-
-						// Create the entity manager factory
-						mos.entityManagerFactory = mos.persistenceFactory
-								.createEntityManagerFactory(mos.persistenceUnitName, dataSource, mos.properties);
-					}
-
-					// Factory created (so indicate no need to create anymore)
-					mos.persistenceFactory = null;
-				}
-			}
+			// Obtain the entity manager factory
+			EntityManagerFactory factory = mos.getEntityManagerFactory(this, registry);
 
 			// Create the entity manager
-			this.entityManager = mos.entityManagerFactory.createEntityManager();
+			this.entityManager = factory.createEntityManager();
 
 			// Run entity manager within managed transaction
 			if (mos.isRunWithinTransaction()) {
@@ -585,8 +633,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			try {
 
 				// Handle possible transaction
-				EntityTransaction transaction = entityManager.getTransaction();
-				if ((transaction != null) && (transaction.isActive())) {
+				if (entityManager.isJoinedToTransaction()) {
 
 					// If no escalations, then commit changes
 					CleanupEscalation[] escalations = recycle.getCleanupEscalations();

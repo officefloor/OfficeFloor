@@ -17,6 +17,9 @@
  */
 package net.officefloor.jdbc.test;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -41,6 +44,93 @@ import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 public class DataSourceRule implements TestRule {
 
 	/**
+	 * Factory to create the {@link Connection}.
+	 */
+	public static interface ConnectionFactory {
+
+		/**
+		 * Create the {@link Connection}.
+		 * 
+		 * @return {@link Connection}.
+		 * @throws Exception If fails to create {@link Connection}.
+		 */
+		Connection createConnection() throws Exception;
+	}
+
+	/**
+	 * Waits for the database to be available.
+	 * 
+	 * @param connectionFactory {@link ConnectionFactory}.
+	 * @return {@link Connection}.
+	 * @throws Exception If failed waiting on database or {@link Connection} issue.
+	 */
+	public static Connection waitForDatabaseAvailable(ConnectionFactory connectionFactory) throws Exception {
+		return waitForDatabaseAvailable(null, connectionFactory);
+	}
+
+	/**
+	 * Waits for the database to be available.
+	 * 
+	 * @param lock              To wait on to allow locking setup.
+	 * @param connectionFactory {@link ConnectionFactory}.
+	 * @return {@link Connection}.
+	 * @throws Exception If failed waiting on database or {@link Connection} issue.
+	 */
+	public static Connection waitForDatabaseAvailable(Object lock, ConnectionFactory connectionFactory)
+			throws Exception {
+
+		// Ignore output
+		OutputStream devNull = new OutputStream() {
+			@Override
+			public void write(int b) throws IOException {
+				// discard
+			}
+		};
+
+		// Ignore errors in trying to start
+		PrintStream stdout = System.out;
+		PrintStream stderr = System.err;
+		System.setOut(new PrintStream(devNull));
+		System.setErr(new PrintStream(devNull));
+		try {
+
+			// Try until time out (as may take time for database to come up)
+			final int MAX_SETUP_TIME = 30000; // milliseconds
+			long startTimestamp = System.currentTimeMillis();
+			NEXT_TRY: for (;;) {
+				try {
+
+					// Obtain connection
+					return connectionFactory.createConnection();
+
+				} catch (Throwable ex) {
+
+					// Failed setup, determine if try again
+					long currentTimestamp = System.currentTimeMillis();
+					if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
+						throw new RuntimeException("Timed out setting up JDBC test ("
+								+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
+
+					} else {
+						// Try again in a little
+						if (lock == null) {
+							Thread.sleep(100);
+						} else {
+							lock.wait(100);
+						}
+						continue NEXT_TRY;
+					}
+				}
+			}
+
+		} finally {
+			// Reinstate standard out / error
+			System.setOut(stdout);
+			System.setErr(stderr);
+		}
+	}
+
+	/**
 	 * Path to the {@link DataSource} properties file.
 	 */
 	private final String dataSourcePropertiesFilePath;
@@ -58,8 +148,8 @@ public class DataSourceRule implements TestRule {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param dataSourcePropertiesFilePath
-	 *            Path to the {@link DataSource} properties file.
+	 * @param dataSourcePropertiesFilePath Path to the {@link DataSource} properties
+	 *                                     file.
 	 */
 	public DataSourceRule(String dataSourcePropertiesFilePath) {
 		this.dataSourcePropertiesFilePath = dataSourcePropertiesFilePath;
@@ -81,8 +171,7 @@ public class DataSourceRule implements TestRule {
 	 * Convenience method to obtain a {@link Connection}.
 	 * 
 	 * @return {@link Connection}.
-	 * @throws SQLException
-	 *             If fails to obtain {@link Connection}.
+	 * @throws SQLException If fails to obtain {@link Connection}.
 	 */
 	public Connection getConnection() throws SQLException {
 		return this.getDataSource().getConnection();
@@ -117,7 +206,8 @@ public class DataSourceRule implements TestRule {
 						.createDataSource(DataSourceRule.this.dataSourcePropertiesFilePath);
 
 				// Obtain connection to keep potential in memory database active
-				try (Connection conneciton = DataSourceRule.this.dataSource.getConnection()) {
+				try (Connection conneciton = waitForDatabaseAvailable(
+						() -> DataSourceRule.this.dataSource.getConnection())) {
 					DataSourceRule.this.connection = conneciton;
 
 					// Undertake the test

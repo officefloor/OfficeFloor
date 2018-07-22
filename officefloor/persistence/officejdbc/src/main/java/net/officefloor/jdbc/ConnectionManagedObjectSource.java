@@ -148,6 +148,9 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 		// Create the data source
 		DataSourceFactory factory = this.getDataSourceFactory(this.mosContext);
 		this.dataSource = factory.createDataSource(this.mosContext);
+
+		// Provide connectivity
+		this.setConnectivity(() -> this.dataSource.getConnection());
 	}
 
 	@Override
@@ -173,6 +176,11 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 
 				// Obtain the connection
 				this.connection = ConnectionManagedObjectSource.this.dataSource.getConnection();
+
+				// Ensure within transaction
+				if (this.connection.getAutoCommit()) {
+					this.connection.setAutoCommit(false);
+				}
 
 				// Create proxy around connection
 				this.proxy = ConnectionManagedObjectSource.this.wrapperFactory.wrap(this.connection);

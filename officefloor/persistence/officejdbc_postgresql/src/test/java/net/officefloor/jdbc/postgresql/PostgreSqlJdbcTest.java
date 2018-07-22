@@ -20,30 +20,17 @@ package net.officefloor.jdbc.postgresql;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.function.Consumer;
 
 import org.postgresql.ds.PGSimpleDataSource;
 
-import com.spotify.docker.client.DefaultDockerClient;
-import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.messages.Container;
-import com.spotify.docker.client.messages.ContainerConfig;
-import com.spotify.docker.client.messages.ContainerCreation;
-import com.spotify.docker.client.messages.HostConfig;
-import com.spotify.docker.client.messages.PortBinding;
 import com.zaxxer.hikari.HikariDataSource;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
+import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 
 /**
@@ -54,80 +41,30 @@ import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 
 	/**
-	 * Pulled docker images.
+	 * Port to run PostgreSql.
 	 */
-	private static final Set<String> pulledDockerImages = new HashSet<>();
+	private static final int PORT = 5433;
 
 	/**
-	 * Pulls the docker image.
-	 * 
-	 * @param imageName Docker image name.
-	 * @param client    {@link DockerClient}.
+	 * Username to connect to PostgreSql.
 	 */
-	public static void pullDockerImage(String imageName, DockerClient client) throws Exception {
+	private static final String USERNAME = "testuser";
 
-		// Determine if already pulled
-		if (pulledDockerImages.contains(imageName)) {
-			return;
-		}
+	/**
+	 * Password to connect to PostgreSql.
+	 */
+	private static final String PASSWORD = "testpassword";
 
-		// Pull the docker image
-		Consumer<String> print = (message) -> {
-			System.out.print(message == null ? "" : " " + message);
-			System.out.flush();
-		};
-		client.pull(imageName, (message) -> {
-			print.accept(message.progress());
-			print.accept(message.status());
-			print.accept(message.id());
-			System.out.println();
-		});
-
-		// Flag that pulled image
-		pulledDockerImages.add(imageName);
-	}
-
-	private DockerClient docker;
-
-	private String postgresContainerId;
+	/**
+	 * {@link PostgreSqlRule} to run PostgreSql.
+	 */
+	private PostgreSqlRule server = new PostgreSqlRule(PORT, USERNAME, PASSWORD);
 
 	@Override
 	protected void setUp() throws Exception {
 
-		final String IMAGE_NAME = "postgres:latest";
-		final String CONTAINER_NAME = "officefloor_postgres";
-
-		// Create the docker client
-		this.docker = DefaultDockerClient.fromEnv().build();
-
-		// Determine if container already running
-		for (Container container : this.docker.listContainers()) {
-			for (String name : container.names()) {
-				if (name.equals("/" + CONTAINER_NAME)) {
-					this.postgresContainerId = container.id();
-				}
-			}
-		}
-
-		// Start PostgreSQL (if not running)
-		if (this.postgresContainerId == null) {
-			System.out.println();
-			System.out.println("Starting PostgreSQL");
-			pullDockerImage(IMAGE_NAME, this.docker);
-
-			// Bind container port to host port
-			final String[] ports = { "5432" };
-			final Map<String, List<PortBinding>> portBindings = new HashMap<>();
-			portBindings.put("5432", Arrays.asList(PortBinding.of("0.0.0.0", "5433")));
-			final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
-			final ContainerConfig containerConfig = ContainerConfig.builder().hostConfig(hostConfig).image(IMAGE_NAME)
-					.exposedPorts(ports).env("POSTGRES_USER=testuser", "POSTGRES_PASSWORD=testpassword").build();
-
-			// Start the container
-			final ContainerCreation creation = docker.createContainer(containerConfig, CONTAINER_NAME);
-			this.postgresContainerId = creation.id();
-			this.docker.startContainer(this.postgresContainerId);
-		}
+		// Start PostgreSql
+		this.server.startPostgreSql();
 
 		// Run setup (now database available to connect)
 		super.setUp();
@@ -137,15 +74,12 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	protected void tearDown() throws Exception {
 
 		// Stop PostgresSQL
-		System.out.println("Stopping PostgreSQL");
-		this.docker.killContainer(this.postgresContainerId);
-		this.docker.removeContainer(this.postgresContainerId);
-		this.docker.close();
+		this.server.stopPostgreSql();
 
 		// Complete tear down
 		super.tearDown();
 	}
-
+	
 	@Override
 	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
 		return PostgreSqlConnectionManagedObjectSource.class;
@@ -159,9 +93,9 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	@Override
 	protected void loadConnectionProperties(PropertyConfigurable mos) {
 		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_SERVER_NAME, "localhost");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, "5433");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, "testuser");
-		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PASSWORD, "testpassword");
+		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PORT, String.valueOf(PORT));
+		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_USER, USERNAME);
+		mos.addProperty(PostgreSqlConnectionManagedObjectSource.PROPERTY_PASSWORD, PASSWORD);
 	}
 
 	@Override
@@ -173,9 +107,9 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	protected void loadDataSourceProperties(PropertyConfigurable mos) {
 		new PGSimpleDataSource();
 		mos.addProperty(DefaultDataSourceFactory.PROPERTY_DATA_SOURCE_CLASS_NAME, HikariDataSource.class.getName());
-		mos.addProperty("jdbcUrl", "jdbc:postgresql://localhost:5433/");
-		mos.addProperty("username", "testuser");
-		mos.addProperty("password", "testpassword");
+		mos.addProperty("jdbcUrl", "jdbc:postgresql://localhost:" + String.valueOf(PORT) + "/");
+		mos.addProperty("username", USERNAME);
+		mos.addProperty("password", PASSWORD);
 	}
 
 	@Override

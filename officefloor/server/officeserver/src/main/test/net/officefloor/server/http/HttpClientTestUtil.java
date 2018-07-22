@@ -66,7 +66,8 @@ public class HttpClientTestUtil {
 	 * @return <code>true</code> to allow timing out the {@link HttpClient}.
 	 */
 	private static boolean isTimeoutClient() {
-		return !("true".equalsIgnoreCase(System.getProperty(PROPERTY_NO_TIMEOUT)));
+		String value = System.getProperty(PROPERTY_NO_TIMEOUT);
+		return !("true".equalsIgnoreCase(value));
 	}
 
 	/**

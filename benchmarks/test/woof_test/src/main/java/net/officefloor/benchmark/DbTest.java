@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.http.HttpResponse;
@@ -20,7 +19,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.Data;
-import net.officefloor.jdbc.test.DataSourceRule;
+import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
 import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpServerLocation;
@@ -33,7 +32,7 @@ import net.officefloor.test.OfficeFloorRule;
 public class DbTest {
 
 	@ClassRule
-	public static DataSourceRule dataSource = new DataSourceRule("datasource.properties");
+	public static PostgreSqlRule dataSource = BenchmarkEnvironment.createPostgreSqlRule();
 
 	@ClassRule
 	public static SystemPropertiesRule systemProperties = new SystemPropertiesRule(HttpServer.PROPERTY_HTTP_SERVER_NAME,
@@ -47,20 +46,15 @@ public class DbTest {
 	public HttpClientRule client = new HttpClientRule();
 
 	@Before
-	public void setupDatabase() throws SQLException {
+	public void setupDatabase() throws Exception {
 		try (Connection connection = dataSource.getConnection()) {
-			try {
-				connection.createStatement().executeQuery("SELECT * FROM World");
-			} catch (SQLException ex) {
-				connection.createStatement()
-						.executeUpdate("CREATE TABLE World ( id INT PRIMARY KEY, randomNumber INT)");
-				PreparedStatement insert = connection
-						.prepareStatement("INSERT INTO World (id, randomNumber) VALUES (?, ?)");
-				for (int i = 0; i < 10000; i++) {
-					insert.setInt(1, i + 1);
-					insert.setInt(2, ThreadLocalRandom.current().nextInt(1, 10000));
-					insert.executeUpdate();
-				}
+			connection.createStatement().executeUpdate("CREATE TABLE World ( id INT PRIMARY KEY, randomNumber INT)");
+			PreparedStatement insert = connection
+					.prepareStatement("INSERT INTO World (id, randomNumber) VALUES (?, ?)");
+			for (int i = 0; i < 10000; i++) {
+				insert.setInt(1, i + 1);
+				insert.setInt(2, ThreadLocalRandom.current().nextInt(1, 10000));
+				insert.executeUpdate();
 			}
 		}
 	}

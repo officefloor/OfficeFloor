@@ -37,6 +37,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
@@ -48,6 +49,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.jdbc.AbstractConnectionManagedObjectSource;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
@@ -169,52 +171,32 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		super.setUp();
+		synchronized (AbstractJdbcTestCase.class) {
+			super.setUp();
 
-		// Ignore errors in trying to start
-		PrintStream stdout = System.out;
-		PrintStream stderr = System.err;
-		System.setOut(new PrintStream(new ByteArrayOutputStream()));
-		System.setErr(new PrintStream(new ByteArrayOutputStream()));
-		try {
+			// Obtain connection
+			this.connection = DataSourceRule.waitForDatabaseAvailable(AbstractJdbcTestCase.class, () -> {
 
-			// Try until time out (as may take time for database to come up)
-			final int MAX_SETUP_TIME = 30000; // milliseconds
-			long startTimestamp = System.currentTimeMillis();
-			NEXT_TRY: for (;;) {
-				try {
+				// Obtain the connection
+				this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
+						(mos) -> this.loadConnectionProperties(mos));
 
-					// Obtain connection
-					// Must keep reference to keep potential in memory databases active
-					this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
-							(mos) -> this.loadConnectionProperties(mos));
+				// Clean database
+				this.cleanDatabase(this.connection);
 
-					// Clean database
-					this.cleanDatabase(this.connection);
+				// Return the connection
+				return connection;
+			});
+		}
+	}
 
-					// Successful setup
-					return;
+	@Override
+	protected void tearDown() throws Exception {
+		synchronized (AbstractJdbcTestCase.class) {
+			super.tearDown();
 
-				} catch (Throwable ex) {
-
-					// Failed setup, determine if try again
-					long currentTimestamp = System.currentTimeMillis();
-					if (currentTimestamp > (startTimestamp + MAX_SETUP_TIME)) {
-						throw new RuntimeException("Timed out setting up JDBC test ("
-								+ (currentTimestamp - startTimestamp) + " milliseconds)", ex);
-
-					} else {
-						// Try again in a little
-						Thread.sleep(100);
-						continue NEXT_TRY;
-					}
-				}
-			}
-
-		} finally {
-			// Reinstate standard out / error
-			System.setOut(stdout);
-			System.setErr(stderr);
+			// Close connection
+			this.connection.close();
 		}
 	}
 
@@ -367,15 +349,45 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testWritableConnectivity() throws Throwable {
+		this.doWritableConnectivityTest(false);
+	}
+
+	/**
+	 * Ensure can connect to database.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	public void testPooledWritableConnectivity() throws Throwable {
+		this.doWritableConnectivityTest(true);
+	}
+
+	/**
+	 * Ensure can connect to database.
+	 * 
+	 * @throws Throwable On test failure.
+	 */
+	private void doWritableConnectivityTest(boolean isPooled) throws Throwable {
+
+		// Pooled connections not within transaction (by default)
+		ConnectivitySection.isAutoCommit = isPooled;
 
 		// Run connectivity to create table and add row
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Add connection
 			context.addSection("SECTION", ConnectivitySection.class);
-			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("mo",
 					this.getConnectionManagedObjectSourceClass().getName());
 			this.loadConnectionProperties(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Provide pooling
+			if (isPooled) {
+				architect.link(mos,
+						architect.addManagedObjectPool("POOL", ThreadLocalJdbcConnectionPoolSource.class.getName()));
+			}
 		});
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.checkConnectivity", null);
@@ -391,15 +403,22 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		}
 
 		// As no pooling, should close the connection
-		assertTrue("Connection should be closed", ConnectivitySection.connection.isClosed());
+		if (!isPooled) {
+			assertTrue("Connection should be closed", ConnectivitySection.connection.isClosed());
+		}
 	}
 
 	public static class ConnectivitySection {
 
 		private static Connection connection;
 
+		private static boolean isAutoCommit;
+
 		public void checkConnectivity(Connection connection) throws SQLException {
 			ConnectivitySection.connection = connection;
+
+			// Ensure connection within transaction
+			assertEquals("Incorrect transaction state", isAutoCommit, connection.getAutoCommit());
 
 			// Create table with row
 			try (Statement statement = connection.createStatement()) {
@@ -407,6 +426,115 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 				statement.execute("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
 			}
 		}
+	}
+
+	/**
+	 * Ensure correct type for writable {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testWritableValidateConnectivity() throws Exception {
+		this.doValidateConnectivityTest(this.getConnectionManagedObjectSourceClass(), false);
+	}
+
+	/**
+	 * Ensure correct type for writable {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testPooledWritableValidateConnectivity() throws Exception {
+		this.doValidateConnectivityTest(this.getConnectionManagedObjectSourceClass(), true);
+	}
+
+	/**
+	 * Ensure correct type for read-only {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testReadOnlyValidateConnectivity() throws Exception {
+		this.doValidateConnectivityTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false);
+	}
+
+	/**
+	 * Ensure correct type for {@link DataSource}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testDataSourceValidateConnectivity() throws Exception {
+		this.doValidateConnectivityTest(this.getDataSourceManagedObjectSourceClass(), false);
+	}
+
+	/**
+	 * Ensure can validate the connectivity on start up.
+	 * 
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
+	 * @param isPooled                 Indicates if should pool.
+	 * @throws Throwable On test failure.
+	 */
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doValidateConnectivityTest(
+			Class<MS> managedObjectSourceClass, boolean isPooled) throws Exception {
+
+		// Setup table
+		try (Statement statement = this.connection.createStatement()) {
+			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+		}
+
+		// Run connectivity to create table and add row
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Add the connection
+			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("mo",
+					managedObjectSourceClass.getName());
+			if (managedObjectSourceClass == this.getDataSourceManagedObjectSourceClass()) {
+				this.loadDataSourceProperties(mos);
+			} else {
+				this.loadConnectionProperties(mos);
+			}
+			mos.addProperty(AbstractConnectionManagedObjectSource.PROPERTY_DATA_SOURCE_VALIDATE_SQL,
+					"INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Provide pooling
+			if (isPooled) {
+				architect.link(mos,
+						architect.addManagedObjectPool("POOL", ThreadLocalJdbcConnectionPoolSource.class.getName()));
+			}
+		});
+
+		OfficeFloor officeFloor;
+
+		// Ensure no error on start up
+		final PrintStream original = System.err;
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		PrintStream stream = new PrintStream(buffer);
+		System.setErr(stream);
+		try {
+
+			// Open the OfficeFloor
+			officeFloor = compiler.compileAndOpenOfficeFloor();
+
+		} finally {
+			System.setErr(original);
+		}
+
+		// Ensure no errors
+		stream.flush();
+		String errors = buffer.toString();
+		assertEquals("Should be no errors\n\n" + errors, 0, errors.length());
+
+		// Ensure row in database
+		try (PreparedStatement statement = this.connection
+				.prepareStatement("SELECT NAME FROM OFFICE_FLOOR_JDBC_TEST WHERE ID = ?")) {
+			statement.setInt(1, 1);
+			ResultSet resultSet = statement.executeQuery();
+			assertTrue("Should have row in database", resultSet.next());
+			assertEquals("Incorrect row in database", "test", resultSet.getString("NAME"));
+		}
+
+		// Close
+		officeFloor.closeOfficeFloor();
 	}
 
 	/**
