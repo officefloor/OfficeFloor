@@ -92,7 +92,8 @@ public abstract class OfficeFloorJavaCompiler {
 	 * available.
 	 * <p>
 	 * This is useful for testing non Java compile solutions.
-	 * 
+	 *
+	 * @param           <T> Possible {@link Throwable} type.
 	 * @param operation {@link NonCompilerOperation}.
 	 * @throws T Possible failure.
 	 */

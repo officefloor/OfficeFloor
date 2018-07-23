@@ -252,7 +252,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
 	 * @throws Exception On test failure.
 	 */
-	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doSpecification(
+	private <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doSpecification(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Load the specification
@@ -315,7 +315,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @param expectedType             Expected type.
 	 * @throws Exception On test failure.
 	 */
-	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doTypeTest(
+	private <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doTypeTest(
 			Class<MS> managedObjectSourceClass, Class<?> expectedType) throws Exception {
 
 		// Create the expected type
@@ -471,7 +471,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @param isPooled                 Indicates if should pool.
 	 * @throws Throwable On test failure.
 	 */
-	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doValidateConnectivityTest(
+	private <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doValidateConnectivityTest(
 			Class<MS> managedObjectSourceClass, boolean isPooled) throws Exception {
 
 		// Setup table
@@ -814,7 +814,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * @param sectionLogicClass        Section logic {@link Class}.
 	 * @throws Throwable On test failure.
 	 */
-	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doSelectStressTest(
+	private <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doSelectStressTest(
 			Class<?> managedObjectSourceClass, boolean isPool, Class<?> sectionLogicClass) throws Throwable {
 
 		final int RUN_COUNT = 10000;
