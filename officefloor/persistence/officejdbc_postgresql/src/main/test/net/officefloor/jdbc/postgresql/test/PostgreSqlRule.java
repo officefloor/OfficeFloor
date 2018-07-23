@@ -62,6 +62,7 @@ public class PostgreSqlRule implements TestRule {
 	 * 
 	 * @param imageName Docker image name.
 	 * @param client    {@link DockerClient}.
+	 * @throws Exception If fails to pull image.
 	 */
 	public static void pullDockerImage(String imageName, DockerClient client) throws Exception {
 
