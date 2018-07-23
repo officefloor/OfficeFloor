@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import net.officefloor.frame.api.build.ExecutiveBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuildException;
@@ -29,6 +30,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
@@ -43,6 +45,7 @@ import net.officefloor.frame.impl.construct.team.TeamBuilderImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.impl.execute.officefloor.ThreadLocalAwareExecutorImpl;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
+import net.officefloor.frame.internal.configuration.ExecutiveConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -120,8 +123,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeFloorName
-	 *            Name of the {@link OfficeFloor}.
+	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 */
 	public OfficeFloorBuilderImpl(String officeFloorName) {
 		this.officeFloorName = officeFloorName;
@@ -185,6 +187,18 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<>(teamName, teamSource);
 		this.teams.add(builder);
 		return builder;
+	}
+
+	@Override
+	public <XS extends ExecutiveSource> ExecutiveBuilder<XS> setExecutive(Class<XS> executiveSourceClass) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement setExecutive");
+	}
+
+	@Override
+	public <XS extends ExecutiveSource> ExecutiveBuilder<XS> setExecutive(XS executiveSource) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement setExecutive");
 	}
 
 	@Override
@@ -259,6 +273,12 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	@Override
 	public TeamConfiguration<?>[] getTeamConfiguration() {
 		return this.teams.toArray(new TeamConfiguration[0]);
+	}
+
+	@Override
+	public ExecutiveConfiguration<?> getExecutiveConfiguration() {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement getExecutiveConfiguration");
 	}
 
 	@Override

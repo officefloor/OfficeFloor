@@ -36,11 +36,10 @@ public interface TeamSourceContext extends SourceContext {
 	 * Obtains the name of the {@link Team} to be created from the
 	 * {@link TeamSource}.
 	 * <p>
-	 * This enables naming the {@link Thread} instances for the {@link Team} to
-	 * be specific to the {@link Team}.
+	 * This enables naming the {@link Thread} instances for the {@link Team} to be
+	 * specific to the {@link Team}.
 	 * 
-	 * @return Name of the {@link Team} to be created from the
-	 *         {@link TeamSource}.
+	 * @return Name of the {@link Team} to be created from the {@link TeamSource}.
 	 */
 	String getTeamName();
 
@@ -50,13 +49,13 @@ public interface TeamSourceContext extends SourceContext {
 	 * <p>
 	 * It is encouraged for {@link Team} implementations to use this in creating
 	 * {@link Thread} instances. This is to enable performance improvements by
-	 * {@link OfficeFloor}, such as {@link ThreadLocal}
-	 * {@link ManagedObjectPool} solutions to reduce pool locking overheads.
+	 * {@link OfficeFloor}, such as {@link ThreadLocal} {@link ManagedObjectPool}
+	 * solutions to reduce pool locking overheads.
 	 * 
-	 * @param threadPriority
-	 *            Priority for the created {@link Thread} instances.
+	 * @param threadPriority Priority for the created {@link Thread} instances.
 	 * @return {@link ThreadFactory} for the {@link Team}.
 	 */
+	@Deprecated // remove threadPriority parameter (Runnable wrapper achieves this plus other)
 	ThreadFactory getThreadFactory(int threadPriority);
 
 }

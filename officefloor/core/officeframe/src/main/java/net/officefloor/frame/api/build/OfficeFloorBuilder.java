@@ -20,6 +20,8 @@ package net.officefloor.frame.api.build;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -41,8 +43,7 @@ public interface OfficeFloorBuilder {
 	 * Allows overriding the {@link ClassLoader} provided to the sources by the
 	 * {@link SourceContext}.
 	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param classLoader {@link ClassLoader}.
 	 */
 	void setClassLoader(ClassLoader classLoader);
 
@@ -50,41 +51,33 @@ public interface OfficeFloorBuilder {
 	 * Decorates all the {@link Thread} instances created by the
 	 * {@link TeamSourceContext}.
 	 * 
-	 * @param decorator
-	 *            Decorates all the {@link Thread} instances created by the
-	 *            {@link TeamSourceContext}.
+	 * @param decorator Decorates all the {@link Thread} instances created by the
+	 *                  {@link TeamSourceContext}.
 	 */
 	void setThreadDecorator(Consumer<Thread> decorator);
 
 	/**
 	 * Adds a {@link ResourceSource} to locate resources.
 	 * 
-	 * @param resourceSource
-	 *            {@link ResourceSource}.
+	 * @param resourceSource {@link ResourceSource}.
 	 */
 	void addResources(ResourceSource resourceSource);
 
 	/**
 	 * Adds an {@link OfficeFloorListener}.
 	 * 
-	 * @param listener
-	 *            {@link OfficeFloorListener}.
+	 * @param listener {@link OfficeFloorListener}.
 	 */
 	void addOfficeFloorListener(OfficeFloorListener listener);
 
 	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSourceClass
-	 *            Class of the {@link ManagedObjectSource}.
+	 * @param                          <O> Dependency key type.
+	 * @param                          <F> Flow key type.
+	 * @param                          <MS> {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceName  Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClass Class of the {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
 	<O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> ManagedObjectBuilder<F> addManagedObject(
@@ -93,14 +86,10 @@ public interface OfficeFloorBuilder {
 	/**
 	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance to use.
+	 * @param                         <O> Dependency key type.
+	 * @param                         <F> Flow key type.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource     {@link ManagedObjectSource} instance to use.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
 	<O extends Enum<O>, F extends Enum<F>> ManagedObjectBuilder<F> addManagedObject(String managedObjectSourceName,
@@ -110,12 +99,10 @@ public interface OfficeFloorBuilder {
 	 * Adds a {@link Team} which will execute {@link FunctionState} instances within
 	 * this {@link OfficeFloor}.
 	 * 
-	 * @param <TS>
-	 *            {@link TeamSource} type.
-	 * @param teamName
-	 *            Name to register the {@link Team} under.
-	 * @param teamSourceClass
-	 *            {@link TeamSource} {@link Class} name to source the {@link Team}.
+	 * @param                 <TS> {@link TeamSource} type.
+	 * @param teamName        Name to register the {@link Team} under.
+	 * @param teamSourceClass {@link TeamSource} {@link Class} to source the
+	 *                        {@link Team}.
 	 * @return {@link TeamBuilder} to build the {@link Team}.
 	 */
 	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, Class<TS> teamSourceClass);
@@ -124,15 +111,32 @@ public interface OfficeFloorBuilder {
 	 * Adds a {@link Team} which will execute {@link FunctionState} instances within
 	 * the {@link OfficeFloor}.
 	 *
-	 * @param <TS>
-	 *            {@link TeamSource} type.
-	 * @param teamName
-	 *            Name to register the {@link Team} under.
-	 * @param teamSource
-	 *            {@link TeamSource} to source the {@link Team}.
+	 * @param            <TS> {@link TeamSource} type.
+	 * @param teamName   Name to register the {@link Team} under.
+	 * @param teamSource {@link TeamSource} to source the {@link Team}.
 	 * @return {@link TeamBuilder} to build the {@link Team}.
 	 */
 	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName, TS teamSource);
+
+	/**
+	 * Specifies an {@link Executive} which will manage the {@link Team} instances
+	 * within the {@link OfficeFloor}.
+	 * 
+	 * @param executiveSourceClass {@link ExecutiveSource} {@link Class} to source
+	 *                             the {@link Executive}.
+	 * @return {@link ExecutiveBuilder} to build the {@link Executive}.
+	 */
+	<XS extends ExecutiveSource> ExecutiveBuilder<XS> setExecutive(Class<XS> executiveSourceClass);
+
+	/**
+	 * Specifies an {@link Executive} which will manage the {@link Team} instances
+	 * within the {@link OfficeFloor}.
+	 * 
+	 * @param executiveSource {@link ExecutiveSource} to source the
+	 *                        {@link Executive}.
+	 * @return {@link ExecutiveBuilder} to build the {@link Executive}.
+	 */
+	<XS extends ExecutiveSource> ExecutiveBuilder<XS> setExecutive(XS executiveSource);
 
 	/**
 	 * <p>
@@ -141,10 +145,8 @@ public interface OfficeFloorBuilder {
 	 * This need not be specified, but is available to override the default
 	 * {@link Team}.
 	 * 
-	 * @param <TS>
-	 *            {@link TeamSource} type.
-	 * @param teamSourceClass
-	 *            {@link TeamSource} to source the {@link Team}.
+	 * @param                 <TS> {@link TeamSource} type.
+	 * @param teamSourceClass {@link TeamSource} to source the {@link Team}.
 	 * @return {@link TeamBuilder} to build the {@link Team}.
 	 */
 	<TS extends TeamSource> TeamBuilder<TS> setBreakChainTeam(Class<TS> teamSourceClass);
@@ -152,8 +154,7 @@ public interface OfficeFloorBuilder {
 	/**
 	 * Adds an {@link Office} on the {@link OfficeFloor}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
+	 * @param officeName Name of the {@link Office}.
 	 * @return {@link OfficeBuilder} to build the {@link Office}.
 	 */
 	OfficeBuilder addOffice(String officeName);
@@ -162,17 +163,15 @@ public interface OfficeFloorBuilder {
 	 * Specifies the {@link EscalationHandler} for issues escalating out of the
 	 * {@link Office} instances.
 	 * 
-	 * @param escalationHandler
-	 *            {@link EscalationHandler}.
+	 * @param escalationHandler {@link EscalationHandler}.
 	 */
 	void setEscalationHandler(EscalationHandler escalationHandler);
 
 	/**
 	 * Builds the {@link OfficeFloor}.
 	 * 
-	 * @param issuesListener
-	 *            {@link OfficeFloorIssues} to listen for issues in constructing the
-	 *            {@link OfficeFloor}.
+	 * @param issuesListener {@link OfficeFloorIssues} to listen for issues in
+	 *                       constructing the {@link OfficeFloor}.
 	 * @return Built {@link OfficeFloor} if successfully built, or <code>null</code>
 	 *         if could not construct {@link OfficeFloor} with reasons passed to the
 	 *         {@link OfficeFloorIssues}.
@@ -183,8 +182,7 @@ public interface OfficeFloorBuilder {
 	 * Builds the {@link OfficeFloor}.
 	 * 
 	 * @return Built {@link OfficeFloor}.
-	 * @throws OfficeFloorBuildException
-	 *             If fails to build the {@link OfficeFloor}.
+	 * @throws OfficeFloorBuildException If fails to build the {@link OfficeFloor}.
 	 * 
 	 * @see OfficeFloorBuildException
 	 */
