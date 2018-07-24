@@ -19,7 +19,6 @@ package net.officefloor.frame.api.executive;
 
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
-import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
@@ -34,7 +33,9 @@ public interface Executive {
 	 * 
 	 * @return New {@link ProcessState} identifier.
 	 */
-	Object createProcessIdentifier();
+	default Object createProcessIdentifier() {
+		return new Object();
+	}
 
 	/**
 	 * Obtains the {@link ExecutionStrategy} strategies.
@@ -54,12 +55,12 @@ public interface Executive {
 	 * is, however, ultimately left to the {@link Executive} to manage the
 	 * {@link Team} instances.
 	 *
-	 * @param teamSource {@link TeamSource} to create the {@link Team}.
-	 * @param context    {@link TeamSourceContext} to configure the creation of the
-	 *                   {@link Team}.
+	 * @param context {@link ExecutiveContext}.
 	 * @return {@link Team}.
 	 * @throws Exception If fails to configure the {@link TeamSource}.
 	 */
-	Team createTeam(TeamSource teamSource, TeamSourceContext context) throws Exception;
+	default Team createTeam(ExecutiveContext context) throws Exception {
+		return context.getTeamSource().createTeam(context);
+	}
 
 }

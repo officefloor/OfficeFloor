@@ -20,13 +20,12 @@ package net.officefloor.frame.impl.construct.executive;
 import junit.framework.TestCase;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.ExecutiveContext;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceSpecification;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.team.source.TeamSource;
-import net.officefloor.frame.api.team.source.TeamSourceContext;
 
 /**
  * Adapter providing empty {@link ExecutiveSource} methods.
@@ -67,7 +66,7 @@ public class ExecutiveSourceAdapter implements ExecutiveSource, Executive {
 	}
 
 	@Override
-	public Team createTeam(TeamSource teamSource, TeamSourceContext context) throws Exception {
+	public Team createTeam(ExecutiveContext context) throws Exception {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}

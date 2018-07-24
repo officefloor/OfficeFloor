@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
+import java.util.concurrent.ThreadFactory;
+
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -58,17 +60,14 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectMetaData
-	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}.
-	 * @param processMoIndex
-	 *            Index of the {@link ManagedObject} within the
-	 *            {@link ProcessState}.
-	 * @param processLinks
-	 *            {@link FlowMetaData} in index order for the
-	 *            {@link ManagedObjectSource}.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData} to create {@link ProcessState}
-	 *            instances.
+	 * @param managedObjectMetaData {@link ManagedObjectMetaData} of the
+	 *                              {@link ManagedObject}.
+	 * @param processMoIndex        Index of the {@link ManagedObject} within the
+	 *                              {@link ProcessState}.
+	 * @param processLinks          {@link FlowMetaData} in index order for the
+	 *                              {@link ManagedObjectSource}.
+	 * @param officeMetaData        {@link OfficeMetaData} to create
+	 *                              {@link ProcessState} instances.
 	 */
 	public ManagedObjectExecuteContextImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
 			FlowMetaData[] processLinks, OfficeMetaData officeMetaData) {
@@ -112,6 +111,12 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 			}
 		};
 		this.officeMetaData.getManagedExecutionFactory().createManagedExecution(execution).execute();
+	}
+
+	@Override
+	public ThreadFactory[] getExecutionStrategy(int executionStrategyIndex) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 }

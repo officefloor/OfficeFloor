@@ -83,12 +83,12 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 
 	@Override
 	public void linkFlow(F key, String functionName) {
-		this.linkProcess(key.ordinal(), key, functionName);
+		this.linkFlow(key.ordinal(), key, functionName);
 	}
 
 	@Override
 	public void linkFlow(int flowIndex, String functionName) {
-		this.linkProcess(flowIndex, null, functionName);
+		this.linkFlow(flowIndex, null, functionName);
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 	 *                     <code>null</code>.
 	 * @param functionName Name of {@link ManagedFunction}.
 	 */
-	private void linkProcess(int index, F key, String functionName) {
+	private void linkFlow(int index, F key, String functionName) {
 
 		// Create the managed object flow configuration
 		ManagedObjectFlowConfiguration<F> flow = new ManagedObjectFlowConfigurationImpl(key, null,
@@ -107,6 +107,12 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 
 		// Register the flow at its index
 		this.flows.put(Integer.valueOf(index), flow);
+	}
+
+	@Override
+	public void linkExecutionStrategy(int strategyIndex, String executionStrategyName) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	/*

@@ -15,26 +15,50 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.executive.source;
+package net.officefloor.frame.api.executive.source.impl;
 
-import java.util.concurrent.ThreadFactory;
-
-import net.officefloor.frame.api.executive.ExecutionStrategy;
-import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.executive.source.ExecutiveSourceProperty;
 
 /**
- * Context for the {@link ExecutiveSource}.
+ * {@link ExecutiveSourceProperty} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ExecutiveSourceContext extends SourceContext {
+public class ExecutiveSourcePropertyImpl implements ExecutiveSourceProperty {
 
 	/**
-	 * Obtains the underlying {@link ThreadFactory} that should be used for
-	 * {@link ExecutionStrategy} instances.
-	 * 
-	 * @return {@link ThreadFactory} to use for {@link ExecutionStrategy} instances.
+	 * Name of property.
 	 */
-	ThreadFactory getThreadFactory();
+	protected final String name;
+
+	/**
+	 * Label of property.
+	 */
+	protected final String label;
+
+	/**
+	 * Initiate with name and label of property.
+	 * 
+	 * @param name  Name of property.
+	 * @param label Label of property.
+	 */
+	public ExecutiveSourcePropertyImpl(String name, String label) {
+		this.name = name;
+		this.label = label;
+	}
+
+	/*
+	 * =============== ExecutiveSourceProperty =====================
+	 */
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
+
+	@Override
+	public String getLabel() {
+		return this.label;
+	}
 
 }

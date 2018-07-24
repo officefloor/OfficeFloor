@@ -15,28 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.managedobject.executive;
+package net.officefloor.frame.api.managedobject.source;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Tests providing the {@link ExecutionStrategy} to the
+ * Describes an {@link ExecutionStrategy} required by the
  * {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ExecutionStrategyTest extends AbstractOfficeConstructTestCase {
+public interface ManagedObjectExecutionMetaData {
 
 	/**
-	 * Ensure can configure {@link ExecutionStrategy} for
-	 * {@link ManagedObjectSource}.
+	 * Provides a descriptive name for this {@link ExecutionStrategy}. This is
+	 * useful to better describe the {@link ExecutionStrategy}.
+	 * 
+	 * @return Descriptive name for this {@link ExecutionStrategy}.
 	 */
-	public void testExecutionStrategy() {
-
-		// Construct the managed object
-		fail("TODO implement");
-	}
+	String getLabel();
 
 }
