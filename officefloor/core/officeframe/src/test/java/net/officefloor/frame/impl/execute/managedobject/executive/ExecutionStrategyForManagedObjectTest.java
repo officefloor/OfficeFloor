@@ -86,25 +86,41 @@ public class ExecutionStrategyForManagedObjectTest extends AbstractOfficeConstru
 
 		private static ThreadFactory[] strategy;
 
+		/*
+		 * =============== ExecutiveSource ==================
+		 */
+
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
 		}
 
 		@Override
 		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
-			thread = context.getThreadFactory().newThread(() -> {
+			thread = context.createThreadFactory("TEST").newThread(() -> {
 			});
+
+			// Ensure correct thread name
+			assertEquals("Incorrect thread name", "TEST-1", thread.getName());
 
 			// Run thread (to allow tear down of used thread)
 			thread.start();
 
+			// Provide executive
 			return this;
 		}
+
+		/*
+		 * ================ Executive =======================
+		 */
 
 		@Override
 		public ExecutionStrategy[] getExcutionStrategies() {
 			return new ExecutionStrategy[] { this };
 		}
+
+		/*
+		 * ============== ExecutionStrategy =================
+		 */
 
 		@Override
 		public String getExecutionStrategyName() {

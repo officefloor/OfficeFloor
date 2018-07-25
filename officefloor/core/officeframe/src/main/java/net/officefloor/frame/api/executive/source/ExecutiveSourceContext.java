@@ -30,11 +30,14 @@ import net.officefloor.frame.api.source.SourceContext;
 public interface ExecutiveSourceContext extends SourceContext {
 
 	/**
-	 * Obtains the underlying {@link ThreadFactory} that should be used for
+	 * Creates the underlying {@link ThreadFactory} that should be used for
 	 * {@link ExecutionStrategy} instances.
 	 * 
+	 * @param executionStrategyName Name of the {@link ExecutionStrategy} to
+	 *                              associate {@link Thread} names to the
+	 *                              {@link ExecutionStrategy}.
 	 * @return {@link ThreadFactory} to use for {@link ExecutionStrategy} instances.
 	 */
-	ThreadFactory getThreadFactory();
+	ThreadFactory createThreadFactory(String executionStrategyName);
 
 }
