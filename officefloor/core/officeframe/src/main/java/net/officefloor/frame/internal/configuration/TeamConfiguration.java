@@ -36,15 +36,21 @@ public interface TeamConfiguration<TS extends TeamSource> {
 	String getTeamName();
 
 	/**
+	 * Obtains the size of the {@link Team}.
+	 * 
+	 * @return {@link Team} size.
+	 */
+	int getTeamSize();
+
+	/**
 	 * Obtains the {@link TeamSource} instance to use.
 	 * 
-	 * @return {@link TeamSource} instance to use. This may be
-	 *         <code>null</code> and therefore the
-	 *         {@link #getTeamSourceClass()} should be used to obtain
+	 * @return {@link TeamSource} instance to use. This may be <code>null</code> and
+	 *         therefore the {@link #getTeamSourceClass()} should be used to obtain
 	 *         the {@link TeamSource}.
 	 */
 	TS getTeamSource();
-	
+
 	/**
 	 * Obtains the {@link Class} of the {@link TeamSource}.
 	 * 
@@ -53,8 +59,7 @@ public interface TeamConfiguration<TS extends TeamSource> {
 	Class<TS> getTeamSourceClass();
 
 	/**
-	 * Obtains the {@link SourceProperties} for initialising the
-	 * {@link TeamSource}.
+	 * Obtains the {@link SourceProperties} for initialising the {@link TeamSource}.
 	 * 
 	 * @return {@link SourceProperties} for initialising the {@link TeamSource}.
 	 */

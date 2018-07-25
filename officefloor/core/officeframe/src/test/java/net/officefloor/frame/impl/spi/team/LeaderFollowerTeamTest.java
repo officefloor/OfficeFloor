@@ -70,8 +70,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	/**
 	 * Runs the test on the {@link LeaderFollowerTeam}.
 	 * 
-	 * @param teamMemberCount
-	 *            Count of workers in the team.
+	 * @param teamMemberCount Count of workers in the team.
 	 */
 	private void leaderFollowerTest(int teamMemberCount, int taskCount) throws Exception {
 
@@ -81,7 +80,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 		// Create the team and start it working
 		TeamSourceStandAlone standAlone = new TeamSourceStandAlone();
 		standAlone.setThreadDecorator((thread) -> teamThreads.add(thread));
-		standAlone.addProperty(LeaderFollowerTeamSource.TEAM_SIZE_PROPERTY_NAME, String.valueOf(teamSize));
+		standAlone.setTeamSize(teamSize);
 		Team team = standAlone.loadTeam(LeaderFollowerTeamSource.class);
 		team.startWorking();
 

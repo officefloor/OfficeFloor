@@ -56,6 +56,11 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 	protected final TeamSourceContext context;
 
 	/**
+	 * {@link Team} size.
+	 */
+	private final int teamSize;
+
+	/**
 	 * Optional suffix for the {@link Team} name.
 	 */
 	private final String teamNameSuffix;
@@ -69,14 +74,16 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 	 * Instantiate.
 	 * 
 	 * @param context           {@link TeamSourceContext}.
+	 * @param teamSize          {@link Team} size.
 	 * @param teamNameSuffix    Optional suffix for the {@link Team} name. May be
 	 *                          <code>null</code> for no suffix.
 	 * @param workerEnvironment {@link WorkerEnvironment}. May be <code>null</code>.
 	 */
-	public TeamSourceContextWrapper(TeamSourceContext context, String teamNameSuffix,
+	public TeamSourceContextWrapper(TeamSourceContext context, int teamSize, String teamNameSuffix,
 			WorkerEnvironment workerEnvironment) {
 		super(context.isLoadingType(), context, context);
 		this.context = context;
+		this.teamSize = teamSize;
 		this.teamNameSuffix = teamNameSuffix;
 		this.workerEnvironment = workerEnvironment;
 	}
@@ -91,16 +98,23 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 	}
 
 	@Override
-	public ThreadFactory getThreadFactory(int threadPriority) {
+	public int getTeamSize() {
+		return this.teamSize;
+	}
+
+	@Override
+	public ThreadFactory getThreadFactory() {
+
+		// Obtain the delegate thread factory
+		ThreadFactory delegate = this.context.getThreadFactory();
 
 		// Determine if worker environment
 		if (this.workerEnvironment == null) {
-			return this.context.getThreadFactory(threadPriority);
+			return delegate;
 		}
 
 		// Provide worker wrapper around threads
-		return (worker) -> this.context.getThreadFactory(threadPriority)
-				.newThread(this.workerEnvironment.createWorkerEnvironment(worker));
+		return (worker) -> delegate.newThread(this.workerEnvironment.createWorkerEnvironment(worker));
 	}
 
 }

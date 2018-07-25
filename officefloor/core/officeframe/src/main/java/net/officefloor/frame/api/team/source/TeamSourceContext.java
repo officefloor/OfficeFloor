@@ -19,10 +19,12 @@ package net.officefloor.frame.api.team.source;
 
 import java.util.concurrent.ThreadFactory;
 
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 
 /**
  * Context for the {@link TeamSource}.
@@ -45,6 +47,21 @@ public interface TeamSourceContext extends SourceContext {
 
 	/**
 	 * <p>
+	 * Obtains the size of the {@link Team}.
+	 * <p>
+	 * Typically this is the maximum number of {@link Thread} instances for the
+	 * {@link Team}. However, for some {@link Team} implementations it may not be
+	 * used (e.g. {@link PassiveTeamSource}).
+	 * <p>
+	 * It is provided to allow the {@link Executive} to have some control over
+	 * {@link Team} sizes.
+	 * 
+	 * @return {@link Team} size.
+	 */
+	int getTeamSize();
+
+	/**
+	 * <p>
 	 * Obtains the {@link ThreadFactory} for the {@link Team}.
 	 * <p>
 	 * It is encouraged for {@link Team} implementations to use this in creating
@@ -52,10 +69,8 @@ public interface TeamSourceContext extends SourceContext {
 	 * {@link OfficeFloor}, such as {@link ThreadLocal} {@link ManagedObjectPool}
 	 * solutions to reduce pool locking overheads.
 	 * 
-	 * @param threadPriority Priority for the created {@link Thread} instances.
 	 * @return {@link ThreadFactory} for the {@link Team}.
 	 */
-	@Deprecated // remove threadPriority parameter (Runnable wrapper achieves this plus other)
-	ThreadFactory getThreadFactory(int threadPriority);
+	ThreadFactory getThreadFactory();
 
 }

@@ -62,8 +62,9 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		MockExecutiveSource.isWrapWorker = isWrapWorker;
 		this.getOfficeFloorBuilder().setExecutive(MockExecutiveSource.class);
 
-		// Construct the team
-		this.constructTeam("FUNCTION_TEAM", OnePersonTeamSource.class);
+		// Construct the team (4 threads)
+		MockTeamSource.teamSize = -1;
+		this.constructTeam("FUNCTION_TEAM", MockTeamSource.class).setTeamSize(4);
 
 		// Create the function
 		TestWork work = new TestWork();
@@ -83,9 +84,11 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		if (!isWrapWorker) {
 			assertNull("Should not wrap worker", MockExecutiveSource.worker);
 			assertEquals("Incorrect thread name", "FUNCTION_TEAM", work.functionThread.getName());
+			assertEquals("Should pass through team size", 4, MockTeamSource.teamSize);
 		} else {
 			assertNotNull("Should wrap worker", MockExecutiveSource.worker);
 			assertEquals("Incorrect thread name", "FUNCTION_TEAM-EXECUTIVE", work.functionThread.getName());
+			assertEquals("Executive should be able to control team size", 2, MockTeamSource.teamSize);
 		}
 
 		// Ensure provided thread factory uses thread decoration
@@ -134,10 +137,13 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 			// Ensure team source
 			assertTrue("Incorrect team source", context.getTeamSource() instanceof OnePersonTeamSource);
 
+			// Ensure correct team size
+			assertEquals("Incorrect team size", 4, context.getTeamSize());
+
 			// Create the team source context
 			TeamSourceContext teamContext = context;
 			if (isWrapWorker) {
-				teamContext = new TeamSourceContextWrapper(teamContext, "EXECUTIVE", this);
+				teamContext = new TeamSourceContextWrapper(teamContext, 2, "EXECUTIVE", this);
 			}
 
 			// Create the team
@@ -192,6 +198,18 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 				MockExecutiveSource.worker = worker;
 				worker.run();
 			};
+		}
+	}
+
+	@TestSource
+	public static class MockTeamSource extends OnePersonTeamSource {
+
+		private static int teamSize;
+
+		@Override
+		public Team createTeam(TeamSourceContext context) throws Exception {
+			teamSize = context.getTeamSize();
+			return super.createTeam(context);
 		}
 	}
 

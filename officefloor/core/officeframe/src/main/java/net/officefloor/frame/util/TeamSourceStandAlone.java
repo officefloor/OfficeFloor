@@ -51,6 +51,11 @@ public class TeamSourceStandAlone {
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
 
 	/**
+	 * {@link Team} size.
+	 */
+	private int teamSize = 1;
+
+	/**
 	 * {@link Thread} decorator. May be <code>null</code>.
 	 */
 	private Consumer<Thread> threadDecorator = null;
@@ -92,6 +97,15 @@ public class TeamSourceStandAlone {
 
 		// Return the team source
 		return teamSource;
+	}
+
+	/**
+	 * Specifies the {@link Team} size.
+	 * 
+	 * @param teamSize {@link Team} size.
+	 */
+	public void setTeamSize(int teamSize) {
+		this.teamSize = teamSize;
 	}
 
 	/**
@@ -144,7 +158,7 @@ public class TeamSourceStandAlone {
 		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
 		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
 				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));
-		TeamSourceContext context = new TeamSourceContextImpl(false, teamName, this.threadDecorator,
+		TeamSourceContext context = new TeamSourceContextImpl(false, teamName, this.teamSize, this.threadDecorator,
 				managedExecutionFactory, this.properties, sourceContext);
 
 		// Return the created team

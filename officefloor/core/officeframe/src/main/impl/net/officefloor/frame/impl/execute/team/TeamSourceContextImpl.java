@@ -46,8 +46,12 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 	private final String teamName;
 
 	/**
-	 * Decorator of the created {@link Thread} instances. May be
-	 * <code>null</code>.
+	 * {@link Team} size.
+	 */
+	private final int teamSize;
+
+	/**
+	 * Decorator of the created {@link Thread} instances. May be <code>null</code>.
 	 */
 	private final Consumer<Thread> decorator;
 
@@ -60,41 +64,37 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 	 * <p>
 	 * Registered {@link ThreadLocalAwareTeam} instances.
 	 * <p>
-	 * <code>volatile</code> to ensure threading of {@link Team} sees the lock
-	 * (null list).
+	 * <code>volatile</code> to ensure threading of {@link Team} sees the lock (null
+	 * list).
 	 */
 	private volatile List<ThreadLocalAwareTeam> processContextListeners = new LinkedList<ThreadLocalAwareTeam>();
 
 	/**
 	 * Initialise.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param teamName
-	 *            Name of the {@link Team} to be created from the
-	 *            {@link TeamSource}.
-	 * @param decorator
-	 *            Decorator of the created {@link Thread} instances. May be
-	 *            <code>null</code>.
-	 * @param managedExecutionFactory
-	 *            {@link ManagedExecutionFactory}.
-	 * @param properties
-	 *            {@link SourceProperties} to initialise the {@link TeamSource}.
-	 * @param sourceContext
-	 *            {@link SourceContext}.
+	 * @param isLoadingType           Indicates if loading type.
+	 * @param teamName                Name of the {@link Team} to be created from
+	 *                                the {@link TeamSource}.
+	 * @param teamSize                {@link Team} size.
+	 * @param decorator               Decorator of the created {@link Thread}
+	 *                                instances. May be <code>null</code>.
+	 * @param managedExecutionFactory {@link ManagedExecutionFactory}.
+	 * @param properties              {@link SourceProperties} to initialise the
+	 *                                {@link TeamSource}.
+	 * @param sourceContext           {@link SourceContext}.
 	 */
-	public TeamSourceContextImpl(boolean isLoadingType, String teamName, Consumer<Thread> decorator,
+	public TeamSourceContextImpl(boolean isLoadingType, String teamName, int teamSize, Consumer<Thread> decorator,
 			ManagedExecutionFactory managedExecutionFactory, SourceProperties properties, SourceContext sourceContext) {
 		super(isLoadingType, sourceContext, properties);
 		this.teamName = teamName;
+		this.teamSize = teamSize;
 		this.decorator = decorator;
 		this.managedExecutionFactory = managedExecutionFactory;
 	}
 
 	/**
-	 * Locks from adding further {@link ThreadLocalAwareTeam} instances and
-	 * returns the listing of the registered {@link ThreadLocalAwareTeam}
-	 * instances.
+	 * Locks from adding further {@link ThreadLocalAwareTeam} instances and returns
+	 * the listing of the registered {@link ThreadLocalAwareTeam} instances.
 	 * 
 	 * @return Listing of the registered {@link ThreadLocalAwareTeam} instances.
 	 */
@@ -120,8 +120,13 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 	}
 
 	@Override
-	public ThreadFactory getThreadFactory(int threadPriority) {
-		return new TeamThreadFactory(this.teamName, threadPriority, this.decorator);
+	public int getTeamSize() {
+		return this.teamSize;
+	}
+
+	@Override
+	public ThreadFactory getThreadFactory() {
+		return new TeamThreadFactory(this.teamName, this.decorator);
 	}
 
 	/**
@@ -145,32 +150,21 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 		private final AtomicInteger nextThreadIndex = new AtomicInteger(1);
 
 		/**
-		 * {@link Thread} priority.
-		 */
-		private final int threadPriority;
-
-		/**
-		 * Decorator of the created {@link Thread} instances. May be
-		 * <code>null</code>.
+		 * Decorator of the created {@link Thread} instances. May be <code>null</code>.
 		 */
 		private final Consumer<Thread> decorator;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param teamName
-		 *            Name of the {@link Team}.
-		 * @param threadPriority
-		 *            {@link Thread} priority.
-		 * @param decorator
-		 *            Decorator of the created {@link Thread} instances. May be
-		 *            <code>null</code>.
+		 * @param teamName  Name of the {@link Team}.
+		 * @param decorator Decorator of the created {@link Thread} instances. May be
+		 *                  <code>null</code>.
 		 */
-		protected TeamThreadFactory(String teamName, int threadPriority, Consumer<Thread> decorator) {
+		protected TeamThreadFactory(String teamName, Consumer<Thread> decorator) {
 			SecurityManager s = System.getSecurityManager();
 			this.group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
 			this.threadNamePrefix = teamName + "-";
-			this.threadPriority = threadPriority;
 			this.decorator = decorator;
 		}
 
@@ -191,9 +185,6 @@ public class TeamSourceContextImpl extends SourceContextImpl implements TeamSour
 			Thread thread = new Thread(this.group, runnable, threadName, 0);
 			if (thread.isDaemon()) {
 				thread.setDaemon(false);
-			}
-			if (thread.getPriority() != this.threadPriority) {
-				thread.setPriority(this.threadPriority);
 			}
 			if (this.decorator != null) {
 				this.decorator.accept(thread);

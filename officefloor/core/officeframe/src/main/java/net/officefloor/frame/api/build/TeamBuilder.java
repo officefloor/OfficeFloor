@@ -28,12 +28,18 @@ import net.officefloor.frame.api.team.source.TeamSource;
 public interface TeamBuilder<TS extends TeamSource> {
 
 	/**
+	 * Specifies the {@link Team} size (typically being the maximum number of
+	 * {@link Thread} instances within the {@link Team}).
+	 * 
+	 * @param teamSize {@link Team} size.
+	 */
+	void setTeamSize(int teamSize);
+
+	/**
 	 * Specifies a property for the {@link TeamSource}.
 	 * 
-	 * @param name
-	 *            Name of property.
-	 * @param value
-	 *            Value of property.
+	 * @param name  Name of property.
+	 * @param value Value of property.
 	 */
 	void addProperty(String name, String value);
 
