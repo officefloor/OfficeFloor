@@ -15,22 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.spi.team.stress;
+package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
-import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
- * Stress tests the {@link ExecutorCachedTeamSource}.
- *
+ * Configuration of an {@link ExecutionStrategy} utilised by a
+ * {@link ManagedObjectSource}.
+ * 
  * @author Daniel Sagenschneider
  */
-public class ExecutorFixedTeamStressTest extends AbstractTeamStressTest {
+public interface ManagedObjectExecutionConfiguration {
 
-	@Override
-	protected Team getTeamToTest() throws Exception {
-		return new ExecutorFixedTeamSource().createTeam(5);
-	}
+	/**
+	 * Obtains the name to identify this {@link ExecutionStrategy}.
+	 * 
+	 * @return Name identifying this {@link ExecutionStrategy}.
+	 */
+	String getExecutionStrategyName();
 
 }

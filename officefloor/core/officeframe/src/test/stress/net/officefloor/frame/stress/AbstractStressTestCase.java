@@ -424,18 +424,16 @@ public abstract class AbstractStressTestCase extends AbstractOfficeConstructTest
 				(name, test) -> test.constructTeam(name, PassiveTeamSource.class));
 		teamConstructors.put(ExecutorCachedTeamSource.class,
 				(name, test) -> test.constructTeam(name, ExecutorCachedTeamSource.class));
-		teamConstructors.put(ExecutorFixedTeamSource.class,
-				(name, test) -> test.constructTeam(name, ExecutorFixedTeamSource.class)
-						.addProperty(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, String.valueOf(test.getTeamSize())));
+		teamConstructors.put(ExecutorFixedTeamSource.class, (name, test) -> test
+				.constructTeam(name, ExecutorFixedTeamSource.class).setTeamSize(test.getTeamSize()));
 		teamConstructors.put(OnePersonTeamSource.class,
 				(name, test) -> test.constructTeam(name, OnePersonTeamSource.class));
 		teamConstructors.put(ThreadLocalAwareTeamSource.class,
 				(name, test) -> test.constructTeam(name, ThreadLocalAwareTeamSource.class));
 		teamConstructors.put(WorkerPerJobTeamSource.class,
 				(name, test) -> test.constructTeam(name, WorkerPerJobTeamSource.class));
-		teamConstructors.put(LeaderFollowerTeamSource.class,
-				(name, test) -> test.constructTeam(name, LeaderFollowerTeamSource.class).addProperty(
-						LeaderFollowerTeamSource.TEAM_SIZE_PROPERTY_NAME, String.valueOf(test.getTeamSize())));
+		teamConstructors.put(LeaderFollowerTeamSource.class, (name, test) -> test
+				.constructTeam(name, LeaderFollowerTeamSource.class).setTeamSize(test.getTeamSize()));
 	}
 
 	/**

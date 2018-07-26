@@ -26,9 +26,12 @@ import java.util.function.Consumer;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.impl.construct.executive.RawExecutiveMetaData;
+import net.officefloor.frame.impl.construct.executive.RawExecutiveMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
@@ -40,11 +43,14 @@ import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorMetaDataImpl;
+import net.officefloor.frame.internal.configuration.ExecutiveConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -72,8 +78,7 @@ public class RawOfficeFloorMetaDataFactory {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param threadLocalAwareExecutor
-	 *            {@link ThreadLocalAwareExecutor}.
+	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
 	 */
 	public RawOfficeFloorMetaDataFactory(ThreadLocalAwareExecutor threadLocalAwareExecutor) {
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
@@ -83,10 +88,8 @@ public class RawOfficeFloorMetaDataFactory {
 	 * Constructs the {@link RawOfficeFloorMetaData} from the
 	 * {@link OfficeFloorConfiguration}.
 	 * 
-	 * @param configuration
-	 *            {@link OfficeFloorConfiguration}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param configuration {@link OfficeFloorConfiguration}.
+	 * @param issues        {@link OfficeFloorIssues}.
 	 * @return {@link RawOfficeFloorMetaData}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -185,9 +188,27 @@ public class RawOfficeFloorMetaDataFactory {
 		// Obtain the thread decorator
 		Consumer<Thread> threadDecorator = configuration.getThreadDecorator();
 
+		// Create the thread factory manufacturer
+		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,
+				threadDecorator);
+
+		// Create the executive
+		Executive executive;
+		ExecutiveConfiguration<?> executiveConfiguration = configuration.getExecutiveConfiguration();
+		if (executiveConfiguration != null) {
+			// Create the configured Executive
+			RawExecutiveMetaDataFactory rawExecutiveFactory = new RawExecutiveMetaDataFactory(sourceContext);
+			RawExecutiveMetaData rawExecutive = rawExecutiveFactory
+					.constructRawExecutiveMetaData(executiveConfiguration, officeFloorName, issues);
+			executive = rawExecutive.getExecutive();
+		} else {
+			// No Executive configured, so use default
+			executive = new DefaultExecutive(threadFactoryManufacturer);
+		}
+
 		// Create the team factory
-		RawTeamMetaDataFactory rawTeamFactory = new RawTeamMetaDataFactory(sourceContext, threadDecorator,
-				this.threadLocalAwareExecutor, managedExecutionFactory);
+		RawTeamMetaDataFactory rawTeamFactory = new RawTeamMetaDataFactory(sourceContext, executive,
+				threadFactoryManufacturer, this.threadLocalAwareExecutor);
 
 		// Construct the configured teams
 		for (TeamConfiguration<?> teamConfiguration : configuration.getTeamConfiguration()) {
@@ -237,8 +258,9 @@ public class RawOfficeFloorMetaDataFactory {
 				officeFloorManagement);
 
 		// Create the raw office floor meta-data
-		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(teamRegistry, breakChainTeamManagement,
-				threadLocalAwareExecutor, managedExecutionFactory, mosRegistry, officeFloorEscalation);
+		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, teamRegistry,
+				breakChainTeamManagement, threadLocalAwareExecutor, managedExecutionFactory, mosRegistry,
+				officeFloorEscalation);
 
 		// Construct the office factory
 		RawOfficeMetaDataFactory rawOfficeFactory = new RawOfficeMetaDataFactory(rawMetaData);

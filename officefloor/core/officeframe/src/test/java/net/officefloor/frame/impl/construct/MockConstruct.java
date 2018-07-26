@@ -32,6 +32,7 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -74,6 +75,7 @@ import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
@@ -1548,8 +1550,11 @@ public class MockConstruct {
 					}
 				}
 
+				// Create the executive
+				Executive executive = new DefaultExecutive();
+
 				// Build
-				this.built = new RawOfficeFloorMetaData(this.teamRegistry, this.breakChainTeamManagement,
+				this.built = new RawOfficeFloorMetaData(executive, this.teamRegistry, this.breakChainTeamManagement,
 						this.threadLocalAwareExecutor, this.managedExecutionFactory, mosRegistry,
 						this.officeFloorEscalation);
 			}
@@ -1749,7 +1754,7 @@ public class MockConstruct {
 		 */
 		public ProcessMetaData build() {
 			if (this.built == null) {
-				this.built = new ProcessMetaDataImpl(
+				this.built = new ProcessMetaDataImpl(new DefaultExecutive(),
 						this.managedObjects.toArray(new ManagedObjectMetaData[this.managedObjects.size()]),
 						this.thread.built());
 			}

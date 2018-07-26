@@ -35,8 +35,8 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceProperty;
 import net.officefloor.frame.api.team.source.TeamSourceSpecification;
+import net.officefloor.frame.impl.construct.team.ExecutiveContextImpl;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
-import net.officefloor.frame.impl.execute.team.TeamSourceContextImpl;
 
 /**
  * {@link TeamLoader} implementation.
@@ -189,7 +189,7 @@ public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 
 		// Attempt to create the team
 		try {
-			teamSource.createTeam(new TeamSourceContextImpl(true, teamName, null,
+			teamSource.createTeam(new ExecutiveContextImpl(true, teamName, null,
 					new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]),
 					new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext()));
 

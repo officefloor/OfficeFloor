@@ -38,6 +38,7 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.impl.construct.executive.ExecutiveBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBuilderImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -81,6 +82,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	 * Listing of {@link TeamConfiguration} instances.
 	 */
 	private final List<TeamConfiguration<?>> teams = new LinkedList<TeamConfiguration<?>>();
+
+	/**
+	 * {@link ExecutiveConfiguration}.
+	 */
+	private ExecutiveConfiguration<?> executiveConfiguration = null;
 
 	/**
 	 * Break {@link FunctionState} chain {@link Team}. Initiate with default
@@ -191,8 +197,9 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 
 	@Override
 	public <XS extends ExecutiveSource> ExecutiveBuilder<XS> setExecutive(Class<XS> executiveSourceClass) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement setExecutive");
+		ExecutiveBuilderImpl<XS> builder = new ExecutiveBuilderImpl<>(executiveSourceClass);
+		this.executiveConfiguration = builder;
+		return builder;
 	}
 
 	@Override
@@ -277,8 +284,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 
 	@Override
 	public ExecutiveConfiguration<?> getExecutiveConfiguration() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement getExecutiveConfiguration");
+		return this.executiveConfiguration;
 	}
 
 	@Override

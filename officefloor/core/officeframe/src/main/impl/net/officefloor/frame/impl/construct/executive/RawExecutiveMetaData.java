@@ -27,11 +27,25 @@ import net.officefloor.frame.api.executive.Executive;
 public class RawExecutiveMetaData {
 
 	/**
+	 * {@link Executive}.
+	 */
+	private final Executive executive;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param executive {@link Exception}.
+	 */
+	public RawExecutiveMetaData(Executive executive) {
+		this.executive = executive;
+	}
+
+	/**
 	 * Obtains the {@link Executive}.
 	 * 
 	 * @return {@link Executive}.
 	 */
 	public Executive getExecutive() {
-		throw new UnsupportedOperationException("TODO implement");
+		return this.executive;
 	}
 }

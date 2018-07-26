@@ -17,8 +17,11 @@
  */
 package net.officefloor.frame.impl.construct.executive;
 
+import java.util.concurrent.ThreadFactory;
+
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
@@ -327,6 +330,28 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
 			return executive;
 		}
+	}
+
+	/**
+	 * Indicate missing {@link ExecutionStrategy} instances.
+	 */
+	public void testMissingExecutionStrategies() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Indicate missing {@link ExecutionStrategy} name.
+	 */
+	public void testMissingExecutionStrategyName() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Indicating missing {@link ThreadFactory} instances of the
+	 * {@link ExecutionStrategy}.
+	 */
+	public void testMissingThreadFactories() {
+		fail("TODO implement");
 	}
 
 	/**

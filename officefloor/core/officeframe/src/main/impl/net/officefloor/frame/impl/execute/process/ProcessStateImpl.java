@@ -55,7 +55,7 @@ public class ProcessStateImpl implements ProcessState {
 	/**
 	 * Identifier for this {@link ProcessState}.
 	 */
-	private final Object processIdentifier = new Object();
+	private final Object processIdentifier;
 
 	/**
 	 * Active {@link ThreadState} instances for this {@link ProcessState}.
@@ -112,19 +112,17 @@ public class ProcessStateImpl implements ProcessState {
 	/**
 	 * Initiate.
 	 * 
-	 * @param processMetaData
-	 *            {@link ProcessMetaData} for this {@link ProcessState}.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param callback
-	 *            Optional {@link FlowCallback}. May be <code>null</code>.
-	 * @param callbackThreadState
-	 *            Optional {@link FlowCallback} {@link ThreadState}. May be
-	 *            <code>null</code>.
-	 * @param threadLocalAwareExecutor
-	 *            {@link ThreadLocalAwareExecutor}.
-	 * @param profiler
-	 *            Optional {@link Profiler}. May be <code>null</code>.
+	 * @param processMetaData          {@link ProcessMetaData} for this
+	 *                                 {@link ProcessState}.
+	 * @param officeMetaData           {@link OfficeMetaData}.
+	 * @param callback                 Optional {@link FlowCallback}. May be
+	 *                                 <code>null</code>.
+	 * @param callbackThreadState      Optional {@link FlowCallback}
+	 *                                 {@link ThreadState}. May be
+	 *                                 <code>null</code>.
+	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
+	 * @param profiler                 Optional {@link Profiler}. May be
+	 *                                 <code>null</code>.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, OfficeMetaData officeMetaData, FlowCallback callback,
 			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor, Profiler profiler) {
@@ -135,29 +133,26 @@ public class ProcessStateImpl implements ProcessState {
 	/**
 	 * Initiate for a {@link ProcessState} initiated by a {@link ManagedObject}.
 	 * 
-	 * @param processMetaData
-	 *            {@link ProcessMetaData} for this {@link ProcessState}.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param callback
-	 *            Optional {@link FlowCallback}. May be <code>null</code>.
-	 * @param callbackThreadState
-	 *            Optional {@link FlowCallback} {@link ThreadState}. May be
-	 *            <code>null</code>.
-	 * @param threadLocalAwareExecutor
-	 *            {@link ThreadLocalAwareExecutor}.
-	 * @param profiler
-	 *            Optional {@link Profiler}. May be <code>null</code>.
-	 * @param inputManagedObject
-	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
-	 *            May be <code>null</code>.
-	 * @param inputManagedObjectMetaData
-	 *            {@link ManagedObjectMetaData} of the input
-	 *            {@link ManagedObject}. Should the input {@link ManagedObject}
-	 *            be provided this must be also provided.
-	 * @param inputManagedObjectIndex
-	 *            Index of the input {@link ManagedObject} within this
-	 *            {@link ProcessState}.
+	 * @param processMetaData            {@link ProcessMetaData} for this
+	 *                                   {@link ProcessState}.
+	 * @param officeMetaData             {@link OfficeMetaData}.
+	 * @param callback                   Optional {@link FlowCallback}. May be
+	 *                                   <code>null</code>.
+	 * @param callbackThreadState        Optional {@link FlowCallback}
+	 *                                   {@link ThreadState}. May be
+	 *                                   <code>null</code>.
+	 * @param threadLocalAwareExecutor   {@link ThreadLocalAwareExecutor}.
+	 * @param profiler                   Optional {@link Profiler}. May be
+	 *                                   <code>null</code>.
+	 * @param inputManagedObject         {@link ManagedObject} that invoked this
+	 *                                   {@link ProcessState}. May be
+	 *                                   <code>null</code>.
+	 * @param inputManagedObjectMetaData {@link ManagedObjectMetaData} of the input
+	 *                                   {@link ManagedObject}. Should the input
+	 *                                   {@link ManagedObject} be provided this must
+	 *                                   be also provided.
+	 * @param inputManagedObjectIndex    Index of the input {@link ManagedObject}
+	 *                                   within this {@link ProcessState}.
 	 */
 	public ProcessStateImpl(ProcessMetaData processMetaData, OfficeMetaData officeMetaData, FlowCallback callback,
 			ThreadState callbackThreadState, ThreadLocalAwareExecutor threadLocalAwareExecutor, Profiler profiler,
@@ -166,6 +161,9 @@ public class ProcessStateImpl implements ProcessState {
 		this.processMetaData = processMetaData;
 		this.officeMetaData = officeMetaData;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
+
+		// Create the process identifier
+		this.processIdentifier = this.processMetaData.createProcessIdentifier();
 
 		// Create the process profiler (if profiling)
 		this.processProfiler = (profiler == null ? null

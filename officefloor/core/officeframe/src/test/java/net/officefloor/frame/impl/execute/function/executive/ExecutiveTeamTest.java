@@ -83,11 +83,11 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		// Determine if wrap worker
 		if (!isWrapWorker) {
 			assertNull("Should not wrap worker", MockExecutiveSource.worker);
-			assertEquals("Incorrect thread name", "FUNCTION_TEAM", work.functionThread.getName());
+			assertEquals("Incorrect thread name", "of-FUNCTION_TEAM-1", work.functionThread.getName());
 			assertEquals("Should pass through team size", 4, MockTeamSource.teamSize);
 		} else {
 			assertNotNull("Should wrap worker", MockExecutiveSource.worker);
-			assertEquals("Incorrect thread name", "FUNCTION_TEAM-EXECUTIVE", work.functionThread.getName());
+			assertEquals("Incorrect thread name", "of-FUNCTION_TEAM-EXECUTIVE-1", work.functionThread.getName());
 			assertEquals("Executive should be able to control team size", 2, MockTeamSource.teamSize);
 		}
 
@@ -135,22 +135,27 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		public Team createTeam(ExecutiveContext context) throws Exception {
 
 			// Ensure team source
-			assertTrue("Incorrect team source", context.getTeamSource() instanceof OnePersonTeamSource);
+			if (context.getTeamSource() instanceof OnePersonTeamSource) {
 
-			// Ensure correct team size
-			assertEquals("Incorrect team size", 4, context.getTeamSize());
+				// Ensure correct team size
+				assertEquals("Incorrect team size", 4, context.getTeamSize());
 
-			// Create the team source context
-			TeamSourceContext teamContext = context;
-			if (isWrapWorker) {
-				teamContext = new TeamSourceContextWrapper(teamContext, 2, "EXECUTIVE", this);
+				// Create the team source context
+				TeamSourceContext teamContext = context;
+				if (isWrapWorker) {
+					teamContext = new TeamSourceContextWrapper(context, 2, "EXECUTIVE", this);
+				}
+
+				// Create the team
+				this.team = context.getTeamSource().createTeam(teamContext);
+
+				// Return this to intercept team
+				return this;
+
+			} else {
+				// Break team follow standard
+				return context.getTeamSource().createTeam(context);
 			}
-
-			// Create the team
-			this.team = context.getTeamSource().createTeam(teamContext);
-
-			// Return this to intercept team
-			return this;
 		}
 
 		@Override

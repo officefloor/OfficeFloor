@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.construct.team;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
@@ -30,7 +31,10 @@ import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -88,6 +92,21 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures issue if negative {@link Team} size.
+	 */
+	public void testNegativeTeamSize() {
+
+		// Record
+		this.configuration.setTeamSize(-1);
+		this.issues.addIssue(AssetType.TEAM, TEAM_NAME, "Team size can not be negative");
+
+		// Construct
+		this.replayMockObjects();
+		this.constructRawTeamMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensures issue if no {@link TeamSource}.
 	 */
 	public void testNoTeamSource() {
@@ -133,8 +152,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		/**
 		 * Constructor that will fail instantiation.
 		 * 
-		 * @throws Exception
-		 *             Failure to instantiate.
+		 * @throws Exception Failure to instantiate.
 		 */
 		public FailInstantiateTeamSource() throws Exception {
 			throw instantiateFailure;
@@ -192,8 +210,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link TeamSource} that obtains a {@link Class} and creates a
-	 * {@link Team}.
+	 * {@link TeamSource} that obtains a {@link Class} and creates a {@link Team}.
 	 */
 	@TestSource
 	public static class NoClassTeamSource extends TeamSourceAdapter {
@@ -298,8 +315,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can obtain the {@link Team} name from the
-	 * {@link TeamSourceContext}.
+	 * Ensure can obtain the {@link Team} name from the {@link TeamSourceContext}.
 	 */
 	public void testTeamNameAvailableFromContext() {
 
@@ -455,9 +471,15 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	private RawTeamMetaData constructRawTeamMetaData(boolean isExpectConstruction) {
 
 		// Attempt to construct
-		RawTeamMetaData metaData = new RawTeamMetaDataFactory(this.sourceContext, (thread) -> {
-		}, this.threadLocalAwareExecutor, new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]))
-				.constructRawTeamMetaData(this.configuration, OFFICE_FLOOR_NAME, this.issues);
+		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
+				new ThreadCompletionListener[0]);
+		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,
+				(thread) -> {
+				});
+		Executive executive = new DefaultExecutive(threadFactoryManufacturer);
+		RawTeamMetaData metaData = new RawTeamMetaDataFactory(this.sourceContext, executive, threadFactoryManufacturer,
+				this.threadLocalAwareExecutor).constructRawTeamMetaData(this.configuration, OFFICE_FLOOR_NAME,
+						this.issues);
 
 		// Provide assertion on whether should be constructed
 		if (isExpectConstruction) {

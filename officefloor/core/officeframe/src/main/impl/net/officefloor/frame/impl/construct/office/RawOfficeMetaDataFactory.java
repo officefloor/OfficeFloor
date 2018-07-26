@@ -25,6 +25,7 @@ import java.util.Timer;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
@@ -99,8 +100,7 @@ public class RawOfficeMetaDataFactory {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param rawOfficeFloorMetaData
-	 *            {@link RawOfficeFloorMetaData}.
+	 * @param rawOfficeFloorMetaData {@link RawOfficeFloorMetaData}.
 	 */
 	public RawOfficeMetaDataFactory(RawOfficeFloorMetaData rawOfficeFloorMetaData) {
 		this.rawOfficeFloorMetaData = rawOfficeFloorMetaData;
@@ -109,13 +109,10 @@ public class RawOfficeMetaDataFactory {
 	/**
 	 * Constructs the {@link RawOfficeMetaData}.
 	 * 
-	 * @param configuration
-	 *            {@link OfficeConfiguration}.
-	 * @param officeManagingManagedObjects
-	 *            {@link RawManagingOfficeMetaData} instances for the
-	 *            {@link Office}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param configuration                {@link OfficeConfiguration}.
+	 * @param officeManagingManagedObjects {@link RawManagingOfficeMetaData}
+	 *                                     instances for the {@link Office}.
+	 * @param issues                       {@link OfficeFloorIssues}.
 	 * @return {@link RawOfficeMetaData}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -418,8 +415,11 @@ public class RawOfficeMetaDataFactory {
 				this.constructDefaultManagedObjectMetaData(threadBoundManagedObjects), governanceMetaDatas,
 				maxFunctionChainLength, breakChainTeam, officeEscalationProcedure, officeFloorEscalation);
 
+		// Obtain the executive
+		Executive executive = rawOfficeFloorMetaData.getExecutive();
+
 		// Create the process meta-data
-		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
+		ProcessMetaData processMetaData = new ProcessMetaDataImpl(executive,
 				this.constructDefaultManagedObjectMetaData(processBoundManagedObjects), threadMetaData);
 
 		// Obtain the profiler
@@ -523,8 +523,8 @@ public class RawOfficeMetaDataFactory {
 	 * Constructs the default {@link ManagedObjectMetaData} listing from the input
 	 * {@link RawBoundManagedObjectMetaData} instances.
 	 * 
-	 * @param rawBoundManagedObjects
-	 *            {@link RawBoundManagedObjectMetaData} instances.
+	 * @param rawBoundManagedObjects {@link RawBoundManagedObjectMetaData}
+	 *                               instances.
 	 * @return Default {@link ManagedObjectMetaData} instances.
 	 */
 	private ManagedObjectMetaData<?>[] constructDefaultManagedObjectMetaData(

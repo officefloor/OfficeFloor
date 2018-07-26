@@ -61,15 +61,14 @@ public class PassParameterTest extends AbstractOfficeConstructTestCase {
 	 * Validates with {@link ExecutorCachedTeamSource}.
 	 */
 	public void test_executor_PassParameterBetweenFunctions() throws Exception {
-		this.doPassParameterBetweenFunctionsTest(new ExecutorCachedTeamSource().createTeam());
+		this.doPassParameterBetweenFunctionsTest(new ExecutorCachedTeamSource().createTeam(0));
 	}
 
 	/**
-	 * Validates passing a parameter between two {@link ManagedFunction}
-	 * instances of an {@link Office}.
+	 * Validates passing a parameter between two {@link ManagedFunction} instances
+	 * of an {@link Office}.
 	 * 
-	 * @param team
-	 *            {@link Team}.
+	 * @param team {@link Team}.
 	 */
 	private void doPassParameterBetweenFunctionsTest(Team team) throws Exception {
 
@@ -119,8 +118,7 @@ public class PassParameterTest extends AbstractOfficeConstructTestCase {
 		/**
 		 * Initiate.
 		 * 
-		 * @param parameter
-		 *            Parameter to invoke delegate with.
+		 * @param parameter Parameter to invoke delegate with.
 		 */
 		public FunctionOne(Object parameter) {
 			this.parameter = parameter;

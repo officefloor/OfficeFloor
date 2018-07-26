@@ -51,9 +51,9 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 	}
 
 	/**
-	 * {@link TeamSourceContext}.
+	 * {@link Team} name.
 	 */
-	protected final TeamSourceContext context;
+	private final String teamName;
 
 	/**
 	 * {@link Team} size.
@@ -61,31 +61,35 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 	private final int teamSize;
 
 	/**
-	 * Optional suffix for the {@link Team} name.
+	 * {@link ThreadFactory}.
 	 */
-	private final String teamNameSuffix;
-
-	/**
-	 * Optional {@link WorkerEnvironment}.
-	 */
-	private final WorkerEnvironment workerEnvironment;
+	private final ThreadFactory threadFactory;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param context           {@link TeamSourceContext}.
+	 * @param context           {@link ExecutiveContext}.
 	 * @param teamSize          {@link Team} size.
 	 * @param teamNameSuffix    Optional suffix for the {@link Team} name. May be
 	 *                          <code>null</code> for no suffix.
 	 * @param workerEnvironment {@link WorkerEnvironment}. May be <code>null</code>.
 	 */
-	public TeamSourceContextWrapper(TeamSourceContext context, int teamSize, String teamNameSuffix,
+	public TeamSourceContextWrapper(ExecutiveContext context, int teamSize, String teamNameSuffix,
 			WorkerEnvironment workerEnvironment) {
 		super(context.isLoadingType(), context, context);
-		this.context = context;
 		this.teamSize = teamSize;
-		this.teamNameSuffix = teamNameSuffix;
-		this.workerEnvironment = workerEnvironment;
+
+		// Specify the team name
+		this.teamName = context.getTeamName() + (teamNameSuffix == null ? "" : "-" + teamNameSuffix);
+
+		// Obtain the thread factory
+		ThreadFactory threadFactory = context.createThreadFactory(this.teamName);
+		if (workerEnvironment != null) {
+			// Provide worker wrapper
+			ThreadFactory delegate = threadFactory;
+			threadFactory = (worker) -> delegate.newThread(workerEnvironment.createWorkerEnvironment(worker));
+		}
+		this.threadFactory = threadFactory;
 	}
 
 	/*
@@ -94,7 +98,7 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 
 	@Override
 	public String getTeamName() {
-		return this.context.getTeamName() + (this.teamNameSuffix == null ? "" : "-" + this.teamNameSuffix);
+		return this.teamName;
 	}
 
 	@Override
@@ -104,17 +108,7 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 
 	@Override
 	public ThreadFactory getThreadFactory() {
-
-		// Obtain the delegate thread factory
-		ThreadFactory delegate = this.context.getThreadFactory();
-
-		// Determine if worker environment
-		if (this.workerEnvironment == null) {
-			return delegate;
-		}
-
-		// Provide worker wrapper around threads
-		return (worker) -> delegate.newThread(this.workerEnvironment.createWorkerEnvironment(worker));
+		return this.threadFactory;
 	}
 
 }

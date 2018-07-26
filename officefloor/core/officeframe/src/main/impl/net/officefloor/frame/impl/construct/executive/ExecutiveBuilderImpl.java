@@ -72,8 +72,7 @@ public class ExecutiveBuilderImpl<XS extends ExecutiveSource>
 
 	@Override
 	public void addProperty(String name, String value) {
-		// TODO Auto-generated method stub
-
+		this.properties.addProperty(name, value);
 	}
 
 	/*
@@ -82,20 +81,17 @@ public class ExecutiveBuilderImpl<XS extends ExecutiveSource>
 
 	@Override
 	public XS getExecutiveSource() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.executiveSource;
 	}
 
 	@Override
 	public Class<XS> getExecutiveSourceClass() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.executiveSourceClass;
 	}
 
 	@Override
 	public SourceProperties getProperties() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.properties;
 	}
 
 }

@@ -32,11 +32,6 @@ import net.officefloor.frame.api.team.source.TeamSourceContext;
  */
 public class ExecutorFixedTeamSource extends AbstractExecutorTeamSource {
 
-	/**
-	 * Name of property to specify maximum number of {@link Thread} instances.
-	 */
-	public static final String PROPERTY_TEAM_SIZE = "team.size";
-
 	/*
 	 * ===================== AbstractExecutorTeamSource =====================
 	 */
@@ -46,7 +41,7 @@ public class ExecutorFixedTeamSource extends AbstractExecutorTeamSource {
 			final ThreadFactory threadFactory) throws Exception {
 
 		// Obtain the team details
-		final int teamSize = Integer.valueOf(context.getProperty(PROPERTY_TEAM_SIZE));
+		final int teamSize = context.getTeamSize();
 
 		// Create and return the factory
 		return new FixedExecutorServiceFactory(teamSize, threadFactory);
@@ -70,10 +65,8 @@ public class ExecutorFixedTeamSource extends AbstractExecutorTeamSource {
 		/**
 		 * Initiate.
 		 * 
-		 * @param teamSize
-		 *            Size of the {@link Team}.
-		 * @param threadFactory
-		 *            {@link ThreadFactory}.
+		 * @param teamSize      Size of the {@link Team}.
+		 * @param threadFactory {@link ThreadFactory}.
 		 */
 		public FixedExecutorServiceFactory(int teamSize, ThreadFactory threadFactory) {
 			this.teamSize = teamSize;

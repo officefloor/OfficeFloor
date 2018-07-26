@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.impl.construct.team;
 
-import java.util.function.Consumer;
-
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.ExecutiveContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.AbstractSourceError;
 import net.officefloor.frame.api.source.SourceContext;
@@ -30,11 +30,10 @@ import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.source.OfficeFloorIssueTarget;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
 import net.officefloor.frame.impl.execute.team.TeamManagementImpl;
-import net.officefloor.frame.impl.execute.team.TeamSourceContextImpl;
 import net.officefloor.frame.impl.execute.team.ThreadLocalAwareContextImpl;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
-import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
 
@@ -51,10 +50,14 @@ public class RawTeamMetaDataFactory {
 	private final SourceContext sourceContext;
 
 	/**
-	 * Decorator for the created {@link Thread} instances. May be
-	 * <code>null</code>.
+	 * {@link Executive}.
 	 */
-	private final Consumer<Thread> threadDecorator;
+	private final Executive executive;
+
+	/**
+	 * {@link ThreadFactoryManufacturer}.
+	 */
+	private final ThreadFactoryManufacturer threadFactoryManufacturer;
 
 	/**
 	 * {@link ThreadLocalAwareExecutor}.
@@ -62,44 +65,29 @@ public class RawTeamMetaDataFactory {
 	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
 
 	/**
-	 * {@link ManagedExecutionFactory}.
-	 */
-	private ManagedExecutionFactory managedExecutionFactory;
-
-	/**
 	 * Instantiate.
 	 * 
-	 * @param sourceContext
-	 *            {@link SourceContext}.
-	 * @param threadDecorator
-	 *            Decorator for the created {@link Thread} instances. May be
-	 *            <code>null</code>.
-	 * @param threadLocalAwareExecutor
-	 *            {@link ThreadLocalAwareExecutor}.
-	 * @param managedExecutionFactory
-	 *            {@link ManagedExecutionFactory}.
+	 * @param sourceContext             {@link SourceContext}.
+	 * @param executive                 {@link Executive}.
+	 * @param threadFactoryManufacturer {@link ThreadFactoryManufacturer}.
+	 * @param threadLocalAwareExecutor  {@link ThreadLocalAwareExecutor}.
 	 */
-	public RawTeamMetaDataFactory(SourceContext sourceContext, Consumer<Thread> threadDecorator,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory) {
+	public RawTeamMetaDataFactory(SourceContext sourceContext, Executive executive,
+			ThreadFactoryManufacturer threadFactoryManufacturer, ThreadLocalAwareExecutor threadLocalAwareExecutor) {
 		this.sourceContext = sourceContext;
-		this.threadDecorator = threadDecorator;
+		this.executive = executive;
+		this.threadFactoryManufacturer = threadFactoryManufacturer;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
-		this.managedExecutionFactory = managedExecutionFactory;
 	}
 
 	/**
 	 * Constructs the {@link RawTeamMetaData}.
 	 * 
-	 * @param <TS>
-	 *            {@link TeamSource} type.
-	 * @param configuration
-	 *            {@link TeamConfiguration}.
-	 * @param officeFloorName
-	 *            Name of the {@link OfficeFloor}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to
-	 *         construct.
+	 * @param                 <TS> {@link TeamSource} type.
+	 * @param configuration   {@link TeamConfiguration}.
+	 * @param officeFloorName Name of the {@link OfficeFloor}.
+	 * @param issues          {@link OfficeFloorIssues}.
+	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to construct.
 	 */
 	public <TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(TeamConfiguration<TS> configuration,
 			String officeFloorName, OfficeFloorIssues issues) {
@@ -108,6 +96,13 @@ public class RawTeamMetaDataFactory {
 		String teamName = configuration.getTeamName();
 		if (ConstructUtil.isBlank(teamName)) {
 			issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName, "Team added without a name");
+			return null; // can not carry on
+		}
+
+		// Obtain the team size
+		int teamSize = configuration.getTeamSize();
+		if (teamSize < 0) {
+			issues.addIssue(AssetType.TEAM, teamName, "Team size can not be negative");
 			return null; // can not carry on
 		}
 
@@ -131,25 +126,29 @@ public class RawTeamMetaDataFactory {
 		Team team;
 		boolean isRequireThreadLocalAwareness = false;
 		try {
-			// Create the team source context
+
+			// Create the executive context
 			SourceProperties properties = configuration.getProperties();
-			TeamSourceContextImpl context = new TeamSourceContextImpl(false, teamName, this.threadDecorator,
-					this.managedExecutionFactory, properties, this.sourceContext);
+			ExecutiveContext executiveContext = new ExecutiveContextImpl(false, teamName, teamSize, teamSource,
+					this.threadFactoryManufacturer, properties, this.sourceContext);
 
 			// Create the team
-			team = teamSource.createTeam(context);
+			team = this.executive.createTeam(executiveContext);
 			if (team == null) {
 				// Indicate failed to provide team
-				issues.addIssue(AssetType.TEAM, teamName, "TeamSource failed to provide Team");
+				issues.addIssue(AssetType.TEAM, teamName,
+						TeamSource.class.getSimpleName() + " failed to provide " + Team.class.getSimpleName());
 				return null; // can not carry on
 			}
 
 			// Determine if requires thread local awareness
 			if (team instanceof ThreadLocalAwareTeam) {
 				ThreadLocalAwareTeam threadLocalAwareTeam = (ThreadLocalAwareTeam) team;
-				threadLocalAwareTeam
-						.setThreadLocalAwareness(new ThreadLocalAwareContextImpl(this.threadLocalAwareExecutor));
-				isRequireThreadLocalAwareness = true;
+				if (threadLocalAwareTeam.isThreadLocalAware()) {
+					threadLocalAwareTeam
+							.setThreadLocalAwareness(new ThreadLocalAwareContextImpl(this.threadLocalAwareExecutor));
+					isRequireThreadLocalAwareness = true;
+				}
 			}
 
 		} catch (AbstractSourceError ex) {

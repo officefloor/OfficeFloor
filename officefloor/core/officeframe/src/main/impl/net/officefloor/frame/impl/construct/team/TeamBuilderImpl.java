@@ -37,6 +37,11 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	private final String teamName;
 
 	/**
+	 * {@link Team} size.
+	 */
+	private int teamSize = 0;
+
+	/**
 	 * {@link TeamSource}.
 	 */
 	private final TS teamSource;
@@ -54,10 +59,8 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	/**
 	 * Initiate.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @param teamSource
-	 *            {@link TeamSource}.
+	 * @param teamName   Name of the {@link Team}.
+	 * @param teamSource {@link TeamSource}.
 	 */
 	public TeamBuilderImpl(String teamName, TS teamSource) {
 		this.teamName = teamName;
@@ -68,10 +71,8 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	/**
 	 * Initiate.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @param teamSourceClass
-	 *            {@link Class} of the {@link TeamSource}.
+	 * @param teamName        Name of the {@link Team}.
+	 * @param teamSourceClass {@link Class} of the {@link TeamSource}.
 	 */
 	public TeamBuilderImpl(String teamName, Class<TS> teamSourceClass) {
 		this.teamName = teamName;
@@ -82,6 +83,11 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	/*
 	 * ====================== TeamBuilder ================================
 	 */
+
+	@Override
+	public void setTeamSize(int teamSize) {
+		this.teamSize = teamSize;
+	}
 
 	@Override
 	public void addProperty(String name, String value) {
@@ -95,6 +101,11 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	@Override
 	public String getTeamName() {
 		return this.teamName;
+	}
+
+	@Override
+	public int getTeamSize() {
+		return this.teamSize;
 	}
 
 	@Override
