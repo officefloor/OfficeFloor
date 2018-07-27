@@ -17,8 +17,13 @@
  */
 package net.officefloor.frame.impl.construct.executive;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ThreadFactory;
+
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -27,6 +32,7 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.OfficeFloorIssueTarget;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
 import net.officefloor.frame.internal.configuration.ExecutiveConfiguration;
 
 /**
@@ -47,12 +53,20 @@ public class RawExecutiveMetaDataFactory {
 	private final SourceContext sourceContext;
 
 	/**
+	 * {@link ThreadFactoryManufacturer}.
+	 */
+	private final ThreadFactoryManufacturer threadFactoryManufacturer;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param sourceContext {@link SourceContext}.
+	 * @param sourceContext             {@link SourceContext}.
+	 * @param threadFactoryManufacturer {@link ThreadFactoryManufacturer}.
 	 */
-	public RawExecutiveMetaDataFactory(SourceContext sourceContext) {
+	public RawExecutiveMetaDataFactory(SourceContext sourceContext,
+			ThreadFactoryManufacturer threadFactoryManufacturer) {
 		this.sourceContext = sourceContext;
+		this.threadFactoryManufacturer = threadFactoryManufacturer;
 	}
 
 	/**
@@ -86,10 +100,12 @@ public class RawExecutiveMetaDataFactory {
 		}
 
 		Executive executive;
+		Map<String, ThreadFactory[]> strategies = new HashMap<>();
 		try {
 			// Create the team source context
 			SourceProperties properties = configuration.getProperties();
-			ExecutiveSourceContextImpl context = new ExecutiveSourceContextImpl(false, this.sourceContext, properties);
+			ExecutiveSourceContextImpl context = new ExecutiveSourceContextImpl(false, this.sourceContext, properties,
+					this.threadFactoryManufacturer);
 
 			// Create the executive
 			executive = executiveSource.createExecutive(context);
@@ -98,6 +114,58 @@ public class RawExecutiveMetaDataFactory {
 				issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME, ExecutiveSource.class.getSimpleName()
 						+ " failed to provide " + Executive.class.getSimpleName());
 				return null; // can not carry on
+			}
+
+			// Obtain the execution strategies
+			ExecutionStrategy[] executionStrategies = executive.getExcutionStrategies();
+			if ((executionStrategies == null) || (executionStrategies.length == 0)) {
+				// Must have at least one execution strategy
+				issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+						"Must have at least one " + ExecutionStrategy.class.getSimpleName());
+				return null; // can not carry on
+			}
+
+			// Load the execution strategies
+			for (int i = 0; i < executionStrategies.length; i++) {
+				ExecutionStrategy executionStrategy = executionStrategies[i];
+
+				// Ensure have execution strategy
+				if (executionStrategy == null) {
+					issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+							"Null " + ExecutionStrategy.class.getSimpleName() + " provided for index " + i);
+					return null; // can not carry on
+				}
+
+				// Ensure have name
+				String executionStrategyName = executionStrategy.getExecutionStrategyName();
+				if ((executionStrategyName == null) || (executionStrategyName.trim().length() == 0)) {
+					// Must have name
+					issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+							ExecutionStrategy.class.getSimpleName() + " for index " + i + " did not provide a name");
+					return null; // can not carry on
+				}
+
+				// Ensure not duplicate name
+				if (strategies.containsKey(executionStrategyName)) {
+					// Duplicate name
+					issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+							"One or more " + ExecutionStrategy.class.getSimpleName()
+									+ " instances provided by the same name '" + executionStrategyName + "'");
+					return null; // can not carry on
+				}
+
+				// Obtain the thread factories for the execution strategy
+				ThreadFactory[] threadFactories = executionStrategy.getThreadFactories();
+				if ((threadFactories == null) || (threadFactories.length == 0)) {
+					// Must have at least one thread factory
+					issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+							ExecutionStrategy.class.getSimpleName() + " '" + executionStrategyName
+									+ "' must provide at least one " + ThreadFactory.class.getSimpleName());
+					return null; // can not carry on
+				}
+
+				// Map in the execution strategy
+				strategies.put(executionStrategyName, threadFactories);
 			}
 
 		} catch (AbstractSourceError ex) {
@@ -112,7 +180,7 @@ public class RawExecutiveMetaDataFactory {
 		}
 
 		// Return the executive meta-data
-		return new RawExecutiveMetaData(executive);
+		return new RawExecutiveMetaData(executive, strategies);
 	}
 
 }

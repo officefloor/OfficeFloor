@@ -21,13 +21,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecutionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
@@ -39,6 +42,7 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteContextFactoryImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
+import net.officefloor.frame.internal.configuration.ManagedObjectExecutionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
@@ -91,6 +95,12 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * {@link ManagedObjectSource}.
 	 */
 	private final ManagedObjectFlowMetaData<F>[] flowMetaDatas;
+
+	/**
+	 * {@link ManagedObjectExecutionMetaData} instances for the
+	 * {@link ManagedObjectSource}.
+	 */
+	private final ManagedObjectExecutionMetaData[] executionMetaDatas;
 
 	/**
 	 * {@link ManagingOfficeConfiguration}.
@@ -146,15 +156,20 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 * @param flowMetaDatas               {@link ManagedObjectFlowMetaData}
 	 *                                    instances for the
 	 *                                    {@link ManagedObjectSource}.
+	 * @param executionMetaDatas          {@link ManagedObjectExecutionMetaData}
+	 *                                    instances for the
+	 *                                    {@link ManagedObjectSource}.
 	 * @param managingOfficeConfiguration {@link ManagingOfficeConfiguration}.
 	 */
 	public RawManagingOfficeMetaData(String managingOfficeName, String recycleFunctionName,
 			InputManagedObjectConfiguration<?> inputConfiguration, ManagedObjectFlowMetaData<F>[] flowMetaDatas,
+			ManagedObjectExecutionMetaData[] executionMetaDatas,
 			ManagingOfficeConfiguration<F> managingOfficeConfiguration) {
 		this.managingOfficeName = managingOfficeName;
 		this.recycleFunctionName = recycleFunctionName;
 		this.inputConfiguration = inputConfiguration;
 		this.flowMetaDatas = flowMetaDatas;
+		this.executionMetaDatas = executionMetaDatas;
 		this.managingOfficeConfiguration = managingOfficeConfiguration;
 	}
 
@@ -253,11 +268,14 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 *                                          {@link ManagedObject} instances of
 	 *                                          the managing {@link Office}.
 	 * @param moAdminFactory                    {@link ManagedObjectAdministrationMetaDataFactory}.
+	 * @param executionStrategies               {@link ExecutionStrategy} instances
+	 *                                          by their name.
 	 * @param issues                            {@link OfficeFloorIssues}.
 	 */
 	public void manageByOffice(OfficeMetaData officeMetaData,
 			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
-			ManagedObjectAdministrationMetaDataFactory moAdminFactory, OfficeFloorIssues issues) {
+			ManagedObjectAdministrationMetaDataFactory moAdminFactory, Map<String, ThreadFactory[]> executionStrategies,
+			OfficeFloorIssues issues) {
 
 		// Obtain the name of the managed object source
 		String managedObjectSourceName = this.rawManagedObjectMetaData.getManagedObjectName();
@@ -269,7 +287,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 		// Obtain the function locator
 		ManagedFunctionLocator functionLocator = officeMetaData.getManagedFunctionLocator();
 
-		// Obtain the recycle task meta-data
+		// Obtain the recycle function meta-data
 		FlowMetaData recycleFlowMetaData = null;
 		if (this.recycleFunctionName != null) {
 
@@ -314,6 +332,86 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 		// Create the Managed Object Execute Context
 		// -----------------------------------------------------------
 
+		// Obtain the execution configuration
+		ManagedObjectExecutionConfiguration[] executionConfigurations = this.managingOfficeConfiguration
+				.getExecutionConfiguration();
+
+		// Create the execution mappings for the configuration
+		Map<Integer, ManagedObjectExecutionConfiguration> executionMappings = new HashMap<>();
+		for (int i = 0; i < executionConfigurations.length; i++) {
+			ManagedObjectExecutionConfiguration executionConfiguration = executionConfigurations[i];
+			executionMappings.put(Integer.valueOf(i), executionConfiguration);
+		}
+
+		// Create the executions
+		ThreadFactory[][] threadFactories;
+		if ((this.executionMetaDatas == null) || (this.executionMetaDatas.length == 0)) {
+
+			// No exectuion strategies but issue if configuration
+			if ((executionConfigurations != null) && (executionConfigurations.length > 0)) {
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+						ManagedObjectSourceMetaData.class.getSimpleName()
+								+ " specifies no execution strategies but execution strategies configured for it");
+				return; // configuration does not align to meta-data
+			}
+
+			// No execution strategies
+			threadFactories = new ThreadFactory[0][];
+
+		} else {
+			// Configure the thread factories
+			threadFactories = new ThreadFactory[this.executionMetaDatas.length][];
+			for (int i = 0; i < threadFactories.length; i++) {
+				int index = i;
+				ManagedObjectExecutionMetaData executionMetaData = this.executionMetaDatas[i];
+
+				// Create name to identify flow
+				String label = executionMetaData.getLabel();
+				String executionLabel = "execution strategy " + index + " (label="
+						+ (!ConstructUtil.isBlank(label) ? label : "<no label>") + ")";
+
+				// Obtain the execution configuration
+				ManagedObjectExecutionConfiguration executionConfiguration = executionMappings
+						.get(Integer.valueOf(index));
+				if (executionConfiguration == null) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+							"No execution strategy configured for " + executionLabel);
+					return; // execution not configured
+				}
+
+				// Remove execution for later check no extra configured
+				executionMappings.remove(Integer.valueOf(index));
+
+				// Obtain the execution strategy
+				String executionStrategyName = executionConfiguration.getExecutionStrategyName();
+				if (executionStrategyName == null) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+							"No execution strategy name configured for " + executionLabel);
+					return; // execution not configured
+				}
+
+				// Obtain the execution strategy
+				ThreadFactory[] executionStrategy = executionStrategies.get(executionStrategyName);
+				if (executionStrategy == null) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+							"No execution strategy available by name '" + executionStrategyName + "' for "
+									+ executionLabel);
+					return; // execution not configured
+				}
+
+				// Specify the execution stragegy
+				threadFactories[i] = executionStrategy;
+			}
+
+			// Ensure no extra execution configurations
+			if (executionMappings.size() > 0) {
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+						"Extra execution strategies configured than specified by "
+								+ ManagedObjectSourceMetaData.class.getSimpleName());
+				return; // should only have configurations for meta-data required
+			}
+		}
+
 		// Obtain the flow configuration
 		ManagedObjectFlowConfiguration<F>[] flowConfigurations = this.managingOfficeConfiguration
 				.getFlowConfiguration();
@@ -330,7 +428,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 			}
 
 			// No flows, so provide empty execution context
-			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>();
+			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(threadFactories);
 			return;
 		}
 
@@ -440,7 +538,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 
 		// Specify the managed object execute context
 		this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(managedObjectMetaData,
-				processBoundIndex, flows, officeMetaData);
+				processBoundIndex, flows, threadFactories, officeMetaData);
 	}
 
 	/**

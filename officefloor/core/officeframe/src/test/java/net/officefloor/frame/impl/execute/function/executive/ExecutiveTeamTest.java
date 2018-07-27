@@ -17,17 +17,15 @@
  */
 package net.officefloor.frame.impl.execute.function.executive;
 
-import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveContext;
 import net.officefloor.frame.api.executive.TeamSourceContextWrapper;
 import net.officefloor.frame.api.executive.TeamSourceContextWrapper.WorkerEnvironment;
-import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
-import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -72,12 +70,14 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		task.getBuilder().setResponsibleTeam("FUNCTION_TEAM");
 
 		// Invoke the function
+		MockExecutiveSource.isControlTeam = false;
 		MockExecutiveSource.isInterceptTeam = false;
 		MockExecutiveSource.worker = null;
 		this.invokeFunction("function", null);
 
 		// Ensure intercepted by executive
 		assertTrue("Function should be invoked", work.isFunctionInvoked);
+		assertTrue("Executive should control teams", MockExecutiveSource.isControlTeam);
 		assertTrue("Executive should intercept Job", MockExecutiveSource.isInterceptTeam);
 
 		// Determine if wrap worker
@@ -96,8 +96,9 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 	}
 
 	@TestSource
-	public static class MockExecutiveSource extends AbstractExecutiveSource
-			implements Executive, Team, WorkerEnvironment {
+	public static class MockExecutiveSource extends DefaultExecutive implements Executive, Team, WorkerEnvironment {
+
+		private static boolean isControlTeam = false;
 
 		private static boolean isWrapWorker = false;
 
@@ -110,32 +111,17 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		private static volatile Runnable worker = null;
 
 		/*
-		 * =============== ExecutiveSource ==================
-		 */
-
-		@Override
-		protected void loadSpecification(SpecificationContext context) {
-		}
-
-		@Override
-		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
-			return this;
-		}
-
-		/*
 		 * ================= Executive ======================
 		 */
-
-		@Override
-		public ExecutionStrategy[] getExcutionStrategies() {
-			return new ExecutionStrategy[0];
-		}
 
 		@Override
 		public Team createTeam(ExecutiveContext context) throws Exception {
 
 			// Ensure team source
-			if (context.getTeamSource() instanceof OnePersonTeamSource) {
+			if (context.getTeamSource() instanceof MockTeamSource) {
+
+				// Indicate controlling the team
+				isControlTeam = true;
 
 				// Ensure correct team size
 				assertEquals("Incorrect team size", 4, context.getTeamSize());

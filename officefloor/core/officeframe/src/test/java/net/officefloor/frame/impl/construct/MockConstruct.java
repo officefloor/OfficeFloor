@@ -426,12 +426,10 @@ public class MockConstruct {
 		/**
 		 * Adds a {@link ManagedObjectExecutionMetaData}.
 		 * 
-		 * @param threadFactories {@link ThreadFactory} instances for the
-		 *                        {@link ExecutionStrategy}.
 		 * @return {@link ManagedObjectExecutionMetaDataImpl} for further configuration
 		 *         of the {@link ExecutionStrategy}.
 		 */
-		public ManagedObjectExecutionMetaDataImpl addExecutionStrategy(ThreadFactory[] threadFactories) {
+		public ManagedObjectExecutionMetaDataImpl addExecutionStrategy() {
 			this.assertNotBuilt();
 			ManagedObjectExecutionMetaDataImpl execution = new ManagedObjectExecutionMetaDataImpl();
 			this.executionStrategies.add(execution);
@@ -599,7 +597,9 @@ public class MockConstruct {
 			if (this.built == null) {
 				this.built = new RawManagingOfficeMetaData<>(this.managingOfficeName, this.recycleFunctionName,
 						this.managingOfficeConfiguration.getInputManagedObjectConfiguration(),
-						this.managedObjectSourceMetDataBuilder.getFlowMetaData(), this.managingOfficeConfiguration);
+						this.managedObjectSourceMetDataBuilder.getFlowMetaData(),
+						this.managedObjectSourceMetDataBuilder.getExecutionMetaData(),
+						this.managingOfficeConfiguration);
 			}
 			return this.built;
 		}
@@ -1552,11 +1552,12 @@ public class MockConstruct {
 
 				// Create the executive
 				Executive executive = new DefaultExecutive();
+				Map<String, ThreadFactory[]> executionStrategies = new HashMap<>();
 
 				// Build
-				this.built = new RawOfficeFloorMetaData(executive, this.teamRegistry, this.breakChainTeamManagement,
-						this.threadLocalAwareExecutor, this.managedExecutionFactory, mosRegistry,
-						this.officeFloorEscalation);
+				this.built = new RawOfficeFloorMetaData(executive, executionStrategies, this.teamRegistry,
+						this.breakChainTeamManagement, this.threadLocalAwareExecutor, this.managedExecutionFactory,
+						mosRegistry, this.officeFloorEscalation);
 			}
 			return this.built;
 		}

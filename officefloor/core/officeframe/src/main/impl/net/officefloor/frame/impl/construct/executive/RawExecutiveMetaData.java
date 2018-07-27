@@ -17,6 +17,10 @@
  */
 package net.officefloor.frame.impl.construct.executive;
 
+import java.util.Map;
+import java.util.concurrent.ThreadFactory;
+
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 
 /**
@@ -32,12 +36,21 @@ public class RawExecutiveMetaData {
 	private final Executive executive;
 
 	/**
+	 * {@link Map} of {@link ExecutionStrategy} name to its {@link ThreadFactory}
+	 * instances.
+	 */
+	private final Map<String, ThreadFactory[]> executionStrategies;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param executive {@link Exception}.
+	 * @param executive           {@link Exception}.
+	 * @param executionStrategies {@link Map} of {@link ExecutionStrategy} name to
+	 *                            its {@link ThreadFactory} instances.
 	 */
-	public RawExecutiveMetaData(Executive executive) {
+	public RawExecutiveMetaData(Executive executive, Map<String, ThreadFactory[]> executionStrategies) {
 		this.executive = executive;
+		this.executionStrategies = executionStrategies;
 	}
 
 	/**
@@ -48,4 +61,14 @@ public class RawExecutiveMetaData {
 	public Executive getExecutive() {
 		return this.executive;
 	}
+
+	/**
+	 * Obtains the {@link ExecutionStrategy} instances by their names.
+	 * 
+	 * @return {@link ExecutionStrategy} instances by their names.
+	 */
+	public Map<String, ThreadFactory[]> getExecutionStrategies() {
+		return this.executionStrategies;
+	}
+
 }

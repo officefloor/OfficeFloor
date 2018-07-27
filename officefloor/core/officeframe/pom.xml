@@ -14,12 +14,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>net.openhft</groupId>
-			<artifactId>affinity</artifactId>
-		</dependency>
-	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -52,18 +46,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<!-- Allow for quick build by ignoring stress tests -->
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<systemProperties>
-						<property>
-							<name>ignore.stress.tests</name>
-							<value>${ignore.stress.testing}</value>
-						</property>
-					</systemProperties>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

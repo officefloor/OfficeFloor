@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.executive;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
@@ -52,6 +54,17 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 	public DefaultExecutive(ThreadFactoryManufacturer threadFactoryManufacturer) {
 		this.threadFactories = new ThreadFactory[] {
 				threadFactoryManufacturer.manufactureThreadFactory(this.getExecutionStrategyName()) };
+	}
+
+	/**
+	 * Obtains the {@link ExecutionStrategy} instances by name.
+	 * 
+	 * @return {@link ExecutionStrategy} instances by name.
+	 */
+	public Map<String, ThreadFactory[]> getExecutionStrategyMap() {
+		Map<String, ThreadFactory[]> executionStrategies = new HashMap<>();
+		executionStrategies.put(this.getExecutionStrategyName(), this.threadFactories);
+		return executionStrategies;
 	}
 
 	/*

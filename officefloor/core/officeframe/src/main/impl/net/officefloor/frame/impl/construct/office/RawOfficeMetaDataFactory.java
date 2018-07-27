@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -493,10 +494,13 @@ public class RawOfficeMetaDataFactory {
 		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
 				rawAdminFactory, threadScopeMo, processScopeMo);
 
+		// Obtain the execution strategies
+		Map<String, ThreadFactory[]> executionStrategies = this.rawOfficeFloorMetaData.getExecutionStrategies();
+
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
 			officeManagingManagedObject.manageByOffice(officeMetaData, processBoundManagedObjects, moAdminFactory,
-					issues);
+					executionStrategies, issues);
 		}
 
 		// Link functions within the meta-data of the office

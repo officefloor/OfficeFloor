@@ -18,7 +18,9 @@
 package net.officefloor.frame.impl.construct.officefloor;
 
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -44,6 +46,11 @@ public class RawOfficeFloorMetaData {
 	 * {@link Executive}.
 	 */
 	private final Executive executive;
+
+	/**
+	 * {@link ExecutionStrategy} instances by name.
+	 */
+	private final Map<String, ThreadFactory[]> executionStrategies;
 
 	/**
 	 * Registry of {@link RawTeamMetaData} by the {@link Team} name.
@@ -85,6 +92,7 @@ public class RawOfficeFloorMetaData {
 	 * Initiate.
 	 * 
 	 * @param executive                {@link Executive}.
+	 * @param executionStrategies      {@link ExecutionStrategy} instances by name.
 	 * @param teamRegistry             Registry of {@link RawTeamMetaData} by the
 	 *                                 {@link Team} name.
 	 * @param breakChainTeamManagement {@link TeamManagement} to break the
@@ -95,11 +103,12 @@ public class RawOfficeFloorMetaData {
 	 *                                 by the {@link ManagedObjectSource} name.
 	 * @param officeFloorEscalation    {@link EscalationProcedure}.
 	 */
-	public RawOfficeFloorMetaData(Executive executive, Map<String, RawTeamMetaData> teamRegistry,
-			TeamManagement breakChainTeamManagement, ThreadLocalAwareExecutor threadLocalAwareExecutor,
-			ManagedExecutionFactory managedExecutionFactory, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
-			EscalationFlow officeFloorEscalation) {
+	public RawOfficeFloorMetaData(Executive executive, Map<String, ThreadFactory[]> executionStrategies,
+			Map<String, RawTeamMetaData> teamRegistry, TeamManagement breakChainTeamManagement,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
+			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry, EscalationFlow officeFloorEscalation) {
 		this.executive = executive;
+		this.executionStrategies = executionStrategies;
 		this.teamRegistry = teamRegistry;
 		this.breakChainTeamManagement = breakChainTeamManagement;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
@@ -115,6 +124,15 @@ public class RawOfficeFloorMetaData {
 	 */
 	public Executive getExecutive() {
 		return this.executive;
+	}
+
+	/**
+	 * Obtains the {@link ExecutionStrategy} instances by name.
+	 * 
+	 * @return {@link ExecutionStrategy} instances by name.
+	 */
+	public Map<String, ThreadFactory[]> getExecutionStrategies() {
+		return this.executionStrategies;
 	}
 
 	/**

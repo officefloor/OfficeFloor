@@ -27,7 +27,6 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
@@ -505,20 +504,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Should add start up function", 1, startUps.length);
 		assertEquals("Incorrect start up function", MANAGED_OBJECT_NAME + ".STARTUP_FUNCTION",
 				startUps[0].getFunctionName());
-	}
-
-	/**
-	 * Ensure able to require {@link ExecutionStrategy}.
-	 */
-	public void testExecutionStrategy() {
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		RawManagedObjectMetaData<?, ?> rawMetaData = this.constructRawManagedObjectMetaData(true);
-		this.verifyMockObjects();
-
-		// Validate strategies
-		fail("TODO implement");
 	}
 
 	/**

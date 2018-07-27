@@ -23,6 +23,7 @@ import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
 
 /**
  * {@link ExecutiveSourceContext} implementation.
@@ -31,22 +32,32 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  */
 public class ExecutiveSourceContextImpl extends SourceContextImpl implements ExecutiveSourceContext {
 
-	
-	public ExecutiveSourceContextImpl(boolean isLoadingType, SourceContext delegate,
-			SourceProperties sourceProperties) {
-		super(isLoadingType, delegate, sourceProperties);
-		// TODO Auto-generated constructor stub
+	/**
+	 * {@link ThreadFactoryManufacturer}.
+	 */
+	private final ThreadFactoryManufacturer threadFactoryManufacturer;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param isLoadingType             Indicates if loading type.
+	 * @param sourceContext             {@link SourceContext}.
+	 * @param sourceProperties          {@link SourceProperties}.
+	 * @param threadFactoryManufacturer {@link ThreadFactoryManufacturer}.
+	 */
+	public ExecutiveSourceContextImpl(boolean isLoadingType, SourceContext sourceContext,
+			SourceProperties sourceProperties, ThreadFactoryManufacturer threadFactoryManufacturer) {
+		super(isLoadingType, sourceContext, sourceProperties);
+		this.threadFactoryManufacturer = threadFactoryManufacturer;
 	}
-	
+
 	/*
 	 * ================ ExecutiveSourceContext ===========================
 	 */
 
-
 	@Override
 	public ThreadFactory createThreadFactory(String executionStrategyName) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.threadFactoryManufacturer.manufactureThreadFactory(executionStrategyName);
 	}
 
 }

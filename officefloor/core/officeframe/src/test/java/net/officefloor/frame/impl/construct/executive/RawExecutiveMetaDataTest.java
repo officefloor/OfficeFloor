@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.construct.executive;
 
+import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -25,6 +26,7 @@ import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
+import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.TestSource;
@@ -278,6 +280,169 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Indicate missing {@link ExecutionStrategy} instances.
+	 */
+	public void testMissingExecutionStrategies() {
+
+		// Record
+		this.configuration = new ExecutiveBuilderImpl<>(ExecutionStrategyExecutiveSource.class);
+		this.issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME, "Must have at least one ExecutionStrategy");
+
+		// Construct
+		ExecutionStrategyExecutiveSource.strategies = null;
+		this.replayMockObjects();
+		this.constructRawExecutiveMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Indicate missing {@link ExecutionStrategy} instance within returned listing.
+	 */
+	public void testMissingAnExecutionStrategy() {
+
+		// Record
+		this.configuration = new ExecutiveBuilderImpl<>(ExecutionStrategyExecutiveSource.class);
+		this.issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME, "Null ExecutionStrategy provided for index 0");
+
+		// Construct
+		ExecutionStrategyExecutiveSource.strategies = new ExecutionStrategy[] { null };
+		this.replayMockObjects();
+		this.constructRawExecutiveMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Indicate missing {@link ExecutionStrategy} name.
+	 */
+	public void testMissingExecutionStrategyName() {
+
+		// Record
+		this.configuration = new ExecutiveBuilderImpl<>(ExecutionStrategyExecutiveSource.class);
+		ExecutionStrategy strategy = this.createMock(ExecutionStrategy.class);
+		this.recordReturn(strategy, strategy.getExecutionStrategyName(), null);
+		this.issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+				"ExecutionStrategy for index 0 did not provide a name");
+
+		// Construct
+		ExecutionStrategyExecutiveSource.strategies = new ExecutionStrategy[] { strategy };
+		this.replayMockObjects();
+		this.constructRawExecutiveMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Indicating missing {@link ThreadFactory} instances of the
+	 * {@link ExecutionStrategy}.
+	 */
+	public void testMissingThreadFactories() {
+
+		// Record
+		this.configuration = new ExecutiveBuilderImpl<>(ExecutionStrategyExecutiveSource.class);
+		ExecutionStrategy strategy = this.createMock(ExecutionStrategy.class);
+		this.recordReturn(strategy, strategy.getExecutionStrategyName(), "test");
+		this.recordReturn(strategy, strategy.getThreadFactories(), null);
+		this.issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+				"ExecutionStrategy 'test' must provide at least one ThreadFactory");
+
+		// Construct
+		ExecutionStrategyExecutiveSource.strategies = new ExecutionStrategy[] { strategy };
+		this.replayMockObjects();
+		this.constructRawExecutiveMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Indicating no {@link ThreadFactory} instances of the
+	 * {@link ExecutionStrategy}.
+	 */
+	public void testNoThreadFactories() {
+
+		// Record
+		this.configuration = new ExecutiveBuilderImpl<>(ExecutionStrategyExecutiveSource.class);
+		ExecutionStrategy strategy = this.createMock(ExecutionStrategy.class);
+		this.recordReturn(strategy, strategy.getExecutionStrategyName(), "test");
+		this.recordReturn(strategy, strategy.getThreadFactories(), new ThreadFactory[0]);
+		this.issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+				"ExecutionStrategy 'test' must provide at least one ThreadFactory");
+
+		// Construct
+		ExecutionStrategyExecutiveSource.strategies = new ExecutionStrategy[] { strategy };
+		this.replayMockObjects();
+		this.constructRawExecutiveMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Indicating issue if duplicate {@link ExecutionStrategy} names.
+	 */
+	public void testDuplicateExecutionStrategyNames() {
+
+		// Record
+		final String STRATEGY_NAME = "strategy";
+		this.configuration = new ExecutiveBuilderImpl<>(ExecutionStrategyExecutiveSource.class);
+		ExecutionStrategy strategyOne = this.createMock(ExecutionStrategy.class);
+		this.recordReturn(strategyOne, strategyOne.getExecutionStrategyName(), STRATEGY_NAME);
+		this.recordReturn(strategyOne, strategyOne.getThreadFactories(),
+				new ThreadFactory[] { this.createMock(ThreadFactory.class) });
+		ExecutionStrategy strategyTwo = this.createMock(ExecutionStrategy.class);
+		this.recordReturn(strategyTwo, strategyTwo.getExecutionStrategyName(), STRATEGY_NAME);
+		this.issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+				"One or more ExecutionStrategy instances provided by the same name 'strategy'");
+
+		// Construct
+		ExecutionStrategyExecutiveSource.strategies = new ExecutionStrategy[] { strategyOne, strategyTwo };
+		this.replayMockObjects();
+		this.constructRawExecutiveMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can obtain the {@link ExecutionStrategy}.
+	 */
+	public void testExecutionStrategyAvailable() {
+
+		// Record
+		final String STRATEGY_NAME = "test";
+		this.configuration = new ExecutiveBuilderImpl<>(ExecutionStrategyExecutiveSource.class);
+		ExecutionStrategy strategy = this.createMock(ExecutionStrategy.class);
+		this.recordReturn(strategy, strategy.getExecutionStrategyName(), STRATEGY_NAME);
+		ThreadFactory[] threadFactories = new ThreadFactory[] { this.createMock(ThreadFactory.class) };
+		this.recordReturn(strategy, strategy.getThreadFactories(), threadFactories);
+
+		// Construct
+		ExecutionStrategyExecutiveSource.strategies = new ExecutionStrategy[] { strategy };
+		this.replayMockObjects();
+		RawExecutiveMetaData metaData = this.constructRawExecutiveMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure exeuction strategy available
+		Map<String, ThreadFactory[]> executionStrategies = metaData.getExecutionStrategies();
+		assertEquals("Should have one execution strategy", 1, executionStrategies.size());
+		assertSame("Incorrect thread factories for strategy name", threadFactories,
+				executionStrategies.get(STRATEGY_NAME));
+	}
+
+	@TestSource
+	public static class ExecutionStrategyExecutiveSource extends AbstractExecutiveSource implements Executive {
+
+		private static ExecutionStrategy[] strategies;
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
+			return this;
+		}
+
+		@Override
+		public ExecutionStrategy[] getExcutionStrategies() {
+			return strategies;
+		}
+	}
+
+	/**
 	 * Ensures able to successfully source the {@link Executive} and details of
 	 * {@link RawExecutiveMetaData} are correct.
 	 */
@@ -285,7 +450,13 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 
 		// Record
 		this.configuration = new ExecutiveBuilderImpl<>(SourceExecutiveSource.class);
-		SourceExecutiveSource.executive = this.createMock(Executive.class);
+		Executive executive = this.createMock(Executive.class);
+		ExecutionStrategy strategy = this.createMock(ExecutionStrategy.class);
+		this.recordReturn(executive, executive.getExcutionStrategies(), new ExecutionStrategy[] { strategy });
+		this.recordReturn(strategy, strategy.getExecutionStrategyName(), "strategy");
+		this.recordReturn(strategy, strategy.getThreadFactories(),
+				new ThreadFactory[] { this.createMock(ThreadFactory.class) });
+		SourceExecutiveSource.executive = executive;
 
 		// Construct
 		this.replayMockObjects();
@@ -304,7 +475,13 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 
 		// Record
 		this.configuration = new ExecutiveBuilderImpl<>(new SourceExecutiveSource());
-		SourceExecutiveSource.executive = this.createMock(Executive.class);
+		Executive executive = this.createMock(Executive.class);
+		ExecutionStrategy strategy = this.createMock(ExecutionStrategy.class);
+		this.recordReturn(executive, executive.getExcutionStrategies(), new ExecutionStrategy[] { strategy });
+		this.recordReturn(strategy, strategy.getExecutionStrategyName(), "strategy");
+		this.recordReturn(strategy, strategy.getThreadFactories(),
+				new ThreadFactory[] { this.createMock(ThreadFactory.class) });
+		SourceExecutiveSource.executive = executive;
 
 		// Construct
 		this.replayMockObjects();
@@ -333,28 +510,6 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Indicate missing {@link ExecutionStrategy} instances.
-	 */
-	public void testMissingExecutionStrategies() {
-		fail("TODO implement");
-	}
-
-	/**
-	 * Indicate missing {@link ExecutionStrategy} name.
-	 */
-	public void testMissingExecutionStrategyName() {
-		fail("TODO implement");
-	}
-
-	/**
-	 * Indicating missing {@link ThreadFactory} instances of the
-	 * {@link ExecutionStrategy}.
-	 */
-	public void testMissingThreadFactories() {
-		fail("TODO implement");
-	}
-
-	/**
 	 * Constructs the {@link RawExecutiveMetaData} with the mock objects.
 	 * 
 	 * @return {@link RawExecutiveMetaData}.
@@ -362,7 +517,7 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 	private RawExecutiveMetaData constructRawExecutiveMetaData(boolean isExpectConstruction) {
 
 		// Attempt to construct
-		RawExecutiveMetaData metaData = new RawExecutiveMetaDataFactory(this.sourceContext)
+		RawExecutiveMetaData metaData = new RawExecutiveMetaDataFactory(this.sourceContext, null)
 				.constructRawExecutiveMetaData(this.configuration, OFFICE_FLOOR_NAME, this.issues);
 
 		// Provide assertion on whether should be constructed

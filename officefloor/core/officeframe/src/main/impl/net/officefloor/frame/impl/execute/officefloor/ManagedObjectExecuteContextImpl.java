@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.officefloor;
 
 import java.util.concurrent.ThreadFactory;
 
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -53,6 +54,12 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	private final FlowMetaData[] processLinks;
 
 	/**
+	 * {@link ExecutionStrategy} instances in index order for the
+	 * {@link ManagedObjectSource}.
+	 */
+	private final ThreadFactory[][] executionStrategies;
+
+	/**
 	 * {@link OfficeMetaData} to create {@link ProcessState} instances.
 	 */
 	private final OfficeMetaData officeMetaData;
@@ -66,14 +73,17 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	 *                              {@link ProcessState}.
 	 * @param processLinks          {@link FlowMetaData} in index order for the
 	 *                              {@link ManagedObjectSource}.
+	 * @param executionStrategies   {@link ExecutionStrategy} instances in index
+	 *                              order for the {@link ManagedObjectSource}.
 	 * @param officeMetaData        {@link OfficeMetaData} to create
 	 *                              {@link ProcessState} instances.
 	 */
 	public ManagedObjectExecuteContextImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
-			FlowMetaData[] processLinks, OfficeMetaData officeMetaData) {
+			FlowMetaData[] processLinks, ThreadFactory[][] executionStrategies, OfficeMetaData officeMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
+		this.executionStrategies = executionStrategies;
 		this.officeMetaData = officeMetaData;
 	}
 
@@ -115,8 +125,17 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 
 	@Override
 	public ThreadFactory[] getExecutionStrategy(int executionStrategyIndex) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+
+		// Ensure valid execution strategy index
+		if ((executionStrategyIndex < 0) || (executionStrategyIndex >= this.executionStrategies.length)) {
+			String validIndexes = (this.executionStrategies.length == 0 ? " [no execution strategies linked]"
+					: " [valid only 0 to " + (this.executionStrategies.length - 1) + "]");
+			throw new IllegalArgumentException(
+					"Invalid execution strategy index " + executionStrategyIndex + validIndexes);
+		}
+
+		// Return the execution strategy
+		return this.executionStrategies[executionStrategyIndex];
 	}
 
 }

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -194,16 +195,21 @@ public class RawOfficeFloorMetaDataFactory {
 
 		// Create the executive
 		Executive executive;
+		Map<String, ThreadFactory[]> executionStrategies;
 		ExecutiveConfiguration<?> executiveConfiguration = configuration.getExecutiveConfiguration();
 		if (executiveConfiguration != null) {
 			// Create the configured Executive
-			RawExecutiveMetaDataFactory rawExecutiveFactory = new RawExecutiveMetaDataFactory(sourceContext);
+			RawExecutiveMetaDataFactory rawExecutiveFactory = new RawExecutiveMetaDataFactory(sourceContext,
+					threadFactoryManufacturer);
 			RawExecutiveMetaData rawExecutive = rawExecutiveFactory
 					.constructRawExecutiveMetaData(executiveConfiguration, officeFloorName, issues);
 			executive = rawExecutive.getExecutive();
+			executionStrategies = rawExecutive.getExecutionStrategies();
 		} else {
 			// No Executive configured, so use default
-			executive = new DefaultExecutive(threadFactoryManufacturer);
+			DefaultExecutive defaultExecutive = new DefaultExecutive(threadFactoryManufacturer);
+			executive = defaultExecutive;
+			executionStrategies = defaultExecutive.getExecutionStrategyMap();
 		}
 
 		// Create the team factory
@@ -258,7 +264,7 @@ public class RawOfficeFloorMetaDataFactory {
 				officeFloorManagement);
 
 		// Create the raw office floor meta-data
-		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, teamRegistry,
+		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, executionStrategies, teamRegistry,
 				breakChainTeamManagement, threadLocalAwareExecutor, managedExecutionFactory, mosRegistry,
 				officeFloorEscalation);
 
