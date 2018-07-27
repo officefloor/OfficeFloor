@@ -37,6 +37,7 @@ import net.officefloor.frame.api.team.source.TeamSourceProperty;
 import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 import net.officefloor.frame.impl.construct.team.ExecutiveContextImpl;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
 
 /**
  * {@link TeamLoader} implementation.
@@ -58,10 +59,8 @@ public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 	/**
 	 * Initiate for building.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link Team}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link Team}.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public TeamLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -187,10 +186,13 @@ public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 	@Override
 	public TeamType loadTeamType(String teamName, TeamSource teamSource, PropertyList propertyList) {
 
+		// Create thread factory manufacturer
+		ThreadFactoryManufacturer threadFactoryManufactuer = new ThreadFactoryManufacturer(
+				new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]), null);
+
 		// Attempt to create the team
 		try {
-			teamSource.createTeam(new ExecutiveContextImpl(true, teamName, null,
-					new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]),
+			teamSource.createTeam(new ExecutiveContextImpl(true, teamName, 10, null, threadFactoryManufactuer,
 					new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext()));
 
 		} catch (AbstractSourceError ex) {
@@ -231,13 +233,10 @@ public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 	/**
 	 * Loads the {@link OfficeFloorTeamSourceType}.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @param properties
-	 *            {@link PropertyList} from specification.
-	 * @param propertyList
-	 *            {@link PropertyList} for loading
-	 *            {@link OfficeFloorTeamSourceType}.
+	 * @param teamName     Name of the {@link Team}.
+	 * @param properties   {@link PropertyList} from specification.
+	 * @param propertyList {@link PropertyList} for loading
+	 *                     {@link OfficeFloorTeamSourceType}.
 	 * @return {@link OfficeFloorTeamSourceType}.
 	 */
 	private OfficeFloorTeamSourceType loadOfficeFloorTeamSourceType(String teamName, PropertyList properties,
