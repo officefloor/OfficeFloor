@@ -177,6 +177,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_executive</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
 				<artifactId>woof</artifactId>
 				<version>${project.version}</version>
 			</dependency>

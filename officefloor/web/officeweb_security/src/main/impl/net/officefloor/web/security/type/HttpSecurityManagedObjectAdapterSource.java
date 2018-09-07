@@ -318,7 +318,8 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 		@Override
 		@SuppressWarnings("unchecked")
 		public ManagedObjectFlowMetaData<F>[] getFlowMetaData() {
-			return AdaptFactory.adaptArray(this.metaData.getFlowMetaData(), ManagedObjectFlowMetaData.class,
+			return (ManagedObjectFlowMetaData<F>[]) AdaptFactory.adaptArray(this.metaData.getFlowMetaData(),
+					ManagedObjectFlowMetaData.class,
 					(delegate) -> new HttpSecurityManagedObjectFlowMetaData<>(delegate));
 		}
 
