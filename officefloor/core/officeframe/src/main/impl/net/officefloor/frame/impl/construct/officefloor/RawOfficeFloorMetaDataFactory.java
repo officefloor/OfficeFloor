@@ -177,11 +177,6 @@ public class RawOfficeFloorMetaDataFactory {
 			}
 		}
 
-		// Create the managed execution factory
-		ThreadCompletionListener[] threadCompletionListeners = threadCompletionListenerList
-				.toArray(new ThreadCompletionListener[0]);
-		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(threadCompletionListeners);
-
 		// Construct the teams
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
 		List<TeamManagement> teamListing = new LinkedList<TeamManagement>();
@@ -189,7 +184,14 @@ public class RawOfficeFloorMetaDataFactory {
 		// Obtain the thread decorator
 		Consumer<Thread> threadDecorator = configuration.getThreadDecorator();
 
-		// Create the thread factory manufacturer
+		// Obtain the thread completion listeners
+		ThreadCompletionListener[] threadCompletionListeners = threadCompletionListenerList
+				.toArray(new ThreadCompletionListener[0]);
+
+		// Create the execution factory
+		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(threadCompletionListeners);
+
+		// Create thread factory manufacturer (managed execution factory and executive)
 		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,
 				threadDecorator);
 
@@ -252,7 +254,7 @@ public class RawOfficeFloorMetaDataFactory {
 		// Undertake OfficeFloor escalation on any team available
 		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(null);
 		OfficeMetaData officeFloorManagement = new OfficeMetaDataImpl("Management", null, null, null,
-				officeFloorFunctionLoop, null, null, null, null, null, null, null);
+				officeFloorFunctionLoop, null, null, null, null, null, null, null, null);
 
 		// Obtain the escalation handler for the OfficeFloor
 		EscalationHandler officeFloorEscalationHandler = configuration.getEscalationHandler();

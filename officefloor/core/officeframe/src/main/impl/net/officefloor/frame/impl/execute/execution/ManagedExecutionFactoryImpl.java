@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.execution;
 
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.ManagedExecution;
@@ -69,8 +70,7 @@ public class ManagedExecutionFactoryImpl implements ManagedExecutionFactory {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param threadCompletionListeners
-	 *            {@link ThreadCompletionListener} instances.
+	 * @param threadCompletionListeners {@link ThreadCompletionListener} instances.
 	 */
 	public ManagedExecutionFactoryImpl(ThreadCompletionListener[] threadCompletionListeners) {
 		this.threadCompletionListeners = threadCompletionListeners;
@@ -81,14 +81,20 @@ public class ManagedExecutionFactoryImpl implements ManagedExecutionFactory {
 	 */
 
 	@Override
-	public <E extends Throwable> ManagedExecution<E> createManagedExecution(Execution<E> execution) {
-		return new ManagedExecutionImpl<>(execution);
+	public <E extends Throwable> ManagedExecution<E> createManagedExecution(Executive executive,
+			Execution<E> execution) {
+		return new ManagedExecutionImpl<>(executive, execution);
 	}
 
 	/**
 	 * {@link ManagedExecution} implementation.
 	 */
-	private class ManagedExecutionImpl<E extends Throwable> implements ManagedExecution<E> {
+	private class ManagedExecutionImpl<E extends Throwable> implements ManagedExecution<E>, Execution<E> {
+
+		/**
+		 * {@link Executive}.
+		 */
+		private final Executive executive;
 
 		/**
 		 * {@link Execution}.
@@ -98,15 +104,25 @@ public class ManagedExecutionFactoryImpl implements ManagedExecutionFactory {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param execution
-		 *            {@link Execution}.
+		 * @param executive {@link Executive}.
+		 * @param execution {@link Execution}.
 		 */
-		public ManagedExecutionImpl(Execution<E> execution) {
+		public ManagedExecutionImpl(Executive executive, Execution<E> execution) {
+			this.executive = executive;
 			this.execution = execution;
 		}
 
 		/*
 		 * ====================== ManagedExecution ==========================
+		 */
+
+		@Override
+		public void managedExecute() throws E {
+			this.executive.manageExecution(this);
+		}
+
+		/*
+		 * ========================= Execution ===============================
 		 */
 
 		@Override

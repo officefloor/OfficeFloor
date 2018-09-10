@@ -20,6 +20,7 @@ package net.officefloor.frame.api.executive.source;
 import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.source.SourceContext;
 
 /**
@@ -36,8 +37,9 @@ public interface ExecutiveSourceContext extends SourceContext {
 	 * @param executionStrategyName Name of the {@link ExecutionStrategy} to
 	 *                              associate {@link Thread} names to the
 	 *                              {@link ExecutionStrategy}.
+	 * @param executive             {@link Executive}.
 	 * @return {@link ThreadFactory} to use for {@link ExecutionStrategy} instances.
 	 */
-	ThreadFactory createThreadFactory(String executionStrategyName);
+	ThreadFactory createThreadFactory(String executionStrategyName, Executive executive);
 
 }

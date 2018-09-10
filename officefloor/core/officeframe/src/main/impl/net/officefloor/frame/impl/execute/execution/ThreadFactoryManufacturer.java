@@ -21,6 +21,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.ManagedExecution;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
@@ -44,25 +45,26 @@ public class ThreadFactoryManufacturer {
 
 	/**
 	 * Instantiate.
-	 * 
-	 * @param managedExecutionFactory {@link ManagedExecutionFactory}.
-	 * @param decorator               Decorator of the created {@link Thread}
-	 *                                instances. May be <code>null</code>.
+	 *
+	 * @param executionFactory {@link ManagedExecutionFactory}.
+	 * @param decorator        Decorator of the created {@link Thread} instances.
+	 *                         May be <code>null</code>.
 	 */
-	public ThreadFactoryManufacturer(ManagedExecutionFactory managedExecutionFactory, Consumer<Thread> decorator) {
-		this.managedExecutionFactory = managedExecutionFactory;
+	public ThreadFactoryManufacturer(ManagedExecutionFactory executionFactory, Consumer<Thread> decorator) {
+		this.managedExecutionFactory = executionFactory;
 		this.decorator = decorator;
 	}
 
 	/**
 	 * Manufactures a new {@link ThreadFactory}.
 	 * 
-	 * @param name Name for the {@link Thread} instances created from the
-	 *             {@link ThreadFactory}.
+	 * @param name      Name for the {@link Thread} instances created from the
+	 *                  {@link ThreadFactory}.
+	 * @param executive {@link Executive}.
 	 * @return {@link ThreadFactory}.
 	 */
-	public ThreadFactory manufactureThreadFactory(String name) {
-		return new OfficeFloorThreadFactory(name);
+	public ThreadFactory manufactureThreadFactory(String name, Executive executive) {
+		return new OfficeFloorThreadFactory(name, executive);
 	}
 
 	/**
@@ -81,6 +83,11 @@ public class ThreadFactoryManufacturer {
 		private final String threadNamePrefix;
 
 		/**
+		 * {@link Executive}.
+		 */
+		private final Executive executive;
+
+		/**
 		 * Index of the next {@link Thread}.
 		 */
 		private final AtomicInteger nextThreadIndex = new AtomicInteger(1);
@@ -91,9 +98,10 @@ public class ThreadFactoryManufacturer {
 		 * @param name Name for the {@link Thread} instances created from the
 		 *             {@link ThreadFactory}.
 		 */
-		private OfficeFloorThreadFactory(String name) {
+		private OfficeFloorThreadFactory(String name, Executive executive) {
 			this.group = new ThreadGroup(name);
 			this.threadNamePrefix = name + "-";
+			this.executive = executive;
 		}
 
 		/*
@@ -105,11 +113,11 @@ public class ThreadFactoryManufacturer {
 
 			// Create the managed execution
 			ManagedExecution<RuntimeException> managedExecution = ThreadFactoryManufacturer.this.managedExecutionFactory
-					.createManagedExecution(() -> r.run());
+					.createManagedExecution(this.executive, () -> r.run());
 
 			// Create and configure the thread
 			String threadName = this.threadNamePrefix + this.nextThreadIndex.getAndIncrement();
-			Runnable runnable = () -> managedExecution.execute();
+			Runnable runnable = () -> managedExecution.managedExecute();
 			Thread thread = new Thread(this.group, runnable, threadName);
 			if (thread.isDaemon()) {
 				thread.setDaemon(false);

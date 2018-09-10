@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.managedobject.executive;
 
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
@@ -67,6 +68,7 @@ public class ExecutionStrategyForManagedObjectTest extends AbstractOfficeConstru
 		// Open the OfficeFloor (should load strategy)
 		MockExecutionSource.strategy = new ThreadFactory[] { this.createMock(ThreadFactory.class) };
 		MockExecutionSource.thread = null;
+		MockExecutionSource.executedThreads.set(0);
 		ExecutionStrategyManagedObjectSource.strategy = null;
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
@@ -77,6 +79,9 @@ public class ExecutionStrategyForManagedObjectTest extends AbstractOfficeConstru
 
 		// Ensure provided thread factory uses thread decoration
 		this.assertThreadUsed(MockExecutionSource.thread);
+
+		// Ensure both threads execute correctly
+		this.waitForTrue(() -> MockExecutionSource.executedThreads.get() == 2);
 	}
 
 	@TestSource
@@ -85,6 +90,8 @@ public class ExecutionStrategyForManagedObjectTest extends AbstractOfficeConstru
 		private static Thread thread;
 
 		private static ThreadFactory[] strategy;
+
+		private static AtomicInteger executedThreads = new AtomicInteger(0);
 
 		/*
 		 * =============== ExecutiveSource ==================
@@ -96,14 +103,17 @@ public class ExecutionStrategyForManagedObjectTest extends AbstractOfficeConstru
 
 		@Override
 		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
-			thread = context.createThreadFactory("TEST").newThread(() -> {
-			});
 
-			// Ensure correct thread name
+			// Ensure can run thread without executive
+			Thread noExecutiveThread = context.createThreadFactory("TEST", null)
+					.newThread(() -> executedThreads.incrementAndGet());
+			assertEquals("Incorrect no executive thread name", "TEST-1", noExecutiveThread.getName());
+			noExecutiveThread.start(); // run to allow tear down
+
+			// Ensure can create thread with executive
+			thread = context.createThreadFactory("TEST", this).newThread(() -> executedThreads.incrementAndGet());
 			assertEquals("Incorrect thread name", "TEST-1", thread.getName());
-
-			// Run thread (to allow tear down of used thread)
-			thread.start();
+			thread.start(); // run to allow tear down
 
 			// Provide executive
 			return this;

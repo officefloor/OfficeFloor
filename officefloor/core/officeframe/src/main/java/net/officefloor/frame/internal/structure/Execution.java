@@ -27,8 +27,7 @@ public interface Execution<E extends Throwable> {
 	/**
 	 * Undertakes the execution.
 	 * 
-	 * @throws E
-	 *             Possible {@link Throwable} from execution.
+	 * @throws E Possible {@link Throwable} from execution.
 	 */
 	void execute() throws E;
 

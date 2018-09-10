@@ -19,6 +19,7 @@ package net.officefloor.frame.api.executive;
 
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
+import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
@@ -35,6 +36,16 @@ public interface Executive {
 	 */
 	default Object createProcessIdentifier() {
 		return new Object();
+	}
+
+	/**
+	 * <p>
+	 * Manages the {@link Execution}.
+	 * <p>
+	 * The {@link Thread#currentThread()} will provide the inbound {@link Thread}.
+	 */
+	default <T extends Throwable> void manageExecution(Execution<T> execution) throws T {
+		execution.execute();
 	}
 
 	/**

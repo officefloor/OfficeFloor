@@ -20,7 +20,6 @@ package net.officefloor.frame.impl.construct.team;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.executive.Executive;
-import net.officefloor.frame.api.executive.ExecutiveContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.AbstractSourceError;
 import net.officefloor.frame.api.source.SourceContext;
@@ -85,6 +84,7 @@ public class RawTeamMetaDataFactory {
 	 * 
 	 * @param                 <TS> {@link TeamSource} type.
 	 * @param configuration   {@link TeamConfiguration}.
+	 * @param executive       {@link Executive}.
 	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 * @param issues          {@link OfficeFloorIssues}.
 	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to construct.
@@ -129,8 +129,8 @@ public class RawTeamMetaDataFactory {
 
 			// Create the executive context
 			SourceProperties properties = configuration.getProperties();
-			ExecutiveContext executiveContext = new ExecutiveContextImpl(false, teamName, teamSize, teamSource,
-					this.threadFactoryManufacturer, properties, this.sourceContext);
+			ExecutiveContextImpl executiveContext = new ExecutiveContextImpl(false, teamName, teamSize, teamSource,
+					this.executive, this.threadFactoryManufacturer, properties, this.sourceContext);
 
 			// Create the team
 			team = this.executive.createTeam(executiveContext);

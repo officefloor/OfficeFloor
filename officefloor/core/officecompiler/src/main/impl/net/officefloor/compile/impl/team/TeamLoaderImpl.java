@@ -28,6 +28,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.team.TeamType;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.AbstractSourceError;
 import net.officefloor.frame.api.source.IssueTarget;
@@ -38,6 +39,7 @@ import net.officefloor.frame.api.team.source.TeamSourceSpecification;
 import net.officefloor.frame.impl.construct.team.ExecutiveContextImpl;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
 import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 
 /**
  * {@link TeamLoader} implementation.
@@ -187,13 +189,17 @@ public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 	public TeamType loadTeamType(String teamName, TeamSource teamSource, PropertyList propertyList) {
 
 		// Create thread factory manufacturer
-		ThreadFactoryManufacturer threadFactoryManufactuer = new ThreadFactoryManufacturer(
+		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(
 				new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]), null);
+
+		// Create the executive
+		Executive executive = new DefaultExecutive(threadFactoryManufacturer);
 
 		// Attempt to create the team
 		try {
-			teamSource.createTeam(new ExecutiveContextImpl(true, teamName, 10, null, threadFactoryManufactuer,
-					new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext()));
+			teamSource
+					.createTeam(new ExecutiveContextImpl(true, teamName, 10, null, executive, threadFactoryManufacturer,
+							new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext()));
 
 		} catch (AbstractSourceError ex) {
 			ex.addIssue(this);

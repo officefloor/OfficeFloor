@@ -53,7 +53,7 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 	 */
 	public DefaultExecutive(ThreadFactoryManufacturer threadFactoryManufacturer) {
 		this.threadFactories = new ThreadFactory[] {
-				threadFactoryManufacturer.manufactureThreadFactory(this.getExecutionStrategyName()) };
+				threadFactoryManufacturer.manufactureThreadFactory(this.getExecutionStrategyName(), this) };
 	}
 
 	/**
@@ -77,7 +77,8 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 
 	@Override
 	public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
-		this.threadFactories = new ThreadFactory[] { context.createThreadFactory(this.getExecutionStrategyName()) };
+		this.threadFactories = new ThreadFactory[] {
+				context.createThreadFactory(this.getExecutionStrategyName(), this) };
 		return this;
 	}
 

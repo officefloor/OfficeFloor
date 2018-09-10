@@ -1678,7 +1678,7 @@ public class MockConstruct {
 				// Load the convenience functions
 				ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
 						functions.toArray(new ManagedFunctionMetaData[functions.size()]));
-				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null,
+				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null, null,
 						functionLocator, this.processMetaData.build(), null, null);
 
 				// Load the office meta-data to functions

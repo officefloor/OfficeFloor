@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -32,6 +33,7 @@ import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.construct.team.ExecutiveContextImpl;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
 import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 
 /**
@@ -161,7 +163,8 @@ public class TeamSourceStandAlone {
 				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));
 		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,
 				this.threadDecorator);
-		TeamSourceContext context = new ExecutiveContextImpl(false, teamName, this.teamSize, teamSource,
+		Executive executive = new DefaultExecutive(threadFactoryManufacturer);
+		TeamSourceContext context = new ExecutiveContextImpl(false, teamName, this.teamSize, teamSource, executive,
 				threadFactoryManufacturer, this.properties, sourceContext);
 
 		// Return the created team

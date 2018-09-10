@@ -482,7 +482,7 @@ public class RawOfficeMetaDataFactory {
 
 		// Load the office meta-data
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,
-				functionLoop, threadLocalAwareExecutor, managedExecutionFactory,
+				functionLoop, threadLocalAwareExecutor, executive, managedExecutionFactory,
 				functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), functionLocator, processMetaData,
 				startupFunctions, profiler);
 

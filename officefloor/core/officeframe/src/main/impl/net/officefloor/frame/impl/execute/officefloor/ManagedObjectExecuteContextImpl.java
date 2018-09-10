@@ -120,7 +120,8 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 				throw new IllegalArgumentException(ex);
 			}
 		};
-		this.officeMetaData.getManagedExecutionFactory().createManagedExecution(execution).execute();
+		this.officeMetaData.getManagedExecutionFactory()
+				.createManagedExecution(this.officeMetaData.getExecutive(), execution).managedExecute();
 	}
 
 	@Override

@@ -28,10 +28,14 @@ import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
 import net.officefloor.frame.internal.configuration.ExecutiveConfiguration;
+import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -517,7 +521,11 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 	private RawExecutiveMetaData constructRawExecutiveMetaData(boolean isExpectConstruction) {
 
 		// Attempt to construct
-		RawExecutiveMetaData metaData = new RawExecutiveMetaDataFactory(this.sourceContext, null)
+		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
+				new ThreadCompletionListener[0]);
+		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,
+				null);
+		RawExecutiveMetaData metaData = new RawExecutiveMetaDataFactory(this.sourceContext, threadFactoryManufacturer)
 				.constructRawExecutiveMetaData(this.configuration, OFFICE_FLOOR_NAME, this.issues);
 
 		// Provide assertion on whether should be constructed

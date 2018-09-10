@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.construct.team;
 
 import java.util.concurrent.ThreadFactory;
 
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -55,6 +56,11 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 	private final ThreadFactoryManufacturer threadFactoryManufacturer;
 
 	/**
+	 * {@link Executive}.
+	 */
+	private Executive executive;
+
+	/**
 	 * {@link ThreadFactory}.
 	 */
 	private ThreadFactory threadFactory = null;
@@ -67,19 +73,30 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 	 *                                  the {@link TeamSource}.
 	 * @param teamSize                  {@link Team} size.
 	 * @param teamSource                {@link TeamSource}.
+	 * @param executive                 {@link Executive}.
 	 * @param threadFactoryManufacturer {@link ThreadFactoryManufacturer}.
 	 * @param properties                {@link SourceProperties} to initialise the
 	 *                                  {@link TeamSource}.
 	 * @param sourceContext             {@link SourceContext}.
 	 */
 	public ExecutiveContextImpl(boolean isLoadingType, String teamName, int teamSize, TeamSource teamSource,
-			ThreadFactoryManufacturer threadFactoryManufacturer, SourceProperties properties,
+			Executive executive, ThreadFactoryManufacturer threadFactoryManufacturer, SourceProperties properties,
 			SourceContext sourceContext) {
 		super(isLoadingType, sourceContext, properties);
 		this.teamName = teamName;
 		this.teamSize = teamSize;
 		this.teamSource = teamSource;
+		this.executive = executive;
 		this.threadFactoryManufacturer = threadFactoryManufacturer;
+	}
+
+	/**
+	 * Specifies the {@link Executive}.
+	 * 
+	 * @param executive {@link Executive}.
+	 */
+	public void setExecutive(Executive executive) {
+		this.executive = executive;
 	}
 
 	/*
@@ -99,7 +116,7 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 	@Override
 	public ThreadFactory getThreadFactory() {
 		if (this.threadFactory == null) {
-			this.threadFactory = this.threadFactoryManufacturer.manufactureThreadFactory(this.teamName);
+			this.threadFactory = this.threadFactoryManufacturer.manufactureThreadFactory(this.teamName, this.executive);
 		}
 		return this.threadFactory;
 	}
@@ -111,7 +128,7 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 
 	@Override
 	public ThreadFactory createThreadFactory(String teamName) {
-		return this.threadFactoryManufacturer.manufactureThreadFactory(teamName);
+		return this.threadFactoryManufacturer.manufactureThreadFactory(teamName, this.executive);
 	}
 
 }
