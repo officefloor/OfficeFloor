@@ -76,6 +76,10 @@ import net.officefloor.extension.ExtendOfficeFloor;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.source.ExecutiveSource;
+import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
+import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
@@ -92,6 +96,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -492,6 +497,57 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can register {@link ExecutiveSource} as MBean.
+	 */
+	public void testRegisterExecutiveSource() throws Exception {
+		TestExecutiveSource executiveSource = new TestExecutiveSource();
+		this.doTestInOfficeFloor(ExecutiveSource.class, "EXECUTIVE", (deployer, context) -> {
+			deployer.setExecutive(executiveSource);
+		}, (objectName) -> {
+
+			// Ensure able to obtain ExecutiveSource MBean
+			TestExecutiveSourceMBean mbean = getMBean(objectName, TestExecutiveSourceMBean.class);
+			assertEquals("Incorrect Mbean value", "Team Executive", mbean.getExecutiveValue());
+
+			// Change value to ensure correct instance
+			executiveSource.mbeanValue = "Executive changed";
+			assertEquals("Incorrect changed MBean value", "Executive changed", mbean.getExecutiveValue());
+		});
+	}
+
+	public static interface TestExecutiveSourceMBean {
+		String getExecutiveValue();
+	}
+
+	@TestSource
+	public static class TestExecutiveSource extends AbstractExecutiveSource implements TestExecutiveSourceMBean {
+
+		private String mbeanValue = "Team Executive";
+
+		/*
+		 * ================ TestExecutiveSourceMBean =====================
+		 */
+
+		@Override
+		public String getExecutiveValue() {
+			return this.mbeanValue;
+		}
+
+		/*
+		 * ================ ExecutiveSource ==============================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
+			return new DefaultExecutive();
+		}
+	}
+
+	/**
 	 * Ensure can register {@link AdministrationSource} as MBean.
 	 */
 	public void testRegisterAdministrationSource() throws Exception {
@@ -755,14 +811,10 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the test.
 	 * 
-	 * @param type
-	 *            Type of MBean.
-	 * @param name
-	 *            Name of MBean.
-	 * @param extendOfficeFloor
-	 *            {@link OfficeFloorExtensionService}.
-	 * @param testLogic
-	 *            {@link TestLogic}.
+	 * @param type              Type of MBean.
+	 * @param name              Name of MBean.
+	 * @param extendOfficeFloor {@link OfficeFloorExtensionService}.
+	 * @param testLogic         {@link TestLogic}.
 	 */
 	private void doTestInOfficeFloor(Class<?> type, String name, OfficeFloorExtensionService extendOfficeFloor,
 			TestLogic testLogic) throws Exception {
@@ -791,14 +843,10 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the test.
 	 * 
-	 * @param type
-	 *            Type of MBean.
-	 * @param name
-	 *            Name of MBean.
-	 * @param extendOffice
-	 *            {@link OfficeExtensionService}.
-	 * @param testLogic
-	 *            {@link TestLogic}.
+	 * @param type         Type of MBean.
+	 * @param name         Name of MBean.
+	 * @param extendOffice {@link OfficeExtensionService}.
+	 * @param testLogic    {@link TestLogic}.
 	 */
 	private void doTestInOffice(Class<?> type, String name, OfficeExtensionService extendOffice, TestLogic testLogic)
 			throws Exception {
@@ -830,13 +878,10 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 	/**
 	 * Obtains the MBean.
 	 * 
-	 * @param objectName
-	 *            MBean {@link ObjectName}.
-	 * @param proxyType
-	 *            Proxy type for MBean.
+	 * @param objectName MBean {@link ObjectName}.
+	 * @param proxyType  Proxy type for MBean.
 	 * @return MBean.
-	 * @throws Exception
-	 *             If fails to obtain the MBean.
+	 * @throws Exception If fails to obtain the MBean.
 	 */
 	private static <B> B getMBean(ObjectName objectName, Class<B> proxyType) throws Exception {
 		MBeanServerConnection connection = ManagementFactory.getPlatformMBeanServer();
@@ -846,10 +891,8 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures the MBean has been unregistered.
 	 * 
-	 * @param objectName
-	 *            MBean {@link ObjectName}.
-	 * @throws Exception
-	 *             If fails to check MBean.
+	 * @param objectName MBean {@link ObjectName}.
+	 * @throws Exception If fails to check MBean.
 	 */
 	private static void assertMBeanUnregistered(ObjectName objectName) throws Exception {
 		MBeanServerConnection connection = ManagementFactory.getPlatformMBeanServer();
@@ -859,13 +902,10 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 	/**
 	 * Obtains the {@link ObjectName}.
 	 * 
-	 * @param type
-	 *            Type of MBean.
-	 * @param name
-	 *            Name of MBean.
+	 * @param type Type of MBean.
+	 * @param name Name of MBean.
 	 * @return {@link ObjectName}.
-	 * @throws Exception
-	 *             If fails to create {@link ObjectName}.
+	 * @throws Exception If fails to create {@link ObjectName}.
 	 */
 	private static ObjectName getObjectName(Class<?> type, String name) throws Exception {
 		return new ObjectName("net.officefloor:type=" + type.getName() + ",name=" + name);

@@ -64,6 +64,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyObjectNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyRequireNode;
+import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorFlowSinkNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorFlowSourceNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
@@ -80,6 +81,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
@@ -152,8 +154,8 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	private final Map<String, InputManagedObjectNode> inputManagedObjects = new HashMap<String, InputManagedObjectNode>();
 
 	/**
-	 * {@link ManagedObjectNode} instances by their
-	 * {@link OfficeFloorManagedObject} name.
+	 * {@link ManagedObjectNode} instances by their {@link OfficeFloorManagedObject}
+	 * name.
 	 */
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
 
@@ -196,17 +198,14 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeFloorSourceClassName
-	 *            {@link OfficeFloorSource} class name.
-	 * @param officeFloorSource
-	 *            Optional instantiated {@link OfficeFloorSource}. May be
-	 *            <code>null</code>.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 * @param profilers
-	 *            Mapping of {@link Profiler} by their {@link Office} name.
+	 * @param officeFloorSourceClassName {@link OfficeFloorSource} class name.
+	 * @param officeFloorSource          Optional instantiated
+	 *                                   {@link OfficeFloorSource}. May be
+	 *                                   <code>null</code>.
+	 * @param officeFloorLocation        Location of the {@link OfficeFloor}.
+	 * @param context                    {@link NodeContext}.
+	 * @param profilers                  Mapping of {@link Profiler} by their
+	 *                                   {@link Office} name.
 	 */
 	public OfficeFloorNodeImpl(String officeFloorSourceClassName, OfficeFloorSource officeFloorSource,
 			String officeFloorLocation, NodeContext context, Map<String, Profiler> profilers) {
@@ -364,6 +363,18 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		return NodeUtil.getInitialisedNode(teamName, this.teams, this.context,
 				() -> this.context.createTeamNode(teamName, this),
 				(team) -> team.initialise(teamSource.getClass().getName(), teamSource));
+	}
+
+	@Override
+	public OfficeFloorExecutive setExecutive(String executiveSourceClassName) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement setExecutive");
+	}
+
+	@Override
+	public OfficeFloorExecutive setExecutive(ExecutiveSource executiveSource) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement setExecutive");
 	}
 
 	@Override

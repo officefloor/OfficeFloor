@@ -20,7 +20,6 @@ package net.officefloor.compile.impl;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.channels.UnsupportedAddressTypeException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
