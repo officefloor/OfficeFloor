@@ -114,14 +114,21 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can load the {@link TeamType}.
+	 */
+	public void testLoadTeamType() {
+		TeamType type = this.loadTeamType(true, (context) -> {
+		});
+		assertNotNull("Should load the team type", type);
+	}
+
+	/**
 	 * Loads the {@link TeamType} within the input {@link Loader}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the {@link TeamType}.
-	 * @param loader
-	 *            {@link Loader}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link TeamType}.
+	 * @param loader                 {@link Loader}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link TeamType}.
 	 */
 	private TeamType loadTeamType(boolean isExpectedToLoad, Loader loader, String... propertyNameValuePairs) {
@@ -166,10 +173,8 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Implemented to load the {@link TeamType}.
 		 * 
-		 * @param context
-		 *            {@link TeamSourceContext}.
-		 * @throws Exception
-		 *             If fails to source {@link TeamType}.
+		 * @param context {@link TeamSourceContext}.
+		 * @throws Exception If fails to source {@link TeamType}.
 		 */
 		void sourceTeam(TeamSourceContext context) throws Exception;
 	}

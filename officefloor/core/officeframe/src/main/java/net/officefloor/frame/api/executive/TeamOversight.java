@@ -19,41 +19,20 @@ package net.officefloor.frame.api.executive;
 
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
-import net.officefloor.frame.internal.structure.Execution;
-import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
- * Executive.
+ * Oversight for a {@link Team}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Executive {
+public interface TeamOversight {
 
 	/**
-	 * Creates a new {@link ProcessState} identifier.
+	 * Obtains the name of the {@link TeamOversight}.
 	 * 
-	 * @return New {@link ProcessState} identifier.
+	 * @return Name of the {@link TeamOversight}.
 	 */
-	default Object createProcessIdentifier() {
-		return new Object();
-	}
-
-	/**
-	 * <p>
-	 * Manages the {@link Execution}.
-	 * <p>
-	 * The {@link Thread#currentThread()} will provide the inbound {@link Thread}.
-	 */
-	default <T extends Throwable> void manageExecution(Execution<T> execution) throws T {
-		execution.execute();
-	}
-
-	/**
-	 * Obtains the {@link ExecutionStrategy} strategies.
-	 * 
-	 * @return {@link ExecutionStrategy} instances.
-	 */
-	ExecutionStrategy[] getExcutionStrategies();
+	String getTeamOversightName();
 
 	/**
 	 * <p>
@@ -70,18 +49,8 @@ public interface Executive {
 	 * @return {@link Team}.
 	 * @throws Exception If fails to configure the {@link TeamSource}.
 	 */
-	@Deprecated // getTeamOversights() to allow wiring oversights to teams
 	default Team createTeam(ExecutiveContext context) throws Exception {
 		return context.getTeamSource().createTeam(context);
-	}
-
-	/**
-	 * Obtains the {@link TeamOversight} instances.
-	 * 
-	 * @return {@link TeamOversight} instances.
-	 */
-	default TeamOversight[] getTeamOversights() {
-		return new TeamOversight[0]; // no oversight by default
 	}
 
 }

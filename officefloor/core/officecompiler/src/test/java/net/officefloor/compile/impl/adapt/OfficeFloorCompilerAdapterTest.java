@@ -26,6 +26,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administration.AdministrationLoader;
+import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompileError;
@@ -57,6 +58,7 @@ import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
@@ -66,6 +68,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.spi.team.PassiveTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -147,8 +150,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Mock {@link OfficeFloorCompilerRunnable} result to ensure can adapt
-	 * result.
+	 * Mock {@link OfficeFloorCompilerRunnable} result to ensure can adapt result.
 	 */
 	public static interface MockRunnableResult {
 
@@ -249,12 +251,10 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		/**
 		 * {@link ManagedFunction}.
 		 * 
-		 * @param fileLocation
-		 *            Location of the {@link File} to notify run. Necessary as
-		 *            running in separate {@link ClassLoader} instances so can
-		 *            not use static check.
-		 * @throws IOException
-		 *             If fails to write task invoked to file.
+		 * @param fileLocation Location of the {@link File} to notify run. Necessary as
+		 *                     running in separate {@link ClassLoader} instances so can
+		 *                     not use static check.
+		 * @throws IOException If fails to write task invoked to file.
 		 */
 		public void task(@Parameter String fileLocation) throws IOException {
 			// Write invoked task to file
@@ -383,10 +383,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		/**
 		 * {@link ManagedFunction}.
 		 * 
-		 * @param mo
-		 *            {@link AdaptManagedObject}.
-		 * @param fileLocation
-		 *            Location of the file.
+		 * @param mo           {@link AdaptManagedObject}.
+		 * @param fileLocation Location of the file.
 		 */
 		public void task(AdaptManagedObject mo, @Parameter String fileLocation) throws IOException {
 			mo.useManagedObject(fileLocation);
@@ -401,12 +399,10 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		/**
 		 * Invoked to use the {@link ManagedObject}.
 		 * 
-		 * @param fileLocation
-		 *            Location of the {@link File} to notify run. Necessary as
-		 *            running in separate {@link ClassLoader} instances so can
-		 *            not use static check.
-		 * @throws IOException
-		 *             If fails to write {@link ManagedObject} invoked to file.
+		 * @param fileLocation Location of the {@link File} to notify run. Necessary as
+		 *                     running in separate {@link ClassLoader} instances so can
+		 *                     not use static check.
+		 * @throws IOException If fails to write {@link ManagedObject} invoked to file.
 		 */
 		void useManagedObject(String fileLocation) throws IOException;
 	}
@@ -561,16 +557,25 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to be provided details of the cause of the
-	 * {@link CompilerIssues} issue maintaining type.
+	 * Tests the {@link Executive}.
+	 */
+	public void testExecutiveLoader() {
+		ExecutiveLoader loader = this.compiler.getExecutiveLoader();
+		PropertyList specification = loader.loadSpecification(DefaultExecutive.class);
+		assertEquals("Should be no properties", 0, specification.getPropertyNames().length);
+	}
+
+	/**
+	 * Ensure able to be provided details of the cause of the {@link CompilerIssues}
+	 * issue maintaining type.
 	 */
 	public void testCompilerIssueSameTypeCause() {
 		this.doCompilerIssueCauseTest(new NullPointerException("TEST"), NullPointerException.class);
 	}
 
 	/**
-	 * Ensure able to be provided details of the cause of the
-	 * {@link CompilerIssues} issue, with need to adapt the cause.
+	 * Ensure able to be provided details of the cause of the {@link CompilerIssues}
+	 * issue, with need to adapt the cause.
 	 */
 	public void testCompilerIssueAdaptCause() {
 		this.doCompilerIssueCauseTest(new NonAdaptableException("TEST", null), AdaptedException.class);
@@ -626,10 +631,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		/**
 		 * Initiate.
 		 * 
-		 * @param message
-		 *            Message.
-		 * @param nonAdaptSignature
-		 *            Constructor is non-adaptable.
+		 * @param message           Message.
+		 * @param nonAdaptSignature Constructor is non-adaptable.
 		 */
 		public NonAdaptableException(String message, Object nonAdaptSignature) {
 			super(message);
@@ -650,8 +653,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		/**
 		 * Initiate.
 		 * 
-		 * @param failure
-		 *            Failure.
+		 * @param failure Failure.
 		 */
 		public MockFailManagedObjectSource(Exception failure) {
 			this.failure = failure;
@@ -686,8 +688,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public static class OfficeLoaderOfficeFloorSource extends AbstractOfficeFloorSource {
 
 		/**
-		 * Name of {@link Property} to obtain the {@link OfficeSource} class
-		 * name.
+		 * Name of {@link Property} to obtain the {@link OfficeSource} class name.
 		 */
 		public static final String PROPERTY_OFFICE_CLASS_NAME = "office.class.name";
 

@@ -17,10 +17,7 @@
  */
 package net.officefloor.web.executive;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.openhft.affinity.Affinity;
@@ -49,23 +46,22 @@ public class ThreadAffinityTest extends OfficeFrameTestCase {
 		assertEquals("Affinity information does not match Java runtime", Runtime.getRuntime().availableProcessors(),
 				layout.sockets() * layout.coresPerSocket() * layout.threadsPerCore());
 
-		// Indicate logical CPUs on same core
-		Map<Integer, List<String>> allocation = new HashMap<>();
-		for (int cpu = 0; cpu < Runtime.getRuntime().availableProcessors(); cpu++) {
-			int core = layout.coreId(cpu);
-			List<String> coreCpus = allocation.get(core);
-			if (coreCpus == null) {
-				coreCpus = new ArrayList<>();
-				allocation.put(core, coreCpus);
-			}
-			coreCpus.add(String.valueOf(cpu));
-		}
+		// Provide details on the cores
+		CpuCore[] cores = CpuCore.getCores();
+		assertEquals("Incorrect number of cores", layout.sockets() * layout.coresPerSocket(), cores.length);
 		System.out.println("Core layout:");
-		for (int core = 0; core < (layout.sockets() * layout.coresPerSocket()); core++) {
-			System.out.println("\t" + core + ": " + String.join(",", allocation.get(core)));
-			allocation.remove(core);
+		int totalCpus = 0;
+		for (int coreId = 0; coreId < cores.length; coreId++) {
+			CpuCore core = cores[coreId];
+			assertEquals("Incorrect core identifier", coreId, core.getCoreId());
+			String[] values = Arrays.asList(core.getCpus()).stream()
+					.map((cpu) -> String.valueOf(cpu.getCpuId() + " [" + cpu.getCpuAffinity() + "]"))
+					.toArray(String[]::new);
+			System.out.println(
+					"\t" + core.getCoreId() + " [" + core.getCoreAffinity() + "]: " + String.join(", ", values));
+			totalCpus += core.getCpus().length;
 		}
-		assertEquals("Affinity information does not line up cores to cpus", 0, allocation.size());
+		assertEquals("Incorrect number of CPUs", Runtime.getRuntime().availableProcessors(), totalCpus);
 
 		// Determine if hyper threading on CPU
 		boolean isHyperThreading = (layout.threadsPerCore() >= 2);

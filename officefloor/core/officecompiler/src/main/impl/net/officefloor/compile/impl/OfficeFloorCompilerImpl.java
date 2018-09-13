@@ -20,6 +20,7 @@ package net.officefloor.compile.impl;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.channels.UnsupportedAddressTypeException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -33,6 +34,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administration.AdministrationLoader;
+import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.administrator.AdministrationLoaderImpl;
 import net.officefloor.compile.impl.governance.GovernanceLoaderImpl;
@@ -1111,6 +1113,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public TeamNode createTeamNode(String teamName, OfficeFloorNode officeFloor) {
 		return new TeamNodeImpl(teamName, officeFloor, this);
+	}
+
+	@Override
+	public ExecutiveLoader getExecutiveLoader() {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement getExecutiveLoader");
 	}
 
 	@Override
