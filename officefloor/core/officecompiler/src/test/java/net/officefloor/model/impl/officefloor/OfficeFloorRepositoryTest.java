@@ -31,6 +31,8 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputM
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorExecutionStrategyModel;
+import net.officefloor.model.officefloor.OfficeFloorExecutiveModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
@@ -38,6 +40,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOff
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectPoolModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
@@ -54,6 +58,8 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
 import net.officefloor.model.repository.ModelRepository;
 
 /**
@@ -101,6 +107,14 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectPoolModel officeFloorManagedObjectPool = new OfficeFloorManagedObjectPoolModel("POOL",
 				"net.example.ExampleManagedObjectPoolSource");
 		officeFloor.addOfficeFloorManagedObjectPool(officeFloorManagedObjectPool);
+		OfficeFloorExecutiveModel officeFloorExecutive = new OfficeFloorExecutiveModel("OFFICE_FLOOR_EXECUTIVE");
+		officeFloor.setOfficeFloorExecutive(officeFloorExecutive);
+		OfficeFloorExecutionStrategyModel officeFloorExecutionStrategy = new OfficeFloorExecutionStrategyModel(
+				"OFFICE_FLOOR_EXECUTION_STRATEGY");
+		officeFloorExecutive.addExecutionStrategy(officeFloorExecutionStrategy);
+		OfficeFloorTeamOversightModel officeFloorTeamOversight = new OfficeFloorTeamOversightModel(
+				"OFFICE_FLOOR_TEAM_OVERSIGHT");
+		officeFloorExecutive.addTeamOversight(officeFloorTeamOversight);
 		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel("OFFICE_FLOOR_TEAM",
 				"net.example.ExampleTeamSource");
 		officeFloor.addOfficeFloorTeam(officeFloorTeam);
@@ -192,6 +206,14 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"OFFICE_FLOOR_TEAM");
 		mosTeam.setOfficeFloorTeam(mosTeamToTeam);
 
+		// OfficeFloor mos execution strategy -> OfficeFloor execution strategy
+		OfficeFloorManagedObjectSourceExecutionStrategyModel mosExecutionStrategy = new OfficeFloorManagedObjectSourceExecutionStrategyModel(
+				"MO_EXECUTION_STRATEGY");
+		officeFloorManagedObjectSource.addOfficeFloorManagedObjectSourceExecutionStrategy(mosExecutionStrategy);
+		OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel mosExecutionStrategyToExecutionStrategy = new OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel(
+				"EXECUTION_STRATEGY");
+		mosExecutionStrategy.setOfficeFloorExecutionStrategy(mosExecutionStrategyToExecutionStrategy);
+
 		// office object -> OfficeFloor managed object
 		DeployedOfficeObjectToOfficeFloorManagedObjectModel officeObjectToManagedObject = new DeployedOfficeObjectToOfficeFloorManagedObjectModel(
 				"MANAGED_OBJECT");
@@ -206,6 +228,11 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		DeployedOfficeTeamToOfficeFloorTeamModel officeTeamToFloorTeam = new DeployedOfficeTeamToOfficeFloorTeamModel(
 				"OFFICE_FLOOR_TEAM");
 		officeTeam.setOfficeFloorTeam(officeTeamToFloorTeam);
+
+		// OfficeFloor team -> OfficeFloor team oversight
+		OfficeFloorTeamToOfficeFloorTeamOversightModel officeFloorTeamToTeamOversight = new OfficeFloorTeamToOfficeFloorTeamOversightModel(
+				"TEAM_OVERSIGHT");
+		officeFloorTeam.setOfficeFloorTeamOversight(officeFloorTeamToTeamOversight);
 
 		// Record retrieving the office
 		this.modelRepository.retrieve(null, this.configurationItem);
@@ -225,84 +252,98 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure OfficeFloor managed object source connected to its supplier
-		assertEquals("OfficeFloor managed object source <- OfficeFloor supplier", officeFloorManagedObjectSource,
+		assertSame("OfficeFloor managed object source <- OfficeFloor supplier", officeFloorManagedObjectSource,
 				mosToSupplier.getOfficeFloorManagedObjectSource());
-		assertEquals("OfficeFloor managed object source -> OfficeFloor supplier", officeFloorSupplier,
+		assertSame("OfficeFloor managed object source -> OfficeFloor supplier", officeFloorSupplier,
 				mosToSupplier.getOfficeFloorSupplier());
 
 		// Ensure OfficeFloor managed object connected to its source
-		assertEquals("OfficeFloor managed object <- OfficeFloor managed object source", officeFloorManagedObject,
+		assertSame("OfficeFloor managed object <- OfficeFloor managed object source", officeFloorManagedObject,
 				moToSource.getOfficeFloorManagedObject());
-		assertEquals("OfficeFloor managed object -> OfficeFloor managed object source", officeFloorManagedObjectSource,
+		assertSame("OfficeFloor managed object -> OfficeFloor managed object source", officeFloorManagedObjectSource,
 				moToSource.getOfficeFloorManagedObjectSource());
 
 		// Ensure OfficeFloor managed object source connected to its pool
-		assertEquals("OfficeFloor managed object source <- OfficeFloor managed object pool",
+		assertSame("OfficeFloor managed object source <- OfficeFloor managed object pool",
 				officeFloorManagedObjectSource, mosToPool.getOfficeFloorManagedObjectSource());
-		assertEquals("OfficeFloor managed object source -> OfficeFloor managed object pool",
-				officeFloorManagedObjectPool, mosToPool.getOfficeFloorManagedObjectPool());
+		assertSame("OfficeFloor managed object source -> OfficeFloor managed object pool", officeFloorManagedObjectPool,
+				mosToPool.getOfficeFloorManagedObjectPool());
 
 		// Ensure input managed object connected to its bound source
-		assertEquals("input managed object <- bound managed object source", officeFloorInputManagedObject,
+		assertSame("input managed object <- bound managed object source", officeFloorInputManagedObject,
 				inputMoToBoundSource.getBoundOfficeFloorInputManagedObject());
-		assertEquals("input managed object -> bound managed object source", officeFloorManagedObjectSource,
+		assertSame("input managed object -> bound managed object source", officeFloorManagedObjectSource,
 				inputMoToBoundSource.getBoundOfficeFloorManagedObjectSource());
 
 		// Ensure managed object dependency to managed object
-		assertEquals("dependency <- managed object", dependencyOne,
+		assertSame("dependency <- managed object", dependencyOne,
 				dependencyToMo.getOfficeFloorManagedObjectDependency());
-		assertEquals("dependency -> managed object", mo_dependency, dependencyToMo.getOfficeFloorManagedObject());
+		assertSame("dependency -> managed object", mo_dependency, dependencyToMo.getOfficeFloorManagedObject());
 
 		// Ensure managed object dependency to input managed object
-		assertEquals("dependency <- input managed object", dependencyTwo,
+		assertSame("dependency <- input managed object", dependencyTwo,
 				dependencyToInput.getOfficeFloorManagedObjectDependency());
-		assertEquals("dependency -> input managed object", mo_input_dependency,
+		assertSame("dependency -> input managed object", mo_input_dependency,
 				dependencyToInput.getOfficeFloorInputManagedObject());
 
 		// Ensure managed object source connected to managing office
-		assertEquals("OfficeFloor managed object source <- office", officeFloorManagedObjectSource,
+		assertSame("OfficeFloor managed object source <- office", officeFloorManagedObjectSource,
 				moSourceToOffice.getOfficeFloorManagedObjectSource());
-		assertEquals("OfficeFloor managed object source -> office", office, moSourceToOffice.getManagingOffice());
+		assertSame("OfficeFloor managed object source -> office", office, moSourceToOffice.getManagingOffice());
 
 		// Ensure managed object source connected to input managed object
-		assertEquals("OfficeFloor managed object source <- input managed object", officeFloorManagedObjectSource,
+		assertSame("OfficeFloor managed object source <- input managed object", officeFloorManagedObjectSource,
 				moSourceToInputMo.getOfficeFloorManagedObjectSource());
-		assertEquals("OfficeFloor managed object source -> input managed object", officeFloorInputManagedObject,
+		assertSame("OfficeFloor managed object source -> input managed object", officeFloorInputManagedObject,
 				moSourceToInputMo.getOfficeFloorInputManagedObject());
 
 		// Ensure input dependency connected to managed object
-		assertEquals("input dependency <- managed object", inputDependency,
+		assertSame("input dependency <- managed object", inputDependency,
 				inputDependencyToMo.getOfficeFloorManagedObjectDependency());
-		assertEquals("input dependency -> managed object", input_dependency,
+		assertSame("input dependency -> managed object", input_dependency,
 				inputDependencyToMo.getOfficeFloorManagedObject());
 
 		// Ensure managed object source flow connected to office input
-		assertEquals("OfficeFloor managed object source flow <- office input", flow,
+		assertSame("OfficeFloor managed object source flow <- office input", flow,
 				flowToInput.getOfficeFloorManagedObjectSoruceFlow());
-		assertEquals("OfficeFloor managed object source flow -> office input", officeInput,
+		assertSame("OfficeFloor managed object source flow -> office input", officeInput,
 				flowToInput.getDeployedOfficeInput());
 
 		// Ensure managed object source team connected to OfficeFloor team
-		assertEquals("OfficeFloor managed object source team <- OfficeFloor team", mosTeam,
+		assertSame("OfficeFloor managed object source team <- OfficeFloor team", mosTeam,
 				mosTeamToTeam.getOfficeFloorManagedObjectSourceTeam());
-		assertEquals("OfficeFloor managed object source team -> OfficeFloor team", officeFloorTeam,
+		assertSame("OfficeFloor managed object source team -> OfficeFloor team", officeFloorTeam,
 				mosTeamToTeam.getOfficeFloorTeam());
 
+		// Ensure mos execution strategy connected to OfficeFloor execution strategy
+		assertSame("OfficeFloor managed object source execution strategy <- OfficeFloor execution strategy",
+				mosExecutionStrategy,
+				mosExecutionStrategyToExecutionStrategy.getOfficeFloorManagedObjectSoruceExecutionStrategy());
+		assertSame("OfficeFloor managed object source execution strategy -> OfficeFloor execution strategy",
+				officeFloorExecutionStrategy,
+				mosExecutionStrategyToExecutionStrategy.getOfficeFloorExecutionStrategy());
+
 		// Ensure office object connected to OfficeFloor managed object
-		assertEquals("office object <- OfficeFloor managed object", officeObject,
+		assertSame("office object <- OfficeFloor managed object", officeObject,
 				officeObjectToManagedObject.getDeployedOfficeObject());
-		assertEquals("office object -> OfficeFloor managed object", officeFloorManagedObject,
+		assertSame("office object -> OfficeFloor managed object", officeFloorManagedObject,
 				officeObjectToManagedObject.getOfficeFloorManagedObject());
 
 		// Ensure office object connected to OfficeFloor input managed object
-		assertEquals("office object <- OfficeFloor input managed object", officeObject,
+		assertSame("office object <- OfficeFloor input managed object", officeObject,
 				officeObjectToInputMo.getDeployedOfficeObject());
-		assertEquals("office object -> OfficeFloor input managed object", officeFloorInputManagedObject,
+		assertSame("office object -> OfficeFloor input managed object", officeFloorInputManagedObject,
 				officeObjectToInputMo.getOfficeFloorInputManagedObject());
 
 		// Ensure office team connected to OfficeFloor team
-		assertEquals("office team <- OfficeFloor team", officeTeam, officeTeamToFloorTeam.getDeployedOfficeTeam());
-		assertEquals("office team -> OfficeFloor team", officeFloorTeam, officeTeamToFloorTeam.getOfficeFloorTeam());
+		assertSame("office team <- OfficeFloor team", officeTeam, officeTeamToFloorTeam.getDeployedOfficeTeam());
+		assertSame("office team -> OfficeFloor team", officeFloorTeam, officeTeamToFloorTeam.getOfficeFloorTeam());
+
+		// Ensure OfficeFloor team to OfficeFloor team oversight
+		assertSame("OfficeFloor team <- OfficeFloor team oversight", officeFloorTeam,
+				officeFloorTeamToTeamOversight.getOfficeFloorTeam());
+		assertSame("OfficeFloor team -> OfficeFloor team oversight", officeFloorTeamOversight,
+				officeFloorTeamToTeamOversight.getOfficeFloorTeamOversight());
 	}
 
 	/**
@@ -328,6 +369,14 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorManagedObjectPoolModel officeFloorManagedObjectPool = new OfficeFloorManagedObjectPoolModel("POOL",
 				"net.example.ExampleManagedObjectPoolSource");
 		officeFloor.addOfficeFloorManagedObjectPool(officeFloorManagedObjectPool);
+		OfficeFloorExecutiveModel officeFloorExecutive = new OfficeFloorExecutiveModel("OFFICE_FLOOR_EXECUTIVE");
+		officeFloor.setOfficeFloorExecutive(officeFloorExecutive);
+		OfficeFloorExecutionStrategyModel officeFloorExecutionStrategy = new OfficeFloorExecutionStrategyModel(
+				"OFFICE_FLOOR_EXECUTION_STRATEGY");
+		officeFloorExecutive.addExecutionStrategy(officeFloorExecutionStrategy);
+		OfficeFloorTeamOversightModel officeFloorTeamOversight = new OfficeFloorTeamOversightModel(
+				"OFFICE_FLOOR_TEAM_OVERSIGHT");
+		officeFloorExecutive.addTeamOversight(officeFloorTeamOversight);
 		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel("OFFICE_FLOOR_TEAM",
 				"net.example.ExampleTeamSource");
 		officeFloor.addOfficeFloorTeam(officeFloorTeam);
@@ -430,6 +479,16 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		mosTeamToTeam.setOfficeFloorTeam(officeFloorTeam);
 		mosTeamToTeam.connect();
 
+		// managed object source executive strategy -> executive strategy
+		OfficeFloorManagedObjectSourceExecutionStrategyModel mosExecutiveStrategy = new OfficeFloorManagedObjectSourceExecutionStrategyModel(
+				"MO_EXECUTIVE_STRATEGY");
+		officeFloorManagedObjectSource.addOfficeFloorManagedObjectSourceExecutionStrategy(mosExecutiveStrategy);
+		OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel mosExecutionStrategyToExecutionStrategy = new OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel();
+		mosExecutionStrategyToExecutionStrategy
+				.setOfficeFloorManagedObjectSoruceExecutionStrategy(mosExecutiveStrategy);
+		mosExecutionStrategyToExecutionStrategy.setOfficeFloorExecutionStrategy(officeFloorExecutionStrategy);
+		mosExecutionStrategyToExecutionStrategy.connect();
+
 		// office object -> OfficeFloor managed object
 		DeployedOfficeObjectToOfficeFloorManagedObjectModel officeObjectToManagedObject = new DeployedOfficeObjectToOfficeFloorManagedObjectModel();
 		officeObjectToManagedObject.setDeployedOfficeObject(officeObject);
@@ -447,6 +506,12 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		officeTeamToFloorTeam.setDeployedOfficeTeam(officeTeam);
 		officeTeamToFloorTeam.setOfficeFloorTeam(officeFloorTeam);
 		officeTeamToFloorTeam.connect();
+
+		// OfficeFloor team -> OfficeFloor team oversight
+		OfficeFloorTeamToOfficeFloorTeamOversightModel teamToTeamOversight = new OfficeFloorTeamToOfficeFloorTeamOversightModel();
+		teamToTeamOversight.setOfficeFloorTeam(officeFloorTeam);
+		teamToTeamOversight.setOfficeFloorTeamOversight(officeFloorTeamOversight);
+		teamToTeamOversight.connect();
 
 		// Record storing the OfficeFloor
 		this.modelRepository.store(officeFloor, this.configurationItem);
@@ -481,12 +546,17 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				flowToInput.getSectionInputName());
 		assertEquals("OfficeFloor managed object team - OfficeFloor team", "OFFICE_FLOOR_TEAM",
 				mosTeamToTeam.getOfficeFloorTeamName());
+		assertEquals("OfficeFloor managed object executive strategy - OfficeFloor executive strategy",
+				"OFFICE_FLOOR_EXECUTIVE_STRATEGY",
+				mosExecutionStrategyToExecutionStrategy.getOfficeFloorExecutionStategyName());
 		assertEquals("office object - OfficeFloor managed object", "MANAGED_OBJECT",
 				officeObjectToManagedObject.getOfficeFloorManagedObjectName());
 		assertEquals("office object - OfficeFloor input managed object", "INPUT_MANAGED_OBJECT",
 				officeObjectToInputMo.getOfficeFloorInputManagedObjectName());
 		assertEquals("office team - OfficeFloor team", "OFFICE_FLOOR_TEAM",
 				officeTeamToFloorTeam.getOfficeFloorTeamName());
+		assertEquals("OfficeFloor team - OfficeFloor Team Oversight", "OFFICE_FLOOR_TEAM_OVERSIGHT",
+				teamToTeamOversight.getOfficeFloorTeamOversightName());
 	}
 
 }

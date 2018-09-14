@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-    <field type="String" name="office floor team name" />
-    <field type="String" name="team source class name" />
+	<field type="String" name="office floor team name" />
+	<field type="String" name="team source class name" />
+	<field type="OfficeFloorTeamToOfficeFloorTeamOversightModel"
+		name="office floor team oversight" />
 	<list type="TypeQualificationModel" name="type qualification" />
-    <list type="PropertyModel" name="property" plural="properties" />
-    <list type="DeployedOfficeTeamToOfficeFloorTeamModel" name="deployed office team" />
-    <list type="OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel"
-        name="office floor managed object source team" />
+	<list type="PropertyModel" name="property" plural="properties" />
+	<list type="DeployedOfficeTeamToOfficeFloorTeamModel"
+		name="deployed office team" />
+	<list
+		type="OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel"
+		name="office floor managed object source team" />
 </model>
