@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.construct.team;
 
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
@@ -40,6 +41,11 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	 * {@link Team} size.
 	 */
 	private int teamSize = 0;
+
+	/**
+	 * Name of the possible {@link TeamOversight}.
+	 */
+	private String teamOversightName = null;
 
 	/**
 	 * {@link TeamSource}.
@@ -90,6 +96,11 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	}
 
 	@Override
+	public void setTeamOversight(String teamOversightName) {
+		this.teamOversightName = teamOversightName;
+	}
+
+	@Override
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name, value);
 	}
@@ -106,6 +117,11 @@ public class TeamBuilderImpl<TS extends TeamSource> implements TeamBuilder<TS>, 
 	@Override
 	public int getTeamSize() {
 		return this.teamSize;
+	}
+
+	@Override
+	public String getTeamOversightName() {
+		return this.teamOversightName;
 	}
 
 	@Override

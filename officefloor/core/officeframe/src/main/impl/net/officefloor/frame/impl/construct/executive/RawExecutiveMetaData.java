@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.TeamOversight;
 
 /**
  * Raw {@link Executive} meta-data.
@@ -42,15 +43,23 @@ public class RawExecutiveMetaData {
 	private final Map<String, ThreadFactory[]> executionStrategies;
 
 	/**
+	 * {@link TeamOversight} instances by their names.
+	 */
+	private final Map<String, TeamOversight> teamOversights;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param executive           {@link Exception}.
 	 * @param executionStrategies {@link Map} of {@link ExecutionStrategy} name to
 	 *                            its {@link ThreadFactory} instances.
+	 * @param teamOversights      {@link TeamOversight} instances by their names.
 	 */
-	public RawExecutiveMetaData(Executive executive, Map<String, ThreadFactory[]> executionStrategies) {
+	public RawExecutiveMetaData(Executive executive, Map<String, ThreadFactory[]> executionStrategies,
+			Map<String, TeamOversight> teamOversights) {
 		this.executive = executive;
 		this.executionStrategies = executionStrategies;
+		this.teamOversights = teamOversights;
 	}
 
 	/**
@@ -69,6 +78,15 @@ public class RawExecutiveMetaData {
 	 */
 	public Map<String, ThreadFactory[]> getExecutionStrategies() {
 		return this.executionStrategies;
+	}
+
+	/**
+	 * Obtains the {@link TeamOversight} instances by their name.
+	 * 
+	 * @return {@link TeamOversight} instances by their name.
+	 */
+	public Map<String, TeamOversight> getTeamOversights() {
+		return this.teamOversights;
 	}
 
 }

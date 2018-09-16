@@ -90,15 +90,6 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 		this.threadFactoryManufacturer = threadFactoryManufacturer;
 	}
 
-	/**
-	 * Specifies the {@link Executive}.
-	 * 
-	 * @param executive {@link Executive}.
-	 */
-	public void setExecutive(Executive executive) {
-		this.executive = executive;
-	}
-
 	/*
 	 * ===================== TeamSourceContext =========================
 	 */

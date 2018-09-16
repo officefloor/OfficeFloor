@@ -25,6 +25,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.AbstractSourceError;
@@ -101,6 +102,7 @@ public class RawExecutiveMetaDataFactory {
 
 		Executive executive;
 		Map<String, ThreadFactory[]> strategies = new HashMap<>();
+		Map<String, TeamOversight> oversights = new HashMap<>();
 		try {
 			// Create the team source context
 			SourceProperties properties = configuration.getProperties();
@@ -168,6 +170,42 @@ public class RawExecutiveMetaDataFactory {
 				strategies.put(executionStrategyName, threadFactories);
 			}
 
+			// Load the team oversights
+			TeamOversight[] teamOversights = executive.getTeamOversights();
+			if (teamOversights != null) {
+				for (int i = 0; i < teamOversights.length; i++) {
+					TeamOversight teamOversight = teamOversights[i];
+
+					// Ensure have team oversight
+					if (teamOversight == null) {
+						issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+								"Null " + TeamOversight.class.getSimpleName() + " provided for index " + i);
+						return null; // can not carry on
+					}
+
+					// Ensure have name
+					String teamOversightName = teamOversight.getTeamOversightName();
+					if ((teamOversightName == null) || (teamOversightName.trim().length() == 0)) {
+						// Must have name
+						issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+								TeamOversight.class.getSimpleName() + " for index " + i + " did not provide a name");
+						return null; // can not carry on
+					}
+
+					// Ensure not duplicate name
+					if (oversights.containsKey(teamOversightName)) {
+						// Duplicate name
+						issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+								"One or more " + TeamOversight.class.getSimpleName()
+										+ " instances provided by the same name '" + teamOversightName + "'");
+						return null; // can not carry on
+					}
+
+					// Map in the team oversight
+					oversights.put(teamOversightName, teamOversight);
+				}
+			}
+
 		} catch (AbstractSourceError ex) {
 			ex.addIssue(new OfficeFloorIssueTarget(issues, AssetType.EXECUTIVE, EXECUTIVE_NAME));
 			return null; // can not carry on
@@ -180,7 +218,7 @@ public class RawExecutiveMetaDataFactory {
 		}
 
 		// Return the executive meta-data
-		return new RawExecutiveMetaData(executive, strategies);
+		return new RawExecutiveMetaData(executive, strategies, oversights);
 	}
 
 }

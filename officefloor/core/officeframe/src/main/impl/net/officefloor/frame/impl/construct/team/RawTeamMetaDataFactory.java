@@ -17,9 +17,12 @@
  */
 package net.officefloor.frame.impl.construct.team;
 
+import java.util.Map;
+
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.source.AbstractSourceError;
 import net.officefloor.frame.api.source.SourceContext;
@@ -54,6 +57,11 @@ public class RawTeamMetaDataFactory {
 	private final Executive executive;
 
 	/**
+	 * {@link TeamOversight} instances by their names.
+	 */
+	private final Map<String, TeamOversight> teamOversights;
+
+	/**
 	 * {@link ThreadFactoryManufacturer}.
 	 */
 	private final ThreadFactoryManufacturer threadFactoryManufacturer;
@@ -68,13 +76,17 @@ public class RawTeamMetaDataFactory {
 	 * 
 	 * @param sourceContext             {@link SourceContext}.
 	 * @param executive                 {@link Executive}.
+	 * @param teamOversights            {@link TeamOversight} instances by their
+	 *                                  names.
 	 * @param threadFactoryManufacturer {@link ThreadFactoryManufacturer}.
 	 * @param threadLocalAwareExecutor  {@link ThreadLocalAwareExecutor}.
 	 */
 	public RawTeamMetaDataFactory(SourceContext sourceContext, Executive executive,
-			ThreadFactoryManufacturer threadFactoryManufacturer, ThreadLocalAwareExecutor threadLocalAwareExecutor) {
+			Map<String, TeamOversight> teamOversights, ThreadFactoryManufacturer threadFactoryManufacturer,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor) {
 		this.sourceContext = sourceContext;
 		this.executive = executive;
+		this.teamOversights = teamOversights;
 		this.threadFactoryManufacturer = threadFactoryManufacturer;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 	}
@@ -123,6 +135,18 @@ public class RawTeamMetaDataFactory {
 			}
 		}
 
+		// Obtain the possible team oversight
+		TeamOversight teamOversight = null;
+		String teamOversightName = configuration.getTeamOversightName();
+		if (!ConstructUtil.isBlank(teamOversightName)) {
+			teamOversight = this.teamOversights.get(teamOversightName);
+			if (teamOversight == null) {
+				issues.addIssue(AssetType.TEAM, teamName,
+						"No TeamOversight '" + teamOversightName + "' available from Executive");
+				return null; // can not carry on
+			}
+		}
+
 		Team team;
 		boolean isRequireThreadLocalAwareness = false;
 		try {
@@ -132,8 +156,12 @@ public class RawTeamMetaDataFactory {
 			ExecutiveContextImpl executiveContext = new ExecutiveContextImpl(false, teamName, teamSize, teamSource,
 					this.executive, this.threadFactoryManufacturer, properties, this.sourceContext);
 
-			// Create the team
-			team = this.executive.createTeam(executiveContext);
+			// Create the team (via oversight if provided, otherwise directly)
+			if (teamOversight != null) {
+				team = teamOversight.createTeam(executiveContext);
+			} else {
+				team = teamSource.createTeam(executiveContext);
+			}
 			if (team == null) {
 				// Indicate failed to provide team
 				issues.addIssue(AssetType.TEAM, teamName,

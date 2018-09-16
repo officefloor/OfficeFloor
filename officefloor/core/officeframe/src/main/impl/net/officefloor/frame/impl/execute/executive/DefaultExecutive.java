@@ -17,12 +17,14 @@
  */
 package net.officefloor.frame.impl.execute.executive;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
@@ -65,6 +67,15 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 		Map<String, ThreadFactory[]> executionStrategies = new HashMap<>();
 		executionStrategies.put(this.getExecutionStrategyName(), this.threadFactories);
 		return executionStrategies;
+	}
+
+	/**
+	 * Obtains the {@link TeamOversight} instances by name.
+	 * 
+	 * @return {@link TeamOversight} instances by name.
+	 */
+	public Map<String, TeamOversight> getTeamOversightMap() {
+		return Collections.emptyMap();
 	}
 
 	/*

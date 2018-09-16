@@ -17,8 +17,10 @@
  */
 package net.officefloor.frame.impl.execute.function.executive;
 
+import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.ExecutiveContext;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.TeamSourceContextWrapper;
 import net.officefloor.frame.api.executive.TeamSourceContextWrapper.WorkerEnvironment;
 import net.officefloor.frame.api.source.TestSource;
@@ -38,23 +40,30 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 
 	/**
+	 * Ensure the {@link Team} can not have oversight.
+	 */
+	public void testTeamWithoutOversight() throws Exception {
+		this.doExecutiveTeamTest(false, false);
+	}
+
+	/**
 	 * Ensure the {@link Executive} can wrap {@link Team}.
 	 */
-	public void testExecutiveWrapTeam() throws Exception {
-		this.doExecutiveTeamTest(false);
+	public void testExecutiveOverseeTeam() throws Exception {
+		this.doExecutiveTeamTest(true, false);
 	}
 
 	/**
 	 * Ensure the {@link Executive} can wrap {@link Thread} of {@link Team}.
 	 */
 	public void testExecutiveWrapWorker() throws Exception {
-		this.doExecutiveTeamTest(true);
+		this.doExecutiveTeamTest(true, true);
 	}
 
 	/**
 	 * Ensure the {@link Executive} can wrap {@link Team}.
 	 */
-	public void doExecutiveTeamTest(boolean isWrapWorker) throws Exception {
+	public void doExecutiveTeamTest(boolean isTeamOversight, boolean isWrapWorker) throws Exception {
 
 		// Construct Executive
 		MockExecutiveSource.isWrapWorker = isWrapWorker;
@@ -62,7 +71,11 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 
 		// Construct the team (4 threads)
 		MockTeamSource.teamSize = -1;
-		this.constructTeam("FUNCTION_TEAM", MockTeamSource.class).setTeamSize(4);
+		TeamBuilder<?> team = this.constructTeam("FUNCTION_TEAM", MockTeamSource.class);
+		team.setTeamSize(4);
+		if (isTeamOversight) {
+			team.setTeamOversight(MockExecutiveSource.TEAM_OVERSIGHT_NAME);
+		}
 
 		// Create the function
 		TestWork work = new TestWork();
@@ -75,20 +88,32 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		MockExecutiveSource.worker = null;
 		this.invokeFunction("function", null);
 
-		// Ensure intercepted by executive
+		// Ensure function invoked
 		assertTrue("Function should be invoked", work.isFunctionInvoked);
-		assertTrue("Executive should control teams", MockExecutiveSource.isControlTeam);
-		assertTrue("Executive should intercept Job", MockExecutiveSource.isInterceptTeam);
 
-		// Determine if wrap worker
-		if (!isWrapWorker) {
-			assertNull("Should not wrap worker", MockExecutiveSource.worker);
-			assertEquals("Incorrect thread name", "of-FUNCTION_TEAM-1", work.functionThread.getName());
-			assertEquals("Should pass through team size", 4, MockTeamSource.teamSize);
+		// Determine if team oversight
+		if (!isTeamOversight) {
+
+			// Should not intercept by executive
+			assertFalse("Executive should not control team", MockExecutiveSource.isControlTeam);
+			assertFalse("Executive should not intercept Job", MockExecutiveSource.isInterceptTeam);
+
 		} else {
-			assertNotNull("Should wrap worker", MockExecutiveSource.worker);
-			assertEquals("Incorrect thread name", "of-FUNCTION_TEAM-EXECUTIVE-1", work.functionThread.getName());
-			assertEquals("Executive should be able to control team size", 2, MockTeamSource.teamSize);
+
+			// Ensure intercepted by executive
+			assertTrue("Executive should control teams", MockExecutiveSource.isControlTeam);
+			assertTrue("Executive should intercept Job", MockExecutiveSource.isInterceptTeam);
+
+			// Determine if wrap worker
+			if (!isWrapWorker) {
+				assertNull("Should not wrap worker", MockExecutiveSource.worker);
+				assertEquals("Incorrect thread name", "of-FUNCTION_TEAM-1", work.functionThread.getName());
+				assertEquals("Should pass through team size", 4, MockTeamSource.teamSize);
+			} else {
+				assertNotNull("Should wrap worker", MockExecutiveSource.worker);
+				assertEquals("Incorrect thread name", "of-FUNCTION_TEAM-EXECUTIVE-1", work.functionThread.getName());
+				assertEquals("Executive should be able to control team size", 2, MockTeamSource.teamSize);
+			}
 		}
 
 		// Ensure provided thread factory uses thread decoration
@@ -96,7 +121,10 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 	}
 
 	@TestSource
-	public static class MockExecutiveSource extends DefaultExecutive implements Executive, Team, WorkerEnvironment {
+	public static class MockExecutiveSource extends DefaultExecutive
+			implements Executive, TeamOversight, Team, WorkerEnvironment {
+
+		private static final String TEAM_OVERSIGHT_NAME = "OVERSIGHT";
 
 		private static boolean isControlTeam = false;
 
@@ -115,44 +143,50 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Team createTeam(ExecutiveContext context) throws Exception {
-
-			// Ensure team source
-			if (context.getTeamSource() instanceof MockTeamSource) {
-
-				// Indicate controlling the team
-				isControlTeam = true;
-
-				// Ensure correct team size
-				assertEquals("Incorrect team size", 4, context.getTeamSize());
-
-				// Create the team source context
-				TeamSourceContext teamContext = context;
-				if (isWrapWorker) {
-					teamContext = new TeamSourceContextWrapper(context, 2, "EXECUTIVE", this);
-				}
-
-				// Create the team
-				this.team = context.getTeamSource().createTeam(teamContext);
-
-				// Return this to intercept team
-				return this;
-
-			} else {
-				// Break team follow standard
-				return context.getTeamSource().createTeam(context);
-			}
-		}
-
-		@Override
 		public Object createProcessIdentifier() {
 			assertNull("Should only create one process in test", this.processIdentifier);
 			this.processIdentifier = new Object();
 			return this.processIdentifier;
 		}
 
+		@Override
+		public TeamOversight[] getTeamOversights() {
+			return new TeamOversight[] { this };
+		}
+
 		/*
-		 * ================= Executive ======================
+		 * ================ TeamOversight ====================
+		 */
+
+		@Override
+		public String getTeamOversightName() {
+			return TEAM_OVERSIGHT_NAME;
+		}
+
+		@Override
+		public Team createTeam(ExecutiveContext context) throws Exception {
+
+			// Indicate controlling the team
+			isControlTeam = true;
+
+			// Ensure correct team size
+			assertEquals("Incorrect team size", 4, context.getTeamSize());
+
+			// Create the team source context
+			TeamSourceContext teamContext = context;
+			if (isWrapWorker) {
+				teamContext = new TeamSourceContextWrapper(context, 2, "EXECUTIVE", this);
+			}
+
+			// Create the team
+			this.team = context.getTeamSource().createTeam(teamContext);
+
+			// Return this to intercept team
+			return this;
+		}
+
+		/*
+		 * ================= Team ======================
 		 */
 
 		@Override

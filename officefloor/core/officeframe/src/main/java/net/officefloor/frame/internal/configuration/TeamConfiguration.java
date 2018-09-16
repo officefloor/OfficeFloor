@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
@@ -41,6 +42,13 @@ public interface TeamConfiguration<TS extends TeamSource> {
 	 * @return {@link Team} size.
 	 */
 	int getTeamSize();
+
+	/**
+	 * Obtains the name of the {@link TeamOversight}.
+	 * 
+	 * @return Name of the {@link TeamOversight}.
+	 */
+	String getTeamOversightName();
 
 	/**
 	 * Obtains the {@link TeamSource} instance to use.

@@ -28,6 +28,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
@@ -198,6 +199,7 @@ public class RawOfficeFloorMetaDataFactory {
 		// Create the executive
 		Executive executive;
 		Map<String, ThreadFactory[]> executionStrategies;
+		Map<String, TeamOversight> teamOversights;
 		ExecutiveConfiguration<?> executiveConfiguration = configuration.getExecutiveConfiguration();
 		if (executiveConfiguration != null) {
 			// Create the configured Executive
@@ -207,15 +209,17 @@ public class RawOfficeFloorMetaDataFactory {
 					.constructRawExecutiveMetaData(executiveConfiguration, officeFloorName, issues);
 			executive = rawExecutive.getExecutive();
 			executionStrategies = rawExecutive.getExecutionStrategies();
+			teamOversights = rawExecutive.getTeamOversights();
 		} else {
 			// No Executive configured, so use default
 			DefaultExecutive defaultExecutive = new DefaultExecutive(threadFactoryManufacturer);
 			executive = defaultExecutive;
 			executionStrategies = defaultExecutive.getExecutionStrategyMap();
+			teamOversights = defaultExecutive.getTeamOversightMap();
 		}
 
 		// Create the team factory
-		RawTeamMetaDataFactory rawTeamFactory = new RawTeamMetaDataFactory(sourceContext, executive,
+		RawTeamMetaDataFactory rawTeamFactory = new RawTeamMetaDataFactory(sourceContext, executive, teamOversights,
 				threadFactoryManufacturer, this.threadLocalAwareExecutor);
 
 		// Construct the configured teams

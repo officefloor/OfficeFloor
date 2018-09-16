@@ -24,6 +24,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
@@ -447,6 +448,121 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Indicate missing {@link TeamOversight} instance within returned listing.
+	 */
+	public void testMissingTeamOversight() {
+
+		// Record
+		this.configuration = new ExecutiveBuilderImpl<>(TeamOversightExecutiveSource.class);
+		this.issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME, "Null TeamOversight provided for index 0");
+
+		// Construct
+		TeamOversightExecutiveSource.oversights = new TeamOversight[] { null };
+		this.replayMockObjects();
+		this.constructRawExecutiveMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Indicate missing {@link TeamOversight} name.
+	 */
+	public void testMissingTeamOversightName() {
+
+		// Record
+		this.configuration = new ExecutiveBuilderImpl<>(TeamOversightExecutiveSource.class);
+		TeamOversight oversight = this.createMock(TeamOversight.class);
+		this.recordReturn(oversight, oversight.getTeamOversightName(), null);
+		this.issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME, "TeamOversight for index 0 did not provide a name");
+
+		// Construct
+		TeamOversightExecutiveSource.oversights = new TeamOversight[] { oversight };
+		this.replayMockObjects();
+		this.constructRawExecutiveMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Indicating issue if duplicate {@link TeamOversight} names.
+	 */
+	public void testDuplicateTeamOversightNames() {
+
+		// Record
+		final String OVERSIGHT_NAME = "oversight";
+		this.configuration = new ExecutiveBuilderImpl<>(TeamOversightExecutiveSource.class);
+		TeamOversight oversightOne = this.createMock(TeamOversight.class);
+		this.recordReturn(oversightOne, oversightOne.getTeamOversightName(), OVERSIGHT_NAME);
+		TeamOversight oversightTwo = this.createMock(TeamOversight.class);
+		this.recordReturn(oversightTwo, oversightTwo.getTeamOversightName(), OVERSIGHT_NAME);
+		this.issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
+				"One or more TeamOversight instances provided by the same name 'oversight'");
+
+		// Construct
+		TeamOversightExecutiveSource.oversights = new TeamOversight[] { oversightOne, oversightTwo };
+		this.replayMockObjects();
+		this.constructRawExecutiveMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can obtain the {@link TeamOversight}.
+	 */
+	public void testTeamOversightAvailable() {
+
+		// Record
+		final String OVERSIGHT_NAME = "test";
+		this.configuration = new ExecutiveBuilderImpl<>(TeamOversightExecutiveSource.class);
+		TeamOversight oversight = this.createMock(TeamOversight.class);
+		this.recordReturn(oversight, oversight.getTeamOversightName(), OVERSIGHT_NAME);
+
+		// Construct
+		TeamOversightExecutiveSource.oversights = new TeamOversight[] { oversight };
+		this.replayMockObjects();
+		RawExecutiveMetaData metaData = this.constructRawExecutiveMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure exeuction strategy available
+		Map<String, TeamOversight> executionStrategies = metaData.getTeamOversights();
+		assertEquals("Should have one execution strategy", 1, executionStrategies.size());
+		assertSame("Incorrect team oversight", oversight, executionStrategies.get(OVERSIGHT_NAME));
+	}
+
+	@TestSource
+	public static class TeamOversightExecutiveSource extends AbstractExecutiveSource implements Executive {
+
+		private static TeamOversight[] oversights;
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
+			return this;
+		}
+
+		@Override
+		public ExecutionStrategy[] getExcutionStrategies() {
+			return new ExecutionStrategy[] { new ExecutionStrategy() {
+
+				@Override
+				public String getExecutionStrategyName() {
+					return "TEST";
+				}
+
+				@Override
+				public ThreadFactory[] getThreadFactories() {
+					return new ThreadFactory[] { (runnable) -> new Thread(runnable) };
+				}
+			} };
+		}
+
+		@Override
+		public TeamOversight[] getTeamOversights() {
+			return oversights;
+		}
+	}
+
+	/**
 	 * Ensures able to successfully source the {@link Executive} and details of
 	 * {@link RawExecutiveMetaData} are correct.
 	 */
@@ -460,6 +576,9 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(strategy, strategy.getExecutionStrategyName(), "strategy");
 		this.recordReturn(strategy, strategy.getThreadFactories(),
 				new ThreadFactory[] { this.createMock(ThreadFactory.class) });
+		TeamOversight oversight = this.createMock(TeamOversight.class);
+		this.recordReturn(executive, executive.getTeamOversights(), new TeamOversight[] { oversight });
+		this.recordReturn(oversight, oversight.getTeamOversightName(), "oversight");
 		SourceExecutiveSource.executive = executive;
 
 		// Construct
@@ -485,6 +604,9 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(strategy, strategy.getExecutionStrategyName(), "strategy");
 		this.recordReturn(strategy, strategy.getThreadFactories(),
 				new ThreadFactory[] { this.createMock(ThreadFactory.class) });
+		TeamOversight oversight = this.createMock(TeamOversight.class);
+		this.recordReturn(executive, executive.getTeamOversights(), new TeamOversight[] { oversight });
+		this.recordReturn(oversight, oversight.getTeamOversightName(), "oversight");
 		SourceExecutiveSource.executive = executive;
 
 		// Construct
