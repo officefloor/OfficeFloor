@@ -211,7 +211,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"MO_EXECUTION_STRATEGY");
 		officeFloorManagedObjectSource.addOfficeFloorManagedObjectSourceExecutionStrategy(mosExecutionStrategy);
 		OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel mosExecutionStrategyToExecutionStrategy = new OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel(
-				"EXECUTION_STRATEGY");
+				"OFFICE_FLOOR_EXECUTION_STRATEGY");
 		mosExecutionStrategy.setOfficeFloorExecutionStrategy(mosExecutionStrategyToExecutionStrategy);
 
 		// office object -> OfficeFloor managed object

@@ -31,6 +31,8 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorInputM
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorExecutionStrategyModel;
+import net.officefloor.model.officefloor.OfficeFloorExecutiveModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
@@ -38,6 +40,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOff
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectPoolModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
@@ -71,8 +75,7 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 	/**
 	 * Initiate.
 	 * 
-	 * @param modelRepository
-	 *            {@link ModelRepository}.
+	 * @param modelRepository {@link ModelRepository}.
 	 */
 	public OfficeFloorRepositoryImpl(ModelRepository modelRepository) {
 		this.modelRepository = modelRepository;
@@ -360,6 +363,34 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				}
 			}
 		}
+
+		// Create the set of execution strategies
+		Map<String, OfficeFloorExecutionStrategyModel> executionStrategies = new HashMap<>();
+		OfficeFloorExecutiveModel executive = officeFloor.getOfficeFloorExecutive();
+		if (executive != null) {
+			for (OfficeFloorExecutionStrategyModel strategy : executive.getExecutionStrategies()) {
+				executionStrategies.put(strategy.getExecutionStrategyName(), strategy);
+			}
+		}
+
+		// Connect the OfficeFloor managed object source to its execution strategies
+		for (OfficeFloorManagedObjectSourceModel mos : officeFloor.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceExecutionStrategyModel mosExecutionStrategy : mos
+					.getOfficeFloorManagedObjectSourceExecutionStrategies()) {
+				OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel conn = mosExecutionStrategy
+						.getOfficeFloorExecutionStrategy();
+				if (conn != null) {
+					OfficeFloorExecutionStrategyModel executionStrategy = executionStrategies
+							.get(conn.getOfficeFloorExecutionStrategyName());
+					if (executionStrategy != null) {
+						conn.setOfficeFloorManagedObjectSoruceExecutionStrategy(mosExecutionStrategy);
+						conn.setOfficeFloorExecutionStrategy(executionStrategy);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 	}
 
 	@Override
