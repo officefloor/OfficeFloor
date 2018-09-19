@@ -19,7 +19,6 @@ package net.officefloor.compile.executive;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceProperty;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceSpecification;
@@ -59,27 +58,25 @@ public interface ExecutiveLoader {
 	 * {@link ExecutiveSource}.
 	 * 
 	 * @param                      <TS> {@link ExecutiveSource} type.
-	 * @param executiveName        Name of the {@link Executive}.
 	 * @param executiveSourceClass Class of the {@link ExecutiveSource}.
 	 * @param propertyList         {@link PropertyList} containing the properties to
 	 *                             source the {@link ExecutiveType}.
 	 * @return {@link ExecutiveType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<TS extends ExecutiveSource> ExecutiveType loadExecutiveType(String executiveName, Class<TS> executiveSourceClass,
+	<TS extends ExecutiveSource> ExecutiveType loadExecutiveType(Class<TS> executiveSourceClass,
 			PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link ExecutiveType} sourced from the
 	 * {@link ExecutiveSource}.
 	 * 
-	 * @param executiveName   Name of the {@link Executive}.
 	 * @param executiveSource {@link ExecutiveSource} instance.
 	 * @param propertyList    {@link PropertyList} containing the properties to
 	 *                        source the {@link ExecutiveType}.
 	 * @return {@link ExecutiveType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	ExecutiveType loadExecutiveType(String executiveName, ExecutiveSource executiveSource, PropertyList propertyList);
+	ExecutiveType loadExecutiveType(ExecutiveSource executiveSource, PropertyList propertyList);
 
 }

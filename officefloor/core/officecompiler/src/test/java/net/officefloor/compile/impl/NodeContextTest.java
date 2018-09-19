@@ -26,6 +26,7 @@ import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImp
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.FunctionObjectNode;
@@ -834,6 +835,16 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can create {@link ExecutiveNode}.
+	 */
+	public void testCreateExecutiveNode() {
+		ExecutiveNode node = this.context.createExecutiveNode(this.officeFloor);
+		assertNode(node, "Executive", "Executive", null, this.officeFloor);
+		assertEquals("Executive", node.getOfficeFloorExecutiveName());
+		assertInitialise(node, (n) -> n.initialise("ExampleExecutiveSource", null));
+	}
+
+	/**
 	 * Ensure can create {@link FunctionNamespaceNode}.
 	 */
 	public void testCreateFunctionNamespaceNode() {
@@ -849,16 +860,11 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link Node} is correct.
 	 * 
-	 * @param node
-	 *            {@link Node} to validate.
-	 * @param name
-	 *            Expected name.
-	 * @param type
-	 *            Expected type.
-	 * @param location
-	 *            Expected location.
-	 * @param parent
-	 *            Parent {@link Node}.
+	 * @param node     {@link Node} to validate.
+	 * @param name     Expected name.
+	 * @param type     Expected type.
+	 * @param location Expected location.
+	 * @param parent   Parent {@link Node}.
 	 */
 	private static void assertNode(Node node, String name, String type, String location, Node parent) {
 		assertEquals("Incorrect node name", name, node.getNodeName());
@@ -871,10 +877,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link TypeQualification} for the {@link ManagedObjectNode}.
 	 * 
-	 * @param typeQualifications
-	 *            {@link TypeQualification} instances.
-	 * @param qualifierTypePairs
-	 *            Pairings of expected qualifier and types.
+	 * @param typeQualifications {@link TypeQualification} instances.
+	 * @param qualifierTypePairs Pairings of expected qualifier and types.
 	 */
 	private static void assertTypeQualifications(TypeQualification[] typeQualifications, String... qualifierTypePairs) {
 		assertEquals("Incorrect number of type qualifications", (qualifierTypePairs.length / 2),
@@ -890,10 +894,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the correct children {@link Node} instances.
 	 * 
-	 * @param node
-	 *            {@link Node} to check its children.
-	 * @param children
-	 *            Child {@link Node} instances.
+	 * @param node     {@link Node} to check its children.
+	 * @param children Child {@link Node} instances.
 	 */
 	private static void assertChildren(Node node, Object... children) {
 		assertArrayEquals("Incorrect children", node.getChildNodes(), children);
@@ -902,10 +904,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link Node} is initialised.
 	 * 
-	 * @param node
-	 *            {@link Node} to validate initialising.
-	 * @param initialiser
-	 *            {@link Consumer} to initialise the {@link Node}.
+	 * @param node        {@link Node} to validate initialising.
+	 * @param initialiser {@link Consumer} to initialise the {@link Node}.
 	 */
 	private static <N extends Node> void assertInitialise(N node, Consumer<N> initialiser) {
 		assertFalse("Should not be initialised", node.isInitialised());

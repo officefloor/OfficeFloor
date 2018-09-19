@@ -115,7 +115,7 @@ public class LoadExecutiveSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testFailGetExecutiveSourceProperties() {
 
-		final NullPointerException failure = new NullPointerException("Fail to get managed object source properties");
+		final NullPointerException failure = new NullPointerException("Fail to get executive source properties");
 
 		// Record null properties
 		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);

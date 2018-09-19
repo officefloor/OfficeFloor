@@ -79,11 +79,10 @@ public interface NodeContext {
 	OfficeFrame getOfficeFrame();
 
 	/**
-	 * Initiates the {@link OfficeFloorBuilder} with the
-	 * {@link OfficeFloorCompiler} details.
+	 * Initiates the {@link OfficeFloorBuilder} with the {@link OfficeFloorCompiler}
+	 * details.
 	 * 
-	 * @param builder
-	 *            {@link OfficeFloorBuilder}.
+	 * @param builder {@link OfficeFloorBuilder}.
 	 */
 	void initiateOfficeFloorBuilder(OfficeFloorBuilder builder);
 
@@ -104,12 +103,10 @@ public interface NodeContext {
 	/**
 	 * Overrides the {@link PropertyList}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the overridden {@link PropertyList}.
-	 * @param qualifiedName
-	 *            Qualified name.
-	 * @param originalProperties
-	 *            Original {@link PropertyList}.
+	 * @param node               {@link Node} requiring the overridden
+	 *                           {@link PropertyList}.
+	 * @param qualifiedName      Qualified name.
+	 * @param originalProperties Original {@link PropertyList}.
 	 * @return Overridden {@link PropertyList}.
 	 */
 	PropertyList overrideProperties(Node node, String qualifiedName, PropertyList originalProperties);
@@ -117,10 +114,8 @@ public interface NodeContext {
 	/**
 	 * Creates a new {@link AutoWirer}.
 	 * 
-	 * @param <N>
-	 *            Type of {@link Node}.
-	 * @param nodeType
-	 *            {@link Class} type of {@link Node}.
+	 * @param          <N> Type of {@link Node}.
+	 * @param nodeType {@link Class} type of {@link Node}.
 	 * @return New {@link AutoWirer}.
 	 */
 	<N extends Node> AutoWirer<N> createAutoWirer(Class<N> nodeType);
@@ -128,23 +123,20 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link OfficeFloorSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link OfficeFloorSource} type.
-	 * @param officeFloorSourceClassName
-	 *            {@link Class} name of the {@link OfficeFloorSource}.
-	 * @param node
-	 *            {@link Node} requirining the {@link OfficeFloorSource} class.
+	 * @param                            <S> {@link OfficeFloorSource} type.
+	 * @param officeFloorSourceClassName {@link Class} name of the
+	 *                                   {@link OfficeFloorSource}.
+	 * @param node                       {@link Node} requirining the
+	 *                                   {@link OfficeFloorSource} class.
 	 * @return {@link OfficeFloorSource} class, or <code>null</code> with issues
-	 *         reported to the {@link CompilerIssues} of this
-	 *         {@link NodeContext}.
+	 *         reported to the {@link CompilerIssues} of this {@link NodeContext}.
 	 */
 	<S extends OfficeFloorSource> Class<S> getOfficeFloorSourceClass(String officeFloorSourceClassName, Node node);
 
 	/**
 	 * Obtains the {@link OfficeFloorLoader}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link OfficeFloorLoader}.
+	 * @param node {@link Node} requiring the {@link OfficeFloorLoader}.
 	 * @return {@link OfficeFloorLoader}.
 	 */
 	OfficeFloorLoader getOfficeFloorLoader(Node node);
@@ -152,13 +144,12 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link OfficeFloorNode}.
 	 * 
-	 * @param officeFloorSourceClassName
-	 *            {@link Class} name of the {@link OfficeFloorSource}.
-	 * @param officeFloorSource
-	 *            Optional instantiated {@link OfficeFloorSource}. May be
-	 *            <code>null</code>.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
+	 * @param officeFloorSourceClassName {@link Class} name of the
+	 *                                   {@link OfficeFloorSource}.
+	 * @param officeFloorSource          Optional instantiated
+	 *                                   {@link OfficeFloorSource}. May be
+	 *                                   <code>null</code>.
+	 * @param officeFloorLocation        Location of the {@link OfficeFloor}.
 	 * @return {@link OfficeFloorNode}.
 	 */
 	OfficeFloorNode createOfficeFloorNode(String officeFloorSourceClassName, OfficeFloorSource officeFloorSource,
@@ -167,24 +158,20 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link OfficeSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link OfficeSource} type.
-	 * @param officeSourceClassName
-	 *            {@link OfficeSource} class name or an alias to an
-	 *            {@link OfficeSource} class.
-	 * @param node
-	 *            {@link Node} requiring the {@link OfficeSource} class.
-	 * @return {@link OfficeSource} class, or <code>null</code> with issues
-	 *         reported to the {@link CompilerIssues} of this
-	 *         {@link NodeContext}.
+	 * @param                       <S> {@link OfficeSource} type.
+	 * @param officeSourceClassName {@link OfficeSource} class name or an alias to
+	 *                              an {@link OfficeSource} class.
+	 * @param node                  {@link Node} requiring the {@link OfficeSource}
+	 *                              class.
+	 * @return {@link OfficeSource} class, or <code>null</code> with issues reported
+	 *         to the {@link CompilerIssues} of this {@link NodeContext}.
 	 */
 	<S extends OfficeSource> Class<S> getOfficeSourceClass(String officeSourceClassName, Node node);
 
 	/**
 	 * Obtains the {@link OfficeLoader}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link OfficeLoader}.
+	 * @param node {@link Node} requiring the {@link OfficeLoader}.
 	 * @return {@link OfficeLoader}.
 	 */
 	OfficeLoader getOfficeLoader(Node node);
@@ -192,10 +179,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link OfficeInputNode}.
 	 * 
-	 * @param officeInputName
-	 *            Name of the {@link OfficeInputNode}.
-	 * @param office
-	 *            Parent {@link OfficeNode}.
+	 * @param officeInputName Name of the {@link OfficeInputNode}.
+	 * @param office          Parent {@link OfficeNode}.
 	 * @return {@link OfficeInputNode}.
 	 */
 	OfficeInputNode createOfficeInputNode(String officeInputName, OfficeNode office);
@@ -203,10 +188,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link OfficeNode}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link OfficeNode}.
-	 * @param officeFloor
-	 *            Parent {@link OfficeFloorNode}.
+	 * @param officeName  Name of the {@link OfficeNode}.
+	 * @param officeFloor Parent {@link OfficeFloorNode}.
 	 * @return {@link OfficeNode}.
 	 */
 	OfficeNode createOfficeNode(String officeName, OfficeFloorNode officeFloor);
@@ -214,10 +197,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link OfficeObjectNode}.
 	 * 
-	 * @param objectName
-	 *            Name of the {@link OfficeObjectNode}.
-	 * @param office
-	 *            Parent {@link OfficeNode}.
+	 * @param objectName Name of the {@link OfficeObjectNode}.
+	 * @param office     Parent {@link OfficeNode}.
 	 * @return {@link OfficeObjectNode}.
 	 */
 	OfficeObjectNode createOfficeObjectNode(String objectName, OfficeNode office);
@@ -225,10 +206,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link OfficeOutputNode}.
 	 * 
-	 * @param name
-	 *            Name of the {@link OfficeOutputNode}.
-	 * @param office
-	 *            Parent {@link OfficeNode}.
+	 * @param name   Name of the {@link OfficeOutputNode}.
+	 * @param office Parent {@link OfficeNode}.
 	 * @return {@link OfficeOutputNode}.
 	 */
 	OfficeOutputNode createOfficeOutputNode(String name, OfficeNode office);
@@ -236,10 +215,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link OfficeStartNode}.
 	 * 
-	 * @param startName
-	 *            Name of the {@link OfficeStartNode}.
-	 * @param office
-	 *            Parent {@link OfficeNode}.
+	 * @param startName Name of the {@link OfficeStartNode}.
+	 * @param office    Parent {@link OfficeNode}.
 	 * @return {@link OfficeStartNode}.
 	 */
 	OfficeStartNode createOfficeStartNode(String startName, OfficeNode office);
@@ -247,10 +224,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link OfficeTeamNode}.
 	 * 
-	 * @param officeTeamName
-	 *            Name of the {@link OfficeTeamNode}.
-	 * @param office
-	 *            Parent {@link OfficeNode}.
+	 * @param officeTeamName Name of the {@link OfficeTeamNode}.
+	 * @param office         Parent {@link OfficeNode}.
 	 * @return {@link OfficeTeamNode}.
 	 */
 	OfficeTeamNode createOfficeTeamNode(String officeTeamName, OfficeNode office);
@@ -258,24 +233,20 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link SectionSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param sectionSourceClassName
-	 *            {@link SectionSource} class name or an alias to an
-	 *            {@link SectionSource} class.
-	 * @param node
-	 *            {@link Node} requiring the {@link SectionSource} class.
+	 * @param                        <S> {@link SectionSource} type.
+	 * @param sectionSourceClassName {@link SectionSource} class name or an alias to
+	 *                               an {@link SectionSource} class.
+	 * @param node                   {@link Node} requiring the
+	 *                               {@link SectionSource} class.
 	 * @return {@link SectionSource} class, or <code>null</code> with issues
-	 *         reported to the {@link CompilerIssues} of this
-	 *         {@link NodeContext}.
+	 *         reported to the {@link CompilerIssues} of this {@link NodeContext}.
 	 */
 	<S extends SectionSource> Class<S> getSectionSourceClass(String sectionSourceClassName, Node node);
 
 	/**
 	 * Obtains the {@link SectionLoader}.
 	 * 
-	 * @param officeNode
-	 *            {@link OfficeNode} requiring the {@link SectionLoader}.
+	 * @param officeNode {@link OfficeNode} requiring the {@link SectionLoader}.
 	 * @return {@link SectionLoader}.
 	 */
 	SectionLoader getSectionLoader(OfficeNode officeNode);
@@ -283,9 +254,8 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link SectionLoader}.
 	 * 
-	 * @param parentSectionNode
-	 *            Parent {@link SectionNode} requiring the
-	 *            {@link SectionLoader}.
+	 * @param parentSectionNode Parent {@link SectionNode} requiring the
+	 *                          {@link SectionLoader}.
 	 * @return {@link SectionLoader}.
 	 */
 	SectionLoader getSectionLoader(SectionNode parentSectionNode);
@@ -293,10 +263,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link SectionInputNode}.
 	 * 
-	 * @param inputName
-	 *            Name of the {@link SectionInputNode}.
-	 * @param section
-	 *            Parent {@link SectionNode}.
+	 * @param inputName Name of the {@link SectionInputNode}.
+	 * @param section   Parent {@link SectionNode}.
 	 * @return {@link SectionInputNode}.
 	 */
 	SectionInputNode createSectionInputNode(String inputName, SectionNode section);
@@ -304,10 +272,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link SectionObjectNode}.
 	 * 
-	 * @param objectName
-	 *            Name of the {@link SectionObjectNode}.
-	 * @param section
-	 *            Parent {@link SectionNode}.
+	 * @param objectName Name of the {@link SectionObjectNode}.
+	 * @param section    Parent {@link SectionNode}.
 	 * @return {@link SectionObjectNode}.
 	 */
 	SectionObjectNode createSectionObjectNode(String objectName, SectionNode section);
@@ -315,10 +281,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link SectionOutputNode}.
 	 * 
-	 * @param outputName
-	 *            Name of the {@link SectionOutputNode}.
-	 * @param section
-	 *            Parent {@link SectionNode}.
+	 * @param outputName Name of the {@link SectionOutputNode}.
+	 * @param section    Parent {@link SectionNode}.
 	 * @return {@link SectionOutputNode}.
 	 */
 	SectionOutputNode createSectionOutputNode(String outputName, SectionNode section);
@@ -326,10 +290,8 @@ public interface NodeContext {
 	/**
 	 * Creates a top level {@link SectionNode} within the {@link OfficeNode}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param office
-	 *            {@link OfficeNode} containing this {@link OfficeSection}.
+	 * @param sectionName Name of the {@link OfficeSection}.
+	 * @param office      {@link OfficeNode} containing this {@link OfficeSection}.
 	 * @return {@link SectionNode}.
 	 */
 	SectionNode createSectionNode(String sectionName, OfficeNode office);
@@ -337,11 +299,9 @@ public interface NodeContext {
 	/**
 	 * Creates a {@link SectionNode}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param parentSection
-	 *            Parent {@link SectionNode} containing this
-	 *            {@link OfficeSection}.
+	 * @param sectionName   Name of the {@link OfficeSection}.
+	 * @param parentSection Parent {@link SectionNode} containing this
+	 *                      {@link OfficeSection}.
 	 * @return {@link SectionNode}.
 	 */
 	SectionNode createSectionNode(String sectionName, SectionNode parentSection);
@@ -349,17 +309,14 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedFunctionSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link ManagedFunctionSource} type.
-	 * @param managedFunctionSourceName
-	 *            {@link ManagedFunctionSource} class name or an alias to a
-	 *            {@link ManagedFunctionSource} class.
-	 * @param node
-	 *            {@link Node} requiring the {@link ManagedFunctionSource}
-	 *            class.
-	 * @return {@link ManagedFunctionSource} class, or <code>null</code> with
-	 *         issues reported to the {@link CompilerIssues} of this
-	 *         {@link NodeContext}.
+	 * @param                           <S> {@link ManagedFunctionSource} type.
+	 * @param managedFunctionSourceName {@link ManagedFunctionSource} class name or
+	 *                                  an alias to a {@link ManagedFunctionSource}
+	 *                                  class.
+	 * @param node                      {@link Node} requiring the
+	 *                                  {@link ManagedFunctionSource} class.
+	 * @return {@link ManagedFunctionSource} class, or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues} of this {@link NodeContext}.
 	 */
 	<S extends ManagedFunctionSource> Class<S> getManagedFunctionSourceClass(String managedFunctionSourceName,
 			Node node);
@@ -367,8 +324,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedFunctionLoader}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link ManagedFunctionLoader}.
+	 * @param node {@link Node} requiring the {@link ManagedFunctionLoader}.
 	 * @return {@link ManagedFunctionLoader}.
 	 */
 	ManagedFunctionLoader getManagedFunctionLoader(Node node);
@@ -376,10 +332,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link FunctionNamespaceNode}.
 	 * 
-	 * @param functionNamespaceName
-	 *            Name of the {@link FunctionNamespaceNode}.
-	 * @param section
-	 *            Parent {@link SectionNode}.
+	 * @param functionNamespaceName Name of the {@link FunctionNamespaceNode}.
+	 * @param section               Parent {@link SectionNode}.
 	 * @return {@link FunctionNamespaceNode}.
 	 */
 	FunctionNamespaceNode createFunctionNamespaceNode(String functionNamespaceName, SectionNode section);
@@ -387,12 +341,9 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link FunctionFlowNode}.
 	 * 
-	 * @param flowName
-	 *            Name of the {@link FunctionFlowNode}.
-	 * @param isEscalation
-	 *            Indicates if is {@link Escalation}.
-	 * @param function
-	 *            Parent {@link ManagedFunctionNode}.
+	 * @param flowName     Name of the {@link FunctionFlowNode}.
+	 * @param isEscalation Indicates if is {@link Escalation}.
+	 * @param function     Parent {@link ManagedFunctionNode}.
 	 * @return {@link FunctionFlowNode}.
 	 */
 	FunctionFlowNode createFunctionFlowNode(String flowName, boolean isEscalation, ManagedFunctionNode function);
@@ -400,8 +351,7 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link ManagedFunctionNode}.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunctionNode}.
+	 * @param functionName Name of the {@link ManagedFunctionNode}.
 	 * @return {@link ManagedFunctionNode}.
 	 */
 	ManagedFunctionNode createFunctionNode(String functionName);
@@ -409,10 +359,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link FunctionObjectNode}.
 	 * 
-	 * @param objectName
-	 *            Name of the {@link FunctionObjectNode}.
-	 * @param functionNode
-	 *            Parent {@link ManagedFunctionNode}.
+	 * @param objectName   Name of the {@link FunctionObjectNode}.
+	 * @param functionNode Parent {@link ManagedFunctionNode}.
 	 * @return {@link FunctionObjectNode}.
 	 */
 	FunctionObjectNode createFunctionObjectNode(String objectName, ManagedFunctionNode functionNode);
@@ -420,10 +368,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link ResponsibleTeamNode}.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link ResponsibleTeamNode}.
-	 * @param function
-	 *            Parent {@link ManagedFunctionNode}.
+	 * @param teamName Name of the {@link ResponsibleTeamNode}.
+	 * @param function Parent {@link ManagedFunctionNode}.
 	 * @return {@link ResponsibleTeamNode}.
 	 */
 	ResponsibleTeamNode createResponsibleTeamNode(String teamName, ManagedFunctionNode function);
@@ -431,16 +377,12 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedObjectSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceName
-	 *            {@link ManagedObjectSource} class name or an alias to a
-	 *            {@link ManagedObjectSource} class.
-	 * @param node
-	 *            {@link Node} for reporting issues.
-	 * @return {@link ManagedObjectSource} class, or <code>null</code> with
-	 *         issues reported to the {@link CompilerIssues} of this
-	 *         {@link NodeContext}.
+	 * @param                         <S> {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceName {@link ManagedObjectSource} class name or an
+	 *                                alias to a {@link ManagedObjectSource} class.
+	 * @param node                    {@link Node} for reporting issues.
+	 * @return {@link ManagedObjectSource} class, or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues} of this {@link NodeContext}.
 	 */
 	<S extends ManagedObjectSource<?, ?>> Class<S> getManagedObjectSourceClass(String managedObjectSourceName,
 			Node node);
@@ -448,8 +390,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedObjectLoader}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link ManagedObjectLoader}.
+	 * @param node {@link Node} requiring the {@link ManagedObjectLoader}.
 	 * @return {@link ManagedObjectLoader}.
 	 */
 	ManagedObjectLoader getManagedObjectLoader(Node node);
@@ -457,12 +398,9 @@ public interface NodeContext {
 	/**
 	 * Creates an {@link InputManagedObjectNode}.
 	 * 
-	 * @param inputManagedObjectName
-	 *            Name of the {@link InputManagedObjectNode}.
-	 * @param inputObjectType
-	 *            Input object type.
-	 * @param officeFloor
-	 *            Parent {@link OfficeFloorNode}.
+	 * @param inputManagedObjectName Name of the {@link InputManagedObjectNode}.
+	 * @param inputObjectType        Input object type.
+	 * @param officeFloor            Parent {@link OfficeFloorNode}.
 	 * @return {@link InputManagedObjectNode}.
 	 */
 	InputManagedObjectNode createInputManagedNode(String inputManagedObjectName, String inputObjectType,
@@ -472,10 +410,8 @@ public interface NodeContext {
 	 * Creates a {@link ManagedObjectDependencyNode} for a
 	 * {@link ManagedObjectNode}.
 	 * 
-	 * @param dependencyName
-	 *            Name of the {@link ManagedObjectDependencyNode}.
-	 * @param managedObject
-	 *            Parent {@link ManagedObjectNode}.
+	 * @param dependencyName Name of the {@link ManagedObjectDependencyNode}.
+	 * @param managedObject  Parent {@link ManagedObjectNode}.
 	 * @return {@link ManagedObjectDependencyNode}.
 	 */
 	ManagedObjectDependencyNode createManagedObjectDependencyNode(String dependencyName,
@@ -485,10 +421,8 @@ public interface NodeContext {
 	 * Creates a {@link ManagedObjectDependencyNode} for a
 	 * {@link InputManagedObjectNode}.
 	 * 
-	 * @param dependencyName
-	 *            Name of the {@link ManagedObjectDependencyNode}.
-	 * @param managedObjectSource
-	 *            Parent {@link ManagedObjectSourceNode}.
+	 * @param dependencyName      Name of the {@link ManagedObjectDependencyNode}.
+	 * @param managedObjectSource Parent {@link ManagedObjectSourceNode}.
 	 * @return {@link ManagedObjectDependencyNode}.
 	 */
 	ManagedObjectDependencyNode createManagedObjectDependencyNode(String dependencyName,
@@ -497,10 +431,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link ManagedObjectFlowNode}.
 	 * 
-	 * @param flowName
-	 *            Name of the {@link ManagedObjectFlowNode}.
-	 * @param managedObjectSource
-	 *            Parent {@link ManagedObjectSourceNode}.
+	 * @param flowName            Name of the {@link ManagedObjectFlowNode}.
+	 * @param managedObjectSource Parent {@link ManagedObjectSourceNode}.
 	 * @return {@link ManagedObjectFlowNode}.
 	 */
 	ManagedObjectFlowNode createManagedObjectFlowNode(String flowName, ManagedObjectSourceNode managedObjectSource);
@@ -508,10 +440,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link ManagedObjectTeamNode}.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link ManagedObjectTeamNode}.
-	 * @param managedObjectSource
-	 *            Parent {@link ManagedObjectSourceNode}.
+	 * @param teamName            Name of the {@link ManagedObjectTeamNode}.
+	 * @param managedObjectSource Parent {@link ManagedObjectSourceNode}.
 	 * @return {@link ManagedObjectTeamNode}.
 	 */
 	ManagedObjectTeamNode createManagedObjectTeamNode(String teamName, ManagedObjectSourceNode managedObjectSource);
@@ -519,8 +449,7 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link ManagingOfficeNode}.
 	 * 
-	 * @param managedObjectSource
-	 *            Parent {@link ManagedObjectSourceNode}.
+	 * @param managedObjectSource Parent {@link ManagedObjectSourceNode}.
 	 * @return {@link ManagingOfficeNode}.
 	 */
 	ManagingOfficeNode createManagingOfficeNode(ManagedObjectSourceNode managedObjectSource);
@@ -528,8 +457,7 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link ManagedObjectNode}.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObjectNode}.
+	 * @param managedObjectName Name of the {@link ManagedObjectNode}.
 	 * @return {@link ManagedObjectNode}.
 	 */
 	ManagedObjectNode createManagedObjectNode(String managedObjectName);
@@ -537,10 +465,8 @@ public interface NodeContext {
 	/**
 	 * Creates a {@link ManagedObjectSourceNode}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSourceNode}.
-	 * @param section
-	 *            Parent {@link SectionNode}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSourceNode}.
+	 * @param section                 Parent {@link SectionNode}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName, SectionNode section);
@@ -548,10 +474,8 @@ public interface NodeContext {
 	/**
 	 * Creates a {@link ManagedObjectSourceNode}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSourceNode}.
-	 * @param office
-	 *            Parent {@link OfficeNode}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSourceNode}.
+	 * @param office                  Parent {@link OfficeNode}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName, OfficeNode office);
@@ -559,10 +483,9 @@ public interface NodeContext {
 	/**
 	 * Creates a {@link ManagedObjectSourceNode}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSourceNode}.
-	 * @param suppliedManagedObject
-	 *            Parent {@link SuppliedManagedObjectSourceNode}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSourceNode}.
+	 * @param suppliedManagedObject   Parent
+	 *                                {@link SuppliedManagedObjectSourceNode}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName,
@@ -571,10 +494,8 @@ public interface NodeContext {
 	/**
 	 * Creates a {@link ManagedObjectSourceNode}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSourceNode}.
-	 * @param officeFloor
-	 *            Parent {@link OfficeFloorNode}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSourceNode}.
+	 * @param officeFloor             Parent {@link OfficeFloorNode}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	ManagedObjectSourceNode createManagedObjectSourceNode(String managedObjectSourceName, OfficeFloorNode officeFloor);
@@ -582,13 +503,11 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedObjectPoolSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link ManagedObjectPoolSource} type.
-	 * @param managedObjectPoolSourceName
-	 *            {@link ManagedObjectPoolSource} class name or an alias to a
-	 *            {@link ManagedObjectPoolSource} class.
-	 * @param node
-	 *            {@link Node} for reporting issues.
+	 * @param                             <S> {@link ManagedObjectPoolSource} type.
+	 * @param managedObjectPoolSourceName {@link ManagedObjectPoolSource} class name
+	 *                                    or an alias to a
+	 *                                    {@link ManagedObjectPoolSource} class.
+	 * @param node                        {@link Node} for reporting issues.
 	 * @return {@link ManagedObjectPoolSource} class, or <code>null</code> with
 	 *         issues reported to the {@link CompilerIssues} of this
 	 *         {@link NodeContext}.
@@ -599,8 +518,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedObjectPoolLoader}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link ManagedObjectPoolLoader}.
+	 * @param node {@link Node} requiring the {@link ManagedObjectPoolLoader}.
 	 * @return {@link ManagedObjectPoolLoader}.
 	 */
 	ManagedObjectPoolLoader getManagedObjectPoolLoader(Node node);
@@ -608,10 +526,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link ManagedObjectPoolNode}.
 	 * 
-	 * @param managedObjectPoolName
-	 *            Name of the {@link ManagedObjectPoolNode}.
-	 * @param officeFloorNode
-	 *            Parent {@link OfficeFloorNode}.
+	 * @param managedObjectPoolName Name of the {@link ManagedObjectPoolNode}.
+	 * @param officeFloorNode       Parent {@link OfficeFloorNode}.
 	 * @return {@link ManagedObjectPoolNode}.
 	 */
 	ManagedObjectPoolNode createManagedObjectPoolNode(String managedObjectPoolName, OfficeFloorNode officeFloorNode);
@@ -619,10 +535,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link ManagedObjectPoolNode}.
 	 * 
-	 * @param managedObjectPoolName
-	 *            Name of the {@link ManagedObjectPoolNode}.
-	 * @param officeNode
-	 *            Parent {@link OfficeNode}.
+	 * @param managedObjectPoolName Name of the {@link ManagedObjectPoolNode}.
+	 * @param officeNode            Parent {@link OfficeNode}.
 	 * @return {@link ManagedObjectPoolNode}.
 	 */
 	ManagedObjectPoolNode createManagedObjectPoolNode(String managedObjectPoolName, OfficeNode officeNode);
@@ -630,10 +544,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link ManagedObjectPoolNode}.
 	 * 
-	 * @param managedObjectPoolName
-	 *            Name of the {@link ManagedObjectPoolNode}.
-	 * @param sectionNode
-	 *            Parent {@link SectionNode}.
+	 * @param managedObjectPoolName Name of the {@link ManagedObjectPoolNode}.
+	 * @param sectionNode           Parent {@link SectionNode}.
 	 * @return {@link ManagedObjectPoolNode}.
 	 */
 	ManagedObjectPoolNode createManagedObjectPoolNode(String managedObjectPoolName, SectionNode sectionNode);
@@ -641,24 +553,20 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link SupplierSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link SupplierSource} type.
-	 * @param supplierSourceClassName
-	 *            {@link SupplierSource} class name or an alias to a
-	 *            {@link SupplierSource} class.
-	 * @param node
-	 *            {@link Node} requiring the {@link SupplierSource} class.
+	 * @param                         <S> {@link SupplierSource} type.
+	 * @param supplierSourceClassName {@link SupplierSource} class name or an alias
+	 *                                to a {@link SupplierSource} class.
+	 * @param node                    {@link Node} requiring the
+	 *                                {@link SupplierSource} class.
 	 * @return {@link SupplierSource} class, or <code>null</code> with issues
-	 *         reported to the {@link CompilerIssues} of this
-	 *         {@link NodeContext}.
+	 *         reported to the {@link CompilerIssues} of this {@link NodeContext}.
 	 */
 	<S extends SupplierSource> Class<S> getSupplierSourceClass(String supplierSourceClassName, Node node);
 
 	/**
 	 * Obtains the {@link SupplierLoader}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link SupplierLoader}.
+	 * @param node {@link Node} requiring the {@link SupplierLoader}.
 	 * @return {@link SupplierLoader}.
 	 */
 	SupplierLoader getSupplierLoader(Node node);
@@ -666,12 +574,9 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link SuppliedManagedObjectSourceNode}.
 	 * 
-	 * @param qualifier
-	 *            Qualifier. May be <code>null</code> if no qualifier.
-	 * @param type
-	 *            Type.
-	 * @param supplier
-	 *            Parent {@link SupplierNode}.
+	 * @param qualifier Qualifier. May be <code>null</code> if no qualifier.
+	 * @param type      Type.
+	 * @param supplier  Parent {@link SupplierNode}.
 	 * @return {@link SuppliedManagedObjectSourceNode}.
 	 */
 	SuppliedManagedObjectSourceNode createSuppliedManagedObjectNode(String qualifier, String type,
@@ -680,10 +585,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link SupplierNode}.
 	 * 
-	 * @param supplierName
-	 *            Name of the {@link SupplierNode}.
-	 * @param officeFloor
-	 *            Parent {@link OfficeFloorNode}.
+	 * @param supplierName Name of the {@link SupplierNode}.
+	 * @param officeFloor  Parent {@link OfficeFloorNode}.
 	 * @return {@link SupplierNode}.
 	 */
 	SupplierNode createSupplierNode(String supplierName, OfficeFloorNode officeFloor);
@@ -691,10 +594,8 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link SupplierNode}.
 	 * 
-	 * @param supplierName
-	 *            Name of the {@link SupplierNode}.
-	 * @param office
-	 *            Parent {@link Office}.
+	 * @param supplierName Name of the {@link SupplierNode}.
+	 * @param office       Parent {@link Office}.
 	 * @return {@link SupplierNode}.
 	 */
 	SupplierNode createSupplierNode(String supplierName, OfficeNode office);
@@ -702,16 +603,14 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link AdministrationSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link AdministrationSource} type.
-	 * @param administrationSourceClassName
-	 *            {@link AdministrationSource} class name or an alias to an
-	 *            {@link AdministrationSource} class.
-	 * @param node
-	 *            {@link Node} requiring the {@link AdministrationSource} class.
-	 * @return {@link AdministrationSource} class, or <code>null</code> with
-	 *         issues reported to the {@link CompilerIssues} of this
-	 *         {@link NodeContext}.
+	 * @param                               <S> {@link AdministrationSource} type.
+	 * @param administrationSourceClassName {@link AdministrationSource} class name
+	 *                                      or an alias to an
+	 *                                      {@link AdministrationSource} class.
+	 * @param node                          {@link Node} requiring the
+	 *                                      {@link AdministrationSource} class.
+	 * @return {@link AdministrationSource} class, or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues} of this {@link NodeContext}.
 	 */
 	<S extends AdministrationSource<?, ?, ?>> Class<S> getAdministrationSourceClass(
 			String administrationSourceClassName, Node node);
@@ -719,8 +618,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link AdministrationLoader}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link AdministrationLoader}.
+	 * @param node {@link Node} requiring the {@link AdministrationLoader}.
 	 * @return {@link AdministrationLoader}.
 	 */
 	AdministrationLoader getAdministrationLoader(Node node);
@@ -728,10 +626,9 @@ public interface NodeContext {
 	/**
 	 * Creates a {@link AdministrationNode}.
 	 * 
-	 * @param administratorName
-	 *            Name of the {@link Administration}.
-	 * @param office
-	 *            {@link OfficeNode} containing this {@link Administration}.
+	 * @param administratorName Name of the {@link Administration}.
+	 * @param office            {@link OfficeNode} containing this
+	 *                          {@link Administration}.
 	 * @return {@link AdministrationNode}.
 	 */
 	AdministrationNode createAdministrationNode(String administratorName, OfficeNode office);
@@ -739,24 +636,20 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link GovernanceSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link GovernanceSource} type.
-	 * @param governanceSourceName
-	 *            {@link GovernanceSource} class name or an alias to an
-	 *            {@link GovernanceSource} class.
-	 * @param node
-	 *            {@link Node} requiring the {@link GovernanceSource} class.
+	 * @param                      <S> {@link GovernanceSource} type.
+	 * @param governanceSourceName {@link GovernanceSource} class name or an alias
+	 *                             to an {@link GovernanceSource} class.
+	 * @param node                 {@link Node} requiring the
+	 *                             {@link GovernanceSource} class.
 	 * @return {@link GovernanceSource} class, or <code>null</code> with issues
-	 *         reported to the {@link CompilerIssues} of this
-	 *         {@link NodeContext}.
+	 *         reported to the {@link CompilerIssues} of this {@link NodeContext}.
 	 */
 	<S extends GovernanceSource<?, ?>> Class<S> getGovernanceSourceClass(String governanceSourceName, Node node);
 
 	/**
 	 * Obtains the {@link GovernanceLoader}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link GovernanceLoader}.
+	 * @param node {@link Node} requiring the {@link GovernanceLoader}.
 	 * @return {@link GovernanceLoader}.
 	 */
 	GovernanceLoader getGovernanceLoader(Node node);
@@ -764,10 +657,8 @@ public interface NodeContext {
 	/**
 	 * Creates a {@link GovernanceNode}.
 	 * 
-	 * @param governanceName
-	 *            Name of the {@link Governance}.
-	 * @param office
-	 *            {@link OfficeNode} containing this {@link Governance}.
+	 * @param governanceName Name of the {@link Governance}.
+	 * @param office         {@link OfficeNode} containing this {@link Governance}.
 	 * @return {@link GovernanceNode}.
 	 */
 	GovernanceNode createGovernanceNode(String governanceName, OfficeNode office);
@@ -775,24 +666,20 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link TeamSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link TeamSource} type.
-	 * @param teamSourceClassName
-	 *            {@link TeamSource} class name or an alias to a
-	 *            {@link TeamSource} class.
-	 * @param node
-	 *            {@link Node} requiring the {@link TeamSource} class.
-	 * @return {@link TeamSource} class, or <code>null</code> with issues
-	 *         reported to the {@link CompilerIssues} of this
-	 *         {@link NodeContext}.
+	 * @param                     <S> {@link TeamSource} type.
+	 * @param teamSourceClassName {@link TeamSource} class name or an alias to a
+	 *                            {@link TeamSource} class.
+	 * @param node                {@link Node} requiring the {@link TeamSource}
+	 *                            class.
+	 * @return {@link TeamSource} class, or <code>null</code> with issues reported
+	 *         to the {@link CompilerIssues} of this {@link NodeContext}.
 	 */
 	<S extends TeamSource> Class<S> getTeamSourceClass(String teamSourceClassName, Node node);
 
 	/**
 	 * Obtains the {@link TeamLoader}.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link TeamLoader}.
+	 * @param node {@link Node} requiring the {@link TeamLoader}.
 	 * @return {@link TeamLoader}.
 	 */
 	TeamLoader getTeamLoader(Node node);
@@ -800,21 +687,25 @@ public interface NodeContext {
 	/**
 	 * Creates the {@link TeamNode}.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link TeamNode}.
-	 * @param officeFloor
-	 *            Parent {@link OfficeFloorNode}.
+	 * @param teamName    Name of the {@link TeamNode}.
+	 * @param officeFloor Parent {@link OfficeFloorNode}.
 	 * @return {@link TeamNode}.
 	 */
 	TeamNode createTeamNode(String teamName, OfficeFloorNode officeFloor);
 
 	/**
+	 * Creates the {@link ExecutiveNode}.
+	 * 
+	 * @param officeFloor Parent {@link OfficeFloorNode}.
+	 * @return {@link ExecutiveNode}.
+	 */
+	ExecutiveNode createExecutiveNode(OfficeFloorNode officeFloor);
+
+	/**
 	 * Creates an {@link EscalationNode}.
 	 * 
-	 * @param escalationType
-	 *            {@link Escalation} type.
-	 * @param officeNode
-	 *            {@link OfficeNode} containing this {@link Escalation}.
+	 * @param escalationType {@link Escalation} type.
+	 * @param officeNode     {@link OfficeNode} containing this {@link Escalation}.
 	 * @return {@link EscalationNode}.
 	 */
 	EscalationNode createEscalationNode(String escalationType, OfficeNode officeNode);

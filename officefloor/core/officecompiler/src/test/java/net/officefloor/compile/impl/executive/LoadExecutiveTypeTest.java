@@ -25,6 +25,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.executive.ExecutionStrategyType;
 import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.executive.ExecutiveType;
+import net.officefloor.compile.executive.TeamOversightType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
@@ -126,6 +127,36 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if fail to create {@link Executive}.
+	 */
+	public void testFailureInCreatingExecutive() {
+
+		// Record failure to create executive
+		Exception exception = new Exception("TEST");
+		this.issues.recordIssue("Failed to create the Executive from " + MockLoadExecutiveSource.class.getName(),
+				exception);
+
+		// Attempt to load
+		this.loadExecutiveType(false, (context) -> {
+			throw exception;
+		});
+	}
+
+	/**
+	 * Ensure issue if no {@link Executive} created.
+	 */
+	public void testIssueIfNoExecutive() {
+
+		// Record no executive
+		this.issues.recordIssue("No Executive provided from " + MockLoadExecutiveSource.class.getName());
+
+		// Attempt to load
+		MockLoadExecutiveSource.isCreateExecutive = false;
+		this.loadExecutiveType(false, (context) -> {
+		});
+	}
+
+	/**
 	 * Ensure can load the {@link ExecutiveType}.
 	 */
 	public void testLoadExecutive() {
@@ -136,10 +167,12 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 		// Ensure contains type information
 		assertNotNull("Should have executive type");
 		ExecutionStrategyType[] strategies = type.getExecutionStrategyTypes();
-		assertNotNull("Should have execution strategies");
+		assertNotNull("Should have execution strategies", strategies);
 		assertEquals("Incorrect number of execution strategies", 1, strategies.length);
 		assertEquals("Incorrect execution strategy", MockLoadExecutiveSource.DEFAULT_EXECUTION_STRATEGY_NAME,
 				strategies[0].getExecutionStrategyName());
+		TeamOversightType[] oversights = type.getTeamOversightTypes();
+		assertEquals("Should have no team oversights", 0, oversights.length);
 	}
 
 	/**
@@ -160,7 +193,7 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testIssueIfNullExecutionStrategy() {
 		// Record null executive strategy
-		this.issues.recordIssue("Executive provided null ExecutionStrategy for index 0");
+		this.issues.recordIssue("Null ExecutionStrategy provided for index 0");
 
 		// Attempt to load
 		MockLoadExecutiveSource.executionStrategyNames = new String[] { null };
@@ -172,7 +205,7 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testIssueIfNoExecutionStrategyName() {
 		// Return no strategy name
-		this.issues.recordIssue("Executive had blank name for ExecutionStrategy for index 0");
+		this.issues.recordIssue("No name for ExecutionStrategy at index 0");
 
 		// Attempt to load
 		MockLoadExecutiveSource.executionStrategyNames = new String[] { "" };
@@ -184,7 +217,7 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testIssueIfNullTeamOversight() {
 		// Record null team oversight
-		this.issues.recordIssue("Executive provided null TeamOversight for index 0");
+		this.issues.recordIssue("Null TeamOversight provided for index 0");
 
 		// Attempt to load
 		MockLoadExecutiveSource.teamOversightNames = new String[] { null };
@@ -196,11 +229,29 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 	 */
 	public void testIssueIfNoTeamOversightName() {
 		// Return no strategy name
-		this.issues.recordIssue("Executive had blank name for TeamOversight for index 0");
+		this.issues.recordIssue("No name for TeamOversight at index 0");
 
 		// Attempt to load
 		MockLoadExecutiveSource.teamOversightNames = new String[] { "" };
 		this.loadExecutiveType(false, null);
+	}
+
+	/**
+	 * Ensure load {@link TeamOversightType}.
+	 */
+	public void testLoadTeamOversight() {
+
+		// Load the executive
+		MockLoadExecutiveSource.teamOversightNames = new String[] { "TEST" };
+		ExecutiveType type = this.loadExecutiveType(true, null);
+
+		// Ensure contains type information
+		assertNotNull("Should have executive type");
+		TeamOversightType[] oversights = type.getTeamOversightTypes();
+		assertNotNull("Should have team oversights", oversights);
+		assertEquals("Incorrect number of team oversights", 1, oversights.length);
+		assertEquals("Incorrect team oversight", MockLoadExecutiveSource.teamOversightNames[0],
+				oversights[0].getTeamOversightName());
 	}
 
 	/**
@@ -236,8 +287,7 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		ExecutiveLoader executiveLoader = compiler.getExecutiveLoader();
 		MockLoadExecutiveSource.loader = loader;
-		ExecutiveType executiveType = executiveLoader.loadExecutiveType("executive", MockLoadExecutiveSource.class,
-				propertyList);
+		ExecutiveType executiveType = executiveLoader.loadExecutiveType(MockLoadExecutiveSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();
@@ -284,6 +334,11 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 		public static Loader loader;
 
 		/**
+		 * Indicates whether will create the {@link Executive}.
+		 */
+		private static boolean isCreateExecutive = true;
+
+		/**
 		 * {@link ExecutionStrategy} names.
 		 */
 		private static String[] executionStrategyNames = new String[] { DEFAULT_EXECUTION_STRATEGY_NAME };
@@ -303,6 +358,7 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 		 */
 		public static void reset() {
 			loader = null;
+			isCreateExecutive = true;
 			executionStrategyNames = new String[] { DEFAULT_EXECUTION_STRATEGY_NAME };
 			teamOversightNames = new String[0];
 			instantiateFailure = null;
@@ -330,7 +386,7 @@ public class LoadExecutiveTypeTest extends OfficeFrameTestCase {
 		@Override
 		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
 			loader.sourceExecutive(context);
-			return this;
+			return isCreateExecutive ? this : null;
 		}
 
 		/*

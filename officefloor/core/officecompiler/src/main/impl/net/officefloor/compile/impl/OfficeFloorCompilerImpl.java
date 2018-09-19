@@ -36,6 +36,7 @@ import net.officefloor.compile.administration.AdministrationLoader;
 import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.administrator.AdministrationLoaderImpl;
+import net.officefloor.compile.impl.executive.ExecutiveLoaderImpl;
 import net.officefloor.compile.impl.governance.GovernanceLoaderImpl;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.impl.managedfunction.ManagedFunctionLoaderImpl;
@@ -50,6 +51,7 @@ import net.officefloor.compile.impl.structure.AdministrationNodeImpl;
 import net.officefloor.compile.impl.structure.AutoWirerImpl;
 import net.officefloor.compile.impl.structure.CompileContextImpl;
 import net.officefloor.compile.impl.structure.EscalationNodeImpl;
+import net.officefloor.compile.impl.structure.ExecutiveNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionFlowNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
@@ -86,6 +88,7 @@ import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.FunctionObjectNode;
@@ -513,6 +516,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public TeamLoader getTeamLoader() {
 		return new TeamLoaderImpl(this, this);
+	}
+
+	@Override
+	public ExecutiveLoader getExecutiveLoader() {
+		return new ExecutiveLoaderImpl(this, this);
 	}
 
 	@Override
@@ -1115,9 +1123,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public ExecutiveLoader getExecutiveLoader() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement getExecutiveLoader");
+	public ExecutiveNode createExecutiveNode(OfficeFloorNode officeFloor) {
+		return new ExecutiveNodeImpl(officeFloor, this);
 	}
 
 	@Override

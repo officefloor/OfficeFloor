@@ -19,6 +19,7 @@ package net.officefloor.compile.executive;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.TeamOversight;
 
 /**
  * <p>
@@ -38,4 +39,12 @@ public interface ExecutiveType {
 	 */
 	ExecutionStrategyType[] getExecutionStrategyTypes();
 
+	/**
+	 * Obtains the {@link TeamOversightType} definitions for the
+	 * {@link TeamOversight} instances available from the {@link Executive}.
+	 * 
+	 * @return {@link TeamOversightType} definitions for the {@link TeamOversight}
+	 *         instances available from the {@link Executive}.
+	 */
+	TeamOversightType[] getTeamOversightTypes();
 }
