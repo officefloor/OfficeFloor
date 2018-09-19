@@ -92,7 +92,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 	 */
 	public void testRetrieveOfficeFloor() throws Exception {
 
-		// Load the Office Floor
+		// Load the OfficeFloor
 		ModelRepository repository = new ModelRepositoryImpl();
 		OfficeFloorModel officeFloor = new OfficeFloorModel();
 		repository.retrieve(officeFloor, this.configurationItem);
@@ -203,8 +203,8 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the OfficeFloor executive
 		// ----------------------------------------
 		OfficeFloorExecutiveModel executive = officeFloor.getOfficeFloorExecutive();
-		assertProperties(new OfficeFloorExecutiveModel("net.example.ExampleExecutiveSource"), executive,
-				"getExecutiveSourceClassName");
+		assertProperties(new OfficeFloorExecutiveModel("net.example.ExampleExecutiveSource", 500, 501), executive,
+				"getExecutiveSourceClassName", "getX", "getY");
 		assertList(new String[] { "getExecutionStrategyName" }, executive.getExecutionStrategies(),
 				new OfficeFloorExecutionStrategyModel("EXECUTION_STRATEGY"));
 		assertList(new String[] { "getTeamOversightName" }, executive.getTeamOversights(),
@@ -215,7 +215,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeFloorTeamName", "getTeamSourceClassName", "getX", "getY" },
 				officeFloor.getOfficeFloorTeams(),
-				new OfficeFloorTeamModel("TEAM", "net.example.ExampleTeamSource", 500, 501));
+				new OfficeFloorTeamModel("TEAM", "net.example.ExampleTeamSource", 600, 601));
 		OfficeFloorTeamModel team = officeFloor.getOfficeFloorTeams().get(0);
 		assertList(new String[] { "getName", "getValue" }, team.getProperties(),
 				new PropertyModel("TEAM_ONE", "VALUE_ONE"), new PropertyModel("TEAM_TWO", "VALUE_TWO"));
@@ -232,7 +232,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				new String[] { "getDeployedOfficeName", "getOfficeSourceClassName", "getOfficeLocation", "getX",
 						"getY" },
 				officeFloor.getDeployedOffices(),
-				new DeployedOfficeModel("OFFICE", "net.example.ExampleOfficeSource", "OFFICE_LOCATION", 600, 601));
+				new DeployedOfficeModel("OFFICE", "net.example.ExampleOfficeSource", "OFFICE_LOCATION", 700, 701));
 		DeployedOfficeModel office = officeFloor.getDeployedOffices().get(0);
 		assertList(new String[] { "getName", "getValue" }, office.getProperties(),
 				new PropertyModel("OFFICE_ONE", "VALUE_ONE"), new PropertyModel("OFFICE_TWO", "VALUE_TWO"));

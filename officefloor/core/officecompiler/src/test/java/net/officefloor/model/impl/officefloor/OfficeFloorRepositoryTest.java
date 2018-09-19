@@ -548,7 +548,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				mosTeamToTeam.getOfficeFloorTeamName());
 		assertEquals("OfficeFloor managed object executive strategy - OfficeFloor executive strategy",
 				"OFFICE_FLOOR_EXECUTIVE_STRATEGY",
-				mosExecutionStrategyToExecutionStrategy.getOfficeFloorExecutionStategyName());
+				mosExecutionStrategyToExecutionStrategy.getOfficeFloorExecutionStrategyName());
 		assertEquals("office object - OfficeFloor managed object", "MANAGED_OBJECT",
 				officeObjectToManagedObject.getOfficeFloorManagedObjectName());
 		assertEquals("office object - OfficeFloor input managed object", "INPUT_MANAGED_OBJECT",
