@@ -20,6 +20,8 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.executive.ExecutiveType;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 
 /**
@@ -51,5 +53,13 @@ public interface ExecutiveNode extends Node, OfficeFloorExecutive {
 	 *         the {@link CompilerIssues}.
 	 */
 	ExecutiveType loadExecutiveType();
+
+	/**
+	 * Builds the {@link Executive} for this {@link ExecutiveNode}.
+	 * 
+	 * @param builder        {@link OfficeFloorBuilder}.
+	 * @param compileContext {@link CompileContext}.
+	 */
+	void buildExecutive(OfficeFloorBuilder builder, CompileContext compileContext);
 
 }

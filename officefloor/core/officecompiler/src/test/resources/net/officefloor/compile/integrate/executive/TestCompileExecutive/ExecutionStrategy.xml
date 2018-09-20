@@ -1,0 +1,19 @@
+<context>
+	<office-floor>
+		<executive source="${testcase}$MockExecutiveSource">
+			<team-oversight name="MOCK" />
+		</executive>
+		<managed-object-sources>
+			<managed-object-source
+				name="MANAGED_OBJECT_SOURCE"
+				source="${testcase}$ExecutionStrategyManagedObject" timeout="10">
+				<managing-office name="OFFICE" />
+				<execution-strategy name="MOCK" />
+			</managed-object-source>
+		</managed-object-sources>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office />
+</context>

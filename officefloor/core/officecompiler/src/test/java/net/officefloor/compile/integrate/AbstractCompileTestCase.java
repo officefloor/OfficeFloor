@@ -39,6 +39,7 @@ import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.build.ExecutiveBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
@@ -51,6 +52,8 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
@@ -139,6 +142,32 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 			this.officeFloorBuilder.addResources(resourceSource);
 		}
 		this.officeFloorBuilder.addResources(this.getResourceSource());
+	}
+
+	/**
+	 * Records specifying the {@link Executive} on the {@link OfficeFloorBuilder}.
+	 * 
+	 * @param executiveSource    {@link ExecutiveSource}.
+	 * @param propertyNameValues {@link Property} name/value listing.
+	 * @return {@link ExecutiveBuilder} for the {@link Executive}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <S extends ExecutiveSource> ExecutiveBuilder<S> record_officeFloorBuilder_setExecutive(S executiveSource,
+			String... propertyNameValues) {
+		ExecutiveBuilder<S> builder = this.createMock(ExecutiveBuilder.class);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder.setExecutive(executiveSource), builder);
+		this.control(this.officeFloorBuilder).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				return (expected[0].getClass().equals(actual[0].getClass()));
+			}
+		});
+		for (int i = 0; i < propertyNameValues.length; i += 2) {
+			String name = propertyNameValues[i];
+			String value = propertyNameValues[i + 1];
+			builder.addProperty(name, value);
+		}
+		return builder;
 	}
 
 	/**

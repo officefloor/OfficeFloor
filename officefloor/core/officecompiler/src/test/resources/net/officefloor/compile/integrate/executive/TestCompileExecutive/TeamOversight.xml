@@ -1,0 +1,12 @@
+<context>
+	<office-floor>
+		<executive source="${testcase}$MockExecutiveSource">
+			<team-oversight name="MOCK" />
+		</executive>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON">
+				<team-oversight name="MOCK" />
+			</team>
+		</teams>
+	</office-floor>
+</context>

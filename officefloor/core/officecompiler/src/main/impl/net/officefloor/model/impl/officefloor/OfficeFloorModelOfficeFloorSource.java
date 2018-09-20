@@ -22,18 +22,19 @@ import java.util.Map;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.TripleKeyMap;
-import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
@@ -51,6 +52,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
+import net.officefloor.model.officefloor.OfficeFloorExecutiveModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
@@ -58,6 +60,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOff
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectPoolModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
@@ -371,6 +374,13 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			}
 		}
 
+		// Set the OfficeFloor executive
+		OfficeFloorExecutiveModel executiveModel = officeFloor.getOfficeFloorExecutive();
+		OfficeFloorExecutive executive = null;
+		if (executiveModel != null) {
+			executive = deployer.setExecutive(executiveModel.getExecutiveSourceClassName());
+		}
+
 		// Add the OfficeFloor teams, keeping registry of teams
 		Map<String, OfficeFloorTeam> officeFloorTeams = new HashMap<String, OfficeFloorTeam>();
 		for (OfficeFloorTeamModel teamModel : officeFloor.getOfficeFloorTeams()) {
@@ -552,7 +562,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 
 				// Add the OfficeFloor managed object source team
 				String mosTeamName = mosTeamModel.getOfficeFloorManagedObjectSourceTeamName();
-				ManagedObjectTeam mosTeam = managedObjectSource.getManagedObjectTeam(mosTeamName);
+				OfficeFloorManagedObjectTeam mosTeam = managedObjectSource.getOfficeFloorManagedObjectTeam(mosTeamName);
 
 				// Obtain the OfficeFloor team
 				OfficeFloorTeam team = null;
@@ -569,17 +579,28 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 					deployer.link(mosTeam, team);
 				}
 			}
+
+			// Add the OfficeFloor managed object source execution strategies
+			for (OfficeFloorManagedObjectSourceExecutionStrategyModel mosExecutionStrategyModel : managedObjectSourceModel
+					.getOfficeFloorManagedObjectSourceExecutionStrategies()) {
+
+				// Add the OfficeFloor managed object source execution strategy
+				String mosExecutionStrategyName = mosExecutionStrategyModel
+						.getOfficeFloorManagedObjectSourceExecutionStrategyName();
+//				OfficeFloorManagedObjectExecutionStrategy mosExecutionStrategy = managedObjectSource
+//						.getOfficeFloorManagedObjectExecutionStrategy(mosExecutionStrategyName);
+
+				// Obtain the OfficeFloor execution strategy
+				
+			}
 		}
 	}
 
 	/**
-	 * Obtains {@link DeployedOfficeModel} for the
-	 * {@link DeployedOfficeInputModel}.
+	 * Obtains {@link DeployedOfficeModel} for the {@link DeployedOfficeInputModel}.
 	 * 
-	 * @param officeInputModel
-	 *            {@link DeployedOfficeInputModel}.
-	 * @param officeFloor
-	 *            {@link OfficeFloorModel}.
+	 * @param officeInputModel {@link DeployedOfficeInputModel}.
+	 * @param officeFloor      {@link OfficeFloorModel}.
 	 * @return {@link DeployedOfficeModel}.
 	 */
 	private DeployedOfficeModel getOfficeForInput(DeployedOfficeInputModel officeInputModel,
@@ -600,17 +621,13 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 	}
 
 	/**
-	 * Obtains the {@link ManagedObjectScope} from the managed object scope
-	 * name.
+	 * Obtains the {@link ManagedObjectScope} from the managed object scope name.
 	 * 
-	 * @param managedObjectScope
-	 *            Name of the {@link ManagedObjectScope}.
-	 * @param deployer
-	 *            {@link OfficeFloorDeployer}.
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeFloorManagedObjectModel}.
-	 * @return {@link ManagedObjectScope} or <code>null</code> with issue
-	 *         reported to the {@link OfficeFloorDeployer}.
+	 * @param managedObjectScope Name of the {@link ManagedObjectScope}.
+	 * @param deployer           {@link OfficeFloorDeployer}.
+	 * @param managedObjectName  Name of the {@link OfficeFloorManagedObjectModel}.
+	 * @return {@link ManagedObjectScope} or <code>null</code> with issue reported
+	 *         to the {@link OfficeFloorDeployer}.
 	 */
 	private ManagedObjectScope getManagedObjectScope(String managedObjectScope, OfficeFloorDeployer deployer,
 			String managedObjectName) {

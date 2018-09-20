@@ -37,6 +37,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
@@ -180,8 +181,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if adding the {@link OfficeFloorManagedObjectSource}
-	 * instance twice.
+	 * Ensure issue if adding the {@link OfficeFloorManagedObjectSource} instance
+	 * twice.
 	 */
 	public void testAddOfficeFloorManagedObjectSourceInstanceTwice() {
 
@@ -335,8 +336,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if adding the supplied
-	 * {@link OfficeFloorManagedObjectSource} twice.
+	 * Ensure issue if adding the supplied {@link OfficeFloorManagedObjectSource}
+	 * twice.
 	 */
 	public void testAddSuppliedOfficeFloorManagedObjectSourceTwice() {
 
@@ -359,8 +360,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if adding the {@link OfficeFloorManagedObjectSource} twice
-	 * by different {@link OfficeFloorSupplier} instances.
+	 * Ensure issue if adding the {@link OfficeFloorManagedObjectSource} twice by
+	 * different {@link OfficeFloorSupplier} instances.
 	 */
 	public void testAddOfficeFloorManagedObjectSourceTwiceByDifferentSuppliers() {
 
@@ -537,7 +538,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeFloorManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO", null);
-		ManagedObjectTeam team = moSource.getManagedObjectTeam("TEAM");
+		OfficeFloorManagedObjectTeam team = moSource.getOfficeFloorManagedObjectTeam("TEAM");
 		OfficeFloorTeam officeFloorTeam = this.addTeam(this.node, "OFFICE_FLOOR_TEAM", null);
 		this.node.link(team, officeFloorTeam);
 		assertTeamLink("managed object source team -> office floor team", team, officeFloorTeam);
@@ -581,8 +582,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 	/**
 	 * Ensure can link {@link OfficeFloorManagedObject}
-	 * {@link ManagedObjectDependency} to the
-	 * {@link OfficeFloorInputManagedObject}.
+	 * {@link ManagedObjectDependency} to the {@link OfficeFloorInputManagedObject}.
 	 */
 	public void testLinkManagedObjectDependencyToOfficeFloorInputManagedObject() {
 
@@ -690,8 +690,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can link {@link OfficeObject} to the
-	 * {@link OfficeFloorManagedObject}.
+	 * Ensure can link {@link OfficeObject} to the {@link OfficeFloorManagedObject}.
 	 */
 	public void testLinkOfficeObjectToOfficeFloorManagedObject() {
 

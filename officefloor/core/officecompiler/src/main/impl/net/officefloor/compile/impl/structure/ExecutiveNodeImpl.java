@@ -18,13 +18,19 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.executive.ExecutiveType;
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
+import net.officefloor.frame.api.build.ExecutiveBuilder;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 
@@ -99,6 +105,43 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 		this.propertyList = this.context.createPropertyList();
 	}
 
+	/**
+	 * Obtains the {@link ExecutiveSource}.
+	 * 
+	 * @return {@link ExecutiveSource} or <code>null</code> if issue obtaining with
+	 *         issues reported to the {@link CompilerIssues}.
+	 */
+	private ExecutiveSource getExecutiveSource() {
+
+		// Load the executive source
+		ExecutiveSource executiveSource = this.state.executiveSource;
+		if (executiveSource == null) {
+
+			// Obtain the executive source class
+			Class<ExecutiveSource> executiveSourceClass = this.context
+					.getExecutiveSourceClass(this.state.executiveSourceClassName, this);
+			if (executiveSourceClass == null) {
+				return null; // must have source class
+			}
+
+			// Instantiate the executive source
+			executiveSource = CompileUtil.newInstance(executiveSourceClass, ExecutiveSource.class, this,
+					this.context.getCompilerIssues());
+		}
+
+		// Return the executive source
+		return executiveSource;
+	}
+
+	/**
+	 * Obtains the {@link PropertyList}.
+	 * 
+	 * @return {@link PropertyList}.
+	 */
+	private PropertyList getProperties() {
+		return this.context.overrideProperties(this, this.getNodeName(), this.propertyList);
+	}
+
 	/*
 	 * ==================== Node ============================
 	 */
@@ -146,6 +189,25 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 	public ExecutiveType loadExecutiveType() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void buildExecutive(OfficeFloorBuilder builder, CompileContext compileContext) {
+
+		// Obtain the executive source
+		ExecutiveSource executiveSource = this.getExecutiveSource();
+		if (executiveSource == null) {
+			return; // must obtain source
+		}
+
+		// Possibly register source as MBean
+		compileContext.registerPossibleMBean(ExecutiveSource.class, this.getNodeName(), executiveSource);
+
+		// Build the executive
+		ExecutiveBuilder<?> executiveBuilder = builder.setExecutive(executiveSource);
+		for (Property property : this.getProperties()) {
+			executiveBuilder.addProperty(property.getName(), property.getValue());
+		}
 	}
 
 	/*

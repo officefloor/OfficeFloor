@@ -442,7 +442,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
 
 		// Validate children
-		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
+		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getOfficeFloorManagedObjectTeam("TEAM"),
 				node.getInputSectionManagedObjectDependency("DEPENDENCY"));
 	}
 
@@ -527,7 +527,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
 
 		// Validate children
-		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
+		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getOfficeFloorManagedObjectTeam("TEAM"),
 				node.getInputSectionManagedObjectDependency("DEPENDENCY"));
 	}
 

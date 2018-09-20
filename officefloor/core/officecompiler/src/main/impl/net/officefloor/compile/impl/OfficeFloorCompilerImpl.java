@@ -146,6 +146,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
@@ -1120,6 +1121,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public TeamNode createTeamNode(String teamName, OfficeFloorNode officeFloor) {
 		return new TeamNodeImpl(teamName, officeFloor, this);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends ExecutiveSource> Class<S> getExecutiveSourceClass(String executiveSourceClassName, Node node) {
+		return (Class<S>) CompileUtil.obtainClass(executiveSourceClassName, ExecutiveSource.class, new HashMap<>(),
+				this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override

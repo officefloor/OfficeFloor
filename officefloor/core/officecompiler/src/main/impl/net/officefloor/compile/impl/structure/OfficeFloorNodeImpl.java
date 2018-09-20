@@ -34,6 +34,7 @@ import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
@@ -169,6 +170,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	 * {@link SupplierNode} instances by their {@link OfficeFloorSupplier} name.
 	 */
 	private final Map<String, SupplierNode> suppliers = new HashMap<String, SupplierNode>();
+
+	/**
+	 * {@link ExecutiveNode} for the {@link OfficeFloorExecutive}.
+	 */
+	private ExecutiveNode executive = null;
 
 	/**
 	 * {@link TeamNode} instances by their {@link OfficeFloorTeam} name.
@@ -367,14 +373,18 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 	@Override
 	public OfficeFloorExecutive setExecutive(String executiveSourceClassName) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement setExecutive");
+		this.executive = NodeUtil.getInitialisedNode(this.executive, this.context,
+				() -> this.context.createExecutiveNode(this),
+				(executive) -> executive.initialise(executiveSourceClassName, null));
+		return this.executive;
 	}
 
 	@Override
 	public OfficeFloorExecutive setExecutive(ExecutiveSource executiveSource) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement setExecutive");
+		this.executive = NodeUtil.getInitialisedNode(this.executive, this.context,
+				() -> this.context.createExecutiveNode(this),
+				(executive) -> executive.initialise(executiveSource.getClass().getName(), executiveSource));
+		return this.executive;
 	}
 
 	@Override
@@ -774,6 +784,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 		// Register the OfficeFloor source for possible MBean
 		compileContext.registerPossibleMBean(OfficeFloorSource.class, officeFloorName, this.officeFloorSource);
+
+		// Build the executive
+		if (this.executive != null) {
+			this.executive.buildExecutive(builder, compileContext);
+		}
 
 		// Build the teams (in deterministic order)
 		this.teams.values().stream()

@@ -43,6 +43,7 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -692,6 +693,19 @@ public interface NodeContext {
 	 * @return {@link TeamNode}.
 	 */
 	TeamNode createTeamNode(String teamName, OfficeFloorNode officeFloor);
+
+	/**
+	 * Obtains the {@link ExecutiveSource} class.
+	 * 
+	 * @param                          <S> {@link ExecutiveSource} type.
+	 * @param executiveSourceClassName {@link ExecutiveSource} class name or an
+	 *                                 alias to a {@link ExecutiveSource} class.
+	 * @param node                     {@link Node} requiring the
+	 *                                 {@link ExecutiveSource} class.
+	 * @return {@link ExecutiveSource} class, or <code>null</code> with issues
+	 *         reported to the {@link CompilerIssues} of this {@link NodeContext}.
+	 */
+	<S extends ExecutiveSource> Class<S> getExecutiveSourceClass(String executiveSourceClassName, Node node);
 
 	/**
 	 * Creates the {@link ExecutiveNode}.

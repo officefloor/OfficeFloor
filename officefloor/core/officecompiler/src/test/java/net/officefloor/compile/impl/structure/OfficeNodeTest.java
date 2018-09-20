@@ -33,6 +33,7 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -40,6 +41,7 @@ import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
@@ -808,8 +810,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can specify {@link OfficeGovernance} for a
-	 * {@link OfficeSubSection}.
+	 * Ensure can specify {@link OfficeGovernance} for a {@link OfficeSubSection}.
 	 */
 	public void testLinkOfficeGovernanceForOfficeSubSection() {
 
@@ -908,8 +909,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can specify pre-load {@link Administration} for
-	 * {@link OfficeObject}.
+	 * Ensure can specify pre-load {@link Administration} for {@link OfficeObject}.
 	 */
 	public void testLinkPreLoadAdministrationForOfficeObject() {
 		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
@@ -1167,8 +1167,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link OfficeManagedObjectSource}
-	 * {@link ManagedObjectTeam} to the {@link OfficeTeam}.
+	 * Ensures can link {@link OfficeManagedObjectSource} {@link ManagedObjectTeam}
+	 * to the {@link OfficeTeam}.
 	 */
 	public void testLinkOfficeManagedObjectSourceTeamToOfficeTeam() {
 
@@ -1180,7 +1180,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(this.node, "MO", null);
-		ManagedObjectTeam team = moSource.getManagedObjectTeam("TEAM");
+		OfficeManagedObjectTeam team = moSource.getOfficeManagedObjectTeam("TEAM");
 		OfficeTeam officeTeam = this.node.addOfficeTeam("OFFICE_TEAM");
 		this.node.link(team, officeTeam);
 		assertTeamLink("managed object team -> office team", team, officeTeam);
@@ -1225,7 +1225,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		assertNotNull("Should have managed object source", moSource);
 		assertEquals("Incorrect section managed object source", "MO_SOURCE",
 				moSource.getOfficeSectionManagedObjectSourceName());
-		ManagedObjectTeam team = moSource.getOfficeSectionManagedObjectTeam("TEAM");
+		OfficeSectionManagedObjectTeam team = moSource.getOfficeSectionManagedObjectTeam("TEAM");
 		assertEquals("Incorrect section managed object source team", "TEAM", team.getManagedObjectTeamName());
 
 		// Link
@@ -1269,8 +1269,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link ManagedObjectDependency} to the
-	 * {@link OfficeObject}.
+	 * Ensures can link {@link ManagedObjectDependency} to the {@link OfficeObject}.
 	 */
 	public void testLinkManagedObjectDependencyToOfficeObject() {
 
@@ -1349,8 +1348,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link ManagedObjectFlow} to the
-	 * {@link OfficeSectionInput}.
+	 * Ensures can link {@link ManagedObjectFlow} to the {@link OfficeSectionInput}.
 	 */
 	public void testLinkManagedObjectFlowToOfficeSectionInput() {
 
@@ -1413,8 +1411,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link OfficeEscalation} to the
-	 * {@link OfficeSectionInput}.
+	 * Ensures can link {@link OfficeEscalation} to the {@link OfficeSectionInput}.
 	 */
 	public void testLinkOfficeEscalationToOfficeSectionInput() {
 

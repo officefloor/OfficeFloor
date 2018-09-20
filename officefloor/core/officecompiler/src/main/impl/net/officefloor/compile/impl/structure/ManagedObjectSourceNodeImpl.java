@@ -70,11 +70,14 @@ import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
+import net.officefloor.compile.spi.office.OfficeManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObjectFlow;
@@ -900,7 +903,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Ensure all the teams are made available
 		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
 			// Obtain team (ensures any missing teams are added)
-			this.getManagedObjectTeam(teamType.getTeamName());
+			this.getOfficeFloorManagedObjectTeam(teamType.getTeamName());
 		}
 	}
 
@@ -955,7 +958,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public ManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName) {
+	public OfficeSectionManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName) {
 		return NodeUtil.getNode(teamName, this.teams, () -> this.context.createManagedObjectTeamNode(teamName, this));
 	}
 
@@ -991,7 +994,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public ManagedObjectTeam getManagedObjectTeam(String managedObjectSourceTeamName) {
+	public OfficeManagedObjectTeam getOfficeManagedObjectTeam(String managedObjectSourceTeamName) {
 		return NodeUtil.getNode(managedObjectSourceTeamName, this.teams,
 				() -> this.context.createManagedObjectTeamNode(managedObjectSourceTeamName, this));
 	}
@@ -1027,6 +1030,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			String managedObjectDependencyName) {
 		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
 				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+	}
+
+	@Override
+	public OfficeFloorManagedObjectTeam getOfficeFloorManagedObjectTeam(String managedObjectSourceTeamName) {
+		return NodeUtil.getNode(managedObjectSourceTeamName, this.teams,
+				() -> this.context.createManagedObjectTeamNode(managedObjectSourceTeamName, this));
 	}
 
 	/*
