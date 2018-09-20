@@ -19,8 +19,7 @@ package net.officefloor.web.executive;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
-import net.officefloor.frame.api.executive.ExecutiveContext;
-import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.internal.structure.Execution;
 
 /**
@@ -47,15 +46,15 @@ public class WebThreadAffinityExecutive implements Executive {
 	}
 
 	@Override
-	public Team createTeam(ExecutiveContext context) throws Exception {
-		// TODO Auto-generated method stub
-		return Executive.super.createTeam(context);
-	}
-
-	@Override
 	public ExecutionStrategy[] getExcutionStrategies() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public TeamOversight[] getTeamOversights() {
+		// TODO Auto-generated method stub
+		return Executive.super.getTeamOversights();
 	}
 
 }

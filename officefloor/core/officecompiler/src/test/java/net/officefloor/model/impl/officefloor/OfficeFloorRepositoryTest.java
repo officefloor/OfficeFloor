@@ -231,7 +231,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 
 		// OfficeFloor team -> OfficeFloor team oversight
 		OfficeFloorTeamToOfficeFloorTeamOversightModel officeFloorTeamToTeamOversight = new OfficeFloorTeamToOfficeFloorTeamOversightModel(
-				"TEAM_OVERSIGHT");
+				"OFFICE_FLOOR_TEAM_OVERSIGHT");
 		officeFloorTeam.setOfficeFloorTeamOversight(officeFloorTeamToTeamOversight);
 
 		// Record retrieving the office
@@ -547,7 +547,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("OfficeFloor managed object team - OfficeFloor team", "OFFICE_FLOOR_TEAM",
 				mosTeamToTeam.getOfficeFloorTeamName());
 		assertEquals("OfficeFloor managed object executive strategy - OfficeFloor executive strategy",
-				"OFFICE_FLOOR_EXECUTIVE_STRATEGY",
+				"OFFICE_FLOOR_EXECUTION_STRATEGY",
 				mosExecutionStrategyToExecutionStrategy.getOfficeFloorExecutionStrategyName());
 		assertEquals("office object - OfficeFloor managed object", "MANAGED_OBJECT",
 				officeObjectToManagedObject.getOfficeFloorManagedObjectName());
