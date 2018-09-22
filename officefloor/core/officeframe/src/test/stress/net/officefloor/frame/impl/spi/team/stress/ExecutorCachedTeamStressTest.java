@@ -29,7 +29,7 @@ public class ExecutorCachedTeamStressTest extends AbstractTeamStressTest {
 
 	@Override
 	protected Team getTeamToTest() throws Exception {
-		return new ExecutorCachedTeamSource().createTeam();
+		return new ExecutorCachedTeamSource().createTeam(0);
 	}
 
 }

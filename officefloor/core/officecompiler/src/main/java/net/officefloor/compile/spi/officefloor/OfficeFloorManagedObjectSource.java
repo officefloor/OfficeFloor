@@ -18,12 +18,10 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
-import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -47,8 +45,7 @@ public interface OfficeFloorManagedObjectSource extends PropertyConfigurable {
 	/**
 	 * Specifies the timeout for the {@link ManagedObject}.
 	 * 
-	 * @param timeout
-	 *            Timeout for the {@link ManagedObject}.
+	 * @param timeout Timeout for the {@link ManagedObject}.
 	 */
 	void setTimeout(long timeout);
 
@@ -61,46 +58,55 @@ public interface OfficeFloorManagedObjectSource extends PropertyConfigurable {
 	ManagingOffice getManagingOffice();
 
 	/**
-	 * Obtains the {@link ManagedObjectFlow} for he
+	 * Obtains the {@link OfficeFloorManagedObjectFlow} for he
 	 * {@link ManagedObjectFlowType}.
 	 * 
-	 * @param managedObjectSourceFlowName
-	 *            Name of the {@link ManagedObjectFlowType}.
-	 * @return {@link ManagedObjectFlow}.
+	 * @param managedObjectSourceFlowName Name of the {@link ManagedObjectFlowType}.
+	 * @return {@link OfficeFloorManagedObjectFlow}.
 	 */
 	OfficeFloorManagedObjectFlow getOfficeFloorManagedObjectFlow(String managedObjectSourceFlowName);
 
 	/**
-	 * Obtains the {@link ManagedObjectTeam} for the
+	 * Obtains the {@link OfficeFloorManagedObjectTeam} for the
 	 * {@link ManagedObjectTeamType}.
 	 * 
-	 * @param managedObjectSourceTeamName
-	 *            Name of the {@link ManagedObjectTeamType}.
-	 * @return {@link ManagedObjectTeam}.
+	 * @param managedObjectSourceTeamName Name of the {@link ManagedObjectTeamType}.
+	 * @return {@link OfficeFloorManagedObjectTeam}.
 	 */
-	ManagedObjectTeam getManagedObjectTeam(String managedObjectSourceTeamName);
+	OfficeFloorManagedObjectTeam getOfficeFloorManagedObjectTeam(String managedObjectSourceTeamName);
 
 	/**
-	 * Obtains the {@link ManagedObjectDependency} for the
+	 * Obtains the {@link OfficeFloorManagedObjectExecutionStrategy} for the
+	 * {@link ManagedObjectExecutionStrategyType}.
+	 * 
+	 * @param managedObjectExecutionStrategyName Name of the
+	 *                                           {@link ManagedObjectExecutionStrategyType}.
+	 * @return {@link OfficeFloorManagedObjectExecutionStrategy}.
+	 */
+	OfficeFloorManagedObjectExecutionStrategy getOfficeFloorManagedObjectExecutionStrategy(
+			String managedObjectExecutionStrategyName);
+
+	/**
+	 * Obtains the {@link OfficeFloorManagedObjectDependency} for the
 	 * {@link ManagedObjectDependencyType} for the Input {@link ManagedObject}.
 	 * 
-	 * @param managedObjectDependencyName
-	 *            Name of the {@link ManagedObjectDependencyType}.
-	 * @return {@link ManagedObjectDependency}.
+	 * @param managedObjectDependencyName Name of the
+	 *                                    {@link ManagedObjectDependencyType}.
+	 * @return {@link OfficeFloorManagedObjectDependency}.
 	 */
 	OfficeFloorManagedObjectDependency getInputOfficeFloorManagedObjectDependency(String managedObjectDependencyName);
 
 	/**
-	 * Obtains the {@link OfficeFloorManagedObject} representing an instance use
-	 * of a {@link ManagedObject} from the {@link ManagedObjectSource}.
+	 * Obtains the {@link OfficeFloorManagedObject} representing an instance use of
+	 * a {@link ManagedObject} from the {@link ManagedObjectSource}.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeFloorManagedObject}. Typically this
-	 *            will be the name under which the {@link ManagedObject} will be
-	 *            registered to the {@link Office}.
-	 * @param managedObjectScope
-	 *            {@link ManagedObjectScope} of the
-	 *            {@link OfficeFloorManagedObject} within the {@link Office}.
+	 * @param managedObjectName  Name of the {@link OfficeFloorManagedObject}.
+	 *                           Typically this will be the name under which the
+	 *                           {@link ManagedObject} will be registered to the
+	 *                           {@link Office}.
+	 * @param managedObjectScope {@link ManagedObjectScope} of the
+	 *                           {@link OfficeFloorManagedObject} within the
+	 *                           {@link Office}.
 	 * @return {@link OfficeFloorManagedObject}.
 	 */
 	OfficeFloorManagedObject addOfficeFloorManagedObject(String managedObjectName,

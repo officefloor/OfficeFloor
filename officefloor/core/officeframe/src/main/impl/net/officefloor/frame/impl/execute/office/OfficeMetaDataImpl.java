@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.office;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
@@ -78,8 +79,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final FunctionLoop functionLoop;
 
 	/**
-	 * {@link ManagedFunctionMetaData} of the {@link ManagedFunction} that can
-	 * be executed within the {@link Office}.
+	 * {@link ManagedFunctionMetaData} of the {@link ManagedFunction} that can be
+	 * executed within the {@link Office}.
 	 */
 	private final ManagedFunctionMetaData<?, ?>[] functionMetaDatas;
 
@@ -89,8 +90,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final ManagedFunctionLocator functionLocator;
 
 	/**
-	 * {@link ProcessMetaData} of the {@link ProcessState} instances created
-	 * within this {@link Office}.
+	 * {@link ProcessMetaData} of the {@link ProcessState} instances created within
+	 * this {@link Office}.
 	 */
 	private final ProcessMetaData processMetaData;
 
@@ -105,6 +106,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
 
 	/**
+	 * {@link Executive}.
+	 */
+	private final Executive executive;
+
+	/**
 	 * {@link ManagedExecutionFactory}.
 	 */
 	private final ManagedExecutionFactory managedExecutionFactory;
@@ -117,35 +123,26 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
-	 * @param officeManager
-	 *            {@link OfficeManager}.
-	 * @param officeClock
-	 *            {@link OfficeClock}.
-	 * @param timer
-	 *            {@link Timer} for the {@link Office}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
-	 * @param threadLocalAwareExecutor
-	 *            {@link ThreadLocalAwareExecutor}.
-	 * @param managedExecutionFactory
-	 *            {@link ManagedExecutionFactory}.
-	 * @param functionMetaDatas
-	 *            {@link ManagedFunctionMetaData} of the {@link ManagedFunction}
-	 *            that can be executed within the {@link Office}.
-	 * @param functionLocator
-	 *            {@link ManagedFunctionLocator}.
-	 * @param processMetaData
-	 *            {@link ProcessMetaData} of the {@link ProcessState} instances
-	 *            created within this {@link Office}.
-	 * @param startupFunctions
-	 *            {@link OfficeStartupFunction} instances.
-	 * @param profiler
-	 *            {@link Profiler}.
+	 * @param officeName               Name of the {@link Office}.
+	 * @param officeManager            {@link OfficeManager}.
+	 * @param officeClock              {@link OfficeClock}.
+	 * @param timer                    {@link Timer} for the {@link Office}.
+	 * @param functionLoop             {@link FunctionLoop}.
+	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
+	 * @param executive                {@link Executive}.
+	 * @param managedExecutionFactory  {@link ManagedExecutionFactory}.
+	 * @param functionMetaDatas        {@link ManagedFunctionMetaData} of the
+	 *                                 {@link ManagedFunction} that can be executed
+	 *                                 within the {@link Office}.
+	 * @param functionLocator          {@link ManagedFunctionLocator}.
+	 * @param processMetaData          {@link ProcessMetaData} of the
+	 *                                 {@link ProcessState} instances created within
+	 *                                 this {@link Office}.
+	 * @param startupFunctions         {@link OfficeStartupFunction} instances.
+	 * @param profiler                 {@link Profiler}.
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager, OfficeClock officeClock, Timer timer,
-			FunctionLoop functionLoop, ThreadLocalAwareExecutor threadLocalAwareExecutor,
+			FunctionLoop functionLoop, ThreadLocalAwareExecutor threadLocalAwareExecutor, Executive executive,
 			ManagedExecutionFactory managedExecutionFactory, ManagedFunctionMetaData<?, ?>[] functionMetaDatas,
 			ManagedFunctionLocator functionLocator, ProcessMetaData processMetaData,
 			OfficeStartupFunction[] startupFunctions, Profiler profiler) {
@@ -154,6 +151,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		this.timer = timer;
 		this.functionLoop = functionLoop;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
+		this.executive = executive;
 		this.managedExecutionFactory = managedExecutionFactory;
 		this.officeManager = officeManager;
 		this.functionMetaDatas = functionMetaDatas;
@@ -205,6 +203,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	@Override
 	public OfficeStartupFunction[] getStartupFunctions() {
 		return this.startupFunctions;
+	}
+
+	@Override
+	public Executive getExecutive() {
+		return this.executive;
 	}
 
 	@Override
@@ -281,25 +284,28 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	/**
 	 * Creates a new {@link ProcessState}.
 	 * 
-	 * @param flowMetaData
-	 *            {@link FlowMetaData} for the initial {@link ManagedFunction}.
-	 * @param parameter
-	 *            Parameter for the initial {@link ManagedFunction}.
-	 * @param callback
-	 *            Optional {@link FlowCallback} to invoke on completion of the
-	 *            {@link ProcessState}. May be <code>null</code>.
-	 * @param callbackThreadState
-	 *            Optional {@link ThreadState} to invoked the
-	 *            {@link FlowCallback} within. May be <code>null</code>.
-	 * @param inputManagedObject
-	 *            Input {@link ManagedObject}. May be <code>null</code> if no
-	 *            input {@link ManagedObject}.
-	 * @param inputManagedObjectMetaData
-	 *            {@link ManagedObjectMetaData} to the input
-	 *            {@link ManagedObject}.
-	 * @param processBoundIndexForInputManagedObject
-	 *            Index of the input {@link ManagedObject} within the
-	 *            {@link ProcessState}.
+	 * @param flowMetaData                           {@link FlowMetaData} for the
+	 *                                               initial
+	 *                                               {@link ManagedFunction}.
+	 * @param parameter                              Parameter for the initial
+	 *                                               {@link ManagedFunction}.
+	 * @param callback                               Optional {@link FlowCallback}
+	 *                                               to invoke on completion of the
+	 *                                               {@link ProcessState}. May be
+	 *                                               <code>null</code>.
+	 * @param callbackThreadState                    Optional {@link ThreadState} to
+	 *                                               invoked the
+	 *                                               {@link FlowCallback} within.
+	 *                                               May be <code>null</code>.
+	 * @param inputManagedObject                     Input {@link ManagedObject}.
+	 *                                               May be <code>null</code> if no
+	 *                                               input {@link ManagedObject}.
+	 * @param inputManagedObjectMetaData             {@link ManagedObjectMetaData}
+	 *                                               to the input
+	 *                                               {@link ManagedObject}.
+	 * @param processBoundIndexForInputManagedObject Index of the input
+	 *                                               {@link ManagedObject} within
+	 *                                               the {@link ProcessState}.
 	 * @return Initial {@link FunctionState} to be executed for the
 	 *         {@link ProcessState}.
 	 */

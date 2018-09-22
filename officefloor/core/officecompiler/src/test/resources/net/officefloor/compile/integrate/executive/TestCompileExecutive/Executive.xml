@@ -1,0 +1,13 @@
+<context>
+	<office-floor>
+		<executive source="${testcase}$MockExecutiveSource">
+			<properties>
+				<property name="ONE" value="1" />
+				<property name="TWO" value="2" />
+			</properties>
+		</executive>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON" />
+		</teams>
+	</office-floor>
+</context>

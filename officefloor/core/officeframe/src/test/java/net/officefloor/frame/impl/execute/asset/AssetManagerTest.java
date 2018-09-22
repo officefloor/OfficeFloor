@@ -59,7 +59,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	 * {@link ProcessState}.
 	 */
 	private final ProcessState processState = new OfficeManagerProcessState(this.clock, 1000,
-			new TeamManagementImpl(new ExecutorCachedTeamSource().createTeam()), this.loop);
+			new TeamManagementImpl(new ExecutorCachedTeamSource().createTeam(0)), this.loop);
 
 	/**
 	 * {@link AssetManager}.
@@ -258,8 +258,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the operation.
 	 * 
-	 * @param operation
-	 *            Operation.
+	 * @param operation Operation.
 	 */
 	private void doOperation(Supplier<FunctionState> operation) {
 		FunctionState operationFunction = operation.get();

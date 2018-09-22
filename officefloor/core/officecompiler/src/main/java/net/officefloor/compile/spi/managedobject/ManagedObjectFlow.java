@@ -17,10 +17,11 @@
  */
 package net.officefloor.compile.spi.managedobject;
 
-import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Flow for a {@link SectionManagedObject}.
+ * {@link Flow} requird by a {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */

@@ -20,6 +20,7 @@ package net.officefloor.frame.internal.configuration;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -72,6 +73,14 @@ public interface OfficeFloorConfiguration {
 	 * @return {@link TeamConfiguration} instances.
 	 */
 	TeamConfiguration<?>[] getTeamConfiguration();
+
+	/**
+	 * Obtains the configuration of the {@link Executive} for the
+	 * {@link OfficeFloor}.
+	 * 
+	 * @return {@link ExecutiveConfiguration}.
+	 */
+	ExecutiveConfiguration<?> getExecutiveConfiguration();
 
 	/**
 	 * Obtains the break {@link FunctionState} chain {@link TeamConfiguration}.

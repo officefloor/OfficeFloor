@@ -24,6 +24,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerRunnable;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administration.AdministrationLoader;
+import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
@@ -87,12 +88,9 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	/**
 	 * Initiate.
 	 * 
-	 * @param implementation
-	 *            {@link OfficeFloorCompiler} implementation.
-	 * @param clientClassLoader
-	 *            {@link ClassLoader} of the client.
-	 * @param implClassLoader
-	 *            {@link ClassLoader} of the implementation.
+	 * @param implementation    {@link OfficeFloorCompiler} implementation.
+	 * @param clientClassLoader {@link ClassLoader} of the client.
+	 * @param implClassLoader   {@link ClassLoader} of the implementation.
 	 */
 	public OfficeFloorCompilerAdapter(Object implementation, ClassLoader clientClassLoader,
 			ClassLoader implClassLoader) {
@@ -104,12 +102,9 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	/**
 	 * Invokes the method.
 	 * 
-	 * @param methodName
-	 *            Name of the {@link Method}.
-	 * @param arguments
-	 *            Arguments for the {@link Method}.
-	 * @param paramTypes
-	 *            Parameter types.
+	 * @param methodName Name of the {@link Method}.
+	 * @param arguments  Arguments for the {@link Method}.
+	 * @param paramTypes Parameter types.
 	 * @return Return on the value.
 	 */
 	private Object invokeMethod(String methodName, Object[] arguments, Class<?>... paramTypes) {
@@ -311,6 +306,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	@Override
 	public TeamLoader getTeamLoader() {
 		return (TeamLoader) this.invokeMethod("getTeamLoader", null);
+	}
+
+	@Override
+	public ExecutiveLoader getExecutiveLoader() {
+		return (ExecutiveLoader) this.invokeMethod("getExecutiveLoader", null);
 	}
 
 	@Override

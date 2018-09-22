@@ -55,14 +55,16 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	 * Convenience method to create a {@link Team} from the implementation of this
 	 * {@link AbstractExecutorTeamSource}.
 	 *
-	 * @param propertyNameValues
-	 *            Property name/value pairs for the {@link TeamSource}.
+	 * @param teamSize           {@link Team} size.
+	 * @param propertyNameValues Property name/value pairs for the
+	 *                           {@link TeamSource}.
 	 * @return {@link Team}.
-	 * @throws IllegalArgumentException
-	 *             If fails to provide correct information to load the {@link Team}.
+	 * @throws IllegalArgumentException If fails to provide correct information to
+	 *                                  load the {@link Team}.
 	 */
-	public Team createTeam(String... propertyNameValues) throws IllegalArgumentException {
+	public Team createTeam(int teamSize, String... propertyNameValues) throws IllegalArgumentException {
 		TeamSourceStandAlone standAlone = new TeamSourceStandAlone();
+		standAlone.setTeamSize(teamSize);
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
@@ -81,14 +83,11 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 	/**
 	 * Obtains the factory to create {@link ExecutorService}.
 	 * 
-	 * @param context
-	 *            {@link TeamSourceContext}.
-	 * @param threadFactory
-	 *            {@link ThreadFactory} to use for the creation of the
-	 *            {@link Thread} instances.
+	 * @param context       {@link TeamSourceContext}.
+	 * @param threadFactory {@link ThreadFactory} to use for the creation of the
+	 *                      {@link Thread} instances.
 	 * @return {@link ExecutorServiceFactory}.
-	 * @throws Exception
-	 *             If fails to create the {@link ExecutorServiceFactory}.
+	 * @throws Exception If fails to create the {@link ExecutorServiceFactory}.
 	 */
 	protected abstract ExecutorServiceFactory createExecutorServiceFactory(TeamSourceContext context,
 			ThreadFactory threadFactory) throws Exception;
@@ -126,8 +125,18 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		int threadPriority = Integer
 				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(Thread.NORM_PRIORITY)));
 
+		// Create the thread factory
+		ThreadFactory threadFactory = context.getThreadFactory();
+		if (threadPriority != Thread.NORM_PRIORITY) {
+			ThreadFactory delegate = threadFactory;
+			threadFactory = (runnable) -> {
+				Thread thread = delegate.newThread(runnable);
+				thread.setPriority(threadPriority);
+				return thread;
+			};
+		}
+
 		// Create and return the executor team
-		ThreadFactory threadFactory = context.getThreadFactory(threadPriority);
 		ExecutorServiceFactory serviceFactory = this.createExecutorServiceFactory(context, threadFactory);
 		return new ExecutorTeam(teamName, serviceFactory, maxShutdownWaitTimeInSeconds);
 	}
@@ -160,12 +169,10 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		/**
 		 * Initiate.
 		 * 
-		 * @param teamName
-		 *            Name of the {@link Team}.
-		 * @param factory
-		 *            {@link ExecutorServiceFactory}.
-		 * @param maxShutdownWaitTimeInSeconds
-		 *            Maximum time in seconds to wait for shutdown.
+		 * @param teamName                     Name of the {@link Team}.
+		 * @param factory                      {@link ExecutorServiceFactory}.
+		 * @param maxShutdownWaitTimeInSeconds Maximum time in seconds to wait for
+		 *                                     shutdown.
 		 */
 		public ExecutorTeam(String teamName, ExecutorServiceFactory factory, int maxShutdownWaitTimeInSeconds) {
 			this.teamName = teamName;

@@ -30,6 +30,7 @@ import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.ExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
@@ -38,6 +39,7 @@ import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectRegistry;
@@ -54,6 +56,7 @@ import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNod
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
@@ -64,17 +67,22 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeSectionManagedObjectSourceType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.compile.spi.managedobject.ManagedObjectExecutionStrategy;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
+import net.officefloor.compile.spi.office.OfficeManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObjectFlow;
@@ -203,6 +211,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * names.
 	 */
 	private final Map<String, ManagedObjectTeamNode> teams = new HashMap<String, ManagedObjectTeamNode>();
+
+	/**
+	 * {@link ManagedObjectExecutionStrategyNode} instances by their
+	 * {@link ManagedObjectExecutionStrategy} names.
+	 */
+	private final Map<String, ManagedObjectExecutionStrategyNode> executionStrategies = new HashMap<>();
 
 	/**
 	 * {@link ManagedObjectDependencyNode} instances by their
@@ -835,7 +849,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				ManagedFunctionNode functionNode = LinkUtil.retrieveTarget(flowNode, ManagedFunctionNode.class,
 						this.context.getCompilerIssues());
 				if (functionNode == null) {
-					continue; // must have task node
+					continue; // must have function node
 				}
 
 				// Ensure the function is contained in the managing office
@@ -880,6 +894,27 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				officeBuilder.registerTeam(officeTeamName, team.getOfficeFloorTeamName());
 			}
 
+			// Link in the execution strategies for the managed object source
+			ManagedObjectExecutionStrategyType[] strategyTypes = managedObjectType.getExecutionStrategyTypes();
+			for (int i = 0; i < strategyTypes.length; i++) {
+				ManagedObjectExecutionStrategyType strategyType = strategyTypes[i];
+
+				// Obtain the execution strategy type details
+				String strategyName = strategyType.getExecutionStrategyName();
+
+				// Obtain the execution strategy
+				ManagedObjectExecutionStrategyNode managedObjectExecution = this.executionStrategies.get(strategyName);
+				ExecutionStrategyNode executionStrategy = LinkUtil.retrieveTarget(managedObjectExecution,
+						ExecutionStrategyNode.class, this.context.getCompilerIssues());
+				if (executionStrategy == null) {
+					continue; // must have execution strategy
+				}
+
+				// Register the execution strategy
+				String executionStrategyName = executionStrategy.getOfficeFloorExecutionStratgyName();
+				managingOfficeBuilder.linkExecutionStrategy(i, executionStrategyName);
+			}
+
 			// Determine if pool the managed object
 			ManagedObjectPoolNode poolNode = LinkUtil.findTarget(this, ManagedObjectPoolNode.class,
 					this.context.getCompilerIssues());
@@ -900,7 +935,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Ensure all the teams are made available
 		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
 			// Obtain team (ensures any missing teams are added)
-			this.getManagedObjectTeam(teamType.getTeamName());
+			this.getOfficeFloorManagedObjectTeam(teamType.getTeamName());
 		}
 	}
 
@@ -955,7 +990,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public ManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName) {
+	public OfficeSectionManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName) {
 		return NodeUtil.getNode(teamName, this.teams, () -> this.context.createManagedObjectTeamNode(teamName, this));
 	}
 
@@ -991,7 +1026,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public ManagedObjectTeam getManagedObjectTeam(String managedObjectSourceTeamName) {
+	public OfficeManagedObjectTeam getOfficeManagedObjectTeam(String managedObjectSourceTeamName) {
 		return NodeUtil.getNode(managedObjectSourceTeamName, this.teams,
 				() -> this.context.createManagedObjectTeamNode(managedObjectSourceTeamName, this));
 	}
@@ -1027,6 +1062,19 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			String managedObjectDependencyName) {
 		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
 				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+	}
+
+	@Override
+	public OfficeFloorManagedObjectTeam getOfficeFloorManagedObjectTeam(String managedObjectSourceTeamName) {
+		return NodeUtil.getNode(managedObjectSourceTeamName, this.teams,
+				() -> this.context.createManagedObjectTeamNode(managedObjectSourceTeamName, this));
+	}
+
+	@Override
+	public OfficeFloorManagedObjectExecutionStrategy getOfficeFloorManagedObjectExecutionStrategy(
+			String managedObjectExecutionStrategyName) {
+		return NodeUtil.getNode(managedObjectExecutionStrategyName, this.executionStrategies,
+				() -> this.context.createManagedObjectExecutionStrategyNode(managedObjectExecutionStrategyName, this));
 	}
 
 	/*

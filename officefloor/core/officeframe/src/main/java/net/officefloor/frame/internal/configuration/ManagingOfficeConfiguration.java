@@ -35,8 +35,7 @@ public interface ManagingOfficeConfiguration<F extends Enum<F>> {
 	 * Obtains the name of the {@link Office} managing this
 	 * {@link ManagedObjectSource}.
 	 *
-	 * @return Name of the {@link Office} managing this
-	 *         {@link ManagedObjectSource}.
+	 * @return Name of the {@link Office} managing this {@link ManagedObjectSource}.
 	 */
 	String getOfficeName();
 
@@ -69,5 +68,14 @@ public interface ManagingOfficeConfiguration<F extends Enum<F>> {
 	 *         {@link ManagedObjectSource}.
 	 */
 	ManagedObjectFlowConfiguration<F>[] getFlowConfiguration();
+
+	/**
+	 * Obtains the {@link ManagedObjectExecutionConfiguration} for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ManagedObjectExecutionConfiguration} for the
+	 *         {@link ManagedObjectSource}.
+	 */
+	ManagedObjectExecutionConfiguration[] getExecutionConfiguration();
 
 }

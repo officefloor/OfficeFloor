@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<marshall type="net.officefloor.model.officefloor.OfficeFloorModel"
+<marshall
+	type="net.officefloor.model.officefloor.OfficeFloorModel"
 	element="office-floor">
 
 	<!-- OFFICE ATTRIBUTES -->
 	<attributes>
-		<attribute method="getIsAutoWireObjects" attribute="auto-wire-objects" />
-		<attribute method="getIsAutoWireTeams" attribute="auto-wire-teams" />
+		<attribute method="getIsAutoWireObjects"
+			attribute="auto-wire-objects" />
+		<attribute method="getIsAutoWireTeams"
+			attribute="auto-wire-teams" />
 	</attributes>
 
 	<!-- SUPPLIERS -->
-	<collection method="getOfficeFloorSuppliers" element="suppliers">
-		<item type="net.officefloor.model.officefloor.OfficeFloorSupplierModel"
+	<collection method="getOfficeFloorSuppliers"
+		element="suppliers">
+		<item
+			type="net.officefloor.model.officefloor.OfficeFloorSupplierModel"
 			element="supplier">
 			<attributes>
-				<attribute method="getOfficeFloorSupplierName" attribute="name" />
-				<attribute method="getSupplierSourceClassName" attribute="source" />
+				<attribute method="getOfficeFloorSupplierName"
+					attribute="name" />
+				<attribute method="getSupplierSourceClassName"
+					attribute="source" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
@@ -55,7 +62,8 @@
 					</attributes>
 				</item>
 			</collection>
-			<object method="getOfficeFloorManagedObjectPool" element="managed-object-pool">
+			<object method="getOfficeFloorManagedObjectPool"
+				element="managed-object-pool">
 				<attributes>
 					<attribute method="getOfficeFloorManagedObjectPoolName"
 						attribute="name" />
@@ -63,32 +71,39 @@
 			</object>
 			<object method="getOfficeFloorSupplier" element="supplier">
 				<attributes>
-					<attribute method="getOfficeFloorSupplierName" attribute="name" />
+					<attribute method="getOfficeFloorSupplierName"
+						attribute="name" />
 					<attribute method="getType" attribute="type" />
 					<attribute method="getQualifier" attribute="qualifier" />
 				</attributes>
 			</object>
 			<object method="getManagingOffice" element="managing-office">
 				<attributes>
-					<attribute method="getManagingOfficeName" attribute="name" />
+					<attribute method="getManagingOfficeName"
+						attribute="name" />
 				</attributes>
 			</object>
-			<object method="getOfficeFloorInputManagedObject" element="input-managed-object">
+			<object method="getOfficeFloorInputManagedObject"
+				element="input-managed-object">
 				<attributes>
 					<attribute method="getOfficeFloorInputManagedObjectName"
 						attribute="name" />
 				</attributes>
 			</object>
-			<collection method="getOfficeFloorManagedObjectSourceInputDependencies">
+			<collection
+				method="getOfficeFloorManagedObjectSourceInputDependencies">
 				<item
 					type="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel"
 					element="input-dependency">
 					<attributes>
-						<attribute method="getOfficeFloorManagedObjectSourceInputDependencyName"
+						<attribute
+							method="getOfficeFloorManagedObjectSourceInputDependencyName"
 							attribute="name" />
-						<attribute method="getDependencyType" attribute="object-type" />
+						<attribute method="getDependencyType"
+							attribute="object-type" />
 					</attributes>
-					<object method="getOfficeFloorManagedObject" element="managed-object">
+					<object method="getOfficeFloorManagedObject"
+						element="managed-object">
 						<attributes>
 							<attribute method="getOfficeFloorManagedObjectName"
 								attribute="name" />
@@ -96,35 +111,64 @@
 					</object>
 				</item>
 			</collection>
-			<collection method="getOfficeFloorManagedObjectSourceFlows">
+			<collection
+				method="getOfficeFloorManagedObjectSourceFlows">
 				<item
 					type="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel"
 					element="flow">
 					<attributes>
-						<attribute method="getOfficeFloorManagedObjectSourceFlowName"
+						<attribute
+							method="getOfficeFloorManagedObjectSourceFlowName"
 							attribute="name" />
-						<attribute method="getArgumentType" attribute="argument-type" />
+						<attribute method="getArgumentType"
+							attribute="argument-type" />
 					</attributes>
-					<object method="getDeployedOfficeInput" element="office-input">
+					<object method="getDeployedOfficeInput"
+						element="office-input">
 						<attributes>
-							<attribute method="getDeployedOfficeName" attribute="office" />
+							<attribute method="getDeployedOfficeName"
+								attribute="office" />
 							<attribute method="getSectionName" attribute="section" />
-							<attribute method="getSectionInputName" attribute="input" />
+							<attribute method="getSectionInputName"
+								attribute="input" />
 						</attributes>
 					</object>
 				</item>
 			</collection>
-			<collection method="getOfficeFloorManagedObjectSourceTeams">
+			<collection
+				method="getOfficeFloorManagedObjectSourceTeams">
 				<item
 					type="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel"
 					element="team">
 					<attributes>
-						<attribute method="getOfficeFloorManagedObjectSourceTeamName"
+						<attribute
+							method="getOfficeFloorManagedObjectSourceTeamName"
 							attribute="name" />
 					</attributes>
-					<object method="getOfficeFloorTeam" element="office-floor-team">
+					<object method="getOfficeFloorTeam"
+						element="office-floor-team">
 						<attributes>
-							<attribute method="getOfficeFloorTeamName" attribute="name" />
+							<attribute method="getOfficeFloorTeamName"
+								attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+			<collection
+				method="getOfficeFloorManagedObjectSourceExecutionStrategies">
+				<item
+					type="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyModel"
+					element="execution-strategy">
+					<attributes>
+						<attribute
+							method="getOfficeFloorManagedObjectSourceExecutionStrategyName"
+							attribute="name" />
+					</attributes>
+					<object method="getOfficeFloorExecutionStrategy"
+						element="office-floor-execution-strategy">
+						<attributes>
+							<attribute method="getOfficeFloorExecutionStrategyName"
+								attribute="name" />
 						</attributes>
 					</object>
 				</item>
@@ -146,7 +190,8 @@
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getTypeQualifications">
-				<item type="net.officefloor.model.officefloor.TypeQualificationModel"
+				<item
+					type="net.officefloor.model.officefloor.TypeQualificationModel"
 					element="type-qualification">
 					<attributes>
 						<attribute method="getQualifier" attribute="qualifier" />
@@ -165,25 +210,29 @@
 	</collection>
 
 	<!-- MANAGED OBJECTS -->
-	<collection method="getOfficeFloorManagedObjects" element="managed-objects">
+	<collection method="getOfficeFloorManagedObjects"
+		element="managed-objects">
 		<item
 			type="net.officefloor.model.officefloor.OfficeFloorManagedObjectModel"
 			element="managed-object">
 			<attributes>
 				<attribute method="getOfficeFloorManagedObjectName"
 					attribute="name" />
-				<attribute method="getManagedObjectScope" attribute="scope" />
+				<attribute method="getManagedObjectScope"
+					attribute="scope" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
-			<object method="getOfficeFloorManagedObjectSource" element="managed-object-source">
+			<object method="getOfficeFloorManagedObjectSource"
+				element="managed-object-source">
 				<attributes>
 					<attribute method="getOfficeFloorManagedObjectSourceName"
 						attribute="name" />
 				</attributes>
 			</object>
 			<collection method="getTypeQualifications">
-				<item type="net.officefloor.model.officefloor.TypeQualificationModel"
+				<item
+					type="net.officefloor.model.officefloor.TypeQualificationModel"
 					element="type-qualification">
 					<attributes>
 						<attribute method="getQualifier" attribute="qualifier" />
@@ -191,25 +240,30 @@
 					</attributes>
 				</item>
 			</collection>
-			<collection method="getOfficeFloorManagedObjectDependencies">
+			<collection
+				method="getOfficeFloorManagedObjectDependencies">
 				<item
 					type="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel"
 					element="dependency">
 					<attributes>
-						<attribute method="getOfficeFloorManagedObjectDependencyName"
+						<attribute
+							method="getOfficeFloorManagedObjectDependencyName"
 							attribute="name" />
-						<attribute method="getDependencyType" attribute="object-type" />
+						<attribute method="getDependencyType"
+							attribute="object-type" />
 					</attributes>
-					<object method="getOfficeFloorManagedObject" element="managed-object">
+					<object method="getOfficeFloorManagedObject"
+						element="managed-object">
 						<attributes>
 							<attribute method="getOfficeFloorManagedObjectName"
 								attribute="name" />
 						</attributes>
 					</object>
-					<object method="getOfficeFloorInputManagedObject" element="input-managed-object">
+					<object method="getOfficeFloorInputManagedObject"
+						element="input-managed-object">
 						<attributes>
-							<attribute method="getOfficeFloorInputManagedObjectName"
-								attribute="name" />
+							<attribute
+								method="getOfficeFloorInputManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
 				</item>
@@ -243,13 +297,54 @@
 		</item>
 	</collection>
 
+	<!-- EXECUTIVE -->
+	<object method="getOfficeFloorExecutive" element="executive">
+		<attributes>
+			<attribute method="getExecutiveSourceClassName"
+				attribute="source" />
+			<attribute method="getX" attribute="x" />
+			<attribute method="getY" attribute="y" />
+		</attributes>
+		<collection method="getProperties" element="properties">
+			<item type="net.officefloor.model.officefloor.PropertyModel"
+				element="property">
+				<attributes>
+					<attribute method="getName" attribute="name" />
+					<attribute method="getValue" attribute="value" />
+				</attributes>
+			</item>
+		</collection>
+		<collection method="getExecutionStrategies">
+			<item
+				type="net.officefloor.model.officefloor.OfficeFloorExecutionStrategyModel"
+				element="execution-strategy">
+				<attributes>
+					<attribute method="getExecutionStrategyName"
+						attribute="name" />
+				</attributes>
+			</item>
+		</collection>
+		<collection method="getTeamOversights">
+			<item
+				type="net.officefloor.model.officefloor.OfficeFloorTeamOversightModel"
+				element="team-oversight">
+				<attributes>
+					<attribute method="getTeamOversightName" attribute="name" />
+				</attributes>
+			</item>
+		</collection>
+	</object>
+
 	<!-- TEAMS -->
 	<collection method="getOfficeFloorTeams" element="teams">
-		<item type="net.officefloor.model.officefloor.OfficeFloorTeamModel"
+		<item
+			type="net.officefloor.model.officefloor.OfficeFloorTeamModel"
 			element="team">
 			<attributes>
-				<attribute method="getOfficeFloorTeamName" attribute="name" />
-				<attribute method="getTeamSourceClassName" attribute="source" />
+				<attribute method="getOfficeFloorTeamName"
+					attribute="name" />
+				<attribute method="getTeamSourceClassName"
+					attribute="source" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
@@ -263,7 +358,8 @@
 				</item>
 			</collection>
 			<collection method="getTypeQualifications">
-				<item type="net.officefloor.model.officefloor.TypeQualificationModel"
+				<item
+					type="net.officefloor.model.officefloor.TypeQualificationModel"
 					element="type-qualification">
 					<attributes>
 						<attribute method="getQualifier" attribute="qualifier" />
@@ -271,16 +367,25 @@
 					</attributes>
 				</item>
 			</collection>
+			<object method="getOfficeFloorTeamOversight"
+				element="team-oversight">
+				<attributes>
+					<attribute method="getOfficeFloorTeamOversightName"
+						attribute="name" />
+				</attributes>
+			</object>
 		</item>
 	</collection>
 
 	<!-- OFFICES -->
 	<collection method="getDeployedOffices" element="offices">
-		<item type="net.officefloor.model.officefloor.DeployedOfficeModel"
+		<item
+			type="net.officefloor.model.officefloor.DeployedOfficeModel"
 			element="office">
 			<attributes>
 				<attribute method="getDeployedOfficeName" attribute="name" />
-				<attribute method="getOfficeSourceClassName" attribute="source" />
+				<attribute method="getOfficeSourceClassName"
+					attribute="source" />
 				<attribute method="getOfficeLocation" attribute="location" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
@@ -295,46 +400,57 @@
 				</item>
 			</collection>
 			<collection method="getDeployedOfficeObjects">
-				<item type="net.officefloor.model.officefloor.DeployedOfficeObjectModel"
+				<item
+					type="net.officefloor.model.officefloor.DeployedOfficeObjectModel"
 					element="object">
 					<attributes>
 						<attribute method="getDeployedOfficeObjectName"
 							attribute="name" />
-						<attribute method="getObjectType" attribute="object-type" />
+						<attribute method="getObjectType"
+							attribute="object-type" />
 					</attributes>
-					<object method="getOfficeFloorManagedObject" element="managed-object">
+					<object method="getOfficeFloorManagedObject"
+						element="managed-object">
 						<attributes>
 							<attribute method="getOfficeFloorManagedObjectName"
 								attribute="name" />
 						</attributes>
 					</object>
-					<object method="getOfficeFloorInputManagedObject" element="input-managed-object">
+					<object method="getOfficeFloorInputManagedObject"
+						element="input-managed-object">
 						<attributes>
-							<attribute method="getOfficeFloorInputManagedObjectName"
-								attribute="name" />
+							<attribute
+								method="getOfficeFloorInputManagedObjectName" attribute="name" />
 						</attributes>
 					</object>
 				</item>
 			</collection>
 			<collection method="getDeployedOfficeInputs">
-				<item type="net.officefloor.model.officefloor.DeployedOfficeInputModel"
+				<item
+					type="net.officefloor.model.officefloor.DeployedOfficeInputModel"
 					element="input">
 					<attributes>
 						<attribute method="getSectionName" attribute="section" />
-						<attribute method="getSectionInputName" attribute="input" />
-						<attribute method="getParameterType" attribute="parameter-type" />
+						<attribute method="getSectionInputName"
+							attribute="input" />
+						<attribute method="getParameterType"
+							attribute="parameter-type" />
 					</attributes>
 				</item>
 			</collection>
 			<collection method="getDeployedOfficeTeams">
-				<item type="net.officefloor.model.officefloor.DeployedOfficeTeamModel"
+				<item
+					type="net.officefloor.model.officefloor.DeployedOfficeTeamModel"
 					element="team">
 					<attributes>
-						<attribute method="getDeployedOfficeTeamName" attribute="name" />
+						<attribute method="getDeployedOfficeTeamName"
+							attribute="name" />
 					</attributes>
-					<object method="getOfficeFloorTeam" element="office-floor-team">
+					<object method="getOfficeFloorTeam"
+						element="office-floor-team">
 						<attributes>
-							<attribute method="getOfficeFloorTeamName" attribute="name" />
+							<attribute method="getOfficeFloorTeamName"
+								attribute="name" />
 						</attributes>
 					</object>
 				</item>

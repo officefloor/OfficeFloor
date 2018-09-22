@@ -18,17 +18,15 @@
 package net.officefloor.compile.spi.managedobject;
 
 import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.compile.spi.office.OfficeManagedObject;
-import net.officefloor.compile.spi.office.OfficeResponsibility;
-import net.officefloor.compile.spi.officefloor.OfficeFloorResponsibility;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 
 /**
- * {@link Team} required by the {@link OfficeManagedObject}.
+ * {@link Team} required by the {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectTeam extends OfficeResponsibility, OfficeFloorResponsibility {
+public interface ManagedObjectTeam {
 
 	/**
 	 * Obtains the name of the {@link ManagedObjectTeam}.
@@ -44,10 +42,8 @@ public interface ManagedObjectTeam extends OfficeResponsibility, OfficeFloorResp
 	 * This enables distinguishing {@link ManagedObjectTeam} instances to enable
 	 * dynamic {@link Team} assignment.
 	 * 
-	 * @param qualifier
-	 *            Qualifier. May be <code>null</code> if no qualification.
-	 * @param type
-	 *            Type (typically the fully qualified type).
+	 * @param qualifier Qualifier. May be <code>null</code> if no qualification.
+	 * @param type      Type (typically the fully qualified type).
 	 */
 	void addTypeQualification(String qualifier, String type);
 

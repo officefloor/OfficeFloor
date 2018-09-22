@@ -21,14 +21,19 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.impl.construct.executive.RawExecutiveMetaData;
+import net.officefloor.frame.impl.construct.executive.RawExecutiveMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOfficeMetaData;
@@ -40,11 +45,14 @@ import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.execute.job.FunctionLoopImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorMetaDataImpl;
+import net.officefloor.frame.internal.configuration.ExecutiveConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -72,8 +80,7 @@ public class RawOfficeFloorMetaDataFactory {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param threadLocalAwareExecutor
-	 *            {@link ThreadLocalAwareExecutor}.
+	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
 	 */
 	public RawOfficeFloorMetaDataFactory(ThreadLocalAwareExecutor threadLocalAwareExecutor) {
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
@@ -83,10 +90,8 @@ public class RawOfficeFloorMetaDataFactory {
 	 * Constructs the {@link RawOfficeFloorMetaData} from the
 	 * {@link OfficeFloorConfiguration}.
 	 * 
-	 * @param configuration
-	 *            {@link OfficeFloorConfiguration}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param configuration {@link OfficeFloorConfiguration}.
+	 * @param issues        {@link OfficeFloorIssues}.
 	 * @return {@link RawOfficeFloorMetaData}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -173,11 +178,6 @@ public class RawOfficeFloorMetaDataFactory {
 			}
 		}
 
-		// Create the managed execution factory
-		ThreadCompletionListener[] threadCompletionListeners = threadCompletionListenerList
-				.toArray(new ThreadCompletionListener[0]);
-		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(threadCompletionListeners);
-
 		// Construct the teams
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
 		List<TeamManagement> teamListing = new LinkedList<TeamManagement>();
@@ -185,9 +185,42 @@ public class RawOfficeFloorMetaDataFactory {
 		// Obtain the thread decorator
 		Consumer<Thread> threadDecorator = configuration.getThreadDecorator();
 
+		// Obtain the thread completion listeners
+		ThreadCompletionListener[] threadCompletionListeners = threadCompletionListenerList
+				.toArray(new ThreadCompletionListener[0]);
+
+		// Create the execution factory
+		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(threadCompletionListeners);
+
+		// Create thread factory manufacturer (managed execution factory and executive)
+		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,
+				threadDecorator);
+
+		// Create the executive
+		Executive executive;
+		Map<String, ThreadFactory[]> executionStrategies;
+		Map<String, TeamOversight> teamOversights;
+		ExecutiveConfiguration<?> executiveConfiguration = configuration.getExecutiveConfiguration();
+		if (executiveConfiguration != null) {
+			// Create the configured Executive
+			RawExecutiveMetaDataFactory rawExecutiveFactory = new RawExecutiveMetaDataFactory(sourceContext,
+					threadFactoryManufacturer);
+			RawExecutiveMetaData rawExecutive = rawExecutiveFactory
+					.constructRawExecutiveMetaData(executiveConfiguration, officeFloorName, issues);
+			executive = rawExecutive.getExecutive();
+			executionStrategies = rawExecutive.getExecutionStrategies();
+			teamOversights = rawExecutive.getTeamOversights();
+		} else {
+			// No Executive configured, so use default
+			DefaultExecutive defaultExecutive = new DefaultExecutive(threadFactoryManufacturer);
+			executive = defaultExecutive;
+			executionStrategies = defaultExecutive.getExecutionStrategyMap();
+			teamOversights = defaultExecutive.getTeamOversightMap();
+		}
+
 		// Create the team factory
-		RawTeamMetaDataFactory rawTeamFactory = new RawTeamMetaDataFactory(sourceContext, threadDecorator,
-				this.threadLocalAwareExecutor, managedExecutionFactory);
+		RawTeamMetaDataFactory rawTeamFactory = new RawTeamMetaDataFactory(sourceContext, executive, teamOversights,
+				threadFactoryManufacturer, this.threadLocalAwareExecutor);
 
 		// Construct the configured teams
 		for (TeamConfiguration<?> teamConfiguration : configuration.getTeamConfiguration()) {
@@ -225,7 +258,7 @@ public class RawOfficeFloorMetaDataFactory {
 		// Undertake OfficeFloor escalation on any team available
 		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(null);
 		OfficeMetaData officeFloorManagement = new OfficeMetaDataImpl("Management", null, null, null,
-				officeFloorFunctionLoop, null, null, null, null, null, null, null);
+				officeFloorFunctionLoop, null, null, null, null, null, null, null, null);
 
 		// Obtain the escalation handler for the OfficeFloor
 		EscalationHandler officeFloorEscalationHandler = configuration.getEscalationHandler();
@@ -237,8 +270,9 @@ public class RawOfficeFloorMetaDataFactory {
 				officeFloorManagement);
 
 		// Create the raw office floor meta-data
-		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(teamRegistry, breakChainTeamManagement,
-				threadLocalAwareExecutor, managedExecutionFactory, mosRegistry, officeFloorEscalation);
+		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, executionStrategies, teamRegistry,
+				breakChainTeamManagement, threadLocalAwareExecutor, managedExecutionFactory, mosRegistry,
+				officeFloorEscalation);
 
 		// Construct the office factory
 		RawOfficeMetaDataFactory rawOfficeFactory = new RawOfficeMetaDataFactory(rawMetaData);

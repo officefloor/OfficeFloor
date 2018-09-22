@@ -31,6 +31,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
@@ -44,6 +45,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecutionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -84,10 +86,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	/**
 	 * Instantiate.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link ManagedObject}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link ManagedObject}.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public ManagedObjectLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -116,12 +116,9 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	/**
 	 * Loads the {@link PropertyList} specification.
 	 * 
-	 * @param <D>
-	 *            Dependency key.
-	 * @param <H>
-	 *            Flow key.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
+	 * @param                     <D> Dependency key.
+	 * @param                     <H> Flow key.
+	 * @param managedObjectSource {@link ManagedObjectSource}.
 	 * @return {@link PropertyList} specification or <code>null</code> if issue.
 	 */
 	@Override
@@ -260,6 +257,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 		Class<?> objectType;
 		ManagedObjectDependencyType<D>[] dependencyTypes;
 		ManagedObjectFlowType<F>[] flowTypes;
+		ManagedObjectExecutionStrategyType[] strategyTypes;
 		Class<?>[] extensionInterfaces;
 		try {
 
@@ -292,6 +290,12 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 			flowTypes = this.getManagedObjectFlowTypes(metaData);
 			if (flowTypes == null) {
 				return null; // issue in getting flow types
+			}
+
+			// Obtain the execution strategy types
+			strategyTypes = this.getExecutionStrategyTypes(metaData);
+			if (strategyTypes == null) {
+				return null; // issue in getting execution strategy types
 			}
 
 			// Obtain the supported extension interfaces
@@ -327,7 +331,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 
 		// Create and return the managed object type
 		return new ManagedObjectTypeImpl<D>(objectType, isInput, dependencyTypes, unlinkedFlowTypes, teamTypes,
-				extensionInterfaces);
+				strategyTypes, extensionInterfaces);
 	}
 
 	@Override
@@ -371,13 +375,10 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	 * {@link ManagedObjectSourceMetaData} that are linked to an added
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param metaDataFlows
-	 *            {@link ManagedObjectFlowType} instances defining linked
-	 *            processes for the {@link ManagedObjectSourceMetaData}.
-	 * @param managingOffice
-	 *            {@link ManagingOfficeConfiguration}.
-	 * @param office
-	 *            {@link OfficeConfiguration}.
+	 * @param metaDataFlows  {@link ManagedObjectFlowType} instances defining linked
+	 *                       processes for the {@link ManagedObjectSourceMetaData}.
+	 * @param managingOffice {@link ManagingOfficeConfiguration}.
+	 * @param office         {@link OfficeConfiguration}.
 	 * @return Filtered {@link ManagedObjectFlowType}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -479,11 +480,10 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	}
 
 	/**
-	 * Provides issue if the {@link Flow} of the {@link ManagedFunction}
-	 * instances added are not linked.
+	 * Provides issue if the {@link Flow} of the {@link ManagedFunction} instances
+	 * added are not linked.
 	 * 
-	 * @param office
-	 *            {@link OfficeConfiguration}.
+	 * @param office {@link OfficeConfiguration}.
 	 * @return <code>true</code> if all {@link Flow} instances of all the
 	 *         {@link ManagedFunction} instances are configured. Otherwise,
 	 *         <code>false</code> with issues reported.
@@ -526,8 +526,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	 * Obtains the {@link ManagedObjectTeamType} instances ensuring all added
 	 * {@link ManagedFunction} instances have names.
 	 * 
-	 * @param office
-	 *            {@link OfficeConfiguration}.
+	 * @param office {@link OfficeConfiguration}.
 	 * @return {@link ManagedObjectTeamType} instances.
 	 */
 	private ManagedObjectTeamType[] getTeamsEnsuringHaveFunctionNames(OfficeConfiguration office) {
@@ -565,10 +564,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	/**
 	 * Indicates if the {@link ManagedFunction} was added to the {@link Office}.
 	 * 
-	 * @param functionName
-	 *            {@link ManagedFunction} name.
-	 * @param office
-	 *            {@link OfficeConfiguration}.
+	 * @param functionName {@link ManagedFunction} name.
+	 * @param office       {@link OfficeConfiguration}.
 	 * @return <code>true</code> if {@link ManagedFunction} added to the
 	 *         {@link Office}.
 	 */
@@ -590,8 +587,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	 * Obtains the {@link ManagedObjectDependencyType} instances from the
 	 * {@link ManagedObjectSourceMetaData}.
 	 * 
-	 * @param metaData
-	 *            {@link ManagedObjectSourceMetaData}.
+	 * @param metaData {@link ManagedObjectSourceMetaData}.
 	 * @return {@link ManagedObjectDependencyType} instances.
 	 */
 	@SuppressWarnings("unchecked")
@@ -718,8 +714,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	 * Obtains the {@link ManagedObjectFlowType} instances from the
 	 * {@link ManagedObjectSourceMetaData}.
 	 * 
-	 * @param metaData
-	 *            {@link ManagedObjectSourceMetaData}.
+	 * @param metaData {@link ManagedObjectSourceMetaData}.
 	 * @return {@link ManagedObjectFlowType} instances.
 	 */
 	@SuppressWarnings("unchecked")
@@ -834,10 +829,52 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	}
 
 	/**
+	 * Obtains the {@link ManagedObjectExecutionStrategyType} instances.
+	 * 
+	 * @param metaData {@link ManagedObjectSourceMetaData}.
+	 * @return {@link ManagedObjectExecutionStrategyType} instances.
+	 */
+	private ManagedObjectExecutionStrategyType[] getExecutionStrategyTypes(ManagedObjectSourceMetaData<?, ?> metaData) {
+
+		// Obtain the execution strategies
+		ManagedObjectExecutionStrategyType[] strategyTypes;
+		ManagedObjectExecutionMetaData[] executionMetaDatas = metaData.getExecutionMetaData();
+		if (executionMetaDatas == null) {
+			// No strategies
+			strategyTypes = new ManagedObjectExecutionStrategyType[0];
+
+		} else {
+			// Load the execution strategies
+			strategyTypes = new ManagedObjectExecutionStrategyType[executionMetaDatas.length];
+			for (int i = 0; i < strategyTypes.length; i++) {
+				ManagedObjectExecutionMetaData executionMetaData = executionMetaDatas[i];
+
+				// Ensure have execution meta-data
+				if (executionMetaData == null) {
+					this.addIssue("Null " + ManagedObjectExecutionMetaData.class.getSimpleName()
+							+ " for execution strategy " + i);
+					return null; // missing met-data
+				}
+
+				// Obtain the execution details
+				String executionStrategyName = executionMetaData.getLabel();
+				if (CompileUtil.isBlank(executionStrategyName)) {
+					executionStrategyName = String.valueOf(i);
+				}
+
+				// Add the execution strategy type
+				strategyTypes[i] = new ManagedObjectExecutionStrategyTypeImpl(executionStrategyName);
+			}
+		}
+
+		// Return the exeuction strategy types
+		return strategyTypes;
+	}
+
+	/**
 	 * Obtains the extension interfaces supported by the {@link ManagedObject}.
 	 * 
-	 * @param metaData
-	 *            {@link ManagedObjectSourceMetaData}.
+	 * @param metaData {@link ManagedObjectSourceMetaData}.
 	 * @return Extension interfaces.
 	 */
 	private Class<?>[] getExtensionInterfaces(ManagedObjectSourceMetaData<?, ?> metaData) {

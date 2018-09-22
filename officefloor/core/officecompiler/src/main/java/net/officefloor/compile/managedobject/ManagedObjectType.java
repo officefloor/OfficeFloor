@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.managedobject;
 
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -77,6 +78,16 @@ public interface ManagedObjectType<D extends Enum<D>> {
 	 *         required by the {@link ManagedObject}.
 	 */
 	ManagedObjectTeamType[] getTeamTypes();
+
+	/**
+	 * Obtains the {@link ManagedObjectExecutionStrategyType} definitions of the
+	 * {@link ExecutionStrategy} instances required by the {@link ManagedObject}.
+	 * 
+	 * @return {@link ManagedObjectExecutionStrategyType} definitions of the
+	 *         {@link ExecutionStrategy} instances required by the
+	 *         {@link ManagedObject}.
+	 */
+	ManagedObjectExecutionStrategyType[] getExecutionStrategyTypes();
 
 	/**
 	 * Obtains the extension types supported by the {@link ManagedObject}.

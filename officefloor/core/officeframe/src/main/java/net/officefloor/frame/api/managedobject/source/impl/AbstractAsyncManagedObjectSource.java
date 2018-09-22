@@ -23,10 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecutionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -218,6 +220,15 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		Labeller<F> addFlow(Class<?> argumentType);
 
 		/**
+		 * Adds a required {@link ExecutionStrategy} identified by an index into the
+		 * order the {@link ExecutionStrategy} was added.
+		 * 
+		 * @return {@link ExecutionLabeller} to possibly label the
+		 *         {@link ExecutionStrategy}.
+		 */
+		ExecutionLabeller addExecutionStrategy();
+
+		/**
 		 * Adds a {@link ManagedObjectExtensionMetaData} instance.
 		 * 
 		 * @param                           <E> Extension interface type.
@@ -274,6 +285,27 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 	}
 
 	/**
+	 * Provides the ability to label the required {@link ExecutionStrategy}.
+	 */
+	public static interface ExecutionLabeller {
+
+		/**
+		 * Specifies the label.
+		 * 
+		 * @param label Label.
+		 * @return <code>this</code> {@link ExecutionLabeller} (allows simpler coding).
+		 */
+		ExecutionLabeller setLabel(String label);
+
+		/**
+		 * Obtains the index of the {@link ExecutionStrategy}.
+		 * 
+		 * @return Index of the {@link ExecutionStrategy}.
+		 */
+		int getIndex();
+	}
+
+	/**
 	 * Meta-data for the {@link ManagedObjectSource}.
 	 */
 	private class MetaData implements MetaDataContext<O, F>, ManagedObjectSourceMetaData<O, F> {
@@ -297,17 +329,22 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		/**
 		 * {@link ManagedObjectDependencyMetaData} instances.
 		 */
-		private Map<Integer, ManagedObjectDependencyMetaData<O>> dependencies = new HashMap<Integer, ManagedObjectDependencyMetaData<O>>();
+		private Map<Integer, ManagedObjectDependencyMetaData<O>> dependencies = new HashMap<>();
 
 		/**
 		 * {@link ManagedObjectFlowMetaData} instances.
 		 */
-		private Map<Integer, ManagedObjectFlowMetaData<F>> flows = new HashMap<Integer, ManagedObjectFlowMetaData<F>>();
+		private Map<Integer, ManagedObjectFlowMetaData<F>> flows = new HashMap<>();
+
+		/**
+		 * {@link ManagedObjectExecutionMetaData} instances.
+		 */
+		private Map<Integer, ManagedObjectExecutionMetaData> executions = new HashMap<>();
 
 		/**
 		 * {@link ManagedObjectExtensionMetaData} instances.
 		 */
-		private List<ManagedObjectExtensionMetaData<?>> externsionInterfaces = new LinkedList<ManagedObjectExtensionMetaData<?>>();
+		private List<ManagedObjectExtensionMetaData<?>> externsionInterfaces = new LinkedList<>();
 
 		/**
 		 * Initiate.
@@ -441,6 +478,32 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		}
 
 		@Override
+		public ExecutionLabeller addExecutionStrategy() {
+
+			// Create the execution meta-data
+			final ManagedObjectExecutionMetaDataImpl execution = new ManagedObjectExecutionMetaDataImpl();
+
+			// Register the execution at the index
+			int index = this.executions.size();
+			this.executions.put(Integer.valueOf(index), execution);
+
+			// Return the labeller for the flow
+			return new ExecutionLabeller() {
+
+				@Override
+				public ExecutionLabeller setLabel(String label) {
+					execution.setLabel(label);
+					return this;
+				}
+
+				@Override
+				public int getIndex() {
+					return index;
+				}
+			};
+		}
+
+		@Override
 		public <E> void addManagedObjectExtension(Class<E> interfaceType,
 				ExtensionFactory<E> extensionInterfaceFactory) {
 			this.externsionInterfaces
@@ -469,6 +532,11 @@ public abstract class AbstractAsyncManagedObjectSource<O extends Enum<O>, F exte
 		@Override
 		public ManagedObjectFlowMetaData<F>[] getFlowMetaData() {
 			return ConstructUtil.toArray(this.flows, new ManagedObjectFlowMetaData[0]);
+		}
+
+		@Override
+		public ManagedObjectExecutionMetaData[] getExecutionMetaData() {
+			return ConstructUtil.toArray(this.executions, new ManagedObjectExecutionMetaData[0]);
 		}
 
 		@Override

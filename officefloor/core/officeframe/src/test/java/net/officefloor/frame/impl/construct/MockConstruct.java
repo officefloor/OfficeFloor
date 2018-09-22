@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 
 import org.junit.Assert;
 
@@ -30,6 +31,8 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -43,12 +46,14 @@ import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecutionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectDependencyMetaDataImpl;
+import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectExecutionMetaDataImpl;
 import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectExtensionMetaDataImpl;
 import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectFlowMetaDataImpl;
 import net.officefloor.frame.api.source.TestSource;
@@ -70,6 +75,7 @@ import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
@@ -129,8 +135,7 @@ public class MockConstruct {
 	/**
 	 * Creates a mock {@link ManagedObjectBuilderImpl}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectBuilderImpl}.
 	 */
 	public static <O extends Enum<O>, F extends Enum<F>> ManagedObjectBuilderImpl<O, F, ConstructManagedObjectSource<O, F>> mockManagedObjectBuilder(
@@ -151,8 +156,7 @@ public class MockConstruct {
 	/**
 	 * Creates a mock {@link RawOfficeFloorMetaData}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
+	 * @param officeName Name of the {@link Office}.
 	 * @return Mock {@link RawOfficeFloorMetaData}.
 	 */
 	public static RawOfficeMetaDataMockBuilder mockRawOfficeMetaData(String officeName) {
@@ -162,8 +166,7 @@ public class MockConstruct {
 	/**
 	 * Creates a {@link OfficeMetaDataMockBuilder}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
+	 * @param officeName Name of the {@link Office}.
 	 * @return {@link OfficeMetaDataMockBuilder}.
 	 */
 	public static OfficeMetaDataMockBuilder mockOfficeMetaData(String officeName) {
@@ -173,10 +176,8 @@ public class MockConstruct {
 	/**
 	 * Creates mock {@link ManagedObjectMetaDataImpl}.
 	 * 
-	 * @param boundManagedObjectName
-	 *            Bound {@link ManagedObject} name.
-	 * @param objectType
-	 *            Object type of {@link ManagedObject}.
+	 * @param boundManagedObjectName Bound {@link ManagedObject} name.
+	 * @param objectType             Object type of {@link ManagedObject}.
 	 * @return Mock {@link ManagedObjectMetaDataImpl}.
 	 */
 	public static <O extends Enum<O>> ManagedObjectMetaDataImpl<O> mockManagedObjectMetaData(
@@ -203,8 +204,7 @@ public class MockConstruct {
 	 * Creates a {@link RawManagedObjectMetaDataMockBuilder} to build a
 	 * {@link RawManagedObjectMetaData}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
 	 * @return {@link RawManagedObjectMetaDataMockBuilder}.
 	 */
 	public static <O extends Enum<O>, F extends Enum<F>> RawManagedObjectMetaDataMockBuilder<O, F> mockRawManagedObjectMetaData(
@@ -216,10 +216,8 @@ public class MockConstruct {
 	 * Creates a {@link RawManagingOfficeMetaDataMockBuilder} to build a
 	 * {@link RawManagingOfficeMetaData}.
 	 * 
-	 * @param managingOfficeName
-	 *            Name of the managing {@link Office}.
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managingOfficeName      Name of the managing {@link Office}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
 	 * @return {@link RawManagingOfficeMetaDataMockBuilder}.
 	 */
 	public static <F extends Enum<F>> RawManagingOfficeMetaDataMockBuilder<F> mockRawManagingOfficeMetaData(
@@ -231,10 +229,8 @@ public class MockConstruct {
 	 * Creates a {@link RawBoundManagedObjectMetaDataMockBuilder} to build a
 	 * {@link RawBoundManagedObjectMetaData} (that is not an input).
 	 * 
-	 * @param boundManagedObjectName
-	 *            Bound {@link ManagedObject} name.
-	 * @param rawManagedObjectMetaData
-	 *            {@link RawManagedObjectMetaData}.
+	 * @param boundManagedObjectName   Bound {@link ManagedObject} name.
+	 * @param rawManagedObjectMetaData {@link RawManagedObjectMetaData}.
 	 * @return {@link RawBoundManagedObjectMetaDataMockBuilder}.
 	 */
 	public static <O extends Enum<O>, F extends Enum<F>> RawBoundManagedObjectMetaDataMockBuilder<O, F> mockRawBoundManagedObjectMetaData(
@@ -246,12 +242,9 @@ public class MockConstruct {
 	 * Creates a {@link RawBoundManagedObjectMetaDataMockBuilder} to build a
 	 * {@link RawBoundManagedObjectMetaData}.
 	 * 
-	 * @param boundManagedObjectName
-	 *            Bound {@link ManagedObject} name.
-	 * @param isInput
-	 *            Indicates if input.
-	 * @param rawManagedObjectMetaData
-	 *            {@link RawManagedObjectMetaData}.
+	 * @param boundManagedObjectName   Bound {@link ManagedObject} name.
+	 * @param isInput                  Indicates if input.
+	 * @param rawManagedObjectMetaData {@link RawManagedObjectMetaData}.
 	 * @return {@link RawBoundManagedObjectMetaDataMockBuilder}.
 	 */
 	public static <O extends Enum<O>, F extends Enum<F>> RawBoundManagedObjectMetaDataMockBuilder<O, F> mockRawBoundManagedObjectMetaData(
@@ -264,10 +257,8 @@ public class MockConstruct {
 	 * Creates a {@link RawBoundManagedObjectMetaDataMockBuilder} to build a
 	 * {@link RawBoundManagedObjectMetaData} (that is not an input).
 	 * 
-	 * @param boundManagedObjectName
-	 *            Bound {@link ManagedObject} name.
-	 * @param rawManagedObjectMetaData
-	 *            {@link RawManagedObjectMetaDataMockBuilder}.
+	 * @param boundManagedObjectName   Bound {@link ManagedObject} name.
+	 * @param rawManagedObjectMetaData {@link RawManagedObjectMetaDataMockBuilder}.
 	 * @return {@link RawBoundManagedObjectMetaDataMockBuilder}.
 	 */
 	public static <O extends Enum<O>, F extends Enum<F>> RawBoundManagedObjectMetaDataMockBuilder<O, F> mockRawBoundManagedObjectMetaData(
@@ -279,12 +270,9 @@ public class MockConstruct {
 	 * Creates a {@link RawBoundManagedObjectMetaDataMockBuilder} to build a
 	 * {@link RawBoundManagedObjectMetaData} (that is not an input).
 	 * 
-	 * @param boundManagedObjectName
-	 *            Bound {@link ManagedObject} name.
-	 * @param isInput
-	 *            Indicates if input.
-	 * @param rawManagedObjectMetaData
-	 *            {@link RawManagedObjectMetaDataMockBuilder}.
+	 * @param boundManagedObjectName   Bound {@link ManagedObject} name.
+	 * @param isInput                  Indicates if input.
+	 * @param rawManagedObjectMetaData {@link RawManagedObjectMetaDataMockBuilder}.
 	 * @return {@link RawBoundManagedObjectMetaDataMockBuilder}.
 	 */
 	public static <O extends Enum<O>, F extends Enum<F>> RawBoundManagedObjectMetaDataMockBuilder<O, F> mockRawBoundManagedObjectMetaData(
@@ -298,10 +286,8 @@ public class MockConstruct {
 	 * Creates a {@link RawGovernanceMetaDataMockBuilder} to build a
 	 * {@link RawGovernanceMetaData}.
 	 * 
-	 * @param governanceName
-	 *            Name of the {@link Governance}.
-	 * @param extensionType
-	 *            Extension type used by the {@link Governance}.
+	 * @param governanceName Name of the {@link Governance}.
+	 * @param extensionType  Extension type used by the {@link Governance}.
 	 * @return {@link RawGovernanceMetaDataMockBuilder}.
 	 */
 	public static <E, F extends Enum<F>> RawGovernanceMetaDataMockBuilder<E, F> mockRawGovernanceMetaData(
@@ -360,6 +346,11 @@ public class MockConstruct {
 		private final List<ManagedObjectFlowMetaData<F>> flows = new LinkedList<>();
 
 		/**
+		 * {@link ManagedObjectExecutionMetaData} instances.
+		 */
+		private final List<ManagedObjectExecutionMetaData> executionStrategies = new LinkedList<>();
+
+		/**
 		 * {@link ManagedObjectExtensionMetaData} instances.
 		 */
 		private final List<ManagedObjectExtensionMetaData<?>> extensions = new LinkedList<>();
@@ -385,8 +376,7 @@ public class MockConstruct {
 		/**
 		 * Specifies the {@link ManagedObject} class.
 		 * 
-		 * @param managedObjectClass
-		 *            {@link ManagedObject} class.
+		 * @param managedObjectClass {@link ManagedObject} class.
 		 */
 		public void setManagedObjectClass(Class<? extends ManagedObject> managedObjectClass) {
 			this.assertNotBuilt();
@@ -396,8 +386,7 @@ public class MockConstruct {
 		/**
 		 * Specifies the {@link Object} class.
 		 * 
-		 * @param objectClass
-		 *            {@link Object} class.
+		 * @param objectClass {@link Object} class.
 		 */
 		public void setObjectClass(Class<?> objectClass) {
 			this.assertNotBuilt();
@@ -407,12 +396,10 @@ public class MockConstruct {
 		/**
 		 * Adds a {@link ManagedObjectDependencyMetaData}.
 		 * 
-		 * @param type
-		 *            Dependency type.
-		 * @param key
-		 *            Key. May be <code>null</code>.
-		 * @return {@link ManagedObjectDependencyMetaDataImpl} for further
-		 *         configuration of the dependency.
+		 * @param type Dependency type.
+		 * @param key  Key. May be <code>null</code>.
+		 * @return {@link ManagedObjectDependencyMetaDataImpl} for further configuration
+		 *         of the dependency.
 		 */
 		public ManagedObjectDependencyMetaDataImpl<O> addDependency(Class<?> type, O key) {
 			this.assertNotBuilt();
@@ -424,12 +411,10 @@ public class MockConstruct {
 		/**
 		 * Adds a {@link ManagedObjectFlowMetaData}.
 		 * 
-		 * @param argumentType
-		 *            Argument type to {@link Flow}. May be <code>null</code>.
-		 * @param key
-		 *            Key. May be <code>null</code>.
-		 * @return {@link ManagedObjectFlowMetaDataImpl} for further
-		 *         configuration of the {@link Flow}.
+		 * @param argumentType Argument type to {@link Flow}. May be <code>null</code>.
+		 * @param key          Key. May be <code>null</code>.
+		 * @return {@link ManagedObjectFlowMetaDataImpl} for further configuration of
+		 *         the {@link Flow}.
 		 */
 		public ManagedObjectFlowMetaDataImpl<F> addFlow(Class<?> argumentType, F key) {
 			this.assertNotBuilt();
@@ -439,12 +424,23 @@ public class MockConstruct {
 		}
 
 		/**
+		 * Adds a {@link ManagedObjectExecutionMetaData}.
+		 * 
+		 * @return {@link ManagedObjectExecutionMetaDataImpl} for further configuration
+		 *         of the {@link ExecutionStrategy}.
+		 */
+		public ManagedObjectExecutionMetaDataImpl addExecutionStrategy() {
+			this.assertNotBuilt();
+			ManagedObjectExecutionMetaDataImpl execution = new ManagedObjectExecutionMetaDataImpl();
+			this.executionStrategies.add(execution);
+			return execution;
+		}
+
+		/**
 		 * Adds an extension.
 		 * 
-		 * @param extensionType
-		 *            Extension type.
-		 * @param extensionFactory
-		 *            {@link ExtensionFactory}.
+		 * @param extensionType    Extension type.
+		 * @param extensionFactory {@link ExtensionFactory}.
 		 */
 		public <E> void addExtension(Class<E> extensionType, ExtensionFactory<E> extensionFactory) {
 			this.assertNotBuilt();
@@ -479,6 +475,13 @@ public class MockConstruct {
 		public ManagedObjectFlowMetaData<F>[] getFlowMetaData() {
 			this.isBuilt = true;
 			return this.flows.toArray(new ManagedObjectFlowMetaData[this.flows.size()]);
+		}
+
+		@Override
+		public ManagedObjectExecutionMetaData[] getExecutionMetaData() {
+			this.isBuilt = true;
+			return this.executionStrategies
+					.toArray(new ManagedObjectExecutionMetaData[this.executionStrategies.size()]);
 		}
 
 		@Override
@@ -521,10 +524,8 @@ public class MockConstruct {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managingOfficeName
-		 *            Name of the managing {@link Office}.
-		 * @param managedObjectSourceName
-		 *            Name of the {@link ManagedObjectSource}.
+		 * @param managingOfficeName      Name of the managing {@link Office}.
+		 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
 		 */
 		private RawManagingOfficeMetaDataMockBuilder(String managingOfficeName, String managedObjectSourceName) {
 			this(managingOfficeName, managedObjectSourceName, new ManagedObjectSourceMetaDataMockBuilder<>());
@@ -533,12 +534,11 @@ public class MockConstruct {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managingOfficeName
-		 *            Name of the managing {@link Office}.
-		 * @param managedObjectSourceName
-		 *            Name of the {@link ManagedObjectSource}.
-		 * @param managedObjectSourceMetaDataBuilder
-		 *            {@link ManagedObjectSourceMetaDataMockBuilder}.
+		 * @param managingOfficeName                 Name of the managing
+		 *                                           {@link Office}.
+		 * @param managedObjectSourceName            Name of the
+		 *                                           {@link ManagedObjectSource}.
+		 * @param managedObjectSourceMetaDataBuilder {@link ManagedObjectSourceMetaDataMockBuilder}.
 		 */
 		private RawManagingOfficeMetaDataMockBuilder(String managingOfficeName, String managedObjectSourceName,
 				ManagedObjectSourceMetaDataMockBuilder<?, F> managedObjectSourceMetaDataBuilder) {
@@ -567,8 +567,7 @@ public class MockConstruct {
 		/**
 		 * Specifies the recycle {@link ManagedFunction} name.
 		 * 
-		 * @param recycleFunctionName
-		 *            Recycle {@link ManagedFunction} name.
+		 * @param recycleFunctionName Recycle {@link ManagedFunction} name.
 		 * @return <code>this</code>.
 		 */
 		public RawManagingOfficeMetaDataMockBuilder<F> recycle(String recycleFunctionName) {
@@ -578,11 +577,11 @@ public class MockConstruct {
 		}
 
 		/**
-		 * Obtains the {@link ManagedObjectSourceMetaDataMockBuilder} to
-		 * configure the {@link Flow} instances.
+		 * Obtains the {@link ManagedObjectSourceMetaDataMockBuilder} to configure the
+		 * {@link Flow} instances.
 		 * 
-		 * @return {@link ManagedObjectSourceMetaDataMockBuilder} to configure
-		 *         the {@link Flow} instances.
+		 * @return {@link ManagedObjectSourceMetaDataMockBuilder} to configure the
+		 *         {@link Flow} instances.
 		 */
 		public ManagedObjectSourceMetaDataMockBuilder<?, F> getFlowBuilder() {
 			this.assetNotBuilt();
@@ -598,7 +597,9 @@ public class MockConstruct {
 			if (this.built == null) {
 				this.built = new RawManagingOfficeMetaData<>(this.managingOfficeName, this.recycleFunctionName,
 						this.managingOfficeConfiguration.getInputManagedObjectConfiguration(),
-						this.managedObjectSourceMetDataBuilder.getFlowMetaData(), this.managingOfficeConfiguration);
+						this.managedObjectSourceMetDataBuilder.getFlowMetaData(),
+						this.managedObjectSourceMetDataBuilder.getExecutionMetaData(),
+						this.managingOfficeConfiguration);
 			}
 			return this.built;
 		}
@@ -681,8 +682,7 @@ public class MockConstruct {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedObjectSourceName
-		 *            {@link ManagedObjectSource} name.
+		 * @param managedObjectSourceName {@link ManagedObjectSource} name.
 		 */
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private RawManagedObjectMetaDataMockBuilder(String managedObjectSourceName) {
@@ -721,8 +721,7 @@ public class MockConstruct {
 		/**
 		 * Specifies the {@link ManagedObjectSource}.
 		 * 
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
+		 * @param managedObjectSource {@link ManagedObjectSource}.
 		 */
 		public void setManagedObjectSource(ManagedObjectSource<O, F> managedObjectSource) {
 			this.managedObjectSource = managedObjectSource;
@@ -731,8 +730,7 @@ public class MockConstruct {
 		/**
 		 * Specifies the timeout.
 		 * 
-		 * @param timeout
-		 *            Timeout.
+		 * @param timeout Timeout.
 		 * @return <code>this</code>.
 		 */
 		public RawManagedObjectMetaDataMockBuilder<O, F> timeout(long timeout) {
@@ -744,8 +742,7 @@ public class MockConstruct {
 		/**
 		 * Specifies the {@link ManagedObjectPool}.
 		 * 
-		 * @param managedObjectPool
-		 *            {@link ManagedObjectPool}.
+		 * @param managedObjectPool {@link ManagedObjectPool}.
 		 * @return <code>this</code>.
 		 */
 		public RawManagedObjectMetaDataMockBuilder<O, F> pool(ManagedObjectPool managedObjectPool) {
@@ -757,8 +754,7 @@ public class MockConstruct {
 		/**
 		 * Adds a {@link ThreadCompletionListener}.
 		 * 
-		 * @param listener
-		 *            {@link ThreadCompletionListener}.
+		 * @param listener {@link ThreadCompletionListener}.
 		 * @return <code>this</code>.
 		 */
 		public RawManagedObjectMetaDataMockBuilder<O, F> threadCompletionListener(ThreadCompletionListener listener) {
@@ -907,8 +903,7 @@ public class MockConstruct {
 		private ManagedObjectScope managedOjectScope = ManagedObjectScope.PROCESS;
 
 		/**
-		 * Index of this {@link ManagedObject} within the
-		 * {@link ManagedObjectScope}.
+		 * Index of this {@link ManagedObject} within the {@link ManagedObjectScope}.
 		 */
 		private int indexOfManagedObjectWithinScope = 0;
 
@@ -920,12 +915,9 @@ public class MockConstruct {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param boundManagedObjectName
-		 *            Bound {@link ManagedObject} name.
-		 * @param isInput
-		 *            Indicates if input.
-		 * @param rawManagedObjectMetaData
-		 *            {@link RawManagedObjectMetaData}.
+		 * @param boundManagedObjectName   Bound {@link ManagedObject} name.
+		 * @param isInput                  Indicates if input.
+		 * @param rawManagedObjectMetaData {@link RawManagedObjectMetaData}.
 		 */
 		private RawBoundManagedObjectMetaDataMockBuilder(String boundManagedObjectName, boolean isInput,
 				RawManagedObjectMetaData<O, F> rawManagedObjectMetaData) {
@@ -937,12 +929,9 @@ public class MockConstruct {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param boundManagedObjectName
-		 *            Bound {@link ManagedObject} name.
-		 * @param isInput
-		 *            Indicates if input.
-		 * @param rawManagedObjectMetaData
-		 *            {@link RawManagedObjectMetaDataMockBuilder}.
+		 * @param boundManagedObjectName   Bound {@link ManagedObject} name.
+		 * @param isInput                  Indicates if input.
+		 * @param rawManagedObjectMetaData {@link RawManagedObjectMetaDataMockBuilder}.
 		 */
 		private RawBoundManagedObjectMetaDataMockBuilder(String boundManagedObjectName, boolean isInput,
 				RawManagedObjectMetaDataMockBuilder<O, F> rawManagedObjectMetaData) {
@@ -973,10 +962,9 @@ public class MockConstruct {
 		/**
 		 * Specifies the {@link ManagedObjectIndex}.
 		 * 
-		 * @param managedObjectScope
-		 *            {@link ManagedObjectScope}.
-		 * @param indexOfManagedObjectWithinScope
-		 *            Index of {@link ManagedObject} within the scope.
+		 * @param managedObjectScope              {@link ManagedObjectScope}.
+		 * @param indexOfManagedObjectWithinScope Index of {@link ManagedObject} within
+		 *                                        the scope.
 		 */
 		public void setManagedObjectIndex(ManagedObjectScope managedObjectScope, int indexOfManagedObjectWithinScope) {
 			this.assetNotBuilt();
@@ -1041,8 +1029,7 @@ public class MockConstruct {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param rawBoundManagedObjectMetaData
-		 *            {@link RawBoundManagedObjectMetaDataMockBuilder}.
+		 * @param rawBoundManagedObjectMetaData {@link RawBoundManagedObjectMetaDataMockBuilder}.
 		 */
 		private RawBoundManagedObjectInstanceMetaDataMockBuilder(
 				RawBoundManagedObjectMetaDataMockBuilder<O, F> rawBoundManagedObjectMetaData) {
@@ -1140,8 +1127,7 @@ public class MockConstruct {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param governanceName
-		 *            Name of the {@link Governance}.
+		 * @param governanceName Name of the {@link Governance}.
 		 */
 		private RawGovernanceMetaDataMockBuilder(String governanceName, Class<E> extensionType) {
 			this.governanceName = governanceName;
@@ -1160,8 +1146,7 @@ public class MockConstruct {
 		/**
 		 * Specifies the {@link Governance} index.
 		 * 
-		 * @param governanceIndex
-		 *            Index of the {@link Governance}.
+		 * @param governanceIndex Index of the {@link Governance}.
 		 * @return <code>this</code>.
 		 */
 		public RawGovernanceMetaDataMockBuilder<E, F> index(int governanceIndex) {
@@ -1237,14 +1222,12 @@ public class MockConstruct {
 		private Map<String, RawManagedObjectMetaDataMockBuilder<?, ?>> registeredManagedObjects = new HashMap<>();
 
 		/**
-		 * {@link ProcessState} bound {@link RawBoundManagedObjectMetaData}
-		 * instances.
+		 * {@link ProcessState} bound {@link RawBoundManagedObjectMetaData} instances.
 		 */
 		private final List<RawBoundManagedObjectMetaData> processManagedObjects = new LinkedList<>();
 
 		/**
-		 * {@link ThreadState} bound {@link RawBoundManagedObjectMetaData}
-		 * instances.
+		 * {@link ThreadState} bound {@link RawBoundManagedObjectMetaData} instances.
 		 */
 		private final List<RawBoundManagedObjectMetaData> threadManagedObjects = new LinkedList<>();
 
@@ -1271,8 +1254,7 @@ public class MockConstruct {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param officeName
-		 *            Name of the {@link Office}.
+		 * @param officeName Name of the {@link Office}.
 		 */
 		private RawOfficeMetaDataMockBuilder(String officeName) {
 			this.officeName = officeName;
@@ -1288,8 +1270,7 @@ public class MockConstruct {
 		/**
 		 * Specifies the {@link RawOfficeFloorMetaData}.
 		 * 
-		 * @param rawOfficeFloorMetaData
-		 *            {@link RawOfficeFloorMetaData}.
+		 * @param rawOfficeFloorMetaData {@link RawOfficeFloorMetaData}.
 		 */
 		public void setRawOfficeFloorMetaData(RawOfficeFloorMetaData rawOfficeFloorMetaData) {
 			this.assetNotBuilt();
@@ -1299,8 +1280,7 @@ public class MockConstruct {
 		/**
 		 * Registers a {@link Team}.
 		 * 
-		 * @param teamName
-		 *            Name of the {@link Team}.
+		 * @param teamName Name of the {@link Team}.
 		 */
 		public TeamManagement addTeam(String teamName) {
 			this.assetNotBuilt();
@@ -1312,8 +1292,8 @@ public class MockConstruct {
 		/**
 		 * Adds a registered {@link RawManagedObjectMetaData}.
 		 * 
-		 * @param registeredManagedObjectName
-		 *            Name of the registered {@link RawManagedObjectMetaData}.
+		 * @param registeredManagedObjectName Name of the registered
+		 *                                    {@link RawManagedObjectMetaData}.
 		 * @return {@link RawManagedObjectMetaDataMockBuilder} for the
 		 *         {@link RawManagedObjectMetaData}.
 		 */
@@ -1329,8 +1309,8 @@ public class MockConstruct {
 		/**
 		 * Adds a scope bound {@link RawBoundManagedObjectMetaData}.
 		 * 
-		 * @param scopeManagedObjectName
-		 *            Name of the {@link RawBoundManagedObjectMetaData}.
+		 * @param scopeManagedObjectName Name of the
+		 *                               {@link RawBoundManagedObjectMetaData}.
 		 * @return {@link RawBoundManagedObjectMetaDataMockBuilder} for the
 		 *         {@link RawBoundManagedObjectMetaData}.
 		 */
@@ -1360,10 +1340,8 @@ public class MockConstruct {
 		/**
 		 * Adds {@link RawGovernanceMetaData}.
 		 * 
-		 * @param governanceName
-		 *            Name of the {@link Governance}.
-		 * @param extensionType
-		 *            Extension type used by the {@link Governance}.
+		 * @param governanceName Name of the {@link Governance}.
+		 * @param extensionType  Extension type used by the {@link Governance}.
 		 * @return {@link RawGovernanceMetaDataMockBuilder} for the
 		 *         {@link RawGovernanceMetaData}.
 		 */
@@ -1501,13 +1479,11 @@ public class MockConstruct {
 		}
 
 		/**
-		 * Convenience method to register {@link Team} that is not
-		 * {@link ThreadLocal} aware.
+		 * Convenience method to register {@link Team} that is not {@link ThreadLocal}
+		 * aware.
 		 * 
-		 * @param teamName
-		 *            Name of the {@link Team}.
-		 * @param team
-		 *            {@link Team}.
+		 * @param teamName Name of the {@link Team}.
+		 * @param team     {@link Team}.
 		 * @return {@link RawTeamMetaData}.
 		 */
 		public RawTeamMetaData registerTeam(String teamName, Team team) {
@@ -1517,13 +1493,10 @@ public class MockConstruct {
 		/**
 		 * Registers a {@link RawTeamMetaData}.
 		 * 
-		 * @param teamName
-		 *            Name of the {@link Team}.
-		 * @param team
-		 *            {@link Team}.
-		 * @param isRequireThreadLocalAwareness
-		 *            <code>true</code> if requires {@link ThreadLocal}
-		 *            awareness.
+		 * @param teamName                      Name of the {@link Team}.
+		 * @param team                          {@link Team}.
+		 * @param isRequireThreadLocalAwareness <code>true</code> if requires
+		 *                                      {@link ThreadLocal} awareness.
 		 * @return {@link RawTeamMetaData}.
 		 */
 		public RawTeamMetaData registerTeam(String teamName, Team team, boolean isRequireThreadLocalAwareness) {
@@ -1536,8 +1509,7 @@ public class MockConstruct {
 		/**
 		 * Registers the {@link RawManagedObjectMetaData}.
 		 * 
-		 * @param managedObjectSourceName
-		 *            Name of the {@link ManagedObjectSource}.
+		 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
 		 * @return {@link RawManagedObjectMetaDataMockBuilder} for the
 		 *         {@link RawManagedObjectMetaData}.
 		 */
@@ -1550,8 +1522,7 @@ public class MockConstruct {
 		/**
 		 * Specifies the {@link EscalationFlow} for the {@link OfficeFloor}.
 		 * 
-		 * @param escalationFlow
-		 *            {@link EscalationFlow} for the {@link OfficeFloor}.
+		 * @param escalationFlow {@link EscalationFlow} for the {@link OfficeFloor}.
 		 */
 		public void setOfficeFloorEscalation(EscalationFlow escalationFlow) {
 			this.officeFloorEscalation = escalationFlow;
@@ -1579,10 +1550,14 @@ public class MockConstruct {
 					}
 				}
 
+				// Create the executive
+				Executive executive = new DefaultExecutive();
+				Map<String, ThreadFactory[]> executionStrategies = new HashMap<>();
+
 				// Build
-				this.built = new RawOfficeFloorMetaData(this.teamRegistry, this.breakChainTeamManagement,
-						this.threadLocalAwareExecutor, this.managedExecutionFactory, mosRegistry,
-						this.officeFloorEscalation);
+				this.built = new RawOfficeFloorMetaData(executive, executionStrategies, this.teamRegistry,
+						this.breakChainTeamManagement, this.threadLocalAwareExecutor, this.managedExecutionFactory,
+						mosRegistry, this.officeFloorEscalation);
 			}
 			return this.built;
 		}
@@ -1621,8 +1596,7 @@ public class MockConstruct {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param officeName
-		 *            Name of the {@link Office}.
+		 * @param officeName Name of the {@link Office}.
 		 */
 		private OfficeMetaDataMockBuilder(String officeName) {
 			this.officeName = officeName;
@@ -1659,12 +1633,9 @@ public class MockConstruct {
 		/**
 		 * Adds a {@link ManagedFunction} to the {@link OfficeMetaData}.
 		 * 
-		 * @param functionName
-		 *            Name of the {@link ManagedFunction}.
-		 * @param parameterType
-		 *            to the {@link ManagedFunction}.
-		 * @return {@link ManagedFunctionMetaData} for the
-		 *         {@link ManagedFunction}.
+		 * @param functionName  Name of the {@link ManagedFunction}.
+		 * @param parameterType to the {@link ManagedFunction}.
+		 * @return {@link ManagedFunctionMetaData} for the {@link ManagedFunction}.
 		 */
 		public ManagedFunctionMetaData<?, ?> addManagedFunction(String functionName, Class<?> parameterType) {
 			this.assertNotBuilt();
@@ -1707,7 +1678,7 @@ public class MockConstruct {
 				// Load the convenience functions
 				ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
 						functions.toArray(new ManagedFunctionMetaData[functions.size()]));
-				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null,
+				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null, null,
 						functionLocator, this.processMetaData.build(), null, null);
 
 				// Load the office meta-data to functions
@@ -1766,10 +1737,8 @@ public class MockConstruct {
 		/**
 		 * Adds a {@link ManagedObjectMetaData}.
 		 * 
-		 * @param boundManagedObjectName
-		 *            Name of {@link ManagedObject}.
-		 * @param objectType
-		 *            Object type of {@link ManagedObject}.
+		 * @param boundManagedObjectName Name of {@link ManagedObject}.
+		 * @param objectType             Object type of {@link ManagedObject}.
 		 * @return {@link ManagedObjectMetaData}.
 		 */
 		public ManagedObjectMetaData<?> addManagedObjectMetaData(String boundManagedObjectName, Class<?> objectType) {
@@ -1786,7 +1755,7 @@ public class MockConstruct {
 		 */
 		public ProcessMetaData build() {
 			if (this.built == null) {
-				this.built = new ProcessMetaDataImpl(
+				this.built = new ProcessMetaDataImpl(new DefaultExecutive(),
 						this.managedObjects.toArray(new ManagedObjectMetaData[this.managedObjects.size()]),
 						this.thread.built());
 			}
@@ -1830,10 +1799,8 @@ public class MockConstruct {
 		/**
 		 * Adds a {@link ManagedObjectMetaData}.
 		 * 
-		 * @param boundManagedObjectName
-		 *            Name of {@link ManagedObject}.
-		 * @param objectType
-		 *            Object type of {@link ManagedObject}.
+		 * @param boundManagedObjectName Name of {@link ManagedObject}.
+		 * @param objectType             Object type of {@link ManagedObject}.
 		 * @return {@link ManagedObjectMetaData}.
 		 */
 		public ManagedObjectMetaData<?> addManagedObjectMetaData(String boundManagedObjectName, Class<?> objectType) {
@@ -1846,8 +1813,7 @@ public class MockConstruct {
 		/**
 		 * Adds a {@link GovernanceMetaData}.
 		 * 
-		 * @param governanceName
-		 *            Name of {@link Governance}.
+		 * @param governanceName Name of {@link Governance}.
 		 * @return {@link GovernanceMetaData}.
 		 */
 		public GovernanceMetaData<?, ?> addGovernanceMetaData(String governanceName) {

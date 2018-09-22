@@ -51,10 +51,8 @@ public class FunctionManagerImpl implements FunctionManager {
 	/**
 	 * Initiate.
 	 * 
-	 * @param functionMetaData
-	 *            {@link ManagedFunctionMetaData}.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
+	 * @param functionMetaData {@link ManagedFunctionMetaData}.
+	 * @param officeMetaData   {@link OfficeMetaData}.
 	 */
 	public FunctionManagerImpl(ManagedFunctionMetaData<?, ?> functionMetaData, OfficeMetaData officeMetaData) {
 		this.functionMetaData = functionMetaData;
@@ -80,13 +78,13 @@ public class FunctionManagerImpl implements FunctionManager {
 
 		// Create the managed execution
 		ManagedExecution<InvalidParameterTypeException> execution = this.officeMetaData.getManagedExecutionFactory()
-				.createManagedExecution(() -> {
+				.createManagedExecution(this.officeMetaData.getExecutive(), () -> {
 					// Invoke the process for the function
 					this.officeMetaData.invokeProcess(this.flowMetaData, parameter, 0, callback, null, null, null, -1);
 				});
 
 		// Execute
-		execution.execute();
+		execution.managedExecute();
 	}
 
 	/**

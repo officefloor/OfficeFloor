@@ -18,7 +18,10 @@
 package net.officefloor.frame.impl.construct.officefloor;
 
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 
+import net.officefloor.frame.api.executive.ExecutionStrategy;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
@@ -38,6 +41,16 @@ import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
  * @author Daniel Sagenschneider
  */
 public class RawOfficeFloorMetaData {
+
+	/**
+	 * {@link Executive}.
+	 */
+	private final Executive executive;
+
+	/**
+	 * {@link ExecutionStrategy} instances by name.
+	 */
+	private final Map<String, ThreadFactory[]> executionStrategies;
 
 	/**
 	 * Registry of {@link RawTeamMetaData} by the {@link Team} name.
@@ -78,25 +91,24 @@ public class RawOfficeFloorMetaData {
 	/**
 	 * Initiate.
 	 * 
-	 * @param teamRegistry
-	 *            Registry of {@link RawTeamMetaData} by the {@link Team} name.
-	 * @param breakChainTeamManagement
-	 *            {@link TeamManagement} to break the {@link FunctionState}
-	 *            chain.
-	 * @param threadLocalAwareExecutor
-	 *            {@link ThreadLocalAwareExecutor}.
-	 * @param managedExecutionFactory
-	 *            {@link ManagedExecutionFactory}.
-	 * @param mosRegistry
-	 *            Registry of {@link RawManagedObjectMetaData} by the
-	 *            {@link ManagedObjectSource} name.
-	 * @param officeFloorEscalation
-	 *            {@link EscalationProcedure}.
+	 * @param executive                {@link Executive}.
+	 * @param executionStrategies      {@link ExecutionStrategy} instances by name.
+	 * @param teamRegistry             Registry of {@link RawTeamMetaData} by the
+	 *                                 {@link Team} name.
+	 * @param breakChainTeamManagement {@link TeamManagement} to break the
+	 *                                 {@link FunctionState} chain.
+	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
+	 * @param managedExecutionFactory  {@link ManagedExecutionFactory}.
+	 * @param mosRegistry              Registry of {@link RawManagedObjectMetaData}
+	 *                                 by the {@link ManagedObjectSource} name.
+	 * @param officeFloorEscalation    {@link EscalationProcedure}.
 	 */
-	public RawOfficeFloorMetaData(Map<String, RawTeamMetaData> teamRegistry,
-			TeamManagement breakChainTeamManagement, ThreadLocalAwareExecutor threadLocalAwareExecutor,
-			ManagedExecutionFactory managedExecutionFactory, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
-			EscalationFlow officeFloorEscalation) {
+	public RawOfficeFloorMetaData(Executive executive, Map<String, ThreadFactory[]> executionStrategies,
+			Map<String, RawTeamMetaData> teamRegistry, TeamManagement breakChainTeamManagement,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
+			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry, EscalationFlow officeFloorEscalation) {
+		this.executive = executive;
+		this.executionStrategies = executionStrategies;
 		this.teamRegistry = teamRegistry;
 		this.breakChainTeamManagement = breakChainTeamManagement;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
@@ -106,20 +118,35 @@ public class RawOfficeFloorMetaData {
 	}
 
 	/**
+	 * Obtains the {@link Executive}.
+	 * 
+	 * @return {@link Executive}.
+	 */
+	public Executive getExecutive() {
+		return this.executive;
+	}
+
+	/**
+	 * Obtains the {@link ExecutionStrategy} instances by name.
+	 * 
+	 * @return {@link ExecutionStrategy} instances by name.
+	 */
+	public Map<String, ThreadFactory[]> getExecutionStrategies() {
+		return this.executionStrategies;
+	}
+
+	/**
 	 * Obtains the {@link RawTeamMetaData} for the {@link Team} name.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
-	 * @return {@link RawTeamMetaData} or <code>null</code> if not exist for
-	 *         name.
+	 * @param teamName Name of the {@link Team}.
+	 * @return {@link RawTeamMetaData} or <code>null</code> if not exist for name.
 	 */
 	public RawTeamMetaData getRawTeamMetaData(String teamName) {
 		return this.teamRegistry.get(teamName);
 	}
 
 	/**
-	 * Obtains the {@link TeamManagement} to break the {@link FunctionState}
-	 * chain.
+	 * Obtains the {@link TeamManagement} to break the {@link FunctionState} chain.
 	 * 
 	 * @return {@link TeamManagement} to break the {@link FunctionState} chain.
 	 */
@@ -149,10 +176,9 @@ public class RawOfficeFloorMetaData {
 	 * Obtains the {@link RawManagedObjectMetaData} for the
 	 * {@link ManagedObjectSource} name.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @return {@link RawManagedObjectMetaData} or <code>null</code> if not
-	 *         exist for name.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
+	 * @return {@link RawManagedObjectMetaData} or <code>null</code> if not exist
+	 *         for name.
 	 */
 	public RawManagedObjectMetaData<?, ?> getRawManagedObjectMetaData(String managedObjectSourceName) {
 		return this.mosRegistry.get(managedObjectSourceName);

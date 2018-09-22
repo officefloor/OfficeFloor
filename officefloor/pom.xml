@@ -177,6 +177,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_executive</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
 				<artifactId>woof</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -506,6 +511,11 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>4.5.2</version>
+			</dependency>
+			<dependency>
+				<groupId>net.openhft</groupId>
+				<artifactId>affinity</artifactId>
+				<version>3.1.9</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>

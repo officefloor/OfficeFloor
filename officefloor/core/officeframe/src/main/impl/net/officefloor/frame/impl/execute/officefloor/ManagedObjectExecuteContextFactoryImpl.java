@@ -17,6 +17,9 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
+import java.util.concurrent.ThreadFactory;
+
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -50,6 +53,12 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	private final FlowMetaData[] processLinks;
 
 	/**
+	 * {@link ExecutionStrategy} instances in index order for the
+	 * {@link ManagedObjectSource}.
+	 */
+	private final ThreadFactory[][] executionStrategies;
+
+	/**
 	 * {@link OfficeMetaData} to create {@link ProcessState} instances.
 	 */
 	private final OfficeMetaData officeMetaData;
@@ -57,34 +66,38 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	/**
 	 * Instantiate for {@link ManagedObjectExecuteContext} that has no
 	 * {@link FlowMetaData}.
+	 * 
+	 * @param executionStrategies {@link ExecutionStrategy} instances in index order
+	 *                            for the {@link ManagedObjectSource}.
 	 */
-	public ManagedObjectExecuteContextFactoryImpl() {
+	public ManagedObjectExecuteContextFactoryImpl(ThreadFactory[][] executionStrategies) {
 		this.managedObjectMetaData = null;
 		this.processMoIndex = -1;
 		this.processLinks = new FlowMetaData[0];
+		this.executionStrategies = executionStrategies;
 		this.officeMetaData = null;
 	}
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectMetaData
-	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}.
-	 * @param processMoIndex
-	 *            Index of the {@link ManagedObject} within the
-	 *            {@link ProcessState}.
-	 * @param processLinks
-	 *            {@link FlowMetaData} in index order for the
-	 *            {@link ManagedObjectSource}.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData} to create {@link ProcessState}
-	 *            instances.
+	 * @param managedObjectMetaData {@link ManagedObjectMetaData} of the
+	 *                              {@link ManagedObject}.
+	 * @param processMoIndex        Index of the {@link ManagedObject} within the
+	 *                              {@link ProcessState}.
+	 * @param processLinks          {@link FlowMetaData} in index order for the
+	 *                              {@link ManagedObjectSource}.
+	 * @param executionStrategies   {@link ExecutionStrategy} instances in index
+	 *                              order for the {@link ManagedObjectSource}.
+	 * @param officeMetaData        {@link OfficeMetaData} to create
+	 *                              {@link ProcessState} instances.
 	 */
 	public ManagedObjectExecuteContextFactoryImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
-			FlowMetaData[] processLinks, OfficeMetaData officeMetaData) {
+			FlowMetaData[] processLinks, ThreadFactory[][] executionStrategies, OfficeMetaData officeMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
+		this.executionStrategies = executionStrategies;
 		this.officeMetaData = officeMetaData;
 	}
 
@@ -95,7 +108,7 @@ public class ManagedObjectExecuteContextFactoryImpl<F extends Enum<F>>
 	@Override
 	public ManagedObjectExecuteContext<F> createManagedObjectExecuteContext() {
 		return new ManagedObjectExecuteContextImpl<>(this.managedObjectMetaData, this.processMoIndex, this.processLinks,
-				this.officeMetaData);
+				this.executionStrategies, this.officeMetaData);
 	}
 
 }

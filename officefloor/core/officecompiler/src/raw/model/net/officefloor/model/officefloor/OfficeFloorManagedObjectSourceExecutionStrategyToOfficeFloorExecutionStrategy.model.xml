@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="office floor execution strategy name" />
+	<field
+		type="OfficeFloorManagedObjectSourceExecutionStrategyModel"
+		name="office floor managed object soruce execution strategy"
+		end-field="office floor execution strategy" />
+	<field type="OfficeFloorExecutionStrategyModel"
+		name="office floor execution strategy"
+		end-list="office floor managed object source execution strategy" />
+</model>

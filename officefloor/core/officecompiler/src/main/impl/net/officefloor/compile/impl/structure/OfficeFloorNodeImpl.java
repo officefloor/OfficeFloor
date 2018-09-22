@@ -34,6 +34,7 @@ import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
@@ -64,15 +65,19 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyObjectNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyRequireNode;
+import net.officefloor.compile.spi.officefloor.OfficeFloorExecutionStrategy;
+import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorFlowSinkNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorFlowSourceNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorResponsibility;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
@@ -80,6 +85,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
@@ -152,8 +158,8 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	private final Map<String, InputManagedObjectNode> inputManagedObjects = new HashMap<String, InputManagedObjectNode>();
 
 	/**
-	 * {@link ManagedObjectNode} instances by their
-	 * {@link OfficeFloorManagedObject} name.
+	 * {@link ManagedObjectNode} instances by their {@link OfficeFloorManagedObject}
+	 * name.
 	 */
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
 
@@ -167,6 +173,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	 * {@link SupplierNode} instances by their {@link OfficeFloorSupplier} name.
 	 */
 	private final Map<String, SupplierNode> suppliers = new HashMap<String, SupplierNode>();
+
+	/**
+	 * {@link ExecutiveNode} for the {@link OfficeFloorExecutive}.
+	 */
+	private ExecutiveNode executive = null;
 
 	/**
 	 * {@link TeamNode} instances by their {@link OfficeFloorTeam} name.
@@ -196,17 +207,14 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeFloorSourceClassName
-	 *            {@link OfficeFloorSource} class name.
-	 * @param officeFloorSource
-	 *            Optional instantiated {@link OfficeFloorSource}. May be
-	 *            <code>null</code>.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 * @param context
-	 *            {@link NodeContext}.
-	 * @param profilers
-	 *            Mapping of {@link Profiler} by their {@link Office} name.
+	 * @param officeFloorSourceClassName {@link OfficeFloorSource} class name.
+	 * @param officeFloorSource          Optional instantiated
+	 *                                   {@link OfficeFloorSource}. May be
+	 *                                   <code>null</code>.
+	 * @param officeFloorLocation        Location of the {@link OfficeFloor}.
+	 * @param context                    {@link NodeContext}.
+	 * @param profilers                  Mapping of {@link Profiler} by their
+	 *                                   {@link Office} name.
 	 */
 	public OfficeFloorNodeImpl(String officeFloorSourceClassName, OfficeFloorSource officeFloorSource,
 			String officeFloorLocation, NodeContext context, Map<String, Profiler> profilers) {
@@ -367,6 +375,22 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	@Override
+	public OfficeFloorExecutive setExecutive(String executiveSourceClassName) {
+		this.executive = NodeUtil.getInitialisedNode(this.executive, this.context,
+				() -> this.context.createExecutiveNode(this),
+				(executive) -> executive.initialise(executiveSourceClassName, null));
+		return this.executive;
+	}
+
+	@Override
+	public OfficeFloorExecutive setExecutive(ExecutiveSource executiveSource) {
+		this.executive = NodeUtil.getInitialisedNode(this.executive, this.context,
+				() -> this.context.createExecutiveNode(this),
+				(executive) -> executive.initialise(executiveSource.getClass().getName(), executiveSource));
+		return this.executive;
+	}
+
+	@Override
 	public DeployedOffice addDeployedOffice(String officeName, OfficeSource officeSource, String officeLocation) {
 		return NodeUtil.getInitialisedNode(officeName, this.offices, this.context,
 				() -> this.context.createOfficeNode(officeName, this),
@@ -412,6 +436,18 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public void link(OfficeFloorResponsibility responsibility, OfficeFloorTeam officeFloorTeam) {
 		LinkUtil.linkTeam(responsibility, officeFloorTeam, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void link(OfficeFloorManagedObjectExecutionStrategy managedObjectExecutionStrategy,
+			OfficeFloorExecutionStrategy executionStrategy) {
+		LinkUtil.linkExecutionStrategy(managedObjectExecutionStrategy, executionStrategy,
+				this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void link(OfficeFloorTeam team, OfficeFloorTeamOversight oversight) {
+		LinkUtil.linkTeamOversight(team, oversight, this.context.getCompilerIssues(), this);
 	}
 
 	@Override
@@ -763,6 +799,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 		// Register the OfficeFloor source for possible MBean
 		compileContext.registerPossibleMBean(OfficeFloorSource.class, officeFloorName, this.officeFloorSource);
+
+		// Build the executive
+		if (this.executive != null) {
+			this.executive.buildExecutive(builder, compileContext);
+		}
 
 		// Build the teams (in deterministic order)
 		this.teams.values().stream()

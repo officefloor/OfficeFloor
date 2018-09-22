@@ -17,6 +17,9 @@
  */
 package net.officefloor.frame.api.managedobject.source;
 
+import java.util.concurrent.ThreadFactory;
+
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
@@ -49,26 +52,22 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	/**
 	 * Instigates a {@link Flow}.
 	 * 
-	 * @param key
-	 *            Key identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter to first {@link ManagedFunction} of the {@link Flow}.
-	 * @param managedObject
-	 *            {@link ManagedObject} for the {@link ProcessState} of the
-	 *            {@link Flow}.
-	 * @param delay
-	 *            Delay in milliseconds before the {@link Flow} is invoked. A
-	 *            <code>0</code> or negative value invokes the {@link Flow}
-	 *            immediately.
-	 * @param callback
-	 *            {@link FlowCallback} on completion of the {@link Flow}.
-	 * @throws IllegalArgumentException
-	 *             If
-	 *             <ul>
-	 *             <li>unknown {@link Flow} key</li>
-	 *             <li>parameter is incorrect type</li>
-	 *             <li>no {@link ManagedObject} is supplied</li>
-	 *             </ul>
+	 * @param key           Key identifying the {@link Flow} to instigate.
+	 * @param parameter     Parameter to first {@link ManagedFunction} of the
+	 *                      {@link Flow}.
+	 * @param managedObject {@link ManagedObject} for the {@link ProcessState} of
+	 *                      the {@link Flow}.
+	 * @param delay         Delay in milliseconds before the {@link Flow} is
+	 *                      invoked. A <code>0</code> or negative value invokes the
+	 *                      {@link Flow} immediately.
+	 * @param callback      {@link FlowCallback} on completion of the {@link Flow}.
+	 * @throws IllegalArgumentException If
+	 *                                  <ul>
+	 *                                  <li>unknown {@link Flow} key</li>
+	 *                                  <li>parameter is incorrect type</li>
+	 *                                  <li>no {@link ManagedObject} is
+	 *                                  supplied</li>
+	 *                                  </ul>
 	 */
 	void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback)
 			throws IllegalArgumentException;
@@ -76,29 +75,32 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	/**
 	 * Instigates a {@link Flow}.
 	 * 
-	 * @param flowIndex
-	 *            Index identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter that to the first {@link ManagedFunction} of the
-	 *            {@link Flow}.
-	 * @param managedObject
-	 *            {@link ManagedObject} for the {@link ProcessState} of the
-	 *            {@link Flow}.
-	 * @param delay
-	 *            Delay in milliseconds before the {@link Flow} is invoked. A
-	 *            <code>0</code> or negative value invokes the {@link Flow}
-	 *            immediately.
-	 * @param callback
-	 *            {@link FlowCallback} on completion of the {@link Flow}.
-	 * @throws IllegalArgumentException
-	 *             If
-	 *             <ul>
-	 *             <li>unknown {@link Flow} index</li>
-	 *             <li>parameter is incorrect type</li>
-	 *             <li>no {@link ManagedObject} is supplied</li>
-	 *             </ul>
+	 * @param flowIndex     Index identifying the {@link Flow} to instigate.
+	 * @param parameter     Parameter that to the first {@link ManagedFunction} of
+	 *                      the {@link Flow}.
+	 * @param managedObject {@link ManagedObject} for the {@link ProcessState} of
+	 *                      the {@link Flow}.
+	 * @param delay         Delay in milliseconds before the {@link Flow} is
+	 *                      invoked. A <code>0</code> or negative value invokes the
+	 *                      {@link Flow} immediately.
+	 * @param callback      {@link FlowCallback} on completion of the {@link Flow}.
+	 * @throws IllegalArgumentException If
+	 *                                  <ul>
+	 *                                  <li>unknown {@link Flow} index</li>
+	 *                                  <li>parameter is incorrect type</li>
+	 *                                  <li>no {@link ManagedObject} is
+	 *                                  supplied</li>
+	 *                                  </ul>
 	 */
 	void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback)
 			throws IllegalArgumentException;
+
+	/**
+	 * Obtains an {@link ExecutionStrategy}.
+	 * 
+	 * @param executionStrategyIndex Index of the {@link ExecutionStrategy}.
+	 * @return {@link ThreadFactory} instances for the {@link ExecutionStrategy}.
+	 */
+	ThreadFactory[] getExecutionStrategy(int executionStrategyIndex);
 
 }

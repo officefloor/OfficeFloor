@@ -24,23 +24,18 @@ import java.lang.reflect.Array;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AdaptFactory<A, O> {
+public abstract interface AdaptFactory<A, O> {
 
 	/**
 	 * Adapts the object.
 	 * 
-	 * @param <A>
-	 *            Required type.
-	 * @param <O>
-	 *            Original type.
-	 * @param delegateObject
-	 *            Delegate object.
-	 * @param adaptFactory
-	 *            {@link AdaptFactory}.
+	 * @param                <A> Required type.
+	 * @param                <O> Original type.
+	 * @param delegateObject Delegate object.
+	 * @param adaptFactory   {@link AdaptFactory}.
 	 * @return Adapted object.
 	 */
-	public static <A, O> A adaptObject(O delegateObject,
-			AdaptFactory<A, O> adaptFactory) {
+	static <A, O> A adaptObject(O delegateObject, AdaptFactory<A, O> adaptFactory) {
 
 		// Ensure have delegate object to adapt
 		if (delegateObject == null) {
@@ -57,21 +52,15 @@ public abstract class AdaptFactory<A, O> {
 	/**
 	 * Adapts the array.
 	 * 
-	 * @param <A>
-	 *            Required type.
-	 * @param <O>
-	 *            Original type.
-	 * @param delegateArray
-	 *            Array of delegate objects.
-	 * @param adaptComponentType
-	 *            Adapt component type.
-	 * @param adaptFactory
-	 *            {@link AdaptFactory}.
+	 * @param                    <A> Required type.
+	 * @param                    <O> Original type.
+	 * @param delegateArray      Array of delegate objects.
+	 * @param adaptComponentType Adapt component type.
+	 * @param adaptFactory       {@link AdaptFactory}.
 	 * @return Adapted array.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <A, O> A[] adaptArray(O[] delegateArray,
-			Class<A> adaptComponentType, AdaptFactory<A, O> adaptFactory) {
+	static <A, O> A[] adaptArray(O[] delegateArray, Class<A> adaptComponentType, AdaptFactory<A, O> adaptFactory) {
 
 		// Ensure have delegate array to adapt
 		if (delegateArray == null) {
@@ -79,13 +68,11 @@ public abstract class AdaptFactory<A, O> {
 		}
 
 		// Adapt the array
-		A[] adaptedArray = (A[]) Array.newInstance(adaptComponentType,
-				delegateArray.length);
+		A[] adaptedArray = (A[]) Array.newInstance(adaptComponentType, delegateArray.length);
 		for (int i = 0; i < delegateArray.length; i++) {
 			O delegateObject = delegateArray[i];
 			if (delegateObject != null) {
-				adaptedArray[i] = adaptFactory
-						.createAdaptedObject(delegateObject);
+				adaptedArray[i] = adaptFactory.createAdaptedObject(delegateObject);
 			}
 		}
 
@@ -96,10 +83,9 @@ public abstract class AdaptFactory<A, O> {
 	/**
 	 * Creates the adapted object for the delegate object.
 	 * 
-	 * @param delegate
-	 *            Delegate object to wrap.
+	 * @param delegate Delegate object to wrap.
 	 * @return Adapted object.
 	 */
-	public abstract A createAdaptedObject(O delegate);
+	A createAdaptedObject(O delegate);
 
 }

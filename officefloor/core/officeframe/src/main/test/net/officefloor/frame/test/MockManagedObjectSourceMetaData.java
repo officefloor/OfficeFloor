@@ -20,15 +20,19 @@ package net.officefloor.frame.test;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import junit.framework.TestCase;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecutionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectDependencyMetaDataImpl;
+import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectExecutionMetaDataImpl;
 import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectFlowMetaDataImpl;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -61,47 +65,45 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	private final ManagedObjectFlowMetaData<H>[] flowMetaData;
 
 	/**
+	 * {@link ExecutionStrategy} meta-data.
+	 */
+	private final ManagedObjectExecutionMetaData[] executionMetaData;
+
+	/**
 	 * Initiate from the {@link ManagedObject}.
 	 * 
-	 * @param managedObject
-	 *            {@link ManagedObject}.
+	 * @param managedObject {@link ManagedObject}.
 	 */
 	public MockManagedObjectSourceMetaData(ManagedObject managedObject) {
 		this.managedObjectClass = managedObject.getClass();
 		try {
 			this.objectClass = managedObject.getObject().getClass();
 		} catch (Throwable ex) {
-			TestCase.fail("Failed to obtain object type from managed object "
-					+ ex.getMessage());
+			TestCase.fail("Failed to obtain object type from managed object " + ex.getMessage());
 			throw new Error("Only for compiling as fail above will throw");
 		}
 		this.dependencyMetaData = null;
 		this.flowMetaData = null;
+		this.executionMetaData = null;
 	}
 
 	/**
 	 * Initiate.
 	 *
-	 * @param <MO>
-	 *            {@link ManagedObject} type.
-	 * @param managedObjectClass
-	 *            Class of the {@link ManagedObject}.
-	 * @param objectClass
-	 *            Class of the object being managed.
-	 * @param dependencyKeys
-	 *            Dependency key {@link Enum}.
-	 * @param dependencyClasses
-	 *            {@link Class} types for the dependency keys.
-	 * @param flowKeys
-	 *            Flow key {@link Enum}.
-	 * @param flowClasses
-	 *            {@link Class} types for the arguments of the flow keys.
+	 * @param                     <MO> {@link ManagedObject} type.
+	 * @param managedObjectClass  Class of the {@link ManagedObject}.
+	 * @param objectClass         Class of the object being managed.
+	 * @param dependencyKeys      Dependency key {@link Enum}.
+	 * @param dependencyClasses   {@link Class} types for the dependency keys.
+	 * @param flowKeys            Flow key {@link Enum}.
+	 * @param flowClasses         {@link Class} types for the arguments of the flow
+	 *                            keys.
+	 * @param executionStrategies Names of the {@link ExecutionStrategy} instances.
 	 */
 	@SuppressWarnings("unchecked")
-	public <MO extends ManagedObject> MockManagedObjectSourceMetaData(
-			Class<MO> managedObjectClass, Class<?> objectClass,
-			Class<D> dependencyKeys, Map<D, Class<?>> dependencyClasses,
-			Class<H> flowKeys, Map<H, Class<?>> flowClasses) {
+	public <MO extends ManagedObject> MockManagedObjectSourceMetaData(Class<MO> managedObjectClass,
+			Class<?> objectClass, Class<D> dependencyKeys, Map<D, Class<?>> dependencyClasses, Class<H> flowKeys,
+			Map<H, Class<?>> flowClasses, String[] executionStrategies) {
 		this.managedObjectClass = managedObjectClass;
 		this.objectClass = objectClass;
 
@@ -110,8 +112,8 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 		this.dependencyMetaData = new ManagedObjectDependencyMetaData[keysForDependencies.length];
 		for (int i = 0; i < keysForDependencies.length; i++) {
 			D keyForDependency = keysForDependencies[i];
-			this.dependencyMetaData[i] = new ManagedObjectDependencyMetaDataImpl<D>(
-					keyForDependency, dependencyClasses.get(keyForDependency));
+			this.dependencyMetaData[i] = new ManagedObjectDependencyMetaDataImpl<D>(keyForDependency,
+					dependencyClasses.get(keyForDependency));
 		}
 
 		// Load the flow meta-data
@@ -119,8 +121,18 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 		this.flowMetaData = new ManagedObjectFlowMetaData[keysForHandlers.length];
 		for (int i = 0; i < keysForHandlers.length; i++) {
 			H keyForHandler = keysForHandlers[i];
-			this.flowMetaData[i] = new ManagedObjectFlowMetaDataImpl<H>(
-					keyForHandler, flowClasses.get(keyForHandler));
+			this.flowMetaData[i] = new ManagedObjectFlowMetaDataImpl<H>(keyForHandler, flowClasses.get(keyForHandler));
+		}
+
+		// Load the execution strategies
+		this.executionMetaData = new ManagedObjectExecutionMetaData[executionStrategies.length];
+		Function<String, ManagedObjectExecutionMetaData> createExecution = (label) -> {
+			ManagedObjectExecutionMetaDataImpl execution = new ManagedObjectExecutionMetaDataImpl();
+			execution.setLabel(label);
+			return execution;
+		};
+		for (int i = 0; i < executionStrategies.length; i++) {
+			this.executionMetaData[i] = createExecution.apply(executionStrategies[i]);
 		}
 	}
 
@@ -149,6 +161,11 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	}
 
 	@Override
+	public ManagedObjectExecutionMetaData[] getExecutionMetaData() {
+		return this.executionMetaData;
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedObjectExtensionMetaData<?>[] getExtensionInterfacesMetaData() {
 		// Use interfaces of object
@@ -164,9 +181,8 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	/**
 	 * Mock {@link ManagedObjectExtensionMetaData}.
 	 */
-	private class MockManagedObjectExtensionInterfaceMetaData<I> implements
-			ManagedObjectExtensionMetaData<I>,
-			ExtensionFactory<I> {
+	private class MockManagedObjectExtensionInterfaceMetaData<I>
+			implements ManagedObjectExtensionMetaData<I>, ExtensionFactory<I> {
 
 		/**
 		 * Extension interface type.
@@ -176,11 +192,9 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 		/**
 		 * Initiate.
 		 * 
-		 * @param extensionInterfaceType
-		 *            Extension interface type.
+		 * @param extensionInterfaceType Extension interface type.
 		 */
-		public MockManagedObjectExtensionInterfaceMetaData(
-				Class<I> extensionInterfaceType) {
+		public MockManagedObjectExtensionInterfaceMetaData(Class<I> extensionInterfaceType) {
 			this.extensionInterfaceType = extensionInterfaceType;
 		}
 

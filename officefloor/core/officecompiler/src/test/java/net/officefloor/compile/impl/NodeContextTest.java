@@ -26,6 +26,8 @@ import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImp
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.ExecutionStrategyNode;
+import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.FunctionObjectNode;
@@ -33,6 +35,7 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
@@ -56,6 +59,7 @@ import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.frame.api.manage.Office;
@@ -100,6 +104,11 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Mock {@link ManagedObjectSourceNode}.
 	 */
 	private final ManagedObjectSourceNode managedObjectSource = this.createMock(ManagedObjectSourceNode.class);
+
+	/**
+	 * Mock {@link ExecutiveNode}.
+	 */
+	private final ExecutiveNode executive = this.createMock(ExecutiveNode.class);
 
 	/**
 	 * Ensure create {@link SectionNode} within {@link OfficeNode}.
@@ -441,7 +450,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
 
 		// Validate children
-		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
+		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getOfficeFloorManagedObjectTeam("TEAM"),
 				node.getInputSectionManagedObjectDependency("DEPENDENCY"));
 	}
 
@@ -526,7 +535,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertInitialise(node, (n) -> n.initialise("ExampleManagedObjectSource", null));
 
 		// Validate children
-		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getManagedObjectTeam("TEAM"),
+		assertChildren(node, node.getSectionManagedObjectFlow("FLOW"), node.getOfficeFloorManagedObjectTeam("TEAM"),
 				node.getInputSectionManagedObjectDependency("DEPENDENCY"));
 	}
 
@@ -538,6 +547,19 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				.doTest(() -> this.context.createManagedObjectTeamNode("TEAM", this.managedObjectSource));
 		assertNode(node, "TEAM", "Managed Object Source Team", null, this.managedObjectSource);
 		assertEquals("Incorrect managed object team name", "TEAM", node.getManagedObjectTeamName());
+		assertInitialise(node, (n) -> n.initialise());
+	}
+
+	/**
+	 * Ensure can create {@link ManagedObjectExecutionStrategyNode}.
+	 */
+	public void testCreateManagedObjectExecutionStrategyNode() {
+		ManagedObjectExecutionStrategyNode node = this.doTest(() -> this.context
+				.createManagedObjectExecutionStrategyNode("EXECUTION_STRATEGY", this.managedObjectSource));
+		assertNode(node, "EXECUTION_STRATEGY", "Managed Object Source Execution Strategy", null,
+				this.managedObjectSource);
+		assertEquals("Incorrect managed object execution strategy name", "EXECUTION_STRATEGY",
+				node.getManagedObjectExecutionStrategyName());
 		assertInitialise(node, (n) -> n.initialise());
 	}
 
@@ -834,6 +856,40 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can create {@link ExecutiveNode}.
+	 */
+	public void testCreateExecutiveNode() {
+		ExecutiveNode node = this.context.createExecutiveNode(this.officeFloor);
+		assertNode(node, "Executive", "Executive", null, this.officeFloor);
+		assertEquals("Executive", node.getOfficeFloorExecutiveName());
+		assertInitialise(node, (n) -> n.initialise("ExampleExecutiveSource", null));
+
+		// Validate children
+		assertChildren(node, node.getOfficeFloorExecutionStrategy("EXECUTION_STRATEGY"),
+				node.getOfficeFloorTeamOversight("TEAM_OVERSIGHT"));
+	}
+
+	/**
+	 * Ensure can create {@link ExecutionStrategyNode}.
+	 */
+	public void testCreateExecutionStrategyNode() {
+		ExecutionStrategyNode node = this.context.createExecutionStrategyNode("EXECUTION_STRATEGY", this.executive);
+		assertNode(node, "EXECUTION_STRATEGY", "Execution Strategy", null, this.executive);
+		assertEquals("EXECUTION_STRATEGY", node.getOfficeFloorExecutionStratgyName());
+		assertInitialise(node, (n) -> n.initialise());
+	}
+
+	/**
+	 * Ensure can create {@link TeamOversightNode}.
+	 */
+	public void testCreateTeamOversightNode() {
+		TeamOversightNode node = this.context.createTeamOversightNode("TEAM_OVERSIGHT", this.executive);
+		assertNode(node, "TEAM_OVERSIGHT", "Team Oversight", null, this.executive);
+		assertEquals("TEAM_OVERSIGHT", node.getOfficeFloorTeamOversightName());
+		assertInitialise(node, (n) -> n.initialise());
+	}
+
+	/**
 	 * Ensure can create {@link FunctionNamespaceNode}.
 	 */
 	public void testCreateFunctionNamespaceNode() {
@@ -849,16 +905,11 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link Node} is correct.
 	 * 
-	 * @param node
-	 *            {@link Node} to validate.
-	 * @param name
-	 *            Expected name.
-	 * @param type
-	 *            Expected type.
-	 * @param location
-	 *            Expected location.
-	 * @param parent
-	 *            Parent {@link Node}.
+	 * @param node     {@link Node} to validate.
+	 * @param name     Expected name.
+	 * @param type     Expected type.
+	 * @param location Expected location.
+	 * @param parent   Parent {@link Node}.
 	 */
 	private static void assertNode(Node node, String name, String type, String location, Node parent) {
 		assertEquals("Incorrect node name", name, node.getNodeName());
@@ -871,10 +922,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link TypeQualification} for the {@link ManagedObjectNode}.
 	 * 
-	 * @param typeQualifications
-	 *            {@link TypeQualification} instances.
-	 * @param qualifierTypePairs
-	 *            Pairings of expected qualifier and types.
+	 * @param typeQualifications {@link TypeQualification} instances.
+	 * @param qualifierTypePairs Pairings of expected qualifier and types.
 	 */
 	private static void assertTypeQualifications(TypeQualification[] typeQualifications, String... qualifierTypePairs) {
 		assertEquals("Incorrect number of type qualifications", (qualifierTypePairs.length / 2),
@@ -890,10 +939,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the correct children {@link Node} instances.
 	 * 
-	 * @param node
-	 *            {@link Node} to check its children.
-	 * @param children
-	 *            Child {@link Node} instances.
+	 * @param node     {@link Node} to check its children.
+	 * @param children Child {@link Node} instances.
 	 */
 	private static void assertChildren(Node node, Object... children) {
 		assertArrayEquals("Incorrect children", node.getChildNodes(), children);
@@ -902,10 +949,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link Node} is initialised.
 	 * 
-	 * @param node
-	 *            {@link Node} to validate initialising.
-	 * @param initialiser
-	 *            {@link Consumer} to initialise the {@link Node}.
+	 * @param node        {@link Node} to validate initialising.
+	 * @param initialiser {@link Consumer} to initialise the {@link Node}.
 	 */
 	private static <N extends Node> void assertInitialise(N node, Consumer<N> initialiser) {
 		assertFalse("Should not be initialised", node.isInitialised());
