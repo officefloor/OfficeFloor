@@ -15,23 +15,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.spi.officefloor;
+package net.officefloor.compile.managedobject;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
- * {@link ExecutionStrategy} within the {@link OfficeFloor}.
- * 
+ * <code>Type definition</code> of a {@link ExecutionStrategy} required by the
+ * {@link ManagedObject}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorExecutionStrategy {
+public interface ManagedObjectExecutionStrategyType {
 
 	/**
-	 * Obtains the name of this {@link OfficeFloorExecutionStrategy}.
+	 * Obtains the name to identify requirement of a {@link ExecutionStrategy}.
 	 * 
-	 * @return Name of this {@link OfficeFloorExecutionStrategy}.
+	 * @return Name to identify requirement of a {@link ExecutionStrategy}.
 	 */
-	String getOfficeFloorExecutionStratgyName();
+	String getExecutionStrategyName();
 
 }

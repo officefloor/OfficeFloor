@@ -15,23 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.spi.officefloor;
+package net.officefloor.compile.internal.structure;
 
-import net.officefloor.frame.api.executive.ExecutionStrategy;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.compile.spi.officefloor.OfficeFloorExecutionStrategy;
 
 /**
- * {@link ExecutionStrategy} within the {@link OfficeFloor}.
+ * {@link OfficeFloorExecutionStrategy} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorExecutionStrategy {
+public interface ExecutionStrategyNode extends LinkExecutionStrategyNode, OfficeFloorExecutionStrategy {
 
 	/**
-	 * Obtains the name of this {@link OfficeFloorExecutionStrategy}.
-	 * 
-	 * @return Name of this {@link OfficeFloorExecutionStrategy}.
+	 * {@link Node} type.
 	 */
-	String getOfficeFloorExecutionStratgyName();
+	static String TYPE = "Execution Strategy";
+
+	/**
+	 * Initialises the {@link ExecutionStrategyNode}.
+	 */
+	void initialise();
 
 }

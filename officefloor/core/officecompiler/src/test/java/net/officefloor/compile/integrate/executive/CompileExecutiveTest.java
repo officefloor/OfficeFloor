@@ -19,9 +19,8 @@ package net.officefloor.compile.integrate.executive;
 
 import java.util.concurrent.ThreadFactory;
 
-import net.officefloor.compile.impl.structure.ExecutiveNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ExecutiveBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TeamBuilder;
@@ -64,26 +63,13 @@ public class CompileExecutiveTest extends AbstractCompileTestCase {
 
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
+		ExecutiveBuilder<?> executive = this.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
+		executive.addProperty("ONE", "1");
+		executive.addProperty("TWO", "2");
 		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 
 		// Compile the OfficeFloor
 		this.compile(true);
-	}
-
-	/**
-	 * Ensure issue if unknown {@link TeamOversight}.
-	 */
-	public void testUnknownTeamOversight() {
-
-		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
-		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
-		this.issues.recordIssue("Executive", ExecutiveNodeImpl.class, "Unknown TeamOversight 'UNKNOWN'");
-
-		// Compile the OfficeFloor
-		this.compile(false);
 	}
 
 	/**
@@ -102,24 +88,6 @@ public class CompileExecutiveTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure issue if unknown {@link ExecutionStrategy}.
-	 */
-	public void testUnknownExecutionStrategy() {
-
-		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ExecutionStrategyManagedObject.class,
-				10);
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.issues.recordIssue("Executive", ExecutiveNodeImpl.class, "Unknown ExecutionStrategy 'UNKNOWN'");
-
-		// Compile the OfficeFloor
-		this.compile(false);
-	}
-
-	/**
 	 * Ensure link {@link ExecutionStrategy}.
 	 */
 	public void testExecutionStrategy() {
@@ -129,7 +97,7 @@ public class CompileExecutiveTest extends AbstractCompileTestCase {
 		this.record_officeFloorBuilder_setExecutive(new MockExecutiveSource());
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ExecutionStrategyManagedObject.class,
-				0);
+				10);
 		ManagingOfficeBuilder<?> mo = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		mo.linkExecutionStrategy(0, "MOCK");
 

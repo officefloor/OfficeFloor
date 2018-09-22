@@ -24,10 +24,12 @@ import org.junit.Assert;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.managedobject.ManagedObjectDependencyTypeImpl;
+import net.officefloor.compile.impl.managedobject.ManagedObjectExecutionStrategyTypeImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectFlowTypeImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectTeamTypeImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -55,14 +57,11 @@ public class ManagedObjectLoaderUtil {
 	 * Validates the {@link ManagedObjectSourceSpecification} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param <M>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} class.
-	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property} instances.
+	 * @param                     <M> Dependency keys type.
+	 * @param                     <F> {@link Flow} keys type.
+	 * @param managedObjectSource {@link ManagedObjectSource} class.
+	 * @param propertyNameLabels  Listing of name/label pairs for the
+	 *                            {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <M extends Enum<M>, F extends Enum<F>> PropertyList validateSpecification(
@@ -83,16 +82,12 @@ public class ManagedObjectLoaderUtil {
 	 * Validates the {@link ManagedObjectSourceSpecification} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param <M>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param <S>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
-	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property} instances.
+	 * @param                          <M> Dependency keys type.
+	 * @param                          <F> {@link Flow} keys type.
+	 * @param                          <S> {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
+	 * @param propertyNameLabels       Listing of name/label pairs for the
+	 *                                 {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <M extends Enum<M>, F extends Enum<F>, S extends ManagedObjectSource<M, F>> PropertyList validateSpecification(
@@ -125,18 +120,13 @@ public class ManagedObjectLoaderUtil {
 	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType} loaded
 	 * from the {@link ManagedObjectSource}.
 	 * 
-	 * @param <M>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param <S>
-	 *            {@link ManagedObjectSource} type.
-	 * @param expectedManagedObjectType
-	 *            Expected {@link ManagedObjectType}.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} {@link Class}.
-	 * @param propertyNameValues
-	 *            Property values to configure the {@link ManagedObjectSource}.
+	 * @param                           <M> Dependency keys type.
+	 * @param                           <F> {@link Flow} keys type.
+	 * @param                           <S> {@link ManagedObjectSource} type.
+	 * @param expectedManagedObjectType Expected {@link ManagedObjectType}.
+	 * @param managedObjectSourceClass  {@link ManagedObjectSource} {@link Class}.
+	 * @param propertyNameValues        Property values to configure the
+	 *                                  {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectType} loaded from the
 	 *         {@link ManagedObjectSource}.
 	 */
@@ -156,16 +146,12 @@ public class ManagedObjectLoaderUtil {
 	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType} loaded
 	 * from the {@link ManagedObjectSource}.
 	 * 
-	 * @param <M>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param expectedManagedObjectType
-	 *            Expected {@link ManagedObjectType}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance.
-	 * @param propertyNameValues
-	 *            Property values to configure the {@link ManagedObjectSource}.
+	 * @param                           <M> Dependency keys type.
+	 * @param                           <F> {@link Flow} keys type.
+	 * @param expectedManagedObjectType Expected {@link ManagedObjectType}.
+	 * @param managedObjectSource       {@link ManagedObjectSource} instance.
+	 * @param propertyNameValues        Property values to configure the
+	 *                                  {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectType} loaded from the
 	 *         {@link ManagedObjectSource}.
 	 */
@@ -183,10 +169,8 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Validates the {@link ManagedObjectType}.
 	 * 
-	 * @param expectedManagedObjectType
-	 *            Expected {@link ManagedObjectType}.
-	 * @param aType
-	 *            Actual {@link ManagedObjectType}.
+	 * @param expectedManagedObjectType Expected {@link ManagedObjectType}.
+	 * @param aType                     Actual {@link ManagedObjectType}.
 	 * @return {@link ManagedObjectType} loaded from the
 	 *         {@link ManagedObjectSource}.
 	 */
@@ -248,6 +232,17 @@ public class ManagedObjectLoaderUtil {
 			Assert.assertEquals("Incorrect name for team " + i, eTeam.getTeamName(), aTeam.getTeamName());
 		}
 
+		// Verify the execution strategies
+		ManagedObjectExecutionStrategyType[] eStrategies = eType.getExecutionStrategyTypes();
+		ManagedObjectExecutionStrategyType[] aStrategies = aType.getExecutionStrategyTypes();
+		Assert.assertEquals("Incorrect number of execution strategies", eStrategies.length, aStrategies.length);
+		for (int i = 0; i < eStrategies.length; i++) {
+			ManagedObjectExecutionStrategyType eStrategy = eStrategies[i];
+			ManagedObjectExecutionStrategyType aStrategy = aStrategies[i];
+			Assert.assertEquals("Incorrect name for execution strategy " + i, eStrategy.getExecutionStrategyName(),
+					aStrategy.getExecutionStrategyName());
+		}
+
 		// Verify the extension interfaces
 		Class<?>[] eEis = eType.getExtensionTypes();
 		Class<?>[] aEis = aType.getExtensionTypes();
@@ -265,16 +260,11 @@ public class ManagedObjectLoaderUtil {
 	 * {@link ManagedObjectSource} utilising the {@link ClassLoader} from the input
 	 * {@link ManagedObjectSource} class.
 	 * 
-	 * @param <M>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param <S>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value listing.
+	 * @param                          <M> Dependency keys type.
+	 * @param                          <F> {@link Flow} keys type.
+	 * @param                          <S> {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
+	 * @param propertyNameValues       {@link Property} name/value listing.
 	 * @return {@link ManagedObjectType}.
 	 */
 	public static <M extends Enum<M>, F extends Enum<F>, S extends ManagedObjectSource<M, F>> ManagedObjectType<M> loadManagedObjectType(
@@ -290,18 +280,12 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.
 	 * 
-	 * @param <M>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param <S>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value listing.
+	 * @param                          <M> Dependency keys type.
+	 * @param                          <F> {@link Flow} keys type.
+	 * @param                          <S> {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
+	 * @param classLoader              {@link ClassLoader}.
+	 * @param propertyNameValues       {@link Property} name/value listing.
 	 * @return {@link ManagedObjectType}.
 	 */
 	public static <M extends Enum<M>, F extends Enum<F>, S extends ManagedObjectSource<M, F>> ManagedObjectType<M> loadManagedObjectType(
@@ -315,14 +299,10 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.
 	 * 
-	 * @param <M>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value listing.
+	 * @param                     <M> Dependency keys type.
+	 * @param                     <F> {@link Flow} keys type.
+	 * @param managedObjectSource {@link ManagedObjectSource} instance.
+	 * @param propertyNameValues  {@link Property} name/value listing.
 	 * @return {@link ManagedObjectType}.
 	 */
 	public static <M extends Enum<M>, F extends Enum<F>> ManagedObjectType<M> loadManagedObjectType(
@@ -341,8 +321,7 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Specifies the {@link OfficeFloorCompiler} for the next operation.
 	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler} for the next operation.
+	 * @param compiler {@link OfficeFloorCompiler} for the next operation.
 	 */
 	public static void setNextOfficeFloorCompiler(OfficeFloorCompiler compiler) {
 		nextOfficeFloorCompiler = compiler;
@@ -351,8 +330,7 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Obtains the {@link OfficeFloorCompiler} setup for use.
 	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param classLoader {@link ClassLoader}.
 	 * @return {@link OfficeFloorCompiler}.
 	 */
 	private static OfficeFloorCompiler getOfficeFloorCompiler(ClassLoader classLoader) {
@@ -381,16 +359,12 @@ public class ManagedObjectLoaderUtil {
 	 * This is useful for testing abstract {@link ManagedObjectSource} instances
 	 * that delegate configuration to sub classes.
 	 * 
-	 * @param <M>
-	 *            Dependency keys type.
-	 * @param <F>
-	 *            {@link Flow} keys type.
-	 * @param dependenciesEnum
-	 *            Dependency {@link Enum}.
-	 * @param flowsEnum
-	 *            Flows {@link Enum}.
-	 * @param propertyNameValues
-	 *            Property name values for the {@link MetaDataContext}.
+	 * @param                    <M> Dependency keys type.
+	 * @param                    <F> {@link Flow} keys type.
+	 * @param dependenciesEnum   Dependency {@link Enum}.
+	 * @param flowsEnum          Flows {@link Enum}.
+	 * @param propertyNameValues Property name values for the
+	 *                           {@link MetaDataContext}.
 	 * 
 	 * @return {@link MetaDataContext}.
 	 */
@@ -483,6 +457,11 @@ public class ManagedObjectLoaderUtil {
 		private final List<ManagedObjectTeamType> teams = new LinkedList<ManagedObjectTeamType>();
 
 		/**
+		 * {@link ManagedObjectExecutionStrategyType} instances.
+		 */
+		private final List<ManagedObjectExecutionStrategyType> executionStrategies = new LinkedList<>();
+
+		/**
 		 * Extension interfaces.
 		 */
 		private final List<Class<?>> extensionInterfaces = new LinkedList<Class<?>>();
@@ -515,6 +494,11 @@ public class ManagedObjectLoaderUtil {
 		@Override
 		public ManagedObjectTeamType[] getTeamTypes() {
 			return this.teams.toArray(new ManagedObjectTeamType[0]);
+		}
+
+		@Override
+		public ManagedObjectExecutionStrategyType[] getExecutionStrategyTypes() {
+			return this.executionStrategies.toArray(new ManagedObjectExecutionStrategyType[0]);
 		}
 
 		@Override
@@ -561,6 +545,11 @@ public class ManagedObjectLoaderUtil {
 		@Override
 		public void addTeam(String teamName) {
 			this.teams.add(new ManagedObjectTeamTypeImpl(teamName));
+		}
+
+		@Override
+		public void addExecutionStrategy(String executionStrategyName) {
+			this.executionStrategies.add(new ManagedObjectExecutionStrategyTypeImpl(executionStrategyName));
 		}
 
 		@Override

@@ -27,10 +27,12 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
@@ -52,6 +54,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
+import net.officefloor.model.officefloor.OfficeFloorExecutionStrategyModel;
 import net.officefloor.model.officefloor.OfficeFloorExecutiveModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel;
@@ -61,6 +64,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOff
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectPoolModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
@@ -377,8 +381,27 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 		// Set the OfficeFloor executive
 		OfficeFloorExecutiveModel executiveModel = officeFloor.getOfficeFloorExecutive();
 		OfficeFloorExecutive executive = null;
+		Map<String, OfficeFloorExecutionStrategy> executionStrategies = new HashMap<>();
 		if (executiveModel != null) {
+
+			// Specify the executive
 			executive = deployer.setExecutive(executiveModel.getExecutiveSourceClassName());
+
+			// Add properties for the executive
+			for (PropertyModel property : executiveModel.getProperties()) {
+				executive.addProperty(property.getName(), property.getValue());
+			}
+
+			// Load the execution strategies
+			for (OfficeFloorExecutionStrategyModel strategyModel : executiveModel.getExecutionStrategies()) {
+
+				// Add the OfficeFloor execution strategy
+				String strategyName = strategyModel.getExecutionStrategyName();
+				OfficeFloorExecutionStrategy strategy = executive.getOfficeFloorExecutionStrategy(strategyName);
+
+				// Register the execution strategy
+				executionStrategies.put(strategyName, strategy);
+			}
 		}
 
 		// Add the OfficeFloor teams, keeping registry of teams
@@ -587,11 +610,24 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				// Add the OfficeFloor managed object source execution strategy
 				String mosExecutionStrategyName = mosExecutionStrategyModel
 						.getOfficeFloorManagedObjectSourceExecutionStrategyName();
-//				OfficeFloorManagedObjectExecutionStrategy mosExecutionStrategy = managedObjectSource
-//						.getOfficeFloorManagedObjectExecutionStrategy(mosExecutionStrategyName);
+				OfficeFloorManagedObjectExecutionStrategy mosExecutionStrategy = managedObjectSource
+						.getOfficeFloorManagedObjectExecutionStrategy(mosExecutionStrategyName);
 
 				// Obtain the OfficeFloor execution strategy
-				
+				OfficeFloorExecutionStrategy executionStrategy = null;
+				OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel mosExecutionStrategyToExecutionStrategy = mosExecutionStrategyModel
+						.getOfficeFloorExecutionStrategy();
+				if (mosExecutionStrategyToExecutionStrategy != null) {
+					OfficeFloorExecutionStrategyModel executionStrategyModel = mosExecutionStrategyToExecutionStrategy
+							.getOfficeFloorExecutionStrategy();
+					if (executionStrategyModel != null) {
+						executionStrategy = executionStrategies.get(executionStrategyModel.getExecutionStrategyName());
+					}
+				}
+				if (executionStrategy != null) {
+					// Have the execution strategy for the managed object source execution strategy
+					deployer.link(mosExecutionStrategy, executionStrategy);
+				}
 			}
 		}
 	}

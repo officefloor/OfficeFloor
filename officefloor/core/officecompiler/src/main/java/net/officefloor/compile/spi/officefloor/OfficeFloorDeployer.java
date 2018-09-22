@@ -244,6 +244,16 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	void link(OfficeFloorResponsibility responsibility, OfficeFloorTeam officeFloorTeam);
 
 	/**
+	 * Links the {@link OfficeFloorManagedObjectExecutionStrategy} to the
+	 * {@link OfficeFloorExecutionStrategy}.
+	 * 
+	 * @param managedObjectExecutionStrategy {@link OfficeFloorManagedObjectExecutionStrategy}.
+	 * @param executionStrategy              {@link OfficeFloorExecutionStrategy}.
+	 */
+	void link(OfficeFloorManagedObjectExecutionStrategy managedObjectExecutionStrategy,
+			OfficeFloorExecutionStrategy executionStrategy);
+
+	/**
 	 * Links the {@link ManagingOffice} to be managed by the {@link DeployedOffice}.
 	 * 
 	 * @param managingOffice {@link ManagingOffice}.

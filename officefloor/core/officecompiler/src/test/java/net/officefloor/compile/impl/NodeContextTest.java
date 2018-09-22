@@ -26,6 +26,7 @@ import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImp
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.ExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
@@ -34,6 +35,7 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
@@ -101,6 +103,11 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Mock {@link ManagedObjectSourceNode}.
 	 */
 	private final ManagedObjectSourceNode managedObjectSource = this.createMock(ManagedObjectSourceNode.class);
+
+	/**
+	 * Mock {@link ExecutiveNode}.
+	 */
+	private final ExecutiveNode executive = this.createMock(ExecutiveNode.class);
 
 	/**
 	 * Ensure create {@link SectionNode} within {@link OfficeNode}.
@@ -543,6 +550,19 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can create {@link ManagedObjectExecutionStrategyNode}.
+	 */
+	public void testCreateManagedObjectExecutionStrategyNode() {
+		ManagedObjectExecutionStrategyNode node = this.doTest(() -> this.context
+				.createManagedObjectExecutionStrategyNode("EXECUTION_STRATEGY", this.managedObjectSource));
+		assertNode(node, "EXECUTION_STRATEGY", "Managed Object Source Execution Strategy", null,
+				this.managedObjectSource);
+		assertEquals("Incorrect managed object execution strategy name", "EXECUTION_STRATEGY",
+				node.getManagedObjectExecutionStrategyName());
+		assertInitialise(node, (n) -> n.initialise());
+	}
+
+	/**
 	 * Ensure can create {@link ManagingOfficeNode}.
 	 */
 	public void testCreateManagingOfficeNode() {
@@ -842,6 +862,19 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertNode(node, "Executive", "Executive", null, this.officeFloor);
 		assertEquals("Executive", node.getOfficeFloorExecutiveName());
 		assertInitialise(node, (n) -> n.initialise("ExampleExecutiveSource", null));
+
+		// Validate children
+		assertChildren(node, node.getOfficeFloorExecutionStrategy("EXECUTION_STRATEGY"));
+	}
+
+	/**
+	 * Ensure can create {@link ExecutionStrategyNode}.
+	 */
+	public void testCreateExecutionStrategyNode() {
+		ExecutionStrategyNode node = this.context.createExecutionStrategyNode("EXECUTION_STRATEGY", this.executive);
+		assertNode(node, "EXECUTION_STRATEGY", "Execution Strategy", null, this.executive);
+		assertEquals("EXECUTION_STRATEGY", node.getOfficeFloorExecutionStratgyName());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**

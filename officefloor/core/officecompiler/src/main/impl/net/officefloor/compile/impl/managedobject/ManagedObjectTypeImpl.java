@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.managedobject;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -57,6 +58,11 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectTy
 	private final ManagedObjectTeamType[] teams;
 
 	/**
+	 * {@link ManagedObjectExecutionStrategyType} instances.
+	 */
+	private final ManagedObjectExecutionStrategyType[] executionStrategies;
+
+	/**
 	 * Extension interfaces supported by the {@link ManagedObject}.
 	 */
 	private final Class<?>[] extensionTypes;
@@ -64,27 +70,26 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectTy
 	/**
 	 * Initiate.
 	 * 
-	 * @param objectClass
-	 *            {@link Class} of the {@link Object} returned from the
-	 *            {@link ManagedObject}.
-	 * @param isInput
-	 *            Indicates if may trigger a {@link Flow}.
-	 * @param dependencies
-	 *            {@link ManagedObjectDependencyType} instances.
-	 * @param flows
-	 *            {@link ManagedObjectFlowType} instances.
-	 * @param teams
-	 *            {@link ManagedObjectTeamType} instances.
-	 * @param extensionTypes
-	 *            Extension types supported by the {@link ManagedObject}.
+	 * @param objectClass       {@link Class} of the {@link Object} returned from
+	 *                          the {@link ManagedObject}.
+	 * @param isInput           Indicates if may trigger a {@link Flow}.
+	 * @param dependencies      {@link ManagedObjectDependencyType} instances.
+	 * @param flows             {@link ManagedObjectFlowType} instances.
+	 * @param teams             {@link ManagedObjectTeamType} instances.
+	 * @param executionStrategy {@link ManagedObjectExecutionStrategyType}
+	 *                          instances.
+	 * @param extensionTypes    Extension types supported by the
+	 *                          {@link ManagedObject}.
 	 */
 	public ManagedObjectTypeImpl(Class<?> objectClass, boolean isInput, ManagedObjectDependencyType<D>[] dependencies,
-			ManagedObjectFlowType<?>[] flows, ManagedObjectTeamType[] teams, Class<?>[] extensionTypes) {
+			ManagedObjectFlowType<?>[] flows, ManagedObjectTeamType[] teams,
+			ManagedObjectExecutionStrategyType[] executionStrategy, Class<?>[] extensionTypes) {
 		this.objectClass = objectClass;
 		this.isInput = isInput;
 		this.dependencies = dependencies;
 		this.flows = flows;
 		this.teams = teams;
+		this.executionStrategies = executionStrategy;
 		this.extensionTypes = extensionTypes;
 	}
 
@@ -115,6 +120,11 @@ public class ManagedObjectTypeImpl<D extends Enum<D>> implements ManagedObjectTy
 	@Override
 	public ManagedObjectTeamType[] getTeamTypes() {
 		return this.teams;
+	}
+
+	@Override
+	public ManagedObjectExecutionStrategyType[] getExecutionStrategyTypes() {
+		return this.executionStrategies;
 	}
 
 	@Override

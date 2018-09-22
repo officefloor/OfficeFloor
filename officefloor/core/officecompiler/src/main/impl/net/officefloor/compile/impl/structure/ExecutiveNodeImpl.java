@@ -17,9 +17,13 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.officefloor.compile.executive.ExecutiveType;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.CompileContext;
+import net.officefloor.compile.internal.structure.ExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -89,6 +93,12 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 			this.executiveSource = executiveSource;
 		}
 	}
+
+	/**
+	 * {@link ExecutionStrategyNode} instances by their
+	 * {@link OfficeFloorExecutionStrategy} name.
+	 */
+	private final Map<String, ExecutionStrategyNode> executionStrategies = new HashMap<String, ExecutionStrategyNode>();
 
 	/**
 	 * Initiate.
@@ -173,7 +183,7 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		return new Node[0];
+		return NodeUtil.getChildNodes(this.executionStrategies);
 	}
 
 	/*
@@ -187,8 +197,8 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 
 	@Override
 	public ExecutiveType loadExecutiveType() {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
@@ -221,20 +231,19 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 
 	@Override
 	public void addProperty(String name, String value) {
-		// TODO Auto-generated method stub
-
+		this.propertyList.addProperty(name).setValue(value);
 	}
 
 	@Override
 	public OfficeFloorExecutionStrategy getOfficeFloorExecutionStrategy(String executionStrategyName) {
-		// TODO Auto-generated method stub
-		return null;
+		return NodeUtil.getInitialisedNode(executionStrategyName, this.executionStrategies, this.context,
+				() -> this.context.createExecutionStrategyNode(executionStrategyName, this), (n) -> n.initialise());
 	}
 
 	@Override
 	public OfficeFloorTeamOversight getOfficeFloorTeamOversight(String teamOversightName) {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 }

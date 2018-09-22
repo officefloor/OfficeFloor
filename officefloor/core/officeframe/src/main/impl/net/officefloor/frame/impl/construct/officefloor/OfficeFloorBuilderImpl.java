@@ -204,8 +204,9 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 
 	@Override
 	public <XS extends ExecutiveSource> ExecutiveBuilder<XS> setExecutive(XS executiveSource) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement setExecutive");
+		ExecutiveBuilderImpl<XS> builder = new ExecutiveBuilderImpl<>(executiveSource);
+		this.executiveConfiguration = builder;
+		return builder;
 	}
 
 	@Override

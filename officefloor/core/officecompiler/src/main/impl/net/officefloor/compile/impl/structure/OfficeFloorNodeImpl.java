@@ -65,11 +65,13 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyObjectNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyRequireNode;
+import net.officefloor.compile.spi.officefloor.OfficeFloorExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorFlowSinkNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorFlowSourceNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorResponsibility;
@@ -433,6 +435,13 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public void link(OfficeFloorResponsibility responsibility, OfficeFloorTeam officeFloorTeam) {
 		LinkUtil.linkTeam(responsibility, officeFloorTeam, this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void link(OfficeFloorManagedObjectExecutionStrategy managedObjectExecutionStrategy,
+			OfficeFloorExecutionStrategy executionStrategy) {
+		LinkUtil.linkExecutionStrategy(managedObjectExecutionStrategy, executionStrategy,
+				this.context.getCompilerIssues(), this);
 	}
 
 	@Override

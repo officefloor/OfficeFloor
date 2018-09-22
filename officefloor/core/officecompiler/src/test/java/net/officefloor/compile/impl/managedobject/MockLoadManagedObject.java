@@ -59,8 +59,7 @@ public class MockLoadManagedObject {
 	/**
 	 * Validates the {@link ManagedObjectType} is correct for this class object.
 	 * 
-	 * @param managedObjectType
-	 *            {@link ManagedObjectType}
+	 * @param managedObjectType {@link ManagedObjectType}
 	 */
 	public static void assertManagedObjectType(ManagedObjectType<?> managedObjectType) {
 
@@ -84,6 +83,10 @@ public class MockLoadManagedObject {
 		// Ensure no teams
 		Assert.assertEquals("Incorrect number of teams", 0, managedObjectType.getTeamTypes().length);
 
+		// Ensure no execution strategies
+		Assert.assertEquals("Incorrect number of execution strategies", 0,
+				managedObjectType.getExecutionStrategyTypes().length);
+
 		// Ensure correct extension interface
 		Assert.assertEquals("Incorrect number of extension interfaces", 1,
 				managedObjectType.getExtensionTypes().length);
@@ -95,8 +98,7 @@ public class MockLoadManagedObject {
 	 * Validates the {@link OfficeFloorManagedObjectSourceType} is correct for the
 	 * class object.
 	 * 
-	 * @param managedObjectSourceType
-	 *            {@link OfficeFloorManagedObjectSourceType}.
+	 * @param managedObjectSourceType {@link OfficeFloorManagedObjectSourceType}.
 	 */
 	public static void assertOfficeFloorManagedObjectSourceType(
 			OfficeFloorManagedObjectSourceType managedObjectSourceType, String managedObjectSourceName) {

@@ -18,12 +18,10 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.properties.PropertyConfigurable;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
-import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -60,28 +58,41 @@ public interface OfficeFloorManagedObjectSource extends PropertyConfigurable {
 	ManagingOffice getManagingOffice();
 
 	/**
-	 * Obtains the {@link ManagedObjectFlow} for he {@link ManagedObjectFlowType}.
+	 * Obtains the {@link OfficeFloorManagedObjectFlow} for he
+	 * {@link ManagedObjectFlowType}.
 	 * 
 	 * @param managedObjectSourceFlowName Name of the {@link ManagedObjectFlowType}.
-	 * @return {@link ManagedObjectFlow}.
+	 * @return {@link OfficeFloorManagedObjectFlow}.
 	 */
 	OfficeFloorManagedObjectFlow getOfficeFloorManagedObjectFlow(String managedObjectSourceFlowName);
 
 	/**
-	 * Obtains the {@link ManagedObjectTeam} for the {@link ManagedObjectTeamType}.
+	 * Obtains the {@link OfficeFloorManagedObjectTeam} for the
+	 * {@link ManagedObjectTeamType}.
 	 * 
 	 * @param managedObjectSourceTeamName Name of the {@link ManagedObjectTeamType}.
-	 * @return {@link ManagedObjectTeam}.
+	 * @return {@link OfficeFloorManagedObjectTeam}.
 	 */
 	OfficeFloorManagedObjectTeam getOfficeFloorManagedObjectTeam(String managedObjectSourceTeamName);
 
 	/**
-	 * Obtains the {@link ManagedObjectDependency} for the
+	 * Obtains the {@link OfficeFloorManagedObjectExecutionStrategy} for the
+	 * {@link ManagedObjectExecutionStrategyType}.
+	 * 
+	 * @param managedObjectExecutionStrategyName Name of the
+	 *                                           {@link ManagedObjectExecutionStrategyType}.
+	 * @return {@link OfficeFloorManagedObjectExecutionStrategy}.
+	 */
+	OfficeFloorManagedObjectExecutionStrategy getOfficeFloorManagedObjectExecutionStrategy(
+			String managedObjectExecutionStrategyName);
+
+	/**
+	 * Obtains the {@link OfficeFloorManagedObjectDependency} for the
 	 * {@link ManagedObjectDependencyType} for the Input {@link ManagedObject}.
 	 * 
 	 * @param managedObjectDependencyName Name of the
 	 *                                    {@link ManagedObjectDependencyType}.
-	 * @return {@link ManagedObjectDependency}.
+	 * @return {@link OfficeFloorManagedObjectDependency}.
 	 */
 	OfficeFloorManagedObjectDependency getInputOfficeFloorManagedObjectDependency(String managedObjectDependencyName);
 

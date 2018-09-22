@@ -205,6 +205,8 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorExecutiveModel executive = officeFloor.getOfficeFloorExecutive();
 		assertProperties(new OfficeFloorExecutiveModel("net.example.ExampleExecutiveSource", 500, 501), executive,
 				"getExecutiveSourceClassName", "getX", "getY");
+		assertList(new String[] { "getName", "getValue" }, executive.getProperties(),
+				new PropertyModel("EXECUTION_ONE", "VALUE_ONE"), new PropertyModel("EXECUTION_TWO", "VALUE_TWO"));
 		assertList(new String[] { "getExecutionStrategyName" }, executive.getExecutionStrategies(),
 				new OfficeFloorExecutionStrategyModel("EXECUTION_STRATEGY"));
 		assertList(new String[] { "getTeamOversightName" }, executive.getTeamOversights(),

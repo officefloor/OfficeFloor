@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -90,11 +91,9 @@ public class TeamNodeImpl implements TeamNode {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param teamSourceClassName
-		 *            Class name of the {@link TeamSource}.
-		 * @param teamSource
-		 *            Optional instantiated {@link TeamSource}. May be
-		 *            <code>null</code>.
+		 * @param teamSourceClassName Class name of the {@link TeamSource}.
+		 * @param teamSource          Optional instantiated {@link TeamSource}. May be
+		 *                            <code>null</code>.
 		 */
 		public InitialisedState(String teamSourceClassName, TeamSource teamSource) {
 			this.teamSourceClassName = teamSourceClassName;
@@ -110,12 +109,9 @@ public class TeamNodeImpl implements TeamNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param teamName
-	 *            Name of this {@link OfficeFloorTeam}.
-	 * @param officeFloor
-	 *            {@link OfficeFloorNode} containing this {@link TeamNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param teamName    Name of this {@link OfficeFloorTeam}.
+	 * @param officeFloor {@link OfficeFloorNode} containing this {@link TeamNode}.
+	 * @param context     {@link NodeContext}.
 	 */
 	public TeamNodeImpl(String teamName, OfficeFloorNode officeFloor, NodeContext context) {
 		this.teamName = teamName;
@@ -304,9 +300,8 @@ public class TeamNodeImpl implements TeamNode {
 
 	@Override
 	public boolean linkTeamNode(LinkTeamNode node) {
-		// Link
-		this.linkedTeamNode = node;
-		return true;
+		return LinkUtil.linkTeamNode(this, node, this.context.getCompilerIssues(),
+				(link) -> this.linkedTeamNode = link);
 	}
 
 	@Override

@@ -43,6 +43,7 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -448,6 +449,17 @@ public interface NodeContext {
 	ManagedObjectTeamNode createManagedObjectTeamNode(String teamName, ManagedObjectSourceNode managedObjectSource);
 
 	/**
+	 * Creates the {@link ManagedObjectExecutionStrategyNode}.
+	 * 
+	 * @param executionStrategyName Name of the
+	 *                              {@link ManagedObjectExecutionStrategyNode}.
+	 * @param managedObjectSource   Parent {@link ManagedObjectSourceNode}.
+	 * @return {@link ManagedObjectExecutionStrategyNode}.
+	 */
+	ManagedObjectExecutionStrategyNode createManagedObjectExecutionStrategyNode(String executionStrategyName,
+			ManagedObjectSourceNode managedObjectSource);
+
+	/**
 	 * Creates the {@link ManagingOfficeNode}.
 	 * 
 	 * @param managedObjectSource Parent {@link ManagedObjectSourceNode}.
@@ -714,6 +726,15 @@ public interface NodeContext {
 	 * @return {@link ExecutiveNode}.
 	 */
 	ExecutiveNode createExecutiveNode(OfficeFloorNode officeFloor);
+
+	/**
+	 * Creates the {@link ExecutionStrategyNode}.
+	 * 
+	 * @param executionStrategyName Name of the {@link ExecutionStrategy}.
+	 * @param executive             Parent {@link ExecutiveNode}.
+	 * @return {@link ExecutionStrategyNode}.
+	 */
+	ExecutionStrategyNode createExecutionStrategyNode(String executionStrategyName, ExecutiveNode executive);
 
 	/**
 	 * Creates an {@link EscalationNode}.

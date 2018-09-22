@@ -18,11 +18,11 @@
 package net.officefloor.compile.spi.managedobject;
 
 import net.officefloor.compile.section.TypeQualification;
-import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 
 /**
- * {@link Team} required by the {@link OfficeManagedObject}.
+ * {@link Team} required by the {@link ManagedObjectSource}.
  * 
  * @author Daniel Sagenschneider
  */

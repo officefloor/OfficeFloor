@@ -26,6 +26,7 @@ import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
+import net.officefloor.compile.internal.structure.LinkExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
@@ -37,6 +38,7 @@ import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -63,6 +65,12 @@ public class LinkUtil {
 	private static final Traverser<LinkTeamNode> TEAM_TRAVERSER = (team) -> team.getLinkedTeamNode();
 
 	/**
+	 * {@link LinkExecutionStrategyNode} {@link Traverser}.
+	 */
+	private static final Traverser<LinkExecutionStrategyNode> EXECUTION_STRATEGY_TRAVERSER = (
+			executionStrategy) -> executionStrategy.getLinkedExecutionStrategyNode();
+
+	/**
 	 * {@link LinkOfficeNode} {@link Traverser}.
 	 */
 	private static final Traverser<LinkOfficeNode> OFFICE_TRAVERSER = (office) -> office.getLinkedOfficeNode();
@@ -75,14 +83,10 @@ public class LinkUtil {
 	/**
 	 * Ensures both inputs are a {@link LinkFlowNode} and if so links them.
 	 *
-	 * @param linkSource
-	 *            Source {@link LinkFlowNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkFlowNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param node
-	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @param linkSource Source {@link LinkFlowNode}.
+	 * @param linkTarget Target {@link LinkFlowNode}.
+	 * @param issues     {@link CompilerIssues}.
+	 * @param node       {@link Node} wishing to link the {@link Flow}.
 	 * @return <code>true</code> if linked.
 	 */
 	public static boolean linkFlow(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
@@ -113,14 +117,10 @@ public class LinkUtil {
 	/**
 	 * Ensures both inputs are a {@link LinkObjectNode} and if so links them.
 	 *
-	 * @param linkSource
-	 *            Source {@link LinkObjectNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkObjectNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param node
-	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @param linkSource Source {@link LinkObjectNode}.
+	 * @param linkTarget Target {@link LinkObjectNode}.
+	 * @param issues     {@link CompilerIssues}.
+	 * @param node       {@link Node} wishing to link the {@link Flow}.
 	 * @return <code>true</code> if linked.
 	 */
 	public static boolean linkObject(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
@@ -151,14 +151,10 @@ public class LinkUtil {
 	/**
 	 * Ensures both inputs are a {@link LinkTeamNode} and if so links them.
 	 *
-	 * @param linkSource
-	 *            Source {@link LinkTeamNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkTeamNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param node
-	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @param linkSource Source {@link LinkTeamNode}.
+	 * @param linkTarget Target {@link LinkTeamNode}.
+	 * @param issues     {@link CompilerIssues}.
+	 * @param node       {@link Node} wishing to link the {@link Flow}.
 	 * @return <code>true</code> if linked.
 	 */
 	public static boolean linkTeam(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
@@ -187,16 +183,49 @@ public class LinkUtil {
 	}
 
 	/**
+	 * Ensure both inputs are a {@link LinkExecutionStrategyNode} and if so links
+	 * them.
+	 * 
+	 * @param linkSource Source {@link LinkExecutionStrategyNode}.
+	 * @param linkTarget Target {@link LinkExecutionStrategyNode}.
+	 * @param issues     {@link CompilerIssues}.
+	 * @param node       {@link Node} wishing to link the {@link ExecutionStrategy}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkExecutionStrategy(Object linkSource, Object linkTarget, CompilerIssues issues,
+			Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link execution strategy node
+		if (!(linkSource instanceof LinkExecutionStrategyNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link execution strategy node
+		if (!(linkTarget instanceof LinkExecutionStrategyNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkExecutionStrategyNode) linkSource)
+				.linkExecutionStrategyNode((LinkExecutionStrategyNode) linkTarget);
+	}
+
+	/**
 	 * Ensures both inputs are a {@link LinkOfficeNode} and if so links them.
 	 *
-	 * @param linkSource
-	 *            Source {@link LinkOfficeNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkOfficeNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param node
-	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @param linkSource Source {@link LinkOfficeNode}.
+	 * @param linkTarget Target {@link LinkOfficeNode}.
+	 * @param issues     {@link CompilerIssues}.
+	 * @param node       {@link Node} wishing to link the {@link Flow}.
 	 * @return <code>true</code> if linked.
 	 */
 	public static boolean linkOffice(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
@@ -227,14 +256,10 @@ public class LinkUtil {
 	/**
 	 * Ensures both inputs are a {@link LinkPoolNode} and if so links them.
 	 * 
-	 * @param linkSource
-	 *            Source {@link LinkPoolNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkPoolNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param node
-	 *            {@link Node} wishing to link the {@link ManagedObjectPool}.
+	 * @param linkSource Source {@link LinkPoolNode}.
+	 * @param linkTarget Target {@link LinkPoolNode}.
+	 * @param issues     {@link CompilerIssues}.
+	 * @param node       {@link Node} wishing to link the {@link ManagedObjectPool}.
 	 * @return <code>true</code> if linked.
 	 */
 	public static boolean linkPool(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
@@ -266,14 +291,10 @@ public class LinkUtil {
 	 * Links the {@link ManagedObjectSourceNode} to the
 	 * {@link InputManagedObjectNode}.
 	 *
-	 * @param inputManagedObject
-	 *            {@link InputManagedObjectNode}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSourceNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param node
-	 *            {@link Node} wishing to link the {@link Flow}.
+	 * @param inputManagedObject  {@link InputManagedObjectNode}.
+	 * @param managedObjectSource {@link ManagedObjectSourceNode}.
+	 * @param issues              {@link CompilerIssues}.
+	 * @param node                {@link Node} wishing to link the {@link Flow}.
 	 * @return <code>true</code> if linked.
 	 */
 	public static boolean linkManagedObjectSourceInput(Object managedObjectSource, Object inputManagedObject,
@@ -306,14 +327,10 @@ public class LinkUtil {
 	/**
 	 * Finds the furtherest target link by the specified type.
 	 * 
-	 * @param <T>
-	 *            Target type.
-	 * @param link
-	 *            Starting {@link LinkFlowNode}.
-	 * @param targetType
-	 *            Target {@link LinkFlowNode} type to find.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param            <T> Target type.
+	 * @param link       Starting {@link LinkFlowNode}.
+	 * @param targetType Target {@link LinkFlowNode} type to find.
+	 * @param issues     {@link CompilerIssues}.
 	 * @return Furtherest target {@link LinkFlowNode} or <code>null</code> if no
 	 *         targets found.
 	 */
@@ -325,16 +342,12 @@ public class LinkUtil {
 	/**
 	 * Finds the furtherest target link by the specified type.
 	 * 
-	 * @param <T>
-	 *            Target type.
-	 * @param link
-	 *            Starting {@link LinkObjectNode}.
-	 * @param targetType
-	 *            Target {@link LinkObjectNode} type to find.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @return Furthurest target {@link LinkObjectNode} or <code>null</code> if
-	 *         no targets found.
+	 * @param            <T> Target type.
+	 * @param link       Starting {@link LinkObjectNode}.
+	 * @param targetType Target {@link LinkObjectNode} type to find.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Furthurest target {@link LinkObjectNode} or <code>null</code> if no
+	 *         targets found.
 	 */
 	public static <T extends LinkObjectNode> T retrieveFurtherestTarget(LinkObjectNode link, Class<T> targetType,
 			CompilerIssues issues) {
@@ -344,16 +357,11 @@ public class LinkUtil {
 	/**
 	 * Finds the target link by the specified type.
 	 * 
-	 * @param <T>
-	 *            Target type.
-	 * @param link
-	 *            Starting {@link LinkFlowNode}.
-	 * @param targetType
-	 *            Target {@link LinkFlowNode} type to find.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @return Target {@link LinkFlowNode} or <code>null</code> if target not
-	 *         found.
+	 * @param            <T> Target type.
+	 * @param link       Starting {@link LinkFlowNode}.
+	 * @param targetType Target {@link LinkFlowNode} type to find.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Target {@link LinkFlowNode} or <code>null</code> if target not found.
 	 */
 	public static <T extends LinkFlowNode> T findTarget(LinkFlowNode link, Class<T> targetType, CompilerIssues issues) {
 		return retrieveTarget(link, FLOW_TRAVERSER, targetType, false, issues, null).target;
@@ -362,16 +370,12 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
-	 * @param <T>
-	 *            Target type.
-	 * @param link
-	 *            Starting {@link LinkFlowNode}.
-	 * @param targetType
-	 *            Target {@link LinkFlowNode} type to retrieve.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @return Target {@link LinkFlowNode} or <code>null</code> if issue
-	 *         obtaining which is reported to the {@link CompilerIssues}.
+	 * @param            <T> Target type.
+	 * @param link       Starting {@link LinkFlowNode}.
+	 * @param targetType Target {@link LinkFlowNode} type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Target {@link LinkFlowNode} or <code>null</code> if issue obtaining
+	 *         which is reported to the {@link CompilerIssues}.
 	 */
 	public static <T extends LinkFlowNode> T retrieveTarget(LinkFlowNode link, Class<T> targetType,
 			CompilerIssues issues) {
@@ -381,16 +385,12 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
-	 * @param <T>
-	 *            Target type.
-	 * @param link
-	 *            Starting {@link LinkObjectNode}.
-	 * @param targetType
-	 *            Target {@link LinkObjectNode} type to retrieve.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @return Target {@link LinkObjectNode} or <code>null</code> if issue
-	 *         obtaining which is reported to the {@link CompilerIssues}.
+	 * @param            <T> Target type.
+	 * @param link       Starting {@link LinkObjectNode}.
+	 * @param targetType Target {@link LinkObjectNode} type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Target {@link LinkObjectNode} or <code>null</code> if issue obtaining
+	 *         which is reported to the {@link CompilerIssues}.
 	 */
 	public static <T extends LinkObjectNode> T retrieveTarget(LinkObjectNode link, Class<T> targetType,
 			CompilerIssues issues) {
@@ -400,14 +400,10 @@ public class LinkUtil {
 	/**
 	 * Finds the target link by the specified type.
 	 * 
-	 * @param <T>
-	 *            Target type.
-	 * @param link
-	 *            Starting {@link LinkTeamNode}.
-	 * @param targetType
-	 *            Target {@link LinkTeamNode} type to retrieve.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param            <T> Target type.
+	 * @param link       Starting {@link LinkTeamNode}.
+	 * @param targetType Target {@link LinkTeamNode} type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
 	 * @return Target {@link LinkTeamNode} or <code>null</code> if not found.
 	 */
 	public static <T extends Node> T findTarget(LinkTeamNode link, Class<T> targetType, CompilerIssues issues) {
@@ -417,16 +413,27 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
-	 * @param <T>
-	 *            Target type.
-	 * @param link
-	 *            Starting {@link LinkOfficeNode}.
-	 * @param targetType
-	 *            Target {@link LinkOfficeNode} type to retrieve.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @return Target {@link LinkOfficeNode} or <code>null</code> if issue
-	 *         obtaining which is reported to the {@link CompilerIssues}.
+	 * @param            <T> Target type.
+	 * @param link       Starting {@link LinkExecutionStrategyNode}.
+	 * @param targetType Target {@link LinkExecutionStrategyNode} type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Target {@link LinkExecutionStrategyNode} or <code>null</code> if
+	 *         issue obtaining which is reported to the {@link CompilerIssues}.
+	 */
+	public static <T extends Node> T retrieveTarget(LinkExecutionStrategyNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return retrieveTarget(link, EXECUTION_STRATEGY_TRAVERSER, targetType, true, issues, null).target;
+	}
+
+	/**
+	 * Retrieves the target link by the specified type.
+	 * 
+	 * @param            <T> Target type.
+	 * @param link       Starting {@link LinkOfficeNode}.
+	 * @param targetType Target {@link LinkOfficeNode} type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Target {@link LinkOfficeNode} or <code>null</code> if issue obtaining
+	 *         which is reported to the {@link CompilerIssues}.
 	 */
 	public static <T extends Node> T retrieveTarget(LinkOfficeNode link, Class<T> targetType, CompilerIssues issues) {
 		return retrieveTarget(link, OFFICE_TRAVERSER, targetType, true, issues, null).target;
@@ -435,16 +442,11 @@ public class LinkUtil {
 	/**
 	 * Finds the target by the specified type.
 	 * 
-	 * @param <T>
-	 *            Target type.
-	 * @param link
-	 *            Starting {@link LinkPoolNode}.
-	 * @param targetType
-	 *            Target {@link LinkPoolNode} type to retrieve.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @return Target {@link LinkPoolNode} or <code>null</code> if target not
-	 *         found.
+	 * @param            <T> Target type.
+	 * @param link       Starting {@link LinkPoolNode}.
+	 * @param targetType Target {@link LinkPoolNode} type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return Target {@link LinkPoolNode} or <code>null</code> if target not found.
 	 */
 	public static <T extends Node> T findTarget(LinkPoolNode link, Class<T> targetType, CompilerIssues issues) {
 		return retrieveTarget(link, POOL_TRAVERSER, targetType, false, issues, null).target;
@@ -453,15 +455,11 @@ public class LinkUtil {
 	/**
 	 * Links the {@link LinkFlowNode}.
 	 * 
-	 * @param node
-	 *            {@link LinkFlowNode} to have the link loaded.
-	 * @param linkNode
-	 *            Link {@link LinkFlowNode} to load.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param loader
-	 *            {@link Consumer} to load the link onto the
-	 *            {@link LinkFlowNode}.
+	 * @param node     {@link LinkFlowNode} to have the link loaded.
+	 * @param linkNode Link {@link LinkFlowNode} to load.
+	 * @param issues   {@link CompilerIssues}.
+	 * @param loader   {@link Consumer} to load the link onto the
+	 *                 {@link LinkFlowNode}.
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -473,15 +471,11 @@ public class LinkUtil {
 	/**
 	 * Links the {@link LinkObjectNode}.
 	 * 
-	 * @param node
-	 *            {@link LinkObjectNode} to have the link loaded.
-	 * @param linkNode
-	 *            Link {@link LinkObjectNode} to load.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param loader
-	 *            {@link Consumer} to load the link onto the
-	 *            {@link LinkObjectNode}.
+	 * @param node     {@link LinkObjectNode} to have the link loaded.
+	 * @param linkNode Link {@link LinkObjectNode} to load.
+	 * @param issues   {@link CompilerIssues}.
+	 * @param loader   {@link Consumer} to load the link onto the
+	 *                 {@link LinkObjectNode}.
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -493,21 +487,15 @@ public class LinkUtil {
 	/**
 	 * Links the {@link AutoWire} {@link LinkObjectNode}.
 	 * 
-	 * @param node
-	 *            {@link LinkObjectNode} to have the link loaded.
-	 * @param linkNode
-	 *            Link {@link LinkObjectNode} to load.
-	 * @param office
-	 *            {@link OfficeNode}.
-	 * @param autoWirer
-	 *            {@link AutoWirer} to enable dependencies to be auto-wired.
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param loader
-	 *            {@link Consumer} to load the link onto the
-	 *            {@link LinkObjectNode}.
+	 * @param node           {@link LinkObjectNode} to have the link loaded.
+	 * @param linkNode       Link {@link LinkObjectNode} to load.
+	 * @param office         {@link OfficeNode}.
+	 * @param autoWirer      {@link AutoWirer} to enable dependencies to be
+	 *                       auto-wired.
+	 * @param compileContext {@link CompileContext}.
+	 * @param issues         {@link CompilerIssues}.
+	 * @param loader         {@link Consumer} to load the link onto the
+	 *                       {@link LinkObjectNode}.
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -547,19 +535,15 @@ public class LinkUtil {
 
 	/**
 	 * Loads the {@link AutoWire} instances for the {@link LinkObjectNode} along
-	 * with its dependency {@link AutoWire} instances and subsequent
-	 * (transitive) dependency {@link AutoWire} instances.
+	 * with its dependency {@link AutoWire} instances and subsequent (transitive)
+	 * dependency {@link AutoWire} instances.
 	 * 
-	 * @param node
-	 *            {@link LinkObjectNode} to load transitive dependency
-	 *            {@link AutoWire} instances.
-	 * @param allAutoWires
-	 *            {@link Set} to be loaded with all the {@link AutoWire}
-	 *            instances.
-	 * @param compileContext
-	 *            {@link CompileContext}
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param node           {@link LinkObjectNode} to load transitive dependency
+	 *                       {@link AutoWire} instances.
+	 * @param allAutoWires   {@link Set} to be loaded with all the {@link AutoWire}
+	 *                       instances.
+	 * @param compileContext {@link CompileContext}
+	 * @param issues         {@link CompilerIssues}.
 	 */
 	public static void loadAllObjectAutoWires(LinkObjectNode node, Set<AutoWire> allAutoWires,
 			CompileContext compileContext, CompilerIssues issues) {
@@ -569,19 +553,14 @@ public class LinkUtil {
 	/**
 	 * Loads the {@link AutoWire} instances.
 	 * 
-	 * @param node
-	 *            {@link LinkObjectNode} to load transitive dependency
-	 *            {@link AutoWire} instances.
-	 * @param allAutoWires
-	 *            {@link Set} to be loaded with all the {@link AutoWire}
-	 *            instances.
-	 * @param compileContext
-	 *            {@link CompileContext}
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param traversedNodes
-	 *            {@link LinkObjectNode} instances already traversed to avoid
-	 *            cycles (causing infinite loops).
+	 * @param node           {@link LinkObjectNode} to load transitive dependency
+	 *                       {@link AutoWire} instances.
+	 * @param allAutoWires   {@link Set} to be loaded with all the {@link AutoWire}
+	 *                       instances.
+	 * @param compileContext {@link CompileContext}
+	 * @param issues         {@link CompilerIssues}.
+	 * @param traversedNodes {@link LinkObjectNode} instances already traversed to
+	 *                       avoid cycles (causing infinite loops).
 	 */
 	private static void loadAllObjectAutoWires(LinkObjectNode node, Set<AutoWire> allAutoWires,
 			CompileContext compileContext, CompilerIssues issues, Set<Node> traversedNodes) {
@@ -639,15 +618,11 @@ public class LinkUtil {
 	/**
 	 * Links the {@link LinkObjectNode}.
 	 * 
-	 * @param node
-	 *            {@link LinkTeamNode} to have the link loaded.
-	 * @param linkNode
-	 *            Link {@link LinkTeamNode} to load.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param loader
-	 *            {@link Consumer} to load the link onto the
-	 *            {@link LinkTeamNode}.
+	 * @param node     {@link LinkTeamNode} to have the link loaded.
+	 * @param linkNode Link {@link LinkTeamNode} to load.
+	 * @param issues   {@link CompilerIssues}.
+	 * @param loader   {@link Consumer} to load the link onto the
+	 *                 {@link LinkTeamNode}.
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -657,17 +632,29 @@ public class LinkUtil {
 	}
 
 	/**
+	 * Links the {@link LinkExecutionStrategyNode}.
+	 * 
+	 * @param node     {@link LinkExecutionStrategyNode} to have the link loaded.
+	 * @param linkNode {@link LinkExecutionStrategyNode} to load.
+	 * @param issues   {@link CompilerIssues}.
+	 * @param loader   {@link Consumer} to load the link onto the
+	 *                 {@link LinkExecutionStrategyNode}.
+	 * @return <code>true</code> if successful, or <code>false</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	public static boolean linkExecutionStrategyNode(LinkExecutionStrategyNode node, LinkExecutionStrategyNode linkNode,
+			CompilerIssues issues, Consumer<LinkExecutionStrategyNode> loader) {
+		return linkNode(node, linkNode, EXECUTION_STRATEGY_TRAVERSER, issues, loader);
+	}
+
+	/**
 	 * Links the {@link LinkOfficeNode}.
 	 * 
-	 * @param node
-	 *            {@link LinkOfficeNode} to have the link loaded.
-	 * @param linkNode
-	 *            Link {@link LinkOfficeNode} to load.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param loader
-	 *            {@link Consumer} to load the link on the
-	 *            {@link LinkOfficeNode}.
+	 * @param node     {@link LinkOfficeNode} to have the link loaded.
+	 * @param linkNode Link {@link LinkOfficeNode} to load.
+	 * @param issues   {@link CompilerIssues}.
+	 * @param loader   {@link Consumer} to load the link on the
+	 *                 {@link LinkOfficeNode}.
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -679,14 +666,11 @@ public class LinkUtil {
 	/**
 	 * Links the {@link LinkPoolNode}.
 	 * 
-	 * @param node
-	 *            {@link LinkPoolNode} to have the link loaded.
-	 * @param linkNode
-	 *            Link {@link LinkPoolNode} to load.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param loader
-	 *            {@link Consumer} to load the link on the {@link LinkPoolNode}.
+	 * @param node     {@link LinkPoolNode} to have the link loaded.
+	 * @param linkNode Link {@link LinkPoolNode} to load.
+	 * @param issues   {@link CompilerIssues}.
+	 * @param loader   {@link Consumer} to load the link on the
+	 *                 {@link LinkPoolNode}.
 	 * @return <code>true</code> if successful, or <code>false</code> with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -698,16 +682,11 @@ public class LinkUtil {
 	/**
 	 * Loads the link to the {@link Node}.
 	 * 
-	 * @param node
-	 *            {@link Node} to have the link loaded.
-	 * @param linkNode
-	 *            Link {@link Node} to load.
-	 * @param traverser
-	 *            {@link Traverser}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param loader
-	 *            {@link Consumer} to load the link onto the {@link Node}.
+	 * @param node      {@link Node} to have the link loaded.
+	 * @param linkNode  Link {@link Node} to load.
+	 * @param traverser {@link Traverser}.
+	 * @param issues    {@link CompilerIssues}.
+	 * @param loader    {@link Consumer} to load the link onto the {@link Node}.
 	 * @return <code>true</code> if successfully loaded the link {@link Node}.
 	 *         Otherwise, <code>false</code> with issue reported to the
 	 *         {@link CompilerIssues}.
@@ -730,20 +709,14 @@ public class LinkUtil {
 	/**
 	 * Retrieves the furtherest target link by the specified type.
 	 * 
-	 * @param <L>
-	 *            Link type.
-	 * @param <T>
-	 *            Target type.
-	 * @param link
-	 *            Starting {@link LinkFlowNode}.
-	 * @param traverser
-	 *            {@link Traverser} to traverse the links.
-	 * @param targetType
-	 *            Target {@link LinkFlowNode} type to find.
-	 * @param isIssueOnNoTarget
-	 *            Indicates if issue should be made if target not found.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param                   <L> Link type.
+	 * @param                   <T> Target type.
+	 * @param link              Starting {@link LinkFlowNode}.
+	 * @param traverser         {@link Traverser} to traverse the links.
+	 * @param targetType        Target {@link LinkFlowNode} type to find.
+	 * @param isIssueOnNoTarget Indicates if issue should be made if target not
+	 *                          found.
+	 * @param issues            {@link CompilerIssues}.
 	 * @return Furtherest target {@link LinkFlowNode} or <code>null</code> if no
 	 *         targets found.
 	 */
@@ -779,22 +752,16 @@ public class LinkUtil {
 	/**
 	 * Retrieves the target link by the specified type.
 	 * 
-	 * @param <L>
-	 *            Link type.
-	 * @param <T>
-	 *            Target type.
-	 * @param link
-	 *            Starting link.
-	 * @param traverser
-	 *            {@link Traverser} to traverse the links.
-	 * @param targetType
-	 *            Target type to retrieve.
-	 * @param isIssueOnNoTarget
-	 *            Indicates if issue should be made if target not found.
-	 * @param traversedLinks
-	 *            Optional traversed links. May be <code>null</code>.
-	 * @return Target link or <code>null</code> if issue obtaining which is
-	 *         reported to the {@link CompilerIssues}.
+	 * @param                   <L> Link type.
+	 * @param                   <T> Target type.
+	 * @param link              Starting link.
+	 * @param traverser         {@link Traverser} to traverse the links.
+	 * @param targetType        Target type to retrieve.
+	 * @param isIssueOnNoTarget Indicates if issue should be made if target not
+	 *                          found.
+	 * @param traversedLinks    Optional traversed links. May be <code>null</code>.
+	 * @return Target link or <code>null</code> if issue obtaining which is reported
+	 *         to the {@link CompilerIssues}.
 	 */
 	@SuppressWarnings("unchecked")
 	private static <T extends Node, L extends Node> Target<T> retrieveTarget(L link, Traverser<L> traverser,
@@ -866,10 +833,8 @@ public class LinkUtil {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param target
-		 *            Target. May be <code>null</code>.
-		 * @param isError
-		 *            Flag indicating if error in attempting to obtain target.
+		 * @param target  Target. May be <code>null</code>.
+		 * @param isError Flag indicating if error in attempting to obtain target.
 		 */
 		public Target(T target, boolean isError) {
 			this.target = target;
@@ -885,8 +850,7 @@ public class LinkUtil {
 		/**
 		 * Traverses to the next link.
 		 * 
-		 * @param link
-		 *            Current link node.
+		 * @param link Current link node.
 		 * @return Next link node.
 		 */
 		L getNextLinkNode(L link);

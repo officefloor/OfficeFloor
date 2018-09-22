@@ -51,6 +51,7 @@ import net.officefloor.compile.impl.structure.AdministrationNodeImpl;
 import net.officefloor.compile.impl.structure.AutoWirerImpl;
 import net.officefloor.compile.impl.structure.CompileContextImpl;
 import net.officefloor.compile.impl.structure.EscalationNodeImpl;
+import net.officefloor.compile.impl.structure.ExecutionStrategyNodeImpl;
 import net.officefloor.compile.impl.structure.ExecutiveNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionFlowNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
@@ -59,6 +60,7 @@ import net.officefloor.compile.impl.structure.GovernanceNodeImpl;
 import net.officefloor.compile.impl.structure.InputManagedObjectNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectExecutionStrategyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectPoolNodeImpl;
@@ -88,6 +90,7 @@ import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.ExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
@@ -96,6 +99,7 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
@@ -967,6 +971,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
+	public ManagedObjectExecutionStrategyNode createManagedObjectExecutionStrategyNode(String executionStrategyName,
+			ManagedObjectSourceNode managedObjectSource) {
+		return new ManagedObjectExecutionStrategyNodeImpl(executionStrategyName, managedObjectSource, this);
+	}
+
+	@Override
 	public ManagingOfficeNode createManagingOfficeNode(ManagedObjectSourceNode managedObjectSource) {
 		return new ManagingOfficeNodeImpl(managedObjectSource, this);
 	}
@@ -1133,6 +1143,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public ExecutiveNode createExecutiveNode(OfficeFloorNode officeFloor) {
 		return new ExecutiveNodeImpl(officeFloor, this);
+	}
+
+	@Override
+	public ExecutionStrategyNode createExecutionStrategyNode(String executionStrategyName, ExecutiveNode executive) {
+		return new ExecutionStrategyNodeImpl(executionStrategyName, executive, this);
 	}
 
 	@Override

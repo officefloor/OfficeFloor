@@ -121,6 +121,10 @@
 
 	<executive source="net.example.ExampleExecutiveSource"
 		x="500" y="501">
+		<properties>
+			<property name="EXECUTION_ONE" value="VALUE_ONE" />
+			<property name="EXECUTION_TWO" value="VALUE_TWO" />
+		</properties>
 		<execution-strategy name="EXECUTION_STRATEGY" />
 		<team-oversight name="TEAM_OVERSIGHT" />
 	</executive>

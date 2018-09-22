@@ -501,7 +501,7 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 	 */
 	public void testRegisterExecutiveSource() throws Exception {
 		TestExecutiveSource executiveSource = new TestExecutiveSource();
-		this.doTestInOfficeFloor(ExecutiveSource.class, "EXECUTIVE", (deployer, context) -> {
+		this.doTestInOfficeFloor(ExecutiveSource.class, "Executive", (deployer, context) -> {
 			deployer.setExecutive(executiveSource);
 		}, (objectName) -> {
 
@@ -543,7 +543,7 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 
 		@Override
 		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
-			return new DefaultExecutive();
+			return new DefaultExecutive().createExecutive(context);
 		}
 	}
 
