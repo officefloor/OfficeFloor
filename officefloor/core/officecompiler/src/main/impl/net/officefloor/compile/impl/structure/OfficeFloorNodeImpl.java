@@ -77,6 +77,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorResponsibility;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
@@ -442,6 +443,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 			OfficeFloorExecutionStrategy executionStrategy) {
 		LinkUtil.linkExecutionStrategy(managedObjectExecutionStrategy, executionStrategy,
 				this.context.getCompilerIssues(), this);
+	}
+
+	@Override
+	public void link(OfficeFloorTeam team, OfficeFloorTeamOversight oversight) {
+		LinkUtil.linkTeamOversight(team, oversight, this.context.getCompilerIssues(), this);
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkPoolNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.LinkTeamOversightNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -39,6 +40,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
+import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -69,6 +71,12 @@ public class LinkUtil {
 	 */
 	private static final Traverser<LinkExecutionStrategyNode> EXECUTION_STRATEGY_TRAVERSER = (
 			executionStrategy) -> executionStrategy.getLinkedExecutionStrategyNode();
+
+	/**
+	 * {@link LinkTeamOversightNode} {@link Traverser}.
+	 */
+	private static final Traverser<LinkTeamOversightNode> TEAM_OVERSIGHT_TRAVERSER = (teamOversight) -> teamOversight
+			.getLinkedTeamOversightNode();
 
 	/**
 	 * {@link LinkOfficeNode} {@link Traverser}.
@@ -217,6 +225,40 @@ public class LinkUtil {
 		// Link the nodes together
 		return ((LinkExecutionStrategyNode) linkSource)
 				.linkExecutionStrategyNode((LinkExecutionStrategyNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkTeamOversightNode} and if so links them.
+	 * 
+	 * @param linkSource Source {@link LinkTeamOversightNode}.
+	 * @param linkTarget Target {@link LinkTeamOversightNode}.
+	 * @param issues     {@link CompilerIssues}.
+	 * @param node       {@link Node} wishing to link the {@link TeamOversight}.
+	 * @return <code>true</code> if linked.
+	 */
+	public static boolean linkTeamOversight(Object linkSource, Object linkTarget, CompilerIssues issues, Node node) {
+
+		// Obtain the node
+		if (linkSource instanceof Node) {
+			node = (Node) linkSource;
+		}
+
+		// Ensure the link source is link team oversight node
+		if (!(linkSource instanceof LinkTeamOversightNode)) {
+			issues.addIssue(node, "Invalid link source: " + linkSource + " ["
+					+ (linkSource == null ? null : linkSource.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link team oversight node
+		if (!(linkTarget instanceof LinkTeamOversightNode)) {
+			issues.addIssue(node, "Invalid link target: " + linkTarget + " ["
+					+ (linkTarget == null ? null : linkTarget.getClass().getName()) + "]");
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkTeamOversightNode) linkSource).linkTeamOversightNode((LinkTeamOversightNode) linkTarget);
 	}
 
 	/**
@@ -408,6 +450,20 @@ public class LinkUtil {
 	 */
 	public static <T extends Node> T findTarget(LinkTeamNode link, Class<T> targetType, CompilerIssues issues) {
 		return retrieveTarget(link, TEAM_TRAVERSER, targetType, false, issues, null).target;
+	}
+
+	/**
+	 * Finds the target link by the specified type.
+	 * 
+	 * @param            <T> Target type.
+	 * @param link       Starting {@link LinkTeamOversightNode}.
+	 * @param targetType Target {@link LinkTeamOversightNode} type to retrieve.
+	 * @param issues     {@link CompilerIssues}.
+	 * @return {@link LinkTeamOversightNode} or <code>null</code> if not found.
+	 */
+	public static <T extends Node> T findTarget(LinkTeamOversightNode link, Class<T> targetType,
+			CompilerIssues issues) {
+		return retrieveTarget(link, TEAM_OVERSIGHT_TRAVERSER, targetType, false, issues, null).target;
 	}
 
 	/**
@@ -645,6 +701,22 @@ public class LinkUtil {
 	public static boolean linkExecutionStrategyNode(LinkExecutionStrategyNode node, LinkExecutionStrategyNode linkNode,
 			CompilerIssues issues, Consumer<LinkExecutionStrategyNode> loader) {
 		return linkNode(node, linkNode, EXECUTION_STRATEGY_TRAVERSER, issues, loader);
+	}
+
+	/**
+	 * Links the {@link LinkTeamOversightNode}.
+	 * 
+	 * @param node     {@link LinkTeamOversightNode} to have the link loaded.
+	 * @param linkNode {@link LinkTeamOversightNode} to load.
+	 * @param issues   {@link CompilerIssues}.
+	 * @param loader   {@link Consumer} to load the link onto the
+	 *                 {@link LinkTeamOversightNode}.
+	 * @return <code>true</code> if successful, or <code>false</code> with issue
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	public static boolean linkTeamOversightNode(LinkTeamOversightNode node, LinkTeamOversightNode linkNode,
+			CompilerIssues issues, Consumer<LinkTeamOversightNode> loader) {
+		return linkNode(node, linkNode, TEAM_OVERSIGHT_TRAVERSER, issues, loader);
 	}
 
 	/**

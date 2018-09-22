@@ -59,6 +59,7 @@ import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.frame.api.manage.Office;
@@ -864,7 +865,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertInitialise(node, (n) -> n.initialise("ExampleExecutiveSource", null));
 
 		// Validate children
-		assertChildren(node, node.getOfficeFloorExecutionStrategy("EXECUTION_STRATEGY"));
+		assertChildren(node, node.getOfficeFloorExecutionStrategy("EXECUTION_STRATEGY"),
+				node.getOfficeFloorTeamOversight("TEAM_OVERSIGHT"));
 	}
 
 	/**
@@ -874,6 +876,16 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		ExecutionStrategyNode node = this.context.createExecutionStrategyNode("EXECUTION_STRATEGY", this.executive);
 		assertNode(node, "EXECUTION_STRATEGY", "Execution Strategy", null, this.executive);
 		assertEquals("EXECUTION_STRATEGY", node.getOfficeFloorExecutionStratgyName());
+		assertInitialise(node, (n) -> n.initialise());
+	}
+
+	/**
+	 * Ensure can create {@link TeamOversightNode}.
+	 */
+	public void testCreateTeamOversightNode() {
+		TeamOversightNode node = this.context.createTeamOversightNode("TEAM_OVERSIGHT", this.executive);
+		assertNode(node, "TEAM_OVERSIGHT", "Team Oversight", null, this.executive);
+		assertEquals("TEAM_OVERSIGHT", node.getOfficeFloorTeamOversightName());
 		assertInitialise(node, (n) -> n.initialise());
 	}
 

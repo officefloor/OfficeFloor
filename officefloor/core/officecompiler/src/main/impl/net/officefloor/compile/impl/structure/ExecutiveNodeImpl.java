@@ -28,6 +28,7 @@ import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
+import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -98,7 +99,13 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 	 * {@link ExecutionStrategyNode} instances by their
 	 * {@link OfficeFloorExecutionStrategy} name.
 	 */
-	private final Map<String, ExecutionStrategyNode> executionStrategies = new HashMap<String, ExecutionStrategyNode>();
+	private final Map<String, ExecutionStrategyNode> executionStrategies = new HashMap<>();
+
+	/**
+	 * {@link TeamOversightNode} instances by their {@link OfficeFloorTeamOversight}
+	 * name.
+	 */
+	private final Map<String, TeamOversightNode> teamOversights = new HashMap<>();
 
 	/**
 	 * Initiate.
@@ -183,7 +190,7 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		return NodeUtil.getChildNodes(this.executionStrategies);
+		return NodeUtil.getChildNodes(this.executionStrategies, this.teamOversights);
 	}
 
 	/*
@@ -242,8 +249,8 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 
 	@Override
 	public OfficeFloorTeamOversight getOfficeFloorTeamOversight(String teamOversightName) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
+		return NodeUtil.getInitialisedNode(teamOversightName, this.teamOversights, this.context,
+				() -> this.context.createTeamOversightNode(teamOversightName, this), (n) -> n.initialise());
 	}
 
 }

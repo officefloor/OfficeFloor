@@ -15,23 +15,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.spi.officefloor;
-
-import net.officefloor.frame.api.executive.TeamOversight;
-import net.officefloor.frame.api.manage.OfficeFloor;
+package net.officefloor.compile.internal.structure;
 
 /**
- * {@link TeamOversight} within the {@link OfficeFloor}.
+ * {@link LinkTeamOversightNode} that can be linked to another
+ * {@link LinkTeamOversightNode}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorTeamOversight {
+public interface LinkTeamOversightNode extends Node {
 
 	/**
-	 * Obtains the name of this {@link OfficeFloorTeamOversight}.
+	 * Links the input {@link LinkTeamOversightNode} to this
+	 * {@link LinkTeamOversightNode}.
 	 * 
-	 * @return Name of this {@link OfficeFloorTeamOversight}.
+	 * @param node {@link LinkTeamOversightNode} to link to this
+	 *             {@link LinkTeamOversightNode}.
+	 * @return <code>true</code> if linked.
 	 */
-	String getOfficeFloorTeamOversightName();
+	boolean linkTeamOversightNode(LinkTeamOversightNode node);
+
+	/**
+	 * Obtains the {@link LinkTeamOversightNode} linked to this
+	 * {@link LinkTeamOversightNode}.
+	 * 
+	 * @return {@link LinkTeamOversightNode} linked to this
+	 *         {@link LinkTeamOversightNode}.
+	 */
+	LinkTeamOversightNode getLinkedTeamOversightNode();
 
 }

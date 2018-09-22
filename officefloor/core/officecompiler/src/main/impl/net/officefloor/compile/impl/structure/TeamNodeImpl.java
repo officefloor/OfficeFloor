@@ -24,10 +24,12 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.LinkTeamOversightNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.Property;
@@ -268,6 +270,13 @@ public class TeamNodeImpl implements TeamNode {
 		for (Property property : this.getProperties()) {
 			teamBuilder.addProperty(property.getName(), property.getValue());
 		}
+
+		// Determine if provide team oversight
+		TeamOversightNode teamOversight = LinkUtil.findTarget((LinkTeamOversightNode) this, TeamOversightNode.class,
+				this.context.getCompilerIssues());
+		if (teamOversight != null) {
+			teamBuilder.setTeamOversight(teamOversight.getOfficeFloorTeamOversightName());
+		}
 	}
 
 	/*
@@ -307,6 +316,26 @@ public class TeamNodeImpl implements TeamNode {
 	@Override
 	public LinkTeamNode getLinkedTeamNode() {
 		return this.linkedTeamNode;
+	}
+
+	/*
+	 * ============= LinkTeamOversightNode ============================
+	 */
+
+	/**
+	 * Linked {@link LinkTeamOversightNode}.
+	 */
+	private LinkTeamOversightNode linkedTeamOversightNode;
+
+	@Override
+	public boolean linkTeamOversightNode(LinkTeamOversightNode node) {
+		return LinkUtil.linkTeamOversightNode(this, node, this.context.getCompilerIssues(),
+				(link) -> this.linkedTeamOversightNode = link);
+	}
+
+	@Override
+	public LinkTeamOversightNode getLinkedTeamOversightNode() {
+		return this.linkedTeamOversightNode;
 	}
 
 }

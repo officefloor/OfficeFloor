@@ -39,6 +39,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
@@ -80,6 +81,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorMa
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TypeQualificationModel;
 
@@ -382,6 +385,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 		OfficeFloorExecutiveModel executiveModel = officeFloor.getOfficeFloorExecutive();
 		OfficeFloorExecutive executive = null;
 		Map<String, OfficeFloorExecutionStrategy> executionStrategies = new HashMap<>();
+		Map<String, OfficeFloorTeamOversight> teamOversights = new HashMap<>();
 		if (executiveModel != null) {
 
 			// Specify the executive
@@ -401,6 +405,17 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 
 				// Register the execution strategy
 				executionStrategies.put(strategyName, strategy);
+			}
+
+			// Load the team oversights
+			for (OfficeFloorTeamOversightModel oversightModel : executiveModel.getTeamOversights()) {
+
+				// Add the OfficeFloor team oversight
+				String oversightName = oversightModel.getTeamOversightName();
+				OfficeFloorTeamOversight oversight = executive.getOfficeFloorTeamOversight(oversightName);
+
+				// Register the team oversight
+				teamOversights.put(oversightName, oversight);
 			}
 		}
 
@@ -422,6 +437,20 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 
 			// Register the team
 			officeFloorTeams.put(teamName, team);
+
+			// Link the possible team oversight
+			OfficeFloorTeamOversight oversight = null;
+			OfficeFloorTeamToOfficeFloorTeamOversightModel connToOversight = teamModel.getOfficeFloorTeamOversight();
+			if (connToOversight != null) {
+				OfficeFloorTeamOversightModel oversightModel = connToOversight.getOfficeFloorTeamOversight();
+				if (oversightModel != null) {
+					oversight = teamOversights.get(oversightModel.getTeamOversightName());
+				}
+			}
+			if (oversight != null) {
+				// Provide oversight over the team
+				deployer.link(team, oversight);
+			}
 		}
 
 		// Add the offices, keeping registry of the offices and their inputs

@@ -15,23 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.spi.officefloor;
+package net.officefloor.compile.internal.structure;
 
-import net.officefloor.frame.api.executive.TeamOversight;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 
 /**
- * {@link TeamOversight} within the {@link OfficeFloor}.
+ * {@link OfficeFloorTeamOversight} node.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorTeamOversight {
+public interface TeamOversightNode extends LinkTeamOversightNode, OfficeFloorTeamOversight {
 
 	/**
-	 * Obtains the name of this {@link OfficeFloorTeamOversight}.
-	 * 
-	 * @return Name of this {@link OfficeFloorTeamOversight}.
+	 * {@link Node} type.
 	 */
-	String getOfficeFloorTeamOversightName();
+	static String TYPE = "Team Oversight";
+
+	/**
+	 * Initialises the {@link TeamOversightNode}.
+	 */
+	void initialise();
 
 }
