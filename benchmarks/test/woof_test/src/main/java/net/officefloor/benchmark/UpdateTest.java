@@ -80,17 +80,33 @@ public class UpdateTest {
 		WorldResponse[] worlds = new ObjectMapper().readValue(entity, WorldResponse[].class);
 		assertEquals("Incorrect number of worlds", 20, worlds.length);
 
-		// Ensure database updated to the values
-		try (Connection connection = dataSource.getConnection()) {
-			PreparedStatement statement = connection
-					.prepareStatement("SELECT ID, RANDOMNUMBER FROM WORLD WHERE ID = ?");
-			for (WorldResponse world : worlds) {
-				statement.setInt(1, world.getId());
-				ResultSet resultSet = statement.executeQuery();
-				assertTrue("Should find row", resultSet.next());
-				assertEquals("Should update row " + world.getId(), world.getRandomNumber(), resultSet.getInt(2));
+		// Allow some time for asynchronous updates
+		AssertionError failure = null;
+		for (int i = 0; i < 5; i++) {
+			try {
+				Thread.sleep(1000);
+
+				// Ensure database updated to the values
+				try (Connection connection = dataSource.getConnection()) {
+					PreparedStatement statement = connection
+							.prepareStatement("SELECT ID, RANDOMNUMBER FROM WORLD WHERE ID = ?");
+					for (WorldResponse world : worlds) {
+						statement.setInt(1, world.getId());
+						ResultSet resultSet = statement.executeQuery();
+						assertTrue("Should find row", resultSet.next());
+						assertEquals("Should update row " + world.getId(), world.getRandomNumber(),
+								resultSet.getInt(2));
+					}
+				}
+
+				// As here successful
+				return;
+
+			} catch (AssertionError ex) {
+				failure = ex;
 			}
 		}
+		throw failure;
 	}
 
 	@Data

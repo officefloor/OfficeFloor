@@ -37,10 +37,12 @@ import org.postgresql.ds.PGSimpleDataSource;
 
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.exceptions.DockerRequestException;
 import com.spotify.docker.client.messages.Container;
 import com.spotify.docker.client.messages.ContainerConfig;
 import com.spotify.docker.client.messages.ContainerCreation;
 import com.spotify.docker.client.messages.HostConfig;
+import com.spotify.docker.client.messages.Image;
 import com.spotify.docker.client.messages.PortBinding;
 
 import net.officefloor.jdbc.test.DataSourceRule;
@@ -62,6 +64,7 @@ public class PostgreSqlRule implements TestRule {
 	 * 
 	 * @param imageName Docker image name.
 	 * @param client    {@link DockerClient}.
+	 * @throws Exception If fails to pull image.
 	 */
 	public static void pullDockerImage(String imageName, DockerClient client) throws Exception {
 
@@ -70,17 +73,40 @@ public class PostgreSqlRule implements TestRule {
 			return;
 		}
 
-		// Pull the docker image
-		Consumer<String> print = (message) -> {
-			System.out.print(message == null ? "" : " " + message);
-			System.out.flush();
-		};
-		client.pull(imageName, (message) -> {
-			print.accept(message.progress());
-			print.accept(message.status());
-			print.accept(message.id());
-			System.out.println();
-		});
+		try {
+
+			// Pull the docker image
+			Consumer<String> print = (message) -> {
+				System.out.print(message == null ? "" : " " + message);
+				System.out.flush();
+			};
+			client.pull(imageName, (message) -> {
+				print.accept(message.progress());
+				print.accept(message.status());
+				print.accept(message.id());
+				System.out.println();
+			});
+
+		} catch (DockerRequestException ex) {
+
+			// Failed to pull image, determine if already exists
+			// (typically as no connection to Internet to check)
+			List<Image> images = client.listImages();
+			boolean isImageExist = false;
+			for (Image image : images) {
+				if (image.repoTags() != null) {
+					for (String tag : image.repoTags()) {
+						if (imageName.equals(tag)) {
+							isImageExist = true;
+						}
+					}
+				}
+			}
+			if (!isImageExist) {
+				// Propagate the failure
+				throw ex;
+			}
+		}
 
 		// Flag that pulled image
 		pulledDockerImages.add(imageName);

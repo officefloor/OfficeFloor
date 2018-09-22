@@ -27,7 +27,8 @@ import org.junit.runners.Suite.SuiteClasses;
  * Tests.
  */
 @RunWith(Suite.class)
-@SuiteClasses({ TestSuite.RawJsonTest.class, TestSuite.RawPlaintextTest.class })
+@SuiteClasses({ TestSuite.RawJsonTest.class, TestSuite.RawPlaintextTest.class, TestSuite.RawDbTest.class,
+		TestSuite.RawQueriesTest.class, TestSuite.RawFortunesTest.class, TestSuite.RawUpdateTest.class })
 public class TestSuite {
 
 	public static void start() throws Exception {
@@ -61,4 +62,53 @@ public class TestSuite {
 			TestSuite.stop();
 		}
 	}
+
+	public static class RawDbTest extends DbTest {
+		@Before
+		public void start() throws Exception {
+			TestSuite.start();
+		}
+
+		@After
+		public void stop() throws Exception {
+			TestSuite.stop();
+		}
+	}
+
+	public static class RawQueriesTest extends QueriesTest {
+		@Before
+		public void start() throws Exception {
+			TestSuite.start();
+		}
+
+		@After
+		public void stop() throws Exception {
+			TestSuite.stop();
+		}
+	}
+
+	public static class RawFortunesTest extends FortunesTest {
+		@Before
+		public void start() throws Exception {
+			TestSuite.start();
+		}
+
+		@After
+		public void stop() throws Exception {
+			TestSuite.stop();
+		}
+	}
+
+	public static class RawUpdateTest extends UpdateTest {
+		@Before
+		public void start() throws Exception {
+			TestSuite.start();
+		}
+
+		@After
+		public void stop() throws Exception {
+			TestSuite.stop();
+		}
+	}
+
 }

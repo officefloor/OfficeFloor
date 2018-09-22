@@ -59,11 +59,11 @@
 	</distributionManagement>
 	<modules>
 		<module>core</module>
+		<module>persistence</module>
 		<module>server</module>
 		<module>web</module>
 		<module>maven</module>
 		<module>eclipse</module>
-		<module>persistence</module>
 		<module>tutorials</module>
 	</modules>
 	<properties>

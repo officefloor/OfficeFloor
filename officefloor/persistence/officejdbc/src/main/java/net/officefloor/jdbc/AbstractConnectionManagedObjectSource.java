@@ -121,7 +121,8 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 		/**
 		 * Obtains the {@link Connection} for connectivity.
-		 * 
+		 *
+		 * @return {@link Connection}.
 		 * @throws SQLException If fails to obtain connectivity.
 		 */
 		Connection createConnectivity() throws SQLException;

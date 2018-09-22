@@ -90,6 +90,7 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 
 		// Create the re-usable connection
 		this.connection = this.dataSource.getConnection();
+		this.connection.setAutoCommit(true);
 		this.connection.setReadOnly(true);
 
 		// Wrap connection to avoid changing
