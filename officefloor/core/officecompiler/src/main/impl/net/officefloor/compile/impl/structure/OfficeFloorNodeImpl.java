@@ -62,6 +62,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.ManagedObjectSourceAugmentor;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyObjectNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyRequireNode;
@@ -303,6 +304,12 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public void addOfficeFloorListener(OfficeFloorListener listener) {
 		this.listeners.add(listener);
+	}
+
+	@Override
+	public void addManagedObjectSourceAugmentor(ManagedObjectSourceAugmentor managedObjectSourceAugmentor) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override

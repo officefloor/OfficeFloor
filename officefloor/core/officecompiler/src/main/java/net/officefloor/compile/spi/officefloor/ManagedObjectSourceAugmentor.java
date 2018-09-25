@@ -15,23 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.spi.office;
+package net.officefloor.compile.spi.officefloor;
 
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
- * Augments the {@link ManagedFunction} instances within the {@link Office}.
+ * Augments the {@link ManagedObjectSource} instances within the
+ * {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionAugmentor {
+public interface ManagedObjectSourceAugmentor {
 
 	/**
-	 * Augments the {@link ManagedFunction}.
+	 * Augments the {@link ManagedObjectSource}.
 	 * 
-	 * @param context {@link ManagedFunctionAugmentorContext}.
+	 * @param context {@link ManagedObjectSourceAugmentorContext}.
 	 */
-	void augmentManagedFunction(ManagedFunctionAugmentorContext context);
+	void augmentManagedObjectSource(ManagedObjectSourceAugmentorContext context);
 
 }

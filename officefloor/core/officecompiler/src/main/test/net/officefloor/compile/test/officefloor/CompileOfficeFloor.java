@@ -21,6 +21,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.officefloor.OfficeFloorLoader;
+import net.officefloor.compile.officefloor.OfficeFloorType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
@@ -62,14 +65,10 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 * Convenience method to invoke the {@link ProcessState} for the
 	 * {@link ManagedFunction} within the default {@link Office}.
 	 * 
-	 * @param officeFloor
-	 *            {@link OfficeFloor}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param parameter
-	 *            Parameter to the {@link ManagedFunction}.
-	 * @throws Throwable
-	 *             If fails to invoke the {@link ProcessState}.
+	 * @param officeFloor  {@link OfficeFloor}.
+	 * @param functionName Name of the {@link ManagedFunction}.
+	 * @param parameter    Parameter to the {@link ManagedFunction}.
+	 * @throws Throwable If fails to invoke the {@link ProcessState}.
 	 */
 	public static void invokeProcess(OfficeFloor officeFloor, String functionName, Object parameter) throws Throwable {
 		invokeProcess(officeFloor, functionName, parameter, 3000);
@@ -79,16 +78,12 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 * Convenience method to invoke the {@link ProcessState} for the
 	 * {@link ManagedFunction} within the default {@link Office}.
 	 * 
-	 * @param officeFloor
-	 *            {@link OfficeFloor}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param parameter
-	 *            Parameter to the {@link ManagedFunction}.
-	 * @param waitTime
-	 *            Time in milliseconds to wait for {@link ProcessState} to complete.
-	 * @throws Throwable
-	 *             If fails to invoke the {@link ProcessState}.
+	 * @param officeFloor  {@link OfficeFloor}.
+	 * @param functionName Name of the {@link ManagedFunction}.
+	 * @param parameter    Parameter to the {@link ManagedFunction}.
+	 * @param waitTime     Time in milliseconds to wait for {@link ProcessState} to
+	 *                     complete.
+	 * @throws Throwable If fails to invoke the {@link ProcessState}.
 	 */
 	public static void invokeProcess(OfficeFloor officeFloor, String functionName, Object parameter, long waitTime)
 			throws Throwable {
@@ -99,18 +94,14 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 * Convenience method to invoke the {@link ProcessState} for the
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param officeFloor
-	 *            {@link OfficeFloor}.
-	 * @param officeName
-	 *            Name of the {@link Office} containing the {@link ManagedFunction}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param parameter
-	 *            Parameter to the {@link ManagedFunction}.
-	 * @param waitTime
-	 *            Time in milliseconds to wait for {@link ProcessState} to complete.
-	 * @throws Throwable
-	 *             If fails to invoke the {@link ProcessState}.
+	 * @param officeFloor  {@link OfficeFloor}.
+	 * @param officeName   Name of the {@link Office} containing the
+	 *                     {@link ManagedFunction}.
+	 * @param functionName Name of the {@link ManagedFunction}.
+	 * @param parameter    Parameter to the {@link ManagedFunction}.
+	 * @param waitTime     Time in milliseconds to wait for {@link ProcessState} to
+	 *                     complete.
+	 * @throws Throwable If fails to invoke the {@link ProcessState}.
 	 */
 	public static void invokeProcess(OfficeFloor officeFloor, String officeName, String functionName, Object parameter,
 			long waitTime) throws Throwable {
@@ -194,8 +185,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	/**
 	 * Adds a {@link CompileOfficeFloorExtension}.
 	 * 
-	 * @param extension
-	 *            {@link CompileOfficeFloorExtension}.
+	 * @param extension {@link CompileOfficeFloorExtension}.
 	 */
 	public void officeFloor(CompileOfficeFloorExtension extension) {
 		this.officeFloorExtensions.add(extension);
@@ -204,8 +194,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	/**
 	 * Adds a {@link CompileOfficeExtension}.
 	 * 
-	 * @param extension
-	 *            {@link CompileOfficeExtension}.
+	 * @param extension {@link CompileOfficeExtension}.
 	 */
 	public void office(CompileOfficeExtension extension) {
 		this.officeExtensions.add(extension);
@@ -214,8 +203,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	/**
 	 * Adds a {@link CompileSectionExtension}.
 	 * 
-	 * @param extension
-	 *            {@link CompileSectionExtension}.
+	 * @param extension {@link CompileSectionExtension}.
 	 */
 	public void section(CompileSectionExtension extension) {
 		this.sectionExtensions.add(extension);
@@ -225,8 +213,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 * Compiles the {@link OfficeFloor}.
 	 * 
 	 * @return {@link OfficeFloor}.
-	 * @throws Exception
-	 *             If fails to compile the {@link OfficeFloor}.
+	 * @throws Exception If fails to compile the {@link OfficeFloor}.
 	 */
 	public OfficeFloor compileOfficeFloor() throws Exception {
 
@@ -241,8 +228,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 * Compiles and opens the {@link Office}.
 	 * 
 	 * @return {@link OfficeFloor}.
-	 * @throws Exception
-	 *             If fails to compile and open the {@link OfficeFloor}.
+	 * @throws Exception If fails to compile and open the {@link OfficeFloor}.
 	 */
 	public OfficeFloor compileAndOpenOfficeFloor() throws Exception {
 
@@ -254,6 +240,24 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 
 		// Return the OfficeFloor
 		return officeFloor;
+	}
+
+	/**
+	 * Loads the {@link OfficeFloorType}.
+	 * 
+	 * @return {@link OfficeFloorType}.
+	 */
+	public OfficeFloorType loadOfficeFloorType() {
+
+		// Obtain the loader
+		OfficeFloorLoader loader = this.getOfficeFloorCompiler().getOfficeFloorLoader();
+
+		// Load the OfficeFloor type
+		PropertyList properties = this.compiler.createPropertyList();
+		OfficeFloorType officeFloorType = loader.loadOfficeFloorType(this, null, properties);
+
+		// Return the OfficeFloor type
+		return officeFloorType;
 	}
 
 	/*
@@ -325,8 +329,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 		/**
 		 * Obtains the {@link OfficeSection}.
 		 * 
-		 * @param architect
-		 *            {@link OfficeArchitect}.
+		 * @param architect {@link OfficeArchitect}.
 		 * @return {@link OfficeSection}.
 		 */
 		private OfficeSection getSection(OfficeArchitect architect) {

@@ -36,10 +36,8 @@ public interface OfficeFloorLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link OfficeFloorSourceSpecification} for the {@link OfficeFloorSource}.
 	 * 
-	 * @param <OF>
-	 *            {@link OfficeFloorSource} type.
-	 * @param officeFloorSourceClass
-	 *            Class of the {@link OfficeFloorSource}.
+	 * @param                        <OF> {@link OfficeFloorSource} type.
+	 * @param officeFloorSourceClass Class of the {@link OfficeFloorSource}.
 	 * @return {@link PropertyList} of the {@link OfficeFloorSourceProperty}
 	 *         instances of the {@link OfficeFloorSourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
@@ -54,21 +52,18 @@ public interface OfficeFloorLoader {
 	 * <p>
 	 * These are additional {@link Property} instances over and above the
 	 * {@link OfficeFloorSourceSpecification} that are required by the
-	 * {@link OfficeFloorSource} to load the {@link OfficeFloor}. Typically
-	 * these will be {@link Property} instances required by the configuration of
-	 * the {@link OfficeFloor}.
+	 * {@link OfficeFloorSource} to load the {@link OfficeFloor}. Typically these
+	 * will be {@link Property} instances required by the configuration of the
+	 * {@link OfficeFloor}.
 	 * 
-	 * @param <OF>
-	 *            {@link OfficeFloorSource} type.
-	 * @param officeFloorSourceClass
-	 *            Class of the {@link OfficeFloorSource}.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties as per the
-	 *            {@link OfficeFloorSourceSpecification}.
-	 * @return Required {@link PropertyList} or <code>null</code> if issues,
-	 *         which are reported to the {@link CompilerIssues}.
+	 * @param                        <OF> {@link OfficeFloorSource} type.
+	 * @param officeFloorSourceClass Class of the {@link OfficeFloorSource}.
+	 * @param officeFloorLocation    Location of the {@link OfficeFloor}.
+	 * @param propertyList           {@link PropertyList} containing the properties
+	 *                               as per the
+	 *                               {@link OfficeFloorSourceSpecification}.
+	 * @return Required {@link PropertyList} or <code>null</code> if issues, which
+	 *         are reported to the {@link CompilerIssues}.
 	 */
 	<OF extends OfficeFloorSource> PropertyList loadRequiredProperties(Class<OF> officeFloorSourceClass,
 			String officeFloorLocation, PropertyList propertyList);
@@ -76,20 +71,31 @@ public interface OfficeFloorLoader {
 	/**
 	 * Loads the {@link OfficeFloorType}.
 	 * 
-	 * @param <OF>
-	 *            {@link OfficeFloorSource} type.
-	 * @param officeFloorSourceClass
-	 *            Class of the {@link OfficeFloorSource}.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing both the
-	 *            {@link OfficeFloorSourceProperty} and required
-	 *            {@link Property} instances.
+	 * @param                        <OF> {@link OfficeFloorSource} type.
+	 * @param officeFloorSourceClass Class of the {@link OfficeFloorSource}.
+	 * @param officeFloorLocation    Location of the {@link OfficeFloor}.
+	 * @param propertyList           {@link PropertyList} containing both the
+	 *                               {@link OfficeFloorSourceProperty} and required
+	 *                               {@link Property} instances.
 	 * @return {@link OfficeFloorType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<OF extends OfficeFloorSource> OfficeFloorType loadOfficeFloorType(Class<OF> officeFloorSourceClass,
 			String officeFloorLocation, PropertyList propertyList);
+
+	/**
+	 * Loads the {@link OfficeFloorType}.
+	 * 
+	 * @param                     <OF> {@link OfficeFloorSource} type.
+	 * @param officeFloorSource   {@link OfficeFloorSource}.
+	 * @param officeFloorLocation Location of the {@link OfficeFloor}.
+	 * @param propertyList        {@link PropertyList} containing both the
+	 *                            {@link OfficeFloorSourceProperty} and required
+	 *                            {@link Property} instances.
+	 * @return {@link OfficeFloorType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
+	 */
+	<OF extends OfficeFloorSource> OfficeFloorType loadOfficeFloorType(OF officeFloorSource, String officeFloorLocation,
+			PropertyList propertyList);
 
 }

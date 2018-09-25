@@ -1,0 +1,184 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.compile.integrate.officefloor;
+
+import java.util.function.BiConsumer;
+
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectFlow;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.test.OfficeFrameTestCase;
+
+/**
+ * Ensure able to augment {@link ManagedObjectSource} instances.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class AugmentManagedObjectSourceFlowTest extends OfficeFrameTestCase {
+
+	/**
+	 * Ensure can augment the {@link OfficeFloorManagedObjectSource}.
+	 */
+	public void testAugmentOfficeFloorManagedObjectSourceFlow() throws Exception {
+		this.doAugmentedManagedObjectSourceTest("MOS", (compile, mos) -> {
+			compile.officeFloor((context) -> {
+				OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+				OfficeFloorManagedObjectSource source = deployer.addManagedObjectSource("MOS", mos);
+				deployer.link(source.getManagingOffice(), context.getDeployedOffice());
+				OfficeFloorInputManagedObject inputMo = deployer.addInputManagedObject("MOS",
+						AugmentFlowManagedObjectSource.class.getName());
+				deployer.link(source, inputMo);
+			});
+		});
+	}
+
+	/**
+	 * Ensure can augment the {@link OfficeManagedObjectSource}.
+	 */
+	public void testAugmentOfficeManagedObjectSourceFlow() throws Exception {
+		this.doAugmentedManagedObjectSourceTest("OFFICE.MOS", (compile, mos) -> {
+			compile.office((context) -> {
+				context.getOfficeArchitect().addOfficeManagedObjectSource("MOS", mos);
+			});
+		});
+	}
+
+	/**
+	 * Ensure can augment the {@link SectionManagedObjectSource}.
+	 */
+	public void testAugmentSectionManagedObjectSourceFlow() throws Exception {
+		this.doAugmentedManagedObjectSourceTest("OFFICE.SECTION.MOS", (compile, mos) -> {
+			compile.section((context) -> {
+				context.getSectionDesigner().addSectionManagedObjectSource("MOS", mos);
+			});
+		});
+	}
+
+	/**
+	 * Undertakes the augment {@link ManagedObjectSource} test.
+	 * 
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
+	 * @param loader                  Loads the {@link ManagedObjectSource}.
+	 */
+	private void doAugmentedManagedObjectSourceTest(String managedObjectSourceName,
+			BiConsumer<CompileOfficeFloor, AugmentFlowManagedObjectSource> loader) throws Exception {
+
+		// Create the augment
+		AugmentFlowManagedObjectSource mos = new AugmentFlowManagedObjectSource();
+
+		// Compile with the augmented managed object source
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.officeFloor((context) -> {
+			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
+			// Obtain the section input
+			DeployedOfficeInput input = context.getDeployedOffice().getDeployedOfficeInput("SERVICE", "service");
+
+			// Augment the managed object source
+			deployer.addManagedObjectSourceAugmentor((augment) -> {
+
+				// Ensure correct name
+				assertEquals("Incorrect managed object source name", managedObjectSourceName,
+						augment.getManagedObjectSourceName());
+
+				// Obtain the flow
+				AugmentedManagedObjectFlow flow = augment.getManagedObjectFlow("FLOW");
+				assertEquals("Incorrect flow name", "FLOW", flow.getManagedObjectFlowName());
+
+				// Link the flow
+				augment.link(flow, input);
+			});
+		});
+		compile.office((context) -> {
+			context.addSection("SERVICE", Section.class);
+		});
+		loader.accept(compile, mos);
+		compile.compileAndOpenOfficeFloor();
+
+		// Execute the flow (ensures augmented)
+		Section.isInvoked = false;
+		mos.executeContext.invokeProcess(Flows.FLOW, null, mos, 0, null);
+		assertTrue("Should invoked section", Section.isInvoked);
+	}
+
+	public static class Section {
+
+		private static boolean isInvoked = false;
+
+		public void service() {
+			isInvoked = true;
+		}
+	}
+
+	public static enum Flows {
+		FLOW
+	}
+
+	@TestSource
+	public static class AugmentFlowManagedObjectSource extends AbstractManagedObjectSource<None, Flows>
+			implements ManagedObject {
+
+		private ManagedObjectExecuteContext<Flows> executeContext;
+
+		/*
+		 * =================== ManagedObjectSource ============================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
+			context.setObjectClass(this.getClass());
+			context.addFlow(Flows.FLOW, null);
+		}
+
+		@Override
+		public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
+			this.executeContext = context;
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			fail("Should not obtain managed object");
+			return null;
+		}
+
+		/*
+		 * ====================== ManagedObject ==================================
+		 */
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
+		}
+	}
+
+}

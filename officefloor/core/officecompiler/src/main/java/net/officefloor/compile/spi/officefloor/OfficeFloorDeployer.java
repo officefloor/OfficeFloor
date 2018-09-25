@@ -58,6 +58,13 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	void addOfficeFloorListener(OfficeFloorListener listener);
 
 	/**
+	 * Adds a {@link ManagedObjectSourceAugmentor}.
+	 * 
+	 * @param managedObjectSourceAugmentor {@link ManagedObjectSourceAugmentor}.
+	 */
+	void addManagedObjectSourceAugmentor(ManagedObjectSourceAugmentor managedObjectSourceAugmentor);
+
+	/**
 	 * Adds a {@link OfficeFloorTeam}.
 	 * 
 	 * @param teamName            Name of the {@link OfficeFloorTeam}.
