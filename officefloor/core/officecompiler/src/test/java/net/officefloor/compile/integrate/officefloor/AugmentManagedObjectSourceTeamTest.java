@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloorContext;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -48,26 +49,37 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
 
 	/**
+	 * Ensure indicates already linked.
+	 */
+	public void testAugmentOfficeFloorManagedObjectSourceTeamAlreadyLinked() throws Exception {
+		this.doAugmentedManagedObjectSourceTest("MOS", true, null);
+	}
+
+	/**
 	 * Ensure can augment the {@link OfficeFloorManagedObjectSource}.
 	 */
 	public void testAugmentOfficeFloorManagedObjectSourceTeam() throws Exception {
-		this.doAugmentedManagedObjectSourceTest("MOS", (compile, mos) -> {
-			compile.officeFloor((context) -> {
-				OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
-				OfficeFloorManagedObjectSource source = deployer.addManagedObjectSource("MOS", mos);
-				deployer.link(source.getManagingOffice(), context.getDeployedOffice());
-				OfficeFloorInputManagedObject inputMo = deployer.addInputManagedObject("MOS",
-						AugmentTeamManagedObjectSource.class.getName());
-				deployer.link(source, inputMo);
-			});
+		this.doAugmentedManagedObjectSourceTest("MOS", false, (compile, mos) -> {
+			compile.officeFloor((context) -> this.createOfficeFloorManagedObjectSource(context, mos));
 		});
+	}
+
+	private OfficeFloorManagedObjectSource createOfficeFloorManagedObjectSource(CompileOfficeFloorContext context,
+			AugmentTeamManagedObjectSource mos) {
+		OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+		OfficeFloorManagedObjectSource source = deployer.addManagedObjectSource("MOS", mos);
+		deployer.link(source.getManagingOffice(), context.getDeployedOffice());
+		OfficeFloorInputManagedObject inputMo = deployer.addInputManagedObject("MOS",
+				AugmentTeamManagedObjectSource.class.getName());
+		deployer.link(source, inputMo);
+		return source;
 	}
 
 	/**
 	 * Ensure can augment the {@link OfficeManagedObjectSource}.
 	 */
 	public void testAugmentOfficeManagedObjectSourceTeam() throws Exception {
-		this.doAugmentedManagedObjectSourceTest("OFFICE.MOS", (compile, mos) -> {
+		this.doAugmentedManagedObjectSourceTest("OFFICE.MOS", false, (compile, mos) -> {
 			compile.office((context) -> {
 				context.getOfficeArchitect().addOfficeManagedObjectSource("MOS", mos);
 			});
@@ -78,7 +90,7 @@ public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
 	 * Ensure can augment the {@link SectionManagedObjectSource}.
 	 */
 	public void testAugmentSectionManagedObjectSourceTeam() throws Exception {
-		this.doAugmentedManagedObjectSourceTest("OFFICE.SECTION.MOS", (compile, mos) -> {
+		this.doAugmentedManagedObjectSourceTest("OFFICE.SECTION.MOS", false, (compile, mos) -> {
 			compile.section((context) -> {
 				context.getSectionDesigner().addSectionManagedObjectSource("MOS", mos);
 			});
@@ -89,9 +101,10 @@ public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
 	 * Undertakes the augment {@link ManagedObjectSource} test.
 	 * 
 	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
+	 * @param isAlreadyLinked         Indicates if already linked.
 	 * @param loader                  Loads the {@link ManagedObjectSource}.
 	 */
-	private void doAugmentedManagedObjectSourceTest(String managedObjectSourceName,
+	private void doAugmentedManagedObjectSourceTest(String managedObjectSourceName, boolean isAlreadyLinked,
 			BiConsumer<CompileOfficeFloor, AugmentTeamManagedObjectSource> loader) throws Exception {
 
 		// Create the augment
@@ -106,6 +119,12 @@ public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
 			// Add the team
 			OfficeFloorTeam team = deployer.addTeam("TEAM", teamSource);
 
+			// Determine if already linked
+			if (isAlreadyLinked) {
+				OfficeFloorManagedObjectSource source = this.createOfficeFloorManagedObjectSource(context, mos);
+				deployer.link(source.getOfficeFloorManagedObjectTeam("TEAM"), team);
+			}
+
 			// Augment the managed object source
 			deployer.addManagedObjectSourceAugmentor((augment) -> {
 
@@ -115,13 +134,21 @@ public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
 
 				// Obtain the team
 				AugmentedManagedObjectTeam responsibility = augment.getManagedObjectTeam("TEAM");
-				assertEquals("Incorrect team name", "TEAM", responsibility.getManagedObjectTeamName());
+				assertEquals("Incorrectly already linked", isAlreadyLinked, responsibility.isLinked());
 
-				// Link the team
-				augment.link(responsibility, team);
+				// Possibly link team
+				if (!responsibility.isLinked()) {
+					assertEquals("Incorrect team name", "TEAM", responsibility.getManagedObjectTeamName());
+					augment.link(responsibility, team);
+				}
 			});
 		});
-		loader.accept(compile, mos);
+		if (!isAlreadyLinked) {
+			loader.accept(compile, mos);
+		}
+		compile.office((context) -> {
+			// Ensure office available
+		});
 		compile.compileAndOpenOfficeFloor();
 
 		// Execute the flow (ensures augmented)

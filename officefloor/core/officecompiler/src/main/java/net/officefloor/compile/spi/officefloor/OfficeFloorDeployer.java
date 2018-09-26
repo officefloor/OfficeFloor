@@ -65,6 +65,13 @@ public interface OfficeFloorDeployer extends SourceIssues {
 	void addManagedObjectSourceAugmentor(ManagedObjectSourceAugmentor managedObjectSourceAugmentor);
 
 	/**
+	 * Adds a {@link TeamAugmentor}.
+	 * 
+	 * @param teamAugmentor {@link TeamAugmentor}.
+	 */
+	void addTeamAugmentor(TeamAugmentor teamAugmentor);
+
+	/**
 	 * Adds a {@link OfficeFloorTeam}.
 	 * 
 	 * @param teamName            Name of the {@link OfficeFloorTeam}.

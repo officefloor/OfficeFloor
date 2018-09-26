@@ -79,6 +79,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorResponsibility;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
+import net.officefloor.compile.spi.officefloor.TeamAugmentor;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
@@ -308,6 +309,12 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 
 	@Override
 	public void addManagedObjectSourceAugmentor(ManagedObjectSourceAugmentor managedObjectSourceAugmentor) {
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement");
+	}
+
+	@Override
+	public void addTeamAugmentor(TeamAugmentor teamAugmentor) {
 		// TODO implement
 		throw new UnsupportedOperationException("TODO implement");
 	}
