@@ -120,6 +120,15 @@ public class ManagedObjectExecutionStrategyNodeImpl implements ManagedObjectExec
 	}
 
 	/*
+	 * ============== AugmentedManagedObjectExecutionStrategy =========
+	 */
+
+	@Override
+	public boolean isLinked() {
+		return (this.linkedExecutionStrategyNode != null);
+	}
+
+	/*
 	 * ================ ExecutionStrategyNode =========================
 	 */
 

@@ -22,6 +22,7 @@ import net.officefloor.compile.section.OfficeSectionManagedObjectTeamType;
 import net.officefloor.compile.spi.office.OfficeManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
 
 /**
@@ -29,8 +30,8 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectTeamNode
-		extends LinkTeamNode, OfficeSectionManagedObjectTeam, OfficeManagedObjectTeam, OfficeFloorManagedObjectTeam {
+public interface ManagedObjectTeamNode extends LinkTeamNode, AugmentedManagedObjectTeam, OfficeSectionManagedObjectTeam,
+		OfficeManagedObjectTeam, OfficeFloorManagedObjectTeam {
 
 	/**
 	 * {@link Node} type.

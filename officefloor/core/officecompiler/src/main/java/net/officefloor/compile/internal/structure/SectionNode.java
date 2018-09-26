@@ -55,13 +55,10 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	/**
 	 * Initialises this {@link SectionNode}.
 	 * 
-	 * @param sectionSourceClassName
-	 *            {@link SectionSource} class name.
-	 * @param sectionSource
-	 *            Optional instantiated {@link SectionSource}. May be
-	 *            <code>null</code>.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
+	 * @param sectionSourceClassName {@link SectionSource} class name.
+	 * @param sectionSource          Optional instantiated {@link SectionSource}.
+	 *                               May be <code>null</code>.
+	 * @param sectionLocation        Location of the {@link OfficeSection}.
 	 */
 	void initialise(String sectionSourceClassName, SectionSource sectionSource, String sectionLocation);
 
@@ -71,33 +68,32 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * <p>
 	 * This will only source the top level {@link OfficeSection}.
 	 * 
-	 * @param managedFunctionVisitor
-	 *            {@link ManagedFunctionVisitor}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param managedFunctionVisitor     {@link ManagedFunctionVisitor}.
+	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
+	 * @param compileContext             {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
-	boolean sourceSection(ManagedFunctionVisitor managedFunctionVisitor, CompileContext compileContext);
+	boolean sourceSection(ManagedFunctionVisitor managedFunctionVisitor,
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext);
 
 	/**
 	 * Sources this {@link SectionNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
-	 * @param managedFunctionVisitor
-	 *            {@link ManagedFunctionVisitor}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param managedFunctionVisitor     {@link ManagedFunctionVisitor}.
+	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
+	 * @param compileContext             {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
-	boolean sourceSectionTree(ManagedFunctionVisitor managedFunctionVisitor, CompileContext compileContext);
+	boolean sourceSectionTree(ManagedFunctionVisitor managedFunctionVisitor,
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext);
 
 	/**
 	 * Sources the inheritance of the {@link SectionNode}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
 	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
@@ -113,8 +109,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	/**
 	 * Obtains the possible {@link SectionOutputNode}.
 	 * 
-	 * @param outputName
-	 *            Name of the {@link SectionOutputNode}.
+	 * @param outputName Name of the {@link SectionOutputNode}.
 	 * @return {@link SectionOutputNode} or <code>null</code> if no
 	 *         {@link SectionOutputNode} by name on the {@link SectionNode}.
 	 */
@@ -123,8 +118,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	/**
 	 * Loads the {@link SectionType}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 * @return {@link SectionType} or <code>null</code> if issue loading with issue
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -133,8 +127,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	/**
 	 * Loads the {@link OfficeSectionType}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 * @return {@link OfficeSectionType} or <code>null</code> if issue loading with
 	 *         issue reported to the {@link CompilerIssues}.
 	 */
@@ -143,10 +136,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	/**
 	 * Loads the {@link OfficeSubSectionType}.
 	 * 
-	 * @param parentSectionType
-	 *            Parent {@link OfficeSubSectionType}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param parentSectionType Parent {@link OfficeSubSectionType}.
+	 * @param compileContext    {@link CompileContext}.
 	 * @return {@link OfficeSubSectionType} or <code>null</code> if issue loading
 	 *         with issue reported to the {@link CompilerIssues}.
 	 */
@@ -156,8 +147,7 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	/**
 	 * Loads the {@link OfficeAvailableSectionInputType} instances.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 * @return {@link OfficeAvailableSectionInputType} instances or
 	 *         <code>null</code> with issues reported to the {@link CompilerIssues}.
 	 */
@@ -166,8 +156,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	/**
 	 * Obtains the {@link DeployedOfficeInput}.
 	 * 
-	 * @param inputName
-	 *            Input name as per the {@link OfficeAvailableSectionInputType}.
+	 * @param inputName Input name as per the
+	 *                  {@link OfficeAvailableSectionInputType}.
 	 * @return {@link DeployedOfficeInput}.
 	 */
 	DeployedOfficeInput getDeployedOfficeInput(String inputName);
@@ -209,8 +199,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * Obtain the {@link OfficeSection} qualified name. This includes the
 	 * {@link Office} name.
 	 * 
-	 * @param simpleName
-	 *            Simple name to qualify with the {@link OfficeSection} name space.
+	 * @param simpleName Simple name to qualify with the {@link OfficeSection} name
+	 *                   space.
 	 * @return {@link OfficeSection} qualified name.
 	 */
 	String getQualifiedName(String simpleName);
@@ -218,8 +208,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	/**
 	 * Obtains the {@link SectionNode} qualified name within the {@link OfficeNode}.
 	 * 
-	 * @param simpleName
-	 *            Simple name to qualify with the {@link SectionNode} name space.
+	 * @param simpleName Simple name to qualify with the {@link SectionNode} name
+	 *                   space.
 	 * @return {@link SectionNode} qualified name.
 	 */
 	String getSectionQualifiedName(String simpleName);
@@ -227,10 +217,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	/**
 	 * Auto-wires the {@link SectionObjectNode} instances that are unlinked.
 	 * 
-	 * @param autoWirer
-	 *            {@link AutoWirer}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
 
@@ -238,29 +226,26 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * Auto-wires the {@link SectionFunction} instances to a possible responsible
 	 * {@link Team}.
 	 * 
-	 * @param autoWirer
-	 *            {@link AutoWirer}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Loads the {@link ManagedFunctionNode} instances.
 	 * 
-	 * @param managedFunctionNodes
-	 *            {@link Map} to be loaded with the {@link ManagedFunctionNode}
-	 *            instances by their qualified name.
+	 * @param managedFunctionNodes {@link Map} to be loaded with the
+	 *                             {@link ManagedFunctionNode} instances by their
+	 *                             qualified name.
 	 */
 	void loadManagedFunctionNodes(Map<String, ManagedFunctionNode> managedFunctionNodes);
 
 	/**
 	 * Runs the {@link ExecutionExplorer} instances.
 	 * 
-	 * @param managedFunctions
-	 *            {@link ManagedFunctionNode} instances by their qualified name.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param managedFunctions {@link ManagedFunctionNode} instances by their
+	 *                         qualified name.
+	 * @param compileContext   {@link CompileContext}.
 	 * @return <code>true</code> if successfully explored execution.
 	 */
 	boolean runExecutionExplorers(Map<String, ManagedFunctionNode> managedFunctions, CompileContext compileContext);
@@ -268,14 +253,11 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	/**
 	 * Builds this {@link OfficeSection} for this {@link SectionNode}.
 	 * 
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder} of the {@link Office} containing this
-	 *            {@link SectionNode}.
-	 * @param officeBindings
-	 *            {@link OfficeBindings} of the {@link Office} containing this
-	 *            {@link SectionNode}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param officeBuilder  {@link OfficeBuilder} of the {@link Office} containing
+	 *                       this {@link SectionNode}.
+	 * @param officeBindings {@link OfficeBindings} of the {@link Office} containing
+	 *                       this {@link SectionNode}.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void buildSection(OfficeBuilder officeBuilder, OfficeBindings officeBindings, CompileContext compileContext);
 
@@ -283,10 +265,8 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * Loads the {@link FunctionManager} instances to externally trigger this
 	 * {@link SectionNode}.
 	 * 
-	 * @param office
-	 *            {@link Office} containing this {@link SectionNode}.
-	 * @throws UnknownFunctionException
-	 *             {@link UnknownFunctionException}.
+	 * @param office {@link Office} containing this {@link SectionNode}.
+	 * @throws UnknownFunctionException {@link UnknownFunctionException}.
 	 */
 	void loadExternalServicing(Office office) throws UnknownFunctionException;
 

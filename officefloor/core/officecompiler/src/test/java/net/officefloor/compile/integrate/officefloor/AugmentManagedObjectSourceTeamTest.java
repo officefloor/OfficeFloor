@@ -19,6 +19,8 @@ package net.officefloor.compile.integrate.officefloor;
 
 import java.util.function.BiConsumer;
 
+import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
+import net.officefloor.compile.integrate.officefloor.AugmentManagedObjectSourceFlowTest.AugmentFlowManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
@@ -26,6 +28,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorContext;
 import net.officefloor.frame.api.build.None;
@@ -47,6 +50,43 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
+
+	/**
+	 * Ensure notifies of issue.
+	 */
+	public void testAddIssue() throws Exception {
+
+		// Record the issues
+		final Exception exception = new Exception("TEST");
+		MockCompilerIssues issues = new MockCompilerIssues(this);
+		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class, "Issue One");
+		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class, "Issue Two", exception);
+
+		// Test
+		this.replayMockObjects();
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.getOfficeFloorCompiler().setCompilerIssues(issues);
+		compile.officeFloor((context) -> {
+			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
+			// Augment
+			deployer.addManagedObjectSourceAugmentor((augment) -> {
+
+				// Add the issue
+				augment.addIssue("Issue One");
+
+				// Add issue with exception
+				throw augment.addIssue("Issue Two", exception);
+			});
+		});
+		compile.office((context) -> {
+			// Add managed object source (to ensure visit)
+			context.getOfficeArchitect().addOfficeManagedObjectSource("MOS",
+					AugmentFlowManagedObjectSource.class.getName());
+		});
+		assertNull("Should not compile", compile.compileOfficeFloor());
+		this.verifyMockObjects();
+	}
 
 	/**
 	 * Ensure indicates already linked.
@@ -131,6 +171,7 @@ public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
 				// Ensure correct name
 				assertEquals("Incorrect managed object source name", managedObjectSourceName,
 						augment.getManagedObjectSourceName());
+				assertNotNull("Should have managed object type", augment.getManagedObjectType());
 
 				// Obtain the team
 				AugmentedManagedObjectTeam responsibility = augment.getManagedObjectTeam("TEAM");

@@ -130,6 +130,7 @@ public class AugmentManagedObjectSourceExecutionStrategyTest extends OfficeFrame
 				// Ensure correct name
 				assertEquals("Incorrect managed object source name", managedObjectSourceName,
 						augment.getManagedObjectSourceName());
+				assertNotNull("Should have managed object type", augment.getManagedObjectType());
 
 				// Obtain the execution strategy
 				AugmentedManagedObjectExecutionStrategy required = augment

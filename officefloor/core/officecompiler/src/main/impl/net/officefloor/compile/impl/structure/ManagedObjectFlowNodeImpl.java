@@ -61,12 +61,9 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectFlowName
-	 *            Name of this {@link ManagedObjectFlow}.
-	 * @param managedObjectSource
-	 *            Parent {@link ManagedObjectSourceNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param managedObjectFlowName Name of this {@link ManagedObjectFlow}.
+	 * @param managedObjectSource   Parent {@link ManagedObjectSourceNode}.
+	 * @param context               {@link NodeContext}.
 	 */
 	public ManagedObjectFlowNodeImpl(String managedObjectFlowName, ManagedObjectSourceNode managedObjectSource,
 			NodeContext context) {
@@ -121,6 +118,15 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 	@Override
 	public String getManagedObjectFlowName() {
 		return this.managedObjectFlowName;
+	}
+
+	/*
+	 * ================ AugmentedManagedObjectFlow =======================
+	 */
+
+	@Override
+	public boolean isLinked() {
+		return (this.linkedFlowNode != null);
 	}
 
 	/*

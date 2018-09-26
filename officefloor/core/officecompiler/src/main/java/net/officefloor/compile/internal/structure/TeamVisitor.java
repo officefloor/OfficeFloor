@@ -17,28 +17,22 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
-import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
-import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectFlow;
-import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
-import net.officefloor.compile.spi.section.SectionManagedObjectFlow;
+import net.officefloor.compile.team.TeamType;
 
 /**
- * {@link ManagedObjectFlow} node.
+ * Visits each {@link TeamNode}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectFlowNode extends LinkFlowNode, AugmentedManagedObjectFlow, SectionManagedObjectFlow,
-		OfficeManagedObjectFlow, OfficeFloorManagedObjectFlow {
+public interface TeamVisitor {
 
 	/**
-	 * {@link Node} type.
+	 * Visits the {@link TeamNode}.
+	 * 
+	 * @param teamType       {@link TeamType}.
+	 * @param teamNode       {@link TeamNode}.
+	 * @param compileContext {@link CompileContext}.
 	 */
-	static String TYPE = "Managed Object Source Flow";
-
-	/**
-	 * Initialises the {@link ManagedObjectFlowNode}.
-	 */
-	void initialise();
+	void visit(TeamType teamType, TeamNode teamNode, CompileContext compileContext);
 
 }

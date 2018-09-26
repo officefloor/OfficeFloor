@@ -38,19 +38,18 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	/**
 	 * Initialises the {@link SupplierNode}.
 	 * 
-	 * @param supplierSourceClassName
-	 *            {@link Class} name of the {@link SupplierSource}.
-	 * @param supplierSource
-	 *            Optional instantiated {@link SupplierSource}. May be
-	 *            <code>null</code>.
+	 * @param supplierSourceClassName {@link Class} name of the
+	 *                                {@link SupplierSource}.
+	 * @param supplierSource          Optional instantiated {@link SupplierSource}.
+	 *                                May be <code>null</code>.
 	 */
 	void initialise(String supplierSourceClassName, SupplierSource supplierSource);
 
 	/**
 	 * Obtains the parent {@link OfficeNode}.
 	 * 
-	 * @return Parent {@link OfficeNode} or <code>null</code> if configured at
-	 *         the {@link OfficeFloor} level.
+	 * @return Parent {@link OfficeNode} or <code>null</code> if configured at the
+	 *         {@link OfficeFloor} level.
 	 */
 	OfficeNode getOfficeNode();
 
@@ -64,8 +63,7 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	/**
 	 * Registers as a possible MBean.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void registerAsPossibleMBean(CompileContext compileContext);
 
@@ -73,12 +71,12 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	 * Loads the {@link SuppliedManagedObjectSourceNode} instances as
 	 * {@link ManagedObjectNode} instances to the {@link AutoWirer}.
 	 * 
-	 * @param autoWirer
-	 *            {@link AutoWirer}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param autoWirer                  {@link AutoWirer}.
+	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
+	 * @param compileContext             {@link CompileContext}.
 	 */
-	void loadAutoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
+	void loadAutoWireObjects(AutoWirer<LinkObjectNode> autoWirer, ManagedObjectSourceVisitor managedObjectSourceVisitor,
+			CompileContext compileContext);
 
 	/**
 	 * Loads the {@link SupplierType}.

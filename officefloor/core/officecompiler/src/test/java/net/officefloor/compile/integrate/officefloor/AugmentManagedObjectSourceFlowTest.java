@@ -34,6 +34,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -107,6 +108,7 @@ public class AugmentManagedObjectSourceFlowTest extends OfficeFrameTestCase {
 
 		// Compile with the augmented managed object source
 		CompileOfficeFloor compile = new CompileOfficeFloor();
+		Closure<Boolean> isSectionObjectAvailable = new Closure<>(false);
 		compile.officeFloor((context) -> {
 			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
 
@@ -121,6 +123,13 @@ public class AugmentManagedObjectSourceFlowTest extends OfficeFrameTestCase {
 
 			// Augment the managed object source
 			deployer.addManagedObjectSourceAugmentor((augment) -> {
+
+				// Ignore section class object
+				assertNotNull("Should have managed object type", augment.getManagedObjectType());
+				if (augment.getManagedObjectType().getObjectType().equals(Section.class)) {
+					isSectionObjectAvailable.value = true;
+					return;
+				}
 
 				// Ensure correct name
 				assertEquals("Incorrect managed object source name", managedObjectSourceName,
@@ -149,6 +158,9 @@ public class AugmentManagedObjectSourceFlowTest extends OfficeFrameTestCase {
 		Section.isInvoked = false;
 		mos.executeContext.invokeProcess(Flows.FLOW, null, mos, 0, null);
 		assertTrue("Should invoked section", Section.isInvoked);
+
+		// Ensure section object also augmented
+		assertTrue("Should augment section object", isSectionObjectAvailable.value);
 	}
 
 	public static class Section {

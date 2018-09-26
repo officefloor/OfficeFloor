@@ -32,6 +32,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
@@ -142,7 +143,7 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 	}
 
 	@TestSource
-	public static class TestTeamSource extends AbstractTeamSource {
+	public static class TestTeamSource extends AbstractTeamSource implements Team {
 
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
@@ -151,8 +152,22 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 
 		@Override
 		public Team createTeam(TeamSourceContext context) throws Exception {
+			return this; // required in sourcing (for type)
+		}
+
+		@Override
+		public void startWorking() {
 			fail("Should not be invoked");
-			return null;
+		}
+
+		@Override
+		public void assignJob(Job job) {
+			fail("Should not be invoked");
+		}
+
+		@Override
+		public void stopWorking() {
+			fail("Should not be invoked");
 		}
 	}
 

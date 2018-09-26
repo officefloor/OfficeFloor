@@ -19,11 +19,13 @@ package net.officefloor.compile.integrate.officefloor;
 
 import java.util.concurrent.ThreadFactory;
 
+import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
@@ -47,6 +49,41 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class AugmentTeamTest extends OfficeFrameTestCase {
 
 	/**
+	 * Ensure notifies of issue.
+	 */
+	public void testAddIssue() throws Exception {
+
+		// Record the issues
+		final Exception exception = new Exception("TEST");
+		MockCompilerIssues issues = new MockCompilerIssues(this);
+		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class, "Issue One");
+		issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class, "Issue Two", exception);
+
+		// Test
+		this.replayMockObjects();
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.getOfficeFloorCompiler().setCompilerIssues(issues);
+		compile.officeFloor((context) -> {
+			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
+			// Add team (to ensure visit)
+			deployer.addTeam("team", AugmentTeamSource.class.getName());
+
+			// Augment
+			deployer.addTeamAugmentor((augment) -> {
+
+				// Add the issue
+				augment.addIssue("Issue One");
+
+				// Add issue with exception
+				throw augment.addIssue("Issue Two", exception);
+			});
+		});
+		assertNull("Should not compile", compile.compileOfficeFloor());
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure indicates already linked.
 	 */
 	public void testAugmentTeamAlreadyLinked() throws Exception {
@@ -56,7 +93,7 @@ public class AugmentTeamTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can augment the {@link OfficeFloorManagedObjectSource}.
 	 */
-	public void testAugmentOfficeFloorManagedObjectSourceTeam() throws Exception {
+	public void testAugmentTeam() throws Exception {
 		this.doAugmentedTeamTest(false);
 	}
 
@@ -94,6 +131,7 @@ public class AugmentTeamTest extends OfficeFrameTestCase {
 
 				// Ensure correct name
 				assertEquals("Incorrect team name", TEAM_NAME, augment.getTeamName());
+				assertNotNull("Should have team type", augment.getTeamType());
 
 				// Determine if have oversight
 				assertEquals("Incorrectly already linked", isAlreadyLinked, augment.isTeamOversight());

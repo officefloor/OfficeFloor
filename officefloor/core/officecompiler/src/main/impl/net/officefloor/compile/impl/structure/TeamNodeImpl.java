@@ -30,6 +30,8 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.TeamOversightNode;
+import net.officefloor.compile.internal.structure.TeamVisitor;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.Property;
@@ -203,6 +205,34 @@ public class TeamNodeImpl implements TeamNode {
 	/*
 	 * =============== TeamNode ======================================
 	 */
+
+	@Override
+	public boolean sourceTeam(TeamVisitor visitor, CompileContext compileContext) {
+
+		// Load the team type
+		TeamType teamType = compileContext.getOrLoadTeamType(this);
+		if (teamType == null) {
+			return false;
+		}
+
+		// Visit this team
+		if (visitor != null) {
+			try {
+				visitor.visit(teamType, this, compileContext);
+			} catch (CompileError error) {
+				// Issue should already be provided
+				return false;
+			}
+		}
+
+		// Successfully sourced
+		return true;
+	}
+
+	@Override
+	public boolean isTeamOversight() {
+		return (this.linkedTeamOversightNode != null);
+	}
 
 	@Override
 	public TeamType loadTeamType() {
