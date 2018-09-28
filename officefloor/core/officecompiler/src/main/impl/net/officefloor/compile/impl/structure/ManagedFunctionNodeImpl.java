@@ -114,12 +114,10 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		/**
 		 * Initialise the state.
 		 * 
-		 * @param functionTypeName
-		 *            Name of the {@link ManagedFunctionType} for this
-		 *            {@link SectionFunction}.
-		 * @param namespaceNode
-		 *            {@link FunctionNamespaceNode} containing this
-		 *            {@link ManagedFunctionNode}.
+		 * @param functionTypeName Name of the {@link ManagedFunctionType} for this
+		 *                         {@link SectionFunction}.
+		 * @param namespaceNode    {@link FunctionNamespaceNode} containing this
+		 *                         {@link ManagedFunctionNode}.
 		 */
 		private InitialisedState(String functionTypeName, FunctionNamespaceNode namespaceNode) {
 			this.functionTypeName = functionTypeName;
@@ -168,10 +166,8 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param functionName
-	 *            Name of this {@link SectionFunction}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param functionName Name of this {@link SectionFunction}.
+	 * @param context      {@link NodeContext}.
 	 */
 	public ManagedFunctionNodeImpl(String functionName, NodeContext context) {
 		this.functionName = functionName;
@@ -184,8 +180,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	/**
 	 * Obtains the {@link FunctionObjectNode}.
 	 * 
-	 * @param functionObjectName
-	 *            Name of the {@link FunctionObjectNode}.
+	 * @param functionObjectName Name of the {@link FunctionObjectNode}.
 	 * @return {@link FunctionObjectNode}.
 	 */
 	private FunctionObjectNode getFunctionObjectNode(String functionObjectName) {
@@ -357,6 +352,11 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		this.functionObjects.values().forEach((object) -> LinkUtil.loadAllObjectAutoWires(object, autoWires,
 				compileContext, this.context.getCompilerIssues()));
 		AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
+
+		// No auto-wires then no auto-wire team
+		if (sourceAutoWires.length == 0) {
+			return;
+		}
 
 		// Obtain the office
 		OfficeNode office = this.state.namespaceNode.getSectionNode().getOfficeNode();
@@ -695,10 +695,8 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param node
-		 *            {@link ManagedFunctionNodeImpl}.
-		 * @param compileContext
-		 *            {@link CompileContext}.
+		 * @param node           {@link ManagedFunctionNodeImpl}.
+		 * @param compileContext {@link CompileContext}.
 		 */
 		public ExecutionManagedFunctionImpl(ManagedFunctionNodeImpl node, CompileContext compileContext) {
 			this.node = node;

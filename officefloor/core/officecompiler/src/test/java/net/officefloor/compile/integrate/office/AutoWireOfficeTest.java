@@ -23,12 +23,14 @@ import java.util.List;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.integrate.officefloor.AugmentManagedObjectSourceFlowTest.Section;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.SubSection;
@@ -353,8 +355,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure can auto-wire {@link OfficeFloor}
-	 * {@link SuppliedManagedObjectSource}.
+	 * Ensure can auto-wire {@link OfficeFloor} {@link SuppliedManagedObjectSource}.
 	 */
 	public void testAutoWireOfficeFloorSuppliedManagedObject() {
 
@@ -393,8 +394,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure can auto-wire {@link OfficeFloor} {@link ManagedObjectDependency}
-	 * for a {@link SuppliedManagedObjectSource}.
+	 * Ensure can auto-wire {@link OfficeFloor} {@link ManagedObjectDependency} for
+	 * a {@link SuppliedManagedObjectSource}.
 	 */
 	public void testAutoWireOfficeFloorSuppliedManagedObjectDependency() {
 
@@ -447,13 +448,13 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 	/**
 	 * <p>
-	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Flow} is
-	 * not available for auto-wiring. Must be manually added with {@link Flow}
+	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Flow} is not
+	 * available for auto-wiring. Must be manually added with {@link Flow}
 	 * configured.
 	 * <p>
 	 * Purpose of {@link SupplierSource} is integration with object dependency
-	 * injection libraries. These are not expected to support
-	 * continuation/thread injection.
+	 * injection libraries. These are not expected to support continuation/thread
+	 * injection.
 	 */
 	public void testSuppliedManagedObjectWithFlowNotAvailable() {
 
@@ -486,13 +487,13 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 	/**
 	 * <p>
-	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Team} is
-	 * not available for auto-wiring. Must be manually added with {@link Team}
+	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Team} is not
+	 * available for auto-wiring. Must be manually added with {@link Team}
 	 * configured.
 	 * <p>
 	 * Purpose of {@link SupplierSource} is integration with object dependency
-	 * injection libraries. These are not expected to support
-	 * continuation/thread injection.
+	 * injection libraries. These are not expected to support continuation/thread
+	 * injection.
 	 */
 	public void testSuppliedManagedObjectWithTeamNotAvailable() {
 
@@ -591,8 +592,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 	/**
 	 * Ensure able to auto-wire the {@link Team} for a {@link SubSection}
-	 * {@link ManagedFunction} based on transitive
-	 * {@link ManagedObjectDependency}.
+	 * {@link ManagedFunction} based on transitive {@link ManagedObjectDependency}.
 	 */
 	public void testAutoWireSubSectionFunctionTeamFromTransitiveDependency() {
 
@@ -633,6 +633,75 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
 				DependencySectionClass.class, "function", "OFFICE_TEAM");
 		function.linkManagedObject(1, "DEPENDENCY_OBJECT", DependencyManagedObject.class);
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link Team} for a {@link Section}
+	 * {@link ManagedFunction} based on {@link OfficeFloorInputManagedObject}.
+	 */
+	public void testAutoWireOfficeFloorTeamViaInputManagedObject() {
+
+		// Flag to enable auto-wiring of the teams
+		AutoWireOfficeExtensionService.enableAutoWireTeams();
+
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
+
+		// Register the team
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		this.record_officeFloorBuilder_addOffice("OFFICE", "TEAM", "TEAM");
+
+		// Build the input dependency
+		this.record_officeFloorBuilder_addManagedObject("INPUT_OBJECT", ClassManagedObjectSource.class, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, ProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> mo = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
+		mo.linkFlow(0, "SECTION.INPUT");
+
+		// Build the function (with auto-wire of team)
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT", "TEAM");
+		function.linkManagedObject(0, "INPUT_MANAGED_OBJECT", ProcessManagedObject.class);
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure can auto-wire the {@link OfficeFloorInputManagedObject} and then based
+	 * on that the {@link Team}.
+	 */
+	public void testAutoWireInputManagedObjectThenAutoWireTeam() {
+
+		// Flag to enable auto-wiring both objects and teams
+		AutoWireOfficeExtensionService.enableAutoWireObjects();
+		AutoWireOfficeExtensionService.enableAutoWireTeams();
+
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+
+		// Record building the OfficeFloor
+		this.record_init();
+
+		// Register the team
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		this.record_officeFloorBuilder_addOffice("OFFICE", "TEAM", "TEAM");
+
+		// Build the input dependency
+		this.record_officeFloorBuilder_addManagedObject("INPUT_OBJECT", ClassManagedObjectSource.class, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, ProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> mo = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MANAGED_OBJECT");
+		mo.linkFlow(0, "SECTION.INPUT");
+
+		// Build the function (with auto-wire of team)
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT", "TEAM");
+		function.linkManagedObject(0, "INPUT_MANAGED_OBJECT", ProcessManagedObject.class);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -901,8 +970,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure can auto-wire the {@link Team} for the
-	 * {@link ManagedFunctionSource} {@link ManagedFunction}.
+	 * Ensure can auto-wire the {@link Team} for the {@link ManagedFunctionSource}
+	 * {@link ManagedFunction}.
 	 */
 	public void testAutoWireManagedObjectSourceFunctionTeam() {
 
@@ -942,6 +1011,11 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		}
 	}
 
+	public static class ProcessSectionClass {
+		public void function(ProcessManagedObject object) {
+		}
+	}
+
 	public static class TeamSectionClass {
 		public void function(TeamManagedObjectSource object) {
 		}
@@ -958,6 +1032,16 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 	public static class DependencyManagedObject {
 		@Dependency
 		private CompileManagedObject dependency;
+	}
+
+	public static class ProcessManagedObject extends CompileManagedObject {
+
+		@FlowInterface
+		public static interface Flows {
+			void doFlow();
+		}
+
+		Flows flows;
 	}
 
 	public static class DependencyProcessManagedObject {

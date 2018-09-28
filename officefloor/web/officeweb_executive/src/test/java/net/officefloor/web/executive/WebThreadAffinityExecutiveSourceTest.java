@@ -20,6 +20,7 @@ package net.officefloor.web.executive;
 import java.io.IOException;
 import java.util.BitSet;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
@@ -47,7 +48,9 @@ public class WebThreadAffinityExecutiveSourceTest extends AbstractWebCompileTest
 			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
 
 			// Provide team for servicing
+			deployer.enableAutoWireTeams();
 			OfficeFloorTeam team = deployer.addTeam("TEAM", ExecutorFixedTeamSource.class.getName());
+			team.setTeamSize(50);
 			team.addTypeQualification(null, ServerHttpConnection.class.getName());
 
 			// Configure thread affinity
@@ -63,6 +66,13 @@ public class WebThreadAffinityExecutiveSourceTest extends AbstractWebCompileTest
 	public void testAffinity() throws Exception {
 
 		this.compile.web((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Configure team
+			architect.enableAutoWireTeams();
+			architect.addOfficeTeam("TEAM").addTypeQualification(null, ServerHttpConnection.class.getName());
+
+			// Configure web handling
 			context.link(false, "/path", EnsureThreadAffinity.class);
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
