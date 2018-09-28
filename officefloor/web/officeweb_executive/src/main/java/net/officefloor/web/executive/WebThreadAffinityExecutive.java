@@ -17,17 +17,75 @@
  */
 package net.officefloor.web.executive;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ThreadFactory;
+
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.TeamOversight;
+import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.internal.structure.Execution;
+import net.officefloor.web.executive.CpuCore.LogicalCpu;
+import net.openhft.affinity.Affinity;
 
 /**
  * Web {@link Thread} affinity {@link Executive}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WebThreadAffinityExecutive implements Executive {
+public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy, TeamOversight {
+
+	/**
+	 * Bound {@link LogicalCpu}.
+	 */
+	private final ThreadLocal<LogicalCpu> boundLogicalCpu = new ThreadLocal<>();
+
+	/**
+	 * {@link ExecutionStrategy} instances.
+	 */
+	private final ExecutionStrategy[] executionStrategies = new ExecutionStrategy[] { this };
+
+	/**
+	 * {@link ThreadFactory} instances for the {@link ExecutionStrategy}.
+	 */
+	private final ThreadFactory[] threadFactories;
+
+	/**
+	 * {@link TeamOversight} instances.
+	 */
+	private final TeamOversight[] teamOversights = new TeamOversight[] { this };
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param cpuCores {@link CpuCore} instances.
+	 * @param context  {@link ExecutiveSourceContext}.
+	 */
+	public WebThreadAffinityExecutive(CpuCore[] cpuCores, ExecutiveSourceContext context) {
+
+		// Create a thread factory per logical CPU
+		List<ThreadFactory> threadFactories = new LinkedList<>();
+		for (CpuCore cpuCore : cpuCores) {
+			for (LogicalCpu logicalCpu : cpuCore.getCpus()) {
+
+				// Create thread factory for logical CPU
+				ThreadFactory rawThreadFactory = context.createThreadFactory(this.getExecutionStrategyName(), this);
+				ThreadFactory boundThreadFactory = (runnable) -> rawThreadFactory.newThread(() -> {
+
+					// Bind thread to logical CPU
+					Affinity.setAffinity(logicalCpu.getCpuAffinity());
+
+					// Run logic for thread
+					runnable.run();
+				});
+
+				// Add the thread factory
+				threadFactories.add(boundThreadFactory);
+			}
+		}
+		this.threadFactories = threadFactories.toArray(new ThreadFactory[0]);
+	}
 
 	/*
 	 * =================== Executive ======================
@@ -41,20 +99,44 @@ public class WebThreadAffinityExecutive implements Executive {
 
 	@Override
 	public <T extends Throwable> void manageExecution(Execution<T> execution) throws T {
-		// TODO Auto-generated method stub
-		Executive.super.manageExecution(execution);
+
+		// TODO ensure associate thread to core
+
+		// Execute the execution
+		execution.execute();
 	}
 
 	@Override
 	public ExecutionStrategy[] getExcutionStrategies() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.executionStrategies;
 	}
 
 	@Override
 	public TeamOversight[] getTeamOversights() {
-		// TODO Auto-generated method stub
-		return Executive.super.getTeamOversights();
+		return this.teamOversights;
+	}
+
+	/*
+	 * ================= ExecutionStrategy ==================
+	 */
+
+	@Override
+	public String getExecutionStrategyName() {
+		return "LOGICAL_CPU_AFFINITY";
+	}
+
+	@Override
+	public ThreadFactory[] getThreadFactories() {
+		return this.threadFactories;
+	}
+
+	/*
+	 * =================== TeamOversight =====================
+	 */
+
+	@Override
+	public String getTeamOversightName() {
+		return "THREAD_AFFINITY";
 	}
 
 }

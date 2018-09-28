@@ -30,6 +30,7 @@ import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.change.Change;
@@ -67,24 +68,20 @@ public interface OfficeFloorChanges {
 	/**
 	 * Adds a {@link OfficeFloorTeamModel} to the {@link OfficeFloorModel}.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link OfficeFloorTeamModel}.
-	 * @param teamSourceClassName
-	 *            Class name for the {@link TeamSource}.
-	 * @param propertylist
-	 *            {@link PropertyList}.
-	 * @param teamType
-	 *            {@link TeamType}.
+	 * @param teamName            Name of the {@link OfficeFloorTeamModel}.
+	 * @param teamSize            Size of the {@link Team}.
+	 * @param teamSourceClassName Class name for the {@link TeamSource}.
+	 * @param propertylist        {@link PropertyList}.
+	 * @param teamType            {@link TeamType}.
 	 * @return {@link Change} to add the {@link OfficeFloorTeamModel}.
 	 */
-	Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName, String teamSourceClassName,
+	Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName, int teamSize, String teamSourceClassName,
 			PropertyList propertylist, TeamType teamType);
 
 	/**
 	 * Removes the {@link OfficeFloorTeamModel}.
 	 * 
-	 * @param officeFloorTeam
-	 *            {@link OfficeFloorTeamModel} to remove.
+	 * @param officeFloorTeam {@link OfficeFloorTeamModel} to remove.
 	 * @return {@link Change} to remove the {@link OfficeFloorTeamModel}.
 	 */
 	Change<OfficeFloorTeamModel> removeOfficeFloorTeam(OfficeFloorTeamModel officeFloorTeam);
@@ -92,10 +89,8 @@ public interface OfficeFloorChanges {
 	/**
 	 * Renames the {@link OfficeFloorTeamModel}.
 	 * 
-	 * @param officeFloorTeam
-	 *            {@link OfficeFloorTeamModel} to rename.
-	 * @param newOfficeFloorTeamName
-	 *            New name for the {@link OfficeFloorTeamModel}.
+	 * @param officeFloorTeam        {@link OfficeFloorTeamModel} to rename.
+	 * @param newOfficeFloorTeamName New name for the {@link OfficeFloorTeamModel}.
 	 * @return {@link Change} to rename the {@link OfficeFloorTeamModel}.
 	 */
 	Change<OfficeFloorTeamModel> renameOfficeFloorTeam(OfficeFloorTeamModel officeFloorTeam,
@@ -104,12 +99,9 @@ public interface OfficeFloorChanges {
 	/**
 	 * Adds {@link TypeQualificationModel} to the {@link OfficeFloorTeamModel}.
 	 * 
-	 * @param officeFloorTeam
-	 *            {@link OfficeFloorTeamModel}.
-	 * @param qualifier
-	 *            Qualifier. May be <code>null</code>.
-	 * @param type
-	 *            Type.
+	 * @param officeFloorTeam {@link OfficeFloorTeamModel}.
+	 * @param qualifier       Qualifier. May be <code>null</code>.
+	 * @param type            Type.
 	 * @return {@link Change} to add the {@link TypeQualificationModel}.
 	 */
 	Change<TypeQualificationModel> addOfficeFloorTeamTypeQualification(OfficeFloorTeamModel officeFloorTeam,
@@ -119,8 +111,7 @@ public interface OfficeFloorChanges {
 	 * Removes the {@link TypeQualificationModel} from the
 	 * {@link OfficeFloorTeamModel}.
 	 * 
-	 * @param typeQualification
-	 *            {@link TypeQualificationModel}.
+	 * @param typeQualification {@link TypeQualificationModel}.
 	 * @return {@link Change} to remove the {@link TypeQualificationModel}.
 	 */
 	Change<TypeQualificationModel> removeOfficeFloorTeamTypeQualification(TypeQualificationModel typeQualification);
@@ -128,16 +119,11 @@ public interface OfficeFloorChanges {
 	/**
 	 * Adds a {@link DeployedOfficeModel} to the {@link OfficeFloorModel}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link DeployedOfficeModel}.
-	 * @param officeSourceClassName
-	 *            Class name of the {@link OfficeSource}.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 * @param propertyList
-	 *            {@link PropertyList}.
-	 * @param officeType
-	 *            {@link OfficeType}.
+	 * @param officeName            Name of the {@link DeployedOfficeModel}.
+	 * @param officeSourceClassName Class name of the {@link OfficeSource}.
+	 * @param officeLocation        Location of the {@link Office}.
+	 * @param propertyList          {@link PropertyList}.
+	 * @param officeType            {@link OfficeType}.
 	 * @return {@link Change} to add the {@link DeployedOfficeModel}.
 	 */
 	Change<DeployedOfficeModel> addDeployedOffice(String officeName, String officeSourceClassName,
@@ -146,8 +132,7 @@ public interface OfficeFloorChanges {
 	/**
 	 * Removes the {@link DeployedOfficeModel}.
 	 * 
-	 * @param deployedOffice
-	 *            {@link DeployedOfficeModel} to remove.
+	 * @param deployedOffice {@link DeployedOfficeModel} to remove.
 	 * @return {@link Change} to remove the {@link DeployedOfficeModel}.
 	 */
 	Change<DeployedOfficeModel> removeDeployedOffice(DeployedOfficeModel deployedOffice);
@@ -155,10 +140,8 @@ public interface OfficeFloorChanges {
 	/**
 	 * Renames the {@link DeployedOfficeModel}.
 	 * 
-	 * @param deployedOffice
-	 *            {@link DeployedOfficeModel} to rename.
-	 * @param newDeployedOfficeName
-	 *            New name for the {@link DeployedOfficeModel}.
+	 * @param deployedOffice        {@link DeployedOfficeModel} to rename.
+	 * @param newDeployedOfficeName New name for the {@link DeployedOfficeModel}.
 	 * @return {@link Change} to rename the {@link DeployedOfficeModel}.
 	 */
 	Change<DeployedOfficeModel> renameDeployedOffice(DeployedOfficeModel deployedOffice, String newDeployedOfficeName);
@@ -166,29 +149,21 @@ public interface OfficeFloorChanges {
 	/**
 	 * Refactors the {@link DeployedOfficeModel}.
 	 * 
-	 * @param deployedOffice
-	 *            {@link DeployedOfficeModel} to refactor.
-	 * @param officeName
-	 *            Name for the {@link DeployedOfficeModel}.
-	 * @param officeSourceClassName
-	 *            {@link OfficeSource} class name for the
-	 *            {@link DeployedOfficeModel}.
-	 * @param officeLocation
-	 *            Location of the {@link DeployedOfficeModel}.
-	 * @param properties
-	 *            {@link PropertyList}.
-	 * @param officeType
-	 *            {@link OfficeType} to refactor the {@link DeployedOfficeModel}
-	 *            to.
-	 * @param objectNameMapping
-	 *            Mapping of {@link OfficeManagedObjectType} name to
-	 *            {@link DeployedOfficeObjectModel} name.
-	 * @param inputNameMapping
-	 *            Mapping of {@link OfficeAvailableSectionInputType} name to
-	 *            {@link DeployedOfficeInputModel} name.
-	 * @param teamNameMapping
-	 *            Mapping of {@link OfficeTeamType} name to
-	 *            {@link DeployedOfficeTeamModel} name.
+	 * @param deployedOffice        {@link DeployedOfficeModel} to refactor.
+	 * @param officeName            Name for the {@link DeployedOfficeModel}.
+	 * @param officeSourceClassName {@link OfficeSource} class name for the
+	 *                              {@link DeployedOfficeModel}.
+	 * @param officeLocation        Location of the {@link DeployedOfficeModel}.
+	 * @param properties            {@link PropertyList}.
+	 * @param officeType            {@link OfficeType} to refactor the
+	 *                              {@link DeployedOfficeModel} to.
+	 * @param objectNameMapping     Mapping of {@link OfficeManagedObjectType} name
+	 *                              to {@link DeployedOfficeObjectModel} name.
+	 * @param inputNameMapping      Mapping of
+	 *                              {@link OfficeAvailableSectionInputType} name to
+	 *                              {@link DeployedOfficeInputModel} name.
+	 * @param teamNameMapping       Mapping of {@link OfficeTeamType} name to
+	 *                              {@link DeployedOfficeTeamModel} name.
 	 * @return {@link Change} to refactor the {@link DeployedOfficeModel}.
 	 */
 	Change<DeployedOfficeModel> refactorDeployedOffice(DeployedOfficeModel deployedOffice, String officeName,
@@ -200,16 +175,13 @@ public interface OfficeFloorChanges {
 	 * Adds an {@link OfficeFloorManagedObjectSourceModel} to the
 	 * {@link OfficeFloorModel}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeFloorManagedObjectSourceModel}.
-	 * @param managedObjectSourceClassName
-	 *            Class name of the {@link ManagedObjectSource}.
-	 * @param properties
-	 *            {@link PropertyList}.
-	 * @param timeout
-	 *            Timeout of the {@link ManagedObject}.
-	 * @param managedObjectType
-	 *            {@link ManagedObjectType}.
+	 * @param managedObjectSourceName      Name of the
+	 *                                     {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param managedObjectSourceClassName Class name of the
+	 *                                     {@link ManagedObjectSource}.
+	 * @param properties                   {@link PropertyList}.
+	 * @param timeout                      Timeout of the {@link ManagedObject}.
+	 * @param managedObjectType            {@link ManagedObjectType}.
 	 * @return {@link Change} to add the
 	 *         {@link OfficeFloorManagedObjectSourceModel}.
 	 */
@@ -220,8 +192,8 @@ public interface OfficeFloorChanges {
 	/**
 	 * Removes the {@link OfficeFloorManagedObjectSourceModel}.
 	 * 
-	 * @param managedObjectSource
-	 *            {@link OfficeFloorManagedObjectSourceModel} to remove.
+	 * @param managedObjectSource {@link OfficeFloorManagedObjectSourceModel} to
+	 *                            remove.
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorManagedObjectSourceModel}.
 	 */
@@ -231,10 +203,10 @@ public interface OfficeFloorChanges {
 	/**
 	 * Renames the {@link OfficeFloorManagedObjectSourceModel}.
 	 * 
-	 * @param managedObjectSource
-	 *            {@link OfficeFloorManagedObjectSourceModel} to rename.
-	 * @param newManagedObjectSourceName
-	 *            New name for the {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param managedObjectSource        {@link OfficeFloorManagedObjectSourceModel}
+	 *                                   to rename.
+	 * @param newManagedObjectSourceName New name for the
+	 *                                   {@link OfficeFloorManagedObjectSourceModel}.
 	 * @return {@link Change} to rename the
 	 *         {@link OfficeFloorManagedObjectSourceModel}.
 	 */
@@ -243,18 +215,13 @@ public interface OfficeFloorChanges {
 
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectModel} for an
-	 * {@link OfficeFloorManagedObjectSourceModel} to the
-	 * {@link OfficeFloorModel}.
+	 * {@link OfficeFloorManagedObjectSourceModel} to the {@link OfficeFloorModel}.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeFloorManagedObjectModel}.
-	 * @param managedObjectScope
-	 *            {@link ManagedObjectScope} for the
-	 *            {@link OfficeFloorManagedObjectModel}.
-	 * @param managedObjectSource
-	 *            {@link OfficeFloorManagedObjectSourceModel}.
-	 * @param managedObjectType
-	 *            {@link ManagedObjectType}.
+	 * @param managedObjectName   Name of the {@link OfficeFloorManagedObjectModel}.
+	 * @param managedObjectScope  {@link ManagedObjectScope} for the
+	 *                            {@link OfficeFloorManagedObjectModel}.
+	 * @param managedObjectSource {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param managedObjectType   {@link ManagedObjectType}.
 	 * @return {@link Change} to add the {@link OfficeFloorManagedObjectModel}.
 	 */
 	Change<OfficeFloorManagedObjectModel> addOfficeFloorManagedObject(String managedObjectName,
@@ -264,22 +231,18 @@ public interface OfficeFloorChanges {
 	/**
 	 * Removes the {@link OfficeFloorManagedObjectModel}.
 	 * 
-	 * @param managedObject
-	 *            {@link OfficeFloorManagedObjectModel} to remove.
-	 * @return {@link Change} to remove the
-	 *         {@link OfficeFloorManagedObjectModel}.
+	 * @param managedObject {@link OfficeFloorManagedObjectModel} to remove.
+	 * @return {@link Change} to remove the {@link OfficeFloorManagedObjectModel}.
 	 */
 	Change<OfficeFloorManagedObjectModel> removeOfficeFloorManagedObject(OfficeFloorManagedObjectModel managedObject);
 
 	/**
 	 * Renames the {@link OfficeFloorManagedObjectModel}.
 	 * 
-	 * @param managedObject
-	 *            {@link OfficeFloorManagedObjectModel} to rename.
-	 * @param newManagedObjectName
-	 *            New name for the {@link OfficeFloorManagedObjectModel}.
-	 * @return {@link Change} to rename the
-	 *         {@link OfficeFloorManagedObjectModel}.
+	 * @param managedObject        {@link OfficeFloorManagedObjectModel} to rename.
+	 * @param newManagedObjectName New name for the
+	 *                             {@link OfficeFloorManagedObjectModel}.
+	 * @return {@link Change} to rename the {@link OfficeFloorManagedObjectModel}.
 	 */
 	Change<OfficeFloorManagedObjectModel> renameOfficeFloorManagedObject(OfficeFloorManagedObjectModel managedObject,
 			String newManagedObjectName);
@@ -287,11 +250,9 @@ public interface OfficeFloorChanges {
 	/**
 	 * Scopes the {@link OfficeFloorManagedObjectModel}.
 	 * 
-	 * @param managedObject
-	 *            {@link OfficeFloorManagedObjectModel} to scope.
-	 * @param newManagedObjectScope
-	 *            New {@link ManagedObjectScope} for the
-	 *            {@link OfficeFloorManagedObjectModel}.
+	 * @param managedObject         {@link OfficeFloorManagedObjectModel} to scope.
+	 * @param newManagedObjectScope New {@link ManagedObjectScope} for the
+	 *                              {@link OfficeFloorManagedObjectModel}.
 	 * @return {@link Change} to scope {@link OfficeFloorManagedObjectModel}.
 	 */
 	Change<OfficeFloorManagedObjectModel> rescopeOfficeFloorManagedObject(OfficeFloorManagedObjectModel managedObject,
@@ -301,12 +262,9 @@ public interface OfficeFloorChanges {
 	 * Adds {@link TypeQualificationModel} to the
 	 * {@link OfficeFloorManagedObjectModel}.
 	 * 
-	 * @param officeFloorManagedObject
-	 *            {@link OfficeFloorManagedObjectModel}.
-	 * @param qualifier
-	 *            Qualifier. May be <code>null</code>.
-	 * @param type
-	 *            Type.
+	 * @param officeFloorManagedObject {@link OfficeFloorManagedObjectModel}.
+	 * @param qualifier                Qualifier. May be <code>null</code>.
+	 * @param type                     Type.
 	 * @return {@link Change} to add the {@link TypeQualificationModel}.
 	 */
 	Change<TypeQualificationModel> addOfficeFloorManagedObjectTypeQualification(
@@ -316,8 +274,7 @@ public interface OfficeFloorChanges {
 	 * Removes the {@link TypeQualificationModel} from the
 	 * {@link OfficeFloorManagedObjectModel}.
 	 * 
-	 * @param typeQualification
-	 *            {@link TypeQualificationModel}.
+	 * @param typeQualification {@link TypeQualificationModel}.
 	 * @return {@link Change} to remove the {@link TypeQualificationModel}.
 	 */
 	Change<TypeQualificationModel> removeOfficeFloorManagedObjectTypeQualification(
@@ -327,10 +284,8 @@ public interface OfficeFloorChanges {
 	 * Links the {@link OfficeFloorManagedObjectSourceModel} to the
 	 * {@link DeployedOfficeModel}.
 	 * 
-	 * @param officeFloorManagedObjectSource
-	 *            {@link OfficeFloorManagedObjectSourceModel}.
-	 * @param deployedOffice
-	 *            {@link DeployedOfficeModel}.
+	 * @param officeFloorManagedObjectSource {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param deployedOffice                 {@link DeployedOfficeModel}.
 	 * @return {@link Change} to add the
 	 *         {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
 	 */
@@ -340,9 +295,8 @@ public interface OfficeFloorChanges {
 	/**
 	 * Removes the {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
 	 * 
-	 * @param officeFloorManagedObjectSourceToDeployedOffice
-	 *            {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel} to
-	 *            remove.
+	 * @param officeFloorManagedObjectSourceToDeployedOffice {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}
+	 *                                                       to remove.
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorManagedObjectSourceToDeployedOfficeModel}.
 	 */
@@ -352,12 +306,11 @@ public interface OfficeFloorChanges {
 	/**
 	 * Adds the {@link OfficeFloorInputManagedObjectModel}.
 	 * 
-	 * @param inputManagedObjectName
-	 *            Name of the {@link OfficeFloorInputManagedObjectModel}.
-	 * @param objectType
-	 *            Object type of the {@link OfficeFloorInputManagedObjectModel}.
-	 * @return {@link Change} to add the
-	 *         {@link OfficeFloorInputManagedObjectModel}.
+	 * @param inputManagedObjectName Name of the
+	 *                               {@link OfficeFloorInputManagedObjectModel}.
+	 * @param objectType             Object type of the
+	 *                               {@link OfficeFloorInputManagedObjectModel}.
+	 * @return {@link Change} to add the {@link OfficeFloorInputManagedObjectModel}.
 	 */
 	Change<OfficeFloorInputManagedObjectModel> addOfficeFloorInputManagedObject(String inputManagedObjectName,
 			String objectType);
@@ -365,10 +318,10 @@ public interface OfficeFloorChanges {
 	/**
 	 * Renames the {@link OfficeFloorInputManagedObjectModel}.
 	 * 
-	 * @param inputManagedObject
-	 *            {@link OfficeFloorInputManagedObjectModel} to be renamed.
-	 * @param newInputManagedObjectName
-	 *            New name for the {@link OfficeFloorInputManagedObjectModel}.
+	 * @param inputManagedObject        {@link OfficeFloorInputManagedObjectModel}
+	 *                                  to be renamed.
+	 * @param newInputManagedObjectName New name for the
+	 *                                  {@link OfficeFloorInputManagedObjectModel}.
 	 * @return {@link Change} to rename the
 	 *         {@link OfficeFloorInputManagedObjectModel}.
 	 */
@@ -378,8 +331,8 @@ public interface OfficeFloorChanges {
 	/**
 	 * Removes the {@link OfficeFloorInputManagedObjectModel}.
 	 * 
-	 * @param inputManagedObject
-	 *            {@link OfficeFloorInputManagedObjectModel} to remove.
+	 * @param inputManagedObject {@link OfficeFloorInputManagedObjectModel} to
+	 *                           remove.
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorInputManagedObjectModel}.
 	 */
@@ -390,10 +343,8 @@ public interface OfficeFloorChanges {
 	 * Links the {@link OfficeFloorManagedObjectSourceModel} to the
 	 * {@link OfficeFloorInputManagedObjectModel}.
 	 * 
-	 * @param managedObjectSource
-	 *            {@link OfficeFloorManagedObjectSourceModel}.
-	 * @param inputManagedObject
-	 *            {@link OfficeFloorInputManagedObjectModel}.
+	 * @param managedObjectSource {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param inputManagedObject  {@link OfficeFloorInputManagedObjectModel}.
 	 * @return {@link Change} to link the
 	 *         {@link OfficeFloorManagedObjectSourceModel} to the
 	 *         {@link OfficeFloorInputManagedObjectModel}.
@@ -404,12 +355,10 @@ public interface OfficeFloorChanges {
 
 	/**
 	 * Removes the
-	 * {@link OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel}
-	 * .
+	 * {@link OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel} .
 	 * 
-	 * @param managedObjectSourceToInputManagedObject
-	 *            {@link OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel}
-	 *            to remove.
+	 * @param managedObjectSourceToInputManagedObject {@link OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel}
+	 *                                                to remove.
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorManagedObjectSourceToOfficeFloorInputManagedObjectModel}
 	 *         .
@@ -421,13 +370,11 @@ public interface OfficeFloorChanges {
 	 * Links the {@link OfficeFloorInputManagedObjectModel} to its bound
 	 * {@link OfficeFloorManagedObjectSourceModel}.
 	 * 
-	 * @param inputManagedObject
-	 *            {@link OfficeFloorInputManagedObjectModel}.
-	 * @param boundManagedObjectSource
-	 *            Bound {@link OfficeFloorManagedObjectSourceModel}.
-	 * @return {@link Change} to link the
-	 *         {@link OfficeFloorInputManagedObjectModel} to its bound
-	 *         {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param inputManagedObject       {@link OfficeFloorInputManagedObjectModel}.
+	 * @param boundManagedObjectSource Bound
+	 *                                 {@link OfficeFloorManagedObjectSourceModel}.
+	 * @return {@link Change} to link the {@link OfficeFloorInputManagedObjectModel}
+	 *         to its bound {@link OfficeFloorManagedObjectSourceModel}.
 	 */
 	Change<OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel> linkOfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSource(
 			OfficeFloorInputManagedObjectModel inputManagedObject,
@@ -438,9 +385,8 @@ public interface OfficeFloorChanges {
 	 * {@link OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel}
 	 * .
 	 * 
-	 * @param inputManagedObjectToBoundManagedObjectSource
-	 *            {@link OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel}
-	 *            to be removed.
+	 * @param inputManagedObjectToBoundManagedObjectSource {@link OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel}
+	 *                                                     to be removed.
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel}
 	 *         .
@@ -452,10 +398,8 @@ public interface OfficeFloorChanges {
 	 * Links the {@link OfficeFloorManagedObjectSourceFlowModel} to the
 	 * {@link DeployedOfficeInputModel}.
 	 * 
-	 * @param officeFloorManagedObjectSourceFlow
-	 *            {@link OfficeFloorManagedObjectSourceFlowModel}.
-	 * @param deployedOfficeInput
-	 *            {@link DeployedOfficeInputModel}.
+	 * @param officeFloorManagedObjectSourceFlow {@link OfficeFloorManagedObjectSourceFlowModel}.
+	 * @param deployedOfficeInput                {@link DeployedOfficeInputModel}.
 	 * @return {@link Change} to add the
 	 *         {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}
 	 */
@@ -467,9 +411,8 @@ public interface OfficeFloorChanges {
 	 * Removes the
 	 * {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}.
 	 * 
-	 * @param officeFloorManagedObjectSourceFlowToDeployedOfficeInput
-	 *            {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}
-	 *            .
+	 * @param officeFloorManagedObjectSourceFlowToDeployedOfficeInput {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}
+	 *                                                                .
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel}
 	 */
@@ -480,10 +423,8 @@ public interface OfficeFloorChanges {
 	 * Links the {@link OfficeFloorManagedObjectSourceTeamModel} to the
 	 * {@link OfficeFloorTeamModel}.
 	 * 
-	 * @param officeFloorManagedObjectSourceTeam
-	 *            {@link OfficeFloorManagedObjectSourceTeamModel}.
-	 * @param officeFloorTeam
-	 *            {@link OfficeFloorTeamModel}.
+	 * @param officeFloorManagedObjectSourceTeam {@link OfficeFloorManagedObjectSourceTeamModel}.
+	 * @param officeFloorTeam                    {@link OfficeFloorTeamModel}.
 	 * @return {@link Change} to add the
 	 *         {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel}.
 	 */
@@ -492,12 +433,10 @@ public interface OfficeFloorChanges {
 			OfficeFloorTeamModel officeFloorTeam);
 
 	/**
-	 * Removes the
-	 * {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel}.
+	 * Removes the {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel}.
 	 * 
-	 * @param officeFloorManagedObjectSourceTeamToOfficeFloorTeam
-	 *            {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel}
-	 *            to remove.
+	 * @param officeFloorManagedObjectSourceTeamToOfficeFloorTeam {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel}
+	 *                                                            to remove.
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel}.
 	 */
@@ -508,10 +447,8 @@ public interface OfficeFloorChanges {
 	 * Links the {@link OfficeFloorManagedObjectDependencyModel} to the
 	 * {@link OfficeFloorManagedObjectModel}.
 	 * 
-	 * @param officeFloorManagedObjectDependency
-	 *            {@link OfficeFloorManagedObjectDependencyModel}.
-	 * @param officeFloorManagedObject
-	 *            {@link OfficeFloorManagedObjectModel}.
+	 * @param officeFloorManagedObjectDependency {@link OfficeFloorManagedObjectDependencyModel}.
+	 * @param officeFloorManagedObject           {@link OfficeFloorManagedObjectModel}.
 	 * @return {@link Change} to add the
 	 *         {@link OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel}
 	 */
@@ -523,9 +460,9 @@ public interface OfficeFloorChanges {
 	 * Removes the
 	 * {@link OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel}
 	 * 
-	 * @param officeFloorManagedObjectDependencyToOfficeFloorManagedObject
-	 *            {@link OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel}
-	 *            to remove.
+	 * @param officeFloorManagedObjectDependencyToOfficeFloorManagedObject {@link OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel}
+	 *                                                                     to
+	 *                                                                     remove.
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel}
 	 */
@@ -536,10 +473,8 @@ public interface OfficeFloorChanges {
 	 * Links the {@link OfficeFloorManagedObjectDependencyModel} to the
 	 * {@link OfficeFloorInputManagedObjectModel}.
 	 * 
-	 * @param officeFloorManagedObjectDependency
-	 *            {@link OfficeFloorManagedObjectDependencyModel}.
-	 * @param officeFloorInputManagedObject
-	 *            {@link OfficeFloorInputManagedObjectModel}.
+	 * @param officeFloorManagedObjectDependency {@link OfficeFloorManagedObjectDependencyModel}.
+	 * @param officeFloorInputManagedObject      {@link OfficeFloorInputManagedObjectModel}.
 	 * @return {@link Change} to add the
 	 *         {@link OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel}
 	 */
@@ -551,9 +486,9 @@ public interface OfficeFloorChanges {
 	 * Removes the
 	 * {@link OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel}
 	 * 
-	 * @param officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject
-	 *            {@link OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel}
-	 *            to remove.
+	 * @param officeFloorManagedObjectDependencyToOfficeFloorInputManagedObject {@link OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel}
+	 *                                                                          to
+	 *                                                                          remove.
 	 * @return {@link Change} to remove the
 	 *         {@link OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel}
 	 */
@@ -564,10 +499,8 @@ public interface OfficeFloorChanges {
 	 * Links the {@link DeployedOfficeObjectModel} to the
 	 * {@link OfficeFloorManagedObjectModel}.
 	 * 
-	 * @param deployedOfficeObject
-	 *            {@link DeployedOfficeObjectModel}.
-	 * @param officeFloorManagedObject
-	 *            {@link OfficeFloorManagedObjectModel}.
+	 * @param deployedOfficeObject     {@link DeployedOfficeObjectModel}.
+	 * @param officeFloorManagedObject {@link OfficeFloorManagedObjectModel}.
 	 * @return {@link Change} to add the
 	 *         {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}.
 	 */
@@ -577,9 +510,8 @@ public interface OfficeFloorChanges {
 	/**
 	 * Removes the {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}.
 	 * 
-	 * @param deployedOfficeObjectToOfficeFloorManagedObject
-	 *            {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel} to
-	 *            remove.
+	 * @param deployedOfficeObjectToOfficeFloorManagedObject {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}
+	 *                                                       to remove.
 	 * @return {@link Change} to remove the
 	 *         {@link DeployedOfficeObjectToOfficeFloorManagedObjectModel}.
 	 */
@@ -590,10 +522,8 @@ public interface OfficeFloorChanges {
 	 * Links the {@link DeployedOfficeObjectModel} to the
 	 * {@link OfficeFloorInputManagedObjectModel}.
 	 * 
-	 * @param deployedOfficeObject
-	 *            {@link DeployedOfficeObjectModel}.
-	 * @param inputManagedObject
-	 *            {@link OfficeFloorInputManagedObjectModel}.
+	 * @param deployedOfficeObject {@link DeployedOfficeObjectModel}.
+	 * @param inputManagedObject   {@link OfficeFloorInputManagedObjectModel}.
 	 * @return {@link Change} to add the
 	 *         {@link DeployedOfficeObjectToOfficeFloorInputManagedObjectModel}.
 	 */
@@ -601,12 +531,10 @@ public interface OfficeFloorChanges {
 			DeployedOfficeObjectModel deployedOfficeObject, OfficeFloorInputManagedObjectModel inputManagedObject);
 
 	/**
-	 * Removes the
-	 * {@link DeployedOfficeObjectToOfficeFloorInputManagedObjectModel}.
+	 * Removes the {@link DeployedOfficeObjectToOfficeFloorInputManagedObjectModel}.
 	 * 
-	 * @param deployedOfficeObjectToInputManagedObject
-	 *            {@link DeployedOfficeObjectToOfficeFloorInputManagedObjectModel}
-	 *            to be removed.
+	 * @param deployedOfficeObjectToInputManagedObject {@link DeployedOfficeObjectToOfficeFloorInputManagedObjectModel}
+	 *                                                 to be removed.
 	 * @return {@link Change} to remove the
 	 *         {@link DeployedOfficeObjectToOfficeFloorInputManagedObjectModel}.
 	 */
@@ -617,10 +545,8 @@ public interface OfficeFloorChanges {
 	 * Links the {@link DeployedOfficeTeamModel} to the
 	 * {@link OfficeFloorTeamModel}.
 	 * 
-	 * @param deployedOfficeTeam
-	 *            {@link DeployedOfficeTeamModel}.
-	 * @param officeFloorTeam
-	 *            {@link OfficeFloorTeamModel}.
+	 * @param deployedOfficeTeam {@link DeployedOfficeTeamModel}.
+	 * @param officeFloorTeam    {@link OfficeFloorTeamModel}.
 	 * @return {@link Change} to add the
 	 *         {@link DeployedOfficeTeamToOfficeFloorTeamModel}.
 	 */
@@ -630,8 +556,8 @@ public interface OfficeFloorChanges {
 	/**
 	 * Removes the {@link DeployedOfficeTeamToOfficeFloorTeamModel}.
 	 * 
-	 * @param deployedOfficeTeamToOfficeFloorTeam
-	 *            {@link DeployedOfficeTeamToOfficeFloorTeamModel} to remove.
+	 * @param deployedOfficeTeamToOfficeFloorTeam {@link DeployedOfficeTeamToOfficeFloorTeamModel}
+	 *                                            to remove.
 	 * @return {@link Change} to remove the
 	 *         {@link DeployedOfficeTeamToOfficeFloorTeamModel}.
 	 */

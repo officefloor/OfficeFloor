@@ -215,9 +215,9 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the OfficeFloor teams
 		// ----------------------------------------
-		assertList(new String[] { "getOfficeFloorTeamName", "getTeamSourceClassName", "getX", "getY" },
+		assertList(new String[] { "getOfficeFloorTeamName", "getTeamSize", "getTeamSourceClassName", "getX", "getY" },
 				officeFloor.getOfficeFloorTeams(),
-				new OfficeFloorTeamModel("TEAM", "net.example.ExampleTeamSource", 600, 601));
+				new OfficeFloorTeamModel("TEAM", 50, "net.example.ExampleTeamSource", 600, 601));
 		OfficeFloorTeamModel team = officeFloor.getOfficeFloorTeams().get(0);
 		assertList(new String[] { "getName", "getValue" }, team.getProperties(),
 				new PropertyModel("TEAM_ONE", "VALUE_ONE"), new PropertyModel("TEAM_TWO", "VALUE_TWO"));

@@ -343,6 +343,7 @@
 			<attributes>
 				<attribute method="getOfficeFloorTeamName"
 					attribute="name" />
+				<attribute method="getTeamSize" attribute="size" />
 				<attribute method="getTeamSourceClassName"
 					attribute="source" />
 				<attribute method="getX" attribute="x" />

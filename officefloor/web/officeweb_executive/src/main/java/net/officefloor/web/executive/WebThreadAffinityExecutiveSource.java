@@ -41,10 +41,10 @@ public class WebThreadAffinityExecutiveSource extends AbstractExecutiveSource {
 	public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
 
 		// Obtain the CPU cores
-		CpuCore[] cores = CpuCore.getCores();
+		CpuCore[] cpuCores = CpuCore.getCores();
 
-		// TODO Auto-generated method stub
-		return null;
+		// Return the executive
+		return new WebThreadAffinityExecutive(cpuCores, context);
 	}
 
 }

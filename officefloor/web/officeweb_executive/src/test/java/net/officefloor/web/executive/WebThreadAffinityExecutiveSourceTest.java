@@ -20,6 +20,11 @@ package net.officefloor.web.executive;
 import java.io.IOException;
 import java.util.BitSet;
 
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
+import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -39,7 +44,16 @@ public class WebThreadAffinityExecutiveSourceTest extends AbstractWebCompileTest
 
 		// Provide web thread affinity
 		this.compile.officeFloor((context) -> {
-			context.getOfficeFloorDeployer().setExecutive(WebThreadAffinityExecutiveSource.class.getName());
+			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
+			// Provide team for servicing
+			OfficeFloorTeam team = deployer.addTeam("TEAM", ExecutorFixedTeamSource.class.getName());
+			team.addTypeQualification(null, ServerHttpConnection.class.getName());
+
+			// Configure thread affinity
+			OfficeFloorExecutive executive = deployer.setExecutive(WebThreadAffinityExecutiveSource.class.getName());
+			OfficeFloorTeamOversight oversight = executive.getOfficeFloorTeamOversight("THREAD_AFFINITY");
+			deployer.addTeamAugmentor((teamAugment) -> teamAugment.setTeamOversight(oversight));
 		});
 	}
 
@@ -48,31 +62,41 @@ public class WebThreadAffinityExecutiveSourceTest extends AbstractWebCompileTest
 	 */
 	public void testAffinity() throws Exception {
 
-		// FIXME
-		if (true) {
-			System.err.println("TODO implement thread affinity");
-			return;
-		}
-
 		this.compile.web((context) -> {
 			context.link(false, "/path", EnsureThreadAffinity.class);
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
 		// Service request and capture affinity
+		EnsureThreadAffinity.executingThread = null;
 		EnsureThreadAffinity.affinity = null;
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path"));
 		response.assertResponse(200, "TEST");
 
 		// Ensure have affinity
+		assertNotNull("Should have executing thread", EnsureThreadAffinity.executingThread);
+		assertNotSame("Should be executive with different thread", Thread.currentThread(),
+				EnsureThreadAffinity.executingThread);
 		assertNotNull("Should have affinity", EnsureThreadAffinity.affinity);
+
+		// Ensure thread bound to only one core
+		boolean isBoundToCore = false;
+		for (CpuCore core : CpuCore.getCores()) {
+			if (EnsureThreadAffinity.affinity.equals(core.getCoreAffinity())) {
+				isBoundToCore = true;
+			}
+		}
+		assertTrue("Executing thread should be bound to a core", isBoundToCore);
 	}
 
 	public static class EnsureThreadAffinity {
 
+		private static volatile Thread executingThread;
+
 		private static volatile BitSet affinity;
 
 		public static void service(ServerHttpConnection connection) throws IOException {
+			executingThread = Thread.currentThread();
 			affinity = Affinity.getAffinity();
 			connection.getResponse().getEntityWriter().write("TEST");
 		}

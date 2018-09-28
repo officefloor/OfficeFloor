@@ -58,6 +58,11 @@ public class TeamNodeImpl implements TeamNode {
 	private final String teamName;
 
 	/**
+	 * Size of the {@link Team}.
+	 */
+	private Integer teamSize = null;
+
+	/**
 	 * {@link PropertyList} to source the {@link Team}.
 	 */
 	private final PropertyList propertyList;
@@ -300,6 +305,9 @@ public class TeamNodeImpl implements TeamNode {
 		for (Property property : this.getProperties()) {
 			teamBuilder.addProperty(property.getName(), property.getValue());
 		}
+		if (this.teamSize != null) {
+			teamBuilder.setTeamSize(this.teamSize);
+		}
 
 		// Determine if provide team oversight
 		TeamOversightNode teamOversight = LinkUtil.findTarget((LinkTeamOversightNode) this, TeamOversightNode.class,
@@ -316,6 +324,11 @@ public class TeamNodeImpl implements TeamNode {
 	@Override
 	public String getOfficeFloorTeamName() {
 		return this.teamName;
+	}
+
+	@Override
+	public void setTeamSize(int teamSize) {
+		this.teamSize = teamSize;
 	}
 
 	@Override

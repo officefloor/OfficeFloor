@@ -1,0 +1,9 @@
+<context>
+	<office-floor>
+		<executive source="${testcase}$TestExecutiveSource">
+			<properties>
+				<property name="value" value="to be overridden" />
+			</properties>
+		</executive>
+	</office-floor>
+</context>

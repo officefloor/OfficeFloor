@@ -86,8 +86,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeFloor
-	 *            {@link OfficeFloorModel}.
+	 * @param officeFloor {@link OfficeFloorModel}.
 	 */
 	public OfficeFloorChangesImpl(OfficeFloorModel officeFloor) {
 		this.officeFloor = officeFloor;
@@ -96,8 +95,7 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	/**
 	 * Obtains the text name identifying the {@link ManagedObjectScope}.
 	 * 
-	 * @param scope
-	 *            {@link ManagedObjectScope}.
+	 * @param scope {@link ManagedObjectScope}.
 	 * @return Text name for the {@link ManagedObjectScope}.
 	 */
 	public static String getManagedObjectScope(ManagedObjectScope scope) {
@@ -594,12 +592,11 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	/**
 	 * Obtains the existing item for the target name.
 	 * 
-	 * @param targetItemName
-	 *            Target item name.
-	 * @param targetToExistingName
-	 *            Mapping of target item name to existing item name.
-	 * @param existingNameToItem
-	 *            Mapping of existing item name to the existing item.
+	 * @param targetItemName       Target item name.
+	 * @param targetToExistingName Mapping of target item name to existing item
+	 *                             name.
+	 * @param existingNameToItem   Mapping of existing item name to the existing
+	 *                             item.
 	 */
 	private <T> T getExistingItem(String targetItemName, Map<String, String> targetToExistingName,
 			Map<String, T> existingNameToItem) {
@@ -878,13 +875,13 @@ public class OfficeFloorChangesImpl implements OfficeFloorChanges {
 	}
 
 	@Override
-	public Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName, String teamSourceClassName,
+	public Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName, int teamSize, String teamSourceClassName,
 			PropertyList properties, TeamType teamType) {
 
 		// TODO test this method (addOfficeFloorTeam)
 
 		// Create the office floor team
-		final OfficeFloorTeamModel team = new OfficeFloorTeamModel(teamName, teamSourceClassName);
+		final OfficeFloorTeamModel team = new OfficeFloorTeamModel(teamName, teamSize, teamSourceClassName);
 		for (Property property : properties) {
 			team.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
