@@ -497,6 +497,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					() -> this.context.createManagedObjectTeamNode(teamName, this), (team) -> team.initialise());
 		}
 
+		// Initialise the execution strategies
+		for (ManagedObjectExecutionStrategyType executionStrategyType : managedObjectType.getExecutionStrategyTypes()) {
+			String executionStrategyName = executionStrategyType.getExecutionStrategyName();
+			NodeUtil.getInitialisedNode(executionStrategyName, this.executionStrategies, this.context,
+					() -> this.context.createManagedObjectExecutionStrategyNode(executionStrategyName, this),
+					(executionStrategy) -> executionStrategy.initialise());
+		}
+
 		// Initialise the input dependencies (if input)
 		if (managedObjectType.isInput()) {
 			for (ManagedObjectDependencyType<?> dependencyType : managedObjectType.getDependencyTypes()) {
