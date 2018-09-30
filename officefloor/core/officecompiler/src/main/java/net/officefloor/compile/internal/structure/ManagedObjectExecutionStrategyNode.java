@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectExecutionStrategy;
 
 /**
@@ -24,8 +25,8 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectExecution
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectExecutionStrategyNode
-		extends LinkExecutionStrategyNode, OfficeFloorManagedObjectExecutionStrategy {
+public interface ManagedObjectExecutionStrategyNode extends LinkExecutionStrategyNode,
+		AugmentedManagedObjectExecutionStrategy, OfficeFloorManagedObjectExecutionStrategy {
 
 	/**
 	 * {@link Node} type.

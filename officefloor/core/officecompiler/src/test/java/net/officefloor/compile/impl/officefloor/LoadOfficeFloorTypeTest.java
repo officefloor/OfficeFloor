@@ -47,6 +47,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -91,7 +92,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 
 		// Load the office floor type
 		MockOfficeFloorSource.instantiateFailure = failure;
-		this.loadType(null, null);
+		this.loadType((Loader) null, null);
 	}
 
 	/**
@@ -264,8 +265,8 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code>
-	 * {@link OfficeFloorManagedObjectSourceType} name.
+	 * Ensure issue if <code>null</code> {@link OfficeFloorManagedObjectSourceType}
+	 * name.
 	 */
 	public void testNullManagedObjectSourceName() {
 		this.issues.recordIssue(null, ManagedObjectSourceNodeImpl.class, "Null name for Managed Object Source");
@@ -287,7 +288,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	/**
 	 * Ensure provide properties of {@link ManagedObjectSource} type.
 	 */
-	public void testManagedObjectSourceType() {
+	public void testOfficeFloorManagedObjectSourceType() {
 		this.loadType((officeFloor, context) -> {
 			officeFloor.addManagedObjectSource("MO", TestManagedObjectSource.class.getName())
 					.addProperty("example.test", "DEFAULT_VALUE");
@@ -305,6 +306,21 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 			assertEquals("Incorrect property name", "example.test", property.getName());
 			assertEquals("Incorrect property label", "Test Property", property.getLabel());
 			assertEquals("Incorrect default value", "DEFAULT_VALUE", property.getDefaultValue());
+		});
+	}
+
+	/**
+	 * Ensure provide properties of {@link ManagedObjectSource} type.
+	 */
+	public void testOfficeManagedObjectSourceType() {
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.office((context) -> {
+			context.getOfficeArchitect().addOfficeManagedObjectSource("MO", TestManagedObjectSource.class.getName())
+					.addProperty("example.test", "DEFAULT_VALUE");
+		});
+		this.loadType(compile, (type) -> {
+			assertEquals("Should only include OfficeFloor managed object sources", 0,
+					type.getOfficeFloorManagedObjectSourceTypes().length);
 		});
 	}
 
@@ -406,14 +422,13 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	/**
 	 * Loads the {@link OfficeFloorType} within the input {@link Loader}.
 	 * 
-	 * @param loader
-	 *            {@link Loader}.
-	 * @param validator
-	 *            {@link Validator} to validate the {@link OfficeFloorType}. May
-	 *            be <code>null</code> to indicate the {@link OfficeFloorType}
-	 *            should fail to be loaded.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param loader                 {@link Loader}.
+	 * @param validator              {@link Validator} to validate the
+	 *                               {@link OfficeFloorType}. May be
+	 *                               <code>null</code> to indicate the
+	 *                               {@link OfficeFloorType} should fail to be
+	 *                               loaded.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link OfficeFloorType}.
 	 */
 	private OfficeFloorType loadType(Loader loader, Validator validator, String... propertyNameValuePairs) {
@@ -429,7 +444,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 			propertyList.addProperty(name).setValue(value);
 		}
 
-		// Create the office floor loader and load the office floor
+		// Load the OfficeFloor type
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		compiler.addResources(this.resourceSource);
@@ -448,7 +463,39 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 			assertNull("Should not load the OfficeFloor type", officeFloorType);
 		}
 
-		// Return the office floor type
+		// Return the OfficeFloor type
+		return officeFloorType;
+	}
+
+	/**
+	 * Loads the {@link OfficeFloorType} from the {@link CompileOfficeFloor}.
+	 * 
+	 * @param compile   {@link CompileOfficeFloor}.
+	 * @param validator {@link Validator} to validate the {@link OfficeFloorType}.
+	 *                  May be <code>null</code> to indicate the
+	 *                  {@link OfficeFloorType} should fail to be loaded.
+	 * @return {@link OfficeFloorType}.
+	 */
+	private OfficeFloorType loadType(CompileOfficeFloor compile, Validator validator) {
+
+		// Replay mock objects
+		this.replayMockObjects();
+
+		// Load the OfficeFloor type
+		compile.getOfficeFloorCompiler().setCompilerIssues(this.issues);
+		OfficeFloorType officeFloorType = compile.loadOfficeFloorType();
+
+		// Verify the mock objects
+		this.verifyMockObjects();
+
+		// Ensure if should be loaded
+		if (validator != null) {
+			validator.validate(officeFloorType);
+		} else {
+			assertNull("Should not load the OfficeFloor type", officeFloorType);
+		}
+
+		// Return the OfficeFloor type
 		return officeFloorType;
 	}
 
@@ -460,12 +507,9 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		/**
 		 * Implemented to load the {@link OfficeFloorType}.
 		 * 
-		 * @param officeFloor
-		 *            {@link OfficeFloorDeployer}.
-		 * @param context
-		 *            {@link OfficeFloorSourceContext}.
-		 * @throws Exception
-		 *             If fails to source {@link OfficeFloorType}.
+		 * @param officeFloor {@link OfficeFloorDeployer}.
+		 * @param context     {@link OfficeFloorSourceContext}.
+		 * @throws Exception If fails to source {@link OfficeFloorType}.
 		 */
 		void sourceOffice(OfficeFloorDeployer officeFloor, OfficeFloorSourceContext context) throws Exception;
 	}
@@ -478,8 +522,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		/**
 		 * Implemented to validate the {@link OfficeFloorType}.
 		 * 
-		 * @param type
-		 *            {@link OfficeFloorType} to validate.
+		 * @param type {@link OfficeFloorType} to validate.
 		 */
 		void validate(OfficeFloorType type);
 	}
@@ -547,7 +590,6 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 				throws Exception {
 			loader.sourceOffice(officeFloorDeployer, context);
 		}
-
 	}
 
 }

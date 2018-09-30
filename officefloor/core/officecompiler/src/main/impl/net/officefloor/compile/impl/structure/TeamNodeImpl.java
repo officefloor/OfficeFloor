@@ -30,6 +30,8 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.TeamOversightNode;
+import net.officefloor.compile.internal.structure.TeamVisitor;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.Property;
@@ -54,6 +56,11 @@ public class TeamNodeImpl implements TeamNode {
 	 * Name of this {@link OfficeFloorTeam}.
 	 */
 	private final String teamName;
+
+	/**
+	 * Size of the {@link Team}.
+	 */
+	private Integer teamSize = null;
 
 	/**
 	 * {@link PropertyList} to source the {@link Team}.
@@ -205,6 +212,34 @@ public class TeamNodeImpl implements TeamNode {
 	 */
 
 	@Override
+	public boolean sourceTeam(TeamVisitor visitor, CompileContext compileContext) {
+
+		// Load the team type
+		TeamType teamType = compileContext.getOrLoadTeamType(this);
+		if (teamType == null) {
+			return false;
+		}
+
+		// Visit this team
+		if (visitor != null) {
+			try {
+				visitor.visit(teamType, this, compileContext);
+			} catch (CompileError error) {
+				// Issue should already be provided
+				return false;
+			}
+		}
+
+		// Successfully sourced
+		return true;
+	}
+
+	@Override
+	public boolean isTeamOversight() {
+		return (this.linkedTeamOversightNode != null);
+	}
+
+	@Override
 	public TeamType loadTeamType() {
 
 		// Obtain the loader
@@ -270,6 +305,9 @@ public class TeamNodeImpl implements TeamNode {
 		for (Property property : this.getProperties()) {
 			teamBuilder.addProperty(property.getName(), property.getValue());
 		}
+		if (this.teamSize != null) {
+			teamBuilder.setTeamSize(this.teamSize);
+		}
 
 		// Determine if provide team oversight
 		TeamOversightNode teamOversight = LinkUtil.findTarget((LinkTeamOversightNode) this, TeamOversightNode.class,
@@ -286,6 +324,11 @@ public class TeamNodeImpl implements TeamNode {
 	@Override
 	public String getOfficeFloorTeamName() {
 		return this.teamName;
+	}
+
+	@Override
+	public void setTeamSize(int teamSize) {
+		this.teamSize = teamSize;
 	}
 
 	@Override

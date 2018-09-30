@@ -65,13 +65,10 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param teamName
-	 *            Name of this {@link OfficeTeam}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSourceNode} containing this
-	 *            {@link ManagedObjectTeamNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param teamName            Name of this {@link OfficeTeam}.
+	 * @param managedObjectSource {@link ManagedObjectSourceNode} containing this
+	 *                            {@link ManagedObjectTeamNode}.
+	 * @param context             {@link NodeContext}.
 	 */
 	public ManagedObjectTeamNodeImpl(String teamName, ManagedObjectSourceNode managedObjectSource,
 			NodeContext context) {
@@ -146,6 +143,15 @@ public class ManagedObjectTeamNodeImpl implements ManagedObjectTeamNode {
 		// TODO implement
 		// ManagedObjectTeamNode.addTypeQualification
 		throw new UnsupportedOperationException("TODO implement ManagedObjectTeamNode.addTypeQualification");
+	}
+
+	/*
+	 * ============= AugmentedManagedObjectNode ====================
+	 */
+
+	@Override
+	public boolean isLinked() {
+		return (this.linkedTeamNode != null);
 	}
 
 	/*

@@ -44,6 +44,7 @@ import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectRegistry;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceVisitor;
 import net.officefloor.compile.internal.structure.ManagedObjectTeamNode;
 import net.officefloor.compile.internal.structure.ManagingOfficeNode;
 import net.officefloor.compile.internal.structure.Node;
@@ -54,6 +55,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
@@ -77,6 +79,9 @@ import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectTeam;
+import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectExecutionStrategy;
+import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectFlow;
+import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
@@ -359,6 +364,53 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		return this.context.overrideProperties(this, this.getManagedObjectSourceName(), properties);
 	}
 
+	/**
+	 * Obtains the {@link ManagedObjectDependencyNode}.
+	 * 
+	 * @param managedObjectDependencyName Name of the
+	 *                                    {@link ManagedObjectDependencyNode}.
+	 * @return {@link ManagedObjectDependencyNode}.
+	 */
+	private ManagedObjectDependencyNode getManagedObjectDependencyNode(String managedObjectDependencyName) {
+		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
+				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectFlowNode}.
+	 * 
+	 * @param managedObjectSourceFlowName Name of the {@link ManagedObjectFlowNode}.
+	 * @return {@link ManagedObjectFlowNode}.
+	 */
+	private ManagedObjectFlowNode getManagedObjectFlowNode(String managedObjectSourceFlowName) {
+		return NodeUtil.getNode(managedObjectSourceFlowName, this.flows,
+				() -> this.context.createManagedObjectFlowNode(managedObjectSourceFlowName, this));
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectTeamNode}.
+	 * 
+	 * @param managedObjectSourceTeamName Name of the {@link ManagedObjectTeamNode}.
+	 * @return {@link ManagedObjectTeamNode}.
+	 */
+	private ManagedObjectTeamNode getManagedObjectTeamNode(String managedObjectSourceTeamName) {
+		return NodeUtil.getNode(managedObjectSourceTeamName, this.teams,
+				() -> this.context.createManagedObjectTeamNode(managedObjectSourceTeamName, this));
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectExecutionStrategyNode}.
+	 * 
+	 * @param managedObjectSourceExecutionStrategyName Name of the
+	 *                                                 {@link ManagedObjectExecutionStrategyNode}.
+	 * @return {@link ManagedObjectExecutionStrategyNode}.
+	 */
+	private ManagedObjectExecutionStrategyNode getManagedObjectExecutionStrategyNode(
+			String managedObjectSourceExecutionStrategyName) {
+		return NodeUtil.getNode(managedObjectSourceExecutionStrategyName, this.executionStrategies, () -> this.context
+				.createManagedObjectExecutionStrategyNode(managedObjectSourceExecutionStrategyName, this));
+	}
+
 	/*
 	 * =========================== Node ===================================
 	 */
@@ -423,7 +475,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public boolean sourceManagedObjectSource(CompileContext compileContext) {
+	public boolean sourceManagedObjectSource(ManagedObjectSourceVisitor visitor, CompileContext compileContext) {
 
 		// Load the managed object type
 		ManagedObjectType<?> managedObjectType = compileContext.getOrLoadManagedObjectType(this);
@@ -445,6 +497,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					() -> this.context.createManagedObjectTeamNode(teamName, this), (team) -> team.initialise());
 		}
 
+		// Initialise the execution strategies
+		for (ManagedObjectExecutionStrategyType executionStrategyType : managedObjectType.getExecutionStrategyTypes()) {
+			String executionStrategyName = executionStrategyType.getExecutionStrategyName();
+			NodeUtil.getInitialisedNode(executionStrategyName, this.executionStrategies, this.context,
+					() -> this.context.createManagedObjectExecutionStrategyNode(executionStrategyName, this),
+					(executionStrategy) -> executionStrategy.initialise());
+		}
+
 		// Initialise the input dependencies (if input)
 		if (managedObjectType.isInput()) {
 			for (ManagedObjectDependencyType<?> dependencyType : managedObjectType.getDependencyTypes()) {
@@ -455,8 +515,34 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			}
 		}
 
+		// Visit this managed object source
+		if (visitor != null) {
+			try {
+				visitor.visit(managedObjectType, this, compileContext);
+			} catch (CompileError error) {
+				// Issue should already be provided
+				return false;
+			}
+		}
+
 		// Successfully sourced
 		return true;
+	}
+
+	@Override
+	public AugmentedManagedObjectFlow getAugmentedManagedObjectFlow(String flowName) {
+		return this.getManagedObjectFlowNode(flowName);
+	}
+
+	@Override
+	public AugmentedManagedObjectTeam getAugmentedManagedObjectTeam(String teamName) {
+		return this.getManagedObjectTeamNode(teamName);
+	}
+
+	@Override
+	public AugmentedManagedObjectExecutionStrategy getAugmentedManagedObjectExecutionStrategy(
+			String executionStrategyName) {
+		return this.getManagedObjectExecutionStrategyNode(executionStrategyName);
 	}
 
 	@Override
@@ -970,14 +1056,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public SectionManagedObjectFlow getSectionManagedObjectFlow(String managedObjectSourceFlowName) {
-		return NodeUtil.getNode(managedObjectSourceFlowName, this.flows,
-				() -> this.context.createManagedObjectFlowNode(managedObjectSourceFlowName, this));
+		return this.getManagedObjectFlowNode(managedObjectSourceFlowName);
 	}
 
 	@Override
 	public SectionManagedObjectDependency getInputSectionManagedObjectDependency(String managedObjectDependencyName) {
-		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
-				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+		return this.getManagedObjectDependencyNode(managedObjectDependencyName);
 	}
 
 	/*
@@ -991,7 +1075,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public OfficeSectionManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName) {
-		return NodeUtil.getNode(teamName, this.teams, () -> this.context.createManagedObjectTeamNode(teamName, this));
+		return this.getManagedObjectTeamNode(teamName);
 	}
 
 	@Override
@@ -1015,20 +1099,17 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public OfficeManagedObjectFlow getOfficeManagedObjectFlow(String managedObjectSourceFlowName) {
-		return NodeUtil.getNode(managedObjectSourceFlowName, this.flows,
-				() -> this.context.createManagedObjectFlowNode(managedObjectSourceFlowName, this));
+		return this.getManagedObjectFlowNode(managedObjectSourceFlowName);
 	}
 
 	@Override
 	public OfficeManagedObjectDependency getInputOfficeManagedObjectDependency(String managedObjectDependencyName) {
-		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
-				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+		return this.getManagedObjectDependencyNode(managedObjectDependencyName);
 	}
 
 	@Override
 	public OfficeManagedObjectTeam getOfficeManagedObjectTeam(String managedObjectSourceTeamName) {
-		return NodeUtil.getNode(managedObjectSourceTeamName, this.teams,
-				() -> this.context.createManagedObjectTeamNode(managedObjectSourceTeamName, this));
+		return this.getManagedObjectTeamNode(managedObjectSourceTeamName);
 	}
 
 	/*
@@ -1053,28 +1134,24 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public OfficeFloorManagedObjectFlow getOfficeFloorManagedObjectFlow(String managedObjectSourceFlowName) {
-		return NodeUtil.getNode(managedObjectSourceFlowName, this.flows,
-				() -> this.context.createManagedObjectFlowNode(managedObjectSourceFlowName, this));
+		return this.getManagedObjectFlowNode(managedObjectSourceFlowName);
 	}
 
 	@Override
 	public OfficeFloorManagedObjectDependency getInputOfficeFloorManagedObjectDependency(
 			String managedObjectDependencyName) {
-		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
-				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+		return this.getManagedObjectDependencyNode(managedObjectDependencyName);
 	}
 
 	@Override
 	public OfficeFloorManagedObjectTeam getOfficeFloorManagedObjectTeam(String managedObjectSourceTeamName) {
-		return NodeUtil.getNode(managedObjectSourceTeamName, this.teams,
-				() -> this.context.createManagedObjectTeamNode(managedObjectSourceTeamName, this));
+		return this.getManagedObjectTeamNode(managedObjectSourceTeamName);
 	}
 
 	@Override
 	public OfficeFloorManagedObjectExecutionStrategy getOfficeFloorManagedObjectExecutionStrategy(
 			String managedObjectExecutionStrategyName) {
-		return NodeUtil.getNode(managedObjectExecutionStrategyName, this.executionStrategies,
-				() -> this.context.createManagedObjectExecutionStrategyNode(managedObjectExecutionStrategyName, this));
+		return this.getManagedObjectExecutionStrategyNode(managedObjectExecutionStrategyName);
 	}
 
 	/*

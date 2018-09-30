@@ -46,6 +46,7 @@ import net.officefloor.compile.internal.structure.ManagedFunctionVisitor;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceVisitor;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
@@ -170,13 +171,11 @@ public class SectionNodeImpl implements SectionNode {
 		/**
 		 * Initialise the state.
 		 * 
-		 * @param sectionSourceClassName
-		 *            Class name of the {@link SectionSource}.
-		 * @param sectionSource
-		 *            {@link SectionSource} for this {@link SectionNode}.
-		 * @param sectionLocation
-		 *            Location of the {@link OfficeSection} being built by this
-		 *            {@link SectionDesigner}.
+		 * @param sectionSourceClassName Class name of the {@link SectionSource}.
+		 * @param sectionSource          {@link SectionSource} for this
+		 *                               {@link SectionNode}.
+		 * @param sectionLocation        Location of the {@link OfficeSection} being
+		 *                               built by this {@link SectionDesigner}.
 		 */
 		private InitialisedState(String sectionSourceClassName, SectionSource sectionSource, String sectionLocation) {
 			this.sectionSourceClassName = sectionSourceClassName;
@@ -219,8 +218,8 @@ public class SectionNodeImpl implements SectionNode {
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
 
 	/**
-	 * Listing of {@link OfficeGovernance} instances providing
-	 * {@link Governance} over this {@link SectionNode}.
+	 * Listing of {@link OfficeGovernance} instances providing {@link Governance}
+	 * over this {@link SectionNode}.
 	 */
 	private final List<GovernanceNode> governances = new LinkedList<GovernanceNode>();
 
@@ -230,8 +229,8 @@ public class SectionNodeImpl implements SectionNode {
 	private final Map<String, FunctionNamespaceNode> namespaceNodes = new HashMap<String, FunctionNamespaceNode>();
 
 	/**
-	 * Map of {@link ManagedFunctionNode} instances for this
-	 * {@link OfficeSection} by their {@link SectionFunction} names.
+	 * Map of {@link ManagedFunctionNode} instances for this {@link OfficeSection}
+	 * by their {@link SectionFunction} names.
 	 */
 	private final Map<String, ManagedFunctionNode> functionNodes = new HashMap<String, ManagedFunctionNode>();
 
@@ -253,14 +252,11 @@ public class SectionNodeImpl implements SectionNode {
 	/**
 	 * Initialises this {@link SectionNode} with the basic information.
 	 * 
-	 * @param sectionName
-	 *            Name of this {@link OfficeSection}.
-	 * @param parentSection
-	 *            Optional parent {@link SectionNode}. May be <code>null</code>.
-	 * @param office
-	 *            {@link Office} containing the {@link OfficeSection}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param sectionName   Name of this {@link OfficeSection}.
+	 * @param parentSection Optional parent {@link SectionNode}. May be
+	 *                      <code>null</code>.
+	 * @param office        {@link Office} containing the {@link OfficeSection}.
+	 * @param context       {@link NodeContext}.
 	 */
 	public SectionNodeImpl(String sectionName, SectionNode parentSection, OfficeNode office, NodeContext context) {
 		this.sectionName = sectionName;
@@ -359,7 +355,8 @@ public class SectionNodeImpl implements SectionNode {
 	 */
 
 	@Override
-	public boolean sourceSection(ManagedFunctionVisitor visitor, CompileContext compileContext) {
+	public boolean sourceSection(ManagedFunctionVisitor managedFunctionVisitor,
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext) {
 
 		// Ensure the section is initialised
 		if (!this.isInitialised()) {
@@ -419,17 +416,18 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public boolean sourceSectionTree(ManagedFunctionVisitor visitor, CompileContext compileContext) {
+	public boolean sourceSectionTree(ManagedFunctionVisitor managedFunctionVisitor,
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext) {
 
 		// Source this section
-		boolean isSourced = this.sourceSection(visitor, compileContext);
+		boolean isSourced = this.sourceSection(managedFunctionVisitor, managedObjectSourceVisitor, compileContext);
 		if (!isSourced) {
 			return false;
 		}
 
 		// Ensure all functions are sourced
 		isSourced = CompileUtil.source(this.functionNodes, (function) -> function.getSectionFunctionName(),
-				(function) -> function.souceManagedFunction(visitor, compileContext));
+				(function) -> function.souceManagedFunction(managedFunctionVisitor, compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -437,7 +435,8 @@ public class SectionNodeImpl implements SectionNode {
 		// Ensure all managed object sources are source
 		isSourced = CompileUtil.source(this.managedObjectSourceNodes,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
-				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(compileContext));
+				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(managedObjectSourceVisitor,
+						compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -452,7 +451,8 @@ public class SectionNodeImpl implements SectionNode {
 
 		// Successful only if all sub sections are also sourced
 		return CompileUtil.source(this.subSections, (subSection) -> subSection.getOfficeSectionName(),
-				(subSection) -> subSection.sourceSectionTree(visitor, compileContext));
+				(subSection) -> subSection.sourceSectionTree(managedFunctionVisitor, managedObjectSourceVisitor,
+						compileContext));
 	}
 
 	@Override
@@ -619,14 +619,10 @@ public class SectionNodeImpl implements SectionNode {
 	 * Initialises the {@link OfficeSectionTypeImpl} with the
 	 * {@link OfficeSubSectionType} information.
 	 * 
-	 * @param sectionType
-	 *            {@link OfficeSectionTypeImpl}.
-	 * @param parentSectionType
-	 *            Parent {@link OfficeSubSectionType}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return <code>true</code> if initialised {@link OfficeSubSectionType}
-	 *         state.
+	 * @param sectionType       {@link OfficeSectionTypeImpl}.
+	 * @param parentSectionType Parent {@link OfficeSubSectionType}.
+	 * @param compileContext    {@link CompileContext}.
+	 * @return <code>true</code> if initialised {@link OfficeSubSectionType} state.
 	 */
 	private boolean initialiseSubSectionState(OfficeSectionTypeImpl sectionType, OfficeSubSectionType parentSectionType,
 			CompileContext compileContext) {

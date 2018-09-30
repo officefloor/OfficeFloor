@@ -426,6 +426,10 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			// Add the OfficeFloor team
 			String teamName = teamModel.getOfficeFloorTeamName();
 			OfficeFloorTeam team = deployer.addTeam(teamName, teamModel.getTeamSourceClassName());
+			int teamSize = teamModel.getTeamSize();
+			if (teamSize != 0) {
+				team.setTeamSize(teamSize);
+			}
 			for (PropertyModel property : teamModel.getProperties()) {
 				team.addProperty(property.getName(), property.getValue());
 			}

@@ -232,6 +232,7 @@
 	<object method="addOfficeFloorTeam" node="team"
 		class="net.officefloor.model.officefloor.OfficeFloorTeamModel">
 		<value method="setOfficeFloorTeamName" node="team@name" />
+		<value method="setTeamSize" node="team@size" />
 		<value method="setTeamSourceClassName" node="team@source" />
 		<value method="setX" node="team@x" />
 		<value method="setY" node="team@y" />
