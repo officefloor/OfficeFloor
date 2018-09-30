@@ -1,0 +1,28 @@
+<woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+    <template path="/" location="Template.woof.html" class="net.officefloor.tutorial.threadaffinityhttpserver.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="47" y="30">
+    </template>
+  </templates>
+  <sections>
+    <section name="Setup" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.threadaffinityhttpserver.Setup" x="175" y="94">
+      <input name="setup" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+    <start x="49" y="118">
+      <section name="Setup" input="setup"/>
+    </start>
+  </starting>
+</woof>
