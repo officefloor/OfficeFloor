@@ -980,25 +980,30 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				officeBuilder.registerTeam(officeTeamName, team.getOfficeFloorTeamName());
 			}
 
-			// Link in the execution strategies for the managed object source
-			ManagedObjectExecutionStrategyType[] strategyTypes = managedObjectType.getExecutionStrategyTypes();
-			for (int i = 0; i < strategyTypes.length; i++) {
-				ManagedObjectExecutionStrategyType strategyType = strategyTypes[i];
+			// Determine if default execution strategy
+			if (!(managingOffice.getOfficeFloorNode().isDefaultExecutionStrategy())) {
 
-				// Obtain the execution strategy type details
-				String strategyName = strategyType.getExecutionStrategyName();
+				// Link in the execution strategies for the managed object source
+				ManagedObjectExecutionStrategyType[] strategyTypes = managedObjectType.getExecutionStrategyTypes();
+				for (int i = 0; i < strategyTypes.length; i++) {
+					ManagedObjectExecutionStrategyType strategyType = strategyTypes[i];
 
-				// Obtain the execution strategy
-				ManagedObjectExecutionStrategyNode managedObjectExecution = this.executionStrategies.get(strategyName);
-				ExecutionStrategyNode executionStrategy = LinkUtil.retrieveTarget(managedObjectExecution,
-						ExecutionStrategyNode.class, this.context.getCompilerIssues());
-				if (executionStrategy == null) {
-					continue; // must have execution strategy
+					// Obtain the execution strategy type details
+					String strategyName = strategyType.getExecutionStrategyName();
+
+					// Obtain the execution strategy
+					ManagedObjectExecutionStrategyNode managedObjectExecution = this.executionStrategies
+							.get(strategyName);
+					ExecutionStrategyNode executionStrategy = LinkUtil.retrieveTarget(managedObjectExecution,
+							ExecutionStrategyNode.class, this.context.getCompilerIssues());
+					if (executionStrategy == null) {
+						continue; // must have execution strategy
+					}
+
+					// Register the execution strategy
+					String executionStrategyName = executionStrategy.getOfficeFloorExecutionStratgyName();
+					managingOfficeBuilder.linkExecutionStrategy(i, executionStrategyName);
 				}
-
-				// Register the execution strategy
-				String executionStrategyName = executionStrategy.getOfficeFloorExecutionStratgyName();
-				managingOfficeBuilder.linkExecutionStrategy(i, executionStrategyName);
 			}
 
 			// Determine if pool the managed object

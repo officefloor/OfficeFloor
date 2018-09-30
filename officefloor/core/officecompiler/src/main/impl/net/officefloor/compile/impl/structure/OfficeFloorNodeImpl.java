@@ -952,6 +952,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	}
 
 	@Override
+	public boolean isDefaultExecutionStrategy() {
+		return (this.executive == null);
+	}
+
+	@Override
 	public OfficeFloor deployOfficeFloor(String officeFloorName, OfficeFloorBuilder builder,
 			CompileContext compileContext) {
 
