@@ -38,6 +38,11 @@ import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
 public class DefaultExecutive extends AbstractExecutiveSource implements Executive, ExecutionStrategy {
 
 	/**
+	 * Default {@link ExecutionStrategy} name.
+	 */
+	public static final String EXECUTION_STRATEGY_NAME = "default";
+
+	/**
 	 * {@link ThreadFactory} instances.
 	 */
 	private ThreadFactory[] threadFactories;
@@ -108,7 +113,7 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 
 	@Override
 	public String getExecutionStrategyName() {
-		return "default";
+		return EXECUTION_STRATEGY_NAME;
 	}
 
 	@Override

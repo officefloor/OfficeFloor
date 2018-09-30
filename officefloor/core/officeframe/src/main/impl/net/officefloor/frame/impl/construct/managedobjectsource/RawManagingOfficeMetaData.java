@@ -268,14 +268,15 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	 *                                          {@link ManagedObject} instances of
 	 *                                          the managing {@link Office}.
 	 * @param moAdminFactory                    {@link ManagedObjectAdministrationMetaDataFactory}.
+	 * @param defaultExecutionStrategy          Default {@link ExecutionStrategy}.
 	 * @param executionStrategies               {@link ExecutionStrategy} instances
 	 *                                          by their name.
 	 * @param issues                            {@link OfficeFloorIssues}.
 	 */
 	public void manageByOffice(OfficeMetaData officeMetaData,
 			RawBoundManagedObjectMetaData[] processBoundManagedObjectMetaData,
-			ManagedObjectAdministrationMetaDataFactory moAdminFactory, Map<String, ThreadFactory[]> executionStrategies,
-			OfficeFloorIssues issues) {
+			ManagedObjectAdministrationMetaDataFactory moAdminFactory, ThreadFactory[] defaultExecutionStrategy,
+			Map<String, ThreadFactory[]> executionStrategies, OfficeFloorIssues issues) {
 
 		// Obtain the name of the managed object source
 		String managedObjectSourceName = this.rawManagedObjectMetaData.getManagedObjectName();
@@ -365,38 +366,46 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 				int index = i;
 				ManagedObjectExecutionMetaData executionMetaData = this.executionMetaDatas[i];
 
-				// Create name to identify flow
-				String label = executionMetaData.getLabel();
-				String executionLabel = "execution strategy " + index + " (label="
-						+ (!ConstructUtil.isBlank(label) ? label : "<no label>") + ")";
-
-				// Obtain the execution configuration
-				ManagedObjectExecutionConfiguration executionConfiguration = executionMappings
-						.get(Integer.valueOf(index));
-				if (executionConfiguration == null) {
-					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-							"No execution strategy configured for " + executionLabel);
-					return; // execution not configured
-				}
-
-				// Remove execution for later check no extra configured
-				executionMappings.remove(Integer.valueOf(index));
-
 				// Obtain the execution strategy
-				String executionStrategyName = executionConfiguration.getExecutionStrategyName();
-				if (executionStrategyName == null) {
-					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-							"No execution strategy name configured for " + executionLabel);
-					return; // execution not configured
-				}
+				ThreadFactory[] executionStrategy;
+				if (defaultExecutionStrategy != null) {
+					// Use default execution strategy
+					executionStrategy = defaultExecutionStrategy;
 
-				// Obtain the execution strategy
-				ThreadFactory[] executionStrategy = executionStrategies.get(executionStrategyName);
-				if (executionStrategy == null) {
-					issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-							"No execution strategy available by name '" + executionStrategyName + "' for "
-									+ executionLabel);
-					return; // execution not configured
+				} else {
+					// Use configured execution strategy
+					String label = executionMetaData.getLabel();
+					String executionLabel = "execution strategy " + index + " (label="
+							+ (!ConstructUtil.isBlank(label) ? label : "<no label>") + ")";
+
+					// Obtain the execution configuration
+					ManagedObjectExecutionConfiguration executionConfiguration = executionMappings
+							.get(Integer.valueOf(index));
+					if (executionConfiguration == null) {
+						issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+								"No execution strategy configured for " + executionLabel);
+						return; // execution not configured
+					}
+
+					// Remove execution for later check no extra configured
+					executionMappings.remove(Integer.valueOf(index));
+
+					// Obtain the execution strategy
+					String executionStrategyName = executionConfiguration.getExecutionStrategyName();
+					if (executionStrategyName == null) {
+						issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+								"No execution strategy name configured for " + executionLabel);
+						return; // execution not configured
+					}
+
+					// Obtain the execution strategy
+					executionStrategy = executionStrategies.get(executionStrategyName);
+					if (executionStrategy == null) {
+						issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+								"No execution strategy available by name '" + executionStrategyName + "' for "
+										+ executionLabel);
+						return; // execution not configured
+					}
 				}
 
 				// Specify the execution stragegy

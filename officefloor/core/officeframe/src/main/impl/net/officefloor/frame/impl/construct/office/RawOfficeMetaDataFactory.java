@@ -495,12 +495,13 @@ public class RawOfficeMetaDataFactory {
 				rawAdminFactory, threadScopeMo, processScopeMo);
 
 		// Obtain the execution strategies
+		ThreadFactory[] defaultexecutionStrategy = this.rawOfficeFloorMetaData.getDefaultExecutionStrategy();
 		Map<String, ThreadFactory[]> executionStrategies = this.rawOfficeFloorMetaData.getExecutionStrategies();
 
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
 			officeManagingManagedObject.manageByOffice(officeMetaData, processBoundManagedObjects, moAdminFactory,
-					executionStrategies, issues);
+					defaultexecutionStrategy, executionStrategies, issues);
 		}
 
 		// Link functions within the meta-data of the office
