@@ -21,13 +21,9 @@ import java.io.IOException;
 import java.util.BitSet;
 import java.util.concurrent.ThreadFactory;
 
-import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
-import net.officefloor.compile.spi.officefloor.OfficeFloorExecutionStrategy;
-import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
-import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -73,22 +69,7 @@ public class WebThreadAffinityExecutiveSourceTest extends AbstractWebCompileTest
 			team.setTeamSize(50);
 			team.addTypeQualification(null, ServerHttpConnection.class.getName());
 
-			// Create the Executive
-			OfficeFloorExecutive executive = deployer.setExecutive(WebThreadAffinityExecutiveSource.class.getName());
-
-			// Configure thread affinity for teams
-			OfficeFloorTeamOversight oversight = executive.getOfficeFloorTeamOversight("CORE_AFFINITY");
-			deployer.addTeamAugmentor((teamAugment) -> teamAugment.setTeamOversight(oversight));
-
-			// Configure thread affinity for execution strategy
-			OfficeFloorExecutionStrategy executionStrategy = executive.getOfficeFloorExecutionStrategy("CPU_AFFINITY");
-			deployer.addManagedObjectSourceAugmentor((mos) -> {
-				for (ManagedObjectExecutionStrategyType executionStrategyType : mos.getManagedObjectType()
-						.getExecutionStrategyTypes()) {
-					mos.link(mos.getManagedObjectExecutionStrategy(executionStrategyType.getExecutionStrategyName()),
-							executionStrategy);
-				}
-			});
+			// Web Thread Affinity configured with extension
 		});
 	}
 
