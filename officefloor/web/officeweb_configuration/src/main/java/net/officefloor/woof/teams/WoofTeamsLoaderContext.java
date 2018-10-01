@@ -17,6 +17,7 @@
  */
 package net.officefloor.woof.teams;
 
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.configuration.ConfigurationItem;
@@ -51,5 +52,14 @@ public interface WoofTeamsLoaderContext {
 	 * @return {@link OfficeFloorExtensionContext}.
 	 */
 	OfficeFloorExtensionContext getOfficeFloorExtensionContext();
+
+	/**
+	 * Obtains the {@link DeployedOffice} that the WoOF application is being
+	 * deployed into.
+	 * 
+	 * @return {@link DeployedOffice} that the WoOF application is being deployed
+	 *         into.
+	 */
+	DeployedOffice getDeployedOffice();
 
 }

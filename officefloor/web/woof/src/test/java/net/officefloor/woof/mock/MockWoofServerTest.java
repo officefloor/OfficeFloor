@@ -17,6 +17,7 @@
  */
 package net.officefloor.woof.mock;
 
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -35,6 +36,13 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	private MockWoofServer server;
 
 	@Override
+	protected void setUp() throws Exception {
+
+		// Start WoOF application for testing
+		this.server = MockWoofServer.open();
+	}
+
+	@Override
 	protected void tearDown() throws Exception {
 		if (this.server != null) {
 			this.server.close();
@@ -42,35 +50,35 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can run the application from default configuration.
+	 * Ensure able to access template.
 	 */
-	@SuppressWarnings("unused")
-	public void testWoOF() throws Exception {
-
-		// Start WoOF application for testing
-		this.server = MockWoofServer.open();
-
-		// Ensure WoOF configuration loaded
+	public void testTemplate() throws Exception {
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/template"));
 		response.assertResponse(200, "TEMPLATE");
+	}
 
-		// FIXME
-		if (true) {
-			System.err.println("TODO implement /objects /resources /teams to ensure WoOF loads appropriately");
-			return;
-		}
+	/**
+	 * Ensure able to utilise configured objects.
+	 */
+	public void testObjects() throws Exception {
+		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/objects"));
+		response.assertResponse(200, "{\"message\":\"mock\"}");
+	}
 
-		// Ensure Objects loaded
-		response = this.server.send(MockWoofServer.mockRequest("/objects"));
-		response.assertResponse(200, "OBJECT");
-
-		// Ensure Resources loaded
-		response = this.server.send(MockWoofServer.mockRequest("/resource"));
+	/**
+	 * Enable able to serve static resource.
+	 */
+	public void testResource() throws Exception {
+		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/resource.html"));
 		response.assertResponse(200, "RESOURCE");
+	}
 
-		// Ensure Teams loaded
-		response = this.server.send(MockWoofServer.mockRequest("/teams"));
-		response.assertResponse(200, "TEAMS");
+	/**
+	 * Ensure runs with different {@link Team}.
+	 */
+	public void testTeam() throws Exception {
+		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/teams"));
+		response.assertResponse(200, "\"DIFFERENT THREAD\"");
 	}
 
 	/**
@@ -91,7 +99,7 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 				request.cookies(response);
 			}
 			response = this.server.send(request);
-			response.assertResponse(200, "param=" + i + ", previous=" + (i - 1));
+			response.assertResponse(200, "param=" + i + ", previous=" + (i - 1) + ", object=mock");
 		}
 	}
 

@@ -17,29 +17,38 @@
  */
 package net.officefloor.woof.teams;
 
-import net.officefloor.woof.model.teams.WoofTeamsModel;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.woof.resources.WoofResourcesLoader;
 
 /**
- * Loads the {@link WoofTeamsModel} configuration.
- * 
+ * Context for the {@link WoofResourcesLoader}.
+ *
  * @author Daniel Sagenschneider
  */
-public interface WoofTeamsLoader {
+public interface WoofTeamsUsageContext {
 
 	/**
-	 * Loads the {@link WoofTeamsModel} configuration.
+	 * Obtains the {@link ConfigurationItem} containing the configuration of the
+	 * teams.
 	 * 
-	 * @param context {@link WoofTeamsLoaderContext}.
-	 * @throws Exception If fails to load the configuration.
+	 * @return {@link ConfigurationItem} containing the configuration.
 	 */
-	void loadWoofTeamsConfiguration(WoofTeamsLoaderContext context) throws Exception;
+	ConfigurationItem getConfiguration();
 
 	/**
-	 * Loads the use of the {@link WoofTeamsModel} configuration.
+	 * Obtains the {@link OfficeArchitect} to be configured with the teams.
 	 * 
-	 * @param context
-	 * @throws Exception If fails to load the usage.
+	 * @return {@link OfficeArchitect} to be configured.
 	 */
-	void loadWoofTeamsUsage(WoofTeamsUsageContext context) throws Exception;
+	OfficeArchitect getOfficeArchitect();
+
+	/**
+	 * Obtains the {@link OfficeExtensionContext}.
+	 * 
+	 * @return {@link OfficeExtensionContext}.
+	 */
+	OfficeExtensionContext getOfficeExtensionContext();
 
 }
