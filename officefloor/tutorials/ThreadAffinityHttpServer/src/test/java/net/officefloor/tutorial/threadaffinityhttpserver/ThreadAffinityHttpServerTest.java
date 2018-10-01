@@ -57,20 +57,17 @@ public class ThreadAffinityHttpServerTest {
 
 		// On multiple calls, should be same core (as locks affinity)
 		String previousCore = null;
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 100; i++) {
 
 			// GET entry
 			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/"));
 			String html = response.getEntity(null);
 			assertEquals("Should be successful: " + html, 200, response.getStatus().getStatusCode());
 
-			// TODO RMEOVE
-			System.out.println("HTML: " + html);
-
 			// Parse out the core
-			Pattern pattern = Pattern.compile("CORE-(\\d+)<");
+			Pattern pattern = Pattern.compile(".*CORE-(\\d+)-.*", Pattern.DOTALL);
 			Matcher matcher = pattern.matcher(html);
-			assertTrue("Should be able to obtain thread affinity thread name", matcher.matches());
+			assertTrue("Should be able to obtain thread affinity core", matcher.matches());
 			String core = matcher.group(1);
 
 			// Ensure same as previous core (ignoring first call)

@@ -1,0 +1,87 @@
+                                               -----------------------
+                                               Thread Affinity Tutorial 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Thread Affinity Tutorial>>
+
+  
+  This tutorial looks at using JavaScript within WoOF templates and interacting with the WoOF server by AJAX (by both HTTP parameters and JSON).
+
+  To focus on JavaScript and AJAX, the below simple application will undertake adding or subtracting from a number.  While this can be accomplished client-side with JavaScript, the tutorial demonstrates AJAX by sending the values to the WoOF server to undertake the calculations.
+
+[./images/JavaScriptApp-screenshot.png] JavaScriptApp screen shot.
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/JavaScriptApp/${projectVersion}/JavaScriptApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+  
+JavaScript
+
+  The below is the HTML and JavaScript for the page.  While production applications should use a JavaScript framework (e.g. {{{http://jQuery.org}jQuery}}) to handle issues such as cross browser differences, the tutorial will use raw JavaScript to show it is JavaScript framework agnostic.
+  
+  The reason that WoOF may use any JavaScript framework is that it does not interpret the web page contents.  WoOF treats the content of a web page as text, providing only the necessary tag replacements.  In the case below, WoOF provides the URLs for the AJAX calls.  This means any JavaScript code (whether raw or part of a framework) may be included in the WoOF templates.  It even means that WoOF templates can be used for other content types such as XML.  The focus of this tutorial will be on including JavaScript within HTML web pages.
+
+%{snippet|file=${basedir}/src/main/resources/template.woof.html|ignoreDownloadError=false}
+  
+  Different payload types (HTTP parameters and JSON) are used for the respective AJAX requests.  This is to demonstrate in the next sections how WoOF handles each payload type.
+
+
+
+Including JSON object handling
+
+  To include the object parsing/rendering from/to JSON, include the following in your <<<pom.xml>>>:
+
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+  
+  WoOF will auto detect the extension and include it.
+
+  
+  
+AJAX with HTTP parameters
+
+  The handling HTTP parameters in the AJAX request is very similar to handling HTML form submissions.  The difference is that the default behaviour of re-rendering the template's content is to be avoided.  To avoid re-rendering the template's content the below annotation is added to the servicing method to flag to not re-render the template.
+
+%{snippet|id=HttpParameters|file=${basedir}/src/main/java/net/officefloor/tutorial/javascriptapp/TemplateLogic.java|ignoreDownloadError=false}
+
+
+
+AJAX with JSON
+
+  To handle JSON content in both the request and response, the JSON content is mapped to Java Objects.  The below demonstrates the:
+  
+   * <<<@HttpObject>>> annotation on the parameter class to have the injected object loaded from the request's entity content.  Due to the <<<Content-Type>>> this will trigger JSON mapping.
+   
+   * <<<ObjectResponder>>> to write the object response.  Due to either <<<Accept>>>, <<<Content-Type>>> headers of the request, an appropriate object mapper is used.  In this case, JSON.
+
+%{snippet|id=HttpJson|file=${basedir}/src/main/java/net/officefloor/tutorial/javascriptapp/TemplateLogic.java|ignoreDownloadError=false}
+
+  The underlying implementation of JSON to Java Object mapping is via {{{http://github.com/FasterXML/jackson}Jackson}}.  Please see their documentation regarding additional annotations available to Java Objects to fine tune mapping of JSON to/from Java Objects.
+
+
+
+Generic Object handling
+
+  You will notice in the JSON example that there is no mention of JSON.  The reason is that the code is agnostic to the underlying wire format and therefore re-usable for say receiving / sending XML.
+
+  To integrate your own wire formats provide implementations of the following services:
+
+   * {{{/apidocs/net/officefloor/web/build/HttpObjectParserServiceFactory.html}HttpObjectParserServiceFactory}} to parse the input request entity into an object.
+
+   * {{{/apidocs/net/officefloor/web/build/HttpObjectResponderServiceFactory.html}HttpObjectResponderServiceFactory}} to write the output object as a response entity.
+
+
+
+Unit Test
+
+  The following unit tests manually undertake the AJAX calls to the WoOF server and verifying the correct responses.
+
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/javascriptapp/JavaScriptAppTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SectionHttpServer/index.html}next tutorial}} looks at sectioning the template.
+
