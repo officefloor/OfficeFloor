@@ -20,13 +20,18 @@ package net.officefloor.tutorial.threadaffinityhttpserver;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.sql.Connection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.sql.DataSource;
 
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
+import net.officefloor.OfficeFloorMain;
+import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.test.DataSourceRule;
 import net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource;
 import net.officefloor.jpa.test.EntityManagerRule;
@@ -40,6 +45,17 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * @author Daniel Sagenschneider
  */
 public class ThreadAffinityHttpServerTest {
+
+	/**
+	 * Run application.
+	 */
+	public static void main(String[] args) throws Exception {
+		// Keep database alive by keeping connection
+		DataSource dataSource = DefaultDataSourceFactory.createDataSource("datasource.properties");
+		try (Connection connection = dataSource.getConnection()) {
+			OfficeFloorMain.main(args);
+		}
+	}
 
 	// START SNIPPET: tutorial
 	@ClassRule
