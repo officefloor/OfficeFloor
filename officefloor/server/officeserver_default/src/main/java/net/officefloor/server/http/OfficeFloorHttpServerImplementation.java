@@ -22,7 +22,9 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.server.http.impl.DateHttpHeaderClock;
 
 /**
@@ -64,7 +66,7 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 						isIncludeEscalationStackTrace));
 		deployer.link(http.getManagingOffice(), office);
 		deployer.link(
-				http.getOfficeFloorManagedObjectFlow(HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()),
+				http.getOfficeFloorManagedObjectFlow(HttpServerSocketManagedObjectSource.HANDLE_REQUEST_FLOW_NAME),
 				serviceInput);
 		deployer.link(http, input);
 
@@ -75,12 +77,19 @@ public class OfficeFloorHttpServerImplementation implements HttpServerImplementa
 					new HttpServerSocketManagedObjectSource(serverLocation, serverHttpHeaderValue, dateHttpHeaderClock,
 							isIncludeEscalationStackTrace, context.getSslContext()));
 			deployer.link(https.getManagingOffice(), office);
-			deployer.link(https.getOfficeFloorManagedObjectFlow(
-					HttpServerSocketManagedObjectSource.Flows.HANDLE_REQUEST.name()), serviceInput);
+			deployer.link(
+					https.getOfficeFloorManagedObjectFlow(HttpServerSocketManagedObjectSource.HANDLE_REQUEST_FLOW_NAME),
+					serviceInput);
 			deployer.link(https, input);
 
 			// Specify default bound name
 			input.setBoundOfficeFloorManagedObjectSource(http);
+
+			// Specify the SSL team
+			OfficeFloorTeam sslTeam = deployer.addTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME,
+					ExecutorCachedTeamSource.class.getName());
+			deployer.link(https.getOfficeFloorManagedObjectTeam(HttpServerSocketManagedObjectSource.SSL_TEAM_NAME),
+					sslTeam);
 		}
 	}
 
