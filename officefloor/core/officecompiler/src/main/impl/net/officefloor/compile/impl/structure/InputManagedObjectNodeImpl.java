@@ -104,14 +104,10 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param inputManagedObjectName
-	 *            Name of this {@link InputManagedObjectNode}.
-	 * @param inputObjectType
-	 *            Input object type.
-	 * @param officeFloor
-	 *            {@link OfficeFloorNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param inputManagedObjectName Name of this {@link InputManagedObjectNode}.
+	 * @param inputObjectType        Input object type.
+	 * @param officeFloor            {@link OfficeFloorNode}.
+	 * @param context                {@link NodeContext}.
 	 */
 	public InputManagedObjectNodeImpl(String inputManagedObjectName, String inputObjectType,
 			OfficeFloorNode officeFloor, NodeContext context) {
@@ -266,6 +262,11 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 				// Use the managed object type
 				qualifications = new TypeQualification[] {
 						new TypeQualificationImpl(null, managedObjectType.getObjectType().getName()) };
+			}
+
+			// Still no qualifications, so use input object type
+			if ((qualifications.length == 0) && (this.inputObjectType != null)) {
+				qualifications = new TypeQualification[] { new TypeQualificationImpl(null, this.inputObjectType) };
 			}
 		}
 		return qualifications;

@@ -106,6 +106,23 @@ public class CompileExecutiveTest extends AbstractCompileTestCase {
 	}
 
 	/**
+	 * Ensure able to use default {@link ExecutionStrategy}.
+	 */
+	public void testDefaultExecutionStrategy() {
+
+		// Record building the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ExecutionStrategyManagedObject.class,
+				10);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		// allow default execution strategy (by frame)
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
 	 * Mock {@link ExecutiveSource} for testing.
 	 * 
 	 * @author Daniel Sagenschneider

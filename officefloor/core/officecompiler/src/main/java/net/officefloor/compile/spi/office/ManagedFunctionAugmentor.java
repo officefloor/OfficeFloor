@@ -17,19 +17,11 @@
  */
 package net.officefloor.compile.spi.office;
 
-import java.lang.annotation.Annotation;
-
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
- * <p>
  * Augments the {@link ManagedFunction} instances within the {@link Office}.
- * <p>
- * This enables adding additional {@link ManagedObject} instances based on
- * {@link Annotation} configured in line by the {@link ManagedFunction} to cut
- * down on configuration.
  * 
  * @author Daniel Sagenschneider
  */
@@ -38,8 +30,7 @@ public interface ManagedFunctionAugmentor {
 	/**
 	 * Augments the {@link ManagedFunction}.
 	 * 
-	 * @param context
-	 *            {@link ManagedFunctionAugmentorContext}.
+	 * @param context {@link ManagedFunctionAugmentorContext}.
 	 */
 	void augmentManagedFunction(ManagedFunctionAugmentorContext context);
 

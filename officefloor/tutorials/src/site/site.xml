@@ -21,6 +21,7 @@
 			<item name="DI (Managed Object)" href="./DatabaseHttpServer/index.html" />
 			<item name="Thread Injection" href="./TeamHttpServer/index.html" />
 			<item name="REST" href="./RestHttpServer/index.html" />
+			<item name="Thread Affinity" href="./ThreadAffinityHttpServer/index.html" />
 			<item name="Test" href="./TestHttpServer/index.html" />
 			<item name="Deploy" href="./DeployHttpServer/index.html" />
 			<!-- <item name="Governance" href="./TransactionHttpServer/index.html" 

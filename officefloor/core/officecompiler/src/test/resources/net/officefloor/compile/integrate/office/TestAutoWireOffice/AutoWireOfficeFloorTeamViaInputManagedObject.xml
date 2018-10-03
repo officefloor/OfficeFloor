@@ -1,0 +1,84 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="INPUT_OBJECT"
+				source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$ProcessManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<input-managed-object
+					name="INPUT_MANAGED_OBJECT" />
+				<flow name="doFlow">
+					<office-input office="OFFICE" section="SECTION"
+						input="INPUT" />
+				</flow>
+			</managed-object-source>
+		</managed-object-sources>
+		<input-managed-objects>
+			<input-managed-object
+				name="INPUT_MANAGED_OBJECT"
+				object-type="${testcase}$ProcessManagedObject">
+			</input-managed-object>
+		</input-managed-objects>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON">
+				<type-qualification
+					type="${testcase}$ProcessManagedObject" />
+			</team>
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<input section="SECTION" input="INPUT" />
+				<object name="OBJECT"
+					object-type="${testcase}$ProcessManagedObject">
+					<input-managed-object
+						name="INPUT_MANAGED_OBJECT" />
+				</object>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<external-managed-objects>
+			<external-managed-object name="OBJECT"
+				object-type="${testcase}$ProcessManagedObject"
+				object-scope="PROCESS">
+			</external-managed-object>
+		</external-managed-objects>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section">
+				<input name="INPUT" />
+				<object name="OBJECT"
+					object-type="${testcase}$ProcessManagedObject">
+					<external-managed-object name="OBJECT" />
+				</object>
+			</section>
+		</sections>
+	</office>
+	<section>
+		<external-managed-objects>
+			<external-managed-object name="OBJECT"
+				object-type="${testcase}$ProcessManagedObject" />
+		</external-managed-objects>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE"
+				source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$ProcessSectionClass" />
+				</properties>
+				<managed-function name="function">
+					<managed-function-object
+						name="${testcase}$ProcessManagedObject">
+						<external-managed-object name="OBJECT" />
+					</managed-function-object>
+				</managed-function>
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="INPUT" function-namespace="NAMESPACE"
+				managed-function="function" public="true" />
+		</functions>
+	</section>
+</context>

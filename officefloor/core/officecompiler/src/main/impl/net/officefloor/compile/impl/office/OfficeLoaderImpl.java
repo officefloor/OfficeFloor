@@ -51,10 +51,8 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link Office}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link Office}.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public OfficeLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -184,7 +182,7 @@ public class OfficeLoaderImpl implements OfficeLoader {
 		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the office tree
-		boolean isSourced = officeNode.sourceOfficeWithTopLevelSections(compileContext);
+		boolean isSourced = officeNode.sourceOfficeWithTopLevelSections(null, compileContext);
 		if (!isSourced) {
 			return null; // must source office successfully
 		}
@@ -196,10 +194,8 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
+	 * @param issueDescription Description of the issue.
+	 * @param officeLocation   Location of the {@link Office}.
 	 */
 	private void addIssue(String issueDescription, String officeLocation) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
@@ -208,12 +204,9 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
+	 * @param issueDescription Description of the issue.
+	 * @param cause            Cause of the issue.
+	 * @param officeLocation   Location of the {@link Office}.
 	 */
 	private void addIssue(String issueDescription, Throwable cause, String officeLocation) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);

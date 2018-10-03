@@ -1552,12 +1552,13 @@ public class MockConstruct {
 
 				// Create the executive
 				Executive executive = new DefaultExecutive();
+				ThreadFactory[] defaultExecutionStrategy = new ThreadFactory[0];
 				Map<String, ThreadFactory[]> executionStrategies = new HashMap<>();
 
 				// Build
-				this.built = new RawOfficeFloorMetaData(executive, executionStrategies, this.teamRegistry,
-						this.breakChainTeamManagement, this.threadLocalAwareExecutor, this.managedExecutionFactory,
-						mosRegistry, this.officeFloorEscalation);
+				this.built = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy, executionStrategies,
+						this.teamRegistry, this.breakChainTeamManagement, this.threadLocalAwareExecutor,
+						this.managedExecutionFactory, mosRegistry, this.officeFloorEscalation);
 			}
 			return this.built;
 		}

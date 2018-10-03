@@ -37,16 +37,21 @@ public interface OfficeFloorTeam extends PropertyConfigurable {
 	String getOfficeFloorTeamName();
 
 	/**
+	 * Specifies the size of the {@link Team}.
+	 * 
+	 * @param teamSize Size of the {@link Team}.
+	 */
+	void setTeamSize(int teamSize);
+
+	/**
 	 * <p>
 	 * Adds an {@link TypeQualification} for this {@link OfficeFloorTeam}.
 	 * <p>
-	 * This enables distinguishing {@link OfficeFloorTeam} instances to enable,
-	 * for example, dynamic {@link Team} assignment.
+	 * This enables distinguishing {@link OfficeFloorTeam} instances to enable, for
+	 * example, dynamic {@link Team} assignment.
 	 * 
-	 * @param qualifier
-	 *            Qualifier. May be <code>null</code> if no qualification.
-	 * @param type
-	 *            Type (typically the fully qualified type).
+	 * @param qualifier Qualifier. May be <code>null</code> if no qualification.
+	 * @param type      Type (typically the fully qualified type).
 	 */
 	void addTypeQualification(String qualifier, String type);
 

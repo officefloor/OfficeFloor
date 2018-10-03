@@ -64,13 +64,11 @@ public class SectionLoaderImpl implements SectionLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeNode
-	 *            {@link OfficeNode} containing the {@link OfficeSection}.
-	 * @param parentSectionNode
-	 *            Parent {@link SectionNode}. May be <code>null</code> if top
-	 *            level {@link OfficeSection}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param officeNode        {@link OfficeNode} containing the
+	 *                          {@link OfficeSection}.
+	 * @param parentSectionNode Parent {@link SectionNode}. May be <code>null</code>
+	 *                          if top level {@link OfficeSection}.
+	 * @param nodeContext       {@link NodeContext}.
 	 */
 	public SectionLoaderImpl(OfficeNode officeNode, SectionNode parentSectionNode, NodeContext nodeContext) {
 		this.officeNode = officeNode;
@@ -84,10 +82,8 @@ public class SectionLoaderImpl implements SectionLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link SectionLoader}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link SectionLoader}.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public SectionLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -102,14 +98,11 @@ public class SectionLoaderImpl implements SectionLoader {
 	 * Creates the {@link SectionNode} to load the {@link OfficeSectionType} or
 	 * {@link SectionType}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link SectionNode}.
-	 * @param sectionSourceClassName
-	 *            {@link SectionSource} {@link Class} name.
-	 * @param sectionSource
-	 *            {@link SectionSource} instance. May be <code>null</code>.
-	 * @param sectionLocation
-	 *            Location of the {@link SectionNode}.
+	 * @param sectionName            Name of the {@link SectionNode}.
+	 * @param sectionSourceClassName {@link SectionSource} {@link Class} name.
+	 * @param sectionSource          {@link SectionSource} instance. May be
+	 *                               <code>null</code>.
+	 * @param sectionLocation        Location of the {@link SectionNode}.
 	 * @return {@link SectionNode}.
 	 */
 	private SectionNode createSectionNode(String sectionName, String sectionSourceClassName,
@@ -252,7 +245,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the section
-		boolean isSourced = sectionNode.sourceSection(null, compileContext);
+		boolean isSourced = sectionNode.sourceSection(null, null, compileContext);
 		if (!isSourced) {
 			return null; // must source section successfully
 		}
@@ -289,7 +282,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the section
-		boolean isSourced = sectionNode.sourceSectionTree(null, compileContext);
+		boolean isSourced = sectionNode.sourceSectionTree(null, null, compileContext);
 		if (!isSourced) {
 			return null; // must source section successfully
 		}
@@ -301,8 +294,7 @@ public class SectionLoaderImpl implements SectionLoader {
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	 * @param issueDescription Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
@@ -311,10 +303,8 @@ public class SectionLoaderImpl implements SectionLoader {
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
+	 * @param issueDescription Description of the issue.
+	 * @param cause            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);

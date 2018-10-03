@@ -130,8 +130,8 @@
 	</executive>
 
 	<teams>
-		<team name="TEAM" source="net.example.ExampleTeamSource" x="600"
-			y="601">
+		<team name="TEAM" size="50"
+			source="net.example.ExampleTeamSource" x="600" y="601">
 			<properties>
 				<property name="TEAM_ONE" value="VALUE_ONE" />
 				<property name="TEAM_TWO" value="VALUE_TWO" />

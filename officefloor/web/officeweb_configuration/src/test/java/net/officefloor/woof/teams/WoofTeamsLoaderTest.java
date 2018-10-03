@@ -20,6 +20,9 @@ package net.officefloor.woof.teams;
 import java.io.ByteArrayInputStream;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
@@ -49,61 +52,98 @@ public class WoofTeamsLoaderTest extends OfficeFrameTestCase {
 			new WoofTeamsRepositoryImpl(new ModelRepositoryImpl()));
 
 	/**
-	 * {@link WoofTeamsLoaderContext}.
+	 * Ensure can load configuration to {@link OfficeFloorDeployer} with the teams.
 	 */
-	private final WoofTeamsLoaderContext loaderContext = this.createMock(WoofTeamsLoaderContext.class);
+	public void testLoadingOfficeFloorTeams() throws Exception {
 
-	/**
-	 * Mock {@link OfficeFloorDeployer}.
-	 */
-	private final OfficeFloorDeployer deployer = this.createMock(OfficeFloorDeployer.class);
-
-	/**
-	 * Mock {@link OfficeFloorExtensionContext}.
-	 */
-	private final OfficeFloorExtensionContext extensionContext = this.createMock(OfficeFloorExtensionContext.class);
-
-	/**
-	 * Ensure can load configuration to {@link OfficeFloorDeployer} with the
-	 * teams.
-	 */
-	public void testLoading() throws Exception {
+		// Create specific OfficeFloor mocks
+		final WoofTeamsLoaderContext loaderContext = this.createMock(WoofTeamsLoaderContext.class);
+		final OfficeFloorDeployer deployer = this.createMock(OfficeFloorDeployer.class);
+		final OfficeFloorExtensionContext extensionContext = this.createMock(OfficeFloorExtensionContext.class);
+		final DeployedOffice office = this.createMock(DeployedOffice.class);
 
 		// Obtain the configuration
-		this.recordReturn(this.loaderContext, this.loaderContext.getConfiguration(),
-				this.getConfiguration("Teams.teams.xml"));
-		this.recordReturn(this.loaderContext, this.loaderContext.getOfficeFloorDeployer(), this.deployer);
-		this.recordReturn(this.loaderContext, this.loaderContext.getOfficeFloorExtensionContext(),
-				this.extensionContext);
+		this.recordReturn(loaderContext, loaderContext.getOfficeFloorDeployer(), deployer);
+		this.recordReturn(loaderContext, loaderContext.getOfficeFloorExtensionContext(), extensionContext);
+		this.recordReturn(loaderContext, loaderContext.getDeployedOffice(), office);
+		this.recordReturn(loaderContext, loaderContext.getConfiguration(), this.getConfiguration("Teams.teams.xml"));
+
+		// Enable auto wire teams (for other managed object sources possibly deployed)
+		deployer.enableAutoWireTeams();
 
 		// Record first team
+		final String teamOneName = "QUALIFIED_ONE:TYPE_ONE";
 		OfficeFloorTeam teamOne = this.createMock(OfficeFloorTeam.class);
-		this.recordReturn(this.deployer,
-				this.deployer.addTeam("QUALIFIED_ONE:TYPE_ONE", "net.example.ExampleTeamSource"), teamOne);
+		this.recordReturn(deployer, deployer.addTeam(teamOneName, "net.example.ExampleTeamSource"), teamOne);
 		teamOne.addTypeQualification("QUALIFIED_ONE", "TYPE_ONE");
 		teamOne.addTypeQualification("QUALIFIED_TWO", "TYPE_TWO");
 		teamOne.addProperty("NAME_ONE", "VALUE_ONE");
-		this.recordReturn(this.extensionContext, this.extensionContext.getResource("example/team.properties"),
+		this.recordReturn(extensionContext, extensionContext.getResource("example/team.properties"),
 				new ByteArrayInputStream("file=value".getBytes()));
 		teamOne.addProperty("file", "value");
 		teamOne.addProperty("NAME_TWO", "VALUE_TWO");
 
+		// Record link directly to Office team
+		// Ensures application links to its specified team
+		// (and not from another WoOF loading teams)
+		OfficeTeam officeTeamOne = this.createMock(OfficeTeam.class);
+		this.recordReturn(office, office.getDeployedOfficeTeam(teamOneName), officeTeamOne);
+		deployer.link(officeTeamOne, teamOne);
+
 		// Record second team
+		final String teamTwoName = "QUALIFIED:net.example.Type";
 		OfficeFloorTeam teamTwo = this.createMock(OfficeFloorTeam.class);
-		this.recordReturn(this.deployer, this.deployer.addTeam("QUALIFIED:net.example.Type", "PASSIVE"), teamTwo);
+		this.recordReturn(deployer, deployer.addTeam(teamTwoName, "PASSIVE"), teamTwo);
+		teamTwo.addTypeQualification("QUALIFIED", "net.example.Type");
+
+		// Record link directly to Office team
+		OfficeTeam officeTeamTwo = this.createMock(OfficeTeam.class);
+		this.recordReturn(office, office.getDeployedOfficeTeam(teamTwoName), officeTeamTwo);
+		deployer.link(officeTeamTwo, teamTwo);
+
+		// Tests
+		this.replayMockObjects();
+		this.loader.loadWoofTeamsConfiguration(loaderContext);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can load configuration to {@link OfficeArchitect} with the teams.
+	 */
+	public void testLoadingOfficeUsageOfTeams() throws Exception {
+
+		// Create specific Office mocks
+		final WoofTeamsUsageContext usageContext = this.createMock(WoofTeamsUsageContext.class);
+		final OfficeArchitect architect = this.createMock(OfficeArchitect.class);
+
+		// Obtain the configuration
+		this.recordReturn(usageContext, usageContext.getOfficeArchitect(), architect);
+		this.recordReturn(usageContext, usageContext.getConfiguration(), this.getConfiguration("Teams.teams.xml"));
+
+		// Enable auto wire of teams
+		architect.enableAutoWireTeams();
+
+		// Record first team
+		OfficeTeam teamOne = this.createMock(OfficeTeam.class);
+		this.recordReturn(architect, architect.addOfficeTeam("QUALIFIED_ONE:TYPE_ONE"), teamOne);
+		teamOne.addTypeQualification("QUALIFIED_ONE", "TYPE_ONE");
+		teamOne.addTypeQualification("QUALIFIED_TWO", "TYPE_TWO");
+
+		// Record second team
+		OfficeTeam teamTwo = this.createMock(OfficeTeam.class);
+		this.recordReturn(architect, architect.addOfficeTeam("QUALIFIED:net.example.Type"), teamTwo);
 		teamTwo.addTypeQualification("QUALIFIED", "net.example.Type");
 
 		// Test
 		this.replayMockObjects();
-		this.loader.loadWoofTeamsConfiguration(this.loaderContext);
+		this.loader.loadWoofTeamsUsage(usageContext);
 		this.verifyMockObjects();
 	}
 
 	/**
 	 * Obtains the {@link ConfigurationItem}.
 	 * 
-	 * @param fileName
-	 *            File name for {@link ConfigurationItem}.
+	 * @param fileName File name for {@link ConfigurationItem}.
 	 * @return {@link ConfigurationItem}.
 	 */
 	private ConfigurationItem getConfiguration(String fileName) throws Exception {

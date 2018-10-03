@@ -48,6 +48,28 @@ public class ExecutionStrategyForManagedObjectTest extends AbstractOfficeConstru
 	private static final String STRATEGY_NAME = "strategy";
 
 	/**
+	 * Ensure can configure default {@link ExecutionStrategy} for
+	 * {@link ManagedObjectSource}.
+	 */
+	public void testDefaultExecutionStrategy() throws Exception {
+
+		// Obtain the office
+		String officeName = this.getOfficeName();
+
+		// Create the managed object
+		this.constructManagedObject("MO", ExecutionStrategyManagedObjectSource.class, officeName)
+				.setManagingOffice(officeName);
+
+		// Open the OfficeFloor (should load default strategy)
+		ExecutionStrategyManagedObjectSource.strategy = null;
+		OfficeFloor officeFloor = this.constructOfficeFloor();
+		officeFloor.openOfficeFloor();
+
+		// Ensure have default execution strategy
+		assertNotNull("Should load default execution strategy", ExecutionStrategyManagedObjectSource.strategy);
+	}
+
+	/**
 	 * Ensure can configure {@link ExecutionStrategy} for
 	 * {@link ManagedObjectSource}.
 	 */

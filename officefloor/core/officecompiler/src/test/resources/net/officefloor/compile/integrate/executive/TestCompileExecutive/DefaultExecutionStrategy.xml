@@ -1,0 +1,15 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source
+				name="MANAGED_OBJECT_SOURCE"
+				source="${testcase}$ExecutionStrategyManagedObject" timeout="10">
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office />
+</context>

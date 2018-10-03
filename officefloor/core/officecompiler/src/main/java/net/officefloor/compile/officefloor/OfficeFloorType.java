@@ -39,17 +39,16 @@ public interface OfficeFloorType {
 	OfficeFloorPropertyType[] getOfficeFloorPropertyTypes();
 
 	/**
-	 * Obtains the <code>type definitions</code> of the
-	 * {@link ManagedObjectSource} instances that may be configured for the
-	 * {@link OfficeFloor}.
+	 * Obtains the <code>type definitions</code> of the {@link ManagedObjectSource}
+	 * instances that may be configured for the {@link OfficeFloor}.
 	 * 
 	 * @return {@link OfficeFloorManagedObjectSourceType} instances.
 	 */
 	OfficeFloorManagedObjectSourceType[] getOfficeFloorManagedObjectSourceTypes();
 
 	/**
-	 * Obtains the <code>type definitions</code> of the {@link TeamSource}
-	 * instances that may be onfigured for the {@link OfficeFloor}.
+	 * Obtains the <code>type definitions</code> of the {@link TeamSource} instances
+	 * that may be configured for the {@link OfficeFloor}.
 	 * 
 	 * @return {@link OfficeFloorTeamSourceType} instances.
 	 */

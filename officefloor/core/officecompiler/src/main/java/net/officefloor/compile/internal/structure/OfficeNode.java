@@ -49,13 +49,10 @@ public interface OfficeNode
 	/**
 	 * Initialises the {@link OfficeNode}.
 	 * 
-	 * @param officeSourceClassName
-	 *            {@link OfficeSource} class name.
-	 * @param officeSource
-	 *            Optional instantiated {@link OfficeSource}. May be
-	 *            <code>null</code>.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
+	 * @param officeSourceClassName {@link OfficeSource} class name.
+	 * @param officeSource          Optional instantiated {@link OfficeSource}. May
+	 *                              be <code>null</code>.
+	 * @param officeLocation        Location of the {@link Office}.
 	 */
 	void initialise(String officeSourceClassName, OfficeSource officeSource, String officeLocation);
 
@@ -63,44 +60,40 @@ public interface OfficeNode
 	 * Adds a {@link OfficeManagedObjectSource} supplied from an
 	 * {@link OfficeSupplier}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeManagedObjectSource}.
-	 * @param suppliedManagedObject
-	 *            {@link SuppliedManagedObjectSourceNode} to supply the
-	 *            {@link OfficeManagedObjectSource}.
+	 * @param managedObjectSourceName Name of the {@link OfficeManagedObjectSource}.
+	 * @param suppliedManagedObject   {@link SuppliedManagedObjectSourceNode} to
+	 *                                supply the {@link OfficeManagedObjectSource}.
 	 * @return {@link OfficeManagedObjectSource}.
 	 */
 	OfficeManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
 			SuppliedManagedObjectSourceNode suppliedManagedObject);
 
 	/**
-	 * Sources this {@link Office} along with its top level
-	 * {@link OfficeSection} instances into this {@link OfficeNode}.
+	 * Sources this {@link Office} along with its top level {@link OfficeSection}
+	 * instances into this {@link OfficeNode}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
+	 * @param compileContext             {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
-	 *         <code>false</code> with issue reported to the
-	 *         {@link CompilerIssues}.
+	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeWithTopLevelSections(CompileContext compileContext);
+	boolean sourceOfficeWithTopLevelSections(ManagedObjectSourceVisitor managedObjectSourceVisitor,
+			CompileContext compileContext);
 
 	/**
 	 * Sources this {@link Office} and all descendant {@link Node} instances.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
+	 * @param compileContext             {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
-	 *         <code>false</code> with issue reported to the
-	 *         {@link CompilerIssues}.
+	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
-	boolean sourceOfficeTree(CompileContext compileContext);
+	boolean sourceOfficeTree(ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext);
 
 	/**
 	 * Obtain the qualified name.
 	 * 
-	 * @param simpleName
-	 *            Simple name to qualify with the {@link Office} name space.
+	 * @param simpleName Simple name to qualify with the {@link Office} name space.
 	 * @return {@link Office} qualified name.
 	 */
 	String getQualifiedName(String simpleName);
@@ -115,38 +108,32 @@ public interface OfficeNode
 	/**
 	 * Loads the {@link OfficeType}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return {@link OfficeType} or <code>null</code> if issue loading with
-	 *         issue reported to the {@link CompilerIssues}.
+	 * @param compileContext {@link CompileContext}.
+	 * @return {@link OfficeType} or <code>null</code> if issue loading with issue
+	 *         reported to the {@link CompilerIssues}.
 	 */
 	OfficeType loadOfficeType(CompileContext compileContext);
 
 	/**
 	 * Auto-wires the {@link OfficeObjectNode} instances that are unlinked.
 	 * 
-	 * @param autoWirer
-	 *            {@link AutoWirer}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Auto-wires the {@link OfficeTeamNode} instances that are unlinked.
 	 * 
-	 * @param autoWirer
-	 *            {@link AutoWirer}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Runs the {@link ExecutionExplorer} instances.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 * @return <code>true</code> if successfully explored execution.
 	 */
 	boolean runExecutionExplorers(CompileContext compileContext);
@@ -154,12 +141,9 @@ public interface OfficeNode
 	/**
 	 * Builds the {@link Office} for this {@link OfficeNode}.
 	 * 
-	 * @param builder
-	 *            {@link OfficeFloorBuilder}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @param profiler
-	 *            Optional {@link Profiler}. May be <code>null</code>.
+	 * @param builder        {@link OfficeFloorBuilder}.
+	 * @param compileContext {@link CompileContext}.
+	 * @param profiler       Optional {@link Profiler}. May be <code>null</code>.
 	 * @return {@link OfficeBuilder} for the built {@link Office}.
 	 */
 	OfficeBindings buildOffice(OfficeFloorBuilder builder, CompileContext compileContext, Profiler profiler);
@@ -168,10 +152,8 @@ public interface OfficeNode
 	 * Loads the {@link FunctionManager} instances to externally trigger this
 	 * {@link OfficeNode}.
 	 * 
-	 * @param office
-	 *            {@link Office} for this {@link OfficeNode}.
-	 * @throws UnknownFunctionException
-	 *             {@link UnknownFunctionException}.
+	 * @param office {@link Office} for this {@link OfficeNode}.
+	 * @throws UnknownFunctionException {@link UnknownFunctionException}.
 	 */
 	void loadExternalServicing(Office office) throws UnknownFunctionException;
 

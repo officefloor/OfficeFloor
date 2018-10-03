@@ -41,6 +41,7 @@ import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuild
 import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectCleanupImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
@@ -108,6 +109,11 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * {@link OfficeMetaData}.
 	 */
 	private final OfficeMetaDataMockBuilder officeMetaData = MockConstruct.mockOfficeMetaData(MANAGING_OFFICE_NAME);
+
+	/**
+	 * Default {@link ExecutionStrategy}.
+	 */
+	private ThreadFactory[] defaultExecutionStrategy = null;
 
 	/**
 	 * {@link ExecutionStrategy} instances by name.
@@ -426,7 +432,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * Ensures issues if {@link ExecutionStrategy} instances configured but no
 	 * {@link ExecutionStrategy} instances required.
 	 */
-	public void testNoExecutionStrategiessButExecutionStrategiessConfigured() {
+	public void testNoExecutionStrategiesButExecutionStrategiesConfigured() {
 
 		// Record flows configured but none required
 		this.configuration.linkExecutionStrategy(0, "test");
@@ -515,6 +521,29 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures able to construct {@link DefaultExecutive} {@link ExecutionStrategy}
+	 * for a {@link ManagedObject}.
+	 */
+	public void testConstructDefaultExecutionStrategy() throws Exception {
+
+		// Record
+		final ThreadFactory[] threadFactories = new ThreadFactory[0];
+		this.rawMoMetaData.getMetaDataBuilder().addExecutionStrategy();
+		this.defaultExecutionStrategy = threadFactories;
+
+		// Manage by office
+		this.replayMockObjects();
+		RawManagingOfficeMetaData<?> metaData = this.run_manageByOffice(true, INPUT_MANAGED_OBJECT_NAME);
+		this.verifyMockObjects();
+
+		// Ensure strategy available from execution context
+		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteContextFactory()
+				.createManagedObjectExecuteContext();
+		assertSame("Incorrect thread factories for default execution strategy", threadFactories,
+				context.getExecutionStrategy(0));
+	}
+
+	/**
 	 * Records an issue.
 	 * 
 	 * @param issueDescription Description of the issue.
@@ -575,7 +604,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
 				new RawAdministrationMetaDataFactory(this.officeMetaData.build(), null, null, null), null, null);
 		rawManagingOffice.manageByOffice(this.officeMetaData.build(), processBoundMetaData, moAdminFactory,
-				this.executionStrategies, this.issues);
+				this.defaultExecutionStrategy, this.executionStrategies, this.issues);
 
 		// Validate creation of execute context
 		if (isCreateExecuteContext) {

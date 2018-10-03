@@ -24,17 +24,24 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.OfficeFloorExecutive;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
+import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -116,7 +123,25 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 
 		// Record the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addTeam("OVERRIDE_TEAM", new TestTeamSource(), "value", "override", "additional",
+		TeamBuilder<?> team = this.record_officeFloorBuilder_addTeam("OVERRIDE_TEAM", new TestTeamSource(), "value",
+				"override", "additional", "another");
+		team.setTeamSize(50);
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure can override {@link Property} for the {@link OfficeFloorExecutive}.
+	 */
+	public void testOverrideExecutiveProperties() {
+
+		// Enables override of properties
+		this.enableOverrideProperties();
+
+		// Record the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_setExecutive(new TestExecutiveSource(), "value", "override", "additional",
 				"another");
 
 		// Compile the OfficeFloor
@@ -142,7 +167,7 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 	}
 
 	@TestSource
-	public static class TestTeamSource extends AbstractTeamSource {
+	public static class TestTeamSource extends AbstractTeamSource implements Team {
 
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
@@ -151,8 +176,22 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 
 		@Override
 		public Team createTeam(TeamSourceContext context) throws Exception {
+			return this; // required in sourcing (for type)
+		}
+
+		@Override
+		public void startWorking() {
 			fail("Should not be invoked");
-			return null;
+		}
+
+		@Override
+		public void assignJob(Job job) {
+			fail("Should not be invoked");
+		}
+
+		@Override
+		public void stopWorking() {
+			fail("Should not be invoked");
 		}
 	}
 
@@ -174,6 +213,22 @@ public class OfficeFloorOverridePropertiesTest extends AbstractCompileTestCase {
 					context.getManagedObjectPoolSourceContext().getProperty("additional"));
 			context.setPooledObjectType(CompileManagedObject.class);
 			context.setManagedObjectPoolFactory(managedObjectPoolFactory);
+		}
+	}
+
+	@TestSource
+	public static class TestExecutiveSource extends AbstractExecutiveSource {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			context.addProperty("value");
+		}
+
+		@Override
+		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
+			assertEquals("Incorrect overridden value", "override", context.getProperty("value"));
+			assertEquals("Incorrect additional value", "another", context.getProperty("additional"));
+			return new DefaultExecutive();
 		}
 	}
 

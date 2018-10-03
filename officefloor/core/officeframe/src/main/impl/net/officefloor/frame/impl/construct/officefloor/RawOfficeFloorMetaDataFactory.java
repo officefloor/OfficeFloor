@@ -198,6 +198,7 @@ public class RawOfficeFloorMetaDataFactory {
 
 		// Create the executive
 		Executive executive;
+		ThreadFactory[] defaultExecutionStrategy;
 		Map<String, ThreadFactory[]> executionStrategies;
 		Map<String, TeamOversight> teamOversights;
 		ExecutiveConfiguration<?> executiveConfiguration = configuration.getExecutiveConfiguration();
@@ -208,12 +209,14 @@ public class RawOfficeFloorMetaDataFactory {
 			RawExecutiveMetaData rawExecutive = rawExecutiveFactory
 					.constructRawExecutiveMetaData(executiveConfiguration, officeFloorName, issues);
 			executive = rawExecutive.getExecutive();
+			defaultExecutionStrategy = null;
 			executionStrategies = rawExecutive.getExecutionStrategies();
 			teamOversights = rawExecutive.getTeamOversights();
 		} else {
 			// No Executive configured, so use default
 			DefaultExecutive defaultExecutive = new DefaultExecutive(threadFactoryManufacturer);
 			executive = defaultExecutive;
+			defaultExecutionStrategy = defaultExecutive.getExcutionStrategies()[0].getThreadFactories();
 			executionStrategies = defaultExecutive.getExecutionStrategyMap();
 			teamOversights = defaultExecutive.getTeamOversightMap();
 		}
@@ -270,9 +273,9 @@ public class RawOfficeFloorMetaDataFactory {
 				officeFloorManagement);
 
 		// Create the raw office floor meta-data
-		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, executionStrategies, teamRegistry,
-				breakChainTeamManagement, threadLocalAwareExecutor, managedExecutionFactory, mosRegistry,
-				officeFloorEscalation);
+		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy,
+				executionStrategies, teamRegistry, breakChainTeamManagement, threadLocalAwareExecutor,
+				managedExecutionFactory, mosRegistry, officeFloorEscalation);
 
 		// Construct the office factory
 		RawOfficeMetaDataFactory rawOfficeFactory = new RawOfficeMetaDataFactory(rawMetaData);

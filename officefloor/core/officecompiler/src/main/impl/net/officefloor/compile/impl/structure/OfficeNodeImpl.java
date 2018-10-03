@@ -49,6 +49,7 @@ import net.officefloor.compile.internal.structure.ManagedFunctionVisitor;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceVisitor;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
@@ -171,13 +172,10 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param officeSourceClassName
-		 *            Class name of the {@link OfficeSource}.
-		 * @param officeSource
-		 *            {@link OfficeSource} instance to use rather than
-		 *            instantiating the {@link OfficeSource} class.
-		 * @param officeLocation
-		 *            Location of the {@link Office}.
+		 * @param officeSourceClassName Class name of the {@link OfficeSource}.
+		 * @param officeSource          {@link OfficeSource} instance to use rather than
+		 *                              instantiating the {@link OfficeSource} class.
+		 * @param officeLocation        Location of the {@link Office}.
 		 */
 		public InitialisedState(String officeSourceClassName, OfficeSource officeSource, String officeLocation) {
 			this.officeSourceClassName = officeSourceClassName;
@@ -235,8 +233,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
 
 	/**
-	 * {@link AdministrationNode} instances by their
-	 * {@link OfficeAdministration} name.
+	 * {@link AdministrationNode} instances by their {@link OfficeAdministration}
+	 * name.
 	 */
 	private final Map<String, AdministrationNode> administrators = new HashMap<String, AdministrationNode>();
 
@@ -283,12 +281,9 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	/**
 	 * Initialise with all parameters.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link DeployedOffice}.
-	 * @param officeFloor
-	 *            Parent {@link OfficeFloorNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param officeName  Name of the {@link DeployedOffice}.
+	 * @param officeFloor Parent {@link OfficeFloorNode}.
+	 * @param context     {@link NodeContext}.
 	 */
 	public OfficeNodeImpl(String officeName, OfficeFloorNode officeFloor, NodeContext context) {
 		this.officeName = officeName;
@@ -302,10 +297,9 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	/**
 	 * Adds a {@link ManagedObjectSourceNode}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSourceClassName
-	 *            {@link Class} name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceName      Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClassName {@link Class} name of the
+	 *                                     {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	private ManagedObjectSourceNode addManagedObjectSource(String managedObjectSourceName,
@@ -318,10 +312,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	/**
 	 * Adds a {@link ManagedObjectSourceNode}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource     {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectSourceNode}.
 	 */
 	private ManagedObjectSourceNode addManagedObjectSource(String managedObjectSourceName,
@@ -427,7 +419,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	public void visit(ManagedFunctionType<?, ?> managedFunctionType, ManagedFunctionNode managedFunctionNode,
 			CompileContext compileContext) {
 
-		// Create the managed function augmentor context
+		// Create the managed function augment context
 		ManagedFunctionAugmentorContext context = new ManagedFunctionAugmentorContext() {
 
 			@Override
@@ -503,10 +495,9 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	/**
 	 * Sources the {@link Office}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return <true> to indicate sourced, otherwise <false> with issues
-	 *         reported to the {@link CompilerIssues}.
+	 * @param compileContext {@link CompileContext}.
+	 * @return <true> to indicate sourced, otherwise <false> with issues reported to
+	 *         the {@link CompilerIssues}.
 	 */
 	private boolean sourceOffice(CompileContext compileContext) {
 
@@ -598,7 +589,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	}
 
 	@Override
-	public boolean sourceOfficeWithTopLevelSections(CompileContext compileContext) {
+	public boolean sourceOfficeWithTopLevelSections(ManagedObjectSourceVisitor managedObjectSourceVisitor,
+			CompileContext compileContext) {
 
 		// Source the office
 		boolean isSourced = this.sourceOffice(compileContext);
@@ -611,7 +603,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 		// Source the top level sections
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSection(this, compileContext));
+				(section) -> section.sourceSection(this, managedObjectSourceVisitor, compileContext));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -621,7 +613,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	}
 
 	@Override
-	public boolean sourceOfficeTree(CompileContext compileContext) {
+	public boolean sourceOfficeTree(ManagedObjectSourceVisitor managedObjectSourceVisitor,
+			CompileContext compileContext) {
 
 		// Source the office
 		boolean isSourced = this.sourceOffice(compileContext);
@@ -634,7 +627,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 		// Source all section trees
 		isSourced = CompileUtil.source(this.sections, (section) -> section.getOfficeSectionName(),
-				(section) -> section.sourceSectionTree(this, compileContext));
+				(section) -> section.sourceSectionTree(this, managedObjectSourceVisitor, compileContext));
 		if (!isSourced) {
 			return false; // must source all top level sections
 		}
@@ -649,7 +642,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		// Ensure all managed object sources are sourced
 		isSourced = CompileUtil.source(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
-				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(compileContext));
+				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(managedObjectSourceVisitor,
+						compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -678,8 +672,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			// Create the Office supplier auto wirer
 			final AutoWirer<LinkObjectNode> officeSupplierAutoWirer = officeFloorContextAutoWirer
 					.createScopeAutoWirer();
-			this.suppliers.values()
-					.forEach((supplier) -> supplier.loadAutoWireObjects(officeSupplierAutoWirer, compileContext));
+			this.suppliers.values().forEach((supplier) -> supplier.loadAutoWireObjects(officeSupplierAutoWirer,
+					managedObjectSourceVisitor, compileContext));
 
 			// Create the Office objects auto wirer
 			final AutoWirer<LinkObjectNode> officeObjectsAutoWirer = officeSupplierAutoWirer.createScopeAutoWirer();
@@ -1316,10 +1310,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		/**
 		 * Initiate.
 		 * 
-		 * @param type
-		 *            Type of {@link Escalation}.
-		 * @param node
-		 *            {@link EscalationNode}.
+		 * @param type Type of {@link Escalation}.
+		 * @param node {@link EscalationNode}.
 		 */
 		public EscalationStruct(Class<? extends Throwable> type, EscalationNode node) {
 			this.type = type;

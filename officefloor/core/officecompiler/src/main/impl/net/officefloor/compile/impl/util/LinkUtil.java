@@ -640,6 +640,23 @@ public class LinkUtil {
 							traversedNodes));
 		};
 
+		// Handling of input managed object
+		Consumer<InputManagedObjectNode> loadInputManagedObject = (inputManagedObject) -> {
+			// Load auto wires for the input managed object
+			Arrays.stream(inputManagedObject.getTypeQualifications(compileContext))
+					.forEach((typeQualification) -> allAutoWires
+							.add(new AutoWire(typeQualification.getQualifier(), typeQualification.getType())));
+
+			/*
+			 * TODO: consider loading the dependency auto wires.
+			 * 
+			 * As input managed object may be realised by more than one managed object
+			 * source, it is possible that this could be a wider spread than anticipated.
+			 * Therefore, for now just use the type qualifications of the input managed
+			 * object.
+			 */
+		};
+
 		// Handling of office object
 		Consumer<OfficeObjectNode> loadOfficeObject = (officeObject) -> allAutoWires
 				.add(new AutoWire(officeObject.getTypeQualifier(), officeObject.getOfficeObjectType()));
@@ -649,7 +666,6 @@ public class LinkUtil {
 			loadManagedObject.accept((ManagedObjectNode) node);
 
 		} else {
-
 			// Attempt to obtain the managed object
 			ManagedObjectNode managedObject = retrieveTarget(node, OBJECT_TRAVERSER, ManagedObjectNode.class, false,
 					issues, null).target;
@@ -657,15 +673,22 @@ public class LinkUtil {
 				loadManagedObject.accept(managedObject);
 
 			} else {
+				// Attempt to obtain input managed object
+				InputManagedObjectNode inputManagedObject = retrieveTarget(node, OBJECT_TRAVERSER,
+						InputManagedObjectNode.class, false, issues, null).target;
+				if (inputManagedObject != null) {
+					loadInputManagedObject.accept(inputManagedObject);
 
-				// Attempt to load office object
-				OfficeObjectNode officeObject = retrieveTarget(node, OBJECT_TRAVERSER, OfficeObjectNode.class, false,
-						issues, null).target;
-				if (officeObject != null) {
-					loadOfficeObject.accept(officeObject);
+				} else {
+					// Attempt to load office object
+					OfficeObjectNode officeObject = retrieveTarget(node, OBJECT_TRAVERSER, OfficeObjectNode.class,
+							false, issues, null).target;
+					if (officeObject != null) {
+						loadOfficeObject.accept(officeObject);
 
-				} else if (node instanceof OfficeObjectNode) {
-					loadOfficeObject.accept((OfficeObjectNode) node);
+					} else if (node instanceof OfficeObjectNode) {
+						loadOfficeObject.accept((OfficeObjectNode) node);
+					}
 				}
 			}
 		}

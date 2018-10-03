@@ -115,7 +115,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorTeamOversightModel officeFloorTeamOversight = new OfficeFloorTeamOversightModel(
 				"OFFICE_FLOOR_TEAM_OVERSIGHT");
 		officeFloorExecutive.addTeamOversight(officeFloorTeamOversight);
-		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel("OFFICE_FLOOR_TEAM",
+		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel("OFFICE_FLOOR_TEAM", 50,
 				"net.example.ExampleTeamSource");
 		officeFloor.addOfficeFloorTeam(officeFloorTeam);
 		DeployedOfficeModel office = new DeployedOfficeModel("OFFICE", "net.example.ExampleOfficeSource",
@@ -377,7 +377,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorTeamOversightModel officeFloorTeamOversight = new OfficeFloorTeamOversightModel(
 				"OFFICE_FLOOR_TEAM_OVERSIGHT");
 		officeFloorExecutive.addTeamOversight(officeFloorTeamOversight);
-		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel("OFFICE_FLOOR_TEAM",
+		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel("OFFICE_FLOOR_TEAM", 50,
 				"net.example.ExampleTeamSource");
 		officeFloor.addOfficeFloorTeam(officeFloorTeam);
 		DeployedOfficeModel office = new DeployedOfficeModel("OFFICE", "net.example.ExampleOfficeSource",

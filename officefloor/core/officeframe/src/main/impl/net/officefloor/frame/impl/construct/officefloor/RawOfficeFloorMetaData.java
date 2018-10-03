@@ -48,6 +48,11 @@ public class RawOfficeFloorMetaData {
 	private final Executive executive;
 
 	/**
+	 * Default {@link ExecutionStrategy}.
+	 */
+	private final ThreadFactory[] defaultExecutionStrategy;
+
+	/**
 	 * {@link ExecutionStrategy} instances by name.
 	 */
 	private final Map<String, ThreadFactory[]> executionStrategies;
@@ -92,6 +97,7 @@ public class RawOfficeFloorMetaData {
 	 * Initiate.
 	 * 
 	 * @param executive                {@link Executive}.
+	 * @param defaultExecutionStrategy Default {@link ExecutionStrategy}.
 	 * @param executionStrategies      {@link ExecutionStrategy} instances by name.
 	 * @param teamRegistry             Registry of {@link RawTeamMetaData} by the
 	 *                                 {@link Team} name.
@@ -103,11 +109,13 @@ public class RawOfficeFloorMetaData {
 	 *                                 by the {@link ManagedObjectSource} name.
 	 * @param officeFloorEscalation    {@link EscalationProcedure}.
 	 */
-	public RawOfficeFloorMetaData(Executive executive, Map<String, ThreadFactory[]> executionStrategies,
-			Map<String, RawTeamMetaData> teamRegistry, TeamManagement breakChainTeamManagement,
-			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
-			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry, EscalationFlow officeFloorEscalation) {
+	public RawOfficeFloorMetaData(Executive executive, ThreadFactory[] defaultExecutionStrategy,
+			Map<String, ThreadFactory[]> executionStrategies, Map<String, RawTeamMetaData> teamRegistry,
+			TeamManagement breakChainTeamManagement, ThreadLocalAwareExecutor threadLocalAwareExecutor,
+			ManagedExecutionFactory managedExecutionFactory, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
+			EscalationFlow officeFloorEscalation) {
 		this.executive = executive;
+		this.defaultExecutionStrategy = defaultExecutionStrategy;
 		this.executionStrategies = executionStrategies;
 		this.teamRegistry = teamRegistry;
 		this.breakChainTeamManagement = breakChainTeamManagement;
@@ -124,6 +132,15 @@ public class RawOfficeFloorMetaData {
 	 */
 	public Executive getExecutive() {
 		return this.executive;
+	}
+
+	/**
+	 * Obtains the default {@link ExecutionStrategy}.
+	 * 
+	 * @return Default {@link ExecutionStrategy}.
+	 */
+	public ThreadFactory[] getDefaultExecutionStrategy() {
+		return this.defaultExecutionStrategy;
 	}
 
 	/**

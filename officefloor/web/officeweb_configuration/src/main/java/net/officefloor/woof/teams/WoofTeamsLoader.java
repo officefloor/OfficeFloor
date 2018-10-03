@@ -29,11 +29,17 @@ public interface WoofTeamsLoader {
 	/**
 	 * Loads the {@link WoofTeamsModel} configuration.
 	 * 
-	 * @param context
-	 *            {@link WoofTeamsLoaderContext}.
-	 * @throws Exception
-	 *             If fails to load the configuration.
+	 * @param context {@link WoofTeamsLoaderContext}.
+	 * @throws Exception If fails to load the configuration.
 	 */
 	void loadWoofTeamsConfiguration(WoofTeamsLoaderContext context) throws Exception;
+
+	/**
+	 * Loads the use of the {@link WoofTeamsModel} configuration.
+	 * 
+	 * @param context
+	 * @throws Exception If fails to load the usage.
+	 */
+	void loadWoofTeamsUsage(WoofTeamsUsageContext context) throws Exception;
 
 }

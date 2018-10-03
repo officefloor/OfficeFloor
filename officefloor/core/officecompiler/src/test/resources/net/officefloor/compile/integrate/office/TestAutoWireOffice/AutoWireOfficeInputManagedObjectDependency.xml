@@ -12,8 +12,6 @@
 					<property name="class.name"
 						value="${testcase}$DependencyProcessManagedObject" />
 				</properties>
-				<managing-office name="OFFICE" />
-				<input-managed-object name="DEPENDENCY_OBJECT" />
 				<flow name="doFlow">
 					<section-input section="SECTION" input="INPUT" />
 				</flow>

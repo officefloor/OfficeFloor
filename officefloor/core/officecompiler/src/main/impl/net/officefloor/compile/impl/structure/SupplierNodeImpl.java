@@ -28,6 +28,7 @@ import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceVisitor;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
@@ -98,19 +99,16 @@ public class SupplierNodeImpl implements SupplierNode {
 		private final String supplierSourceClassName;
 
 		/**
-		 * Optional instantiated {@link SupplierSource}. May be
-		 * <code>null</code>.
+		 * Optional instantiated {@link SupplierSource}. May be <code>null</code>.
 		 */
 		private final SupplierSource supplierSource;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param supplierSourceClassName
-		 *            {@link SupplierSource} {@link Class} name.
-		 * @param supplierSource
-		 *            Optional instantiated {@link SupplierSource}. May be
-		 *            <code>null</code>.
+		 * @param supplierSourceClassName {@link SupplierSource} {@link Class} name.
+		 * @param supplierSource          Optional instantiated {@link SupplierSource}.
+		 *                                May be <code>null</code>.
 		 */
 		public InitialisedState(String supplierSourceClassName, SupplierSource supplierSource) {
 			this.supplierSourceClassName = supplierSourceClassName;
@@ -126,14 +124,10 @@ public class SupplierNodeImpl implements SupplierNode {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param supplierName
-	 *            Name of the {@link OfficeFloorSupplier}.
-	 * @param officeNode
-	 *            {@link OfficeNode}.
-	 * @param officeFloorNode
-	 *            {@link OfficeFloorNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param supplierName    Name of the {@link OfficeFloorSupplier}.
+	 * @param officeNode      {@link OfficeNode}.
+	 * @param officeFloorNode {@link OfficeFloorNode}.
+	 * @param context         {@link NodeContext}.
 	 */
 	public SupplierNodeImpl(String supplierName, OfficeNode officeNode, OfficeFloorNode officeFloorNode,
 			NodeContext context) {
@@ -300,7 +294,8 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public void loadAutoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext) {
+	public void loadAutoWireObjects(AutoWirer<LinkObjectNode> autoWirer,
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext) {
 
 		// Load the supplier type
 		SupplierType supplierType = compileContext.getOrLoadSupplierType(this);
@@ -349,7 +344,7 @@ public class SupplierNodeImpl implements SupplierNode {
 				}
 
 				// Source the managed object source and managed object
-				mos.sourceManagedObjectSource(compileContext);
+				mos.sourceManagedObjectSource(managedObjectSourceVisitor, compileContext);
 				mo.sourceManagedObject(compileContext);
 
 				// Return the managed object

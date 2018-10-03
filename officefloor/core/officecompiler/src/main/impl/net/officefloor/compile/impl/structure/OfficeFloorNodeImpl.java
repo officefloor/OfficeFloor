@@ -41,6 +41,7 @@ import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceVisitor;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
@@ -51,7 +52,9 @@ import net.officefloor.compile.internal.structure.OfficeTeamRegistry;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.internal.structure.TeamVisitor;
 import net.officefloor.compile.issues.CompileError;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
 import net.officefloor.compile.officefloor.OfficeFloorPropertyType;
@@ -61,7 +64,13 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectExecutionStrategy;
+import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectFlow;
+import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.ManagedObjectSourceAugmentor;
+import net.officefloor.compile.spi.officefloor.ManagedObjectSourceAugmentorContext;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyObjectNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDependencyRequireNode;
@@ -78,10 +87,13 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorResponsibility;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
+import net.officefloor.compile.spi.officefloor.TeamAugmentor;
+import net.officefloor.compile.spi.officefloor.TeamAugmentorContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -102,7 +114,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorNodeImpl implements OfficeFloorNode {
+public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSourceVisitor, TeamVisitor {
 
 	/**
 	 * {@link Class} name of the {@link OfficeFloorSource}.
@@ -205,6 +217,16 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	private final List<OfficeFloorListener> listeners = new LinkedList<>();
 
 	/**
+	 * {@link ManagedObjectSourceAugmentor} instances.
+	 */
+	private final List<ManagedObjectSourceAugmentor> managedObjectSourceAugmentors = new LinkedList<>();
+
+	/**
+	 * {@link TeamAugmentor} instances.
+	 */
+	private final List<TeamAugmentor> teamAugmentors = new LinkedList<>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeFloorSourceClassName {@link OfficeFloorSource} class name.
@@ -269,6 +291,128 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	}
 
 	/*
+	 * ===================== ManagedObjectSourceVisitor =====================
+	 */
+
+	@Override
+	public void visit(ManagedObjectType<?> managedObjectType, ManagedObjectSourceNode managedObjectSourceNode,
+			CompileContext compileContext) {
+
+		// Create the managed object source augment context
+		ManagedObjectSourceAugmentorContext context = new ManagedObjectSourceAugmentorContext() {
+
+			@Override
+			public String getManagedObjectSourceName() {
+				return managedObjectSourceNode.getManagedObjectSourceName();
+			}
+
+			@Override
+			public ManagedObjectType<?> getManagedObjectType() {
+				return managedObjectType;
+			}
+
+			@Override
+			public AugmentedManagedObjectFlow getManagedObjectFlow(String managedObjectSourceFlowName) {
+				return managedObjectSourceNode.getAugmentedManagedObjectFlow(managedObjectSourceFlowName);
+			}
+
+			@Override
+			public AugmentedManagedObjectTeam getManagedObjectTeam(String managedObjectSourceTeamName) {
+				return managedObjectSourceNode.getAugmentedManagedObjectTeam(managedObjectSourceTeamName);
+			}
+
+			@Override
+			public AugmentedManagedObjectExecutionStrategy getManagedObjectExecutionStrategy(
+					String managedObjectSourceExecutionStrategyName) {
+				return managedObjectSourceNode
+						.getAugmentedManagedObjectExecutionStrategy(managedObjectSourceExecutionStrategyName);
+			}
+
+			@Override
+			public void link(AugmentedManagedObjectFlow flow, DeployedOfficeInput officeInput) {
+				LinkUtil.linkFlow(flow, officeInput, OfficeFloorNodeImpl.this.context.getCompilerIssues(),
+						managedObjectSourceNode);
+			}
+
+			@Override
+			public void link(AugmentedManagedObjectTeam responsibility, OfficeFloorTeam team) {
+				LinkUtil.linkTeam(responsibility, team, OfficeFloorNodeImpl.this.context.getCompilerIssues(),
+						managedObjectSourceNode);
+			}
+
+			@Override
+			public void link(AugmentedManagedObjectExecutionStrategy requiredStrategy,
+					OfficeFloorExecutionStrategy executionStrategy) {
+				LinkUtil.linkExecutionStrategy(requiredStrategy, executionStrategy,
+						OfficeFloorNodeImpl.this.context.getCompilerIssues(), managedObjectSourceNode);
+			}
+
+			@Override
+			public CompileError addIssue(String issueDescription) {
+				return OfficeFloorNodeImpl.this.addIssue(issueDescription);
+			}
+
+			@Override
+			public CompileError addIssue(String issueDescription, Throwable cause) {
+				return OfficeFloorNodeImpl.this.addIssue(issueDescription, cause);
+			}
+		};
+
+		// Augment the managed object source
+		for (ManagedObjectSourceAugmentor augmentor : this.managedObjectSourceAugmentors) {
+			augmentor.augmentManagedObjectSource(context);
+		}
+	}
+
+	/*
+	 * ========================== TeamVisitor ==============================
+	 */
+
+	@Override
+	public void visit(TeamType teamType, TeamNode teamNode, CompileContext compileContext) {
+
+		// Create the team augment context
+		TeamAugmentorContext context = new TeamAugmentorContext() {
+
+			@Override
+			public String getTeamName() {
+				return teamNode.getOfficeFloorTeamName();
+			}
+
+			@Override
+			public TeamType getTeamType() {
+				return teamType;
+			}
+
+			@Override
+			public boolean isTeamOversight() {
+				return teamNode.isTeamOversight();
+			}
+
+			@Override
+			public void setTeamOversight(OfficeFloorTeamOversight teamOversight) {
+				LinkUtil.linkTeamOversight(teamNode, teamOversight,
+						OfficeFloorNodeImpl.this.context.getCompilerIssues(), teamNode);
+			}
+
+			@Override
+			public CompileError addIssue(String issueDescription) {
+				return OfficeFloorNodeImpl.this.addIssue(issueDescription);
+			}
+
+			@Override
+			public CompileError addIssue(String issueDescription, Throwable cause) {
+				return OfficeFloorNodeImpl.this.addIssue(issueDescription, cause);
+			}
+		};
+
+		// Augment the team
+		for (TeamAugmentor augmentor : this.teamAugmentors) {
+			augmentor.augmentTeam(context);
+		}
+	}
+
+	/*
 	 * ===================== ManagedObjectRegistry =============================
 	 */
 
@@ -303,6 +447,16 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public void addOfficeFloorListener(OfficeFloorListener listener) {
 		this.listeners.add(listener);
+	}
+
+	@Override
+	public void addManagedObjectSourceAugmentor(ManagedObjectSourceAugmentor managedObjectSourceAugmentor) {
+		this.managedObjectSourceAugmentors.add(managedObjectSourceAugmentor);
+	}
+
+	@Override
+	public void addTeamAugmentor(TeamAugmentor teamAugmentor) {
+		this.teamAugmentors.add(teamAugmentor);
 	}
 
 	@Override
@@ -559,10 +713,17 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 			return false;
 		}
 
+		// Ensure all teams are sourced
+		isSourced = CompileUtil.source(this.teams, (team) -> team.getOfficeFloorTeamName(),
+				(team) -> team.sourceTeam(this, compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Ensure all managed object sources are sourced
 		isSourced = CompileUtil.source(this.managedObjectSources,
 				(managedObjectSource) -> managedObjectSource.getSectionManagedObjectSourceName(),
-				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(compileContext));
+				(managedObjectSource) -> managedObjectSource.sourceManagedObjectSource(this, compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -578,7 +739,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		// Source all the offices
 		isSourced = this.offices.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
-				.allMatch((office) -> office.sourceOfficeTree(compileContext));
+				.allMatch((office) -> office.sourceOfficeTree(this, compileContext));
 		if (!isSourced) {
 			return false;
 		}
@@ -683,7 +844,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 		// Load the supplied managed objects
 		final AutoWirer<LinkObjectNode> supplierAutoWirer = autoWirer.createScopeAutoWirer();
 		this.suppliers.values().stream()
-				.forEach((supplier) -> supplier.loadAutoWireObjects(supplierAutoWirer, compileContext));
+				.forEach((supplier) -> supplier.loadAutoWireObjects(supplierAutoWirer, this, compileContext));
 
 		// Load the managed objects
 		final AutoWirer<LinkObjectNode> managedObjectAutoWirer = supplierAutoWirer.createScopeAutoWirer();
@@ -788,6 +949,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode {
 	@Override
 	public OfficeFloorListener[] getOfficeFloorListeners() {
 		return this.listeners.toArray(new OfficeFloorListener[this.listeners.size()]);
+	}
+
+	@Override
+	public boolean isDefaultExecutionStrategy() {
+		return (this.executive == null);
 	}
 
 	@Override

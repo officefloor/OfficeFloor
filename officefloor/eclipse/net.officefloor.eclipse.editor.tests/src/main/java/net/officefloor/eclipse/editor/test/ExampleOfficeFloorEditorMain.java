@@ -65,8 +65,7 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 	/**
 	 * Main to run the editor.
 	 * 
-	 * @param args
-	 *            Command line arguments.
+	 * @param args Command line arguments.
 	 */
 	public static void main(String[] args) {
 		Application.launch(args);
@@ -283,16 +282,20 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 
 		// Team
 		AdaptedParentBuilder<OfficeFloorModel, OfficeFloorChanges, OfficeFloorTeamModel, OfficeFloorTeamEvent> team = root
-				.parent(new OfficeFloorTeamModel("Team", null), (r) -> r.getOfficeFloorTeams(), (model, context) -> {
-					HBox container = new HBox();
-					context.label(container);
-					context.addNode(container, context.connector(DefaultConnectors.TEAM,
-							OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class).getNode());
-					return container;
-				}, OfficeFloorEvent.ADD_OFFICE_FLOOR_TEAM, OfficeFloorEvent.REMOVE_OFFICE_FLOOR_TEAM);
+				.parent(new OfficeFloorTeamModel("Team", 50, null), (r) -> r.getOfficeFloorTeams(),
+						(model, context) -> {
+							HBox container = new HBox();
+							context.label(container);
+							context.addNode(
+									container, context
+											.connector(DefaultConnectors.TEAM,
+													OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class)
+											.getNode());
+							return container;
+						}, OfficeFloorEvent.ADD_OFFICE_FLOOR_TEAM, OfficeFloorEvent.REMOVE_OFFICE_FLOOR_TEAM);
 		team.label((m) -> m.getOfficeFloorTeamName(), OfficeFloorTeamEvent.CHANGE_OFFICE_FLOOR_TEAM_NAME);
-		team.create(
-				(p) -> p.getRootModel().addOfficeFloorTeam(p.position(new OfficeFloorTeamModel("Created Team", null))));
+		team.create((p) -> p.getRootModel()
+				.addOfficeFloorTeam(p.position(new OfficeFloorTeamModel("Created Team", 50, null))));
 		team.action((ctx) -> ctx.getChangeExecutor().execute(ctx.getOperations().removeOfficeFloorTeam(ctx.getModel())),
 				DefaultImages.DELETE);
 		Runnable toggleTeamStyleRunnable = new Runnable() {
@@ -362,11 +365,11 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 		mos.addOfficeFloorManagedObjectSourceTeam(new OfficeFloorManagedObjectSourceTeamModel("Another"));
 
 		// Team
-		OfficeFloorTeamModel team = new OfficeFloorTeamModel("Team", "net.example.TeamSource", 100, 50);
+		OfficeFloorTeamModel team = new OfficeFloorTeamModel("Team", 50, "net.example.TeamSource", 100, 50);
 		root.addOfficeFloorTeam(team);
 
 		// Another Team
-		root.addOfficeFloorTeam(new OfficeFloorTeamModel("Team", null, 100, 150));
+		root.addOfficeFloorTeam(new OfficeFloorTeamModel("Team", 50, null, 100, 150));
 
 		// Connect team
 		OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel mosTeamToTeam = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel(
