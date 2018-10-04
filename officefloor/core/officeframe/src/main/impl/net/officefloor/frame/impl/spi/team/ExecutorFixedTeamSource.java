@@ -42,6 +42,9 @@ public class ExecutorFixedTeamSource extends AbstractExecutorTeamSource {
 
 		// Obtain the team details
 		final int teamSize = context.getTeamSize();
+		if (teamSize < 1) {
+			throw new IllegalArgumentException("Team size must be one or more");
+		}
 
 		// Create and return the factory
 		return new FixedExecutorServiceFactory(teamSize, threadFactory);

@@ -67,9 +67,9 @@ public class WoofTeamsModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the teams
 		// ----------------------------------------
-		assertList(new String[] { "getTeamSourceClassName", "getQualifier", "getType" }, teams.getWoofTeams(),
-				new WoofTeamModel("net.example.ExampleTeamSource", null, null),
-				new WoofTeamModel("PASSIVE", "QUALIFIED", "net.example.Type"));
+		assertList(new String[] { "getTeamSize", "getTeamSourceClassName", "getQualifier", "getType" },
+				teams.getWoofTeams(), new WoofTeamModel(50, "net.example.ExampleTeamSource", null, null),
+				new WoofTeamModel(0, "PASSIVE", "QUALIFIED", "net.example.Type"));
 		WoofTeamModel team = teams.getWoofTeams().get(0);
 
 		// Validate the properties
@@ -85,10 +85,8 @@ public class WoofTeamsModelRepositoryTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the object is of the type.
 	 * 
-	 * @param type
-	 *            Expected type.
-	 * @param object
-	 *            Object to validate.
+	 * @param type   Expected type.
+	 * @param object Object to validate.
 	 * @return Object cast to type for convenience.
 	 */
 	@SuppressWarnings("unchecked")
@@ -100,14 +98,10 @@ public class WoofTeamsModelRepositoryTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link PropertySourceModel}.
 	 * 
-	 * @param propertyOne
-	 *            Expected {@link PropertyModel}.
-	 * @param propertyFile
-	 *            Expected {@link PropertyFileModel}.
-	 * @param propertyTwo
-	 *            Expected {@link PropertyModel}.
-	 * @param actual
-	 *            Actual {@link PropertySourceModel} instances.
+	 * @param propertyOne  Expected {@link PropertyModel}.
+	 * @param propertyFile Expected {@link PropertyFileModel}.
+	 * @param propertyTwo  Expected {@link PropertyModel}.
+	 * @param actual       Actual {@link PropertySourceModel} instances.
 	 */
 	private static void assertProperties(PropertyModel propertyOne, PropertyFileModel propertyFile,
 			PropertyModel propertyTwo, List<PropertySourceModel> actual) {
@@ -118,8 +112,7 @@ public class WoofTeamsModelRepositoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to round trip storing and retrieving the
-	 * {@link WoofTeamsModel}.
+	 * Ensure able to round trip storing and retrieving the {@link WoofTeamsModel}.
 	 */
 	public void testRoundTripStoreRetrieveTeams() throws Exception {
 
