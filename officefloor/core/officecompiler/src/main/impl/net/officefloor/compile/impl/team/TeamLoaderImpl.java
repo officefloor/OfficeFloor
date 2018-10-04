@@ -195,11 +195,14 @@ public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 		// Create the executive
 		Executive executive = new DefaultExecutive(threadFactoryManufacturer);
 
+		// Create the team (executive) context
+		ExecutiveContextImpl context = new ExecutiveContextImpl(true, teamName, 10, null, executive,
+				threadFactoryManufacturer, new PropertyListSourceProperties(propertyList),
+				this.nodeContext.getRootSourceContext());
+
 		// Attempt to create the team
 		try {
-			teamSource
-					.createTeam(new ExecutiveContextImpl(true, teamName, 10, null, executive, threadFactoryManufacturer,
-							new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext()));
+			teamSource.createTeam(context);
 
 		} catch (AbstractSourceError ex) {
 			ex.addIssue(this);
@@ -210,8 +213,11 @@ public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 			return null; // failed loading team
 		}
 
+		// Obtain whether required team size
+		boolean isRequireTeamSize = context.isRequireTeamSize();
+
 		// Create and return the team type
-		return new TeamTypeImpl();
+		return new TeamTypeImpl(isRequireTeamSize);
 	}
 
 	@Override
