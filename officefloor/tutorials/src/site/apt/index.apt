@@ -23,7 +23,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./InteractiveHttpServer/index.html}Interactive web page}} | Handling of requests to provide interactive pages.         | #\{link\} , @HttpParameters
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./NavigateHttpServer/index.html}Dynamic navigation between pages}}  | Controlling the navigation between pages.        | @NextTask , @FlowInterface\
+| {{{./NavigateHttpServer/index.html}Dynamic navigation between pages}}  | Controlling the navigation between pages.        | @NextFunction , @FlowInterface\
 |                                                              |                                                            | (Continuation Injection)
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SessionHttpServer/index.html}Session state}}            | Storing state between requests within the HTTP session.    | @HttpSessionStateful
