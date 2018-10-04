@@ -106,7 +106,7 @@ public class ExecutiveSourceStandAlone {
 	/**
 	 * Returns a {@link Executive} from the loaded {@link ExecutiveSource}.
 	 * 
-	 * @param teamSource {@link ExecutiveSource}.
+	 * @param executiveSource {@link ExecutiveSource}.
 	 * @return Loaded {@link Executive}.
 	 * @throws Exception If fails to initialise {@link ExecutiveSource}.
 	 */

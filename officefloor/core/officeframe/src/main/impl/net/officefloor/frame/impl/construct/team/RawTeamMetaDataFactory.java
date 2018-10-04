@@ -96,7 +96,6 @@ public class RawTeamMetaDataFactory {
 	 * 
 	 * @param                 <TS> {@link TeamSource} type.
 	 * @param configuration   {@link TeamConfiguration}.
-	 * @param executive       {@link Executive}.
 	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 * @param issues          {@link OfficeFloorIssues}.
 	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to construct.
