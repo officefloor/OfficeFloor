@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 
 import javax.sql.DataSource;
 
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,11 +56,8 @@ public class TeamHttpServerTest {
 		}
 	}
 
-	/**
-	 * Ensure able to connect to database.
-	 */
-	@Test
-	public void testConnection() throws Exception {
+	@Before
+	public void ensureData() throws Exception {
 
 		// Request page to allow time for database setup
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example"));
@@ -87,8 +85,9 @@ public class TeamHttpServerTest {
 
 		// Retrieving from database (will have value cached)
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/example+encrypt?letter=A"));
-		assertEquals("Follow POST then GET pattern", 303, response.getStatus().getStatusCode());
-		assertFalse("Ensure not cached (obtain from database)", response.getEntity(null).contains("[cached]"));
+		String responseBody = response.getEntity(null);
+		assertEquals("Follow POST then GET pattern: " + responseBody, 303, response.getStatus().getStatusCode());
+		assertFalse("Ensure not cached (obtain from database)", responseBody.contains("[cached]"));
 
 		// Looking up within cache
 		response = this.server.send(MockHttpServer.mockRequest("/example+encrypt?letter=A"));
