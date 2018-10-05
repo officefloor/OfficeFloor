@@ -75,6 +75,7 @@ public class WoofTeamsLoaderTest extends OfficeFrameTestCase {
 		final String teamOneName = "QUALIFIED_ONE:TYPE_ONE";
 		OfficeFloorTeam teamOne = this.createMock(OfficeFloorTeam.class);
 		this.recordReturn(deployer, deployer.addTeam(teamOneName, "net.example.ExampleTeamSource"), teamOne);
+		teamOne.setTeamSize(50);
 		teamOne.addTypeQualification("QUALIFIED_ONE", "TYPE_ONE");
 		teamOne.addTypeQualification("QUALIFIED_TWO", "TYPE_TWO");
 		teamOne.addProperty("NAME_ONE", "VALUE_ONE");

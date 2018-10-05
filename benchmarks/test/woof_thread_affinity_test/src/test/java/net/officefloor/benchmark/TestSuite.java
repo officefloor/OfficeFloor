@@ -17,49 +17,22 @@
  */
 package net.officefloor.benchmark;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+
+import net.officefloor.benchmark.DbTest;
+import net.officefloor.benchmark.FortunesTest;
+import net.officefloor.benchmark.JsonTest;
+import net.officefloor.benchmark.PlaintextTest;
+import net.officefloor.benchmark.QueriesTest;
+import net.officefloor.benchmark.UpdateTest;
 
 /**
  * Tests.
  */
 @RunWith(Suite.class)
-@SuiteClasses({ TestSuite.RawJsonTest.class, TestSuite.RawPlaintextTest.class })
+@SuiteClasses({ JsonTest.class, DbTest.class, QueriesTest.class, FortunesTest.class, UpdateTest.class,
+		PlaintextTest.class })
 public class TestSuite {
-
-	public static void start() throws Exception {
-		RawOfficeFloorMain.main(new String[] { "8181" });
-	}
-
-	public static void stop() throws Exception {
-		RawOfficeFloorMain.socketManager.shutdown();
-	}
-
-	public static class RawJsonTest extends JsonTest {
-		@Before
-		public void start() throws Exception {
-			TestSuite.start();
-		}
-
-		@After
-		public void stop() throws Exception {
-			TestSuite.stop();
-		}
-	}
-
-	public static class RawPlaintextTest extends PlaintextTest {
-		@Before
-		public void start() throws Exception {
-			TestSuite.start();
-		}
-
-		@After
-		public void stop() throws Exception {
-			TestSuite.stop();
-		}
-	}
-
 }

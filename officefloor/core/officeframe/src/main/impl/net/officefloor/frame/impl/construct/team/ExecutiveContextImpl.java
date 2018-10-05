@@ -46,6 +46,11 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 	private final int teamSize;
 
 	/**
+	 * Indicates if the {@link Team} size is required.
+	 */
+	private boolean isRequireTeamSize = false;
+
+	/**
 	 * {@link TeamSource}.
 	 */
 	private final TeamSource teamSource;
@@ -90,6 +95,15 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 		this.threadFactoryManufacturer = threadFactoryManufacturer;
 	}
 
+	/**
+	 * Indicates if required {@link Team} size.
+	 * 
+	 * @return <code>true</code> if the {@link Team} size is required.
+	 */
+	public boolean isRequireTeamSize() {
+		return this.isRequireTeamSize;
+	}
+
 	/*
 	 * ===================== TeamSourceContext =========================
 	 */
@@ -101,6 +115,11 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 
 	@Override
 	public int getTeamSize() {
+
+		// Flag that requires team size
+		this.isRequireTeamSize = true;
+
+		// Return the team size
 		return this.teamSize;
 	}
 

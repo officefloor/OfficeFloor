@@ -93,6 +93,7 @@ public class NodeUtil {
 	/**
 	 * Obtains an initialised {@link Node}.
 	 * 
+	 * @param              <N> {@link Node} type.
 	 * @param existingNode Existing {@link Node}. May be <code>null</code>.
 	 * @param context      {@link NodeContext}.
 	 * @param create       {@link Supplier} to create the {@link Node}.

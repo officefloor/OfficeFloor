@@ -102,8 +102,10 @@ public class CpuCore {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param coreId Core identifier.
-	 * @param cpus   {@link LogicalCpu} instances for the {@link CpuCore}.
+	 * @param coreId       Core identifier.
+	 * @param coreAffinity Affinity {@link BitSet} for all {@link LogicalCpu}
+	 *                     instances on the {@link CpuCore}.
+	 * @param cpus         {@link LogicalCpu} instances for the {@link CpuCore}.
 	 */
 	public CpuCore(int coreId, BitSet coreAffinity, LogicalCpu[] cpus) {
 		this.coreId = coreId;

@@ -73,13 +73,14 @@ public class WoofTeamsLoaderImpl implements WoofTeamsLoader {
 		 * Loads the {@link WoofTeamModel}.
 		 * 
 		 * @param teamName            Name of the {@link Team}.
+		 * @param teamSize            Size of the {@link Team}.
 		 * @param teamSourceClassName Name of the {@link TeamSource} {@link Class}.
 		 * @param typeQualifications  {@link AutoWire} type qualifications for the
 		 *                            {@link Team}.
 		 * @param teamModel           {@link WoofTeamModel}.
 		 * @throws Exception If fails to load the {@link Team}.
 		 */
-		void loadTeam(String teamName, String teamSourceClassName, List<AutoWire> typeQualifications,
+		void loadTeam(String teamName, int teamSize, String teamSourceClassName, List<AutoWire> typeQualifications,
 				WoofTeamModel teamModel) throws Exception;
 	}
 
@@ -113,6 +114,7 @@ public class WoofTeamsLoaderImpl implements WoofTeamsLoader {
 		for (WoofTeamModel teamModel : teamModels) {
 
 			// Obtain the team details
+			int teamSize = teamModel.getTeamSize();
 			String teamSourceClassName = teamModel.getTeamSourceClassName();
 
 			// Obtain the type qualification
@@ -132,7 +134,7 @@ public class WoofTeamsLoaderImpl implements WoofTeamsLoader {
 					: teamSourceClassName);
 
 			// Load the team
-			loader.loadTeam(teamName, teamSourceClassName, typeQualifications, teamModel);
+			loader.loadTeam(teamName, teamSize, teamSourceClassName, typeQualifications, teamModel);
 		}
 	}
 
@@ -150,10 +152,13 @@ public class WoofTeamsLoaderImpl implements WoofTeamsLoader {
 
 		// Load the teams
 		this.loadWoofTeams(() -> context.getConfiguration(), () -> deployer.enableAutoWireTeams(),
-				(teamName, teamSourceClassName, typeQualifications, teamModel) -> {
+				(teamName, teamSize, teamSourceClassName, typeQualifications, teamModel) -> {
 
 					// Add the team
 					OfficeFloorTeam team = deployer.addTeam(teamName, teamSourceClassName);
+					if (teamSize > 0) {
+						team.setTeamSize(teamSize);
+					}
 
 					// Load the type qualification
 					for (AutoWire autoWire : typeQualifications) {
@@ -201,7 +206,7 @@ public class WoofTeamsLoaderImpl implements WoofTeamsLoader {
 
 		// Load the teams
 		this.loadWoofTeams(() -> context.getConfiguration(), () -> architect.enableAutoWireTeams(),
-				(teamName, teamSourceClassName, typeQualifications, teamModel) -> {
+				(teamName, teamSize, teamSourceClassName, typeQualifications, teamModel) -> {
 
 					// Add the team
 					OfficeTeam team = architect.addOfficeTeam(teamName);

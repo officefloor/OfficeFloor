@@ -41,6 +41,10 @@ public interface Executive {
 	 * Manages the {@link Execution}.
 	 * <p>
 	 * The {@link Thread#currentThread()} will provide the inbound {@link Thread}.
+	 * 
+	 * @param           <T> Type of {@link Throwable} thrown.
+	 * @param execution {@link Execution} to be undertaken.
+	 * @throws T Propagation of failure from {@link Execution}.
 	 */
 	default <T extends Throwable> void manageExecution(Execution<T> execution) throws T {
 		execution.execute();

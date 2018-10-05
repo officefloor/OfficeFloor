@@ -54,6 +54,9 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 
 		// Obtain the required configuration
 		int teamSize = context.getTeamSize();
+		if (teamSize < 1) {
+			throw new IllegalArgumentException("Team size must be one or more");
+		}
 
 		// Obtain the optional configuration
 		long waitTime = Long.parseLong(context.getProperty("wait.time", "100"));

@@ -121,7 +121,8 @@ public interface OfficeFloorBuilder {
 	/**
 	 * Specifies an {@link Executive} which will manage the {@link Team} instances
 	 * within the {@link OfficeFloor}.
-	 * 
+	 *
+	 * @param                      <XS> {@link ExecutiveSource} type.
 	 * @param executiveSourceClass {@link ExecutiveSource} {@link Class} to source
 	 *                             the {@link Executive}.
 	 * @return {@link ExecutiveBuilder} to build the {@link Executive}.
@@ -132,6 +133,7 @@ public interface OfficeFloorBuilder {
 	 * Specifies an {@link Executive} which will manage the {@link Team} instances
 	 * within the {@link OfficeFloor}.
 	 * 
+	 * @param                 <XS> {@link ExecutiveSource} type.
 	 * @param executiveSource {@link ExecutiveSource} to source the
 	 *                        {@link Executive}.
 	 * @return {@link ExecutiveBuilder} to build the {@link Executive}.

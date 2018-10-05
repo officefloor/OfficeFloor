@@ -32,6 +32,7 @@ import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.internal.structure.TeamVisitor;
 import net.officefloor.compile.issues.CompileError;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorTeamSourceType;
 import net.officefloor.compile.properties.Property;
@@ -167,6 +168,15 @@ public class TeamNodeImpl implements TeamNode {
 		return this.context.overrideProperties(this, this.teamName, this.propertyList);
 	}
 
+	/**
+	 * Convenience method to add a {@link CompilerIssue}.
+	 * 
+	 * @param issueDescription Description for the {@link CompilerIssue}.
+	 */
+	private void addIssue(String issueDescription) {
+		this.context.getCompilerIssues().addIssue(this, issueDescription);
+	}
+
 	/*
 	 * ========================= Node ======================================
 	 */
@@ -220,6 +230,23 @@ public class TeamNodeImpl implements TeamNode {
 			return false;
 		}
 
+		// Determine if require team size
+		if (teamType.isRequireTeamSize()) {
+
+			// Ensure have team size
+			if (this.teamSize == null) {
+				this.addIssue("Team size must be specified for team '" + this.teamName + "'");
+				return false; // can not carry on
+			}
+
+			// Ensure valid team size
+			if (this.teamSize < 1) {
+				this.addIssue(
+						"Invalid size (" + this.teamSize + ") for team '" + this.teamName + "'.  Must be 1 or more.");
+				return false; // can not carry on
+			}
+		}
+
 		// Visit this team
 		if (visitor != null) {
 			try {
@@ -260,13 +287,13 @@ public class TeamNodeImpl implements TeamNode {
 
 		// Ensure have the team name
 		if (CompileUtil.isBlank(this.teamName)) {
-			this.context.getCompilerIssues().addIssue(this, "Null name for " + TYPE);
+			this.addIssue("Null name for " + TYPE);
 			return null; // must have name
 		}
 
 		// Ensure have the team source
 		if (CompileUtil.isBlank(this.state.teamSourceClassName)) {
-			this.context.getCompilerIssues().addIssue(this, "Null source for " + TYPE + " " + teamName);
+			this.addIssue("Null source for " + TYPE + " " + teamName);
 			return null; // must have source
 		}
 

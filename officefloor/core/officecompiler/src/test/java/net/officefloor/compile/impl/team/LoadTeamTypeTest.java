@@ -116,10 +116,23 @@ public class LoadTeamTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can load the {@link TeamType}.
 	 */
-	public void testLoadTeamType() {
+	public void testLoadTeamTypeWithoutSize() {
 		TeamType type = this.loadTeamType(true, (context) -> {
+			// do not request team size
 		});
 		assertNotNull("Should load the team type", type);
+		assertFalse("Should not require team size", type.isRequireTeamSize());
+	}
+
+	/**
+	 * Ensure can load the {@link TeamType} requiring a {@link Team} size.
+	 */
+	public void testLoadTeamTypeRequiringSize() {
+		TeamType type = this.loadTeamType(true, (context) -> {
+			assertEquals("Calling to get size and ensuring valid value for creating a team", 10, context.getTeamSize());
+		});
+		assertNotNull("Should load the team type", type);
+		assertTrue("Should require team size", type.isRequireTeamSize());
 	}
 
 	/**
