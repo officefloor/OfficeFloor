@@ -44,18 +44,17 @@ public interface OfficeBuilder {
 
 	/**
 	 * <p>
-	 * Allows providing an {@link OfficeClock} implementation to obtain the
-	 * current time.
+	 * Allows providing an {@link OfficeClock} implementation to obtain the current
+	 * time.
 	 * <p>
-	 * Should no {@link OfficeClock} be provided, a default implementation will
-	 * be used.
+	 * Should no {@link OfficeClock} be provided, a default implementation will be
+	 * used.
 	 * <p>
-	 * Typically this is useful in testing to fix to a deterministic time.
-	 * However, should there be native implementations of keeping time that is
-	 * efficient, this enables overriding the default implementation.
+	 * Typically this is useful in testing to fix to a deterministic time. However,
+	 * should there be native implementations of keeping time that is efficient,
+	 * this enables overriding the default implementation.
 	 * 
-	 * @param clock
-	 *            {@link OfficeClock}.
+	 * @param clock {@link OfficeClock}.
 	 */
 	void setOfficeClock(OfficeClock clock);
 
@@ -63,9 +62,9 @@ public interface OfficeBuilder {
 	 * Specifies the interval in milli-seconds between each time the
 	 * {@link OfficeManager} monitors the {@link Office}.
 	 * 
-	 * @param monitorOfficeInterval
-	 *            Interval in milli-seconds between each time the
-	 *            {@link OfficeManager} monitors the {@link Office}.
+	 * @param monitorOfficeInterval Interval in milli-seconds between each time the
+	 *                              {@link OfficeManager} monitors the
+	 *                              {@link Office}.
 	 */
 	void setMonitorOfficeInterval(long monitorOfficeInterval);
 
@@ -76,58 +75,51 @@ public interface OfficeBuilder {
 	 * This value is a trade off between limiting {@link Thread} stack calls and
 	 * performance. Setting this value low runs the risk of
 	 * {@link StackOverflowError} occurring in having recursively call into the
-	 * {@link FunctionState} chain. Setting this value high, has more
-	 * {@link Thread} overheads in breaking the recursive chain, slowing
-	 * performance.
+	 * {@link FunctionState} chain. Setting this value high, has more {@link Thread}
+	 * overheads in breaking the recursive chain, slowing performance.
 	 * 
-	 * @param maximumFunctionStateChainLength
-	 *            Maximum {@link FunctionState} chain length.
+	 * @param maximumFunctionStateChainLength Maximum {@link FunctionState} chain
+	 *                                        length.
 	 */
 	void setMaximumFunctionStateChainLength(int maximumFunctionStateChainLength);
 
 	/**
-	 * Registers a {@link Team} which will execute {@link ManagedFunction}
-	 * instances within this {@link Office}.
+	 * Registers a {@link Team} which will execute {@link ManagedFunction} instances
+	 * within this {@link Office}.
 	 * 
-	 * @param officeTeamName
-	 *            Name of the {@link Team} to be referenced locally by this
-	 *            {@link Office}.
-	 * @param officeFloorTeamName
-	 *            Name of the {@link Team} within the {@link OfficeFloor}.
+	 * @param officeTeamName      Name of the {@link Team} to be referenced locally
+	 *                            by this {@link Office}.
+	 * @param officeFloorTeamName Name of the {@link Team} within the
+	 *                            {@link OfficeFloor}.
 	 */
 	void registerTeam(String officeTeamName, String officeFloorTeamName);
 
 	/**
-	 * Allows optionally specifying the default {@link Team} for the
-	 * {@link Office}.
+	 * Allows optionally specifying the default {@link Team} for the {@link Office}.
 	 * 
-	 * @param officeTeamName
-	 *            Name of the {@link Team} within this {@link Office} to use as
-	 *            default {@link Team}.
+	 * @param officeTeamName Name of the {@link Team} within this {@link Office} to
+	 *                       use as default {@link Team}.
 	 */
 	void setDefaultTeam(String officeTeamName);
 
 	/**
 	 * Registers the {@link ManagedObject} within this {@link Office}.
 	 * 
-	 * @param officeManagedObjectName
-	 *            Name of the {@link ManagedObject} to be referenced locally by
-	 *            this {@link Office}.
-	 * @param officeFloorManagedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource} within the
-	 *            {@link OfficeFloor}.
+	 * @param officeManagedObjectName            Name of the {@link ManagedObject}
+	 *                                           to be referenced locally by this
+	 *                                           {@link Office}.
+	 * @param officeFloorManagedObjectSourceName Name of the
+	 *                                           {@link ManagedObjectSource} within
+	 *                                           the {@link OfficeFloor}.
 	 */
 	void registerManagedObjectSource(String officeManagedObjectName, String officeFloorManagedObjectSourceName);
 
 	/**
 	 * Specifies the input {@link ManagedObject} to be bound to the
-	 * {@link ProcessState} should there be multiple instances and it was not
-	 * input.
+	 * {@link ProcessState} should there be multiple instances and it was not input.
 	 * 
-	 * @param inputManagedObjectName
-	 *            Input {@link ManagedObject} name.
-	 * @param managedObjectSourceName
-	 *            {@link ManagedObjectSource} name.
+	 * @param inputManagedObjectName  Input {@link ManagedObject} name.
+	 * @param managedObjectSourceName {@link ManagedObjectSource} name.
 	 */
 	void setBoundInputManagedObject(String inputManagedObjectName, String managedObjectSourceName);
 
@@ -141,16 +133,15 @@ public interface OfficeBuilder {
 	 * <li>Other {@link ManagedObject} instances added via this method.</li>
 	 * </ol>
 	 * 
-	 * @param processManagedObjectName
-	 *            Name to link the {@link ManagedObject} for
-	 *            {@link ManagedFunction} instances.
-	 * @param officeManagedObjectName
-	 *            Name of the {@link ManagedObject} registered within this
-	 *            {@link Office}.
-	 * @return {@link DependencyMappingBuilder} to build any necessary
+	 * @param processManagedObjectName Name to link the {@link ManagedObject} for
+	 *                                 {@link ManagedFunction} instances.
+	 * @param officeManagedObjectName  Name of the {@link ManagedObject} registered
+	 *                                 within this {@link Office}.
+	 * @return {@link ThreadDependencyMappingBuilder} to build any necessary
 	 *         dependencies for the {@link ManagedObject}. See scope above.
 	 */
-	DependencyMappingBuilder addProcessManagedObject(String processManagedObjectName, String officeManagedObjectName);
+	ThreadDependencyMappingBuilder addProcessManagedObject(String processManagedObjectName,
+			String officeManagedObjectName);
 
 	/**
 	 * <p>
@@ -163,41 +154,35 @@ public interface OfficeBuilder {
 	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
 	 * </ol>
 	 * 
-	 * @param threadManagedObjectName
-	 *            Name to link the {@link ManagedObject} for
-	 *            {@link ManagedFunction} instances.
-	 * @param officeManagedObjectName
-	 *            Name of the{@link ManagedObject} registered within this
-	 *            {@link Office}.
-	 * @return {@link DependencyMappingBuilder} to build any necessary
+	 * @param threadManagedObjectName Name to link the {@link ManagedObject} for
+	 *                                {@link ManagedFunction} instances.
+	 * @param officeManagedObjectName Name of the{@link ManagedObject} registered
+	 *                                within this {@link Office}.
+	 * @return {@link ThreadDependencyMappingBuilder} to build any necessary
 	 *         dependencies for the {@link ManagedObject}. See scope above.
 	 */
-	DependencyMappingBuilder addThreadManagedObject(String threadManagedObjectName, String officeManagedObjectName);
+	ThreadDependencyMappingBuilder addThreadManagedObject(String threadManagedObjectName,
+			String officeManagedObjectName);
 
 	/**
 	 * Flags whether to manually manage {@link Governance} via
 	 * {@link Administration} instances.
 	 * 
-	 * @param isManuallyManageGovernance
-	 *            <code>true</code> to manually manage {@link Governance} via
-	 *            {@link Administration} instances.
+	 * @param isManuallyManageGovernance <code>true</code> to manually manage
+	 *                                   {@link Governance} via
+	 *                                   {@link Administration} instances.
 	 */
 	void setManuallyManageGovernance(boolean isManuallyManageGovernance);
 
 	/**
 	 * Adds {@link Governance} within the {@link Office}.
 	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param governanceName
-	 *            Name of the {@link Governance} to be referenced locally by
-	 *            this {@link Office}.
-	 * @param extensionInterface
-	 *            Extension interface.
-	 * @param governanceFactory
-	 *            {@link GovernanceFactory} class.
+	 * @param                    <E> Extension interface type.
+	 * @param                    <F> Flow key type.
+	 * @param governanceName     Name of the {@link Governance} to be referenced
+	 *                           locally by this {@link Office}.
+	 * @param extensionInterface Extension interface.
+	 * @param governanceFactory  {@link GovernanceFactory} class.
 	 * @return {@link GovernanceBuilder}.
 	 */
 	<E, F extends Enum<F>> GovernanceBuilder<F> addGovernance(String governanceName, Class<E> extensionInterface,
@@ -206,15 +191,11 @@ public interface OfficeBuilder {
 	/**
 	 * Adds a {@link ManagedFunction} to be executed within the {@link Office}.
 	 * 
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param mangedFunctionFactory
-	 *            {@link ManagedFunctionFactory} to create the
-	 *            {@link ManagedFunction}.
+	 * @param                       <O> Dependency key type.
+	 * @param                       <F> Flow key type.
+	 * @param functionName          Name of the {@link ManagedFunction}.
+	 * @param mangedFunctionFactory {@link ManagedFunctionFactory} to create the
+	 *                              {@link ManagedFunction}.
 	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
 	 */
 	<O extends Enum<O>, F extends Enum<F>> ManagedFunctionBuilder<O, F> addManagedFunction(String functionName,
@@ -224,20 +205,16 @@ public interface OfficeBuilder {
 	 * Adds an {@link EscalationFlow} for issues not handled within the
 	 * {@link Office}.
 	 * 
-	 * @param typeOfCause
-	 *            Type of cause handled by this {@link EscalationFlow}.
-	 * @param functionName
-	 *            Name of {@link ManagedFunction} to handle the
-	 *            {@link EscalationFlow}.
+	 * @param typeOfCause  Type of cause handled by this {@link EscalationFlow}.
+	 * @param functionName Name of {@link ManagedFunction} to handle the
+	 *                     {@link EscalationFlow}.
 	 */
 	void addEscalation(Class<? extends Throwable> typeOfCause, String functionName);
 
 	/**
-	 * Adds a {@link ManagedFunction} to invoke on start up of the
-	 * {@link Office}.
+	 * Adds a {@link ManagedFunction} to invoke on start up of the {@link Office}.
 	 * 
-	 * @param functionName
-	 *            Name of {@link ManagedFunction}.
+	 * @param functionName Name of {@link ManagedFunction}.
 	 */
 	void addStartupFunction(String functionName);
 
@@ -248,17 +225,15 @@ public interface OfficeBuilder {
 	 * This enables enhancing the {@link Office} after the
 	 * {@link ManagedObjectSource} instances are registered.
 	 * 
-	 * @param officeEnhancer
-	 *            {@link OfficeEnhancer}.
+	 * @param officeEnhancer {@link OfficeEnhancer}.
 	 */
 	void addOfficeEnhancer(OfficeEnhancer officeEnhancer);
 
 	/**
-	 * Allows to optionally specify a {@link Profiler} that listens in on
-	 * profiling information of the {@link Office}.
+	 * Allows to optionally specify a {@link Profiler} that listens in on profiling
+	 * information of the {@link Office}.
 	 * 
-	 * @param profiler
-	 *            {@link Profiler}.
+	 * @param profiler {@link Profiler}.
 	 */
 	void setProfiler(Profiler profiler);
 

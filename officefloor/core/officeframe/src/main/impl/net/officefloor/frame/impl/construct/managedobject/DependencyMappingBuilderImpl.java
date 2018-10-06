@@ -25,9 +25,11 @@ import java.util.Map;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.thread.OptionalThreadLocal;
 import net.officefloor.frame.impl.construct.administration.AdministrationBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
@@ -41,8 +43,8 @@ import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfi
  * 
  * @author Daniel Sagenschneider
  */
-public class DependencyMappingBuilderImpl<O extends Enum<O>>
-		implements DependencyMappingBuilder, ManagedObjectConfiguration<O>, InputManagedObjectConfiguration<O> {
+public class DependencyMappingBuilderImpl<O extends Enum<O>> implements DependencyMappingBuilder,
+		ThreadDependencyMappingBuilder, ManagedObjectConfiguration<O>, InputManagedObjectConfiguration<O> {
 
 	/**
 	 * Name of the {@link ManagedObject} is being bound.
@@ -125,6 +127,17 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 				administrationFactory);
 		this.preLoadAdministrations.add(admin);
 		return admin;
+	}
+
+	/*
+	 * ========== ThreadDependencyMappingBuilder ==========================
+	 */
+
+	@Override
+	public <T> OptionalThreadLocal<T> getOptionalThreadLocal() {
+		// TODO implement ThreadDependencyMappingBuilder.getOptionalThreadLocal(...)
+		throw new UnsupportedOperationException(
+				"TODO implement ThreadDependencyMappingBuilder.getOptionalThreadLocal(...)");
 	}
 
 	/**
