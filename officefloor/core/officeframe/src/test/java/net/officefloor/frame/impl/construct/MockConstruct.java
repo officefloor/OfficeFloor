@@ -921,7 +921,8 @@ public class MockConstruct {
 		 */
 		private RawBoundManagedObjectMetaDataMockBuilder(String boundManagedObjectName, boolean isInput,
 				RawManagedObjectMetaData<O, F> rawManagedObjectMetaData) {
-			this.rawBoundManagedObjectMetaData = new RawBoundManagedObjectMetaData(boundManagedObjectName, isInput);
+			this.rawBoundManagedObjectMetaData = new RawBoundManagedObjectMetaData(boundManagedObjectName, isInput,
+					null);
 			this.rawManagedObjectMetaData = rawManagedObjectMetaData;
 			this.rawManagedObjectMetaDataBuilder = null;
 		}
@@ -935,7 +936,8 @@ public class MockConstruct {
 		 */
 		private RawBoundManagedObjectMetaDataMockBuilder(String boundManagedObjectName, boolean isInput,
 				RawManagedObjectMetaDataMockBuilder<O, F> rawManagedObjectMetaData) {
-			this.rawBoundManagedObjectMetaData = new RawBoundManagedObjectMetaData(boundManagedObjectName, isInput);
+			this.rawBoundManagedObjectMetaData = new RawBoundManagedObjectMetaData(boundManagedObjectName, isInput,
+					null);
 			this.rawManagedObjectMetaData = null;
 			this.rawManagedObjectMetaDataBuilder = rawManagedObjectMetaData;
 		}

@@ -38,16 +38,16 @@ public class OptionalThreadLocalManagedFunctionTest extends AbstractOfficeConstr
 	 * Ensure the {@link OptionalThreadLocal} not provide object if
 	 * {@link ManagedObject} not instantiated.
 	 */
-	public void testNotAvailable() throws Exception {
-		this.doManagedFunctionTest(false, false);
+	public void test_Process_NotAvailable() throws Exception {
+		this.doManagedFunctionTest(ManagedObjectScope.PROCESS, false, false);
 	}
 
 	/**
 	 * Ensure the {@link ManagedFunction} can access the {@link OptionalThreadLocal}
 	 * value.
 	 */
-	public void testAvailable() throws Exception {
-		this.doManagedFunctionTest(true, false);
+	public void test_Process_Available() throws Exception {
+		this.doManagedFunctionTest(ManagedObjectScope.PROCESS, true, false);
 	}
 
 	/**
@@ -55,36 +55,86 @@ public class OptionalThreadLocalManagedFunctionTest extends AbstractOfficeConstr
 	 * {@link ManagedObject} not instantiated via {@link Team} on another
 	 * {@link Thread}.
 	 */
-	public void testNotAvailableWithTeam() throws Exception {
-		this.doManagedFunctionTest(false, true);
+	public void test_Process_NotAvailableWithTeam() throws Exception {
+		this.doManagedFunctionTest(ManagedObjectScope.PROCESS, false, true);
 	}
 
 	/**
 	 * Ensure the {@link ManagedFunction} can access the {@link OptionalThreadLocal}
 	 * value run by {@link Team} on another {@link Thread}.
 	 */
-	public void testAvailableWithTeam() throws Exception {
-		this.doManagedFunctionTest(true, true);
+	public void test_Process_AvailableWithTeam() throws Exception {
+		this.doManagedFunctionTest(ManagedObjectScope.PROCESS, true, true);
+	}
+
+	/**
+	 * Ensure the {@link OptionalThreadLocal} not provide object if
+	 * {@link ManagedObject} not instantiated.
+	 */
+	public void test_Thread_NotAvailable() throws Exception {
+		this.doManagedFunctionTest(ManagedObjectScope.THREAD, false, false);
+	}
+
+	/**
+	 * Ensure the {@link ManagedFunction} can access the {@link OptionalThreadLocal}
+	 * value.
+	 */
+	public void test_Thread_Available() throws Exception {
+		this.doManagedFunctionTest(ManagedObjectScope.THREAD, true, false);
+	}
+
+	/**
+	 * Ensure the {@link OptionalThreadLocal} no provide object if
+	 * {@link ManagedObject} not instantiated via {@link Team} on another
+	 * {@link Thread}.
+	 */
+	public void test_Thread_NotAvailableWithTeam() throws Exception {
+		this.doManagedFunctionTest(ManagedObjectScope.THREAD, false, true);
+	}
+
+	/**
+	 * Ensure the {@link ManagedFunction} can access the {@link OptionalThreadLocal}
+	 * value run by {@link Team} on another {@link Thread}.
+	 */
+	public void test_Thread_AvailableWithTeam() throws Exception {
+		this.doManagedFunctionTest(ManagedObjectScope.THREAD, true, true);
 	}
 
 	/**
 	 * Undertakes the test.
 	 * 
+	 * @param scope             {@link ManagedObjectScope}.
 	 * @param isExpectAvailable If object should be available.
 	 * @param isTeam            If use {@link Team} for {@link ManagedFunction}.
 	 */
-	private void doManagedFunctionTest(boolean isExpectAvailable, boolean isTeam) throws Exception {
+	private void doManagedFunctionTest(ManagedObjectScope scope, boolean isExpectAvailable, boolean isTeam)
+			throws Exception {
 
 		// Create the managed object
 		String object = "Should be available";
 		this.constructManagedObject(object, "MOS", this.getOfficeName());
-		ThreadDependencyMappingBuilder mo = this.getOfficeBuilder().addThreadManagedObject("MO", "MOS");
+		ThreadDependencyMappingBuilder mo;
+		switch (scope) {
+		case PROCESS:
+			mo = this.getOfficeBuilder().addProcessManagedObject("MO", "MOS");
+			break;
+		case THREAD:
+			mo = this.getOfficeBuilder().addThreadManagedObject("MO", "MOS");
+			break;
+		default:
+			throw new IllegalArgumentException("Invalid managed object scope " + scope);
+		}
+
+		// Ensure the same optional thread local on multiple calls
+		OptionalThreadLocal<String> threadLocal = mo.getOptionalThreadLocal();
+		assertNotNull("Should have thread local", threadLocal);
+		assertSame("Should be same thread local on multiple calls", threadLocal, mo.getOptionalThreadLocal());
 
 		// Construct the functions
-		Work work = new Work(mo.getOptionalThreadLocal());
+		Work work = new Work(threadLocal);
 		ReflectiveFunctionBuilder expectObject = this.constructFunction(work, "expectObject");
-		expectObject.buildObject("MO", ManagedObjectScope.THREAD);
-		ReflectiveFunctionBuilder notExpectObject = this.constructFunction(work, "notExpectedObject");
+		expectObject.buildObject("MO");
+		ReflectiveFunctionBuilder notExpectObject = this.constructFunction(work, "notExpectObject");
 
 		// Determine if team
 		if (isTeam) {

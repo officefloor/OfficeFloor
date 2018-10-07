@@ -51,6 +51,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
@@ -384,7 +385,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected DependencyMappingBuilder record_officeBuilder_addProcessManagedObject(String processManagedObjectName,
 			String officeManagedObjectName) {
-		this.dependencyMappingBuilder = this.createMock(DependencyMappingBuilder.class);
+		this.dependencyMappingBuilder = this.createMock(ThreadDependencyMappingBuilder.class);
 		this.recordReturn(this.officeBuilder,
 				this.officeBuilder.addProcessManagedObject(processManagedObjectName, officeManagedObjectName),
 				this.dependencyMappingBuilder);
@@ -401,7 +402,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected DependencyMappingBuilder record_officeBuilder_addThreadManagedObject(String threadManagedObjectName,
 			String officeManagedObjectName) {
-		this.dependencyMappingBuilder = this.createMock(DependencyMappingBuilder.class);
+		this.dependencyMappingBuilder = this.createMock(ThreadDependencyMappingBuilder.class);
 		this.recordReturn(this.officeBuilder,
 				this.officeBuilder.addThreadManagedObject(threadManagedObjectName, officeManagedObjectName),
 				this.dependencyMappingBuilder);
