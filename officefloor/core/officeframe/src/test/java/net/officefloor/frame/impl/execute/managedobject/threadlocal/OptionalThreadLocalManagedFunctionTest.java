@@ -159,9 +159,9 @@ public class OptionalThreadLocalManagedFunctionTest extends AbstractOfficeConstr
 
 		private final OptionalThreadLocal<String> threadLocal;
 
-		private String dependencyObject;
+		private volatile String dependencyObject;
 
-		private String threadLocalObject;
+		private volatile String threadLocalObject;
 
 		public Work(OptionalThreadLocal<String> threadLocal) {
 			this.threadLocal = threadLocal;
