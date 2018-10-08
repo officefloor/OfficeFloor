@@ -40,7 +40,7 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 	 * Ensure able to access {@link ManagedObject} via the
 	 * {@link SupplierThreadLocal}.
 	 */
-	public void testSupplierThreadLocal() throws Exception {
+	public void testOfficeFloorSupplierThreadLocal() throws Exception {
 
 		// Open the OfficeFloor
 		OfficeFloor officeFloor = this.open();
@@ -49,14 +49,14 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.threadLocal");
 
 		// Invoke function and ensure thread local access to dependency
-		Section.threadLocalObject = null;
-		Section.dependencyObject = null;
+		CompileSection.threadLocalObject = null;
+		CompileSection.dependencyObject = null;
 		function.invokeProcess(null, null);
-		assertNotNull("Should have dependency object", Section.dependencyObject);
-		assertSame("Should obtain via thread local", Section.dependencyObject, Section.threadLocalObject);
+		assertNotNull("Should have dependency object", CompileSection.dependencyObject);
+		assertSame("Should obtain via thread local", CompileSection.dependencyObject, CompileSection.threadLocalObject);
 	}
 
-	public static class Section {
+	public static class CompileSection {
 
 		private static MockObject threadLocalObject;
 
