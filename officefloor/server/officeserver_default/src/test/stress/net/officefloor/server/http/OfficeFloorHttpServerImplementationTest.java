@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
@@ -58,8 +59,11 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	@Override
 	protected SocketManager startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 
+		// Create thread affinity execution strategy
+		ThreadFactory[] executionStrategy = new ThreadFactory[Runtime.getRuntime().availableProcessors()];
+
 		// Create the socket manager
-		SocketManager manager = HttpServerSocketManagedObjectSource.createSocketManager();
+		SocketManager manager = HttpServerSocketManagedObjectSource.createSocketManager(executionStrategy);
 
 		// Create raw HTTP servicing
 		StreamBufferPool<ByteBuffer> serviceBufferPool = new ThreadLocalStreamBufferPool(
@@ -100,10 +104,8 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		/**
 		 * Instantiate.
 		 *
-		 * @param serverLocation
-		 *            {@link HttpServerLocation}.
-		 * @param serviceBufferPool
-		 *            {@link StreamBufferPool}.
+		 * @param serverLocation    {@link HttpServerLocation}.
+		 * @param serviceBufferPool {@link StreamBufferPool}.
 		 */
 		public RawHttpServicerFactory(HttpServerLocation serverLocation,
 				StreamBufferPool<ByteBuffer> serviceBufferPool) {

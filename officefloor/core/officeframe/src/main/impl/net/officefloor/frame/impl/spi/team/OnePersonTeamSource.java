@@ -50,11 +50,9 @@ public class OnePersonTeamSource extends AbstractTeamSource {
 	/**
 	 * Convenience method to create a {@link OnePersonTeam}.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link Team}.
+	 * @param teamName Name of the {@link Team}.
 	 * @return {@link OnePersonTeam}.
-	 * @throws Exception
-	 *             If fails to create the {@link OnePersonTeam}.
+	 * @throws Exception If fails to create the {@link OnePersonTeam}.
 	 */
 	public static OnePersonTeam createOnePersonTeam(String teamName) throws Exception {
 		return (OnePersonTeam) new TeamSourceStandAlone(teamName).loadTeam(OnePersonTeamSource.class);
@@ -79,8 +77,18 @@ public class OnePersonTeamSource extends AbstractTeamSource {
 		int priority = Integer
 				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(DEFAULT_THREAD_PRIORITY)));
 
+		// Obtain the thread factory
+		ThreadFactory threadFactory = context.getThreadFactory();
+		if (priority != Thread.NORM_PRIORITY) {
+			ThreadFactory delegate = threadFactory;
+			threadFactory = (runnable) -> {
+				Thread thread = delegate.newThread(runnable);
+				thread.setPriority(priority);
+				return thread;
+			};
+		}
+
 		// Return the one person team
-		ThreadFactory threadFactory = context.getThreadFactory(priority);
 		return new OnePersonTeam(threadFactory, waitTime);
 	}
 

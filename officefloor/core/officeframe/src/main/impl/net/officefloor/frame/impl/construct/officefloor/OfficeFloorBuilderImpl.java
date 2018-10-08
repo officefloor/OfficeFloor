@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import net.officefloor.frame.api.build.ExecutiveBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuildException;
@@ -29,6 +30,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
@@ -36,6 +38,7 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
+import net.officefloor.frame.impl.construct.executive.ExecutiveBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBuilderImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -43,6 +46,7 @@ import net.officefloor.frame.impl.construct.team.TeamBuilderImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
 import net.officefloor.frame.impl.execute.officefloor.ThreadLocalAwareExecutorImpl;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
+import net.officefloor.frame.internal.configuration.ExecutiveConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -78,6 +82,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	 * Listing of {@link TeamConfiguration} instances.
 	 */
 	private final List<TeamConfiguration<?>> teams = new LinkedList<TeamConfiguration<?>>();
+
+	/**
+	 * {@link ExecutiveConfiguration}.
+	 */
+	private ExecutiveConfiguration<?> executiveConfiguration = null;
 
 	/**
 	 * Break {@link FunctionState} chain {@link Team}. Initiate with default
@@ -120,8 +129,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeFloorName
-	 *            Name of the {@link OfficeFloor}.
+	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 */
 	public OfficeFloorBuilderImpl(String officeFloorName) {
 		this.officeFloorName = officeFloorName;
@@ -184,6 +192,20 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 		// Create, register and return the builder
 		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<>(teamName, teamSource);
 		this.teams.add(builder);
+		return builder;
+	}
+
+	@Override
+	public <XS extends ExecutiveSource> ExecutiveBuilder<XS> setExecutive(Class<XS> executiveSourceClass) {
+		ExecutiveBuilderImpl<XS> builder = new ExecutiveBuilderImpl<>(executiveSourceClass);
+		this.executiveConfiguration = builder;
+		return builder;
+	}
+
+	@Override
+	public <XS extends ExecutiveSource> ExecutiveBuilder<XS> setExecutive(XS executiveSource) {
+		ExecutiveBuilderImpl<XS> builder = new ExecutiveBuilderImpl<>(executiveSource);
+		this.executiveConfiguration = builder;
 		return builder;
 	}
 
@@ -259,6 +281,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	@Override
 	public TeamConfiguration<?>[] getTeamConfiguration() {
 		return this.teams.toArray(new TeamConfiguration[0]);
+	}
+
+	@Override
+	public ExecutiveConfiguration<?> getExecutiveConfiguration() {
+		return this.executiveConfiguration;
 	}
 
 	@Override

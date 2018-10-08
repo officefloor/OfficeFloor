@@ -21,12 +21,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.administration.Administration;
-import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
+import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
@@ -65,10 +65,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * Obtains the name with the added namespace.
 	 * 
-	 * @param namespace
-	 *            Namespace.
-	 * @param name
-	 *            Name.
+	 * @param namespace Namespace.
+	 * @param name      Name.
 	 * @return Name within the namespace.
 	 */
 	public static String getNamespacedName(String namespace, String name) {
@@ -144,8 +142,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<EscalationConfiguration> escalations = new LinkedList<EscalationConfiguration>();
 
 	/**
-	 * List of start up {@link ManagedFunction} instances for the
-	 * {@link Office}.
+	 * List of start up {@link ManagedFunction} instances for the {@link Office}.
 	 */
 	private final List<ManagedFunctionReference> startupFunctions = new LinkedList<ManagedFunctionReference>();
 
@@ -155,8 +152,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private OfficeClock clock = null;
 
 	/**
-	 * Interval in milli-seconds to monitor the {@link Office}. Default is 1
-	 * second.
+	 * Interval in milli-seconds to monitor the {@link Office}. Default is 1 second.
 	 */
 	private long monitorOfficeInterval = 1000;
 
@@ -176,8 +172,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeName
-	 *            Name of this {@link Office}.
+	 * @param officeName Name of this {@link Office}.
 	 */
 	public OfficeBuilderImpl(String officeName) {
 		this.officeName = officeName;
@@ -226,7 +221,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public DependencyMappingBuilder addThreadManagedObject(String threadManagedObjectName,
+	public ThreadDependencyMappingBuilder addThreadManagedObject(String threadManagedObjectName,
 			String officeManagedObjectName) {
 		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(threadManagedObjectName,
 				officeManagedObjectName);
@@ -236,7 +231,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public DependencyMappingBuilder addProcessManagedObject(String processManagedObjectName,
+	public ThreadDependencyMappingBuilder addProcessManagedObject(String processManagedObjectName,
 			String officeManagedObjectName) {
 		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(processManagedObjectName,
 				officeManagedObjectName);

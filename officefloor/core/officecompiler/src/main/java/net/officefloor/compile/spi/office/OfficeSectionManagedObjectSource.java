@@ -35,24 +35,22 @@ public interface OfficeSectionManagedObjectSource {
 	String getOfficeSectionManagedObjectSourceName();
 
 	/**
-	 * Obtains the {@link ManagedObjectTeam} required by this
+	 * Obtains the {@link OfficeSectionManagedObjectTeam} required by this
 	 * {@link OfficeSectionManagedObjectSource}.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link ManagedObjectTeam}.
-	 * @return {@link ManagedObjectTeam}.
+	 * @param teamName Name of the {@link ManagedObjectTeam}.
+	 * @return {@link OfficeSectionManagedObjectTeam}.
 	 */
-	ManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName);
+	OfficeSectionManagedObjectTeam getOfficeSectionManagedObjectTeam(String teamName);
 
 	/**
 	 * Obtains the {@link OfficeSectionManagedObject} use of this
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeSectionManagedObject} to obtain.
+	 * @param managedObjectName Name of the {@link OfficeSectionManagedObject} to
+	 *                          obtain.
 	 * @return {@link OfficeSectionManagedObject}.
 	 */
-	OfficeSectionManagedObject getOfficeSectionManagedObject(
-			String managedObjectName);
+	OfficeSectionManagedObject getOfficeSectionManagedObject(String managedObjectName);
 
 }

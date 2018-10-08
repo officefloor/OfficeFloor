@@ -30,7 +30,7 @@ public class ExecutorFixedTeamStressTest extends AbstractTeamStressTest {
 
 	@Override
 	protected Team getTeamToTest() throws Exception {
-		return new ExecutorFixedTeamSource().createTeam(ExecutorFixedTeamSource.PROPERTY_TEAM_SIZE, "5");
+		return new ExecutorFixedTeamSource().createTeam(5);
 	}
 
 }

@@ -30,7 +30,6 @@ import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.section.OfficeSubSectionType;
-import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -41,6 +40,7 @@ import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
@@ -702,8 +702,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			for (OfficeManagedObjectSourceTeamModel mosTeamModel : mosModel.getOfficeManagedObjectSourceTeams()) {
 
 				// Obtain the managed object source team
-				ManagedObjectTeam mosTeam = mos
-						.getManagedObjectTeam(mosTeamModel.getOfficeManagedObjectSourceTeamName());
+				OfficeManagedObjectTeam mosTeam = mos
+						.getOfficeManagedObjectTeam(mosTeamModel.getOfficeManagedObjectSourceTeamName());
 
 				// Link managed object source team to office team
 				OfficeTeam officeTeam = null;
@@ -829,15 +829,12 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	}
 
 	/**
-	 * Obtains the {@link GovernanceModel} instances that provide
-	 * {@link Governance} over the particular location.
+	 * Obtains the {@link GovernanceModel} instances that provide {@link Governance}
+	 * over the particular location.
 	 * 
-	 * @param x
-	 *            X co-ordinate of location.
-	 * @param y
-	 *            Y co-ordinate of location.
-	 * @param governances
-	 *            {@link GovernanceModel} instances.
+	 * @param x           X co-ordinate of location.
+	 * @param y           Y co-ordinate of location.
+	 * @param governances {@link GovernanceModel} instances.
 	 * @return {@link GovernanceModel} instances that provide {@link Governance}
 	 *         over the particular location. May be empty array if no
 	 *         {@link Governance} for location.
@@ -882,17 +879,13 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	}
 
 	/**
-	 * Obtains the {@link ManagedObjectScope} from the managed object scope
-	 * name.
+	 * Obtains the {@link ManagedObjectScope} from the managed object scope name.
 	 * 
-	 * @param managedObjectScope
-	 *            Name of the {@link ManagedObjectScope}.
-	 * @param architect
-	 *            {@link OfficeArchitect}.
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeManagedObjectModel}.
-	 * @return {@link ManagedObjectScope} or <code>null</code> with issue
-	 *         reported to the {@link OfficeArchitect}.
+	 * @param managedObjectScope Name of the {@link ManagedObjectScope}.
+	 * @param architect          {@link OfficeArchitect}.
+	 * @param managedObjectName  Name of the {@link OfficeManagedObjectModel}.
+	 * @return {@link ManagedObjectScope} or <code>null</code> with issue reported
+	 *         to the {@link OfficeArchitect}.
 	 */
 	private ManagedObjectScope getManagedObjectScope(String managedObjectScope, OfficeArchitect architect,
 			String managedObjectName) {
@@ -916,12 +909,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	 * Obtains the {@link OfficeSectionModel} containing the
 	 * {@link OfficeSectionInputModel}.
 	 * 
-	 * @param office
-	 *            {@link OfficeModel}.
-	 * @param input
-	 *            {@link OfficeSectionInput}.
-	 * @return {@link OfficeSectionModel} containing the
-	 *         {@link OfficeSectionInput}.
+	 * @param office {@link OfficeModel}.
+	 * @param input  {@link OfficeSectionInput}.
+	 * @return {@link OfficeSectionModel} containing the {@link OfficeSectionInput}.
 	 */
 	private OfficeSectionModel getOfficeSectionForInput(OfficeModel office, OfficeSectionInputModel input) {
 
@@ -943,13 +933,11 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	 * Loads the {@link OfficeSectionFunction} instances for the
 	 * {@link OfficeSubSection} and its {@link OfficeSubSection} instances.
 	 * 
-	 * @param section
-	 *            {@link OfficeSubSection}.
-	 * @param sectionType
-	 *            {@link OfficeSubSectionType}.
-	 * @param functions
-	 *            Listing to be populated with the {@link OfficeSubSectionType}
-	 *            {@link OfficeSectionFunction} instances.
+	 * @param section     {@link OfficeSubSection}.
+	 * @param sectionType {@link OfficeSubSectionType}.
+	 * @param functions   Listing to be populated with the
+	 *                    {@link OfficeSubSectionType} {@link OfficeSectionFunction}
+	 *                    instances.
 	 */
 	private void loadOfficeFunctions(OfficeSubSection section, OfficeSubSectionType sectionType,
 			List<OfficeSectionFunction> functions) {
@@ -975,24 +963,17 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	}
 
 	/**
-	 * Recurses through the {@link OfficeSubSectionModel} instances processing
-	 * the {@link OfficeSubSectionModel} instances.
+	 * Recurses through the {@link OfficeSubSectionModel} instances processing the
+	 * {@link OfficeSubSectionModel} instances.
 	 * 
-	 * @param subSectionPath
-	 *            Path from top level {@link OfficeSubSectionModel} to current
-	 *            {@link OfficeSubSectionModel}.
-	 * @param subSection
-	 *            {@link OfficeSubSection}.
-	 * @param subSectionType
-	 *            {@link OfficeSubSectionType}.
-	 * @param subSectionModel
-	 *            {@link OfficeSubSectionModel}.
-	 * @param sectionModel
-	 *            {@link OfficeSectionModel}.
-	 * @param processor
-	 *            {@link SubSectionProcessor}.
-	 * @param architect
-	 *            {@link OfficeArchitect}.
+	 * @param subSectionPath  Path from top level {@link OfficeSubSectionModel} to
+	 *                        current {@link OfficeSubSectionModel}.
+	 * @param subSection      {@link OfficeSubSection}.
+	 * @param subSectionType  {@link OfficeSubSectionType}.
+	 * @param subSectionModel {@link OfficeSubSectionModel}.
+	 * @param sectionModel    {@link OfficeSectionModel}.
+	 * @param processor       {@link SubSectionProcessor}.
+	 * @param architect       {@link OfficeArchitect}.
 	 */
 	private void processSubSections(String subSectionPath, OfficeSubSection subSection,
 			OfficeSubSectionType subSectionType, OfficeSubSectionModel subSectionModel, OfficeSectionModel sectionModel,
@@ -1079,14 +1060,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Processes the {@link OfficeSubSection}.
 		 * 
-		 * @param subSectionModel
-		 *            {@link OfficeSubSectionModel}.
-		 * @param subSection
-		 *            {@link OfficeSubSection}.
-		 * @param architect
-		 *            {@link OfficeArchitect}.
-		 * @param subSectionPath
-		 *            Path to the {@link OfficeSubSection}.
+		 * @param subSectionModel {@link OfficeSubSectionModel}.
+		 * @param subSection      {@link OfficeSubSection}.
+		 * @param architect       {@link OfficeArchitect}.
+		 * @param subSectionPath  Path to the {@link OfficeSubSection}.
 		 */
 		void processSubSection(OfficeSubSectionModel subSectionModel, OfficeSubSection subSection,
 				OfficeArchitect architect, String subSectionPath);
@@ -1094,14 +1071,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Processes the {@link OfficeSectionManagedObject}.
 		 * 
-		 * @param managedObjectModel
-		 *            {@link OfficeSectionManagedObjectModel}.
-		 * @param managedObject
-		 *            {@link OfficeSectionManagedObject}.
-		 * @param architect
-		 *            {@link OfficeArchitect}.
-		 * @param subSectionPath
-		 *            Path to the {@link OfficeSubSection}.
+		 * @param managedObjectModel {@link OfficeSectionManagedObjectModel}.
+		 * @param managedObject      {@link OfficeSectionManagedObject}.
+		 * @param architect          {@link OfficeArchitect}.
+		 * @param subSectionPath     Path to the {@link OfficeSubSection}.
 		 */
 		void processManagedObject(OfficeSectionManagedObjectModel managedObjectModel,
 				OfficeSectionManagedObject managedObject, OfficeArchitect architect, String subSectionPath);
@@ -1109,14 +1082,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Processes the {@link OfficeSectionFunction}.
 		 * 
-		 * @param functionModel
-		 *            {@link OfficeFunctionModel}.
-		 * @param function
-		 *            {@link OfficeSectionFunction}.
-		 * @param architect
-		 *            {@link OfficeArchitect}.
-		 * @param subSectionPath
-		 *            Path to the {@link OfficeSubSection}.
+		 * @param functionModel  {@link OfficeFunctionModel}.
+		 * @param function       {@link OfficeSectionFunction}.
+		 * @param architect      {@link OfficeArchitect}.
+		 * @param subSectionPath Path to the {@link OfficeSubSection}.
 		 */
 		void processOfficeFunction(OfficeFunctionModel functionModel, OfficeSectionFunction function,
 				OfficeArchitect architect, String subSectionPath);
@@ -1151,8 +1120,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	}
 
 	/**
-	 * {@link SubSectionProcessor} to process multiple
-	 * {@link SubSectionProcessor} instances.
+	 * {@link SubSectionProcessor} to process multiple {@link SubSectionProcessor}
+	 * instances.
 	 */
 	private static class AggregateSubSectionProcessor implements SubSectionProcessor {
 
@@ -1164,8 +1133,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Adds a {@link SubSectionProcessor}.
 		 * 
-		 * @param processor
-		 *            {@link SubSectionProcessor}.
+		 * @param processor {@link SubSectionProcessor}.
 		 */
 		public void addSubSectionProcessor(SubSectionProcessor processor) {
 			this.processors.add(processor);
@@ -1201,8 +1169,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 	}
 
 	/**
-	 * {@link SubSectionProcessor} to link {@link Administration} instances to
-	 * the {@link ManagedFunction} instances.
+	 * {@link SubSectionProcessor} to link {@link Administration} instances to the
+	 * {@link ManagedFunction} instances.
 	 */
 	private static class FunctionsToAdministrationSubSectionProcessor extends AbstractSubSectionProcessor {
 
@@ -1219,11 +1187,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Initiate.
 		 * 
-		 * @param teams
-		 *            {@link OfficeTeam} by {@link OfficeTeam} name.
-		 * @param administrations
-		 *            {@link OfficeAdministration} by
-		 *            {@link OfficeAdministration} name.
+		 * @param teams           {@link OfficeTeam} by {@link OfficeTeam} name.
+		 * @param administrations {@link OfficeAdministration} by
+		 *                        {@link OfficeAdministration} name.
 		 */
 		public FunctionsToAdministrationSubSectionProcessor(Map<String, OfficeTeam> teams,
 				Map<String, OfficeAdministration> administrations) {
@@ -1318,8 +1284,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Initiate.
 		 * 
-		 * @param administrations
-		 *            {@link OfficeAdministration} instances by their name.
+		 * @param administrations {@link OfficeAdministration} instances by their name.
 		 */
 		public AdministerManagedObject(Map<String, OfficeAdministration> administrations) {
 			this.administrations = administrations;
@@ -1361,8 +1326,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Initiate.
 		 * 
-		 * @param administrations
-		 *            {@link OfficeAdministration} instances by their name.
+		 * @param administrations {@link OfficeAdministration} instances by their name.
 		 */
 		public PreLoadAdministerManagedObject(Map<String, OfficeAdministration> administrations) {
 			this.administrations = administrations;
@@ -1404,8 +1368,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Initiate.
 		 * 
-		 * @param governances
-		 *            {@link OfficeGovernance} instances by their name.
+		 * @param governances {@link OfficeGovernance} instances by their name.
 		 */
 		public GovernanceSubSectionProcessor(Map<String, OfficeGovernance> governances) {
 			this.governances = governances;
@@ -1494,10 +1457,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Initiate.
 		 * 
-		 * @param order
-		 *            Position in the order that the objects are administered.
-		 * @param managedObject
-		 *            {@link AdministerableManagedObject}.
+		 * @param order         Position in the order that the objects are administered.
+		 * @param managedObject {@link AdministerableManagedObject}.
 		 */
 		public AdministeredManagedObject(String order, AdministerableManagedObject managedObject) {
 			this.order = order;
@@ -1516,8 +1477,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		/**
 		 * Obtains the order as an {@link Integer}.
 		 * 
-		 * @param order
-		 *            Text order value.
+		 * @param order Text order value.
 		 * @return Numeric order value.
 		 */
 		private int getOrder(String order) {

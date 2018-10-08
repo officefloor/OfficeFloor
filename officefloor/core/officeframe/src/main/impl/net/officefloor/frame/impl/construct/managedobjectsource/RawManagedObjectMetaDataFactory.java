@@ -31,6 +31,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecutionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
@@ -68,10 +69,8 @@ public class RawManagedObjectMetaDataFactory {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param sourceContext
-	 *            {@link SourceContext}.
-	 * @param officeFloorConfiguration
-	 *            {@link OfficeFloorConfiguration}.
+	 * @param sourceContext            {@link SourceContext}.
+	 * @param officeFloorConfiguration {@link OfficeFloorConfiguration}.
 	 */
 	public RawManagedObjectMetaDataFactory(SourceContext sourceContext,
 			OfficeFloorConfiguration officeFloorConfiguration) {
@@ -82,18 +81,12 @@ public class RawManagedObjectMetaDataFactory {
 	/**
 	 * Creates the {@link RawManagedObjectMetaData}.
 	 * 
-	 * @param <d>
-	 *            Dependency key type.
-	 * @param <h>
-	 *            {@link Flow} key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param configuration
-	 *            {@link ManagedObjectSourceConfiguration}.
-	 * @param officeFloorName
-	 *            Name of the {@link OfficeFloor}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param                 <d> Dependency key type.
+	 * @param                 <h> {@link Flow} key type.
+	 * @param                 <MS> {@link ManagedObjectSource} type.
+	 * @param configuration   {@link ManagedObjectSourceConfiguration}.
+	 * @param officeFloorName Name of the {@link OfficeFloor}.
+	 * @param issues          {@link OfficeFloorIssues}.
 	 * @return {@link RawManagedObjectMetaData} or <code>null</code> if issue.
 	 */
 	public <d extends Enum<d>, h extends Enum<h>, MS extends ManagedObjectSource<d, h>> RawManagedObjectMetaData<d, h> constructRawManagedObjectMetaData(
@@ -272,9 +265,13 @@ public class RawManagedObjectMetaDataFactory {
 		// Obtain the recycle function name
 		String recycleFunctionName = context.getRecycleFunctionName();
 
+		// Obtain the execution meta-data
+		ManagedObjectExecutionMetaData[] executionMetaDatas = metaData.getExecutionMetaData();
+
 		// Create the raw managing office meta-data
 		RawManagingOfficeMetaData<h> rawManagingOfficeMetaData = new RawManagingOfficeMetaData<h>(officeName,
-				recycleFunctionName, inputConfiguration, flowMetaDatas, managingOfficeConfiguration);
+				recycleFunctionName, inputConfiguration, flowMetaDatas, executionMetaDatas,
+				managingOfficeConfiguration);
 
 		// Created raw managed object meta-data
 		RawManagedObjectMetaData<d, h> rawMoMetaData = new RawManagedObjectMetaData<d, h>(managedObjectSourceName,

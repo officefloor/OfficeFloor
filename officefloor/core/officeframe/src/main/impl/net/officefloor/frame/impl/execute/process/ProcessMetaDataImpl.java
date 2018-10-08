@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.process;
 
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
@@ -27,6 +28,11 @@ import net.officefloor.frame.internal.structure.ThreadMetaData;
  * @author Daniel Sagenschneider
  */
 public class ProcessMetaDataImpl implements ProcessMetaData {
+
+	/**
+	 * {@link Executive} to provide the process identifiers.
+	 */
+	private final Executive executive;
 
 	/**
 	 * {@link ManagedObjectMetaData} instances.
@@ -41,12 +47,13 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectMetaData
-	 *            {@link ManagedObjectMetaData} instances.
-	 * @param threadMetaData
-	 *            {@link ThreadMetaData}.
+	 * @param executive             {@link Executive}.
+	 * @param managedObjectMetaData {@link ManagedObjectMetaData} instances.
+	 * @param threadMetaData        {@link ThreadMetaData}.
 	 */
-	public ProcessMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData, ThreadMetaData threadMetaData) {
+	public ProcessMetaDataImpl(Executive executive, ManagedObjectMetaData<?>[] managedObjectMetaData,
+			ThreadMetaData threadMetaData) {
+		this.executive = executive;
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.threadMetaData = threadMetaData;
 	}
@@ -54,6 +61,11 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	/*
 	 * ============== ProcessMetaData =================================
 	 */
+
+	@Override
+	public Object createProcessIdentifier() {
+		return this.executive.createProcessIdentifier();
+	}
 
 	@Override
 	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {

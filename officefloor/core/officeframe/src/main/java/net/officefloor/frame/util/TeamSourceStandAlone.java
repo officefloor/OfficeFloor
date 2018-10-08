@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -29,8 +30,10 @@ import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.impl.construct.team.ExecutiveContextImpl;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
-import net.officefloor.frame.impl.execute.team.TeamSourceContextImpl;
+import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 
 /**
@@ -49,6 +52,11 @@ public class TeamSourceStandAlone {
 	 * {@link SourceProperties} to initialise the {@link TeamSource}.
 	 */
 	private final SourcePropertiesImpl properties = new SourcePropertiesImpl();
+
+	/**
+	 * {@link Team} size.
+	 */
+	private int teamSize = 1;
 
 	/**
 	 * {@link Thread} decorator. May be <code>null</code>.
@@ -92,6 +100,15 @@ public class TeamSourceStandAlone {
 
 		// Return the team source
 		return teamSource;
+	}
+
+	/**
+	 * Specifies the {@link Team} size.
+	 * 
+	 * @param teamSize {@link Team} size.
+	 */
+	public void setTeamSize(int teamSize) {
+		this.teamSize = teamSize;
 	}
 
 	/**
@@ -144,8 +161,11 @@ public class TeamSourceStandAlone {
 		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
 		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
 				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));
-		TeamSourceContext context = new TeamSourceContextImpl(false, teamName, this.threadDecorator,
-				managedExecutionFactory, this.properties, sourceContext);
+		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,
+				this.threadDecorator);
+		Executive executive = new DefaultExecutive(threadFactoryManufacturer);
+		TeamSourceContext context = new ExecutiveContextImpl(false, teamName, this.teamSize, teamSource, executive,
+				threadFactoryManufacturer, this.properties, sourceContext);
 
 		// Return the created team
 		return teamSource.createTeam(context);

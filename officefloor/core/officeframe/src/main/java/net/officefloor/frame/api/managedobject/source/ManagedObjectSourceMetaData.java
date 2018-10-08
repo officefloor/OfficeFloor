@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.api.managedobject.source;
 
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
@@ -33,8 +34,8 @@ public interface ManagedObjectSourceMetaData<O extends Enum<O>, F extends Enum<F
 	 * Obtains the {@link Class} of the {@link ManagedObject} instances from the
 	 * {@link ManagedObjectSource}.
 	 * <p>
-	 * This is to enable coupled configuration rather than specifying in a
-	 * possibly unrelated configuration file.
+	 * This is to enable coupled configuration rather than specifying in a possibly
+	 * unrelated configuration file.
 	 * <p>
 	 * Note this does not prevent the configuration passed to the
 	 * {@link ManagedObjectSource#init(ManagedObjectSourceContext)} method to
@@ -50,8 +51,8 @@ public interface ManagedObjectSourceMetaData<O extends Enum<O>, F extends Enum<F
 	 * Obtains the {@link Class} of the object returned from
 	 * {@link ManagedObject#getObject()}.
 	 * <p>
-	 * This is to enable coupled configuration rather than specifying in a
-	 * possibly unrelated configuration file.
+	 * This is to enable coupled configuration rather than specifying in a possibly
+	 * unrelated configuration file.
 	 * <p>
 	 * Note this does not prevent the configuration passed to the
 	 * {@link ManagedObjectSource#init(ManagedObjectSourceContext)} method to
@@ -64,9 +65,8 @@ public interface ManagedObjectSourceMetaData<O extends Enum<O>, F extends Enum<F
 	Class<?> getObjectClass();
 
 	/**
-	 * Obtains the list of {@link ManagedObjectDependencyMetaData} instances
-	 * should this {@link ManagedObjectSource} provide a
-	 * {@link CoordinatingManagedObject}.
+	 * Obtains the list of {@link ManagedObjectDependencyMetaData} instances should
+	 * this {@link ManagedObjectSource} provide a {@link CoordinatingManagedObject}.
 	 * 
 	 * @return Meta-data of the required dependencies for this
 	 *         {@link ManagedObjectSource}.
@@ -74,13 +74,22 @@ public interface ManagedObjectSourceMetaData<O extends Enum<O>, F extends Enum<F
 	ManagedObjectDependencyMetaData<O>[] getDependencyMetaData();
 
 	/**
-	 * Obtains the list of {@link ManagedObjectFlowMetaData} instances should
-	 * this {@link ManagedObjectSource} require instigating a {@link Flow}.
+	 * Obtains the list of {@link ManagedObjectFlowMetaData} instances should this
+	 * {@link ManagedObjectSource} require instigating a {@link Flow}.
 	 * 
 	 * @return Meta-data of {@link Flow} instances instigated by this
 	 *         {@link ManagedObjectSource}.
 	 */
 	ManagedObjectFlowMetaData<F>[] getFlowMetaData();
+
+	/**
+	 * Obtains the list of {@link ManagedObjectExecutionMetaData} instances should
+	 * the {@link ManagedObjectSource} require {@link ExecutionStrategy}.
+	 * 
+	 * @return Meta-data of {@link ExecutionStrategy} instances required by this
+	 *         {@link ManagedObjectSource}.
+	 */
+	ManagedObjectExecutionMetaData[] getExecutionMetaData();
 
 	/**
 	 * Obtains the meta-data regarding the extension interfaces that this

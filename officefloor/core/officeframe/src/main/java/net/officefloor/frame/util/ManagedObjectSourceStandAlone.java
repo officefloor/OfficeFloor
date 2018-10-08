@@ -19,11 +19,13 @@ package net.officefloor.frame.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -65,7 +67,12 @@ public class ManagedObjectSourceStandAlone {
 	 * {@link InvokedProcessServicer} instances by their {@link ProcessState}
 	 * invocation index.
 	 */
-	private final Map<Integer, InvokedProcessServicer> processes = new HashMap<Integer, InvokedProcessServicer>();
+	private final Map<Integer, InvokedProcessServicer> processes = new HashMap<>();
+
+	/**
+	 * {@link ThreadFactory} instances for the {@link ExecutionStrategy} index.
+	 */
+	private final Map<Integer, ThreadFactory[]> executionStrategies = new HashMap<>();
 
 	/**
 	 * Adds a property for the {@link ManagedObjectSource}.
@@ -250,6 +257,17 @@ public class ManagedObjectSourceStandAlone {
 	}
 
 	/**
+	 * Registers an {@link ExecutionStrategy}.
+	 * 
+	 * @param strategyIndex   Index of the {@link ExecutionStrategy}.
+	 * @param threadFactories {@link ThreadFactory} instances for the
+	 *                        {@link ExecutionStrategy}.
+	 */
+	public void registerExecutionStrategy(int strategyIndex, ThreadFactory[] threadFactories) {
+		this.executionStrategies.put(Integer.valueOf(strategyIndex), threadFactories);
+	}
+
+	/**
 	 * {@link InvokedProcessServicer} containing the details for the initial
 	 * {@link ManagedFunction} to be executed for the invoked {@link ProcessState}.
 	 */
@@ -361,6 +379,11 @@ public class ManagedObjectSourceStandAlone {
 		public void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
 				FlowCallback callback) {
 			this.process(flowIndex, parameter, managedObject, delay, callback);
+		}
+
+		@Override
+		public ThreadFactory[] getExecutionStrategy(int executionStrategyIndex) {
+			return ManagedObjectSourceStandAlone.this.executionStrategies.get(executionStrategyIndex);
 		}
 	}
 

@@ -32,11 +32,6 @@ import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
 public class LeaderFollowerTeamSource extends AbstractTeamSource {
 
 	/**
-	 * Name of property for the {@link Team} size.
-	 */
-	public static final String TEAM_SIZE_PROPERTY_NAME = "size";
-
-	/**
 	 * Property to specify the worker {@link Thread} priority.
 	 */
 	public static final String PROPERTY_THREAD_PRIORITY = "person.thread.priority";
@@ -52,14 +47,16 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(TEAM_SIZE_PROPERTY_NAME, "Number of threads in team");
 	}
 
 	@Override
 	public Team createTeam(TeamSourceContext context) throws Exception {
 
 		// Obtain the required configuration
-		int teamSize = Integer.parseInt(context.getProperty(TEAM_SIZE_PROPERTY_NAME));
+		int teamSize = context.getTeamSize();
+		if (teamSize < 1) {
+			throw new IllegalArgumentException("Team size must be one or more");
+		}
 
 		// Obtain the optional configuration
 		long waitTime = Long.parseLong(context.getProperty("wait.time", "100"));
@@ -69,7 +66,15 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(DEFAULT_THREAD_PRIORITY)));
 
 		// Create and return the team
-		ThreadFactory threadFactory = context.getThreadFactory(priority);
+		ThreadFactory threadFactory = context.getThreadFactory();
+		if (priority != DEFAULT_THREAD_PRIORITY) {
+			final ThreadFactory delegate = threadFactory;
+			threadFactory = (runnable) -> {
+				Thread thread = delegate.newThread(runnable);
+				thread.setPriority(priority);
+				return thread;
+			};
+		}
 		return new LeaderFollowerTeam(teamSize, threadFactory, waitTime);
 	}
 

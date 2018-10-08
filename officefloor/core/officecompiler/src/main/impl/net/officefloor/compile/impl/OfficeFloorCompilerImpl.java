@@ -33,8 +33,10 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerConfigurationService;
 import net.officefloor.compile.TypeLoader;
 import net.officefloor.compile.administration.AdministrationLoader;
+import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.administrator.AdministrationLoaderImpl;
+import net.officefloor.compile.impl.executive.ExecutiveLoaderImpl;
 import net.officefloor.compile.impl.governance.GovernanceLoaderImpl;
 import net.officefloor.compile.impl.issues.FailCompilerIssues;
 import net.officefloor.compile.impl.managedfunction.ManagedFunctionLoaderImpl;
@@ -49,6 +51,8 @@ import net.officefloor.compile.impl.structure.AdministrationNodeImpl;
 import net.officefloor.compile.impl.structure.AutoWirerImpl;
 import net.officefloor.compile.impl.structure.CompileContextImpl;
 import net.officefloor.compile.impl.structure.EscalationNodeImpl;
+import net.officefloor.compile.impl.structure.ExecutionStrategyNodeImpl;
+import net.officefloor.compile.impl.structure.ExecutiveNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionFlowNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
@@ -56,6 +60,7 @@ import net.officefloor.compile.impl.structure.GovernanceNodeImpl;
 import net.officefloor.compile.impl.structure.InputManagedObjectNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectExecutionStrategyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectPoolNodeImpl;
@@ -78,6 +83,7 @@ import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
 import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.SupplierNodeImpl;
 import net.officefloor.compile.impl.structure.TeamNodeImpl;
+import net.officefloor.compile.impl.structure.TeamOversightNodeImpl;
 import net.officefloor.compile.impl.supplier.SupplierLoaderImpl;
 import net.officefloor.compile.impl.team.TeamLoaderImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -85,6 +91,8 @@ import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
+import net.officefloor.compile.internal.structure.ExecutionStrategyNode;
+import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
 import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
 import net.officefloor.compile.internal.structure.FunctionObjectNode;
@@ -92,6 +100,7 @@ import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
@@ -115,6 +124,7 @@ import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.TeamNode;
+import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
@@ -142,6 +152,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
@@ -512,6 +523,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public TeamLoader getTeamLoader() {
 		return new TeamLoaderImpl(this, this);
+	}
+
+	@Override
+	public ExecutiveLoader getExecutiveLoader() {
+		return new ExecutiveLoaderImpl(this, this);
 	}
 
 	@Override
@@ -957,6 +973,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
+	public ManagedObjectExecutionStrategyNode createManagedObjectExecutionStrategyNode(String executionStrategyName,
+			ManagedObjectSourceNode managedObjectSource) {
+		return new ManagedObjectExecutionStrategyNodeImpl(executionStrategyName, managedObjectSource, this);
+	}
+
+	@Override
 	public ManagingOfficeNode createManagingOfficeNode(ManagedObjectSourceNode managedObjectSource) {
 		return new ManagingOfficeNodeImpl(managedObjectSource, this);
 	}
@@ -1111,6 +1133,28 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public TeamNode createTeamNode(String teamName, OfficeFloorNode officeFloor) {
 		return new TeamNodeImpl(teamName, officeFloor, this);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends ExecutiveSource> Class<S> getExecutiveSourceClass(String executiveSourceClassName, Node node) {
+		return (Class<S>) CompileUtil.obtainClass(executiveSourceClassName, ExecutiveSource.class, new HashMap<>(),
+				this.getRootSourceContext(), node, this.getCompilerIssues());
+	}
+
+	@Override
+	public ExecutiveNode createExecutiveNode(OfficeFloorNode officeFloor) {
+		return new ExecutiveNodeImpl(officeFloor, this);
+	}
+
+	@Override
+	public ExecutionStrategyNode createExecutionStrategyNode(String executionStrategyName, ExecutiveNode executive) {
+		return new ExecutionStrategyNodeImpl(executionStrategyName, executive, this);
+	}
+
+	@Override
+	public TeamOversightNode createTeamOversightNode(String teamOversightName, ExecutiveNode executive) {
+		return new TeamOversightNodeImpl(teamOversightName, executive, this);
 	}
 
 	@Override

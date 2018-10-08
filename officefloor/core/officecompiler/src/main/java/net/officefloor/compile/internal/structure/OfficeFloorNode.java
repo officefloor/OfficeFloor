@@ -28,6 +28,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
@@ -59,11 +60,11 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 * Adds a {@link OfficeFloorManagedObjectSource} supplied from an
 	 * {@link OfficeFloorSupplier}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeFloorManagedObjectSource}.
-	 * @param suppliedManagedObject
-	 *            {@link SuppliedManagedObjectSourceNode} to supply the
-	 *            {@link OfficeFloorManagedObjectSource}.
+	 * @param managedObjectSourceName Name of the
+	 *                                {@link OfficeFloorManagedObjectSource}.
+	 * @param suppliedManagedObject   {@link SuppliedManagedObjectSourceNode} to
+	 *                                supply the
+	 *                                {@link OfficeFloorManagedObjectSource}.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
 	OfficeFloorManagedObjectSource addManagedObjectSource(String managedObjectSourceName,
@@ -75,11 +76,9 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 * <p>
 	 * This will only source the top level {@link OfficeSection}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
-	 *         <code>false</code> with issue reported to the
-	 *         {@link CompilerIssues}.
+	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
 	boolean sourceOfficeFloor(CompileContext compileContext);
 
@@ -87,39 +86,31 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 * Sources this {@link OfficeFloorNode} and all its descendant {@link Node}
 	 * instances recursively.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced. Otherwise
-	 *         <code>false</code> with issue reported to the
-	 *         {@link CompilerIssues}.
+	 *         <code>false</code> with issue reported to the {@link CompilerIssues}.
 	 */
 	boolean sourceOfficeFloorTree(CompileContext compileContext);
 
 	/**
-	 * Loads the {@link AutoWire} targets for the
-	 * {@link OfficeFloorManagedObject} instances.
+	 * Loads the {@link AutoWire} targets for the {@link OfficeFloorManagedObject}
+	 * instances.
 	 * 
-	 * @param autoWirer
-	 *            {@link AutoWirer} to be loaded with the
-	 *            {@link OfficeFloorManagedObject} targets.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param autoWirer      {@link AutoWirer} to be loaded with the
+	 *                       {@link OfficeFloorManagedObject} targets.
+	 * @param compileContext {@link CompileContext}.
 	 * @return {@link AutoWirer} with context for the {@link OfficeFloor}.
 	 */
 	AutoWirer<LinkObjectNode> loadAutoWireObjectTargets(AutoWirer<LinkObjectNode> autoWirer,
 			CompileContext compileContext);
 
 	/**
-	 * Loads the {@link AutoWire} targets for the {@link OfficeFloorTeam}
-	 * instances.
+	 * Loads the {@link AutoWire} targets for the {@link OfficeFloorTeam} instances.
 	 * 
-	 * @param autoWirer
-	 *            {@link AutoWire} to be loaded with the {@link OfficeFloorTeam}
-	 *            targets.
-	 * @param officeTeamRegistry
-	 *            {@link OfficeTeamRegistry}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param autoWirer          {@link AutoWire} to be loaded with the
+	 *                           {@link OfficeFloorTeam} targets.
+	 * @param officeTeamRegistry {@link OfficeTeamRegistry}.
+	 * @param compileContext     {@link CompileContext}.
 	 */
 	void loadAutoWireTeamTargets(AutoWirer<LinkTeamNode> autoWirer, OfficeTeamRegistry officeTeamRegistry,
 			CompileContext compileContext);
@@ -127,8 +118,7 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	/**
 	 * Loads the {@link OfficeFloorType}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 * @return <code>true</code> if the {@link OfficeFloorType} was loaded.
 	 */
 	OfficeFloorType loadOfficeFloorType(CompileContext compileContext);
@@ -137,21 +127,25 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 * Obtains the {@link OfficeFloorDeployer} configured
 	 * {@link OfficeFloorListener} instances.
 	 * 
-	 * @return {@link OfficeFloorDeployer} configured
-	 *         {@link OfficeFloorListener} instances.
+	 * @return {@link OfficeFloorDeployer} configured {@link OfficeFloorListener}
+	 *         instances.
 	 */
 	OfficeFloorListener[] getOfficeFloorListeners();
 
 	/**
+	 * Indicates if default {@link ExecutionStrategy} is being used.
+	 * 
+	 * @return <code>true</code> if default {@link ExecutionStrategy} is being used.
+	 */
+	boolean isDefaultExecutionStrategy();
+
+	/**
 	 * Deploys the {@link OfficeFloor}.
 	 * 
-	 * @param officeFloorName
-	 *            Name of the {@link OfficeFloor}.
-	 * @param officeFloorBuilder
-	 *            {@link OfficeFloorBuilder} to build the deployed
-	 *            {@link OfficeFloor}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param officeFloorName    Name of the {@link OfficeFloor}.
+	 * @param officeFloorBuilder {@link OfficeFloorBuilder} to build the deployed
+	 *                           {@link OfficeFloor}.
+	 * @param compileContext     {@link CompileContext}.
 	 * @return {@link OfficeFloor}.
 	 */
 	OfficeFloor deployOfficeFloor(String officeFloorName, OfficeFloorBuilder officeFloorBuilder,
@@ -161,12 +155,9 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 	 * Loads the {@link FunctionManager} instances to externally trigger this
 	 * {@link OfficeFloorNode}.
 	 * 
-	 * @param officeFloor
-	 *            {@link OfficeFloor} for this {@link OfficeFloorNode}.
-	 * @throws UnknownOfficeException
-	 *             {@link UnknownOfficeException}.
-	 * @throws UnknownFunctionException
-	 *             {@link UnknownFunctionException}.
+	 * @param officeFloor {@link OfficeFloor} for this {@link OfficeFloorNode}.
+	 * @throws UnknownOfficeException   {@link UnknownOfficeException}.
+	 * @throws UnknownFunctionException {@link UnknownFunctionException}.
 	 */
 	void loadExternalServicing(OfficeFloor officeFloor) throws UnknownOfficeException, UnknownFunctionException;
 

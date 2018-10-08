@@ -22,7 +22,7 @@ import net.officefloor.frame.api.team.ThreadLocalAwareTeam;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
 /**
- * Raw {@link Team} meta-data implementation.
+ * Raw {@link Team} meta-data.
  * 
  * @author Daniel Sagenschneider
  */
@@ -46,12 +46,10 @@ public class RawTeamMetaData {
 	/**
 	 * Initiate.
 	 * 
-	 * @param teamName
-	 *            Name of {@link Team}.
-	 * @param team
-	 *            {@link TeamManagement}.
-	 * @param isRequireThreadLocalAwareness
-	 *            Flag indicating if a {@link ThreadLocalAwareTeam}.
+	 * @param teamName                      Name of {@link Team}.
+	 * @param team                          {@link TeamManagement}.
+	 * @param isRequireThreadLocalAwareness Flag indicating if a
+	 *                                      {@link ThreadLocalAwareTeam}.
 	 */
 	public RawTeamMetaData(String teamName, TeamManagement team, boolean isRequireThreadLocalAwareness) {
 		this.teamName = teamName;

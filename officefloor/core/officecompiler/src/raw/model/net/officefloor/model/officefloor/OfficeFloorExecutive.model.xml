@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="executive source class name" />
+	<list type="PropertyModel" name="property" plural="properties" />
+	<list type="OfficeFloorExecutionStrategyModel"
+		name="execution strategy" plural="execution strategies" />
+	<list type="OfficeFloorTeamOversightModel" name="team oversight" />
+</model>

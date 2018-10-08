@@ -4,6 +4,12 @@
 		<http-continuation path="/path">
 			<section name="Section" input="service" />
 		</http-continuation>
+		<http-continuation path="/objects">
+			<section name="Section" input="objects" />
+		</http-continuation>
+		<http-continuation path="/teams">
+			<section name="Section" input="teams" />
+		</http-continuation>
 	</http-continuations>
 
 	<templates>
@@ -14,6 +20,8 @@
 		<section name="Section" source="CLASS"
 			location="net.officefloor.woof.mock.MockSection">
 			<input name="service" />
+			<input name="objects" />
+			<input name="teams" />
 		</section>
 	</sections>
 

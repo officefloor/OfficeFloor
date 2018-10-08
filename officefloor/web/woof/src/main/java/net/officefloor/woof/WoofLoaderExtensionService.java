@@ -62,6 +62,7 @@ import net.officefloor.woof.resources.WoofResourcesLoaderImpl;
 import net.officefloor.woof.teams.WoofTeamsLoader;
 import net.officefloor.woof.teams.WoofTeamsLoaderContext;
 import net.officefloor.woof.teams.WoofTeamsLoaderImpl;
+import net.officefloor.woof.teams.WoofTeamsUsageContext;
 
 /**
  * {@link OfficeFloorExtensionService} / {@link OfficeExtensionService} to
@@ -81,11 +82,9 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	/**
 	 * Determines if a WoOF application.
 	 * 
-	 * @param context
-	 *            {@link SourceContext}.
+	 * @param context {@link SourceContext}.
 	 * @return <code>true</code> if a WoOF application.
-	 * @throws IOException
-	 *             If fails to check if WoOF application.
+	 * @throws IOException If fails to check if WoOF application.
 	 */
 	private static boolean isWoofApplication(SourceContext context) throws IOException {
 
@@ -107,11 +106,9 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		/**
 		 * Runs.
 		 * 
-		 * @param context
-		 *            {@link WoofLoaderRunnableContext}.
+		 * @param context {@link WoofLoaderRunnableContext}.
 		 * @return Allows for return an object.
-		 * @throws E
-		 *             Potential failure.
+		 * @throws E Potential failure.
 		 */
 		R run(WoofLoaderRunnableContext context) throws E;
 	}
@@ -185,15 +182,12 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	/**
 	 * Undertakes a contextual load.
 	 *
-	 * @param <R>
-	 *            Return type from {@link WoofLoaderRunnable}.
-	 * @param <E>
-	 *            Possible {@link Throwable} from {@link WoofLoaderRunnable}.
-	 * @param runnable
-	 *            {@link WoofLoaderRunnable} to configure the contextual load.
+	 * @param          <R> Return type from {@link WoofLoaderRunnable}.
+	 * @param          <E> Possible {@link Throwable} from
+	 *                 {@link WoofLoaderRunnable}.
+	 * @param runnable {@link WoofLoaderRunnable} to configure the contextual load.
 	 * @return Returned object from {@link WoofLoaderRunnable}.
-	 * @throws E
-	 *             Potential failure.
+	 * @throws E Potential failure.
 	 */
 	public static <R, E extends Throwable> R contextualLoad(WoofLoaderRunnable<R, E> runnable) throws E {
 		try {
@@ -259,11 +253,13 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		// Indicate loading WoOF
 		System.out.println("Extending OfficeFloor with WoOF");
 
+		// Obtain the office
+		DeployedOffice office = officeFloorDeployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+
 		// Load the HTTP Server
 		if (isLoadHttpServer) {
 
 			// Obtain the input to service the HTTP requests
-			DeployedOffice office = officeFloorDeployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
 			DeployedOfficeInput officeInput = office.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME,
 					WebArchitect.HANDLER_INPUT_NAME);
 
@@ -301,6 +297,11 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 					@Override
 					public ConfigurationItem getConfiguration() {
 						return teamsConfiguration;
+					}
+
+					@Override
+					public DeployedOffice getDeployedOffice() {
+						return office;
 					}
 				});
 			}
@@ -436,6 +437,34 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 					@Override
 					public ConfigurationItem getConfiguration() {
 						return resourcesConfiguration;
+					}
+				});
+			}
+		}
+
+		// Load the optional teams configuration for the application
+		if (isLoadTeams) {
+			ConfigurationItem teamsConfiguration = context.getOptionalConfigurationItem("application.teams", null);
+			if (teamsConfiguration != null) {
+
+				// Load the teams configuration
+				WoofTeamsLoader teamsLoader = new WoofTeamsLoaderImpl(
+						new WoofTeamsRepositoryImpl(new ModelRepositoryImpl()));
+				teamsLoader.loadWoofTeamsUsage(new WoofTeamsUsageContext() {
+
+					@Override
+					public OfficeExtensionContext getOfficeExtensionContext() {
+						return context;
+					}
+
+					@Override
+					public OfficeArchitect getOfficeArchitect() {
+						return officeArchitect;
+					}
+
+					@Override
+					public ConfigurationItem getConfiguration() {
+						return teamsConfiguration;
 					}
 				});
 			}

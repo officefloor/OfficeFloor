@@ -1,6 +1,6 @@
 <teams>
 
-	<team source="net.example.ExampleTeamSource">
+	<team size="50" source="net.example.ExampleTeamSource">
 		<property name="NAME_ONE" value="VALUE_ONE" />
 		<property-file path="example/team.properties" />
 		<property name="NAME_TWO" value="VALUE_TWO" />
@@ -8,6 +8,7 @@
 		<auto-wire qualifier="QUALIFIED_TWO" type="TYPE_TWO" />
 	</team>
 
-	<team source="PASSIVE" qualifier="QUALIFIED" type="net.example.Type" />
+	<team source="PASSIVE" qualifier="QUALIFIED"
+		type="net.example.Type" />
 
 </teams>

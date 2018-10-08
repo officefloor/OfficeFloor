@@ -20,9 +20,13 @@ package net.officefloor.woof.mock;
 import java.io.IOException;
 import java.io.Serializable;
 
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.HttpSessionStateful;
+import net.officefloor.web.ObjectResponse;
 
 /**
  * Mock logic for the section.
@@ -39,17 +43,44 @@ public class MockSection {
 	/**
 	 * Services.
 	 * 
-	 * @param parameter
-	 *            Parameter.
-	 * @param state
-	 *            {@link State}.
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
+	 * @param parameter  Parameter.
+	 * @param state      {@link State}.
+	 * @param connection {@link ServerHttpConnection}.
+	 * @param object     {@link MockObject} injected from configuration.
 	 */
-	public void service(@HttpQueryParameter("param") String parameter, State state, ServerHttpConnection connection)
-			throws IOException {
-		connection.getResponse().getEntityWriter().write("param=" + parameter + ", previous=" + state.previous);
+	public void service(@HttpQueryParameter("param") String parameter, State state, ServerHttpConnection connection,
+			MockObject object) throws IOException {
+		connection.getResponse().getEntityWriter()
+				.write("param=" + parameter + ", previous=" + state.previous + ", object=" + object.getMessage());
 		state.previous = parameter;
+	}
+
+	/**
+	 * Provides testing of objects.
+	 * 
+	 * @param object   {@link MockObject} injected from configuration.
+	 * @param response Sends the {@link MockObject} as a response.
+	 */
+	public void objects(MockObject object, ObjectResponse<MockObject> response) {
+		response.send(object);
+	}
+
+	/**
+	 * Initial service method for testing {@link Team}
+	 * 
+	 * @param flows {@link TeamFlows}.
+	 */
+	@NextFunction("teamsDifferent")
+	public String teams() {
+		return Thread.currentThread().getName();
+	}
+
+	/**
+	 * Ensure different {@link Team}.
+	 */
+	public void teamsDifferent(@Parameter String threadName, MockObject object, ObjectResponse<String> response) {
+		boolean isSameThread = Thread.currentThread().getName().equals(threadName);
+		response.send(isSameThread ? "SAME THREAD" : "DIFFERENT THREAD");
 	}
 
 }

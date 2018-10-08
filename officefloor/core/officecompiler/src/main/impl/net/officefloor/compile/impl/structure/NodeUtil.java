@@ -40,14 +40,11 @@ public class NodeUtil {
 	/**
 	 * Obtains the particular {@link Node}.
 	 * 
-	 * @param <N>
-	 *            {@link Node} type.
-	 * @param nodeName
-	 *            Name of the {@link Node}.
-	 * @param nodes
-	 *            Existing {@link Map} of {@link Node} instances by their names.
-	 * @param create
-	 *            {@link Supplier} to create the {@link Node}.
+	 * @param          <N> {@link Node} type.
+	 * @param nodeName Name of the {@link Node}.
+	 * @param nodes    Existing {@link Map} of {@link Node} instances by their
+	 *                 names.
+	 * @param create   {@link Supplier} to create the {@link Node}.
 	 * @return {@link Node} for the name.
 	 */
 	public static <N extends Node> N getNode(String nodeName, Map<String, N> nodes, Supplier<N> create) {
@@ -63,21 +60,15 @@ public class NodeUtil {
 	 * <p>
 	 * Obtains the initialised {@link Node}.
 	 * <p>
-	 * Should the {@link Node} be already initialised, an issue will be reported
-	 * to the {@link CompilerIssues}.
+	 * Should the {@link Node} be already initialised, an issue will be reported to
+	 * the {@link CompilerIssues}.
 	 * 
-	 * @param <N>
-	 *            {@link Node} type.
-	 * @param nodeName
-	 *            Name of the {@link Node}.
-	 * @param nodes
-	 *            {@link Map} of {@link Node} instances by their name.
-	 * @param context
-	 *            {@link NodeContext}.
-	 * @param create
-	 *            {@link Supplier} to create the {@link Node}.
-	 * @param initialiser
-	 *            {@link Consumer} to initialise the {@link Node}.
+	 * @param             <N> {@link Node} type.
+	 * @param nodeName    Name of the {@link Node}.
+	 * @param nodes       {@link Map} of {@link Node} instances by their name.
+	 * @param context     {@link NodeContext}.
+	 * @param create      {@link Supplier} to create the {@link Node}.
+	 * @param initialiser {@link Consumer} to initialise the {@link Node}.
 	 * @return Initialised {@link Node}.
 	 */
 	public static <N extends Node> N getInitialisedNode(String nodeName, Map<String, N> nodes, NodeContext context,
@@ -97,23 +88,49 @@ public class NodeUtil {
 
 		// Return the node
 		return node;
+	}
 
+	/**
+	 * Obtains an initialised {@link Node}.
+	 * 
+	 * @param              <N> {@link Node} type.
+	 * @param existingNode Existing {@link Node}. May be <code>null</code>.
+	 * @param context      {@link NodeContext}.
+	 * @param create       {@link Supplier} to create the {@link Node}.
+	 * @param initialiser  {@link Consumer} to initialise the {@link Node}.
+	 * @return Initialised {@link Node}.
+	 */
+	public static <N extends Node> N getInitialisedNode(N existingNode, NodeContext context, Supplier<N> create,
+			Consumer<N> initialiser) {
+
+		// Ensure have the node
+		N node = existingNode;
+		if (node == null) {
+			node = create.get();
+		}
+
+		// Determine if requires initialising
+		if (!node.isInitialised()) {
+			// Initialise as not yet initialised
+			initialiser.accept(node);
+		} else {
+			// Node already initialised
+			context.getCompilerIssues().addIssue(node, node.getNodeType() + " already configured");
+		}
+
+		// Return the node
+		return node;
 	}
 
 	/**
 	 * Initialises the {@link Node}.
 	 * 
-	 * @param <S>
-	 *            Type of state.
-	 * @param node
-	 *            {@link Node} to be initialised.
-	 * @param context
-	 *            {@link NodeContext}.
-	 * @param existingState
-	 *            Existing initialised state of the {@link Node}. May be
-	 *            <code>null</code>.
-	 * @param createState
-	 *            {@link Supplier} to create the initialised state.
+	 * @param               <S> Type of state.
+	 * @param node          {@link Node} to be initialised.
+	 * @param context       {@link NodeContext}.
+	 * @param existingState Existing initialised state of the {@link Node}. May be
+	 *                      <code>null</code>.
+	 * @param createState   {@link Supplier} to create the initialised state.
 	 * @return Initialised state for the {@link Node}.
 	 */
 	public static <S> S initialise(Node node, NodeContext context, S existingState, Supplier<S> createState) {
@@ -132,14 +149,12 @@ public class NodeUtil {
 	/**
 	 * Indicates if the {@link Node} tree is fully initialised.
 	 * 
-	 * @param root
-	 *            Root {@link Node} of tree.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @return <code>true</code> if all {@link Node} instances within the tree
-	 *         are initialised. <code>false</code> if non-initialised
-	 *         {@link Node} instances within the tree, with issues reported to
-	 *         the {@link CompilerIssues}.
+	 * @param root   Root {@link Node} of tree.
+	 * @param issues {@link CompilerIssues}.
+	 * @return <code>true</code> if all {@link Node} instances within the tree are
+	 *         initialised. <code>false</code> if non-initialised {@link Node}
+	 *         instances within the tree, with issues reported to the
+	 *         {@link CompilerIssues}.
 	 */
 	public static boolean isNodeTreeInitialised(Node root, CompilerIssues issues) {
 		return isNodeTreeInitialised(root, root, issues);
@@ -148,16 +163,13 @@ public class NodeUtil {
 	/**
 	 * Indicates if the {@link Node} tree is fully initialised.
 	 * 
-	 * @param root
-	 *            Root {@link Node} of the tree being checked.
-	 * @param parent
-	 *            Current {@link Node} of tree being checked.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @return <code>true</code> if all {@link Node} instances within the tree
-	 *         are initialised. <code>false</code> if non-initialised
-	 *         {@link Node} instances within the tree, with issues reported to
-	 *         the {@link CompilerIssues}.
+	 * @param root   Root {@link Node} of the tree being checked.
+	 * @param parent Current {@link Node} of tree being checked.
+	 * @param issues {@link CompilerIssues}.
+	 * @return <code>true</code> if all {@link Node} instances within the tree are
+	 *         initialised. <code>false</code> if non-initialised {@link Node}
+	 *         instances within the tree, with issues reported to the
+	 *         {@link CompilerIssues}.
 	 */
 	private static boolean isNodeTreeInitialised(Node root, Node parent, CompilerIssues issues) {
 
@@ -191,12 +203,9 @@ public class NodeUtil {
 	/**
 	 * Logs the {@link Node} tree structure to the {@link Writer}.
 	 * 
-	 * @param node
-	 *            Root {@link Node} of tree.
-	 * @param log
-	 *            {@link Writer}.
-	 * @throws IOException
-	 *             If fails to log.
+	 * @param node Root {@link Node} of tree.
+	 * @param log  {@link Writer}.
+	 * @throws IOException If fails to log.
 	 */
 	public static void logTreeStructure(Node node, Writer log) throws IOException {
 		log.append("{ \"name\": \"" + node.getNodeName() + "\"");
@@ -222,12 +231,9 @@ public class NodeUtil {
 	/**
 	 * Obtains the location for the {@link Node}.
 	 * 
-	 * @param sourceClassName
-	 *            Source {@link Class} name.
-	 * @param sourceInstance
-	 *            Instance of the source. May be <code>null</code>.
-	 * @param location
-	 *            Location of the source.
+	 * @param sourceClassName Source {@link Class} name.
+	 * @param sourceInstance  Instance of the source. May be <code>null</code>.
+	 * @param location        Location of the source.
 	 * @return Location for the {@link Node}.
 	 */
 	public static String getLocation(String sourceClassName, Object sourceInstance, String location) {
@@ -237,9 +243,8 @@ public class NodeUtil {
 	/**
 	 * Obtains the child {@link Node} instances.
 	 * 
-	 * @param children
-	 *            {@link Map} instances containing the child {@link Node}
-	 *            instances.
+	 * @param children {@link Map} instances containing the child {@link Node}
+	 *                 instances.
 	 * @return Child {@link Node} instances.
 	 */
 	@SafeVarargs
@@ -249,11 +254,11 @@ public class NodeUtil {
 		final List<Node> childNodes = new ArrayList<>();
 		for (final Map<String, ? extends Node> childMap : children) {
 			childMap.keySet().stream().sorted().forEach((key) -> {
-				
+
 				if (key == null) {
 					System.out.println("FOUND");
 				}
-				
+
 				childNodes.add(childMap.get(key));
 			});
 		}

@@ -57,10 +57,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link OfficeFloor}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link OfficeFloor}.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public OfficeFloorLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -89,8 +87,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	 * Loads the {@link PropertyList} specification from the
 	 * {@link OfficeFloorSource} instance.
 	 * 
-	 * @param officeFloorSource
-	 *            {@link OfficeFloorSource}.
+	 * @param officeFloorSource {@link OfficeFloorSource}.
 	 * @return {@link PropertyList} specification or <code>null</code> if issue.
 	 */
 	private PropertyList loadSpecification(OfficeFloorSource officeFloorSource) {
@@ -192,12 +189,10 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	/**
 	 * Loads the required {@link Property} instances.
 	 * 
-	 * @param officeFloorSource
-	 *            {@link OfficeFloorSource}.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 * @param propertyList
-	 *            {@link PropertyList} to configure the {@link OfficeFloor}.
+	 * @param officeFloorSource   {@link OfficeFloorSource}.
+	 * @param officeFloorLocation Location of the {@link OfficeFloor}.
+	 * @param propertyList        {@link PropertyList} to configure the
+	 *                            {@link OfficeFloor}.
 	 * @return Required {@link Property} instances or <code>null</code> if issue
 	 *         loading.
 	 */
@@ -296,11 +291,19 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			return null; // failed to instantiate
 		}
 
+		// Return the OfficeFloor type
+		return this.loadOfficeFloorType(officeFloorSource, officeFloorLocation, propertyList);
+	}
+
+	@Override
+	public <OF extends OfficeFloorSource> OfficeFloorType loadOfficeFloorType(OF officeFloorSource,
+			String officeFloorLocation, PropertyList propertyList) {
+
 		// Create the compile context
 		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the OfficeFloor
-		OfficeFloorNode node = this.nodeContext.createOfficeFloorNode(officeFloorSourceClass.getName(),
+		OfficeFloorNode node = this.nodeContext.createOfficeFloorNode(officeFloorSource.getClass().getName(),
 				officeFloorSource, officeFloorLocation);
 		propertyList.configureProperties(node);
 		boolean isSourced = node.sourceOfficeFloor(compileContext);
@@ -315,10 +318,8 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
+	 * @param issueDescription    Description of the issue.
+	 * @param officeFloorLocation Location of the {@link OfficeFloor}.
 	 */
 	private void addIssue(String issueDescription, String officeFloorLocation) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
@@ -327,12 +328,9 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
+	 * @param issueDescription    Description of the issue.
+	 * @param cause               Cause of the issue.
+	 * @param officeFloorLocation Location of the {@link OfficeFloor}.
 	 */
 	private void addIssue(String issueDescription, Throwable cause, String officeFloorLocation) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);

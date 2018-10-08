@@ -29,6 +29,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
@@ -45,6 +46,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecutionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
@@ -508,6 +510,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowProvided, flowProvided.getLabel(), null);
 		this.recordReturn(flowProvided, flowProvided.getKey(), null);
 		this.recordReturn(flowProvided, flowProvided.getArgumentType(), Connection.class);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
@@ -648,6 +651,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), TwoKey.ONE); // order
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
@@ -715,6 +719,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(flowTwo, flowTwo.getLabel(), null);
 		this.recordReturn(flowTwo, flowTwo.getKey(), null);
 		this.recordReturn(flowTwo, flowTwo.getArgumentType(), String.class);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
@@ -763,6 +768,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(),
 				new ManagedObjectExtensionMetaData[] { null });
 		this.issues.recordIssue("Null extension interface meta-data");
@@ -782,6 +788,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(),
 				new ManagedObjectExtensionMetaData[] { eiMetaData });
 		this.recordReturn(eiMetaData, eiMetaData.getExtensionType(), null);
@@ -802,6 +809,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(),
 				new ManagedObjectExtensionMetaData[] { eiMetaData });
 		this.recordReturn(eiMetaData, eiMetaData.getExtensionType(), XAResource.class);
@@ -824,6 +832,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.record_objectAndManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(),
 				new ManagedObjectExtensionMetaData[] { eiMetaData });
 		this.recordReturn(eiMetaData, eiMetaData.getExtensionType(), XAResource.class);
@@ -1221,6 +1230,71 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if <code>null</code> {@link ManagedObjectExecutionMetaData}.
+	 */
+	public void testNullExecutionStrategy() {
+
+		// Record
+		this.record_objectAndManagedObject();
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(),
+				new ManagedObjectExecutionMetaData[] { null });
+		this.issues.recordIssue("Null ManagedObjectExecutionMetaData for execution strategy 0");
+
+		// Attempt to load
+		this.loadManagedObjectType(false, null);
+	}
+
+	/**
+	 * Ensure default label for {@link ManagedObjectExecutionStrategyType}.
+	 */
+	public void testNonLabelledExecutionStrategy() {
+
+		// Record
+		this.record_objectAndManagedObject();
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		ManagedObjectExecutionMetaData executionStrategy = this.createMock(ManagedObjectExecutionMetaData.class);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(),
+				new ManagedObjectExecutionMetaData[] { executionStrategy });
+		this.recordReturn(executionStrategy, executionStrategy.getLabel(), null);
+		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
+
+		// Attempt to load
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, null);
+
+		// Should have execution strategy
+		ManagedObjectExecutionStrategyType[] strategies = moType.getExecutionStrategyTypes();
+		assertEquals("Incorrect number of execution strategies", 1, strategies.length);
+		assertEquals("Incorrect execution strategy", "0", strategies[0].getExecutionStrategyName());
+	}
+
+	/**
+	 * Ensure provides {@link ManagedObjectExecutionStrategyType}.
+	 */
+	public void testExecutionStrategy() {
+
+		// Record
+		this.record_objectAndManagedObject();
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		ManagedObjectExecutionMetaData executionStrategy = this.createMock(ManagedObjectExecutionMetaData.class);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(),
+				new ManagedObjectExecutionMetaData[] { executionStrategy });
+		this.recordReturn(executionStrategy, executionStrategy.getLabel(), "STRATEGY");
+		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
+
+		// Attempt to load
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, null);
+
+		// Should have execution strategy
+		ManagedObjectExecutionStrategyType[] strategies = moType.getExecutionStrategyTypes();
+		assertEquals("Incorrect number of execution strategies", 1, strategies.length);
+		assertEquals("Incorrect execution strategy", "STRATEGY", strategies[0].getExecutionStrategyName());
+	}
+
+	/**
 	 * Single key {@link Enum}.
 	 */
 	private enum OneKey {
@@ -1254,9 +1328,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 * Records obtaining simple meta-data from the
 	 * {@link ManagedObjectSourceMetaData}.
 	 * 
-	 * @param flowKeys
-	 *            Flow keys to be defined in meta-data. Provide <code>null</code>
-	 *            values for indexing.
+	 * @param flowKeys Flow keys to be defined in meta-data. Provide
+	 *                 <code>null</code> values for indexing.
 	 */
 	@SuppressWarnings("unchecked")
 	private <F extends Enum<?>> void record_basicMetaData(F... flowKeys) {
@@ -1286,6 +1359,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 			}
 		}
 
+		// Record no execution strategies
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
+
 		// Record no supported extension interfaces
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
 	}
@@ -1293,13 +1369,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link ManagedObjectType}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the
-	 *            {@link FunctionNamespaceType}.
-	 * @param init
-	 *            {@link Init}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link FunctionNamespaceType}.
+	 * @param init                   {@link Init}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link ManagedObjectType}.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -1346,10 +1419,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Implemented to init the {@link ManagedObjectSource}.
 		 * 
-		 * @param context
-		 *            {@link ManagedObjectSourceContext}.
-		 * @param util
-		 *            {@link InitUtil}.
+		 * @param context {@link ManagedObjectSourceContext}.
+		 * @param util    {@link InitUtil}.
 		 */
 		void init(ManagedObjectSourceContext<F> context, InitUtil util);
 	}
@@ -1404,10 +1475,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param metaData
-		 *            {@link ManagedObjectSourceMetaData}.
-		 * @param initUtil
-		 *            {@link InitUtil}.
+		 * @param metaData {@link ManagedObjectSourceMetaData}.
+		 * @param initUtil {@link InitUtil}.
 		 */
 		public static void reset(ManagedObjectSourceMetaData<?, ?> metaData, InitUtil initUtil) {
 			instantiateFailure = null;

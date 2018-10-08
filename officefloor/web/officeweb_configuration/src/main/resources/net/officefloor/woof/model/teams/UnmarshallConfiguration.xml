@@ -5,6 +5,7 @@
 	<!-- TEAMS -->
 	<object method="addWoofTeam" node="team"
 		class="net.officefloor.woof.model.teams.WoofTeamModel">
+		<value method="setTeamSize" node="team@size" />
 		<value method="setTeamSourceClassName" node="team@source" />
 		<value method="setQualifier" node="team@qualifier" />
 		<value method="setType" node="team@type" />

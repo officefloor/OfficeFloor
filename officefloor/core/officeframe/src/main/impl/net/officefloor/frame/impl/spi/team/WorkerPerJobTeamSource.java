@@ -59,7 +59,15 @@ public class WorkerPerJobTeamSource extends AbstractTeamSource {
 				.valueOf(context.getProperty(PROPERTY_THREAD_PRIORITY, String.valueOf(DEFAULT_THREAD_PRIORITY)));
 
 		// Obtain the thread factory
-		ThreadFactory threadFactory = context.getThreadFactory(priority);
+		ThreadFactory threadFactory = context.getThreadFactory();
+		if (priority != Thread.NORM_PRIORITY) {
+			ThreadFactory delegate = threadFactory;
+			threadFactory = (runnable) -> {
+				Thread thread = delegate.newThread(runnable);
+				thread.setPriority(priority);
+				return thread;
+			};
+		}
 
 		// Create and return the team
 		return new WorkerPerJobTeam(threadFactory);
@@ -78,8 +86,7 @@ public class WorkerPerJobTeamSource extends AbstractTeamSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param threadFactory
-		 *            {@link ThreadFactory}.
+		 * @param threadFactory {@link ThreadFactory}.
 		 */
 		public WorkerPerJobTeam(ThreadFactory threadFactory) {
 			this.threadFactory = threadFactory;

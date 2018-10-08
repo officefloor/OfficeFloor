@@ -30,11 +30,9 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -43,8 +41,8 @@ import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.compile.AbstractWebCompileTestCase;
 import net.officefloor.web.compile.CompileWebContext;
-import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.build.AbstractHttpSecurable;
 import net.officefloor.web.security.build.HttpSecurer;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
@@ -65,37 +63,7 @@ import net.officefloor.web.spi.security.HttpSecurity;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
-
-	/**
-	 * {@link WebCompileOfficeFloor}.
-	 */
-	private final WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
-
-	/**
-	 * {@link MockHttpServer}.
-	 */
-	private MockHttpServer server;
-
-	/**
-	 * {@link OfficeFloor}.
-	 */
-	private OfficeFloor officeFloor;
-
-	@Override
-	protected void setUp() throws Exception {
-		this.compile.officeFloor((context) -> {
-			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
-					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-		});
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
-		}
-	}
+public class HttpSecurityArchitectTest extends AbstractWebCompileTestCase {
 
 	/**
 	 * Ensure able to employ {@link HttpSecurityArchitect} without configuring
@@ -266,8 +234,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure disallows access if not authenticated with
-	 * {@link HttpAccessControl}.
+	 * Ensure disallows access if not authenticated with {@link HttpAccessControl}.
 	 */
 	public void testStandard_NoAccessAsNotAuthenticated() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", Standard_NoAccessAsNotAuthenticatedServicer.class);
@@ -339,8 +306,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure allows access with {@link HttpAccess} if authenticated and in
-	 * role.
+	 * Ensure allows access with {@link HttpAccess} if authenticated and in role.
 	 */
 	public void testHttpAccess() throws Exception {
 		this.initialiseMockHttpSecurity("/path", "REALM", HttpAccessServicer.class);
@@ -431,8 +397,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to configure multiple challenge {@link HttpSecurity}
-	 * instances.
+	 * Ensure able to configure multiple challenge {@link HttpSecurity} instances.
 	 */
 	public void testMultipleChallengeSecurity() throws Exception {
 		this.compile((context, security) -> {
@@ -690,8 +655,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can secure {@link Office} {@link Flow} passing through an
-	 * argument.
+	 * Ensure can secure {@link Office} {@link Flow} passing through an argument.
 	 */
 	public void testHttpOfficeSecurerFlowWithArgument() throws Exception {
 		this.compile((context, security) -> {
@@ -961,12 +925,9 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Creates a {@link MockHttpRequestBuilder} with credentials.
 	 * 
-	 * @param path
-	 *            Path.
-	 * @param userName
-	 *            User name.
-	 * @param password
-	 *            Password.
+	 * @param path     Path.
+	 * @param userName User name.
+	 * @param password Password.
 	 * @return {@link MockHttpRequestBuilder}.
 	 */
 	private MockHttpRequestBuilder mockRequest(String path, String userName, String password) {
@@ -991,10 +952,8 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		/**
 		 * Initialises the {@link HttpSecurityArchitect}.
 		 * 
-		 * @param context
-		 *            {@link CompileWebContext}.
-		 * @param security
-		 *            {@link HttpSecurityArchitect}.
+		 * @param context  {@link CompileWebContext}.
+		 * @param security {@link HttpSecurityArchitect}.
 		 */
 		void initialise(CompileWebContext context, HttpSecurityArchitect security);
 	}
@@ -1002,8 +961,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Compiles with the {@link Initialiser}.
 	 * 
-	 * @param initialiser
-	 *            {@link Initialiser}.
+	 * @param initialiser {@link Initialiser}.
 	 */
 	private void compile(Initialiser initialiser) throws Exception {
 		this.compile.web((context) -> {

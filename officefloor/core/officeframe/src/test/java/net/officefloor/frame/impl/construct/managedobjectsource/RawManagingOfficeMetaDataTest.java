@@ -17,9 +17,14 @@
  */
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ThreadFactory;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -36,6 +41,7 @@ import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuild
 import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectCleanupImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
@@ -58,7 +64,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * {@link Flow} key.
 	 */
 	private enum Flows {
-		KEY, WRONG_KEY
+	KEY, WRONG_KEY
 	}
 
 	/**
@@ -103,6 +109,16 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * {@link OfficeMetaData}.
 	 */
 	private final OfficeMetaDataMockBuilder officeMetaData = MockConstruct.mockOfficeMetaData(MANAGING_OFFICE_NAME);
+
+	/**
+	 * Default {@link ExecutionStrategy}.
+	 */
+	private ThreadFactory[] defaultExecutionStrategy = null;
+
+	/**
+	 * {@link ExecutionStrategy} instances by name.
+	 */
+	private final Map<String, ThreadFactory[]> executionStrategies = new HashMap<>();
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -238,8 +254,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issues if {@link ManagedObject} is not managed by the
-	 * {@link Office}.
+	 * Ensures issues if {@link ManagedObject} is not managed by the {@link Office}.
 	 */
 	public void testNotManagedByOffice() {
 
@@ -258,8 +273,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issues if no {@link RawBoundManagedObjectInstanceMetaData} for
-	 * the {@link ManagedObjectSource}.
+	 * Ensures issues if no {@link RawBoundManagedObjectInstanceMetaData} for the
+	 * {@link ManagedObjectSource}.
 	 */
 	public void testNoInstanceForManagedObjectSource() {
 
@@ -387,8 +402,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to construct {@link Flow} for a {@link ManagedObject} that
-	 * is not the first bound or first instance.
+	 * Ensures able to construct {@link Flow} for a {@link ManagedObject} that is
+	 * not the first bound or first instance.
 	 */
 	public void testConstructFlowOfNotFirstBoundOrInstance() throws Exception {
 
@@ -414,10 +429,124 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures issues if {@link ExecutionStrategy} instances configured but no
+	 * {@link ExecutionStrategy} instances required.
+	 */
+	public void testNoExecutionStrategiesButExecutionStrategiesConfigured() {
+
+		// Record flows configured but none required
+		this.configuration.linkExecutionStrategy(0, "test");
+		this.record_issue(
+				"ManagedObjectSourceMetaData specifies no execution strategies but execution strategies configured for it");
+
+		// Manage by office
+		this.replayMockObjects();
+		this.run_manageByOffice(false, INPUT_MANAGED_OBJECT_NAME);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures issue if no {@link ExecutionStrategy} is configured.
+	 */
+	public void testNoExecutionStrategyConfigured() {
+
+		// Record no execution strategy configured
+		this.rawMoMetaData.getMetaDataBuilder().addExecutionStrategy();
+		this.record_issue("No execution strategy configured for execution strategy 0 (label=<no label>)");
+
+		// Manage by office
+		this.replayMockObjects();
+		this.run_manageByOffice(false, INPUT_MANAGED_OBJECT_NAME);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures issue if no {@link ExecutionStrategy} for the
+	 * {@link ExecutionStrategy}.
+	 */
+	public void testNoExecutionStrategy() {
+
+		// Record
+		this.rawMoMetaData.getMetaDataBuilder().addExecutionStrategy();
+		this.configuration.getBuilder().linkExecutionStrategy(0, "UNKNOWN");
+		this.record_issue(
+				"No execution strategy available by name 'UNKNOWN' for execution strategy 0 (label=<no label>)");
+
+		// Manage by office
+		this.replayMockObjects();
+		this.run_manageByOffice(false, INPUT_MANAGED_OBJECT_NAME);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures issue if extra {@link ExecutionStrategy} configured.
+	 */
+	public void testExtraExecutionStrategyConfigured() {
+
+		// Record
+		this.rawMoMetaData.getMetaDataBuilder().addExecutionStrategy();
+		this.configuration.getBuilder().linkExecutionStrategy(0, "STRATEGY");
+		this.configuration.getBuilder().linkExecutionStrategy(1, "STRATEGY");
+		this.executionStrategies.put("STRATEGY", new ThreadFactory[0]);
+		this.record_issue("Extra execution strategies configured than specified by ManagedObjectSourceMetaData");
+
+		// Manage by office
+		this.replayMockObjects();
+		this.run_manageByOffice(false, INPUT_MANAGED_OBJECT_NAME);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures able to construct {@link ExecutionStrategy} for a
+	 * {@link ManagedObject}.
+	 */
+	public void testConstructExecutionStrategy() throws Exception {
+
+		// Record
+		final ThreadFactory[] threadFactories = new ThreadFactory[0];
+		this.rawMoMetaData.getMetaDataBuilder().addExecutionStrategy();
+		this.configuration.getBuilder().linkExecutionStrategy(0, "STRATEGY");
+		this.executionStrategies.put("STRATEGY", threadFactories);
+
+		// Manage by office
+		this.replayMockObjects();
+		RawManagingOfficeMetaData<?> metaData = this.run_manageByOffice(true, INPUT_MANAGED_OBJECT_NAME);
+		this.verifyMockObjects();
+
+		// Ensure strategy available from execution context
+		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteContextFactory()
+				.createManagedObjectExecuteContext();
+		assertSame("Incorrect thread factories for execution strategy", threadFactories,
+				context.getExecutionStrategy(0));
+	}
+
+	/**
+	 * Ensures able to construct {@link DefaultExecutive} {@link ExecutionStrategy}
+	 * for a {@link ManagedObject}.
+	 */
+	public void testConstructDefaultExecutionStrategy() throws Exception {
+
+		// Record
+		final ThreadFactory[] threadFactories = new ThreadFactory[0];
+		this.rawMoMetaData.getMetaDataBuilder().addExecutionStrategy();
+		this.defaultExecutionStrategy = threadFactories;
+
+		// Manage by office
+		this.replayMockObjects();
+		RawManagingOfficeMetaData<?> metaData = this.run_manageByOffice(true, INPUT_MANAGED_OBJECT_NAME);
+		this.verifyMockObjects();
+
+		// Ensure strategy available from execution context
+		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteContextFactory()
+				.createManagedObjectExecuteContext();
+		assertSame("Incorrect thread factories for default execution strategy", threadFactories,
+				context.getExecutionStrategy(0));
+	}
+
+	/**
 	 * Records an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	 * @param issueDescription Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
 		this.issues.addIssue(AssetType.MANAGED_OBJECT, MANAGED_OBJECT_SOURCE_NAME, issueDescription);
@@ -432,7 +561,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Create and return the raw managing office meta-data
 		RawManagingOfficeMetaData<Flows> rawManagingOffice = new RawManagingOfficeMetaData<>(MANAGING_OFFICE_NAME,
 				this.recycleFunctionName, this.inputConfiguration,
-				this.rawMoMetaData.getManagedObjectSourceMetaData().getFlowMetaData(), this.configuration);
+				this.rawMoMetaData.getManagedObjectSourceMetaData().getFlowMetaData(),
+				this.rawMoMetaData.getManagedObjectSourceMetaData().getExecutionMetaData(), this.configuration);
 		rawManagingOffice.setRawManagedObjectMetaData(this.rawMoMetaData.build(rawManagingOffice));
 		return rawManagingOffice;
 	}
@@ -440,8 +570,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Creates the {@link RawBoundManagedObjectMetaData}.
 	 * 
-	 * @param rawManaingOfficeMetaData
-	 *            {@link RawManagingOfficeMetaData}.
+	 * @param rawManaingOfficeMetaData {@link RawManagingOfficeMetaData}.
 	 * @return {@link RawBoundManagedObjectInstanceMetaData}.
 	 */
 	private RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> createRawBoundManagedObjectInstanceMetaData(
@@ -457,19 +586,16 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates a {@link RawManagingOfficeMetaData} and runs the manage by
-	 * office.
+	 * Creates a {@link RawManagingOfficeMetaData} and runs the manage by office.
 	 *
-	 * @param rawManagingOffice
-	 *            {@link RawManagingOfficeMetaData}.
-	 * @param isCreateExecuteContext
-	 *            <code>true</code> if {@link ManagedObjectExecuteContext}
-	 *            should be available.
-	 * @param recycleFunctionName
-	 *            Recycle {@link ManagedFunction} name.
-	 * @param processBoundMetaData
-	 *            {@link ProcessState} bound
-	 *            {@link RawBoundManagedObjectMetaData} for the {@link Office}.
+	 * @param rawManagingOffice      {@link RawManagingOfficeMetaData}.
+	 * @param isCreateExecuteContext <code>true</code> if
+	 *                               {@link ManagedObjectExecuteContext} should be
+	 *                               available.
+	 * @param recycleFunctionName    Recycle {@link ManagedFunction} name.
+	 * @param processBoundMetaData   {@link ProcessState} bound
+	 *                               {@link RawBoundManagedObjectMetaData} for the
+	 *                               {@link Office}.
 	 */
 	private void run_manageByOffice(RawManagingOfficeMetaData<Flows> rawManagingOffice, boolean isCreateExecuteContext,
 			RawBoundManagedObjectMetaData... processBoundMetaData) {
@@ -478,7 +604,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
 				new RawAdministrationMetaDataFactory(this.officeMetaData.build(), null, null, null), null, null);
 		rawManagingOffice.manageByOffice(this.officeMetaData.build(), processBoundMetaData, moAdminFactory,
-				this.issues);
+				this.defaultExecutionStrategy, this.executionStrategies, this.issues);
 
 		// Validate creation of execute context
 		if (isCreateExecuteContext) {
@@ -491,16 +617,14 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates a {@link RawManagingOfficeMetaData} and runs the manage by
-	 * office.
+	 * Creates a {@link RawManagingOfficeMetaData} and runs the manage by office.
 	 * 
-	 * @param isCreateExecuteContext
-	 *            <code>true</code> if {@link ManagedObjectExecuteContext}
-	 *            should be available.
-	 * @param recycleFunctionName
-	 *            Recycle {@link ManagedFunction} name.
-	 * @param processBoundMetaDataNames
-	 *            Names fo the {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param isCreateExecuteContext    <code>true</code> if
+	 *                                  {@link ManagedObjectExecuteContext} should
+	 *                                  be available.
+	 * @param recycleFunctionName       Recycle {@link ManagedFunction} name.
+	 * @param processBoundMetaDataNames Names fo the
+	 *                                  {@link RawBoundManagedObjectInstanceMetaData}.
 	 * @return New {@link RawManagingOfficeMetaData} with manage by office run.
 	 */
 	private RawManagingOfficeMetaData<?> run_manageByOffice(boolean isCreateExecuteContext,

@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
@@ -52,8 +53,7 @@ public interface OfficeMetaData {
 	OfficeClock getOfficeClock();
 
 	/**
-	 * Obtains the {@link ProcessMetaData} for processes within this
-	 * {@link Office}.
+	 * Obtains the {@link ProcessMetaData} for processes within this {@link Office}.
 	 * 
 	 * @return {@link ProcessMetaData} for processes within this {@link Office}.
 	 */
@@ -67,8 +67,8 @@ public interface OfficeMetaData {
 	FunctionLoop getFunctionLoop();
 
 	/**
-	 * Obtains the {@link ManagedFunctionMetaData} of the
-	 * {@link ManagedFunction} that may be done within this {@link Office}.
+	 * Obtains the {@link ManagedFunctionMetaData} of the {@link ManagedFunction}
+	 * that may be done within this {@link Office}.
 	 * 
 	 * @return {@link ManagedFunctionMetaData} instances of this {@link Office}.
 	 */
@@ -82,12 +82,18 @@ public interface OfficeMetaData {
 	ManagedFunctionLocator getManagedFunctionLocator();
 
 	/**
-	 * Obtains the {@link OfficeStartupFunction} instances for this
-	 * {@link Office}.
+	 * Obtains the {@link OfficeStartupFunction} instances for this {@link Office}.
 	 * 
 	 * @return {@link OfficeStartupFunction} instances for this {@link Office}.
 	 */
 	OfficeStartupFunction[] getStartupFunctions();
+
+	/**
+	 * Obtains the {@link Executive} for this {@link Office}.
+	 * 
+	 * @return {@link Executive} for this {@link Office}.
+	 */
+	Executive getExecutive();
 
 	/**
 	 * Obtains the {@link ManagedExecutionFactory} for this {@link Office}.
@@ -99,19 +105,15 @@ public interface OfficeMetaData {
 	/**
 	 * Creates a new {@link ProcessState}.
 	 * 
-	 * @param flowMetaData
-	 *            {@link FlowMetaData} of the starting {@link FunctionState} for
-	 *            the {@link ProcessState}.
-	 * @param parameter
-	 *            Parameter to the starting {@link FunctionState}.
-	 * @param callback
-	 *            Optional {@link FlowCallback} of the {@link ProcessState}. May
-	 *            be <code>null</code>.
-	 * @param callbackThreadState
-	 *            Optional {@link ThreadState} for the {@link FlowCallback}. May
-	 *            be <code>null</code>.
-	 * @return {@link FunctionState} to start processing the
-	 *         {@link ProcessState}.
+	 * @param flowMetaData        {@link FlowMetaData} of the starting
+	 *                            {@link FunctionState} for the
+	 *                            {@link ProcessState}.
+	 * @param parameter           Parameter to the starting {@link FunctionState}.
+	 * @param callback            Optional {@link FlowCallback} of the
+	 *                            {@link ProcessState}. May be <code>null</code>.
+	 * @param callbackThreadState Optional {@link ThreadState} for the
+	 *                            {@link FlowCallback}. May be <code>null</code>.
+	 * @return {@link FunctionState} to start processing the {@link ProcessState}.
 	 */
 	FunctionState createProcess(FlowMetaData flowMetaData, Object parameter, FlowCallback callback,
 			ThreadState callbackThreadState);
@@ -119,37 +121,44 @@ public interface OfficeMetaData {
 	/**
 	 * Invokes a {@link ProcessState}.
 	 * 
-	 * @param flowMetaData
-	 *            {@link FlowMetaData} of the starting {@link FunctionState} for
-	 *            the {@link ProcessState}.
-	 * @param parameter
-	 *            Parameter to the starting {@link FunctionState}.
-	 * @param delay
-	 *            Millisecond delay in invoking the {@link ProcessState}. 0 (or
-	 *            negative value) will invoke immediately on the current
-	 *            {@link Thread}.
-	 * @param callback
-	 *            Optional {@link FlowCallback} of the {@link ProcessState}. May
-	 *            be <code>null</code>.
-	 * @param callbackThreadState
-	 *            Optional {@link ThreadState} for the {@link FlowCallback}. May
-	 *            be <code>null</code>.
-	 * @param inputManagedObject
-	 *            {@link ManagedObject} that possibly invoked the new
-	 *            {@link ProcessState}. This may be <code>null</code> and if so
-	 *            the remaining parameters will be ignored.
-	 * @param inputManagedObjectMetaData
-	 *            {@link ManagedObjectMetaData} for the {@link ManagedObject}
-	 *            that invoked the new {@link ProcessState}. Should the
-	 *            {@link ManagedObject} be provided this must then also be
-	 *            provided.
-	 * @param processBoundIndexForInputManagedObject
-	 *            Index of the {@link ManagedObject} within the
-	 *            {@link ProcessState}. Ignored if {@link ManagedObject} passed
-	 *            in is <code>null</code>.
-	 * @throws InvalidParameterTypeException
-	 *             Should the type of parameter be invalid for the initial
-	 *             {@link ManagedFunction}.
+	 * @param flowMetaData                           {@link FlowMetaData} of the
+	 *                                               starting {@link FunctionState}
+	 *                                               for the {@link ProcessState}.
+	 * @param parameter                              Parameter to the starting
+	 *                                               {@link FunctionState}.
+	 * @param delay                                  Millisecond delay in invoking
+	 *                                               the {@link ProcessState}. 0 (or
+	 *                                               negative value) will invoke
+	 *                                               immediately on the current
+	 *                                               {@link Thread}.
+	 * @param callback                               Optional {@link FlowCallback}
+	 *                                               of the {@link ProcessState}.
+	 *                                               May be <code>null</code>.
+	 * @param callbackThreadState                    Optional {@link ThreadState}
+	 *                                               for the {@link FlowCallback}.
+	 *                                               May be <code>null</code>.
+	 * @param inputManagedObject                     {@link ManagedObject} that
+	 *                                               possibly invoked the new
+	 *                                               {@link ProcessState}. This may
+	 *                                               be <code>null</code> and if so
+	 *                                               the remaining parameters will
+	 *                                               be ignored.
+	 * @param inputManagedObjectMetaData             {@link ManagedObjectMetaData}
+	 *                                               for the {@link ManagedObject}
+	 *                                               that invoked the new
+	 *                                               {@link ProcessState}. Should
+	 *                                               the {@link ManagedObject} be
+	 *                                               provided this must then also be
+	 *                                               provided.
+	 * @param processBoundIndexForInputManagedObject Index of the
+	 *                                               {@link ManagedObject} within
+	 *                                               the {@link ProcessState}.
+	 *                                               Ignored if
+	 *                                               {@link ManagedObject} passed in
+	 *                                               is <code>null</code>.
+	 * @throws InvalidParameterTypeException Should the type of parameter be invalid
+	 *                                       for the initial
+	 *                                       {@link ManagedFunction}.
 	 */
 	void invokeProcess(FlowMetaData flowMetaData, Object parameter, long delay, FlowCallback callback,
 			ThreadState callbackThreadState, ManagedObject inputManagedObject,

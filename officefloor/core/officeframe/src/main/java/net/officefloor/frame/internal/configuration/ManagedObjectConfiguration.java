@@ -74,4 +74,12 @@ public interface ManagedObjectConfiguration<O extends Enum<O>> {
 	 */
 	AdministrationConfiguration<?, ?, ?>[] getPreLoadAdministration();
 
+	/**
+	 * Obtains the {@link ThreadLocalConfiguration}.
+	 * 
+	 * @return {@link ThreadLocalConfiguration} or <code>null</code> if not bound to
+	 *         {@link Thread}.
+	 */
+	ThreadLocalConfiguration getThreadLocalConfiguration();
+
 }

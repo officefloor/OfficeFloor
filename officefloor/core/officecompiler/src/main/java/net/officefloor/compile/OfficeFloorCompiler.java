@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 
 import net.officefloor.compile.administration.AdministrationLoader;
+import net.officefloor.compile.executive.ExecutiveLoader;
 import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.impl.adapt.OfficeFloorCompilerAdapter;
@@ -825,6 +826,13 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @return {@link TeamLoader}.
 	 */
 	public abstract TeamLoader getTeamLoader();
+
+	/**
+	 * Obtains the {@link ExecutiveLoader}.
+	 * 
+	 * @return {@link ExecutiveLoader}.
+	 */
+	public abstract ExecutiveLoader getExecutiveLoader();
 
 	/**
 	 * <p>

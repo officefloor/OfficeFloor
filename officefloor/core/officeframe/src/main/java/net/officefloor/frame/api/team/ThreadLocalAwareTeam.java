@@ -34,10 +34,21 @@ import net.officefloor.frame.internal.structure.ProcessState;
 public interface ThreadLocalAwareTeam extends Team {
 
 	/**
+	 * <p>
+	 * Indicates if {@link ThreadLocalAwareTeam}.
+	 * <p>
+	 * Allows for implementing the interface without being thread-local aware.
+	 * 
+	 * @return <code>true</code> if {@link ThreadLocalAwareTeam}.
+	 */
+	default boolean isThreadLocalAware() {
+		return true;
+	}
+
+	/**
 	 * Sets the {@link ThreadLocalAwareContext} for the {@link Team}.
 	 * 
-	 * @param context
-	 *            {@link ThreadLocalAwareContext} for the {@link Team}.
+	 * @param context {@link ThreadLocalAwareContext} for the {@link Team}.
 	 */
 	void setThreadLocalAwareness(ThreadLocalAwareContext context);
 

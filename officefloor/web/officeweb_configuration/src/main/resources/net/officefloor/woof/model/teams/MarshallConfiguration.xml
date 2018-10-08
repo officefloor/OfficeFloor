@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<marshall type="net.officefloor.woof.model.teams.WoofTeamsModel"
-	element="teams">
+<marshall
+	type="net.officefloor.woof.model.teams.WoofTeamsModel" element="teams">
 
 	<!-- TEAMS -->
 	<collection method="getWoofTeams" element="teams">
 		<item type="net.officefloor.woof.model.teams.WoofTeamModel"
 			element="team">
 			<attributes>
-				<attribute method="getTeamSourceClassName" attribute="source" />
+				<attribute method="getTeamSize" attribute="size" />
+				<attribute method="getTeamSourceClassName"
+					attribute="source" />
 				<attribute method="getQualifier" attribute="qualifier" />
 				<attribute method="getType" attribute="type" />
 			</attributes>
@@ -27,7 +29,8 @@
 				</item>
 			</collection>
 			<collection method="getTypeQualifications">
-				<item type="net.officefloor.woof.model.teams.TypeQualificationModel"
+				<item
+					type="net.officefloor.woof.model.teams.TypeQualificationModel"
 					element="auto-wire">
 					<attributes>
 						<attribute method="getQualifier" attribute="qualifier" />

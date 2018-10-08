@@ -30,9 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,15 +43,19 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.executor.ManagedObjectExecutorFactory;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.AcceptedSocketDecorator;
 import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.ServerSocketDecorator;
@@ -74,16 +77,8 @@ import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
  * @author Daniel Sagenschneider
  */
 @PrivateSource
-public class HttpServerSocketManagedObjectSource
-		extends AbstractManagedObjectSource<None, HttpServerSocketManagedObjectSource.Flows>
+public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSource<None, Indexed>
 		implements ManagedFunction<Indexed, None> {
-
-	/**
-	 * Flows for this {@link HttpServerSocketManagedObjectSource}.
-	 */
-	public static enum Flows {
-			HANDLE_REQUEST
-	}
 
 	/**
 	 * {@link Logger}.
@@ -170,13 +165,23 @@ public class HttpServerSocketManagedObjectSource
 	 * Name of {@link Property} for the maximum number of {@link StreamBuffer}
 	 * instances cached in a core pool.
 	 */
-	private static final String PROPERTY_SERVICE_MAX_CORE_POOL_SIZE = "service.buffer.max.core.pool.size";
+	public static final String PROPERTY_SERVICE_MAX_CORE_POOL_SIZE = "service.buffer.max.core.pool.size";
 
 	/**
 	 * Name of {@link Property} to specify the threshold of active requests to start
 	 * throttling new requests.
 	 */
-	private static final String PROPERTY_THROTTLE_ACTIVE_REQUEST_THRESHOLD = "throttle.active.request.threshold";
+	public static final String PROPERTY_THROTTLE_ACTIVE_REQUEST_THRESHOLD = "throttle.active.request.threshold";
+
+	/**
+	 * Name of the {@link Flow} to handle the request.
+	 */
+	public static final String HANDLE_REQUEST_FLOW_NAME = "HANDLE_REQUEST";
+
+	/**
+	 * Name of the {@link Team} to execute the SSL tasks.
+	 */
+	public static final String SSL_TEAM_NAME = "SSL_TEAM";
 
 	/**
 	 * Singleton {@link SocketManager} for all {@link Connection} instances.
@@ -184,14 +189,9 @@ public class HttpServerSocketManagedObjectSource
 	private static SocketManager singletonSocketManager;
 
 	/**
-	 * {@link ExecutorService} for executing {@link SocketManager}.
+	 * {@link ServiceExecutor} for executing {@link SocketManager}.
 	 */
-	private static ExecutorService executorService;
-
-	/**
-	 * {@link ServiceExecutor}.
-	 */
-	private static ServiceExecutor executor;
+	private static ServiceExecutor serviceExecutor;
 
 	/**
 	 * Registered {@link HttpServerSocketManagedObjectSource} instances.
@@ -226,10 +226,13 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * Creates the {@link SocketManager} configured from {@link System} properties.
 	 * 
+	 * @param executionStrategy {@link ThreadFactory} instances for the
+	 *                          {@link ExecutionStrategy} for the
+	 *                          {@link SocketManager}.
 	 * @return {@link SocketManager} configured from {@link System} properties.
 	 * @throws IOException If fails to create the {@link SocketManager}.
 	 */
-	public static SocketManager createSocketManager() throws IOException {
+	public static SocketManager createSocketManager(ThreadFactory[] executionStrategy) throws IOException {
 
 		/*
 		 * Obtain configuration of socket manager.
@@ -243,8 +246,8 @@ public class HttpServerSocketManagedObjectSource
 		 * 
 		 * - 8 * 8192 = 65536 to fill a TCP packet, with 4 TCP packet buffer.
 		 */
-		int availableProcessors = Runtime.getRuntime().availableProcessors();
-		int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT, availableProcessors);
+		int numberOfSocketListeners = getSystemProperty(SYSTEM_PROPERTY_SOCKET_LISTENER_COUNT,
+				executionStrategy.length);
 		int streamBufferSize = getSystemProperty(SYSTEM_PROPERTY_STREAM_BUFFER_SIZE, 8192);
 		int maxReadsOnSelect = getSystemProperty(SYSTEM_PROPERTY_MAX_READS_ON_SELECT, 8 * 4);
 		int receiveBufferSize = getSystemProperty(SYSTEM_PROPERTY_RECEIVE_BUFFER_SIZE,
@@ -267,28 +270,31 @@ public class HttpServerSocketManagedObjectSource
 	 * Obtains the {@link SocketManager} for use by
 	 * {@link HttpServerSocketManagedObjectSource} instances.
 	 * 
-	 * @param mosContext {@link ManagedObjectSourceContext}.
-	 * @param instance   Instance of the {@link HttpServerSocketManagedObjectSource}
-	 *                   using the {@link SocketManager}.
+	 * @param mosContext        {@link ManagedObjectSourceContext}.
+	 * @param instance          Instance of the
+	 *                          {@link HttpServerSocketManagedObjectSource} using
+	 *                          the {@link SocketManager}.
+	 * @param executionStrategy {@link ThreadFactory} instances for the
+	 *                          {@link ExecutionStrategy} for the
+	 *                          {@link SocketManager}.
 	 * @return {@link SocketManager}.
 	 */
-	private static synchronized SocketManager getSocketManager(HttpServerSocketManagedObjectSource instance)
-			throws IOException {
+	private static synchronized SocketManager getSocketManager(HttpServerSocketManagedObjectSource instance,
+			ThreadFactory[] executionStrategy) throws IOException {
 
 		// Lazy create the singleton socket manager
 		if (singletonSocketManager == null) {
 
 			// Create the singleton socket manager
-			singletonSocketManager = createSocketManager();
+			singletonSocketManager = createSocketManager(executionStrategy);
 
-			// Create the executor service
-			executorService = Executors.newCachedThreadPool();
-			executor = new ServiceExecutor();
+			// Create the service executor
+			serviceExecutor = new ServiceExecutor();
 
 			// Run the socket listeners
 			Runnable[] runnables = singletonSocketManager.getRunnables();
 			for (int i = 0; i < runnables.length; i++) {
-				executor.execute(runnables[i]);
+				serviceExecutor.execute(runnables[i], executionStrategy[i]);
 			}
 		}
 
@@ -302,7 +308,7 @@ public class HttpServerSocketManagedObjectSource
 	/**
 	 * Keeps track of active {@link Thread} instances.
 	 */
-	private static class ServiceExecutor implements Executor {
+	private static class ServiceExecutor {
 
 		/**
 		 * Active {@link Thread}.
@@ -405,12 +411,39 @@ public class HttpServerSocketManagedObjectSource
 		}
 
 		/**
-		 * ================= Executor =======================
+		 * Awaits the termination of the {@link Thread} instances.
+		 * 
+		 * @param waitTimeInMilliseconds Wait time in milliseconds.
+		 * @throws InterruptedException If fails to wait on termination.
+		 * @throws TimeoutException     If termination taken too long.
 		 */
+		public void awaitTermination(int waitTimeInMilliseconds) throws InterruptedException, TimeoutException {
 
-		@Override
-		public void execute(Runnable command) {
-			executorService.execute(() -> {
+			// Capture the start time for time out
+			long endTime = System.currentTimeMillis() + waitTimeInMilliseconds;
+
+			// Loop until times out or no active threads
+			synchronized (this.activeThreads) {
+				while (this.activeThreads.size() > 0) {
+
+					// Determine if timed out
+					if (System.currentTimeMillis() > endTime) {
+						throw new TimeoutException("Waited more than " + waitTimeInMilliseconds
+								+ " milliseconds for HTTP socket servicing to terminate");
+					}
+				}
+			}
+		}
+
+		/**
+		 * Executes the {@link Runnable}.
+		 * 
+		 * @param command       {@link Runnable} command to be executed.
+		 * @param threadFactory {@link ThreadFactory} to create the {@link Thread} for
+		 *                      the {@link Runnable}.
+		 */
+		public void execute(Runnable command, ThreadFactory threadFactory) {
+			threadFactory.newThread(() -> {
 				Thread currentThread = Thread.currentThread();
 				try {
 					// Register this thread
@@ -427,7 +460,7 @@ public class HttpServerSocketManagedObjectSource
 						this.activeThreads.remove(currentThread);
 					}
 				}
-			});
+			}).start();
 		}
 	}
 
@@ -437,9 +470,11 @@ public class HttpServerSocketManagedObjectSource
 	 * <p>
 	 * Made public so that tests may use to close.
 	 * 
-	 * @throws IOException If fails to close the {@link Old_SocketManager}.
+	 * @throws IOException      If fails to close the {@link SocketManager}.
+	 * @throws TimeoutException If taking too long to close the
+	 *                          {@link SocketManager}.
 	 */
-	private static synchronized void closeSocketManager() throws IOException {
+	private static synchronized void closeSocketManager() throws TimeoutException, IOException {
 
 		// Clear all registered server sockets
 		registeredServerSocketManagedObjectSources.clear();
@@ -450,22 +485,20 @@ public class HttpServerSocketManagedObjectSource
 			singletonSocketManager.shutdown();
 
 			// Wait on shut down
-			executorService.shutdown();
 			try {
 				int waitTime = 10; // 10 seconds
-				executor.dumpActiveThreadsAfter((waitTime - 1) * 1000);
-				executorService.awaitTermination(10, TimeUnit.SECONDS);
+				serviceExecutor.dumpActiveThreadsAfter((waitTime - 1) * 1000);
+				serviceExecutor.awaitTermination(waitTime * 1000);
 			} catch (InterruptedException ex) {
 				throw new IOException("Interrupted waiting on Socket Manager shut down", ex);
 			} finally {
-				executor.stopDump();
+				serviceExecutor.stopDump();
 			}
 		}
 
 		// Close (release) the socket manager to create again
 		singletonSocketManager = null;
-		executorService = null;
-		executor = null;
+		serviceExecutor = null;
 	}
 
 	/**
@@ -477,10 +510,12 @@ public class HttpServerSocketManagedObjectSource
 	 * the {@link SocketManager} itself is closed.
 	 * 
 	 * @param instance {@link HttpServerSocketManagedObjectSource}.
-	 * @throws IOException If fails to close the {@link SocketManager}.
+	 * @throws IOException      If fails to close the {@link SocketManager}.
+	 * @throws TimeoutException If taking too long to close the
+	 *                          {@link SocketManager}.
 	 */
 	private static synchronized void releaseFromSocketManager(HttpServerSocketManagedObjectSource instance)
-			throws IOException {
+			throws IOException, TimeoutException {
 
 		// Unregister from the connection manager
 		registeredServerSocketManagedObjectSources.remove(instance);
@@ -549,6 +584,16 @@ public class HttpServerSocketManagedObjectSource
 	private SSLContext sslContext;
 
 	/**
+	 * {@link Flow} index for the handle request.
+	 */
+	private int handleRequestFlowIndex;
+
+	/**
+	 * {@link ManagedObjectExecutorFactory}.
+	 */
+	private ManagedObjectExecutorFactory<Indexed> executorFactory;
+
+	/**
 	 * {@link ServerSocketDecorator}.
 	 */
 	private ServerSocketDecorator serverSocketDecorator;
@@ -615,7 +660,7 @@ public class HttpServerSocketManagedObjectSource
 	 * @param context {@link MetaDataContext}.
 	 * @return {@link ServerSocketDecorator}.
 	 */
-	protected ServerSocketDecorator getServerSocketDecorator(MetaDataContext<None, Flows> context) {
+	protected ServerSocketDecorator getServerSocketDecorator(MetaDataContext<None, Indexed> context) {
 		return null;
 	}
 
@@ -625,7 +670,7 @@ public class HttpServerSocketManagedObjectSource
 	 * @param context {@link MetaDataContext}.
 	 * @return {@link AcceptedSocketDecorator}.
 	 */
-	protected AcceptedSocketDecorator getAcceptedSocketDecorator(MetaDataContext<None, Flows> context) {
+	protected AcceptedSocketDecorator getAcceptedSocketDecorator(MetaDataContext<None, Indexed> context) {
 		return null;
 	}
 
@@ -639,17 +684,22 @@ public class HttpServerSocketManagedObjectSource
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
+	protected void loadMetaData(MetaDataContext<None, Indexed> context) throws Exception {
 
 		// Configure meta-data
 		context.setObjectClass(ServerHttpConnection.class);
 		context.setManagedObjectClass(ProcessAwareServerHttpConnectionManagedObject.class);
 
 		// Create the flow meta-data
-		context.addFlow(Flows.HANDLE_REQUEST, null);
+		Labeller<Indexed> handleRequestFlow = context.addFlow(null);
+		handleRequestFlow.setLabel(HANDLE_REQUEST_FLOW_NAME);
+		this.handleRequestFlowIndex = handleRequestFlow.getIndex();
+
+		// Create the execution meta-data (for servicing HTTP sockets)
+		context.addExecutionStrategy().setLabel("HTTP_SOCKET_SERVICING");
 
 		// Obtain the managed object source context
-		ManagedObjectSourceContext<Flows> mosContext = context.getManagedObjectSourceContext();
+		ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
 
 		// Load configuration
 		int maxHeaderCount = Integer.parseInt(mosContext.getProperty(PROPERTY_MAX_HEADER_COUNT, String.valueOf(50)));
@@ -679,8 +729,15 @@ public class HttpServerSocketManagedObjectSource
 			this.serverLocation = new HttpServerLocationImpl(mosContext);
 			this.isIncludeEscalationStackTrace = Boolean.parseBoolean(mosContext.getProperty(
 					HttpServer.PROPERTY_INCLUDE_STACK_TRACE, String.valueOf(this.isIncludeEscalationStackTrace)));
+
+			// Determine if secure and set up security
 			this.isSecure = Boolean.parseBoolean(mosContext.getProperty(PROPERTY_SECURE, String.valueOf(false)));
 			this.sslContext = this.isSecure ? HttpServer.getSslContext(mosContext) : null;
+		}
+
+		// Add the executor factory if SSL context
+		if (this.sslContext != null) {
+			this.executorFactory = new ManagedObjectExecutorFactory<>(context, SSL_TEAM_NAME);
 		}
 
 		// Add recycle function (to capture clean up failures)
@@ -690,10 +747,13 @@ public class HttpServerSocketManagedObjectSource
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
+	public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
+
+		// Obtain the execution strategy
+		ThreadFactory[] executionStrategy = context.getExecutionStrategy(0);
 
 		// Obtain the socket manager
-		SocketManager socketManager = getSocketManager(this);
+		SocketManager socketManager = getSocketManager(this, executionStrategy);
 
 		// Create the HTTP servicer factory
 		ThreadLocalStreamBufferPool serviceBufferPool = new ThreadLocalStreamBufferPool(
@@ -708,6 +768,14 @@ public class HttpServerSocketManagedObjectSource
 		SocketServicerFactory socketServicerFactory = servicerFactory;
 		RequestServicerFactory requestServicerFactory = servicerFactory;
 		if (this.sslContext != null) {
+
+			// Create the executor for the SSL tasks
+			ProcessAwareServerHttpConnectionManagedObject executorManagedObject = new ProcessAwareServerHttpConnectionManagedObject<>(
+					this.serverLocation, true, () -> HttpMethod.GET, () -> "SSL TASK", HttpVersion.HTTP_1_1, null, null,
+					this.serverName, this.dateHttpHeaderClock, false, null, null);
+			Executor executor = this.executorFactory.createExecutor(context, executorManagedObject);
+
+			// Register SSL servicing
 			SslSocketServicerFactory<?> sslServicerFactory = new SslSocketServicerFactory<>(this.sslContext,
 					servicerFactory, servicerFactory, socketManager.getStreamBufferPool(), executor);
 			socketServicerFactory = sslServicerFactory;
@@ -734,7 +802,7 @@ public class HttpServerSocketManagedObjectSource
 		try {
 			releaseFromSocketManager(this);
 
-		} catch (IOException ex) {
+		} catch (IOException | TimeoutException ex) {
 			// Shutting down so just log issue
 			if (LOGGER.isLoggable(Level.INFO)) {
 				LOGGER.log(Level.INFO, "Failed to release " + SocketManager.class.getSimpleName(), ex);
@@ -772,7 +840,7 @@ public class HttpServerSocketManagedObjectSource
 		 * {@link ManagedObjectExecuteContext} to service the
 		 * {@link ServerHttpConnection}.
 		 */
-		private final ManagedObjectExecuteContext<Flows> context;
+		private final ManagedObjectExecuteContext<Indexed> context;
 
 		/**
 		 * Instantiate.
@@ -791,7 +859,7 @@ public class HttpServerSocketManagedObjectSource
 		 *                                       {@link Escalation} stack trace in the
 		 *                                       {@link HttpResponse}.
 		 */
-		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Flows> context,
+		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Indexed> context,
 				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,
 				StreamBufferPool<ByteBuffer> serviceBufferPool, int throttleActiveRequestThreshold,
 				HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock,
@@ -806,7 +874,8 @@ public class HttpServerSocketManagedObjectSource
 				throws IOException, HttpException {
 
 			// Service request
-			this.context.invokeProcess(Flows.HANDLE_REQUEST, null, connection, 0, connection.getServiceFlowCallback());
+			this.context.invokeProcess(HttpServerSocketManagedObjectSource.this.handleRequestFlowIndex, null,
+					connection, 0, connection.getServiceFlowCallback());
 		}
 	}
 
