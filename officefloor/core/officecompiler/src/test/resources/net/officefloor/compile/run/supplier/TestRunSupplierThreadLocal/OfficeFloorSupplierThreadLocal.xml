@@ -1,5 +1,5 @@
 <context>
-	<office-floor>
+	<office-floor auto-wire-objects="true">
 		<suppliers>
 			<supplier name="SUPPLIER"
 				source="${testcase}$MockSupplierSource" />
@@ -12,22 +12,11 @@
 				</properties>
 				<managing-office name="OFFICE" />
 			</managed-object-source>
-			<managed-object-source
-				name="SUPPLIED_MANAGED_OBJECT_SOURCE"
-				object-type="${testcase}$MockManagedObjectSource">
-				<supplier name="SUPPLIER"
-					type="${testcase}$MockManagedObjectSource" />
-				<managing-office name="OFFICE" />
-			</managed-object-source>
 		</managed-object-sources>
 		<managed-objects>
 			<managed-object name="MOCK_OBJECT" scope="PROCESS">
 				<managed-object-source
 					name="MOCK_OBJECT_SOURCE" />
-			</managed-object>
-			<managed-object name="SUPPLIED_OBJECT" scope="PROCESS">
-				<managed-object-source
-					name="SUPPLIED_MANAGED_OBJECT_SOURCE" />
 			</managed-object>
 		</managed-objects>
 		<offices>
@@ -35,9 +24,7 @@
 				<object name="MOCK_OBJECT">
 					<managed-object name="MOCK_OBJECT" />
 				</object>
-				<object name="SUPPLIED_OBJECT">
-					<managed-object name="SUPPLIED_OBJECT" />
-				</object>
+				<object name="SUPPLIED_OBJECT" />
 			</office>
 		</offices>
 	</office-floor>

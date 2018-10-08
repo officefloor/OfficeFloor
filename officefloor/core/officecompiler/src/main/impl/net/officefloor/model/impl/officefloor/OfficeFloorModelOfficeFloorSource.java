@@ -115,6 +115,14 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 		OfficeFloorModel officeFloor = new OfficeFloorModel();
 		new OfficeFloorRepositoryImpl(new ModelRepositoryImpl()).retrieveOfficeFloor(officeFloor, configuration);
 
+		// Determine if auto-wire
+		if (officeFloor.getIsAutoWireObjects()) {
+			deployer.enableAutoWireObjects();
+		}
+		if (officeFloor.getIsAutoWireTeams()) {
+			deployer.enableAutoWireTeams();
+		}
+
 		// Add the OfficeFloor suppliers, keeping registry of them
 		Map<String, OfficeFloorSupplier> officeFloorSuppliers = new HashMap<String, OfficeFloorSupplier>();
 		for (OfficeFloorSupplierModel supplierModel : officeFloor.getOfficeFloorSuppliers()) {

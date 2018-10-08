@@ -158,6 +158,14 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		OfficeModel office = new OfficeModel();
 		new OfficeRepositoryImpl(new ModelRepositoryImpl()).retrieveOffice(office, configuration);
 
+		// Determine if auto-wire
+		if (office.getIsAutoWireObjects()) {
+			architect.enableAutoWireObjects();
+		}
+		if (office.getIsAutoWireTeams()) {
+			architect.enableAutoWireTeams();
+		}
+
 		// Create aggregate processor to add sub section processing
 		AggregateSubSectionProcessor processors = new AggregateSubSectionProcessor();
 
