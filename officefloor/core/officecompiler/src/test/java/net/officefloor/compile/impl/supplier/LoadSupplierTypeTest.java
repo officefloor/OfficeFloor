@@ -29,8 +29,10 @@ import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
+import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.None;
@@ -191,18 +193,15 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 * Ensure able to load with no {@link ManagedObject} instances.
 	 * <p>
 	 * No {@link ManagedObject} instances is allowed as may have
-	 * {@link SupplierSource} turn off supplying {@link ManagedObject}
-	 * instances. Allowing none, will prevent this case having to load an
-	 * arbitrary {@link ManagedObject}.
+	 * {@link SupplierSource} turn off supplying {@link ManagedObject} instances.
+	 * Allowing none, will prevent this case having to load an arbitrary
+	 * {@link ManagedObject}.
 	 */
 	public void testNoSuppliedManagedObjects() {
 
 		// Attempt to load
-		this.loadEmptySupplierType(new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				// No supplied managed objects
-			}
+		this.loadEmptySupplierType((context) -> {
+			// No supplied managed objects
 		});
 	}
 
@@ -215,11 +214,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Must provide type for ManagedObject 1");
 
 		// Attempt to load
-		this.loadSupplierType(false, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				context.addManagedObjectSource(null, new ClassManagedObjectSource());
-			}
+		this.loadSupplierType(false, (context) -> {
+			context.addManagedObjectSource(null, new ClassManagedObjectSource());
 		});
 	}
 
@@ -232,11 +228,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Must provide a ManagedObjectSource for ManagedObject " + Connection.class.getName());
 
 		// Attempt to load
-		this.loadSupplierType(false, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				context.addManagedObjectSource(Connection.class, (ManagedObjectSource<None, None>) null);
-			}
+		this.loadSupplierType(false, (context) -> {
+			context.addManagedObjectSource(Connection.class, (ManagedObjectSource<None, None>) null);
 		});
 	}
 
@@ -246,11 +239,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testSimpleManagedObject() {
 
 		// Load
-		SuppliedManagedObjectSourceType type = this.loadSuppliedManagedObjectType(new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				addClassManagedObjectSource(context, SimpleManagedObject.class);
-			}
+		SuppliedManagedObjectSourceType type = this.loadSuppliedManagedObjectType((context) -> {
+			addClassManagedObjectSource(context, SimpleManagedObject.class);
 		});
 
 		// Validate the managed object type
@@ -270,11 +260,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testComplexManagedObject() {
 
 		// Load
-		SupplierType type = this.loadSupplierType(true, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) throws Exception {
-				new MockLoadSupplierSource().supply(context);
-			}
+		SupplierType type = this.loadSupplierType(true, (context) -> {
+			new MockLoadSupplierSource().supply(context);
 		}, MockLoadSupplierSource.PROPERTY_TEST, MockLoadSupplierSource.PROPERTY_TEST);
 
 		// Validate the supplier type
@@ -288,15 +275,11 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testMultipleManagedObjects() {
 
 		// Load the managed objects
-		SupplierType type = this.loadSupplierType(true, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				context.addManagedObjectSource(Object.class, new MockTypeManagedObjectSource(Object.class));
-				context.addManagedObjectSource(Connection.class, new MockTypeManagedObjectSource(Connection.class));
-				addClassManagedObjectSource(context, SimpleManagedObject.class);
-				context.addManagedObjectSource("QUALIFIER", Object.class,
-						new MockTypeManagedObjectSource(Object.class));
-			}
+		SupplierType type = this.loadSupplierType(true, (context) -> {
+			context.addManagedObjectSource(Object.class, new MockTypeManagedObjectSource(Object.class));
+			context.addManagedObjectSource(Connection.class, new MockTypeManagedObjectSource(Connection.class));
+			addClassManagedObjectSource(context, SimpleManagedObject.class);
+			context.addManagedObjectSource("QUALIFIER", Object.class, new MockTypeManagedObjectSource(Object.class));
 		});
 
 		// Validate the managed object types (and order)
@@ -310,13 +293,45 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if no object type for {@link SupplierThreadLocal}.
+	 */
+	public void testIssueIfNoSupplierThreadLocalObjectType() {
+
+		// Record no null object type
+		this.issues.recordIssue("Must provide object type for SupplierThreadLocal");
+
+		// Attempt to load supplier type
+		this.loadSupplierType(false, (context) -> {
+			context.addSupplierThreadLocal("qualifier", null);
+		});
+	}
+
+	/**
+	 * Ensure can load {@link SupplierThreadLocal}.
+	 */
+	public void testSupplierThreadLocal() {
+
+		// Load the supplier type
+		SupplierType type = this.loadSupplierType(true, (context) -> {
+			context.addSupplierThreadLocal("qualification", String.class);
+			context.addSupplierThreadLocal(null, Connection.class);
+		});
+
+		// Validate the supplier thread locals
+		SupplierThreadLocalType[] types = type.getSupplierThreadLocalTypes();
+		assertEquals("Incorrect number of thread locals", 2, types.length);
+		assertEquals("Incorrect qualifier for first", "qualification", types[0].getQualifier());
+		assertEquals("Incorrect type for first", String.class, types[0].getObjectType());
+		assertNull("Should be no qualifier for second", types[1].getQualifier());
+		assertEquals("Incorrect type for second", types[1].getObjectType());
+	}
+
+	/**
 	 * Convenience method to load a {@link SupplierSource} with only one
 	 * {@link SuppliedManagedObjectSourceType}.
 	 * 
-	 * @param init
-	 *            {@link Init}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param init                   {@link Init}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Single {@link SuppliedManagedObjectSourceType}.
 	 */
 	private SuppliedManagedObjectSourceType loadSuppliedManagedObjectType(Init init, String... propertyNameValuePairs) {
@@ -337,10 +352,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	 * {@link SupplierType} with no {@link SuppliedManagedObjectSourceType}
 	 * instances.
 	 * 
-	 * @param init
-	 *            {@link Init}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param init                   {@link Init}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 */
 	private void loadEmptySupplierType(Init init, String... propertyNameValuePairs) {
 
@@ -354,12 +367,10 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link SupplierType}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the {@link SupplierType}.
-	 * @param init
-	 *            {@link Init}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link SupplierType}.
+	 * @param init                   {@link Init}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link SupplierType}.
 	 */
 	private SupplierType loadSupplierType(boolean isExpectedToLoad, Init init, String... propertyNameValuePairs) {
@@ -404,8 +415,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Implemented to init the {@link SupplierSource}.
 		 * 
-		 * @param context
-		 *            {@link SupplierSourceContext}.
+		 * @param context {@link SupplierSourceContext}.
 		 */
 		void supply(SupplierSourceContext context) throws Exception;
 	}
@@ -413,10 +423,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Convenience method to add a {@link ClassManagedObjectSource}.
 	 * 
-	 * @param context
-	 *            {@link SupplierSourceContext}.
-	 * @param clazz
-	 *            Class for the {@link ClassManagedObjectSource}.
+	 * @param context {@link SupplierSourceContext}.
+	 * @param clazz   Class for the {@link ClassManagedObjectSource}.
 	 * @return {@link SuppliedManagedObjectSource}.
 	 */
 	private static SuppliedManagedObjectSource addClassManagedObjectSource(SupplierSourceContext context,

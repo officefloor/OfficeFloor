@@ -25,6 +25,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
@@ -49,12 +50,9 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	/**
 	 * Initiate.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param propertyList
-	 *            {@link PropertyList}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param isLoadingType Indicates if loading type.
+	 * @param propertyList  {@link PropertyList}.
+	 * @param context       {@link NodeContext}.
 	 */
 	public SupplierSourceContextImpl(boolean isLoadingType, PropertyList propertyList, NodeContext context) {
 		super(isLoadingType, context.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
@@ -73,6 +71,12 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	/*
 	 * ====================== SupplierSourceContext =====================
 	 */
+
+	@Override
+	public <T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualification, Class<? extends T> type) {
+		// TODO implement SupplierSourceContext.addSupplierThreadLocal(...)
+		throw new UnsupportedOperationException("TODO implement SupplierSourceContext.addSupplierThreadLocal(...)");
+	}
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(Class<?> type,
@@ -126,14 +130,10 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 		/**
 		 * Initiate.
 		 * 
-		 * @param objectType
-		 *            Object type.
-		 * @param qualifier
-		 *            Qualifier. May be <code>null</code>.
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
-		 * @param properties
-		 *            {@link PropertyList}.
+		 * @param objectType          Object type.
+		 * @param qualifier           Qualifier. May be <code>null</code>.
+		 * @param managedObjectSource {@link ManagedObjectSource}.
+		 * @param properties          {@link PropertyList}.
 		 */
 		public SuppliedManagedObjectSourceImpl(Class<?> objectType, String qualifier,
 				ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties) {
