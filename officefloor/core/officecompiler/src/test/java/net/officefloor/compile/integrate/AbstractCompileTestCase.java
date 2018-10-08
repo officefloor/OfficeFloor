@@ -340,7 +340,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected DependencyMappingBuilder record_managingOfficeBuilder_setInputManagedObjectName(
 			String inputManagedObjectName) {
-		DependencyMappingBuilder dependencyMapper = this.createMock(DependencyMappingBuilder.class);
+		ThreadDependencyMappingBuilder dependencyMapper = this.createMock(ThreadDependencyMappingBuilder.class);
 		this.recordReturn(this.managingOfficeBuilder,
 				this.managingOfficeBuilder.setInputManagedObjectName(inputManagedObjectName), dependencyMapper);
 		return dependencyMapper;
