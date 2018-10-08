@@ -46,6 +46,7 @@ import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogicMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessProfiler;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -80,10 +81,10 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * Attaches the {@link ThreadState} to the {@link Thread}.
 	 * 
-	 * @param threadState
-	 *            {@link ThreadState} to attached to the {@link Thread}.
-	 * @param isThreadStateSafe
-	 *            Indicates if the execution is {@link ThreadState} safe.
+	 * @param threadState       {@link ThreadState} to attached to the
+	 *                          {@link Thread}.
+	 * @param isThreadStateSafe Indicates if the execution is {@link ThreadState}
+	 *                          safe.
 	 * @return {@link ThreadStateContext} for executing the {@link ThreadState}
 	 *         attached to the {@link Thread}.
 	 */
@@ -130,9 +131,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * Obtains the current {@link ThreadStateContext}.
 	 * 
-	 * @param fallbackThreadState
-	 *            Fall back {@link ThreadState} if no {@link ThreadState} bound
-	 *            to {@link Thread}.
+	 * @param fallbackThreadState Fall back {@link ThreadState} if no
+	 *                            {@link ThreadState} bound to {@link Thread}.
 	 * @return Current {@link ThreadStateContext}.
 	 */
 	public static ThreadStateContext currentThreadContext(ThreadState fallbackThreadState) {
@@ -201,8 +201,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private EscalationLevel escalationLevel = EscalationLevel.OFFICE;
 
 	/**
-	 * {@link ThreadState} {@link Escalation} to potential
-	 * {@link FlowCompletion}.
+	 * {@link ThreadState} {@link Escalation} to potential {@link FlowCompletion}.
 	 */
 	private Throwable threadEscalation = null;
 
@@ -214,16 +213,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * Initiate with {@link ProcessState} {@link FlowCallback}.
 	 * 
-	 * @param threadMetaData
-	 *            {@link ThreadMetaData} for this {@link ThreadState}.
-	 * @param callback
-	 *            {@link ProcessState} {@link FlowCallback}.
-	 * @param callbackThreadState
-	 *            {@link FlowCallback} {@link ThreadState}.
-	 * @param processState
-	 *            {@link ProcessState} for this {@link ThreadState}.
-	 * @param processProfiler
-	 *            {@link ProcessProfiler}. May be <code>null</code>.
+	 * @param threadMetaData      {@link ThreadMetaData} for this
+	 *                            {@link ThreadState}.
+	 * @param callback            {@link ProcessState} {@link FlowCallback}.
+	 * @param callbackThreadState {@link FlowCallback} {@link ThreadState}.
+	 * @param processState        {@link ProcessState} for this {@link ThreadState}.
+	 * @param processProfiler     {@link ProcessProfiler}. May be <code>null</code>.
 	 */
 	public ThreadStateImpl(ThreadMetaData threadMetaData, FlowCallback callback, ThreadState callbackThreadState,
 			ProcessState processState, ProcessProfiler processProfiler) {
@@ -235,18 +230,20 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * Initiate.
 	 * 
-	 * @param threadMetaData
-	 *            {@link ThreadMetaData} for this {@link ThreadState}.
-	 * @param completion
-	 *            {@link FlowCompletion} for this {@link ThreadState}.
-	 * @param isEscalationHandlingThreadState
-	 *            <code>true</code> if this {@link ThreadState} was spawned to
-	 *            handle an {@link Escalation}. <code>false</code> to indicate a
-	 *            {@link ThreadState} for normal execution.
-	 * @param processState
-	 *            {@link ProcessState} for this {@link ThreadState}.
-	 * @param processProfiler
-	 *            {@link ProcessProfiler}. May be <code>null</code>.
+	 * @param threadMetaData                  {@link ThreadMetaData} for this
+	 *                                        {@link ThreadState}.
+	 * @param completion                      {@link FlowCompletion} for this
+	 *                                        {@link ThreadState}.
+	 * @param isEscalationHandlingThreadState <code>true</code> if this
+	 *                                        {@link ThreadState} was spawned to
+	 *                                        handle an {@link Escalation}.
+	 *                                        <code>false</code> to indicate a
+	 *                                        {@link ThreadState} for normal
+	 *                                        execution.
+	 * @param processState                    {@link ProcessState} for this
+	 *                                        {@link ThreadState}.
+	 * @param processProfiler                 {@link ProcessProfiler}. May be
+	 *                                        <code>null</code>.
 	 */
 	public ThreadStateImpl(ThreadMetaData threadMetaData, FlowCompletion completion,
 			boolean isEscalationHandlingThreadState, ProcessState processState, ProcessProfiler processProfiler) {
@@ -258,22 +255,24 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * Instantiate using appropriate {@link FlowCompletion}.
 	 * 
-	 * @param threadMetaData
-	 *            {@link ThreadMetaData} for this {@link ThreadState}.
-	 * @param completion
-	 *            {@link FlowCompletion} for this {@link ThreadState}.
-	 * @param callback
-	 *            {@link ProcessState} invoked {@link FlowCallback}.
-	 * @param callbackThreadState
-	 *            {@link FlowCallback} {@link ThreadState}.
-	 * @param isEscalationHandlingThreadState
-	 *            <code>true</code> if this {@link ThreadState} was spawned to
-	 *            handle an {@link Escalation}. <code>false</code> to indicate a
-	 *            {@link ThreadState} for normal execution.
-	 * @param processState
-	 *            {@link ProcessState} for this {@link ThreadState}.
-	 * @param processProfiler
-	 *            {@link ProcessProfiler}. May be <code>null</code>.
+	 * @param threadMetaData                  {@link ThreadMetaData} for this
+	 *                                        {@link ThreadState}.
+	 * @param completion                      {@link FlowCompletion} for this
+	 *                                        {@link ThreadState}.
+	 * @param callback                        {@link ProcessState} invoked
+	 *                                        {@link FlowCallback}.
+	 * @param callbackThreadState             {@link FlowCallback}
+	 *                                        {@link ThreadState}.
+	 * @param isEscalationHandlingThreadState <code>true</code> if this
+	 *                                        {@link ThreadState} was spawned to
+	 *                                        handle an {@link Escalation}.
+	 *                                        <code>false</code> to indicate a
+	 *                                        {@link ThreadState} for normal
+	 *                                        execution.
+	 * @param processState                    {@link ProcessState} for this
+	 *                                        {@link ThreadState}.
+	 * @param processProfiler                 {@link ProcessProfiler}. May be
+	 *                                        <code>null</code>.
 	 */
 	private ThreadStateImpl(ThreadMetaData threadMetaData, FlowCompletion completion, FlowCallback callback,
 			ThreadState callbackThreadState, boolean isEscalationHandlingThreadState, ProcessState processState,
@@ -659,10 +658,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		/**
 		 * Instantiate.
 		 * 
-		 * @param threadState
-		 *            {@link ThreadState}.
-		 * @param callback
-		 *            {@link FlowCallback}.
+		 * @param threadState {@link ThreadState}.
+		 * @param callback    {@link FlowCallback}.
 		 */
 		public ProcessFlowCompletion(ThreadState threadState, FlowCallback callback) {
 			this.threadState = threadState;
@@ -693,8 +690,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			/**
 			 * Instantiate.
 			 * 
-			 * @param escalation
-			 *            {@link Escalation}.
+			 * @param escalation {@link Escalation}.
 			 */
 			public CompleteFunctionState(Throwable escalation) {
 				this.escalation = escalation;
@@ -734,14 +730,13 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		private ProxyFunction proxy = null;
 
 		/**
-		 * {@link FunctionState} to continue on completion of the
-		 * {@link ProxyFunction}.
+		 * {@link FunctionState} to continue on completion of the {@link ProxyFunction}.
 		 */
 		private FunctionState thenFunction = null;
 
 		/**
-		 * {@link FunctionState} to continue should {@link BreakFunction} have
-		 * to handle {@link Escalation}.
+		 * {@link FunctionState} to continue should {@link BreakFunction} have to handle
+		 * {@link Escalation}.
 		 */
 		private FunctionState handleThenFunction = null;
 	}
@@ -773,10 +768,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		private final int threadStateStackDepth;
 
 		/**
-		 * Previous {@link ActiveThreadState}. This enables
-		 * {@link FunctionLogic} to be executed within the context of another
-		 * {@link FunctionLogic}. Will be <code>null</code> for top level
-		 * {@link ThreadState} of {@link Thread}.
+		 * Previous {@link ActiveThreadState}. This enables {@link FunctionLogic} to be
+		 * executed within the context of another {@link FunctionLogic}. Will be
+		 * <code>null</code> for top level {@link ThreadState} of {@link Thread}.
 		 */
 		private final ActiveThreadState previousActiveThreadState;
 
@@ -798,18 +792,14 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		/**
 		 * Instantiate.
 		 * 
-		 * @param functionChainBreak
-		 *            {@link FunctionChainBreak}.
-		 * @param threadState
-		 *            Active {@link ThreadState}.
-		 * @param isThreadStateSafe
-		 *            Flag indicating if the {@link ThreadState} is safe on the
-		 *            current {@link Thread}.
-		 * @param threadStateStackDepth
-		 *            Stack depth on invoking this {@link ThreadState}.
-		 * @param previousActiveThreadState
-		 *            Previous {@link ActiveThreadState} on the {@link Thread}.
-		 *            May be <code>null</code>.
+		 * @param functionChainBreak        {@link FunctionChainBreak}.
+		 * @param threadState               Active {@link ThreadState}.
+		 * @param isThreadStateSafe         Flag indicating if the {@link ThreadState}
+		 *                                  is safe on the current {@link Thread}.
+		 * @param threadStateStackDepth     Stack depth on invoking this
+		 *                                  {@link ThreadState}.
+		 * @param previousActiveThreadState Previous {@link ActiveThreadState} on the
+		 *                                  {@link Thread}. May be <code>null</code>.
 		 */
 		private ActiveThreadState(FunctionChainBreak functionChainBreak, ThreadState threadState,
 				boolean isThreadStateSafe, int threadStateStackDepth, ActiveThreadState previousActiveThreadState) {
@@ -912,6 +902,29 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			return next;
 		}
 
+		@Override
+		public ManagedObjectContainer getManagedObject(ManagedObjectIndex index) {
+
+			// Obtain the scope index
+			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
+
+			// Obtain the managed object container
+			switch (index.getManagedObjectScope()) {
+
+			case THREAD:
+				// Obtain the container from the thread state
+				return this.threadState.getManagedObjectContainer(scopeIndex);
+
+			case PROCESS:
+				// Obtain the container from the process state
+				return this.threadState.getProcessState().getManagedObjectContainer(scopeIndex);
+
+			default:
+				throw new IllegalStateException(
+						"Illegal managed object scope " + index.getManagedObjectScope() + " for thread local access");
+			}
+		}
+
 		/*
 		 * ========================= FunctionContext =========================
 		 */
@@ -947,7 +960,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			// Undertake the delegate function
 			return delegate.execute(this);
 		}
-
 	}
 
 	/**
@@ -963,12 +975,10 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		/**
 		 * Instantiate.
 		 * 
-		 * @param delegate
-		 *            Delegate {@link FunctionState} to complete it and all
-		 *            produced {@link FunctionState} instances before
-		 *            continuing.
-		 * @param thenFunction
-		 *            Then {@link FunctionState}.
+		 * @param delegate     Delegate {@link FunctionState} to complete it and all
+		 *                     produced {@link FunctionState} instances before
+		 *                     continuing.
+		 * @param thenFunction Then {@link FunctionState}.
 		 */
 		private ThenFunction(FunctionState delegate, FunctionState thenFunction) {
 			super(delegate);
@@ -1009,18 +1019,16 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	/**
-	 * Proxy {@link FunctionState} to act in the place of a
-	 * {@link FunctionState} broken from the then chain.
+	 * Proxy {@link FunctionState} to act in the place of a {@link FunctionState}
+	 * broken from the then chain.
 	 */
 	private static class ProxyFunction extends AbstractDelegateFunctionState {
 
 		/**
 		 * Instantiate with the {@link FunctionState} to proxy.
 		 * 
-		 * @param delegate
-		 *            {@link FunctionState} to proxy.
-		 * @param executor
-		 *            {@link ExecuteFunctionState}.
+		 * @param delegate {@link FunctionState} to proxy.
+		 * @param executor {@link ExecuteFunctionState}.
 		 */
 		private ProxyFunction(FunctionState delegate) {
 			super(delegate);
@@ -1056,24 +1064,20 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		 * {@link FunctionState} to continue on handling {@link Escalation}.
 		 * <p>
 		 * Because the current {@link ThreadState} will not be continued on
-		 * {@link Escalation}, only the next outer {@link ThreadState} will
-		 * continue.
+		 * {@link Escalation}, only the next outer {@link ThreadState} will continue.
 		 */
 		private final FunctionState handleThenFunction;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param proxy
-		 *            {@link ProxyFunction} to have its actual
-		 *            {@link FunctionState} broken away from the execution
-		 *            chain.
-		 * @param thenFunction
-		 *            {@link FunctionState} to complete after the
-		 *            {@link ProxyFunction} chain is complete.
-		 * @param handleThenFunction
-		 *            {@link FunctionState} to continue on handling
-		 *            {@link Escalation}.
+		 * @param proxy              {@link ProxyFunction} to have its actual
+		 *                           {@link FunctionState} broken away from the
+		 *                           execution chain.
+		 * @param thenFunction       {@link FunctionState} to complete after the
+		 *                           {@link ProxyFunction} chain is complete.
+		 * @param handleThenFunction {@link FunctionState} to continue on handling
+		 *                           {@link Escalation}.
 		 */
 		private BreakFunction(final ProxyFunction proxy, FunctionState thenFunction, FunctionState handleThenFunction) {
 			super(proxy.getProxiedFunction(), thenFunction);

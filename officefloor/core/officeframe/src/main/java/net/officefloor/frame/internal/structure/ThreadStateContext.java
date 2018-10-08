@@ -41,26 +41,30 @@ public interface ThreadStateContext {
 	 * Creates a {@link FunctionState} for the {@link FunctionLogic} under the
 	 * current {@link ThreadState}.
 	 * 
-	 * @param logic
-	 *            {@link FunctionLogic}.
-	 * @param fallbackThreadState
-	 *            Fall back {@link ThreadState} should there be no current
-	 *            {@link ThreadState}.
+	 * @param logic               {@link FunctionLogic}.
+	 * @param fallbackThreadState Fall back {@link ThreadState} should there be no
+	 *                            current {@link ThreadState}.
 	 * @return {@link FunctionState} for the {@link FunctionLogic}.
 	 */
 	FunctionState createFunction(FunctionLogic logic, ThreadState fallbackThreadState);
 
 	/**
-	 * Executes the {@link FunctionState} returning the next
-	 * {@link FunctionState} to execute.
+	 * Executes the {@link FunctionState} returning the next {@link FunctionState}
+	 * to execute.
 	 * 
-	 * @param function
-	 *            {@link FunctionState} to be executed.
-	 * @return Next {@link FunctionState} to be executed. May be
-	 *         <code>null</code>.
-	 * @throws Throwable
-	 *             Possible failure in executing the {@link FunctionState}.
+	 * @param function {@link FunctionState} to be executed.
+	 * @return Next {@link FunctionState} to be executed. May be <code>null</code>.
+	 * @throws Throwable Possible failure in executing the {@link FunctionState}.
 	 */
 	FunctionState executeFunction(FunctionState function) throws Throwable;
+
+	/**
+	 * Obtains the {@link ManagedObjectContainer} for the
+	 * {@link ManagedObjectIndex}.
+	 * 
+	 * @param index
+	 * @return
+	 */
+	ManagedObjectContainer getManagedObject(ManagedObjectIndex index);
 
 }
