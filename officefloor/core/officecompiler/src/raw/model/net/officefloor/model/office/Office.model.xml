@@ -5,10 +5,15 @@
 	<list type="OfficeSectionModel" name="office section" />
 	<list type="OfficeTeamModel" name="office team" />
 	<list type="OfficeSupplierModel" name="office supplier" />
-	<list type="ExternalManagedObjectModel" name="external managed object" />
-	<list type="OfficeManagedObjectSourceModel" name="office managed object source" />
+	<list type="OfficeSupplierThreadLocalModel"
+		name="office supplier thread local" />
+	<list type="ExternalManagedObjectModel"
+		name="external managed object" />
+	<list type="OfficeManagedObjectSourceModel"
+		name="office managed object source" />
 	<list type="OfficeManagedObjectModel" name="office managed object" />
-	<list type="OfficeManagedObjectPoolModel" name="office managed object pool" />
+	<list type="OfficeManagedObjectPoolModel"
+		name="office managed object pool" />
 	<list type="OfficeEscalationModel" name="office escalation" />
 	<list type="AdministrationModel" name="administration" />
 	<list type="GovernanceModel" name="governance" />

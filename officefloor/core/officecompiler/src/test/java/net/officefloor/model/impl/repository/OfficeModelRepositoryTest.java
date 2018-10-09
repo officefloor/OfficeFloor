@@ -30,15 +30,19 @@ import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.office.AdministrationEscalationModel;
 import net.officefloor.model.office.AdministrationFlowModel;
 import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel;
-import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
-import net.officefloor.model.office.GovernanceToExternalManagedObjectModel;
 import net.officefloor.model.office.GovernanceAreaModel;
 import net.officefloor.model.office.GovernanceEscalationModel;
 import net.officefloor.model.office.GovernanceFlowModel;
 import net.officefloor.model.office.GovernanceModel;
+import net.officefloor.model.office.GovernanceToExternalManagedObjectModel;
+import net.officefloor.model.office.GovernanceToOfficeManagedObjectModel;
+import net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeFunctionModel;
@@ -61,9 +65,6 @@ import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
-import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
-import net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel;
-import net.officefloor.model.office.GovernanceToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel;
 import net.officefloor.model.office.OfficeModel;
@@ -71,7 +72,6 @@ import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectTeamModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel;
-import net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
@@ -83,6 +83,10 @@ import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
 import net.officefloor.model.office.OfficeSupplierModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.TypeQualificationModel;
@@ -133,6 +137,28 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		OfficeSupplierModel supplier = office.getOfficeSuppliers().get(0);
 		assertList(new String[] { "getName", "getValue" }, supplier.getProperties(),
 				new PropertyModel("SUPPLIER_ONE", "VALUE_ONE"), new PropertyModel("SUPPLIER_TWO", "VALUE_TWO"));
+
+		// ----------------------------------------
+		// Validate the OfficeFloor supplier thread locals
+		// ----------------------------------------
+		assertList(new String[] { "getOfficeSupplierThreadLocalName", "getX", "getY" },
+				office.getOfficeSupplierThreadLocals(),
+				new OfficeSupplierThreadLocalModel("THREAD_LOCAL_ONE", 100, 101),
+				new OfficeSupplierThreadLocalModel("THREAD_LOCAL_TWO", 110, 111));
+		OfficeSupplierThreadLocalModel threadLocalOne = office.getOfficeSupplierThreadLocals().get(0);
+		assertProperties(threadLocalOne.getOfficeSupplier(),
+				new OfficeSupplierThreadLocalToOfficeSupplierModel("SUPPLIER", null, "java.sql.GenericConnection"),
+				"getOfficeSupplierName", "getQualifier", "getType");
+		assertProperties(threadLocalOne.getOfficeManagedObject(),
+				new OfficeSupplierThreadLocalToOfficeManagedObjectModel("MANAGED_OBJECT_ONE"),
+				"getOfficeManagedObjectName");
+		OfficeSupplierThreadLocalModel threadLocalTwo = office.getOfficeSupplierThreadLocals().get(1);
+		assertProperties(threadLocalTwo.getOfficeSupplier(),
+				new OfficeSupplierThreadLocalToOfficeSupplierModel("SUPPLIER", "QUALIFIED", "java.http.InputRequest"),
+				"getOfficeFloorSupplierName", "getQualifier", "getType");
+		assertProperties(threadLocalOne.getExternalManagedObject(),
+				new OfficeSupplierThreadLocalToExternalManagedObjectModel("EXTERNAL_MANAGED_OBJECT"),
+				"getOfficeInputManagedObjectName");
 
 		// ----------------------------------------
 		// Validate the external managed objects
@@ -366,8 +392,7 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link OfficeManagedObjectSourceModel} is correct.
 	 * 
-	 * @param mos
-	 *            {@link OfficeManagedObjectSourceModel}.
+	 * @param mos {@link OfficeManagedObjectSourceModel}.
 	 */
 	private static void assertOfficeManagedObjectSource(OfficeManagedObjectSourceModel mos) {
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
