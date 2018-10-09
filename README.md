@@ -1,4 +1,5 @@
  [![Build Status](https://travis-ci.org/sagenschneider/OfficeFloor.svg?branch=master)](https://travis-ci.org/sagenschneider/OfficeFloor)
+ [![codecov](https://codecov.io/gh/sagenschneider/OfficeFloor/branch/master/graph/badge.svg)](https://codecov.io/gh/sagenschneider/OfficeFloor)
  [![DepShield Badge](https://depshield.sonatype.org/badges/sagenschneider/OfficeFloor/depshield.svg)](https://depshield.github.io)
 
 
