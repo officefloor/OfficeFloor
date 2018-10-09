@@ -38,26 +38,14 @@ public interface OfficeSupplier extends PropertyConfigurable {
 	/**
 	 * Adds an {@link OfficeManagedObjectSource}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeManagedObjectSource}.
-	 * @param type
-	 *            Type of object required from the {@link OfficeSupplier}.
+	 * @param managedObjectSourceName Name of the {@link OfficeManagedObjectSource}.
+	 * @param qualifier               Qualifier on the object type. May be
+	 *                                <code>null</code> to match only on type.
+	 * @param type                    Type of object required from the
+	 *                                {@link OfficeSupplier}.
 	 * @return {@link OfficeManagedObjectSource}.
 	 */
-	OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String type);
-
-	/**
-	 * Adds an {@link OfficeManagedObjectSource}.
-	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeManagedObjectSource}.
-	 * @param type
-	 *            Type of object required from the {@link OfficeSupplier}.
-	 * @param qualifier
-	 *            Qualifier on the object type.
-	 * @return {@link OfficeManagedObjectSource}.
-	 */
-	OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String type,
-			String qualifier);
+	OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String qualifier,
+			String type);
 
 }

@@ -43,6 +43,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	private final NodeContext context;
 
 	/**
+	 * {@link SupplierThreadLocalTypeImpl} instances.
+	 */
+	private final List<SupplierThreadLocalTypeImpl<?>> supplierThreadLocals = new LinkedList<>();
+
+	/**
 	 * {@link SuppliedManagedObjectSourceImpl} instances.
 	 */
 	private final List<SuppliedManagedObjectSourceImpl> suppliedManagedObjectSources = new LinkedList<>();
@@ -74,14 +79,9 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 
 	@Override
 	public <T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualification, Class<? extends T> type) {
-		// TODO implement SupplierSourceContext.addSupplierThreadLocal(...)
-		throw new UnsupportedOperationException("TODO implement SupplierSourceContext.addSupplierThreadLocal(...)");
-	}
-
-	@Override
-	public <D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(Class<?> type,
-			ManagedObjectSource<D, F> managedObjectSource) {
-		return this.addManagedObjectSource(null, type, managedObjectSource);
+		SupplierThreadLocalTypeImpl<T> supplierThreadLocal = new SupplierThreadLocalTypeImpl<>();
+		this.supplierThreadLocals.add(supplierThreadLocal);
+		return supplierThreadLocal.getSupplierThreadLocal();
 	}
 
 	@Override

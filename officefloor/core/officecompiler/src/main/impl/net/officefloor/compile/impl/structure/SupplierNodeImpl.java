@@ -41,6 +41,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierType;
@@ -196,13 +197,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName,
-			String type) {
-		return this.addOfficeFloorManagedObjectSource(managedObjectSourceName, type, null);
-	}
-
-	@Override
-	public OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName, String type,
-			String qualifier) {
+			String qualifier, String type) {
 
 		// Create the supplied managed object node
 		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = this.context
@@ -225,13 +220,15 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String type) {
-		return this.addOfficeManagedObjectSource(managedObjectSourceName, type, null);
+	public OfficeFloorSupplierThreadLocal addOfficeFloorSupplierThreadLocal(String qualifier, String type) {
+		// TODO implement OfficeFloorSupplier.addOfficeFloorSupplierThreadLocal(...)
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeFloorSupplier.addOfficeFloorSupplierThreadLocal(...)");
 	}
 
 	@Override
-	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String type,
-			String qualifier) {
+	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String qualifier,
+			String type) {
 
 		// Create the supplied managed object node
 		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = this.context
@@ -327,16 +324,16 @@ public class SupplierNodeImpl implements SupplierNode {
 				ManagedObjectNode mo;
 				if (this.officeNode != null) {
 					// Register the office managed object source
-					mos = (ManagedObjectSourceNode) this.addOfficeManagedObjectSource(managedObjectName, type,
-							qualifier);
+					mos = (ManagedObjectSourceNode) this.addOfficeManagedObjectSource(managedObjectName, qualifier,
+							type);
 
 					// Add the office managed object
 					mo = (ManagedObjectNode) mos.addOfficeManagedObject(managedObjectName, ManagedObjectScope.THREAD);
 
 				} else {
 					// Register the OfficeFloor managed object source
-					mos = (ManagedObjectSourceNode) this.addOfficeFloorManagedObjectSource(managedObjectName, type,
-							qualifier);
+					mos = (ManagedObjectSourceNode) this.addOfficeFloorManagedObjectSource(managedObjectName, qualifier,
+							type);
 
 					// Add the OfficeFloor managed object
 					mo = (ManagedObjectNode) mos.addOfficeFloorManagedObject(managedObjectName,
@@ -352,6 +349,12 @@ public class SupplierNodeImpl implements SupplierNode {
 
 			}, new AutoWire(suppliedMosType.getQualifier(), suppliedMosType.getObjectType()));
 		});
+	}
+
+	@Override
+	public void autoWireThreadLocals(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext) {
+		// TODO implement SupplierNode.autoWireThreadLocals(...)
+		throw new UnsupportedOperationException("TODO implement SupplierNode.autoWireThreadLocals(...)");
 	}
 
 }

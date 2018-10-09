@@ -35,7 +35,6 @@ import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
@@ -215,7 +214,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load
 		this.loadSupplierType(false, (context) -> {
-			context.addManagedObjectSource(null, new ClassManagedObjectSource());
+			context.addManagedObjectSource("Qualifier", null, new ClassManagedObjectSource());
 		});
 	}
 
@@ -229,7 +228,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to load
 		this.loadSupplierType(false, (context) -> {
-			context.addManagedObjectSource(Connection.class, (ManagedObjectSource<None, None>) null);
+			context.addManagedObjectSource(null, Connection.class, null);
 		});
 	}
 
@@ -276,8 +275,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 
 		// Load the managed objects
 		SupplierType type = this.loadSupplierType(true, (context) -> {
-			context.addManagedObjectSource(Object.class, new MockTypeManagedObjectSource(Object.class));
-			context.addManagedObjectSource(Connection.class, new MockTypeManagedObjectSource(Connection.class));
+			context.addManagedObjectSource(null, Object.class, new MockTypeManagedObjectSource(Object.class));
+			context.addManagedObjectSource(null, Connection.class, new MockTypeManagedObjectSource(Connection.class));
 			addClassManagedObjectSource(context, SimpleManagedObject.class);
 			context.addManagedObjectSource("QUALIFIER", Object.class, new MockTypeManagedObjectSource(Object.class));
 		});
@@ -431,7 +430,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 			Class<?> clazz) {
 
 		// Configure in the managed object source
-		SuppliedManagedObjectSource managedObjectSource = context.addManagedObjectSource(clazz,
+		SuppliedManagedObjectSource managedObjectSource = context.addManagedObjectSource(null, clazz,
 				new ClassManagedObjectSource());
 		managedObjectSource.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, clazz.getName());
 

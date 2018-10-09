@@ -47,33 +47,22 @@ public interface SupplierSourceContext extends SourceContext {
 	 * This allows integrating third party libraries that require
 	 * {@link ThreadLocal} access to objects.
 	 *
-	 * @param               <T> Type of object to be returned from the
-	 *                      {@link SupplierThreadLocal}.
-	 * @param qualification Qualification for the {@link AutoWire}. May be
-	 *                      <code>null</code>.
-	 * @param type          Type for {@link AutoWire}.
+	 * @param           <T> Type of object to be returned from the
+	 *                  {@link SupplierThreadLocal}.
+	 * @param qualifier Qualifier for the {@link AutoWire}. May be <code>null</code>
+	 *                  to match only on type.
+	 * @param type      Type for {@link AutoWire}.
 	 * @return {@link SupplierThreadLocal} to obtain the object.
 	 */
-	<T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualification, Class<? extends T> type);
+	<T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualifier, Class<? extends T> type);
 
 	/**
 	 * Adds a potential {@link ManagedObjectSource} for dependency injection.
 	 * 
 	 * @param                     <D> Dependency type keys.
 	 * @param                     <F> {@link Flow} type keys.
-	 * @param type                Type of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource {@link ManagedObjectSource}.
-	 * @return {@link SuppliedManagedObjectSource}
-	 */
-	<D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(Class<?> type,
-			ManagedObjectSource<D, F> managedObjectSource);
-
-	/**
-	 * Adds a potential {@link ManagedObjectSource} for dependency injection.
-	 * 
-	 * @param                     <D> Dependency type keys.
-	 * @param                     <F> {@link Flow} type keys.
-	 * @param qualifier           Qualifier for the {@link ManagedObjectSource}.
+	 * @param qualifier           Qualifier for the {@link ManagedObjectSource}. May
+	 *                            be <code>null</code> to match only on type.
 	 * @param type                Type of the {@link ManagedObjectSource}.
 	 * @param managedObjectSource {@link ManagedObjectSource}.
 	 * @return {@link SuppliedManagedObjectSource}.

@@ -66,7 +66,7 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 		// Obtain the method
 		FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("SECTION.threadLocal");
 
-		// Invoke function and ensues tre thread local access to dependency
+		// Invoke function and ensues the thread local access to dependency
 		CompileSection.threadLocalObject = null;
 		CompileSection.dependencyObject = null;
 		function.invokeProcess(null, null);
@@ -116,7 +116,8 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 			SupplierThreadLocal<MockObject> threadLocal = context.addSupplierThreadLocal(null, MockObject.class);
 
 			// Add the managed object source
-			context.addManagedObjectSource(MockManagedObjectSource.class, new MockManagedObjectSource(threadLocal));
+			context.addManagedObjectSource(null, MockManagedObjectSource.class,
+					new MockManagedObjectSource(threadLocal));
 		}
 	}
 

@@ -20,6 +20,7 @@ package net.officefloor.compile.internal.structure;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -77,6 +78,14 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	 */
 	void loadAutoWireObjects(AutoWirer<LinkObjectNode> autoWirer, ManagedObjectSourceVisitor managedObjectSourceVisitor,
 			CompileContext compileContext);
+
+	/**
+	 * Auto-wires the {@link SupplierThreadLocal} instances.
+	 * 
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
+	 */
+	void autoWireThreadLocals(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Loads the {@link SupplierType}.

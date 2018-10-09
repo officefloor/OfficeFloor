@@ -58,6 +58,7 @@ import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
+import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -728,6 +729,18 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can create {@link SupplierThreadLocalNode}.
+	 */
+	public void testCreateSupplierThreadLocalNode() {
+		SupplierNode supplier = this.createMock(SupplierNode.class);
+		SupplierThreadLocalNode node = this.doTest(
+				() -> this.context.createSupplierThreadLocalNode("QUALIFIER", Object.class.getName(), supplier));
+		assertNode(node, "QUALIFIER-" + Object.class.getName(), "Supplier Thread Local", null, supplier);
+		assertSame("Incorrect supplier", supplier, node.getSupplierNode());
+		assertInitialise(node, (n) -> n.initialise());
+	}
+
+	/**
 	 * Ensure can create {@link SuppliedManagedObjectSourceNode}.
 	 */
 	public void testCreateSuppliedManagedObjectNode() {
@@ -735,6 +748,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		SuppliedManagedObjectSourceNode node = this.doTest(
 				() -> this.context.createSuppliedManagedObjectNode("QUALIFIER", Object.class.getName(), supplier));
 		assertNode(node, "QUALIFIER-" + Object.class.getName(), "Supplied Managed Object Source", null, supplier);
+		assertSame("Incorrect supplier", supplier, node.getSupplierNode());
 		assertInitialise(node, (n) -> n.initialise());
 	}
 
@@ -759,7 +773,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		SupplierNode node = this.doTest(() -> {
 			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.officeFloor);
 			assertNode(supplier, "SUPPLIER", "Supplier", null, this.officeFloor);
-			supplier.addOfficeFloorManagedObjectSource("MOS", "TYPE");
+			supplier.addOfficeFloorManagedObjectSource("MOS", null, "TYPE");
 			assertChildren(supplier, suppliedManagedObjectNode[0]);
 			return supplier;
 		});
@@ -790,7 +804,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		SupplierNode node = this.doTest(() -> {
 			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.office);
 			assertNode(supplier, "SUPPLIER", "Supplier", null, this.office);
-			supplier.addOfficeManagedObjectSource("MOS", "TYPE");
+			supplier.addOfficeManagedObjectSource("MOS", null, "TYPE");
 			assertChildren(supplier, suppliedManagedObjectNode[0]);
 			return supplier;
 		});
