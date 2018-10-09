@@ -41,6 +41,7 @@ import net.officefloor.frame.internal.configuration.InputManagedObjectConfigurat
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.ThreadLocalConfiguration;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
@@ -70,14 +71,11 @@ public class RawBoundManagedObjectMetaDataFactory {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
-	 * @param registeredManagedObjects
-	 *            Registered {@link ManagedObject} instances that may be
-	 *            selected for being bound.
-	 * @param rawGovernanceMetaData
-	 *            {@link RawGovernanceMetaData} by its {@link Office} registered
-	 *            name.
+	 * @param assetManagerFactory      {@link AssetManagerFactory}.
+	 * @param registeredManagedObjects Registered {@link ManagedObject} instances
+	 *                                 that may be selected for being bound.
+	 * @param rawGovernanceMetaData    {@link RawGovernanceMetaData} by its
+	 *                                 {@link Office} registered name.
 	 */
 	public RawBoundManagedObjectMetaDataFactory(AssetManagerFactory assetManagerFactory,
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
@@ -90,31 +88,33 @@ public class RawBoundManagedObjectMetaDataFactory {
 	/**
 	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
 	 * 
-	 * @param boundManagedObjectConfiguration
-	 *            {@link ManagedObjectConfiguration} of the
-	 *            {@link RawBoundManagedObjectMetaData} instances.
-	 * @param scope
-	 *            {@link ManagedObjectScope} for the
-	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param scopeManagedObjects
-	 *            Already bound {@link ManagedObject} instances that may fulfill
-	 *            dependencies of bound {@link ManagedObject} instances.
-	 * @param inputManagedObjects
-	 *            Meta-data about input {@link ManagedObject} instances by
-	 *            {@link ManagedObjectSource} instances.
-	 * @param boundInputManagedObjects
-	 *            Default {@link ManagedObjectSource} names for multiple input
-	 *            {@link ManagedObject} instances bound to the same name.
-	 *            Mapping is of input {@link ManagedObject} name to the default
-	 *            {@link ManagedObjectSource} name.
-	 * @param assetType
-	 *            {@link AssetType} that {@link ManagedObject} instances are
-	 *            being bound.
-	 * @param assetName
-	 *            Name of the {@link Asset} that {@link ManagedObject} instances
-	 *            are being bound.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param boundManagedObjectConfiguration {@link ManagedObjectConfiguration} of
+	 *                                        the
+	 *                                        {@link RawBoundManagedObjectMetaData}
+	 *                                        instances.
+	 * @param scope                           {@link ManagedObjectScope} for the
+	 *                                        {@link RawBoundManagedObjectMetaData}.
+	 * @param scopeManagedObjects             Already bound {@link ManagedObject}
+	 *                                        instances that may fulfill
+	 *                                        dependencies of bound
+	 *                                        {@link ManagedObject} instances.
+	 * @param inputManagedObjects             Meta-data about input
+	 *                                        {@link ManagedObject} instances by
+	 *                                        {@link ManagedObjectSource} instances.
+	 * @param boundInputManagedObjects        Default {@link ManagedObjectSource}
+	 *                                        names for multiple input
+	 *                                        {@link ManagedObject} instances bound
+	 *                                        to the same name. Mapping is of input
+	 *                                        {@link ManagedObject} name to the
+	 *                                        default {@link ManagedObjectSource}
+	 *                                        name.
+	 * @param assetType                       {@link AssetType} that
+	 *                                        {@link ManagedObject} instances are
+	 *                                        being bound.
+	 * @param assetName                       Name of the {@link Asset} that
+	 *                                        {@link ManagedObject} instances are
+	 *                                        being bound.
+	 * @param issues                          {@link OfficeFloorIssues}.
 	 * @return {@link RawBoundManagedObjectMetaData} instances for the bound
 	 *         {@link ManagedObject} instances.
 	 */
@@ -178,9 +178,12 @@ public class RawBoundManagedObjectMetaDataFactory {
 				AdministrationConfiguration<?, ?, ?>[] preloadAdministrationConfiguration = mo
 						.getPreLoadAdministration();
 
+				// Obtain the thread local configuration
+				ThreadLocalConfiguration threadLocalConfiguration = mo.getThreadLocalConfiguration();
+
 				// Create the bound ManagedObject meta-data (with instance)
-				RawBoundManagedObjectMetaData rawBoundMoMetaData = new RawBoundManagedObjectMetaData(boundMoName,
-						false);
+				RawBoundManagedObjectMetaData rawBoundMoMetaData = new RawBoundManagedObjectMetaData(boundMoName, false,
+						threadLocalConfiguration);
 				rawBoundMoMetaData.addInstance(boundMoName, rawMoMetaData, dependenciesConfiguration,
 						governanceConfiguration, preloadAdministrationConfiguration);
 
@@ -246,6 +249,9 @@ public class RawBoundManagedObjectMetaDataFactory {
 				AdministrationConfiguration<?, ?, ?>[] preloadAdministration = inputConfiguration
 						.getPreLoadAdministration();
 
+				// Obtain the thread local configuration
+				ThreadLocalConfiguration threadLocalConfiguration = inputConfiguration.getThreadLocalConfiguration();
+
 				// Obtain the bound ManagedObject meta-data
 				RawBoundManagedObjectMetaData rawBoundMoMetaData;
 				if (possibleClash != null) {
@@ -253,7 +259,7 @@ public class RawBoundManagedObjectMetaDataFactory {
 					rawBoundMoMetaData = possibleClash;
 				} else {
 					// Create the bound ManagedObject meta-data
-					rawBoundMoMetaData = new RawBoundManagedObjectMetaData(boundMoName, true);
+					rawBoundMoMetaData = new RawBoundManagedObjectMetaData(boundMoName, true, threadLocalConfiguration);
 
 					// Register the input managed object
 					boundMo.put(boundMoName, rawBoundMoMetaData);
@@ -360,11 +366,9 @@ public class RawBoundManagedObjectMetaDataFactory {
 					}
 
 					/*
-					 * No dependency relationship. As the sorting only changes
-					 * on differences (non 0 value) then need means to
-					 * differentiate when no dependency relationship. This is
-					 * especially the case with the merge sort used by default
-					 * by Java.
+					 * No dependency relationship. As the sorting only changes on differences (non 0
+					 * value) then need means to differentiate when no dependency relationship. This
+					 * is especially the case with the merge sort used by default by Java.
 					 */
 
 					// Most number of dependencies first.
@@ -380,8 +384,7 @@ public class RawBoundManagedObjectMetaDataFactory {
 				/**
 				 * Obtains the names of the dependencies.
 				 * 
-				 * @param mo
-				 *            {@link RawBoundManagedObjectMetaData}.
+				 * @param mo {@link RawBoundManagedObjectMetaData}.
 				 * @return Names of the dependencies.
 				 */
 				private Set<String> getDependencyManagedObjectNames(RawBoundManagedObjectMetaData mo) {
@@ -443,8 +446,7 @@ public class RawBoundManagedObjectMetaDataFactory {
 		/**
 		 * Initiate.
 		 * 
-		 * @param message
-		 *            Initiate with description for {@link OfficeFloorIssues}.
+		 * @param message Initiate with description for {@link OfficeFloorIssues}.
 		 */
 		public CyclicDependencyException(String message) {
 			super(message);

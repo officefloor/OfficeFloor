@@ -36,6 +36,7 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.ThreadLocalConfiguration;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
@@ -50,12 +51,11 @@ public class RawBoundManagedObjectMetaData {
 	 * Recursively loads all the {@link ManagedObjectIndex} instances for the
 	 * {@link RawBoundManagedObjectMetaData}.
 	 * 
-	 * @param boundMo
-	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param requiredManagedObjects
-	 *            Mapping of the required {@link ManagedObjectIndex} instances
-	 *            by the {@link ManagedFunction} to their respective
-	 *            {@link RawBoundManagedObjectMetaData}.
+	 * @param boundMo                {@link RawBoundManagedObjectMetaData}.
+	 * @param requiredManagedObjects Mapping of the required
+	 *                               {@link ManagedObjectIndex} instances by the
+	 *                               {@link ManagedFunction} to their respective
+	 *                               {@link RawBoundManagedObjectMetaData}.
 	 * @return {@link ManagedObjectIndex} of the input
 	 *         {@link RawBoundManagedObjectMetaData}.
 	 */
@@ -86,25 +86,21 @@ public class RawBoundManagedObjectMetaData {
 	/**
 	 * <p>
 	 * Sorts the required {@link ManagedObjectIndex} instances for the
-	 * {@link ManagedFunction} so that dependency {@link ManagedObject}
-	 * instances are before the {@link ManagedObject} instances using them. In
-	 * essence this is a topological sort so that dependencies are first.
+	 * {@link ManagedFunction} so that dependency {@link ManagedObject} instances
+	 * are before the {@link ManagedObject} instances using them. In essence this is
+	 * a topological sort so that dependencies are first.
 	 * <p>
 	 * This is necessary for coordinating so that dependencies are coordinated
 	 * before the {@link ManagedObject} instances using them are coordinated.
 	 * 
-	 * @param requiredManagedObjects
-	 *            Mapping of the {@link ManagedObjectIndex} to its
-	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param assetType
-	 *            {@link AssetType}.
-	 * @param assetName
-	 *            Name of asset to issues.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @return Listing of required {@link ManagedObject} instances to be sorted,
-	 *         or <code>null</code> indicating unable to sort, possible because
-	 *         of cyclic dependencies.
+	 * @param requiredManagedObjects Mapping of the {@link ManagedObjectIndex} to
+	 *                               its {@link RawBoundManagedObjectMetaData}.
+	 * @param assetType              {@link AssetType}.
+	 * @param assetName              Name of asset to issues.
+	 * @param issues                 {@link OfficeFloorIssues}.
+	 * @return Listing of required {@link ManagedObject} instances to be sorted, or
+	 *         <code>null</code> indicating unable to sort, possible because of
+	 *         cyclic dependencies.
 	 */
 	public static ManagedObjectIndex[] createSortedRequiredManagedObjects(
 			final Map<ManagedObjectIndex, RawBoundManagedObjectMetaData> requiredManagedObjects, AssetType assetType,
@@ -175,11 +171,9 @@ public class RawBoundManagedObjectMetaData {
 						return 1;
 					} else {
 						/*
-						 * No dependency relationship. As the sorting only
-						 * changes on differences (non 0 value) then need means
-						 * to differentiate when no dependency relationship.
-						 * This is especially the case with the merge sort used
-						 * by default by Java.
+						 * No dependency relationship. As the sorting only changes on differences (non 0
+						 * value) then need means to differentiate when no dependency relationship. This
+						 * is especially the case with the merge sort used by default by Java.
 						 */
 
 						// Least number of dependencies first.
@@ -218,8 +212,7 @@ public class RawBoundManagedObjectMetaData {
 		/**
 		 * Initiate.
 		 * 
-		 * @param message
-		 *            Initiate with description for {@link OfficeFloorIssues}.
+		 * @param message Initiate with description for {@link OfficeFloorIssues}.
 		 */
 		public CyclicDependencyException(String message) {
 			super(message);
@@ -237,13 +230,18 @@ public class RawBoundManagedObjectMetaData {
 	private final boolean isInput;
 
 	/**
+	 * {@link ThreadLocalConfiguration}.
+	 */
+	private final ThreadLocalConfiguration threadLocalConfiguration;
+
+	/**
 	 * Bound {@link ManagedObjectIndex} for the {@link ManagedObject}.
 	 */
 	private ManagedObjectIndex index = null;
 
 	/**
-	 * Listing of {@link RawBoundManagedObjectInstanceMetaData} instances for
-	 * this {@link RawBoundManagedObjectMetaData}.
+	 * Listing of {@link RawBoundManagedObjectInstanceMetaData} instances for this
+	 * {@link RawBoundManagedObjectMetaData}.
 	 */
 	final List<RawBoundManagedObjectInstanceMetaData<?>> instancesMetaData = new LinkedList<RawBoundManagedObjectInstanceMetaData<?>>();
 
@@ -255,14 +253,17 @@ public class RawBoundManagedObjectMetaData {
 	/**
 	 * Initiate.
 	 * 
-	 * @param boundManagedObjectName
-	 *            Name that the {@link ManagedObject} is bound under.
-	 * @param isInput
-	 *            Indicates if an Input {@link ManagedObject}.
+	 * @param boundManagedObjectName   Name that the {@link ManagedObject} is bound
+	 *                                 under.
+	 * @param isInput                  Indicates if an Input {@link ManagedObject}.
+	 * @param threadLocalConfiguration {@link ThreadLocalConfiguration}. May be
+	 *                                 <code>null</code>.
 	 */
-	public RawBoundManagedObjectMetaData(String boundManagedObjectName, boolean isInput) {
+	public RawBoundManagedObjectMetaData(String boundManagedObjectName, boolean isInput,
+			ThreadLocalConfiguration threadLocalConfiguration) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.isInput = isInput;
+		this.threadLocalConfiguration = threadLocalConfiguration;
 	}
 
 	/**
@@ -277,33 +278,37 @@ public class RawBoundManagedObjectMetaData {
 	/**
 	 * Specifies the {@link ManagedObjectIndex}.
 	 * 
-	 * @param managedObjectScope
-	 *            {@link ManagedObjectScope}.
-	 * @param indexOfManagedObjectWithinScope
-	 *            Index of the {@link ManagedObject} within the
-	 *            {@link ManagedObjectScope}.
+	 * @param managedObjectScope              {@link ManagedObjectScope}.
+	 * @param indexOfManagedObjectWithinScope Index of the {@link ManagedObject}
+	 *                                        within the {@link ManagedObjectScope}.
 	 */
 	public void setManagedObjectIndex(ManagedObjectScope managedObjectScope, int indexOfManagedObjectWithinScope) {
 		this.index = new ManagedObjectIndexImpl(managedObjectScope, indexOfManagedObjectWithinScope);
+
+		// Specify index on the thread local
+		if (this.threadLocalConfiguration != null) {
+			this.threadLocalConfiguration.setManagedObjectIndex(this.index);
+		}
 	}
 
 	/**
 	 * Adds a {@link RawBoundManagedObjectInstanceMetaData} to this
 	 * {@link RawBoundManagedObjectMetaData}.
 	 * 
-	 * @param boundManagedObjectName
-	 *            Name that the {@link ManagedObject} is bound under.
-	 * @param rawMoMetaData
-	 *            {@link RawManagedObjectMetaData}.
-	 * @param dependenciesConfiguration
-	 *            Listing of the {@link ManagedObjectDependencyConfiguration}
-	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
-	 * @param governanceConfiguration
-	 *            Listing of the {@link ManagedObjectGovernanceConfiguration}
-	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
-	 * @param preloadAdministration
-	 *            Listing of the pre-load {@link AdministrationConfiguration}
-	 *            for the {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param boundManagedObjectName    Name that the {@link ManagedObject} is bound
+	 *                                  under.
+	 * @param rawMoMetaData             {@link RawManagedObjectMetaData}.
+	 * @param dependenciesConfiguration Listing of the
+	 *                                  {@link ManagedObjectDependencyConfiguration}
+	 *                                  for the
+	 *                                  {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param governanceConfiguration   Listing of the
+	 *                                  {@link ManagedObjectGovernanceConfiguration}
+	 *                                  for the
+	 *                                  {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param preloadAdministration     Listing of the pre-load
+	 *                                  {@link AdministrationConfiguration} for the
+	 *                                  {@link RawBoundManagedObjectInstanceMetaData}.
 	 * @return {@link RawBoundManagedObjectInstanceMetaData}.
 	 */
 	public RawBoundManagedObjectInstanceMetaData<?> addInstance(String boundManagedObjectName,
@@ -346,17 +351,16 @@ public class RawBoundManagedObjectMetaData {
 	 * {@link RawBoundManagedObjectInstanceMetaData} for this
 	 * {@link RawBoundManagedObjectMetaData}.
 	 *
-	 * @return Index of the default
-	 *         {@link RawBoundManagedObjectInstanceMetaData} for this
-	 *         {@link RawBoundManagedObjectMetaData}.
+	 * @return Index of the default {@link RawBoundManagedObjectInstanceMetaData}
+	 *         for this {@link RawBoundManagedObjectMetaData}.
 	 */
 	public int getDefaultInstanceIndex() {
 		return this.defaultInstanceIndex;
 	}
 
 	/**
-	 * Obtains the {@link RawBoundManagedObjectInstanceMetaData} instances for
-	 * the {@link ManagedObjectSource} instances that may provide a
+	 * Obtains the {@link RawBoundManagedObjectInstanceMetaData} instances for the
+	 * {@link ManagedObjectSource} instances that may provide a
 	 * {@link ManagedObject} for this {@link RawBoundManagedObjectMetaData}.
 	 *
 	 * @return {@link RawBoundManagedObjectMetaData} instances for this

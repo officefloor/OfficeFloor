@@ -22,6 +22,7 @@ import java.util.List;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.thread.OptionalThreadLocal;
 
 /**
  * Container managing a {@link ManagedObject}.
@@ -42,9 +43,8 @@ public interface ManagedObjectContainer {
 	/**
 	 * Creates a {@link FunctionState} to load the {@link ManagedObject}.
 	 * 
-	 * @param managedFunctionContainer
-	 *            {@link ManagedFunctionContainer} requiring the
-	 *            {@link ManagedObject}.
+	 * @param managedFunctionContainer {@link ManagedFunctionContainer} requiring
+	 *                                 the {@link ManagedObject}.
 	 * @return Optional {@link FunctionState} to load the {@link ManagedObject}.
 	 *         Should this return <code>null</code>, the
 	 *         {@link ManagedFunctionContainer} should not then be executed, as it
@@ -62,8 +62,7 @@ public interface ManagedObjectContainer {
 	 * Should the {@link ManagedObject} not be ready, then will latch to wait for
 	 * the {@link ManagedObject} to be ready.
 	 * 
-	 * @param check
-	 *            {@link ManagedObjectReadyCheck}.
+	 * @param check {@link ManagedObjectReadyCheck}.
 	 * @return {@link FunctionState} to check if the {@link ManagedObject} contained
 	 *         within this {@link ManagedObjectContainer} is ready.
 	 */
@@ -77,18 +76,15 @@ public interface ManagedObjectContainer {
 	 * Should the {@link ManagedObject} not be loaded, then no {@link ManagedObject}
 	 * extension will be loaded.
 	 *
-	 * @param <E>
-	 *            Extension type.
-	 * @param extractor
-	 *            {@link ManagedObjectExtensionExtractor}.
-	 * @param managedObjectExtensions
-	 *            {@link List} to load the {@link ManagedObject} extension.
-	 * @param extensionIndex
-	 *            Index within the {@link ManagedObject} extensions array to load
-	 *            the extension.
-	 * @param responsibleTeam
-	 *            {@link TeamManagement} responsible for extracting the extension.
-	 *            May be <code>null</code> to use any {@link Team}.
+	 * @param                         <E> Extension type.
+	 * @param extractor               {@link ManagedObjectExtensionExtractor}.
+	 * @param managedObjectExtensions {@link List} to load the {@link ManagedObject}
+	 *                                extension.
+	 * @param extensionIndex          Index within the {@link ManagedObject}
+	 *                                extensions array to load the extension.
+	 * @param responsibleTeam         {@link TeamManagement} responsible for
+	 *                                extracting the extension. May be
+	 *                                <code>null</code> to use any {@link Team}.
 	 * @return {@link FunctionState} to load the {@link ManagedObject} extension.
 	 */
 	<E> FunctionState extractExtension(ManagedObjectExtensionExtractor<E> extractor, E[] managedObjectExtensions,
@@ -102,10 +98,19 @@ public interface ManagedObjectContainer {
 	Object getObject();
 
 	/**
+	 * Obtains the object only if available, otherwise <code>null</code>.
+	 * 
+	 * @return Object being managed by the {@link ManagedObject} or
+	 *         <code>null</code> if not yet available.
+	 * 
+	 * @see OptionalThreadLocal
+	 */
+	Object getOptionalObject();
+
+	/**
 	 * Unregisters the {@link ManagedObject} from {@link Governance}.
 	 * 
-	 * @param governanceIndex
-	 *            Index of the {@link Governance}.
+	 * @param governanceIndex Index of the {@link Governance}.
 	 * @return {@link FunctionState} to unregister the {@link ManagedObject} from
 	 *         {@link Governance}.
 	 */
