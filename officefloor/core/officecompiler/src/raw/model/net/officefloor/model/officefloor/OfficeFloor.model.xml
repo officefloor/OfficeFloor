@@ -5,6 +5,8 @@
 	<field type="OfficeFloorExecutiveModel"
 		name="office floor executive" />
 	<list type="OfficeFloorSupplierModel" name="office floor supplier" />
+	<list type="OfficeFloorSupplierThreadLocalModel"
+		name="office floor supplier thread local" />
 	<list type="OfficeFloorManagedObjectSourceModel"
 		name="office floor managed object source" />
 	<list type="OfficeFloorInputManagedObjectModel"

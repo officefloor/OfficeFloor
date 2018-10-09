@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<field type="String" name="office floor input managed object name" />
+	<field type="String"
+		name="office floor input managed object name" />
 	<field type="String" name="object type" />
 	<field
 		type="OfficeFloorInputManagedObjectToBoundOfficeFloorManagedObjectSourceModel"
@@ -12,6 +13,10 @@
 	<list
 		type="OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel"
 		name="dependent office floor managed object" />
-	<list type="DeployedOfficeObjectToOfficeFloorInputManagedObjectModel"
+	<list
+		type="OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel"
+		name="dependent office floor supplier thread local" />
+	<list
+		type="DeployedOfficeObjectToOfficeFloorInputManagedObjectModel"
 		name="deployed office object" />
 </model>
