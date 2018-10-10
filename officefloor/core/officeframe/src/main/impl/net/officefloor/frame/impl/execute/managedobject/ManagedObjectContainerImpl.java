@@ -76,12 +76,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	/**
 	 * Convenience method to obtain the {@link ManagedObjectContainer}.
 	 * 
-	 * @param index
-	 *            {@link ManagedObjectIndex} to identify the
-	 *            {@link ManagedObjectContainer}.
-	 * @param managedFunction
-	 *            {@link ManagedFunctionContainer} to specify context for obtaining
-	 *            the {@link ManagedObjectContainer}.
+	 * @param index           {@link ManagedObjectIndex} to identify the
+	 *                        {@link ManagedObjectContainer}.
+	 * @param managedFunction {@link ManagedFunctionContainer} to specify context
+	 *                        for obtaining the {@link ManagedObjectContainer}.
 	 * @return {@link ManagedObjectContainer}.
 	 */
 	public static ManagedObjectContainer getManagedObjectContainer(ManagedObjectIndex index,
@@ -182,13 +180,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	/**
 	 * Initiate the container.
 	 * 
-	 * @param <D>
-	 *            Dependency key type.
-	 * @param metaData
-	 *            Meta-data of the {@link ManagedObject}.
-	 * @param responsibleThreadState
-	 *            {@link ThreadState} responsible for making changes to this
-	 *            {@link ManagedObjectContainer}.
+	 * @param                        <D> Dependency key type.
+	 * @param metaData               Meta-data of the {@link ManagedObject}.
+	 * @param responsibleThreadState {@link ThreadState} responsible for making
+	 *                               changes to this {@link ManagedObjectContainer}.
 	 */
 	public <D extends Enum<D>> ManagedObjectContainerImpl(ManagedObjectMetaData<D> metaData,
 			ThreadState responsibleThreadState) {
@@ -214,15 +209,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	/**
 	 * Initiate the container with a provided {@link ManagedObject}.
 	 * 
-	 * @param <D>
-	 *            Dependency key type.
-	 * @param managedObject
-	 *            {@link ManagedObject} triggering the {@link ProcessState}.
-	 * @param metaData
-	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}.
-	 * @param responsibleThreadState
-	 *            {@link ThreadState} responsible for making changes to this
-	 *            {@link ManagedObjectContainer}.
+	 * @param                        <D> Dependency key type.
+	 * @param managedObject          {@link ManagedObject} triggering the
+	 *                               {@link ProcessState}.
+	 * @param metaData               {@link ManagedObjectMetaData} of the
+	 *                               {@link ManagedObject}.
+	 * @param responsibleThreadState {@link ThreadState} responsible for making
+	 *                               changes to this {@link ManagedObjectContainer}.
 	 */
 	public <D extends Enum<D>> ManagedObjectContainerImpl(ManagedObject managedObject,
 			ManagedObjectMetaData<D> metaData, ThreadState responsibleThreadState) {
@@ -258,8 +251,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	/**
 	 * Undertakes the {@link ManagedObjectOperation}.
 	 * 
-	 * @param operation
-	 *            {@link ManagedObjectOperation} to undertake.
+	 * @param operation {@link ManagedObjectOperation} to undertake.
 	 */
 	private void doOperation(ManagedObjectOperation operation) {
 		FunctionLoop loop = this.metaData.getFunctionLoop();
@@ -306,9 +298,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedFunction
-		 *            {@link ManagedFunctionContainer} requesting the
-		 *            {@link ManagedObject} to be loaded.
+		 * @param managedFunction {@link ManagedFunctionContainer} requesting the
+		 *                        {@link ManagedObject} to be loaded.
 		 */
 		public LoadManagedObjectOperation(ManagedFunctionContainer managedFunction) {
 			this.managedFunction = managedFunction;
@@ -792,8 +783,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		/**
 		 * Create the {@link FunctionState} for the {@link AsynchronousOperation}.
 		 * 
-		 * @param operation
-		 *            {@link AsynchronousOperation}.
+		 * @param operation {@link AsynchronousOperation}.
 		 * @return {@link FunctionState} for the {@link AsynchronousOperation}.
 		 */
 		private <T extends Throwable> FunctionState createAsynchronousFunction(AsynchronousOperation<T> operation) {
@@ -877,6 +867,20 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		// Incorrect state if here
 		throw new IllegalStateException(
 				"ManagedObject in incorrect state " + this.containerState + " to obtain Object");
+	}
+
+	@Override
+	public Object getOptionalObject() {
+
+		// Return only if available
+		switch (this.containerState) {
+		case OBJECT_AVAILABLE:
+			// Return the available object
+			return this.object;
+
+		default:
+			return null; // not available
+		}
 	}
 
 	@Override
@@ -1034,8 +1038,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedObject
-		 *            {@link ManagedObject} to clean up.
+		 * @param managedObject {@link ManagedObject} to clean up.
 		 */
 		public CleanupManagedObjectOperation(ManagedObject managedObject) {
 			this.managedObject = managedObject;
@@ -1135,11 +1138,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		/**
 		 * Instantiate.
 		 * 
-		 * @param failure
-		 *            Cause of the failure.
-		 * @param managedFunction
-		 *            {@link ManagedFunctionContainer} requiring the
-		 *            {@link ManagedObject}.
+		 * @param failure         Cause of the failure.
+		 * @param managedFunction {@link ManagedFunctionContainer} requiring the
+		 *                        {@link ManagedObject}.
 		 */
 		public FailManagedObjectOperation(Throwable failure, ManagedFunctionContainer managedFunction) {
 			this.failure = failure;

@@ -25,24 +25,28 @@ import java.util.Map;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.thread.OptionalThreadLocal;
 import net.officefloor.frame.impl.construct.administration.AdministrationBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.thread.ThreadLocalImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
+import net.officefloor.frame.internal.configuration.ThreadLocalConfiguration;
 
 /**
  * {@link DependencyMappingBuilder} implementation.
  * 
  * @author Daniel Sagenschneider
  */
-public class DependencyMappingBuilderImpl<O extends Enum<O>>
-		implements DependencyMappingBuilder, ManagedObjectConfiguration<O>, InputManagedObjectConfiguration<O> {
+public class DependencyMappingBuilderImpl<O extends Enum<O>> implements DependencyMappingBuilder,
+		ThreadDependencyMappingBuilder, ManagedObjectConfiguration<O>, InputManagedObjectConfiguration<O> {
 
 	/**
 	 * Name of the {@link ManagedObject} is being bound.
@@ -68,6 +72,11 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 	 * {@link ManagedObjectGovernanceConfiguration} instances.
 	 */
 	private final List<ManagedObjectGovernanceConfiguration> governances = new LinkedList<>();
+
+	/**
+	 * {@link ThreadLocalImpl} for the {@link OptionalThreadLocal}.
+	 */
+	private ThreadLocalImpl<?> threadLocal = null;
 
 	/**
 	 * Initiate as a {@link ManagedObjectConfiguration}.
@@ -127,6 +136,23 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 		return admin;
 	}
 
+	/*
+	 * ========== ThreadDependencyMappingBuilder ==========================
+	 */
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> OptionalThreadLocal<T> getOptionalThreadLocal() {
+
+		// Ensure have thread local
+		if (this.threadLocal == null) {
+			this.threadLocal = new ThreadLocalImpl<>();
+		}
+
+		// Return the optional thread local
+		return (OptionalThreadLocal<T>) this.threadLocal.getOptionalThreadLocal();
+	}
+
 	/**
 	 * Maps in the dependency.
 	 * 
@@ -177,6 +203,11 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 	@Override
 	public AdministrationConfiguration<?, ?, ?>[] getPreLoadAdministration() {
 		return this.preLoadAdministrations.toArray(new AdministrationConfiguration[0]);
+	}
+
+	@Override
+	public ThreadLocalConfiguration getThreadLocalConfiguration() {
+		return this.threadLocal;
 	}
 
 	/**

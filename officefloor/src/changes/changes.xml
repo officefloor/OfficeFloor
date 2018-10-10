@@ -2,8 +2,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.1.0" date="in SCM" description="Performance improvements">
-			<action type="add" dev="sagenschneider">Performance improvements</action>
+		<release version="3.2.0" date="in SCM" description="Spring Integration">
+			<action type="add" dev="sagenschneider">Spring Integration</action>
+		</release>
+		<release version="3.1.0" date="2018-10-06" description="Thread Affinity">
+			<action type="add" dev="sagenschneider">Thread Affinity</action>
 		</release>
 		<release version="3.0.0" date="2018-07-07" description="Improved compiler that blends functional and object-oriented techniques">
 			<action type="add" dev="sagenschneider">Improved compiler that blends functional and object-oriented techniques</action>

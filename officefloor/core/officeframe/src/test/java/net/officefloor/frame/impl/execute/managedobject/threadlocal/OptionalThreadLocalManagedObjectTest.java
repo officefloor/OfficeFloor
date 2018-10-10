@@ -1,0 +1,310 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package net.officefloor.frame.impl.execute.managedobject.threadlocal;
+
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
+import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.thread.OptionalThreadLocal;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.ReflectiveFunctionBuilder;
+
+/**
+ * Tests accessing the {@link OptionalThreadLocal} from a {@link ManagedObject}.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class OptionalThreadLocalManagedObjectTest extends AbstractOfficeConstructTestCase {
+
+	/**
+	 * Ensure the {@link OptionalThreadLocal} not provide object if
+	 * {@link ManagedObject} not instantiated.
+	 */
+	public void test_Process_NotAvailable() throws Exception {
+		this.doManagedObjectTest(ManagedObjectScope.PROCESS, false, false);
+	}
+
+	/**
+	 * Ensure the {@link ManagedFunction} can access the {@link OptionalThreadLocal}
+	 * value.
+	 */
+	public void test_Process_Available() throws Exception {
+		this.doManagedObjectTest(ManagedObjectScope.PROCESS, true, false);
+	}
+
+	/**
+	 * Ensure the {@link OptionalThreadLocal} no provide object if
+	 * {@link ManagedObject} not instantiated via {@link Team} on another
+	 * {@link Thread}.
+	 */
+	public void test_Process_NotAvailableWithTeam() throws Exception {
+		this.doManagedObjectTest(ManagedObjectScope.PROCESS, false, true);
+	}
+
+	/**
+	 * Ensure the {@link ManagedFunction} can access the {@link OptionalThreadLocal}
+	 * value run by {@link Team} on another {@link Thread}.
+	 */
+	public void test_Process_AvailableWithTeam() throws Exception {
+		this.doManagedObjectTest(ManagedObjectScope.PROCESS, true, true);
+	}
+
+	/**
+	 * Ensure the {@link OptionalThreadLocal} not provide object if
+	 * {@link ManagedObject} not instantiated.
+	 */
+	public void test_Thread_NotAvailable() throws Exception {
+		this.doManagedObjectTest(ManagedObjectScope.THREAD, false, false);
+	}
+
+	/**
+	 * Ensure the {@link ManagedFunction} can access the {@link OptionalThreadLocal}
+	 * value.
+	 */
+	public void test_Thread_Available() throws Exception {
+		this.doManagedObjectTest(ManagedObjectScope.THREAD, true, false);
+	}
+
+	/**
+	 * Ensure the {@link OptionalThreadLocal} no provide object if
+	 * {@link ManagedObject} not instantiated via {@link Team} on another
+	 * {@link Thread}.
+	 */
+	public void test_Thread_NotAvailableWithTeam() throws Exception {
+		this.doManagedObjectTest(ManagedObjectScope.THREAD, false, true);
+	}
+
+	/**
+	 * Ensure the {@link ManagedFunction} can access the {@link OptionalThreadLocal}
+	 * value run by {@link Team} on another {@link Thread}.
+	 */
+	public void test_Thread_AvailableWithTeam() throws Exception {
+		this.doManagedObjectTest(ManagedObjectScope.THREAD, true, true);
+	}
+
+	/**
+	 * Undertakes the test.
+	 * 
+	 * @param scope             {@link ManagedObjectScope}.
+	 * @param isExpectAvailable If object should be available.
+	 * @param isTeam            If use {@link Team} for {@link ManagedFunction}.
+	 */
+	private void doManagedObjectTest(ManagedObjectScope scope, boolean isExpectAvailable, boolean isTeam)
+			throws Exception {
+
+		// Construct the thread local
+		String value = "TEST";
+		this.constructManagedObject(value, "VALUE_MOS", this.getOfficeName());
+
+		// Construct the dependency
+		Dependency dependency = new Dependency();
+		this.constructManagedObject(dependency, "DEPENDENCY_MOS", this.getOfficeName());
+
+		// Link into office
+		ThreadDependencyMappingBuilder dependencies;
+		switch (scope) {
+		case PROCESS:
+			dependencies = this.getOfficeBuilder().addProcessManagedObject("MO", "VALUE_MOS");
+			this.getOfficeBuilder().addProcessManagedObject("DEPENDENCY", "DEPENDENCY_MOS");
+			break;
+		case THREAD:
+			dependencies = this.getOfficeBuilder().addThreadManagedObject("MO", "VALUE_MOS");
+			this.getOfficeBuilder().addThreadManagedObject("DEPENDENCY", "DEPENDENCY_MOS");
+			break;
+		default:
+			throw new IllegalArgumentException("Invalid scope " + scope);
+		}
+		OptionalThreadLocal<String> threadLocal = dependencies.getOptionalThreadLocal();
+
+		// Obtain the expected thread local value
+		String expectedValue = isExpectAvailable ? value : null;
+
+		// Construct the check on thread local
+		ThreadLocalManagedObjectSource mos = new ThreadLocalManagedObjectSource(threadLocal, expectedValue);
+		ManagedObjectBuilder<None> check = this.constructManagedObject("CHECK", mos, this.getOfficeName());
+		check.setTimeout(10);
+
+		// Construct the functions
+		Work work = new Work(expectedValue, dependency);
+		ReflectiveFunctionBuilder expectObject = this.constructFunction(work, "expectObject");
+		expectObject.buildObject("MO");
+		expectObject.setNextFunction("service");
+		ReflectiveFunctionBuilder service = this.constructFunction(work, "service");
+		service.buildObject("CHECK", scope).mapDependency(DependencyKeys.DEPENDENCY, "DEPENDENCY");
+
+		// Invoke the function
+		String methodName = isExpectAvailable ? "expectObject" : "service";
+		this.invokeFunction(methodName, null);
+		assertTrue("Should be serviced", work.isServiced);
+	}
+
+	public static class Work {
+
+		private final String expectedValue;
+
+		private final Dependency expectedDependency;
+
+		private volatile boolean isServiced = false;
+
+		public Work(String expectedValue, Dependency expectedDependency) {
+			this.expectedValue = expectedValue;
+			this.expectedDependency = expectedDependency;
+		}
+
+		public void expectObject(String value) {
+			assertSame("Should have dependency object", this.expectedValue, value);
+		}
+
+		public void service(ThreadLocalManagedObjectSource mo) {
+			assertTrue("Accessible via name", mo.isBoundManagedObjectName);
+			assertTrue("Accessible via process aware", mo.isProcessAware);
+			assertTrue("Accessible via asynchronous", mo.isAsynchronousContext);
+			assertTrue("Accessible via co-ordination", mo.isLoadObjects);
+			assertSame("Incorrect dependency", this.expectedDependency, mo.dependency);
+			assertTrue("Accessible via managed object", mo.isManagedObject);
+			assertTrue("Accessible via object", mo.isObject);
+			this.isServiced = true;
+		}
+	}
+
+	public static enum DependencyKeys {
+		DEPENDENCY
+	}
+
+	public static class Dependency {
+	}
+
+	@TestSource
+	public static class ThreadLocalManagedObjectSource extends AbstractManagedObjectSource<DependencyKeys, None>
+			implements NameAwareManagedObject, ProcessAwareManagedObject, AsynchronousManagedObject,
+			CoordinatingManagedObject<DependencyKeys>, ManagedObject {
+
+		private final OptionalThreadLocal<String> threadLocal;
+
+		private final String expectedThreadLocalValue;
+
+		private boolean isBoundManagedObjectName = false;
+
+		private boolean isProcessAware = false;
+
+		private boolean isAsynchronousContext = false;
+
+		private boolean isLoadObjects = false;
+
+		private Dependency dependency = null;
+
+		private boolean isManagedObject = false;
+
+		private boolean isObject = false;
+
+		private ThreadLocalManagedObjectSource(OptionalThreadLocal<String> threadLocal,
+				String exepctedThreadLocalValue) {
+			this.threadLocal = threadLocal;
+			this.expectedThreadLocalValue = exepctedThreadLocalValue;
+		}
+
+		/*
+		 * ================= ManagedObjectSource =======================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			assertNull("Thread local should not be available for specification", this.threadLocal.get());
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<DependencyKeys, None> context) throws Exception {
+			context.setObjectClass(this.getClass());
+			context.setManagedObjectClass(this.getClass());
+			context.addDependency(DependencyKeys.DEPENDENCY, Dependency.class);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			assertSame("Incorrect getManagedObject", this.expectedThreadLocalValue, this.threadLocal.get());
+			this.isManagedObject = true;
+			return this;
+		}
+
+		/*
+		 * ================= NameAwareManagedObject ========================
+		 */
+
+		@Override
+		public void setBoundManagedObjectName(String boundManagedObjectName) {
+			assertSame("Incorrect setBoundManagedObjectName", this.expectedThreadLocalValue, this.threadLocal.get());
+			this.isBoundManagedObjectName = true;
+		}
+
+		/*
+		 * ================ ProcessAwareManagedObject ======================
+		 */
+
+		@Override
+		public void setProcessAwareContext(ProcessAwareContext context) {
+			assertSame("Incorrect setProcessAwareContext", this.expectedThreadLocalValue, this.threadLocal.get());
+			this.isProcessAware = true;
+		}
+
+		/*
+		 * ================ AsynchronousManagedObject =====================
+		 */
+
+		@Override
+		public void setAsynchronousContext(AsynchronousContext context) {
+			assertSame("Incorrect setAsynchronousContext", this.expectedThreadLocalValue, this.threadLocal.get());
+			this.isAsynchronousContext = true;
+		}
+
+		/*
+		 * ================ CoordinatingManagedObject ======================
+		 */
+
+		@Override
+		public void loadObjects(ObjectRegistry<DependencyKeys> registry) throws Throwable {
+			assertSame("Incorrect loadObjects", this.expectedThreadLocalValue, this.threadLocal.get());
+			this.dependency = (Dependency) registry.getObject(DependencyKeys.DEPENDENCY);
+			this.isLoadObjects = true;
+		}
+
+		/*
+		 * ===================== ManagedObject ============================
+		 */
+
+		@Override
+		public Object getObject() throws Throwable {
+			assertSame("Incorrect getObject", this.expectedThreadLocalValue, this.threadLocal.get());
+			this.isObject = true;
+			return this;
+		}
+	}
+
+}
