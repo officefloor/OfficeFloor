@@ -38,6 +38,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -54,6 +55,7 @@ import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -62,6 +64,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.thread.OptionalThreadLocal;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
@@ -358,13 +361,13 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Flow} is
-	 * not available for auto-wiring. Must be manually added with {@link Flow}
+	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Flow} is not
+	 * available for auto-wiring. Must be manually added with {@link Flow}
 	 * configured.
 	 * <p>
 	 * Purpose of {@link SupplierSource} is integration with object dependency
-	 * injection libraries. These are not expected to support
-	 * continuation/thread injection.
+	 * injection libraries. These are not expected to support continuation/thread
+	 * injection.
 	 */
 	public void testSuppliedManagedObjectWithFlowNotAvailable() {
 
@@ -395,13 +398,13 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Team} is
-	 * not available for auto-wiring. Must be manually added with {@link Team}
+	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Team} is not
+	 * available for auto-wiring. Must be manually added with {@link Team}
 	 * configured.
 	 * <p>
 	 * Purpose of {@link SupplierSource} is integration with object dependency
-	 * injection libraries. These are not expected to support
-	 * continuation/thread injection.
+	 * injection libraries. These are not expected to support continuation/thread
+	 * injection.
 	 */
 	public void testSuppliedManagedObjectWithTeamNotAvailable() {
 
@@ -426,6 +429,32 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		CompileOfficeSource.isBuild = false;
 		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, "OBJECT", null, this);
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure able to auto-wire the {@link OfficeFloorSupplierThreadLocal}.
+	 */
+	public void testAutoWireSupplierThreadLocal() {
+
+		// Flag to enable auto-wiring of the objects
+		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
+
+		// Register supplier thread local
+		CompileSupplierSource.addSupplierThreadLocal(CompileManagedObject.class);
+
+		// Record building the OfficeFloor
+		this.record_init();
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("MOS", ClassManagedObjectSource.class, 0);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		ThreadDependencyMappingBuilder dependencyMapper = this.record_officeBuilder_addThreadManagedObject("MO", "MOS");
+
+		// Should obtain thread local
+		this.recordReturn(dependencyMapper, dependencyMapper.getOptionalThreadLocal(),
+				this.createMock(OptionalThreadLocal.class));
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -514,6 +543,10 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		public static void addSuppliedManagedObjectSource(Class<?> type, ManagedObjectSource<?, ?> managedObjectSource,
 				String... propertyNameValuePairs) {
 			addSuppliedManagedObjectSource(null, type, managedObjectSource, propertyNameValuePairs);
+		}
+
+		public static void addSupplierThreadLocal(Class<?> type) {
+			fail("TODO implement");
 		}
 
 		/*

@@ -30,16 +30,20 @@ import net.officefloor.model.office.AdministrationEscalationToOfficeSectionInput
 import net.officefloor.model.office.AdministrationFlowModel;
 import net.officefloor.model.office.AdministrationFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.AdministrationModel;
+import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
+import net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel;
-import net.officefloor.model.office.AdministrationToExternalManagedObjectModel;
-import net.officefloor.model.office.GovernanceToExternalManagedObjectModel;
 import net.officefloor.model.office.GovernanceEscalationModel;
 import net.officefloor.model.office.GovernanceEscalationToOfficeSectionInputModel;
 import net.officefloor.model.office.GovernanceFlowModel;
 import net.officefloor.model.office.GovernanceFlowToOfficeSectionInputModel;
 import net.officefloor.model.office.GovernanceModel;
+import net.officefloor.model.office.GovernanceToExternalManagedObjectModel;
+import net.officefloor.model.office.GovernanceToOfficeManagedObjectModel;
+import net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.GovernanceToOfficeTeamModel;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
@@ -63,9 +67,6 @@ import net.officefloor.model.office.OfficeManagedObjectSourceTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceTeamToOfficeTeamModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceToOfficeSupplierModel;
-import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
-import net.officefloor.model.office.AdministrationToOfficeSectionManagedObjectModel;
-import net.officefloor.model.office.GovernanceToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectToOfficeManagedObjectSourceModel;
 import net.officefloor.model.office.OfficeManagedObjectToPreLoadAdministrationModel;
 import net.officefloor.model.office.OfficeModel;
@@ -73,7 +74,6 @@ import net.officefloor.model.office.OfficeRepository;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectToPreLoadAdministrationModel;
-import net.officefloor.model.office.GovernanceToOfficeSectionManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
@@ -85,6 +85,10 @@ import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
 import net.officefloor.model.office.OfficeSupplierModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -111,8 +115,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 	private final OfficeRepository officeRepository = new OfficeRepositoryImpl(this.modelRepository);
 
 	/**
-	 * Ensures on retrieving a {@link OfficeModel} that all
-	 * {@link ConnectionModel} instances are connected.
+	 * Ensures on retrieving a {@link OfficeModel} that all {@link ConnectionModel}
+	 * instances are connected.
 	 */
 	public void testRetrieveOffice() throws Exception {
 
@@ -127,6 +131,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addOfficeManagedObjectPool(pool);
 		OfficeSupplierModel supplier = new OfficeSupplierModel("SUPPLIER", "net.example.ExampleSupplierSource");
 		office.addOfficeSupplier(supplier);
+		OfficeSupplierThreadLocalModel supplierThreadLocal = new OfficeSupplierThreadLocalModel(
+				"SUPPLIER_THREAD_LOCAL");
+		office.addOfficeSupplierThreadLocal(supplierThreadLocal);
 		OfficeManagedObjectDependencyModel dependency = new OfficeManagedObjectDependencyModel("DEPENDENCY",
 				Connection.class.getName());
 		mo.addOfficeManagedObjectDependency(dependency);
@@ -172,6 +179,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeSectionInputModel targetInput = new OfficeSectionInputModel("INPUT", String.class.getName());
 		targetSection.addOfficeSectionInput(targetInput);
 
+		// supplier thread local -> supplier
+		OfficeSupplierThreadLocalToOfficeSupplierModel threadLocalToSupplier = new OfficeSupplierThreadLocalToOfficeSupplierModel(
+				"SUPPLIER", null, "java.sql.Connection");
+		supplierThreadLocal.setOfficeSupplier(threadLocalToSupplier);
+
 		// managed object -> managed object source
 		OfficeManagedObjectToOfficeManagedObjectSourceModel moToMos = new OfficeManagedObjectToOfficeManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE");
@@ -201,6 +213,16 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeManagedObjectDependencyToOfficeManagedObjectModel dependencyToMo = new OfficeManagedObjectDependencyToOfficeManagedObjectModel(
 				"MANAGED_OBJECT");
 		dependency.setOfficeManagedObject(dependencyToMo);
+
+		// supplier thread local -> external managed object
+		OfficeSupplierThreadLocalToExternalManagedObjectModel supplierThreadLocalToExtMo = new OfficeSupplierThreadLocalToExternalManagedObjectModel(
+				"EXTERNAL_MANAGED_OBJECT");
+		supplierThreadLocal.setExternalManagedObject(supplierThreadLocalToExtMo);
+
+		// supplier thread local -> office managed object
+		OfficeSupplierThreadLocalToOfficeManagedObjectModel supplierThreadLocalToMo = new OfficeSupplierThreadLocalToOfficeManagedObjectModel(
+				"MO_DEPENDENCY");
+		supplierThreadLocal.setOfficeManagedObject(supplierThreadLocalToMo);
 
 		// input managed object dependency -> external managed object
 		OfficeInputManagedObjectDependencyToExternalManagedObjectModel inputDependencyToExtMo = new OfficeInputManagedObjectDependencyToExternalManagedObjectModel(
@@ -365,6 +387,11 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		this.officeRepository.retrieveOffice(office, this.configurationItem);
 		this.verifyMockObjects();
 
+		// Ensure supplier thread local connected to its supplier
+		assertSame("supplier thread local <- supplier", supplierThreadLocal,
+				threadLocalToSupplier.getOfficeSupplierThreadLocal());
+		assertSame("supplier thread local -> supplier", supplier, supplierThreadLocal.getOfficeSupplier());
+
 		// Ensure managed object connected to its managed object source
 		assertEquals("managed object <- managed object source", mo, moToMos.getOfficeManagedObject());
 		assertEquals("managed object -> managed object source", mos, moToMos.getOfficeManagedObjectSource());
@@ -388,6 +415,17 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		// Ensure dependency connected to office managed object
 		assertEquals("dependency <- managed object", dependency, dependencyToMo.getOfficeManagedObjectDependency());
 		assertEquals("dependency -> managed object", mo, dependencyToMo.getOfficeManagedObject());
+
+		// Ensure supplier thread local to external managed object
+		assertSame("supplier thread local <- external mo", supplierThreadLocal,
+				supplierThreadLocalToExtMo.getOfficeSupplierThreadLocal());
+		assertSame("supplier thread local -> external mo", extMo,
+				supplierThreadLocalToExtMo.getExternalManagedObject());
+
+		// Ensure supplier thread local to managed object
+		assertSame("supplier thread local <- managed object", supplierThreadLocal,
+				supplierThreadLocalToMo.getOfficeSupplierThreadLocal());
+		assertSame("supplier thread local -> managed object", extMo, supplierThreadLocalToMo.getOfficeManagedObject());
 
 		// Ensure input dependency connected to external managed object
 		assertEquals("input dependency <- external mo", inputDependency,
@@ -529,6 +567,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addOfficeManagedObjectPool(pool);
 		OfficeSupplierModel supplier = new OfficeSupplierModel("SUPPLIER", "net.example.ExampleSupplierSource");
 		office.addOfficeSupplier(supplier);
+		OfficeSupplierThreadLocalModel supplierThreadLocal = new OfficeSupplierThreadLocalModel(
+				"SUPPLIER_THREAD_LOCAL");
+		office.addOfficeSupplierThreadLocal(supplierThreadLocal);
 		OfficeManagedObjectDependencyModel dependency = new OfficeManagedObjectDependencyModel("DEPENDENCY",
 				Connection.class.getName());
 		mo.addOfficeManagedObjectDependency(dependency);
@@ -567,6 +608,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		governance.addGovernanceEscalation(govEscalation);
 		OfficeStartModel start = new OfficeStartModel("START");
 		office.addOfficeStart(start);
+
+		// supplier thread local -> supplier
+		OfficeSupplierThreadLocalToOfficeSupplierModel supplierThreadLocalToSupplier = new OfficeSupplierThreadLocalToOfficeSupplierModel();
+		supplierThreadLocalToSupplier.setOfficeSupplierThreadLocal(supplierThreadLocal);
+		supplierThreadLocalToSupplier.setOfficeSupplier(supplier);
+		supplierThreadLocalToSupplier.connect();
 
 		// Create the target section input
 		OfficeSectionModel targetSection = new OfficeSectionModel("SECTION_TARGET", "net.example.ExcampleSectionSource",
@@ -610,6 +657,18 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		dependencyToMo.setOfficeManagedObjectDependency(dependency);
 		dependencyToMo.setOfficeManagedObject(mo);
 		dependencyToMo.connect();
+
+		// supplier thread local -> external managed object
+		OfficeSupplierThreadLocalToExternalManagedObjectModel supplierThreadLocalToExtMo = new OfficeSupplierThreadLocalToExternalManagedObjectModel();
+		supplierThreadLocalToExtMo.setOfficeSupplierThreadLocal(supplierThreadLocal);
+		supplierThreadLocalToExtMo.setExternalManagedObject(extMo);
+		supplierThreadLocalToExtMo.connect();
+
+		// supplier thread local -> managed object
+		OfficeSupplierThreadLocalToOfficeManagedObjectModel supplierThreadLocalToMo = new OfficeSupplierThreadLocalToOfficeManagedObjectModel();
+		supplierThreadLocalToMo.setOfficeSupplierThreadLocal(supplierThreadLocal);
+		supplierThreadLocalToMo.setOfficeManagedObject(mo);
+		supplierThreadLocalToMo.connect();
 
 		// input dependency -> external managed object
 		OfficeInputManagedObjectDependencyToExternalManagedObjectModel inputDependencyToExtMo = new OfficeInputManagedObjectDependencyToExternalManagedObjectModel();
@@ -801,7 +860,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		this.officeRepository.storeOffice(office, this.configurationItem);
 		this.verifyMockObjects();
 
-		// Ensure the connections have links to enable retrieving
+		// Ensure the connections have links to enable retrieve
+		assertEquals("supplier thread local - supplier", "SUPPLIER",
+				supplierThreadLocalToSupplier.getOfficeSupplierName());
 		assertEquals("managed object - managed object source", "MANAGED_OBJECT_SOURCE",
 				moToMos.getOfficeManagedObjectSourceName());
 		assertEquals("managed object source - managed object pool", "POOL", mosToPool.getOfficeManagedObjectPoolName());
@@ -813,6 +874,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("dependency - external managed object", "EXTERNAL_MANAGED_OBJECT",
 				dependencyToExtMo.getExternalManagedObjectName());
 		assertEquals("dependency - managed object", "MANAGED_OBJECT", dependencyToMo.getOfficeManagedObjectName());
+		assertEquals("supplier thread local - external managed object", "EXTERNAL_MANAGED_OBJECT",
+				supplierThreadLocalToExtMo.getExternalManagedObjectName());
+		assertEquals("supplier thread local - managed object", supplierThreadLocalToMo.getOfficeManagedObjectName());
 		assertEquals("input dependency - external managed object", "EXTERNAL_MANAGED_OBJECT",
 				inputDependencyToExtMo.getExternalManagedObjectName());
 		assertEquals("input dependency - managed object", "MANAGED_OBJECT",

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<field type="String" name="office external managed object name" />
+	<field type="String" name="external managed object name" />
 	<field type="OfficeSupplierThreadLocalModel"
 		name="office supplier thread local"
 		end-field="external managed object" />

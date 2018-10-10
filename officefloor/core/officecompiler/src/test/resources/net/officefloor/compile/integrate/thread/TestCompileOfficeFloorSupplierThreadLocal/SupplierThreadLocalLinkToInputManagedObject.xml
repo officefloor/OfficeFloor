@@ -1,0 +1,64 @@
+<context>
+	<office-floor>
+		<suppliers>
+			<supplier name="SUPPLIER"
+				source="${testcase}$MockSupplierSource" />
+		</suppliers>
+		<supplier-thread-locals>
+			<supplier-thread-local name="THREAD_LOCAL">
+				<supplier name="SUPPLIER"
+					type="${testcase}$ThreadLocalManagedObject" />
+				<input-managed-object name="INPUT" />
+			</supplier-thread-local>
+		</supplier-thread-locals>
+		<managed-object-sources>
+			<managed-object-source name="INPUT_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$ProcessManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<input-managed-object name="INPUT" />
+				<flow name="doProcess">
+					<office-input office="OFFICE" section="SECTION"
+						input="INPUT" />
+				</flow>
+			</managed-object-source>
+		</managed-object-sources>
+		<input-managed-objects>
+			<input-managed-object name="INPUT">
+				<bound-managed-object-source
+					name="INPUT_SOURCE" />
+			</input-managed-object>
+		</input-managed-objects>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<input section="SECTION" input="INPUT" />
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section">
+				<input name="INPUT" />
+			</section>
+		</sections>
+	</office>
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE"
+				source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$ProcessSection" />
+				</properties>
+				<managed-function name="process" />
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="INPUT" function-namespace="NAMESPACE"
+				managed-function="process" public="true" />
+		</functions>
+	</section>
+</context>

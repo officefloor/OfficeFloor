@@ -383,13 +383,13 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * @param officeManagedObjectName  {@link Office} registered
 	 *                                 {@link ManagedObject} name.
 	 */
-	protected DependencyMappingBuilder record_officeBuilder_addProcessManagedObject(String processManagedObjectName,
-			String officeManagedObjectName) {
+	protected ThreadDependencyMappingBuilder record_officeBuilder_addProcessManagedObject(
+			String processManagedObjectName, String officeManagedObjectName) {
 		this.dependencyMappingBuilder = this.createMock(ThreadDependencyMappingBuilder.class);
 		this.recordReturn(this.officeBuilder,
 				this.officeBuilder.addProcessManagedObject(processManagedObjectName, officeManagedObjectName),
 				this.dependencyMappingBuilder);
-		return this.dependencyMappingBuilder;
+		return (ThreadDependencyMappingBuilder) this.dependencyMappingBuilder;
 	}
 
 	/**
@@ -400,13 +400,13 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * @param officeManagedObjectName {@link Office} registered
 	 *                                {@link ManagedObject} name.
 	 */
-	protected DependencyMappingBuilder record_officeBuilder_addThreadManagedObject(String threadManagedObjectName,
+	protected ThreadDependencyMappingBuilder record_officeBuilder_addThreadManagedObject(String threadManagedObjectName,
 			String officeManagedObjectName) {
 		this.dependencyMappingBuilder = this.createMock(ThreadDependencyMappingBuilder.class);
 		this.recordReturn(this.officeBuilder,
 				this.officeBuilder.addThreadManagedObject(threadManagedObjectName, officeManagedObjectName),
 				this.dependencyMappingBuilder);
-		return this.dependencyMappingBuilder;
+		return (ThreadDependencyMappingBuilder) this.dependencyMappingBuilder;
 	}
 
 	/**
