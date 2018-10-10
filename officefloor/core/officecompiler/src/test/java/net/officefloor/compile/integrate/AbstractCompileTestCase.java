@@ -20,6 +20,8 @@ package net.officefloor.compile.integrate;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.easymock.AbstractMatcher;
 
@@ -99,6 +101,27 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	private boolean isOverrideProperties = false;
 
 	/**
+	 * {@link FunctionalInterface} to validate the {@link OfficeFloor}.
+	 */
+	@FunctionalInterface
+	protected static interface OfficeFloorValidator {
+
+		/**
+		 * Validates the {@link OfficeFloor}.
+		 * 
+		 * @param officeFloor {@link OfficeFloor} or <code>null</code> if failed to
+		 *                    compile.
+		 * @throws Throwable If fails to validate.
+		 */
+		public void validate(OfficeFloor officeFloor) throws Throwable;
+	}
+
+	/**
+	 * {@link OfficeFloorValidator} instances.
+	 */
+	protected final List<OfficeFloorValidator> validators = new LinkedList<>();
+
+	/**
 	 * {@link OfficeFloorBuilder}.
 	 */
 	protected final OfficeFloorBuilder officeFloorBuilder = this.createMock(OfficeFloorBuilder.class);
@@ -122,6 +145,15 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected void enableOverrideProperties() {
 		this.isOverrideProperties = true;
+	}
+
+	/**
+	 * Adds the {@link OfficeFloorValidator}.
+	 * 
+	 * @param validator {@link OfficeFloorValidator}.
+	 */
+	protected void addValidator(OfficeFloorValidator validator) {
+		this.validators.add(validator);
 	}
 
 	/**
@@ -825,6 +857,15 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 
 		// Compile the OfficeFloor
 		OfficeFloor loadedOfficeFloor = compiler.compile("OfficeFloor");
+
+		// Run the validators
+		for (OfficeFloorValidator validator : this.validators) {
+			try {
+				validator.validate(loadedOfficeFloor);
+			} catch (Throwable ex) {
+				throw fail(ex);
+			}
+		}
 
 		// Verify the mocks
 		this.verifyMockObjects();
