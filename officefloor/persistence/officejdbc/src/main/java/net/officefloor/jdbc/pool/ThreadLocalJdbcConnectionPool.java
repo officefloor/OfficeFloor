@@ -345,8 +345,10 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				reference.connection.rollback();
 				reference.connection.setAutoCommit(true);
 
-				// Return connection to pool
-				this.pooledConnections.push(reference);
+				// Synchronize connection into pool
+				synchronized (reference) {
+					this.pooledConnections.push(reference);
+				}
 
 			} catch (SQLException ex) {
 				// Failed to return connection to pool
@@ -365,7 +367,11 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		ConnectionReferenceImpl reference = this.threadLocalConnection.get();
 		if (reference != null) {
 			this.threadLocalConnection.set(null);
-			this.pooledConnections.push(reference);
+
+			// Synchronize connection into pool
+			synchronized (reference) {
+				this.pooledConnections.push(reference);
+			}
 		}
 	}
 
@@ -431,17 +437,25 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			if (reference == null) {
 
 				// Obtain the next valid pooled connection
-				while ((reference == null) && (!ThreadLocalJdbcConnectionPool.this.pooledConnections.isEmpty())) {
+				boolean isAvailable = true;
+				do {
 					reference = ThreadLocalJdbcConnectionPool.this.pooledConnections.poll();
+					isAvailable = (reference != null);
 
 					// Determine if valid reference
-					if ((reference != null) && (!reference.isValid)) {
+					if ((isAvailable) && (!reference.isValid)) {
 						reference = null; // not valid connection
 					}
-				}
+				} while ((isAvailable) && (reference == null));
 
-				// If no valid pooled connection, create a new connection
-				if (reference == null) {
+				// Determine if have reference from pool
+				if (reference != null) {
+					// Ensure consistent state with other thread
+					synchronized (reference) {
+					}
+
+				} else {
+					// No valid pooled connection, create a new connection
 
 					// Obtain the connection
 					PooledConnection pooledConnection = ThreadLocalJdbcConnectionPool.this.dataSource
@@ -458,7 +472,6 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				}
 
 				// Register the connection with the thread
-				reference.connection.setAutoCommit(true); // thread local should not be in transaction
 				ThreadLocalJdbcConnectionPool.this.threadLocalConnection.set(reference);
 			}
 
@@ -469,24 +482,27 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		@Override
 		public void setAutoCommit(ConnectionReference reference, boolean isAutoCommit) throws SQLException {
 
-			// Determine if connection already in state
-			if (isAutoCommit == reference.getConnection().getAutoCommit()) {
-				return; // already in state
-			}
-
 			// Reference to return to pool
 			ConnectionReferenceImpl returnReference = null;
 			if (!isAutoCommit) {
 				// Within transaction, so lock to managed object
-				this.transactionConnection = (ConnectionReferenceImpl) reference;
-				ThreadLocalJdbcConnectionPool.this.threadLocalConnection.set(null);
+				if (this.transactionConnection == null) {
+					// Initiating the transaction
+					this.transactionConnection = (ConnectionReferenceImpl) reference;
+					ThreadLocalJdbcConnectionPool.this.threadLocalConnection.set(null);
+				}
 			} else {
 				// No longer transaction
-				returnReference = this.transactionConnection;
-				this.transactionConnection = null;
+				if (this.transactionConnection != null) {
+					// Releasing transaction
+					returnReference = this.transactionConnection;
+					this.transactionConnection = null;
+				}
 			}
+			boolean isResetSuccessful = false;
 			try {
 				reference.getConnection().setAutoCommit(isAutoCommit);
+				isResetSuccessful = true;
 			} finally {
 				// Ensure return possible connection to thread / pool
 				if (returnReference != null) {
@@ -495,13 +511,15 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 					// (typically transaction runs on same thread)
 					ConnectionReferenceImpl threadReference = ThreadLocalJdbcConnectionPool.this.threadLocalConnection
 							.get();
-					if (threadReference == null) {
+					if ((isResetSuccessful) && (threadReference == null)) {
 						// No thread connection, so bind to thread
 						ThreadLocalJdbcConnectionPool.this.threadLocalConnection.set(returnReference);
 
 					} else {
-						// Thread has connection, so return to the pool
-						ThreadLocalJdbcConnectionPool.this.pooledConnections.push(returnReference);
+						// Thread has connection (or invalid reset), so return to the pool
+						synchronized (returnReference) {
+							ThreadLocalJdbcConnectionPool.this.pooledConnections.push(returnReference);
+						}
 					}
 				}
 			}
