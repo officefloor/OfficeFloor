@@ -57,6 +57,10 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorMa
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
+import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel;
+import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
@@ -97,6 +101,19 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 		Map<String, OfficeFloorSupplierModel> suppliers = new HashMap<String, OfficeFloorSupplierModel>();
 		for (OfficeFloorSupplierModel supplier : officeFloor.getOfficeFloorSuppliers()) {
 			suppliers.put(supplier.getOfficeFloorSupplierName(), supplier);
+		}
+
+		// Connect the supplier thread locals to their suppliers
+		for (OfficeFloorSupplierThreadLocalModel threadLocal : officeFloor.getOfficeFloorSupplierThreadLocals()) {
+			OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel conn = threadLocal.getOfficeFloorSupplier();
+			if (conn != null) {
+				OfficeFloorSupplierModel supplier = suppliers.get(conn.getOfficeFloorSupplierName());
+				if (supplier != null) {
+					conn.setOfficeFloorSupplierThreadLocal(threadLocal);
+					conn.setOfficeFloorSupplier(supplier);
+					conn.connect();
+				}
+			}
 		}
 
 		// Connect the managed object sources to their suppliers
@@ -312,6 +329,20 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			}
 		}
 
+		// Connect the supplier thread locals to managed objects
+		for (OfficeFloorSupplierThreadLocalModel threadLocal : officeFloor.getOfficeFloorSupplierThreadLocals()) {
+			OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel conn = threadLocal
+					.getOfficeFloorManagedObject();
+			if (conn != null) {
+				OfficeFloorManagedObjectModel mo = managedObjects.get(conn.getOfficeFloorManagedObjectName());
+				if (mo != null) {
+					conn.setOfficeFloorSupplierThreadLocal(threadLocal);
+					conn.setOfficeFloorManagedObject(mo);
+					conn.connect();
+				}
+			}
+		}
+
 		// Connect the dependencies to the OfficeFloor input managed objects
 		for (OfficeFloorManagedObjectModel managedObject : officeFloor.getOfficeFloorManagedObjects()) {
 			for (OfficeFloorManagedObjectDependencyModel dependency : managedObject
@@ -326,6 +357,21 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 						conn.setOfficeFloorInputManagedObject(dependentManagedObject);
 						conn.connect();
 					}
+				}
+			}
+		}
+
+		// Connect the supplier thread locals to input managed objects
+		for (OfficeFloorSupplierThreadLocalModel threadLocal : officeFloor.getOfficeFloorSupplierThreadLocals()) {
+			OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel conn = threadLocal
+					.getOfficeFloorInputManagedObject();
+			if (conn != null) {
+				OfficeFloorInputManagedObjectModel inputMo = inputManagedObjects
+						.get(conn.getOfficeFloorInputManagedObjectName());
+				if (inputMo != null) {
+					conn.setOfficeFloorSupplierThreadLocal(threadLocal);
+					conn.setOfficeFloorInputManagedObject(inputMo);
+					conn.connect();
 				}
 			}
 		}
@@ -420,6 +466,14 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 	public void storeOfficeFloor(OfficeFloorModel officeFloor, WritableConfigurationItem configuration)
 			throws IOException {
 
+		// Specify the suppliers for the supplier thread locals
+		for (OfficeFloorSupplierModel supplier : officeFloor.getOfficeFloorSuppliers()) {
+			for (OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel conn : supplier
+					.getOfficeFloorSupplierThreadLocals()) {
+				conn.setOfficeFloorSupplierName(supplier.getOfficeFloorSupplierName());
+			}
+		}
+
 		// Specify the suppliers for the managed object sources
 		for (OfficeFloorSupplierModel supplier : officeFloor.getOfficeFloorSuppliers()) {
 			for (OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel conn : supplier
@@ -510,11 +564,27 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			}
 		}
 
+		// Specify managed object for supplier thread local
+		for (OfficeFloorManagedObjectModel managedObject : officeFloor.getOfficeFloorManagedObjects()) {
+			for (OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel conn : managedObject
+					.getDependentOfficeFloorSupplierThreadLocals()) {
+				conn.setOfficeFloorManagedObjectName(managedObject.getOfficeFloorManagedObjectName());
+			}
+		}
+
 		// Specify dependencies to OfficeFloor input managed objects
 		for (OfficeFloorInputManagedObjectModel inputManagedObject : officeFloor.getOfficeFloorInputManagedObjects()) {
 			for (OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel conn : inputManagedObject
 					.getDependentOfficeFloorManagedObjects()) {
 				conn.setOfficeFloorInputManagedObjectName(inputManagedObject.getOfficeFloorInputManagedObjectName());
+			}
+		}
+
+		// Specify managed object for supplier thread local
+		for (OfficeFloorInputManagedObjectModel inputMo : officeFloor.getOfficeFloorInputManagedObjects()) {
+			for (OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel conn : inputMo
+					.getDependentOfficeFloorSupplierThreadLocals()) {
+				conn.setOfficeFloorInputManagedObjectName(inputMo.getOfficeFloorInputManagedObjectName());
 			}
 		}
 

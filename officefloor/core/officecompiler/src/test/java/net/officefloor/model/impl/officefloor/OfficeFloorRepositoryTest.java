@@ -277,7 +277,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertSame("OfficeFloor supplier thread local <- OfficeFloor supplier", officeFloorSupplierThreadLocal,
 				threadLocalToSupplier.getOfficeFloorSupplierThreadLocal());
 		assertSame("OfficeFloor supplier thread local -> OfficeFloor supplier", officeFloorSupplier,
-				officeFloorSupplierThreadLocal.getOfficeFloorSupplier());
+				threadLocalToSupplier.getOfficeFloorSupplier());
 
 		// Ensure OfficeFloor managed object source connected to its supplier
 		assertSame("OfficeFloor managed object source <- OfficeFloor supplier", officeFloorManagedObjectSource,

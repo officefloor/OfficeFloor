@@ -221,7 +221,7 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 
 		// supplier thread local -> office managed object
 		OfficeSupplierThreadLocalToOfficeManagedObjectModel supplierThreadLocalToMo = new OfficeSupplierThreadLocalToOfficeManagedObjectModel(
-				"MO_DEPENDENCY");
+				"MANAGED_OBJECT");
 		supplierThreadLocal.setOfficeManagedObject(supplierThreadLocalToMo);
 
 		// input managed object dependency -> external managed object
@@ -390,7 +390,7 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		// Ensure supplier thread local connected to its supplier
 		assertSame("supplier thread local <- supplier", supplierThreadLocal,
 				threadLocalToSupplier.getOfficeSupplierThreadLocal());
-		assertSame("supplier thread local -> supplier", supplier, supplierThreadLocal.getOfficeSupplier());
+		assertSame("supplier thread local -> supplier", supplier, threadLocalToSupplier.getOfficeSupplier());
 
 		// Ensure managed object connected to its managed object source
 		assertEquals("managed object <- managed object source", mo, moToMos.getOfficeManagedObject());
@@ -425,7 +425,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		// Ensure supplier thread local to managed object
 		assertSame("supplier thread local <- managed object", supplierThreadLocal,
 				supplierThreadLocalToMo.getOfficeSupplierThreadLocal());
-		assertSame("supplier thread local -> managed object", extMo, supplierThreadLocalToMo.getOfficeManagedObject());
+		assertSame("supplier thread local -> managed object", extMo,
+				supplierThreadLocalToExtMo.getExternalManagedObject());
 
 		// Ensure input dependency connected to external managed object
 		assertEquals("input dependency <- external mo", inputDependency,
@@ -876,7 +877,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("dependency - managed object", "MANAGED_OBJECT", dependencyToMo.getOfficeManagedObjectName());
 		assertEquals("supplier thread local - external managed object", "EXTERNAL_MANAGED_OBJECT",
 				supplierThreadLocalToExtMo.getExternalManagedObjectName());
-		assertEquals("supplier thread local - managed object", supplierThreadLocalToMo.getOfficeManagedObjectName());
+		assertEquals("supplier thread local - managed object", "MANAGED_OBJECT",
+				supplierThreadLocalToMo.getOfficeManagedObjectName());
 		assertEquals("input dependency - external managed object", "EXTERNAL_MANAGED_OBJECT",
 				inputDependencyToExtMo.getExternalManagedObjectName());
 		assertEquals("input dependency - managed object", "MANAGED_OBJECT",
