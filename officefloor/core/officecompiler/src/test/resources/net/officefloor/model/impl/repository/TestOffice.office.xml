@@ -179,8 +179,8 @@
 				<input sub-section="SECTION" input="INPUT_B" />
 			</escalation>
 			<escalation type="java.lang.RuntimeException" />
-			<governance-area x="810" y="811" height="820"
-				width="821" />
+			<governance-area x="910" y="911" height="920"
+				width="921" />
 		</governance>
 	</governances>
 

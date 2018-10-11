@@ -23,6 +23,34 @@
 		</object>
 	</object>
 
+	<!-- SUPPLIER THREAD LOCALS -->
+	<object method="addOfficeFloorSupplierThreadLocal"
+		node="supplier-thread-local"
+		class="net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel">
+		<value method="setOfficeFloorSupplierThreadLocalName"
+			node="supplier-thread-local@name" />
+		<value method="setX" node="supplier-thread-local@x" />
+		<value method="setY" node="supplier-thread-local@y" />
+		<object method="setOfficeFloorSupplier" node="supplier"
+			class="net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel">
+			<value method="setOfficeFloorSupplierName" node="supplier@name" />
+			<value method="setQualifier" node="supplier@qualifier" />
+			<value method="setType" node="supplier@type" />
+		</object>
+		<object method="setOfficeFloorManagedObject"
+			node="managed-object"
+			class="net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel">
+			<value method="setOfficeFloorManagedObjectName"
+				node="managed-object@name" />
+		</object>
+		<object method="setOfficeFloorInputManagedObject"
+			node="input-managed-object"
+			class="net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel">
+			<value method="setOfficeFloorInputManagedObjectName"
+				node="input-managed-object@name" />
+		</object>
+	</object>
+
 	<!-- MANAGED OBJECT SOURCES -->
 	<object method="addOfficeFloorManagedObjectSource"
 		node="managed-object-source"
