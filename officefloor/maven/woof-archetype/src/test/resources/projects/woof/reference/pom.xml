@@ -8,7 +8,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<officefloor-version>3.2.0</officefloor-version>
-		<compiler-version>3.7.0</compiler-version>
+		<compiler-version>3.8.0</compiler-version>
 		<failsafe-version>2.21.0</failsafe-version>
 		<junit-version>4.12</junit-version>
 	</properties>
@@ -33,8 +33,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${compiler-version}</version>
 				<configuration>
-					<source>8</source>
-					<target>8</target>
+					<source>10</source>
+					<target>10</target>
 				</configuration>
 			</plugin>
 			<plugin>
