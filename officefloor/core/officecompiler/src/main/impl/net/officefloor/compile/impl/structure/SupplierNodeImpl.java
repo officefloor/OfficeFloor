@@ -18,8 +18,10 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AutoWire;
@@ -35,6 +37,7 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
+import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
@@ -73,6 +76,11 @@ public class SupplierNodeImpl implements SupplierNode {
 	 * {@link PropertyList} to source the supplier.
 	 */
 	private final PropertyList propertyList;
+
+	/**
+	 * {@link Map} of {@link SupplierThreadLocalNode} instances by name.
+	 */
+	private final Map<String, SupplierThreadLocalNode> supplierThreadLocals = new HashMap<>();
 
 	/**
 	 * {@link SuppliedManagedObjectSourceNode} instances.
@@ -221,9 +229,12 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public OfficeFloorSupplierThreadLocal addOfficeFloorSupplierThreadLocal(String qualifier, String type) {
-		// TODO implement OfficeFloorSupplier.addOfficeFloorSupplierThreadLocal(...)
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorSupplier.addOfficeFloorSupplierThreadLocal(...)");
+		
+		// TODO implement
+		throw new UnsupportedOperationException("TODO implement addOfficeFloorSupplierThreadLocal");
+		
+		// Create the initialised node
+//		return NodeUtil.getInitialisedNode(nodeName, nodes, context, create, initialiser);
 	}
 
 	@Override

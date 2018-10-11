@@ -38,6 +38,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeamOversight;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
@@ -80,6 +81,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeF
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
+import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel;
+import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
@@ -124,7 +127,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 
 		// Add the OfficeFloor suppliers, keeping registry of them
-		Map<String, OfficeFloorSupplier> officeFloorSuppliers = new HashMap<String, OfficeFloorSupplier>();
+		Map<String, OfficeFloorSupplier> suppliers = new HashMap<String, OfficeFloorSupplier>();
 		for (OfficeFloorSupplierModel supplierModel : officeFloor.getOfficeFloorSuppliers()) {
 
 			// Add the OfficeFloor supplier
@@ -136,11 +139,40 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			}
 
 			// Register the supplier
-			officeFloorSuppliers.put(supplierName, supplier);
+			suppliers.put(supplierName, supplier);
+		}
+
+		// Add the OfficeFloor supplier thread locals, keeping registry of them
+		Map<String, OfficeFloorSupplierThreadLocal> supplierThreadLocals = new HashMap<>();
+		for (OfficeFloorSupplierThreadLocalModel threadLocalModel : officeFloor.getOfficeFloorSupplierThreadLocals()) {
+
+			// Obtain the thread local details
+			String threadLocalName = threadLocalModel.getOfficeFloorSupplierThreadLocalName();
+
+			// Obtain the supplier for thread local
+			String supplierName = null;
+			OfficeFloorSupplier supplier = null;
+			OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel threadLocalToSupplier = threadLocalModel
+					.getOfficeFloorSupplier();
+			if (threadLocalToSupplier != null) {
+				// Obtain its supplier
+				supplierName = threadLocalToSupplier.getOfficeFloorSupplierName();
+				supplier = suppliers.get(supplierName);
+			}
+			if (supplier == null) {
+				// Must have supplier
+				deployer.addIssue("No supplier '" + supplierName + "' for supplier thread local " + threadLocalName);
+				continue; // must have supplier
+			}
+
+			// Add the supplier thread local
+			OfficeFloorSupplierThreadLocal threadLocal = supplier.addOfficeFloorSupplierThreadLocal(
+					threadLocalToSupplier.getQualifier(), threadLocalToSupplier.getType());
+
 		}
 
 		// Add the OfficeFloor managed object pools, keeping registry of them
-		Map<String, OfficeFloorManagedObjectPool> officeFloorManagedObjectPools = new HashMap<>();
+		Map<String, OfficeFloorManagedObjectPool> managedObjectPools = new HashMap<>();
 		for (OfficeFloorManagedObjectPoolModel poolModel : officeFloor.getOfficeFloorManagedObjectPools()) {
 
 			// Add the managed object pool
@@ -148,7 +180,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			String managedObjectPoolSourceClassName = poolModel.getManagedObjectPoolSourceClassName();
 			OfficeFloorManagedObjectPool pool = deployer.addManagedObjectPool(managedObjectPoolName,
 					managedObjectPoolSourceClassName);
-			officeFloorManagedObjectPools.put(managedObjectPoolName, pool);
+			managedObjectPools.put(managedObjectPoolName, pool);
 
 			// Add properties for the managed object source
 			for (PropertyModel property : poolModel.getProperties()) {
@@ -157,7 +189,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 
 		// Add the OfficeFloor managed object sources, keeping registry of them
-		Map<String, OfficeFloorManagedObjectSource> officeFloorManagedObjectSources = new HashMap<String, OfficeFloorManagedObjectSource>();
+		Map<String, OfficeFloorManagedObjectSource> managedObjectSources = new HashMap<String, OfficeFloorManagedObjectSource>();
 		for (OfficeFloorManagedObjectSourceModel managedObjectSourceModel : officeFloor
 				.getOfficeFloorManagedObjectSources()) {
 
@@ -171,7 +203,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			if (mosToSupplier != null) {
 				// Supplied managed object source, so obtain its supplier
 				String supplierName = mosToSupplier.getOfficeFloorSupplierName();
-				OfficeFloorSupplier supplier = officeFloorSuppliers.get(supplierName);
+				OfficeFloorSupplier supplier = suppliers.get(supplierName);
 				if (supplier == null) {
 					// Must have supplier
 					deployer.addIssue(
@@ -209,7 +241,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			}
 
 			// Register the managed object source
-			officeFloorManagedObjectSources.put(managedObjectSourceName, managedObjectSource);
+			managedObjectSources.put(managedObjectSourceName, managedObjectSource);
 
 			// Determine if pool the managed object
 			OfficeFloorManagedObjectSourceToOfficeFloorManagedObjectPoolModel mosToPool = managedObjectSourceModel
@@ -217,7 +249,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			if (mosToPool != null) {
 				OfficeFloorManagedObjectPoolModel poolModel = mosToPool.getOfficeFloorManagedObjectPool();
 				if (poolModel != null) {
-					OfficeFloorManagedObjectPool pool = officeFloorManagedObjectPools
+					OfficeFloorManagedObjectPool pool = managedObjectPools
 							.get(poolModel.getOfficeFloorManagedObjectPoolName());
 					deployer.link(managedObjectSource, pool);
 				}
@@ -225,7 +257,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 
 		// Add the OfficeFloor managed objects, keeping registry of them
-		Map<String, OfficeFloorManagedObject> officeFloorManagedObjects = new HashMap<String, OfficeFloorManagedObject>();
+		Map<String, OfficeFloorManagedObject> managedObjects = new HashMap<String, OfficeFloorManagedObject>();
 		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor.getOfficeFloorManagedObjects()) {
 
 			// Obtain the managed object details
@@ -240,8 +272,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			if (moToSource != null) {
 				OfficeFloorManagedObjectSourceModel moSourceModel = moToSource.getOfficeFloorManagedObjectSource();
 				if (moSourceModel != null) {
-					moSource = officeFloorManagedObjectSources
-							.get(moSourceModel.getOfficeFloorManagedObjectSourceName());
+					moSource = managedObjectSources.get(moSourceModel.getOfficeFloorManagedObjectSourceName());
 				}
 			}
 			if (moSource == null) {
@@ -251,7 +282,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			// Add the managed object and also register it
 			OfficeFloorManagedObject managedObject = moSource.addOfficeFloorManagedObject(managedObjectName,
 					managedObjectScope);
-			officeFloorManagedObjects.put(managedObjectName, managedObject);
+			managedObjects.put(managedObjectName, managedObject);
 
 			// Load type qualifications
 			for (TypeQualificationModel qualification : managedObjectModel.getTypeQualifications()) {
@@ -260,7 +291,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 
 		// Add the OfficeFloor input managed objects, keeping registry of them
-		Map<String, OfficeFloorInputManagedObject> officeFloorInputManagedObjects = new HashMap<String, OfficeFloorInputManagedObject>();
+		Map<String, OfficeFloorInputManagedObject> inputManagedObjects = new HashMap<String, OfficeFloorInputManagedObject>();
 		for (OfficeFloorInputManagedObjectModel inputManagedObjectModel : officeFloor
 				.getOfficeFloorInputManagedObjects()) {
 
@@ -269,7 +300,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			String inputObjectType = inputManagedObjectModel.getObjectType();
 			OfficeFloorInputManagedObject inputManagedObject = deployer.addInputManagedObject(inputManagedObjectName,
 					inputObjectType);
-			officeFloorInputManagedObjects.put(inputManagedObjectName, inputManagedObject);
+			inputManagedObjects.put(inputManagedObjectName, inputManagedObject);
 
 			// Load type qualifications
 			for (TypeQualificationModel qualification : inputManagedObjectModel.getTypeQualifications()) {
@@ -283,7 +314,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			if (conn != null) {
 				OfficeFloorManagedObjectSourceModel boundMoSourceModel = conn.getBoundOfficeFloorManagedObjectSource();
 				if (boundMoSourceModel != null) {
-					boundManagedObjectSource = officeFloorManagedObjectSources
+					boundManagedObjectSource = managedObjectSources
 							.get(boundMoSourceModel.getOfficeFloorManagedObjectSourceName());
 				}
 			}
@@ -301,8 +332,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				OfficeFloorManagedObjectSourceModel inputMosModel = mosToInputMoModel
 						.getOfficeFloorManagedObjectSource();
 				if (inputMosModel != null) {
-					inputMos = officeFloorManagedObjectSources
-							.get(inputMosModel.getOfficeFloorManagedObjectSourceName());
+					inputMos = managedObjectSources.get(inputMosModel.getOfficeFloorManagedObjectSourceName());
 				}
 				if (inputMos != null) {
 					// Have managed object source so link input dependencies
@@ -323,7 +353,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 							OfficeFloorManagedObjectModel dependentMoModel = dependencyToMo
 									.getOfficeFloorManagedObject();
 							if (dependentMoModel != null) {
-								dependentManagedObject = officeFloorManagedObjects
+								dependentManagedObject = managedObjects
 										.get(dependentMoModel.getOfficeFloorManagedObjectName());
 							}
 						}
@@ -342,7 +372,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor.getOfficeFloorManagedObjects()) {
 
 			// Obtain the managed object
-			OfficeFloorManagedObject managedObject = officeFloorManagedObjects
+			OfficeFloorManagedObject managedObject = managedObjects
 					.get(managedObjectModel.getOfficeFloorManagedObjectName());
 
 			// Link each dependency for the managed object
@@ -361,8 +391,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				if (dependencyToMo != null) {
 					OfficeFloorManagedObjectModel dependentMoModel = dependencyToMo.getOfficeFloorManagedObject();
 					if (dependentMoModel != null) {
-						dependentManagedObject = officeFloorManagedObjects
-								.get(dependentMoModel.getOfficeFloorManagedObjectName());
+						dependentManagedObject = managedObjects.get(dependentMoModel.getOfficeFloorManagedObjectName());
 					}
 				}
 				if (dependentManagedObject != null) {
@@ -378,7 +407,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 					OfficeFloorInputManagedObjectModel inputMoModel = dependencyToInput
 							.getOfficeFloorInputManagedObject();
 					if (inputMoModel != null) {
-						inputManagedObject = officeFloorInputManagedObjects
+						inputManagedObject = inputManagedObjects
 								.get(inputMoModel.getOfficeFloorInputManagedObjectName());
 					}
 				}
@@ -428,7 +457,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 		}
 
 		// Add the OfficeFloor teams, keeping registry of teams
-		Map<String, OfficeFloorTeam> officeFloorTeams = new HashMap<String, OfficeFloorTeam>();
+		Map<String, OfficeFloorTeam> teams = new HashMap<String, OfficeFloorTeam>();
 		for (OfficeFloorTeamModel teamModel : officeFloor.getOfficeFloorTeams()) {
 
 			// Add the OfficeFloor team
@@ -448,7 +477,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			}
 
 			// Register the team
-			officeFloorTeams.put(teamName, team);
+			teams.put(teamName, team);
 
 			// Link the possible team oversight
 			OfficeFloorTeamOversight oversight = null;
@@ -500,8 +529,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				if (connToMo != null) {
 					OfficeFloorManagedObjectModel managedObjectModel = connToMo.getOfficeFloorManagedObject();
 					if (managedObjectModel != null) {
-						managedObject = officeFloorManagedObjects
-								.get(managedObjectModel.getOfficeFloorManagedObjectName());
+						managedObject = managedObjects.get(managedObjectModel.getOfficeFloorManagedObjectName());
 					}
 				}
 				if (managedObject != null) {
@@ -516,7 +544,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				if (connToInputMo != null) {
 					OfficeFloorInputManagedObjectModel inputMoModel = connToInputMo.getOfficeFloorInputManagedObject();
 					if (inputMoModel != null) {
-						inputManagedObject = officeFloorInputManagedObjects
+						inputManagedObject = inputManagedObjects
 								.get(inputMoModel.getOfficeFloorInputManagedObjectName());
 					}
 				}
@@ -538,7 +566,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				if (conn != null) {
 					OfficeFloorTeamModel officeFloorTeamModel = conn.getOfficeFloorTeam();
 					if (officeFloorTeamModel != null) {
-						officeFloorTeam = officeFloorTeams.get(officeFloorTeamModel.getOfficeFloorTeamName());
+						officeFloorTeam = teams.get(officeFloorTeamModel.getOfficeFloorTeamName());
 					}
 				}
 				if (officeFloorTeam == null) {
@@ -555,7 +583,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				.getOfficeFloorManagedObjectSources()) {
 
 			// Obtain the managed object source
-			OfficeFloorManagedObjectSource managedObjectSource = officeFloorManagedObjectSources
+			OfficeFloorManagedObjectSource managedObjectSource = managedObjectSources
 					.get(managedObjectSourceModel.getOfficeFloorManagedObjectSourceName());
 			if (managedObjectSource == null) {
 				continue; // must have managed object source
@@ -585,7 +613,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				if (inputMo != null) {
 					String inputManagedObjectName = inputMo.getOfficeFloorInputManagedObjectName();
 					if (!CompileUtil.isBlank(inputManagedObjectName)) {
-						inputManagedObject = officeFloorInputManagedObjects.get(inputManagedObjectName);
+						inputManagedObject = inputManagedObjects.get(inputManagedObjectName);
 					}
 				}
 			}
@@ -635,7 +663,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				if (mosTeamToTeam != null) {
 					OfficeFloorTeamModel teamModel = mosTeamToTeam.getOfficeFloorTeam();
 					if (teamModel != null) {
-						team = officeFloorTeams.get(teamModel.getOfficeFloorTeamName());
+						team = teams.get(teamModel.getOfficeFloorTeamName());
 					}
 				}
 				if (team != null) {

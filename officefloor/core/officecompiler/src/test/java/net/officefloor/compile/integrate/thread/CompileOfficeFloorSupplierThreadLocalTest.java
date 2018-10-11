@@ -20,9 +20,11 @@ package net.officefloor.compile.integrate.thread;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.structure.SupplierThreadLocalNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.integrate.managedobject.CompileOfficeFloorManagedObjectTest.InputDependencyManagedObject;
+import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
@@ -49,13 +51,40 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 public class CompileOfficeFloorSupplierThreadLocalTest extends AbstractCompileTestCase {
 
 	/**
-	 * Ensure issue if no {@link SupplierThreadLocal} for configured qualifer and
+	 * Ensure issue if unknown {@link SupplierNode} for the
+	 * {@link SupplierThreadLocal}.
+	 */
+	public void testUnknownSupplierForThreadLocal() {
+
+		// Record no supplier thread local for configuration
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, SuppliedManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
+		this.issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class,
+				"No supplier 'UNKNOWN' for supplier thread local THREAD_LOCAL");
+
+		// Should not compile
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure issue if no {@link SupplierThreadLocal} for configured qualifier and
 	 * object type.
 	 */
 	public void testUnknownSupplierThreadLocal() {
 
 		// Record no supplier thread local for configuration
 		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, SuppliedManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 		this.issues.recordIssue(String.class.getName(), SupplierThreadLocalNodeImpl.class,
 				"No supplier thread local for " + String.class.getName());
 
