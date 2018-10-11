@@ -12,7 +12,7 @@
 	<description>Archetype to generate a WoOF project</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<archetype.version>2.2</archetype.version>
+		<archetype.version>3.0.1</archetype.version>
 		<!-- Properties for reporting and site generation -->
 		<basedir>${basedir}</basedir>
 		<projectGroupId>${project.groupId}</projectGroupId>
