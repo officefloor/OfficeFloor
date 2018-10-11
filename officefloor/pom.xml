@@ -80,9 +80,9 @@
 		<failsafe-version>2.21.0</failsafe-version>
 		<compiler-version>3.7.0</compiler-version>
 		<ant-jsch-version>1.10.3</ant-jsch-version>
-		<netty-version>4.1.14.Final</netty-version>
+		<netty-version>4.1.30.Final</netty-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
-		<jackson-version>2.9.6</jackson-version>
+		<jackson-version>2.9.7</jackson-version>
 		<jaxb-version>2.3.0</jaxb-version>
 		<asm-version>6.2</asm-version>
 	</properties>
@@ -439,7 +439,7 @@
 			<dependency>
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-client</artifactId>
-				<version>8.11.4</version>
+				<version>8.14.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
@@ -604,7 +604,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.21.0</version>
+					<version>2.22.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -654,7 +654,7 @@
 						<dependency>
 							<groupId>org.apache.ant</groupId>
 							<artifactId>ant</artifactId>
-							<version>1.10.4</version>
+							<version>1.10.5</version>
 						</dependency>
 					</dependencies>
 				</plugin>
