@@ -80,7 +80,7 @@
 		<failsafe-version>2.21.0</failsafe-version>
 		<compiler-version>3.7.0</compiler-version>
 		<ant-jsch-version>1.10.3</ant-jsch-version>
-		<netty-version>4.1.14.Final</netty-version>
+		<netty-version>4.1.30.Final</netty-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<jackson-version>2.9.6</jackson-version>
 		<jaxb-version>2.3.0</jaxb-version>
