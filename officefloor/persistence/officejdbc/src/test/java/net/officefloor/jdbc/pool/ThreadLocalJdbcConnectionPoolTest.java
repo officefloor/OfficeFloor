@@ -178,11 +178,11 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 
 	public static class MockSection {
 
-		private static boolean isTransaction = false;
+		private static volatile boolean isTransaction = false;
 
 		private static ThreadLocalJdbcConnectionPool pool = null;
 
-		private static Connection serviceDelegate = null;
+		private static volatile Connection serviceDelegate = null;
 
 		private static volatile Connection threadDelegate = null;
 
