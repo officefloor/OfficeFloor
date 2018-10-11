@@ -78,7 +78,7 @@
 		<maven-changes-version>2.11</maven-changes-version>
 		<jetty-version>9.2.2.v20140723</jetty-version>
 		<failsafe-version>2.21.0</failsafe-version>
-		<compiler-version>3.7.0</compiler-version>
+		<compiler-version>3.8.0</compiler-version>
 		<ant-jsch-version>1.10.3</ant-jsch-version>
 		<netty-version>4.1.30.Final</netty-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
