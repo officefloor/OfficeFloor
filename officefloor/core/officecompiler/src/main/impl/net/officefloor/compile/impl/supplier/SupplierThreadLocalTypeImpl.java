@@ -34,6 +34,27 @@ public class SupplierThreadLocalTypeImpl<T> implements SupplierThreadLocalType {
 	private final SupplierThreadLocalImpl<T> supplierThreadLocal = new SupplierThreadLocalImpl<>();
 
 	/**
+	 * Qualifier. May be <code>null</code>.
+	 */
+	private final String qualifier;
+
+	/**
+	 * Object type.
+	 */
+	private final Class<?> objectType;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param qualifier  Qualifier. May be <code>null</code>.
+	 * @param objectType Object type.
+	 */
+	public SupplierThreadLocalTypeImpl(String qualifier, Class<?> objectType) {
+		this.qualifier = qualifier;
+		this.objectType = objectType;
+	}
+
+	/**
 	 * Obtains the {@link SupplierThreadLocal}.
 	 * 
 	 * @return {@link SupplierThreadLocal}.
@@ -47,15 +68,13 @@ public class SupplierThreadLocalTypeImpl<T> implements SupplierThreadLocalType {
 	 */
 
 	@Override
-	public Class<?> getObjectType() {
-		// TODO implement SupplierThreadLocalType.getObjectType(...)
-		throw new UnsupportedOperationException("TODO implement SupplierThreadLocalType.getObjectType(...)");
+	public String getQualifier() {
+		return this.qualifier;
 	}
 
 	@Override
-	public String getQualifier() {
-		// TODO implement SupplierThreadLocalType.getQualifier(...)
-		throw new UnsupportedOperationException("TODO implement SupplierThreadLocalType.getQualifier(...)");
+	public Class<?> getObjectType() {
+		return this.objectType;
 	}
 
 	/**

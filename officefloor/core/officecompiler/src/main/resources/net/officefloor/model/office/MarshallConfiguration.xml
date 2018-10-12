@@ -30,43 +30,31 @@
 					</attributes>
 				</item>
 			</collection>
-		</item>
-	</collection>
-
-	<!-- SUPPLIER THREAD LOCALS -->
-	<collection method="getOfficeSupplierThreadLocals"
-		element="supplier-thread-locals">
-		<item
-			type="net.officefloor.model.office.OfficeSupplierThreadLocalModel"
-			element="supplier-thread-local">
-			<attributes>
-				<attribute method="getOfficeSupplierThreadLocalName"
-					attribute="name" />
-				<attribute method="getX" attribute="x" />
-				<attribute method="getY" attribute="y" />
-			</attributes>
-			<object method="getOfficeSupplier" element="supplier">
-				<attributes>
-					<attribute method="getOfficeSupplierName"
-						attribute="name" />
-					<attribute method="getQualifier" attribute="qualifier" />
-					<attribute method="getType" attribute="type" />
-				</attributes>
-			</object>
-			<object method="getExternalManagedObject"
-				element="external-managed-object">
-				<attributes>
-					<attribute method="getExternalManagedObjectName"
-						attribute="name" />
-				</attributes>
-			</object>
-			<object method="getOfficeManagedObject"
-				element="managed-object">
-				<attributes>
-					<attribute method="getOfficeManagedObjectName"
-						attribute="name" />
-				</attributes>
-			</object>
+			<collection method="getOfficeSupplierThreadLocals"
+				element="thread-locals">
+				<item
+					type="net.officefloor.model.office.OfficeSupplierThreadLocalModel"
+					element="thread-local">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
+					</attributes>
+					<object method="getExternalManagedObject"
+						element="external-managed-object">
+						<attributes>
+							<attribute method="getExternalManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+					<object method="getOfficeManagedObject"
+						element="managed-object">
+						<attributes>
+							<attribute method="getOfficeManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
 		</item>
 	</collection>
 

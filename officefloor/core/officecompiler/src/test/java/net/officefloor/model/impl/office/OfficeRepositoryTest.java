@@ -88,7 +88,6 @@ import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeSupplierThreadLocalModel;
 import net.officefloor.model.office.OfficeSupplierThreadLocalToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeManagedObjectModel;
-import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -131,9 +130,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addOfficeManagedObjectPool(pool);
 		OfficeSupplierModel supplier = new OfficeSupplierModel("SUPPLIER", "net.example.ExampleSupplierSource");
 		office.addOfficeSupplier(supplier);
-		OfficeSupplierThreadLocalModel supplierThreadLocal = new OfficeSupplierThreadLocalModel(
-				"SUPPLIER_THREAD_LOCAL");
-		office.addOfficeSupplierThreadLocal(supplierThreadLocal);
+		OfficeSupplierThreadLocalModel supplierThreadLocal = new OfficeSupplierThreadLocalModel("QUALIFIER", "TYPE");
+		supplier.addOfficeSupplierThreadLocal(supplierThreadLocal);
 		OfficeManagedObjectDependencyModel dependency = new OfficeManagedObjectDependencyModel("DEPENDENCY",
 				Connection.class.getName());
 		mo.addOfficeManagedObjectDependency(dependency);
@@ -178,11 +176,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addOfficeSection(targetSection);
 		OfficeSectionInputModel targetInput = new OfficeSectionInputModel("INPUT", String.class.getName());
 		targetSection.addOfficeSectionInput(targetInput);
-
-		// supplier thread local -> supplier
-		OfficeSupplierThreadLocalToOfficeSupplierModel threadLocalToSupplier = new OfficeSupplierThreadLocalToOfficeSupplierModel(
-				"SUPPLIER", null, "java.sql.Connection");
-		supplierThreadLocal.setOfficeSupplier(threadLocalToSupplier);
 
 		// managed object -> managed object source
 		OfficeManagedObjectToOfficeManagedObjectSourceModel moToMos = new OfficeManagedObjectToOfficeManagedObjectSourceModel(
@@ -387,11 +380,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		this.officeRepository.retrieveOffice(office, this.configurationItem);
 		this.verifyMockObjects();
 
-		// Ensure supplier thread local connected to its supplier
-		assertSame("supplier thread local <- supplier", supplierThreadLocal,
-				threadLocalToSupplier.getOfficeSupplierThreadLocal());
-		assertSame("supplier thread local -> supplier", supplier, threadLocalToSupplier.getOfficeSupplier());
-
 		// Ensure managed object connected to its managed object source
 		assertEquals("managed object <- managed object source", mo, moToMos.getOfficeManagedObject());
 		assertEquals("managed object -> managed object source", mos, moToMos.getOfficeManagedObjectSource());
@@ -568,9 +556,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addOfficeManagedObjectPool(pool);
 		OfficeSupplierModel supplier = new OfficeSupplierModel("SUPPLIER", "net.example.ExampleSupplierSource");
 		office.addOfficeSupplier(supplier);
-		OfficeSupplierThreadLocalModel supplierThreadLocal = new OfficeSupplierThreadLocalModel(
-				"SUPPLIER_THREAD_LOCAL");
-		office.addOfficeSupplierThreadLocal(supplierThreadLocal);
+		OfficeSupplierThreadLocalModel supplierThreadLocal = new OfficeSupplierThreadLocalModel("QUALIFIER", "TYPE");
+		supplier.addOfficeSupplierThreadLocal(supplierThreadLocal);
 		OfficeManagedObjectDependencyModel dependency = new OfficeManagedObjectDependencyModel("DEPENDENCY",
 				Connection.class.getName());
 		mo.addOfficeManagedObjectDependency(dependency);
@@ -609,12 +596,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		governance.addGovernanceEscalation(govEscalation);
 		OfficeStartModel start = new OfficeStartModel("START");
 		office.addOfficeStart(start);
-
-		// supplier thread local -> supplier
-		OfficeSupplierThreadLocalToOfficeSupplierModel supplierThreadLocalToSupplier = new OfficeSupplierThreadLocalToOfficeSupplierModel();
-		supplierThreadLocalToSupplier.setOfficeSupplierThreadLocal(supplierThreadLocal);
-		supplierThreadLocalToSupplier.setOfficeSupplier(supplier);
-		supplierThreadLocalToSupplier.connect();
 
 		// Create the target section input
 		OfficeSectionModel targetSection = new OfficeSectionModel("SECTION_TARGET", "net.example.ExcampleSectionSource",
@@ -862,8 +843,6 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieve
-		assertEquals("supplier thread local - supplier", "SUPPLIER",
-				supplierThreadLocalToSupplier.getOfficeSupplierName());
 		assertEquals("managed object - managed object source", "MANAGED_OBJECT_SOURCE",
 				moToMos.getOfficeManagedObjectSourceName());
 		assertEquals("managed object source - managed object pool", "POOL", mosToPool.getOfficeManagedObjectPoolName());

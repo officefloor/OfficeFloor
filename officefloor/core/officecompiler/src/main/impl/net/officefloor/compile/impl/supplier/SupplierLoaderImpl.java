@@ -27,8 +27,10 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceProperty;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceSpecification;
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
+import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -56,10 +58,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link Supplier}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link Supplier}.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public SupplierLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -212,25 +212,35 @@ public class SupplierLoaderImpl implements SupplierLoader {
 			return null; // must be successful
 		}
 
-		// Validate the supplied managed object source types
-		int index = 0;
-		SuppliedManagedObjectSourceType[] managedObjectSourceTypes = sourceContext
-				.getSuppliedManagedObjectSourceTypes();
-		for (SuppliedManagedObjectSourceType managedObjectSourceType : managedObjectSourceTypes) {
-
-			// Increment to identify the managed object source
-			index++;
+		// Validate the supplier thread local types
+		SupplierThreadLocalType[] threadLocalTypes = sourceContext.getSupplierThreadLocalTypes();
+		for (int i = 0; i < threadLocalTypes.length; i++) {
+			SupplierThreadLocalType threadLocalType = threadLocalTypes[i];
 
 			// Ensure have type
-			if (managedObjectSourceType.getObjectType() == null) {
-				this.addIssue("Must provide type for " + ManagedObject.class.getSimpleName() + " " + index);
+			Class<?> objectType = threadLocalType.getObjectType();
+			if (objectType == null) {
+				this.addIssue("Must provide type for " + SupplierThreadLocal.class.getSimpleName() + " " + i);
+				return null; // can not load supplier thread local
+			}
+		}
+
+		// Validate the supplied managed object source types
+		SuppliedManagedObjectSourceType[] managedObjectSourceTypes = sourceContext
+				.getSuppliedManagedObjectSourceTypes();
+		for (int i = 0; i < managedObjectSourceTypes.length; i++) {
+			SuppliedManagedObjectSourceType managedObjectSourceType = managedObjectSourceTypes[i];
+
+			// Ensure have type
+			Class<?> objectType = managedObjectSourceType.getObjectType();
+			if (objectType == null) {
+				this.addIssue("Must provide type for " + ManagedObject.class.getSimpleName() + " " + i);
 				return null; // can not load supplied managed object source
 			}
 
 			// Obtain the name of the managed object source
 			String qualifier = managedObjectSourceType.getQualifier();
-			String managedObjectSourceName = (qualifier != null ? qualifier + "-" : "")
-					+ managedObjectSourceType.getObjectType().getName();
+			String managedObjectSourceName = (qualifier != null ? qualifier + "-" : "") + objectType.getName();
 			String issueSuffix = " for " + ManagedObject.class.getSimpleName() + " " + managedObjectSourceName;
 
 			// Ensure have managed object source
@@ -241,14 +251,13 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		}
 
 		// Return the supplier type
-		return new SupplierTypeImpl(managedObjectSourceTypes);
+		return new SupplierTypeImpl(threadLocalTypes, managedObjectSourceTypes);
 	}
 
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Issue description.
+	 * @param issueDescription Issue description.
 	 */
 	private void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
@@ -257,10 +266,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of issue.
+	 * @param issueDescription Description of the issue.
+	 * @param cause            Cause of issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);

@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -62,11 +63,29 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	OfficeFloorNode getOfficeFloorNode();
 
 	/**
+	 * Loads the {@link SupplierType}.
+	 * 
+	 * @return {@link SupplierType}.
+	 */
+	SupplierType loadSupplierType();
+
+	/**
 	 * Registers as a possible MBean.
 	 * 
 	 * @param compileContext {@link CompileContext}.
 	 */
 	void registerAsPossibleMBean(CompileContext compileContext);
+
+	/**
+	 * Sources the {@link SupplierThreadLocal} instances.
+	 * 
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced the {@link SupplierSource}.
+	 *         <code>false</code> if failed to source, with issues reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceSupplier(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link SuppliedManagedObjectSourceNode} instances as
@@ -80,18 +99,11 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 			CompileContext compileContext);
 
 	/**
-	 * Auto-wires the {@link SupplierThreadLocal} instances.
+	 * Builds the {@link SupplierThreadLocal} instances for the
+	 * {@link SupplierSource}.
 	 * 
-	 * @param autoWirer      {@link AutoWirer}.
 	 * @param compileContext {@link CompileContext}.
 	 */
-	void autoWireThreadLocals(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext);
-
-	/**
-	 * Loads the {@link SupplierType}.
-	 * 
-	 * @return {@link SupplierType}.
-	 */
-	SupplierType loadSupplierType();
+	void buildSupplier(CompileContext compileContext);
 
 }

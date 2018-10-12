@@ -210,7 +210,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testNoType() {
 
 		// Record no auto-wiring
-		this.issues.recordIssue("Must provide type for ManagedObject 1");
+		this.issues.recordIssue("Must provide type for ManagedObject 0");
 
 		// Attempt to load
 		this.loadSupplierType(false, (context) -> {
@@ -297,7 +297,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testIssueIfNoSupplierThreadLocalObjectType() {
 
 		// Record no null object type
-		this.issues.recordIssue("Must provide object type for SupplierThreadLocal");
+		this.issues.recordIssue("Must provide type for SupplierThreadLocal 0");
 
 		// Attempt to load supplier type
 		this.loadSupplierType(false, (context) -> {
@@ -322,7 +322,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect qualifier for first", "qualification", types[0].getQualifier());
 		assertEquals("Incorrect type for first", String.class, types[0].getObjectType());
 		assertNull("Should be no qualifier for second", types[1].getQualifier());
-		assertEquals("Incorrect type for second", types[1].getObjectType());
+		assertEquals("Incorrect type for second", Connection.class, types[1].getObjectType());
 	}
 
 	/**

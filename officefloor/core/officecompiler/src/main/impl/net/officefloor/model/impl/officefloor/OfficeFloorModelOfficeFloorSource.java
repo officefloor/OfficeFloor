@@ -82,7 +82,6 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorMa
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel;
-import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
@@ -140,35 +139,6 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 
 			// Register the supplier
 			suppliers.put(supplierName, supplier);
-		}
-
-		// Add the OfficeFloor supplier thread locals, keeping registry of them
-		Map<String, OfficeFloorSupplierThreadLocal> supplierThreadLocals = new HashMap<>();
-		for (OfficeFloorSupplierThreadLocalModel threadLocalModel : officeFloor.getOfficeFloorSupplierThreadLocals()) {
-
-			// Obtain the thread local details
-			String threadLocalName = threadLocalModel.getOfficeFloorSupplierThreadLocalName();
-
-			// Obtain the supplier for thread local
-			String supplierName = null;
-			OfficeFloorSupplier supplier = null;
-			OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel threadLocalToSupplier = threadLocalModel
-					.getOfficeFloorSupplier();
-			if (threadLocalToSupplier != null) {
-				// Obtain its supplier
-				supplierName = threadLocalToSupplier.getOfficeFloorSupplierName();
-				supplier = suppliers.get(supplierName);
-			}
-			if (supplier == null) {
-				// Must have supplier
-				deployer.addIssue("No supplier '" + supplierName + "' for supplier thread local " + threadLocalName);
-				continue; // must have supplier
-			}
-
-			// Add the supplier thread local
-			OfficeFloorSupplierThreadLocal threadLocal = supplier.addOfficeFloorSupplierThreadLocal(
-					threadLocalToSupplier.getQualifier(), threadLocalToSupplier.getType());
-
 		}
 
 		// Add the OfficeFloor managed object pools, keeping registry of them
@@ -415,6 +385,24 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 					// Link the dependency to the input managed object
 					deployer.link(dependency, inputManagedObject);
 				}
+			}
+		}
+
+		// Link the thread locals of the supplier
+		for (OfficeFloorSupplierModel supplierModel : officeFloor.getOfficeFloorSuppliers()) {
+
+			// Obtain the supplier
+			OfficeFloorSupplier supplier = suppliers.get(supplierModel.getOfficeFloorSupplierName());
+
+			// Link each thread local for the supplier
+			for (OfficeFloorSupplierThreadLocalModel threadLocalModel : supplierModel
+					.getOfficeFloorSupplierThreadLocals()) {
+
+				// Add the supplier
+				String qualifier = threadLocalModel.getQualifier();
+				String type = threadLocalModel.getType();
+				OfficeFloorSupplierThreadLocal threadLocal = supplier.getOfficeFloorSupplierThreadLocal(qualifier,
+						type);
 			}
 		}
 

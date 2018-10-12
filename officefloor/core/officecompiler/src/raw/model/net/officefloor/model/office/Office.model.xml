@@ -5,8 +5,6 @@
 	<list type="OfficeSectionModel" name="office section" />
 	<list type="OfficeTeamModel" name="office team" />
 	<list type="OfficeSupplierModel" name="office supplier" />
-	<list type="OfficeSupplierThreadLocalModel"
-		name="office supplier thread local" />
 	<list type="ExternalManagedObjectModel"
 		name="external managed object" />
 	<list type="OfficeManagedObjectSourceModel"

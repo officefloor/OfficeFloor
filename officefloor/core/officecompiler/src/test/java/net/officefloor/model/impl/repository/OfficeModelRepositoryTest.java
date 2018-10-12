@@ -86,7 +86,6 @@ import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeSupplierThreadLocalModel;
 import net.officefloor.model.office.OfficeSupplierThreadLocalToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeManagedObjectModel;
-import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.TypeQualificationModel;
@@ -133,29 +132,18 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// ---------------------------------------
 		assertList(new String[] { "getOfficeSupplierName", "getSupplierSourceClassName", "getX", "getY" },
 				office.getOfficeSuppliers(),
-				new OfficeSupplierModel("SUPPLIER", "net.example.ExampleSupplierSource", 0, 1));
+				new OfficeSupplierModel("SUPPLIER", "net.example.ExampleSupplierSource", 100, 101));
 		OfficeSupplierModel supplier = office.getOfficeSuppliers().get(0);
 		assertList(new String[] { "getName", "getValue" }, supplier.getProperties(),
 				new PropertyModel("SUPPLIER_ONE", "VALUE_ONE"), new PropertyModel("SUPPLIER_TWO", "VALUE_TWO"));
-
-		// ----------------------------------------
-		// Validate the OfficeFloor supplier thread locals
-		// ----------------------------------------
-		assertList(new String[] { "getOfficeSupplierThreadLocalName", "getX", "getY" },
-				office.getOfficeSupplierThreadLocals(),
-				new OfficeSupplierThreadLocalModel("THREAD_LOCAL_ONE", 100, 101),
-				new OfficeSupplierThreadLocalModel("THREAD_LOCAL_TWO", 110, 111));
-		OfficeSupplierThreadLocalModel threadLocalOne = office.getOfficeSupplierThreadLocals().get(0);
-		assertProperties(threadLocalOne.getOfficeSupplier(),
-				new OfficeSupplierThreadLocalToOfficeSupplierModel("SUPPLIER", null, "java.sql.GenericConnection"),
-				"getOfficeSupplierName", "getQualifier", "getType");
+		assertList(new String[] { "getQualifier", "getType" }, supplier.getOfficeSupplierThreadLocals(),
+				new OfficeSupplierThreadLocalModel(null, "java.sql.GenericConnection"),
+				new OfficeSupplierThreadLocalModel("QUALIFIED", "java.sql.Connection"));
+		OfficeSupplierThreadLocalModel threadLocalOne = supplier.getOfficeSupplierThreadLocals().get(0);
 		assertProperties(threadLocalOne.getOfficeManagedObject(),
 				new OfficeSupplierThreadLocalToOfficeManagedObjectModel("MANAGED_OBJECT_ONE"),
 				"getOfficeManagedObjectName");
-		OfficeSupplierThreadLocalModel threadLocalTwo = office.getOfficeSupplierThreadLocals().get(1);
-		assertProperties(threadLocalTwo.getOfficeSupplier(),
-				new OfficeSupplierThreadLocalToOfficeSupplierModel("SUPPLIER", "QUALIFIED", "java.sql.Connection"),
-				"getOfficeSupplierName", "getQualifier", "getType");
+		OfficeSupplierThreadLocalModel threadLocalTwo = supplier.getOfficeSupplierThreadLocals().get(1);
 		assertProperties(threadLocalTwo.getExternalManagedObject(),
 				new OfficeSupplierThreadLocalToExternalManagedObjectModel("EXTERNAL_MANAGED_OBJECT"),
 				"getExternalManagedObjectName");

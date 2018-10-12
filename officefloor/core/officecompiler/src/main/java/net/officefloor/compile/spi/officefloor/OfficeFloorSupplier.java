@@ -45,7 +45,7 @@ public interface OfficeFloorSupplier extends PropertyConfigurable {
 	 *                  {@link OfficeFloorSupplierThreadLocal}.
 	 * @return {@link OfficeFloorSupplierThreadLocal}.
 	 */
-	OfficeFloorSupplierThreadLocal addOfficeFloorSupplierThreadLocal(String qualifier, String type);
+	OfficeFloorSupplierThreadLocal getOfficeFloorSupplierThreadLocal(String qualifier, String type);
 
 	/**
 	 * Adds an {@link OfficeFloorManagedObjectSource}.

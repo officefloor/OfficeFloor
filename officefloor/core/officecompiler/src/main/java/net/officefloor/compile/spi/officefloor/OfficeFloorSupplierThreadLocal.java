@@ -34,4 +34,18 @@ public interface OfficeFloorSupplierThreadLocal {
 	 */
 	String getOfficeFloorSupplierThreadLocalName();
 
+	/**
+	 * Obtains the qualifier.
+	 * 
+	 * @return Qualifier. May be <code>null</code>.
+	 */
+	String getQualifier();
+
+	/**
+	 * Obtains the required type.
+	 * 
+	 * @return Required type.
+	 */
+	String getType();
+
 }

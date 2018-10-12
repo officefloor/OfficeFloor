@@ -3,7 +3,7 @@
 	<field type="String" name="office supplier name" />
 	<field type="String" name="supplier source class name" />
 	<list type="PropertyModel" name="property" plural="properties" />
-	<list type="OfficeSupplierThreadLocalToOfficeSupplierModel"
+	<list type="OfficeSupplierThreadLocalModel"
 		name="office supplier thread local" />
 	<list type="OfficeManagedObjectSourceToOfficeSupplierModel"
 		name="office managed object source" />

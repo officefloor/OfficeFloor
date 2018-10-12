@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
+import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
@@ -65,6 +66,15 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	}
 
 	/**
+	 * Obtains the {@link SupplierThreadLocalType} instances.
+	 * 
+	 * @return {@link SupplierThreadLocalType} instances.
+	 */
+	public SupplierThreadLocalType[] getSupplierThreadLocalTypes() {
+		return this.supplierThreadLocals.stream().toArray(SupplierThreadLocalType[]::new);
+	}
+
+	/**
 	 * Obtains the {@link SuppliedManagedObjectSourceType} instances.
 	 * 
 	 * @return {@link SuppliedManagedObjectSourceType} instances.
@@ -78,8 +88,8 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	 */
 
 	@Override
-	public <T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualification, Class<? extends T> type) {
-		SupplierThreadLocalTypeImpl<T> supplierThreadLocal = new SupplierThreadLocalTypeImpl<>();
+	public <T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualifier, Class<? extends T> type) {
+		SupplierThreadLocalTypeImpl<T> supplierThreadLocal = new SupplierThreadLocalTypeImpl<>(qualifier, type);
 		this.supplierThreadLocals.add(supplierThreadLocal);
 		return supplierThreadLocal.getSupplierThreadLocal();
 	}

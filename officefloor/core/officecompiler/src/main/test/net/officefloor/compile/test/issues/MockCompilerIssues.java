@@ -17,7 +17,9 @@
  */
 package net.officefloor.compile.test.issues;
 
+import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
@@ -53,8 +55,7 @@ public class MockCompilerIssues implements CompilerIssues {
 	/**
 	 * Initiate with {@link OfficeFrameTestCase}.
 	 * 
-	 * @param testCase
-	 *            {@link OfficeFrameTestCase}.
+	 * @param testCase {@link OfficeFrameTestCase}.
 	 */
 	public MockCompilerIssues(OfficeFrameTestCase testCase) {
 		this.testCase = testCase;
@@ -64,8 +65,7 @@ public class MockCompilerIssues implements CompilerIssues {
 	/**
 	 * Records the capturing the {@link CompilerIssue} instances.
 	 * 
-	 * @param isIssue
-	 *            Flag indicating if there is a {@link CompilerIssue}.
+	 * @param isIssue Flag indicating if there is a {@link CompilerIssue}.
 	 * @return Captured {@link CompilerIssue} instances.
 	 */
 	public CompilerIssue[] recordCaptureIssues(boolean isIssue) {
@@ -82,44 +82,68 @@ public class MockCompilerIssues implements CompilerIssues {
 	/**
 	 * Records an issue against a {@link Node}.
 	 * 
-	 * @param nodeName
-	 *            Name of the {@link Node}.
-	 * @param nodeClass
-	 *            {@link Class} of the {@link Node} reporting the issue.
-	 * @param issueDescription
-	 *            Expected issue description.
-	 * @param capturedIssues
-	 *            Captured {@link CompilerIssue} instances.
+	 * @param nodeName         Name of the {@link Node}.
+	 * @param nodeClass        {@link Class} of the {@link Node} reporting the
+	 *                         issue.
+	 * @param issueDescription Expected issue description.
+	 * @param capturedIssues   Captured {@link CompilerIssue} instances.
 	 */
 	public void recordIssue(String nodeName, Class<? extends Node> nodeClass, String issueDescription,
 			CompilerIssue... capturedIssues) {
-		this.mock.addIssue(nodeName, nodeClass, issueDescription, new MockCompilerIssuesArray(capturedIssues));
+		this.mock.addIssue(nodeName, nodeClass, new MockIssueDescription(issueDescription, false),
+				new MockCompilerIssuesArray(capturedIssues));
 	}
 
 	/**
 	 * Records an issue against a {@link Node}.
 	 * 
-	 * @param nodeName
-	 *            Name of the {@link Node}.
-	 * @param nodeClass
-	 *            {@link Class} of the {@link Node} reporting the issue.
-	 * @param issueDescription
-	 *            Expected issue description.
-	 * @param cause
-	 *            Expected cause.
+	 * @param nodeName         Name of the {@link Node}.
+	 * @param nodeClass        {@link Class} of the {@link Node} reporting the
+	 *                         issue.
+	 * @param issueDescription Expected issue description.
+	 * @param cause            Expected cause.
 	 */
 	public void recordIssue(String nodeName, Class<? extends Node> nodeClass, String issueDescription,
 			Throwable cause) {
-		this.mock.addIssue(nodeName, nodeClass, issueDescription, new MockThrowable(cause));
+		this.mock.addIssue(nodeName, nodeClass, new MockIssueDescription(issueDescription, false),
+				new MockThrowable(cause));
+	}
+
+	/**
+	 * Records an issue against a {@link Node}.
+	 * 
+	 * @param nodeName         Name of the {@link Node}.
+	 * @param nodeClass        {@link Class} of the {@link Node} reporting the
+	 *                         issue.
+	 * @param issueDescription Expected issue description as regular expression.
+	 * @param capturedIssues   Captured {@link CompilerIssue} instances.
+	 */
+	public void recordIssueRegex(String nodeName, Class<? extends Node> nodeClass, String issueDescription,
+			CompilerIssue... capturedIssues) {
+		this.mock.addIssue(nodeName, nodeClass, new MockIssueDescription(issueDescription, true),
+				new MockCompilerIssuesArray(capturedIssues));
+	}
+
+	/**
+	 * Records an issue against a {@link Node}.
+	 * 
+	 * @param nodeName         Name of the {@link Node}.
+	 * @param nodeClass        {@link Class} of the {@link Node} reporting the
+	 *                         issue.
+	 * @param issueDescription Expected issue description as regular expression.
+	 * @param cause            Expected cause.
+	 */
+	public void recordIssueRegex(String nodeName, Class<? extends Node> nodeClass, String issueDescription,
+			Throwable cause) {
+		this.mock.addIssue(nodeName, nodeClass, new MockIssueDescription(issueDescription, true),
+				new MockThrowable(cause));
 	}
 
 	/**
 	 * Records a top level issue.
 	 * 
-	 * @param issueDescription
-	 *            Expected issue description.
-	 * @param capturedIssues
-	 *            Captured {@link CompilerIssue} instances.
+	 * @param issueDescription Expected issue description.
+	 * @param capturedIssues   Captured {@link CompilerIssue} instances.
 	 */
 	public void recordIssue(String issueDescription, CompilerIssue... capturedIssues) {
 		this.recordIssue(OfficeFloorCompiler.TYPE, OfficeFloorCompilerImpl.class, issueDescription, capturedIssues);
@@ -128,10 +152,8 @@ public class MockCompilerIssues implements CompilerIssues {
 	/**
 	 * Records a top level issue.
 	 * 
-	 * @param issueDescription
-	 *            Expected issue description.
-	 * @param cause
-	 *            Expected cause.
+	 * @param issueDescription Expected issue description.
+	 * @param cause            Expected cause.
 	 */
 	public void recordIssue(String issueDescription, Throwable cause) {
 		this.recordIssue(OfficeFloorCompiler.TYPE, OfficeFloorCompilerImpl.class, issueDescription, cause);
@@ -167,7 +189,8 @@ public class MockCompilerIssues implements CompilerIssues {
 	public CompileError addIssue(Node node, String issueDescription, CompilerIssue... causes) {
 		String nodeName = node.getNodeName();
 		Class<? extends Node> nodeClass = node.getClass();
-		this.mock.addIssue(nodeName, nodeClass, issueDescription, new MockCompilerIssuesArray(causes));
+		this.mock.addIssue(nodeName, nodeClass, new MockIssueDescription(issueDescription, false),
+				new MockCompilerIssuesArray(causes));
 		return new CompileError(issueDescription);
 	}
 
@@ -182,7 +205,8 @@ public class MockCompilerIssues implements CompilerIssues {
 		// Undertake adding the issue
 		String nodeName = node.getNodeName();
 		Class<? extends Node> nodeClass = node.getClass();
-		this.mock.addIssue(nodeName, nodeClass, issueDescription, new MockThrowable(cause));
+		this.mock.addIssue(nodeName, nodeClass, new MockIssueDescription(issueDescription, false),
+				new MockThrowable(cause));
 
 		// Return the error
 		return new CompileError(issueDescription);
@@ -201,32 +225,95 @@ public class MockCompilerIssues implements CompilerIssues {
 		/**
 		 * Enable recording adding an issue for a particular type of node.
 		 * 
-		 * @param nodeName
-		 *            Name of the {@link Node}.
-		 * @param nodeClass
-		 *            {@link Class} of the {@link Node}.
-		 * @param issueDescription
-		 *            Expected issue description.
-		 * @param capturedIssues
-		 *            {@link MockCompilerIssuesArray}.
+		 * @param nodeName         Name of the {@link Node}.
+		 * @param nodeClass        {@link Class} of the {@link Node}.
+		 * @param issueDescription Expected issue description.
+		 * @param capturedIssues   {@link MockCompilerIssuesArray}.
 		 */
-		void addIssue(String nodeName, Class<? extends Node> nodeClass, String issueDescription,
+		void addIssue(String nodeName, Class<? extends Node> nodeClass, MockIssueDescription issueDescription,
 				MockCompilerIssuesArray capturedIssues);
 
 		/**
 		 * Enable recording adding an issue for a particular type of node.
 		 * 
-		 * @param nodeName
-		 *            Name of the {@link Node}.
-		 * @param nodeClass
-		 *            {@link Class} of the {@link Node}.
-		 * @param issueDescription
-		 *            Expected issue description.
-		 * @param cause
-		 *            Expected cause.
+		 * @param nodeName         Name of the {@link Node}.
+		 * @param nodeClass        {@link Class} of the {@link Node}.
+		 * @param issueDescription Expected issue description.
+		 * @param cause            Expected cause.
 		 */
-		void addIssue(String nodeName, Class<? extends Node> nodeclClass, String issuedDescription,
+		void addIssue(String nodeName, Class<? extends Node> nodeclClass, MockIssueDescription issuedDescription,
 				MockThrowable cause);
+	}
+
+	/**
+	 * Mock {@link CompilerIssue} description.
+	 */
+	private class MockIssueDescription {
+
+		/**
+		 * Description.
+		 */
+		private final String description;
+
+		/**
+		 * Indicates if regular expression match.
+		 */
+		private final boolean isRegularExpression;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param description         {@link CompilerIssue} description.
+		 * @param isRegularExpression Indicates if description is regular expression
+		 *                            match.
+		 */
+		public MockIssueDescription(String description, boolean isRegularExpression) {
+			this.description = description;
+			this.isRegularExpression = isRegularExpression;
+		}
+
+		/*
+		 * ================ Object ====================
+		 */
+
+		@Override
+		public boolean equals(Object obj) {
+
+			// Ensure right type
+			if (!(obj instanceof MockIssueDescription)) {
+				return false;
+			}
+			MockIssueDescription that = (MockIssueDescription) obj;
+
+			// Determine if regular
+			if (this.isRegularExpression || that.isRegularExpression) {
+
+				// Ensure both are not a regular expression
+				if (this.isRegularExpression && that.isRegularExpression) {
+					return false;
+				}
+
+				// Obtain the regular expression
+				MockIssueDescription check = this;
+				if (!check.isRegularExpression) {
+					// Swap around (as other is regular expression)
+					check = that;
+					that = this;
+				}
+				Pattern pattern = Pattern.compile(check.description, Pattern.DOTALL);
+
+				// Return if matches pattern
+				return pattern.matcher(that.description).matches();
+			}
+
+			// As here, compare only on description
+			return Objects.equals(this.description, that.description);
+		}
+
+		@Override
+		public String toString() {
+			return this.description + (this.isRegularExpression ? " (RegEx)" : "");
+		}
 	}
 
 	/**
@@ -242,8 +329,7 @@ public class MockCompilerIssues implements CompilerIssues {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param issues
-		 *            {@link CompilerIssue} array.
+		 * @param issues {@link CompilerIssue} array.
 		 */
 		public MockCompilerIssuesArray(CompilerIssue[] issues) {
 			this.issues = issues;
@@ -297,8 +383,7 @@ public class MockCompilerIssues implements CompilerIssues {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param cause
-		 *            {@link Throwable} cause.
+		 * @param cause {@link Throwable} cause.
 		 */
 		public MockThrowable(Throwable cause) {
 			this.cause = cause;
@@ -323,12 +408,13 @@ public class MockCompilerIssues implements CompilerIssues {
 			}
 
 			// Ensure message is the same
-			if (!this.cause.getMessage().equals(that.cause.getMessage())) {
-				return false;
+			String thisMessage = this.cause.getMessage();
+			String thatMessage = that.cause.getMessage();
+			if (thisMessage == null) {
+				return (thatMessage == null);
+			} else {
+				return thisMessage.equals(thatMessage);
 			}
-
-			// As here, the same issues
-			return true;
 		}
 
 		@Override

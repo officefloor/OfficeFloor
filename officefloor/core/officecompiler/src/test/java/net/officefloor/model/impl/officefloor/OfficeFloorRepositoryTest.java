@@ -60,7 +60,6 @@ import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel;
-import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
@@ -100,8 +99,8 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"net.example.ExampleSupplierSource");
 		officeFloor.addOfficeFloorSupplier(officeFloorSupplier);
 		OfficeFloorSupplierThreadLocalModel officeFloorSupplierThreadLocal = new OfficeFloorSupplierThreadLocalModel(
-				"SUPPLIER_THREAD_LOCAL");
-		officeFloor.addOfficeFloorSupplierThreadLocal(officeFloorSupplierThreadLocal);
+				"QUALIFIER", "TYPE");
+		officeFloorSupplier.addOfficeFloorSupplierThreadLocal(officeFloorSupplierThreadLocal);
 		OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource = new OfficeFloorManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE", "net.example.ExampleManagedObjectSource", Connection.class.getName(), "0");
 		officeFloor.addOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
@@ -135,11 +134,6 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		office.addDeployedOfficeObject(officeObject);
 		DeployedOfficeTeamModel officeTeam = new DeployedOfficeTeamModel("OFFICE_TEAM");
 		office.addDeployedOfficeTeam(officeTeam);
-
-		// OfficeFloor supplier thread local -> OfficeFloor supplier
-		OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel threadLocalToSupplier = new OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel(
-				"SUPPLIER", null, "java.sql.Connection");
-		officeFloorSupplierThreadLocal.setOfficeFloorSupplier(threadLocalToSupplier);
 
 		// OfficeFloor managed object source -> OfficeFloor supplier
 		OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel mosToSupplier = new OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel(
@@ -273,12 +267,6 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		this.officeRepository.retrieveOfficeFloor(officeFloor, this.configurationItem);
 		this.verifyMockObjects();
 
-		// Ensure OfficeFloor supplier thread local connected to its supplier
-		assertSame("OfficeFloor supplier thread local <- OfficeFloor supplier", officeFloorSupplierThreadLocal,
-				threadLocalToSupplier.getOfficeFloorSupplierThreadLocal());
-		assertSame("OfficeFloor supplier thread local -> OfficeFloor supplier", officeFloorSupplier,
-				threadLocalToSupplier.getOfficeFloorSupplier());
-
 		// Ensure OfficeFloor managed object source connected to its supplier
 		assertSame("OfficeFloor managed object source <- OfficeFloor supplier", officeFloorManagedObjectSource,
 				mosToSupplier.getOfficeFloorManagedObjectSource());
@@ -404,8 +392,8 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"net.example.ExampleSupplierSource");
 		officeFloor.addOfficeFloorSupplier(officeFloorSupplier);
 		OfficeFloorSupplierThreadLocalModel officeFloorSupplierThreadLocal = new OfficeFloorSupplierThreadLocalModel(
-				"SUPPLIER_THREAD_LOCAL");
-		officeFloor.addOfficeFloorSupplierThreadLocal(officeFloorSupplierThreadLocal);
+				"QUALIFIER", "TYPE");
+		officeFloorSupplier.addOfficeFloorSupplierThreadLocal(officeFloorSupplierThreadLocal);
 		OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource = new OfficeFloorManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE", "net.example.ExampleManagedObjectSource", Connection.class.getName(), "0");
 		officeFloor.addOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
@@ -439,12 +427,6 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		office.addDeployedOfficeObject(officeObject);
 		DeployedOfficeTeamModel officeTeam = new DeployedOfficeTeamModel("OFFICE_TEAM");
 		office.addDeployedOfficeTeam(officeTeam);
-
-		// OfficeFloor supplier thread local -> OfficeFloor supplier
-		OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel supplierThreadLocalToSupplier = new OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel();
-		supplierThreadLocalToSupplier.setOfficeFloorSupplierThreadLocal(officeFloorSupplierThreadLocal);
-		supplierThreadLocalToSupplier.setOfficeFloorSupplier(officeFloorSupplier);
-		supplierThreadLocalToSupplier.connect();
 
 		// OfficeFloor managed object source -> OfficeFloor supplier
 		OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel mosToSupplier = new OfficeFloorManagedObjectSourceToOfficeFloorSupplierModel();
@@ -589,8 +571,6 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieving
-		assertEquals("OfficeFloor supplier thread local - OfficeFloor supplier", "SUPPLIER",
-				supplierThreadLocalToSupplier.getOfficeFloorSupplierName());
 		assertEquals("OfficeFloor managed object source - OfficeFloor supplier", "SUPPLIER",
 				mosToSupplier.getOfficeFloorSupplierName());
 		assertEquals("OfficeFloor managed object - OfficeFloor managed object source", "MANAGED_OBJECT_SOURCE",

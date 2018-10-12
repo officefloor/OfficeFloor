@@ -62,7 +62,6 @@ import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel;
-import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
@@ -111,31 +110,18 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// ---------------------------------------
 		assertList(new String[] { "getOfficeFloorSupplierName", "getSupplierSourceClassName", "getX", "getY" },
 				officeFloor.getOfficeFloorSuppliers(),
-				new OfficeFloorSupplierModel("SUPPLIER", "net.example.ExampleSupplierSource", 0, 1));
+				new OfficeFloorSupplierModel("SUPPLIER", "net.example.ExampleSupplierSource", 100, 101));
 		OfficeFloorSupplierModel supplier = officeFloor.getOfficeFloorSuppliers().get(0);
 		assertList(new String[] { "getName", "getValue" }, supplier.getProperties(),
 				new PropertyModel("SUPPLIER_ONE", "VALUE_ONE"), new PropertyModel("SUPPLIER_TWO", "VALUE_TWO"));
-
-		// ----------------------------------------
-		// Validate the OfficeFloor supplier thread locals
-		// ----------------------------------------
-		assertList(new String[] { "getOfficeFloorSupplierThreadLocalName", "getX", "getY" },
-				officeFloor.getOfficeFloorSupplierThreadLocals(),
-				new OfficeFloorSupplierThreadLocalModel("THREAD_LOCAL_ONE", 100, 101),
-				new OfficeFloorSupplierThreadLocalModel("THREAD_LOCAL_TWO", 110, 111));
-		OfficeFloorSupplierThreadLocalModel threadLocalOne = officeFloor.getOfficeFloorSupplierThreadLocals().get(0);
-		assertProperties(threadLocalOne.getOfficeFloorSupplier(),
-				new OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel("SUPPLIER", null,
-						"java.sql.GenericConnection"),
-				"getOfficeFloorSupplierName", "getQualifier", "getType");
+		assertList(new String[] { "getQualifier", "getType" }, supplier.getOfficeFloorSupplierThreadLocals(),
+				new OfficeFloorSupplierThreadLocalModel(null, "java.sql.GenericConnection"),
+				new OfficeFloorSupplierThreadLocalModel("QUALIFIED", "java.http.InputRequest"));
+		OfficeFloorSupplierThreadLocalModel threadLocalOne = supplier.getOfficeFloorSupplierThreadLocals().get(0);
 		assertProperties(threadLocalOne.getOfficeFloorManagedObject(),
 				new OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel("MANAGED_OBJECT_ONE"),
 				"getOfficeFloorManagedObjectName");
-		OfficeFloorSupplierThreadLocalModel threadLocalTwo = officeFloor.getOfficeFloorSupplierThreadLocals().get(1);
-		assertProperties(threadLocalTwo.getOfficeFloorSupplier(),
-				new OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel("SUPPLIER", "QUALIFIED",
-						"java.http.InputRequest"),
-				"getOfficeFloorSupplierName", "getQualifier", "getType");
+		OfficeFloorSupplierThreadLocalModel threadLocalTwo = supplier.getOfficeFloorSupplierThreadLocals().get(1);
 		assertProperties(threadLocalTwo.getOfficeFloorInputManagedObject(),
 				new OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel("INPUT_MANAGED_OBJECT"),
 				"getOfficeFloorInputManagedObjectName");

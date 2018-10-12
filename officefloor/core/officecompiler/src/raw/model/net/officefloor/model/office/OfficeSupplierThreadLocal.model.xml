@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<field type="String" name="office supplier thread local name" />
-	<field type="OfficeSupplierThreadLocalToOfficeSupplierModel"
-		name="office supplier" />
+	<field type="String" name="qualifier" />
+	<field type="String" name="type" />
 	<field type="OfficeSupplierThreadLocalToOfficeManagedObjectModel"
 		name="office managed object" />
 	<field

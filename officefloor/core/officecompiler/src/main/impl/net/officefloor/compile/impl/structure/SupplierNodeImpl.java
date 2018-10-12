@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -47,6 +48,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SupplierLoader;
+import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
@@ -175,7 +177,10 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		return this.suppliedManagedObjects.toArray(new Node[this.suppliedManagedObjects.size()]);
+		List<Node> children = new ArrayList<>(this.supplierThreadLocals.size() + this.suppliedManagedObjects.size());
+		children.addAll(Arrays.asList(NodeUtil.getChildNodes(this.supplierThreadLocals)));
+		children.addAll(this.suppliedManagedObjects);
+		return children.toArray(new Node[children.size()]);
 	}
 
 	@Override
@@ -228,13 +233,10 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public OfficeFloorSupplierThreadLocal addOfficeFloorSupplierThreadLocal(String qualifier, String type) {
-		
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement addOfficeFloorSupplierThreadLocal");
-		
-		// Create the initialised node
-//		return NodeUtil.getInitialisedNode(nodeName, nodes, context, create, initialiser);
+	public OfficeFloorSupplierThreadLocal getOfficeFloorSupplierThreadLocal(String qualifier, String type) {
+		String name = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, type);
+		return NodeUtil.getNode(name, this.supplierThreadLocals,
+				() -> this.context.createSupplierThreadLocalNode(qualifier, type, this));
 	}
 
 	@Override
@@ -363,9 +365,37 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public void autoWireThreadLocals(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext) {
-		// TODO implement SupplierNode.autoWireThreadLocals(...)
-		throw new UnsupportedOperationException("TODO implement SupplierNode.autoWireThreadLocals(...)");
+	public boolean sourceSupplier(CompileContext compileContext) {
+
+		// Load the supplier type
+		SupplierType supplierType = compileContext.getOrLoadSupplierType(this);
+		if (supplierType == null) {
+			return false; // must have type
+		}
+
+		// Load the supplier thread locals
+		for (SupplierThreadLocalType threadLocalType : supplierType.getSupplierThreadLocalTypes()) {
+			String qualifier = threadLocalType.getQualifier();
+			Class<?> type = threadLocalType.getObjectType();
+			String threadLocalName = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(
+					threadLocalType.getQualifier(), threadLocalType.getObjectType().getName());
+			NodeUtil.getInitialisedNode(threadLocalName, this.supplierThreadLocals, this.context,
+					() -> this.context.createSupplierThreadLocalNode(qualifier, type.getName(), this),
+					(node) -> node.initialise());
+		}
+
+		// Successfully sourced
+		return true;
+	}
+
+	@Override
+	public void buildSupplier(CompileContext compileContext) {
+
+		// Build the supplier thread locals
+		this.supplierThreadLocals.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorSupplierThreadLocalName(),
+						b.getOfficeFloorSupplierThreadLocalName()))
+				.forEachOrdered((threadLocal) -> threadLocal.buildSupplierThreadLocal(compileContext));
 	}
 
 }

@@ -89,7 +89,6 @@ import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeSupplierThreadLocalModel;
 import net.officefloor.model.office.OfficeSupplierThreadLocalToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeManagedObjectModel;
-import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeSupplierModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -182,19 +181,6 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			teams.put(team.getOfficeTeamName(), team);
 		}
 
-		// Connect the supplier thread locals to their corresponding supplier
-		for (OfficeSupplierThreadLocalModel threadLocal : office.getOfficeSupplierThreadLocals()) {
-			OfficeSupplierThreadLocalToOfficeSupplierModel conn = threadLocal.getOfficeSupplier();
-			if (conn != null) {
-				OfficeSupplierModel supplier = suppliers.get(conn.getOfficeSupplierName());
-				if (supplier != null) {
-					conn.setOfficeSupplierThreadLocal(threadLocal);
-					conn.setOfficeSupplier(supplier);
-					conn.connect();
-				}
-			}
-		}
-
 		// Connect the managed objects to their corresponding sources
 		for (OfficeManagedObjectModel managedObject : office.getOfficeManagedObjects()) {
 			OfficeManagedObjectToOfficeManagedObjectSourceModel conn = managedObject.getOfficeManagedObjectSource();
@@ -284,27 +270,31 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 		}
 
 		// Connect supplier thread locals to external managed objects
-		for (OfficeSupplierThreadLocalModel threadLocal : office.getOfficeSupplierThreadLocals()) {
-			OfficeSupplierThreadLocalToExternalManagedObjectModel conn = threadLocal.getExternalManagedObject();
-			if (conn != null) {
-				ExternalManagedObjectModel extMo = extMos.get(conn.getExternalManagedObjectName());
-				if (extMo != null) {
-					conn.setOfficeSupplierThreadLocal(threadLocal);
-					conn.setExternalManagedObject(extMo);
-					conn.connect();
+		for (OfficeSupplierModel supplier : office.getOfficeSuppliers()) {
+			for (OfficeSupplierThreadLocalModel threadLocal : supplier.getOfficeSupplierThreadLocals()) {
+				OfficeSupplierThreadLocalToExternalManagedObjectModel conn = threadLocal.getExternalManagedObject();
+				if (conn != null) {
+					ExternalManagedObjectModel extMo = extMos.get(conn.getExternalManagedObjectName());
+					if (extMo != null) {
+						conn.setOfficeSupplierThreadLocal(threadLocal);
+						conn.setExternalManagedObject(extMo);
+						conn.connect();
+					}
 				}
 			}
 		}
 
 		// Connect supplier thread locals to managed objects
-		for (OfficeSupplierThreadLocalModel threadLocal : office.getOfficeSupplierThreadLocals()) {
-			OfficeSupplierThreadLocalToOfficeManagedObjectModel conn = threadLocal.getOfficeManagedObject();
-			if (conn != null) {
-				OfficeManagedObjectModel mo = managedObjects.get(conn.getOfficeManagedObjectName());
-				if (mo != null) {
-					conn.setOfficeSupplierThreadLocal(threadLocal);
-					conn.setOfficeManagedObject(mo);
-					conn.connect();
+		for (OfficeSupplierModel supplier : office.getOfficeSuppliers()) {
+			for (OfficeSupplierThreadLocalModel threadLocal : supplier.getOfficeSupplierThreadLocals()) {
+				OfficeSupplierThreadLocalToOfficeManagedObjectModel conn = threadLocal.getOfficeManagedObject();
+				if (conn != null) {
+					OfficeManagedObjectModel mo = managedObjects.get(conn.getOfficeManagedObjectName());
+					if (mo != null) {
+						conn.setOfficeSupplierThreadLocal(threadLocal);
+						conn.setOfficeManagedObject(mo);
+						conn.connect();
+					}
 				}
 			}
 		}
@@ -719,13 +709,6 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 
 	@Override
 	public void storeOffice(OfficeModel office, WritableConfigurationItem configuration) throws Exception {
-
-		// Specify supplier thread locals to their corresponding supplier
-		for (OfficeSupplierModel supplier : office.getOfficeSuppliers()) {
-			for (OfficeSupplierThreadLocalToOfficeSupplierModel conn : supplier.getOfficeSupplierThreadLocals()) {
-				conn.setOfficeSupplierName(supplier.getOfficeSupplierName());
-			}
-		}
 
 		// Specify managed objects to their corresponding sources
 		for (OfficeManagedObjectSourceModel mos : office.getOfficeManagedObjectSources()) {

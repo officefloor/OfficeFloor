@@ -626,6 +626,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 					office.getDeployedOfficeObject("OBJECT"),
 					office.addOfficeSection("SECTION", "net.example.ExampleSectionSource", "LOCATION"),
 					office.getDeployedOfficeTeam("TEAM_ONE"), office.addOfficeTeam("TEAM_TWO"),
+					office.addSupplier("SUPPLIER", "net.example.ExampleSupplierSource"),
 					office.getManagedObjectNode("MO_ONE"),
 					office.addManagedObjectNode("MO_TWO", ManagedObjectScope.THREAD, this.managedObjectSource),
 					office.addOfficeManagedObjectSource("MOS", "net.example.ExampleManagedObjectSource"),
@@ -735,8 +736,12 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		SupplierNode supplier = this.createMock(SupplierNode.class);
 		SupplierThreadLocalNode node = this.doTest(
 				() -> this.context.createSupplierThreadLocalNode("QUALIFIER", Object.class.getName(), supplier));
-		assertNode(node, "QUALIFIER-" + Object.class.getName(), "Supplier Thread Local", null, supplier);
+		final String expectedName = "QUALIFIER-java.lang.Object";
+		assertNode(node, expectedName, "Supplier Thread Local", null, supplier);
 		assertSame("Incorrect supplier", supplier, node.getSupplierNode());
+		assertEquals("Incorrect name", expectedName, node.getOfficeFloorSupplierThreadLocalName());
+		assertEquals("Incorrect qualfiifer", "QUALIFIER", node.getQualifier());
+		assertEquals("Incorrect type", "java.lang.Object", node.getType());
 		assertInitialise(node, (n) -> n.initialise());
 	}
 
@@ -774,7 +779,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.officeFloor);
 			assertNode(supplier, "SUPPLIER", "Supplier", null, this.officeFloor);
 			supplier.addOfficeFloorManagedObjectSource("MOS", null, "TYPE");
-			assertChildren(supplier, suppliedManagedObjectNode[0]);
+			assertChildren(supplier, supplier.getOfficeFloorSupplierThreadLocal("QUALIFIER", Object.class.getName()),
+					suppliedManagedObjectNode[0]);
 			return supplier;
 		});
 

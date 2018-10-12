@@ -2,28 +2,21 @@
 
 	<suppliers>
 		<supplier name="SUPPLIER"
-			source="net.example.ExampleSupplierSource" x="000" y="001">
+			source="net.example.ExampleSupplierSource" x="100" y="101">
 			<properties>
 				<property name="SUPPLIER_ONE" value="VALUE_ONE" />
 				<property name="SUPPLIER_TWO" value="VALUE_TWO" />
 			</properties>
+			<thread-local type="java.sql.GenericConnection">
+				<managed-object name="MANAGED_OBJECT_ONE" />
+			</thread-local>
+			<thread-local qualifier="QUALIFIED"
+				type="java.sql.Connection">
+				<external-managed-object
+					name="EXTERNAL_MANAGED_OBJECT" />
+			</thread-local>
 		</supplier>
 	</suppliers>
-
-	<supplier-thread-locals>
-		<supplier-thread-local name="THREAD_LOCAL_ONE"
-			x="100" y="101">
-			<supplier name="SUPPLIER" type="java.sql.GenericConnection" />
-			<managed-object name="MANAGED_OBJECT_ONE" />
-		</supplier-thread-local>
-		<supplier-thread-local name="THREAD_LOCAL_TWO"
-			x="110" y="111">
-			<supplier name="SUPPLIER" qualifier="QUALIFIED"
-				type="java.sql.Connection" />
-			<external-managed-object
-				name="EXTERNAL_MANAGED_OBJECT" />
-		</supplier-thread-local>
-	</supplier-thread-locals>
 
 	<external-managed-objects>
 		<external-managed-object

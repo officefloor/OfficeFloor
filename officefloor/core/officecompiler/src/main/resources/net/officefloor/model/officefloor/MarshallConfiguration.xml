@@ -34,43 +34,30 @@
 					</attributes>
 				</item>
 			</collection>
-		</item>
-	</collection>
-
-	<!-- SUPPLIER THREAD LOCALS -->
-	<collection method="getOfficeFloorSupplierThreadLocals"
-		element="supplier-thread-locals">
-		<item
-			type="net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel"
-			element="supplier-thread-local">
-			<attributes>
-				<attribute method="getOfficeFloorSupplierThreadLocalName"
-					attribute="name" />
-				<attribute method="getX" attribute="x" />
-				<attribute method="getY" attribute="y" />
-			</attributes>
-			<object method="getOfficeFloorSupplier" element="supplier">
-				<attributes>
-					<attribute method="getOfficeFloorSupplierName"
-						attribute="name" />
-					<attribute method="getQualifier" attribute="qualifier" />
-					<attribute method="getType" attribute="type" />
-				</attributes>
-			</object>
-			<object method="getOfficeFloorManagedObject"
-				element="managed-object">
-				<attributes>
-					<attribute method="getOfficeFloorManagedObjectName"
-						attribute="name" />
-				</attributes>
-			</object>
-			<object method="getOfficeFloorInputManagedObject"
-				element="input-managed-object">
-				<attributes>
-					<attribute method="getOfficeFloorInputManagedObjectName"
-						attribute="name" />
-				</attributes>
-			</object>
+			<collection method="getOfficeFloorSupplierThreadLocals">
+				<item
+					type="net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel"
+					element="thread-local">
+					<attributes>
+						<attribute method="getQualifier" attribute="qualifier" />
+						<attribute method="getType" attribute="type" />
+					</attributes>
+					<object method="getOfficeFloorManagedObject"
+						element="managed-object">
+						<attributes>
+							<attribute method="getOfficeFloorManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+					<object method="getOfficeFloorInputManagedObject"
+						element="input-managed-object">
+						<attributes>
+							<attribute
+								method="getOfficeFloorInputManagedObjectName" attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
 		</item>
 	</collection>
 

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<field type="String"
-		name="office floor supplier thread local name" />
-	<field
-		type="OfficeFloorSupplierThreadLocalToOfficeFloorSupplierModel"
-		name="office floor supplier" />
+	<field type="String" name="qualifier" />
+	<field type="String" name="type" />
 	<field
 		type="OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel"
 		name="office floor managed object" />

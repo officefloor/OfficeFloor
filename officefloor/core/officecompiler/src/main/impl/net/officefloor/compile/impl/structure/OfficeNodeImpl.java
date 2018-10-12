@@ -353,8 +353,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	@Override
 	public Node[] getChildNodes() {
 		return NodeUtil.getChildNodes(this.inputs, this.outputs, this.objects, this.sections, this.teams,
-				this.managedObjects, this.managedObjectSources, this.governances, this.administrators, this.escalations,
-				this.starts);
+				this.suppliers, this.managedObjects, this.managedObjectSources, this.governances, this.administrators,
+				this.escalations, this.starts);
 	}
 
 	@Override
@@ -656,13 +656,20 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			return false;
 		}
 
+		// Ensure all the suppliers are sourced
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceSupplier(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Ensure the office tree is initialised
 		if (!NodeUtil.isNodeTreeInitialised(this, this.context.getCompilerIssues())) {
 			return false; // must have fully initialised tree
 		}
 
 		// Undertake auto-wire of objects (and supplier thread locals)
-		if (this.isAutoWireObjects || (this.suppliers.size() > 0)) {
+		if (this.isAutoWireObjects) {
 
 			// Create the OfficeFloor auto wirer
 			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class);
@@ -692,40 +699,27 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 				autoWirer.addAutoWireTarget(mo, targetAutoWires);
 			});
 
-			// Undertake auto-wire of objects
-			if (this.isAutoWireObjects) {
+			// Iterate over sections (auto-wiring unlinked dependencies)
+			this.sections.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
+					.forEachOrdered((section) -> section.autoWireObjects(autoWirer, compileContext));
 
-				// Iterate over sections (auto-wiring unlinked dependencies)
-				this.sections.values().stream()
-						.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
-						.forEachOrdered((section) -> section.autoWireObjects(autoWirer, compileContext));
+			// Iterate over managed objects (auto-wiring unlinked dependencies)
+			this.managedObjects.values().stream().sorted(
+					(a, b) -> CompileUtil.sortCompare(a.getOfficeManagedObjectName(), b.getOfficeManagedObjectName()))
+					.forEachOrdered(
+							(managedObject) -> managedObject.autoWireDependencies(autoWirer, this, compileContext));
 
-				// Iterate over managed objects (auto-wiring unlinked dependencies)
-				this.managedObjects.values().stream()
-						.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeManagedObjectName(),
-								b.getOfficeManagedObjectName()))
-						.forEachOrdered(
-								(managedObject) -> managedObject.autoWireDependencies(autoWirer, this, compileContext));
+			// Iterate over mo sources (auto-wiring unlinked input dependencies)
+			this.managedObjectSources.values().stream().sorted((a, b) -> CompileUtil
+					.sortCompare(a.getOfficeFloorManagedObjectSourceName(), b.getOfficeFloorManagedObjectSourceName()))
+					.forEachOrdered((managedObjectSource) -> {
+						// This office will manage the managed object
+						OfficeNode officeNode = this;
 
-				// Iterate over mo sources (auto-wiring unlinked input dependencies)
-				this.managedObjectSources.values().stream()
-						.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorManagedObjectSourceName(),
-								b.getOfficeFloorManagedObjectSourceName()))
-						.forEachOrdered((managedObjectSource) -> {
-							// This office will manage the managed object
-							OfficeNode officeNode = this;
-
-							// Load input dependencies for managed object source
-							managedObjectSource.autoWireInputDependencies(autoWirer, officeNode, compileContext);
-						});
-			}
-
-			// Auto-wire the supplier local threads
-			// TODO activate when auto-wiring thread locals
-			if (false)
-				this.suppliers.values().stream()
-						.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSupplierName(), b.getOfficeSupplierName()))
-						.forEachOrdered((supplier) -> supplier.autoWireThreadLocals(autoWirer, compileContext));
+						// Load input dependencies for managed object source
+						managedObjectSource.autoWireInputDependencies(autoWirer, officeNode, compileContext);
+					});
 		}
 
 		// Undertake auto-wire of teams

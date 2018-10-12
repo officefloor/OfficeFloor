@@ -17,11 +17,16 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 
 /**
  * {@link SupplierThreadLocalNode} implementation.
@@ -29,6 +34,22 @@ import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
  * @author Daniel Sagenschneider
  */
 public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
+
+	/**
+	 * Generates the name for the {@link SupplierThreadLocalNode}.
+	 * 
+	 * @param qualifier Qualifier. May be <code>null</code>.
+	 * @param type      Type.
+	 * @return {@link SupplierThreadLocalNode} name.
+	 */
+	public static String getSupplierThreadLocalName(String qualifier, String type) {
+		return CompileUtil.isBlank(qualifier) ? type : qualifier + "-" + type;
+	}
+
+	/**
+	 * Name.
+	 */
+	private final String name;
 
 	/**
 	 * Qualifier. May be <code>null</code>.
@@ -64,12 +85,14 @@ public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
 	/**
 	 * Initiate.
 	 * 
+	 * @param name         Name of the {@link SupplierThreadLocal}.
 	 * @param qualifier    Qualifier. May be <code>null</code>.
 	 * @param type         Type.
 	 * @param supplierNode {@link SupplierNode}.
 	 * @param context      {@link NodeContext}.
 	 */
 	public SupplierThreadLocalNodeImpl(String qualifier, String type, SupplierNode supplierNode, NodeContext context) {
+		this.name = getSupplierThreadLocalName(qualifier, type);
 		this.qualifier = qualifier;
 		this.type = type;
 		this.supplierNode = supplierNode;
@@ -82,7 +105,7 @@ public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
 
 	@Override
 	public String getNodeName() {
-		return (this.qualifier != null ? this.qualifier + "-" : "") + this.type;
+		return this.name;
 	}
 
 	@Override
@@ -116,6 +139,25 @@ public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
 	}
 
 	/*
+	 * ============= OfficeFloorSupplierThreadLocal ================
+	 */
+
+	@Override
+	public String getOfficeFloorSupplierThreadLocalName() {
+		return this.name;
+	}
+
+	@Override
+	public String getQualifier() {
+		return this.qualifier;
+	}
+
+	@Override
+	public String getType() {
+		return this.type;
+	}
+
+	/*
 	 * ================ SupplierThreadLocalNode =====================
 	 */
 
@@ -124,20 +166,35 @@ public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
 		return this.supplierNode;
 	}
 
+	@Override
+	public void buildSupplierThreadLocal(CompileContext context) {
+
+		// Obtain the bound managed object fulfilling supplier thread local
+		BoundManagedObjectNode managedObject = LinkUtil.retrieveTarget(this, BoundManagedObjectNode.class,
+				this.context.getCompilerIssues());
+		if (managedObject == null) {
+			return; // must have dependency
+		}
+	}
+
 	/*
 	 * =================== LinkObjectNode ============================
 	 */
 
+	/**
+	 * linked {@link LinkObjectNode}.
+	 */
+	private LinkObjectNode linkedObjectNode = null;
+
 	@Override
 	public boolean linkObjectNode(LinkObjectNode node) {
-		// TODO implement LinkObjectNode.linkObjectNode(...)
-		throw new UnsupportedOperationException("TODO implement LinkObjectNode.linkObjectNode(...)");
+		return LinkUtil.linkObjectNode(this, node, this.context.getCompilerIssues(),
+				(link) -> this.linkedObjectNode = link);
 	}
 
 	@Override
 	public LinkObjectNode getLinkedObjectNode() {
-		// TODO implement LinkObjectNode.getLinkedObjectNode(...)
-		throw new UnsupportedOperationException("TODO implement LinkObjectNode.getLinkedObjectNode(...)");
+		return this.linkedObjectNode;
 	}
 
 }

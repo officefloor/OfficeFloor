@@ -29,6 +29,11 @@ import net.officefloor.compile.supplier.SupplierType;
 public class SupplierTypeImpl implements SupplierType {
 
 	/**
+	 * {@link SupplierThreadLocalType} instances.
+	 */
+	private final SupplierThreadLocalType[] supplierThreadLocalTypes;
+
+	/**
 	 * {@link SuppliedManagedObjectSourceType} instances.
 	 */
 	private final SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes;
@@ -36,10 +41,13 @@ public class SupplierTypeImpl implements SupplierType {
 	/**
 	 * Initiate.
 	 * 
+	 * @param supplierThreadLocalTypes   {@link SupplierThreadLocalType} instances.
 	 * @param suppliedManagedObjectTypes {@link SuppliedManagedObjectSourceType}
 	 *                                   instances.
 	 */
-	public SupplierTypeImpl(SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes) {
+	public SupplierTypeImpl(SupplierThreadLocalType[] supplierThreadLocalTypes,
+			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes) {
+		this.supplierThreadLocalTypes = supplierThreadLocalTypes;
 		this.suppliedManagedObjectTypes = suppliedManagedObjectTypes;
 	}
 
@@ -49,8 +57,7 @@ public class SupplierTypeImpl implements SupplierType {
 
 	@Override
 	public SupplierThreadLocalType[] getSupplierThreadLocalTypes() {
-		// TODO implement SupplierType.getSupplierThreadLocalTypes(...)
-		throw new UnsupportedOperationException("TODO implement SupplierType.getSupplierThreadLocalTypes(...)");
+		return this.supplierThreadLocalTypes;
 	}
 
 	@Override

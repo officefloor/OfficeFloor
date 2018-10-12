@@ -736,12 +736,24 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			return false;
 		}
 
-		// Source all the offices
-		isSourced = this.offices.values().stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
-				.allMatch((office) -> office.sourceOfficeTree(this, compileContext));
+		// Ensure all the suppliers are sourced
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceSupplier(compileContext));
 		if (!isSourced) {
 			return false;
+		}
+
+		// Source all the offices
+		isSourced = CompileUtil.source(this.offices, (office) -> office.getDeployedOfficeName(),
+				(office) -> office.sourceOfficeTree(this, compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure the OfficeFloor tree is initialised
+		this.initialise();
+		if (!NodeUtil.isNodeTreeInitialised(this, this.context.getCompilerIssues())) {
+			return false; // must have fully initialised tree
 		}
 
 		// Undertake auto-wire of objects
@@ -1050,6 +1062,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 					// Build the input managed object into the office
 					bindings.buildInputManagedObjectIntoOffice(inputManagedObject);
 				});
+
+		// Build the suppliers
+		this.suppliers.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSupplierName(), b.getOfficeSupplierName()))
+				.forEachOrdered((supplier) -> supplier.buildSupplier(compileContext));
 
 		// Return the built OfficeFloor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());

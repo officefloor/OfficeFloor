@@ -20,32 +20,22 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
-	</object>
-
-	<!-- SUPPLIER THREAD LOCALS -->
-	<object method="addOfficeSupplierThreadLocal"
-		node="supplier-thread-local"
-		class="net.officefloor.model.office.OfficeSupplierThreadLocalModel">
-		<value method="setOfficeSupplierThreadLocalName"
-			node="supplier-thread-local@name" />
-		<value method="setX" node="supplier-thread-local@x" />
-		<value method="setY" node="supplier-thread-local@y" />
-		<object method="setOfficeSupplier" node="supplier"
-			class="net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeSupplierModel">
-			<value method="setOfficeSupplierName" node="supplier@name" />
-			<value method="setQualifier" node="supplier@qualifier" />
-			<value method="setType" node="supplier@type" />
-		</object>
-		<object method="setExternalManagedObject"
-			node="external-managed-object"
-			class="net.officefloor.model.office.OfficeSupplierThreadLocalToExternalManagedObjectModel">
-			<value method="setExternalManagedObjectName"
-				node="external-managed-object@name" />
-		</object>
-		<object method="setOfficeManagedObject" node="managed-object"
-			class="net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeManagedObjectModel">
-			<value method="setOfficeManagedObjectName"
-				node="managed-object@name" />
+		<object method="addOfficeSupplierThreadLocal"
+			node="thread-local"
+			class="net.officefloor.model.office.OfficeSupplierThreadLocalModel">
+			<value method="setQualifier" node="thread-local@qualifier" />
+			<value method="setType" node="thread-local@type" />
+			<object method="setExternalManagedObject"
+				node="external-managed-object"
+				class="net.officefloor.model.office.OfficeSupplierThreadLocalToExternalManagedObjectModel">
+				<value method="setExternalManagedObjectName"
+					node="external-managed-object@name" />
+			</object>
+			<object method="setOfficeManagedObject" node="managed-object"
+				class="net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeManagedObjectModel">
+				<value method="setOfficeManagedObjectName"
+					node="managed-object@name" />
+			</object>
 		</object>
 	</object>
 
