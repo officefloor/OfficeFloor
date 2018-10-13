@@ -15,32 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.supplier;
+package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.internal.structure.OptionalThreadLocalReceiver;
-import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
-import net.officefloor.plugin.section.clazz.ManagedObject;
+import net.officefloor.frame.api.thread.OptionalThreadLocal;
 
 /**
- * <code>Type definition</code> of a {@link SupplierThreadLocal}.
+ * Receives the {@link OptionalThreadLocal}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface SupplierThreadLocalType extends OptionalThreadLocalReceiver {
+public interface OptionalThreadLocalReceiver {
 
 	/**
-	 * Obtains the type of {@link Object} required.
+	 * Receives the {@link OptionalThreadLocal}.
 	 * 
-	 * @return Type of {@link Object} required.
+	 * @param optionalThreadLocal {@link OptionalThreadLocal}.
 	 */
-	Class<?> getObjectType();
-
-	/**
-	 * Obtains the possible qualifier for the required {@link ManagedObject}.
-	 * 
-	 * @return Qualifier for the required {@link ManagedObject}. May be
-	 *         <code>null</code>.
-	 */
-	String getQualifier();
+	void setOptionalThreadLocal(OptionalThreadLocal<?> optionalThreadLocal);
 
 }

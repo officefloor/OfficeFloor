@@ -24,6 +24,7 @@ import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OptionalThreadLocalReceiver;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
@@ -80,6 +81,20 @@ public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
 	 * Initialised state.
 	 */
 	private static class InitialisedState {
+
+		/**
+		 * {@link OptionalThreadLocalReceiver}.
+		 */
+		private final OptionalThreadLocalReceiver optionalThreadLocalReceiver;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param optionalThreadLocalReceiver {@link OptionalThreadLocalReceiver}.
+		 */
+		private InitialisedState(OptionalThreadLocalReceiver optionalThreadLocalReceiver) {
+			this.optionalThreadLocalReceiver = optionalThreadLocalReceiver;
+		}
 	}
 
 	/**
@@ -134,8 +149,9 @@ public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
 	}
 
 	@Override
-	public void initialise() {
-		this.state = NodeUtil.initialise(this, this.context, this.state, () -> new InitialisedState());
+	public void initialise(OptionalThreadLocalReceiver optionalThreadLocalReceiver) {
+		this.state = NodeUtil.initialise(this, this.context, this.state,
+				() -> new InitialisedState(optionalThreadLocalReceiver));
 	}
 
 	/*
@@ -175,6 +191,9 @@ public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
 		if (managedObject == null) {
 			return; // must have dependency
 		}
+
+		// Source the optional thread local
+		managedObject.buildSupplierThreadLocal(this.state.optionalThreadLocalReceiver);
 	}
 
 	/*

@@ -19,6 +19,8 @@ package net.officefloor.compile.impl.supplier;
 
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.thread.OptionalThreadLocal;
 
 /**
  * {@link SupplierThreadLocalType} implementation.
@@ -77,10 +79,29 @@ public class SupplierThreadLocalTypeImpl<T> implements SupplierThreadLocalType {
 		return this.objectType;
 	}
 
+	/*
+	 * ================= OptionalThreadLocalReceiver ===================
+	 */
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void setOptionalThreadLocal(OptionalThreadLocal<?> optionalThreadLocal) {
+		this.supplierThreadLocal.optionalThreadLocal = (OptionalThreadLocal<T>) optionalThreadLocal;
+	}
+
 	/**
 	 * {@link SupplierThreadLocal} implementation.
 	 */
 	public static class SupplierThreadLocalImpl<T> implements SupplierThreadLocal<T> {
+
+		/**
+		 * {@link OptionalThreadLocal} to retrieve the {@link ManagedObject} object.
+		 */
+		private OptionalThreadLocal<T> optionalThreadLocal = null;
+
+		/*
+		 * ================= SupplierThreadLocal =======================
+		 */
 
 		@Override
 		public T get() {

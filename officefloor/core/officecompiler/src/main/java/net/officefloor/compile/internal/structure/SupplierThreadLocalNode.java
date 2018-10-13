@@ -34,8 +34,10 @@ public interface SupplierThreadLocalNode extends LinkObjectNode, OfficeFloorSupp
 
 	/**
 	 * Initialises the {@link SupplierThreadLocalNode}.
+	 * 
+	 * @param optionalThreadLocalReceiver {@link OptionalThreadLocalReceiver}.
 	 */
-	void initialise();
+	void initialise(OptionalThreadLocalReceiver optionalThreadLocalReceiver);
 
 	/**
 	 * Obtains the {@link SupplierNode} containing this

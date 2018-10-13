@@ -371,7 +371,7 @@ public class SupplierNodeImpl implements SupplierNode {
 			String threadLocalName = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, type.getName());
 			NodeUtil.getInitialisedNode(threadLocalName, this.supplierThreadLocals, this.context,
 					() -> this.context.createSupplierThreadLocalNode(qualifier, type.getName(), this),
-					(node) -> node.initialise());
+					(node) -> node.initialise(threadLocalType));
 		}
 
 		// Load the supplied managed objects

@@ -52,6 +52,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.OptionalThreadLocalReceiver;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.TeamNode;
@@ -93,11 +94,11 @@ import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObjectFlow;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
-import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -229,6 +230,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * {@link ManagedObject} dependencies.
 	 */
 	private final Map<String, ManagedObjectDependencyNode> inputDependencies = new HashMap<String, ManagedObjectDependencyNode>();
+
+	/**
+	 * {@link OptionalThreadLocalLinker}.
+	 */
+	private final OptionalThreadLocalLinker optionalThreadLocalLinker = new OptionalThreadLocalLinker();
 
 	/**
 	 * Initiate.
@@ -864,7 +870,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 									+ this.managedObjectSourceName + " as managed object source has flows/teams");
 				} else {
 					// Bind managed object to process state of managing office
-					DependencyMappingBuilder inputDependencyMappings = managingOfficeBuilder
+					ThreadDependencyMappingBuilder inputDependencyMappings = managingOfficeBuilder
 							.setInputManagedObjectName(inputBoundManagedObjectName);
 
 					// Provide governance for office floor input managed object.
@@ -918,6 +924,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 							}
 						}
 					}
+
+					// Allow linking the supplier thread locals
+					this.optionalThreadLocalLinker.setThreadDependencyMappingBuilder(inputDependencyMappings);
 				}
 			}
 
@@ -1028,6 +1037,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			// Obtain team (ensures any missing teams are added)
 			this.getOfficeFloorManagedObjectTeam(teamType.getTeamName());
 		}
+	}
+
+	@Override
+	public void buildSupplierThreadLocal(OptionalThreadLocalReceiver optionalThreadLocalReceiver) {
+		this.optionalThreadLocalLinker.addOptionalThreadLocalReceiver(optionalThreadLocalReceiver);
 	}
 
 	/*

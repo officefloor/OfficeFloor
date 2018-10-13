@@ -51,6 +51,7 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.OptionalThreadLocalReceiver;
 import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -742,7 +743,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect name", expectedName, node.getOfficeFloorSupplierThreadLocalName());
 		assertEquals("Incorrect qualfiifer", "QUALIFIER", node.getQualifier());
 		assertEquals("Incorrect type", "java.lang.Object", node.getType());
-		assertInitialise(node, (n) -> n.initialise());
+		assertInitialise(node, (n) -> n.initialise(this.createMock(OptionalThreadLocalReceiver.class)));
 	}
 
 	/**
@@ -750,8 +751,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateSuppliedManagedObjectNode() {
 		SupplierNode supplier = this.createMock(SupplierNode.class);
-		SuppliedManagedObjectSourceNode node = this.doTest(
-				() -> this.context.createSuppliedManagedObjectSourceNode("QUALIFIER", Object.class.getName(), supplier));
+		SuppliedManagedObjectSourceNode node = this.doTest(() -> this.context
+				.createSuppliedManagedObjectSourceNode("QUALIFIER", Object.class.getName(), supplier));
 		assertNode(node, "QUALIFIER-" + Object.class.getName(), "Supplied Managed Object Source", null, supplier);
 		assertSame("Incorrect supplier", supplier, node.getSupplierNode());
 		assertInitialise(node, (n) -> n.initialise());
