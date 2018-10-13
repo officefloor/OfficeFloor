@@ -73,8 +73,7 @@
 		<tycho-version>1.2.0</tycho-version>
 		<maven-version>3.5.4</maven-version>
 		<maven-plugin-version>3.5.2</maven-plugin-version>
-		<maven-project-info-reports-version>2.9
-		</maven-project-info-reports-version>
+		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
 		<maven-changes-version>2.11</maven-changes-version>
 		<jetty-version>9.4.12.v20180830</jetty-version>
 		<failsafe-version>2.21.0</failsafe-version>
