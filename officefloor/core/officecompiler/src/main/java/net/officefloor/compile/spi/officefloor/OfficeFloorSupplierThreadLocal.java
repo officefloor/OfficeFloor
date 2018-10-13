@@ -25,7 +25,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloorSupplierThreadLocal {
+public interface OfficeFloorSupplierThreadLocal extends OfficeFloorDependencyRequireNode {
 
 	/**
 	 * Obtains the name of this {@link OfficeFloorSupplierThreadLocal}.

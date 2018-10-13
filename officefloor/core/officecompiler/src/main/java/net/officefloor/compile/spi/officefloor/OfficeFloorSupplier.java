@@ -48,7 +48,7 @@ public interface OfficeFloorSupplier extends PropertyConfigurable {
 	OfficeFloorSupplierThreadLocal getOfficeFloorSupplierThreadLocal(String qualifier, String type);
 
 	/**
-	 * Adds an {@link OfficeFloorManagedObjectSource}.
+	 * Obtains the {@link OfficeFloorManagedObjectSource}.
 	 * 
 	 * @param managedObjectSourceName Name of the
 	 *                                {@link OfficeFloorManagedObjectSource}.
@@ -58,7 +58,7 @@ public interface OfficeFloorSupplier extends PropertyConfigurable {
 	 *                                {@link OfficeFloorSupplier}.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
-	OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName, String qualifier,
+	OfficeFloorManagedObjectSource getOfficeFloorManagedObjectSource(String managedObjectSourceName, String qualifier,
 			String type);
 
 }

@@ -368,9 +368,10 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * Records specifying the Input {@link ManagedObject} name.
 	 * 
 	 * @param inputManagedObjectName Input {@link ManagedObject} name.
-	 * @return {@link DependencyMappingBuilder} for the Input {@link ManagedObject}.
+	 * @return {@link ThreadDependencyMappingBuilder} for the Input
+	 *         {@link ManagedObject}.
 	 */
-	protected DependencyMappingBuilder record_managingOfficeBuilder_setInputManagedObjectName(
+	protected ThreadDependencyMappingBuilder record_managingOfficeBuilder_setInputManagedObjectName(
 			String inputManagedObjectName) {
 		ThreadDependencyMappingBuilder dependencyMapper = this.createMock(ThreadDependencyMappingBuilder.class);
 		this.recordReturn(this.managingOfficeBuilder,

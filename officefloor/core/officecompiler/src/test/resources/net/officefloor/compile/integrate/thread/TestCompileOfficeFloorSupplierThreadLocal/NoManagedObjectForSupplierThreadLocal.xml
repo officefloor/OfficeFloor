@@ -3,30 +3,8 @@
 		<suppliers>
 			<supplier name="SUPPLIER"
 				source="${testcase}$MockSupplierSource" />
+			<thread-local
+				type="${testcase}$ThreadLocalManagedObject" />
 		</suppliers>
-		<supplier-thread-locals>
-			<supplier-thread-local name="THREAD_LOCAL">
-				<supplier name="SUPPLIER"
-					type="${testcase}$ThreadLocalManagedObject" />
-			</supplier-thread-local>
-		</supplier-thread-locals>
-		<managed-object-sources>
-			<managed-object-source
-				name="MANAGED_OBJECT_SOURCE">
-				<supplier name="SUPPLIER"
-					type="${testcase}$SuppliedManagedObject" />
-				<managing-office name="OFFICE" />
-			</managed-object-source>
-		</managed-object-sources>
-		<managed-objects>
-			<managed-object name="MANAGED_OBJECT" scope="PROCESS">
-				<managed-object-source
-					name="MANAGED_OBJECT_SOURCE" />
-			</managed-object>
-		</managed-objects>
-		<offices>
-			<office name="OFFICE" source="OFFICE" location="office" />
-		</offices>
 	</office-floor>
-	<office />
 </context>

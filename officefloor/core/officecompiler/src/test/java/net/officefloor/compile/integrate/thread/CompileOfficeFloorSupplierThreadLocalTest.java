@@ -22,7 +22,6 @@ import java.util.List;
 
 import net.officefloor.compile.impl.structure.SupplierThreadLocalNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
-import net.officefloor.compile.integrate.managedobject.CompileOfficeFloorManagedObjectTest.InputDependencyManagedObject;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
@@ -30,8 +29,6 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
-import net.officefloor.frame.api.build.DependencyMappingBuilder;
-import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
@@ -74,14 +71,8 @@ public class CompileOfficeFloorSupplierThreadLocalTest extends AbstractCompileTe
 
 		// Record no managed object for supplier
 		this.record_init();
-		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, SuppliedManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
-		this.issues.recordIssue("THREAD_LOCAL", SupplierThreadLocalNodeImpl.class,
-				"Supplier Thread Local THREAD_LOCAL is not linked to a "
+		this.issues.recordIssue(ThreadLocalManagedObject.class.getName(), SupplierThreadLocalNodeImpl.class,
+				"Supplier Thread Local " + ThreadLocalManagedObject.class.getName() + " is not linked to a "
 						+ BoundManagedObjectNode.class.getSimpleName());
 
 		// Should compile
@@ -95,7 +86,7 @@ public class CompileOfficeFloorSupplierThreadLocalTest extends AbstractCompileTe
 	public void testSupplierThreadLocalLinkToManagedObject() {
 
 		// Add supplier thread local
-		MockSupplierSource.addSupplierThreadLocal(String.class);
+		MockSupplierSource.addSupplierThreadLocal(ThreadLocalManagedObject.class);
 
 		// Record no managed object for supplier
 		this.record_init();
@@ -111,7 +102,7 @@ public class CompileOfficeFloorSupplierThreadLocalTest extends AbstractCompileTe
 		this.recordReturn(mo, mo.getOptionalThreadLocal(), this.createMock(OptionalThreadLocal.class));
 
 		// Should not compile
-		this.compile(false);
+		this.compile(true);
 	}
 
 	/**
@@ -120,27 +111,25 @@ public class CompileOfficeFloorSupplierThreadLocalTest extends AbstractCompileTe
 	 */
 	public void testSupplierThreadLocalLinkToInputManagedObject() {
 
+		// Add supplier thread local
+		MockSupplierSource.addSupplierThreadLocal(ThreadLocalManagedObject.class);
+
 		// Record the loading section type
 		this.issues.recordCaptureIssues(false);
 
 		// Record building the OfficeFloor
 		this.record_init();
-
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addFunction("SECTION", "INPUT");
-		function.linkParameter(0, Integer.class);
+		this.record_officeBuilder_addFunction("SECTION", "INPUT");
 		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE", ClassManagedObjectSource.class, 0, "class.name",
 				ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> inputManagingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT");
+		ThreadDependencyMappingBuilder input = this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT");
 		inputManagingOffice.linkFlow(0, "SECTION.INPUT");
-		this.record_officeFloorBuilder_addManagedObject("MO_SOURCE", ClassManagedObjectSource.class, 0, "class.name",
-				InputDependencyManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("MO", "MO_SOURCE");
-		DependencyMappingBuilder dependencies = this.record_officeBuilder_addProcessManagedObject("MO", "MO");
 		office.setBoundInputManagedObject("INPUT", "INPUT_SOURCE");
-		dependencies.mapDependency(0, "INPUT");
+
+		// Record obtaining thread local for supplier thread local
+		this.recordReturn(input, input.getOptionalThreadLocal(), this.createMock(OptionalThreadLocal.class));
 
 		// Compile the OfficeFloor
 		this.compile(true);

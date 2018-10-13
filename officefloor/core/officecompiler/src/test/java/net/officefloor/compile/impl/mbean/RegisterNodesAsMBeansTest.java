@@ -319,7 +319,7 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 		TestSupplierSource supplierSource = new TestSupplierSource();
 		this.doTestInOfficeFloor(SupplierSource.class, "SUPPLIER", (deployer, context) -> {
 			OfficeFloorSupplier supplier = deployer.addSupplier("SUPPLIER", supplierSource);
-			OfficeFloorManagedObjectSource mos = supplier.addOfficeFloorManagedObjectSource("MOS", null,
+			OfficeFloorManagedObjectSource mos = supplier.getOfficeFloorManagedObjectSource("MOS", null,
 					Object.class.getName());
 			DeployedOffice office = deployer.addDeployedOffice("OFFICE", TestOfficeSource.class.getName(), null);
 			deployer.link(mos.getManagingOffice(), office);

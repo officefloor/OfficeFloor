@@ -82,6 +82,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorMa
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel;
+import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
@@ -185,7 +187,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 				String qualifier = mosToSupplier.getQualifier();
 				qualifier = (CompileUtil.isBlank(qualifier) ? null : qualifier);
 				String type = mosToSupplier.getType();
-				managedObjectSource = supplier.addOfficeFloorManagedObjectSource(managedObjectSourceName, qualifier,
+				managedObjectSource = supplier.getOfficeFloorManagedObjectSource(managedObjectSourceName, qualifier,
 						type);
 
 			} else {
@@ -398,11 +400,44 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			for (OfficeFloorSupplierThreadLocalModel threadLocalModel : supplierModel
 					.getOfficeFloorSupplierThreadLocals()) {
 
-				// Add the supplier
+				// Add the supplier thread local
 				String qualifier = threadLocalModel.getQualifier();
 				String type = threadLocalModel.getType();
 				OfficeFloorSupplierThreadLocal threadLocal = supplier.getOfficeFloorSupplierThreadLocal(qualifier,
 						type);
+
+				// Link the managed object
+				OfficeFloorManagedObject dependentManagedObject = null;
+				OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel threadLocalToMo = threadLocalModel
+						.getOfficeFloorManagedObject();
+				if (threadLocalToMo != null) {
+					OfficeFloorManagedObjectModel threadLocalMoModel = threadLocalToMo.getOfficeFloorManagedObject();
+					if (threadLocalMoModel != null) {
+						dependentManagedObject = managedObjects
+								.get(threadLocalMoModel.getOfficeFloorManagedObjectName());
+					}
+				}
+				if (dependentManagedObject != null) {
+					// Link the thread local to the managed object
+					deployer.link(threadLocal, dependentManagedObject);
+				}
+
+				// Link the input managed object
+				OfficeFloorInputManagedObject inputManagedObject = null;
+				OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel threadLocalToInput = threadLocalModel
+						.getOfficeFloorInputManagedObject();
+				if (threadLocalToInput != null) {
+					OfficeFloorInputManagedObjectModel inputMoModel = threadLocalToInput
+							.getOfficeFloorInputManagedObject();
+					if (inputMoModel != null) {
+						inputManagedObject = inputManagedObjects
+								.get(inputMoModel.getOfficeFloorInputManagedObjectName());
+					}
+				}
+				if (inputManagedObject != null) {
+					// Link the thread local to the input managed object
+					deployer.link(threadLocal, inputManagedObject);
+				}
 			}
 		}
 

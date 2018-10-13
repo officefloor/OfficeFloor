@@ -1073,7 +1073,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public SuppliedManagedObjectSourceNode createSuppliedManagedObjectNode(String qualifier, String type,
+	public SuppliedManagedObjectSourceNode createSuppliedManagedObjectSourceNode(String qualifier, String type,
 			SupplierNode supplier) {
 		return new SuppliedManagedObjectSourceNodeImpl(qualifier, type, supplier, this);
 	}

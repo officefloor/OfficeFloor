@@ -604,7 +604,7 @@ public interface NodeContext {
 	 * @param supplier  Parent {@link SupplierNode}.
 	 * @return {@link SuppliedManagedObjectSourceNode}.
 	 */
-	SuppliedManagedObjectSourceNode createSuppliedManagedObjectNode(String qualifier, String type,
+	SuppliedManagedObjectSourceNode createSuppliedManagedObjectSourceNode(String qualifier, String type,
 			SupplierNode supplier);
 
 	/**

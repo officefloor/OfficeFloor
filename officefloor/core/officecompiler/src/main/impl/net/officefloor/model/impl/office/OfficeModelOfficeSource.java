@@ -340,7 +340,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 				String qualifier = mosToSupplier.getQualifier();
 				qualifier = (CompileUtil.isBlank(qualifier) ? null : qualifier);
 				String type = mosToSupplier.getType();
-				mos = supplier.addOfficeManagedObjectSource(mosName, qualifier, type);
+				mos = supplier.getOfficeManagedObjectSource(mosName, qualifier, type);
 
 			} else {
 				// Source the managed object source

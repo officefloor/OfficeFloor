@@ -2,15 +2,13 @@
 	<office-floor>
 		<suppliers>
 			<supplier name="SUPPLIER"
-				source="${testcase}$MockSupplierSource" />
+				source="${testcase}$MockSupplierSource">
+				<thread-local
+					type="${testcase}$ThreadLocalManagedObject">
+					<managed-object name="MANAGED_OBJECT" />
+				</thread-local>
+			</supplier>
 		</suppliers>
-		<supplier-thread-locals>
-			<supplier-thread-local name="THREAD_LOCAL">
-				<supplier name="SUPPLIER"
-					type="${testcase}$ThreadLocalManagedObject" />
-				<managed-object name="MANAGED_OBJECT" />
-			</supplier-thread-local>
-		</supplier-thread-locals>
 		<managed-object-sources>
 			<managed-object-source
 				name="MANAGED_OBJECT_SOURCE">

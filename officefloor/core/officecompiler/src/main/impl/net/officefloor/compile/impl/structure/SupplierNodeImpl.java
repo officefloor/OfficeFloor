@@ -17,11 +17,8 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -47,6 +44,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
@@ -85,9 +83,9 @@ public class SupplierNodeImpl implements SupplierNode {
 	private final Map<String, SupplierThreadLocalNode> supplierThreadLocals = new HashMap<>();
 
 	/**
-	 * {@link SuppliedManagedObjectSourceNode} instances.
+	 * {@link Map} of {@link SuppliedManagedObjectSourceNode} instances by name.
 	 */
-	private final List<SuppliedManagedObjectSourceNode> suppliedManagedObjects = new LinkedList<SuppliedManagedObjectSourceNode>();
+	private final Map<String, SuppliedManagedObjectSourceNode> suppliedManagedObjects = new HashMap<>();
 
 	/**
 	 * {@link NodeContext}.
@@ -177,10 +175,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		List<Node> children = new ArrayList<>(this.supplierThreadLocals.size() + this.suppliedManagedObjects.size());
-		children.addAll(Arrays.asList(NodeUtil.getChildNodes(this.supplierThreadLocals)));
-		children.addAll(this.suppliedManagedObjects);
-		return children.toArray(new Node[children.size()]);
+		return NodeUtil.getChildNodes(this.supplierThreadLocals, this.suppliedManagedObjects);
 	}
 
 	@Override
@@ -209,15 +204,13 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName,
+	public OfficeFloorManagedObjectSource getOfficeFloorManagedObjectSource(String managedObjectSourceName,
 			String qualifier, String type) {
 
 		// Create the supplied managed object node
-		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = this.context
-				.createSuppliedManagedObjectNode(qualifier, type, this);
-
-		// Register the supplied managed object
-		this.suppliedManagedObjects.add(suppliedManagedObjectNode);
+		String name = SuppliedManagedObjectSourceNodeImpl.getSuppliedManagedObjectSourceName(qualifier, type);
+		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = NodeUtil.getNode(name, this.suppliedManagedObjects,
+				() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type, this));
 
 		// Add and return the managed object source
 		return this.officeFloorNode.addManagedObjectSource(managedObjectSourceName, suppliedManagedObjectNode);
@@ -240,15 +233,13 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String qualifier,
+	public OfficeManagedObjectSource getOfficeManagedObjectSource(String managedObjectSourceName, String qualifier,
 			String type) {
 
 		// Create the supplied managed object node
-		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = this.context
-				.createSuppliedManagedObjectNode(qualifier, type, this);
-
-		// Register the supplied managed object
-		this.suppliedManagedObjects.add(suppliedManagedObjectNode);
+		String name = SuppliedManagedObjectSourceNodeImpl.getSuppliedManagedObjectSourceName(qualifier, type);
+		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = NodeUtil.getNode(name, this.suppliedManagedObjects,
+				() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type, this));
 
 		// Add and return the managed object source
 		return this.officeNode.addManagedObjectSource(managedObjectSourceName, suppliedManagedObjectNode);
@@ -337,7 +328,7 @@ public class SupplierNodeImpl implements SupplierNode {
 				ManagedObjectNode mo;
 				if (this.officeNode != null) {
 					// Register the office managed object source
-					mos = (ManagedObjectSourceNode) this.addOfficeManagedObjectSource(managedObjectName, qualifier,
+					mos = (ManagedObjectSourceNode) this.getOfficeManagedObjectSource(managedObjectName, qualifier,
 							type);
 
 					// Add the office managed object
@@ -345,7 +336,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 				} else {
 					// Register the OfficeFloor managed object source
-					mos = (ManagedObjectSourceNode) this.addOfficeFloorManagedObjectSource(managedObjectName, qualifier,
+					mos = (ManagedObjectSourceNode) this.getOfficeFloorManagedObjectSource(managedObjectName, qualifier,
 							type);
 
 					// Add the OfficeFloor managed object
@@ -377,11 +368,21 @@ public class SupplierNodeImpl implements SupplierNode {
 		for (SupplierThreadLocalType threadLocalType : supplierType.getSupplierThreadLocalTypes()) {
 			String qualifier = threadLocalType.getQualifier();
 			Class<?> type = threadLocalType.getObjectType();
-			String threadLocalName = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(
-					threadLocalType.getQualifier(), threadLocalType.getObjectType().getName());
+			String threadLocalName = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, type.getName());
 			NodeUtil.getInitialisedNode(threadLocalName, this.supplierThreadLocals, this.context,
 					() -> this.context.createSupplierThreadLocalNode(qualifier, type.getName(), this),
 					(node) -> node.initialise());
+		}
+
+		// Load the supplied managed objects
+		for (SuppliedManagedObjectSourceType mosType : supplierType.getSuppliedManagedObjectTypes()) {
+			String qualifier = mosType.getQualifier();
+			Class<?> type = mosType.getObjectType();
+			String mosName = SuppliedManagedObjectSourceNodeImpl.getSuppliedManagedObjectSourceName(qualifier,
+					type.getName());
+			NodeUtil.getInitialisedNode(mosName, this.suppliedManagedObjects, this.context,
+					() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type.getName(), this),
+					(mos) -> mos.initialise());
 		}
 
 		// Successfully sourced
