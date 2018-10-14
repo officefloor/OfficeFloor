@@ -210,11 +210,11 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			this.connection = DataSourceRule.waitForDatabaseAvailable(AbstractJdbcTestCase.class, (context) -> {
 
 				// Obtain the connection
-				this.connection = context.setConnection(getConnection(this.getConnectionManagedObjectSourceClass(),
-						(mos) -> this.loadConnectionProperties(mos)));
+				Connection connection = context.setConnection(getConnection(
+						this.getConnectionManagedObjectSourceClass(), (mos) -> this.loadConnectionProperties(mos)));
 
 				// Clean database
-				this.cleanDatabase(this.connection);
+				this.cleanDatabase(connection);
 			});
 		}
 	}
