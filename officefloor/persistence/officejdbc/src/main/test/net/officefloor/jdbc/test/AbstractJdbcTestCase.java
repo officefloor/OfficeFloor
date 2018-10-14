@@ -506,6 +506,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		// Setup table
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+			if (!this.connection.getAutoCommit()) {
+				this.connection.commit();
+			}
 		}
 
 		// Run connectivity to create table and add row
@@ -680,6 +683,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		// Setup table
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+			if (!this.connection.getAutoCommit()) {
+				this.connection.commit();
+			}
 		}
 
 		// Identifier
