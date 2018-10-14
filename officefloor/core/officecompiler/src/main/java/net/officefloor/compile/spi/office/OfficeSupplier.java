@@ -19,6 +19,7 @@ package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Supplies {@link OfficeManagedObjectSource} instances within the
@@ -34,6 +35,17 @@ public interface OfficeSupplier extends PropertyConfigurable {
 	 * @return Name of this {@link OfficeSupplier}.
 	 */
 	String getOfficeSupplierName();
+
+	/**
+	 * Obtains the {@link OfficeSupplierThreadLocal}.
+	 * 
+	 * @param qualifier Qualifier of the required {@link ManagedObject}. May be
+	 *                  <code>null</code> to match only on type.
+	 * @param type      Type of object required for the
+	 *                  {@link OfficeSupplierThreadLocal}.
+	 * @return {@link OfficeSupplierThreadLocal}.
+	 */
+	OfficeSupplierThreadLocal getOfficeSupplierThreadLocal(String qualifier, String type);
 
 	/**
 	 * Obtains the {@link OfficeManagedObjectSource}.

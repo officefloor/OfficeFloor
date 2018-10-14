@@ -390,7 +390,7 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 			}
 		}
 
-		// Link the thread locals of the supplier
+		// Link the thread locals of the suppliers
 		for (OfficeFloorSupplierModel supplierModel : officeFloor.getOfficeFloorSuppliers()) {
 
 			// Obtain the supplier

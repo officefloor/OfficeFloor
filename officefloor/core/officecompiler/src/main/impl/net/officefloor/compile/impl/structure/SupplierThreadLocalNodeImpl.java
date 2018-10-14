@@ -174,6 +174,15 @@ public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
 	}
 
 	/*
+	 * ================= OfficeSupplierThreadLocal =================
+	 */
+
+	@Override
+	public String getOfficeSupplierThreadLocalName() {
+		return this.name;
+	}
+
+	/*
 	 * ================ SupplierThreadLocalNode =====================
 	 */
 

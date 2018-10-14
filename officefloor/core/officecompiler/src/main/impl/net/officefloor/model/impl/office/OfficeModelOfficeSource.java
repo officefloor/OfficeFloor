@@ -51,6 +51,7 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeSupplier;
+import net.officefloor.compile.spi.office.OfficeSupplierThreadLocal;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
@@ -115,6 +116,7 @@ import net.officefloor.model.office.OfficeStartToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
 import net.officefloor.model.office.OfficeSupplierModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.TypeQualificationModel;
@@ -285,7 +287,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		}
 
 		// Add the Office suppliers, keeping registry of them
-		Map<String, OfficeSupplier> officeSuppliers = new HashMap<>();
+		Map<String, OfficeSupplier> suppliers = new HashMap<>();
 		for (OfficeSupplierModel supplierModel : office.getOfficeSuppliers()) {
 
 			// Add the Office supplier
@@ -296,11 +298,11 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			}
 
 			// Register the supplier
-			officeSuppliers.put(supplierName, supplier);
+			suppliers.put(supplierName, supplier);
 		}
 
 		// Add the managed object pools, keeping registry of them
-		Map<String, OfficeManagedObjectPool> officeManagedObjectPools = new HashMap<>();
+		Map<String, OfficeManagedObjectPool> managedObjectPools = new HashMap<>();
 		for (OfficeManagedObjectPoolModel poolModel : office.getOfficeManagedObjectPools()) {
 
 			// Add the managed object pool
@@ -308,7 +310,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			String managedObjectPoolSourceClassName = poolModel.getManagedObjectPoolSourceClassName();
 			OfficeManagedObjectPool pool = architect.addManagedObjectPool(managedObjectPoolName,
 					managedObjectPoolSourceClassName);
-			officeManagedObjectPools.put(managedObjectPoolName, pool);
+			managedObjectPools.put(managedObjectPoolName, pool);
 
 			// Add properties for the managed object source
 			for (PropertyModel property : poolModel.getProperties()) {
@@ -329,7 +331,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			if (mosToSupplier != null) {
 				// Supplied managed object source, so obtain its supplier
 				String supplierName = mosToSupplier.getOfficeSupplierName();
-				OfficeSupplier supplier = officeSuppliers.get(supplierName);
+				OfficeSupplier supplier = suppliers.get(supplierName);
 				if (supplier == null) {
 					// Must have supplier
 					architect.addIssue("No supplier '" + supplierName + "' for managed object source " + mosName);
@@ -371,8 +373,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			if (mosToPool != null) {
 				OfficeManagedObjectPoolModel poolModel = mosToPool.getOfficeManagedObjectPool();
 				if (poolModel != null) {
-					OfficeManagedObjectPool pool = officeManagedObjectPools
-							.get(poolModel.getOfficeManagedObjectPoolName());
+					OfficeManagedObjectPool pool = managedObjectPools.get(poolModel.getOfficeManagedObjectPoolName());
 					architect.link(mos, pool);
 				}
 			}
@@ -521,6 +522,25 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 					// Link to external managed object
 					architect.link(dependency, linkedObject);
 				}
+			}
+		}
+
+		// Link the thread locals of the suppliers
+		for (OfficeSupplierModel supplierModel : office.getOfficeSuppliers()) {
+
+			// Obtain the supplier
+			OfficeSupplier supplier = suppliers.get(supplierModel.getOfficeSupplierName());
+
+			// Link each thread local for the supplier
+			for (OfficeSupplierThreadLocalModel threadLocalModel : supplierModel.getOfficeSupplierThreadLocals()) {
+
+				// Add the supplier thread local
+				String qualifier = threadLocalModel.getQualifier();
+				String type = threadLocalModel.getType();
+				OfficeSupplierThreadLocal threadLocal = supplier.getOfficeSupplierThreadLocal(qualifier, type);
+				
+				
+
 			}
 		}
 

@@ -1,5 +1,10 @@
 <context>
 	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
 		<suppliers>
 			<supplier name="SUPPLIER"
 				source="${testcase}$MockSupplierSource">
@@ -7,5 +12,5 @@
 					type="${testcase}$ThreadLocalManagedObject" />
 			</supplier>
 		</suppliers>
-	</office-floor>
+	</office>
 </context>

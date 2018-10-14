@@ -740,7 +740,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		final String expectedName = "QUALIFIER-java.lang.Object";
 		assertNode(node, expectedName, "Supplier Thread Local", null, supplier);
 		assertSame("Incorrect supplier", supplier, node.getSupplierNode());
-		assertEquals("Incorrect name", expectedName, node.getOfficeFloorSupplierThreadLocalName());
+		assertEquals("Incorrect OfficeFloor name", expectedName, node.getOfficeFloorSupplierThreadLocalName());
+		assertEquals("Incorrect Office name", expectedName, node.getOfficeSupplierThreadLocalName());
 		assertEquals("Incorrect qualfiifer", "QUALIFIER", node.getQualifier());
 		assertEquals("Incorrect type", "java.lang.Object", node.getType());
 		assertInitialise(node, (n) -> n.initialise(this.createMock(OptionalThreadLocalReceiver.class)));

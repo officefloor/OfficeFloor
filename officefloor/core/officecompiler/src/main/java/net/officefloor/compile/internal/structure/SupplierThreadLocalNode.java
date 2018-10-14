@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.spi.office.OfficeSupplierThreadLocal;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 
@@ -25,7 +26,8 @@ import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SupplierThreadLocalNode extends LinkObjectNode, OfficeFloorSupplierThreadLocal {
+public interface SupplierThreadLocalNode
+		extends LinkObjectNode, OfficeFloorSupplierThreadLocal, OfficeSupplierThreadLocal {
 
 	/**
 	 * {@link Node} type.

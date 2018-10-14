@@ -40,6 +40,7 @@ import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSupplierThreadLocal;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
@@ -204,6 +205,13 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
+	public OfficeFloorSupplierThreadLocal getOfficeFloorSupplierThreadLocal(String qualifier, String type) {
+		String name = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, type);
+		return NodeUtil.getNode(name, this.supplierThreadLocals,
+				() -> this.context.createSupplierThreadLocalNode(qualifier, type, this));
+	}
+
+	@Override
 	public OfficeFloorManagedObjectSource getOfficeFloorManagedObjectSource(String managedObjectSourceName,
 			String qualifier, String type) {
 
@@ -226,7 +234,7 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public OfficeFloorSupplierThreadLocal getOfficeFloorSupplierThreadLocal(String qualifier, String type) {
+	public OfficeSupplierThreadLocal getOfficeSupplierThreadLocal(String qualifier, String type) {
 		String name = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, type);
 		return NodeUtil.getNode(name, this.supplierThreadLocals,
 				() -> this.context.createSupplierThreadLocalNode(qualifier, type, this));

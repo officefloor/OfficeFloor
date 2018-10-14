@@ -37,7 +37,7 @@ public interface OfficeFloorSupplier extends PropertyConfigurable {
 	String getOfficeFloorSupplierName();
 
 	/**
-	 * Adds an {@link OfficeFloorSupplierThreadLocal}.
+	 * Obtains the {@link OfficeFloorSupplierThreadLocal}.
 	 * 
 	 * @param qualifier Qualifier of the required {@link ManagedObject}. May be
 	 *                  <code>null</code> to match only on type.
