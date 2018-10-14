@@ -31,6 +31,7 @@ import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.jdbc.AbstractConnectionTestCase;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.ConnectionRecycleWrapper;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -90,7 +91,13 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 			super.tearDown();
 		} finally {
 			if (this.officeFloor != null) {
+
+				// Close the OfficeFloor
 				this.officeFloor.closeOfficeFloor();
+
+				// Should clean up and close connections
+				assertTrue("Should close service delegate connection", MockSection.serviceDelegate.isClosed());
+				assertTrue("Should close thread delegate connection", MockSection.threadDelegate.isClosed());
 			}
 		}
 	}
@@ -169,8 +176,8 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 		MockSection.isTransaction = true;
 		CompileOfficeFloor.invokeProcess(this.officeFloor, "SECTION.service", null);
 		assertNotNull("Connection should still be pooled", !MockSection.serviceDelegate.isClosed());
-		assertSame("Should be same connection", MockSection.serviceDelegate, MockSection.threadDelegate);
 		assertTrue("Thread connection should still be pooled", !MockSection.threadDelegate.isClosed());
+		assertSame("Should be same connection", MockSection.serviceDelegate, MockSection.threadDelegate);
 	}
 
 	public static class NewThread {
@@ -200,6 +207,8 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 
 		public void service(Connection connection, Flows flows) throws SQLException {
 			assertNotNull("Should have connection", connection);
+			assertTrue("Connection should indicate if real to recycle", connection instanceof ConnectionRecycleWrapper);
+			assertFalse("No real connection to recycle", ((ConnectionRecycleWrapper) connection).isRealConnection());
 			serviceDelegate = ThreadLocalJdbcConnectionPool.extractDelegateConnection(connection);
 			assertNotNull("Should have delegate", serviceDelegate);
 			pool = ThreadLocalJdbcConnectionPool.extractConnectionPool(connection);
@@ -207,7 +216,8 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 
 			// Initiate transaction
 			if (isTransaction) {
-				connection.setAutoCommit(true);
+				connection.setAutoCommit(false);
+				assertTrue("Should now be real connection", ((ConnectionRecycleWrapper) connection).isRealConnection());
 			}
 
 			// Undertake flow
@@ -219,6 +229,10 @@ public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCas
 
 		public void thread(Connection connection, @Parameter PassedState parameter, NewThread tag) throws SQLException {
 			assertNotNull("Should have dependency", connection);
+			assertTrue("Thread connection should indicate if real to recycle",
+					connection instanceof ConnectionRecycleWrapper);
+			assertEquals("Only real connection if within transaction", isTransaction,
+					((ConnectionRecycleWrapper) connection).isRealConnection());
 			assertNotSame("Should be different thread", Thread.currentThread(), parameter.thread);
 			assertSame("Should be same dependency between teams", connection, parameter.proxy);
 			threadDelegate = ThreadLocalJdbcConnectionPool.extractDelegateConnection(connection);

@@ -100,6 +100,8 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 			// Fall back to proxy
 			this.wrappedConnection = (Connection) Proxy.newProxyInstance(this.classLoader,
 					new Class[] { Connection.class }, (object, method, args) -> {
+
+						// Ensure not invoke specific connection methods
 						switch (method.getName()) {
 						case "setReadOnly":
 							throw new SQLException("Connection is re-used read-only so can not be changed");
@@ -107,7 +109,7 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 							return null; // no operation methods
 						}
 
-						// Undertake method
+						// Undertake connection method
 						return this.connection.getClass().getMethod(method.getName(), method.getParameterTypes())
 								.invoke(this.connection, args);
 					});

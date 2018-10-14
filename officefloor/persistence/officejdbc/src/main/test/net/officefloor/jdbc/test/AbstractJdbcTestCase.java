@@ -40,12 +40,16 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -89,9 +93,36 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			propertyLoader.accept(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
-			// Pool the connection (keeps it alive)
+			// Obtain the connection via pool return
 			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
-					ThreadLocalJdbcConnectionPoolSource.class.getName());
+					new AbstractManagedObjectPoolSource() {
+
+						@Override
+						protected void loadSpecification(SpecificationContext context) {
+						}
+
+						@Override
+						protected void loadMetaData(MetaDataContext context) throws Exception {
+							context.setPooledObjectType(Connection.class);
+							context.setManagedObjectPoolFactory((poolContext) -> new ManagedObjectPool() {
+
+								@Override
+								public void sourceManagedObject(ManagedObjectUser user) {
+									poolContext.getManagedObjectSource().sourceManagedObject(user);
+								}
+
+								@Override
+								public void returnManagedObject(ManagedObject managedObject) {
+									// Allow connection to live beyond close of OfficeFloor
+								}
+
+								@Override
+								public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
+									// Allow connection to live beyond close of OfficeFloor
+								}
+							});
+						}
+					});
 			context.getOfficeArchitect().link(mos, pool);
 		});
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
@@ -165,7 +196,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	protected abstract void cleanDatabase(Connection connection) throws SQLException;
 
 	/**
-	 * {@link Connection}.
+	 * {@link Connection}. Keep {@link Connection} to database for in memory
+	 * databases to stay alive.
 	 */
 	protected Connection connection;
 
@@ -175,17 +207,14 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			super.setUp();
 
 			// Obtain connection
-			this.connection = DataSourceRule.waitForDatabaseAvailable(AbstractJdbcTestCase.class, () -> {
+			this.connection = DataSourceRule.waitForDatabaseAvailable(AbstractJdbcTestCase.class, (context) -> {
 
 				// Obtain the connection
-				this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
-						(mos) -> this.loadConnectionProperties(mos));
+				this.connection = context.setConnection(getConnection(this.getConnectionManagedObjectSourceClass(),
+						(mos) -> this.loadConnectionProperties(mos)));
 
 				// Clean database
 				this.cleanDatabase(this.connection);
-
-				// Return the connection
-				return connection;
 			});
 		}
 	}
@@ -859,6 +888,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
 			statement.execute("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID , NAME ) VALUES ( 1, 'test' )");
+			if (!this.connection.getAutoCommit()) {
+				this.connection.commit();
+			}
 		}
 
 		// Undertake warm up
@@ -920,7 +952,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			for (int i = 0; i < THREAD_COUNT; i++) {
 				SelectParameter parameter = new SelectParameter();
 				flows.thread(parameter, (exception) -> {
-					assertNull("Should be no failure in thread", exception);
+					assertNull("Should be no failure in thread (" + exception + ")", exception);
 					assertEquals("Should obtain name", "test", parameter.name);
 					completed[0]++;
 					if (completed[0] == THREAD_COUNT) {

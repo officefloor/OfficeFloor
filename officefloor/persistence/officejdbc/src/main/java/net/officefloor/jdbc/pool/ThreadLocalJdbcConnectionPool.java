@@ -41,6 +41,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.jdbc.AbstractConnectionManagedObject;
+import net.officefloor.jdbc.ConnectionRecycleWrapper;
 
 /**
  * {@link Connection} {@link ManagedObjectPool} implementation that uses
@@ -68,6 +69,13 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	 * Context for the pooled {@link Connection}.
 	 */
 	public static interface PooledConnectionContext extends InvocationHandler {
+
+		/**
+		 * Indicates if real {@link Connection}.
+		 * 
+		 * @return <code>true</code> if real {@link Connection}.
+		 */
+		boolean isRealConnection();
 
 		/**
 		 * Obtains the {@link ConnectionReference}.
@@ -147,7 +155,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		if (compiler == null) {
 
 			// Fall back to proxy implementation
-			Class<?>[] interfaces = new Class[] { Connection.class };
+			Class<?>[] interfaces = new Class[] { Connection.class, ConnectionRecycleWrapper.class };
 			return (wrapperContext) -> (Connection) Proxy.newProxyInstance(classLoader, interfaces, wrapperContext);
 
 		} else {
@@ -163,6 +171,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			source.println("@" + compiler.getSourceName(SuppressWarnings.class) + "(\"unchecked\")");
 			source.println("public class " + className.getClassName() + " implements "
 					+ compiler.getSourceName(Connection.class) + ", "
+					+ compiler.getSourceName(ConnectionRecycleWrapper.class) + ","
 					+ compiler.getSourceName(CompiledConnectionWrapper.class) + " {");
 
 			// Write the constructor
@@ -179,6 +188,13 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			source.println("  public " + compiler.getSourceName(ThreadLocalJdbcConnectionPool.class)
 					+ " _getPool() throws " + compiler.getSourceName(SQLException.class) + " {");
 			source.println("    return this.context.getPool();");
+			source.println("  }");
+
+			// Implement isRealConnection
+			source.print("  public ");
+			compiler.writeMethodSignature(source, ConnectionRecycleWrapper.isRealConnectionMethod());
+			source.println(" {");
+			source.println("    return this.context.isRealConnection();");
 			source.println("  }");
 
 			// Write the methods
@@ -417,6 +433,15 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		 */
 
 		@Override
+		public boolean isRealConnection() {
+			/*
+			 * Attempt to recycle (clean transaction). Therefore, only "real" connection if
+			 * within transaction.
+			 */
+			return (this.transactionConnection != null);
+		}
+
+		@Override
 		public ConnectionReference getConnectionReference() throws SQLException {
 
 			// Determine if transaction connection
@@ -536,6 +561,11 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+			// Handle recycle wrapper
+			if (ConnectionRecycleWrapper.isRealConnectionMethod(method)) {
+				return this.isRealConnection();
+			}
 
 			// Obtain the connection reference
 			ConnectionReferenceImpl reference = (ConnectionReferenceImpl) this.getConnectionReference();

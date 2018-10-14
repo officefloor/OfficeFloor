@@ -133,17 +133,14 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 
 		// Obtain connection
 		// Must keep reference to keep potential in memory databases active
-		this.connection = DataSourceRule.waitForDatabaseAvailable(() -> {
+		this.connection = DataSourceRule.waitForDatabaseAvailable((context) -> {
 
 			// Obtain the connection
-			Connection conn = AbstractJdbcTestCase.getConnection(ConnectionManagedObjectSource.class,
-					(mos) -> this.loadDatabaseProperties(mos));
+			Connection conn = context.setConnection(AbstractJdbcTestCase
+					.getConnection(ConnectionManagedObjectSource.class, (mos) -> this.loadDatabaseProperties(mos)));
 
 			// Clean database for testing
 			this.cleanDatabase(conn);
-
-			// Return the connection
-			return conn;
 		});
 
 		// Create table for testing

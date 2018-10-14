@@ -209,6 +209,16 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 					.getRecycleManagedObjectParameter(context);
 			Connection connection = recycle.getManagedObject().connection;
 
+			// Determine if real connection to recycle
+			if (connection instanceof ConnectionRecycleWrapper) {
+				ConnectionRecycleWrapper wrapper = (ConnectionRecycleWrapper) connection;
+				if (!wrapper.isRealConnection()) {
+					// No "real" connection, so no need to clean up
+					recycle.reuseManagedObject();
+					return null;
+				}
+			}
+
 			// Determine if within transaction
 			if (!connection.getAutoCommit()) {
 
