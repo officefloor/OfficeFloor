@@ -106,8 +106,11 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 							// Decorate the connection
 							Connection connection = (Connection) result;
 							for (int i = 0; i < decorators.length; i++) {
-								decorators[i].decorate(connection);
+								connection = decorators[i].decorate(connection);
 							}
+
+							// Return the decorated connection
+							result = connection;
 						}
 						return result;
 					});
@@ -133,7 +136,7 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 							// Decorate the connection
 							methodContext.writeln("    for (int i = 0; i < this.decorators.length; i++) {");
-							methodContext.writeln("      this.decorators[i].decorate(connection);");
+							methodContext.writeln("      connection = this.decorators[i].decorate(connection);");
 							methodContext.writeln("    }");
 
 							// Return the connection
@@ -214,8 +217,11 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 							// Decorate the connection
 							PooledConnection connection = (PooledConnection) result;
 							for (int i = 0; i < decorators.length; i++) {
-								decorators[i].decorate(connection);
+								connection = decorators[i].decorate(connection);
 							}
+
+							// Return the decorated connection
+							result = connection;
 						}
 						return result;
 					});
@@ -241,7 +247,7 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 							// Decorate the connection
 							methodContext.writeln("    for (int i = 0; i < this.decorators.length; i++) {");
-							methodContext.writeln("      this.decorators[i].decorate(connection);");
+							methodContext.writeln("      connection = this.decorators[i].decorate(connection);");
 							methodContext.writeln("    }");
 
 							// Return the connection
