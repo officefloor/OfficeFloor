@@ -80,7 +80,7 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 		this.dataSource = this.newDataSource(mosContext);
 
 		// Validate connectivity
-		this.setConnectivity(() -> this.dataSource.getConnection());
+		this.setConnectivity(() -> new ConnectionConnectivity(this.dataSource.getConnection()));
 	}
 
 	@Override

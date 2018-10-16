@@ -303,18 +303,66 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	private ConnectivityFactory connectivityFactory;
 
 	/**
-	 * Factory for {@link Connection} in confirming connectivity.
+	 * Connectivity.
+	 */
+	public static interface Connectivity extends AutoCloseable {
+
+		/**
+		 * Obtains the {@link Connection} to test connectivity.
+		 * 
+		 * @return {@link Connection} to test connectivity.
+		 * @throws SQLException If fails to obtain {@link Connection}.
+		 */
+		Connection getConnection() throws SQLException;
+	}
+
+	/**
+	 * Factory for {@link Connectivity}.
 	 */
 	@FunctionalInterface
 	public static interface ConnectivityFactory {
 
 		/**
-		 * Obtains the {@link Connection} for connectivity.
+		 * Obtains the {@link Connectivity}.
 		 *
-		 * @return {@link Connection}.
-		 * @throws SQLException If fails to obtain connectivity.
+		 * @return {@link Connectivity}.
+		 * @throws SQLException If fails to obtain {@link Connectivity}.
 		 */
-		Connection createConnectivity() throws SQLException;
+		Connectivity createConnectivity() throws SQLException;
+	}
+
+	/**
+	 * Convenient {@link Connectivity} implementation to wrap a {@link Connection}.
+	 */
+	public static class ConnectionConnectivity implements Connectivity {
+
+		/**
+		 * {@link Connection}.
+		 */
+		private final Connection connection;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param connection {@link Connection}.
+		 */
+		public ConnectionConnectivity(Connection connection) {
+			this.connection = connection;
+		}
+
+		/*
+		 * ================= Connectivity ==========================
+		 */
+
+		@Override
+		public Connection getConnection() {
+			return this.connection;
+		}
+
+		@Override
+		public void close() throws Exception {
+			this.connection.close();
+		}
 	}
 
 	/**
@@ -360,7 +408,8 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 		}
 
 		// Undertake connectivity
-		try (Connection connection = this.connectivityFactory.createConnectivity()) {
+		try (Connectivity connectivity = this.connectivityFactory.createConnectivity()) {
+			Connection connection = connectivity.getConnection();
 			if (sql != null) {
 				connection.createStatement().execute(sql);
 			}

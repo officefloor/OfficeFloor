@@ -155,7 +155,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 		this.dataSource = this.newDataSource(this.mosContext);
 
 		// Provide connectivity
-		this.setConnectivity(() -> this.dataSource.getConnection());
+		this.setConnectivity(() -> new ConnectionConnectivity(this.dataSource.getConnection()));
 	}
 
 	@Override

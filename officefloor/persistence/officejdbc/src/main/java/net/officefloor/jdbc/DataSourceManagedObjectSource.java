@@ -61,7 +61,7 @@ public class DataSourceManagedObjectSource extends AbstractConnectionManagedObje
 		this.dataSource = this.newDataSource(mosContext);
 
 		// Validate connectivity
-		this.setConnectivity(() -> this.dataSource.getConnection());
+		this.setConnectivity(() -> new ConnectionConnectivity(this.dataSource.getConnection()));
 		this.loadValidateConnectivity(context);
 	}
 
