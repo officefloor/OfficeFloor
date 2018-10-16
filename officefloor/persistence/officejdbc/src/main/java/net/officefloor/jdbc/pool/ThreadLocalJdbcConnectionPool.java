@@ -71,11 +71,12 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	public static interface PooledConnectionContext extends InvocationHandler {
 
 		/**
-		 * Indicates if real {@link Connection}.
+		 * Obtains the real {@link Connection}.
 		 * 
-		 * @return <code>true</code> if real {@link Connection}.
+		 * @return The real {@link Connection} or <code>null</code> if no real
+		 *         {@link Connection}.
 		 */
-		boolean isRealConnection();
+		Connection getRealConnection();
 
 		/**
 		 * Obtains the {@link ConnectionReference}.
@@ -193,7 +194,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			source.print("  public ");
 			compiler.writeMethodSignature(source, ConnectionWrapper.getRealConnectionMethod());
 			source.println(" {");
-			source.println("    return this._getConnection();");
+			source.println("    return this.context.getRealConnection();");
 			source.println("  }");
 
 			// Write the methods
@@ -299,6 +300,16 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	private final Deque<ConnectionReferenceImpl> pooledConnections = new ConcurrentLinkedDeque<>();
 
 	/**
+	 * <p>
+	 * All {@link ConnectionReferenceImpl} instances.
+	 * <p>
+	 * Some {@link Thread} instances may not have completed yet leaving a
+	 * {@link PooledConnection} not in the idle list for closing. This tracks all
+	 * {@link PooledConnection} instances created to ensure they are all closed.
+	 */
+	private final Deque<ConnectionReferenceImpl> allPooledConnections = new ConcurrentLinkedDeque<>();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param dataSource     {@link ConnectionPoolDataSource}.
@@ -373,11 +384,11 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	public void empty() {
 
 		// Close all the pooled connections
-		for (ConnectionReferenceImpl reference : this.pooledConnections) {
+		for (ConnectionReferenceImpl reference : this.allPooledConnections) {
 			try {
 				reference.pooledConnection.close();
 			} catch (SQLException ex) {
-				
+
 			}
 		}
 	}
@@ -441,12 +452,13 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		 */
 
 		@Override
-		public boolean isRealConnection() {
+		public Connection getRealConnection() {
 			/*
 			 * Attempt to recycle (clean transaction). Therefore, only "real" connection if
 			 * within transaction.
 			 */
-			return (this.transactionConnection != null);
+			ConnectionReferenceImpl real = this.transactionConnection;
+			return (real != null) ? real.connection : null;
 		}
 
 		@Override
@@ -496,6 +508,9 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 					// Create reference to the connection
 					reference = new ConnectionReferenceImpl(connection, pooledConnection);
+
+					// Register connection (for empty on close)
+					ThreadLocalJdbcConnectionPool.this.allPooledConnections.push(reference);
 				}
 
 				// Register the connection with the thread
@@ -564,8 +579,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 			// Handle recycle wrapper
 			if (ConnectionWrapper.isGetRealConnectionMethod(method)) {
-				ConnectionReferenceImpl realConnection = this.transactionConnection;
-				return (realConnection != null) ? realConnection.getConnection() : null;
+				return this.getRealConnection();
 			}
 
 			// Obtain the connection reference
