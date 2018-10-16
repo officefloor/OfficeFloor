@@ -17,11 +17,20 @@
  */
 package net.officefloor.jdbc;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
 
+import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
+import javax.sql.PooledConnection;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.JavaSource;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -31,6 +40,10 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
+import net.officefloor.jdbc.decorate.ConnectionDecorator;
+import net.officefloor.jdbc.decorate.ConnectionDecoratorFactory;
+import net.officefloor.jdbc.decorate.PooledConnectionDecorator;
+import net.officefloor.jdbc.decorate.PooledConnectionDecoratorFactory;
 
 /**
  * Abstract {@link ManagedObjectSource} for {@link Connection}.
@@ -50,6 +63,90 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	 * {@link DataSource} is configured correctly.
 	 */
 	public static final String PROPERTY_DATA_SOURCE_VALIDATE_SQL = "datasource.validate.sql";
+
+	/**
+	 * Creates the {@link DataSource}.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return Created {@link DataSource}.
+	 * @throws Exception If fails to create the {@link DataSource}.
+	 */
+	protected final DataSource createDataSource(SourceContext context) throws Exception {
+
+		// Obtain the data source
+		DataSourceFactory dataSourceFactory = this.getDataSourceFactory(context);
+		DataSource dataSource = dataSourceFactory.createDataSource(context);
+
+		// Obtain the decorator factories
+		List<ConnectionDecorator> decoratorList = new ArrayList<>();
+		ServiceLoader<ConnectionDecoratorFactory> decoratorFactories = ServiceLoader
+				.load(ConnectionDecoratorFactory.class, context.getClassLoader());
+		for (ConnectionDecoratorFactory decoratorFactory : decoratorFactories) {
+			decoratorList.add(decoratorFactory.createConnectionDecorator(context));
+		}
+		ConnectionDecorator[] decorators = decoratorList.toArray(new ConnectionDecorator[decoratorList.size()]);
+
+		// Determine if require decorating connections
+		if (decorators.length == 0) {
+			return dataSource;
+		}
+
+		// Provide compiled DataSource
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(context.getClassLoader());
+		if (compiler == null) {
+
+			// Fall back to proxy implementation
+			return (DataSource) Proxy.newProxyInstance(context.getClassLoader(), new Class[] { DataSource.class },
+					(object, method, args) -> {
+						Method dataSourceMethod = dataSource.getClass().getMethod(method.getName(),
+								method.getParameterTypes());
+						Object result = dataSourceMethod.invoke(dataSource, args);
+						if ("getConnection".equals(method.getName())) {
+
+							// Decorate the connection
+							Connection connection = (Connection) result;
+							for (int i = 0; i < decorators.length; i++) {
+								decorators[i].decorate(connection);
+							}
+						}
+						return result;
+					});
+
+		} else {
+			// Provide compiled wrapper implementation
+			JavaSource javaSource = compiler.addWrapper(new Class[] { DataSource.class }, DataSource.class,
+					"this.delegate", (constructorContext) -> {
+						compiler.writeConstructor(constructorContext.getSource(),
+								constructorContext.getClassName().getClassName(),
+								compiler.createField(DataSource.class, "delegate"),
+								compiler.createField(ConnectionDecorator[].class, "decorators"));
+					}, (methodContext) -> {
+						Method method = methodContext.getMethod();
+						if ("getConnection".equals(method.getName())) {
+
+							// Obtain the connection
+							methodContext.write("    ");
+							methodContext.write(compiler.getSourceName(Connection.class));
+							methodContext.write(" connection = ");
+							compiler.writeDelegateMethodCall(methodContext.getSource(), "this.delegate", method);
+							methodContext.writeln(";");
+
+							// Decorate the connection
+							methodContext.writeln("    for (int i = 0; i < this.decorators.length; i++) {");
+							methodContext.writeln("      this.decorators[i].decorate(connection);");
+							methodContext.writeln("    }");
+
+							// Return the connection
+							methodContext.writeln("    return connection;");
+						}
+					});
+
+			// Compile and return the class
+			Class<?> wrapperClass = javaSource.compile();
+			return (DataSource) wrapperClass.getConstructor(DataSource.class, ConnectionDecorator[].class)
+					.newInstance(dataSource, decorators);
+		}
+	}
 
 	/**
 	 * Allows overriding to configure a different {@link DataSourceFactory}.
@@ -72,6 +169,92 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 		// Return the data source factory
 		return dataSourceFactory;
+	}
+
+	/**
+	 * Creates the {@link ConnectionPoolDataSource}.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return Created {@link ConnectionPoolDataSource}.
+	 * @throws Exception If fails to create the {@link ConnectionPoolDataSource}.
+	 */
+	protected final ConnectionPoolDataSource createConnectionPoolDataSource(SourceContext context) throws Exception {
+
+		// Obtain the data source
+		ConnectionPoolDataSourceFactory dataSourceFactory = this.getConnectionPoolDataSourceFactory(context);
+		ConnectionPoolDataSource dataSource = dataSourceFactory.createConnectionPoolDataSource(context);
+
+		// Obtain the decorator factories
+		List<PooledConnectionDecorator> decoratorList = new ArrayList<>();
+		ServiceLoader<PooledConnectionDecoratorFactory> decoratorFactories = ServiceLoader
+				.load(PooledConnectionDecoratorFactory.class, context.getClassLoader());
+		for (PooledConnectionDecoratorFactory decoratorFactory : decoratorFactories) {
+			decoratorList.add(decoratorFactory.createPooledConnectionDecorator(context));
+		}
+		PooledConnectionDecorator[] decorators = decoratorList
+				.toArray(new PooledConnectionDecorator[decoratorList.size()]);
+
+		// Determine if require decorating connections
+		if (decorators.length == 0) {
+			return dataSource;
+		}
+
+		// Provide compiled ConnectionPooledDataSource
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(context.getClassLoader());
+		if (compiler == null) {
+
+			// Fall back to proxy implementation
+			return (ConnectionPoolDataSource) Proxy.newProxyInstance(context.getClassLoader(),
+					new Class[] { ConnectionPoolDataSource.class }, (object, method, args) -> {
+						Method dataSourceMethod = dataSource.getClass().getMethod(method.getName(),
+								method.getParameterTypes());
+						Object result = dataSourceMethod.invoke(dataSource, args);
+						if ("getPooledConnection".equals(method.getName())) {
+
+							// Decorate the connection
+							PooledConnection connection = (PooledConnection) result;
+							for (int i = 0; i < decorators.length; i++) {
+								decorators[i].decorate(connection);
+							}
+						}
+						return result;
+					});
+
+		} else {
+			// Provide compiled wrapper implementation
+			JavaSource javaSource = compiler.addWrapper(new Class[] { ConnectionPoolDataSource.class },
+					ConnectionPoolDataSource.class, "this.delegate", (constructorContext) -> {
+						compiler.writeConstructor(constructorContext.getSource(),
+								constructorContext.getClassName().getClassName(),
+								compiler.createField(ConnectionPoolDataSource.class, "delegate"),
+								compiler.createField(ConnectionDecorator[].class, "decorators"));
+					}, (methodContext) -> {
+						Method method = methodContext.getMethod();
+						if ("getPooledConnection".equals(method.getName())) {
+
+							// Obtain the connection
+							methodContext.write("    ");
+							methodContext.write(compiler.getSourceName(PooledConnection.class));
+							methodContext.write(" connection = ");
+							compiler.writeDelegateMethodCall(methodContext.getSource(), "this.delegate", method);
+							methodContext.writeln(";");
+
+							// Decorate the connection
+							methodContext.writeln("    for (int i = 0; i < this.decorators.length; i++) {");
+							methodContext.writeln("      this.decorators[i].decorate(connection);");
+							methodContext.writeln("    }");
+
+							// Return the connection
+							methodContext.writeln("    return connection;");
+						}
+					});
+
+			// Compile and return the class
+			Class<?> wrapperClass = javaSource.compile();
+			return (ConnectionPoolDataSource) wrapperClass
+					.getConstructor(ConnectionPoolDataSource.class, ConnectionDecorator[].class)
+					.newInstance(dataSource, decorators);
+		}
 	}
 
 	/**

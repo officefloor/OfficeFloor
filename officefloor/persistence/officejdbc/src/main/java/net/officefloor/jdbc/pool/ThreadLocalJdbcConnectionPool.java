@@ -41,7 +41,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.jdbc.AbstractConnectionManagedObject;
-import net.officefloor.jdbc.ConnectionRecycleWrapper;
+import net.officefloor.jdbc.ConnectionWrapper;
 
 /**
  * {@link Connection} {@link ManagedObjectPool} implementation that uses
@@ -106,7 +106,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	 * Interface on compiled {@link Connection} wrapper extract details of the
 	 * {@link Connection}.
 	 */
-	public static interface CompiledConnectionWrapper {
+	public static interface CompiledConnectionWrapper extends ConnectionWrapper {
 
 		/**
 		 * Obtains the {@link Connection}.
@@ -155,7 +155,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		if (compiler == null) {
 
 			// Fall back to proxy implementation
-			Class<?>[] interfaces = new Class[] { Connection.class, ConnectionRecycleWrapper.class };
+			Class<?>[] interfaces = new Class[] { Connection.class, ConnectionWrapper.class };
 			return (wrapperContext) -> (Connection) Proxy.newProxyInstance(classLoader, interfaces, wrapperContext);
 
 		} else {
@@ -170,9 +170,8 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			source.println("package " + className.getPackageName() + ";");
 			source.println("@" + compiler.getSourceName(SuppressWarnings.class) + "(\"unchecked\")");
 			source.println("public class " + className.getClassName() + " implements "
-					+ compiler.getSourceName(Connection.class) + ", "
-					+ compiler.getSourceName(ConnectionRecycleWrapper.class) + ","
-					+ compiler.getSourceName(CompiledConnectionWrapper.class) + " {");
+					+ compiler.getSourceName(Connection.class) + ", " + compiler.getSourceName(ConnectionWrapper.class)
+					+ "," + compiler.getSourceName(CompiledConnectionWrapper.class) + " {");
 
 			// Write the constructor
 			compiler.writeConstructor(source, className.getClassName(),
@@ -192,9 +191,9 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 			// Implement isRealConnection
 			source.print("  public ");
-			compiler.writeMethodSignature(source, ConnectionRecycleWrapper.isRealConnectionMethod());
+			compiler.writeMethodSignature(source, ConnectionWrapper.getRealConnectionMethod());
 			source.println(" {");
-			source.println("    return this.context.isRealConnection();");
+			source.println("    return this._getConnection();");
 			source.println("  }");
 
 			// Write the methods
@@ -218,8 +217,8 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 					break;
 				default:
 					// Default implementation
-					compiler.writeDelegateMethodImplementation(source,
-							"this.context.getConnectionReference().getConnection()", method);
+					compiler.writeMethodImplementation(source, "this.context.getConnectionReference().getConnection()",
+							method);
 					break;
 				}
 
@@ -563,8 +562,9 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
 			// Handle recycle wrapper
-			if (ConnectionRecycleWrapper.isRealConnectionMethod(method)) {
-				return this.isRealConnection();
+			if (ConnectionWrapper.isGetRealConnectionMethod(method)) {
+				ConnectionReferenceImpl realConnection = this.transactionConnection;
+				return (realConnection != null) ? realConnection.getConnection() : null;
 			}
 
 			// Obtain the connection reference

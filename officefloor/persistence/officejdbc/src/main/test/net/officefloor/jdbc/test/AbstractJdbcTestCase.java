@@ -55,6 +55,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.jdbc.AbstractConnectionManagedObjectSource;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.ConnectionWrapper;
 import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
@@ -118,7 +119,14 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 								@Override
 								public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
-									// Allow connection to live beyond close of OfficeFloor
+									try {
+										SetupSection.connection.close();
+									} catch (SQLException ex) {
+										// Ignore close failure
+									} finally {
+										// No connection
+										SetupSection.connection = null;
+									}
 								}
 							});
 						}
@@ -143,7 +151,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		private static Connection connection;
 
 		public void script(Connection connection) throws SQLException {
-			SetupSection.connection = connection;
+			SetupSection.connection = ConnectionWrapper.getRealConnection(connection);
 		}
 	}
 
@@ -203,6 +211,11 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
+
+		// Ensure clean state (no connections from previous test)
+		ValidateConnectionDecoratorFactory.assertNoPreviousTestConnections();
+
+		// Setup test
 		synchronized (AbstractJdbcTestCase.class) {
 			super.setUp();
 
@@ -227,6 +240,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			// Close connection
 			this.connection.close();
 		}
+
+		// Ensure no open connections
+		ValidateConnectionDecoratorFactory.assertAllConnectionsClosed();
 	}
 
 	/**
@@ -432,9 +448,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		}
 
 		// As no pooling, should close the connection
-		if (!isPooled) {
-			assertTrue("Connection should be closed", ConnectivitySection.connection.isClosed());
-		}
+		assertTrue("Connection should be closed", ConnectivitySection.connection.isClosed());
 	}
 
 	public static class ConnectivitySection {
@@ -454,6 +468,141 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 				statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
 				statement.execute("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
 			}
+		}
+	}
+
+	/**
+	 * Ensure connection management for writable {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testWritableConnectionManagement() throws Throwable {
+		this.doConnectionManagementTest(this.getConnectionManagedObjectSourceClass(), false, 2);
+	}
+
+	/**
+	 * Ensure connection management for writable {@link Connection} using fallback
+	 * {@link Proxy}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testWritableConnectionManagementViaProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(
+				() -> this.doConnectionManagementTest(this.getConnectionManagedObjectSourceClass(), false, 2));
+	}
+
+	/**
+	 * Ensure connection management for writable {@link Connection} being pooled.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testPooledWritableConnectionManagement() throws Throwable {
+		this.doConnectionManagementTest(this.getConnectionManagedObjectSourceClass(), true, 2);
+	}
+
+	/**
+	 * Ensure connection management for writable {@link Connection} being pooled
+	 * using fallback {@link Proxy}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testPooledWritableConnectionManagementViaProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(
+				() -> this.doConnectionManagementTest(this.getConnectionManagedObjectSourceClass(), true, 2));
+	}
+
+	/**
+	 * Ensure connection management for read-only {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testReadOnlyConnectionManagement() throws Throwable {
+		this.doConnectionManagementTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false, 2);
+	}
+
+	/**
+	 * Ensure connection management for read-only {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testReadOnlyConnectionManagementViaProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(
+				() -> this.doConnectionManagementTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false, 2));
+	}
+
+	/**
+	 * Ensure connection management for {@link DataSource}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testDataSourceConnectionManagement() throws Throwable {
+		this.doConnectionManagementTest(this.getDataSourceManagedObjectSourceClass(), false, 2);
+	}
+
+	/**
+	 * Ensure connection management for {@link DataSource}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testDataSourceConnectionManagementViaProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(
+				() -> this.doConnectionManagementTest(this.getDataSourceManagedObjectSourceClass(), false, 2));
+	}
+
+	/**
+	 * Ensures the {@link ValidateConnectionDecoratorFactory} is registered for
+	 * tracking open connections and that there is appropriate connection management
+	 * in place to close connections.
+	 */
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doConnectionManagementTest(
+			Class<MS> managedObjectSourceClass, boolean isPooled, int connectionIncreaseCount) throws Throwable {
+
+		// Obtain the number of registered connections
+		ConnectionDecoratorSection.expectedConnectionCount = ValidateConnectionDecoratorFactory
+				.getConnectionsRegisteredCount() + connectionIncreaseCount;
+
+		// Run connectivity to create table and add row
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Add connection
+			context.addSection("SECTION", ConnectionDecoratorSection.class);
+			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("mo",
+					this.getConnectionManagedObjectSourceClass().getName());
+			this.loadConnectionProperties(mos);
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Provide pooling
+			if (isPooled) {
+				architect.link(mos,
+						architect.addManagedObjectPool("POOL", ThreadLocalJdbcConnectionPoolSource.class.getName()));
+			}
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.checkConnectionDecoration", null);
+		officeFloor.closeOfficeFloor();
+
+		// Ensure is closed with OfficeFloor
+		assertTrue("Should close connection with closing OfficeFloor",
+				ConnectionDecoratorSection.connection.isClosed());
+	}
+
+	public static class ConnectionDecoratorSection {
+
+		private static Connection connection;
+
+		private static int expectedConnectionCount;
+
+		public void checkConnectionDecoration(Connection connection) throws SQLException {
+			ConnectionDecoratorSection.connection = connection;
+
+			// Ensure connection retrieved (may be pooled)
+			connection.createStatement();
+
+			// Ensure connection is registered
+			assertEquals("Incorrect number of connections registered",
+					ValidateConnectionDecoratorFactory.getConnectionsRegisteredCount(), expectedConnectionCount);
 		}
 	}
 

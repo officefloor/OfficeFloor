@@ -39,8 +39,6 @@ import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
-import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
-import net.officefloor.jdbc.datasource.DataSourceFactory;
 
 /**
  * {@link ManagedObjectSource} for {@link Connection}.
@@ -91,8 +89,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	 * @throws Exception If fails to create the {@link ConnectionPoolDataSource}.
 	 */
 	public ConnectionPoolDataSource getConnectionPoolDataSource() throws Exception {
-		ConnectionPoolDataSourceFactory factory = this.getConnectionPoolDataSourceFactory(this.mosContext);
-		return factory.createConnectionPoolDataSource(this.mosContext);
+		return this.createConnectionPoolDataSource(this.mosContext);
 	}
 
 	/*
@@ -119,9 +116,14 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 		if (compiler == null) {
 
 			// Fall back to proxy implementation
-			Class<?>[] interfaces = new Class<?>[] { Connection.class };
+			Class<?>[] interfaces = new Class<?>[] { Connection.class, ConnectionWrapper.class };
 			this.wrapperFactory = (connection) -> (Connection) Proxy.newProxyInstance(classLoader, interfaces,
 					(proxy, method, args) -> {
+
+						// Determine if getting real connection
+						if (ConnectionWrapper.isGetRealConnectionMethod(method)) {
+							return connection;
+						}
 
 						// As managed, can not change particular methods
 						switch (method.getName()) {
@@ -136,18 +138,21 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 
 		} else {
 			// Use compiled wrapper
-			Class<?> wrapperClass = compiler.addWrapper(Connection.class, (wrapperContext) -> {
-				if ("close".equals(wrapperContext.getMethod().getName())) {
-					wrapperContext.write(""); // do not close
-				}
-			}).compile();
+			Class<?> wrapperClass = compiler.addWrapper(new Class[] { Connection.class, ConnectionWrapper.class },
+					Connection.class, null, null, (wrapperContext) -> {
+						if (ConnectionWrapper.class.equals(wrapperContext.getInterface())) {
+							wrapperContext.write("  return this.delegate;");
+						}
+						if ("close".equals(wrapperContext.getMethod().getName())) {
+							wrapperContext.write(""); // do not close
+						}
+					}).compile();
 			Constructor<?> constructor = wrapperClass.getConstructor(Connection.class);
 			this.wrapperFactory = (connection) -> (Connection) constructor.newInstance(connection);
 		}
 
 		// Create the data source
-		DataSourceFactory factory = this.getDataSourceFactory(this.mosContext);
-		this.dataSource = factory.createDataSource(this.mosContext);
+		this.dataSource = this.createDataSource(this.mosContext);
 
 		// Provide connectivity
 		this.setConnectivity(() -> this.dataSource.getConnection());
@@ -209,14 +214,12 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 					.getRecycleManagedObjectParameter(context);
 			Connection connection = recycle.getManagedObject().connection;
 
-			// Determine if real connection to recycle
-			if (connection instanceof ConnectionRecycleWrapper) {
-				ConnectionRecycleWrapper wrapper = (ConnectionRecycleWrapper) connection;
-				if (!wrapper.isRealConnection()) {
-					// No "real" connection, so no need to clean up
-					recycle.reuseManagedObject();
-					return null;
-				}
+			// Obtain the real connection
+			connection = ConnectionWrapper.getRealConnection(connection);
+			if (connection == null) {
+				// No "real" connection, so no need to clean up
+				recycle.reuseManagedObject();
+				return null;
 			}
 
 			// Determine if within transaction
