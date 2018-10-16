@@ -371,6 +371,12 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		}
 	}
 
+	@Override
+	public void empty() {
+		// TODO implement ManagedObjectPool.empty(...)
+		throw new UnsupportedOperationException("TODO implement ManagedObjectPool.empty(...)");
+	}
+
 	/*
 	 * ================== ThreadCompletionListener ===================
 	 */

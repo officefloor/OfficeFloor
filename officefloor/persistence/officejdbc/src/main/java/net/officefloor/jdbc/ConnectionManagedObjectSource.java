@@ -295,6 +295,11 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
 			this.closeConnection(managedObject);
 		}
+
+		@Override
+		public void empty() {
+			// Does not pool, so always empty
+		}
 	}
 
 }

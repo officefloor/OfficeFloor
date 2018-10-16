@@ -217,12 +217,15 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	public Throwable pooledLostCause = null;
 
 	/**
+	 * Indicates if the {@link ManagedObjectPool} has been emptied.
+	 */
+	public boolean poolEmptied = false;
+
+	/**
 	 * Instantiate and setup.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @param testCase
-	 *            {@link AbstractOfficeConstructTestCase}.
+	 * @param managedObjectName Name of the {@link ManagedObject}.
+	 * @param testCase          {@link AbstractOfficeConstructTestCase}.
 	 */
 	public TestManagedObject(String managedObjectName, AbstractOfficeConstructTestCase testCase) {
 		this(managedObjectName, testCase, false);
@@ -231,12 +234,9 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	/**
 	 * Instantiate and setup.
 	 * 
-	 * @param managedObjectName
-	 *            Name for the {@link ManagedObject}.
-	 * @param testCase
-	 *            {@link AbstractOfficeConstructTestCase}.
-	 * @param isPool
-	 *            Indicates if pool the {@link ManagedObject}.
+	 * @param managedObjectName Name for the {@link ManagedObject}.
+	 * @param testCase          {@link AbstractOfficeConstructTestCase}.
+	 * @param isPool            Indicates if pool the {@link ManagedObject}.
 	 */
 	public TestManagedObject(String managedObjectName, AbstractOfficeConstructTestCase testCase, boolean isPool) {
 		this.managedObjectBuilder = (ManagedObjectBuilder<F>) testCase.constructManagedObject(managedObjectName,
@@ -444,8 +444,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
+		 * @param managedObjectSource {@link ManagedObjectSource}.
 		 */
 		public TestManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
 			this.managedObjectSource = managedObjectSource;
@@ -498,6 +497,11 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 					TestManagedObject.this.pooledReturnedManagedObject);
 			TestManagedObject.this.pooledLostManagedObject = managedObject;
 			TestManagedObject.this.pooledLostCause = cause;
+		}
+
+		@Override
+		public void empty() {
+			TestManagedObject.this.poolEmptied = true;
 		}
 	}
 

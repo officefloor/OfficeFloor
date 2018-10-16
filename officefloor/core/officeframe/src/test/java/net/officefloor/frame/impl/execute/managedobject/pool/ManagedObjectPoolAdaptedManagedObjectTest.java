@@ -177,8 +177,7 @@ public class ManagedObjectPoolAdaptedManagedObjectTest extends AbstractOfficeCon
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
+		 * @param managedObjectSource {@link ManagedObjectSource}.
 		 */
 		private MockAdaptManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
 			this.managedObjectSource = managedObjectSource;
@@ -219,6 +218,10 @@ public class ManagedObjectPoolAdaptedManagedObjectTest extends AbstractOfficeCon
 		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
 			assertTrue("Should be provided the adapted managed object", managedObject instanceof AdaptedManagedObject);
 		}
+
+		@Override
+		public void empty() {
+		}
 	}
 
 	/**
@@ -234,8 +237,7 @@ public class ManagedObjectPoolAdaptedManagedObjectTest extends AbstractOfficeCon
 		/**
 		 * Instantiate.
 		 * 
-		 * @param delegate
-		 *            Delegate {@link ManagedObject}.
+		 * @param delegate Delegate {@link ManagedObject}.
 		 */
 		private AdaptedManagedObject(ManagedObject delegate) {
 			this.delegate = delegate;

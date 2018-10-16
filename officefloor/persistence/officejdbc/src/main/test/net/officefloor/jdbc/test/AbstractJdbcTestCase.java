@@ -128,6 +128,10 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 										SetupSection.connection = null;
 									}
 								}
+
+								@Override
+								public void empty() {
+								}
 							});
 						}
 					});
