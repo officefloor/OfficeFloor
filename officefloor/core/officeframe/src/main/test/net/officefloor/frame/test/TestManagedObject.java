@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.test;
 
+import static org.junit.Assert.assertFalse;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -501,6 +503,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 
 		@Override
 		public void empty() {
+			assertFalse("Should only empty pool once", TestManagedObject.this.poolEmptied);
 			TestManagedObject.this.poolEmptied = true;
 		}
 	}
