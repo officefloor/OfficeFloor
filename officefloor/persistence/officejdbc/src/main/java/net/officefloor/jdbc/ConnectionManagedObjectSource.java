@@ -89,7 +89,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	 * @throws Exception If fails to create the {@link ConnectionPoolDataSource}.
 	 */
 	public ConnectionPoolDataSource getConnectionPoolDataSource() throws Exception {
-		return this.createConnectionPoolDataSource(this.mosContext);
+		return this.newConnectionPoolDataSource(this.mosContext);
 	}
 
 	/*
@@ -152,7 +152,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 		}
 
 		// Create the data source
-		this.dataSource = this.createDataSource(this.mosContext);
+		this.dataSource = this.newDataSource(this.mosContext);
 
 		// Provide connectivity
 		this.setConnectivity(() -> this.dataSource.getConnection());

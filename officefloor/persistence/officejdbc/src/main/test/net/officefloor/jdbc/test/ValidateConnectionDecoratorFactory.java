@@ -19,12 +19,14 @@ package net.officefloor.jdbc.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.sql.PooledConnection;
 
@@ -109,7 +111,8 @@ public class ValidateConnectionDecoratorFactory implements ConnectionDecoratorFa
 		StringBuilder pooledConnectionFlags = new StringBuilder();
 		for (PooledConnection connection : pooledConnections) {
 			try {
-				if (!connection.getConnection().isClosed()) {
+				PooledConnectionClosed check = (PooledConnectionClosed) connection;
+				if (!check.isClosed()) {
 					openPooledConnections.add(connection);
 					pooledConnectionFlags.append('1');
 					connection.close();
@@ -171,8 +174,43 @@ public class ValidateConnectionDecoratorFactory implements ConnectionDecoratorFa
 
 	@Override
 	public PooledConnection decorate(PooledConnection connection) {
-		pooledConnections.push(connection);
-		return connection;
+
+		// Wrap connection to determine if closed
+		AtomicBoolean isClosed = new AtomicBoolean(false);
+		PooledConnection wrapped = (PooledConnection) Proxy.newProxyInstance(this.getClass().getClassLoader(),
+				new Class[] { PooledConnection.class, PooledConnectionClosed.class }, (object, method, args) -> {
+
+					// Handle whether closed
+					switch (method.getName()) {
+					case "close":
+						isClosed.set(true);
+						break; // carry on to close connection
+
+					case "isClosed":
+						return isClosed.get();
+					}
+
+					// Invoke the method
+					return connection.getClass().getMethod(method.getName(), method.getParameterTypes())
+							.invoke(connection, args);
+				});
+
+		// Load wrapped connection (so can determine when closed)
+		pooledConnections.push(wrapped);
+		return wrapped;
+	}
+
+	/**
+	 * Indicates if the {@link PooledConnection} is closed.
+	 */
+	public static interface PooledConnectionClosed {
+
+		/**
+		 * Indicates if closed.
+		 * 
+		 * @return <code>true</code> if closed.
+		 */
+		boolean isClosed();
 	}
 
 }

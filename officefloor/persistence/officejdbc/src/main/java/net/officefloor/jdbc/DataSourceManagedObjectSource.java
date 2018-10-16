@@ -58,7 +58,7 @@ public class DataSourceManagedObjectSource extends AbstractConnectionManagedObje
 		}
 
 		// Obtain the data source
-		this.dataSource = this.createDataSource(mosContext);
+		this.dataSource = this.newDataSource(mosContext);
 
 		// Validate connectivity
 		this.setConnectivity(() -> this.dataSource.getConnection());

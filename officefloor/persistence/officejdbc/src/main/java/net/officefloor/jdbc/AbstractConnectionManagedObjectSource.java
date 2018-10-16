@@ -71,7 +71,7 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	 * @return Created {@link DataSource}.
 	 * @throws Exception If fails to create the {@link DataSource}.
 	 */
-	protected final DataSource createDataSource(SourceContext context) throws Exception {
+	protected final DataSource newDataSource(SourceContext context) throws Exception {
 
 		// Obtain the data source
 		DataSourceFactory dataSourceFactory = this.getDataSourceFactory(context);
@@ -178,7 +178,7 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 	 * @return Created {@link ConnectionPoolDataSource}.
 	 * @throws Exception If fails to create the {@link ConnectionPoolDataSource}.
 	 */
-	protected final ConnectionPoolDataSource createConnectionPoolDataSource(SourceContext context) throws Exception {
+	protected final ConnectionPoolDataSource newConnectionPoolDataSource(SourceContext context) throws Exception {
 
 		// Obtain the data source
 		ConnectionPoolDataSourceFactory dataSourceFactory = this.getConnectionPoolDataSourceFactory(context);
@@ -227,7 +227,7 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 						compiler.writeConstructor(constructorContext.getSource(),
 								constructorContext.getClassName().getClassName(),
 								compiler.createField(ConnectionPoolDataSource.class, "delegate"),
-								compiler.createField(ConnectionDecorator[].class, "decorators"));
+								compiler.createField(PooledConnectionDecorator[].class, "decorators"));
 					}, (methodContext) -> {
 						Method method = methodContext.getMethod();
 						if ("getPooledConnection".equals(method.getName())) {
@@ -252,7 +252,7 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 			// Compile and return the class
 			Class<?> wrapperClass = javaSource.compile();
 			return (ConnectionPoolDataSource) wrapperClass
-					.getConstructor(ConnectionPoolDataSource.class, ConnectionDecorator[].class)
+					.getConstructor(ConnectionPoolDataSource.class, PooledConnectionDecorator[].class)
 					.newInstance(dataSource, decorators);
 		}
 	}

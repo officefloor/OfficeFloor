@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -531,11 +530,13 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 				default:
 					isError = true;
 					JavaFileObject failedSource = diagnostic.getSource();
-					msg.append("\n\t " + failedSource.getName() + " line " + diagnostic.getLineNumber() + ": "
-							+ diagnostic.getMessage(Locale.getDefault()));
+					msg.append("\n\t " + (failedSource != null ? failedSource.getName() + " " : "") + "line "
+							+ diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
 					msg.append("\n\n");
 					try {
-						msg.append(failedSource.getCharContent(true));
+						if (failedSource != null) {
+							msg.append(failedSource.getCharContent(true));
+						}
 					} catch (IOException ex) {
 						msg.append("ERROR: failed to log remaining source content");
 					}
