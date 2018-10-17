@@ -70,8 +70,15 @@ public class HibernatePostgreSqlJpaTest extends AbstractJpaTestCase {
 
 	@Override
 	protected void cleanDatabase(Connection connection) throws SQLException {
+
+		// Ensure not in transaction
+		if (!connection.getAutoCommit()) {
+			connection.setAutoCommit(true);
+		}
+
+		// Create the database
 		try (Statement statement = connection.createStatement()) {
-			statement.execute("CREATE DATABASE ALIVE"); // ensure available
+			statement.execute("CREATE DATABASE ALIVE");
 		}
 	}
 

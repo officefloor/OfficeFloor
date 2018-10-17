@@ -2,9 +2,6 @@ language: java
 jdk: oraclejdk10
 sudo: required
 services: docker
+env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
 before_install: cd officefloor
-env: 
-  - officefloor_skip_stress_tests=true
-  - officefloor_code_coverage=true
-after_success: 
-  - bash <(curl -s https://codecov.io/bash)
+after_success: bash <(curl -s https://codecov.io/bash)
