@@ -83,68 +83,72 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	public static Connection getConnection(Class<? extends ConnectionManagedObjectSource> connectionMosClass,
 			Consumer<PropertyConfigurable> propertyLoader) throws Exception {
 
-		// Run OfficeFloor with pool to obtain connection
-		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		compiler.office((context) -> {
-			context.addSection("SECTION", SetupSection.class);
+		// Avoid compiling as leaves files open (avoids running out of file handles)
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> {
 
-			// Connection
-			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-					connectionMosClass.getName());
-			propertyLoader.accept(mos);
-			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+			// Run OfficeFloor with pool to obtain connection
+			CompileOfficeFloor compiler = new CompileOfficeFloor();
+			compiler.office((context) -> {
+				context.addSection("SECTION", SetupSection.class);
 
-			// Obtain the connection via pool return
-			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
-					new AbstractManagedObjectPoolSource() {
+				// Connection
+				OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+						connectionMosClass.getName());
+				propertyLoader.accept(mos);
+				mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
-						@Override
-						protected void loadSpecification(SpecificationContext context) {
-						}
+				// Obtain the connection via pool return
+				OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
+						new AbstractManagedObjectPoolSource() {
 
-						@Override
-						protected void loadMetaData(MetaDataContext context) throws Exception {
-							context.setPooledObjectType(Connection.class);
-							context.setManagedObjectPoolFactory((poolContext) -> new ManagedObjectPool() {
+							@Override
+							protected void loadSpecification(SpecificationContext context) {
+							}
 
-								@Override
-								public void sourceManagedObject(ManagedObjectUser user) {
-									poolContext.getManagedObjectSource().sourceManagedObject(user);
-								}
+							@Override
+							protected void loadMetaData(MetaDataContext context) throws Exception {
+								context.setPooledObjectType(Connection.class);
+								context.setManagedObjectPoolFactory((poolContext) -> new ManagedObjectPool() {
 
-								@Override
-								public void returnManagedObject(ManagedObject managedObject) {
-									// Allow connection to live beyond close of OfficeFloor
-								}
-
-								@Override
-								public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
-									try {
-										SetupSection.connection.close();
-									} catch (SQLException ex) {
-										// Ignore close failure
-									} finally {
-										// No connection
-										SetupSection.connection = null;
+									@Override
+									public void sourceManagedObject(ManagedObjectUser user) {
+										poolContext.getManagedObjectSource().sourceManagedObject(user);
 									}
-								}
 
-								@Override
-								public void empty() {
-								}
-							});
-						}
-					});
-			context.getOfficeArchitect().link(mos, pool);
+									@Override
+									public void returnManagedObject(ManagedObject managedObject) {
+										// Allow connection to live beyond close of OfficeFloor
+									}
+
+									@Override
+									public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
+										try {
+											SetupSection.connection.close();
+										} catch (SQLException ex) {
+											// Ignore close failure
+										} finally {
+											// No connection
+											SetupSection.connection = null;
+										}
+									}
+
+									@Override
+									public void empty() {
+									}
+								});
+							}
+						});
+				context.getOfficeArchitect().link(mos, pool);
+			});
+			OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+			try {
+				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.script", null);
+			} catch (Throwable ex) {
+				throw fail(ex);
+			} finally {
+				officeFloor.closeOfficeFloor();
+			}
 		});
-		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
-		try {
-			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.script", null);
-		} catch (Throwable ex) {
-			throw fail(ex);
-		} finally {
-			officeFloor.closeOfficeFloor();
-		}
 
 		// Obtain connection
 		return SetupSection.connection;
