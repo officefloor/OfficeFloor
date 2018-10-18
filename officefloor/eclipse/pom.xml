@@ -37,6 +37,14 @@
 		<module>net.officefloor.woof.feature</module>
 		<module>update.site</module>
 	</modules>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>11-ea+25</version>
+		</dependency>
+	</dependencies>
 <!--
 	<dependencies>
 		<dependency>
