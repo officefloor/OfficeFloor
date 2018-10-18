@@ -72,8 +72,7 @@ import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 /**
  * Abstract {@link TestCase} for testing a {@link HttpServerImplementation}.
  * 
- * @param <M>
- *            Type of momento from raw HTTP server.
+ * @param <M> Type of momento from raw HTTP server.
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFrameTestCase {
@@ -96,10 +95,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Creates a new {@link HttpHeader}.
 	 * 
-	 * @param name
-	 *            {@link HttpHeader} name.
-	 * @param value
-	 *            {@link HttpHeader} value.
+	 * @param name  {@link HttpHeader} name.
+	 * @param value {@link HttpHeader} value.
 	 * @return New {@link HttpHeader}.
 	 */
 	protected static HttpHeader newHttpHeader(String name, String value) {
@@ -127,21 +124,17 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * The raw implementation is to return "hello world" in UTF-8 encoding for the
 	 * response entity.
 	 * 
-	 * @param serverLocation
-	 *            {@link HttpServerLocation}.
+	 * @param serverLocation {@link HttpServerLocation}.
 	 * @return Momento to provide to stopping the server.
-	 * @throws Exception
-	 *             If fails to start the raw HTTP server.
+	 * @throws Exception If fails to start the raw HTTP server.
 	 */
 	protected abstract M startRawHttpServer(HttpServerLocation serverLocation) throws Exception;
 
 	/**
 	 * Stops the raw implementation.
 	 * 
-	 * @param momento
-	 *            Momento provided from starting the raw HTTP server.
-	 * @throws Exception
-	 *             If fails to stop the raw HTTP server.
+	 * @param momento Momento provided from starting the raw HTTP server.
+	 * @throws Exception If fails to stop the raw HTTP server.
 	 */
 	protected abstract void stopRawHttpServer(M momento) throws Exception;
 
@@ -225,11 +218,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Starts the {@link HttpServer}.
 	 * 
-	 * @param sectionServicer
-	 *            {@link Class} of the {@link ClassSectionSource} to service the
-	 *            {@link HttpRequest}.
-	 * @throws Exception
-	 *             If fails to start the {@link HttpServer}.
+	 * @param sectionServicer {@link Class} of the {@link ClassSectionSource} to
+	 *                        service the {@link HttpRequest}.
+	 * @throws Exception If fails to start the {@link HttpServer}.
 	 */
 	protected void startHttpServer(Class<?> sectionServicer) throws Exception {
 
@@ -394,6 +385,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			// Send a full response
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
 			response.setStatus(HttpStatus.OK);
+			response.setContentType("text/test", null);
 			response.getHeaders().addHeader("response", "header");
 			response.getCookies().setCookie("response", "cookie");
 			response.getEntityWriter().write("response");
@@ -403,8 +395,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure able to send all details and receive all details.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testFunctionality() throws Exception {
 		this.startHttpServer(FunctionalityServicer.class);
@@ -424,11 +415,15 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			for (Header header : response.getAllHeaders()) {
 				allHeaders.append("\n\t" + header.getName() + "=" + header.getValue());
 			}
-			assertEquals("Incorrect number of headers:" + allHeaders.toString(), 4, response.getAllHeaders().length);
+			Set<String> expectedHeaders = this.getUniqueResponseHeaderNames("header", "Set-Cookie", "Content-Type",
+					"Content-Length");
+			assertEquals("Incorrect number of headers:" + allHeaders.toString() + "\n\n" + expectedHeaders + "\n\n",
+					expectedHeaders.size(), response.getAllHeaders().length);
 			assertEquals("Incorrect header:" + allHeaders.toString(), "header",
 					response.getFirstHeader("response").getValue());
 			assertEquals("Incorrect cookie:" + allHeaders.toString(), "response=cookie",
 					response.getFirstHeader("set-cookie").getValue());
+			assertEquals("Incorrect Content-Type", "text/test", response.getFirstHeader("Content-Type").getValue());
 			assertEquals("Incorrect entity", "response", entity);
 		}
 	}
@@ -436,8 +431,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can send a single HTTP request.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSingleRequest() throws Exception {
 		this.startHttpServer(Servicer.class);
@@ -447,8 +441,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can send a single HTTPS request.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSingleSecureRequest() throws Exception {
 		this.startHttpServer(Servicer.class);
@@ -458,8 +451,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can send a single HTTP {@link ByteBuffer} response.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSingleBufferRequest() throws Exception {
 		this.startHttpServer(BufferServicer.class);
@@ -469,8 +461,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can send a single HTTPS {@link ByteBuffer} response.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSingleSecureBufferRequest() throws Exception {
 		this.startHttpServer(BufferServicer.class);
@@ -480,8 +471,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can send a single HTTP {@link FileBuffer} response.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSingleFileRequest() throws Exception {
 		this.startHttpServer(FileServicer.class);
@@ -491,8 +481,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can send a single HTTPS {@link FileBuffer} response.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSingleSecureFileRequest() throws Exception {
 		this.startHttpServer(FileServicer.class);
@@ -502,8 +491,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure send Server and Date {@link HttpHeader} values.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testServerDateHeaders() throws Exception {
 		new SystemPropertiesRule(HttpServer.PROPERTY_HTTP_SERVER_NAME, "OfficeFloorServer",
@@ -526,8 +514,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure closes the {@link FileChannel} on write.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSingleCloseFileRequest() throws Exception {
 		CLOSE_FILE = TemporaryFiles.getDefault().createTempFile("testSingleCloseFileRequest",
@@ -540,8 +527,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure closes the {@link FileChannel} on write.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSingleSecureCloseFileRequest() throws Exception {
 		CLOSE_FILE = TemporaryFiles.getDefault().createTempFile("testSingleSecureCloseFileRequest",
@@ -569,8 +555,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can send multiple HTTP requests.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testMultipleIndividualRequests() throws Exception {
@@ -583,8 +568,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can send multiple HTTPS requests.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testMultipleIndividualSecureRequests() throws Exception {
@@ -598,8 +582,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * Ensure does not decode characters (allows for routing to work correctly and
 	 * not find query string / fragment incorrectly).
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testNotDecodeRequestUrl() throws Exception {
 		this.startHttpServer(EncodedUrlServicer.class);
@@ -614,8 +597,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can handle request with {@link ThreadedServicer}.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSingleThreadedHandlerRequest() throws Exception {
 		this.startHttpServer(ThreadedServicer.class);
@@ -626,8 +608,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * Ensure can handle request with {@link ThreadedServicer} for a secure
 	 * connection.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSecureSingleThreadedHandlerRequest() throws Exception {
 		this.startHttpServer(ThreadedServicer.class);
@@ -658,8 +639,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure raw secure request.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testSecureSocket() throws Exception {
 		this.startHttpServer(Servicer.class);
@@ -697,8 +677,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can handle {@link Escalation}.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	public void testHandleError() throws Exception {
 		this.startHttpServer(FailServicer.class);
@@ -725,8 +704,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can pipeline HTTP requests.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testRawPipelining() throws Exception {
@@ -736,8 +714,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can pipeline HTTP requests.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testBytesPipelining() throws Exception {
@@ -747,8 +724,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can pipeline HTTP requests.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testBufferPipelining() throws Exception {
@@ -758,8 +734,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can pipeline HTTP requests.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testFilePipelining() throws Exception {
@@ -769,8 +744,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Undertakes the pipelining test.
 	 * 
-	 * @param servicerClass
-	 *            Servicer {@link Class}.
+	 * @param servicerClass Servicer {@link Class}.
 	 */
 	private void doPipeliningTest(Class<?> servicerClass) throws Exception {
 
@@ -794,8 +768,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can handle HTTP requests with threaded handler.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testRawThreadedHandler() throws Exception {
@@ -805,8 +778,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can handle HTTP requests with threaded handler.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testBytesThreadedHandler() throws Exception {
@@ -816,8 +788,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can handle HTTP requests with threaded handler.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testBufferThreadedHandler() throws Exception {
@@ -827,8 +798,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can handle HTTP requests with threaded handler.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testFileThreadedHandler() throws Exception {
@@ -838,8 +808,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Undertakes the threaded handler test.
 	 * 
-	 * @param servicerClass
-	 *            Servicer {@link Class}.
+	 * @param servicerClass Servicer {@link Class}.
 	 */
 	private void doThreadedHandlerTest(Class<?> servicerClass) throws Exception {
 
@@ -863,8 +832,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can service multiple requests pipelined.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testRawHeavyLoad() throws Exception {
@@ -874,8 +842,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can service multiple requests pipelined.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testBytesHeavyLoad() throws Exception {
@@ -885,8 +852,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can service multiple requests pipelined.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testBufferHeavyLoad() throws Exception {
@@ -896,8 +862,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can service multiple requests pipelined.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testFileHeavyLoad() throws Exception {
@@ -907,8 +872,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Undertakes the heavy load test.
 	 * 
-	 * @param servicerClass
-	 *            Servicer {@link Class}.
+	 * @param servicerClass Servicer {@link Class}.
 	 */
 	private void doHeavyLoadTest(Class<?> servicerClass) throws Exception {
 		// CPU for client and server
@@ -922,8 +886,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can service over requests pipelined.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testRawOverLoad() throws Exception {
@@ -933,8 +896,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can service overload requests pipelined.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testBytesOverLoad() throws Exception {
@@ -944,8 +906,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can service overload requests pipelined.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testBufferOverLoad() throws Exception {
@@ -955,8 +916,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure can service overload requests pipelined.
 	 * 
-	 * @throws Exception
-	 *             If test failure.
+	 * @throws Exception If test failure.
 	 */
 	@StressTest
 	public void testFileOverLoad() throws Exception {
@@ -966,8 +926,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Undertakes the over load test.
 	 * 
-	 * @param servicerClass
-	 *            Servicer {@link Class}.
+	 * @param servicerClass Servicer {@link Class}.
 	 */
 	private void doOverLoadTest(Class<?> servicerClass) throws Exception {
 		int clientCount = Runtime.getRuntime().availableProcessors() * 4;
@@ -977,8 +936,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Starts the appropriate server for the servicer.
 	 * 
-	 * @param servicerClass
-	 *            Servicer {@link Class}.
+	 * @param servicerClass Servicer {@link Class}.
 	 */
 	private void startAppropriateHttpServer(Class<?> servicerClass) throws Exception {
 
@@ -1001,16 +959,11 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Undertakes the multi-client pipelining test.
 	 * 
-	 * @param servicerClass
-	 *            Servicer {@link Class}.
-	 * @param clientCount
-	 *            Number of simultaneous clients.
-	 * @param requestCount
-	 *            Number of requests per client.
-	 * @param resultName
-	 *            Name of result for comparison.
-	 * @throws Exception
-	 *             If test failure.
+	 * @param servicerClass Servicer {@link Class}.
+	 * @param clientCount   Number of simultaneous clients.
+	 * @param requestCount  Number of requests per client.
+	 * @param resultName    Name of result for comparison.
+	 * @throws Exception If test failure.
 	 */
 	public void doMultiClientLoadTest(Class<?> servicerClass, int clientCount, int requestCount, String resultName)
 			throws Exception {
@@ -1069,7 +1022,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	private byte[] createPipelineRequestData() {
 		StringBuilder request = new StringBuilder();
 		request.append("GET /test HTTP/1.1\n");
-		request.append("test: value\n");
+		request.append("host: test\n");
 		request.append("\n");
 		return UsAsciiUtil.convertToHttp(request.toString());
 	}
@@ -1099,6 +1052,21 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		response.append("\n");
 		response.append("hello world");
 		return UsAsciiUtil.convertToHttp(response.toString());
+	}
+
+	/**
+	 * Obtains the {@link Set} of expected response {@link HttpHeader} instances.
+	 * 
+	 * @param additionalHeaderNames Additional {@link HttpHeader} names expected in
+	 *                              the response.
+	 * @return {@link Set} of expected response {@link HttpHeader} instances.
+	 */
+	private Set<String> getUniqueResponseHeaderNames(String... additionalHeaderNames) {
+		Set<String> names = new HashSet<>(Arrays.asList(additionalHeaderNames));
+		for (HttpHeader header : this.getServerResponseHeaderValues()) {
+			names.add(header.getName());
+		}
+		return names;
 	}
 
 	/**
@@ -1134,10 +1102,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		/**
 		 * Instantiate.
 		 * 
-		 * @param port
-		 *            Port for the {@link HttpServer}.
-		 * @throws IOException
-		 *             If fails to connect to {@link HttpServer}.
+		 * @param port Port for the {@link HttpServer}.
+		 * @throws IOException If fails to connect to {@link HttpServer}.
 		 */
 		private PipelineExecutor(int port) throws IOException {
 			this.port = port;
@@ -1161,8 +1127,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		/**
 		 * Undertakes a pipeline run of requests.
 		 * 
-		 * @param requestCount
-		 *            Number of requests.
+		 * @param requestCount Number of requests.
 		 * @return {@link PipelineResult}.
 		 */
 		private PipelineResult doPipelineRun(int requestCount) throws IOException {
@@ -1320,8 +1285,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		/**
 		 * Creates {@link Runnable} to run within another {@link Thread}.
 		 * 
-		 * @param requestCount
-		 *            Request count.
+		 * @param requestCount Request count.
 		 * @return {@link Runnable}.
 		 */
 		private Runnable getRunnable(int requestCount) {
@@ -1351,8 +1315,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		 * Waits for completion.
 		 * 
 		 * @return {@link PipelineResult}.
-		 * @throws Exception
-		 *             If run failed.
+		 * @throws Exception If run failed.
 		 */
 		private synchronized PipelineResult waitForCompletion() throws Exception {
 
@@ -1375,8 +1338,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		 * Obtains the result.
 		 * 
 		 * @return {@link PipelineResult}.
-		 * @throws Exception
-		 *             If run failed.
+		 * @throws Exception If run failed.
 		 */
 		private PipelineResult returnResult() throws Exception {
 
