@@ -1,8 +1,0 @@
-<office>
-    
-    <sections>
-        <section name="SECTION" source="SECTION"
-         location="net/officefloor/building/manager/TestSection.section" />
-    </sections>
-    
-</office>

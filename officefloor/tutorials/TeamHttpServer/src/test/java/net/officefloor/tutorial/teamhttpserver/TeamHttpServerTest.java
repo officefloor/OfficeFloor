@@ -64,13 +64,15 @@ public class TeamHttpServerTest {
 		assertEquals("Should be sucessful", 200, response.getStatus().getStatusCode());
 
 		// Ensure can get initial row
-		try (Connection connection = dataSource.getConnection()) {
-			ResultSet resultSet = connection.createStatement()
-					.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
-			assertTrue("Ensure have result", resultSet.next());
-			assertEquals("Incorrect code for letter", "Y", resultSet.getString("CODE"));
-			assertFalse("Ensure no further results", resultSet.next());
-		}
+		DataSourceRule.waitForDatabaseAvailable((context) -> {
+			try (Connection connection = context.setConnection(dataSource.getConnection())) {
+				ResultSet resultSet = connection.createStatement()
+						.executeQuery("SELECT CODE FROM LETTER_CODE WHERE LETTER = 'A'");
+				assertTrue("Ensure have result", resultSet.next());
+				assertEquals("Incorrect code for letter", "Y", resultSet.getString("CODE"));
+				assertFalse("Ensure no further results", resultSet.next());
+			}
+		});
 	}
 
 	// START SNIPPET: test

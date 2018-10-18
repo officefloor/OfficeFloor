@@ -84,7 +84,16 @@
 		<jackson-version>2.9.7</jackson-version>
 		<jaxb-version>2.3.0</jaxb-version>
 		<asm-version>6.2.1</asm-version>
+		<openjfx-version>11-ea+25</openjfx-version>
+		<openjfx-swt-version>11</openjfx-swt-version>
 	</properties>
+	<repositories>
+		<repository>
+			<id>OfficeFloor-build-artifacts</id>
+			<name>Build artifacts for OfficeFloor</name>
+			<url>http://officefloor.net/build2</url>
+		</repository>
+	</repositories>
 	<dependencyManagement>
 		<dependencies>
 			<!-- ================================================ -->
@@ -401,6 +410,21 @@
 				<version>3.0.1</version>
 			</dependency>
 			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-graphics</artifactId>
+				<version>${openjfx-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-controls</artifactId>
+				<version>${openjfx-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-swt</artifactId>
+				<version>${openjfx-swt-version}</version>
+			</dependency>
+			<dependency>
 				<groupId>io.netty</groupId>
 				<artifactId>netty-all</artifactId>
 				<version>${netty-version}</version>
@@ -468,7 +492,7 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
-				<version>5.3.6.Final</version>
+				<version>5.3.7.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.datanucleus</groupId>
@@ -534,7 +558,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.5</version>
+				<version>1.6</version>
 			</dependency>
 			<!-- Following plug-ins are dependency managed to ensure available for 
 				woof-archetype to check using the latest. -->
@@ -747,11 +771,19 @@
 						<encoding>UTF-8</encoding>
 						<extraClasspathElements>
 							<extraClasspathElement>
-								<groupId>com.oracle</groupId>
-								<artifactId>javafx</artifactId>
-								<version>10.0.0-SNAPSHOT</version>
-								<systemPath>${java.home}/lib/javafx-swt.jar</systemPath>
-								<scope>system</scope>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-graphics</artifactId>
+								<version>${openjfx-version}</version>
+							</extraClasspathElement>
+							<extraClasspathElement>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-controls</artifactId>
+								<version>${openjfx-version}</version>
+							</extraClasspathElement>
+							<extraClasspathElement>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-swt</artifactId>
+								<version>${openjfx-swt-version}</version>
 							</extraClasspathElement>
 						</extraClasspathElements>
 					</configuration>
@@ -850,27 +882,6 @@
 					<source>10</source>
 					<target>10</target>
 				</configuration>
-			</plugin>
-
-			<plugin>
-				<!-- Code Coverage -->
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>
@@ -1269,6 +1280,39 @@
 		</plugins>
 	</reporting>
 	<profiles>
+		<profile>
+			<id>officefloor-code-coverage</id>
+			<activation>
+				<property>
+					<name>env.officefloor_code_coverage</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Code Coverage -->
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.2</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>report</id>
+								<phase>test</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<!-- Profile for deploying to SourceForge -->
 			<!-- -->

@@ -99,6 +99,10 @@ public class ManagedObjectPoolThreadCompleteListenerTest extends AbstractOfficeC
 		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
 		}
 
+		@Override
+		public void empty() {
+		}
+
 		/*
 		 * =============== ThreadCompletionListener =================
 		 */
