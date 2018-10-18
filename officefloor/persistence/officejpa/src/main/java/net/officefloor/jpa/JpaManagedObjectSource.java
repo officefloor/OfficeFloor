@@ -450,8 +450,8 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 
 		} else {
 			// Use compiled implementation of entity manager wrapper
-			Class<?> wrapperClass = compiler.addWrapper(EntityManager.class, JpaManagedObject.class,
-					"this.delegate.getEntityManager()", (wrapperContext) -> {
+			Class<?> wrapperClass = compiler.addWrapper(new Class[] { EntityManager.class }, JpaManagedObject.class,
+					"this.delegate.getEntityManager()", null, (wrapperContext) -> {
 						switch (wrapperContext.getMethod().getName()) {
 						case "getTransaction":
 							if (this.isRunWithinTransaction()) {

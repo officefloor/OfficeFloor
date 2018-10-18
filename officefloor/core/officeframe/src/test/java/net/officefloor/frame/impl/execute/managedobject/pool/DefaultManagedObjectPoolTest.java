@@ -110,8 +110,7 @@ public class DefaultManagedObjectPoolTest extends AbstractOfficeConstructTestCas
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
+		 * @param managedObjectSource {@link ManagedObjectSource}.
 		 */
 		private DefaultManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
 			this.managedObjectSource = managedObjectSource;
@@ -134,6 +133,10 @@ public class DefaultManagedObjectPoolTest extends AbstractOfficeConstructTestCas
 		@Override
 		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
 		}
+
+		@Override
+		public void empty() {
+		}
 	}
 
 	/**
@@ -149,8 +152,7 @@ public class DefaultManagedObjectPoolTest extends AbstractOfficeConstructTestCas
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
+		 * @param managedObjectSource {@link ManagedObjectSource}.
 		 */
 		private OverrideManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
 			this.managedObjectSource = managedObjectSource;
@@ -171,6 +173,10 @@ public class DefaultManagedObjectPoolTest extends AbstractOfficeConstructTestCas
 
 		@Override
 		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
+		}
+
+		@Override
+		public void empty() {
 		}
 	}
 

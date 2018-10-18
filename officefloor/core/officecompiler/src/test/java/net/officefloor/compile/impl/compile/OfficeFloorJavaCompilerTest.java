@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.impl.compile;
 
+import static org.junit.Assert.assertNotEquals;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -28,6 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.JavaSourceWriter;
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.JavaSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -306,6 +309,9 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 			case "close":
 				context.write("");
 				break;
+			case "commit":
+				context.getSource();
+				break;
 			case "setAutoCommit":
 				context.writeln("    this.delegate.setAutoCommit(!p0);");
 				break;
@@ -339,8 +345,165 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 
 		// Ensure no operation
 		wrapper.close();
+		wrapper.commit();
 
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can provide wrapper implementing additional features.
+	 */
+	public void testMultiInterfaceWrapper() throws Exception {
+
+		// Obtain the non-interface method
+		Method notExposedMethod = WrapperNonInterfaceMethods.class.getMethod("notExposedMethod");
+
+		// Create the wrapper
+		ClassName[] className = new ClassName[1];
+		JavaSource javaSource = this.compiler.addWrapper(new Class[] { Connection.class, AdditionalFeature.class },
+				Connection.class, "instance", (constructorContext) -> {
+					this.compiler.writeConstructor(constructorContext.getSource(),
+							constructorContext.getClassName().getClassName(),
+							this.compiler.createField(Connection.class, "instance"),
+							this.compiler.createField(int.class, "value"));
+				}, (methodContext) -> {
+					if (AdditionalFeature.class.equals(methodContext.getInterface())) {
+						methodContext.write("return \"added\";");
+					}
+				}, (sourceContext) -> {
+					className[0] = sourceContext.getClassName();
+					Appendable source = sourceContext.getSource();
+					source.append("  public ");
+					this.compiler.writeMethodSignature(source, notExposedMethod);
+					source.append(" {\n");
+					source.append("     return \"value-\" + this.value;\n");
+					source.append("  }\n");
+				});
+
+		// Ensure correct class name
+		assertEquals("Incorrect class name", javaSource.getClassName(), className[0].getName());
+
+		// Compile with wrapper
+		Class<?> wrapperClass = javaSource.compile();
+
+		// Record interactions for appropriate wrapping
+		Connection mock = this.createMock(Connection.class);
+		mock.setAutoCommit(true);
+		this.recordReturn(mock, mock.getTransactionIsolation(), 1);
+		this.replayMockObjects();
+
+		// Wrap the connection
+		Connection wrapper = (Connection) wrapperClass.getDeclaredConstructor(Connection.class, int.class)
+				.newInstance(mock, 2);
+		assertNotSame("Connection should be wrapped", mock, wrapper);
+
+		// Undertake operations to ensure correct wrapping
+		wrapper.setAutoCommit(true);
+		assertEquals("Incorrect return value", 1, wrapper.getTransactionIsolation());
+
+		// Ensure can cast to other interface and accessible
+		assertTrue("Should be able to cast to other interfaces", wrapper instanceof AdditionalFeature);
+		AdditionalFeature feature = (AdditionalFeature) wrapper;
+		assertEquals("Incorrect additional feature value", "added", feature.getAdditionalFeature());
+
+		// Ensure additional source available
+		Method implementedNotExposedMethod = wrapper.getClass().getMethod("notExposedMethod");
+		String result = (String) implementedNotExposedMethod.invoke(wrapper);
+		assertEquals("Incorrect additional source value", "value-2", result);
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Additional feature interface for testing wrapping.
+	 */
+	public static interface AdditionalFeature {
+
+		String getAdditionalFeature();
+	}
+
+	/**
+	 * Ensures can use {@link OfficeFloorJavaCompiler} helper methods in writing
+	 * further methods.
+	 */
+	public static interface WrapperNonInterfaceMethods {
+
+		String notExposedMethod();
+	}
+
+	/**
+	 * <p>
+	 * Ensure does not write the static and default methods.
+	 * <p>
+	 * Use the {@link JavaSourceWriter} if implementation is required for these
+	 * methods.
+	 */
+	public void testIgnoreStaticAndDefaultMethods() throws Exception {
+
+		// Obtain the methods
+		Method staticMethod = StaticDefaultMethods.class.getMethod("staticMethod");
+		Method defaultMethod = StaticDefaultMethods.class.getMethod("defaultMethod");
+		Method implementedDefaultMethod = StaticDefaultMethods.class.getMethod("implementedDefaultMethod");
+
+		// Create the wrapper
+		JavaSource javaSource = this.compiler.addWrapper(StaticDefaultMethods.class, (context) -> {
+			assertNotEquals("Should not be static method", staticMethod.getName(), context.getMethod().getName());
+			assertNotEquals("Should not be default method", defaultMethod.getName(), context.getMethod().getName());
+			assertNotEquals("Should not be implementing default method", implementedDefaultMethod.getName(),
+					context.getMethod().getName());
+		}, (sourceContext) -> {
+			Appendable source = sourceContext.getSource();
+			source.append("  public ");
+			this.compiler.writeMethodSignature(source, implementedDefaultMethod);
+			source.append(" {\n");
+			source.append("    return \"OVERRIDDEN\";");
+			source.append("  }\n");
+		});
+
+		// Compile with wrapper
+		Class<?> wrapperClass = javaSource.compile();
+
+		// Record interaction
+		StaticDefaultMethods mock = this.createMock(StaticDefaultMethods.class);
+		this.recordReturn(mock, mock.instanceMethod(), "INSTANCE");
+		this.replayMockObjects();
+
+		// Wrap the interface
+		StaticDefaultMethods wrapper = (StaticDefaultMethods) wrapperClass
+				.getDeclaredConstructor(StaticDefaultMethods.class).newInstance(mock);
+		assertNotSame("Should be wrapped", mock, wrapper);
+
+		// Undertake operations to ensure appropriate implementation
+		assertEquals("Incorrect static field", "IGNORED", wrapper.getClass().getField("IGNORED_FIELD").get(wrapper));
+		assertEquals("Incorrect default value", "DEFAULT", wrapper.defaultMethod());
+		assertEquals("Incorrect implemented valued", "OVERRIDDEN", wrapper.implementedDefaultMethod());
+		assertEquals("Incorrect instance value", "INSTANCE", wrapper.instanceMethod());
+
+		// Verify
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Interface containing static and default {@link Method} instances.
+	 */
+	public static interface StaticDefaultMethods {
+
+		String IGNORED_FIELD = "IGNORED";
+
+		static String staticMethod() {
+			return "STATIC";
+		}
+
+		default String defaultMethod() {
+			return "DEFAULT";
+		}
+
+		default String implementedDefaultMethod() {
+			return "IMPLEMENTED";
+		}
+
+		String instanceMethod();
 	}
 
 }

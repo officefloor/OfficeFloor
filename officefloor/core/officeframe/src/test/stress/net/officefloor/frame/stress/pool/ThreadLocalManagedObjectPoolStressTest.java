@@ -197,6 +197,10 @@ public class ThreadLocalManagedObjectPoolStressTest extends AbstractStressTestCa
 		@Override
 		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
 		}
+
+		@Override
+		public void empty() {
+		}
 	}
 
 }
