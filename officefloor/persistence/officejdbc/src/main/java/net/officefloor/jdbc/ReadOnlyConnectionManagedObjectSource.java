@@ -31,7 +31,6 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.jdbc.datasource.DataSourceFactory;
 
 /**
  * Read-only {@link Connection} {@link ManagedObjectSource}.
@@ -78,11 +77,10 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 		this.classLoader = mosContext.getClassLoader();
 
 		// Obtain the data source
-		DataSourceFactory dataSourceFactory = this.getDataSourceFactory(mosContext);
-		this.dataSource = dataSourceFactory.createDataSource(mosContext);
+		this.dataSource = this.newDataSource(mosContext);
 
 		// Validate connectivity
-		this.setConnectivity(() -> this.dataSource.getConnection());
+		this.setConnectivity(() -> new ConnectionConnectivity(this.dataSource.getConnection()));
 	}
 
 	@Override
@@ -99,7 +97,14 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 
 			// Fall back to proxy
 			this.wrappedConnection = (Connection) Proxy.newProxyInstance(this.classLoader,
-					new Class[] { Connection.class }, (object, method, args) -> {
+					new Class[] { Connection.class, ConnectionWrapper.class }, (object, method, args) -> {
+
+						// Determine if get real connection
+						if (ConnectionWrapper.isGetRealConnectionMethod(method)) {
+							return null; // never real connection (to be recycled)
+						}
+
+						// Ensure not invoke specific connection methods
 						switch (method.getName()) {
 						case "setReadOnly":
 							throw new SQLException("Connection is re-used read-only so can not be changed");
@@ -107,7 +112,7 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 							return null; // no operation methods
 						}
 
-						// Undertake method
+						// Undertake connection method
 						return this.connection.getClass().getMethod(method.getName(), method.getParameterTypes())
 								.invoke(this.connection, args);
 					});

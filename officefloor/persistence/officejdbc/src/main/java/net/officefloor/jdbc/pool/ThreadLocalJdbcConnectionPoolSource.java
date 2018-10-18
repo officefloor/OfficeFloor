@@ -18,8 +18,10 @@
 package net.officefloor.jdbc.pool;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
 
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
@@ -27,6 +29,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.jdbc.AbstractConnectionManagedObjectSource.Connectivity;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPool.PooledConnectionWrapperFactory;
 
@@ -87,7 +90,19 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 
 		// Configure connectivity
 		connectionManagedObjectSource.setConnectivity(() -> {
-			return dataSource.getPooledConnection().getConnection();
+			PooledConnection connection = dataSource.getPooledConnection();
+			return new Connectivity() {
+
+				@Override
+				public Connection getConnection() throws SQLException {
+					return connection.getConnection();
+				}
+
+				@Override
+				public void close() throws Exception {
+					connection.close();
+				}
+			};
 		});
 
 		// Create and return the pool

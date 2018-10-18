@@ -20,8 +20,12 @@ package net.officefloor.jdbc.test;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -51,10 +55,28 @@ public class DataSourceRule implements TestRule {
 		/**
 		 * Create the {@link Connection}.
 		 * 
-		 * @return {@link Connection}.
+		 * @param context {@link ConnectionFactoryContext}.
 		 * @throws Exception If fails to create {@link Connection}.
 		 */
-		Connection createConnection() throws Exception;
+		void createConnection(ConnectionFactoryContext context) throws Exception;
+	}
+
+	/**
+	 * Context for the {@link ConnectionFactory}.
+	 */
+	public static interface ConnectionFactoryContext {
+
+		/**
+		 * <p>
+		 * Specifies the {@link Connection}.
+		 * <p>
+		 * Allows for the {@link Connection} to cleaned up if further setup is required
+		 * on the {@link Connection} to ensure it is available.
+		 * 
+		 * @param connection Created {@link Connection}.
+		 * @return {@link Connection}.
+		 */
+		Connection setConnection(Connection connection);
 	}
 
 	/**
@@ -98,12 +120,36 @@ public class DataSourceRule implements TestRule {
 			final int MAX_SETUP_TIME = 30000; // milliseconds
 			long startTimestamp = System.currentTimeMillis();
 			NEXT_TRY: for (;;) {
+
+				// Ensure clean up connection (if failure on further connection setup)
+				Connection[] connectionReference = new Connection[1];
 				try {
 
 					// Obtain connection
-					return connectionFactory.createConnection();
+					connectionFactory.createConnection((connection) -> {
+						connectionReference[0] = connection;
+						return connection;
+					});
+
+					// Return the connection
+					if (connectionReference[0] != null) {
+						return connectionReference[0];
+					}
+
+					// As here, no connection was created
+					throw new SQLException("No connection created");
 
 				} catch (Throwable ex) {
+
+					// Ensure clean up connection
+					// (avoids too many connections/files open issue)
+					if (connectionReference[0] != null) {
+						try {
+							connectionReference[0].close();
+						} catch (SQLException ignoreEx) {
+							// ignore close failure
+						}
+					}
 
 					// Failed setup, determine if try again
 					long currentTimestamp = System.currentTimeMillis();
@@ -202,22 +248,52 @@ public class DataSourceRule implements TestRule {
 			public void evaluate() throws Throwable {
 
 				// Load the data source
-				DataSourceRule.this.dataSource = DefaultDataSourceFactory
+				DataSource rawDataSource = DefaultDataSourceFactory
 						.createDataSource(DataSourceRule.this.dataSourcePropertiesFilePath);
 
-				// Obtain connection to keep potential in memory database active
-				try (Connection conneciton = waitForDatabaseAvailable(
-						() -> DataSourceRule.this.dataSource.getConnection())) {
-					DataSourceRule.this.connection = conneciton;
+				// Wrap data source to ensure close connections
+				List<Connection> connections = new LinkedList<>();
+				DataSourceRule.this.dataSource = (DataSource) Proxy.newProxyInstance(this.getClass().getClassLoader(),
+						new Class[] { DataSource.class }, (proxy, method, args) -> {
 
-					// Undertake the test
-					base.evaluate();
+							// Undertake method
+							Method delegateMethod = rawDataSource.getClass().getMethod(method.getName(),
+									method.getParameterTypes());
+							Object result = delegateMethod.invoke(rawDataSource, args);
+
+							// Register connection
+							if ((result != null) && (result instanceof Connection)) {
+								connections.add((Connection) result);
+							}
+
+							// Return the result
+							return result;
+						});
+				try {
+
+					// Obtain connection to keep potential in memory database active
+					try (Connection connection = waitForDatabaseAvailable(
+							(context) -> context.setConnection(DataSourceRule.this.dataSource.getConnection()))) {
+						DataSourceRule.this.connection = connection;
+
+						// Undertake the test
+						base.evaluate();
+
+					} finally {
+						// Clean up
+						DataSourceRule.this.connection = null;
+						DataSourceRule.this.dataSource = null;
+					}
 
 				} finally {
-					// Clean up
-					DataSourceRule.this.connection.close();
-					DataSourceRule.this.connection = null;
-					DataSourceRule.this.dataSource = null;
+					// Ensure connections are closed
+					for (Connection connection : connections) {
+						try {
+							connection.close();
+						} catch (SQLException ex) {
+							// Ignore failure to close connection
+						}
+					}
 				}
 			}
 		};
