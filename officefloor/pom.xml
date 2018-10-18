@@ -85,7 +85,15 @@
 		<jaxb-version>2.3.0</jaxb-version>
 		<asm-version>6.2.1</asm-version>
 		<openjfx-version>11-ea+25</openjfx-version>
+		<openjfx-swt-version>11</openjfx-swt-version>
 	</properties>
+	<repositories>
+		<repository>
+			<id>OfficeFloor-build-artifacts</id>
+			<name>Build artifacts for OfficeFloor</name>
+			<url>http://officefloor.net/build2</url>
+		</repository>
+	</repositories>
 	<dependencyManagement>
 		<dependencies>
 			<!-- ================================================ -->
@@ -410,6 +418,11 @@
 				<groupId>org.openjfx</groupId>
 				<artifactId>javafx-controls</artifactId>
 				<version>${openjfx-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-swt</artifactId>
+				<version>${openjfx-swt-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -767,15 +780,11 @@
 								<artifactId>javafx-controls</artifactId>
 								<version>${openjfx-version}</version>
 							</extraClasspathElement>
-<!--						
 							<extraClasspathElement>
-								<groupId>com.oracle</groupId>
-								<artifactId>javafx</artifactId>
-								<version>10.0.0-SNAPSHOT</version>
-								<systemPath>${java.home}/lib/javafx-swt.jar</systemPath>
-								<scope>system</scope>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-swt</artifactId>
+								<version>${openjfx-swt-version}</version>
 							</extraClasspathElement>
--->
 						</extraClasspathElements>
 					</configuration>
 				</plugin>
