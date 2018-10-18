@@ -762,6 +762,11 @@
 								<artifactId>javafx-graphics</artifactId>
 								<version>${openjfx-version}</version>
 							</extraClasspathElement>
+							<extraClasspathElement>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-controls</artifactId>
+								<version>${openjfx-version}</version>
+							</extraClasspathElement>
 <!--						
 							<extraClasspathElement>
 								<groupId>com.oracle</groupId>
