@@ -750,8 +750,12 @@
 					<version>${tycho-version}</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
-<!--						
 						<extraClasspathElements>
+							<extraClasspathElement>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-graphics</artifactId>
+							</extraClasspathElement>
+<!--						
 							<extraClasspathElement>
 								<groupId>com.oracle</groupId>
 								<artifactId>javafx</artifactId>
@@ -759,8 +763,8 @@
 								<systemPath>${java.home}/lib/javafx-swt.jar</systemPath>
 								<scope>system</scope>
 							</extraClasspathElement>
-						</extraClasspathElements>
 -->
+						</extraClasspathElements>
 					</configuration>
 				</plugin>
 				<plugin>
