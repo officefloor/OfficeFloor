@@ -1,3 +1,6 @@
 **/.project
-**/.settings/
 **/.classpath
+**/.settings
+**/*.jar
+**/*.zip
+**/*.log
