@@ -1,6 +1,0 @@
-<office-floor>
-    <offices>
-        <office name="OFFICE" source="OFFICE"
-         location="net/officefloor/building/manager/TestOffice.office" />
-    </offices>
-</office-floor>

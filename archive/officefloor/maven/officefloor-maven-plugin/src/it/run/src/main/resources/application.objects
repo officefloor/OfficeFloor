@@ -1,7 +1,0 @@
-<objects>
-
-	<managed-object source="net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource" type="TemplateObject">
-		<property-file path="environment.properties" />
-	</managed-object>
-
-</objects>
