@@ -745,6 +745,7 @@
 					<version>${tycho-version}</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
+<!--						
 						<extraClasspathElements>
 							<extraClasspathElement>
 								<groupId>com.oracle</groupId>
@@ -754,6 +755,7 @@
 								<scope>system</scope>
 							</extraClasspathElement>
 						</extraClasspathElements>
+-->
 					</configuration>
 				</plugin>
 				<plugin>
