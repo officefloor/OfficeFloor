@@ -1,1 +1,0 @@
-Class Path Resource within classes directory for testing
