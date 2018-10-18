@@ -754,6 +754,7 @@
 							<extraClasspathElement>
 								<groupId>org.openjfx</groupId>
 								<artifactId>javafx-graphics</artifactId>
+								<version>11-ea+25</version>
 							</extraClasspathElement>
 <!--						
 							<extraClasspathElement>
