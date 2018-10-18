@@ -41,7 +41,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
+			<artifactId>javafx-graphics</artifactId>
 			<version>11-ea+25</version>
 		</dependency>
 	</dependencies>
