@@ -18,6 +18,7 @@
 package net.officefloor.server.stress;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -51,6 +52,7 @@ public class ValidateHttpServerImplementationTest extends AbstractHttpServerImpl
 	@Override
 	protected Server startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 		Server server = ValidateHttpServerImplementation.createServer(serverLocation, null);
+		byte[] helloWorld = "hello world".getBytes(Charset.forName("UTF-8"));
 		server.setHandler(new AbstractHandler() {
 			@Override
 			public void handle(String target, Request baseRequest, HttpServletRequest request,
@@ -58,8 +60,9 @@ public class ValidateHttpServerImplementationTest extends AbstractHttpServerImpl
 				response.setStatus(HttpServletResponse.SC_OK);
 				response.setHeader("Date", "NOW");
 				response.setHeader("Server", "OfficeFloorServer Jetty");
-				response.setHeader("Expire", null);
-				response.getWriter().write("hello world");
+				response.setHeader("Expires", "Thu, 01 Jan 1970 00:00:00 GMT");
+				response.setContentType("text/plain");
+				response.getOutputStream().write(helloWorld);
 				baseRequest.setHandled(true);
 			}
 		});
@@ -74,7 +77,8 @@ public class ValidateHttpServerImplementationTest extends AbstractHttpServerImpl
 
 	@Override
 	protected HttpHeader[] getServerResponseHeaderValues() {
-		return new HttpHeader[] { newHttpHeader("Date", "NOW"), newHttpHeader("Expire", "TODO"),
+		return new HttpHeader[] { newHttpHeader("Date", "NOW"), newHttpHeader("Server", "OfficeFloorServer Jetty"),
+				newHttpHeader("Expires", "Thu, 01 Jan 1970 00:00:00 GMT"), newHttpHeader("Content-Type", "text/plain"),
 				newHttpHeader("Content-Length", "?") };
 	}
 

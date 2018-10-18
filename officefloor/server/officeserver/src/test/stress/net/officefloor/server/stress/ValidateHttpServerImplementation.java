@@ -102,6 +102,8 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 			// Use the provided SSL context
 			SslContextFactory sslContextFactory = new SslContextFactory();
 			sslContextFactory.setSslContext(sslContext);
+			sslContextFactory.setExcludeCipherSuites();
+			sslContextFactory.setExcludeProtocols();
 
 			// Provide HTTPS connector
 			ServerConnector sslConnector = new ServerConnector(server,
@@ -134,9 +136,10 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 						ProcessAwareServerHttpConnectionManagedObject.getCleanupEscalationHandler());
 
 		// Obtain details for servicing
-		HttpHeaderValue serverName = new HttpHeaderValue(context.getServerName() + " Jetty");
+		HttpHeaderValue serverName = new HttpHeaderValue("OfficeFloorServer Jetty");
 		HttpServerLocation serverLocation = context.getHttpServerLocation();
 		DateHttpHeaderClock dateHttpHeaderClock = context.getDateHttpHeaderClock();
+		boolean isIncludeEscalationStackTrace = context.isIncludeEscalationStackTrace();
 
 		// Create in memory buffer pool
 		StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(() -> ByteBuffer.allocate(1024), 10,
@@ -172,7 +175,8 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 
 					// Load constant headers
 					asyncResponse.setHeader("Date", "NOW");
-					asyncResponse.setHeader("Expires", "no");
+					asyncResponse.setHeader("Server", serverName.getValue());
+					asyncResponse.setHeader("Expires", "Thu, 01 Jan 1970 00:00:00 GMT");
 
 					// Load the headers
 					while (headHttpHeader != null) {
@@ -209,16 +213,46 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 							} else {
 								// Write the file content
 								StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer();
+								boolean isWritten = false;
 								try {
 									ByteBuffer buffer = streamBuffer.pooledBuffer;
+									long position = contentHeadStreamBuffer.fileBuffer.position;
+									long count = contentHeadStreamBuffer.fileBuffer.count;
+									int bytesRead;
 									do {
 										buffer.clear();
-										contentHeadStreamBuffer.fileBuffer.file.read(buffer);
+
+										// Read bytes
+										bytesRead = contentHeadStreamBuffer.fileBuffer.file.read(buffer, position);
+										position += bytesRead;
+
+										// Setup for bytes
 										buffer.flip();
+										if (count >= 0) {
+											count -= bytesRead;
+
+											// Determine read further than necessary
+											if (count < 0) {
+												buffer.limit(buffer.limit() - (int) Math.abs(count));
+												bytesRead = 0;
+											}
+										}
+
+										// Write the buffer
 										byteBufferWriter.write(buffer, entity);
-									} while (buffer.position() > 0);
+									} while (bytesRead > 0);
+
+									// As here, written file
+									isWritten = true;
+
 								} finally {
 									streamBuffer.release();
+
+									// Close the file
+									if (contentHeadStreamBuffer.fileBuffer.callback != null) {
+										contentHeadStreamBuffer.fileBuffer.callback
+												.complete(contentHeadStreamBuffer.fileBuffer.file, isWritten);
+									}
 								}
 							}
 							contentHeadStreamBuffer = contentHeadStreamBuffer.next;
@@ -278,8 +312,10 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 				// Create the server HTTP connection
 				ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
 						serverLocation, request.isSecure(), () -> HttpMethod.getHttpMethod(request.getMethod()),
-						() -> request.getRequestURI(), HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders,
-						entity, serverName, dateHttpHeaderClock, false, writer, bufferPool);
+						() -> asyncRequest.getRequestURI()
+								+ (asyncRequest.getQueryString() != null ? "?" + asyncRequest.getQueryString() : ""),
+						HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, serverName,
+						dateHttpHeaderClock, isIncludeEscalationStackTrace, writer, bufferPool);
 
 				// Service request
 				input.service(connection, connection.getServiceFlowCallback());

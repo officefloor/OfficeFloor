@@ -38,6 +38,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javax.net.SocketFactory;
+
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
@@ -637,17 +639,38 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
+	 * Ensure raw request.
+	 * 
+	 * @throws Exception If test failure.
+	 */
+	public void testSocket() throws Exception {
+		this.doSocketTest(false);
+	}
+
+	/**
 	 * Ensure raw secure request.
 	 * 
 	 * @throws Exception If test failure.
 	 */
 	public void testSecureSocket() throws Exception {
+		this.doSocketTest(true);
+	}
+
+	/**
+	 * Undertakes the raw socket test.
+	 * 
+	 * @param isSecure If secure.
+	 * @throws Exception If test failure.
+	 */
+	private void doSocketTest(boolean isSecure) throws Exception {
 		this.startHttpServer(Servicer.class);
 
 		// Create connection to server
-		try (Socket socket = OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
-				.createSocket(InetAddress.getLocalHost(), this.serverLocation.getHttpsPort())) {
-			socket.setSoTimeout(1000);
+		try (Socket socket = (isSecure
+				? OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
+						.createSocket(InetAddress.getLocalHost(), this.serverLocation.getHttpsPort())
+				: SocketFactory.getDefault().createSocket(InetAddress.getLocalHost(),
+						this.serverLocation.getHttpPort()))) {
 
 			// Send the request
 			socket.getOutputStream().write(this.createPipelineRequestData());
@@ -656,7 +679,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			byte[] expectedResponseData = this.createPipelineResponseData();
 			byte[] actualResponseData = new byte[expectedResponseData.length];
 			int totalBytesRead = 0;
-			while (totalBytesRead != expectedResponseData.length) {
+			while (totalBytesRead < expectedResponseData.length) {
 				int bytesRead = socket.getInputStream().read(actualResponseData, totalBytesRead,
 						(expectedResponseData.length - totalBytesRead));
 				assertTrue("Must read bytes\n\nExpected: " + new String(expectedResponseData) + "\n\nActual: "
@@ -699,6 +722,54 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			assertEquals("Incorrect error Content-Type", "text/plain",
 					response.getFirstHeader("Content-Type").getValue());
 		}
+	}
+
+	/**
+	 * Verify pipeline HTTP requests.
+	 * 
+	 * @throws Exception If test failure.
+	 */
+	public void testRawPipelineVerify() throws Exception {
+		this.doPipelineVerifyTest(null);
+	}
+
+	/**
+	 * Verify pipeline HTTP requests.
+	 * 
+	 * @throws Exception If test failure.
+	 */
+	public void testBytesPipelineVerify() throws Exception {
+		this.doPipelineVerifyTest(BytesServicer.class);
+	}
+
+	/**
+	 * Verify pipeline HTTP requests.
+	 * 
+	 * @throws Exception If test failure.
+	 */
+	public void testBufferPipelineVerify() throws Exception {
+		this.doPipelineVerifyTest(BufferServicer.class);
+	}
+
+	/**
+	 * Verify pipeline HTTP requests.
+	 * 
+	 * @throws Exception If test failure.
+	 */
+	public void testFilePipelineVerify() throws Exception {
+		this.doPipelineVerifyTest(FileServicer.class);
+	}
+
+	/**
+	 * Undertakes verifying the pipeline tests.
+	 * 
+	 * @param servicerClass Servicer {@link Class}.
+	 * @throws Exception If fails test.
+	 */
+	public void doPipelineVerifyTest(Class<?> servicerClass) throws Exception {
+		this.startAppropriateHttpServer(servicerClass);
+		PipelineExecutor executor = new PipelineExecutor(this.serverLocation.getHttpPort());
+		executor.doPipelineRun(10);
 	}
 
 	/**
@@ -1062,9 +1133,12 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @return {@link Set} of expected response {@link HttpHeader} instances.
 	 */
 	private Set<String> getUniqueResponseHeaderNames(String... additionalHeaderNames) {
-		Set<String> names = new HashSet<>(Arrays.asList(additionalHeaderNames));
+		Set<String> names = new HashSet<>();
+		for (String additionalHeaderName : additionalHeaderNames) {
+			names.add(additionalHeaderName.toLowerCase());
+		}
 		for (HttpHeader header : this.getServerResponseHeaderValues()) {
-			names.add(header.getName());
+			names.add(header.getName().toLowerCase());
 		}
 		return names;
 	}
@@ -1259,7 +1333,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 									assertEquals("Incorrect character " + i + " of response " + responseReceivedCount
 											+ " (" + UsAsciiUtil.convertToChar(expectedCharacter) + " != "
 											+ UsAsciiUtil.convertToChar(actualCharacter) + "): "
-											+ responseText.toString(), expectedCharacter, actualCharacter);
+											+ responseText.toString() + "\n\nEXPECTED:\n" + new String(responseData),
+											expectedCharacter, actualCharacter);
 								}
 								responseDataPosition = (responseDataPosition + 1) % responseData.length;
 								if (responseDataPosition == 0) {
