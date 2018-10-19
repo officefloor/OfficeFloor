@@ -188,6 +188,9 @@ public class ValidateConnectionDecoratorFactory implements ConnectionDecoratorFa
 
 					case "isClosed":
 						return isClosed.get();
+
+					default:
+						break;
 					}
 
 					// Invoke the method

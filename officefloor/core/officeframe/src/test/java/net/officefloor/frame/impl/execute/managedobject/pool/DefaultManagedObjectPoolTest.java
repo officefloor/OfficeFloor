@@ -128,14 +128,17 @@ public class DefaultManagedObjectPoolTest extends AbstractOfficeConstructTestCas
 
 		@Override
 		public void returnManagedObject(ManagedObject managedObject) {
+			// ignored
 		}
 
 		@Override
 		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
+			// ignored
 		}
 
 		@Override
 		public void empty() {
+			// nothing to clean
 		}
 	}
 

@@ -313,9 +313,7 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 			throws IOException {
 
 		// Provide default delegate extraction
-		if (delegateExtraction == null) {
-			delegateExtraction = "this.delegate";
-		}
+		String delegate = (delegateExtraction == null) ? "this.delegate" : delegateExtraction;
 
 		// Create the source
 		StringWriter buffer = new StringWriter();
@@ -358,37 +356,8 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		for (Class<?> wrappingType : wrappingTypes) {
 
 			// Implement the methods
-			NEXT_METHOD: for (Method method : wrappingType.getMethods()) {
-
-				// Determine if method to implement
-				if (method.isDefault() || Modifier.isStatic(method.getModifiers())) {
-					continue NEXT_METHOD;
-				}
-
-				// Create the wrapper context for the method
-				WrapperContextImpl methodContext = new WrapperContextImpl(wrappingType, method);
-				if (methodWriter != null) {
-					methodWriter.write(methodContext);
-				}
-
-				// Write the method signature
-				source.print("  public ");
-				this.writeMethodSignature(source, method);
-				source.println(" {");
-
-				// Determine if override implementation
-				if (methodContext.overrideBuffer != null) {
-					// Override implementation
-					methodContext.override.flush();
-					source.print(methodContext.overrideBuffer.toString());
-
-				} else {
-					// Write the default implementation
-					this.writeDelegateMethodImplementation(source, methodContext.wrapClass, delegateExtraction, method);
-				}
-
-				// Complete method
-				source.println("  }");
+			for (Method method : wrappingType.getMethods()) {
+				this.writeWrapperMethod(delegate, method, methodWriter, wrappingType, source);
 			}
 		}
 
@@ -414,6 +383,50 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 
 		// Add java source
 		return this.addSource(className.getName(), buffer.toString());
+	}
+
+	/**
+	 * Writes the wrapper {@link Method}.
+	 * 
+	 * @param delegateExtraction Delegate extraction.
+	 * @param method             {@link Method}.
+	 * @param methodWriter       {@link MethodWriter}.
+	 * @param wrappingType       Wrapping type.
+	 * @param source             Source.
+	 * @throws IOException If fails to write the {@link Method}.
+	 */
+	private void writeWrapperMethod(String delegateExtraction, Method method, MethodWriter methodWriter,
+			Class<?> wrappingType, PrintWriter source) throws IOException {
+
+		// Determine if method to implement
+		if (method.isDefault() || Modifier.isStatic(method.getModifiers())) {
+			return;
+		}
+
+		// Create the wrapper context for the method
+		WrapperContextImpl methodContext = new WrapperContextImpl(wrappingType, method);
+		if (methodWriter != null) {
+			methodWriter.write(methodContext);
+		}
+
+		// Write the method signature
+		source.print("  public ");
+		this.writeMethodSignature(source, method);
+		source.println(" {");
+
+		// Determine if override implementation
+		if (methodContext.overrideBuffer != null) {
+			// Override implementation
+			methodContext.override.flush();
+			source.print(methodContext.overrideBuffer.toString());
+
+		} else {
+			// Write the default implementation
+			this.writeDelegateMethodImplementation(source, methodContext.wrapClass, delegateExtraction, method);
+		}
+
+		// Complete method
+		source.println("  }");
 	}
 
 	/**

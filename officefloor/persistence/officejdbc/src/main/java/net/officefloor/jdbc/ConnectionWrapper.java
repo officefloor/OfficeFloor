@@ -70,12 +70,13 @@ public interface ConnectionWrapper {
 	static Connection getRealConnection(Connection connection) throws SQLException {
 
 		// Search through the connection to obtain the real connection
-		while ((connection != null) && (connection instanceof ConnectionWrapper)) {
-			connection = ((ConnectionWrapper) connection).getRealConnection();
+		Connection conn = connection;
+		while ((conn != null) && (conn instanceof ConnectionWrapper)) {
+			conn = ((ConnectionWrapper) conn).getRealConnection();
 		}
 
 		// Return the real connection (or possibly null if none)
-		return connection;
+		return conn;
 	}
 
 	/**
