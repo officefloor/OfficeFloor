@@ -17,21 +17,11 @@
  */
 package net.officefloor.server.stress;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.net.ssl.SSLContext;
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -46,31 +36,28 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
-import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
-import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
 import net.officefloor.server.http.HttpServerLocation;
-import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.DateHttpHeaderClock;
-import net.officefloor.server.http.impl.HttpResponseWriter;
-import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
-import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
-import net.officefloor.server.http.impl.SerialisableHttpHeader;
-import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
-import net.officefloor.server.stream.impl.ByteArrayByteSequence;
-import net.officefloor.server.stream.impl.ByteSequence;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
 
 /**
+ * {@link HttpServerImplementation} to validate tests.
  *
  * @author Daniel Sagenschneider
  */
 public class ValidateHttpServerImplementation implements HttpServerImplementation {
+
+	/**
+	 * {@link StreamBufferPool}.
+	 */
+	private static final StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(
+			() -> ByteBuffer.allocate(1024), 10, 1000);
 
 	/**
 	 * Creates the {@link Server} for the {@link HttpServerLocation}.
@@ -141,186 +128,9 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 		DateHttpHeaderClock dateHttpHeaderClock = context.getDateHttpHeaderClock();
 		boolean isIncludeEscalationStackTrace = context.isIncludeEscalationStackTrace();
 
-		// Create in memory buffer pool
-		StreamBufferPool<ByteBuffer> bufferPool = new ThreadLocalStreamBufferPool(() -> ByteBuffer.allocate(1024), 10,
-				1000);
-
-		// Create the byte buffer writer
-		ByteBufferWriter byteBufferWriter = (buffer, outputStream) -> {
-			for (int position = buffer.position(); position < buffer.limit(); position++) {
-				outputStream.write(buffer.get());
-			}
-		};
-
 		// Provide servicing via using input
-		ServletHolder servlet = new ServletHolder("handler", new HttpServlet() {
-
-			@Override
-			protected void service(HttpServletRequest request, HttpServletResponse response)
-					throws ServletException, IOException {
-
-				// Start asynchronous servicing
-				AsyncContext asyncContext = request.startAsync();
-
-				// Obtain the request / response
-				HttpServletRequest asyncRequest = (HttpServletRequest) asyncContext.getRequest();
-				HttpServletResponse asyncResponse = (HttpServletResponse) asyncContext.getResponse();
-
-				// Create the writer of the response
-				HttpResponseWriter<ByteBuffer> writer = (version, status, headHttpHeader, headHttpCookie, contentLength,
-						contentType, contentHeadStreamBuffer) -> {
-
-					// Load values to response
-					asyncResponse.setStatus(status.getStatusCode());
-
-					// Load constant headers
-					asyncResponse.setHeader("Date", "NOW");
-					asyncResponse.setHeader("Server", serverName.getValue());
-					asyncResponse.setHeader("Expires", "Thu, 01 Jan 1970 00:00:00 GMT");
-
-					// Load the headers
-					while (headHttpHeader != null) {
-						asyncResponse.setHeader(headHttpHeader.getName(), headHttpHeader.getValue());
-						headHttpHeader = headHttpHeader.next;
-					}
-
-					// Load the cookies
-					while (headHttpCookie != null) {
-						Cookie cookie = new Cookie(headHttpCookie.getName(), headHttpCookie.getValue());
-						cookie.setMaxAge(-1);
-						asyncResponse.addCookie(cookie);
-						headHttpCookie = headHttpCookie.next;
-					}
-
-					// Load the entity
-					if (contentType != null) {
-						asyncResponse.setContentType(contentType.getValue());
-					}
-
-					try {
-						// Write the entity content
-						ServletOutputStream entity = asyncResponse.getOutputStream();
-						while (contentHeadStreamBuffer != null) {
-							if (contentHeadStreamBuffer.pooledBuffer != null) {
-								// Write the pooled byte buffer
-								contentHeadStreamBuffer.pooledBuffer.flip();
-								byteBufferWriter.write(contentHeadStreamBuffer.pooledBuffer, entity);
-
-							} else if (contentHeadStreamBuffer.unpooledByteBuffer != null) {
-								// Write the unpooled byte buffer
-								byteBufferWriter.write(contentHeadStreamBuffer.unpooledByteBuffer, entity);
-
-							} else {
-								// Write the file content
-								StreamBuffer<ByteBuffer> streamBuffer = bufferPool.getPooledStreamBuffer();
-								boolean isWritten = false;
-								try {
-									ByteBuffer buffer = streamBuffer.pooledBuffer;
-									long position = contentHeadStreamBuffer.fileBuffer.position;
-									long count = contentHeadStreamBuffer.fileBuffer.count;
-									int bytesRead;
-									do {
-										buffer.clear();
-
-										// Read bytes
-										bytesRead = contentHeadStreamBuffer.fileBuffer.file.read(buffer, position);
-										position += bytesRead;
-
-										// Setup for bytes
-										buffer.flip();
-										if (count >= 0) {
-											count -= bytesRead;
-
-											// Determine read further than necessary
-											if (count < 0) {
-												buffer.limit(buffer.limit() - (int) Math.abs(count));
-												bytesRead = 0;
-											}
-										}
-
-										// Write the buffer
-										byteBufferWriter.write(buffer, entity);
-									} while (bytesRead > 0);
-
-									// As here, written file
-									isWritten = true;
-
-								} finally {
-									streamBuffer.release();
-
-									// Close the file
-									if (contentHeadStreamBuffer.fileBuffer.callback != null) {
-										contentHeadStreamBuffer.fileBuffer.callback
-												.complete(contentHeadStreamBuffer.fileBuffer.file, isWritten);
-									}
-								}
-							}
-							contentHeadStreamBuffer = contentHeadStreamBuffer.next;
-						}
-
-					} catch (IOException e) {
-						throw new IllegalStateException("Should not get failure in writing response");
-					}
-
-					// Flag complete
-					asyncContext.complete();
-				};
-
-				// Create listing of headers
-				List<NonMaterialisedHttpHeader> headers = new ArrayList<>();
-				Enumeration<String> headerNames = asyncRequest.getHeaderNames();
-				while (headerNames.hasMoreElements()) {
-					String name = headerNames.nextElement();
-
-					// Add header
-					Enumeration<String> headerValues = asyncRequest.getHeaders(name);
-					while (headerValues.hasMoreElements()) {
-						String value = headerValues.nextElement();
-						HttpHeader header = new SerialisableHttpHeader(name, value);
-						headers.add(new NonMaterialisedHttpHeader() {
-
-							@Override
-							public CharSequence getName() {
-								return header.getName();
-							}
-
-							@Override
-							public HttpHeader materialiseHttpHeader() {
-								return header;
-							}
-						});
-					}
-				}
-
-				// Create the request headers
-				NonMaterialisedHttpHeaders httpHeaders = new NonMaterialisedHttpHeaders() {
-
-					@Override
-					public Iterator<NonMaterialisedHttpHeader> iterator() {
-						return headers.iterator();
-					}
-
-					@Override
-					public int length() {
-						return headers.size();
-					}
-				};
-
-				// Create the entity content
-				ByteSequence entity = new ByteArrayByteSequence(asyncRequest.getInputStream().readAllBytes());
-
-				// Create the server HTTP connection
-				ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(
-						serverLocation, request.isSecure(), () -> HttpMethod.getHttpMethod(request.getMethod()),
-						() -> asyncRequest.getRequestURI()
-								+ (asyncRequest.getQueryString() != null ? "?" + asyncRequest.getQueryString() : ""),
-						HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, serverName,
-						dateHttpHeaderClock, isIncludeEscalationStackTrace, writer, bufferPool);
-
-				// Service request
-				input.service(connection, connection.getServiceFlowCallback());
-			}
-		});
+		ServletHolder servlet = new ServletHolder("handler", new OfficeFloorHttpServlet(input, serverLocation,
+				serverName, dateHttpHeaderClock, isIncludeEscalationStackTrace, bufferPool));
 		servlet.setAsyncSupported(true);
 		ServletHandler handler = new ServletHandler();
 		handler.addServletWithMapping(servlet, "/");
@@ -339,22 +149,6 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 				server.stop();
 			}
 		});
-	}
-
-	/**
-	 * Writes the {@link ByteBuffer} to the {@link ServletOutputStream}.
-	 */
-	@FunctionalInterface
-	private static interface ByteBufferWriter {
-
-		/**
-		 * Writes the {@link ByteBuffer} to the {@link ServletOutputStream}.
-		 * 
-		 * @param buffer      {@link ByteBuffer}.
-		 * @param outputSteam {@link ServletOutputStream}.
-		 * @throws IOException If fails to write {@link IOException}.
-		 */
-		void write(ByteBuffer buffer, ServletOutputStream outputSteam) throws IOException;
 	}
 
 }
