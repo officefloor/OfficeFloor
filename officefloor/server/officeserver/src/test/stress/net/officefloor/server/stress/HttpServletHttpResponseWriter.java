@@ -100,17 +100,17 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 		this.responseDecorator.accept(asyncResponse);
 
 		// Load the headers
-		while (headHttpHeader != null) {
-			asyncResponse.setHeader(headHttpHeader.getName(), headHttpHeader.getValue());
-			headHttpHeader = headHttpHeader.next;
+		WritableHttpHeader header = headHttpHeader;
+		while (header != null) {
+			asyncResponse.setHeader(header.getName(), header.getValue());
+			header = header.next;
 		}
 
 		// Load the cookies
-		while (headHttpCookie != null) {
-			Cookie cookie = new Cookie(headHttpCookie.getName(), headHttpCookie.getValue());
-			cookie.setMaxAge(-1);
-			asyncResponse.addCookie(cookie);
-			headHttpCookie = headHttpCookie.next;
+		WritableHttpCookie cookie = headHttpCookie;
+		while (cookie != null) {
+			asyncResponse.addCookie(new Cookie(headHttpCookie.getName(), headHttpCookie.getValue()));
+			cookie = cookie.next;
 		}
 
 		// Load the entity
@@ -121,15 +121,16 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 		try {
 			// Write the entity content
 			ServletOutputStream entity = asyncResponse.getOutputStream();
-			while (contentHeadStreamBuffer != null) {
-				if (contentHeadStreamBuffer.pooledBuffer != null) {
+			StreamBuffer<ByteBuffer> stream = contentHeadStreamBuffer;
+			while (stream != null) {
+				if (stream.pooledBuffer != null) {
 					// Write the pooled byte buffer
-					contentHeadStreamBuffer.pooledBuffer.flip();
-					byteBufferWriter.write(contentHeadStreamBuffer.pooledBuffer, entity);
+					stream.pooledBuffer.flip();
+					byteBufferWriter.write(stream.pooledBuffer, entity);
 
-				} else if (contentHeadStreamBuffer.unpooledByteBuffer != null) {
+				} else if (stream.unpooledByteBuffer != null) {
 					// Write the unpooled byte buffer
-					byteBufferWriter.write(contentHeadStreamBuffer.unpooledByteBuffer, entity);
+					byteBufferWriter.write(stream.unpooledByteBuffer, entity);
 
 				} else {
 					// Write the file content
@@ -137,14 +138,14 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 					boolean isWritten = false;
 					try {
 						ByteBuffer buffer = streamBuffer.pooledBuffer;
-						long position = contentHeadStreamBuffer.fileBuffer.position;
-						long count = contentHeadStreamBuffer.fileBuffer.count;
+						long position = stream.fileBuffer.position;
+						long count = stream.fileBuffer.count;
 						int bytesRead;
 						do {
 							buffer.clear();
 
 							// Read bytes
-							bytesRead = contentHeadStreamBuffer.fileBuffer.file.read(buffer, position);
+							bytesRead = stream.fileBuffer.file.read(buffer, position);
 							position += bytesRead;
 
 							// Setup for bytes
@@ -170,13 +171,12 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 						streamBuffer.release();
 
 						// Close the file
-						if (contentHeadStreamBuffer.fileBuffer.callback != null) {
-							contentHeadStreamBuffer.fileBuffer.callback
-									.complete(contentHeadStreamBuffer.fileBuffer.file, isWritten);
+						if (stream.fileBuffer.callback != null) {
+							stream.fileBuffer.callback.complete(stream.fileBuffer.file, isWritten);
 						}
 					}
 				}
-				contentHeadStreamBuffer = contentHeadStreamBuffer.next;
+				stream = stream.next;
 			}
 
 		} catch (IOException e) {
