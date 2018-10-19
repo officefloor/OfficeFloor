@@ -18,6 +18,7 @@
 package net.officefloor.server;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -429,20 +430,49 @@ public class SocketManager {
 			// Create the port socket address
 			InetSocketAddress portAddress = new InetSocketAddress(port);
 
-			// Create the Server Socket
-			ServerSocketChannel channel = ServerSocketChannel.open();
-			channel.configureBlocking(false);
-			ServerSocket socket = channel.socket();
-			socket.setReuseAddress(true);
-			socket.setReceiveBufferSize(this.socketReceiveBufferSize);
-			int serverSocketBackLogSize = DEFAULT_SERVER_SOCKET_BACKLOG_SIZE;
-			if (serverSocketDecorator != null) {
-				// Override the defaults
-				serverSocketBackLogSize = serverSocketDecorator.decorate(socket);
-			}
+			// Quick start/stops can not clean socket so allow retry
+			ServerSocketChannel channel = null;
+			ServerSocket socket = null;
+			BindException exception = null;
+			int attempt = 0;
+			do {
+				// Create the Server Socket
+				channel = ServerSocketChannel.open();
+				try {
+					channel.configureBlocking(false);
+					socket = channel.socket();
+					socket.setReuseAddress(true);
+					socket.setReceiveBufferSize(this.socketReceiveBufferSize);
+					int serverSocketBackLogSize = DEFAULT_SERVER_SOCKET_BACKLOG_SIZE;
+					if (serverSocketDecorator != null) {
+						// Override the defaults
+						serverSocketBackLogSize = serverSocketDecorator.decorate(socket);
+					}
 
-			// Bind the Server Socket
-			socket.bind(portAddress, serverSocketBackLogSize);
+					// Bind the Server Socket
+					socket.bind(portAddress, serverSocketBackLogSize);
+
+				} catch (BindException ex) {
+					exception = ex;
+
+					// Ensure clean up
+					channel.close();
+					socket.close();
+					socket = null;
+
+					// Allow some time for address to release
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException interupted) {
+						throw new IOException(interupted);
+					}
+				}
+			} while ((socket == null) && (attempt < 3));
+
+			// Ensure propagate failure
+			if (exception != null) {
+				throw exception;
+			}
 
 			// Ensure have accepted socket decorator
 			if (acceptedSocketDecorator == null) {
