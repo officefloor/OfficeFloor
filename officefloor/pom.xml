@@ -502,7 +502,7 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
-				<version>5.3.6.Final</version>
+				<version>5.3.7.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.datanucleus</groupId>
@@ -568,7 +568,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.5</version>
+				<version>1.6</version>
 			</dependency>
 			<!-- Following plug-ins are dependency managed to ensure available for 
 				woof-archetype to check using the latest. -->
