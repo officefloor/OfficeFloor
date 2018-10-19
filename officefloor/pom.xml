@@ -72,20 +72,28 @@
 		<projectVersion>${project.version}</projectVersion>
 		<tycho-version>1.2.0</tycho-version>
 		<maven-version>3.5.4</maven-version>
-		<maven-plugin-version>3.5</maven-plugin-version>
-		<maven-project-info-reports-version>2.9
-		</maven-project-info-reports-version>
-		<maven-changes-version>2.11</maven-changes-version>
-		<jetty-version>9.2.2.v20140723</jetty-version>
+		<maven-plugin-version>3.5.2</maven-plugin-version>
+		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
+		<maven-changes-version>2.12.1</maven-changes-version>
+		<jetty-version>9.4.12.v20180830</jetty-version>
 		<failsafe-version>2.21.0</failsafe-version>
-		<compiler-version>3.7.0</compiler-version>
-		<ant-jsch-version>1.10.3</ant-jsch-version>
-		<netty-version>4.1.14.Final</netty-version>
+		<compiler-version>3.8.0</compiler-version>
+		<ant-jsch-version>1.10.5</ant-jsch-version>
+		<netty-version>4.1.30.Final</netty-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
-		<jackson-version>2.9.6</jackson-version>
+		<jackson-version>2.9.7</jackson-version>
 		<jaxb-version>2.3.0</jaxb-version>
-		<asm-version>6.2</asm-version>
+		<asm-version>6.2.1</asm-version>
+		<openjfx-version>11-ea+25</openjfx-version>
+		<openjfx-swt-version>11</openjfx-swt-version>
 	</properties>
+	<repositories>
+		<repository>
+			<id>OfficeFloor-build-artifacts</id>
+			<name>Build artifacts for OfficeFloor</name>
+			<url>http://officefloor.net/build2</url>
+		</repository>
+	</repositories>
 	<dependencyManagement>
 		<dependencies>
 			<!-- ================================================ -->
@@ -394,12 +402,27 @@
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>2.10</version>
+				<version>3.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>mx4j</groupId>
 				<artifactId>mx4j-tools</artifactId>
 				<version>3.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-graphics</artifactId>
+				<version>${openjfx-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-controls</artifactId>
+				<version>${openjfx-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-swt</artifactId>
+				<version>${openjfx-swt-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -409,12 +432,22 @@
 			<dependency>
 				<groupId>org.rapidoid</groupId>
 				<artifactId>rapidoid-web</artifactId>
-				<version>5.5.4</version>
+				<version>5.5.5</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-server</artifactId>
+				<version>${jetty-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-servlet</artifactId>
+				<version>${jetty-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.10</version>
+				<version>1.11</version>
 			</dependency>
 			<dependency>
 				<groupId>com.zaxxer</groupId>
@@ -429,17 +462,17 @@
 			<dependency>
 				<groupId>org.hsqldb</groupId>
 				<artifactId>hsqldb</artifactId>
-				<version>2.4.0</version>
+				<version>2.4.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.2</version>
+				<version>42.2.5</version>
 			</dependency>
 			<dependency>
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-client</artifactId>
-				<version>8.11.4</version>
+				<version>8.14.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
@@ -449,27 +482,27 @@
 			<dependency>
 				<groupId>org.apache.directory.server</groupId>
 				<artifactId>apacheds-all</artifactId>
-				<version>2.0.0-M16</version>
+				<version>2.0.0.AM25</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-simple</artifactId>
-				<version>1.7.7</version>
+				<version>1.7.25</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-nop</artifactId>
-				<version>1.7.7</version>
+				<version>1.7.25</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>javax.persistence</artifactId>
-				<version>2.2.0</version>
+				<version>2.2.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
-				<version>5.3.6.Final</version>
+				<version>5.3.7.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.datanucleus</groupId>
@@ -510,7 +543,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.5.2</version>
+				<version>4.5.6</version>
 			</dependency>
 			<dependency>
 				<groupId>net.openhft</groupId>
@@ -530,12 +563,12 @@
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
-				<version>1.18.0</version>
+				<version>1.18.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.4</version>
+				<version>1.6</version>
 			</dependency>
 			<!-- Following plug-ins are dependency managed to ensure available for 
 				woof-archetype to check using the latest. -->
@@ -557,7 +590,7 @@
 				<!-- Allow for scp distribution -->
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>3.1.0</version>
+				<version>3.2.0</version>
 			</extension>
 		</extensions>
 		<pluginManagement>
@@ -604,7 +637,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.21.0</version>
+					<version>2.22.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -624,7 +657,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.1.1</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -644,7 +677,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-scm-plugin</artifactId>
-					<version>1.10.0</version>
+					<version>1.11.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -654,7 +687,7 @@
 						<dependency>
 							<groupId>org.apache.ant</groupId>
 							<artifactId>ant</artifactId>
-							<version>1.10.4</version>
+							<version>1.10.5</version>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -713,7 +746,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
-					<version>1.1</version>
+					<version>1.6</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -748,11 +781,19 @@
 						<encoding>UTF-8</encoding>
 						<extraClasspathElements>
 							<extraClasspathElement>
-								<groupId>com.oracle</groupId>
-								<artifactId>javafx</artifactId>
-								<version>10.0.0-SNAPSHOT</version>
-								<systemPath>${java.home}/lib/javafx-swt.jar</systemPath>
-								<scope>system</scope>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-graphics</artifactId>
+								<version>${openjfx-version}</version>
+							</extraClasspathElement>
+							<extraClasspathElement>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-controls</artifactId>
+								<version>${openjfx-version}</version>
+							</extraClasspathElement>
+							<extraClasspathElement>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-swt</artifactId>
+								<version>${openjfx-swt-version}</version>
 							</extraClasspathElement>
 						</extraClasspathElements>
 					</configuration>
@@ -851,27 +892,6 @@
 					<source>10</source>
 					<target>10</target>
 				</configuration>
-			</plugin>
-
-			<plugin>
-				<!-- Code Coverage -->
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>
@@ -1270,6 +1290,39 @@
 		</plugins>
 	</reporting>
 	<profiles>
+		<profile>
+			<id>officefloor-code-coverage</id>
+			<activation>
+				<property>
+					<name>env.officefloor_code_coverage</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Code Coverage -->
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>0.8.2</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>report</id>
+								<phase>test</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<!-- Profile for deploying to SourceForge -->
 			<!-- -->

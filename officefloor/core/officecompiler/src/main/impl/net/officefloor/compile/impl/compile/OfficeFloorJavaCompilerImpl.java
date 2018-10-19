@@ -23,15 +23,15 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
@@ -251,9 +251,23 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	}
 
 	@Override
-	public void writeDelegateMethodImplementation(Appendable source, String delegate, Method method)
-			throws IOException {
+	public void writeMethodImplementation(Appendable source, String delegate, Method method) throws IOException {
 		this.writeDelegateMethodImplementation(source, null, delegate, method);
+	}
+
+	@Override
+	public void writeDelegateMethodCall(Appendable source, String delegate, Method method) throws IOException {
+
+		// Write the delegate method call
+		source.append(delegate + "." + method.getName() + "(");
+		Class<?>[] parameters = method.getParameterTypes();
+		for (int i = 0; i < parameters.length; i++) {
+			if (i > 0) {
+				source.append(", ");
+			}
+			source.append("p" + i);
+		}
+		source.append(")");
 	}
 
 	/**
@@ -279,18 +293,11 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 				source.append("new " + wrapClass + "(");
 			}
 		}
-		source.append(delegate + "." + method.getName() + "(");
-		Class<?>[] parameters = method.getParameterTypes();
-		for (int i = 0; i < parameters.length; i++) {
-			if (i > 0) {
-				source.append(", ");
-			}
-			source.append("p" + i);
-		}
+		this.writeDelegateMethodCall(source, delegate, method);
 		if (isReturnValue && (wrapClass != null)) {
 			source.append(")");
 		}
-		source.append(");\n");
+		source.append(";\n");
 	}
 
 	@Override
@@ -301,60 +308,73 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	}
 
 	@Override
-	public JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType, String delegateExtraction,
-			Consumer<WrapperContext> wrapperContext) throws IOException {
+	public JavaSource addWrapper(Class<?>[] wrappingTypes, Class<?> delegateType, String delegateExtraction,
+			ConstructorWriter constructorWriter, MethodWriter methodWriter, JavaSourceWriter... additionalSourceWriter)
+			throws IOException {
 
 		// Provide default delegate extraction
-		if (delegateExtraction == null) {
-			delegateExtraction = "this.delegate";
-		}
+		String delegate = (delegateExtraction == null) ? "this.delegate" : delegateExtraction;
 
 		// Create the source
 		StringWriter buffer = new StringWriter();
 		PrintWriter source = new PrintWriter(buffer);
 
 		// Determine package and class name
-		ClassName className = this.createClassName(wrappedType.getName() + "Wrapper");
-
-		// Obtain the type names
-		String wrappedTypeName = this.getSourceName(wrappedType);
+		ClassName className = this.createClassName(wrappingTypes[0].getName() + "Wrapper");
 
 		// Write the initial class details
 		source.println("package " + className.getPackageName() + ";");
 		source.println(
 				"@" + SuppressWarnings.class.getName() + "({\"all\",\"unchecked\",\"rawtypes\",\"deprecation\"})");
-		source.println("public class " + className.getClassName() + " implements " + wrappedTypeName + " {");
+		source.print("public class " + className.getClassName() + " implements ");
+		source.print(String.join(", ", Arrays.stream(wrappingTypes)
+				.map((wrappingType) -> this.getSourceName(wrappingType)).toArray(String[]::new)));
+		source.println(" {");
 
 		// Provide constructor to delegate
-		this.writeConstructor(source, className.getClassName(), this.createField(delegateType, "delegate"));
+		if (constructorWriter != null) {
+			// Use custom constructor
+			constructorWriter.write(new ConstructorWriterContext() {
 
-		// Implement the methods
-		for (Method method : wrappedType.getMethods()) {
+				@Override
+				public ClassName getClassName() {
+					return className;
+				}
 
-			// Create the wrapper context for the method
-			WrapperContextImpl methodContext = new WrapperContextImpl(method);
-			if (wrapperContext != null) {
-				wrapperContext.accept(methodContext);
+				@Override
+				public Appendable getSource() {
+					return source;
+				}
+			});
+
+		} else {
+			// Use default constructor
+			this.writeConstructor(source, className.getClassName(), this.createField(delegateType, "delegate"));
+		}
+
+		// Implement the various functions
+		for (Class<?> wrappingType : wrappingTypes) {
+
+			// Implement the methods
+			for (Method method : wrappingType.getMethods()) {
+				this.writeWrapperMethod(delegate, method, methodWriter, wrappingType, source);
 			}
+		}
 
-			// Write the method signature
-			source.print("  public ");
-			this.writeMethodSignature(source, method);
-			source.println(" {");
+		// Write the additional wrappings
+		for (JavaSourceWriter additional : additionalSourceWriter) {
+			additional.write(new JavaSourceContext() {
 
-			// Determine if override implementation
-			if (methodContext.overrideBuffer != null) {
-				// Override implementation
-				methodContext.override.flush();
-				source.print(methodContext.overrideBuffer.toString());
+				@Override
+				public ClassName getClassName() {
+					return className;
+				}
 
-			} else {
-				// Write the default implementation
-				this.writeDelegateMethodImplementation(source, methodContext.wrapClass, delegateExtraction, method);
-			}
-
-			// Complete method
-			source.println("  }");
+				@Override
+				public Appendable getSource() {
+					return source;
+				}
+			});
 		}
 
 		// Complete class
@@ -366,9 +386,58 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	}
 
 	/**
-	 * {@link WrapperContext} implementation.
+	 * Writes the wrapper {@link Method}.
+	 * 
+	 * @param delegateExtraction Delegate extraction.
+	 * @param method             {@link Method}.
+	 * @param methodWriter       {@link MethodWriter}.
+	 * @param wrappingType       Wrapping type.
+	 * @param source             Source.
+	 * @throws IOException If fails to write the {@link Method}.
 	 */
-	private static class WrapperContextImpl implements WrapperContext {
+	private void writeWrapperMethod(String delegateExtraction, Method method, MethodWriter methodWriter,
+			Class<?> wrappingType, PrintWriter source) throws IOException {
+
+		// Determine if method to implement
+		if (method.isDefault() || Modifier.isStatic(method.getModifiers())) {
+			return;
+		}
+
+		// Create the wrapper context for the method
+		WrapperContextImpl methodContext = new WrapperContextImpl(wrappingType, method);
+		if (methodWriter != null) {
+			methodWriter.write(methodContext);
+		}
+
+		// Write the method signature
+		source.print("  public ");
+		this.writeMethodSignature(source, method);
+		source.println(" {");
+
+		// Determine if override implementation
+		if (methodContext.overrideBuffer != null) {
+			// Override implementation
+			methodContext.override.flush();
+			source.print(methodContext.overrideBuffer.toString());
+
+		} else {
+			// Write the default implementation
+			this.writeDelegateMethodImplementation(source, methodContext.wrapClass, delegateExtraction, method);
+		}
+
+		// Complete method
+		source.println("  }");
+	}
+
+	/**
+	 * {@link MethodWriterContext} implementation.
+	 */
+	private static class WrapperContextImpl implements MethodWriterContext {
+
+		/**
+		 * Interface.
+		 */
+		private final Class<?> interfaceClass;
 
 		/**
 		 * {@link Method}.
@@ -393,9 +462,11 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param method {@link Method}.
+		 * @param interfaceClass Interface {@link Class}.
+		 * @param method         {@link Method}.
 		 */
-		private WrapperContextImpl(Method method) {
+		private WrapperContextImpl(Class<?> interfaceClass, Method method) {
+			this.interfaceClass = interfaceClass;
 			this.method = method;
 		}
 
@@ -415,6 +486,11 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		/*
 		 * =============== WrapperContext =================
 		 */
+
+		@Override
+		public Class<?> getInterface() {
+			return this.interfaceClass;
+		}
 
 		@Override
 		public Method getMethod() {
@@ -440,6 +516,11 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		public void writeln(String source) {
 			this.getWriter().println(source);
 		}
+
+		@Override
+		public Appendable getSource() {
+			return this.getWriter();
+		}
 	}
 
 	@Override
@@ -461,8 +542,17 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 				case ERROR:
 				default:
 					isError = true;
-					msg.append("\n\t line " + diagnostic.getLineNumber() + ": "
-							+ diagnostic.getMessage(Locale.getDefault()));
+					JavaFileObject failedSource = diagnostic.getSource();
+					msg.append("\n\t " + (failedSource != null ? failedSource.getName() + " " : "") + "line "
+							+ diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
+					msg.append("\n\n");
+					try {
+						if (failedSource != null) {
+							msg.append(failedSource.getCharContent(true));
+						}
+					} catch (IOException ex) {
+						msg.append("ERROR: failed to log remaining source content");
+					}
 					break;
 				}
 			}

@@ -228,6 +228,11 @@ public class ManagedExecutionTest extends AbstractOfficeConstructTestCase {
 		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
 			assertTrue("load managed object should be managed", ManagedExecutionFactoryImpl.isCurrentThreadManaged());
 		}
+
+		@Override
+		public void empty() {
+			// Nothing to empty
+		}
 	}
 
 	@TestSource
