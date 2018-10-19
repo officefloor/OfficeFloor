@@ -1,5 +1,0 @@
-<office-floor>
-    <offices>
-        <office name="OFFICE" source="OFFICE" location="net/officefloor/plugin/jndi/context/test.office" />
-    </offices>
-</office-floor>

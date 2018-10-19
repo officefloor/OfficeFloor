@@ -41,6 +41,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.jdbc.AbstractConnectionManagedObject;
+import net.officefloor.jdbc.ConnectionWrapper;
 
 /**
  * {@link Connection} {@link ManagedObjectPool} implementation that uses
@@ -52,85 +53,46 @@ import net.officefloor.jdbc.AbstractConnectionManagedObject;
 public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadCompletionListener {
 
 	/**
-	 * Reference to a {@link Connection}.
+	 * {@link ConnectionPoolDataSource}.
 	 */
-	public static interface ConnectionReference {
-
-		/**
-		 * Obtains the {@link Connection}.
-		 * 
-		 * @return {@link Connection}.
-		 */
-		Connection getConnection();
-	}
+	private final ConnectionPoolDataSource dataSource;
 
 	/**
-	 * Context for the pooled {@link Connection}.
+	 * {@link PooledConnectionWrapperFactory}.
 	 */
-	public static interface PooledConnectionContext extends InvocationHandler {
-
-		/**
-		 * Obtains the {@link ConnectionReference}.
-		 * 
-		 * @return {@link ConnectionReference}.
-		 * @throws SQLException If fails to obtain the {@link ConnectionReference}.
-		 */
-		ConnectionReference getConnectionReference() throws SQLException;
-
-		/**
-		 * Sets auto-commit on the {@link Connection}.
-		 * 
-		 * @param reference    {@link ConnectionReference} to the {@link Connection}.
-		 * @param isAutoCommit Indicates whether setting/unsetting auto-commit.
-		 * @throws SQLException If fails to set auto-commit.
-		 */
-		void setAutoCommit(ConnectionReference reference, boolean isAutoCommit) throws SQLException;
-
-		/**
-		 * Obtains the {@link ThreadLocalJdbcConnectionPool}.
-		 * 
-		 * @return {@link ThreadLocalJdbcConnectionPool}.
-		 */
-		ThreadLocalJdbcConnectionPool getPool();
-	}
+	private final PooledConnectionWrapperFactory wrapperFactory;
 
 	/**
-	 * Interface on compiled {@link Connection} wrapper extract details of the
-	 * {@link Connection}.
+	 * {@link ThreadLocal} {@link Connection} for this
+	 * {@link ThreadLocalJdbcConnectionPool}.
 	 */
-	public static interface CompiledConnectionWrapper {
-
-		/**
-		 * Obtains the {@link Connection}.
-		 * 
-		 * @return {@link Connection}.
-		 * @throws SQLException If fails to {@link Connection}.
-		 */
-		Connection _getConnection() throws SQLException;
-
-		/**
-		 * Obtains the {@link ThreadLocalJdbcConnectionPool} for the {@link Connection}.
-		 * 
-		 * @return {@link ThreadLocalJdbcConnectionPool} for the {@link Connection}.
-		 * @throws SQLException If fails to obtain
-		 *                      {@link ThreadLocalJdbcConnectionPool}.
-		 */
-		ThreadLocalJdbcConnectionPool _getPool() throws SQLException;
-	}
+	private final ThreadLocal<ConnectionReferenceImpl> threadLocalConnection = new ThreadLocal<>();
 
 	/**
-	 * Factory to create wrapper for the {@link PooledConnection}.
+	 * {@link ConnectionReferenceImpl} instances idle within the pool.
 	 */
-	public static interface PooledConnectionWrapperFactory {
+	private final Deque<ConnectionReferenceImpl> pooledConnections = new ConcurrentLinkedDeque<>();
 
-		/**
-		 * Create the {@link Connection} wrapper.
-		 * 
-		 * @param context {@link PooledConnectionContext}.
-		 * @return Wrapped {@link Connection}.
-		 * @throws Exception If fails to wrap the {@link Connection}.
-		 */
-		Connection wrap(PooledConnectionContext context) throws Exception;
+	/**
+	 * <p>
+	 * All {@link ConnectionReferenceImpl} instances.
+	 * <p>
+	 * Some {@link Thread} instances may not have completed yet leaving a
+	 * {@link PooledConnection} not in the idle list for closing. This tracks all
+	 * {@link PooledConnection} instances created to ensure they are all closed.
+	 */
+	private final Deque<ConnectionReferenceImpl> allPooledConnections = new ConcurrentLinkedDeque<>();
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param dataSource     {@link ConnectionPoolDataSource}.
+	 * @param wrapperFactory {@link PooledConnectionWrapperFactory}.
+	 */
+	public ThreadLocalJdbcConnectionPool(ConnectionPoolDataSource dataSource,
+			PooledConnectionWrapperFactory wrapperFactory) {
+		this.dataSource = dataSource;
+		this.wrapperFactory = wrapperFactory;
 	}
 
 	/**
@@ -147,7 +109,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		if (compiler == null) {
 
 			// Fall back to proxy implementation
-			Class<?>[] interfaces = new Class[] { Connection.class };
+			Class<?>[] interfaces = new Class[] { Connection.class, ConnectionWrapper.class };
 			return (wrapperContext) -> (Connection) Proxy.newProxyInstance(classLoader, interfaces, wrapperContext);
 
 		} else {
@@ -162,8 +124,8 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			source.println("package " + className.getPackageName() + ";");
 			source.println("@" + compiler.getSourceName(SuppressWarnings.class) + "(\"unchecked\")");
 			source.println("public class " + className.getClassName() + " implements "
-					+ compiler.getSourceName(Connection.class) + ", "
-					+ compiler.getSourceName(CompiledConnectionWrapper.class) + " {");
+					+ compiler.getSourceName(Connection.class) + ", " + compiler.getSourceName(ConnectionWrapper.class)
+					+ "," + compiler.getSourceName(CompiledConnectionWrapper.class) + " {");
 
 			// Write the constructor
 			compiler.writeConstructor(source, className.getClassName(),
@@ -179,6 +141,13 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			source.println("  public " + compiler.getSourceName(ThreadLocalJdbcConnectionPool.class)
 					+ " _getPool() throws " + compiler.getSourceName(SQLException.class) + " {");
 			source.println("    return this.context.getPool();");
+			source.println("  }");
+
+			// Implement isRealConnection
+			source.print("  public ");
+			compiler.writeMethodSignature(source, ConnectionWrapper.getRealConnectionMethod());
+			source.println(" {");
+			source.println("    return this.context.getRealConnection();");
 			source.println("  }");
 
 			// Write the methods
@@ -202,8 +171,8 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 					break;
 				default:
 					// Default implementation
-					compiler.writeDelegateMethodImplementation(source,
-							"this.context.getConnectionReference().getConnection()", method);
+					compiler.writeMethodImplementation(source, "this.context.getConnectionReference().getConnection()",
+							method);
 					break;
 				}
 
@@ -263,39 +232,6 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	}
 
 	/**
-	 * {@link ConnectionPoolDataSource}.
-	 */
-	private final ConnectionPoolDataSource dataSource;
-
-	/**
-	 * {@link PooledConnectionWrapperFactory}.
-	 */
-	private final PooledConnectionWrapperFactory wrapperFactory;
-
-	/**
-	 * {@link ThreadLocal} {@link Connection} for this
-	 * {@link ThreadLocalJdbcConnectionPool}.
-	 */
-	private final ThreadLocal<ConnectionReferenceImpl> threadLocalConnection = new ThreadLocal<>();
-
-	/**
-	 * {@link ConnectionReferenceImpl} instances idle within the pool.
-	 */
-	private final Deque<ConnectionReferenceImpl> pooledConnections = new ConcurrentLinkedDeque<>();
-
-	/**
-	 * Instantiate.
-	 * 
-	 * @param dataSource     {@link ConnectionPoolDataSource}.
-	 * @param wrapperFactory {@link PooledConnectionWrapperFactory}.
-	 */
-	public ThreadLocalJdbcConnectionPool(ConnectionPoolDataSource dataSource,
-			PooledConnectionWrapperFactory wrapperFactory) {
-		this.dataSource = dataSource;
-		this.wrapperFactory = wrapperFactory;
-	}
-
-	/**
 	 * Obtains the {@link ThreadLocal} {@link Connection}.
 	 * 
 	 * @return {@link ThreadLocal} {@link Connection}.
@@ -345,13 +281,24 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				reference.connection.rollback();
 				reference.connection.setAutoCommit(true);
 
-				// Synchronize connection into pool
-				synchronized (reference) {
-					this.pooledConnections.push(reference);
-				}
+				// Add to pool
+				this.pooledConnections.push(reference);
 
 			} catch (SQLException ex) {
 				// Failed to return connection to pool
+			}
+		}
+	}
+
+	@Override
+	public void empty() {
+
+		// Close all the pooled connections
+		for (ConnectionReferenceImpl reference : this.allPooledConnections) {
+			try {
+				reference.pooledConnection.close();
+			} catch (SQLException ex) {
+
 			}
 		}
 	}
@@ -368,10 +315,8 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		if (reference != null) {
 			this.threadLocalConnection.set(null);
 
-			// Synchronize connection into pool
-			synchronized (reference) {
-				this.pooledConnections.push(reference);
-			}
+			// Add to pool
+			this.pooledConnections.push(reference);
 		}
 	}
 
@@ -417,6 +362,16 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		 */
 
 		@Override
+		public Connection getRealConnection() {
+			/*
+			 * Attempt to recycle (clean transaction). Therefore, only "real" connection if
+			 * within transaction.
+			 */
+			ConnectionReferenceImpl real = this.transactionConnection;
+			return (real != null) ? real.connection : null;
+		}
+
+		@Override
 		public ConnectionReference getConnectionReference() throws SQLException {
 
 			// Determine if transaction connection
@@ -449,15 +404,9 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				} while ((isAvailable) && (reference == null));
 
 				// Determine if have reference from pool
-				if (reference != null) {
-					// Ensure consistent state with other thread
-					synchronized (reference) {
-					}
+				if (reference == null) {
 
-				} else {
 					// No valid pooled connection, create a new connection
-
-					// Obtain the connection
 					PooledConnection pooledConnection = ThreadLocalJdbcConnectionPool.this.dataSource
 							.getPooledConnection();
 					Connection connection = pooledConnection.getConnection();
@@ -469,6 +418,9 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 					// Create reference to the connection
 					reference = new ConnectionReferenceImpl(connection, pooledConnection);
+
+					// Register connection (for empty on close)
+					ThreadLocalJdbcConnectionPool.this.allPooledConnections.push(reference);
 				}
 
 				// Register the connection with the thread
@@ -517,9 +469,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 					} else {
 						// Thread has connection (or invalid reset), so return to the pool
-						synchronized (returnReference) {
-							ThreadLocalJdbcConnectionPool.this.pooledConnections.push(returnReference);
-						}
+						ThreadLocalJdbcConnectionPool.this.pooledConnections.push(returnReference);
 					}
 				}
 			}
@@ -536,6 +486,11 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+
+			// Handle recycle wrapper
+			if (ConnectionWrapper.isGetRealConnectionMethod(method)) {
+				return this.getRealConnection();
+			}
 
 			// Obtain the connection reference
 			ConnectionReferenceImpl reference = (ConnectionReferenceImpl) this.getConnectionReference();
@@ -622,6 +577,96 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				this.isValid = false;
 			}
 		}
+	}
+
+	/**
+	 * Reference to a {@link Connection}.
+	 */
+	public static interface ConnectionReference {
+
+		/**
+		 * Obtains the {@link Connection}.
+		 * 
+		 * @return {@link Connection}.
+		 */
+		Connection getConnection();
+	}
+
+	/**
+	 * Context for the pooled {@link Connection}.
+	 */
+	public static interface PooledConnectionContext extends InvocationHandler {
+
+		/**
+		 * Obtains the real {@link Connection}.
+		 * 
+		 * @return The real {@link Connection} or <code>null</code> if no real
+		 *         {@link Connection}.
+		 */
+		Connection getRealConnection();
+
+		/**
+		 * Obtains the {@link ConnectionReference}.
+		 * 
+		 * @return {@link ConnectionReference}.
+		 * @throws SQLException If fails to obtain the {@link ConnectionReference}.
+		 */
+		ConnectionReference getConnectionReference() throws SQLException;
+
+		/**
+		 * Sets auto-commit on the {@link Connection}.
+		 * 
+		 * @param reference    {@link ConnectionReference} to the {@link Connection}.
+		 * @param isAutoCommit Indicates whether setting/unsetting auto-commit.
+		 * @throws SQLException If fails to set auto-commit.
+		 */
+		void setAutoCommit(ConnectionReference reference, boolean isAutoCommit) throws SQLException;
+
+		/**
+		 * Obtains the {@link ThreadLocalJdbcConnectionPool}.
+		 * 
+		 * @return {@link ThreadLocalJdbcConnectionPool}.
+		 */
+		ThreadLocalJdbcConnectionPool getPool();
+	}
+
+	/**
+	 * Interface on compiled {@link Connection} wrapper extract details of the
+	 * {@link Connection}.
+	 */
+	public static interface CompiledConnectionWrapper extends ConnectionWrapper {
+
+		/**
+		 * Obtains the {@link Connection}.
+		 * 
+		 * @return {@link Connection}.
+		 * @throws SQLException If fails to {@link Connection}.
+		 */
+		Connection _getConnection() throws SQLException;
+
+		/**
+		 * Obtains the {@link ThreadLocalJdbcConnectionPool} for the {@link Connection}.
+		 * 
+		 * @return {@link ThreadLocalJdbcConnectionPool} for the {@link Connection}.
+		 * @throws SQLException If fails to obtain
+		 *                      {@link ThreadLocalJdbcConnectionPool}.
+		 */
+		ThreadLocalJdbcConnectionPool _getPool() throws SQLException;
+	}
+
+	/**
+	 * Factory to create wrapper for the {@link PooledConnection}.
+	 */
+	public static interface PooledConnectionWrapperFactory {
+
+		/**
+		 * Create the {@link Connection} wrapper.
+		 * 
+		 * @param context {@link PooledConnectionContext}.
+		 * @return Wrapped {@link Connection}.
+		 * @throws Exception If fails to wrap the {@link Connection}.
+		 */
+		Connection wrap(PooledConnectionContext context) throws Exception;
 	}
 
 }

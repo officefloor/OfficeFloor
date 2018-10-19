@@ -255,7 +255,8 @@ public class PostgreSqlRule implements TestRule {
 		try {
 			logger.setLevel(Level.OFF);
 			logger.setUseParentHandlers(false);
-			return DataSourceRule.waitForDatabaseAvailable(() -> dataSource.getConnection());
+			return DataSourceRule
+					.waitForDatabaseAvailable((context) -> context.setConnection(dataSource.getConnection()));
 		} finally {
 			logger.setLevel(level);
 		}

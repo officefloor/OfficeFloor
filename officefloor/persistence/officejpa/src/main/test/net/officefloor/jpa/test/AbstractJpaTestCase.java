@@ -54,6 +54,7 @@ import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 import net.officefloor.jdbc.test.DataSourceRule;
+import net.officefloor.jdbc.test.ValidateConnectionDecoratorFactory;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.DependencyType;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
@@ -131,19 +132,21 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	@Override
 	protected void setUp() throws Exception {
 
+		// Ensure clean state (no connections from previous test)
+		ValidateConnectionDecoratorFactory.assertNoPreviousTestConnections();
+		assertEquals("Should be no connections before test setup", 0,
+				ValidateConnectionDecoratorFactory.getConnectionsRegisteredCount());
+
 		// Obtain connection
 		// Must keep reference to keep potential in memory databases active
-		this.connection = DataSourceRule.waitForDatabaseAvailable(() -> {
+		this.connection = DataSourceRule.waitForDatabaseAvailable((context) -> {
 
 			// Obtain the connection
-			Connection conn = AbstractJdbcTestCase.getConnection(ConnectionManagedObjectSource.class,
-					(mos) -> this.loadDatabaseProperties(mos));
+			Connection conn = context.setConnection(AbstractJdbcTestCase
+					.getConnection(ConnectionManagedObjectSource.class, (mos) -> this.loadDatabaseProperties(mos)));
 
 			// Clean database for testing
 			this.cleanDatabase(conn);
-
-			// Return the connection
-			return conn;
 		});
 
 		// Create table for testing
@@ -167,6 +170,11 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 				this.connection.close();
 			}
 		}
+
+		// Ensure connections (and all closed)
+		assertTrue("Should have at least one connection registered",
+				ValidateConnectionDecoratorFactory.getConnectionsRegisteredCount() >= 1);
+		ValidateConnectionDecoratorFactory.assertAllConnectionsClosed();
 	}
 
 	/**
@@ -366,6 +374,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		// Add entry to database
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("INSERT INTO MOCKENTITY (NAME, DESCRIPTION) VALUES ('test', 'mock read entry')");
+			if (!this.connection.getAutoCommit()) {
+				this.connection.commit();
+			}
 		}
 
 		// Configure the application
@@ -507,6 +518,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		// Add entry to database
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("INSERT INTO MOCKENTITY (NAME, DESCRIPTION) VALUES ('test', 'mock initial entry')");
+			if (!this.connection.getAutoCommit()) {
+				this.connection.commit();
+			}
 		}
 
 		// Configure the application
@@ -577,6 +591,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 		// Add entry to database
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("INSERT INTO MOCKENTITY (NAME, DESCRIPTION) VALUES ('test', 'mock entry')");
+			if (!this.connection.getAutoCommit()) {
+				this.connection.commit();
+			}
 		}
 
 		// Configure the application
@@ -809,6 +826,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 			ResultSet resultTwo = statement.executeQuery("SELECT ID FROM MOCKENTITY WHERE NAME = 'two'");
 			resultTwo.next();
 			rowTwoId = resultTwo.getInt("ID");
+			if (!this.connection.getAutoCommit()) {
+				this.connection.commit();
+			}
 		}
 
 		// Configure the application
