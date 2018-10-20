@@ -117,6 +117,8 @@ import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeSubSectionToGovernanceModel;
 import net.officefloor.model.office.OfficeSupplierModel;
 import net.officefloor.model.office.OfficeSupplierThreadLocalModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSupplierThreadLocalToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.office.TypeQualificationModel;
@@ -538,9 +540,36 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 				String qualifier = threadLocalModel.getQualifier();
 				String type = threadLocalModel.getType();
 				OfficeSupplierThreadLocal threadLocal = supplier.getOfficeSupplierThreadLocal(qualifier, type);
-				
-				
 
+				// Determine if linked to managed object
+				OfficeManagedObject linkedManagedObject = null;
+				OfficeSupplierThreadLocalToOfficeManagedObjectModel threadLocalToMo = threadLocalModel
+						.getOfficeManagedObject();
+				if (threadLocalToMo != null) {
+					OfficeManagedObjectModel linkedMoModel = threadLocalToMo.getOfficeManagedObject();
+					if (linkedMoModel != null) {
+						linkedManagedObject = managedObjects.get(linkedMoModel.getOfficeManagedObjectName());
+					}
+				}
+				if (linkedManagedObject != null) {
+					// Link to managed object
+					architect.link(threadLocal, linkedManagedObject);
+				}
+
+				// Determine if linked to external managed object
+				OfficeObject linkedObject = null;
+				OfficeSupplierThreadLocalToExternalManagedObjectModel threadLocalToExtMo = threadLocalModel
+						.getExternalManagedObject();
+				if (threadLocalToExtMo != null) {
+					ExternalManagedObjectModel linkedExtMoModel = threadLocalToExtMo.getExternalManagedObject();
+					if (linkedExtMoModel != null) {
+						linkedObject = officeObjects.get(linkedExtMoModel.getExternalManagedObjectName());
+					}
+				}
+				if (linkedObject != null) {
+					// Link to external managed object
+					architect.link(threadLocal, linkedObject);
+				}
 			}
 		}
 

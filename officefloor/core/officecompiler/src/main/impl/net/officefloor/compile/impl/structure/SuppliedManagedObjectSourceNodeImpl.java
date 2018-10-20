@@ -99,7 +99,7 @@ public class SuppliedManagedObjectSourceNodeImpl implements SuppliedManagedObjec
 
 	@Override
 	public String getNodeName() {
-		return (this.qualifier != null ? this.qualifier + "-" : "") + this.type;
+		return this.supplierNode.getQualifiedName((this.qualifier != null ? this.qualifier + "-" : "") + this.type);
 	}
 
 	@Override

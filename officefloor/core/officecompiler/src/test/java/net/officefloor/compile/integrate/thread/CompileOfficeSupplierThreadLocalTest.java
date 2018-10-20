@@ -29,14 +29,12 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
-import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.thread.OptionalThreadLocal;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -53,7 +51,7 @@ public class CompileOfficeSupplierThreadLocalTest extends AbstractCompileTestCas
 	public void testUnknownSupplierThreadLocal() {
 
 		// Record no supplier thread local for configuration
-		this.issues.recordIssueRegex("UNKNOWN-" + ThreadLocalManagedObject.class.getName(),
+		this.issues.recordIssueRegex("OFFICE.UNKNOWN-" + ThreadLocalManagedObject.class.getName(),
 				SupplierThreadLocalNodeImpl.class, "Supplier Thread Local not implemented.+");
 
 		// Should compile
@@ -96,7 +94,7 @@ public class CompileOfficeSupplierThreadLocalTest extends AbstractCompileTestCas
 				0, ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, SuppliedManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
-		ThreadDependencyMappingBuilder mo = this.record_officeBuilder_addProcessManagedObject("MANAGED_OBJECT",
+		ThreadDependencyMappingBuilder mo = this.record_officeBuilder_addProcessManagedObject("OFFICE.MANAGED_OBJECT",
 				"OFFICE.MANAGED_OBJECT");
 
 		// Record obtaining thread local for supplier thread local
@@ -115,22 +113,18 @@ public class CompileOfficeSupplierThreadLocalTest extends AbstractCompileTestCas
 		// Add supplier thread local
 		MockSupplierSource.addSupplierThreadLocal(ThreadLocalManagedObject.class);
 
-		// Record the loading section type
-		this.issues.recordCaptureIssues(false);
-
 		// Record building the OfficeFloor
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeBuilder_addFunction("SECTION", "INPUT");
-		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE", ClassManagedObjectSource.class, 0, "class.name",
-				ProcessManagedObject.class.getName());
-		ManagingOfficeBuilder<?> inputManagingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		ThreadDependencyMappingBuilder input = this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT");
-		inputManagingOffice.linkFlow(0, "SECTION.INPUT");
-		office.setBoundInputManagedObject("INPUT", "INPUT_SOURCE");
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", ThreadLocalManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
+		ThreadDependencyMappingBuilder mo = this.record_officeBuilder_addProcessManagedObject("MANAGED_OBJECT",
+				"MANAGED_OBJECT");
 
 		// Record obtaining thread local for supplier thread local
-		this.recordReturn(input, input.getOptionalThreadLocal(), this.createMock(OptionalThreadLocal.class));
+		this.recordReturn(mo, mo.getOptionalThreadLocal(), this.createMock(OptionalThreadLocal.class));
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -146,21 +140,6 @@ public class CompileOfficeSupplierThreadLocalTest extends AbstractCompileTestCas
 	}
 
 	public static class SuppliedManagedObject {
-	}
-
-	public static class ProcessManagedObject {
-
-		@FlowInterface
-		public static interface ProcessFlows {
-			void doProcess();
-		}
-
-		ProcessFlows flows;
-	}
-
-	public static class ProcessSection {
-		public void process() {
-		}
 	}
 
 	@TestSource

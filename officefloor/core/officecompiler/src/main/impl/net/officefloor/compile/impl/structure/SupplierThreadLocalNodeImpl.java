@@ -120,7 +120,7 @@ public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
 
 	@Override
 	public String getNodeName() {
-		return this.name;
+		return this.supplierNode.getQualifiedName(this.name);
 	}
 
 	@Override
