@@ -103,6 +103,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 							@Override
 							protected void loadSpecification(SpecificationContext context) {
+								// no specification
 							}
 
 							@Override
@@ -134,6 +135,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 									@Override
 									public void empty() {
+										// nothing to clean up
 									}
 								});
 							}

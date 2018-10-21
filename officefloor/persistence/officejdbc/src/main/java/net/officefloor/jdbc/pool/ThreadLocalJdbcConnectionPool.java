@@ -53,93 +53,46 @@ import net.officefloor.jdbc.ConnectionWrapper;
 public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadCompletionListener {
 
 	/**
-	 * Reference to a {@link Connection}.
+	 * {@link ConnectionPoolDataSource}.
 	 */
-	public static interface ConnectionReference {
-
-		/**
-		 * Obtains the {@link Connection}.
-		 * 
-		 * @return {@link Connection}.
-		 */
-		Connection getConnection();
-	}
+	private final ConnectionPoolDataSource dataSource;
 
 	/**
-	 * Context for the pooled {@link Connection}.
+	 * {@link PooledConnectionWrapperFactory}.
 	 */
-	public static interface PooledConnectionContext extends InvocationHandler {
-
-		/**
-		 * Obtains the real {@link Connection}.
-		 * 
-		 * @return The real {@link Connection} or <code>null</code> if no real
-		 *         {@link Connection}.
-		 */
-		Connection getRealConnection();
-
-		/**
-		 * Obtains the {@link ConnectionReference}.
-		 * 
-		 * @return {@link ConnectionReference}.
-		 * @throws SQLException If fails to obtain the {@link ConnectionReference}.
-		 */
-		ConnectionReference getConnectionReference() throws SQLException;
-
-		/**
-		 * Sets auto-commit on the {@link Connection}.
-		 * 
-		 * @param reference    {@link ConnectionReference} to the {@link Connection}.
-		 * @param isAutoCommit Indicates whether setting/unsetting auto-commit.
-		 * @throws SQLException If fails to set auto-commit.
-		 */
-		void setAutoCommit(ConnectionReference reference, boolean isAutoCommit) throws SQLException;
-
-		/**
-		 * Obtains the {@link ThreadLocalJdbcConnectionPool}.
-		 * 
-		 * @return {@link ThreadLocalJdbcConnectionPool}.
-		 */
-		ThreadLocalJdbcConnectionPool getPool();
-	}
+	private final PooledConnectionWrapperFactory wrapperFactory;
 
 	/**
-	 * Interface on compiled {@link Connection} wrapper extract details of the
-	 * {@link Connection}.
+	 * {@link ThreadLocal} {@link Connection} for this
+	 * {@link ThreadLocalJdbcConnectionPool}.
 	 */
-	public static interface CompiledConnectionWrapper extends ConnectionWrapper {
-
-		/**
-		 * Obtains the {@link Connection}.
-		 * 
-		 * @return {@link Connection}.
-		 * @throws SQLException If fails to {@link Connection}.
-		 */
-		Connection _getConnection() throws SQLException;
-
-		/**
-		 * Obtains the {@link ThreadLocalJdbcConnectionPool} for the {@link Connection}.
-		 * 
-		 * @return {@link ThreadLocalJdbcConnectionPool} for the {@link Connection}.
-		 * @throws SQLException If fails to obtain
-		 *                      {@link ThreadLocalJdbcConnectionPool}.
-		 */
-		ThreadLocalJdbcConnectionPool _getPool() throws SQLException;
-	}
+	private final ThreadLocal<ConnectionReferenceImpl> threadLocalConnection = new ThreadLocal<>();
 
 	/**
-	 * Factory to create wrapper for the {@link PooledConnection}.
+	 * {@link ConnectionReferenceImpl} instances idle within the pool.
 	 */
-	public static interface PooledConnectionWrapperFactory {
+	private final Deque<ConnectionReferenceImpl> pooledConnections = new ConcurrentLinkedDeque<>();
 
-		/**
-		 * Create the {@link Connection} wrapper.
-		 * 
-		 * @param context {@link PooledConnectionContext}.
-		 * @return Wrapped {@link Connection}.
-		 * @throws Exception If fails to wrap the {@link Connection}.
-		 */
-		Connection wrap(PooledConnectionContext context) throws Exception;
+	/**
+	 * <p>
+	 * All {@link ConnectionReferenceImpl} instances.
+	 * <p>
+	 * Some {@link Thread} instances may not have completed yet leaving a
+	 * {@link PooledConnection} not in the idle list for closing. This tracks all
+	 * {@link PooledConnection} instances created to ensure they are all closed.
+	 */
+	private final Deque<ConnectionReferenceImpl> allPooledConnections = new ConcurrentLinkedDeque<>();
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param dataSource     {@link ConnectionPoolDataSource}.
+	 * @param wrapperFactory {@link PooledConnectionWrapperFactory}.
+	 */
+	public ThreadLocalJdbcConnectionPool(ConnectionPoolDataSource dataSource,
+			PooledConnectionWrapperFactory wrapperFactory) {
+		this.dataSource = dataSource;
+		this.wrapperFactory = wrapperFactory;
 	}
 
 	/**
@@ -276,49 +229,6 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			// Extract from compiled connection wrapper
 			return ((CompiledConnectionWrapper) connection)._getPool();
 		}
-	}
-
-	/**
-	 * {@link ConnectionPoolDataSource}.
-	 */
-	private final ConnectionPoolDataSource dataSource;
-
-	/**
-	 * {@link PooledConnectionWrapperFactory}.
-	 */
-	private final PooledConnectionWrapperFactory wrapperFactory;
-
-	/**
-	 * {@link ThreadLocal} {@link Connection} for this
-	 * {@link ThreadLocalJdbcConnectionPool}.
-	 */
-	private final ThreadLocal<ConnectionReferenceImpl> threadLocalConnection = new ThreadLocal<>();
-
-	/**
-	 * {@link ConnectionReferenceImpl} instances idle within the pool.
-	 */
-	private final Deque<ConnectionReferenceImpl> pooledConnections = new ConcurrentLinkedDeque<>();
-
-	/**
-	 * <p>
-	 * All {@link ConnectionReferenceImpl} instances.
-	 * <p>
-	 * Some {@link Thread} instances may not have completed yet leaving a
-	 * {@link PooledConnection} not in the idle list for closing. This tracks all
-	 * {@link PooledConnection} instances created to ensure they are all closed.
-	 */
-	private final Deque<ConnectionReferenceImpl> allPooledConnections = new ConcurrentLinkedDeque<>();
-
-	/**
-	 * Instantiate.
-	 * 
-	 * @param dataSource     {@link ConnectionPoolDataSource}.
-	 * @param wrapperFactory {@link PooledConnectionWrapperFactory}.
-	 */
-	public ThreadLocalJdbcConnectionPool(ConnectionPoolDataSource dataSource,
-			PooledConnectionWrapperFactory wrapperFactory) {
-		this.dataSource = dataSource;
-		this.wrapperFactory = wrapperFactory;
 	}
 
 	/**
@@ -667,6 +577,96 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				this.isValid = false;
 			}
 		}
+	}
+
+	/**
+	 * Reference to a {@link Connection}.
+	 */
+	public static interface ConnectionReference {
+
+		/**
+		 * Obtains the {@link Connection}.
+		 * 
+		 * @return {@link Connection}.
+		 */
+		Connection getConnection();
+	}
+
+	/**
+	 * Context for the pooled {@link Connection}.
+	 */
+	public static interface PooledConnectionContext extends InvocationHandler {
+
+		/**
+		 * Obtains the real {@link Connection}.
+		 * 
+		 * @return The real {@link Connection} or <code>null</code> if no real
+		 *         {@link Connection}.
+		 */
+		Connection getRealConnection();
+
+		/**
+		 * Obtains the {@link ConnectionReference}.
+		 * 
+		 * @return {@link ConnectionReference}.
+		 * @throws SQLException If fails to obtain the {@link ConnectionReference}.
+		 */
+		ConnectionReference getConnectionReference() throws SQLException;
+
+		/**
+		 * Sets auto-commit on the {@link Connection}.
+		 * 
+		 * @param reference    {@link ConnectionReference} to the {@link Connection}.
+		 * @param isAutoCommit Indicates whether setting/unsetting auto-commit.
+		 * @throws SQLException If fails to set auto-commit.
+		 */
+		void setAutoCommit(ConnectionReference reference, boolean isAutoCommit) throws SQLException;
+
+		/**
+		 * Obtains the {@link ThreadLocalJdbcConnectionPool}.
+		 * 
+		 * @return {@link ThreadLocalJdbcConnectionPool}.
+		 */
+		ThreadLocalJdbcConnectionPool getPool();
+	}
+
+	/**
+	 * Interface on compiled {@link Connection} wrapper extract details of the
+	 * {@link Connection}.
+	 */
+	public static interface CompiledConnectionWrapper extends ConnectionWrapper {
+
+		/**
+		 * Obtains the {@link Connection}.
+		 * 
+		 * @return {@link Connection}.
+		 * @throws SQLException If fails to {@link Connection}.
+		 */
+		Connection _getConnection() throws SQLException;
+
+		/**
+		 * Obtains the {@link ThreadLocalJdbcConnectionPool} for the {@link Connection}.
+		 * 
+		 * @return {@link ThreadLocalJdbcConnectionPool} for the {@link Connection}.
+		 * @throws SQLException If fails to obtain
+		 *                      {@link ThreadLocalJdbcConnectionPool}.
+		 */
+		ThreadLocalJdbcConnectionPool _getPool() throws SQLException;
+	}
+
+	/**
+	 * Factory to create wrapper for the {@link PooledConnection}.
+	 */
+	public static interface PooledConnectionWrapperFactory {
+
+		/**
+		 * Create the {@link Connection} wrapper.
+		 * 
+		 * @param context {@link PooledConnectionContext}.
+		 * @return Wrapped {@link Connection}.
+		 * @throws Exception If fails to wrap the {@link Connection}.
+		 */
+		Connection wrap(PooledConnectionContext context) throws Exception;
 	}
 
 }

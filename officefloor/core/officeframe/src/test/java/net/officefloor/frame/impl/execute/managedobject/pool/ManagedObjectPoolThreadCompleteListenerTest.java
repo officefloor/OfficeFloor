@@ -101,6 +101,7 @@ public class ManagedObjectPoolThreadCompleteListenerTest extends AbstractOfficeC
 
 		@Override
 		public void empty() {
+			// nothing to clean
 		}
 
 		/*

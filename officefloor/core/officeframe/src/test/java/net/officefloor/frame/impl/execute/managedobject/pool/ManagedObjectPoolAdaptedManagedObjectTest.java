@@ -221,6 +221,7 @@ public class ManagedObjectPoolAdaptedManagedObjectTest extends AbstractOfficeCon
 
 		@Override
 		public void empty() {
+			// nothing to clean
 		}
 	}
 
