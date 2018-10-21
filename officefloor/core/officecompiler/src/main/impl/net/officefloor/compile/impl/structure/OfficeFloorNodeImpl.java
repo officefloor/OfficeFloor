@@ -750,6 +750,13 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			return false;
 		}
 
+		// Iterate over suppliers (ensuring no thread locals)
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.ensureNoThreadLocals(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Ensure the OfficeFloor tree is initialised
 		this.initialise();
 		if (!NodeUtil.isNodeTreeInitialised(this, this.context.getCompilerIssues())) {

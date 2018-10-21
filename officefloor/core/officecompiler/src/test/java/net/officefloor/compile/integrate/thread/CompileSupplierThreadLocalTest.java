@@ -20,21 +20,26 @@ package net.officefloor.compile.integrate.thread;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.officefloor.compile.impl.structure.SupplierNodeImpl;
 import net.officefloor.compile.impl.structure.SupplierThreadLocalNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeObject;
-import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
+import net.officefloor.compile.spi.office.OfficeSupplierThreadLocal;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.thread.OptionalThreadLocal;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -42,7 +47,25 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class CompileOfficeSupplierThreadLocalTest extends AbstractCompileTestCase {
+public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
+
+	/**
+	 * Ensure issue if {@link SupplierThreadLocal} used by
+	 * {@link OfficeFloorSupplier}.
+	 */
+	public void testSupplierThreadLocalNotAllowedInOfficeFloorSupplier() {
+
+		// Add supplier thread local
+		MockSupplierSource.addSupplierThreadLocal(ThreadLocalManagedObject.class);
+
+		// Record no supplier thread local for configuration
+		this.issues.recordIssue("SUPPLIER", SupplierNodeImpl.class,
+				"Should not have Supplier Thread Local (" + ThreadLocalManagedObject.class.getName()
+						+ ") registered, as SupplierSource registered at OfficeFloor");
+
+		// Should compile
+		this.compile(false);
+	}
 
 	/**
 	 * Ensure issue if no {@link SupplierThreadLocal} for configured qualifier and
@@ -79,8 +102,8 @@ public class CompileOfficeSupplierThreadLocalTest extends AbstractCompileTestCas
 	}
 
 	/**
-	 * Ensure can link {@link OfficeFloorSupplierThreadLocal} to
-	 * {@link OfficeFloorManagedObject}.
+	 * Ensure can link {@link OfficeSupplierThreadLocal} to
+	 * {@link OfficeManagedObject}.
 	 */
 	public void testSupplierThreadLocalLinkToManagedObject() {
 
@@ -105,8 +128,7 @@ public class CompileOfficeSupplierThreadLocalTest extends AbstractCompileTestCas
 	}
 
 	/**
-	 * Ensure can link {@link OfficeFloorSupplierThreadLocal} to
-	 * {@link OfficeObject}.
+	 * Ensure can link {@link OfficeSupplierThreadLocal} to {@link OfficeObject}.
 	 */
 	public void testSupplierThreadLocalLinkToExternalManagedObject() {
 
@@ -130,6 +152,38 @@ public class CompileOfficeSupplierThreadLocalTest extends AbstractCompileTestCas
 		this.compile(true);
 	}
 
+	/**
+	 * Ensure can link {@link OfficeSupplierThreadLocal} to
+	 * {@link OfficeFloorInputManagedObject}.
+	 */
+	public void testSupplierThreadLocalLinkToInputManagedObject() {
+
+		// Add supplier thread local
+		MockSupplierSource.addSupplierThreadLocal(ThreadLocalManagedObject.class);
+
+		// Record the loading section type
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE", ClassManagedObjectSource.class, 0, "class.name",
+				ProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> inputManagingOffice = this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		ThreadDependencyMappingBuilder input = this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT");
+		inputManagingOffice.linkFlow(0, "SECTION.INPUT");
+		office.setBoundInputManagedObject("INPUT", "INPUT_SOURCE");
+
+		// Record obtaining thread local for supplier thread local
+		this.recordReturn(input, input.getOptionalThreadLocal(), this.createMock(OptionalThreadLocal.class));
+
+		// Complete the Office
+		this.record_officeBuilder_addFunction("SECTION", "INPUT");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -140,6 +194,21 @@ public class CompileOfficeSupplierThreadLocalTest extends AbstractCompileTestCas
 	}
 
 	public static class SuppliedManagedObject {
+	}
+
+	public static class ProcessManagedObject {
+
+		@FlowInterface
+		public static interface ProcessFlows {
+			void doProcess();
+		}
+
+		ProcessFlows flows;
+	}
+
+	public static class ProcessSection {
+		public void process() {
+		}
 	}
 
 	@TestSource

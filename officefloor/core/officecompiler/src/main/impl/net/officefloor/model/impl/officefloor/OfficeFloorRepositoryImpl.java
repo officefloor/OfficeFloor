@@ -57,9 +57,6 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorMa
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
-import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel;
-import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel;
-import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
@@ -315,23 +312,6 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			}
 		}
 
-		// Connect the supplier thread locals to managed objects
-		for (OfficeFloorSupplierModel supplier : officeFloor.getOfficeFloorSuppliers()) {
-			for (OfficeFloorSupplierThreadLocalModel threadLocal : supplier.getOfficeFloorSupplierThreadLocals()) {
-				OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel conn = threadLocal
-						.getOfficeFloorManagedObject();
-				if (conn != null) {
-					OfficeFloorManagedObjectModel mo = managedObjects.get(conn.getOfficeFloorManagedObjectName());
-					if (mo != null) {
-						conn.setOfficeFloorSupplierThreadLocal(threadLocal);
-						conn.setOfficeFloorManagedObject(mo);
-						conn.connect();
-					}
-				}
-			}
-
-		}
-
 		// Connect the dependencies to the OfficeFloor input managed objects
 		for (OfficeFloorManagedObjectModel managedObject : officeFloor.getOfficeFloorManagedObjects()) {
 			for (OfficeFloorManagedObjectDependencyModel dependency : managedObject
@@ -344,23 +324,6 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 					if (dependentManagedObject != null) {
 						conn.setOfficeFloorManagedObjectDependency(dependency);
 						conn.setOfficeFloorInputManagedObject(dependentManagedObject);
-						conn.connect();
-					}
-				}
-			}
-		}
-
-		// Connect the supplier thread locals to input managed objects
-		for (OfficeFloorSupplierModel supplier : officeFloor.getOfficeFloorSuppliers()) {
-			for (OfficeFloorSupplierThreadLocalModel threadLocal : supplier.getOfficeFloorSupplierThreadLocals()) {
-				OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel conn = threadLocal
-						.getOfficeFloorInputManagedObject();
-				if (conn != null) {
-					OfficeFloorInputManagedObjectModel inputMo = inputManagedObjects
-							.get(conn.getOfficeFloorInputManagedObjectName());
-					if (inputMo != null) {
-						conn.setOfficeFloorSupplierThreadLocal(threadLocal);
-						conn.setOfficeFloorInputManagedObject(inputMo);
 						conn.connect();
 					}
 				}
@@ -547,27 +510,11 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			}
 		}
 
-		// Specify managed object for supplier thread local
-		for (OfficeFloorManagedObjectModel managedObject : officeFloor.getOfficeFloorManagedObjects()) {
-			for (OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel conn : managedObject
-					.getDependentOfficeFloorSupplierThreadLocals()) {
-				conn.setOfficeFloorManagedObjectName(managedObject.getOfficeFloorManagedObjectName());
-			}
-		}
-
 		// Specify dependencies to OfficeFloor input managed objects
 		for (OfficeFloorInputManagedObjectModel inputManagedObject : officeFloor.getOfficeFloorInputManagedObjects()) {
 			for (OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel conn : inputManagedObject
 					.getDependentOfficeFloorManagedObjects()) {
 				conn.setOfficeFloorInputManagedObjectName(inputManagedObject.getOfficeFloorInputManagedObjectName());
-			}
-		}
-
-		// Specify managed object for supplier thread local
-		for (OfficeFloorInputManagedObjectModel inputMo : officeFloor.getOfficeFloorInputManagedObjects()) {
-			for (OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel conn : inputMo
-					.getDependentOfficeFloorSupplierThreadLocals()) {
-				conn.setOfficeFloorInputManagedObjectName(inputMo.getOfficeFloorInputManagedObjectName());
 			}
 		}
 

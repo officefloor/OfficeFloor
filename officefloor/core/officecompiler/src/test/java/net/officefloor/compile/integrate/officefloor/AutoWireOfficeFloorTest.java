@@ -38,7 +38,6 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -47,7 +46,6 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
-import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.extension.AutoWireOfficeFloorExtensionService;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
@@ -56,7 +54,6 @@ import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -65,7 +62,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.api.thread.OptionalThreadLocal;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
@@ -436,44 +432,6 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure able to auto-wire the {@link OfficeFloorSupplierThreadLocal}.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testAutoWireSupplierThreadLocal() {
-
-		// Flag to enable auto-wiring of the objects
-		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
-
-		// Register supplier thread local
-		CompileSupplierSource.SupplierThreadLocalInstance instance = CompileSupplierSource
-				.addSupplierThreadLocal(CompileManagedObject.class);
-
-		// Provide supplied managed object for auto-wiring
-		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new ClassManagedObjectSource(),
-				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileManagedObject.class.getName());
-
-		// Record building the OfficeFloor
-		this.record_init();
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject("MOS", ClassManagedObjectSource.class, 0);
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		ThreadDependencyMappingBuilder dependencyMapper = this.record_officeBuilder_addThreadManagedObject("MO", "MOS");
-
-		// Should obtain thread local
-		OptionalThreadLocal<Object> threadLocal = this.createMock(OptionalThreadLocal.class);
-		this.recordReturn(dependencyMapper, dependencyMapper.getOptionalThreadLocal(), threadLocal);
-		this.recordReturn(threadLocal, threadLocal.get(), instance);
-
-		// Ensure correct supplier thread local
-		this.addValidator((officeFloor) -> {
-			assertSame("Invalid thread local", instance, instance.supplierThreadLocal.get());
-		});
-
-		// Compile the OfficeFloor
-		this.compile(true);
-	}
-
-	/**
 	 * Ensure able to auto-wire the {@link OfficeFloorTeam}.
 	 */
 	public void testAutoWireOfficeFloorTeam() {
@@ -527,17 +485,6 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	@TestSource
 	public static class CompileSupplierSource extends AbstractSupplierSource {
 
-		private static class SupplierThreadLocalInstance {
-			private final String qualifier;
-			private final Class<?> type;
-			private SupplierThreadLocal<?> supplierThreadLocal = null;
-
-			public SupplierThreadLocalInstance(String qualifier, Class<?> type) {
-				this.qualifier = qualifier;
-				this.type = type;
-			}
-		}
-
 		private static class SuppliedManagedObjectSourceInstance {
 			private final String qualifier;
 			private final Class<?> type;
@@ -553,23 +500,10 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 			}
 		}
 
-		private static final List<SupplierThreadLocalInstance> supplierThreadLocals = new LinkedList<>();
-
 		private static final List<SuppliedManagedObjectSourceInstance> suppliedManagedObjectSources = new LinkedList<>();
 
 		public static void reset() {
-			supplierThreadLocals.clear();
 			suppliedManagedObjectSources.clear();
-		}
-
-		public static SupplierThreadLocalInstance addSupplierThreadLocal(String qualifier, Class<?> type) {
-			SupplierThreadLocalInstance instance = new SupplierThreadLocalInstance(qualifier, type);
-			supplierThreadLocals.add(instance);
-			return instance;
-		}
-
-		public static SupplierThreadLocalInstance addSupplierThreadLocal(Class<?> type) {
-			return addSupplierThreadLocal(null, type);
 		}
 
 		public static void addSuppliedManagedObjectSource(String qualifier, Class<?> type,
@@ -593,11 +527,6 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		@Override
 		public void supply(SupplierSourceContext context) throws Exception {
-
-			// Add the supplier thread locals
-			for (SupplierThreadLocalInstance instance : supplierThreadLocals) {
-				instance.supplierThreadLocal = context.addSupplierThreadLocal(instance.qualifier, instance.type);
-			}
 
 			// Add the supplied managed object sources
 			for (SuppliedManagedObjectSourceInstance instance : suppliedManagedObjectSources) {

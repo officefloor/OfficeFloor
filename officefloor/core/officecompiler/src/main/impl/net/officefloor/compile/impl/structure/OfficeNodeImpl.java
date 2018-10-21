@@ -720,6 +720,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 						// Load input dependencies for managed object source
 						managedObjectSource.autoWireInputDependencies(autoWirer, officeNode, compileContext);
 					});
+
+			// Iterate over suppliers (auto-wiring unlinked thread locals)
+			this.suppliers.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSupplierName(), b.getOfficeSupplierName()))
+					.forEachOrdered((supplier) -> supplier.autoWireObjects(autoWirer, this, compileContext));
 		}
 
 		// Undertake auto-wire of teams

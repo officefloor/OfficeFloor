@@ -22,7 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -49,6 +51,7 @@ import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -400,6 +403,54 @@ public class SupplierNodeImpl implements SupplierNode {
 
 		// Successfully sourced
 		return true;
+	}
+
+	@Override
+	public boolean ensureNoThreadLocals(CompileContext compileContext) {
+
+		// Ensure no thread locals
+		boolean[] isNoThreadLocals = new boolean[] { true };
+		this.supplierThreadLocals.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getOfficeFloorSupplierThreadLocalName(), b.getOfficeFloorSupplierThreadLocalName()))
+				.forEachOrdered((threadLocal) -> {
+
+					// Flag that have thread local
+					isNoThreadLocals[0] = false;
+
+					// Add issue, as should not have thread local
+					this.context.getCompilerIssues().addIssue(this,
+							"Should not have " + threadLocal.getNodeType() + " ("
+									+ threadLocal.getOfficeFloorSupplierThreadLocalName() + ") registered, as "
+									+ SupplierSource.class.getSimpleName() + " registered at "
+									+ OfficeFloor.class.getSimpleName());
+				});
+
+		// Return if no thread locals
+		return isNoThreadLocals[0];
+	}
+
+	@Override
+	public void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office, CompileContext compileContext) {
+
+		// Auto-wire thread locals
+		this.supplierThreadLocals.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getOfficeSupplierThreadLocalName(), b.getOfficeSupplierThreadLocalName()))
+				.forEachOrdered((threadLocal) -> {
+
+					// Ignore if already configured
+					if (threadLocal.getLinkedObjectNode() != null) {
+						return;
+					}
+
+					// Auto-wire the thread local
+					AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(threadLocal,
+							new AutoWire(threadLocal.getQualifier(), threadLocal.getType()));
+					if (links.length == 1) {
+						LinkUtil.linkAutoWireObjectNode(threadLocal, links[0].getTargetNode(office), office, autoWirer,
+								compileContext, this.context.getCompilerIssues(),
+								(link) -> threadLocal.linkObjectNode(link));
+					}
+				});
 	}
 
 	@Override

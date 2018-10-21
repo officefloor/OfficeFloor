@@ -19,7 +19,6 @@ package net.officefloor.compile.run.supplier;
 
 import net.officefloor.compile.run.AbstractRunTestCase;
 import net.officefloor.compile.spi.office.OfficeSupplier;
-import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
@@ -40,24 +39,9 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 
 	/**
 	 * Ensure able to access {@link ManagedObject} via the
-	 * {@link SupplierThreadLocal} from {@link OfficeFloorSupplier}.
-	 */
-	public void testOfficeFloorSupplierThreadLocal() throws Exception {
-		this.doSupplierThreadLocalTest();
-	}
-
-	/**
-	 * Ensure able to access {@link ManagedObject} via the
 	 * {@link SupplierThreadLocal} from {@link OfficeSupplier}.
 	 */
 	public void testOfficeSupplierThreadLocal() throws Exception {
-		this.doSupplierThreadLocalTest();
-	}
-
-	/**
-	 * Undertakes the {@link SupplierThreadLocal} test.
-	 */
-	private void doSupplierThreadLocalTest() throws Exception {
 
 		// Open the OfficeFloor
 		MockSupplierSource.isInstantiated = false;

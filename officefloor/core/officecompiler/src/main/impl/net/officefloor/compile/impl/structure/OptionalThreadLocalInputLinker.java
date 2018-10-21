@@ -23,7 +23,6 @@ import java.util.List;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.OptionalThreadLocalReceiver;
-import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.thread.OptionalThreadLocal;
 
 /**
@@ -77,7 +76,7 @@ public class OptionalThreadLocalInputLinker {
 
 		// Load the optional thread local receivers
 		for (OptionalThreadLocalReceiver receiver : this.receivers) {
-			managedObjectSource.buildSupplierThreadLocal(optionalThreadLocalReceiver);
+			managedObjectSource.buildSupplierThreadLocal(receiver);
 		}
 
 		// All received (so clear to avoid adding again)

@@ -59,9 +59,6 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToOfficeF
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorSupplierModel;
-import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel;
-import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel;
-import net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamOversightModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamToOfficeFloorTeamOversightModel;
@@ -114,17 +111,6 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		OfficeFloorSupplierModel supplier = officeFloor.getOfficeFloorSuppliers().get(0);
 		assertList(new String[] { "getName", "getValue" }, supplier.getProperties(),
 				new PropertyModel("SUPPLIER_ONE", "VALUE_ONE"), new PropertyModel("SUPPLIER_TWO", "VALUE_TWO"));
-		assertList(new String[] { "getQualifier", "getType" }, supplier.getOfficeFloorSupplierThreadLocals(),
-				new OfficeFloorSupplierThreadLocalModel(null, "java.sql.GenericConnection"),
-				new OfficeFloorSupplierThreadLocalModel("QUALIFIED", "java.http.InputRequest"));
-		OfficeFloorSupplierThreadLocalModel threadLocalOne = supplier.getOfficeFloorSupplierThreadLocals().get(0);
-		assertProperties(threadLocalOne.getOfficeFloorManagedObject(),
-				new OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel("MANAGED_OBJECT_ONE"),
-				"getOfficeFloorManagedObjectName");
-		OfficeFloorSupplierThreadLocalModel threadLocalTwo = supplier.getOfficeFloorSupplierThreadLocals().get(1);
-		assertProperties(threadLocalTwo.getOfficeFloorInputManagedObject(),
-				new OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel("INPUT_MANAGED_OBJECT"),
-				"getOfficeFloorInputManagedObjectName");
 
 		// ----------------------------------------
 		// Validate the OfficeFloor managed object sources

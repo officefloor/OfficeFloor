@@ -1,14 +1,5 @@
 <context>
 	<office-floor>
-		<suppliers>
-			<supplier name="SUPPLIER"
-				source="${testcase}$MockSupplierSource">
-				<thread-local
-					type="${testcase}$ThreadLocalManagedObject">
-					<input-managed-object name="INPUT" />
-				</thread-local>
-			</supplier>
-		</suppliers>
 		<managed-object-sources>
 			<managed-object-source name="INPUT_SOURCE"
 				source="CLASS">
@@ -33,10 +24,29 @@
 		<offices>
 			<office name="OFFICE" source="OFFICE" location="office">
 				<input section="SECTION" input="INPUT" />
+				<object name="INPUT"
+					object-type="${testcase}$ThreadLocalManagedObject">
+					<input-managed-object name="INPUT" />
+				</object>
 			</office>
 		</offices>
 	</office-floor>
 	<office>
+		<external-managed-objects>
+			<external-managed-object name="INPUT"
+				object-type="${testcase}$ThreadLocalManagedObject"
+				object-scope="PROCESS">
+			</external-managed-object>
+		</external-managed-objects>
+		<suppliers>
+			<supplier name="SUPPLIER"
+				source="${testcase}$MockSupplierSource">
+				<thread-local
+					type="${testcase}$ThreadLocalManagedObject">
+					<external-managed-object name="INPUT" />
+				</thread-local>
+			</supplier>
+		</suppliers>
 		<sections>
 			<section name="SECTION" source="SECTION" location="section">
 				<input name="INPUT" />

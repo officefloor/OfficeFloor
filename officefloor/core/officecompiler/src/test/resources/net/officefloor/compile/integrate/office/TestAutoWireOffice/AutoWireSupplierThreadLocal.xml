@@ -1,7 +1,7 @@
 <context>
 	<office-floor>
 		<offices>
-			<office name="OFFICE" source="${testcase}$CompileOfficeSource">
+			<office name="OFFICE" source="OFFICE" location="office">
 				<suppliers>
 					<supplier name="SUPPLIER"
 						source="${testcase}$CompileSupplierSource" />
@@ -10,4 +10,5 @@
 			</office>
 		</offices>
 	</office-floor>
+	<office />
 </context>

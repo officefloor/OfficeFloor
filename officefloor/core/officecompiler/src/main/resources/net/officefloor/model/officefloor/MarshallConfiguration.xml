@@ -34,30 +34,6 @@
 					</attributes>
 				</item>
 			</collection>
-			<collection method="getOfficeFloorSupplierThreadLocals">
-				<item
-					type="net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel"
-					element="thread-local">
-					<attributes>
-						<attribute method="getQualifier" attribute="qualifier" />
-						<attribute method="getType" attribute="type" />
-					</attributes>
-					<object method="getOfficeFloorManagedObject"
-						element="managed-object">
-						<attributes>
-							<attribute method="getOfficeFloorManagedObjectName"
-								attribute="name" />
-						</attributes>
-					</object>
-					<object method="getOfficeFloorInputManagedObject"
-						element="input-managed-object">
-						<attributes>
-							<attribute
-								method="getOfficeFloorInputManagedObjectName" attribute="name" />
-						</attributes>
-					</object>
-				</item>
-			</collection>
 		</item>
 	</collection>
 

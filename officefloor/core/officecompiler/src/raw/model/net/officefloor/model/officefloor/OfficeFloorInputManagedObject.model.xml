@@ -14,9 +14,6 @@
 		type="OfficeFloorManagedObjectDependencyToOfficeFloorInputManagedObjectModel"
 		name="dependent office floor managed object" />
 	<list
-		type="OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel"
-		name="dependent office floor supplier thread local" />
-	<list
 		type="DeployedOfficeObjectToOfficeFloorInputManagedObjectModel"
 		name="deployed office object" />
 </model>

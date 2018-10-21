@@ -21,26 +21,7 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
-		<object method="addOfficeFloorSupplierThreadLocal"
-			node="thread-local"
-			class="net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalModel">
-			<value method="setQualifier" node="thread-local@qualifier" />
-			<value method="setType" node="thread-local@type" />
-			<object method="setOfficeFloorManagedObject"
-				node="managed-object"
-				class="net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel">
-				<value method="setOfficeFloorManagedObjectName"
-					node="managed-object@name" />
-			</object>
-			<object method="setOfficeFloorInputManagedObject"
-				node="input-managed-object"
-				class="net.officefloor.model.officefloor.OfficeFloorSupplierThreadLocalToOfficeFloorInputManagedObjectModel">
-				<value method="setOfficeFloorInputManagedObjectName"
-					node="input-managed-object@name" />
-			</object>
-		</object>
 	</object>
-
 
 	<!-- MANAGED OBJECT SOURCES -->
 	<object method="addOfficeFloorManagedObjectSource"

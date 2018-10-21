@@ -14,9 +14,6 @@
 	<list
 		type="OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel"
 		name="dependent office floor managed object source input" />
-	<list
-		type="OfficeFloorSupplierThreadLocalToOfficeFloorManagedObjectModel"
-		name="dependent office floor supplier thread local" />
 	<list type="OfficeFloorManagedObjectDependencyModel"
 		name="office floor managed object dependency"
 		plural="office floor managed object dependencies" />
