@@ -59,9 +59,10 @@
 	</distributionManagement>
 	<modules>
 		<module>core</module>
-		<module>persistence</module>
 		<module>server</module>
 		<module>web</module>
+		<module>persistence</module>
+		<module>spring</module>
 		<module>maven</module>
 		<module>eclipse</module>
 		<module>tutorials</module>
@@ -243,6 +244,18 @@
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_postgresql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<!-- Spring -->
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>spring</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>officespring</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Eclipse -->
