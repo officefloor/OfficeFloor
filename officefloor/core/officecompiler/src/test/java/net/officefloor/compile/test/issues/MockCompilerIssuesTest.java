@@ -107,7 +107,8 @@ public class MockCompilerIssuesTest extends OfficeFrameTestCase {
 		this.issues.recordIssueRegex("NODE", this.node.getClass(), "start.+", new UnsupportedOperationException());
 		this.recordReturn(this.node, this.node.getNodeName(), "NODE");
 		this.replayMockObjects();
-		this.issues.addIssue(this.node, "start and more ignored description \n including \n new \n lines", new UnsupportedOperationException());
+		this.issues.addIssue(this.node, "start and more ignored description \n including \n new \n lines",
+				new UnsupportedOperationException());
 		this.verifyMockObjects();
 	}
 
