@@ -203,11 +203,12 @@ public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
 			void doProcess();
 		}
 
-		ProcessFlows flows;
+		protected ProcessFlows flows;
 	}
 
 	public static class ProcessSection {
 		public void process() {
+			// typing
 		}
 	}
 
@@ -230,6 +231,7 @@ public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
 
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
+			// no specification
 		}
 
 		@Override

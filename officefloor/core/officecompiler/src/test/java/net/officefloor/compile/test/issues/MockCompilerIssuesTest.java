@@ -104,7 +104,7 @@ public class MockCompilerIssuesTest extends OfficeFrameTestCase {
 	 * Ensure handle issue regular expression.
 	 */
 	public void testIssueRegularExpressionWithException() {
-		this.issues.recordIssueRegex("NODE", this.node.getClass(), "start.+", new NullPointerException());
+		this.issues.recordIssueRegex("NODE", this.node.getClass(), "start.+", new UnsupportedOperationException());
 		this.recordReturn(this.node, this.node.getNodeName(), "NODE");
 		this.replayMockObjects();
 		this.issues.addIssue(this.node, "start and more ignored description \n including \n new \n lines",

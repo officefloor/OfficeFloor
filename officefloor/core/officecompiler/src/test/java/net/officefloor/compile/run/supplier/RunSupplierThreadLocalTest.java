@@ -90,7 +90,7 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 	@TestSource
 	public static class MockSupplierSource extends AbstractSupplierSource {
 
-		private static boolean isInstantiated = false;
+		private static boolean isInstantiated;
 
 		public MockSupplierSource() {
 			assertFalse("Should only instantiate the supplier once", isInstantiated);
@@ -99,6 +99,7 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
+			// no specification
 		}
 
 		@Override
