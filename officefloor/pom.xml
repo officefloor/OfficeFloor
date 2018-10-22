@@ -62,6 +62,7 @@
 		<module>persistence</module>
 		<module>server</module>
 		<module>web</module>
+		<!--  <module>spring</module> -->
 		<module>maven</module>
 		<module>eclipse</module>
 		<module>tutorials</module>
