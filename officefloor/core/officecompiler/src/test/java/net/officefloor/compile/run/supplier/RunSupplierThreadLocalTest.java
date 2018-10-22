@@ -53,9 +53,12 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 		// Invoke function and ensues the thread local access to dependency
 		CompileSection.threadLocalObject = null;
 		CompileSection.dependencyObject = null;
+		CompileSection.dependency = null;
 		function.invokeProcess(null, null);
-		assertNotNull("Should have dependency object", CompileSection.dependencyObject);
-		assertSame("Should obtain via thread local", CompileSection.dependencyObject, CompileSection.threadLocalObject);
+		assertNull("Should not have thread local (as managed object not loaded)", CompileSection.threadLocalObject);
+		assertNotNull("Should have dependency object", CompileSection.dependency);
+		assertSame("Should obtain via thread local (as managed object loaded)", CompileSection.dependency,
+				CompileSection.dependencyObject);
 	}
 
 	public static class CompileSection {
@@ -64,6 +67,8 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 
 		private static MockObject dependencyObject;
 
+		private static MockObject dependency;
+
 		@NextFunction("dependency")
 		public void threadLocal(MockManagedObjectSource mos) {
 
@@ -71,8 +76,11 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 			threadLocalObject = mos.threadLocal.get();
 		}
 
-		public void dependency(MockObject object) {
-			dependencyObject = object;
+		public void dependency(MockObject object, MockManagedObjectSource mos) {
+			dependency = object;
+
+			// Available as supplier source managed object dependency
+			dependencyObject = mos.threadLocal.get();
 		}
 	}
 

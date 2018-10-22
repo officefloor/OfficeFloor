@@ -105,8 +105,7 @@ public class SupplierThreadLocalTypeImpl<T> implements SupplierThreadLocalType {
 
 		@Override
 		public T get() {
-			// TODO implement SupplierThreadLocal<T>.get(...)
-			throw new UnsupportedOperationException("TODO implement SupplierThreadLocal<T>.get(...)");
+			return this.optionalThreadLocal.get();
 		}
 	}
 

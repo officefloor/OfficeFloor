@@ -545,18 +545,34 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new ClassManagedObjectSource(),
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileManagedObject.class.getName());
 
+		// Managed Object name
+		final String MO_NAME = "OFFICE." + CompileManagedObject.class.getName();
+
+		// Record loading section type
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+		this.issues.recordCaptureIssues(true);
+
 		// Record building the OfficeFloor
 		this.record_init();
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.MOS", ClassManagedObjectSource.class, 0);
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject(MO_NAME, ClassManagedObjectSource.class, 0,
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		ThreadDependencyMappingBuilder dependencyMapper = this.record_officeBuilder_addThreadManagedObject("OFFICE.MO",
-				"OFFICE.MOS");
+		office.registerManagedObjectSource(MO_NAME, MO_NAME);
+		ThreadDependencyMappingBuilder dependencyMapper = this.record_officeBuilder_addThreadManagedObject(MO_NAME,
+				MO_NAME);
 
 		// Should obtain thread local
 		OptionalThreadLocal<?> threadLocal = this.createMock(OptionalThreadLocal.class);
 		this.recordReturn(dependencyMapper, dependencyMapper.getOptionalThreadLocal(), threadLocal);
-		this.recordReturn(dependencyMapper, dependencyMapper.getOptionalThreadLocal(), threadLocal);
+
+		// Complete the office
+		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
+				CompileSectionClass.class, "function");
+		function.linkManagedObject(1, MO_NAME, CompileManagedObject.class);
+
+		// Record obtain value from thread local
 		this.recordReturn(threadLocal, threadLocal.get(), instance);
 
 		// Ensure correct supplier thread local
