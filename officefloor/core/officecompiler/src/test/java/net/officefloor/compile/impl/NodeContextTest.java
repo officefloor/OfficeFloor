@@ -51,6 +51,7 @@ import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeOutputNode;
 import net.officefloor.compile.internal.structure.OfficeStartNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.OptionalThreadLocalReceiver;
 import net.officefloor.compile.internal.structure.ResponsibleTeamNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -58,6 +59,7 @@ import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
+import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -625,6 +627,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 					office.getDeployedOfficeObject("OBJECT"),
 					office.addOfficeSection("SECTION", "net.example.ExampleSectionSource", "LOCATION"),
 					office.getDeployedOfficeTeam("TEAM_ONE"), office.addOfficeTeam("TEAM_TWO"),
+					office.addSupplier("SUPPLIER", "net.example.ExampleSupplierSource"),
 					office.getManagedObjectNode("MO_ONE"),
 					office.addManagedObjectNode("MO_TWO", ManagedObjectScope.THREAD, this.managedObjectSource),
 					office.addOfficeManagedObjectSource("MOS", "net.example.ExampleManagedObjectSource"),
@@ -728,17 +731,6 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can create {@link SuppliedManagedObjectSourceNode}.
-	 */
-	public void testCreateSuppliedManagedObjectNode() {
-		SupplierNode supplier = this.createMock(SupplierNode.class);
-		SuppliedManagedObjectSourceNode node = this.doTest(
-				() -> this.context.createSuppliedManagedObjectNode("QUALIFIER", Object.class.getName(), supplier));
-		assertNode(node, "QUALIFIER-" + Object.class.getName(), "Supplied Managed Object Source", null, supplier);
-		assertInitialise(node, (n) -> n.initialise());
-	}
-
-	/**
 	 * Ensure can create {@link SupplierNode} within {@link OfficeFloor}.
 	 */
 	public void testCreateSupplierNode_withinOfficeFloor() {
@@ -759,8 +751,10 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		SupplierNode node = this.doTest(() -> {
 			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.officeFloor);
 			assertNode(supplier, "SUPPLIER", "Supplier", null, this.officeFloor);
-			supplier.addOfficeFloorManagedObjectSource("MOS", "TYPE");
-			assertChildren(supplier, suppliedManagedObjectNode[0]);
+			assertEquals("Incorrect qualified name", "QUALIFIED", supplier.getQualifiedName("QUALIFIED"));
+			supplier.getOfficeFloorManagedObjectSource("MOS", null, "TYPE");
+			assertChildren(supplier, supplier.getOfficeFloorSupplierThreadLocal("QUALIFIER", Object.class.getName()),
+					suppliedManagedObjectNode[0]);
 			return supplier;
 		});
 
@@ -773,6 +767,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateSupplierNode_withinOffice() {
 		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		this.recordReturn(this.office, this.office.getQualifiedName("SUPPLIER"), "OFFICE.SUPPLIER");
+		this.recordReturn(this.office, this.office.getQualifiedName("QUALIFIED"), "OFFICE.QUALIFIED");
 		SuppliedManagedObjectSourceNode[] suppliedManagedObjectNode = new SuppliedManagedObjectSourceNode[] { null };
 		this.recordReturn(this.office,
 				this.office.addManagedObjectSource("MOS",
@@ -789,14 +785,91 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				});
 		SupplierNode node = this.doTest(() -> {
 			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.office);
-			assertNode(supplier, "SUPPLIER", "Supplier", null, this.office);
-			supplier.addOfficeManagedObjectSource("MOS", "TYPE");
+			assertNode(supplier, "OFFICE.SUPPLIER", "Supplier", null, this.office);
+			assertEquals("Incorrect qualified name", "OFFICE.QUALIFIED", supplier.getQualifiedName("QUALIFIED"));
+			supplier.getOfficeManagedObjectSource("MOS", null, "TYPE");
 			assertChildren(supplier, suppliedManagedObjectNode[0]);
 			return supplier;
 		});
 
-		assertEquals("Incorrect supplier name", "SUPPLIER", node.getOfficeFloorSupplierName());
+		assertEquals("Incorrect supplier name", "SUPPLIER", node.getOfficeSupplierName());
 		assertInitialise(node, (n) -> n.initialise("ExampleSupplierSource", null));
+	}
+
+	/**
+	 * Ensure can create {@link SupplierThreadLocalNode} within {@link OfficeFloor}.
+	 */
+	public void testCreateSupplierThreadLocalNode_withinOfficeFloor() {
+		SupplierNode supplier = this.createMock(SupplierNode.class);
+		final String expectedName = "QUALIFIER-java.lang.Object";
+		this.recordReturn(supplier, supplier.getQualifiedName(expectedName), expectedName);
+		SupplierThreadLocalNode node = this.doTest(() -> {
+			SupplierThreadLocalNode threadLocal = this.context.createSupplierThreadLocalNode("QUALIFIER",
+					Object.class.getName(), supplier);
+			assertNode(threadLocal, expectedName, "Supplier Thread Local", null, supplier);
+			return threadLocal;
+		});
+		assertSame("Incorrect supplier", supplier, node.getSupplierNode());
+		assertEquals("Incorrect OfficeFloor name", expectedName, node.getOfficeFloorSupplierThreadLocalName());
+		assertEquals("Incorrect qualfiifer", "QUALIFIER", node.getQualifier());
+		assertEquals("Incorrect type", "java.lang.Object", node.getType());
+		assertInitialise(node, (n) -> n.initialise(this.createMock(OptionalThreadLocalReceiver.class)));
+	}
+
+	/**
+	 * Ensure can create {@link SupplierThreadLocalNode} within {@link Office}.
+	 */
+	public void testCreateSupplierThreadLocalNode_withinOffice() {
+		SupplierNode supplier = this.createMock(SupplierNode.class);
+		final String expectedName = "QUALIFIER-java.lang.Object";
+		this.recordReturn(supplier, supplier.getQualifiedName(expectedName), "OFFICE." + expectedName);
+		SupplierThreadLocalNode node = this.doTest(() -> {
+			SupplierThreadLocalNode threadLocal = this.context.createSupplierThreadLocalNode("QUALIFIER",
+					Object.class.getName(), supplier);
+			assertNode(threadLocal, "OFFICE." + expectedName, "Supplier Thread Local", null, supplier);
+			return threadLocal;
+		});
+		assertSame("Incorrect supplier", supplier, node.getSupplierNode());
+		assertEquals("Incorrect Office name", expectedName, node.getOfficeSupplierThreadLocalName());
+		assertEquals("Incorrect qualfiifer", "QUALIFIER", node.getQualifier());
+		assertEquals("Incorrect type", "java.lang.Object", node.getType());
+		assertInitialise(node, (n) -> n.initialise(this.createMock(OptionalThreadLocalReceiver.class)));
+	}
+
+	/**
+	 * Ensure can create {@link SuppliedManagedObjectSourceNode} within
+	 * {@link OfficeFloor}.
+	 */
+	public void testCreateSuppliedManagedObjectNode_withinOfficeFloor() {
+		SupplierNode supplier = this.createMock(SupplierNode.class);
+		final String expectedName = "QUALIFIER-" + Object.class.getName();
+		this.recordReturn(supplier, supplier.getQualifiedName(expectedName), expectedName);
+		SuppliedManagedObjectSourceNode node = this.doTest(() -> {
+			SuppliedManagedObjectSourceNode mos = this.context.createSuppliedManagedObjectSourceNode("QUALIFIER",
+					Object.class.getName(), supplier);
+			assertNode(mos, expectedName, "Supplied Managed Object Source", null, supplier);
+			return mos;
+		});
+		assertSame("Incorrect supplier", supplier, node.getSupplierNode());
+		assertInitialise(node, (n) -> n.initialise());
+	}
+
+	/**
+	 * Ensure can create {@link SuppliedManagedObjectSourceNode} within
+	 * {@link Office}.
+	 */
+	public void testCreateSuppliedManagedObjectNode_withinOffice() {
+		SupplierNode supplier = this.createMock(SupplierNode.class);
+		final String expectedName = "QUALIFIER-" + Object.class.getName();
+		this.recordReturn(supplier, supplier.getQualifiedName(expectedName), "OFFICE." + expectedName);
+		SuppliedManagedObjectSourceNode node = this.doTest(() -> {
+			SuppliedManagedObjectSourceNode mos = this.context.createSuppliedManagedObjectSourceNode("QUALIFIER",
+					Object.class.getName(), supplier);
+			assertNode(mos, "OFFICE." + expectedName, "Supplied Managed Object Source", null, supplier);
+			return mos;
+		});
+		assertSame("Incorrect supplier", supplier, node.getSupplierNode());
+		assertInitialise(node, (n) -> n.initialise());
 	}
 
 	/**

@@ -20,6 +20,8 @@ package net.officefloor.compile.integrate;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.easymock.AbstractMatcher;
 
@@ -99,6 +101,27 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	private boolean isOverrideProperties = false;
 
 	/**
+	 * {@link FunctionalInterface} to validate the {@link OfficeFloor}.
+	 */
+	@FunctionalInterface
+	protected static interface OfficeFloorValidator {
+
+		/**
+		 * Validates the {@link OfficeFloor}.
+		 * 
+		 * @param officeFloor {@link OfficeFloor} or <code>null</code> if failed to
+		 *                    compile.
+		 * @throws Throwable If fails to validate.
+		 */
+		public void validate(OfficeFloor officeFloor) throws Throwable;
+	}
+
+	/**
+	 * {@link OfficeFloorValidator} instances.
+	 */
+	protected final List<OfficeFloorValidator> validators = new LinkedList<>();
+
+	/**
 	 * {@link OfficeFloorBuilder}.
 	 */
 	protected final OfficeFloorBuilder officeFloorBuilder = this.createMock(OfficeFloorBuilder.class);
@@ -122,6 +145,15 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected void enableOverrideProperties() {
 		this.isOverrideProperties = true;
+	}
+
+	/**
+	 * Adds the {@link OfficeFloorValidator}.
+	 * 
+	 * @param validator {@link OfficeFloorValidator}.
+	 */
+	protected void addValidator(OfficeFloorValidator validator) {
+		this.validators.add(validator);
 	}
 
 	/**
@@ -336,9 +368,10 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * Records specifying the Input {@link ManagedObject} name.
 	 * 
 	 * @param inputManagedObjectName Input {@link ManagedObject} name.
-	 * @return {@link DependencyMappingBuilder} for the Input {@link ManagedObject}.
+	 * @return {@link ThreadDependencyMappingBuilder} for the Input
+	 *         {@link ManagedObject}.
 	 */
-	protected DependencyMappingBuilder record_managingOfficeBuilder_setInputManagedObjectName(
+	protected ThreadDependencyMappingBuilder record_managingOfficeBuilder_setInputManagedObjectName(
 			String inputManagedObjectName) {
 		ThreadDependencyMappingBuilder dependencyMapper = this.createMock(ThreadDependencyMappingBuilder.class);
 		this.recordReturn(this.managingOfficeBuilder,
@@ -383,13 +416,13 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * @param officeManagedObjectName  {@link Office} registered
 	 *                                 {@link ManagedObject} name.
 	 */
-	protected DependencyMappingBuilder record_officeBuilder_addProcessManagedObject(String processManagedObjectName,
-			String officeManagedObjectName) {
+	protected ThreadDependencyMappingBuilder record_officeBuilder_addProcessManagedObject(
+			String processManagedObjectName, String officeManagedObjectName) {
 		this.dependencyMappingBuilder = this.createMock(ThreadDependencyMappingBuilder.class);
 		this.recordReturn(this.officeBuilder,
 				this.officeBuilder.addProcessManagedObject(processManagedObjectName, officeManagedObjectName),
 				this.dependencyMappingBuilder);
-		return this.dependencyMappingBuilder;
+		return (ThreadDependencyMappingBuilder) this.dependencyMappingBuilder;
 	}
 
 	/**
@@ -400,13 +433,13 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 * @param officeManagedObjectName {@link Office} registered
 	 *                                {@link ManagedObject} name.
 	 */
-	protected DependencyMappingBuilder record_officeBuilder_addThreadManagedObject(String threadManagedObjectName,
+	protected ThreadDependencyMappingBuilder record_officeBuilder_addThreadManagedObject(String threadManagedObjectName,
 			String officeManagedObjectName) {
 		this.dependencyMappingBuilder = this.createMock(ThreadDependencyMappingBuilder.class);
 		this.recordReturn(this.officeBuilder,
 				this.officeBuilder.addThreadManagedObject(threadManagedObjectName, officeManagedObjectName),
 				this.dependencyMappingBuilder);
-		return this.dependencyMappingBuilder;
+		return (ThreadDependencyMappingBuilder) this.dependencyMappingBuilder;
 	}
 
 	/**
@@ -825,6 +858,15 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 
 		// Compile the OfficeFloor
 		OfficeFloor loadedOfficeFloor = compiler.compile("OfficeFloor");
+
+		// Run the validators
+		for (OfficeFloorValidator validator : this.validators) {
+			try {
+				validator.validate(loadedOfficeFloor);
+			} catch (Throwable ex) {
+				throw fail(ex);
+			}
+		}
 
 		// Verify the mocks
 		this.verifyMockObjects();

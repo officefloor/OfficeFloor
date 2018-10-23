@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.supplier;
 
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
+import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
 
 /**
@@ -28,6 +29,11 @@ import net.officefloor.compile.supplier.SupplierType;
 public class SupplierTypeImpl implements SupplierType {
 
 	/**
+	 * {@link SupplierThreadLocalType} instances.
+	 */
+	private final SupplierThreadLocalType[] supplierThreadLocalTypes;
+
+	/**
 	 * {@link SuppliedManagedObjectSourceType} instances.
 	 */
 	private final SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes;
@@ -35,17 +41,24 @@ public class SupplierTypeImpl implements SupplierType {
 	/**
 	 * Initiate.
 	 * 
-	 * @param suppliedManagedObjectTypes
-	 *            {@link SuppliedManagedObjectSourceType} instances.
+	 * @param supplierThreadLocalTypes   {@link SupplierThreadLocalType} instances.
+	 * @param suppliedManagedObjectTypes {@link SuppliedManagedObjectSourceType}
+	 *                                   instances.
 	 */
-	public SupplierTypeImpl(
+	public SupplierTypeImpl(SupplierThreadLocalType[] supplierThreadLocalTypes,
 			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes) {
+		this.supplierThreadLocalTypes = supplierThreadLocalTypes;
 		this.suppliedManagedObjectTypes = suppliedManagedObjectTypes;
 	}
 
 	/*
 	 * ====================== SupplierType =========================
 	 */
+
+	@Override
+	public SupplierThreadLocalType[] getSupplierThreadLocalTypes() {
+		return this.supplierThreadLocalTypes;
+	}
 
 	@Override
 	public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes() {

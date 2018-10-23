@@ -18,11 +18,13 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -35,15 +37,21 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
+import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSupplierThreadLocal;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
+import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -74,9 +82,14 @@ public class SupplierNodeImpl implements SupplierNode {
 	private final PropertyList propertyList;
 
 	/**
-	 * {@link SuppliedManagedObjectSourceNode} instances.
+	 * {@link Map} of {@link SupplierThreadLocalNode} instances by name.
 	 */
-	private final List<SuppliedManagedObjectSourceNode> suppliedManagedObjects = new LinkedList<SuppliedManagedObjectSourceNode>();
+	private final Map<String, SupplierThreadLocalNode> supplierThreadLocals = new HashMap<>();
+
+	/**
+	 * {@link Map} of {@link SuppliedManagedObjectSourceNode} instances by name.
+	 */
+	private final Map<String, SuppliedManagedObjectSourceNode> suppliedManagedObjects = new HashMap<>();
 
 	/**
 	 * {@link NodeContext}.
@@ -146,7 +159,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public String getNodeName() {
-		return this.supplierName;
+		return (this.officeNode != null) ? this.officeNode.getQualifiedName(this.supplierName) : this.supplierName;
 	}
 
 	@Override
@@ -166,7 +179,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		return this.suppliedManagedObjects.toArray(new Node[this.suppliedManagedObjects.size()]);
+		return NodeUtil.getChildNodes(this.supplierThreadLocals, this.suppliedManagedObjects);
 	}
 
 	@Override
@@ -195,21 +208,20 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName,
-			String type) {
-		return this.addOfficeFloorManagedObjectSource(managedObjectSourceName, type, null);
+	public OfficeFloorSupplierThreadLocal getOfficeFloorSupplierThreadLocal(String qualifier, String type) {
+		String name = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, type);
+		return NodeUtil.getNode(name, this.supplierThreadLocals,
+				() -> this.context.createSupplierThreadLocalNode(qualifier, type, this));
 	}
 
 	@Override
-	public OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName, String type,
-			String qualifier) {
+	public OfficeFloorManagedObjectSource getOfficeFloorManagedObjectSource(String managedObjectSourceName,
+			String qualifier, String type) {
 
 		// Create the supplied managed object node
-		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = this.context
-				.createSuppliedManagedObjectNode(qualifier, type, this);
-
-		// Register the supplied managed object
-		this.suppliedManagedObjects.add(suppliedManagedObjectNode);
+		String name = SuppliedManagedObjectSourceNodeImpl.getSuppliedManagedObjectSourceName(qualifier, type);
+		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = NodeUtil.getNode(name, this.suppliedManagedObjects,
+				() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type, this));
 
 		// Add and return the managed object source
 		return this.officeFloorNode.addManagedObjectSource(managedObjectSourceName, suppliedManagedObjectNode);
@@ -225,20 +237,20 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String type) {
-		return this.addOfficeManagedObjectSource(managedObjectSourceName, type, null);
+	public OfficeSupplierThreadLocal getOfficeSupplierThreadLocal(String qualifier, String type) {
+		String name = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, type);
+		return NodeUtil.getNode(name, this.supplierThreadLocals,
+				() -> this.context.createSupplierThreadLocalNode(qualifier, type, this));
 	}
 
 	@Override
-	public OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String type,
-			String qualifier) {
+	public OfficeManagedObjectSource getOfficeManagedObjectSource(String managedObjectSourceName, String qualifier,
+			String type) {
 
 		// Create the supplied managed object node
-		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = this.context
-				.createSuppliedManagedObjectNode(qualifier, type, this);
-
-		// Register the supplied managed object
-		this.suppliedManagedObjects.add(suppliedManagedObjectNode);
+		String name = SuppliedManagedObjectSourceNodeImpl.getSuppliedManagedObjectSourceName(qualifier, type);
+		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = NodeUtil.getNode(name, this.suppliedManagedObjects,
+				() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type, this));
 
 		// Add and return the managed object source
 		return this.officeNode.addManagedObjectSource(managedObjectSourceName, suppliedManagedObjectNode);
@@ -247,6 +259,11 @@ public class SupplierNodeImpl implements SupplierNode {
 	/*
 	 * =================== SupplierNode =========================
 	 */
+
+	@Override
+	public String getQualifiedName(String simpleName) {
+		return (this.officeNode != null) ? this.officeNode.getQualifiedName(simpleName) : simpleName;
+	}
 
 	@Override
 	public OfficeNode getOfficeNode() {
@@ -327,16 +344,16 @@ public class SupplierNodeImpl implements SupplierNode {
 				ManagedObjectNode mo;
 				if (this.officeNode != null) {
 					// Register the office managed object source
-					mos = (ManagedObjectSourceNode) this.addOfficeManagedObjectSource(managedObjectName, type,
-							qualifier);
+					mos = (ManagedObjectSourceNode) this.getOfficeManagedObjectSource(managedObjectName, qualifier,
+							type);
 
 					// Add the office managed object
 					mo = (ManagedObjectNode) mos.addOfficeManagedObject(managedObjectName, ManagedObjectScope.THREAD);
 
 				} else {
 					// Register the OfficeFloor managed object source
-					mos = (ManagedObjectSourceNode) this.addOfficeFloorManagedObjectSource(managedObjectName, type,
-							qualifier);
+					mos = (ManagedObjectSourceNode) this.getOfficeFloorManagedObjectSource(managedObjectName, qualifier,
+							type);
 
 					// Add the OfficeFloor managed object
 					mo = (ManagedObjectNode) mos.addOfficeFloorManagedObject(managedObjectName,
@@ -352,6 +369,98 @@ public class SupplierNodeImpl implements SupplierNode {
 
 			}, new AutoWire(suppliedMosType.getQualifier(), suppliedMosType.getObjectType()));
 		});
+	}
+
+	@Override
+	public boolean sourceSupplier(CompileContext compileContext) {
+
+		// Load the supplier type
+		SupplierType supplierType = compileContext.getOrLoadSupplierType(this);
+		if (supplierType == null) {
+			return false; // must have type
+		}
+
+		// Load the supplier thread locals
+		for (SupplierThreadLocalType threadLocalType : supplierType.getSupplierThreadLocalTypes()) {
+			String qualifier = threadLocalType.getQualifier();
+			Class<?> type = threadLocalType.getObjectType();
+			String threadLocalName = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, type.getName());
+			NodeUtil.getInitialisedNode(threadLocalName, this.supplierThreadLocals, this.context,
+					() -> this.context.createSupplierThreadLocalNode(qualifier, type.getName(), this),
+					(node) -> node.initialise(threadLocalType));
+		}
+
+		// Load the supplied managed objects
+		for (SuppliedManagedObjectSourceType mosType : supplierType.getSuppliedManagedObjectTypes()) {
+			String qualifier = mosType.getQualifier();
+			Class<?> type = mosType.getObjectType();
+			String mosName = SuppliedManagedObjectSourceNodeImpl.getSuppliedManagedObjectSourceName(qualifier,
+					type.getName());
+			NodeUtil.getInitialisedNode(mosName, this.suppliedManagedObjects, this.context,
+					() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type.getName(), this),
+					(mos) -> mos.initialise());
+		}
+
+		// Successfully sourced
+		return true;
+	}
+
+	@Override
+	public boolean ensureNoThreadLocals(CompileContext compileContext) {
+
+		// Ensure no thread locals
+		boolean[] isNoThreadLocals = new boolean[] { true };
+		this.supplierThreadLocals.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getOfficeFloorSupplierThreadLocalName(), b.getOfficeFloorSupplierThreadLocalName()))
+				.forEachOrdered((threadLocal) -> {
+
+					// Flag that have thread local
+					isNoThreadLocals[0] = false;
+
+					// Add issue, as should not have thread local
+					this.context.getCompilerIssues().addIssue(this,
+							"Should not have " + threadLocal.getNodeType() + " ("
+									+ threadLocal.getOfficeFloorSupplierThreadLocalName() + ") registered, as "
+									+ SupplierSource.class.getSimpleName() + " registered at "
+									+ OfficeFloor.class.getSimpleName());
+				});
+
+		// Return if no thread locals
+		return isNoThreadLocals[0];
+	}
+
+	@Override
+	public void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office, CompileContext compileContext) {
+
+		// Auto-wire thread locals
+		this.supplierThreadLocals.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getOfficeSupplierThreadLocalName(), b.getOfficeSupplierThreadLocalName()))
+				.forEachOrdered((threadLocal) -> {
+
+					// Ignore if already configured
+					if (threadLocal.getLinkedObjectNode() != null) {
+						return;
+					}
+
+					// Auto-wire the thread local
+					AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(threadLocal,
+							new AutoWire(threadLocal.getQualifier(), threadLocal.getType()));
+					if (links.length == 1) {
+						LinkUtil.linkAutoWireObjectNode(threadLocal, links[0].getTargetNode(office), office, autoWirer,
+								compileContext, this.context.getCompilerIssues(),
+								(link) -> threadLocal.linkObjectNode(link));
+					}
+				});
+	}
+
+	@Override
+	public void buildSupplier(CompileContext compileContext) {
+
+		// Build the supplier thread locals
+		this.supplierThreadLocals.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorSupplierThreadLocalName(),
+						b.getOfficeFloorSupplierThreadLocalName()))
+				.forEachOrdered((threadLocal) -> threadLocal.buildSupplierThreadLocal(compileContext));
 	}
 
 }

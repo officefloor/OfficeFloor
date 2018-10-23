@@ -358,13 +358,13 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Flow} is
-	 * not available for auto-wiring. Must be manually added with {@link Flow}
+	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Flow} is not
+	 * available for auto-wiring. Must be manually added with {@link Flow}
 	 * configured.
 	 * <p>
 	 * Purpose of {@link SupplierSource} is integration with object dependency
-	 * injection libraries. These are not expected to support
-	 * continuation/thread injection.
+	 * injection libraries. These are not expected to support continuation/thread
+	 * injection.
 	 */
 	public void testSuppliedManagedObjectWithFlowNotAvailable() {
 
@@ -395,13 +395,13 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Team} is
-	 * not available for auto-wiring. Must be manually added with {@link Team}
+	 * Ensure {@link SuppliedManagedObjectSource} requiring a {@link Team} is not
+	 * available for auto-wiring. Must be manually added with {@link Team}
 	 * configured.
 	 * <p>
 	 * Purpose of {@link SupplierSource} is integration with object dependency
-	 * injection libraries. These are not expected to support
-	 * continuation/thread injection.
+	 * injection libraries. These are not expected to support continuation/thread
+	 * injection.
 	 */
 	public void testSuppliedManagedObjectWithTeamNotAvailable() {
 
@@ -485,14 +485,14 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 	@TestSource
 	public static class CompileSupplierSource extends AbstractSupplierSource {
 
-		private static class SuppliedInstance {
+		private static class SuppliedManagedObjectSourceInstance {
 			private final String qualifier;
 			private final Class<?> type;
 			private final ManagedObjectSource<?, ?> managedObjectSource;
 			private final String[] propertyNameValuePairs;
 
-			public SuppliedInstance(String qualifier, Class<?> type, ManagedObjectSource<?, ?> managedObjectSource,
-					String[] propertyNameValuePairs) {
+			public SuppliedManagedObjectSourceInstance(String qualifier, Class<?> type,
+					ManagedObjectSource<?, ?> managedObjectSource, String[] propertyNameValuePairs) {
 				this.qualifier = qualifier;
 				this.type = type;
 				this.managedObjectSource = managedObjectSource;
@@ -500,15 +500,16 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 			}
 		}
 
-		private static final List<SuppliedInstance> supplied = new LinkedList<>();
+		private static final List<SuppliedManagedObjectSourceInstance> suppliedManagedObjectSources = new LinkedList<>();
 
 		public static void reset() {
-			supplied.clear();
+			suppliedManagedObjectSources.clear();
 		}
 
 		public static void addSuppliedManagedObjectSource(String qualifier, Class<?> type,
 				ManagedObjectSource<?, ?> managedObjectSource, String... propertyNameValuePairs) {
-			supplied.add(new SuppliedInstance(qualifier, type, managedObjectSource, propertyNameValuePairs));
+			suppliedManagedObjectSources.add(new SuppliedManagedObjectSourceInstance(qualifier, type,
+					managedObjectSource, propertyNameValuePairs));
 		}
 
 		public static void addSuppliedManagedObjectSource(Class<?> type, ManagedObjectSource<?, ?> managedObjectSource,
@@ -526,7 +527,9 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		@Override
 		public void supply(SupplierSourceContext context) throws Exception {
-			for (SuppliedInstance instance : supplied) {
+
+			// Add the supplied managed object sources
+			for (SuppliedManagedObjectSourceInstance instance : suppliedManagedObjectSources) {
 				SuppliedManagedObjectSource mos = context.addManagedObjectSource(instance.qualifier, instance.type,
 						instance.managedObjectSource);
 				for (int i = 0; i < instance.propertyNameValuePairs.length; i += 2) {

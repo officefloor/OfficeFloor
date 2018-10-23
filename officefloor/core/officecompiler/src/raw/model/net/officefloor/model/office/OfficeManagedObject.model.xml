@@ -5,14 +5,23 @@
 	<field type="OfficeManagedObjectToOfficeManagedObjectSourceModel"
 		name="office managed object source" />
 	<list type="TypeQualificationModel" name="type qualification" />
-	<list type="AdministrationToOfficeManagedObjectModel" name="administration" />
-	<list type="GovernanceToOfficeManagedObjectModel" name="governance" />
-	<list type="OfficeSectionObjectToOfficeManagedObjectModel" name="office section object" />
-	<list type="OfficeManagedObjectDependencyModel" name="office managed object dependency"
+	<list type="AdministrationToOfficeManagedObjectModel"
+		name="administration" />
+	<list type="GovernanceToOfficeManagedObjectModel"
+		name="governance" />
+	<list type="OfficeSectionObjectToOfficeManagedObjectModel"
+		name="office section object" />
+	<list type="OfficeManagedObjectDependencyModel"
+		name="office managed object dependency"
 		plural="office managed object dependencies" />
-	<list type="OfficeManagedObjectDependencyToOfficeManagedObjectModel"
+	<list
+		type="OfficeManagedObjectDependencyToOfficeManagedObjectModel"
 		name="dependent office managed object" />
-	<list type="OfficeInputManagedObjectDependencyToOfficeManagedObjectModel"
+	<list
+		type="OfficeInputManagedObjectDependencyToOfficeManagedObjectModel"
 		name="dependent office input managed object" />
-	<list type="OfficeManagedObjectToPreLoadAdministrationModel" name="pre load administration" />
+	<list type="OfficeSupplierThreadLocalToOfficeManagedObjectModel"
+		name="dependent office supplier thread local" />
+	<list type="OfficeManagedObjectToPreLoadAdministrationModel"
+		name="pre load administration" />
 </model>

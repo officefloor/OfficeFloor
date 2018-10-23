@@ -25,7 +25,9 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
+import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
@@ -42,6 +44,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	private final NodeContext context;
 
 	/**
+	 * {@link SupplierThreadLocalTypeImpl} instances.
+	 */
+	private final List<SupplierThreadLocalTypeImpl<?>> supplierThreadLocals = new LinkedList<>();
+
+	/**
 	 * {@link SuppliedManagedObjectSourceImpl} instances.
 	 */
 	private final List<SuppliedManagedObjectSourceImpl> suppliedManagedObjectSources = new LinkedList<>();
@@ -49,16 +56,22 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	/**
 	 * Initiate.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param propertyList
-	 *            {@link PropertyList}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param isLoadingType Indicates if loading type.
+	 * @param propertyList  {@link PropertyList}.
+	 * @param context       {@link NodeContext}.
 	 */
 	public SupplierSourceContextImpl(boolean isLoadingType, PropertyList propertyList, NodeContext context) {
 		super(isLoadingType, context.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
 		this.context = context;
+	}
+
+	/**
+	 * Obtains the {@link SupplierThreadLocalType} instances.
+	 * 
+	 * @return {@link SupplierThreadLocalType} instances.
+	 */
+	public SupplierThreadLocalType[] getSupplierThreadLocalTypes() {
+		return this.supplierThreadLocals.stream().toArray(SupplierThreadLocalType[]::new);
 	}
 
 	/**
@@ -75,9 +88,10 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	 */
 
 	@Override
-	public <D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(Class<?> type,
-			ManagedObjectSource<D, F> managedObjectSource) {
-		return this.addManagedObjectSource(null, type, managedObjectSource);
+	public <T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualifier, Class<? extends T> type) {
+		SupplierThreadLocalTypeImpl<T> supplierThreadLocal = new SupplierThreadLocalTypeImpl<>(qualifier, type);
+		this.supplierThreadLocals.add(supplierThreadLocal);
+		return supplierThreadLocal.getSupplierThreadLocal();
 	}
 
 	@Override
@@ -126,14 +140,10 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 		/**
 		 * Initiate.
 		 * 
-		 * @param objectType
-		 *            Object type.
-		 * @param qualifier
-		 *            Qualifier. May be <code>null</code>.
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
-		 * @param properties
-		 *            {@link PropertyList}.
+		 * @param objectType          Object type.
+		 * @param qualifier           Qualifier. May be <code>null</code>.
+		 * @param managedObjectSource {@link ManagedObjectSource}.
+		 * @param properties          {@link PropertyList}.
 		 */
 		public SuppliedManagedObjectSourceImpl(Class<?> objectType, String qualifier,
 				ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties) {

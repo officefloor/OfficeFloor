@@ -17,6 +17,9 @@
  */
 package net.officefloor.compile.spi.supplier.source;
 
+import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
@@ -29,34 +32,39 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface SupplierSourceContext extends SourceContext {
 
 	/**
-	 * Adds a potential {@link ManagedObjectSource} for dependency injection.
-	 * 
-	 * @param <D>
-	 *            Dependency type keys.
-	 * @param <F>
-	 *            {@link Flow} type keys.
-	 * @param type
-	 *            Type of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
-	 * @return {@link SuppliedManagedObjectSource}
+	 * <p>
+	 * Adds a {@link SupplierThreadLocal}.
+	 * <p>
+	 * All {@link SuppliedManagedObjectSource} instances added will also depend on
+	 * the {@link ManagedObject} for the {@link SupplierThreadLocal}. This ensures
+	 * the {@link ManagedObject} object is available to be returned within the
+	 * {@link SuppliedManagedObjectSource}.
+	 * <p>
+	 * To avoid being dependent on too many {@link ManagedObject} instances,
+	 * consider creating/configuring separate {@link SupplierSource} instances
+	 * within the {@link OfficeFloor}.
+	 * <p>
+	 * This allows integrating third party libraries that require
+	 * {@link ThreadLocal} access to objects.
+	 *
+	 * @param           <T> Type of object to be returned from the
+	 *                  {@link SupplierThreadLocal}.
+	 * @param qualifier Qualifier for the {@link AutoWire}. May be <code>null</code>
+	 *                  to match only on type.
+	 * @param type      Type for {@link AutoWire}.
+	 * @return {@link SupplierThreadLocal} to obtain the object.
 	 */
-	<D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(Class<?> type,
-			ManagedObjectSource<D, F> managedObjectSource);
+	<T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualifier, Class<? extends T> type);
 
 	/**
 	 * Adds a potential {@link ManagedObjectSource} for dependency injection.
 	 * 
-	 * @param <D>
-	 *            Dependency type keys.
-	 * @param <F>
-	 *            {@link Flow} type keys.
-	 * @param qualifier
-	 *            Qualifier for the {@link ManagedObjectSource}.
-	 * @param type
-	 *            Type of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
+	 * @param                     <D> Dependency type keys.
+	 * @param                     <F> {@link Flow} type keys.
+	 * @param qualifier           Qualifier for the {@link ManagedObjectSource}. May
+	 *                            be <code>null</code> to match only on type.
+	 * @param type                Type of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource {@link ManagedObjectSource}.
 	 * @return {@link SuppliedManagedObjectSource}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(String qualifier,

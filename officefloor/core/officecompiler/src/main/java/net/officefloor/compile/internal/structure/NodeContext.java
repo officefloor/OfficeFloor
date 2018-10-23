@@ -587,6 +587,16 @@ public interface NodeContext {
 	SupplierLoader getSupplierLoader(Node node);
 
 	/**
+	 * Creates the {@link SupplierThreadLocalNode}.
+	 * 
+	 * @param qualifier Qualifier. May be <code>null</code> if no qualifier.
+	 * @param type      Type.
+	 * @param supplier  Parent {@link SupplierNode}.
+	 * @return {@link SupplierThreadLocalNode}.
+	 */
+	SupplierThreadLocalNode createSupplierThreadLocalNode(String qualifier, String type, SupplierNode supplier);
+
+	/**
 	 * Creates the {@link SuppliedManagedObjectSourceNode}.
 	 * 
 	 * @param qualifier Qualifier. May be <code>null</code> if no qualifier.
@@ -594,7 +604,7 @@ public interface NodeContext {
 	 * @param supplier  Parent {@link SupplierNode}.
 	 * @return {@link SuppliedManagedObjectSourceNode}.
 	 */
-	SuppliedManagedObjectSourceNode createSuppliedManagedObjectNode(String qualifier, String type,
+	SuppliedManagedObjectSourceNode createSuppliedManagedObjectSourceNode(String qualifier, String type,
 			SupplierNode supplier);
 
 	/**

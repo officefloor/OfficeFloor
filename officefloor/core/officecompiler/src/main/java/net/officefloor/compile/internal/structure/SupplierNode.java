@@ -17,11 +17,15 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
 /**
  * Supplier {@link Node}.
@@ -46,6 +50,15 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	void initialise(String supplierSourceClassName, SupplierSource supplierSource);
 
 	/**
+	 * Obtain the qualified name.
+	 * 
+	 * @param simpleName Simple name to qualify with the {@link SupplierSource} name
+	 *                   space.
+	 * @return Qualified name.
+	 */
+	String getQualifiedName(String simpleName);
+
+	/**
 	 * Obtains the parent {@link OfficeNode}.
 	 * 
 	 * @return Parent {@link OfficeNode} or <code>null</code> if configured at the
@@ -61,11 +74,46 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	OfficeFloorNode getOfficeFloorNode();
 
 	/**
+	 * Loads the {@link SupplierType}.
+	 * 
+	 * @return {@link SupplierType}.
+	 */
+	SupplierType loadSupplierType();
+
+	/**
 	 * Registers as a possible MBean.
 	 * 
 	 * @param compileContext {@link CompileContext}.
 	 */
 	void registerAsPossibleMBean(CompileContext compileContext);
+
+	/**
+	 * Sources the {@link SupplierThreadLocal} instances.
+	 * 
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced the {@link SupplierSource}.
+	 *         <code>false</code> if failed to source, with issues reported to the
+	 *         {@link CompilerIssues}.
+	 */
+	boolean sourceSupplier(CompileContext compileContext);
+
+	/**
+	 * <p>
+	 * Ensures there are no {@link SupplierThreadLocalNode} instances.
+	 * <p>
+	 * {@link SupplierThreadLocal} instances are only applicable within the
+	 * {@link Office} (application). If {@link SupplierSource} is used at the
+	 * {@link OfficeFloor}, then it can only supply {@link ManagedObjectSource}
+	 * instances and not depend on {@link SupplierThreadLocal} instances.
+	 * <p>
+	 * If {@link SupplierThreadLocal} instances then they are raised via
+	 * {@link CompilerIssues}.
+	 *
+	 * @return <code>true</code> if no {@link SupplierThreadLocal} instances.
+	 * @param compileContext {@link CompileContext}.
+	 */
+	boolean ensureNoThreadLocals(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link SuppliedManagedObjectSourceNode} instances as
@@ -79,10 +127,20 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 			CompileContext compileContext);
 
 	/**
-	 * Loads the {@link SupplierType}.
+	 * Auto-wires the {@link SupplierThreadLocalNode} instances that are unlinked.
 	 * 
-	 * @return {@link SupplierType}.
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param office         {@link OfficeNode} requiring the auto-wiring.
+	 * @param compileContext {@link CompileContext}.
 	 */
-	SupplierType loadSupplierType();
+	void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office, CompileContext compileContext);
+
+	/**
+	 * Builds the {@link SupplierThreadLocal} instances for the
+	 * {@link SupplierSource}.
+	 * 
+	 * @param compileContext {@link CompileContext}.
+	 */
+	void buildSupplier(CompileContext compileContext);
 
 }

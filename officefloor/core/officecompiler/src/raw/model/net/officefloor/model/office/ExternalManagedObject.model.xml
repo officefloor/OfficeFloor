@@ -2,12 +2,20 @@
 <model>
 	<field type="String" name="external managed object name" />
 	<field type="String" name="object type" />
-	<list type="OfficeSectionObjectToExternalManagedObjectModel" name="office section object" />
-	<list type="OfficeManagedObjectDependencyToExternalManagedObjectModel"
+	<list type="OfficeSectionObjectToExternalManagedObjectModel"
+		name="office section object" />
+	<list
+		type="OfficeManagedObjectDependencyToExternalManagedObjectModel"
 		name="dependent office managed object" />
-	<list type="OfficeInputManagedObjectDependencyToExternalManagedObjectModel"
+	<list
+		type="OfficeInputManagedObjectDependencyToExternalManagedObjectModel"
 		name="dependent office input managed object" />
-	<list type="AdministrationToExternalManagedObjectModel" name="administration" />
-	<list type="GovernanceToExternalManagedObjectModel" name="governance" />
-	<list type="ExternalManagedObjectToPreLoadAdministrationModel" name="pre load administration" />
+	<list type="OfficeSupplierThreadLocalToExternalManagedObjectModel"
+		name="dependent office supplier thread local" />
+	<list type="AdministrationToExternalManagedObjectModel"
+		name="administration" />
+	<list type="GovernanceToExternalManagedObjectModel"
+		name="governance" />
+	<list type="ExternalManagedObjectToPreLoadAdministrationModel"
+		name="pre load administration" />
 </model>
