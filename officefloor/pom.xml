@@ -258,6 +258,11 @@
 				<artifactId>officespring</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>officespring_data</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- Eclipse -->
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>

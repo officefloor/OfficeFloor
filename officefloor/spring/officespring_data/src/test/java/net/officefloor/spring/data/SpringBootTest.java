@@ -15,10 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.spring;
+package net.officefloor.spring.data;
+
+import java.util.List;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -51,19 +55,47 @@ public class SpringBootTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can configure Spring bean.
+	 * Ensure can obtain Spring data beans.
 	 */
-	public void testSpringConfiguredBeans() {
+	public void testSpringDataBeans() {
 
-		// Ensure can obtain simple bean
-		SimpleBean simple = this.context.getBean(SimpleBean.class);
-		assertNotNull("Should obtain simple bean", simple);
-		assertEquals("Incorrect simple bean", "SIMPLE", simple.getValue());
+		// Ensure can obtain repository
+		RowRepository repository = this.context.getBean(RowRepository.class);
+		assertNotNull("Should obtain repository", repository);
 
-		// Ensure can obtain complex bean
-		ComplexBean complex = this.context.getBean(ComplexBean.class);
-		assertNotNull("Should obtain complex bean", complex);
-		assertSame("Should have simple bean injected", simple, complex.getSimpleBean());
+		// Add rows
+		repository.save(new Row(null, "One"));
+		repository.save(new Row(null, "Two"));
+
+		// Ensure can obtain the row
+		List<Row> rows = repository.findByName("One");
+		assertEquals("Should find a row", 1, rows.size());
+	}
+
+	/**
+	 * Ensure can run transaction.
+	 */
+	public void testTransaction() {
+
+		// Obtain the transaction manager
+		PlatformTransactionManager transactionManager = this.context.getBean(PlatformTransactionManager.class);
+		assertNotNull("Should obtain transaction manager", transactionManager);
+
+		// Undertake transaction
+		TransactionStatus transaction = transactionManager.getTransaction(null);
+
+		// Save item within the transaction
+		RowRepository repository = this.context.getBean(RowRepository.class);
+		repository.save(new Row(null, "One"));
+
+		// Ensure can find row
+		assertEquals("Should find row", 1, repository.findByName("One").size());
+
+		// Rollback transaction
+		transactionManager.rollback(transaction);
+
+		// Ensure row no longer available
+		assertEquals("Should not find row after rollback", 0, repository.findByName("One").size());
 	}
 
 }
