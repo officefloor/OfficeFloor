@@ -1,0 +1,23 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<suppliers>
+			<supplier name="SUPPLIER"
+				source="${testcase}$CompileSupplierSource" />
+			<!-- Thread Local auto wired -->
+		</suppliers>
+		<sections>
+			<section name="SECTION" source="CLASS"
+				location="${testcase}$CompileSectionClass">
+				<object name="${testcase}$CompileManagedObject"
+					object-type="${testcase}$CompileManagedObject">
+					<!-- Managed Object auto supplied -->
+				</object>
+			</section>
+		</sections>
+	</office>
+</context>

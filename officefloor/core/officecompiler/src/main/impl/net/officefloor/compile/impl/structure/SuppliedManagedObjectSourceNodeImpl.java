@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.Node;
@@ -33,6 +34,17 @@ import net.officefloor.compile.supplier.SupplierType;
  * @author Daniel Sagenschneider
  */
 public class SuppliedManagedObjectSourceNodeImpl implements SuppliedManagedObjectSourceNode {
+
+	/**
+	 * Generates the name for the {@link SuppliedManagedObjectSource}.
+	 * 
+	 * @param qualifier Qualifier. May be <code>null</code>.
+	 * @param type      Type.
+	 * @return {@link SuppliedManagedObjectSource} name.
+	 */
+	public static String getSuppliedManagedObjectSourceName(String qualifier, String type) {
+		return CompileUtil.isBlank(qualifier) ? type : qualifier + "-" + type;
+	}
 
 	/**
 	 * Qualifier. May be <code>null</code>.
@@ -68,14 +80,10 @@ public class SuppliedManagedObjectSourceNodeImpl implements SuppliedManagedObjec
 	/**
 	 * Initiate.
 	 * 
-	 * @param qualifier
-	 *            Qualifier. May be <code>null</code>.
-	 * @param type
-	 *            Type.
-	 * @param supplierNode
-	 *            {@link SupplierNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param qualifier    Qualifier. May be <code>null</code>.
+	 * @param type         Type.
+	 * @param supplierNode {@link SupplierNode}.
+	 * @param context      {@link NodeContext}.
 	 */
 	public SuppliedManagedObjectSourceNodeImpl(String qualifier, String type, SupplierNode supplierNode,
 			NodeContext context) {
@@ -91,7 +99,7 @@ public class SuppliedManagedObjectSourceNodeImpl implements SuppliedManagedObjec
 
 	@Override
 	public String getNodeName() {
-		return (this.qualifier != null ? this.qualifier + "-" : "") + this.type;
+		return this.supplierNode.getQualifiedName((this.qualifier != null ? this.qualifier + "-" : "") + this.type);
 	}
 
 	@Override

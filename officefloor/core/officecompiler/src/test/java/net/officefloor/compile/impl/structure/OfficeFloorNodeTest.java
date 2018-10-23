@@ -326,12 +326,12 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Add two different supplied managed object sources verifying details
 		OfficeFloorSupplier supplier = this.addSupplier(this.node, "SUPPLIER", null);
 		this.replayMockObjects();
-		OfficeFloorManagedObjectSource mos = supplier.addOfficeFloorManagedObjectSource("MO_SOURCE",
+		OfficeFloorManagedObjectSource mos = supplier.getOfficeFloorManagedObjectSource("MO_SOURCE", null,
 				Connection.class.getName());
 		assertNotNull("Must have managed object source", mos);
 		assertEquals("Incorrect managed object name", "MO_SOURCE", mos.getOfficeFloorManagedObjectSourceName());
 		assertNotSame("Should obtain another managed object source", mos,
-				supplier.addOfficeFloorManagedObjectSource("ANOTHER", Connection.class.getName()));
+				supplier.getOfficeFloorManagedObjectSource("ANOTHER", null, Connection.class.getName()));
 		this.verifyMockObjects();
 	}
 
@@ -349,9 +349,9 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 		// Add the managed object twice
 		this.replayMockObjects();
-		OfficeFloorManagedObjectSource mosFirst = supplier.addOfficeFloorManagedObjectSource("MO_SOURCE",
+		OfficeFloorManagedObjectSource mosFirst = supplier.getOfficeFloorManagedObjectSource("MO_SOURCE", null,
 				Connection.class.getName());
-		OfficeFloorManagedObjectSource mosSecond = supplier.addOfficeFloorManagedObjectSource("MO_SOURCE",
+		OfficeFloorManagedObjectSource mosSecond = supplier.getOfficeFloorManagedObjectSource("MO_SOURCE", null,
 				Connection.class.getName());
 		this.verifyMockObjects();
 
@@ -374,9 +374,9 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 
 		// Add the managed object twice by different sources
 		this.replayMockObjects();
-		OfficeFloorManagedObjectSource moSourceFirst = supplierOne.addOfficeFloorManagedObjectSource("MO_SOURCE",
+		OfficeFloorManagedObjectSource moSourceFirst = supplierOne.getOfficeFloorManagedObjectSource("MO_SOURCE", null,
 				Connection.class.getName());
-		OfficeFloorManagedObjectSource moSourceSecond = supplierTwo.addOfficeFloorManagedObjectSource("MO_SOURCE",
+		OfficeFloorManagedObjectSource moSourceSecond = supplierTwo.getOfficeFloorManagedObjectSource("MO_SOURCE", null,
 				String.class.getName());
 		this.verifyMockObjects();
 

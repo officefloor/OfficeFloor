@@ -1,10 +1,10 @@
 <context>
 	<office-floor>
 		<managed-object-sources>
-			<managed-object-source name="MANAGED_OBJECT_SOURCE"
-				source="${testcase}$TeamManagedObject">
+			<managed-object-source
+				name="MANAGED_OBJECT_SOURCE" source="${testcase}$TeamManagedObject">
 				<managing-office name="OFFICE" />
-				<team name="MANAGED_OBJECT_TEAM" />
+				<team name="MANAGED_OBJECT_SOURCE_TEAM" />
 			</managed-object-source>
 		</managed-object-sources>
 		<offices>

@@ -82,6 +82,7 @@ import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
 import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.SupplierNodeImpl;
+import net.officefloor.compile.impl.structure.SupplierThreadLocalNodeImpl;
 import net.officefloor.compile.impl.structure.TeamNodeImpl;
 import net.officefloor.compile.impl.structure.TeamOversightNodeImpl;
 import net.officefloor.compile.impl.supplier.SupplierLoaderImpl;
@@ -123,6 +124,7 @@ import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.SuppliedManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.SupplierNode;
+import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
 import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.TeamOversightNode;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -1066,7 +1068,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public SuppliedManagedObjectSourceNode createSuppliedManagedObjectNode(String qualifier, String type,
+	public SupplierThreadLocalNode createSupplierThreadLocalNode(String qualifier, String type, SupplierNode supplier) {
+		return new SupplierThreadLocalNodeImpl(qualifier, type, supplier, this);
+	}
+
+	@Override
+	public SuppliedManagedObjectSourceNode createSuppliedManagedObjectSourceNode(String qualifier, String type,
 			SupplierNode supplier) {
 		return new SuppliedManagedObjectSourceNodeImpl(qualifier, type, supplier, this);
 	}

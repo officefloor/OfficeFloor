@@ -353,8 +353,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	@Override
 	public Node[] getChildNodes() {
 		return NodeUtil.getChildNodes(this.inputs, this.outputs, this.objects, this.sections, this.teams,
-				this.managedObjects, this.managedObjectSources, this.governances, this.administrators, this.escalations,
-				this.starts);
+				this.suppliers, this.managedObjects, this.managedObjectSources, this.governances, this.administrators,
+				this.escalations, this.starts);
 	}
 
 	@Override
@@ -656,6 +656,13 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			return false;
 		}
 
+		// Ensure all the suppliers are sourced
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceSupplier(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
 		// Ensure the office tree is initialised
 		if (!NodeUtil.isNodeTreeInitialised(this, this.context.getCompilerIssues())) {
 			return false; // must have fully initialised tree
@@ -713,6 +720,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 						// Load input dependencies for managed object source
 						managedObjectSource.autoWireInputDependencies(autoWirer, officeNode, compileContext);
 					});
+
+			// Iterate over suppliers (auto-wiring unlinked thread locals)
+			this.suppliers.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSupplierName(), b.getOfficeSupplierName()))
+					.forEachOrdered((supplier) -> supplier.autoWireObjects(autoWirer, this, compileContext));
 		}
 
 		// Undertake auto-wire of teams
@@ -963,6 +975,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		this.managedObjects.values().stream().sorted(
 				(a, b) -> CompileUtil.sortCompare(a.getOfficeManagedObjectName(), b.getOfficeManagedObjectName()))
 				.forEachOrdered((mos) -> officeBindings.buildManagedObjectIntoOffice(mos));
+
+		// Build the suppliers
+		this.suppliers.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSupplierName(), b.getOfficeSupplierName()))
+				.forEachOrdered((supplier) -> supplier.buildSupplier(compileContext));
 
 		// Build the sections of the office (in deterministic order)
 		this.sections.values().stream()

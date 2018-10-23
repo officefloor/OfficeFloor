@@ -286,6 +286,12 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertSame("dependency -> input managed object", mo_input_dependency,
 				dependencyToInput.getOfficeFloorInputManagedObject());
 
+		// Ensure managed object dependency to input managed object
+		assertSame("dependency <- input managed object", dependencyTwo,
+				dependencyToInput.getOfficeFloorManagedObjectDependency());
+		assertSame("dependency -> input managed object", mo_input_dependency,
+				dependencyToInput.getOfficeFloorInputManagedObject());
+
 		// Ensure managed object source connected to managing office
 		assertSame("OfficeFloor managed object source <- office", officeFloorManagedObjectSource,
 				moSourceToOffice.getOfficeFloorManagedObjectSource());

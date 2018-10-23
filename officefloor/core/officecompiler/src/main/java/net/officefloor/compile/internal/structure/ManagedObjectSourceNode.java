@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.officefloor.AugmentedManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
@@ -243,5 +244,13 @@ public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObj
 	 */
 	void buildManagedObject(OfficeFloorBuilder builder, OfficeNode managingOffice, OfficeBuilder managingOfficeBuilder,
 			OfficeBindings officeBindings, CompileContext compileContext);
+
+	/**
+	 * Builds the {@link SupplierThreadLocal} for the {@link InputManagedObjectNode}
+	 * from this {@link ManagedObjectSourceNode}.
+	 * 
+	 * @param optionalThreadLocalReceiver {@link OptionalThreadLocalReceiver}.
+	 */
+	void buildSupplierThreadLocal(OptionalThreadLocalReceiver optionalThreadLocalReceiver);
 
 }
