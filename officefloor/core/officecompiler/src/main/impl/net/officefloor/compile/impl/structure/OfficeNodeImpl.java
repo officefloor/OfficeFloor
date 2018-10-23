@@ -668,7 +668,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			return false; // must have fully initialised tree
 		}
 
-		// Undertake auto-wire of objects (and supplier thread locals)
+		// Undertake auto-wire of objects
 		if (this.isAutoWireObjects) {
 
 			// Create the OfficeFloor auto wirer
