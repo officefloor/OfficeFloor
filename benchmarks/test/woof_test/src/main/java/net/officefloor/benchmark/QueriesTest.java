@@ -108,6 +108,11 @@ public class QueriesTest {
 		}
 	}
 
+	@Test
+	public void stress() throws Exception {
+		BenchmarkEnvironment.doStressTest("http://localhost:8181/queries?queries=10", 100, 100);
+	}
+
 	@Data
 	public static class WorldResponse {
 		private int id;

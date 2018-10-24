@@ -77,6 +77,11 @@ public class DbTest {
 				(world.randomNumber >= 1) && (world.randomNumber <= 10000));
 	}
 
+	@Test
+	public void stress() throws Exception {
+		BenchmarkEnvironment.doStressTest("http://localhost:8181/db", 100, 100);
+	}
+
 	@Data
 	public static class WorldResponse {
 		private int id;

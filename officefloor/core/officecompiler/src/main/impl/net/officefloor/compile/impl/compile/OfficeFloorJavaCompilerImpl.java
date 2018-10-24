@@ -81,11 +81,6 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	private final JavaCompiler javaCompiler;
 
 	/**
-	 * {@link OfficeFloorJavaFileManager}.
-	 */
-	private final OfficeFloorJavaFileManager fileManager;
-
-	/**
 	 * Compiled {@link Class} definitions.
 	 */
 	private final Map<String, ByteArrayOutputStream> compiledClasses = new HashMap<>();
@@ -111,9 +106,6 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 
 		// Obtain the Java Compiler
 		this.javaCompiler = ToolProvider.getSystemJavaCompiler();
-
-		// Create in memory file manager
-		this.fileManager = new OfficeFloorJavaFileManager(this.javaCompiler.getStandardFileManager(null, null, null));
 	}
 
 	/*
@@ -374,6 +366,7 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 				public Appendable getSource() {
 					return source;
 				}
+
 			});
 		}
 
@@ -529,40 +522,44 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		// Create diagnostics to report errors
 		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
 
-		// Undertake compiling
-		JavaCompiler.CompilationTask task = this.javaCompiler.getTask(null, this.fileManager, diagnostics, null, null,
-				this.sources);
-		boolean isSuccessful = task.call();
-		if ((!isSuccessful) || (diagnostics.getDiagnostics().size() > 0)) {
-			StringBuilder msg = new StringBuilder();
-			msg.append("Failed compiling");
-			boolean isError = false;
-			for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-				switch (diagnostic.getKind()) {
-				case ERROR:
-				default:
-					isError = true;
-					JavaFileObject failedSource = diagnostic.getSource();
-					msg.append("\n\t " + (failedSource != null ? failedSource.getName() + " " : "") + "line "
-							+ diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
-					msg.append("\n\n");
-					try {
-						if (failedSource != null) {
-							msg.append(failedSource.getCharContent(true));
+		// Create in memory file manager
+		OfficeFloorJavaFileManager fileManager = new OfficeFloorJavaFileManager(
+				this.javaCompiler.getStandardFileManager(null, null, null));
+		try {
+
+			// Undertake compiling
+			JavaCompiler.CompilationTask task = this.javaCompiler.getTask(null, fileManager, diagnostics, null, null,
+					this.sources);
+			boolean isSuccessful = task.call();
+			if ((!isSuccessful) || (diagnostics.getDiagnostics().size() > 0)) {
+				StringBuilder msg = new StringBuilder();
+				msg.append("Failed compiling");
+				boolean isError = false;
+				for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+					switch (diagnostic.getKind()) {
+					case ERROR:
+					default:
+						isError = true;
+						JavaFileObject failedSource = diagnostic.getSource();
+						msg.append("\n\t " + (failedSource != null ? failedSource.getName() + " " : "") + "line "
+								+ diagnostic.getLineNumber() + ": " + diagnostic.getMessage(null));
+						msg.append("\n\n");
+						try {
+							if (failedSource != null) {
+								msg.append(failedSource.getCharContent(true));
+							}
+						} catch (IOException ex) {
+							msg.append("ERROR: failed to log remaining source content");
 						}
-					} catch (IOException ex) {
-						msg.append("ERROR: failed to log remaining source content");
+						break;
 					}
-					break;
+				}
+				if (isError) {
+					throw new CompileError(msg.toString());
 				}
 			}
-			if (isError) {
-				throw new CompileError(msg.toString());
-			}
-		}
 
-		// Build and return the classes
-		try {
+			// Build and return the classes
 			Map<JavaSource, Class<?>> classes = new HashMap<>();
 			for (JavaSourceImpl javaSource : this.sources) {
 				Class<?> clazz = this.compiledClassLoader.loadClass(javaSource.className);
@@ -576,6 +573,14 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		} catch (Exception ex) {
 			// Should not occur
 			throw new RuntimeException(ex);
+
+		} finally {
+			try {
+				fileManager.close();
+			} catch (Exception ex) {
+				// Should not occur
+				throw new RuntimeException(ex);
+			}
 		}
 	}
 
