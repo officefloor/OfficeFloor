@@ -17,6 +17,15 @@
  */
 package net.officefloor.benchmark;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.concurrent.CompletableFuture;
+
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Dsl;
+import org.asynchttpclient.Response;
+
+import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
 
 /**
@@ -33,6 +42,92 @@ public class BenchmarkEnvironment {
 	 */
 	public static PostgreSqlRule createPostgreSqlRule() {
 		return new PostgreSqlRule("tfb-database", 5432, "hello_world", "benchmarkdbuser", "benchmarkdbpass");
+	}
+
+	/**
+	 * <p>
+	 * Undertakes a pipelined stress test.
+	 * <p>
+	 * This is similar requesting as per the Tech Empower benchmarks.
+	 * 
+	 * @param url               URL to send requests.
+	 * @param iterations        Number of iterations.
+	 * @param pipelineBatchSize Pipeline batch size (maximum number of requests
+	 *                          pipelined together).
+	 * @throws Exception If failure in stress test.
+	 */
+	public static void doStressTest(String url, int iterations, int pipelineBatchSize) throws Exception {
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> {
+			try (AsyncHttpClient client = Dsl.asyncHttpClient()) {
+
+				// Indicate test
+				System.out.println("STRESS: " + url);
+
+				// Undertake the warm up
+				doStressRequests(url, iterations / 10, pipelineBatchSize, 'w', client);
+
+				// Capture the start time
+				long startTime = System.currentTimeMillis();
+
+				// Undertake the stress test
+				doStressRequests(url, iterations, pipelineBatchSize, '.', client);
+
+				// Capture the completion time
+				long endTime = System.currentTimeMillis();
+
+				// Indicate performance
+				int totalRequests = iterations * pipelineBatchSize;
+				long totalTime = endTime - startTime;
+				int requestsPerSecond = (int) ((totalRequests) / (((float) totalTime) / 1000.0));
+				System.out.println("\tRequests: " + totalRequests);
+				System.out.println("\tTime: " + totalTime + " milliseconds");
+				System.out.println("\tReq/Sec: " + requestsPerSecond);
+			}
+		});
+	}
+
+	/**
+	 * Undertakes running the requests.
+	 * 
+	 * @param url               URL to send requests.
+	 * @param iterations        Number of iterations.
+	 * @param pipelineBatchSize Pipeline batch size (maximum number of requests
+	 *                          pipelined together).
+	 * @param progressCharacter Character to print out to indicate progress.
+	 * @param client            {@link AsyncHttpClient}.
+	 * @throws Exception If failure in stress test.
+	 */
+	@SuppressWarnings("unchecked")
+	private static void doStressRequests(String url, int iterations, int pipelineBatchSize, char progressCharacter,
+			AsyncHttpClient client) throws Exception {
+
+		// Calculate the progress marker
+		int progressMarker = iterations / 10;
+
+		// Run the iterations
+		CompletableFuture<Response>[] futures = new CompletableFuture[pipelineBatchSize];
+		for (int i = 0; i < iterations; i++) {
+
+			// Indicate progress
+			if (i % (progressMarker) == 0) {
+				System.out.print(progressCharacter);
+				System.out.flush();
+			}
+
+			// Undertake pipelining via sending bursts of requests
+			for (int p = 0; p < futures.length; p++) {
+				futures[p] = client.prepareGet(url).execute().toCompletableFuture();
+			}
+			CompletableFuture.allOf(futures).get();
+
+			// Ensure all responses are valid
+			for (CompletableFuture<Response> future : futures) {
+				assertEquals("Request should be successful", 200, future.get().getStatusCode());
+			}
+		}
+
+		// End progress output
+		System.out.println();
 	}
 
 }

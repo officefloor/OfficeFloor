@@ -46,4 +46,9 @@ public class JsonTest {
 		assertEquals("Incorrect content", "{\"message\":\"Hello, World!\"}", entity);
 	}
 
+	@Test
+	public void stress() throws Exception {
+		BenchmarkEnvironment.doStressTest("http://localhost:8181/json", 10000, 100);
+	}
+
 }
