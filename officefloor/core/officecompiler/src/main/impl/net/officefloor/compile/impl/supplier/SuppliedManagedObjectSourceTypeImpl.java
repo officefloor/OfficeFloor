@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.supplier;
 
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 
@@ -26,7 +27,8 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class SuppliedManagedObjectTypeImpl implements SuppliedManagedObjectSourceType {
+public class SuppliedManagedObjectSourceTypeImpl
+		implements SuppliedManagedObjectSource, SuppliedManagedObjectSourceType {
 
 	/**
 	 * Object type.
@@ -51,21 +53,26 @@ public class SuppliedManagedObjectTypeImpl implements SuppliedManagedObjectSourc
 	/**
 	 * Instantiate.
 	 * 
-	 * @param objectType
-	 *            Object type.
-	 * @param qualifier
-	 *            Qualifier. May be <code>null</code>.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
-	 * @param properties
-	 *            {@link PropertyList}.
+	 * @param objectType          Object type.
+	 * @param qualifier           Qualifier. May be <code>null</code>.
+	 * @param managedObjectSource {@link ManagedObjectSource}.
+	 * @param properties          {@link PropertyList}.
 	 */
-	public SuppliedManagedObjectTypeImpl(Class<?> objectType, String qualifier,
+	public SuppliedManagedObjectSourceTypeImpl(Class<?> objectType, String qualifier,
 			ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties) {
 		this.objectType = objectType;
 		this.qualifier = qualifier;
 		this.managedObjectSource = managedObjectSource;
 		this.properties = properties;
+	}
+
+	/*
+	 * ===================== SuppliedManagedObjectSource ================
+	 */
+
+	@Override
+	public void addProperty(String name, String value) {
+		this.properties.addProperty(name).setValue(value);
 	}
 
 	/*

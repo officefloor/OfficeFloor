@@ -17,25 +17,34 @@
  */
 package net.officefloor.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
 /**
- * Mock Spring Boot configuration.
+ * Qualfied bean for testing.
  * 
  * @author Daniel Sagenschneider
  */
-@SpringBootApplication
-public class MockSpringBootConfiguration {
+public class QualifiedBean {
 
-	@Bean
-	public QualifiedBean qualifiedOne() {
-		return new QualifiedBean("One");
+	/**
+	 * Value.
+	 */
+	private final String value;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param value Value.
+	 */
+	public QualifiedBean(String value) {
+		this.value = value;
 	}
 
-	@Bean
-	public QualifiedBean qualifiedTwo() {
-		return new QualifiedBean("Two");
+	/**
+	 * Obtains the value.
+	 * 
+	 * @return Value.
+	 */
+	public String getValue() {
+		return this.value;
 	}
 
 }

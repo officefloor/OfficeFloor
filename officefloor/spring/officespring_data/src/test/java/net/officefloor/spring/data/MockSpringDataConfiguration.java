@@ -25,5 +25,5 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Daniel Sagenschneider
  */
 @SpringBootApplication
-public class MockSpringBootConfiguration {
+public class MockSpringDataConfiguration {
 }

@@ -31,7 +31,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringBootTest extends OfficeFrameTestCase {
+public class SpringDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link ConfigurableApplicationContext}.
@@ -40,7 +40,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.context = SpringApplication.run(MockSpringBootConfiguration.class);
+		this.context = SpringApplication.run(MockSpringDataConfiguration.class);
 
 		// Indicate the registered beans
 		System.out.println("Beans:");
