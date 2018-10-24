@@ -19,12 +19,15 @@ package net.officefloor.jdbc.postgresql.test;
 
 import java.net.InetAddress;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -148,6 +151,11 @@ public class PostgreSqlRule implements TestRule {
 	private String postgresContainerId;
 
 	/**
+	 * Created {@link Connection} instances.
+	 */
+	private final Deque<Connection> connections = new ConcurrentLinkedDeque<>();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param server       Server to ensure can connect (confirms accessible from
@@ -255,8 +263,10 @@ public class PostgreSqlRule implements TestRule {
 		try {
 			logger.setLevel(Level.OFF);
 			logger.setUseParentHandlers(false);
-			return DataSourceRule
+			Connection connection = DataSourceRule
 					.waitForDatabaseAvailable((context) -> context.setConnection(dataSource.getConnection()));
+			this.connections.push(connection);
+			return connection;
 		} finally {
 			logger.setLevel(level);
 		}
@@ -268,6 +278,15 @@ public class PostgreSqlRule implements TestRule {
 	 * @throws Exception If fails to stop PostgreSql.
 	 */
 	public void stopPostgreSql() throws Exception {
+
+		// Close all the connections
+		for (Connection connection : this.connections) {
+			try {
+				connection.close();
+			} catch (SQLException ex) {
+				// ignore failure
+			}
+		}
 
 		// Stop PostgresSQL
 		System.out.println("Stopping PostgreSQL");
@@ -307,6 +326,8 @@ public class PostgreSqlRule implements TestRule {
 					// Create the possible required database
 					if (PostgreSqlRule.this.databaseName != null) {
 						try (Connection connection = PostgreSqlRule.this.getConnection(null)) {
+							connection.createStatement()
+									.execute("DROP DATABASE IF EXISTS " + PostgreSqlRule.this.databaseName);
 							connection.createStatement().execute("CREATE DATABASE " + PostgreSqlRule.this.databaseName);
 						}
 					}
