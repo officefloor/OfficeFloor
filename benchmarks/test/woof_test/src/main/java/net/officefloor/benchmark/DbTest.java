@@ -85,7 +85,7 @@ public class DbTest {
 
 	@Test
 	public void stress() throws Exception {
-		BenchmarkEnvironment.doStressTest("http://localhost:8181/db", 100, 100);
+		BenchmarkEnvironment.doStressTest("http://localhost:8181/db", 4, 100, 25);
 	}
 
 	@Data
