@@ -51,26 +51,39 @@ public class BenchmarkEnvironment {
 	 * This is similar requesting as per the Tech Empower benchmarks.
 	 * 
 	 * @param url               URL to send requests.
+	 * @param clients           Number of clients.
 	 * @param iterations        Number of iterations.
 	 * @param pipelineBatchSize Pipeline batch size (maximum number of requests
 	 *                          pipelined together).
 	 * @throws Exception If failure in stress test.
 	 */
-	public static void doStressTest(String url, int iterations, int pipelineBatchSize) throws Exception {
+	public static void doStressTest(String url, int clients, int iterations, int pipelineBatchSize) throws Exception {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> {
+
+			// Undertake warm up
 			try (AsyncHttpClient client = Dsl.asyncHttpClient()) {
+				doStressRequests(url, iterations / 10, pipelineBatchSize, 'w', new AsyncHttpClient[] { client });
+			}
+
+			// Run load
+			AsyncHttpClient[] asyncClients = new AsyncHttpClient[clients];
+			for (int i = 0; i < asyncClients.length; i++) {
+				asyncClients[i] = Dsl.asyncHttpClient();
+			}
+			try {
 
 				// Indicate test
-				System.out.println("STRESS: " + url);
+				System.out.println();
+				System.out.println("STRESS: " + url + " (with " + clients + " clients)");
 
 				// Undertake the warm up
-				doStressRequests(url, iterations / 10, pipelineBatchSize, 'w', client);
+				doStressRequests(url, iterations / 10, pipelineBatchSize, 'w', asyncClients);
 
 				// Capture the start time
 				long startTime = System.currentTimeMillis();
 
 				// Undertake the stress test
-				doStressRequests(url, iterations, pipelineBatchSize, '.', client);
+				doStressRequests(url, iterations, pipelineBatchSize, '.', asyncClients);
 
 				// Capture the completion time
 				long endTime = System.currentTimeMillis();
@@ -82,8 +95,16 @@ public class BenchmarkEnvironment {
 				System.out.println("\tRequests: " + totalRequests);
 				System.out.println("\tTime: " + totalTime + " milliseconds");
 				System.out.println("\tReq/Sec: " + requestsPerSecond);
+				System.out.println();
+
+			} finally {
+				// Close the clients
+				for (AsyncHttpClient asyncClient : asyncClients) {
+					asyncClient.close();
+				}
 			}
 		});
+
 	}
 
 	/**
@@ -94,18 +115,18 @@ public class BenchmarkEnvironment {
 	 * @param pipelineBatchSize Pipeline batch size (maximum number of requests
 	 *                          pipelined together).
 	 * @param progressCharacter Character to print out to indicate progress.
-	 * @param client            {@link AsyncHttpClient}.
+	 * @param clients           {@link AsyncHttpClient} instances.
 	 * @throws Exception If failure in stress test.
 	 */
 	@SuppressWarnings("unchecked")
 	private static void doStressRequests(String url, int iterations, int pipelineBatchSize, char progressCharacter,
-			AsyncHttpClient client) throws Exception {
+			AsyncHttpClient[] clients) throws Exception {
 
 		// Calculate the progress marker
 		int progressMarker = iterations / 10;
 
 		// Run the iterations
-		CompletableFuture<Response>[] futures = new CompletableFuture[pipelineBatchSize];
+		CompletableFuture<Response>[] futures = new CompletableFuture[clients.length * pipelineBatchSize];
 		for (int i = 0; i < iterations; i++) {
 
 			// Indicate progress
@@ -114,13 +135,20 @@ public class BenchmarkEnvironment {
 				System.out.flush();
 			}
 
-			// Undertake pipelining via sending bursts of requests
-			for (int p = 0; p < futures.length; p++) {
-				futures[p] = client.prepareGet(url).execute().toCompletableFuture();
+			// Run the iteration
+			for (int p = 0; p < pipelineBatchSize; p++) {
+				for (int c = 0; c < clients.length; c++) {
+
+					// Determine the index
+					int index = (c * pipelineBatchSize) + p;
+
+					// Undertake the request
+					futures[index] = clients[c].prepareGet(url).execute().toCompletableFuture();
+				}
 			}
-			CompletableFuture.allOf(futures).get();
 
 			// Ensure all responses are valid
+			CompletableFuture.allOf(futures).get();
 			for (CompletableFuture<Response> future : futures) {
 				assertEquals("Request should be successful", 200, future.get().getStatusCode());
 			}
