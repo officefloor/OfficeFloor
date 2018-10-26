@@ -21,7 +21,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
@@ -30,7 +32,8 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringBeanManagedObjectSource extends AbstractManagedObjectSource<Indexed, None> implements ManagedObject {
+public class SpringBeanManagedObjectSource extends AbstractManagedObjectSource<Indexed, None>
+		implements ManagedObject, CoordinatingManagedObject<Indexed> {
 
 	/**
 	 * Name of the Spring bean.
@@ -48,17 +51,24 @@ public class SpringBeanManagedObjectSource extends AbstractManagedObjectSource<I
 	private final ConfigurableApplicationContext springContext;
 
 	/**
+	 * {@link SpringDependency} instances.
+	 */
+	private final SpringDependency[] springDependencies;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param beanName      Name of the Spring bean.
-	 * @param objectType    Object type expected from Spring.
-	 * @param springContext Spring {@link ConfigurableApplicationContext}.
+	 * @param beanName           Name of the Spring bean.
+	 * @param objectType         Object type expected from Spring.
+	 * @param springContext      Spring {@link ConfigurableApplicationContext}.
+	 * @param springDependencies {@link SpringDependency} instances.
 	 */
 	public SpringBeanManagedObjectSource(String beanName, Class<?> objectType,
-			ConfigurableApplicationContext springContext) {
+			ConfigurableApplicationContext springContext, SpringDependency[] springDependencies) {
 		this.beanName = beanName;
 		this.objectType = objectType;
 		this.springContext = springContext;
+		this.springDependencies = springDependencies;
 	}
 
 	/*
@@ -73,12 +83,31 @@ public class SpringBeanManagedObjectSource extends AbstractManagedObjectSource<I
 	@Override
 	protected void loadMetaData(MetaDataContext<Indexed, None> context) throws Exception {
 		context.setObjectClass(this.objectType);
+		context.setManagedObjectClass(this.getClass());
+
+		// Load the dependencies
+		for (SpringDependency springDependency : this.springDependencies) {
+			context.addDependency(springDependency.getObjectType()).setTypeQualifier(springDependency.getQualifier());
+		}
 	}
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		return this;
 	}
+
+	/*
+	 * ================= CoordinatingManagedObject ========================
+	 */
+
+	@Override
+	public void loadObjects(ObjectRegistry<Indexed> registry) throws Throwable {
+		// objects via supplier thread local
+	}
+
+	/*
+	 * ======================== ManagedObject ==============================
+	 */
 
 	@Override
 	public Object getObject() throws Throwable {

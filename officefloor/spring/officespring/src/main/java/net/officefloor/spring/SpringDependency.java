@@ -17,30 +17,52 @@
  */
 package net.officefloor.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * Mock Spring Boot configuration.
+ * Spring dependency on {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
-@SpringBootApplication
-public class MockSpringBootConfiguration {
+public class SpringDependency {
 
-	@Bean
-	public QualifiedBean qualifiedOne() {
-		return new QualifiedBean("One");
+	/**
+	 * Qualifier. May be <code>null</code>.
+	 */
+	private final String qualifier;
+
+	/**
+	 * Object type.
+	 */
+	private final Class<?> objectType;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param qualifier  Qualifier. May be <code>null</code>.
+	 * @param objectType Object type.
+	 */
+	public SpringDependency(String qualifier, Class<?> objectType) {
+		this.qualifier = qualifier;
+		this.objectType = objectType;
 	}
 
-	@Bean("qualifiedTwo")
-	public QualifiedBean createTwo() {
-		return new QualifiedBean("Two");
+	/**
+	 * Obtains the qualifier.
+	 * 
+	 * @return Qualifier. May be <code>null</code>.
+	 */
+	public String getQualifier() {
+		return qualifier;
 	}
 
-	@Bean
-	public OfficeFloorManagedObject officeFloorManagedObject() {
-		return SpringSupplierSource.getBean(null, OfficeFloorManagedObject.class);
+	/**
+	 * Obtains the object type.
+	 * 
+	 * @return Object type.
+	 */
+	public Class<?> getObjectType() {
+		return objectType;
 	}
 
 }

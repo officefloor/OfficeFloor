@@ -17,30 +17,21 @@
  */
 package net.officefloor.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
- * Mock Spring Boot configuration.
+ * Dependent bean for testing.
  * 
  * @author Daniel Sagenschneider
  */
-@SpringBootApplication
-public class MockSpringBootConfiguration {
+@Component
+public class DependentBean {
 
-	@Bean
-	public QualifiedBean qualifiedOne() {
-		return new QualifiedBean("One");
+	@Autowired
+	private OfficeFloorManagedObject managedObject;
+
+	public OfficeFloorManagedObject getManagedObject() {
+		return this.managedObject;
 	}
-
-	@Bean("qualifiedTwo")
-	public QualifiedBean createTwo() {
-		return new QualifiedBean("Two");
-	}
-
-	@Bean
-	public OfficeFloorManagedObject officeFloorManagedObject() {
-		return SpringSupplierSource.getBean(null, OfficeFloorManagedObject.class);
-	}
-
 }
