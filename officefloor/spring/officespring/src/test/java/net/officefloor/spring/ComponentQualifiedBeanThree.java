@@ -17,30 +17,18 @@
  */
 package net.officefloor.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 /**
- * Mock Spring Boot configuration.
+ * Component qualified bean.
  * 
  * @author Daniel Sagenschneider
  */
-@SpringBootApplication
-public class MockSpringBootConfiguration {
+@Component("qualifiedThree")
+public class ComponentQualifiedBeanThree extends QualifiedBean {
 
-	@Bean
-	public QualifiedBean qualifiedOne() {
-		return new QualifiedBean("One");
-	}
-
-	@Bean("qualifiedTwo")
-	public QualifiedBean createTwo() {
-		return new QualifiedBean("Two");
-	}
-
-	@Bean
-	public OfficeFloorManagedObject officeFloorManagedObject() {
-		return SpringSupplierSource.getBean(null, OfficeFloorManagedObject.class);
+	public ComponentQualifiedBeanThree() {
+		super("Three");
 	}
 
 }
