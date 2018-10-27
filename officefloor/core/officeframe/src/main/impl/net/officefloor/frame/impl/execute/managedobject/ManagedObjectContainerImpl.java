@@ -46,6 +46,7 @@ import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -587,7 +588,13 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation) {
+		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion escalationCompletion) {
+
+			// TODO provide escalation completion
+			if (escalationCompletion != null) {
+				throw new IllegalStateException("Should not have " + EscalationCompletion.class.getSimpleName()
+						+ " for " + ManagedObjectContainer.class.getSimpleName());
+			}
 
 			// Fail the managed object and escalate to function
 			return new FailManagedObjectOperation(escalation, this.managedFunction);

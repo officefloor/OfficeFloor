@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.BackPressureTeamSource;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -77,6 +78,37 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
+	 * Ensure for new functionality that attempts the {@link Team} again.
+	 */
+	public void testAttemptOverloadedTeamAgain() throws Exception {
+		BackPressureTeamSource.resetBackPressureEscalationCount(0);
+		this.doBackPressureTest("attemptAgain", (work) -> {
+			assertSame("Should propagate failure in first attempt", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
+					work.firstAttemptFailure);
+			assertSame("Should propagate failure in second attempt", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
+					work.secondAttemptFailue);
+		});
+		assertEquals("Should be back pressure failure for each attempt", 2,
+				BackPressureTeamSource.getBackPressureEscalationCount());
+	}
+
+	/**
+	 * Ensure for new functionality that attempts the {@link Team} again via new
+	 * {@link ThreadState}.
+	 */
+	public void testAttemptOverloadedTeamAgainViaThread() throws Exception {
+		BackPressureTeamSource.resetBackPressureEscalationCount(0);
+		this.doBackPressureTest("attemptThreadAgain", (work) -> {
+			assertSame("Should propagate failure in first attempt", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
+					work.firstAttemptFailure);
+			assertSame("Should propagate failure in second attempt", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
+					work.secondAttemptFailue);
+		});
+		assertEquals("Should be back pressure failure for each attempt", 2,
+				BackPressureTeamSource.getBackPressureEscalationCount());
+	}
+
+	/**
 	 * Undertakes the back pressure test.
 	 * 
 	 * @param functionName Name of {@link ManagedFunction}.
@@ -107,6 +139,14 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 		viaTeamNext.getBuilder().setResponsibleTeam("VIA_TEAM");
 		viaTeamNext.setNextFunction("next");
 
+		// Attempt again
+		ReflectiveFunctionBuilder attemptAgain = this.constructFunction(work, "attemptAgain");
+		attemptAgain.buildFlow("flow", null, false);
+
+		// Attempt again
+		ReflectiveFunctionBuilder attemptThreadAgain = this.constructFunction(work, "attemptThreadAgain");
+		attemptThreadAgain.buildFlow("flow", null, true);
+
 		// Function causing back pressure by team
 		this.constructTeam("BACK_PRESSURE", BackPressureTeamSource.class);
 		this.constructFunction(work, "backPressure").getBuilder().setResponsibleTeam("BACK_PRESSURE");
@@ -133,15 +173,36 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 
 		private volatile Throwable teamFailure = null;
 
-		public void flow(ReflectiveFlow flow) {
+		private volatile Throwable firstAttemptFailure = null;
+
+		private volatile Throwable secondAttemptFailue = null;
+
+		public void attemptThreadAgain(ReflectiveFlow flow) {
 			flow.doFlow(null, (escalation) -> {
-				this.failure = escalation;
-				throw escalation;
+				this.firstAttemptFailure = escalation;
+
+				// Try again
+				flow.doFlow(null, (secondEscalation) -> {
+					this.secondAttemptFailue = secondEscalation;
+
+					// Propagate failure
+					throw secondEscalation;
+				});
 			});
 		}
 
-		public void next() {
-			// ensure next also propagates the back pressure
+		public void attemptAgain(ReflectiveFlow flow) {
+			flow.doFlow(null, (escalation) -> {
+				this.firstAttemptFailure = escalation;
+
+				// Try again
+				flow.doFlow(null, (secondEscalation) -> {
+					this.secondAttemptFailue = secondEscalation;
+
+					// Propagate failure
+					throw secondEscalation;
+				});
+			});
 		}
 
 		public void viaTeamFlow(ReflectiveFlow flow) {
@@ -155,8 +216,19 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 			// Ensure back pressure propagated by team
 		}
 
+		public void flow(ReflectiveFlow flow) {
+			flow.doFlow(null, (escalation) -> {
+				this.failure = escalation;
+				throw escalation;
+			});
+		}
+
+		public void next() {
+			// ensure next also propagates the back pressure
+		}
+
 		public void backPressure() throws Exception {
-			fail("Should not be invoked due to back press of team");
+			fail("Should not be invoked due to back pressure of team");
 		}
 	}
 

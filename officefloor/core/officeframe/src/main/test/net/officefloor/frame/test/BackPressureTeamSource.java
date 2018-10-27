@@ -18,7 +18,9 @@
 package net.officefloor.frame.test;
 
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
@@ -37,6 +39,31 @@ public class BackPressureTeamSource extends AbstractTeamSource implements Team {
 	 */
 	public static final RejectedExecutionException BACK_PRESSURE_EXCEPTION = new RejectedExecutionException(
 			"Testing back pressure from overloaded Team");
+
+	/**
+	 * Indicates the number of back pressure failures.
+	 */
+	private static final AtomicInteger backPressureFailures = new AtomicInteger(0);
+
+	/**
+	 * Obtains the number of back pressure {@link Escalation} instances that have
+	 * occurred.
+	 * 
+	 * @return Number of back pressure {@link Escalation} instances that have
+	 *         occurred.
+	 */
+	public static int getBackPressureEscalationCount() {
+		return backPressureFailures.get();
+	}
+
+	/**
+	 * Resets the back pressure {@link Escalation} count.
+	 * 
+	 * @param count Count to reset the {@link Escalation} count.
+	 */
+	public static void resetBackPressureEscalationCount(int count) {
+		backPressureFailures.set(count);
+	}
 
 	/*
 	 * ============== TeamSource =================
@@ -63,6 +90,9 @@ public class BackPressureTeamSource extends AbstractTeamSource implements Team {
 
 	@Override
 	public void assignJob(Job job) {
+
+		// Increment the number of back pressure failures
+		backPressureFailures.incrementAndGet();
 
 		// Always applies back pressure
 		throw BACK_PRESSURE_EXCEPTION;

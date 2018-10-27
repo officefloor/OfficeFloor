@@ -28,6 +28,7 @@ import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -71,10 +72,8 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param processState
-	 *            {@link ProcessState} to be cleaned up.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
+	 * @param processState   {@link ProcessState} to be cleaned up.
+	 * @param officeMetaData {@link OfficeMetaData}.
 	 */
 	public ManagedObjectCleanupImpl(ProcessState processState, OfficeMetaData officeMetaData) {
 		this.processState = processState;
@@ -130,10 +129,8 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param delegate
-		 *            Delegate {@link FunctionState}.
-		 * @param overrideThreadState
-		 *            Override {@link ThreadState}.
+		 * @param delegate            Delegate {@link FunctionState}.
+		 * @param overrideThreadState Override {@link ThreadState}.
 		 */
 		public RunInThreadStateFunctionState(FunctionState delegate, ThreadState overrideThreadState) {
 			super(delegate);
@@ -161,10 +158,10 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation) {
+		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
 			// Delegate handle escalation (ultimately by flow callback)
 			ThreadState threadState = this.delegate.getThreadState();
-			return threadState.handleEscalation(escalation);
+			return threadState.handleEscalation(escalation, completion);
 		}
 	}
 
@@ -210,12 +207,9 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		/**
 		 * Initiate.
 		 * 
-		 * @param objectType
-		 *            Type of the object for the {@link ManagedObject}.
-		 * @param managedObject
-		 *            {@link ManagedObject} to recycle.
-		 * @param pool
-		 *            {@link ManagedObjectPool}.
+		 * @param objectType    Type of the object for the {@link ManagedObject}.
+		 * @param managedObject {@link ManagedObject} to recycle.
+		 * @param pool          {@link ManagedObjectPool}.
 		 */
 		private RecycleManagedObjectParameterImpl(Class<?> objectType, MO managedObject, ManagedObjectPool pool) {
 			this.objectType = objectType;
@@ -309,10 +303,8 @@ public class ManagedObjectCleanupImpl implements ManagedObjectCleanup {
 		/**
 		 * Initiate.
 		 * 
-		 * @param objectType
-		 *            Object type of the {@link ManagedObject}.
-		 * @param escalation
-		 *            {@link Escalation} cleanup of the {@link ManagedObject}.
+		 * @param objectType Object type of the {@link ManagedObject}.
+		 * @param escalation {@link Escalation} cleanup of the {@link ManagedObject}.
 		 */
 		public CleanupEscalationImpl(Class<?> objectType, Throwable escalation) {
 			this.objectType = objectType;

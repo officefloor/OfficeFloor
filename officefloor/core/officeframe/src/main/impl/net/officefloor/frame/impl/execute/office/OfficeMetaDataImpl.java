@@ -328,7 +328,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 		// Create the Flow
 		ThreadState threadState = processState.getMainThreadState();
-		Flow flow = threadState.createFlow(null);
+		Flow flow = threadState.createFlow(null, null);
 
 		// Obtain the function meta-data
 		ManagedFunctionMetaData<?, ?> functionMetaData = flowMetaData.getInitialFunctionMetaData();

@@ -26,6 +26,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectReadyCheckImpl;
+import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -91,8 +92,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	private final ManagedFunctionBoundManagedObjects boundManagedObjects;
 
 	/**
-	 * {@link ManagedFunctionContainer} {@link ManagedObjectIndex} instances to
-	 * the {@link ManagedObject} instances that must be loaded before the
+	 * {@link ManagedFunctionContainer} {@link ManagedObjectIndex} instances to the
+	 * {@link ManagedObject} instances that must be loaded before the
 	 * {@link ManagedFunction} may be executed.
 	 */
 	private final ManagedObjectIndex[] requiredManagedObjects;
@@ -103,10 +104,10 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * active for this {@link ManagedFunctionLogic}. The {@link Governance} is
 	 * identified by the index into the array.For each {@link Governance}:
 	 * <ol>
-	 * <li><code>true</code> indicates the {@link Governance} is to be activated
-	 * (if not already activated)</li>
-	 * <li><code>false</code> indicates to deactivate the {@link Governance}
-	 * should it be active.</li>
+	 * <li><code>true</code> indicates the {@link Governance} is to be activated (if
+	 * not already activated)</li>
+	 * <li><code>false</code> indicates to deactivate the {@link Governance} should
+	 * it be active.</li>
 	 * </ol>
 	 * <p>
 	 * Should this array be <code>null</code> no change is undertaken with the
@@ -150,14 +151,14 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * Owner if this {@link ManagedFunctionContainer} is a parallel
 	 * {@link ManagedFunctionContainer}.
 	 * <p>
-	 * This is the {@link ManagedFunctionContainer} that is executed once the
-	 * graph from this {@link ManagedFunctionContainer} is complete.
+	 * This is the {@link ManagedFunctionContainer} that is executed once the graph
+	 * from this {@link ManagedFunctionContainer} is complete.
 	 */
 	private ManagedFunctionContainerImpl<?> parallelOwner;
 
 	/**
-	 * Parallel {@link ManagedFunctionContainer} that must be executed before
-	 * this {@link ManagedFunctionContainer} may be executed.
+	 * Parallel {@link ManagedFunctionContainer} that must be executed before this
+	 * {@link ManagedFunctionContainer} may be executed.
 	 */
 	private ManagedFunctionContainerImpl<?> parallelFunction = null;
 
@@ -190,38 +191,36 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	/**
 	 * Initiate.
 	 * 
-	 * @param setupFunction
-	 *            Optional {@link FunctionState} to be executed to setup this
-	 *            {@link ManagedObjectContainer}. May be <code>null</code>.
-	 * @param managedFunctionLogic
-	 *            {@link ManagedFunctionLogic} to be executed by this
-	 *            {@link ManagedFunctionContainer}.
-	 * @param boundManagedObjects
-	 *            {@link ManagedFunctionBoundManagedObjects} containing the
-	 *            {@link ManagedObjectContainer} instances for the
-	 *            {@link ManagedObject} instances bound to the
-	 *            {@link ManagedFunction}.
-	 * @param requiredManagedObjects
-	 *            {@link ManagedObjectIndex} instances to the
-	 *            {@link ManagedObject} instances that must be loaded before the
-	 *            {@link ManagedFunction} may be executed.
-	 * @param requiredGovernance
-	 *            Identifies the required activation state of the
-	 *            {@link Governance} for this {@link ManagedFunction}.
-	 * @param isEnforceGovernance
-	 *            <code>true</code> to enforce {@link Governance} on
-	 *            deactivation. <code>false</code> to disregard
-	 *            {@link Governance} on deactivation.
-	 * @param functionLogicMetaData
-	 *            {@link ManagedFunctionLogicMetaData} for this node.
-	 * @param parallelOwner
-	 *            Parallel owner of this {@link ManagedFunctionContainer}. May
-	 *            be <code>null</code> if no owner.
-	 * @param flow
-	 *            {@link Flow} containing this {@link ManagedFunctionContainer}.
-	 * @param isUnloadManagedObjects
-	 *            Indicates whether this {@link ManagedObjectContainer} is
-	 *            responsible for unloading the {@link ManagedObject} instances.
+	 * @param setupFunction          Optional {@link FunctionState} to be executed
+	 *                               to setup this {@link ManagedObjectContainer}.
+	 *                               May be <code>null</code>.
+	 * @param managedFunctionLogic   {@link ManagedFunctionLogic} to be executed by
+	 *                               this {@link ManagedFunctionContainer}.
+	 * @param boundManagedObjects    {@link ManagedFunctionBoundManagedObjects}
+	 *                               containing the {@link ManagedObjectContainer}
+	 *                               instances for the {@link ManagedObject}
+	 *                               instances bound to the {@link ManagedFunction}.
+	 * @param requiredManagedObjects {@link ManagedObjectIndex} instances to the
+	 *                               {@link ManagedObject} instances that must be
+	 *                               loaded before the {@link ManagedFunction} may
+	 *                               be executed.
+	 * @param requiredGovernance     Identifies the required activation state of the
+	 *                               {@link Governance} for this
+	 *                               {@link ManagedFunction}.
+	 * @param isEnforceGovernance    <code>true</code> to enforce {@link Governance}
+	 *                               on deactivation. <code>false</code> to
+	 *                               disregard {@link Governance} on deactivation.
+	 * @param functionLogicMetaData  {@link ManagedFunctionLogicMetaData} for this
+	 *                               node.
+	 * @param parallelOwner          Parallel owner of this
+	 *                               {@link ManagedFunctionContainer}. May be
+	 *                               <code>null</code> if no owner.
+	 * @param flow                   {@link Flow} containing this
+	 *                               {@link ManagedFunctionContainer}.
+	 * @param isUnloadManagedObjects Indicates whether this
+	 *                               {@link ManagedObjectContainer} is responsible
+	 *                               for unloading the {@link ManagedObject}
+	 *                               instances.
 	 */
 	public ManagedFunctionContainerImpl(FunctionState setupFunction, ManagedFunctionLogic managedFunctionLogic,
 			ManagedFunctionBoundManagedObjects boundManagedObjects, ManagedObjectIndex[] requiredManagedObjects,
@@ -355,7 +354,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 						} else {
 							// De-activate the governance
 							FunctionState deactivateGovernance = (this.isEnforceGovernance
-									? governance.enforceGovernance() : governance.disregardGovernance());
+									? governance.enforceGovernance()
+									: governance.disregardGovernance());
 							updateGovernance = Promise.then(updateGovernance, deactivateGovernance);
 						}
 					}
@@ -476,7 +476,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			}
 
 			// Complete this function (no escalation as successful)
-			FunctionState completeFunction = this.complete(null);
+			FunctionState completeFunction = this.complete(null, null);
 			if (completeFunction != null) {
 				return Promise.then(completeFunction, this);
 			}
@@ -495,7 +495,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	@Override
-	public FunctionState handleEscalation(Throwable escalation) {
+	public FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
 
 		// Escalation from this node, so clean up down stream functions
 		FunctionState handleFunctions = this.cancel(false);
@@ -503,7 +503,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		switch (this.containerState) {
 		case COMPLETED:
 			// Handle by thread as this function is complete
-			handleFunctions = this.flow.getThreadState().handleEscalation(escalation);
+			handleFunctions = this.flow.getThreadState().handleEscalation(escalation, completion);
 			break;
 
 		default:
@@ -516,17 +516,17 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			if (escalationFlow != null) {
 				// Escalation handled by this functions escalation procedure
 				ThreadState threadState = this.flow.getThreadState();
-				Flow parallelFlow = threadState.createFlow(null);
+				Flow parallelFlow = threadState.createFlow(null, completion);
 				FunctionState escalationFunction = parallelFlow.createManagedFunction(escalation,
 						escalationFlow.getManagedFunctionMetaData(), false, this.parallelOwner);
 
 				// Complete this flow (handling escalating)
-				handleFunctions = Promise.then(handleFunctions, this.complete(null));
+				handleFunctions = Promise.then(handleFunctions, this.complete(null, null));
 				handleFunctions = Promise.then(handleFunctions, escalationFunction);
 
 			} else {
 				// Escalate to flow
-				handleFunctions = Promise.then(handleFunctions, this.complete(escalation));
+				handleFunctions = Promise.then(handleFunctions, this.complete(escalation, completion));
 			}
 		}
 
@@ -542,10 +542,10 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	/**
 	 * Cancels all downstream {@link FunctionState} instances.
 	 * 
-	 * @param isCancelThisFunctionState
-	 *            <code>true</code> to cancel this {@link FunctionState}.
-	 * @return {@link FunctionState} to cancel the downstream
-	 *         {@link FunctionState} instances.
+	 * @param isCancelThisFunctionState <code>true</code> to cancel this
+	 *                                  {@link FunctionState}.
+	 * @return {@link FunctionState} to cancel the downstream {@link FunctionState}
+	 *         instances.
 	 */
 	private FunctionState cancel(boolean isCancelThisFunctionState) {
 		return new ManagedFunctionOperation() {
@@ -570,7 +570,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 				// Clean up this function state (if required to do so)
 				if (isCancelThisFunctionState) {
-					cleanUpFunctions = Promise.then(cleanUpFunctions, container.complete(null));
+					cleanUpFunctions = Promise.then(cleanUpFunctions, container.complete(null, null));
 				}
 
 				// Return clean up functions
@@ -698,7 +698,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 			} else if (callback != null) {
 				// Have callback, so execute in parallel in new flow
-				Flow parallelFlow = container.flow.getThreadState().createFlow(completion);
+				Flow parallelFlow = container.flow.getThreadState().createFlow(completion, null);
 
 				// Create the function
 				@SuppressWarnings("unchecked")
@@ -742,10 +742,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		/**
 		 * Instantiate.
 		 * 
-		 * @param flowMetaData
-		 *            {@link FlowMetaData}.
-		 * @param callback
-		 *            {@link FlowCallback}.
+		 * @param flowMetaData {@link FlowMetaData}.
+		 * @param callback     {@link FlowCallback}.
 		 */
 		public FlowCompletionImpl(FlowMetaData flowMetaData, FlowCallback callback) {
 			this.flowMetaData = flowMetaData;
@@ -772,7 +770,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		 */
 
 		@Override
-		public FunctionState complete(final Throwable escalation) {
+		public FunctionState flowComplete(final Throwable escalation, final EscalationCompletion escalationCompletion) {
 			return new ManagedFunctionOperation() {
 				@Override
 				public FunctionState execute(FunctionStateContext context) throws Throwable {
@@ -805,14 +803,26 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 					// Remove callback
 					container.awaitingFlowCompletions.removeEntry(FlowCompletionImpl.this);
 
-					// Undertake the callback
-					FlowCompletionImpl.this.callback.run(escalation);
+					// Notify of escalation completion
+					FunctionState escalationCompletionFunction = escalationCompletion != null
+							? escalationCompletion.escalationComplete()
+							: null;
+					FunctionState continueFunction = Promise.then(escalationCompletionFunction, container);
+
+					try {
+						// Undertake the callback
+						FlowCompletionImpl.this.callback.run(escalation);
+
+					} catch (Throwable ex) {
+						// Handle potential failure in the call back
+						continueFunction = Promise.then(escalationCompletionFunction, this.handleEscalation(ex, null));
+					}
 
 					// Must recheck managed objects
 					container.check = null;
 
 					// Continue execution of this managed function
-					return container;
+					return continueFunction;
 				}
 			};
 		}
@@ -823,8 +833,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * {@link ManagedFunctionContainer} within the tree of
 	 * {@link ManagedFunctionContainer} instances.
 	 * 
-	 * @param sequentialFunction
-	 *            {@link ManagedFunctionContainer} to load to tree.
+	 * @param sequentialFunction {@link ManagedFunctionContainer} to load to tree.
 	 */
 	private final void loadSequentialFunction(ManagedFunctionContainerImpl<?> sequentialFunction) {
 
@@ -843,8 +852,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	 * {@link ManagedFunctionContainer} within the tree of
 	 * {@link ManagedFunctionContainer} instances.
 	 * 
-	 * @param parallelFunction
-	 *            {@link ManagedFunctionContainer} to load to tree.
+	 * @param parallelFunction {@link ManagedFunctionContainer} to load to tree.
 	 */
 	private final void loadParallelFunction(ManagedFunctionContainerImpl<?> parallelFunction) {
 
@@ -860,13 +868,10 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	/**
-	 * Loads the parallel owner to the parallel
-	 * {@link ManagedFunctionContainer}.
+	 * Loads the parallel owner to the parallel {@link ManagedFunctionContainer}.
 	 * 
-	 * @param parallelFunction
-	 *            Parallel {@link ManagedFunctionContainer}.
-	 * @param parallelOwner
-	 *            Parallel owner.
+	 * @param parallelFunction Parallel {@link ManagedFunctionContainer}.
+	 * @param parallelOwner    Parallel owner.
 	 */
 	private final void loadParallelOwner(ManagedFunctionContainerImpl<?> parallelFunction,
 			ManagedFunctionContainerImpl<?> parallelOwner) {
@@ -879,10 +884,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	/**
 	 * Completes this {@link FunctionState}.
 	 * 
-	 * @param functionEscalation
-	 *            Possible {@link Escalation} from this {@link FunctionState}.
+	 * @param functionEscalation   Possible {@link Escalation} from this
+	 *                             {@link FunctionState}.
+	 * @param escalationCompletion {@link EscalationCompletion}.
 	 */
-	private FunctionState complete(Throwable functionEscalation) {
+	private FunctionState complete(Throwable functionEscalation, EscalationCompletion escalationCompletion) {
 		return new ManagedFunctionOperation() {
 			@Override
 			public FunctionState execute(FunctionStateContext context) throws Throwable {
@@ -910,7 +916,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 						container.containerState = ManagedFunctionState.COMPLETED;
 
 						// Flag function complete
-						return container.flow.managedFunctionComplete(container, functionEscalation);
+						return container.flow.managedFunctionComplete(container, functionEscalation,
+								escalationCompletion);
 					}
 				});
 			}
@@ -960,20 +967,18 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		SETUP,
 
 		/**
-		 * Initial state requiring the {@link ManagedObject} instances to be
-		 * loaded.
+		 * Initial state requiring the {@link ManagedObject} instances to be loaded.
 		 */
 		LOAD_MANAGED_OBJECTS,
 
 		/**
-		 * {@link ManagedObject} instances loaded and requiring
-		 * {@link Governance}.
+		 * {@link ManagedObject} instances loaded and requiring {@link Governance}.
 		 */
 		GOVERN_MANAGED_OBJECTS,
 
 		/**
-		 * {@link Governance} in place. Need to ensure the {@link ProcessState}
-		 * is synchronised to this {@link ThreadState} for executing the
+		 * {@link Governance} in place. Need to ensure the {@link ProcessState} is
+		 * synchronised to this {@link ThreadState} for executing the
 		 * {@link ManagedFunctionLogic}.
 		 */
 		SYNCHRONISE_PROCESS_STATE,
