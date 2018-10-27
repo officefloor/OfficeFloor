@@ -195,7 +195,7 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		public void assignJob(Job job) {
+		public void assignJob(Job job) throws Exception {
 
 			// Ensure using process identifier
 			assertNotNull("Should have assigned process identifier", this.processIdentifier);
