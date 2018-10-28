@@ -94,7 +94,7 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 					Thread.currentThread(), work.backPressureThread);
 			assertSame("Should propagate failure in first attempt", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
 					work.firstAttemptFailure);
-			assertSame("Should allow clean up calls to functions", work.secondAttemptFailue);
+			assertNull("Should allow clean up calls to functions", work.secondAttemptFailue);
 		});
 		assertEquals("Should be back pressure failure for each attempt", 1,
 				BackPressureTeamSource.getBackPressureEscalationCount());
@@ -245,7 +245,9 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 		public void flow(ReflectiveFlow flow) {
 			flow.doFlow(null, (escalation) -> {
 				this.failure = escalation;
-				throw escalation;
+				if (escalation != null) {
+					throw escalation;
+				}
 			});
 		}
 
