@@ -17,8 +17,6 @@
  */
 package net.officefloor.server.http;
 
-import static org.junit.Assert.assertNotEquals;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -62,8 +60,8 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
-import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.BackPressureTeamSource;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
@@ -754,11 +752,25 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 */
 	public void testTeamPressureOverload() throws Exception {
 		this.startHttpServer(PressureOverloadServicer.class, (context) -> {
+
+			// Configure marker
 			context.addManagedObject("MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
-			context.getOfficeFloorDeployer().addTeam("TEAM", ExecutorFixedTeamSource.class.getName());
+
+			// Configure teams
+			context.getOfficeFloorDeployer().enableAutoWireTeams();
+			context.getOfficeFloorDeployer().addTeam("TEAM", BackPressureTeamSource.class.getName())
+					.addTypeQualification(null, TeamMarker.class.getName());
 		});
-		PipelineExecutor executor = new PipelineExecutor(this.serverLocation.getHttpPort());
-		executor.doPipelineRun(100000);
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(false, "/test")));
+
+			// Ensure notify of overloaded server
+			String responseBody = EntityUtils.toString(response.getEntity());
+			assertEquals("Response status should indicate that server is overloaded:\n" + responseBody, 503,
+					response.getStatusLine().getStatusCode());
+			assertTrue("Should provide detail of failure:\n" + responseBody,
+					responseBody.contains(BackPressureTeamSource.BACK_PRESSURE_EXCEPTION.getMessage()));
+		}
 	}
 
 	/**
@@ -779,15 +791,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		public void backPressure(@Parameter Thread serviceThread, ServerHttpConnection connection, TeamMarker marker)
 				throws Exception {
-
-			// Ensure using team
-			assertNotEquals("Should be using team", serviceThread, Thread.currentThread());
-
-			// Sleep some time to cause back pressure
-			Thread.sleep(1000);
-
-			// Provide response
-			connection.getResponse().getEntityWriter().write("hello world");
+			fail("Should not be invoked, as back pressure from Team");
 		}
 	}
 
