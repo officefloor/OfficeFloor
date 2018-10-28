@@ -1222,6 +1222,11 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 				}
 			}
 		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
+		}
 	}
 
 	@TestSource

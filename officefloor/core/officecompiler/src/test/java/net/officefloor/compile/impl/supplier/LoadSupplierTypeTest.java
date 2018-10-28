@@ -490,6 +490,11 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				init.supply(context);
 			}
 		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
+		}
 	}
 
 }

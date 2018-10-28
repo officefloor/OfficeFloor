@@ -539,6 +539,11 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 				}
 			}
 		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
+		}
 	}
 
 	@TestSource
