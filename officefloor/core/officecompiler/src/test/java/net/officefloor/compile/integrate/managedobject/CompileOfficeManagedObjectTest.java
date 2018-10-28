@@ -160,6 +160,11 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 					managedObjectSource);
 			source.addProperty("MO_NAME", "MO_VALUE");
 		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
+		}
 	}
 
 	/**
@@ -187,8 +192,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link ManagedObject} with a dependency in
-	 * {@link Office}.
+	 * Tests compiling a {@link ManagedObject} with a dependency in {@link Office}.
 	 */
 	public void testManagedObjectWithDependencyInOffice() {
 
@@ -245,8 +249,8 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling an Input {@link ManagedObject} with dependency linked to
-	 * a {@link ManagedObject} in the {@link Office}.
+	 * Tests compiling an Input {@link ManagedObject} with dependency linked to a
+	 * {@link ManagedObject} in the {@link Office}.
 	 */
 	public void testInputManagedObjectWithDependencyInOffice() {
 
@@ -278,9 +282,8 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling an Input {@link ManagedObject} with dependency linked to
-	 * a {@link ManagedObject} outside the {@link Office} (e.g.
-	 * {@link OfficeFloor}).
+	 * Tests compiling an Input {@link ManagedObject} with dependency linked to a
+	 * {@link ManagedObject} outside the {@link Office} (e.g. {@link OfficeFloor}).
 	 */
 	public void testInputManagedObjectWithDependencyOutsideOffice() {
 
@@ -332,8 +335,8 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests linking the {@link ManagedObjectSource} invoked
-	 * {@link ProcessState} with a {@link ManagedFunction}.
+	 * Tests linking the {@link ManagedObjectSource} invoked {@link ProcessState}
+	 * with a {@link ManagedFunction}.
 	 */
 	public void testManagedObjectSourceFlowLinkedToFunction() {
 
@@ -419,8 +422,7 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Class for {@link ClassManagedObjectSource} containing a
-	 * {@link Dependency}.
+	 * Class for {@link ClassManagedObjectSource} containing a {@link Dependency}.
 	 */
 	public static class DependencyManagedObject {
 
@@ -452,8 +454,8 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Class for {@link ClassManagedObjectSource} containing a
-	 * {@link FlowInterface} and a {@link Dependency}.
+	 * Class for {@link ClassManagedObjectSource} containing a {@link FlowInterface}
+	 * and a {@link Dependency}.
 	 */
 	public static class InputManagedObject {
 

@@ -51,6 +51,8 @@ import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.frame.api.build.OfficeFloorEvent;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
@@ -321,6 +323,7 @@ public class SupplierNodeImpl implements SupplierNode {
 		}
 
 		// Load the supplied managed objects for auto-wiring
+		boolean[] isSupplierTerminateRegistered = new boolean[] { false };
 		Arrays.stream(supplierType.getSuppliedManagedObjectTypes()).forEach((suppliedMosType) -> {
 
 			// Determine if flows for managed object
@@ -363,6 +366,24 @@ public class SupplierNodeImpl implements SupplierNode {
 				// Source the managed object source and managed object
 				mos.sourceManagedObjectSource(managedObjectSourceVisitor, compileContext);
 				mo.sourceManagedObject(compileContext);
+
+				// Register for termination of supplier
+				if (!isSupplierTerminateRegistered[0]) {
+					SupplierSource terminateSupplierSource = this.usedSupplierSource;
+					this.officeFloorNode.addOfficeFloorListener(new OfficeFloorListener() {
+
+						@Override
+						public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
+							// Nothing on startup, as supplier type triggered
+						}
+
+						@Override
+						public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
+							// Terminate the supplier
+							terminateSupplierSource.terminate();
+						}
+					});
+				}
 
 				// Return the managed object
 				return mo;

@@ -156,6 +156,11 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 */
 	public static final String CONFIGURATION_CLASS_NAME = "configuration.class";
 
+	/**
+	 * {@link ConfigurableApplicationContext}.
+	 */
+	private ConfigurableApplicationContext springContext;
+
 	/*
 	 * ================== SupplierSource ============================
 	 */
@@ -170,7 +175,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 		// Load Spring with access to hook in OfficeFloor managed objects
 		Map<String, SpringDependency> springDependenciesByName = new HashMap<>();
-		ConfigurableApplicationContext springContext = runInContext(() -> {
+		this.springContext = runInContext(() -> {
 
 			// Load the configurable application context
 			String configurationClassName = context.getProperty(CONFIGURATION_CLASS_NAME);
@@ -212,8 +217,8 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 		// Load listing of all the beans (mapped by their type)
 		Map<Class<?>, List<String>> beanNamesByType = new HashMap<>();
-		ConfigurableListableBeanFactory beanFactory = springContext.getBeanFactory();
-		NEXT_BEAN: for (String name : springContext.getBeanDefinitionNames()) {
+		ConfigurableListableBeanFactory beanFactory = this.springContext.getBeanFactory();
+		NEXT_BEAN: for (String name : this.springContext.getBeanDefinitionNames()) {
 			BeanDefinition definition = beanFactory.getBeanDefinition(name);
 			String beanClassName = definition.getBeanClassName();
 
@@ -258,19 +263,26 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			case 1:
 				// Only the one type (so no qualifier)
 				String singleBeanName = beanNames.get(0);
-				context.addManagedObjectSource(null, beanType,
-						new SpringBeanManagedObjectSource(singleBeanName, beanType, springContext, springDependencies));
+				context.addManagedObjectSource(null, beanType, new SpringBeanManagedObjectSource(singleBeanName,
+						beanType, this.springContext, springDependencies));
 				break;
 
 			default:
 				// Multiple, so provide qualifier
 				for (String beanName : beanNames) {
-					context.addManagedObjectSource(beanName, beanType,
-							new SpringBeanManagedObjectSource(beanName, beanType, springContext, springDependencies));
+					context.addManagedObjectSource(beanName, beanType, new SpringBeanManagedObjectSource(beanName,
+							beanType, this.springContext, springDependencies));
 				}
 				break;
 			}
 		}
+	}
+
+	@Override
+	public void terminate() {
+
+		// Close the spring context
+		this.springContext.close();
 	}
 
 }

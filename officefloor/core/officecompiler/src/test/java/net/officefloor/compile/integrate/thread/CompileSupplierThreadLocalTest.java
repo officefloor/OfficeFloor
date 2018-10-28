@@ -247,6 +247,11 @@ public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
 					.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 							SuppliedManagedObject.class.getName());
 		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
+		}
 	}
 
 	public static class SupplierThreadLocalInstance {
