@@ -111,7 +111,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testFailGetSupplierSourceProperties() {
 
-		final NullPointerException failure = new NullPointerException("Fail to get supplier source properties");
+		final RuntimeException failure = new RuntimeException("Fail to get supplier source properties");
 
 		// Record null properties
 		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
