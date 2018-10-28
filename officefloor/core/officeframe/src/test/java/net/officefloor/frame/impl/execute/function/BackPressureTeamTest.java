@@ -40,7 +40,8 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 	 * Ensure back pressure notified to caller.
 	 */
 	public void testFlowBackPressure() throws Exception {
-		this.doBackPressureTest("flow", (work) -> {
+		this.doBackPressureTest("flow", true, (work) -> {
+			assertFalse("Should not invoke back pressure method", work.isBackPressureInvoked);
 			assertSame("Should propagate the failure through callback", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
 					work.failure);
 		});
@@ -50,7 +51,8 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 	 * Ensure back pressure propagated.
 	 */
 	public void testNextBackPressure() throws Exception {
-		this.doBackPressureTest("next", (work) -> {
+		this.doBackPressureTest("next", true, (work) -> {
+			assertFalse("Should not invoke back pressure method", work.isBackPressureInvoked);
 			assertNull("No callback, so no capture", work.failure);
 		});
 	}
@@ -59,7 +61,8 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 	 * Ensure back pressure notified to caller even if via {@link Team}.
 	 */
 	public void testFlowBackPressureThroughTeam() throws Exception {
-		this.doBackPressureTest("viaTeamFlow", (work) -> {
+		this.doBackPressureTest("viaTeamFlow", true, (work) -> {
+			assertFalse("Should not invoke back pressure method", work.isBackPressureInvoked);
 			assertSame("Should propagate the failure through callback", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
 					work.failure);
 			assertSame("Should propagate the failure through team", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
@@ -71,7 +74,8 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 	 * Ensure back pressure propagated even if via {@link Team}.
 	 */
 	public void testNextBackPressureThroughTeam() throws Exception {
-		this.doBackPressureTest("viaTeamNext", (work) -> {
+		this.doBackPressureTest("viaTeamNext", true, (work) -> {
+			assertFalse("Should not invoke back pressure method", work.isBackPressureInvoked);
 			assertNull("No callback, so no capture", work.failure);
 			assertNull("Again no callback with team, so no capture", work.teamFailure);
 		});
@@ -82,13 +86,17 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 	 */
 	public void testAttemptOverloadedTeamAgain() throws Exception {
 		BackPressureTeamSource.resetBackPressureEscalationCount(0);
-		this.doBackPressureTest("attemptAgain", (work) -> {
+		this.doBackPressureTest("attemptAgain", false, (work) -> {
+			assertTrue(
+					"Calling parallel within function callback, allows call but with current team to slow current team",
+					work.isBackPressureInvoked);
+			assertSame("Calls to overloaded team should be by current team (back pressure up pipeline)",
+					Thread.currentThread(), work.backPressureThread);
 			assertSame("Should propagate failure in first attempt", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
 					work.firstAttemptFailure);
-			assertSame("Should propagate failure in second attempt", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
-					work.secondAttemptFailue);
+			assertSame("Should allow clean up calls to functions", work.secondAttemptFailue);
 		});
-		assertEquals("Should be back pressure failure for each attempt", 2,
+		assertEquals("Should be back pressure failure for each attempt", 1,
 				BackPressureTeamSource.getBackPressureEscalationCount());
 	}
 
@@ -98,7 +106,8 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 	 */
 	public void testAttemptOverloadedTeamAgainViaThread() throws Exception {
 		BackPressureTeamSource.resetBackPressureEscalationCount(0);
-		this.doBackPressureTest("attemptThreadAgain", (work) -> {
+		this.doBackPressureTest("attemptThreadAgain", true, (work) -> {
+			assertFalse("Should not invoke back pressure method (as new thread state)", work.isBackPressureInvoked);
 			assertSame("Should propagate failure in first attempt", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
 					work.firstAttemptFailure);
 			assertSame("Should propagate failure in second attempt", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
@@ -113,8 +122,10 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 	 * 
 	 * @param functionName Name of {@link ManagedFunction}.
 	 * @param validator    Validates the {@link TestWork}.
+	 * @param isEscalate   Indicates if escalate the back pressure from invocation.
 	 */
-	private void doBackPressureTest(String functionName, Consumer<TestWork> validator) throws Exception {
+	private void doBackPressureTest(String functionName, boolean isEscalate, Consumer<TestWork> validator)
+			throws Exception {
 
 		// Construct the functions
 		TestWork work = new TestWork();
@@ -152,12 +163,19 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 		this.constructFunction(work, "backPressure").getBuilder().setResponsibleTeam("BACK_PRESSURE");
 
 		// Invoke the function
+		RejectedExecutionException escalation = null;
 		try {
 			this.invokeFunction(functionName, null);
-			fail("Should fail due to back pressure");
 		} catch (RejectedExecutionException ex) {
+			escalation = ex;
+		}
+
+		// Ensure appropriate escalation
+		if (isEscalate) {
 			assertSame("Should propagate the back pressure exception", BackPressureTeamSource.BACK_PRESSURE_EXCEPTION,
-					ex);
+					escalation);
+		} else {
+			assertNull("Should not propagate back pressure exception", escalation);
 		}
 
 		// Undertake validation
@@ -177,6 +195,10 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 
 		private volatile Throwable secondAttemptFailue = null;
 
+		private volatile boolean isBackPressureInvoked = false;
+
+		private volatile Thread backPressureThread = null;
+
 		public void attemptThreadAgain(ReflectiveFlow flow) {
 			flow.doFlow(null, (escalation) -> {
 				this.firstAttemptFailure = escalation;
@@ -195,12 +217,16 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 			flow.doFlow(null, (escalation) -> {
 				this.firstAttemptFailure = escalation;
 
-				// Try again
+				// Try again (allowed to run to clean up)
 				flow.doFlow(null, (secondEscalation) -> {
 					this.secondAttemptFailue = secondEscalation;
 
-					// Propagate failure
-					throw secondEscalation;
+					// Within cleanup scope, so should be able to call function
+					assertTrue("Should invoke back pressed function (however not via responsible team)",
+							this.isBackPressureInvoked);
+					assertSame(
+							"Should use current Team to invoke, so slows current team (causing back pressure up the pipeline)",
+							Thread.currentThread(), this.backPressureThread);
 				});
 			});
 		}
@@ -228,7 +254,8 @@ public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
 		}
 
 		public void backPressure() throws Exception {
-			fail("Should not be invoked due to back pressure of team");
+			this.isBackPressureInvoked = true;
+			this.backPressureThread = Thread.currentThread();
 		}
 	}
 

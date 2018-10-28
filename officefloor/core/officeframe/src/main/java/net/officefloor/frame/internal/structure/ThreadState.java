@@ -129,14 +129,13 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	/**
 	 * Flags that the input {@link Flow} has completed.
 	 * 
-	 * @param flow                 {@link Flow} that has completed.
-	 * @param flowEscalation       Possible {@link Escalation} from the
-	 *                             {@link Flow}. May be <code>null</code>.
-	 * @param escalationCompletion Possible {@link EscalationCompletion} from the
-	 *                             {@link Flow}. May be <code>null</code>.
+	 * @param flow           {@link Flow} that has completed.
+	 * @param flowEscalation Possible {@link Escalation} from the {@link Flow}. May
+	 *                       be <code>null</code>.
+	 * @param completion     {@link EscalationCompletion}. May be <code>null</code>.
 	 * @return Optional {@link FunctionState} to complete the {@link Flow}.
 	 */
-	FunctionState flowComplete(Flow flow, Throwable flowEscalation, EscalationCompletion escalationCompletion);
+	FunctionState flowComplete(Flow flow, Throwable flowEscalation, EscalationCompletion completion);
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this

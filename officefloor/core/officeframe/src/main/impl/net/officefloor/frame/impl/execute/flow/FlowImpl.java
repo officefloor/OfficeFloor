@@ -310,7 +310,21 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 	@Override
 	public FunctionState cancel() {
-		return LinkedListSetPromise.all(this.activeFunctions, (function) -> function.cancel());
+
+		// Undertake cancel
+		FunctionState cancelFunctions = null;
+
+		// Ensure escalation completion
+		if (this.escalationCompletion != null) {
+			cancelFunctions = Promise.then(cancelFunctions, this.escalationCompletion.escalationComplete());
+		}
+
+		// Completion functions
+		cancelFunctions = Promise.then(cancelFunctions,
+				LinkedListSetPromise.all(this.activeFunctions, (function) -> function.cancel()));
+
+		// Return the cancel
+		return cancelFunctions;
 	}
 
 	@Override
@@ -328,11 +342,6 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 			// Determine if already an escalation for this flow
 			if (this.flowEscalation == null) {
-
-				// New escalation, so complete existing escalation flow
-				if (this.escalationCompletion != null) {
-					this.escalationCompletion.escalationComplete();
-				}
 
 				// Escalation for this flow
 				this.flowEscalation = functionEscalation;
@@ -352,11 +361,16 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			Throwable threadEscalation;
 			EscalationCompletion threadEscalationCompletion;
 			if (this.flowCompletion != null) {
+				// Handle escalation by flow completion
 				completionFunctions = Promise.then(completionFunctions,
-						this.flowCompletion.flowComplete(this.flowEscalation, this.escalationCompletion));
-				// Handled by flow completion
+						this.flowCompletion.flowComplete(this.flowEscalation));
+				if (this.escalationCompletion != null) {
+					completionFunctions = Promise.then(completionFunctions,
+							this.escalationCompletion.escalationComplete());
+				}
 				threadEscalation = null;
 				threadEscalationCompletion = null;
+
 			} else {
 				// Escalate to thread escalation
 				threadEscalation = this.flowEscalation;
@@ -364,8 +378,6 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			}
 
 			// Include flow complete clean up
-			final Throwable finalThreadEscalation = threadEscalation;
-			final EscalationCompletion finalEscalationCompletion = threadEscalationCompletion;
 			completionFunctions = Promise.then(completionFunctions, new FlowOperation() {
 				@Override
 				public FunctionState execute(FunctionStateContext context) throws Throwable {
@@ -382,7 +394,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 					flow.isFlowComplete = true;
 
 					// Complete the flow
-					return flow.threadState.flowComplete(flow, finalThreadEscalation, finalEscalationCompletion);
+					return flow.threadState.flowComplete(flow, threadEscalation, threadEscalationCompletion);
 				}
 			});
 		}

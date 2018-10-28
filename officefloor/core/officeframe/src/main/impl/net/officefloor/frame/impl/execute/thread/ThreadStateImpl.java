@@ -408,8 +408,17 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	@Override
 	public FunctionState handleEscalation(Throwable escalation, EscalationCompletion escalationCompletion) {
 
+		// Undertake clean up
+		FunctionState cleanUpFunctions = null;
+
+		// Ensure existing escalation is completed
+		if (this.threadEscalationCompletion != null) {
+			cleanUpFunctions = Promise.then(cleanUpFunctions, this.threadEscalationCompletion.escalationComplete());
+		}
+
 		// Cancel all remaining flows
-		FunctionState cleanUpFunctions = LinkedListSetPromise.all(this.activeFlows, (flow) -> flow.cancel());
+		cleanUpFunctions = Promise.then(cleanUpFunctions,
+				LinkedListSetPromise.all(this.activeFlows, (flow) -> flow.cancel()));
 
 		// Handle based on escalation level
 		switch (this.escalationLevel) {
@@ -509,8 +518,17 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				}
 			}
 
+			// Complete functions
+			FunctionState completeFunctions = null;
+
+			// Ensure existing escalation is completed
+			if (this.threadEscalationCompletion != null) {
+				completeFunctions = Promise.then(completeFunctions,
+						this.threadEscalationCompletion.escalationComplete());
+			}
+
 			// Complete the thread
-			return this.complete();
+			return Promise.then(completeFunctions, this.complete());
 		}
 
 		// Thread complete
@@ -534,6 +552,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				// Clean up thread state
 				FunctionState cleanUpFunctions = null;
 
+				// Ensure escalation completion
+				if (threadState.threadEscalationCompletion != null) {
+					cleanUpFunctions = Promise.then(cleanUpFunctions,
+							threadState.threadEscalationCompletion.escalationComplete());
+				}
+
 				// Deactivate the governance
 				for (int i = 0; i < threadState.governanceContainers.length; i++) {
 					GovernanceContainer<?> container = threadState.governanceContainers[i];
@@ -552,7 +576,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 				// Must handle completion at end of chain
 				// (clean up escalations can cause re-attempts until complete)
-				return Promise.then(cleanUpFunctions, new ThreadStateOperation() {
+				cleanUpFunctions = Promise.then(cleanUpFunctions, new ThreadStateOperation() {
 
 					@Override
 					public FunctionState execute(FunctionStateContext context) throws Throwable {
@@ -571,14 +595,22 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 						// Notify complete thread state (with thread escalation)
 						FunctionState threadCompletion = null;
 						if (threadState.completion != null) {
-							threadCompletion = threadState.completion.flowComplete(threadState.threadEscalation,
-									threadState.threadEscalationCompletion);
+							threadCompletion = threadState.completion.flowComplete(threadState.threadEscalation);
 						}
 
 						// Complete the thread state (thread is now cleaned up)
 						return threadState.processState.threadComplete(threadState, threadCompletion);
 					}
 				});
+
+				// Handle escalation completion
+				if (threadState.threadEscalationCompletion != null) {
+					cleanUpFunctions = Promise.then(cleanUpFunctions,
+							threadState.threadEscalationCompletion.escalationComplete());
+				}
+
+				// Return the clean up
+				return cleanUpFunctions;
 			}
 		};
 	}
@@ -685,8 +717,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		}
 
 		@Override
-		public FunctionState flowComplete(Throwable escalation, EscalationCompletion escalationCompletion) {
-			return new CompleteFunctionState(escalation, escalationCompletion);
+		public FunctionState flowComplete(Throwable escalation) {
+			return new CompleteFunctionState(escalation);
 		}
 
 		/**
@@ -701,19 +733,13 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			private final Throwable escalation;
 
 			/**
-			 * {@link EscalationCompletion}.
-			 */
-			private final EscalationCompletion escalationCompletion;
-
-			/**
 			 * Instantiate.
 			 * 
 			 * @param escalation           {@link Escalation}.
 			 * @param escalationCompletion {@link EscalationCompletion}.
 			 */
-			public CompleteFunctionState(Throwable escalation, EscalationCompletion escalationCompletion) {
+			public CompleteFunctionState(Throwable escalation) {
 				this.escalation = escalation;
-				this.escalationCompletion = escalationCompletion;
 			}
 
 			@Override
@@ -730,25 +756,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			@Override
 			public FunctionState execute(FunctionStateContext context) throws Throwable {
 
-				// Easy access to thread state
-				ThreadState threadState = ProcessFlowCompletion.this.threadState;
-
-				// Undertake escalation completion
-				FunctionState completionFunction = escalationCompletion != null
-						? escalationCompletion.escalationComplete()
-						: null;
-
-				try {
-					// Undertake the callback
-					ProcessFlowCompletion.this.callback.run(this.escalation);
-
-				} catch (Throwable ex) {
-					// Handle potential failure in the call back
-					completionFunction = Promise.then(completionFunction, threadState.handleEscalation(ex, null));
-				}
+				// Undertake the callback
+				ProcessFlowCompletion.this.callback.run(this.escalation);
 
 				// Process now complete
-				return completionFunction;
+				return null;
 			}
 		}
 	}

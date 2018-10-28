@@ -770,7 +770,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		 */
 
 		@Override
-		public FunctionState flowComplete(final Throwable escalation, final EscalationCompletion escalationCompletion) {
+		public FunctionState flowComplete(final Throwable escalation) {
 			return new ManagedFunctionOperation() {
 				@Override
 				public FunctionState execute(FunctionStateContext context) throws Throwable {
@@ -803,26 +803,14 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 					// Remove callback
 					container.awaitingFlowCompletions.removeEntry(FlowCompletionImpl.this);
 
-					// Notify of escalation completion
-					FunctionState escalationCompletionFunction = escalationCompletion != null
-							? escalationCompletion.escalationComplete()
-							: null;
-					FunctionState continueFunction = Promise.then(escalationCompletionFunction, container);
-
-					try {
-						// Undertake the callback
-						FlowCompletionImpl.this.callback.run(escalation);
-
-					} catch (Throwable ex) {
-						// Handle potential failure in the call back
-						continueFunction = Promise.then(escalationCompletionFunction, this.handleEscalation(ex, null));
-					}
+					// Undertake the callback
+					FlowCompletionImpl.this.callback.run(escalation);
 
 					// Must recheck managed objects
 					container.check = null;
 
 					// Continue execution of this managed function
-					return continueFunction;
+					return container;
 				}
 			};
 		}

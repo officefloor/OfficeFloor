@@ -521,6 +521,11 @@ public class FunctionLoopImpl implements FunctionLoop {
 			// Obtain the required team
 			TeamManagement requiredTeam = this.delegate.getResponsibleTeam();
 
+			// Allow other threads to attempt team
+			if (this.escalationCompletion.threadState != this.delegate.getThreadState()) {
+				return requiredTeam;
+			}
+
 			// Determine if override team
 			if (this.escalationCompletion.isEscalationHandled) {
 				return requiredTeam; // no further overriding team
