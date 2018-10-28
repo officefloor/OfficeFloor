@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.function;
 
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -39,28 +40,27 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 	protected final FunctionState delegate;
 
 	/**
-	 * Cache the delegate {@link ThreadState} to avoid traversing delegate chain
-	 * for the {@link ThreadState}.
+	 * Cache the delegate {@link ThreadState} to avoid traversing delegate chain for
+	 * the {@link ThreadState}.
 	 */
 	private final ThreadState delegateThreadState;
 
 	/**
-	 * Cache the delegate {@link TeamManagement} to avoid traversing delegate
-	 * chain for the responsible {@link TeamManagement}.
+	 * Cache the delegate {@link TeamManagement} to avoid traversing delegate chain
+	 * for the responsible {@link TeamManagement}.
 	 */
 	private final TeamManagement delegateResponsibleTeam;
 
 	/**
-	 * Cache the delegate {@link ThreadState} safety to avoid traversing
-	 * delegate chain for the value.
+	 * Cache the delegate {@link ThreadState} safety to avoid traversing delegate
+	 * chain for the value.
 	 */
 	private final boolean delegateIsRequireThreadStateSafety;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param delegate
-	 *            Delegate {@link FunctionState}.
+	 * @param delegate Delegate {@link FunctionState}.
 	 */
 	public AbstractDelegateFunctionState(FunctionState delegate) {
 		this.delegate = delegate;
@@ -115,8 +115,8 @@ public class AbstractDelegateFunctionState extends AbstractLinkedListSetEntry<Fu
 	}
 
 	@Override
-	public FunctionState handleEscalation(Throwable escalation) {
-		return this.delegate.handleEscalation(escalation);
+	public FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
+		return this.delegate.handleEscalation(escalation, completion);
 	}
 
 }

@@ -305,7 +305,7 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 		}
 
 		@Override
-		public void assignJob(Job job) {
+		public void assignJob(Job job) throws Exception {
 
 			// Obtain the CPU affinity
 			ProcessIdentifier identifier = (ProcessIdentifier) job.getProcessIdentifier();

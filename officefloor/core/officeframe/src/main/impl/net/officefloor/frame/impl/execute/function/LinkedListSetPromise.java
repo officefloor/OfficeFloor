@@ -42,8 +42,7 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 		/**
 		 * Translates the entry to a {@link FunctionState}.
 		 * 
-		 * @param entry
-		 *            Entry of {@link LinkedListSet}.
+		 * @param entry Entry of {@link LinkedListSet}.
 		 * @return {@link FunctionState}.
 		 */
 		FunctionState translate(E entry);
@@ -53,14 +52,10 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 	 * Purges the {@link LinkedListSet} and executes a {@link FunctionState} for
 	 * each item.
 	 * 
-	 * @param <E>
-	 *            {@link LinkedListSetEntry} type.
-	 * @param <O>
-	 *            Owner type of {@link LinkedListSetEntry}.
-	 * @param linkedListSet
-	 *            {@link LinkedListSet}.
-	 * @param translate
-	 *            {@link Translate}.
+	 * @param               <E> {@link LinkedListSetEntry} type.
+	 * @param               <O> Owner type of {@link LinkedListSetEntry}.
+	 * @param linkedListSet {@link LinkedListSet}.
+	 * @param translate     {@link Translate}.
 	 * @return {@link FunctionState} to purse the {@link LinkedListSet}.
 	 */
 	public static <E extends LinkedListSetEntry<E, O>, O> FunctionState purge(LinkedListSet<E, O> linkedListSet,
@@ -72,7 +67,7 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 		}
 
 		// Create purge of items in linked list
-		return new LinkedListSetPromise<E, E>(linkedListSet.purgeEntries(), (entry) -> {
+		return promise(linkedListSet.purgeEntries(), (entry) -> {
 			return entry;
 		}, (entry) -> {
 			return entry.getNext();
@@ -84,14 +79,10 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 	 * {@link LinkedListSet}. This does not change the {@link LinkedListSet} (as
 	 * takes copy).
 	 *
-	 * @param <E>
-	 *            {@link LinkedListSetEntry} type.
-	 * @param <O>
-	 *            Owner type of {@link LinkedListSetEntry}.
-	 * @param linkedListSet
-	 *            {@link LinkedListSet}.
-	 * @param translate
-	 *            {@link Translate}.
+	 * @param               <E> {@link LinkedListSetEntry} type.
+	 * @param               <O> Owner type of {@link LinkedListSetEntry}.
+	 * @param linkedListSet {@link LinkedListSet}.
+	 * @param translate     {@link Translate}.
 	 * @return {@link FunctionState} to purse the {@link LinkedListSet}.
 	 */
 	public static <E extends LinkedListSetEntry<E, O>, O> FunctionState all(LinkedListSet<E, O> linkedListSet,
@@ -103,11 +94,46 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 		}
 
 		// Create copy of items in linked list
-		return new LinkedListSetPromise<LinkedListSetItem<E>, E>(linkedListSet.copyEntries(), (item) -> {
+		return promise(linkedListSet.copyEntries(), (item) -> {
 			return item.getEntry();
 		}, (entry) -> {
 			return entry.getNext();
 		}, translate);
+	}
+
+	/**
+	 * <p>
+	 * Creates the {@link FunctionState} for items from head.
+	 * <p>
+	 * Note: should no head {@link FunctionState} be found for an item in the list,
+	 * then may return <code>null</code>.
+	 * 
+	 * @param head      Head {@link LinkedListSetItem} of the listing.
+	 * @param getEntry  Obtains the entry from the item.
+	 * @param getNext   Obtains the next item from the {@link LinkedListSet}.
+	 * @param translate {@link Translate}.
+	 * @return {@link FunctionState} to undertake the list. May be <code>null</code>
+	 *         if nothing in the list.
+	 */
+	private static <I, E> FunctionState promise(I head, Function<I, E> getEntry, Function<I, I> getNext,
+			Translate<E> translate) {
+
+		// Obtain the head function
+		FunctionState headFunction = translate.translate(getEntry.apply(head));
+		while (headFunction == null) {
+
+			// Move to next item in the list
+			head = getNext.apply(head);
+			if (head == null) {
+				return null; // nothing in list to handle
+			}
+
+			// Attempt to obtain the head function
+			translate.translate(getEntry.apply(head));
+		}
+
+		// Return the promise start at head function
+		return new LinkedListSetPromise<>(head, headFunction, getEntry, getNext, translate);
 	}
 
 	/**
@@ -144,37 +170,30 @@ public class LinkedListSetPromise<I, E> extends AbstractDelegateFunctionState {
 	/**
 	 * Under takes all {@link FunctionState} instances within the list.
 	 * 
-	 * @param head
-	 *            Head {@link LinkedListSetItem} of the listing.
-	 * @param getEntry
-	 *            Obtains the entry from the item.
-	 * @param getNext
-	 *            Obtains the next item from the {@link LinkedListSet}.
-	 * @param translate
-	 *            {@link Translate}.
+	 * @param head         Head {@link LinkedListSetItem} of the listing.
+	 * @param headFunction {@link FunctionState} for head.
+	 * @param getEntry     Obtains the entry from the item.
+	 * @param getNext      Obtains the next item from the {@link LinkedListSet}.
+	 * @param translate    {@link Translate}.
 	 */
-	private LinkedListSetPromise(I head, Function<I, E> getEntry, Function<I, I> getNext, Translate<E> translate) {
-		this(null, head, translate.translate(getEntry.apply(head)), getEntry, getNext, translate);
+	private LinkedListSetPromise(I head, FunctionState headFunction, Function<I, E> getEntry, Function<I, I> getNext,
+			Translate<E> translate) {
+		this(null, head, headFunction, getEntry, getNext, translate);
 	}
 
 	/**
 	 * Used internally to enable continuing the execution of the list of
 	 * {@link Function} instances.
 	 * 
-	 * @param previousFunction
-	 *            Previous {@link FunctionState} chain to complete before executing
-	 *            the next {@link LinkedListSetItem} in the list.
-	 * @param head
-	 *            Head {@link LinkedListSetItem} of the listing of
-	 *            {@link FunctionState} instances to execute.
-	 * @param headFunction
-	 *            {@link FunctionState} for head.
-	 * @param getEntry
-	 *            Obtains the entry from the item.
-	 * @param getNext
-	 *            Obtains the next item from the {@link LinkedListSet}.
-	 * @param translate
-	 *            {@link Translate}.
+	 * @param previousFunction Previous {@link FunctionState} chain to complete
+	 *                         before executing the next {@link LinkedListSetItem}
+	 *                         in the list.
+	 * @param head             Head {@link LinkedListSetItem} of the listing of
+	 *                         {@link FunctionState} instances to execute.
+	 * @param headFunction     {@link FunctionState} for head.
+	 * @param getEntry         Obtains the entry from the item.
+	 * @param getNext          Obtains the next item from the {@link LinkedListSet}.
+	 * @param translate        {@link Translate}.
 	 */
 	private LinkedListSetPromise(FunctionState previousFunction, I head, FunctionState headFunction,
 			Function<I, E> getEntry, Function<I, I> getNext, Translate<E> translate) {

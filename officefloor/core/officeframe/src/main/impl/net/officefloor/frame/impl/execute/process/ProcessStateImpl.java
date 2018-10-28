@@ -234,7 +234,7 @@ public class ProcessStateImpl implements ProcessState {
 				process.activeThreads.addEntry(threadState);
 
 				// Create the function for spawned thread state
-				Flow flow = threadState.createFlow(null);
+				Flow flow = threadState.createFlow(null, null);
 				FunctionState function = flow.createManagedFunction(parameter, managedFunctionMetaData, true, null);
 
 				// Ensure register profiling

@@ -56,12 +56,10 @@ class MockJob implements Job {
 	/**
 	 * Assigns this {@link MockJob} to a {@link Team}.
 	 * 
-	 * @param team
-	 *            {@link Team} to assign this.
-	 * @param waitTime
-	 *            Wait time in seconds.
+	 * @param team     {@link Team} to assign this.
+	 * @param waitTime Wait time in seconds.
 	 */
-	public void assignJobToTeam(Team team, int waitTime) {
+	public void assignJobToTeam(Team team, int waitTime) throws Exception {
 
 		// Assign job to team
 		team.assignJob(this);
