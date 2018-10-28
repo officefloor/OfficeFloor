@@ -518,17 +518,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				}
 			}
 
-			// Complete functions
-			FunctionState completeFunctions = null;
-
-			// Ensure existing escalation is completed
-			if (this.threadEscalationCompletion != null) {
-				completeFunctions = Promise.then(completeFunctions,
-						this.threadEscalationCompletion.escalationComplete());
-			}
-
 			// Complete the thread
-			return Promise.then(completeFunctions, this.complete());
+			return this.complete();
 		}
 
 		// Thread complete
@@ -552,12 +543,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				// Clean up thread state
 				FunctionState cleanUpFunctions = null;
 
-				// Ensure escalation completion
-				if (threadState.threadEscalationCompletion != null) {
-					cleanUpFunctions = Promise.then(cleanUpFunctions,
-							threadState.threadEscalationCompletion.escalationComplete());
-				}
-
 				// Deactivate the governance
 				for (int i = 0; i < threadState.governanceContainers.length; i++) {
 					GovernanceContainer<?> container = threadState.governanceContainers[i];
@@ -572,6 +557,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 					if (container != null) {
 						cleanUpFunctions = Promise.then(cleanUpFunctions, container.unloadManagedObject());
 					}
+				}
+
+				// Ensure escalation completion
+				if (threadState.threadEscalationCompletion != null) {
+					cleanUpFunctions = Promise.then(cleanUpFunctions,
+							threadState.threadEscalationCompletion.escalationComplete());
 				}
 
 				// Must handle completion at end of chain
@@ -602,12 +593,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 						return threadState.processState.threadComplete(threadState, threadCompletion);
 					}
 				});
-
-				// Handle escalation completion
-				if (threadState.threadEscalationCompletion != null) {
-					cleanUpFunctions = Promise.then(cleanUpFunctions,
-							threadState.threadEscalationCompletion.escalationComplete());
-				}
 
 				// Return the clean up
 				return cleanUpFunctions;
