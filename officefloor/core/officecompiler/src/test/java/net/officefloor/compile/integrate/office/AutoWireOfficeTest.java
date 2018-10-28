@@ -277,6 +277,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -320,6 +321,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -367,6 +369,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -412,6 +415,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -554,6 +558,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject(MO_NAME, ClassManagedObjectSource.class, 0,
