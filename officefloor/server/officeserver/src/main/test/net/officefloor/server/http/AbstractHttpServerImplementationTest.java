@@ -28,6 +28,9 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -177,9 +180,21 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 */
 	private List<PipelineExecutor> executors = new LinkedList<>();
 
+	/**
+	 * Start timestamp.
+	 */
+	private LocalDateTime startTime;
+
+	/**
+	 * Formats the time.
+	 */
+	private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
 	@Override
 	protected void setUp() throws Exception {
-		System.out.println("START: " + this.getName());
+		this.startTime = LocalDateTime.now();
+		System.out.println();
+		System.out.println("START: " + this.getName() + " (" + this.timeFormatter.format(this.startTime) + ")");
 		super.setUp();
 
 		// Log GC
@@ -191,7 +206,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	@Override
 	protected void tearDown() throws Exception {
-		System.out.println("SHUTDOWN: " + this.getName());
+		LocalDateTime shutdownTime = LocalDateTime.now();
+		System.out.println("SHUTDOWN: " + this.getName() + " (" + this.timeFormatter.format(shutdownTime)
+				+ "), run time " + (this.startTime.until(shutdownTime, ChronoUnit.SECONDS) + " seconds"));
 
 		// Close the executors
 		for (PipelineExecutor executor : this.executors) {
@@ -219,7 +236,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		// Remaining tear down
 		super.tearDown();
-		System.out.println("END: " + this.getName());
+		LocalDateTime endTime = LocalDateTime.now();
+		System.out.println("END: " + this.getName() + " (" + this.timeFormatter.format(endTime) + "), shutdown time "
+				+ shutdownTime.until(endTime, ChronoUnit.SECONDS) + " seconds");
 	}
 
 	/**
