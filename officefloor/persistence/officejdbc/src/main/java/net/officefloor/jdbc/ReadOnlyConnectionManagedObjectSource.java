@@ -140,6 +140,8 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 			this.connection.close();
 		} catch (SQLException ex) {
 			LOGGER.log(Level.WARNING, "Failed to close read-only connection", ex);
+		} finally {
+			this.closeDataSource(this.dataSource, LOGGER);
 		}
 	}
 

@@ -152,7 +152,7 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 			MockSection.connection = connection;
 		}
 	}
-	
+
 	/**
 	 * Ensures able to configure {@link DataSourceFactory}.
 	 */
@@ -200,6 +200,21 @@ public class ConnectionManagedObjectSourceTest extends AbstractConnectionTestCas
 			dataSource.setURL("jdbc:h2:mem:test");
 			return dataSource;
 		}
+	}
+
+	/**
+	 * Ensure appropriate management of the {@link DataSource}.
+	 */
+	public void testDataSourceManagementWithCompiler() throws Throwable {
+		this.doDataSourceManagementTest(ConnectionManagedObjectSource.class, 0);
+	}
+
+	/**
+	 * Ensure appropriate management of the {@link DataSource}.
+	 */
+	public void testDataSourceManagementWithDynamicProxy() throws Throwable {
+		OfficeFloorJavaCompiler
+				.runWithoutCompiler(() -> this.doDataSourceManagementTest(ConnectionManagedObjectSource.class, 0));
 	}
 
 }

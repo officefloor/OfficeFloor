@@ -23,7 +23,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * Identifies the {@link Connection} as being wrapped.
+ * Means to obtain the {@link Connection} being wrapped.
  * 
  * @author Daniel Sagenschneider
  */
