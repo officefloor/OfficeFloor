@@ -46,4 +46,9 @@ public class PlaintextTest {
 		assertEquals("Incorrect content", "Hello, World!", entity);
 	}
 
+	@Test
+	public void stress() throws Exception {
+		BenchmarkEnvironment.doStressTest("http://localhost:8181/plaintext", 4, 10000, 25);
+	}
+
 }

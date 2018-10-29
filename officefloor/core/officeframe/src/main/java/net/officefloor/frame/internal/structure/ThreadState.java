@@ -57,11 +57,9 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * {@link FunctionState} before moving onto execute the chain of the second
 	 * {@link FunctionState}.
 	 * 
-	 * @param function
-	 *            Head of initial {@link FunctionState} chain to complete.
-	 * @param thenFunction
-	 *            Head of the second {@link FunctionState} chain to then complete
-	 *            next.
+	 * @param function     Head of initial {@link FunctionState} chain to complete.
+	 * @param thenFunction Head of the second {@link FunctionState} chain to then
+	 *                     complete next.
 	 * @return {@link FunctionState} to execute the chains one after another.
 	 */
 	FunctionState then(FunctionState function, FunctionState thenFunction);
@@ -94,49 +92,50 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	/**
 	 * Runs the {@link ProcessSafeOperation}.
 	 *
-	 * @param <R>
-	 *            Return type from {@link ProcessSafeOperation}.
-	 * @param <T>
-	 *            Possible {@link Escalation} from {@link ProcessSafeOperation}.
-	 * @param operation
-	 *            {@link ProcessSafeOperation}.
+	 * @param           <R> Return type from {@link ProcessSafeOperation}.
+	 * @param           <T> Possible {@link Escalation} from
+	 *                  {@link ProcessSafeOperation}.
+	 * @param operation {@link ProcessSafeOperation}.
 	 * @return Optional return value from {@link ProcessSafeOperation}.
-	 * @throws T
-	 *             Optional {@link Throwable} from {@link ProcessSafeOperation}.
+	 * @throws T Optional {@link Throwable} from {@link ProcessSafeOperation}.
 	 */
 	<R, T extends Throwable> R runProcessSafeOperation(ProcessSafeOperation<R, T> operation) throws T;
 
 	/**
 	 * Creates a {@link Flow} contained in this {@link ThreadState}.
 	 * 
-	 * @param completion
-	 *            Optional {@link FlowCompletion} to handle completion of the
-	 *            {@link Flow}. May be <code>null</code>.
+	 * @param flowCompletion       Optional {@link FlowCompletion} to handle
+	 *                             completion of the {@link Flow}. May be
+	 *                             <code>null</code>.
+	 * @param escalationCompletion Optional {@link EscalationCompletion} to handle
+	 *                             completion of {@link Flow} and notify
+	 *                             {@link Escalation} handling complete. May be
+	 *                             <code>null</code>.
 	 * @return New {@link Flow}.
 	 */
-	Flow createFlow(FlowCompletion completion);
+	Flow createFlow(FlowCompletion flowCompletion, EscalationCompletion escalationCompletion);
 
 	/**
 	 * Handles the {@link Escalation} from a {@link Flow} of this
 	 * {@link ThreadState}.
 	 * 
-	 * @param escalation
-	 *            {@link Escalation}.
+	 * @param escalation {@link Escalation}.
+	 * @param completion Optional {@link EscalationCompletion} to be notified of
+	 *                   completion of {@link Escalation} handling.
 	 * @return {@link FunctionState} to handle the {@link Escalation}.
 	 */
-	FunctionState handleEscalation(Throwable escalation);
+	FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion);
 
 	/**
 	 * Flags that the input {@link Flow} has completed.
 	 * 
-	 * @param flow
-	 *            {@link Flow} that has completed.
-	 * @param flowEscalation
-	 *            Possible {@link Escalation} from the {@link Flow}. May be
-	 *            <code>null</code>.
+	 * @param flow           {@link Flow} that has completed.
+	 * @param flowEscalation Possible {@link Escalation} from the {@link Flow}. May
+	 *                       be <code>null</code>.
+	 * @param completion     {@link EscalationCompletion}. May be <code>null</code>.
 	 * @return Optional {@link FunctionState} to complete the {@link Flow}.
 	 */
-	FunctionState flowComplete(Flow flow, Throwable flowEscalation);
+	FunctionState flowComplete(Flow flow, Throwable flowEscalation, EscalationCompletion completion);
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this
@@ -150,8 +149,7 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	/**
 	 * Obtains the {@link ManagedObjectContainer} for the input index.
 	 * 
-	 * @param index
-	 *            Index of the {@link ManagedObjectContainer} to be returned.
+	 * @param index Index of the {@link ManagedObjectContainer} to be returned.
 	 * @return {@link ManagedObjectContainer} for the index.
 	 */
 	ManagedObjectContainer getManagedObjectContainer(int index);
@@ -159,8 +157,7 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	/**
 	 * Obtains the {@link GovernanceContainer} for the input index.
 	 * 
-	 * @param index
-	 *            Index of the {@link GovernanceContainer} to be returned.
+	 * @param index Index of the {@link GovernanceContainer} to be returned.
 	 * @return {@link GovernanceContainer} for the index only if active. If not
 	 *         active will return <code>null</code>.
 	 */
@@ -173,8 +170,7 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	 * This provides a quick check and avoids creation of the
 	 * {@link GovernanceContainer}.
 	 * 
-	 * @param index
-	 *            Index of the {@link Governance} to check active.
+	 * @param index Index of the {@link Governance} to check active.
 	 * @return <code>true</code> if the {@link Governance} is active.
 	 */
 	boolean isGovernanceActive(int index);
@@ -190,9 +186,8 @@ public interface ThreadState extends LinkedListSetEntry<ThreadState, ProcessStat
 	/**
 	 * Profiles that {@link ManagedObjectContainer} is being executed.
 	 * 
-	 * @param functionMetaData
-	 *            {@link ManagedFunctionLogicMetaData} of the
-	 *            {@link ManagedFunctionContainer} being executed.
+	 * @param functionMetaData {@link ManagedFunctionLogicMetaData} of the
+	 *                         {@link ManagedFunctionContainer} being executed.
 	 */
 	void profile(ManagedFunctionLogicMetaData functionMetaData);
 

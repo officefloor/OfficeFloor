@@ -54,14 +54,19 @@ import junit.framework.TestCase;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.BackPressureTeamSource;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
@@ -225,6 +230,19 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception If fails to start the {@link HttpServer}.
 	 */
 	protected void startHttpServer(Class<?> sectionServicer) throws Exception {
+		startHttpServer(sectionServicer, null);
+	}
+
+	/**
+	 * Starts the {@link HttpServer}.
+	 * 
+	 * @param sectionServicer {@link Class} of the {@link ClassSectionSource} to
+	 *                        service the {@link HttpRequest}.
+	 * @param extension       Additional {@link CompileOfficeFloorExtension}. May be
+	 *                        <code>null</code>.
+	 * @throws Exception If fails to start the {@link HttpServer}.
+	 */
+	protected void startHttpServer(Class<?> sectionServicer, CompileOfficeFloorExtension extension) throws Exception {
 
 		// Compile the OfficeFloor
 		Closure<HttpServer> httpServer = new Closure<>();
@@ -249,6 +267,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 						ThreadedManagedObject.class.getName());
 			}
 		});
+		if (extension != null) {
+			compile.officeFloor(extension);
+		}
 		compile.office((context) -> {
 			context.getOfficeArchitect().enableAutoWireTeams();
 			context.addSection("SERVICER", sectionServicer);
@@ -721,6 +742,56 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 					response.getFirstHeader("Content-Length").getValue());
 			assertEquals("Incorrect error Content-Type", "text/plain",
 					response.getFirstHeader("Content-Type").getValue());
+		}
+	}
+
+	/**
+	 * Ensure can handle pressure overloading the server.
+	 * 
+	 * @throws Exception If test failure.
+	 */
+	public void testTeamPressureOverload() throws Exception {
+		this.startHttpServer(PressureOverloadServicer.class, (context) -> {
+
+			// Configure marker
+			context.addManagedObject("MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
+
+			// Configure teams
+			context.getOfficeFloorDeployer().enableAutoWireTeams();
+			context.getOfficeFloorDeployer().addTeam("TEAM", BackPressureTeamSource.class.getName())
+					.addTypeQualification(null, TeamMarker.class.getName());
+		});
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(false, "/test")));
+
+			// Ensure notify of overloaded server
+			String responseBody = EntityUtils.toString(response.getEntity());
+			assertEquals("Response status should indicate that server is overloaded:\n" + responseBody, 503,
+					response.getStatusLine().getStatusCode());
+			assertTrue("Should provide detail of failure:\n" + responseBody,
+					responseBody.contains(BackPressureTeamSource.BACK_PRESSURE_EXCEPTION.getMessage()));
+		}
+	}
+
+	/**
+	 * Marker {@link ManagedObject} for identifying {@link Team}.
+	 */
+	public static class TeamMarker {
+	}
+
+	/**
+	 * Servicer that is slow causing significant back pressure.
+	 */
+	public static class PressureOverloadServicer {
+
+		@NextFunction("backPressure")
+		public Thread service() {
+			return Thread.currentThread();
+		}
+
+		public void backPressure(@Parameter Thread serviceThread, ServerHttpConnection connection, TeamMarker marker)
+				throws Exception {
+			fail("Should not be invoked, as back pressure from Team");
 		}
 	}
 

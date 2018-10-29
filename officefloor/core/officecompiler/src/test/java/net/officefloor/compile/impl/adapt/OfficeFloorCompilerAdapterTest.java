@@ -527,6 +527,11 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		public void supply(SupplierSourceContext context) throws Exception {
 			fail("Should not be invoked in checking specification");
 		}
+
+		@Override
+		public void terminate() {
+			// nothing to terminate
+		}
 	}
 
 	/**

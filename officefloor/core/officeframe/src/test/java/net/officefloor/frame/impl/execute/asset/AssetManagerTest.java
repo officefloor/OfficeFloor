@@ -29,6 +29,7 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
@@ -331,7 +332,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation) {
+		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
 			this.exception = escalation;
 			return null;
 		}

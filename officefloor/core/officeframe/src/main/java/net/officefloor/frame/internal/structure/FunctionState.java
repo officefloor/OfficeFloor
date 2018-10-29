@@ -42,9 +42,9 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	 * By default, {@link FunctionState} may be executed by any
 	 * {@link TeamManagement}.
 	 * 
-	 * @return {@link TeamManagement} responsible for this
-	 *         {@link FunctionState}. May be <code>null</code> to indicate any
-	 *         {@link Team} may execute the {@link FunctionState}.
+	 * @return {@link TeamManagement} responsible for this {@link FunctionState}.
+	 *         May be <code>null</code> to indicate any {@link Team} may execute the
+	 *         {@link FunctionState}.
 	 */
 	default TeamManagement getResponsibleTeam() {
 		return null; // any team by default
@@ -62,8 +62,7 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	ThreadState getThreadState();
 
 	/**
-	 * Indicates if the {@link FunctionState} requires {@link ThreadState}
-	 * safety.
+	 * Indicates if the {@link FunctionState} requires {@link ThreadState} safety.
 	 * 
 	 * @return <code>true</code> should {@link FunctionState} require
 	 *         {@link ThreadState} safety.
@@ -75,14 +74,11 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	/**
 	 * Executes the {@link FunctionState}.
 	 * 
-	 * @param context
-	 *            {@link FunctionStateContext} for executing the
-	 *            {@link FunctionState}.
-	 * @return Next {@link FunctionState} to be executed. May be
-	 *         <code>null</code> to indicate no further {@link FunctionState}
-	 *         instances to execute.
-	 * @throws Throwable
-	 *             Possible failure of {@link FunctionState} logic.
+	 * @param context {@link FunctionStateContext} for executing the
+	 *                {@link FunctionState}.
+	 * @return Next {@link FunctionState} to be executed. May be <code>null</code>
+	 *         to indicate no further {@link FunctionState} instances to execute.
+	 * @throws Throwable Possible failure of {@link FunctionState} logic.
 	 */
 	FunctionState execute(FunctionStateContext context) throws Throwable;
 
@@ -90,8 +86,7 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	 * Cancels this {@link FunctionState} returning an optional
 	 * {@link FunctionState} to clean up this {@link FunctionState}.
 	 * 
-	 * @return Optional clean up {@link FunctionState}. May be
-	 *         <code>null</code>.
+	 * @return Optional clean up {@link FunctionState}. May be <code>null</code>.
 	 */
 	default FunctionState cancel() {
 		return null; // no clean up by default
@@ -100,12 +95,13 @@ public interface FunctionState extends LinkedListSetEntry<FunctionState, Flow> {
 	/**
 	 * Handles {@link Escalation} from the {@link ManagedFunction}.
 	 * 
-	 * @param escalation
-	 *            {@link Escalation}.
+	 * @param escalation {@link Escalation}.
+	 * @param completion Optional {@link EscalationCompletion} to be notified once
+	 *                   {@link Escalation} has been handled.
 	 * @return Optional {@link FunctionState} to handle the {@link Escalation}.
 	 */
-	default FunctionState handleEscalation(Throwable escalation) {
-		return this.getThreadState().handleEscalation(escalation);
+	default FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
+		return this.getThreadState().handleEscalation(escalation, completion);
 	}
 
 }

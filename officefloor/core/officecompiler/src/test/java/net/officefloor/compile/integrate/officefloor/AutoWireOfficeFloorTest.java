@@ -294,6 +294,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -326,6 +327,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -538,6 +540,11 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 					mos.addProperty(name, value);
 				}
 			}
+		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
 		}
 	}
 

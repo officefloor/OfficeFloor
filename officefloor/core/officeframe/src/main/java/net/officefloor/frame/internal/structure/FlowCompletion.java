@@ -27,15 +27,13 @@ import net.officefloor.frame.api.escalate.Escalation;
 public interface FlowCompletion extends LinkedListSetEntry<FlowCompletion, ManagedFunctionContainer> {
 
 	/**
-	 * Obtains the {@link FunctionState} to notify completion of the
-	 * {@link Flow}.
+	 * Obtains the {@link FunctionState} to notify completion of the {@link Flow}.
 	 * 
-	 * @param escalation
-	 *            Possible {@link Escalation} from the {@link Flow}. Will be
-	 *            <code>null</code> if {@link Flow} completed without
-	 *            {@link Escalation}.
+	 * @param escalation Possible {@link Escalation} from the {@link Flow}. Will be
+	 *                   <code>null</code> if {@link Flow} completed without
+	 *                   {@link Escalation}.
 	 * @return {@link FunctionState} to notify completion of the {@link Flow}.
 	 */
-	FunctionState complete(Throwable escalation);
+	FunctionState flowComplete(Throwable escalation);
 
 }

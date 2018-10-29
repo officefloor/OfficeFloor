@@ -129,4 +129,9 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 		mos.addProperty("PROPERTY", "VALUE");
 	}
 
+	@Override
+	public void terminate() {
+		// nothing to clean up
+	}
+
 }

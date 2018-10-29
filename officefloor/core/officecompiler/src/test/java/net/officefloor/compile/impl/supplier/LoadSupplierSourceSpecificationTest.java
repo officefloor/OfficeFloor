@@ -46,8 +46,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * {@link SupplierSourceSpecification}.
 	 */
-	private final SupplierSourceSpecification specification = this
-			.createMock(SupplierSourceSpecification.class);
+	private final SupplierSourceSpecification specification = this.createMock(SupplierSourceSpecification.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -59,13 +58,11 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testFailInstantiateForSupplierSourceSpecification() {
 
-		final RuntimeException failure = new RuntimeException(
-				"instantiate failure");
+		final RuntimeException failure = new RuntimeException("instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue("Failed to instantiate "
-				+ MockSupplierSource.class.getName()
-				+ " by default constructor", failure);
+		this.issues.recordIssue(
+				"Failed to instantiate " + MockSupplierSource.class.getName() + " by default constructor", failure);
 
 		// Attempt to obtain specification
 		MockSupplierSource.instantiateFailure = failure;
@@ -84,8 +81,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 
 		// Record failure to instantiate
 		this.issues.recordIssue(
-				"Failed to obtain SupplierSourceSpecification from "
-						+ MockSupplierSource.class.getName(), failure);
+				"Failed to obtain SupplierSourceSpecification from " + MockSupplierSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		MockSupplierSource.specificationFailure = failure;
@@ -100,8 +96,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNoSupplierSourceSpecification() {
 
 		// Record no specification returned
-		this.issues.recordIssue("No SupplierSourceSpecification returned from "
-				+ MockSupplierSource.class.getName());
+		this.issues.recordIssue("No SupplierSourceSpecification returned from " + MockSupplierSource.class.getName());
 
 		// Attempt to obtain specification
 		MockSupplierSource.specification = null;
@@ -116,16 +111,13 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testFailGetSupplierSourceProperties() {
 
-		final NullPointerException failure = new NullPointerException(
-				"Fail to get supplier source properties");
+		final RuntimeException failure = new RuntimeException("Fail to get supplier source properties");
 
 		// Record null properties
-		this.control(this.specification).expectAndThrow(
-				this.specification.getProperties(), failure);
+		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
 		this.issues
-				.recordIssue(
-						"Failed to obtain SupplierSourceProperty instances from SupplierSourceSpecification for "
-								+ MockSupplierSource.class.getName(), failure);
+				.recordIssue("Failed to obtain SupplierSourceProperty instances from SupplierSourceSpecification for "
+						+ MockSupplierSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -134,14 +126,12 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures considers null {@link SupplierSourceProperty} array as no
-	 * properties.
+	 * Ensures considers null {@link SupplierSourceProperty} array as no properties.
 	 */
 	public void testNullSupplierSourcePropertiesArray() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -155,12 +145,10 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	public void testNullSupplierSourcePropertyElement() {
 
 		// Record null properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new SupplierSourceProperty[] { null });
-		this.issues
-				.recordIssue("SupplierSourceProperty 0 is null from SupplierSourceSpecification for "
-						+ MockSupplierSource.class.getName());
+		this.issues.recordIssue("SupplierSourceProperty 0 is null from SupplierSourceSpecification for "
+				+ MockSupplierSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -173,17 +161,14 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testNullSupplierSourcePropertyName() {
 
-		final SupplierSourceProperty property = this
-				.createMock(SupplierSourceProperty.class);
+		final SupplierSourceProperty property = this.createMock(SupplierSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new SupplierSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.issues
-				.recordIssue("SupplierSourceProperty 0 provided blank name from SupplierSourceSpecification for "
-						+ MockSupplierSource.class.getName());
+		this.issues.recordIssue("SupplierSourceProperty 0 provided blank name from SupplierSourceSpecification for "
+				+ MockSupplierSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -196,20 +181,15 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testFailGetSupplierSourcePropertyName() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property name");
-		final SupplierSourceProperty property = this
-				.createMock(SupplierSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property name");
+		final SupplierSourceProperty property = this.createMock(SupplierSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new SupplierSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to get name for SupplierSourceProperty 0 from SupplierSourceSpecification for "
-								+ MockSupplierSource.class.getName(), failure);
+		this.issues.recordIssue("Failed to get name for SupplierSourceProperty 0 from SupplierSourceSpecification for "
+				+ MockSupplierSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -222,21 +202,18 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testFailGetSupplierSourcePropertyLabel() {
 
-		final RuntimeException failure = new RuntimeException(
-				"Failed to get property label");
-		final SupplierSourceProperty property = this
-				.createMock(SupplierSourceProperty.class);
+		final RuntimeException failure = new RuntimeException("Failed to get property label");
+		final SupplierSourceProperty property = this.createMock(SupplierSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
+		this.recordReturn(this.specification, this.specification.getProperties(),
 				new SupplierSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.issues
-				.recordIssue(
-						"Failed to get label for SupplierSourceProperty 0 (NAME) from SupplierSourceSpecification for "
-								+ MockSupplierSource.class.getName(), failure);
+		this.issues.recordIssue(
+				"Failed to get label for SupplierSourceProperty 0 (NAME) from SupplierSourceSpecification for "
+						+ MockSupplierSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -249,24 +226,16 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadSupplierSourceSpecification() {
 
-		final SupplierSourceProperty propertyWithLabel = this
-				.createMock(SupplierSourceProperty.class);
-		final SupplierSourceProperty propertyWithoutLabel = this
-				.createMock(SupplierSourceProperty.class);
+		final SupplierSourceProperty propertyWithLabel = this.createMock(SupplierSourceProperty.class);
+		final SupplierSourceProperty propertyWithoutLabel = this.createMock(SupplierSourceProperty.class);
 
 		// Record obtaining properties
-		this.recordReturn(this.specification,
-				this.specification.getProperties(),
-				new SupplierSourceProperty[] { propertyWithLabel,
-						propertyWithoutLabel });
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
-				"NAME");
-		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(),
-				"LABEL");
-		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(),
-				"NO LABEL");
-		this.recordReturn(propertyWithoutLabel,
-				propertyWithoutLabel.getLabel(), null);
+		this.recordReturn(this.specification, this.specification.getProperties(),
+				new SupplierSourceProperty[] { propertyWithLabel, propertyWithoutLabel });
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(), "NAME");
+		this.recordReturn(propertyWithLabel, propertyWithLabel.getLabel(), "LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getName(), "NO LABEL");
+		this.recordReturn(propertyWithoutLabel, propertyWithoutLabel.getLabel(), null);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -277,30 +246,24 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link SupplierSourceSpecification}.
 	 * 
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link SupplierSourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param isExpectToLoad Flag indicating if expect to obtain the
+	 *                       {@link SupplierSourceSpecification}.
+	 * @param propertyNames  Expected {@link Property} names for being returned.
 	 */
-	private void loadSpecification(boolean isExpectToLoad,
-			String... propertyNameLabelPairs) {
+	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
 		// Load the supplier specification specification
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		SupplierLoader supplierLoader = compiler.getSupplierLoader();
-		PropertyList propertyList = supplierLoader
-				.loadSpecification(MockSupplierSource.class);
+		PropertyList propertyList = supplierLoader.loadSpecification(MockSupplierSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {
 			assertNotNull("Expected to load specification", propertyList);
 
 			// Ensure the properties are as expected
-			PropertyListUtil.validatePropertyNameLabels(propertyList,
-					propertyNameLabelPairs);
+			PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabelPairs);
 
 		} else {
 			assertNull("Should not load specification", propertyList);
@@ -331,8 +294,7 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param specification
-		 *            {@link SupplierSourceSpecification}.
+		 * @param specification {@link SupplierSourceSpecification}.
 		 */
 		public static void reset(SupplierSourceSpecification specification) {
 			instantiateFailure = null;
@@ -368,6 +330,11 @@ public class LoadSupplierSourceSpecificationTest extends OfficeFrameTestCase {
 		@Override
 		public void supply(SupplierSourceContext context) {
 			fail("Should not be invoked for obtaining specification");
+		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
 		}
 	}
 

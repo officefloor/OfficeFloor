@@ -36,8 +36,8 @@ public interface SupplierSource {
 	 * {@link SupplierSource}.
 	 * <p>
 	 * This enables the {@link SupplierSourceContext} to be populated with the
-	 * necessary details as per this {@link SupplierSourceSpecification} in
-	 * loading the {@link SupplierType}.
+	 * necessary details as per this {@link SupplierSourceSpecification} in loading
+	 * the {@link SupplierType}.
 	 * 
 	 * @return {@link SupplierSourceSpecification}.
 	 */
@@ -46,12 +46,18 @@ public interface SupplierSource {
 	/**
 	 * Supplies the necessary {@link ManagedObjectSource} instances.
 	 * 
-	 * @param context
-	 *            {@link SupplierSourceContext}.
-	 * @throws Exception
-	 *             If fails to provide supply of {@link ManagedObjectSource}
-	 *             instances.
+	 * @param context {@link SupplierSourceContext}.
+	 * @throws Exception If fails to provide supply of {@link ManagedObjectSource}
+	 *                   instances.
 	 */
 	void supply(SupplierSourceContext context) throws Exception;
+
+	/**
+	 * <p>
+	 * Terminates the supply contract.
+	 * <p>
+	 * This should release all resources required by the supplier.
+	 */
+	void terminate();
 
 }

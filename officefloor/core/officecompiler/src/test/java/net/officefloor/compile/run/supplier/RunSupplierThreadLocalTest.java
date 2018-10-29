@@ -54,11 +54,17 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 		CompileSection.threadLocalObject = null;
 		CompileSection.dependencyObject = null;
 		CompileSection.dependency = null;
+		MockSupplierSource.isTerminated = false;
 		function.invokeProcess(null, null);
 		assertNull("Should not have thread local (as managed object not loaded)", CompileSection.threadLocalObject);
 		assertNotNull("Should have dependency object", CompileSection.dependency);
 		assertSame("Should obtain via thread local (as managed object loaded)", CompileSection.dependency,
 				CompileSection.dependencyObject);
+
+		// Close the OfficeFloor and ensure supplier closed
+		assertFalse("Should keep supplier until OfficeFloor closed", MockSupplierSource.isTerminated);
+		officeFloor.closeOfficeFloor();
+		assertTrue("Supplier should be terminated with close of OfficeFloor", MockSupplierSource.isTerminated);
 	}
 
 	public static class CompileSection {
@@ -90,6 +96,8 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 	@TestSource
 	public static class MockSupplierSource extends AbstractSupplierSource {
 
+		private static boolean isTerminated;
+
 		private static boolean isInstantiated;
 
 		public MockSupplierSource() {
@@ -111,6 +119,11 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 			// Add the managed object source
 			context.addManagedObjectSource(null, MockManagedObjectSource.class,
 					new MockManagedObjectSource(threadLocal));
+		}
+
+		@Override
+		public void terminate() {
+			isTerminated = true;
 		}
 	}
 

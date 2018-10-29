@@ -372,6 +372,11 @@ public class RegisterNodesAsMBeansTest extends OfficeFrameTestCase {
 		public void supply(SupplierSourceContext context) throws Exception {
 			context.addManagedObjectSource(null, Object.class, this.managedObjectSource);
 		}
+
+		@Override
+		public void terminate() {
+			// nothing to terminate
+		}
 	}
 
 	/**

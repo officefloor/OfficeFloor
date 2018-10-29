@@ -35,6 +35,7 @@ import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
@@ -154,6 +155,14 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected void addValidator(OfficeFloorValidator validator) {
 		this.validators.add(validator);
+	}
+
+	/**
+	 * Records initialising the {@link SupplierSource} for terminating.
+	 */
+	protected void record_supplierSetup() {
+		this.officeFloorBuilder.addOfficeFloorListener(null);
+		// matcher configured in record_init
 	}
 
 	/**

@@ -82,13 +82,10 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 	/**
 	 * Initiate.
 	 * 
-	 * @param metaData
-	 *            {@link GovernanceMetaData}.
-	 * @param threadState
-	 *            {@link ThreadState}.
-	 * @param governanceIndex
-	 *            Index of the {@link Governance} within the
-	 *            {@link ThreadState}.
+	 * @param metaData        {@link GovernanceMetaData}.
+	 * @param threadState     {@link ThreadState}.
+	 * @param governanceIndex Index of the {@link Governance} within the
+	 *                        {@link ThreadState}.
 	 */
 	public GovernanceContainerImpl(GovernanceMetaData<E, F> metaData, ThreadState threadState, int governanceIndex) {
 		this.metaData = metaData;
@@ -99,13 +96,11 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 	/**
 	 * Undertakes the {@link GovernanceActivity}.
 	 * 
-	 * @param isWaitManagedObjectsReady
-	 *            <code>true</code> to wait on the {@link ManagedObject}
-	 *            instances under {@link Governance} to be ready.
-	 * @param activity
-	 *            {@link GovernanceActivity}.
-	 * @return {@link FunctionState} to undertake the
-	 *         {@link GovernanceActivity}.
+	 * @param isWaitManagedObjectsReady <code>true</code> to wait on the
+	 *                                  {@link ManagedObject} instances under
+	 *                                  {@link Governance} to be ready.
+	 * @param activity                  {@link GovernanceActivity}.
+	 * @return {@link FunctionState} to undertake the {@link GovernanceActivity}.
 	 */
 	private FunctionState doGovernanceActivity(boolean isWaitManagedObjectsReady, GovernanceActivity<F> activity) {
 		return new GovernanceOperation() {
@@ -128,7 +123,7 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 
 				// Create the governance activity in its own flow
 				if (this.governanceFunction == null) {
-					Flow flow = container.threadState.createFlow(null);
+					Flow flow = container.threadState.createFlow(null, null);
 					this.governanceFunction = flow.createGovernanceFunction(activity, container.metaData);
 				}
 
@@ -192,16 +187,13 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 		/**
 		 * Instantiate.
 		 * 
-		 * @param registeredGovernance
-		 *            {@link RegisteredGovernanceImpl}.
-		 * @param managedObjectContainer
-		 *            {@link ManagedObjectContainer} for the
-		 *            {@link ManagedObject}.
-		 * @param managedObjectMetaData
-		 *            {@link ManagedFunctionMetaData} for the
-		 *            {@link ManagedObjectContainer}.
-		 * @param managedFunction
-		 *            {@link ManagedFunctionContainer} to access dependencies.
+		 * @param registeredGovernance   {@link RegisteredGovernanceImpl}.
+		 * @param managedObjectContainer {@link ManagedObjectContainer} for the
+		 *                               {@link ManagedObject}.
+		 * @param managedObjectMetaData  {@link ManagedFunctionMetaData} for the
+		 *                               {@link ManagedObjectContainer}.
+		 * @param managedFunction        {@link ManagedFunctionContainer} to access
+		 *                               dependencies.
 		 */
 		public RegisteredGovernanceEntry(E managedObjectExtension, ManagedObjectContainer managedObjectContainer,
 				ManagedObjectMetaData<?> managedObjectMetaData, ManagedFunctionContainer managedFunction) {
@@ -254,19 +246,15 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 		/**
 		 * Instantiate.
 		 * 
-		 * @param entry
-		 *            {@link RegisteredGovernanceEntry}.
-		 * @param managedObjectExtension
-		 *            Extension to the {@link ManagedObject} to enable
-		 *            {@link Governance}.
-		 * @param managedObjectContainer
-		 *            {@link ManagedObjectContainer} for the
-		 *            {@link ManagedObject}.
-		 * @param managedObjectMetaData
-		 *            {@link ManagedFunctionMetaData} for the
-		 *            {@link ManagedObjectContainer}.
-		 * @param managedFunction
-		 *            {@link ManagedFunctionContainer} to access dependencies.
+		 * @param entry                  {@link RegisteredGovernanceEntry}.
+		 * @param managedObjectExtension Extension to the {@link ManagedObject} to
+		 *                               enable {@link Governance}.
+		 * @param managedObjectContainer {@link ManagedObjectContainer} for the
+		 *                               {@link ManagedObject}.
+		 * @param managedObjectMetaData  {@link ManagedFunctionMetaData} for the
+		 *                               {@link ManagedObjectContainer}.
+		 * @param managedFunction        {@link ManagedFunctionContainer} to access
+		 *                               dependencies.
 		 */
 		public RegisteredGovernanceImpl(RegisteredGovernanceEntry entry, E managedObjectExtension,
 				ManagedObjectContainer managedObjectContainer, ManagedObjectMetaData<?> managedObjectMetaData,

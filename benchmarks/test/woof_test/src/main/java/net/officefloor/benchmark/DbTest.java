@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.http.HttpResponse;
@@ -48,13 +49,18 @@ public class DbTest {
 	@Before
 	public void setupDatabase() throws Exception {
 		try (Connection connection = dataSource.getConnection()) {
-			connection.createStatement().executeUpdate("CREATE TABLE World ( id INT PRIMARY KEY, randomNumber INT)");
-			PreparedStatement insert = connection
-					.prepareStatement("INSERT INTO World (id, randomNumber) VALUES (?, ?)");
-			for (int i = 0; i < 10000; i++) {
-				insert.setInt(1, i + 1);
-				insert.setInt(2, ThreadLocalRandom.current().nextInt(1, 10000));
-				insert.executeUpdate();
+			try {
+				connection.createStatement().executeQuery("SELECT * FROM World");
+			} catch (SQLException ex) {
+				connection.createStatement()
+						.executeUpdate("CREATE TABLE World ( id INT PRIMARY KEY, randomNumber INT)");
+				PreparedStatement insert = connection
+						.prepareStatement("INSERT INTO World (id, randomNumber) VALUES (?, ?)");
+				for (int i = 0; i < 10000; i++) {
+					insert.setInt(1, i + 1);
+					insert.setInt(2, ThreadLocalRandom.current().nextInt(1, 10000));
+					insert.executeUpdate();
+				}
 			}
 		}
 	}
@@ -75,6 +81,11 @@ public class DbTest {
 		assertTrue("Invalid id: " + world.id, (world.id >= 1) && (world.id <= 10000));
 		assertTrue("Invalid randomNumber: " + world.randomNumber,
 				(world.randomNumber >= 1) && (world.randomNumber <= 10000));
+	}
+
+	@Test
+	public void stress() throws Exception {
+		BenchmarkEnvironment.doStressTest("http://localhost:8181/db", 4, 100, 25);
 	}
 
 	@Data
