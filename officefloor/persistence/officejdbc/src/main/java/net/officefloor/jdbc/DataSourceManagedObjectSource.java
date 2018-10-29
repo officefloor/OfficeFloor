@@ -36,7 +36,7 @@ public class DataSourceManagedObjectSource extends AbstractConnectionManagedObje
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(ConnectionManagedObjectSource.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(DataSourceManagedObjectSource.class.getName());
 
 	/**
 	 * {@link DataSource}.
