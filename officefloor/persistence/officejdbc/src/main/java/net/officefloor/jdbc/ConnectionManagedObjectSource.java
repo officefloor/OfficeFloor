@@ -159,6 +159,13 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	}
 
 	@Override
+	public void stop() {
+
+		// Close the DataSource
+		this.closeDataSource(this.dataSource, LOGGER);
+	}
+
+	@Override
 	protected ManagedObject getManagedObject() {
 		return new ConnectionManagedObject();
 	}
