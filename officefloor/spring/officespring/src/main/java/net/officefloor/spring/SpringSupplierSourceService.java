@@ -15,21 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorial.springhttpserver;
+package net.officefloor.spring;
 
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.compile.SupplierSourceService;
 
 /**
- * {@link OfficeFloor} {@link ManagedObject} wired into Spring.
+ * Spring {@link SupplierSourceService}.
  * 
  * @author Daniel Sagenschneider
  */
-public class World implements Other {
+public class SpringSupplierSourceService implements SupplierSourceService<SpringSupplierSource> {
+
+	/**
+	 * Alias name for the {@link SpringSupplierSource}.
+	 */
+	public static final String ALIAS = "SPRING";
+
+	/*
+	 * =================== SupplierSourceService ========================
+	 */
 
 	@Override
-	public String getName() {
-		return "OfficeFloor";
+	public String getSupplierSourceAlias() {
+		return ALIAS;
+	}
+
+	@Override
+	public Class<SpringSupplierSource> getSupplierSourceClass() {
+		return SpringSupplierSource.class;
 	}
 
 }

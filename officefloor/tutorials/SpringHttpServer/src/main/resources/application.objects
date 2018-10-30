@@ -1,7 +1,9 @@
 <objects>
+	
+	<supplier source="SPRING">
+		<property name="configuration.class" value="net.officefloor.tutorial.springhttpserver.SpringBootConfiguration" />
+	</supplier>
 
 	<managed-object class="net.officefloor.tutorial.springhttpserver.World" />
-	
-	
 
 </objects>
