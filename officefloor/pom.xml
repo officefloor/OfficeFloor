@@ -492,6 +492,20 @@
 				<artifactId>docker-client</artifactId>
 				<version>8.14.3</version>
 			</dependency>
+			<!-- TODO: remove once docker not having issue with org.glassfish.hk2.api.MultiException -->
+			<dependency>
+				<groupId>org.glassfish.jersey.inject</groupId>
+				<artifactId>jersey-hk2</artifactId>
+				<version>2.26</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.bundles.repackaged</groupId>
+				<artifactId>jersey-guava</artifactId>
+				<version>2.25.1</version>
+				<scope>provided</scope>
+			</dependency>
+			<!-- END TODO -->
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
 				<artifactId>activemq-core</artifactId>
