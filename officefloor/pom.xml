@@ -80,11 +80,11 @@
 		<failsafe-version>2.22.1</failsafe-version>
 		<compiler-version>3.8.0</compiler-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
-		<netty-version>4.1.30.Final</netty-version>
+		<netty-version>4.1.31.Final</netty-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<jackson-version>2.9.7</jackson-version>
 		<jaxb-version>2.3.0</jaxb-version>
-		<asm-version>6.2.1</asm-version>
+		<asm-version>7.0</asm-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
 	</properties>
