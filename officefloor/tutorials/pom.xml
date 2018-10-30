@@ -30,6 +30,7 @@
 		<module>SecurePageHttpServer</module>
 		<module>SecureLinkHttpServer</module>
 		<module>SessionHttpServer</module>
+		<module>SpringHttpServer</module>
 		<module>TeamHttpServer</module>
 		<module>ThreadAffinityHttpServer</module>
 		<module>TestHttpServer</module>
