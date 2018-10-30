@@ -72,7 +72,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<projectVersion>${project.version}</projectVersion>
 		<tycho-version>1.2.0</tycho-version>
-		<maven-version>3.5.4</maven-version>
+		<maven-version>3.6.0</maven-version>
 		<maven-plugin-version>3.5.2</maven-plugin-version>
 		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
