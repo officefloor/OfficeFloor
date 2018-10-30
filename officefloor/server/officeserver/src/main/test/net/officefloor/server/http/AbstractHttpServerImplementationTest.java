@@ -1265,6 +1265,11 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		private Object runResult = null;
 
 		/**
+		 * Flags to stop the pipeline (as typically timed out running).
+		 */
+		private volatile boolean isStop = false;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param port Port for the {@link HttpServer}.
@@ -1329,6 +1334,11 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			// Start pipeline run
 			long noDataStart = -1;
 			while (responseReceivedCount < requestCount) {
+				
+				// Determine if stop
+				if (this.isStop) {
+					fail("Pipeline stopped");
+				}
 
 				// Stop interest in writing if all requests sent
 				if ((requestSentCount >= requestCount)
@@ -1494,6 +1504,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			// Wait for completion of pipeline run
 			this.wait(MAX_PIPELINE_RUN_TIME);
 			if (this.runResult == null) {
+				this.isStop = true; // ensure stop pipeline (avoids it continuing to run)
 				fail("Timed out waiting on pipeline completion (" + MAX_PIPELINE_RUN_TIME + " milliseconds)");
 			}
 
