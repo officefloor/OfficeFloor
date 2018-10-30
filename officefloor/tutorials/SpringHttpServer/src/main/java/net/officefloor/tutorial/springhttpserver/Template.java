@@ -15,32 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.spring;
-
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+package net.officefloor.tutorial.springhttpserver;
 
 /**
- * Mock Spring Boot configuration.
+ * Template logic.
  * 
  * @author Daniel Sagenschneider
  */
-@SpringBootApplication
-public class MockSpringBootConfiguration {
+// START SNIPPET: tutorial
+public class Template {
 
-	@Bean
-	public QualifiedBean qualifiedOne() {
-		return new QualifiedBean("One");
+	public HelloBean getTemplate(HelloBean bean) {
+		return bean;
 	}
-
-	@Bean("qualifiedTwo")
-	public QualifiedBean createTwo() {
-		return new QualifiedBean("Two");
-	}
-
-	@Bean
-	public OfficeFloorManagedObject officeFloorManagedObject() {
-		return SpringSupplierSource.getManagedObject(null, OfficeFloorManagedObject.class);
-	}
-
 }
+// END SNIPPET: tutorial

@@ -17,30 +17,32 @@
  */
 package net.officefloor.spring;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import net.officefloor.compile.SupplierSourceService;
 
 /**
- * Mock Spring Boot configuration.
+ * Spring {@link SupplierSourceService}.
  * 
  * @author Daniel Sagenschneider
  */
-@SpringBootApplication
-public class MockSpringBootConfiguration {
+public class SpringSupplierSourceService implements SupplierSourceService<SpringSupplierSource> {
 
-	@Bean
-	public QualifiedBean qualifiedOne() {
-		return new QualifiedBean("One");
+	/**
+	 * Alias name for the {@link SpringSupplierSource}.
+	 */
+	public static final String ALIAS = "SPRING";
+
+	/*
+	 * =================== SupplierSourceService ========================
+	 */
+
+	@Override
+	public String getSupplierSourceAlias() {
+		return ALIAS;
 	}
 
-	@Bean("qualifiedTwo")
-	public QualifiedBean createTwo() {
-		return new QualifiedBean("Two");
-	}
-
-	@Bean
-	public OfficeFloorManagedObject officeFloorManagedObject() {
-		return SpringSupplierSource.getManagedObject(null, OfficeFloorManagedObject.class);
+	@Override
+	public Class<SpringSupplierSource> getSupplierSourceClass() {
+		return SpringSupplierSource.class;
 	}
 
 }

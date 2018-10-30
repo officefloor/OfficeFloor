@@ -32,6 +32,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import net.officefloor.compile.impl.structure.SuppliedManagedObjectSourceNodeImpl;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
@@ -241,6 +242,22 @@ public class SpringBootTest extends OfficeFrameTestCase {
 	 * Ensure can integrate in Spring beans to {@link OfficeFloor}.
 	 */
 	public void testIntegrateSimpleSpringBean() throws Throwable {
+		this.doIntegrateSimpleSpringBeanTest(SpringSupplierSource.class.getName());
+	}
+
+	/**
+	 * Ensure {@link SpringSupplierSourceService} registered providing alias.
+	 */
+	public void testSpringSupplierSourceAlias() throws Throwable {
+		this.doIntegrateSimpleSpringBeanTest(SpringSupplierSourceService.ALIAS);
+	}
+
+	/**
+	 * Undertakes test to integrate simple Spring bean.
+	 * 
+	 * @param supplierSourceName Name of the {@link SupplierSource}.
+	 */
+	private void doIntegrateSimpleSpringBeanTest(String supplierSourceName) throws Throwable {
 
 		// Configure OfficeFloor to auto-wire in Spring beans
 		CompileOfficeFloor compile = new CompileOfficeFloor();
@@ -248,8 +265,8 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			OfficeArchitect office = context.getOfficeArchitect();
 
 			// Add Spring supplier
-			office.addSupplier("SPRING", SpringSupplierSource.class.getName()).addProperty(
-					SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
+			office.addSupplier("SPRING", supplierSourceName).addProperty(SpringSupplierSource.CONFIGURATION_CLASS_NAME,
+					MockSpringBootConfiguration.class.getName());
 
 			// Add the section
 			context.addSection("SECTION", IntegrateSimpleSpringBean.class);

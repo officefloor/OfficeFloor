@@ -44,6 +44,18 @@
 			<artifactId>docker-client</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!-- TODO: remove once docker not having issue with org.glassfish.hk2.api.MultiException -->
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.bundles.repackaged</groupId>
+			<artifactId>jersey-guava</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- END TODO -->
 	</dependencies>
 	<build>
 		<plugins>
