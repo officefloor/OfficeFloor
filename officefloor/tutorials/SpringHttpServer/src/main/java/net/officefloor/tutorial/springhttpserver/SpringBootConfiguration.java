@@ -27,12 +27,13 @@ import net.officefloor.spring.SpringSupplierSource;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @SpringBootApplication
 public class SpringBootConfiguration {
 
 	@Bean
 	public Other other() {
-		return SpringSupplierSource.getBean(null, Other.class);
+		return SpringSupplierSource.getManagedObject(null, Other.class);
 	}
-
 }
+// END SNIPPET: tutorial

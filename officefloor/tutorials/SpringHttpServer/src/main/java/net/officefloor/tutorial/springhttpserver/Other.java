@@ -24,8 +24,9 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public interface Other {
 
 	String getName();
-
 }
+// END SNIPPET: tutorial

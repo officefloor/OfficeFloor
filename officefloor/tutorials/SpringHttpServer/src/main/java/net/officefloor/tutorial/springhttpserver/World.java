@@ -25,11 +25,12 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class World implements Other {
 
 	@Override
 	public String getName() {
 		return "OfficeFloor";
 	}
-
 }
+// END SNIPPET: tutorial

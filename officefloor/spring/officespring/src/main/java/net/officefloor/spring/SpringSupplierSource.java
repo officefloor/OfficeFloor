@@ -58,7 +58,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * 
 	 * 	&#64;Bean
 	 * 	public DependencyType officeFloorDependency() {
-	 * 		return SpringSupplierSource.getBean("qualifier", DependencyType.class);
+	 * 		return SpringSupplierSource.getManagedObject("qualifier", DependencyType.class);
 	 * 	}
 	 * }
 	 * </pre>
@@ -68,7 +68,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * @return Bean sourced from an {@link OfficeFloor} {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <B> B getBean(String qualifier, Class<? extends B> beanType) {
+	public static <B> B getManagedObject(String qualifier, Class<? extends B> beanType) {
 
 		// Obtain the dependency factory
 		SpringDependencyFactory factory = springDependencyFactory.get();

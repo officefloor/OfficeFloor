@@ -18,6 +18,7 @@
 package net.officefloor.tutorial.springhttpserver;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,6 +42,7 @@ public class SpringHttpServerTest {
 		OfficeFloorMain.main(args);
 	}
 
+	// START SNIPPET: tutorial
 	@Rule
 	public MockWoofServerRule server = new MockWoofServerRule();
 
@@ -52,7 +54,8 @@ public class SpringHttpServerTest {
 
 		// Ensure request is successful
 		assertEquals("Request should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Incorrect response", "Hello OfficeFloor, from Spring", response.getEntity(null));
+		assertTrue("Incorrect response", response.getEntity(null).contains("Hello OfficeFloor, from Spring"));
 	}
+	// END SNIPPET: tutorial
 
 }

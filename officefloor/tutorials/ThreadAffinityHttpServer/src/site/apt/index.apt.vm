@@ -69,5 +69,5 @@ ExecutiveSource
 
 Next
 
-  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.
+  The {{{../SpringHttpServer/index.html}next tutorial}} covers integrating Spring beans into OfficeFloor.
 

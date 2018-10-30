@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Component
 public class HelloBean {
 
@@ -34,5 +35,5 @@ public class HelloBean {
 	public String getIntroduction() {
 		return "Hello " + this.other.getName() + ", from Spring";
 	}
-
 }
+// END SNIPPET: tutorial
