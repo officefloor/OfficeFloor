@@ -34,7 +34,7 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class BackPressureTeamTest extends AbstractOfficeConstructTestCase {
+public class BackPressureTeamManagedFunctionTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure back pressure notified to caller.
