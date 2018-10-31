@@ -430,7 +430,7 @@ public abstract class OfficeFloorJavaCompiler {
 	/**
 	 * Adds a wrapper {@link JavaSource}.
 	 * 
-	 * @param wrappedType            Wrapping types.
+	 * @param wrappingTypes          Wrapping types.
 	 * @param delegateType           Delegate type.
 	 * @param delegateExtraction     Means to extract the wrapped implementation
 	 *                               from the delegate. May be <code>null</code> to

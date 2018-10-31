@@ -40,6 +40,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
@@ -48,6 +49,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
@@ -85,75 +87,121 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 		// Avoid compiling as leaves files open (avoids running out of file handles)
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> {
-
-			// Run OfficeFloor with pool to obtain connection
-			CompileOfficeFloor compiler = new CompileOfficeFloor();
-			compiler.office((context) -> {
-				context.addSection("SECTION", SetupSection.class);
-
-				// Connection
-				OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
-						connectionMosClass.getName());
-				propertyLoader.accept(mos);
-				mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
-
-				// Obtain the connection via pool return
-				OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
-						new AbstractManagedObjectPoolSource() {
-
-							@Override
-							protected void loadSpecification(SpecificationContext context) {
-								// no specification
-							}
-
-							@Override
-							protected void loadMetaData(MetaDataContext context) throws Exception {
-								context.setPooledObjectType(Connection.class);
-								context.setManagedObjectPoolFactory((poolContext) -> new ManagedObjectPool() {
-
-									@Override
-									public void sourceManagedObject(ManagedObjectUser user) {
-										poolContext.getManagedObjectSource().sourceManagedObject(user);
-									}
-
-									@Override
-									public void returnManagedObject(ManagedObject managedObject) {
-										// Allow connection to live beyond close of OfficeFloor
-									}
-
-									@Override
-									public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
-										try {
-											SetupSection.connection.close();
-										} catch (SQLException ex) {
-											// Ignore close failure
-										} finally {
-											// No connection
-											SetupSection.connection = null;
-										}
-									}
-
-									@Override
-									public void empty() {
-										// nothing to clean up
-									}
-								});
-							}
-						});
-				context.getOfficeArchitect().link(mos, pool);
-			});
-			OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
-			try {
-				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.script", null);
-			} catch (Throwable ex) {
-				throw fail(ex);
-			} finally {
-				officeFloor.closeOfficeFloor();
-			}
+			loadConnection(connectionMosClass, propertyLoader);
 		});
 
 		// Obtain connection
 		return SetupSection.connection;
+	}
+
+	/**
+	 * Loads the {@link Connection}.
+	 * 
+	 * @param connectionMosClass {@link ConnectionManagedObjectSource} {@link Class}
+	 *                           used to obtain the {@link Connection}.
+	 * @param propertyLoader     Loads the properties.
+	 * @return {@link Connection}.
+	 * @throws Exception If fails to create {@link Connection}.
+	 */
+	private static void loadConnection(Class<? extends ConnectionManagedObjectSource> connectionMosClass,
+			Consumer<PropertyConfigurable> propertyLoader) throws Exception {
+
+		// Run OfficeFloor with pool to obtain connection
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			context.addSection("SECTION", SetupSection.class);
+
+			// Connection
+			OfficeManagedObjectSource mos = context.getOfficeArchitect().addOfficeManagedObjectSource("mo",
+					connectionMosClass.getName());
+			propertyLoader.accept(mos);
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Obtain the connection via pool return
+			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
+					new GetConnectionManagedObjectPoolSource());
+			context.getOfficeArchitect().link(mos, pool);
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+		try {
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.script", null);
+		} catch (Throwable ex) {
+			throw fail(ex);
+		} finally {
+			officeFloor.closeOfficeFloor();
+		}
+	}
+
+	/**
+	 * {@link ManagedObjectPoolSource} to obtain a {@link Connection}.
+	 */
+	private static class GetConnectionManagedObjectPoolSource extends AbstractManagedObjectPoolSource {
+
+		/*
+		 * ==================== ManagedObjectPoolSource =====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// no specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext context) throws Exception {
+			context.setPooledObjectType(Connection.class);
+			context.setManagedObjectPoolFactory((poolContext) -> new GetConnectionManagedObjectPool(poolContext));
+		}
+	}
+
+	/**
+	 * {@link ManagedObjectPool} to obtain a {@link Connection}.
+	 */
+	private static class GetConnectionManagedObjectPool implements ManagedObjectPool {
+
+		/**
+		 * {@link ManagedObjectPoolContext}.
+		 */
+		private final ManagedObjectPoolContext context;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param context {@link ManagedObjectPoolContext}.
+		 */
+		private GetConnectionManagedObjectPool(ManagedObjectPoolContext context) {
+			this.context = context;
+		}
+
+		/*
+		 * ===================== ManagedObjectPool ==========================
+		 */
+
+		@Override
+		public void sourceManagedObject(ManagedObjectUser user) {
+			this.context.getManagedObjectSource().sourceManagedObject(user);
+		}
+
+		@Override
+		public void returnManagedObject(ManagedObject managedObject) {
+			// Allow connection to live beyond close of OfficeFloor
+		}
+
+		@Override
+		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
+			try {
+				SetupSection.connection.close();
+			} catch (SQLException ex) {
+				// Ignore close failure
+			} finally {
+				// No connection
+				SetupSection.connection = null;
+			}
+		}
+
+		@Override
+		public void empty() {
+			// nothing to clean up
+		}
 	}
 
 	public static class SetupSection {
@@ -163,6 +211,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		public void script(Connection connection) throws SQLException {
 			SetupSection.connection = ConnectionWrapper.getRealConnection(connection);
 		}
+
 	}
 
 	/**
@@ -895,14 +944,14 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	public static class NewThread {
 	}
 
+	@FlowInterface
+	public static interface Flows {
+		void thread(AtomicInteger id);
+	}
+
 	public static class InsertConnectionSection {
 
 		private static volatile boolean isTransaction = false;
-
-		@FlowInterface
-		public static interface Flows {
-			void thread(AtomicInteger id);
-		}
 
 		public void run(@Parameter AtomicInteger id, Connection connection, Flows flows) throws SQLException {
 			if (isTransaction) {
@@ -928,8 +977,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	public static class InsertDataSourceSection {
 
-		public void run(@Parameter AtomicInteger id, DataSource dataSource, InsertConnectionSection.Flows flows)
-				throws SQLException {
+		public void run(@Parameter AtomicInteger id, DataSource dataSource, Flows flows) throws SQLException {
 			try (Connection connection = dataSource.getConnection()) {
 				InsertConnectionSection.insertRow(connection, id, "run");
 			}
