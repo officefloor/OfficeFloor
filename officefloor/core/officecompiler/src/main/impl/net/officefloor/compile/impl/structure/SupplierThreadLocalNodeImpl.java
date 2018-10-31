@@ -27,7 +27,6 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OptionalThreadLocalReceiver;
 import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.internal.structure.SupplierThreadLocalNode;
-import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 
 /**
  * {@link SupplierThreadLocalNode} implementation.
@@ -100,7 +99,6 @@ public class SupplierThreadLocalNodeImpl implements SupplierThreadLocalNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param name         Name of the {@link SupplierThreadLocal}.
 	 * @param qualifier    Qualifier. May be <code>null</code>.
 	 * @param type         Type.
 	 * @param supplierNode {@link SupplierNode}.
