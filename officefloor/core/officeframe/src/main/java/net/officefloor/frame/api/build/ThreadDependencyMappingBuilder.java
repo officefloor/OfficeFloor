@@ -35,6 +35,7 @@ public interface ThreadDependencyMappingBuilder extends DependencyMappingBuilder
 	/**
 	 * Obtains the {@link OptionalThreadLocal} for the {@link ManagedObject}.
 	 * 
+	 * @param <T> Type of object.
 	 * @return {@link OptionalThreadLocal} for the {@link ManagedObject}.
 	 */
 	<T> OptionalThreadLocal<T> getOptionalThreadLocal();
