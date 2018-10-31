@@ -28,9 +28,9 @@ import net.officefloor.frame.api.manage.Office;
 public interface OfficeSupplierThreadLocal extends OfficeDependencyRequireNode {
 
 	/**
-	 * Obtains the name of this {@link OfficeThreadLocal}.
+	 * Obtains the name of this {@link OfficeSupplierThreadLocal}.
 	 * 
-	 * @return Name of this {@link OfficeThreadLocal}.
+	 * @return Name of this {@link OfficeSupplierThreadLocal}.
 	 */
 	String getOfficeSupplierThreadLocalName();
 

@@ -35,6 +35,55 @@ import net.openhft.affinity.CpuLayout;
 public class CpuCore {
 
 	/**
+	 * Configured {@link CpuLayout}.
+	 */
+	private static ThreadLocal<CpuLayout> cpuLayout = new ThreadLocal<>();
+
+	/**
+	 * <p>
+	 * Runs with custom {@link CpuLayout}.
+	 * <p>
+	 * This for example, allows restricting access to particular CPU cores or
+	 * logical CPUs.
+	 * 
+	 * @param layout          {@link CpuLayout}.
+	 * @param customExecution {@link CustomExecution}.
+	 * @return Possible return value.
+	 * @throws T Failure on running.
+	 */
+	public static <R, T extends Throwable> R runWithCpuLayout(CpuLayout layout, CustomExecution<R, T> customExecution)
+			throws T {
+		CpuLayout existing = cpuLayout.get();
+		try {
+
+			// Use the custom layout
+			cpuLayout.set(layout);
+
+			// Undertake custom execution
+			return customExecution.run();
+
+		} finally {
+			// Reset CPU layout
+			cpuLayout.set(existing);
+		}
+	}
+
+	/**
+	 * {@link FunctionalInterface} for custom {@link CpuLayout} execution.
+	 */
+	@FunctionalInterface
+	public static interface CustomExecution<R, T extends Throwable> {
+
+		/**
+		 * Runs the custom {@link CpuLayout} execution.
+		 *
+		 * @return Possible return value.
+		 * @throws T Failure on running.
+		 */
+		R run() throws T;
+	}
+
+	/**
 	 * Obtains the {@link CpuCore} instances.
 	 * 
 	 * @return {@link CpuCore} instances.
@@ -45,10 +94,16 @@ public class CpuCore {
 		BitSet affinity = Affinity.getAffinity();
 		int affinityBitSize = affinity.size();
 
+		// Ensure have CPU layout
+		CpuLayout layout = cpuLayout.get();
+		if (layout == null) {
+			layout = AffinityLock.cpuLayout();
+		}
+
 		// Create the listing of cores against logical CPUs
-		CpuLayout layout = AffinityLock.cpuLayout();
 		Map<Integer, List<Integer>> allocation = new HashMap<>();
-		for (int cpuId = 0; cpuId < layout.cpus(); cpuId++) {
+		int cpuCount = layout.cpus();
+		for (int cpuId = 0; cpuId < cpuCount; cpuId++) {
 			int core = layout.coreId(cpuId);
 			List<Integer> coreCpus = allocation.get(core);
 			if (coreCpus == null) {
@@ -59,13 +114,13 @@ public class CpuCore {
 		}
 
 		// Create the Core listing
-		CpuCore[] cores = new CpuCore[allocation.size()];
-		for (int coreId = 0; coreId < cores.length; coreId++) {
+		List<CpuCore> cores = new ArrayList<>(allocation.size());
+		allocation.keySet().stream().sorted().forEachOrdered((coreId) -> {
 
 			// Obtain the logical CPUs
 			List<Integer> coreCpuIds = allocation.get(coreId);
-			if (coreCpuIds == null) {
-				throw new IllegalStateException("No logical CPUs for core " + coreId);
+			if ((coreCpuIds == null) || (coreCpuIds.size() == 0)) {
+				return; // no logical CPUs available on core (possibly restricted)
 			}
 			LogicalCpu[] cpus = coreCpuIds.stream().map((cpuId) -> new LogicalCpu(cpuId, affinityBitSize))
 					.toArray(LogicalCpu[]::new);
@@ -77,11 +132,11 @@ public class CpuCore {
 			}
 
 			// Load the core information
-			cores[coreId] = new CpuCore(coreId, coreAffinity, cpus);
-		}
+			cores.add(new CpuCore(coreId, coreAffinity, cpus));
+		});
 
 		// Return the cores
-		return cores;
+		return cores.toArray(new CpuCore[cores.size()]);
 	}
 
 	/**
