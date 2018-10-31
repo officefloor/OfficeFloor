@@ -19,8 +19,6 @@ package net.officefloor.spring.data;
 
 import java.util.List;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -61,13 +59,10 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 		// Indicate the registered beans
 		System.out.println("Beans:");
-		ConfigurableListableBeanFactory beanFactory = this.context.getBeanFactory();
 		for (String name : this.context.getBeanDefinitionNames()) {
-			BeanDefinition definition = beanFactory.getMergedBeanDefinition(name);
-			if ("rowRepository".equals(name)) {
-				System.out.println(name);
-			}
-			System.out.println("  " + name + " (" + definition.getBeanClassName() + ")");
+			Object bean = this.context.getBean(name);
+			System.out.println(
+					"  " + name + "\t\t(" + bean.getClass().getName() + ") - " + (bean instanceof RowRepository));
 		}
 
 		// Ensure can obtain repository
@@ -113,14 +108,6 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	 * Ensure can use {@link RowRepository}.
 	 */
 	public void testInjectRepository() throws Throwable {
-		
-		// TODO continue work
-		if (true) return;
-
-		// Create row
-		Row row = new Row(null, "TEST");
-		this.context.getBean(RowRepository.class).save(row);
-		this.context.close();
 
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.office((context) -> {
@@ -129,7 +116,11 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		});
 		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 
-			// Ensure can
+			// Create row
+			Row row = new Row(null, "TEST");
+			this.context.getBean(RowRepository.class).save(row);
+
+			// Trigger function to use repository within OfficeFloor
 			Request request = new Request(row.getId());
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", request);
 

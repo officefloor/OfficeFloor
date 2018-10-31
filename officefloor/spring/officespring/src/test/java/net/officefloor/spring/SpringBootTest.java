@@ -24,9 +24,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -130,35 +127,14 @@ public class SpringBootTest extends OfficeFrameTestCase {
 
 		// Load all the beans as managed object sources
 		Map<String, List<String>> beanNamesByType = new HashMap<>();
-		ConfigurableListableBeanFactory beanFactory = this.context.getBeanFactory();
-		NEXT_BEAN: for (String name : this.context.getBeanDefinitionNames()) {
-			BeanDefinition definition = beanFactory.getBeanDefinition(name);
-			String beanClassName = definition.getBeanClassName();
-
-			// Determine if factory method
-			if (beanClassName == null) {
-				if (definition instanceof AnnotatedBeanDefinition) {
-					AnnotatedBeanDefinition annotatedDefinition = (AnnotatedBeanDefinition) definition;
-					if (annotatedDefinition.getFactoryMethodMetadata() != null) {
-						beanClassName = annotatedDefinition.getFactoryMethodMetadata().getReturnTypeName();
-					}
-				}
+		for (String name : this.context.getBeanDefinitionNames()) {
+			String beanClassName = this.context.getBean(name).getClass().getName();
+			List<String> beanNames = beanNamesByType.get(beanClassName);
+			if (beanNames == null) {
+				beanNames = new LinkedList<>();
+				beanNamesByType.put(beanClassName, beanNames);
 			}
-
-			// Ignore OfficeFloor supplied beans
-			if (OfficeFloorManagedObject.class.getName().equals(beanClassName)) {
-				continue NEXT_BEAN;
-			}
-
-			// Add only if have bean class name
-			if (beanClassName != null) {
-				List<String> beanNames = beanNamesByType.get(beanClassName);
-				if (beanNames == null) {
-					beanNames = new LinkedList<>();
-					beanNamesByType.put(beanClassName, beanNames);
-				}
-				beanNames.add(name);
-			}
+			beanNames.add(name);
 		}
 
 		// Obtain the class loader

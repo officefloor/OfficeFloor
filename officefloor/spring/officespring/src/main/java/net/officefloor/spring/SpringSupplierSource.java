@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -243,28 +240,10 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 		// Load listing of all the beans (mapped by their type)
 		Map<Class<?>, List<String>> beanNamesByType = new HashMap<>();
-		ConfigurableListableBeanFactory beanFactory = this.springContext.getBeanFactory();
 		NEXT_BEAN: for (String name : this.springContext.getBeanDefinitionNames()) {
-			BeanDefinition definition = beanFactory.getBeanDefinition(name);
-			String beanClassName = definition.getBeanClassName();
-
-			// Determine if factory method
-			if (beanClassName == null) {
-				if (definition instanceof AnnotatedBeanDefinition) {
-					AnnotatedBeanDefinition annotatedDefinition = (AnnotatedBeanDefinition) definition;
-					if (annotatedDefinition.getFactoryMethodMetadata() != null) {
-						beanClassName = annotatedDefinition.getFactoryMethodMetadata().getReturnTypeName();
-					}
-				}
-			}
-
-			// Ensure have bean type
-			if (beanClassName == null) {
-				continue NEXT_BEAN;
-			}
 
 			// Load the bean type
-			Class<?> beanType = context.loadClass(beanClassName);
+			Class<?> beanType = this.springContext.getBean(name).getClass();
 
 			// Filter out Spring beans being loaded from OfficeFloor
 			for (SpringDependency dependency : springDependencies) {
