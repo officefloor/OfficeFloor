@@ -28,7 +28,7 @@ import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
  * @author Daniel Sagenschneider
  */
 public class WebThreadAffinityExecutiveSource extends AbstractExecutiveSource {
-
+	
 	/*
 	 * ==================== ExecutiveSource ==========================
 	 */

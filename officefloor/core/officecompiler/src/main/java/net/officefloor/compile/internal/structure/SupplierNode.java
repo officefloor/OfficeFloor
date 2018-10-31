@@ -90,7 +90,6 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	/**
 	 * Sources the {@link SupplierThreadLocal} instances.
 	 * 
-	 * @param autoWirer      {@link AutoWirer}.
 	 * @param compileContext {@link CompileContext}.
 	 * @return <code>true</code> if successfully sourced the {@link SupplierSource}.
 	 *         <code>false</code> if failed to source, with issues reported to the
