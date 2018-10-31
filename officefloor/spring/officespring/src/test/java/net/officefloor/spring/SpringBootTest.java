@@ -321,8 +321,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			OfficeArchitect office = context.getOfficeArchitect();
 
 			// Add Spring supplier
-			office.addSupplier("SPRING", SpringSupplierSource.class.getName()).addProperty(
-					SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
+			SpringSupplierSource.configureSpring(office, MockSpringBootConfiguration.class);
 
 			// Add the section
 			context.addSection("SECTION", IntegrateQualifiedSpringBean.class);
