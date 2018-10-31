@@ -31,10 +31,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import net.officefloor.compile.impl.structure.SupplierThreadLocalNodeImpl;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.plugin.section.clazz.Property;
@@ -149,6 +152,29 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			// Ensure clear factory (no longer loading)
 			springDependencyFactory.set(null);
 		}
+	}
+
+	/**
+	 * Convenience method for configuring Spring programmatically into an
+	 * {@link Office}.
+	 * 
+	 * @param architect                        {@link OfficeArchitect}.
+	 * @param configurationClass               Spring Boot configuration
+	 *                                         {@link Class}.
+	 * @param additionalPropertyNameValuePairs Additional {@link Property}
+	 *                                         name/value pairs.
+	 * @return {@link OfficeSupplier} for the {@link SpringSupplierSource}.
+	 */
+	public static OfficeSupplier configureSpring(OfficeArchitect architect, Class<?> configurationClass,
+			String... additionalPropertyNameValuePairs) {
+		OfficeSupplier supplier = architect.addSupplier("Spring", SpringSupplierSource.class.getName());
+		supplier.addProperty(SpringSupplierSource.CONFIGURATION_CLASS_NAME, configurationClass.getName());
+		for (int i = 0; i < additionalPropertyNameValuePairs.length; i += 2) {
+			String name = additionalPropertyNameValuePairs[i];
+			String value = additionalPropertyNameValuePairs[i + 1];
+			supplier.addProperty(name, value);
+		}
+		return supplier;
 	}
 
 	/**
