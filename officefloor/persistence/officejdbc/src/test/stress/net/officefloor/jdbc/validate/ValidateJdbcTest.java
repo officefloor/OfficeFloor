@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officfloor.jdbc.validate;
+package net.officefloor.jdbc.validate;
 
 import java.sql.Connection;
 import java.sql.SQLException;
