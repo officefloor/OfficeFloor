@@ -1288,9 +1288,13 @@
 				<artifactId>maven-changes-plugin</artifactId>
 				<version>${maven-changes-version}</version>
 				<inherited>false</inherited>
-				<configuration>
-					<runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
-				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>changes-report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 			<plugin>
 				<!-- Report on broken links in site. -->
