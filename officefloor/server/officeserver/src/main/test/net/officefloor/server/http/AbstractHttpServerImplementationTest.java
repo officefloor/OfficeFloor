@@ -91,7 +91,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * Time out on waiting for data (no data in this time considers the test
 	 * stalled).
 	 */
-	private static final long WAIT_FOR_DATA_TIMEOUT = 20 * 1000;
+	private static final long WAIT_FOR_DATA_TIMEOUT = 1 * 60 * 1000;
 
 	/**
 	 * Time out on for pipeline run to complete.
@@ -1334,7 +1334,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			// Start pipeline run
 			long noDataStart = -1;
 			while (responseReceivedCount < requestCount) {
-				
+
 				// Determine if stop
 				if (this.isStop) {
 					fail("Pipeline stopped");
@@ -1407,7 +1407,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 									// Capture start time of no data
 									noDataStart = System.currentTimeMillis();
 								} else if ((System.currentTimeMillis() - noDataStart) > (WAIT_FOR_DATA_TIMEOUT)) {
-									fail("Timed out waiting on data");
+									fail("Timed out (" + WAIT_FOR_DATA_TIMEOUT + " milliseconds) waiting on data");
 								}
 							}
 
