@@ -539,7 +539,7 @@
 			<dependency>
 				<groupId>org.datanucleus</groupId>
 				<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
-				<version>5.1.10</version>
+				<version>5.1.11</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
