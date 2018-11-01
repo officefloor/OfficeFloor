@@ -62,8 +62,9 @@ public interface ThreadStateContext {
 	 * Obtains the {@link ManagedObjectContainer} for the
 	 * {@link ManagedObjectIndex}.
 	 * 
-	 * @param index
-	 * @return
+	 * @param index {@link ManagedObjectIndex}.
+	 * @return {@link ManagedObjectContainer}. May be <code>null</code> if not yet
+	 *         instantiated.
 	 */
 	ManagedObjectContainer getManagedObject(ManagedObjectIndex index);
 

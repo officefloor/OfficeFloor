@@ -42,6 +42,9 @@ public interface SupplierTypeBuilder {
 	/**
 	 * Adds a {@link SuppliedManagedObjectSourceType}.
 	 * 
+	 * @param                     <O> Dependency keys type.
+	 * @param                     <F> Flow keys type.
+	 * @param                     <MS> {@link ManagedObjectSource} type.
 	 * @param qualifier           Qualifier. May be <code>null</code>.
 	 * @param objectType          Object type for the
 	 *                            {@link SuppliedManagedObjectSourceType}.

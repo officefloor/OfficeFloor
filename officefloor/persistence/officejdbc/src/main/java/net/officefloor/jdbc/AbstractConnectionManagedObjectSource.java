@@ -24,6 +24,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
@@ -96,8 +98,15 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 		if (compiler == null) {
 
 			// Fall back to proxy implementation
-			return (DataSource) Proxy.newProxyInstance(context.getClassLoader(), new Class[] { DataSource.class },
-					(object, method, args) -> {
+			return (DataSource) Proxy.newProxyInstance(context.getClassLoader(),
+					new Class[] { DataSource.class, DataSourceWrapper.class }, (object, method, args) -> {
+
+						// Determine if real DataSource method
+						if (DataSourceWrapper.isGetRealDataSourceMethod(method)) {
+							return dataSource;
+						}
+
+						// Undertake DataSource methods
 						Method dataSourceMethod = dataSource.getClass().getMethod(method.getName(),
 								method.getParameterTypes());
 						Object result = dataSourceMethod.invoke(dataSource, args);
@@ -117,14 +126,22 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 		} else {
 			// Provide compiled wrapper implementation
-			JavaSource javaSource = compiler.addWrapper(new Class[] { DataSource.class }, DataSource.class,
-					"this.delegate", (constructorContext) -> {
+			JavaSource javaSource = compiler.addWrapper(new Class[] { DataSource.class, DataSourceWrapper.class },
+					DataSource.class, "this.delegate", (constructorContext) -> {
 						compiler.writeConstructor(constructorContext.getSource(),
 								constructorContext.getClassName().getClassName(),
 								compiler.createField(DataSource.class, "delegate"),
 								compiler.createField(ConnectionDecorator[].class, "decorators"));
 					}, (methodContext) -> {
 						Method method = methodContext.getMethod();
+
+						// Obtain the real DataSource
+						if (DataSourceWrapper.isGetRealDataSourceMethod(method)) {
+							// Obtain the real DataSource
+							methodContext.write("    return this.delegate;");
+						}
+
+						// Obtain the connection
 						if ("getConnection".equals(method.getName())) {
 
 							// Obtain the connection
@@ -413,6 +430,28 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 			if (sql != null) {
 				connection.createStatement().execute(sql);
 			}
+		}
+	}
+
+	/**
+	 * Closes the {@link DataSource}.
+	 * 
+	 * @param dataSource {@link DataSource} to be closed.
+	 * @param logger     {@link Logger}.
+	 */
+	protected void closeDataSource(DataSource dataSource, Logger logger) {
+		try {
+
+			// Obtain the real DataSource
+			DataSource realDataSource = DataSourceWrapper.getRealDataSource(dataSource);
+
+			// Close DataSource if closeable
+			if (realDataSource instanceof AutoCloseable) {
+				((AutoCloseable) realDataSource).close();
+			}
+
+		} catch (Exception ex) {
+			logger.log(Level.WARNING, "Failed to close " + DataSource.class.getSimpleName(), ex);
 		}
 	}
 

@@ -5,6 +5,7 @@
 			<item name="Overview" href="./index.html" />
 			<item name="Goals" href="./plugin-info.html" />
 		</menu>
+		<menu ref="reports" />
 		<menu ref="parent" />
 	</body>
 </project>

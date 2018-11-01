@@ -40,7 +40,7 @@ public class MockSpringBootConfiguration {
 
 	@Bean
 	public OfficeFloorManagedObject officeFloorManagedObject() {
-		return SpringSupplierSource.getBean(null, OfficeFloorManagedObject.class);
+		return SpringSupplierSource.getManagedObject(null, OfficeFloorManagedObject.class);
 	}
 
 }

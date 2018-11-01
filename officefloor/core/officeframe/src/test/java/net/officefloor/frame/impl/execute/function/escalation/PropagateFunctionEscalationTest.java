@@ -37,7 +37,7 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class PropagateHandleEscalationTest extends AbstractOfficeConstructTestCase {
+public class PropagateFunctionEscalationTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Failure to propagate.
@@ -163,7 +163,7 @@ public class PropagateHandleEscalationTest extends AbstractOfficeConstructTestCa
 		}
 
 		public void failure() throws Throwable {
-			throw PropagateHandleEscalationTest.this.propagateFailure;
+			throw PropagateFunctionEscalationTest.this.propagateFailure;
 		}
 	}
 

@@ -28,6 +28,9 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,14 +88,15 @@ import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFrameTestCase {
 
 	/**
-	 * Time out on waiting for data.
+	 * Time out on waiting for data (no data in this time considers the test
+	 * stalled).
 	 */
 	private static final long WAIT_FOR_DATA_TIMEOUT = 20 * 1000;
 
 	/**
-	 * Time out on waiting for shutdown.
+	 * Time out on for pipeline run to complete.
 	 */
-	private static final long WAIT_FOR_SHUTDOWN_TIMEOUT = 120 * 1000;
+	private static final long MAX_PIPELINE_RUN_TIME = 5 * 60 * 1000;
 
 	/**
 	 * {@link HttpServerLocation}.
@@ -177,9 +181,21 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 */
 	private List<PipelineExecutor> executors = new LinkedList<>();
 
+	/**
+	 * Start timestamp.
+	 */
+	private LocalDateTime startTime;
+
+	/**
+	 * Formats the time.
+	 */
+	private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
 	@Override
 	protected void setUp() throws Exception {
-		System.out.println("START: " + this.getName());
+		this.startTime = LocalDateTime.now();
+		System.out.println();
+		System.out.println("START: " + this.getName() + " (" + this.timeFormatter.format(this.startTime) + ")");
 		super.setUp();
 
 		// Log GC
@@ -191,7 +207,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 	@Override
 	protected void tearDown() throws Exception {
-		System.out.println("SHUTDOWN: " + this.getName());
+		LocalDateTime shutdownTime = LocalDateTime.now();
+		System.out.println("SHUTDOWN: " + this.getName() + " (" + this.timeFormatter.format(shutdownTime)
+				+ "), run time " + (this.startTime.until(shutdownTime, ChronoUnit.SECONDS) + " seconds"));
 
 		// Close the executors
 		for (PipelineExecutor executor : this.executors) {
@@ -219,7 +237,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		// Remaining tear down
 		super.tearDown();
-		System.out.println("END: " + this.getName());
+		LocalDateTime endTime = LocalDateTime.now();
+		System.out.println("END: " + this.getName() + " (" + this.timeFormatter.format(endTime) + "), shutdown time "
+				+ shutdownTime.until(endTime, ChronoUnit.SECONDS) + " seconds");
 	}
 
 	/**
@@ -1135,7 +1155,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		// Wait for completion of run
 		PipelineResult[] results = new PipelineResult[clientCount];
 		for (int i = 0; i < clientCount; i++) {
-			results[i] = executors[i].waitForCompletion();
+			results[i] = executors[i].waitForPipelineRunComplete();
 		}
 
 		// Provide summary of results
@@ -1245,6 +1265,11 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		private Object runResult = null;
 
 		/**
+		 * Flags to stop the pipeline (as typically timed out running).
+		 */
+		private volatile boolean isStop = false;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param port Port for the {@link HttpServer}.
@@ -1309,6 +1334,11 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			// Start pipeline run
 			long noDataStart = -1;
 			while (responseReceivedCount < requestCount) {
+				
+				// Determine if stop
+				if (this.isStop) {
+					fail("Pipeline stopped");
+				}
 
 				// Stop interest in writing if all requests sent
 				if ((requestSentCount >= requestCount)
@@ -1447,11 +1477,12 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 						synchronized (PipelineExecutor.this) {
 							PipelineExecutor.this.runResult = ex;
 						}
-					}
 
-					// Notify complete
-					synchronized (PipelineExecutor.this) {
-						PipelineExecutor.this.notify();
+					} finally {
+						// Notify complete
+						synchronized (PipelineExecutor.this) {
+							PipelineExecutor.this.notify();
+						}
 					}
 				}
 			};
@@ -1463,17 +1494,18 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		 * @return {@link PipelineResult}.
 		 * @throws Exception If run failed.
 		 */
-		private synchronized PipelineResult waitForCompletion() throws Exception {
+		private synchronized PipelineResult waitForPipelineRunComplete() throws Exception {
 
 			// Determine if already complete
 			if (this.runResult != null) {
 				return this.returnResult();
 			}
 
-			// Wait for completion
-			this.wait(WAIT_FOR_SHUTDOWN_TIMEOUT);
+			// Wait for completion of pipeline run
+			this.wait(MAX_PIPELINE_RUN_TIME);
 			if (this.runResult == null) {
-				fail("Timed out waiting on pipeline completion");
+				this.isStop = true; // ensure stop pipeline (avoids it continuing to run)
+				fail("Timed out waiting on pipeline completion (" + MAX_PIPELINE_RUN_TIME + " milliseconds)");
 			}
 
 			// Return the result

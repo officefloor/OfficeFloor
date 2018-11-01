@@ -190,8 +190,12 @@ public class OfficeFloorImpl implements OfficeFloor {
 		mos.start(executeContext);
 	}
 
+	/*
+	 * =================== AutoCloseable ===================
+	 */
+
 	@Override
-	public void closeOfficeFloor() throws Exception {
+	public void close() throws Exception {
 
 		// Ensure open to be closed
 		if (this.offices == null) {

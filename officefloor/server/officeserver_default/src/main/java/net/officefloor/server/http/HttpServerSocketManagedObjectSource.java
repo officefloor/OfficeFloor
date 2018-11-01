@@ -168,12 +168,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	public static final String PROPERTY_SERVICE_MAX_CORE_POOL_SIZE = "service.buffer.max.core.pool.size";
 
 	/**
-	 * Name of {@link Property} to specify the threshold of active requests to start
-	 * throttling new requests.
-	 */
-	public static final String PROPERTY_THROTTLE_ACTIVE_REQUEST_THRESHOLD = "throttle.active.request.threshold";
-
-	/**
 	 * Name of the {@link Flow} to handle the request.
 	 */
 	public static final String HANDLE_REQUEST_FLOW_NAME = "HANDLE_REQUEST";
@@ -569,11 +563,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	private int serviceBufferMaxCorePoolSize;
 
 	/**
-	 * Throttle active request threshold.
-	 */
-	private int throttleActiveRequestThreshold;
-
-	/**
 	 * Indicates if secure HTTP connection.
 	 */
 	private boolean isSecure;
@@ -712,8 +701,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_MAX_THREAD_POOL_SIZE, String.valueOf(10000)));
 		this.serviceBufferMaxCorePoolSize = Integer
 				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_MAX_CORE_POOL_SIZE, String.valueOf(10000000)));
-		this.throttleActiveRequestThreshold = Integer
-				.parseInt(mosContext.getProperty(PROPERTY_THROTTLE_ACTIVE_REQUEST_THRESHOLD, String.valueOf(100)));
 
 		// Create the request parser meta-data
 		this.httpRequestParserMetaData = new HttpRequestParserMetaData(maxHeaderCount, maxTextLength, maxEntityLength);
@@ -760,9 +747,8 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				() -> ByteBuffer.allocateDirect(this.serviceBufferSize), this.serviceBufferMaxThreadPoolSize,
 				this.serviceBufferMaxCorePoolSize);
 		ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(context,
-				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool,
-				this.throttleActiveRequestThreshold, this.serverName, this.dateHttpHeaderClock,
-				this.isIncludeEscalationStackTrace);
+				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool, this.serverName,
+				this.dateHttpHeaderClock, this.isIncludeEscalationStackTrace);
 
 		// Create the SSL servicer factory
 		SocketServicerFactory socketServicerFactory = servicerFactory;
@@ -845,27 +831,25 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		/**
 		 * Instantiate.
 		 * 
-		 * @param context                        {@link ManagedObjectExecuteContext}.
-		 * @param serverLocation                 {@link HttpServerLocation}.
-		 * @param isSecure                       Indicates if a secure
-		 *                                       {@link ServerHttpConnection}.
-		 * @param metaData                       {@link HttpRequestParserMetaData}.
-		 * @param serviceBufferPool              Service {@link StreamBufferPool}.
-		 * @param throttleActiveRequestThreshold Throttle active request threshold.
-		 * @param serverName                     <code>Server</code>
-		 *                                       {@link HttpHeaderValue}.
-		 * @param dateHttpHeaderClock            {@link DateHttpHeaderClock}.
-		 * @param isIncludeEscalationStackTrace  Indicates whether to include the
-		 *                                       {@link Escalation} stack trace in the
-		 *                                       {@link HttpResponse}.
+		 * @param context                       {@link ManagedObjectExecuteContext}.
+		 * @param serverLocation                {@link HttpServerLocation}.
+		 * @param isSecure                      Indicates if a secure
+		 *                                      {@link ServerHttpConnection}.
+		 * @param metaData                      {@link HttpRequestParserMetaData}.
+		 * @param serviceBufferPool             Service {@link StreamBufferPool}.
+		 * @param serverName                    <code>Server</code>
+		 *                                      {@link HttpHeaderValue}.
+		 * @param dateHttpHeaderClock           {@link DateHttpHeaderClock}.
+		 * @param isIncludeEscalationStackTrace Indicates whether to include the
+		 *                                      {@link Escalation} stack trace in the
+		 *                                      {@link HttpResponse}.
 		 */
 		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Indexed> context,
 				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,
-				StreamBufferPool<ByteBuffer> serviceBufferPool, int throttleActiveRequestThreshold,
-				HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock,
-				boolean isIncludeEscalationStackTrace) {
-			super(serverLocation, isSecure, metaData, serviceBufferPool, throttleActiveRequestThreshold, serverName,
-					dateHttpHeaderClock, isIncludeEscalationStackTrace);
+				StreamBufferPool<ByteBuffer> serviceBufferPool, HttpHeaderValue serverName,
+				DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace) {
+			super(serverLocation, isSecure, metaData, serviceBufferPool, serverName, dateHttpHeaderClock,
+					isIncludeEscalationStackTrace);
 			this.context = context;
 		}
 

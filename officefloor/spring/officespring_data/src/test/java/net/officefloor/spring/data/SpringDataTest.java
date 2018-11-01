@@ -19,12 +19,18 @@ package net.officefloor.spring.data;
 
 import java.util.List;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.spring.SpringSupplierSource;
 
 /**
  * Ensure can integrate Spring via boot.
@@ -40,13 +46,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.context = SpringApplication.run(MockSpringDataConfiguration.class);
-
-		// Indicate the registered beans
-		System.out.println("Beans:");
-		for (String name : this.context.getBeanDefinitionNames()) {
-			System.out.println("  " + name);
-		}
+		this.context = SpringApplication.run(MockSpringDataConfiguration.class, "spring.jmx.default-domain=other");
 	}
 
 	@Override
@@ -58,6 +58,17 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	 * Ensure can obtain Spring data beans.
 	 */
 	public void testSpringDataBeans() {
+
+		// Indicate the registered beans
+		System.out.println("Beans:");
+		ConfigurableListableBeanFactory beanFactory = this.context.getBeanFactory();
+		for (String name : this.context.getBeanDefinitionNames()) {
+			BeanDefinition definition = beanFactory.getMergedBeanDefinition(name);
+			if ("rowRepository".equals(name)) {
+				System.out.println(name);
+			}
+			System.out.println("  " + name + " (" + definition.getBeanClassName() + ")");
+		}
 
 		// Ensure can obtain repository
 		RowRepository repository = this.context.getBean(RowRepository.class);
@@ -96,6 +107,55 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 		// Ensure row no longer available
 		assertEquals("Should not find row after rollback", 0, repository.findByName("One").size());
+	}
+
+	/**
+	 * Ensure can use {@link RowRepository}.
+	 */
+	public void testInjectRepository() throws Throwable {
+		
+		// TODO continue work
+		if (true) return;
+
+		// Create row
+		Row row = new Row(null, "TEST");
+		this.context.getBean(RowRepository.class).save(row);
+		this.context.close();
+
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			context.addSection("SECTION", GetRowSection.class);
+			SpringSupplierSource.configureSpring(context.getOfficeArchitect(), MockSpringDataConfiguration.class);
+		});
+		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+
+			// Ensure can
+			Request request = new Request(row.getId());
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", request);
+
+			// Ensure obtained row
+			assertNotNull("Should obtain the row", request.row);
+			assertEquals("Incorrect row", row.getId(), request.row.getId());
+			assertEquals("Should match name", "TEST", request.row.getName());
+		}
+	}
+
+	private static class Request {
+
+		private final Long id;
+
+		private volatile Row row;
+
+		private Request(Long id) {
+			this.id = id;
+		}
+	}
+
+	public static class GetRowSection {
+
+		public void service(@Parameter Request request, RowRepository repository) {
+			request.row = repository.findById(request.id).get();
+		}
 	}
 
 }
