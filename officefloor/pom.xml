@@ -1234,11 +1234,13 @@
 				<version>${jetty-version}</version>
 				<inherited>false</inherited>
 				<configuration>
-					<webAppSourceDirectory>${basedir}/target/site/
-					</webAppSourceDirectory>
+					<supportedPackagings>
+						<supportedPackaging>pom</supportedPackaging>
+					</supportedPackagings>
 					<httpConnector>
 						<port>9999</port>
 					</httpConnector>
+					<webAppSourceDirectory>${basedir}/target/site/</webAppSourceDirectory>
 					<stopKey>OfficeFloor</stopKey>
 					<stopPort>9966</stopPort>
 					<stopWait>10</stopWait>
@@ -1248,7 +1250,7 @@
 						<id>Start HTTP Server of staged site for linkcheck</id>
 						<phase>pre-site</phase>
 						<goals>
-							<goal>run</goal>
+							<goal>start</goal>
 						</goals>
 						<configuration>
 							<daemon>true</daemon>
@@ -1271,12 +1273,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>${maven-project-info-reports-version}</version>
+				<inherited>true</inherited>
 				<reportSets>
 					<reportSet>
 						<reports>
 							<report>index</report>
 						</reports>
-						<inherited>true</inherited>
 						<configuration>
 							<skipEmptyReport>false</skipEmptyReport>
 						</configuration>
@@ -1288,6 +1290,9 @@
 				<artifactId>maven-changes-plugin</artifactId>
 				<version>${maven-changes-version}</version>
 				<inherited>false</inherited>
+				<configuration>
+					<runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+				</configuration>
 				<reportSets>
 					<reportSet>
 						<reports>

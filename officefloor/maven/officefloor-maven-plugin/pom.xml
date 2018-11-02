@@ -55,7 +55,6 @@
 							<report>index</report>
 							<report>issue-management</report>
 							<report>help</report>
-							<report>scm</report>
 						</reports>
 					</reportSet>
 				</reportSets>
