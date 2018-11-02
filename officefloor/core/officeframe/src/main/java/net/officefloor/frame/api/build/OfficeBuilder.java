@@ -28,6 +28,8 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeClock;
@@ -236,5 +238,14 @@ public interface OfficeBuilder {
 	 * @param profiler {@link Profiler}.
 	 */
 	void setProfiler(Profiler profiler);
+
+	/**
+	 * Adds a {@link ThreadSynchroniser} for the {@link ThreadState} of the
+	 * {@link Office}.
+	 * 
+	 * @param threadSynchroniserFactory {@link ThreadSynchroniserFactory} to create
+	 *                                  the {@link ThreadSynchroniser}.
+	 */
+	void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory);
 
 }

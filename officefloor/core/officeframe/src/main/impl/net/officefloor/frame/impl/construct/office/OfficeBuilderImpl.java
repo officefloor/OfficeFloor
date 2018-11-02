@@ -34,6 +34,7 @@ import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.construct.function.EscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionBuilderImpl;
@@ -391,6 +392,12 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public Profiler getProfiler() {
 		return this.profiler;
+	}
+
+	@Override
+	public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
+		// TODO implement OfficeBuilder.addThreadSynchroniser(...)
+		throw new UnsupportedOperationException("TODO implement OfficeBuilder.addThreadSynchroniser(...)");
 	}
 
 }
