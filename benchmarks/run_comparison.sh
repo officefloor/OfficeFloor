@@ -55,10 +55,10 @@ mvn clean install
 cd "${DIR}/test"
 mvn clean install
 
-# Run the comparison
+# Run the comparison (don't fail build if run fails - as could be just temporary Internet network issue)
 cd "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks"
 ./tfb --clean
-./tfb --test rapidoid-http-fast netty vertx-postgres vertx-web-postgres officefloor officefloor-raw officefloor-micro officefloor-thread_affinity officefloor-tpr officefloor-netty officefloor-rapidoid
+./tfb --test rapidoid-http-fast netty vertx-postgres vertx-web-postgres officefloor officefloor-raw officefloor-micro officefloor-thread_affinity officefloor-tpr officefloor-netty officefloor-rapidoid || true
 
 # Find the latest results directory
 RESULTS_DIR=''
@@ -68,8 +68,16 @@ for CHECK_DIR in $(ls -t "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results
 	fi
 done
 
-# Copy the results to top level
+# Move the results to top level (avoids duplicating results in zip)
 if [  -f "${DIR}/results.json" ]; then
 	rm "${DIR}/results.json"
 fi
-cp "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/results.json" "${DIR}/results.txt"
+mv "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/results.json" "${DIR}/results.txt"
+
+# Create zip of results directory (to aid identifying causes of failure)
+if [ -f "${DIR}/results.zip" ]; then
+	rm "${DIR}/results.zip"
+fi
+zip -r "${DIR}/results.zip" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}"
+
+
