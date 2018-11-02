@@ -15,7 +15,9 @@
 	<description>Provides modules for Spring integration</description>
 	<modules>
 		<module>officespring</module>
+		<!-- Still in development  
 		<module>officespring_data</module>
+		-->
 	</modules>
 	<dependencies>
 		<dependency>

@@ -162,7 +162,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 *                                         name/value pairs.
 	 * @return {@link OfficeSupplier} for the {@link SpringSupplierSource}.
 	 */
-	public static OfficeSupplier configureSpring(OfficeArchitect architect, Class<?> configurationClass,
+	public static OfficeSupplier configure(OfficeArchitect architect, Class<?> configurationClass,
 			String... additionalPropertyNameValuePairs) {
 		OfficeSupplier supplier = architect.addSupplier("Spring", SpringSupplierSource.class.getName());
 		supplier.addProperty(SpringSupplierSource.CONFIGURATION_CLASS_NAME, configurationClass.getName());
