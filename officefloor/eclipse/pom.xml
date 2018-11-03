@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 	</parent>
 	<groupId>net.officefloor.eclipse</groupId>
 	<artifactId>eclipse</artifactId>
