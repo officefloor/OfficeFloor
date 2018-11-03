@@ -27,6 +27,7 @@ import org.asynchttpclient.Response;
 
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
+import net.officefloor.jdbc.postgresql.test.PostgreSqlRule.Configuration;
 
 /**
  * Provides benchmark environment.
@@ -41,7 +42,8 @@ public class BenchmarkEnvironment {
 	 * @return {@link PostgreSqlRule}.
 	 */
 	public static PostgreSqlRule createPostgreSqlRule() {
-		return new PostgreSqlRule("tfb-database", 5432, "hello_world", "benchmarkdbuser", "benchmarkdbpass");
+		return new PostgreSqlRule(new Configuration().server("tfb-database").port(5432).database("hello_world")
+				.username("benchmarkdbuser").password("benchmarkdbpass").maxConnections(200));
 	}
 
 	/**
@@ -104,7 +106,6 @@ public class BenchmarkEnvironment {
 				}
 			}
 		});
-
 	}
 
 	/**
@@ -124,6 +125,9 @@ public class BenchmarkEnvironment {
 
 		// Calculate the progress marker
 		int progressMarker = iterations / 10;
+		if (progressMarker == 0) {
+			progressMarker = 1;
+		}
 
 		// Run the iterations
 		CompletableFuture<Response>[] futures = new CompletableFuture[clients.length * pipelineBatchSize];

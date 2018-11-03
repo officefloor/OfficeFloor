@@ -159,8 +159,8 @@ public class OfficeFloorRule implements TestRule {
 				// Create and compile the OfficeFloor
 				OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 				OfficeFloorRule.this.officeFloor = compiler.compile("OfficeFloor");
-				OfficeFloorRule.this.officeFloor.openOfficeFloor();
 				try {
+					OfficeFloorRule.this.officeFloor.openOfficeFloor();
 
 					// Run the test
 					base.evaluate();
