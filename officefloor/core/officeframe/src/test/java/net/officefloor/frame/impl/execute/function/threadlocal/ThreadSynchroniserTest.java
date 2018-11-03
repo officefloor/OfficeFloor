@@ -76,7 +76,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 	 */
 	public void doThreadSynchroniserTest(boolean isTeams) throws Exception {
 
-		// Handle creating with teams
+		// Handle creating functions with teams
 		TestWork work = new TestWork();
 		List<MockTeamSource> teams = new ArrayList<>();
 		Function<String, ReflectiveFunctionBuilder> functionFactory = !isTeams
@@ -103,7 +103,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		sequentialFlow.buildFlow("differentThread", null, true);
 		functionFactory.apply("differentThread");
 
-		// Create the different thread
+		// Create the different thread (will not share thread state)
 		threadLocalOne.set(null);
 		threadLocalTwo.set(null);
 		InvokedFunction differentThread = new InvokedFunction("differentThread");
@@ -163,7 +163,6 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 			assertEquals("Incorrect value two for " + expectedFunction.name, expectedFunction.twoValue,
 					actualFunction.twoValue);
 		}
-
 		assertEquals("Should be no further invoked functions: " + this.invokedFunctions, 0,
 				this.invokedFunctions.size());
 
