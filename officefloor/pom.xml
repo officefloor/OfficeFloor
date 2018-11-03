@@ -87,6 +87,7 @@
 		<asm-version>7.0</asm-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
+		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 	</properties>
 	<repositories>
 		<repository>
@@ -420,7 +421,7 @@
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>3.3.0</version>
+				<version>${wagon-ssh-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>mx4j</groupId>
@@ -629,7 +630,7 @@
 				<!-- Allow for scp distribution -->
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>3.3.0</version>
+				<version>${wagon-ssh-version}</version>
 			</extension>
 		</extensions>
 		<pluginManagement>
