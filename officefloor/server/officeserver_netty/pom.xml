@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor.server</groupId>
 		<artifactId>server</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 	</parent>
 	<artifactId>officeserver_netty</artifactId>
 	<name>Netty HTTP Server</name>

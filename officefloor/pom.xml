@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>officefloor</artifactId>
-	<version>3.2.0</version>
+	<version>3.3.0</version>
 	<packaging>pom</packaging>
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
@@ -420,7 +420,7 @@
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>3.2.0</version>
+				<version>3.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>mx4j</groupId>
@@ -470,7 +470,7 @@
 			<dependency>
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
-				<version>3.2.0</version>
+				<version>3.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.h2database</groupId>
@@ -629,7 +629,7 @@
 				<!-- Allow for scp distribution -->
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>3.2.0</version>
+				<version>3.3.0</version>
 			</extension>
 		</extensions>
 		<pluginManagement>
@@ -696,7 +696,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

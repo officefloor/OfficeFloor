@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.web</groupId>
 		<artifactId>web</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 	</parent>
 	<artifactId>officeweb_executive</artifactId>
 	<name>Web Executive</name>
