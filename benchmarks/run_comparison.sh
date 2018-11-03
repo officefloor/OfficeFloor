@@ -72,12 +72,12 @@ done
 if [  -f "${DIR}/results.json" ]; then
 	rm "${DIR}/results.json"
 fi
-mv "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/results.json" "${DIR}/results.txt"
+cp "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/results.json" "${DIR}/results.txt"
 
 # Create zip of results directory (to aid identifying causes of failure)
 if [ -f "${DIR}/results.zip" ]; then
 	rm "${DIR}/results.zip"
 fi
-zip -r "${DIR}/results.zip" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}"
+zip -r "${DIR}/results.zip" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/officefloor*"
 
 
