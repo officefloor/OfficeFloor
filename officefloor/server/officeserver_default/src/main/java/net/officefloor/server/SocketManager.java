@@ -436,6 +436,10 @@ public class SocketManager {
 			BindException exception = null;
 			int attempt = 0;
 			do {
+				// Setup for attempt
+				attempt++;
+				exception = null;
+
 				// Create the Server Socket
 				channel = ServerSocketChannel.open();
 				try {

@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.concurrent.CompletableFuture;
 
 import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.Dsl;
 import org.asynchttpclient.Response;
 
@@ -37,13 +38,18 @@ import net.officefloor.jdbc.postgresql.test.PostgreSqlRule.Configuration;
 public class BenchmarkEnvironment {
 
 	/**
+	 * Timeout on requests.
+	 */
+	private static final int TIMEOUT = 10 * 1000;
+
+	/**
 	 * Creates {@link PostgreSqlRule} for benchmark.
 	 * 
 	 * @return {@link PostgreSqlRule}.
 	 */
 	public static PostgreSqlRule createPostgreSqlRule() {
 		return new PostgreSqlRule(new Configuration().server("tfb-database").port(5432).database("hello_world")
-				.username("benchmarkdbuser").password("benchmarkdbpass").maxConnections(200));
+				.username("benchmarkdbuser").password("benchmarkdbpass").maxConnections(2000));
 	}
 
 	/**
@@ -70,7 +76,8 @@ public class BenchmarkEnvironment {
 			// Run load
 			AsyncHttpClient[] asyncClients = new AsyncHttpClient[clients];
 			for (int i = 0; i < asyncClients.length; i++) {
-				asyncClients[i] = Dsl.asyncHttpClient();
+				asyncClients[i] = Dsl.asyncHttpClient(
+						new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(TIMEOUT).setReadTimeout(TIMEOUT));
 			}
 			try {
 
@@ -91,7 +98,7 @@ public class BenchmarkEnvironment {
 				long endTime = System.currentTimeMillis();
 
 				// Indicate performance
-				int totalRequests = iterations * pipelineBatchSize;
+				int totalRequests = clients * iterations * pipelineBatchSize;
 				long totalTime = endTime - startTime;
 				int requestsPerSecond = (int) ((totalRequests) / (((float) totalTime) / 1000.0));
 				System.out.println("\tRequests: " + totalRequests);
@@ -147,7 +154,8 @@ public class BenchmarkEnvironment {
 					int index = (c * pipelineBatchSize) + p;
 
 					// Undertake the request
-					futures[index] = clients[c].prepareGet(url).execute().toCompletableFuture();
+					futures[index] = clients[c].prepareGet(url).setRequestTimeout(TIMEOUT).execute()
+							.toCompletableFuture();
 				}
 			}
 
