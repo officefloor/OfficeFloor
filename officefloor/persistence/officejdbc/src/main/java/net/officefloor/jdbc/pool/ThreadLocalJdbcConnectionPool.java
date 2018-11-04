@@ -406,7 +406,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			}
 			this.pooledConnections.clear();
 			this.allPooledConnections.clear();
-			this.connectionCount = 0;
+			this.connectionCount = -1; // flag closed
 		}
 	}
 
@@ -505,11 +505,16 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 			// Determine if able to create connection
 			boolean isCreateConnection = (pool.maximumConnections == 0);
-			if (!isCreateConnection) {
-				synchronized (pool.allPooledConnections) {
+			synchronized (pool.allPooledConnections) {
 
-					// Determine if reached limit
-					// Allows connections to be created outside lock in parallel
+				// Determine if closed
+				if (pool.connectionCount < 0) {
+					throw new SQLException(ThreadLocalJdbcConnectionPool.class.getSimpleName() + " is closed");
+				}
+
+				// Determine if reached limit
+				// Allows connections to be created outside lock in parallel
+				if (!isCreateConnection) {
 					isCreateConnection = (pool.connectionCount < pool.maximumConnections);
 					pool.connectionCount++;
 				}
@@ -531,6 +536,9 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 					// Create and return reference to the connection
 					reference = new ConnectionReferenceImpl(connection, pooledConnection);
+					synchronized (pool.allPooledConnections) {
+						pool.allPooledConnections.add(reference);
+					}
 					pool.threadLocalConnection.set(reference);
 					return reference;
 

@@ -61,6 +61,15 @@ public interface TeamSourceContext extends SourceContext {
 	int getTeamSize();
 
 	/**
+	 * Allows obtaining the size of the {@link Team}, without forcing it to be
+	 * configured.
+	 * 
+	 * @param defaultSize Default size of the {@link Team}, if no size configured.
+	 * @return {@link Team} size.
+	 */
+	int getTeamSize(int defaultSize);
+
+	/**
 	 * <p>
 	 * Obtains the {@link ThreadFactory} for the {@link Team}.
 	 * <p>

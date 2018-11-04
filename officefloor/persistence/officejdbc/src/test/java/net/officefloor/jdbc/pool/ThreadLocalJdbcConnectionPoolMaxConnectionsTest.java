@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -76,8 +77,9 @@ public class ThreadLocalJdbcConnectionPoolMaxConnectionsTest extends AbstractCon
 			context.getOfficeFloorDeployer().link(mos, pool);
 
 			// Provide different thread
-			context.getOfficeFloorDeployer().addTeam("TEAM", new ExecutorCachedTeamSource()).addTypeQualification(null,
-					Connection.class.getName());
+			OfficeFloorTeam team = context.getOfficeFloorDeployer().addTeam("TEAM", new ExecutorCachedTeamSource());
+			team.addProperty(ExecutorCachedTeamSource.PROPERTY_WAIT_TIME, String.valueOf(10));
+			team.addTypeQualification(null, Connection.class.getName());
 		});
 		compiler.office((context) -> {
 			context.getOfficeArchitect().enableAutoWireTeams();

@@ -76,7 +76,8 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 	 * @param isLoadingType             Indicates if loading type.
 	 * @param teamName                  Name of the {@link Team} to be created from
 	 *                                  the {@link TeamSource}.
-	 * @param teamSize                  {@link Team} size.
+	 * @param teamSize                  {@link Team} size. Value of 0 or below
+	 *                                  indicates no {@link Team} size configured.
 	 * @param teamSource                {@link TeamSource}.
 	 * @param executive                 {@link Executive}.
 	 * @param threadFactoryManufacturer {@link ThreadFactoryManufacturer}.
@@ -121,6 +122,11 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 
 		// Return the team size
 		return this.teamSize;
+	}
+
+	@Override
+	public int getTeamSize(int defaultSize) {
+		return (this.teamSize > 0) ? this.teamSize : defaultSize;
 	}
 
 	@Override
