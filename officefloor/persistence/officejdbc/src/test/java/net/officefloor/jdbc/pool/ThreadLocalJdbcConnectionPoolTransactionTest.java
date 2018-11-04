@@ -36,11 +36,12 @@ import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
- * Tests the {@link ThreadLocalJdbcConnectionPoolSource}.
+ * Tests the transaction scope of the
+ * {@link ThreadLocalJdbcConnectionPoolSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ThreadLocalJdbcConnectionPoolTest extends AbstractConnectionTestCase {
+public class ThreadLocalJdbcConnectionPoolTransactionTest extends AbstractConnectionTestCase {
 
 	/**
 	 * {@link OfficeFloor}.
