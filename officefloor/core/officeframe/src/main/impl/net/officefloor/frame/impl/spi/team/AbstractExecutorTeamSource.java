@@ -205,6 +205,11 @@ public abstract class AbstractExecutorTeamSource extends AbstractTeamSource {
 		@Override
 		public void stopWorking() {
 
+			// Do nothing if not started
+			if (this.servicer == null) {
+				return;
+			}
+
 			// Determine if can wait for thread pool to complete
 			if (this.servicer instanceof ThreadPoolExecutor) {
 				ThreadPoolExecutor threadPool = (ThreadPoolExecutor) this.servicer;

@@ -30,6 +30,7 @@ import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.postgresql.PostgreSqlConnectionManagedObjectSource;
 import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
+import net.officefloor.jdbc.postgresql.test.PostgreSqlRule.Configuration;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource;
 import net.officefloor.jpa.test.AbstractJpaTestCase;
@@ -45,7 +46,8 @@ public class HibernatePostgreSqlJpaTest extends AbstractJpaTestCase {
 	/**
 	 * PostgreSql database.
 	 */
-	private static PostgreSqlRule database = new PostgreSqlRule(5433, "testuser", "testpassword");
+	private static PostgreSqlRule database = new PostgreSqlRule(
+			new Configuration().port(5433).username("testuser").password("testpassword"));
 
 	/**
 	 * Manage PostgreSql before/after class (rather than each test) to improve

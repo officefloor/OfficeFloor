@@ -340,19 +340,17 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		 */
 		private void dumpActiveThreadsAfter(long timeInMilliseconds) {
 			long startTime = System.currentTimeMillis();
+			long endTime = startTime + timeInMilliseconds;
 			new Thread(() -> {
 				synchronized (this.activeThreads) {
 
-					// Determine if should dump
-					if (!this.isDump) {
-						return;
-					}
-
 					// Wait the specified period of time
-					try {
-						this.activeThreads.wait(timeInMilliseconds);
-					} catch (InterruptedException ex) {
-						// ignore, and carry on
+					while ((this.isDump) && (System.currentTimeMillis() < endTime)) {
+						try {
+							this.activeThreads.wait(100);
+						} catch (InterruptedException ex) {
+							return;
+						}
 					}
 
 					// Determine if should dump
@@ -400,7 +398,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				this.isDump = false;
 
 				// Notify, so don't wait
-				this.activeThreads.notify();
+				this.activeThreads.notifyAll();
 			}
 		}
 
@@ -425,6 +423,9 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 						throw new TimeoutException("Waited more than " + waitTimeInMilliseconds
 								+ " milliseconds for HTTP socket servicing to terminate");
 					}
+
+					// Wait some time for termination
+					this.activeThreads.wait(10);
 				}
 			}
 		}
@@ -452,10 +453,14 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 					// Unregister this thread
 					synchronized (this.activeThreads) {
 						this.activeThreads.remove(currentThread);
+
+						// Notify immediately, to allow shutdown
+						this.activeThreads.notifyAll();
 					}
 				}
 			}).start();
 		}
+
 	}
 
 	/**

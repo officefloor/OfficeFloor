@@ -93,8 +93,11 @@ public class DefaultExecutive extends AbstractExecutiveSource implements Executi
 
 	@Override
 	public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
-		this.threadFactories = new ThreadFactory[] {
-				context.createThreadFactory(this.getExecutionStrategyName(), this) };
+		int availableProcessors = Runtime.getRuntime().availableProcessors();
+		this.threadFactories = new ThreadFactory[availableProcessors];
+		for (int i = 0; i < availableProcessors; i++) {
+			this.threadFactories[i] = context.createThreadFactory(this.getExecutionStrategyName() + "-" + i, this);
+		}
 		return this;
 	}
 

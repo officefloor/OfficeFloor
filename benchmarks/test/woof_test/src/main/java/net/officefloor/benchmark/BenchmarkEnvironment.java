@@ -17,16 +17,18 @@
  */
 package net.officefloor.benchmark;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CompletableFuture;
 
 import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.Dsl;
 import org.asynchttpclient.Response;
 
 import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
 import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
+import net.officefloor.jdbc.postgresql.test.PostgreSqlRule.Configuration;
 
 /**
  * Provides benchmark environment.
@@ -36,12 +38,18 @@ import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
 public class BenchmarkEnvironment {
 
 	/**
+	 * Timeout on requests.
+	 */
+	private static final int TIMEOUT = 60 * 1000;
+
+	/**
 	 * Creates {@link PostgreSqlRule} for benchmark.
 	 * 
 	 * @return {@link PostgreSqlRule}.
 	 */
 	public static PostgreSqlRule createPostgreSqlRule() {
-		return new PostgreSqlRule("tfb-database", 5432, "hello_world", "benchmarkdbuser", "benchmarkdbpass");
+		return new PostgreSqlRule(new Configuration().server("tfb-database").port(5432).database("hello_world")
+				.username("benchmarkdbuser").password("benchmarkdbpass").maxConnections(2000));
 	}
 
 	/**
@@ -68,7 +76,8 @@ public class BenchmarkEnvironment {
 			// Run load
 			AsyncHttpClient[] asyncClients = new AsyncHttpClient[clients];
 			for (int i = 0; i < asyncClients.length; i++) {
-				asyncClients[i] = Dsl.asyncHttpClient();
+				asyncClients[i] = Dsl.asyncHttpClient(
+						new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(TIMEOUT).setReadTimeout(TIMEOUT));
 			}
 			try {
 
@@ -89,7 +98,7 @@ public class BenchmarkEnvironment {
 				long endTime = System.currentTimeMillis();
 
 				// Indicate performance
-				int totalRequests = iterations * pipelineBatchSize;
+				int totalRequests = clients * iterations * pipelineBatchSize;
 				long totalTime = endTime - startTime;
 				int requestsPerSecond = (int) ((totalRequests) / (((float) totalTime) / 1000.0));
 				System.out.println("\tRequests: " + totalRequests);
@@ -104,7 +113,6 @@ public class BenchmarkEnvironment {
 				}
 			}
 		});
-
 	}
 
 	/**
@@ -124,6 +132,9 @@ public class BenchmarkEnvironment {
 
 		// Calculate the progress marker
 		int progressMarker = iterations / 10;
+		if (progressMarker == 0) {
+			progressMarker = 1;
+		}
 
 		// Run the iterations
 		CompletableFuture<Response>[] futures = new CompletableFuture[clients.length * pipelineBatchSize];
@@ -143,14 +154,18 @@ public class BenchmarkEnvironment {
 					int index = (c * pipelineBatchSize) + p;
 
 					// Undertake the request
-					futures[index] = clients[c].prepareGet(url).execute().toCompletableFuture();
+					futures[index] = clients[c].prepareGet(url).setRequestTimeout(TIMEOUT).execute()
+							.toCompletableFuture();
 				}
 			}
 
 			// Ensure all responses are valid
 			CompletableFuture.allOf(futures).get();
 			for (CompletableFuture<Response> future : futures) {
-				assertEquals("Request should be successful", 200, future.get().getStatusCode());
+				Response response = future.get();
+				int statusCode = response.getStatusCode();
+				assertTrue("Invalid response status code " + statusCode + "\n" + response.getResponseBody(),
+						(statusCode == 200) || (statusCode == 503));
 			}
 		}
 

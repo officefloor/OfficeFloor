@@ -26,8 +26,13 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
-import java.util.Deque;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
@@ -51,49 +56,6 @@ import net.officefloor.jdbc.ConnectionWrapper;
  * @author Daniel Sagenschneider
  */
 public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadCompletionListener {
-
-	/**
-	 * {@link ConnectionPoolDataSource}.
-	 */
-	private final ConnectionPoolDataSource dataSource;
-
-	/**
-	 * {@link PooledConnectionWrapperFactory}.
-	 */
-	private final PooledConnectionWrapperFactory wrapperFactory;
-
-	/**
-	 * {@link ThreadLocal} {@link Connection} for this
-	 * {@link ThreadLocalJdbcConnectionPool}.
-	 */
-	private final ThreadLocal<ConnectionReferenceImpl> threadLocalConnection = new ThreadLocal<>();
-
-	/**
-	 * {@link ConnectionReferenceImpl} instances idle within the pool.
-	 */
-	private final Deque<ConnectionReferenceImpl> pooledConnections = new ConcurrentLinkedDeque<>();
-
-	/**
-	 * <p>
-	 * All {@link ConnectionReferenceImpl} instances.
-	 * <p>
-	 * Some {@link Thread} instances may not have completed yet leaving a
-	 * {@link PooledConnection} not in the idle list for closing. This tracks all
-	 * {@link PooledConnection} instances created to ensure they are all closed.
-	 */
-	private final Deque<ConnectionReferenceImpl> allPooledConnections = new ConcurrentLinkedDeque<>();
-
-	/**
-	 * Instantiate.
-	 * 
-	 * @param dataSource     {@link ConnectionPoolDataSource}.
-	 * @param wrapperFactory {@link PooledConnectionWrapperFactory}.
-	 */
-	public ThreadLocalJdbcConnectionPool(ConnectionPoolDataSource dataSource,
-			PooledConnectionWrapperFactory wrapperFactory) {
-		this.dataSource = dataSource;
-		this.wrapperFactory = wrapperFactory;
-	}
 
 	/**
 	 * Creates the {@link PooledConnectionWrapperFactory}.
@@ -232,6 +194,83 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	}
 
 	/**
+	 * {@link ConnectionPoolDataSource}.
+	 */
+	private final ConnectionPoolDataSource dataSource;
+
+	/**
+	 * {@link PooledConnectionWrapperFactory}.
+	 */
+	private final PooledConnectionWrapperFactory wrapperFactory;
+
+	/**
+	 * Maximum number of connections.
+	 */
+	private final int maximumConnections;
+
+	/**
+	 * Wait time in milliseconds for a {@link Connection} to become available.
+	 */
+	private final long connectionWaitTime;
+
+	/**
+	 * {@link ThreadLocal} {@link Connection} for this
+	 * {@link ThreadLocalJdbcConnectionPool}.
+	 */
+	private final ThreadLocal<ConnectionReferenceImpl> threadLocalConnection = new ThreadLocal<>();
+
+	/**
+	 * {@link ConnectionReferenceImpl} instances idle within the pool.
+	 */
+	private final BlockingQueue<ConnectionReferenceImpl> pooledConnections;
+
+	/**
+	 * <p>
+	 * All {@link ConnectionReferenceImpl} instances.
+	 * <p>
+	 * Some {@link Thread} instances may not have completed yet leaving a
+	 * {@link PooledConnection} not in the idle list for closing. This tracks all
+	 * {@link PooledConnection} instances created to ensure they are all closed.
+	 */
+	private final List<ConnectionReferenceImpl> allPooledConnections;
+
+	/**
+	 * Number of active {@link Connection} instances.
+	 */
+	private int connectionCount = 0;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param dataSource         {@link ConnectionPoolDataSource}.
+	 * @param wrapperFactory     {@link PooledConnectionWrapperFactory}.
+	 * @param maximumConnections Maximum number of connections. <code>0</code> (or
+	 *                           negative) for unbounded number of
+	 *                           {@link Connection} instances.
+	 * @param connectionWaitTime Wait time in milliseconds for a {@link Connection}
+	 *                           to become available.
+	 */
+	public ThreadLocalJdbcConnectionPool(ConnectionPoolDataSource dataSource,
+			PooledConnectionWrapperFactory wrapperFactory, int maximumConnections, long connectionWaitTime) {
+		this.dataSource = dataSource;
+		this.wrapperFactory = wrapperFactory;
+
+		// Provide maximum number of connections
+		if (maximumConnections < 0) {
+			maximumConnections = 0; // unbounded
+		}
+		this.maximumConnections = maximumConnections;
+		this.connectionWaitTime = connectionWaitTime;
+
+		// Create the queue of idle connections
+		// (attempt to be fair, however must also handled unbounded connections)
+		this.pooledConnections = (this.maximumConnections == 0) ? new LinkedBlockingQueue<>()
+				: new ArrayBlockingQueue<>(this.maximumConnections, true);
+		this.allPooledConnections = (this.maximumConnections == 0) ? new LinkedList<>()
+				: new ArrayList<>(this.maximumConnections);
+	}
+
+	/**
 	 * Obtains the {@link ThreadLocal} {@link Connection}.
 	 * 
 	 * @return {@link ThreadLocal} {@link Connection}.
@@ -239,6 +278,69 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	public Connection getThreadLocalConnection() {
 		ConnectionReferenceImpl reference = this.threadLocalConnection.get();
 		return (reference == null ? null : reference.connection);
+	}
+
+	/**
+	 * Ensures the {@link ConnectionReferenceImpl} is valid.
+	 * 
+	 * @param reference {@link ConnectionReferenceImpl}.
+	 * @return {@link ConnectionReferenceImpl} or <code>null</code> if not valid.
+	 */
+	private ConnectionReferenceImpl ensureValid(ConnectionReferenceImpl reference) {
+
+		// Determine if have reference
+		if (reference == null) {
+			return null;
+		}
+
+		// Determine if valid
+		if (reference.isValid) {
+			return reference; // valid so use
+		}
+
+		// Remove the connection
+		synchronized (this.allPooledConnections) {
+			this.allPooledConnections.remove(reference);
+			this.connectionCount--;
+		}
+
+		// Clean up reference
+		try {
+			reference.pooledConnection.close();
+		} catch (SQLException ex) {
+			// Ignore error, as just attempting to clean up invalid connection
+		}
+
+		// No valid connection
+		return null;
+	}
+
+	/**
+	 * <p>
+	 * Polls immediately for a {@link ConnectionReferenceImpl}.
+	 * <p>
+	 * This handles obtaining a valid {@link ConnectionReferenceImpl}.
+	 * 
+	 * @return {@link ConnectionReferenceImpl} or <code>null</code> if failed to
+	 *         obtain valid {@link ConnectionReferenceImpl} immediately.
+	 */
+	private ConnectionReferenceImpl pollValid() {
+
+		// Attempt to obtain immediately from idle pool
+		boolean isRetrieved = false;
+		do {
+			ConnectionReferenceImpl reference = this.pooledConnections.poll();
+			isRetrieved = (reference != null);
+
+			// Determine if valid
+			reference = this.ensureValid(reference);
+			if (reference != null) {
+				return reference; // use idle connection
+			}
+		} while (isRetrieved);
+
+		// As nothing retrieved from idle
+		return null;
 	}
 
 	/*
@@ -282,7 +384,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				reference.connection.setAutoCommit(true);
 
 				// Add to pool
-				this.pooledConnections.push(reference);
+				this.pooledConnections.add(reference);
 
 			} catch (SQLException ex) {
 				// Failed to return connection to pool
@@ -294,12 +396,17 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	public void empty() {
 
 		// Close all the pooled connections
-		for (ConnectionReferenceImpl reference : this.allPooledConnections) {
-			try {
-				reference.pooledConnection.close();
-			} catch (SQLException ex) {
-
+		synchronized (this.allPooledConnections) {
+			for (ConnectionReferenceImpl reference : this.allPooledConnections) {
+				try {
+					reference.pooledConnection.close();
+				} catch (SQLException ex) {
+					// Ignore error in closing (as shutting down)
+				}
 			}
+			this.pooledConnections.clear();
+			this.allPooledConnections.clear();
+			this.connectionCount = -1; // flag closed
 		}
 	}
 
@@ -316,7 +423,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			this.threadLocalConnection.set(null);
 
 			// Add to pool
-			this.pooledConnections.push(reference);
+			this.pooledConnections.add(reference);
 		}
 	}
 
@@ -380,31 +487,42 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				return reference;
 			}
 
-			// Obtain the thread local connection
-			reference = ThreadLocalJdbcConnectionPool.this.threadLocalConnection.get();
+			// Easy access to pool
+			ThreadLocalJdbcConnectionPool pool = ThreadLocalJdbcConnectionPool.this;
 
-			// Ensure the reference is valid
-			if ((reference != null) && (!reference.isValid)) {
-				reference = null; // no longer valid connection
+			// Obtain the thread local connection
+			reference = pool.ensureValid(ThreadLocalJdbcConnectionPool.this.threadLocalConnection.get());
+			if (reference != null) {
+				return reference; // use thread local connection
 			}
 
-			// Ensure if not thread local, that create and associate connection to thread
-			if (reference == null) {
+			// Attempt to obtain immediately from idle pool
+			reference = pool.pollValid();
+			if (reference != null) {
+				pool.threadLocalConnection.set(reference);
+				return reference; // use idle connection
+			}
 
-				// Obtain the next valid pooled connection
-				boolean isAvailable = true;
-				do {
-					reference = ThreadLocalJdbcConnectionPool.this.pooledConnections.poll();
-					isAvailable = (reference != null);
+			// Determine if able to create connection
+			boolean isCreateConnection = (pool.maximumConnections == 0);
+			synchronized (pool.allPooledConnections) {
 
-					// Determine if valid reference
-					if ((isAvailable) && (!reference.isValid)) {
-						reference = null; // not valid connection
-					}
-				} while ((isAvailable) && (reference == null));
+				// Determine if closed
+				if (pool.connectionCount < 0) {
+					throw new SQLException(ThreadLocalJdbcConnectionPool.class.getSimpleName() + " is closed");
+				}
 
-				// Determine if have reference from pool
-				if (reference == null) {
+				// Determine if reached limit
+				// Allows connections to be created outside lock in parallel
+				if (!isCreateConnection) {
+					isCreateConnection = (pool.connectionCount < pool.maximumConnections);
+					pool.connectionCount++;
+				}
+			}
+
+			// Determine if able to create connection
+			if (isCreateConnection) {
+				try {
 
 					// No valid pooled connection, create a new connection
 					PooledConnection pooledConnection = ThreadLocalJdbcConnectionPool.this.dataSource
@@ -416,19 +534,41 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 						connection.setAutoCommit(true);
 					}
 
-					// Create reference to the connection
+					// Create and return reference to the connection
 					reference = new ConnectionReferenceImpl(connection, pooledConnection);
+					synchronized (pool.allPooledConnections) {
+						pool.allPooledConnections.add(reference);
+					}
+					pool.threadLocalConnection.set(reference);
+					return reference;
 
-					// Register connection (for empty on close)
-					ThreadLocalJdbcConnectionPool.this.allPooledConnections.push(reference);
+				} catch (SQLException | RuntimeException | Error ex) {
+					// Failed to create connection (so decrement count)
+					synchronized (pool.allPooledConnections) {
+						pool.connectionCount--;
+					}
 				}
-
-				// Register the connection with the thread
-				ThreadLocalJdbcConnectionPool.this.threadLocalConnection.set(reference);
 			}
 
-			// Return the connection
-			return reference;
+			// Block waiting for connection (as maximum connections reached)
+			try {
+				reference = pool
+						.ensureValid(pool.pooledConnections.poll(pool.connectionWaitTime, TimeUnit.MILLISECONDS));
+			} catch (InterruptedException ex) {
+				throw new SQLException(ex);
+			}
+			if (reference == null) {
+				// Reference not valid, so give last chance to obtain (but wait no further)
+				reference = pool.pollValid();
+			}
+			if (reference != null) {
+				pool.threadLocalConnection.set(reference);
+				return reference; // use returned connection to idle connection
+			}
+
+			// As here, timed out in obtaining connection
+			throw new SQLException("Timed out after " + pool.connectionWaitTime + " milliseconds to obtain "
+					+ Connection.class.getSimpleName());
 		}
 
 		@Override
@@ -469,7 +609,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 					} else {
 						// Thread has connection (or invalid reset), so return to the pool
-						ThreadLocalJdbcConnectionPool.this.pooledConnections.push(returnReference);
+						ThreadLocalJdbcConnectionPool.this.pooledConnections.add(returnReference);
 					}
 				}
 			}
@@ -568,14 +708,12 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 		@Override
 		public void connectionClosed(ConnectionEvent event) {
-			// Should not close connection, however leave active with thread
+			// Should not get closed events (either way, ignore as handled otherwise)
 		}
 
 		@Override
 		public void connectionErrorOccurred(ConnectionEvent event) {
-			if (event.getSource() == this.pooledConnection) {
-				this.isValid = false;
-			}
+			this.isValid = false;
 		}
 	}
 

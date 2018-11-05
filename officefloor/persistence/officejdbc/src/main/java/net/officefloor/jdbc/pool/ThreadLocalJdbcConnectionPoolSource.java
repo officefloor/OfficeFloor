@@ -23,7 +23,9 @@ import java.sql.SQLException;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceContext;
 import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
@@ -44,9 +46,30 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 		implements ManagedObjectPoolFactory {
 
 	/**
+	 * {@link Property} name for the maximum number of {@link Connection} instances.
+	 */
+	public static final String PROPERTY_MAXIMUM_CONNECTIONS = "maximum.connections";
+
+	/**
+	 * {@link Property} name for the wait time (in milliseconds) for a
+	 * {@link Connection}.
+	 */
+	public static final String PROPERTY_CONNECTION_WAIT_TIME = "connection.wait.time";
+
+	/**
 	 * {@link ClassLoader}.
 	 */
 	private PooledConnectionWrapperFactory wrapperFactory;
+
+	/**
+	 * Maximum {@link Connection}.
+	 */
+	private int maximumConnections = 100;
+
+	/**
+	 * Connection wait time in milliseconds.
+	 */
+	private long connectionWaitTime = 1000;
 
 	/*
 	 * ============= AbstractManagedObjectPoolSource ================
@@ -58,6 +81,7 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 
 	@Override
 	protected void loadMetaData(MetaDataContext context) throws Exception {
+		ManagedObjectPoolSourceContext poolContext = context.getManagedObjectPoolSourceContext();
 
 		// Load the meta-data
 		context.setPooledObjectType(Connection.class);
@@ -67,6 +91,12 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 		// Create the wrapper factory
 		ClassLoader classLoader = context.getManagedObjectPoolSourceContext().getClassLoader();
 		this.wrapperFactory = ThreadLocalJdbcConnectionPool.createWrapperFactory(classLoader);
+
+		// Load configuration
+		this.maximumConnections = Integer.parseInt(
+				poolContext.getProperty(PROPERTY_MAXIMUM_CONNECTIONS, String.valueOf(this.maximumConnections)));
+		this.connectionWaitTime = Long.parseLong(
+				poolContext.getProperty(PROPERTY_CONNECTION_WAIT_TIME, String.valueOf(this.connectionWaitTime)));
 	}
 
 	/*
@@ -106,7 +136,8 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 		});
 
 		// Create and return the pool
-		return new ThreadLocalJdbcConnectionPool(dataSource, this.wrapperFactory);
+		return new ThreadLocalJdbcConnectionPool(dataSource, this.wrapperFactory, this.maximumConnections,
+				this.connectionWaitTime);
 	}
 
 }
