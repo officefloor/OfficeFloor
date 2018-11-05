@@ -162,6 +162,7 @@ public class OfficeFloorRule implements TestRule {
 				} finally {
 					// Ensure close the OfficeFloor
 					OfficeFloorRule.this.officeFloor.closeOfficeFloor();
+					OfficeFloorRule.this.officeFloor = null;
 				}
 			}
 		};
