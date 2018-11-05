@@ -347,9 +347,9 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 					// Wait the specified period of time
 					while ((this.isDump) && (System.currentTimeMillis() < endTime)) {
 						try {
-							this.activeThreads.wait(Math.max(0, endTime - System.currentTimeMillis()));
+							this.activeThreads.wait(100);
 						} catch (InterruptedException ex) {
-							// ignore, and carry on
+							return;
 						}
 					}
 
@@ -460,6 +460,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				}
 			}).start();
 		}
+
 	}
 
 	/**

@@ -97,10 +97,6 @@ public class QueriesTest {
 		HttpResponse response = this.client
 				.execute(new HttpGet("http://localhost:8181/queries?queries=" + queriesValue));
 		String entity = EntityUtils.toString(response.getEntity());
-		
-		// TODO remove
-		System.out.println("RESPONSE: " + entity);
-		
 		assertEquals("Should be successful:\n\n" + entity, 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect content-type", "application/json", response.getFirstHeader("content-type").getValue());
 		assertEquals("Incorrect server", this.getServerName(), response.getFirstHeader("Server").getValue());

@@ -17,7 +17,7 @@
  */
 package net.officefloor.benchmark;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -40,7 +40,7 @@ public class BenchmarkEnvironment {
 	/**
 	 * Timeout on requests.
 	 */
-	private static final int TIMEOUT = 10 * 1000;
+	private static final int TIMEOUT = 60 * 1000;
 
 	/**
 	 * Creates {@link PostgreSqlRule} for benchmark.
@@ -162,7 +162,10 @@ public class BenchmarkEnvironment {
 			// Ensure all responses are valid
 			CompletableFuture.allOf(futures).get();
 			for (CompletableFuture<Response> future : futures) {
-				assertEquals("Request should be successful", 200, future.get().getStatusCode());
+				Response response = future.get();
+				int statusCode = response.getStatusCode();
+				assertTrue("Invalid response status code " + statusCode + "\n" + response.getResponseBody(),
+						(statusCode == 200) || (statusCode == 503));
 			}
 		}
 

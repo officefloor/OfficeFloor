@@ -550,9 +550,6 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 				}
 			}
 
-			// TODO REMOVE
-			System.out.println(Thread.currentThread().getName() + " blocking for connection");
-
 			// Block waiting for connection (as maximum connections reached)
 			try {
 				reference = pool
@@ -712,6 +709,7 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 		@Override
 		public void connectionClosed(ConnectionEvent event) {
 			// Should not close connection, however leave active with thread
+			this.isValid = false;
 		}
 
 		@Override
