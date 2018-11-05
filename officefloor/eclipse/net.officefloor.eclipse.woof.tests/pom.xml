@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor.eclipse</groupId>
 		<artifactId>eclipse</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 	</parent>
 	<artifactId>net.officefloor.eclipse.woof.tests</artifactId>
 	<packaging>eclipse-test-plugin</packaging>

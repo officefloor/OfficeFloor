@@ -507,7 +507,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		}
 
 		// As no pooling, should close the connection
-		assertTrue("Connection should be closed", ConnectivitySection.connection.isClosed());
+		Connection connection = ConnectionWrapper.getRealConnection(ConnectivitySection.connection);
+		assertTrue("Connection should be closed", (connection == null) || (connection.isClosed()));
 	}
 
 	public static class ConnectivitySection {
@@ -643,8 +644,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		officeFloor.closeOfficeFloor();
 
 		// Ensure is closed with OfficeFloor
-		assertTrue("Should close connection with closing OfficeFloor",
-				ConnectionDecoratorSection.connection.isClosed());
+		Connection connection = ConnectionWrapper.getRealConnection(ConnectionDecoratorSection.connection);
+		assertTrue("Should close connection with closing OfficeFloor", (connection == null) || (connection.isClosed()));
 	}
 
 	public static class ConnectionDecoratorSection {

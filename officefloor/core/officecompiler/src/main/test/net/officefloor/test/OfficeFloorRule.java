@@ -56,10 +56,8 @@ public class OfficeFloorRule implements TestRule {
 	 * Convenience method to invoke the {@link ProcessState} for the
 	 * {@link ManagedFunction} within the default {@link Office}.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param parameter
-	 *            Parameter to the {@link ManagedFunction}.
+	 * @param functionName Name of the {@link ManagedFunction}.
+	 * @param parameter    Parameter to the {@link ManagedFunction}.
 	 */
 	public void invokeProcess(String functionName, Object parameter) {
 		this.invokeProcess(functionName, parameter, 3000);
@@ -69,12 +67,10 @@ public class OfficeFloorRule implements TestRule {
 	 * Convenience method to invoke the {@link ProcessState} for the
 	 * {@link ManagedFunction} within the default {@link Office}.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param parameter
-	 *            Parameter to the {@link ManagedFunction}.
-	 * @param waitTime
-	 *            Time in milliseconds to wait for {@link ProcessState} to complete.
+	 * @param functionName Name of the {@link ManagedFunction}.
+	 * @param parameter    Parameter to the {@link ManagedFunction}.
+	 * @param waitTime     Time in milliseconds to wait for {@link ProcessState} to
+	 *                     complete.
 	 */
 	public void invokeProcess(String functionName, Object parameter, long waitTime) {
 		this.invokeProcess("OFFICE", functionName, parameter, waitTime);
@@ -84,14 +80,12 @@ public class OfficeFloorRule implements TestRule {
 	 * Convenience method to invoke the {@link ProcessState} for the
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office} containing the {@link ManagedFunction}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param parameter
-	 *            Parameter to the {@link ManagedFunction}.
-	 * @param waitTime
-	 *            Time in milliseconds to wait for {@link ProcessState} to complete.
+	 * @param officeName   Name of the {@link Office} containing the
+	 *                     {@link ManagedFunction}.
+	 * @param functionName Name of the {@link ManagedFunction}.
+	 * @param parameter    Parameter to the {@link ManagedFunction}.
+	 * @param waitTime     Time in milliseconds to wait for {@link ProcessState} to
+	 *                     complete.
 	 */
 	public void invokeProcess(String officeName, String functionName, Object parameter, long waitTime) {
 
@@ -159,17 +153,16 @@ public class OfficeFloorRule implements TestRule {
 				// Create and compile the OfficeFloor
 				OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 				OfficeFloorRule.this.officeFloor = compiler.compile("OfficeFloor");
-				OfficeFloorRule.this.officeFloor.openOfficeFloor();
 				try {
+					OfficeFloorRule.this.officeFloor.openOfficeFloor();
 
 					// Run the test
 					base.evaluate();
 
 				} finally {
 					// Ensure close the OfficeFloor
-					if (OfficeFloorRule.this.officeFloor != null) {
-						OfficeFloorRule.this.officeFloor.closeOfficeFloor();
-					}
+					OfficeFloorRule.this.officeFloor.closeOfficeFloor();
+					OfficeFloorRule.this.officeFloor = null;
 				}
 			}
 		};

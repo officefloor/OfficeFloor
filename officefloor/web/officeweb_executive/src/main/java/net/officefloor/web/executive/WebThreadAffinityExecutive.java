@@ -211,20 +211,18 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	@Override
 	public Team createTeam(ExecutiveContext context) throws Exception {
 
-		// Determine the split of threads
-		int teamSize = Math.max(1, context.getTeamSize() / this.cpuCores.length);
-
 		// Create a team for each CPU core
 		Team[] teams = new Team[this.cpuCores.length];
 		for (int coreIndex = 0; coreIndex < teams.length; coreIndex++) {
 			CpuCore core = this.cpuCores[coreIndex];
 
 			// Create the team source context
-			TeamSourceContext teamSourceContext = new TeamSourceContextWrapper(context, teamSize,
-					"CORE-" + core.getCoreId(), (runnable) -> () -> {
-						Affinity.setAffinity(core.getCoreAffinity());
-						runnable.run();
-					});
+			TeamSourceContext teamSourceContext = new TeamSourceContextWrapper(context, (teamSize) -> {
+				return Math.max(1, teamSize / this.cpuCores.length);
+			}, "CORE-" + core.getCoreId(), (runnable) -> () -> {
+				Affinity.setAffinity(core.getCoreAffinity());
+				runnable.run();
+			});
 
 			// Create the team
 			teams[coreIndex] = context.getTeamSource().createTeam(teamSourceContext);
