@@ -130,7 +130,6 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 	/**
 	 * Stress tests the {@link TeamSource} in repeating {@link Job} instances.
 	 */
-	@StressTest
 	public void testRepeatSingleJob() throws Exception {
 
 		// Create the repeat job
