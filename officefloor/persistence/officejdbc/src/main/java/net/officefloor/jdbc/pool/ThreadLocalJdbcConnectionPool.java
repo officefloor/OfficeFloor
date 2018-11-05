@@ -298,17 +298,17 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 			return reference; // valid so use
 		}
 
+		// Remove the connection
+		synchronized (this.allPooledConnections) {
+			this.allPooledConnections.remove(reference);
+			this.connectionCount--;
+		}
+
 		// Clean up reference
 		try {
 			reference.pooledConnection.close();
 		} catch (SQLException ex) {
 			// Ignore error, as just attempting to clean up invalid connection
-		}
-
-		// Remove the connection
-		synchronized (this.allPooledConnections) {
-			this.allPooledConnections.remove(reference);
-			this.connectionCount--;
 		}
 
 		// No valid connection
@@ -708,15 +708,12 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 
 		@Override
 		public void connectionClosed(ConnectionEvent event) {
-			// Should not close connection, however leave active with thread
-			this.isValid = false;
+			// Should not get closed events (either way, ignore as handled otherwise)
 		}
 
 		@Override
 		public void connectionErrorOccurred(ConnectionEvent event) {
-			if (event.getSource() == this.pooledConnection) {
-				this.isValid = false;
-			}
+			this.isValid = false;
 		}
 	}
 
