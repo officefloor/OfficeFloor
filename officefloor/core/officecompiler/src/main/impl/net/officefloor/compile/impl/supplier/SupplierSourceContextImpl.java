@@ -29,6 +29,7 @@ import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
@@ -92,6 +93,12 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 		SupplierThreadLocalTypeImpl<T> supplierThreadLocal = new SupplierThreadLocalTypeImpl<>(qualifier, type);
 		this.supplierThreadLocals.add(supplierThreadLocal);
 		return supplierThreadLocal.getSupplierThreadLocal();
+	}
+
+	@Override
+	public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
+		// TODO implement SupplierSourceContext.addThreadSynchroniser(...)
+		throw new UnsupportedOperationException("TODO implement SupplierSourceContext.addThreadSynchroniser(...)");
 	}
 
 	@Override

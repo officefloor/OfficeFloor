@@ -98,7 +98,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		// Suspend the active (soon to be previous) thread state
 		if ((previous != null) && (previous.threadState != null)) {
-			((ThreadStateImpl) previous.threadState).suspendThread();
+			suspendThread(previous.threadState);
 		}
 
 		// Determine new depth
@@ -121,7 +121,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		activeThreadState.set(context);
 
 		// Resume the thread
-		((ThreadStateImpl) threadState).resumeThread();
+		resumeThread(threadState);
 
 		// Return the function context
 		return context;
@@ -140,14 +140,14 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		}
 
 		// Suspend the thread
-		((ThreadStateImpl) active.threadState).suspendThread();
+		suspendThread(active.threadState);
 
 		// Reinstate previous thread state (detaching thread state)
 		activeThreadState.set(active.previousActiveThreadState);
 
 		// Resume the possible previous thread
 		if (active.previousActiveThreadState != null) {
-			((ThreadStateImpl) (active.previousActiveThreadState.threadState)).resumeThread();
+			resumeThread(active.previousActiveThreadState.threadState);
 		}
 	}
 
@@ -170,6 +170,50 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		// Return the current thread state
 		return current;
+	}
+
+	/**
+	 * Resumes the {@link Thread}.
+	 * 
+	 * @param threadState {@link ThreadState} to resume.
+	 */
+	private static void resumeThread(ThreadState threadState) {
+		ThreadStateImpl impl = (ThreadStateImpl) threadState;
+
+		// Determine if first thread
+		if (impl.synchronisers == null) {
+			return; // first thread so nothing to resume
+		}
+
+		// Resume the thread
+		for (int i = 0; i < impl.synchronisers.length; i++) {
+			impl.synchronisers[i].resumeThread();
+		}
+	}
+
+	/**
+	 * Suspends the {@link Thread}.
+	 * 
+	 * @param
+	 */
+	private static void suspendThread(ThreadState threadState) {
+		ThreadStateImpl impl = (ThreadStateImpl) threadState;
+
+		// Determine if have synchronisers
+		if (impl.synchronisers == null) {
+
+			// Create the synchronisers
+			ThreadSynchroniserFactory[] factories = impl.threadMetaData.getThreadSynchronisers();
+			impl.synchronisers = new ThreadSynchroniser[factories.length];
+			for (int i = 0; i < factories.length; i++) {
+				impl.synchronisers[i] = factories[i].createThreadSynchroniser();
+			}
+		}
+
+		// Suspend the thread
+		for (int i = 0; i < impl.synchronisers.length; i++) {
+			impl.synchronisers[i].suspendThread();
+		}
 	}
 
 	/**
@@ -356,44 +400,6 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		// Create thread profiler
 		this.profiler = (processProfiler == null ? null : processProfiler.addThreadState(this));
-	}
-
-	/**
-	 * Resumes the {@link Thread}.
-	 */
-	private void resumeThread() {
-
-		// Determine if first thread
-		if (this.synchronisers == null) {
-			return; // first thread so nothing to resume
-		}
-
-		// Resume the thread
-		for (int i = 0; i < this.synchronisers.length; i++) {
-			this.synchronisers[i].resumeThread();
-		}
-	}
-
-	/**
-	 * Suspends the {@link Thread}.
-	 */
-	private void suspendThread() {
-
-		// Determine if have synchronisers
-		if (this.synchronisers == null) {
-
-			// Create the synchronisers
-			ThreadSynchroniserFactory[] factories = this.threadMetaData.getThreadSynchronisers();
-			this.synchronisers = new ThreadSynchroniser[factories.length];
-			for (int i = 0; i < factories.length; i++) {
-				this.synchronisers[i] = factories[i].createThreadSynchroniser();
-			}
-		}
-
-		// Suspend the thread
-		for (int i = 0; i < this.synchronisers.length; i++) {
-			this.synchronisers[i].suspendThread();
-		}
 	}
 
 	/*

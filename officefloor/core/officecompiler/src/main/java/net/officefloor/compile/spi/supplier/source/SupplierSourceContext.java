@@ -18,10 +18,10 @@
 package net.officefloor.compile.spi.supplier.source;
 
 import net.officefloor.compile.internal.structure.AutoWire;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -35,15 +35,6 @@ public interface SupplierSourceContext extends SourceContext {
 	 * <p>
 	 * Adds a {@link SupplierThreadLocal}.
 	 * <p>
-	 * All {@link SuppliedManagedObjectSource} instances added will also depend on
-	 * the {@link ManagedObject} for the {@link SupplierThreadLocal}. This ensures
-	 * the {@link ManagedObject} object is available to be returned within the
-	 * {@link SuppliedManagedObjectSource}.
-	 * <p>
-	 * To avoid being dependent on too many {@link ManagedObject} instances,
-	 * consider creating/configuring separate {@link SupplierSource} instances
-	 * within the {@link OfficeFloor}.
-	 * <p>
 	 * This allows integrating third party libraries that require
 	 * {@link ThreadLocal} access to objects.
 	 *
@@ -55,6 +46,17 @@ public interface SupplierSourceContext extends SourceContext {
 	 * @return {@link SupplierThreadLocal} to obtain the object.
 	 */
 	<T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualifier, Class<? extends T> type);
+
+	/**
+	 * <p>
+	 * Adds a {@link ThreadSynchroniser}.
+	 * <p>
+	 * This enables keeping the {@link ThreadLocal} instances of the integrating
+	 * third party library consistent across the {@link Thread} instances.
+	 * 
+	 * @param threadSynchroniserFactory {@link ThreadSynchroniserFactory}.
+	 */
+	void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory);
 
 	/**
 	 * Adds a potential {@link ManagedObjectSource} for dependency injection.
