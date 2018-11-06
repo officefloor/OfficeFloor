@@ -19,15 +19,28 @@ package net.officefloor.frame.impl.execute.function.threadlocal;
 
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
 import net.officefloor.frame.api.team.source.impl.AbstractTeamSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -79,10 +92,10 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		// Handle creating functions with teams
 		TestWork work = new TestWork();
 		List<MockTeamSource> teams = new ArrayList<>();
-		Function<String, ReflectiveFunctionBuilder> functionFactory = !isTeams
-				? (functionName) -> this.constructFunction(work, functionName)
-				: (functionName) -> {
-					MockTeamSource teamSource = new MockTeamSource(functionName);
+		BiFunction<String, Integer, ReflectiveFunctionBuilder> functionFactory = !isTeams
+				? (functionName, invocationCount) -> this.constructFunction(work, functionName)
+				: (functionName, invocationCount) -> {
+					MockTeamSource teamSource = new MockTeamSource(functionName, invocationCount);
 					teams.add(teamSource);
 					this.constructTeam(functionName, teamSource);
 					ReflectiveFunctionBuilder function = this.constructFunction(work, functionName);
@@ -90,31 +103,50 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 					return function;
 				};
 
+		// Add managed object
+		ManagedObjectBuilder<?> mo = this.constructManagedObject("INPUT", new MockInput(isTeams), null);
+		ManagingOfficeBuilder<?> moOffice = mo.setManagingOffice(this.getOfficeName());
+		moOffice.setInputManagedObjectName("INPUT");
+		if (isTeams) {
+			MockTeamSource teamSource = new MockTeamSource("inputMo", 1);
+			teams.add(teamSource);
+			this.constructTeam("of-INPUT.TEAM", teamSource);
+		}
+
 		// Configure the functions
-		ReflectiveFunctionBuilder function = functionFactory.apply("function");
+		ReflectiveFunctionBuilder function = functionFactory.apply("function", 1);
 		function.setNextFunction("next");
-		ReflectiveFunctionBuilder next = functionFactory.apply("next");
+		ReflectiveFunctionBuilder next = functionFactory.apply("next", 3);
 		next.buildFlow("parallelFlow", null, false);
 		next.buildFlow("callbackFlow", null, false);
 		next.buildFlow("sequentialFlow", null, false);
-		functionFactory.apply("parallelFlow");
-		functionFactory.apply("callbackFlow");
-		ReflectiveFunctionBuilder sequentialFlow = functionFactory.apply("sequentialFlow");
+		functionFactory.apply("parallelFlow", 3);
+		functionFactory.apply("callbackFlow", 1).setNextFunction("moFunction");
+		ReflectiveFunctionBuilder sequentialFlow = functionFactory.apply("sequentialFlow", 4);
 		sequentialFlow.buildFlow("differentThread", null, true);
-		functionFactory.apply("differentThread");
+		functionFactory.apply("differentThread", 2);
+		ReflectiveFunctionBuilder moFunction = functionFactory.apply("moFunction", 1);
+		moFunction.buildObject("INPUT", ManagedObjectScope.THREAD);
 
 		// Create the different thread (will not share thread state)
 		threadLocalOne.set(null);
 		threadLocalTwo.set(null);
-		InvokedFunction differentThread = new InvokedFunction("differentThread");
+		Map<String, InvokedFunction> nonThreadFunctions = new HashMap<>();
+		for (String name : new String[] { "inputMo", "differentThread" }) {
+			nonThreadFunctions.put(name, new InvokedFunction(name));
+		}
+		Function<String, InvokedFunction> getFunction = (name) -> {
+			InvokedFunction invoked = nonThreadFunctions.get(name);
+			return (invoked != null) ? invoked : new InvokedFunction(name);
+		};
 
 		// Create the expected execution (with thread local state)
 		threadLocalOne.set("TEST");
 		threadLocalTwo.set(1);
 		List<InvokedFunction> expectedFunctions = new ArrayList<>();
-		for (String name : new String[] { "function", "next", "parallelFlow", "callback", "sequentialFlow", "differentThread",
-				"callbackThread", "callbackFlow" }) {
-			expectedFunctions.add(differentThread.name.equals(name) ? differentThread : new InvokedFunction(name));
+		for (String name : new String[] { "function", "next", "parallelFlow", "callback", "sequentialFlow",
+				"differentThread", "callbackThread", "callbackFlow", "moFunction", "inputMo", "moCallback" }) {
+			expectedFunctions.add(getFunction.apply(name));
 		}
 		this.invokedFunctions.clear();
 		threadLocalOne.set(null);
@@ -155,6 +187,15 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		// Invoke
 		this.invokeFunction("function", null);
 
+		// Ensure all the threads have had thread locals cleared
+		// Also, ensures all threads are complete
+		assertEquals("Incorrect number of teams", isTeams ? 8 : 0, teams.size());
+		for (MockTeamSource teamSource : teams) {
+			teamSource.waitForCompletion();
+			assertNull("Should clear one value for team " + teamSource.functionName, teamSource.oneValue);
+			assertNull("Should clear two value for team " + teamSource.functionName, teamSource.twoValue);
+		}
+
 		// Ensure correct invocations (with correct thread state)
 		for (InvokedFunction expectedFunction : expectedFunctions) {
 			InvokedFunction actualFunction = this.invokedFunctions.poll();
@@ -171,14 +212,6 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		// Ensure clear thread state (on exit)
 		assertNull("Should clear thread local one", threadLocalOne.get());
 		assertNull("Should clear thread local two", threadLocalTwo.get());
-
-		// Ensure all the threads have had thread locals cleared
-		assertEquals("Incorrect number of teams", isTeams ? 6 : 0, teams.size());
-		for (MockTeamSource teamSource : teams) {
-			teamSource.waitForCompletion();
-			assertNull("Should clear one value for team " + teamSource.functionName, teamSource.oneValue);
-			assertNull("Should clear two value for team " + teamSource.functionName, teamSource.twoValue);
-		}
 	}
 
 	/**
@@ -205,10 +238,6 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 			new InvokedFunction("parallelFlow");
 		}
 
-		public void callbackFlow() {
-			new InvokedFunction("callbackFlow");
-		}
-
 		public void sequentialFlow(ReflectiveFlow differentThread) {
 			new InvokedFunction("sequentialFlow");
 			differentThread.doFlow(null, (escalation) -> {
@@ -218,6 +247,17 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 
 		public void differentThread() {
 			new InvokedFunction("differentThread");
+		}
+
+		public void callbackFlow() {
+			new InvokedFunction("callbackFlow");
+		}
+
+		public void moFunction(MockInput mo) {
+			new InvokedFunction("moFunction");
+			mo.executeContext.invokeProcess(0, null, mo, 0, (escalation) -> {
+				new InvokedFunction("moCallback");
+			});
 		}
 	}
 
@@ -242,11 +282,60 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		}
 	}
 
+	private class MockInput extends AbstractManagedObjectSource<None, Indexed> implements ManagedObject {
+
+		private final boolean isTeams;
+
+		private ManagedObjectExecuteContext<Indexed> executeContext;
+
+		private MockInput(boolean isTeams) {
+			this.isTeams = isTeams;
+		}
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// no specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, Indexed> context) throws Exception {
+			ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
+			context.setObjectClass(this.getClass());
+			context.addFlow(null);
+			mosContext.getFlow(0).linkFunction("input");
+			ManagedObjectFunctionBuilder<None, Indexed> input = mosContext.addManagedFunction("input",
+					() -> (function) -> {
+						new InvokedFunction("inputMo");
+						return null;
+					});
+			if (this.isTeams) {
+				input.setResponsibleTeam("TEAM");
+			}
+		}
+
+		@Override
+		public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
+			this.executeContext = context;
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this;
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
+		}
+	}
+
 	private class MockTeamSource extends AbstractTeamSource implements Team {
 
 		private final String functionName;
 
-		private boolean isComplete = false;
+		private final int expectedInvocationCount;
+
+		private int invocationCount = 0;
 
 		private Throwable throwable = null;
 
@@ -254,8 +343,9 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 
 		private Integer twoValue = 2;
 
-		private MockTeamSource(String functionName) {
+		private MockTeamSource(String functionName, int expectedInvocationCount) {
 			this.functionName = functionName;
+			this.expectedInvocationCount = expectedInvocationCount;
 		}
 
 		private void waitForCompletion() {
@@ -264,7 +354,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 					if (this.throwable != null) {
 						throw new RuntimeException(this.throwable);
 					}
-					return this.isComplete;
+					return (this.invocationCount == this.expectedInvocationCount);
 				}
 			});
 		}
@@ -310,7 +400,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 				synchronized (this) {
 					this.oneValue = threadLocalOne.get();
 					this.twoValue = threadLocalTwo.get();
-					this.isComplete = true;
+					this.invocationCount++;
 					this.notify();
 				}
 
