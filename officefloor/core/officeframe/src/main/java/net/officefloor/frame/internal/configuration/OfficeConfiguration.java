@@ -30,6 +30,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.OfficeClock;
@@ -63,8 +64,8 @@ public interface OfficeConfiguration {
 	 * Obtains the interval in milli-seconds between each time the
 	 * {@link OfficeManager} monitors the {@link Office}.
 	 * 
-	 * @return Interval in milli-seconds between each time the
-	 *         {@link OfficeManager} monitors the {@link Office}.
+	 * @return Interval in milli-seconds between each time the {@link OfficeManager}
+	 *         monitors the {@link Office}.
 	 */
 	long getMonitorOfficeInterval();
 
@@ -113,11 +114,11 @@ public interface OfficeConfiguration {
 	LinkedManagedObjectSourceConfiguration[] getRegisteredManagedObjectSources();
 
 	/**
-	 * Obtains the configuration of the {@link ManagedObjectSource} to be bound
-	 * for the input {@link ManagedObject}.
+	 * Obtains the configuration of the {@link ManagedObjectSource} to be bound for
+	 * the input {@link ManagedObject}.
 	 * 
-	 * @return Configuration of the {@link ManagedObjectSource} to be bound for
-	 *         the input {@link ManagedObject}.
+	 * @return Configuration of the {@link ManagedObjectSource} to be bound for the
+	 *         input {@link ManagedObject}.
 	 */
 	BoundInputManagedObjectConfiguration[] getBoundInputManagedObjectConfiguration();
 
@@ -125,8 +126,8 @@ public interface OfficeConfiguration {
 	 * Obtains the {@link ManagedObject} instances to be bound to the
 	 * {@link ProcessState} of this {@link Office}.
 	 * 
-	 * @return Listing of the configuration of the {@link ManagedObject}
-	 *         instances bound to the {@link ProcessState}.
+	 * @return Listing of the configuration of the {@link ManagedObject} instances
+	 *         bound to the {@link ProcessState}.
 	 */
 	ManagedObjectConfiguration<?>[] getProcessManagedObjectConfiguration();
 
@@ -134,8 +135,8 @@ public interface OfficeConfiguration {
 	 * Obtains the {@link ManagedObject} instances to be bound to the
 	 * {@link ThreadState} of this {@link Office}.
 	 * 
-	 * @return Listing of the configuration of the {@link ManagedObject}
-	 *         instances bound to the {@link ThreadState}.
+	 * @return Listing of the configuration of the {@link ManagedObject} instances
+	 *         bound to the {@link ThreadState}.
 	 */
 	ManagedObjectConfiguration<?>[] getThreadManagedObjectConfiguration();
 
@@ -147,8 +148,7 @@ public interface OfficeConfiguration {
 	GovernanceConfiguration<?, ?>[] getGovernanceConfiguration();
 
 	/**
-	 * Indicates if manually managing {@link Governance} via
-	 * {@link Administration}.
+	 * Indicates if manually managing {@link Governance} via {@link Administration}.
 	 * 
 	 * @return <code>true</code> to manually managed {@link Governance}.
 	 */
@@ -169,8 +169,7 @@ public interface OfficeConfiguration {
 	OfficeEnhancer[] getOfficeEnhancers();
 
 	/**
-	 * Obtains the {@link EscalationConfiguration} instances for the
-	 * {@link Office}.
+	 * Obtains the {@link EscalationConfiguration} instances for the {@link Office}.
 	 * 
 	 * @return {@link EscalationConfiguration} instances for the {@link Office}.
 	 */
@@ -178,24 +177,20 @@ public interface OfficeConfiguration {
 
 	/**
 	 * <p>
-	 * Obtains a {@link FunctionBuilder} registered with this
-	 * {@link OfficeBuilder}.
+	 * Obtains a {@link FunctionBuilder} registered with this {@link OfficeBuilder}.
 	 * <p>
 	 * This enables addition configuration of {@link ManagedFunction} instances
 	 * registered by a {@link ManagedObjectSource}.
 	 * 
-	 * @param namespace
-	 *            Namespace. Likely the {@link ManagedObjectSource} name.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
+	 * @param namespace    Namespace. Likely the {@link ManagedObjectSource} name.
+	 * @param functionName Name of the {@link ManagedFunction}.
 	 * @return {@link FlowBuilder} for the {@link ManagedFunction}.
 	 */
 	FlowBuilder<?> getFlowBuilder(String namespace, String functionName);
 
 	/**
-	 * Obtains the list of {@link ManagedFunctionReference} instances
-	 * referencing the {@link ManagedFunction} instances to invoke on
-	 * {@link Office} start up.
+	 * Obtains the list of {@link ManagedFunctionReference} instances referencing
+	 * the {@link ManagedFunction} instances to invoke on {@link Office} start up.
 	 * 
 	 * @return List of start up {@link ManagedFunctionReference} references.
 	 */
@@ -207,5 +202,13 @@ public interface OfficeConfiguration {
 	 * @return {@link Profiler} for the {@link Office}.
 	 */
 	Profiler getProfiler();
+
+	/**
+	 * Obtains the {@link ThreadSynchroniserFactory} instances to synchronise the
+	 * {@link ThreadLocal} state between {@link Team} instances.
+	 * 
+	 * @return {@link ThreadSynchroniserFactory} instances.
+	 */
+	ThreadSynchroniserFactory[] getThreadSynchronisers();
 
 }

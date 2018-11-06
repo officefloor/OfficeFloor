@@ -24,6 +24,8 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.function.AbstractFunctionState;
@@ -94,6 +96,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		// Obtain the possible existing thread state on thread
 		ActiveThreadState previous = activeThreadState.get();
 
+		// Suspend the active (soon to be previous) thread state
+		if ((previous != null) && (previous.threadState != null)) {
+			((ThreadStateImpl) previous.threadState).suspendThread();
+		}
+
 		// Determine new depth
 		FunctionChainBreak functionChainBreak;
 		int nextThreadStateDepth;
@@ -113,6 +120,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				nextThreadStateDepth, previous);
 		activeThreadState.set(context);
 
+		// Resume the thread
+		((ThreadStateImpl) threadState).resumeThread();
+
 		// Return the function context
 		return context;
 	}
@@ -121,12 +131,24 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * Detaches the {@link ThreadState} from the {@link Thread}.
 	 */
 	public static void detachThreadStateFromThread() {
+
+		// Obtain the active thread state
 		ActiveThreadState active = activeThreadState.get();
 		if (active == null) {
 			throw new IllegalStateException(
 					"No " + ThreadState.class.getSimpleName() + " attached to " + Thread.class.getSimpleName());
 		}
+
+		// Suspend the thread
+		((ThreadStateImpl) active.threadState).suspendThread();
+
+		// Reinstate previous thread state (detaching thread state)
 		activeThreadState.set(active.previousActiveThreadState);
+
+		// Resume the possible previous thread
+		if (active.previousActiveThreadState != null) {
+			((ThreadStateImpl) (active.previousActiveThreadState.threadState)).resumeThread();
+		}
 	}
 
 	/**
@@ -195,6 +217,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * {@link ThreadProfiler}.
 	 */
 	private final ThreadProfiler profiler;
+
+	/**
+	 * {@link ThreadSynchroniser} instances.
+	 */
+	private ThreadSynchroniser[] synchronisers = null;
 
 	/**
 	 * {@link EscalationLevel} of this {@link ThreadState}.
@@ -329,6 +356,44 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		// Create thread profiler
 		this.profiler = (processProfiler == null ? null : processProfiler.addThreadState(this));
+	}
+
+	/**
+	 * Resumes the {@link Thread}.
+	 */
+	private void resumeThread() {
+
+		// Determine if first thread
+		if (this.synchronisers == null) {
+			return; // first thread so nothing to resume
+		}
+
+		// Resume the thread
+		for (int i = 0; i < this.synchronisers.length; i++) {
+			this.synchronisers[i].resumeThread();
+		}
+	}
+
+	/**
+	 * Suspends the {@link Thread}.
+	 */
+	private void suspendThread() {
+
+		// Determine if have synchronisers
+		if (this.synchronisers == null) {
+
+			// Create the synchronisers
+			ThreadSynchroniserFactory[] factories = this.threadMetaData.getThreadSynchronisers();
+			this.synchronisers = new ThreadSynchroniser[factories.length];
+			for (int i = 0; i < factories.length; i++) {
+				this.synchronisers[i] = factories[i].createThreadSynchroniser();
+			}
+		}
+
+		// Suspend the thread
+		for (int i = 0; i < this.synchronisers.length; i++) {
+			this.synchronisers[i].suspendThread();
+		}
 	}
 
 	/*

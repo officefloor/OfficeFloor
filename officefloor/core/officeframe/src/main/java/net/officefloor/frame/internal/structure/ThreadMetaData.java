@@ -23,6 +23,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
  * Meta-data for the {@link ThreadState}.
@@ -35,8 +36,8 @@ public interface ThreadMetaData {
 	 * Obtains the {@link ManagedObjectMetaData} of the {@link ManagedObject}
 	 * instances bound to the {@link ThreadState}.
 	 * 
-	 * @return {@link ManagedObjectMetaData} of the {@link ManagedObject}
-	 *         instances bound to the {@link ThreadState}.
+	 * @return {@link ManagedObjectMetaData} of the {@link ManagedObject} instances
+	 *         bound to the {@link ThreadState}.
 	 */
 	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
 
@@ -55,8 +56,8 @@ public interface ThreadMetaData {
 	 * <p>
 	 * Once the {@link FunctionState} chain has reached this length, it will be
 	 * broken. (spawned in another {@link Thread}). This avoids
-	 * {@link StackOverflowError} issues in {@link FunctionState} chain being
-	 * too large.
+	 * {@link StackOverflowError} issues in {@link FunctionState} chain being too
+	 * large.
 	 * 
 	 * @return Maximum {@link FunctionState} chain length for this
 	 *         {@link ThreadState}.
@@ -68,10 +69,17 @@ public interface ThreadMetaData {
 	 * chains.
 	 * 
 	 * @return {@link TeamManagement} for an active {@link Team}. An active
-	 *         {@link Team} contains {@link Thread} instances that will execute
-	 *         the {@link Job} with a different {@link Thread} stack.
+	 *         {@link Team} contains {@link Thread} instances that will execute the
+	 *         {@link Job} with a different {@link Thread} stack.
 	 */
 	TeamManagement getBreakChainTeamManagement();
+
+	/**
+	 * Obtains the {@link ThreadSynchroniserFactory} instances.
+	 * 
+	 * @return {@link ThreadSynchroniserFactory} instances.
+	 */
+	ThreadSynchroniserFactory[] getThreadSynchronisers();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for the {@link Office}.

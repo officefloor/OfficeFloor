@@ -112,11 +112,13 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		threadLocalOne.set("TEST");
 		threadLocalTwo.set(1);
 		List<InvokedFunction> expectedFunctions = new ArrayList<>();
-		for (String name : new String[] { "function", "next", "parallelFlow", "callback", "sequentialFlow",
-				"differentThread", "callbackThread", "callbackFlow" }) {
+		for (String name : new String[] { "function", "next", "parallelFlow", "callback", "sequentialFlow", "differentThread",
+				"callbackThread", "callbackFlow" }) {
 			expectedFunctions.add(differentThread.name.equals(name) ? differentThread : new InvokedFunction(name));
 		}
 		this.invokedFunctions.clear();
+		threadLocalOne.set(null);
+		threadLocalTwo.set(null);
 
 		// Add the thread synchronisers
 		this.getOfficeBuilder().addThreadSynchroniser(() -> new ThreadSynchroniser() {
@@ -185,6 +187,8 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 	public class TestWork {
 
 		public void function() {
+			threadLocalOne.set("TEST");
+			threadLocalTwo.set(1);
 			new InvokedFunction("function");
 		}
 
