@@ -38,6 +38,7 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
@@ -323,6 +324,40 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect type for first", String.class, types[0].getObjectType());
 		assertNull("Should be no qualifier for second", types[1].getQualifier());
 		assertEquals("Incorrect type for second", Connection.class, types[1].getObjectType());
+	}
+
+	/**
+	 * Ensure issue if no {@link ThreadSynchroniserFactory} provided.
+	 */
+	public void testIssueIfNoSupplierThreadSynchroniserFactory() {
+
+		// Return no thread synchroniser factory
+		this.issues.recordIssue("Must provide ThreadSynchroniserFactory for added instance 0");
+
+		// Attempt to load supplier type
+		this.loadSupplierType(false, (context) -> {
+			context.addThreadSynchroniser(null);
+		});
+	}
+
+	/**
+	 * Ensure can load {@link ThreadSynchroniserFactory}.
+	 */
+	public void testThreadSynchroniser() {
+
+		// Load the supplier type
+		ThreadSynchroniserFactory threadSynchroniserOne = this.createMock(ThreadSynchroniserFactory.class);
+		ThreadSynchroniserFactory threadSynchroniserTwo = this.createMock(ThreadSynchroniserFactory.class);
+		SupplierType type = this.loadSupplierType(true, (context) -> {
+			context.addThreadSynchroniser(threadSynchroniserOne);
+			context.addThreadSynchroniser(threadSynchroniserTwo);
+		});
+
+		// Validate the thread synchroniser
+		ThreadSynchroniserFactory[] threadSynchronisers = type.getThreadSynchronisers();
+		assertEquals("Incorrect number of thread synchronisers", 2, threadSynchronisers.length);
+		assertSame("Incorrect first thread synchroniser", threadSynchroniserOne, threadSynchronisers[0]);
+		assertSame("Incorrect second thread synchroniser", threadSynchroniserTwo, threadSynchronisers[1]);
 	}
 
 	/**

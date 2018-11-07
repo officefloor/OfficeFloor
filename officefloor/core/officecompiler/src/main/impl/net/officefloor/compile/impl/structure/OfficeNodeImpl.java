@@ -979,7 +979,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		// Build the suppliers
 		this.suppliers.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSupplierName(), b.getOfficeSupplierName()))
-				.forEachOrdered((supplier) -> supplier.buildSupplier(compileContext));
+				.forEachOrdered((supplier) -> supplier.buildSupplier(officeBuilder, compileContext));
 
 		// Build the sections of the office (in deterministic order)
 		this.sections.values().stream()

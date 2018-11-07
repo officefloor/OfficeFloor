@@ -45,11 +45,12 @@ import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
- * Tests compiling an {@link Office} {@link SupplierThreadLocal}.
+ * Tests compiling an {@link Office} {@link SupplierThreadLocal} and
+ * {@link ThreadSynchroniser}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
+public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 
 	/**
 	 * Ensure issue if {@link SupplierThreadLocal} used by
@@ -81,7 +82,7 @@ public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
 
 		// Record no thread synchroniser for configuration
 		this.issues.recordIssue("SUPPLIER", SupplierNodeImpl.class,
-				"Should not have ThreadSynchroniser registered, as SupplierSOurce registered at OfficeFloor");
+				"Should not have ThreadSynchroniser registered, as SupplierSource registered at OfficeFloor");
 
 		// Should not compile
 		this.compile(false);
@@ -213,18 +214,12 @@ public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
 		ThreadSynchroniserFactory threadSynchroniser = this.createMock(ThreadSynchroniserFactory.class);
 		MockSupplierSource.addThreadSynchroniser(threadSynchroniser);
 
-		// Record the loading section type
-		this.issues.recordCaptureIssues(false);
-
 		// Record building the OfficeFloor
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Record registering the thread synchroniser
 		office.addThreadSynchroniser(threadSynchroniser);
-
-		// Complete the Office
-		this.record_officeBuilder_addFunction("SECTION", "INPUT");
 
 		// Compile the OfficeFloor
 		this.compile(true);

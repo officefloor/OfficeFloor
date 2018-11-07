@@ -43,6 +43,8 @@ import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
  * Utility class for testing a {@link SupplierSource}.
@@ -141,6 +143,12 @@ public class SupplierLoaderUtil {
 
 			// Only qualifier and type so already checked by existing
 		}
+
+		// Ensure correct number of thread synchronisers
+		ThreadSynchroniserFactory[] eThreadSynchronisers = eType.getThreadSynchronisers();
+		ThreadSynchroniserFactory[] aThreadSynchronisers = aType.getThreadSynchronisers();
+		Assert.assertEquals("INcorrect number of " + ThreadSynchroniserFactory.class.getSimpleName() + " instances",
+				eThreadSynchronisers.length, aThreadSynchronisers.length);
 
 		// Ensure the set of supplied managed object sources match
 		Function<SupplierType, Map<String, SuppliedManagedObjectSourceType>> extractManagedObjectSources = (type) -> {
@@ -265,12 +273,18 @@ public class SupplierLoaderUtil {
 	/**
 	 * {@link SupplierTypeBuilder} implementation.
 	 */
-	private static class SupplierTypeBuilderImpl implements SupplierTypeBuilder, SupplierType {
+	private static class SupplierTypeBuilderImpl
+			implements SupplierTypeBuilder, SupplierType, ThreadSynchroniserFactory {
 
 		/**
 		 * {@link SupplierThreadLocalType} instances.
 		 */
 		private final List<SupplierThreadLocalType> supplierThreadLocalTypes = new LinkedList<>();
+
+		/**
+		 * {@link ThreadSynchroniserFactory} instances.
+		 */
+		private final List<ThreadSynchroniserFactory> threadSynchronisers = new LinkedList<>();
 
 		/**
 		 * {@link SuppliedManagedObjectSourceType} instances.
@@ -285,6 +299,11 @@ public class SupplierLoaderUtil {
 		public void addSupplierThreadLocal(String qualifier, Class<?> objectType) {
 			SupplierThreadLocalTypeImpl<?> threadLocal = new SupplierThreadLocalTypeImpl<>(qualifier, objectType);
 			this.supplierThreadLocalTypes.add(threadLocal);
+		}
+
+		@Override
+		public void addThreadSynchroniser() {
+			this.threadSynchronisers.add(this);
 		}
 
 		@Override
@@ -308,9 +327,24 @@ public class SupplierLoaderUtil {
 		}
 
 		@Override
+		public ThreadSynchroniserFactory[] getThreadSynchronisers() {
+			return this.threadSynchronisers.toArray(new ThreadSynchroniserFactory[this.threadSynchronisers.size()]);
+		}
+
+		@Override
 		public SuppliedManagedObjectSourceType[] getSuppliedManagedObjectTypes() {
 			return this.suppliedManagedObjectSourceTypes
 					.toArray(new SuppliedManagedObjectSourceType[this.suppliedManagedObjectSourceTypes.size()]);
+		}
+
+		/*
+		 * ============= ThreadSynchroniserFactory ================
+		 */
+
+		@Override
+		public ThreadSynchroniser createThreadSynchroniser() {
+			throw new IllegalStateException("Mock " + ThreadSynchroniser.class.getSimpleName() + " for "
+					+ SupplierTypeBuilder.class.getSimpleName() + " can not be used");
 		}
 	}
 

@@ -50,6 +50,11 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	private final List<SupplierThreadLocalTypeImpl<?>> supplierThreadLocals = new LinkedList<>();
 
 	/**
+	 * {@link ThreadSynchroniserFactory} instances.
+	 */
+	private final List<ThreadSynchroniserFactory> threadSynchronisers = new LinkedList<>();
+
+	/**
 	 * {@link SuppliedManagedObjectSourceImpl} instances.
 	 */
 	private final List<SuppliedManagedObjectSourceTypeImpl> suppliedManagedObjectSources = new LinkedList<>();
@@ -76,6 +81,15 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	}
 
 	/**
+	 * Obtains the {@link ThreadSynchroniserFactory} instances.
+	 * 
+	 * @return {@link ThreadSynchroniserFactory} instances.
+	 */
+	public ThreadSynchroniserFactory[] getThreadSynchronisers() {
+		return this.threadSynchronisers.stream().toArray(ThreadSynchroniserFactory[]::new);
+	}
+
+	/**
 	 * Obtains the {@link SuppliedManagedObjectSourceType} instances.
 	 * 
 	 * @return {@link SuppliedManagedObjectSourceType} instances.
@@ -97,8 +111,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 
 	@Override
 	public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
-		// TODO implement SupplierSourceContext.addThreadSynchroniser(...)
-		throw new UnsupportedOperationException("TODO implement SupplierSourceContext.addThreadSynchroniser(...)");
+		this.threadSynchronisers.add(threadSynchroniserFactory);
 	}
 
 	@Override

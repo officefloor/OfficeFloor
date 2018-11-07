@@ -18,6 +18,7 @@
 package net.officefloor.compile.supplier;
 
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
  * <code>Type definition</code> of a Supplier.
@@ -34,6 +35,15 @@ public interface SupplierType {
 	 *         {@link SupplierSource}.
 	 */
 	SupplierThreadLocalType[] getSupplierThreadLocalTypes();
+
+	/**
+	 * Obtains the {@link ThreadSynchroniserFactory} instances required by the
+	 * {@link SupplierSource}.
+	 * 
+	 * @return Required {@link ThreadSynchroniserFactory} instances required by the
+	 *         {@link SupplierSource}.
+	 */
+	ThreadSynchroniserFactory[] getThreadSynchronisers();
 
 	/**
 	 * Obtains the possible {@link SuppliedManagedObjectSourceType} instances from
