@@ -187,14 +187,8 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		// Invoke
 		this.invokeFunction("function", null);
 
-		// Ensure all the threads have had thread locals cleared
-		// Also, ensures all threads are complete
-		assertEquals("Incorrect number of teams", isTeams ? 8 : 0, teams.size());
-		for (MockTeamSource teamSource : teams) {
-			teamSource.waitForCompletion();
-			assertNull("Should clear one value for team " + teamSource.functionName, teamSource.oneValue);
-			assertNull("Should clear two value for team " + teamSource.functionName, teamSource.twoValue);
-		}
+		// Wait for all functions to be invoked
+		this.waitForTrue(() -> this.invokedFunctions.size() == expectedFunctions.size());
 
 		// Ensure correct invocations (with correct thread state)
 		for (InvokedFunction expectedFunction : expectedFunctions) {
@@ -208,6 +202,15 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		}
 		assertEquals("Should be no further invoked functions: " + this.invokedFunctions, 0,
 				this.invokedFunctions.size());
+
+		// Ensure all the threads have had thread locals cleared
+		// Also, ensures all threads are complete
+		assertEquals("Incorrect number of teams", isTeams ? 8 : 0, teams.size());
+		for (MockTeamSource teamSource : teams) {
+			teamSource.waitForCompletion();
+			assertNull("Should clear one value for team " + teamSource.functionName, teamSource.oneValue);
+			assertNull("Should clear two value for team " + teamSource.functionName, teamSource.twoValue);
+		}
 
 		// Ensure clear thread state (on exit)
 		assertNull("Should clear thread local one", threadLocalOne.get());
@@ -354,6 +357,10 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 					if (this.throwable != null) {
 						throw new RuntimeException(this.throwable);
 					}
+					assertTrue(
+							this.functionName + " too many invocations (a=" + this.invocationCount + ", e="
+									+ this.expectedInvocationCount + ")",
+							(this.invocationCount <= this.expectedInvocationCount));
 					return (this.invocationCount == this.expectedInvocationCount);
 				}
 			});
