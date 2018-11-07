@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.run.supplier;
 
+import static org.junit.Assert.assertNotEquals;
+
 import net.officefloor.compile.run.AbstractRunTestCase;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
@@ -41,33 +43,42 @@ public class RunSupplierThreadSynchroniserTest extends AbstractRunTestCase {
 	/**
 	 * Tests {@link SupplierSource} registering {@link ThreadSynchroniser}.
 	 */
-	public void testThreadSynchroniser() throws Throwable {
+	public void testSupplierThreadSynchroniser() throws Throwable {
 
 		// Open the OfficeFloor
 		OfficeFloor officeFloor = this.open();
 
 		// Trigger function
 		CompileSection.threadLocalValue = null;
+		CompileSection.threadLocalThread = null;
 		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.threadLocal", null);
 
 		// Ensure synchronised between threads
 		assertEquals("Should synchronise thread locals", "MOCK", CompileSection.threadLocalValue);
 	}
 
+	public static class TeamMarker {
+	}
+
 	public static class CompileSection {
 
 		private static volatile String threadLocalValue;
 
+		private static volatile Thread threadLocalThread;
+
 		@NextFunction("differentTeam")
 		public void threadLocal(MockManagedObjectSource mos) {
+			threadLocalThread = Thread.currentThread();
 
 			// Load the thread local value
 			mos.threadLocal.set("MOCK");
 		}
 
-		public void differentTeam(MockManagedObjectSource mos) {
+		public void differentTeam(MockManagedObjectSource mos, TeamMarker marker) {
+			assertNotNull("Should have thread local thread", threadLocalThread);
+			assertNotEquals("Should be different thread", threadLocalThread, Thread.currentThread());
 
-			// Capture the thread local
+			// Capture the thread local value (synchronised to this thread)
 			threadLocalValue = mos.threadLocal.get();
 		}
 	}
