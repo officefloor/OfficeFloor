@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -40,7 +37,11 @@ import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.plugin.section.clazz.Property;
+import net.officefloor.spring.extension.SpringSupplierExtension;
+import net.officefloor.spring.extension.SpringSupplierExtensionContext;
+import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
 
 /**
  * Spring {@link SupplierSource}.
@@ -66,12 +67,12 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * }
 	 * </pre>
 	 * 
-	 * @param qualifier Qualifier. May be <code>null</code>.
-	 * @param beanType  Type of bean required.
-	 * @return Bean sourced from an {@link OfficeFloor} {@link ManagedObject}.
+	 * @param qualifier  Qualifier. May be <code>null</code>.
+	 * @param objectType Type of object required.
+	 * @return Object sourced from an {@link OfficeFloor} {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <B> B getManagedObject(String qualifier, Class<? extends B> beanType) {
+	public static <B> B getManagedObject(String qualifier, Class<? extends B> objectType) {
 
 		// Obtain the dependency factory
 		SpringDependencyFactory factory = springDependencyFactory.get();
@@ -82,12 +83,12 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 		// Create and return the dependency
 		try {
-			return (B) factory.createDependency(qualifier, beanType);
+			return (B) factory.createDependency(qualifier, objectType);
 
 		} catch (Throwable ex) {
 			// Propagate as fatal error
 			throw new FatalBeanException("Failed to obtain " + OfficeFloor.class.getSimpleName() + " dependency "
-					+ SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, beanType.getName()));
+					+ SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, objectType.getName()));
 		}
 	}
 
@@ -165,7 +166,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 *                                         name/value pairs.
 	 * @return {@link OfficeSupplier} for the {@link SpringSupplierSource}.
 	 */
-	public static OfficeSupplier configureSpring(OfficeArchitect architect, Class<?> configurationClass,
+	public static OfficeSupplier configure(OfficeArchitect architect, Class<?> configurationClass,
 			String... additionalPropertyNameValuePairs) {
 		OfficeSupplier supplier = architect.addSupplier("Spring", SpringSupplierSource.class.getName());
 		supplier.addProperty(SpringSupplierSource.CONFIGURATION_CLASS_NAME, configurationClass.getName());
@@ -199,29 +200,36 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	@Override
 	public void supply(SupplierSourceContext context) throws Exception {
 
-		// Load Spring with access to hook in OfficeFloor managed objects
-		Map<String, SpringDependency> springDependenciesByName = new HashMap<>();
-		this.springContext = runInContext(() -> {
+		// Load the extensions
+		List<SpringSupplierExtension> extensions = new LinkedList<>();
+		for (SpringSupplierExtension extension : context
+				.loadOptionalServices(SpringSupplierExtensionServiceFactory.class)) {
+			extensions.add(extension);
+		}
 
-			// Load the configurable application context
-			String configurationClassName = context.getProperty(CONFIGURATION_CLASS_NAME);
-			Class<?> configurationClass = context.loadClass(configurationClassName);
-			return SpringApplication.run(configurationClass);
-
-		}, (qualifier, objectType) -> {
+		// Create the dependency factory
+		Map<String, Object> existingSpringDependencies = new HashMap<>();
+		Map<String, SpringDependency> springDependencies = new HashMap<>();
+		SpringDependencyFactory dependencyFactory = (qualifier, objectType) -> {
 
 			// Obtain the dependency name
 			String dependencyName = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier,
 					objectType.getName());
 
+			// Determine if already created
+			Object dependency = existingSpringDependencies.get(dependencyName);
+			if (dependency != null) {
+				return dependency;
+			}
+
 			// Obtain the supplier thread local
 			SupplierThreadLocal<?> threadLocal = context.addSupplierThreadLocal(qualifier, objectType);
 
 			// Register the Spring dependency
-			springDependenciesByName.put(dependencyName, new SpringDependency(qualifier, objectType));
+			springDependencies.put(dependencyName, new SpringDependency(qualifier, objectType));
 
-			// Provide the proxy to supplier thread local
-			return Proxy.newProxyInstance(context.getClassLoader(), new Class[] { objectType },
+			// Create the dependency to supplier thread local
+			dependency = Proxy.newProxyInstance(context.getClassLoader(), new Class[] { objectType },
 					(proxy, method, args) -> {
 
 						// Ensure obtain the object
@@ -235,39 +243,63 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 						return object.getClass().getMethod(method.getName(), method.getParameterTypes()).invoke(object,
 								args);
 					});
-		});
+
+			// Register the dependency and return it
+			existingSpringDependencies.put(dependencyName, dependency);
+			return dependency;
+		};
+
+		// Create the extension context
+		SpringSupplierExtensionContext extensionContext = new SpringSupplierExtensionContext() {
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public <B> B getManagedObject(String qualifier, Class<? extends B> objectType) throws Exception {
+				return (B) dependencyFactory.createDependency(qualifier, objectType);
+			}
+
+			@Override
+			public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
+				context.addThreadSynchroniser(threadSynchroniserFactory);
+			}
+		};
+
+		// Load Spring with access to hook in OfficeFloor managed objects
+		this.springContext = runInContext(() -> {
+
+			// Run before spring load
+			for (SpringSupplierExtension extension : extensions) {
+				extension.beforeSpringLoad(extensionContext);
+			}
+
+			// Load the configurable application context
+			String configurationClassName = context.getProperty(CONFIGURATION_CLASS_NAME);
+			Class<?> configurationClass = context.loadClass(configurationClassName);
+			ConfigurableApplicationContext applicationContext = SpringApplication.run(configurationClass);
+
+			// Run after spring load
+			for (SpringSupplierExtension extension : extensions) {
+				extension.afterSpringLoad(extensionContext);
+			}
+
+			// Return the application context
+			return applicationContext;
+
+		}, dependencyFactory);
 
 		// Load the Spring dependencies
-		SpringDependency[] springDependencies = springDependenciesByName.values().stream()
+		SpringDependency[] springDependenciesList = springDependencies.values().stream()
 				.toArray(SpringDependency[]::new);
 
 		// Load listing of all the beans (mapped by their type)
 		Map<Class<?>, List<String>> beanNamesByType = new HashMap<>();
-		ConfigurableListableBeanFactory beanFactory = this.springContext.getBeanFactory();
 		NEXT_BEAN: for (String name : this.springContext.getBeanDefinitionNames()) {
-			BeanDefinition definition = beanFactory.getBeanDefinition(name);
-			String beanClassName = definition.getBeanClassName();
-
-			// Determine if factory method
-			if (beanClassName == null) {
-				if (definition instanceof AnnotatedBeanDefinition) {
-					AnnotatedBeanDefinition annotatedDefinition = (AnnotatedBeanDefinition) definition;
-					if (annotatedDefinition.getFactoryMethodMetadata() != null) {
-						beanClassName = annotatedDefinition.getFactoryMethodMetadata().getReturnTypeName();
-					}
-				}
-			}
-
-			// Ensure have bean type
-			if (beanClassName == null) {
-				continue NEXT_BEAN;
-			}
 
 			// Load the bean type
-			Class<?> beanType = context.loadClass(beanClassName);
+			Class<?> beanType = this.springContext.getBean(name).getClass();
 
 			// Filter out Spring beans being loaded from OfficeFloor
-			for (SpringDependency dependency : springDependencies) {
+			for (SpringDependency dependency : springDependenciesList) {
 				if (beanType.isAssignableFrom(dependency.getObjectType())) {
 					continue NEXT_BEAN; // OfficeFloor providing
 				}
@@ -290,14 +322,14 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 				// Only the one type (so no qualifier)
 				String singleBeanName = beanNames.get(0);
 				context.addManagedObjectSource(null, beanType, new SpringBeanManagedObjectSource(singleBeanName,
-						beanType, this.springContext, springDependencies));
+						beanType, this.springContext, springDependenciesList));
 				break;
 
 			default:
 				// Multiple, so provide qualifier
 				for (String beanName : beanNames) {
 					context.addManagedObjectSource(beanName, beanType, new SpringBeanManagedObjectSource(beanName,
-							beanType, this.springContext, springDependencies));
+							beanType, this.springContext, springDependenciesList));
 				}
 				break;
 			}

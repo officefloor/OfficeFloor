@@ -23,6 +23,7 @@ import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
  * Builder for the {@link SupplierType}.
@@ -38,6 +39,11 @@ public interface SupplierTypeBuilder {
 	 * @param objectType Object type for the {@link SupplierThreadLocalType}.
 	 */
 	void addSupplierThreadLocal(String qualifier, Class<?> objectType);
+
+	/**
+	 * Adds a {@link ThreadSynchroniserFactory}.
+	 */
+	void addThreadSynchroniser();
 
 	/**
 	 * Adds a {@link SuppliedManagedObjectSourceType}.

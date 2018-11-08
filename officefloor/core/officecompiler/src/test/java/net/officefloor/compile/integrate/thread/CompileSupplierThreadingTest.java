@@ -39,15 +39,18 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.thread.OptionalThreadLocal;
+import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
- * Tests compiling an {@link Office} {@link SupplierThreadLocal}.
+ * Tests compiling an {@link Office} {@link SupplierThreadLocal} and
+ * {@link ThreadSynchroniser}.
  * 
  * @author Daniel Sagenschneider
  */
-public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
+public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 
 	/**
 	 * Ensure issue if {@link SupplierThreadLocal} used by
@@ -63,7 +66,25 @@ public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
 				"Should not have Supplier Thread Local (" + ThreadLocalManagedObject.class.getName()
 						+ ") registered, as SupplierSource registered at OfficeFloor");
 
-		// Should compile
+		// Should not compile
+		this.compile(false);
+	}
+
+	/**
+	 * Ensure issue if {@link ThreadSynchroniser} used by
+	 * {@link OfficeFloorSupplier}.
+	 */
+	public void testThreadSynchroniserNotAllowedInOfficeFloorSupplier() {
+
+		// Add thread synchroniser
+		ThreadSynchroniserFactory threadSynchroniser = this.createMock(ThreadSynchroniserFactory.class);
+		MockSupplierSource.addThreadSynchroniser(threadSynchroniser);
+
+		// Record no thread synchroniser for configuration
+		this.issues.recordIssue("SUPPLIER", SupplierNodeImpl.class,
+				"Should not have ThreadSynchroniser registered, as SupplierSource registered at OfficeFloor");
+
+		// Should not compile
 		this.compile(false);
 	}
 
@@ -184,10 +205,31 @@ public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
 		this.compile(true);
 	}
 
+	/**
+	 * Ensure can register {@link ThreadSynchroniser}.
+	 */
+	public void testThreadSynchroniser() {
+
+		// Add thread synchroniser
+		ThreadSynchroniserFactory threadSynchroniser = this.createMock(ThreadSynchroniserFactory.class);
+		MockSupplierSource.addThreadSynchroniser(threadSynchroniser);
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Record registering the thread synchroniser
+		office.addThreadSynchroniser(threadSynchroniser);
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		MockSupplierSource.threadLocals.clear();
+		MockSupplierSource.threadSynchronisers.clear();
 	}
 
 	public static class ThreadLocalManagedObject {
@@ -217,12 +259,18 @@ public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
 
 		private static List<SupplierThreadLocalInstance> threadLocals = new ArrayList<>(1);
 
+		private static List<ThreadSynchroniserFactory> threadSynchronisers = new ArrayList<>(1);
+
 		private static void addSupplierThreadLocal(Class<?> objectType) {
 			addSupplierThreadLocal(null, objectType);
 		}
 
 		private static void addSupplierThreadLocal(String qualifier, Class<?> objectType) {
 			threadLocals.add(new SupplierThreadLocalInstance(qualifier, objectType));
+		}
+
+		private static void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniser) {
+			threadSynchronisers.add(threadSynchroniser);
 		}
 
 		/*
@@ -240,6 +288,11 @@ public class CompileSupplierThreadLocalTest extends AbstractCompileTestCase {
 			// Add the thread local
 			for (SupplierThreadLocalInstance instance : threadLocals) {
 				context.addSupplierThreadLocal(instance.qualifier, instance.objectType);
+			}
+
+			// Add the thread synchroniser
+			for (ThreadSynchroniserFactory threadSynchroniser : threadSynchronisers) {
+				context.addThreadSynchroniser(threadSynchroniser);
 			}
 
 			// Add the managed object source

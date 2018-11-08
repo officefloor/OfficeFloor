@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.supplier;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
  * {@link SupplierType} implementation.
@@ -34,6 +35,11 @@ public class SupplierTypeImpl implements SupplierType {
 	private final SupplierThreadLocalType[] supplierThreadLocalTypes;
 
 	/**
+	 * {@link ThreadSynchroniserFactory} instances.
+	 */
+	private final ThreadSynchroniserFactory[] threadSynchronisers;
+
+	/**
 	 * {@link SuppliedManagedObjectSourceType} instances.
 	 */
 	private final SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes;
@@ -42,12 +48,16 @@ public class SupplierTypeImpl implements SupplierType {
 	 * Initiate.
 	 * 
 	 * @param supplierThreadLocalTypes   {@link SupplierThreadLocalType} instances.
+	 * @param threadSynchronisers        {@link ThreadSynchroniserFactory}
+	 *                                   instances.
 	 * @param suppliedManagedObjectTypes {@link SuppliedManagedObjectSourceType}
 	 *                                   instances.
 	 */
 	public SupplierTypeImpl(SupplierThreadLocalType[] supplierThreadLocalTypes,
+			ThreadSynchroniserFactory[] threadSynchronisers,
 			SuppliedManagedObjectSourceType[] suppliedManagedObjectTypes) {
 		this.supplierThreadLocalTypes = supplierThreadLocalTypes;
+		this.threadSynchronisers = threadSynchronisers;
 		this.suppliedManagedObjectTypes = suppliedManagedObjectTypes;
 	}
 
@@ -58,6 +68,11 @@ public class SupplierTypeImpl implements SupplierType {
 	@Override
 	public SupplierThreadLocalType[] getSupplierThreadLocalTypes() {
 		return this.supplierThreadLocalTypes;
+	}
+
+	@Override
+	public ThreadSynchroniserFactory[] getThreadSynchronisers() {
+		return this.threadSynchronisers;
 	}
 
 	@Override

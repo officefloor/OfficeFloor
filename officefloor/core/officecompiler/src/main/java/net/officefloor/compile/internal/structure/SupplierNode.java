@@ -23,9 +23,11 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
  * Supplier {@link Node}.
@@ -99,17 +101,20 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 
 	/**
 	 * <p>
-	 * Ensures there are no {@link SupplierThreadLocalNode} instances.
+	 * Ensures there are no {@link SupplierThreadLocalNode} and
+	 * {@link ThreadSynchroniserFactory} instances.
 	 * <p>
-	 * {@link SupplierThreadLocal} instances are only applicable within the
-	 * {@link Office} (application). If {@link SupplierSource} is used at the
-	 * {@link OfficeFloor}, then it can only supply {@link ManagedObjectSource}
-	 * instances and not depend on {@link SupplierThreadLocal} instances.
+	 * {@link SupplierThreadLocal} and {@link ThreadSynchroniserFactory} instances
+	 * are only applicable within the {@link Office} (application). If
+	 * {@link SupplierSource} is used at the {@link OfficeFloor}, then it can only
+	 * supply {@link ManagedObjectSource} instances and not depend on
+	 * {@link SupplierThreadLocal} nor {@link ThreadSynchroniserFactory} instances.
 	 * <p>
-	 * If {@link SupplierThreadLocal} instances then they are raised via
-	 * {@link CompilerIssues}.
+	 * If {@link SupplierThreadLocal} or {@link ThreadSynchroniserFactory} instances
+	 * then they are raised via {@link CompilerIssues}.
 	 *
-	 * @return <code>true</code> if no {@link SupplierThreadLocal} instances.
+	 * @return <code>true</code> if no {@link SupplierThreadLocal} nor
+	 *         {@link ThreadSynchroniserFactory} instances.
 	 * @param compileContext {@link CompileContext}.
 	 */
 	boolean ensureNoThreadLocals(CompileContext compileContext);
@@ -138,8 +143,10 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	 * Builds the {@link SupplierThreadLocal} instances for the
 	 * {@link SupplierSource}.
 	 * 
+	 * @param officeBuilder  {@link OfficeBuilder} to build the required thread
+	 *                       handling.
 	 * @param compileContext {@link CompileContext}.
 	 */
-	void buildSupplier(CompileContext compileContext);
+	void buildSupplier(OfficeBuilder officeBuilder, CompileContext compileContext);
 
 }

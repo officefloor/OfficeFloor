@@ -58,6 +58,7 @@ import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectExtensio
 import net.officefloor.frame.api.managedobject.source.impl.ManagedObjectFlowMetaDataImpl;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.governance.RawGovernanceMetaData;
@@ -1836,8 +1837,8 @@ public class MockConstruct {
 			if (this.built == null) {
 				this.built = new ThreadMetaDataImpl(
 						this.managedObjects.toArray(new ManagedObjectMetaData[this.managedObjects.size()]),
-						this.governances.toArray(new GovernanceMetaData[this.governances.size()]), 1000, null, null,
-						null);
+						this.governances.toArray(new GovernanceMetaData[this.governances.size()]), 1000, null,
+						new ThreadSynchroniserFactory[0], null, null);
 			}
 			return this.built;
 		}

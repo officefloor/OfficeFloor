@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.thread;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +26,8 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.function.AbstractFunctionState;
@@ -94,6 +98,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		// Obtain the possible existing thread state on thread
 		ActiveThreadState previous = activeThreadState.get();
 
+		// Suspend the active (soon to be previous) thread state
+		if ((previous != null) && (previous.threadState != null)) {
+			suspendThread(previous.threadState);
+		}
+
 		// Determine new depth
 		FunctionChainBreak functionChainBreak;
 		int nextThreadStateDepth;
@@ -113,6 +122,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				nextThreadStateDepth, previous);
 		activeThreadState.set(context);
 
+		// Resume the thread
+		resumeThread(threadState);
+
 		// Return the function context
 		return context;
 	}
@@ -121,12 +133,24 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * Detaches the {@link ThreadState} from the {@link Thread}.
 	 */
 	public static void detachThreadStateFromThread() {
+
+		// Obtain the active thread state
 		ActiveThreadState active = activeThreadState.get();
 		if (active == null) {
 			throw new IllegalStateException(
 					"No " + ThreadState.class.getSimpleName() + " attached to " + Thread.class.getSimpleName());
 		}
+
+		// Suspend the thread
+		suspendThread(active.threadState);
+
+		// Reinstate previous thread state (detaching thread state)
 		activeThreadState.set(active.previousActiveThreadState);
+
+		// Resume the possible previous thread
+		if (active.previousActiveThreadState != null) {
+			resumeThread(active.previousActiveThreadState.threadState);
+		}
 	}
 
 	/**
@@ -148,6 +172,55 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		// Return the current thread state
 		return current;
+	}
+
+	/**
+	 * Resumes the {@link Thread}.
+	 * 
+	 * @param threadState {@link ThreadState} to resume.
+	 */
+	private static void resumeThread(ThreadState threadState) {
+		ThreadStateImpl impl = (ThreadStateImpl) threadState;
+
+		// Determine if first thread (or no state to resume)
+		if (impl.synchronisers == null) {
+			return; // nothing to resume
+		}
+
+		// Resume the thread
+		ThreadSynchroniser[] synchronisers = impl.synchronisers.pop();
+		for (int i = 0; i < synchronisers.length; i++) {
+			synchronisers[i].resumeThread();
+		}
+	}
+
+	/**
+	 * Suspends the {@link Thread}.
+	 * 
+	 * @param threadState {@link ThreadState} to suspend.
+	 */
+	private static void suspendThread(ThreadState threadState) {
+		ThreadStateImpl impl = (ThreadStateImpl) threadState;
+
+		// Obtain the factories
+		ThreadSynchroniserFactory[] factories = impl.threadMetaData.getThreadSynchronisers();
+		if (factories.length == 0) {
+			return; // nothing to suspend
+		}
+
+		// Suspend the thread
+		ThreadSynchroniser[] synchronisers = new ThreadSynchroniser[factories.length];
+		for (int i = 0; i < factories.length; i++) {
+			ThreadSynchroniser synchroniser = factories[i].createThreadSynchroniser();
+			synchroniser.suspendThread();
+			synchronisers[i] = synchroniser;
+		}
+
+		// Capture state
+		if (impl.synchronisers == null) {
+			impl.synchronisers = new LinkedList<>();
+		}
+		impl.synchronisers.push(synchronisers);
 	}
 
 	/**
@@ -195,6 +268,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * {@link ThreadProfiler}.
 	 */
 	private final ThreadProfiler profiler;
+
+	/**
+	 * {@link ThreadSynchroniser} instances.
+	 */
+	private Deque<ThreadSynchroniser[]> synchronisers = null;
 
 	/**
 	 * {@link EscalationLevel} of this {@link ThreadState}.

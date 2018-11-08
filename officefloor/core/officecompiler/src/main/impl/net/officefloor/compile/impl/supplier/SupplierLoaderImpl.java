@@ -37,6 +37,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.UnknownClassError;
 import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.api.source.UnknownResourceError;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 
 /**
  * {@link SupplierLoader} implementation.
@@ -225,6 +226,19 @@ public class SupplierLoaderImpl implements SupplierLoader {
 			}
 		}
 
+		// Validate the thread synchronisers
+		ThreadSynchroniserFactory[] threadSynchronisers = sourceContext.getThreadSynchronisers();
+		for (int i = 0; i < threadSynchronisers.length; i++) {
+			ThreadSynchroniserFactory threadSynchroniser = threadSynchronisers[i];
+
+			// Ensure have thread synchroniser
+			if (threadSynchroniser == null) {
+				this.addIssue(
+						"Must provide " + ThreadSynchroniserFactory.class.getSimpleName() + " for added instance " + i);
+				return null; // can not load
+			}
+		}
+
 		// Validate the supplied managed object source types
 		SuppliedManagedObjectSourceType[] managedObjectSourceTypes = sourceContext
 				.getSuppliedManagedObjectSourceTypes();
@@ -251,7 +265,7 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		}
 
 		// Return the supplier type
-		return new SupplierTypeImpl(threadLocalTypes, managedObjectSourceTypes);
+		return new SupplierTypeImpl(threadLocalTypes, threadSynchronisers, managedObjectSourceTypes);
 	}
 
 	/**

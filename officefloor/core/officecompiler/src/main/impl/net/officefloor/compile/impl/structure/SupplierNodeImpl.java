@@ -51,9 +51,12 @@ import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
 import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.compile.supplier.SupplierType;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
@@ -87,6 +90,11 @@ public class SupplierNodeImpl implements SupplierNode {
 	 * {@link Map} of {@link SupplierThreadLocalNode} instances by name.
 	 */
 	private final Map<String, SupplierThreadLocalNode> supplierThreadLocals = new HashMap<>();
+
+	/**
+	 * {@link ThreadSynchroniserFactory} instances.
+	 */
+	private ThreadSynchroniserFactory[] threadSynchronisers;
 
 	/**
 	 * {@link Map} of {@link SuppliedManagedObjectSourceNode} instances by name.
@@ -411,6 +419,9 @@ public class SupplierNodeImpl implements SupplierNode {
 					(node) -> node.initialise(threadLocalType));
 		}
 
+		// Load the thread synchronisers
+		this.threadSynchronisers = supplierType.getThreadSynchronisers();
+
 		// Load the supplied managed objects
 		for (SuppliedManagedObjectSourceType mosType : supplierType.getSuppliedManagedObjectTypes()) {
 			String qualifier = mosType.getQualifier();
@@ -446,8 +457,18 @@ public class SupplierNodeImpl implements SupplierNode {
 									+ OfficeFloor.class.getSimpleName());
 				});
 
-		// Return if no thread locals
-		return isNoThreadLocals[0];
+		// Ensure no thread synchronisers
+		boolean isNoThreadSynchronisers = (this.threadSynchronisers.length == 0);
+		if (!isNoThreadSynchronisers) {
+			// Add issue, as should not have thread synchroniser
+			this.context.getCompilerIssues().addIssue(this,
+					"Should not have " + ThreadSynchroniser.class.getSimpleName() + " registered, as "
+							+ SupplierSource.class.getSimpleName() + " registered at "
+							+ OfficeFloor.class.getSimpleName());
+		}
+
+		// Return if no thread locals and thread synchronisers
+		return isNoThreadLocals[0] && isNoThreadSynchronisers;
 	}
 
 	@Override
@@ -475,13 +496,18 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	@Override
-	public void buildSupplier(CompileContext compileContext) {
+	public void buildSupplier(OfficeBuilder officeBuilder, CompileContext compileContext) {
 
 		// Build the supplier thread locals
 		this.supplierThreadLocals.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorSupplierThreadLocalName(),
 						b.getOfficeFloorSupplierThreadLocalName()))
 				.forEachOrdered((threadLocal) -> threadLocal.buildSupplierThreadLocal(compileContext));
+
+		// Add the thread synchronisers
+		for (ThreadSynchroniserFactory threadSynchroniser : this.threadSynchronisers) {
+			officeBuilder.addThreadSynchroniser(threadSynchroniser);
+		}
 	}
 
 }

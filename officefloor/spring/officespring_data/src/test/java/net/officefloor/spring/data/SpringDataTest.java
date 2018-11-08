@@ -19,16 +19,19 @@ package net.officefloor.spring.data;
 
 import java.util.List;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.spring.SpringSupplierSource;
 
@@ -61,13 +64,10 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 		// Indicate the registered beans
 		System.out.println("Beans:");
-		ConfigurableListableBeanFactory beanFactory = this.context.getBeanFactory();
 		for (String name : this.context.getBeanDefinitionNames()) {
-			BeanDefinition definition = beanFactory.getMergedBeanDefinition(name);
-			if ("rowRepository".equals(name)) {
-				System.out.println(name);
-			}
-			System.out.println("  " + name + " (" + definition.getBeanClassName() + ")");
+			Object bean = this.context.getBean(name);
+			System.out.println(
+					"  " + name + "\t\t(" + bean.getClass().getName() + ") - " + (bean instanceof RowRepository));
 		}
 
 		// Ensure can obtain repository
@@ -86,7 +86,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can run transaction.
 	 */
-	public void testTransaction() {
+	public void testSpringTransaction() {
 
 		// Obtain the transaction manager
 		PlatformTransactionManager transactionManager = this.context.getBean(PlatformTransactionManager.class);
@@ -113,23 +113,19 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	 * Ensure can use {@link RowRepository}.
 	 */
 	public void testInjectRepository() throws Throwable {
-		
-		// TODO continue work
-		if (true) return;
-
-		// Create row
-		Row row = new Row(null, "TEST");
-		this.context.getBean(RowRepository.class).save(row);
-		this.context.close();
 
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.office((context) -> {
 			context.addSection("SECTION", GetRowSection.class);
-			SpringSupplierSource.configureSpring(context.getOfficeArchitect(), MockSpringDataConfiguration.class);
+			SpringSupplierSource.configure(context.getOfficeArchitect(), MockSpringDataConfiguration.class);
 		});
 		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 
-			// Ensure can
+			// Create row
+			Row row = new Row(null, "TEST");
+			this.context.getBean(RowRepository.class).save(row);
+
+			// Trigger function to use repository within OfficeFloor
 			Request request = new Request(row.getId());
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", request);
 
@@ -155,6 +151,145 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 		public void service(@Parameter Request request, RowRepository repository) {
 			request.row = repository.findById(request.id).get();
+		}
+	}
+
+	/**
+	 * Ensure can use {@link PlatformTransactionManager}.
+	 */
+	public void testInjectTransaction() throws Throwable {
+		this.doInjectTransactionTest(false);
+	}
+
+	/**
+	 * Ensure can use {@link PlatformTransactionManager} across different
+	 * {@link Team} instances.
+	 */
+	public void testInjectTransactionWithDifferentTeamComplete() throws Throwable {
+		this.doInjectTransactionTest(true);
+	}
+
+	/**
+	 * Undertakes the {@link PlatformTransactionManager} injected test.
+	 * 
+	 * @param isDifferentTeam Indicates if different {@link Team} to handle
+	 *                        completing the transaction.
+	 */
+	private void doInjectTransactionTest(boolean isDifferentTeam) throws Throwable {
+
+		// Obtain the repository
+		RowRepository repository = this.context.getBean(RowRepository.class);
+
+		// Test transaction within OfficeFloor
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		if (isDifferentTeam) {
+			compiler.officeFloor((context) -> {
+				context.getOfficeFloorDeployer().addTeam("TEAM", OnePersonTeamSource.class.getName())
+						.addTypeQualification(null, TeamMarker.class.getName());
+			});
+		}
+		compiler.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+			architect.enableAutoWireTeams();
+			context.addSection("SECTION", TransactionSection.class);
+			context.addManagedObject("MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
+			SpringSupplierSource.configure(architect, MockSpringDataConfiguration.class);
+		});
+		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+
+			// Team checks
+			Runnable clearTeams = () -> {
+				TransactionSection.serviceThread = null;
+				TransactionSection.transactionThread = null;
+			};
+			Runnable ensureTeams = () -> {
+				assertNotNull("Should have service thread", TransactionSection.serviceThread);
+				assertNotNull("Should have transaction thread", TransactionSection.transactionThread);
+			};
+			Runnable checkTeams = isDifferentTeam ? () -> {
+				ensureTeams.run();
+				assertNotSame("Should be different threads", TransactionSection.serviceThread,
+						TransactionSection.transactionThread);
+			} : () -> {
+				ensureTeams.run();
+				assertSame("Should be same thread", TransactionSection.serviceThread,
+						TransactionSection.transactionThread);
+			};
+
+			// Create row
+			clearTeams.run();
+			TransactionRequest commit = new TransactionRequest(true);
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", commit);
+			Row committedRow = repository.findById(commit.row.getId()).get();
+			assertNotNull("Should have committed row", committedRow);
+			assertEquals("Incorrect committed row", "COMMIT", committedRow.getName());
+			checkTeams.run();
+
+			// Roll back creating the row
+			clearTeams.run();
+			TransactionRequest rollback = new TransactionRequest(false);
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", rollback);
+			int rolledBackRowCount = repository.findByName("ROLLBACK").size();
+			assertEquals("Should rollback creating row", 0, rolledBackRowCount);
+			checkTeams.run();
+		}
+	}
+
+	public static class TransactionRequest {
+
+		private final boolean isCommit;
+
+		private volatile Row row;
+
+		private TransactionRequest(boolean isCommit) {
+			this.isCommit = isCommit;
+		}
+	}
+
+	@FlowInterface
+	public static interface TransactionFlows {
+
+		void commit(TransactionStatus status);
+
+		void rollback(TransactionStatus status);
+	}
+
+	public static class TeamMarker {
+	}
+
+	public static class TransactionSection {
+
+		private static volatile Thread serviceThread;
+
+		private static volatile Thread transactionThread;
+
+		public void service(@Parameter TransactionRequest request, PlatformTransactionManager transactionManager,
+				RowRepository repository, TransactionFlows flows) {
+			serviceThread = Thread.currentThread();
+			TransactionStatus transaction = transactionManager.getTransaction(null);
+			request.row = new Row(null, request.isCommit ? "COMMIT" : "ROLLBACK");
+			repository.save(request.row);
+			if (request.isCommit) {
+				flows.commit(transaction);
+			} else {
+				flows.rollback(transaction);
+			}
+		}
+
+		public void commit(@Parameter TransactionStatus transaction, PlatformTransactionManager transactionManager,
+				RowRepository repository, TeamMarker marker) {
+			transactionThread = Thread.currentThread();
+			assertEquals("Should have row before commit", 1, repository.findByName("COMMIT").size());
+			transactionManager.commit(transaction);
+			assertEquals("Should have row after commit", 1, repository.findByName("COMMIT").size());
+		}
+
+		public void rollback(@Parameter TransactionStatus transaction, PlatformTransactionManager transactionManager,
+				RowRepository repository, TeamMarker marker) {
+			transactionThread = Thread.currentThread();
+			assertEquals("Should have row before rollback", 1, repository.findByName("ROLLBACK").size());
+			transactionManager.rollback(transaction);
+			assertEquals("Should NOT have row after rollback", 0, repository.findByName("ROLLBACK").size());
 		}
 	}
 

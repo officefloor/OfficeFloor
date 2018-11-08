@@ -1070,10 +1070,10 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 					bindings.buildInputManagedObjectIntoOffice(inputManagedObject);
 				});
 
-		// Build the suppliers
-		this.suppliers.values().stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSupplierName(), b.getOfficeSupplierName()))
-				.forEachOrdered((supplier) -> supplier.buildSupplier(compileContext));
+		/*
+		 * Suppliers only to provide managed objects at OfficeFloor level. There is no
+		 * threading to be built for the supplier at this level.
+		 */
 
 		// Return the built OfficeFloor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
