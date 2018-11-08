@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import net.officefloor.frame.api.build.Indexed;
@@ -92,10 +91,10 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		// Handle creating functions with teams
 		TestWork work = new TestWork();
 		List<MockTeamSource> teams = new ArrayList<>();
-		BiFunction<String, Integer, ReflectiveFunctionBuilder> functionFactory = !isTeams
-				? (functionName, invocationCount) -> this.constructFunction(work, functionName)
-				: (functionName, invocationCount) -> {
-					MockTeamSource teamSource = new MockTeamSource(functionName, invocationCount);
+		Function<String, ReflectiveFunctionBuilder> functionFactory = !isTeams
+				? (functionName) -> this.constructFunction(work, functionName)
+				: (functionName) -> {
+					MockTeamSource teamSource = new MockTeamSource(functionName);
 					teams.add(teamSource);
 					this.constructTeam(functionName, teamSource);
 					ReflectiveFunctionBuilder function = this.constructFunction(work, functionName);
@@ -108,24 +107,24 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		ManagingOfficeBuilder<?> moOffice = mo.setManagingOffice(this.getOfficeName());
 		moOffice.setInputManagedObjectName("INPUT");
 		if (isTeams) {
-			MockTeamSource teamSource = new MockTeamSource("inputMo", 1);
+			MockTeamSource teamSource = new MockTeamSource("inputMo");
 			teams.add(teamSource);
 			this.constructTeam("of-INPUT.TEAM", teamSource);
 		}
 
 		// Configure the functions
-		ReflectiveFunctionBuilder function = functionFactory.apply("function", 1);
+		ReflectiveFunctionBuilder function = functionFactory.apply("function");
 		function.setNextFunction("next");
-		ReflectiveFunctionBuilder next = functionFactory.apply("next", 3);
+		ReflectiveFunctionBuilder next = functionFactory.apply("next");
 		next.buildFlow("parallelFlow", null, false);
 		next.buildFlow("callbackFlow", null, false);
 		next.buildFlow("sequentialFlow", null, false);
-		functionFactory.apply("parallelFlow", 3);
-		functionFactory.apply("callbackFlow", 1).setNextFunction("moFunction");
-		ReflectiveFunctionBuilder sequentialFlow = functionFactory.apply("sequentialFlow", 4);
+		functionFactory.apply("parallelFlow");
+		functionFactory.apply("callbackFlow").setNextFunction("moFunction");
+		ReflectiveFunctionBuilder sequentialFlow = functionFactory.apply("sequentialFlow");
 		sequentialFlow.buildFlow("differentThread", null, true);
-		functionFactory.apply("differentThread", 2);
-		ReflectiveFunctionBuilder moFunction = functionFactory.apply("moFunction", 1);
+		functionFactory.apply("differentThread");
+		ReflectiveFunctionBuilder moFunction = functionFactory.apply("moFunction");
 		moFunction.buildObject("INPUT", ManagedObjectScope.THREAD);
 
 		// Create the different thread (will not share thread state)
@@ -336,9 +335,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 
 		private final String functionName;
 
-		private final int expectedInvocationCount;
-
-		private int invocationCount = 0;
+		private boolean isComplete = false;
 
 		private Throwable throwable = null;
 
@@ -346,9 +343,8 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 
 		private Integer twoValue = 2;
 
-		private MockTeamSource(String functionName, int expectedInvocationCount) {
+		private MockTeamSource(String functionName) {
 			this.functionName = functionName;
-			this.expectedInvocationCount = expectedInvocationCount;
 		}
 
 		private void waitForCompletion() {
@@ -357,11 +353,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 					if (this.throwable != null) {
 						throw new RuntimeException(this.throwable);
 					}
-					assertTrue(
-							this.functionName + " too many invocations (a=" + this.invocationCount + ", e="
-									+ this.expectedInvocationCount + ")",
-							(this.invocationCount <= this.expectedInvocationCount));
-					return (this.invocationCount == this.expectedInvocationCount);
+					return this.isComplete;
 				}
 			});
 		}
@@ -407,7 +399,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 				synchronized (this) {
 					this.oneValue = threadLocalOne.get();
 					this.twoValue = threadLocalTwo.get();
-					this.invocationCount++;
+					this.isComplete = true;
 					this.notify();
 				}
 
