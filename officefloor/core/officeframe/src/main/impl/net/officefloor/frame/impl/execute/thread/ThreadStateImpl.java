@@ -182,9 +182,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private static void resumeThread(ThreadState threadState) {
 		ThreadStateImpl impl = (ThreadStateImpl) threadState;
 
-		// Determine if first thread
-		if (impl.synchronisers.size() == 0) {
-			return; // first thread so nothing to resume
+		// Determine if first thread (or no state to resume)
+		if (impl.synchronisers == null) {
+			return; // nothing to resume
 		}
 
 		// Resume the thread
@@ -202,13 +202,23 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private static void suspendThread(ThreadState threadState) {
 		ThreadStateImpl impl = (ThreadStateImpl) threadState;
 
-		// Suspend the thread
+		// Obtain the factories
 		ThreadSynchroniserFactory[] factories = impl.threadMetaData.getThreadSynchronisers();
+		if (factories.length == 0) {
+			return; // nothing to suspend
+		}
+
+		// Suspend the thread
 		ThreadSynchroniser[] synchronisers = new ThreadSynchroniser[factories.length];
 		for (int i = 0; i < factories.length; i++) {
 			ThreadSynchroniser synchroniser = factories[i].createThreadSynchroniser();
 			synchroniser.suspendThread();
 			synchronisers[i] = synchroniser;
+		}
+
+		// Capture state
+		if (impl.synchronisers == null) {
+			impl.synchronisers = new LinkedList<>();
 		}
 		impl.synchronisers.push(synchronisers);
 	}
@@ -262,7 +272,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * {@link ThreadSynchroniser} instances.
 	 */
-	private Deque<ThreadSynchroniser[]> synchronisers = new LinkedList<>();
+	private Deque<ThreadSynchroniser[]> synchronisers = null;
 
 	/**
 	 * {@link EscalationLevel} of this {@link ThreadState}.
