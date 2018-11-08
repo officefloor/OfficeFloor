@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.thread;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -181,39 +183,34 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		ThreadStateImpl impl = (ThreadStateImpl) threadState;
 
 		// Determine if first thread
-		if (impl.synchronisers == null) {
+		if (impl.synchronisers.size() == 0) {
 			return; // first thread so nothing to resume
 		}
 
 		// Resume the thread
-		for (int i = 0; i < impl.synchronisers.length; i++) {
-			impl.synchronisers[i].resumeThread();
+		ThreadSynchroniser[] synchronisers = impl.synchronisers.pop();
+		for (int i = 0; i < synchronisers.length; i++) {
+			synchronisers[i].resumeThread();
 		}
 	}
 
 	/**
 	 * Suspends the {@link Thread}.
 	 * 
-	 * @param
+	 * @param threadState {@link ThreadState} to suspend.
 	 */
 	private static void suspendThread(ThreadState threadState) {
 		ThreadStateImpl impl = (ThreadStateImpl) threadState;
 
-		// Determine if have synchronisers
-		if (impl.synchronisers == null) {
-
-			// Create the synchronisers
-			ThreadSynchroniserFactory[] factories = impl.threadMetaData.getThreadSynchronisers();
-			impl.synchronisers = new ThreadSynchroniser[factories.length];
-			for (int i = 0; i < factories.length; i++) {
-				impl.synchronisers[i] = factories[i].createThreadSynchroniser();
-			}
-		}
-
 		// Suspend the thread
-		for (int i = 0; i < impl.synchronisers.length; i++) {
-			impl.synchronisers[i].suspendThread();
+		ThreadSynchroniserFactory[] factories = impl.threadMetaData.getThreadSynchronisers();
+		ThreadSynchroniser[] synchronisers = new ThreadSynchroniser[factories.length];
+		for (int i = 0; i < factories.length; i++) {
+			ThreadSynchroniser synchroniser = factories[i].createThreadSynchroniser();
+			synchroniser.suspendThread();
+			synchronisers[i] = synchroniser;
 		}
+		impl.synchronisers.push(synchronisers);
 	}
 
 	/**
@@ -265,7 +262,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	/**
 	 * {@link ThreadSynchroniser} instances.
 	 */
-	private ThreadSynchroniser[] synchronisers = null;
+	private Deque<ThreadSynchroniser[]> synchronisers = new LinkedList<>();
 
 	/**
 	 * {@link EscalationLevel} of this {@link ThreadState}.

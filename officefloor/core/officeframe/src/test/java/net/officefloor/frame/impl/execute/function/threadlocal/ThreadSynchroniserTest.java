@@ -154,10 +154,11 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 		// Add the thread synchronisers
 		this.getOfficeBuilder().addThreadSynchroniser(() -> new ThreadSynchroniser() {
 
-			private String value;
+			private String value = null;
 
 			@Override
 			public void suspendThread() {
+				assertNull("Value one should not be set", this.value);
 				this.value = threadLocalOne.get();
 				threadLocalOne.set(null);
 			}
@@ -173,6 +174,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 
 			@Override
 			public void suspendThread() {
+				assertNull("Value two should not be set", this.value);
 				this.value = threadLocalTwo.get();
 				threadLocalTwo.set(null);
 			}
