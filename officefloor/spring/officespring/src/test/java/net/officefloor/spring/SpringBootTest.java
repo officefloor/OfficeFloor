@@ -17,6 +17,8 @@
  */
 package net.officefloor.spring;
 
+import static org.junit.Assert.assertNotEquals;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,10 +39,13 @@ import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
 import net.officefloor.compile.test.supplier.SupplierTypeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.managedfunction.clazz.Qualified;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
+import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.spring.extension.SpringSupplierExtension;
 
 /**
  * Ensure can integrate Spring via boot.
@@ -250,23 +255,21 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			// Add the OfficeFloor managed object
 			Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
 		});
-		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
-		// Ensure pulls in simple bean via Spring
-		IntegrateSimpleSpringBean.simpleBean = null;
-		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.functionSimple", null);
-		assertNotNull("Should pull in simple bean from Spring", IntegrateSimpleSpringBean.simpleBean);
-		assertEquals("Incorrect simple bean", "SIMPLE", IntegrateSimpleSpringBean.simpleBean.getValue());
+			// Ensure pulls in simple bean via Spring
+			IntegrateSimpleSpringBean.simpleBean = null;
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.functionSimple", null);
+			assertNotNull("Should pull in simple bean from Spring", IntegrateSimpleSpringBean.simpleBean);
+			assertEquals("Incorrect simple bean", "SIMPLE", IntegrateSimpleSpringBean.simpleBean.getValue());
 
-		// Ensure pulls in complex bean via Spring
-		IntegrateSimpleSpringBean.complexBean = null;
-		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.functionComplex", null);
-		assertNotNull("Should pull in complex bean from Spring", IntegrateSimpleSpringBean.complexBean);
-		assertSame("Incorrect complex bean", IntegrateSimpleSpringBean.simpleBean,
-				IntegrateSimpleSpringBean.complexBean.getSimpleBean());
-
-		// Clean up
-		officeFloor.closeOfficeFloor();
+			// Ensure pulls in complex bean via Spring
+			IntegrateSimpleSpringBean.complexBean = null;
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.functionComplex", null);
+			assertNotNull("Should pull in complex bean from Spring", IntegrateSimpleSpringBean.complexBean);
+			assertSame("Incorrect complex bean", IntegrateSimpleSpringBean.simpleBean,
+					IntegrateSimpleSpringBean.complexBean.getSimpleBean());
+		}
 	}
 
 	public static class IntegrateSimpleSpringBean {
@@ -305,27 +308,25 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			// Add the OfficeFloor managed object
 			Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
 		});
-		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
-		// Ensure pulls in bean via Spring
-		Consumer<String> verifyQualification = (qualifier) -> {
-			try {
-				IntegrateQualifiedSpringBean.qualifiedBean = null;
-				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.function" + qualifier, null);
-				assertNotNull("Should pull in bean from Spring", IntegrateQualifiedSpringBean.qualifiedBean);
-				assertEquals("Incorrect qualified bean", qualifier,
-						IntegrateQualifiedSpringBean.qualifiedBean.getValue());
-			} catch (Throwable ex) {
-				fail(ex);
-			}
-		};
-		verifyQualification.accept("One");
-		verifyQualification.accept("Two");
-		verifyQualification.accept("Three");
-		verifyQualification.accept("Four");
-
-		// Clean up
-		officeFloor.closeOfficeFloor();
+			// Ensure pulls in bean via Spring
+			Consumer<String> verifyQualification = (qualifier) -> {
+				try {
+					IntegrateQualifiedSpringBean.qualifiedBean = null;
+					CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.function" + qualifier, null);
+					assertNotNull("Should pull in bean from Spring", IntegrateQualifiedSpringBean.qualifiedBean);
+					assertEquals("Incorrect qualified bean", qualifier,
+							IntegrateQualifiedSpringBean.qualifiedBean.getValue());
+				} catch (Throwable ex) {
+					fail(ex);
+				}
+			};
+			verifyQualification.accept("One");
+			verifyQualification.accept("Two");
+			verifyQualification.accept("Three");
+			verifyQualification.accept("Four");
+		}
 	}
 
 	public static class IntegrateQualifiedSpringBean {
@@ -377,26 +378,24 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			// Add the section
 			context.addSection("SECTION", IntegrateOfficeFloorManagedObject.class);
 		});
-		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
 
-		// Ensure can source the Spring dependency from OfficeFloor
-		IntegrateOfficeFloorManagedObject.dependentBean = null;
-		IntegrateOfficeFloorManagedObject.officeFloorManagedObject = null;
-		IntegrateOfficeFloorManagedObject.value = null;
-		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.function", null);
-		assertNotNull("Should pull in dependent bean from Spring", IntegrateOfficeFloorManagedObject.dependentBean);
-		assertNotNull("Should have managed object dependency available",
-				IntegrateOfficeFloorManagedObject.officeFloorManagedObject);
-		assertNotSame("Should proxy dependency from OfficeFloor", managedObject,
-				IntegrateOfficeFloorManagedObject.officeFloorManagedObject);
-		assertEquals("Should access dependency from OfficeFloor", "OfficeFloor",
-				IntegrateOfficeFloorManagedObject.value);
+			// Ensure can source the Spring dependency from OfficeFloor
+			IntegrateOfficeFloorManagedObject.dependentBean = null;
+			IntegrateOfficeFloorManagedObject.officeFloorManagedObject = null;
+			IntegrateOfficeFloorManagedObject.value = null;
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.function", null);
+			assertNotNull("Should pull in dependent bean from Spring", IntegrateOfficeFloorManagedObject.dependentBean);
+			assertNotNull("Should have managed object dependency available",
+					IntegrateOfficeFloorManagedObject.officeFloorManagedObject);
+			assertNotSame("Should proxy dependency from OfficeFloor", managedObject,
+					IntegrateOfficeFloorManagedObject.officeFloorManagedObject);
+			assertEquals("Should access dependency from OfficeFloor", "OfficeFloor",
+					IntegrateOfficeFloorManagedObject.value);
+		}
 
 		// Ensure OfficeFloor object used
 		this.verifyMockObjects();
-
-		// Clean up
-		officeFloor.closeOfficeFloor();
 	}
 
 	public static class IntegrateOfficeFloorManagedObject {
@@ -411,6 +410,81 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			dependentBean = bean;
 			officeFloorManagedObject = bean.getManagedObject();
 			value = officeFloorManagedObject.getValue();
+		}
+	}
+
+	/**
+	 * Ensure can load {@link SpringSupplierExtension}.
+	 */
+	public void testSpringExtension() throws Throwable {
+
+		// Create the managed object
+		OfficeFloorManagedObject managedObject = this.createMock(OfficeFloorManagedObject.class);
+
+		// Record obtaining value
+		this.recordReturn(managedObject, managedObject.getValue(), "EXTENSION");
+		this.replayMockObjects();
+
+		// Ensure active spring extension
+		MockSpringSupplierExtension.isActive = true;
+		MockSpringSupplierExtension.officeFloorManagedObject = null;
+		try {
+
+			// Configure OfficeFloor to auto-wire in Spring beans
+			CompileOfficeFloor compile = new CompileOfficeFloor();
+			compile.officeFloor((context) -> {
+				context.getOfficeFloorDeployer().addTeam("TEAM", OnePersonTeamSource.class.getName())
+						.addTypeQualification(null, ComplexBean.class.getName());
+			});
+			compile.office((context) -> {
+				OfficeArchitect office = context.getOfficeArchitect();
+				office.enableAutoWireTeams();
+
+				// Add Spring supplier
+				SpringSupplierSource.configure(office, MockSpringBootConfiguration.class);
+
+				// Add the OfficeFloor managed object
+				Singleton.load(office, managedObject);
+
+				// Add the section
+				context.addSection("SECTION", ExtensionSection.class);
+			});
+			try (OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor()) {
+
+				// Invoke the function
+				ExtensionSection.serviceThread = null;
+				ExtensionSection.threadLocalValue = null;
+				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
+
+				// Ensure correct value passed
+				assertEquals("Incorrect value", "SIMPLE-EXTENSION", ExtensionSection.threadLocalValue);
+			}
+
+			// Verify
+			this.verifyMockObjects();
+
+		} finally {
+			MockSpringSupplierExtension.isActive = false;
+		}
+	}
+
+	public static class ExtensionSection {
+
+		private static volatile Thread serviceThread = null;
+
+		private static volatile String threadLocalValue = null;
+
+		@NextFunction("next")
+		public void service(SimpleBean bean) {
+			serviceThread = Thread.currentThread();
+			String value = bean.getValue() + "-" + MockSpringSupplierExtension.officeFloorManagedObject.getValue();
+			MockSpringSupplierExtension.threadLocal.set(value);
+		}
+
+		public void next(ComplexBean bean) {
+			assertNotNull("Should have service thread", serviceThread);
+			assertNotEquals("Should be different thread", serviceThread, Thread.currentThread());
+			threadLocalValue = MockSpringSupplierExtension.threadLocal.get();
 		}
 	}
 
