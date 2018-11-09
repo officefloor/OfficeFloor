@@ -44,22 +44,20 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	/**
 	 * Initialises the {@link ManagedObjectNode}.
 	 * 
-	 * @param managedObjectScope
-	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
-	 * @param managedObjectSourceNode
-	 *            {@link ManagedObjectSourceNode} for the
-	 *            {@link ManagedObjectNode}.
+	 * @param managedObjectScope      {@link ManagedObjectScope} for the
+	 *                                {@link ManagedObject}.
+	 * @param managedObjectSourceNode {@link ManagedObjectSourceNode} for the
+	 *                                {@link ManagedObjectNode}.
 	 */
 	void initialise(ManagedObjectScope managedObjectScope, ManagedObjectSourceNode managedObjectSourceNode);
 
 	/**
 	 * Sources the {@link ManagedObject}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return <code>true</code> if successfully sourced the
-	 *         {@link ManagedObject}. <code>false</code> if failed to source,
-	 *         with issures reported to the {@link CompilerIssues}.
+	 * @param compileContext {@link CompileContext}.
+	 * @return <code>true</code> if successfully sourced the {@link ManagedObject}.
+	 *         <code>false</code> if failed to source, with issues reported to the
+	 *         {@link CompilerIssues}.
 	 */
 	boolean sourceManagedObject(CompileContext compileContext);
 
@@ -67,8 +65,7 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	 * Obtains the {@link ManagedObjectSourceNode} for this
 	 * {@link ManagedObjectNode}.
 	 * 
-	 * @return {@link ManagedObjectSourceNode} for this
-	 *         {@link ManagedObjectNode}.
+	 * @return {@link ManagedObjectSourceNode} for this {@link ManagedObjectNode}.
 	 */
 	ManagedObjectSourceNode getManagedObjectSourceNode();
 
@@ -76,10 +73,8 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	 * Obtains the {@link TypeQualification} instances for the
 	 * {@link ManagedObject}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return {@link TypeQualification} instances for the
-	 *         {@link ManagedObject}.
+	 * @param compileContext {@link CompileContext}.
+	 * @return {@link TypeQualification} instances for the {@link ManagedObject}.
 	 */
 	TypeQualification[] getTypeQualifications(CompileContext compileContext);
 
@@ -93,12 +88,9 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	/**
 	 * Auto-wires the dependencies for the {@link ManagedObject}.
 	 * 
-	 * @param autoWirer
-	 *            {@link AutoWirer}.
-	 * @param office
-	 *            {@link OfficeNode} requiring the auto-wiring.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param office         {@link OfficeNode} requiring the auto-wiring.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void autoWireDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office, CompileContext compileContext);
 
@@ -106,18 +98,15 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	 * Creates the {@link ExecutionManagedObject} for this
 	 * {@link ManagedObjectNode}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @return {@link ExecutionManagedObject} for this
-	 *         {@link ManagedObjectNode}.
+	 * @param compileContext {@link CompileContext}.
+	 * @return {@link ExecutionManagedObject} for this {@link ManagedObjectNode}.
 	 */
 	ExecutionManagedObject createExecutionManagedObject(CompileContext compileContext);
 
 	/**
 	 * Loads the {@link OfficeSectionManagedObjectType}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param compileContext {@link CompileContext}.
 	 * @return {@link OfficeSectionManagedObjectType} or <code>null</code> with
 	 *         issues reported to the {@link CompilerIssues}.
 	 */
