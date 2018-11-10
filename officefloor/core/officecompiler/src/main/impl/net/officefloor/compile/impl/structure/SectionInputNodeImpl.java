@@ -484,8 +484,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		 */
 
 		@Override
-		public void service(M managedObject, FlowCallback callback) {
-			this.context.invokeProcess(Flows.SERVICE, null, managedObject, 0, callback);
+		public ProcessManager service(M managedObject, FlowCallback callback) {
+			return this.context.invokeProcess(Flows.SERVICE, null, managedObject, 0, callback);
 		}
 
 		/*
