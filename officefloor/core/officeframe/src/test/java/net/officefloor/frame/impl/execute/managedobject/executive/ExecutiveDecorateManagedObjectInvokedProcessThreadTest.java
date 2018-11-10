@@ -25,6 +25,7 @@ import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -107,13 +108,18 @@ public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends Abst
 		 */
 
 		@Override
-		public <T extends Throwable> void manageExecution(Execution<T> execution) throws T {
+		public <T extends Throwable> ProcessManager manageExecution(Execution<T> execution) throws T {
 
 			// Capture the execution thread
 			executionThread = Thread.currentThread();
 
 			// Provide detail on the thread
 			markThread.set(execution);
+
+			// Should not use process manager
+			return () -> {
+				fail("Should not cancel process");
+			};
 		}
 
 		@Override

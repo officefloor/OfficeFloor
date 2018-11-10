@@ -24,6 +24,7 @@ import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.api.executive.source.impl.AbstractExecutiveSource;
 import net.officefloor.frame.api.manage.FunctionManager;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -94,13 +95,18 @@ public class ExecutiveDecorateFunctionInvokedProcessThreadTest extends AbstractO
 		 */
 
 		@Override
-		public <T extends Throwable> void manageExecution(Execution<T> execution) throws T {
+		public <T extends Throwable> ProcessManager manageExecution(Execution<T> execution) throws T {
 
 			// Capture the execution thread
 			executionThread = Thread.currentThread();
 
 			// Provide detail on the thread
 			markThread.set(execution);
+
+			// Should not use process manager
+			return () -> {
+				fail("Should not cancel process");
+			};
 		}
 
 		@Override

@@ -24,6 +24,7 @@ import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceSpecification;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.Execution;
 
@@ -60,8 +61,9 @@ public class ExecutiveSourceAdapter implements ExecutiveSource, Executive {
 	}
 
 	@Override
-	public <T extends Throwable> void manageExecution(Execution<T> execution) throws T {
+	public <T extends Throwable> ProcessManager manageExecution(Execution<T> execution) throws T {
 		TestCase.fail("Should not be invoked");
+		return null;
 	}
 
 	@Override

@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.function.Promise;
@@ -198,6 +199,12 @@ public class ProcessStateImpl implements ProcessState {
 	@Override
 	public Object getProcessIdentifier() {
 		return this.processIdentifier;
+	}
+
+	@Override
+	public ProcessManager getProcessManager() {
+		// TODO implement ProcessState.getProcessManager(...)
+		throw new UnsupportedOperationException("TODO implement ProcessState.getProcessManager(...)");
 	}
 
 	@Override

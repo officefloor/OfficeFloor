@@ -22,6 +22,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
@@ -156,11 +157,12 @@ public interface OfficeMetaData {
 	 *                                               Ignored if
 	 *                                               {@link ManagedObject} passed in
 	 *                                               is <code>null</code>.
+	 * @return {@link ProcessManager} for the invoked {@link ProcessState}.
 	 * @throws InvalidParameterTypeException Should the type of parameter be invalid
 	 *                                       for the initial
 	 *                                       {@link ManagedFunction}.
 	 */
-	void invokeProcess(FlowMetaData flowMetaData, Object parameter, long delay, FlowCallback callback,
+	ProcessManager invokeProcess(FlowMetaData flowMetaData, Object parameter, long delay, FlowCallback callback,
 			ThreadState callbackThreadState, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject)
 			throws InvalidParameterTypeException;
