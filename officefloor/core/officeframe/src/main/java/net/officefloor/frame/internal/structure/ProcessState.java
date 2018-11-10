@@ -50,6 +50,18 @@ public interface ProcessState {
 
 	/**
 	 * <p>
+	 * Indicates if the {@link ProcessState} has been cancelled.
+	 * <p>
+	 * This is only valid after synchronising with this {@link ProcessState} (in
+	 * other words the main {@link ThreadState}).
+	 * 
+	 * @return <code>true</code> if cancelled - or indeterminate if have not
+	 *         synchronised on {@link ProcessState}.
+	 */
+	boolean isCancelled();
+
+	/**
+	 * <p>
 	 * Obtains the main {@link ThreadState} for this {@link ProcessState}.
 	 * <p>
 	 * The main {@link ThreadState} is used for any {@link ProcessState} mutations.

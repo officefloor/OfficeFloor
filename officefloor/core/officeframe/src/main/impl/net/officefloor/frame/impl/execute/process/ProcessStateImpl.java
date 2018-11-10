@@ -59,6 +59,21 @@ public class ProcessStateImpl implements ProcessState {
 	private final Object processIdentifier;
 
 	/**
+	 * {@link ProcessManager} for this {@link ProcessState}.
+	 */
+	private final ProcessManager processManager = new ProcessManager() {
+
+		@Override
+		public void cancel() {
+
+			// Ensure managed function sync to main thread picks up cancelled
+			synchronized (ProcessStateImpl.this.mainThreadState) {
+				ProcessStateImpl.this.isCancelled = true;
+			}
+		}
+	};
+
+	/**
 	 * Active {@link ThreadState} instances for this {@link ProcessState}.
 	 */
 	private final LinkedListSet<ThreadState, ProcessState> activeThreads = new StrictLinkedListSet<ThreadState, ProcessState>() {
@@ -109,6 +124,11 @@ public class ProcessStateImpl implements ProcessState {
 	 * {@link Escalation}.
 	 */
 	private FunctionState mainThreadCompletion = null;
+
+	/**
+	 * Indicates if this {@link ProcessState} has been cancelled.
+	 */
+	private boolean isCancelled = false;
 
 	/**
 	 * Initiate.
@@ -203,8 +223,12 @@ public class ProcessStateImpl implements ProcessState {
 
 	@Override
 	public ProcessManager getProcessManager() {
-		// TODO implement ProcessState.getProcessManager(...)
-		throw new UnsupportedOperationException("TODO implement ProcessState.getProcessManager(...)");
+		return this.processManager;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return this.isCancelled;
 	}
 
 	@Override

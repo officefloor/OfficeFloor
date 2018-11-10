@@ -81,7 +81,8 @@ public class FunctionManagerImpl implements FunctionManager {
 		ManagedExecution<InvalidParameterTypeException> execution = this.officeMetaData.getManagedExecutionFactory()
 				.createManagedExecution(this.officeMetaData.getExecutive(), () -> {
 					// Invoke the process for the function
-					this.officeMetaData.invokeProcess(this.flowMetaData, parameter, 0, callback, null, null, null, -1);
+					return this.officeMetaData.invokeProcess(this.flowMetaData, parameter, 0, callback, null, null,
+							null, -1);
 				});
 
 		// Execute

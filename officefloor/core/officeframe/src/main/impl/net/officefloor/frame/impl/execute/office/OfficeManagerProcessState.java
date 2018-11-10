@@ -97,6 +97,11 @@ public class OfficeManagerProcessState implements ProcessState {
 	}
 
 	@Override
+	public boolean isCancelled() {
+		return false; // never cancelled
+	}
+
+	@Override
 	public ProcessManager getProcessManager() {
 		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be process managed");
 	}
