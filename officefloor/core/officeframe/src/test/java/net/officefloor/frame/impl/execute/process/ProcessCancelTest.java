@@ -58,35 +58,48 @@ public class ProcessCancelTest extends AbstractOfficeConstructTestCase {
 		FunctionManager function = officeFloor.getOffice(officeName).getFunctionManager("block");
 
 		// Ensure invoke next function (without cancel)
-		work.isContinue = true;
-		work.isNextInvoked = false;
+		work.reset();
+		work.unblock();
 		WaitFlowCallback notCancelled = new WaitFlowCallback();
 		function.invokeProcess(null, notCancelled);
 		assertNull("Should not fail on run through", notCancelled.waitForCompletion());
 		assertTrue("Should invoke next function", work.isNextInvoked);
 
 		// Ensure now cancel, so no next invoked
-		work.isContinue = false;
-		work.isNextInvoked = false;
+		work.reset();
 		WaitFlowCallback cancelled = new WaitFlowCallback();
 		ProcessManager manager = function.invokeProcess(null, cancelled);
 		manager.cancel();
-		work.isContinue = true;
+		work.unblock();
 		Throwable failure = cancelled.waitForCompletion();
+		assertFalse("Should not invoke the next function: " + failure, work.isNextInvoked);
 		assertNotNull("Should have failure, process cancelled", failure);
 		assertTrue("Incorrect failure: " + failure.getMessage() + " [" + failure.getClass().getName() + "]",
 				failure instanceof ProcessCancelledException);
-		assertFalse("Should not invoke the next function", work.isNextInvoked);
 	}
 
 	public class TestWork {
 
-		private volatile boolean isContinue = false;
+		private boolean isContinue = false;
 
-		private volatile boolean isNextInvoked = false;
+		private boolean isNextInvoked = false;
 
-		public void block() {
-			ProcessCancelTest.this.waitForTrue(() -> this.isContinue);
+		private synchronized void reset() {
+			this.isContinue = false;
+			this.isNextInvoked = false;
+		}
+
+		public synchronized void unblock() {
+			this.isContinue = true;
+			this.notifyAll();
+		}
+
+		public synchronized void block() throws Exception {
+			long startTime = System.currentTimeMillis();
+			while (!this.isContinue) {
+				ProcessCancelTest.this.timeout(startTime);
+				this.wait(10);
+			}
 		}
 
 		public void next() {
@@ -94,14 +107,16 @@ public class ProcessCancelTest extends AbstractOfficeConstructTestCase {
 		}
 	}
 
-	private static class WaitFlowCallback implements FlowCallback {
+	private class WaitFlowCallback implements FlowCallback {
 
 		private boolean isComplete = false;
 
 		private Throwable failure = null;
 
 		private synchronized Throwable waitForCompletion() throws Exception {
+			long startTime = System.currentTimeMillis();
 			while (!isComplete) {
+				ProcessCancelTest.this.timeout(startTime);
 				this.wait(10);
 			}
 			return this.failure;
