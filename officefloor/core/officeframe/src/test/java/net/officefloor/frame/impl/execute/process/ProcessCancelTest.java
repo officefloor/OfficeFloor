@@ -59,7 +59,7 @@ public class ProcessCancelTest extends AbstractOfficeConstructTestCase {
 
 		// Ensure invoke next function (without cancel)
 		work.reset();
-		work.unblock();
+		work.isContinue = true;
 		WaitFlowCallback notCancelled = new WaitFlowCallback();
 		function.invokeProcess(null, notCancelled);
 		assertNull("Should not fail on run through", notCancelled.waitForCompletion());
@@ -68,9 +68,8 @@ public class ProcessCancelTest extends AbstractOfficeConstructTestCase {
 		// Ensure now cancel, so no next invoked
 		work.reset();
 		WaitFlowCallback cancelled = new WaitFlowCallback();
-		ProcessManager manager = function.invokeProcess(null, cancelled);
-		manager.cancel();
-		work.unblock();
+		work.processManager = function.invokeProcess(null, cancelled);
+		work.isContinue = true;
 		Throwable failure = cancelled.waitForCompletion();
 		assertFalse("Should not invoke the next function: " + failure, work.isNextInvoked);
 		assertNotNull("Should have failure, process cancelled", failure);
@@ -80,25 +79,25 @@ public class ProcessCancelTest extends AbstractOfficeConstructTestCase {
 
 	public class TestWork {
 
-		private boolean isContinue = false;
+		private volatile ProcessManager processManager;
 
-		private boolean isNextInvoked = false;
+		private volatile boolean isContinue = false;
 
-		private synchronized void reset() {
+		private volatile boolean isNextInvoked = false;
+
+		private void reset() {
+			this.processManager = null;
 			this.isContinue = false;
 			this.isNextInvoked = false;
 		}
 
-		public synchronized void unblock() {
-			this.isContinue = true;
-			this.notifyAll();
-		}
+		public void block() throws Exception {
+			ProcessCancelTest.this.waitForTrue(() -> this.isContinue);
 
-		public synchronized void block() throws Exception {
-			long startTime = System.currentTimeMillis();
-			while (!this.isContinue) {
-				ProcessCancelTest.this.timeout(startTime);
-				this.wait(10);
+			// Cancel (done here to ensure before next)
+			// (can not do on test thread, as blocks waiting access to thread)
+			if (this.processManager != null) {
+				this.processManager.cancel();
 			}
 		}
 
