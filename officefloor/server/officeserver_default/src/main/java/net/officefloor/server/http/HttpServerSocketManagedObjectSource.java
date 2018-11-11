@@ -46,6 +46,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.executor.ManagedObjectExecutorFactory;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
@@ -859,11 +860,11 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		}
 
 		@Override
-		protected void service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
+		protected ProcessManager service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
 				throws IOException, HttpException {
 
 			// Service request
-			this.context.invokeProcess(HttpServerSocketManagedObjectSource.this.handleRequestFlowIndex, null,
+			return this.context.invokeProcess(HttpServerSocketManagedObjectSource.this.handleRequestFlowIndex, null,
 					connection, 0, connection.getServiceFlowCallback());
 		}
 	}

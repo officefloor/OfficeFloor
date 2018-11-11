@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
@@ -93,6 +94,16 @@ public class OfficeManagerProcessState implements ProcessState {
 	@Override
 	public ThreadState getMainThreadState() {
 		return this.mainThreadState;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return false; // never cancelled
+	}
+
+	@Override
+	public ProcessManager getProcessManager() {
+		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be process managed");
 	}
 
 	@Override

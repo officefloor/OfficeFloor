@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler;
 import net.officefloor.server.RequestServicer;
 import net.officefloor.server.RequestServicerFactory;
@@ -55,6 +56,10 @@ public abstract class AbstractHttpServicerFactory
 
 	private static final HttpHeaderName CONTENT_LENGTH_NAME = new HttpHeaderName("Content-Length");
 	private static final HttpHeaderName CONTENT_TYPE_NAME = new HttpHeaderName("Content-Type");
+
+	private static final ProcessManager FAIL_PROCESSING = () -> {
+		// nothing to cancel, as already failed
+	};
 
 	/**
 	 * {@link HttpServerLocation}.
@@ -97,10 +102,12 @@ public abstract class AbstractHttpServicerFactory
 	 * Services the {@link ProcessAwareServerHttpConnectionManagedObject}.
 	 * 
 	 * @param connection {@link ProcessAwareServerHttpConnectionManagedObject}.
+	 * @return {@link ProcessManager} to servicing the
+	 *         {@link ProcessAwareServerHttpConnectionManagedObject}.
 	 * @throws IOException   If IO failure.
 	 * @throws HttpException If HTTP failure.
 	 */
-	protected abstract void service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
+	protected abstract ProcessManager service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
 			throws IOException, HttpException;
 
 	/*
@@ -204,7 +211,7 @@ public abstract class AbstractHttpServicerFactory
 		 */
 
 		@Override
-		public void service(HttpRequestParser request, ResponseWriter responseWriter) {
+		public ProcessManager service(HttpRequestParser request, ResponseWriter responseWriter) {
 
 			// Determine if parse failure
 			if (this.parseFailure != null) {
@@ -214,7 +221,7 @@ public abstract class AbstractHttpServicerFactory
 							AbstractHttpServicerFactory.this.isIncludeEscalationStackTrace, responseHead,
 							socketBufferPool);
 				}, null);
-				return;
+				return FAIL_PROCESSING;
 			}
 
 			// Request ready, so obtain details
@@ -276,7 +283,7 @@ public abstract class AbstractHttpServicerFactory
 			try {
 				try {
 					// Service the connection
-					AbstractHttpServicerFactory.this.service(connection);
+					return AbstractHttpServicerFactory.this.service(connection);
 
 				} catch (IOException ex) {
 					// Propagate as HTTP exception
@@ -289,6 +296,7 @@ public abstract class AbstractHttpServicerFactory
 					ex.writeHttpResponse(version, AbstractHttpServicerFactory.this.isIncludeEscalationStackTrace,
 							responseHead, socketBufferPool);
 				}, null);
+				return FAIL_PROCESSING;
 			}
 		}
 

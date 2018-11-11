@@ -21,6 +21,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.manage.ProcessCancelledException;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
@@ -400,6 +401,11 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			}
 
 		case SETUP:
+
+			// As now synchronised to process state, ensure not cancelled
+			if (processState.isCancelled()) {
+				throw new ProcessCancelledException();
+			}
 
 			// Setup
 			this.containerState = ManagedFunctionState.EXECUTE_FUNCTION;

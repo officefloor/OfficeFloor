@@ -113,7 +113,10 @@ public class ThreadFactoryManufacturer {
 
 			// Create the managed execution
 			ManagedExecution<RuntimeException> managedExecution = ThreadFactoryManufacturer.this.managedExecutionFactory
-					.createManagedExecution(this.executive, () -> r.run());
+					.createManagedExecution(this.executive, () -> {
+						r.run();
+						return null;
+					});
 
 			// Create and configure the thread
 			String threadName = this.threadNamePrefix + this.nextThreadIndex.getAndIncrement();

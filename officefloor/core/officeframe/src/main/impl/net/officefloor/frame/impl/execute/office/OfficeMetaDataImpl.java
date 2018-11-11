@@ -25,6 +25,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.function.Promise;
@@ -222,7 +223,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
-	public void invokeProcess(FlowMetaData flowMetaData, Object parameter, long delay, FlowCallback callback,
+	public ProcessManager invokeProcess(FlowMetaData flowMetaData, Object parameter, long delay, FlowCallback callback,
 			ThreadState callbackThreadState, ManagedObject inputManagedObject,
 			ManagedObjectMetaData<?> inputManagedObjectMetaData, int processBoundIndexForInputManagedObject)
 			throws InvalidParameterTypeException {
@@ -245,6 +246,9 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		// Create the process
 		final FunctionState function = this.createProcess(flowMetaData, parameter, callback, callbackThreadState,
 				inputManagedObject, inputManagedObjectMetaData, processBoundIndexForInputManagedObject);
+
+		// Obtain the process manager
+		ProcessManager processManager = function.getThreadState().getProcessState().getProcessManager();
 
 		// Trigger the process
 		if (delay > 0) {
@@ -279,6 +283,9 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 				this.functionLoop.executeFunction(function);
 			}
 		}
+
+		// Return the process manager
+		return processManager;
 	}
 
 	/**

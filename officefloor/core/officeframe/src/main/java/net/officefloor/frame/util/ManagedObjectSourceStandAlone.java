@@ -30,6 +30,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -320,8 +321,9 @@ public class ManagedObjectSourceStandAlone {
 		 * @param managedObject {@link ManagedObject} for the {@link ProcessState}.
 		 * @param delay         Delay to invoke {@link ProcessState}.
 		 * @param callback      {@link FlowCallback}.
+		 * @return {@link ProcessManager}.
 		 */
-		private void process(int processIndex, Object parameter, ManagedObject managedObject, long delay,
+		private ProcessManager process(int processIndex, Object parameter, ManagedObject managedObject, long delay,
 				FlowCallback callback) {
 
 			// Ignore delay and execute immediately
@@ -363,6 +365,10 @@ public class ManagedObjectSourceStandAlone {
 					throw new Error(ex);
 				}
 			}
+
+			// Return process manager
+			return () -> {
+			};
 		}
 
 		/*
@@ -370,15 +376,15 @@ public class ManagedObjectSourceStandAlone {
 		 */
 
 		@Override
-		public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
+		public ProcessManager invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
 				FlowCallback callback) {
-			this.process(key.ordinal(), parameter, managedObject, delay, callback);
+			return this.process(key.ordinal(), parameter, managedObject, delay, callback);
 		}
 
 		@Override
-		public void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
+		public ProcessManager invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
 				FlowCallback callback) {
-			this.process(flowIndex, parameter, managedObject, delay, callback);
+			return this.process(flowIndex, parameter, managedObject, delay, callback);
 		}
 
 		@Override

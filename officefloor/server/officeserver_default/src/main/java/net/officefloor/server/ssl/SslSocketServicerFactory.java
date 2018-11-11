@@ -35,6 +35,7 @@ import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLSession;
 
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.RequestServicer;
@@ -260,7 +261,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 		 */
 
 		@Override
-		public synchronized void service(R request, ResponseWriter responseWriter) {
+		public synchronized ProcessManager service(R request, ResponseWriter responseWriter) {
 
 			// Create and register the SSL request
 			final SslRequest sslRequest = new SslRequest(this.previousRequestBuffers, responseWriter);
@@ -268,7 +269,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 			this.previousRequestBuffers = null; // included for release
 
 			// Application level request, so delegate
-			this.delegateRequestServicer.service(request, (responseHeaderWriter, headResponseBuffer) -> {
+			return this.delegateRequestServicer.service(request, (responseHeaderWriter, headResponseBuffer) -> {
 
 				// Process request on socket thread
 				this.requestHandler.execute(() -> {

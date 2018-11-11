@@ -87,4 +87,9 @@ public class ValidateHttpServerImplementationTest extends AbstractHttpServerImpl
 		return "Jetty";
 	}
 
+	@Override
+	protected boolean isHandleCancel() {
+		return false;
+	}
+
 }
