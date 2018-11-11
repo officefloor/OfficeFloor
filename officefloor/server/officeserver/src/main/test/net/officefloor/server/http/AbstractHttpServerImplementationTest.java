@@ -18,6 +18,7 @@
 package net.officefloor.server.http;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
@@ -782,7 +783,6 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			context.addManagedObject("MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
 
 			// Configure teams
-			context.getOfficeFloorDeployer().enableAutoWireTeams();
 			context.getOfficeFloorDeployer().addTeam("TEAM", BackPressureTeamSource.class.getName())
 					.addTypeQualification(null, TeamMarker.class.getName());
 		});
@@ -802,7 +802,6 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * Marker {@link ManagedObject} for identifying {@link Team}.
 	 */
 	public static class TeamMarker {
-
 	}
 
 	/**
@@ -838,21 +837,57 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
+	 * Marker {@link ManagedObject} for identifying {@link Team}.
+	 */
+	public static class TeamTwoMarker {
+	}
+
+	/**
+	 * Indicates if handle cancel.
+	 * 
+	 * @return <code>true</code> if handle cancel.
+	 */
+	protected boolean isHandleCancel() {
+		return true;
+	}
+
+	/**
 	 * Undertakes the cancel connection test.
 	 * 
 	 * @param isSecure Indicates if secure.
 	 */
 	public void doCancelConnectionTest(boolean isSecure) throws Exception {
+
+		// Determine if handle cancel
+		if (!this.isHandleCancel()) {
+			System.out.println(this.getName() + " not handle cancel, so not running test");
+			return;
+		}
+
+		// Start the server
 		CancelConnectionManagedObjectSource mos = new CancelConnectionManagedObjectSource();
 		this.startHttpServer(CancelConnectionServicer.class, (context) -> {
-			context.getOfficeFloorDeployer().addManagedObjectSource("MOS", mos).addOfficeFloorManagedObject("MO",
-					ManagedObjectScope.PROCESS);
+			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
+			// Load the managed object source
+			deployer.addManagedObjectSource("MOS", mos).addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);
+
+			// Configure team one
+			context.addManagedObject("MARKER_ONE", TeamMarker.class, ManagedObjectScope.PROCESS);
+			deployer.addTeam("TEAM_ONE", ExecutorCachedTeamSource.class.getName()).addTypeQualification(null,
+					TeamMarker.class.getName());
+
+			// Configure team two
+			context.addManagedObject("MARKER_TWO", TeamTwoMarker.class, ManagedObjectScope.PROCESS);
+			deployer.addTeam("TEAM_TWO", ExecutorCachedTeamSource.class.getName()).addTypeQualification(null,
+					TeamTwoMarker.class.getName());
 		});
 
 		// Reset state
-		CancelConnectionServicer.isContinue = false;
-		CancelConnectionServicer.isBlocked = false;
-		CancelConnectionServicer.nextCount.set(0);
+		synchronized (CancelConnectionServicer.isContinue) {
+			CancelConnectionServicer.isContinue[0] = false;
+			CancelConnectionServicer.isBlocked = false;
+		}
 
 		// Create connection to server
 		Socket socket = (isSecure
@@ -862,57 +897,75 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 						this.serverLocation.getHttpPort()));
 
 		// Send many requests
-		final int requestCount = 10;
-		for (int i = 0; i < requestCount; i++) {
-			socket.getOutputStream().write(this.createPipelineRequestData());
+		OutputStream socketOutput = socket.getOutputStream();
+		socketOutput.write(this.createPipelineRequestData());
+		socketOutput.flush();
+
+		// Wait for blocking on servicing
+		long startTime = System.currentTimeMillis();
+		synchronized (CancelConnectionServicer.isContinue) {
+			while (!CancelConnectionServicer.isBlocked) {
+				this.timeout(startTime);
+				CancelConnectionServicer.isContinue.wait(10);
+			}
 		}
-		this.waitForTrue(() -> CancelConnectionServicer.isBlocked);
 
 		// Sever (close) the connection
 		socket.close();
-		Thread.sleep(10); // allow some time for shutdown of connection
 
-		// Close server (allows processing to complete)
-		CancelConnectionServicer.isContinue = true;
-		Thread.sleep(10); // allow some time for flushing out servicing
-		this.officeFloor.closeOfficeFloor();
-		assertTrue("Should have return object", mos.completed.get() > 0);
+		// Trigger servicing
+		synchronized (CancelConnectionServicer.isContinue) {
+			CancelConnectionServicer.isContinue[0] = true;
+			CancelConnectionServicer.isContinue.notifyAll();
+		}
 
-		// Ensure flag no further
-		int nextCount = CancelConnectionServicer.nextCount.get();
-		assertTrue("Should not invoke next, as cancelled (" + nextCount + " next() run)", nextCount <= 1);
+		// Wait for completion
+		this.waitForTrue(() -> mos.completed.get() == 1);
 	}
 
 	public static class CancelConnectionServicer {
 
-		private static volatile boolean isContinue = false;
+		private static boolean isBlocked = false;
 
-		private static volatile boolean isBlocked = false;
+		private static final boolean[] isContinue = new boolean[] { false };
 
-		private static final AtomicInteger nextCount = new AtomicInteger(0);
-
-		@NextFunction("next")
+		@NextFunction("loopOne")
 		public void service(CancelConnectionManagedObjectSource mos) throws Throwable {
-
-			isBlocked = true;
 
 			// Only one request gets serviced, while rest chain behind
 			long endTime = System.currentTimeMillis() + 3000;
-			while (!isContinue) {
-				if (endTime < System.currentTimeMillis()) {
-					fail("Timed out waiting on servicing");
+			synchronized (isContinue) {
+
+				// Flag now blocking
+				isBlocked = true;
+				isContinue.notifyAll();
+
+				// Wait to continue
+				while (!isContinue[0]) {
+					if (endTime < System.currentTimeMillis()) {
+						fail("Timed out waiting on servicing");
+					}
+					isContinue.wait(10);
 				}
-				Thread.sleep(10);
 			}
 		}
 
-		public void next() {
-			nextCount.incrementAndGet();
+		@NextFunction("loopTwo")
+		public void loopOne(TeamMarker marker) throws Exception {
+			// loops around (on different team to allow socket listener to close connection)
+			Thread.sleep(1);
+		}
+
+		@NextFunction("loopOne")
+		public void loopTwo(TeamTwoMarker marker) {
+			// loop
 		}
 	}
 
 	public static class CancelConnectionManagedObjectSource extends AbstractManagedObjectSource<None, None>
 			implements ManagedObject, ManagedObjectPool {
+
+		private AtomicInteger created = new AtomicInteger(0);
 
 		private AtomicInteger completed = new AtomicInteger(0);
 
@@ -933,6 +986,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		@Override
 		protected ManagedObject getManagedObject() throws Throwable {
+			created.incrementAndGet();
 			return this;
 		}
 

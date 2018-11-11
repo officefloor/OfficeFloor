@@ -27,6 +27,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.AsciiString;
 import io.netty.util.CharsetUtil;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.http.AbstractHttpServerImplementationTest;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpServerImplementation;
@@ -85,11 +86,14 @@ public class NettyHttpServerImplementationTest
 		}
 
 		@Override
-		protected void service(ChannelHandlerContext context, HttpRequest request) throws Exception {
+		protected ProcessManager service(ChannelHandlerContext context, HttpRequest request) throws Exception {
 			FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
 					HELLO_WORLD_BUFFER.duplicate(), false);
 			response.headers().set(CONTENT_LENGTH, HELLO_WORLD_LENGTH).set(CONTENT_TYPE, TYPE_PLAIN);
 			context.write(response);
+			return () -> {
+				// no cancel handling
+			};
 		}
 	}
 
