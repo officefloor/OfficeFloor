@@ -1425,10 +1425,6 @@ public class SocketManager {
 
 				// Releasing stream buffers (so end processing)
 				if (this.head.processManager != null) {
-					
-					// TODO REMOVE
-					System.out.println("TODO REMOVE: Cancelling process");
-					
 					this.head.processManager.cancel();
 				}
 

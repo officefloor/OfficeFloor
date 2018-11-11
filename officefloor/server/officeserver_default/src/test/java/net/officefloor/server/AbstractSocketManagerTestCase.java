@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.function.Function;
 
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.RequestHandler.Execution;
@@ -926,6 +927,50 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			InputStream inputStream = client.getInputStream();
 			assertEquals("Incorrect response", 2, inputStream.read());
 		}
+	}
+
+	/**
+	 * Ensure handle cancelling the processing.
+	 */
+	public void testCancelProcessing() throws IOException {
+
+		// Create tester
+		this.tester = new SocketManagerTester(1);
+
+		// Process Manager
+		boolean[] isCancelled = new boolean[] { false };
+		ProcessManager manager = () -> {
+			synchronized (isCancelled) {
+				isCancelled[0] = true;
+			}
+		};
+
+		// Bind to server socket
+		this.tester.bindServerSocket(null, null, (requestHandler) -> (buffer, bytesRead, isNewBuffer) -> {
+			requestHandler.handleRequest("CANCEL");
+		}, (socketServicer) -> (request, responseWriter) -> {
+			return manager;
+		});
+
+		this.tester.start();
+
+		// Undertake connect and send data
+		Socket client = this.tester.getClient();
+
+		// Send some data (to trigger request)
+		OutputStream outputStream = client.getOutputStream();
+		outputStream.write(1);
+		outputStream.flush();
+
+		// Close socket
+		client.close();
+
+		// Wait for cancel
+		this.waitForTrue(() -> {
+			synchronized (isCancelled) {
+				return isCancelled[0];
+			}
+		});
 	}
 
 }
