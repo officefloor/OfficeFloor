@@ -68,16 +68,19 @@ public class BenchmarkEnvironment {
 	public static void doStressTest(String url, int clients, int iterations, int pipelineBatchSize) throws Exception {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> {
 
+			// Create configuration
+			DefaultAsyncHttpClientConfig.Builder configuration = new DefaultAsyncHttpClientConfig.Builder()
+					.setConnectTimeout(TIMEOUT).setReadTimeout(TIMEOUT);
+
 			// Undertake warm up
-			try (AsyncHttpClient client = Dsl.asyncHttpClient()) {
+			try (AsyncHttpClient client = Dsl.asyncHttpClient(configuration)) {
 				doStressRequests(url, iterations / 10, pipelineBatchSize, 'w', new AsyncHttpClient[] { client });
 			}
 
 			// Run load
 			AsyncHttpClient[] asyncClients = new AsyncHttpClient[clients];
 			for (int i = 0; i < asyncClients.length; i++) {
-				asyncClients[i] = Dsl.asyncHttpClient(
-						new DefaultAsyncHttpClientConfig.Builder().setConnectTimeout(TIMEOUT).setReadTimeout(TIMEOUT));
+				asyncClients[i] = Dsl.asyncHttpClient(configuration);
 			}
 			try {
 
