@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
@@ -1421,6 +1422,17 @@ public class SocketManager {
 
 			// Release buffers for requests
 			while (this.head != null) {
+
+				// Releasing stream buffers (so end processing)
+				if (this.head.processManager != null) {
+					
+					// TODO REMOVE
+					System.out.println("TODO REMOVE: Cancelling process");
+					
+					this.head.processManager.cancel();
+				}
+
+				// Release the stream buffers
 				StreamBuffer<ByteBuffer> headRequest = this.head.headRequestBuffer;
 				while (headRequest != null) {
 					StreamBuffer<ByteBuffer> release = headRequest;
@@ -1485,7 +1497,7 @@ public class SocketManager {
 			}
 
 			// Service the request
-			this.requestServicer.service(request, socketRequest);
+			socketRequest.processManager = this.requestServicer.service(request, socketRequest);
 		}
 
 		@Override
@@ -1716,6 +1728,11 @@ public class SocketManager {
 		 * Next {@link SocketRequest}.
 		 */
 		private SocketRequest<R> next = null;
+
+		/**
+		 * {@link ProcessManager}.
+		 */
+		private ProcessManager processManager = null;
 
 		/**
 		 * Instantiate.

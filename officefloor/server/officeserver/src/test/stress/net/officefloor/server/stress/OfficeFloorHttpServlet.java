@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpServerLocation;
@@ -142,7 +145,31 @@ public class OfficeFloorHttpServlet extends HttpServlet {
 				this.dateHttpHeaderClock, this.isIncludeEscalationStackTrace, writer, this.bufferPool);
 
 		// Service request
-		this.input.service(connection, connection.getServiceFlowCallback());
+		ProcessManager manager = this.input.service(connection, connection.getServiceFlowCallback());
+
+		// Register to cancel process
+		asyncContext.addListener(new AsyncListener() {
+
+			@Override
+			public void onStartAsync(AsyncEvent event) throws IOException {
+				// Do nothing
+			}
+
+			@Override
+			public void onTimeout(AsyncEvent event) throws IOException {
+				manager.cancel();
+			}
+
+			@Override
+			public void onError(AsyncEvent event) throws IOException {
+				manager.cancel();
+			}
+
+			@Override
+			public void onComplete(AsyncEvent event) throws IOException {
+				// nothing on completion
+			}
+		});
 	}
 
 }

@@ -75,7 +75,10 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			acceptedSocket.set(socket);
 		}, (requestHandler) -> (buffer, bytesRead,
 				isNewBuffer) -> fail("Should not be invoked, as only accepting connection"),
-				(socketServicer) -> (request, responseWriter) -> fail("Should not be invoked, as no requests"));
+				(socketServicer) -> (request, responseWriter) -> {
+					fail("Should not be invoked, as no requests");
+					return null;
+				});
 		assertNotNull("Should have bound server socket", serverSocket.value);
 
 		this.tester.start();
@@ -104,6 +107,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Should not be invoked, as no requests");
+			return null;
 		});
 
 		this.tester.start();
@@ -135,6 +139,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			requestHandler.handleRequest(REQUEST);
 		}, (socketServicer) -> (request, responseWriter) -> {
 			receivedRequest.set(request);
+			return null;
 		});
 
 		this.tester.start();
@@ -172,6 +177,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			});
 		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Should not receive request");
+			return null;
 		});
 
 		this.tester.start();
@@ -206,6 +212,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			});
 		}, (socketServicer) -> (request, responseWriter) -> {
 			receivedRequest.set(request);
+			return null;
 		});
 
 		this.tester.start();
@@ -234,6 +241,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write(null, this.tester.createStreamBuffer(2));
+			return null;
 		});
 
 		this.tester.start();
@@ -263,6 +271,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			requestHandler.handleRequest(buffer.pooledBuffer.get(0));
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write(null, this.tester.createStreamBuffer(10 + (byte) request));
+			return null;
 		});
 
 		this.tester.start();
@@ -298,6 +307,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write((head, pool) -> head.write((byte) 2), null);
+			return null;
 		});
 
 		this.tester.start();
@@ -327,6 +337,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write((head, pool) -> head.write((byte) 2), this.tester.createStreamBuffer(3));
+			return null;
 		});
 
 		this.tester.start();
@@ -361,6 +372,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+			return null;
 		});
 
 		this.tester.start();
@@ -410,6 +422,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+			return null;
 		});
 
 		this.tester.start();
@@ -456,6 +469,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			}
 		}, (socketServicer) -> (request, responseWriter) -> {
 			responseWriter.write((head, pool) -> head.write((byte) 2), fileBuffer);
+			return null;
 		});
 
 		this.tester.start();
@@ -493,6 +507,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 		}, (socketServicer) -> (request, responseWriter) -> {
 			StreamBuffer<ByteBuffer> response = this.tester.createStreamBuffer((byte) request);
 			responseWriter.write(null, response);
+			return null;
 		});
 
 		this.tester.start();
@@ -544,6 +559,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			default:
 				fail("Invalid request " + request);
 			}
+			return null;
 		});
 
 		this.tester.start();
@@ -591,6 +607,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 
 			// Send large response
 			responseWriter.write(null, buffers);
+			return null;
 		});
 
 		this.tester.start();
@@ -622,6 +639,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			requestHandler.handleRequest("SEND");
 		}, (socketServicer) -> (request, responseWriter) -> {
 			this.delay(() -> responseWriter.write(null, this.tester.createStreamBuffer(1)));
+			return null;
 		});
 
 		this.tester.start();
@@ -670,6 +688,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				// Send the response immediately
 				responseWriter.write(null, response);
 			}
+			return null;
 		});
 
 		this.tester.start();
@@ -704,6 +723,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			this.delay(() -> responseWriter.write((buffer, pool) -> {
 				StreamBuffer.write(new byte[] { 1, 2, 3 }, buffer, pool);
 			}, null));
+			return null;
 		});
 
 		this.tester.start();
@@ -755,6 +775,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 				// Send the response immediately
 				responseWriter.write(header, null);
 			}
+			return null;
 		});
 
 		this.tester.start();
@@ -796,6 +817,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			requestHandler.sendImmediateData(immediate);
 		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Immediate response, so no request to service");
+			return null;
 		});
 
 		this.tester.start();
@@ -844,6 +866,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			});
 		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Immediate response, so no request to service");
+			return null;
 		});
 
 		this.tester.start();
@@ -886,6 +909,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 			});
 		}, (socketServicer) -> (request, responseWriter) -> {
 			fail("Immediate response, so no request to service");
+			return null;
 		});
 
 		this.tester.start();
