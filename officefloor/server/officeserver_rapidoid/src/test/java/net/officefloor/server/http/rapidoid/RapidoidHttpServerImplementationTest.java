@@ -55,6 +55,11 @@ public class RapidoidHttpServerImplementationTest extends AbstractHttpServerImpl
 	}
 
 	@Override
+	protected boolean isHandleCancel() {
+		return false;
+	}
+
+	@Override
 	protected Server startRawHttpServer(HttpServerLocation serverLocation) throws Exception {
 		RawRapidoidHttpServer server = new RawRapidoidHttpServer();
 		return server.listen(serverLocation.getClusterHttpPort());
