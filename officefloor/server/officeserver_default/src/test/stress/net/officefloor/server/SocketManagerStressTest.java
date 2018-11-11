@@ -136,6 +136,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 					} else {
 						runnable.run();
 					}
+					return null;
 				});
 
 		this.tester.start();

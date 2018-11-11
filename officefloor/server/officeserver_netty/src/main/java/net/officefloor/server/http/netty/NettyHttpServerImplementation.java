@@ -34,6 +34,7 @@ import io.netty.util.AsciiString;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
@@ -139,18 +140,8 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 		this.stopHttpServer();
 	}
 
-	/**
-	 * Services the {@link HttpRequest}.
-	 * 
-	 * @param context
-	 *            {@link ChannelHandlerContext}.
-	 * @param request
-	 *            {@link HttpRequest}.
-	 * @throws Exception
-	 *             If fail servicing.
-	 */
 	@Override
-	protected void service(ChannelHandlerContext context, HttpRequest request) throws Exception {
+	protected ProcessManager service(ChannelHandlerContext context, HttpRequest request) throws Exception {
 
 		// Obtain the server location
 		HttpServerLocation serverLocation = this.context.getHttpServerLocation();
@@ -303,7 +294,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 				this.serverName, this.dateHttpHeaderClock, this.isIncludeStackTrace, responseWriter, bufferPool);
 
 		// Service the request
-		this.serviceInput.service(connection, connection.getServiceFlowCallback());
+		return this.serviceInput.service(connection, connection.getServiceFlowCallback());
 	}
 
 }

@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.execution;
 
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.ManagedExecution;
@@ -117,8 +118,8 @@ public class ManagedExecutionFactoryImpl implements ManagedExecutionFactory {
 		 */
 
 		@Override
-		public void managedExecute() throws E {
-			this.executive.manageExecution(this);
+		public ProcessManager managedExecute() throws E {
+			return this.executive.manageExecution(this);
 		}
 
 		/*
@@ -126,7 +127,7 @@ public class ManagedExecutionFactoryImpl implements ManagedExecutionFactory {
 		 */
 
 		@Override
-		public void execute() throws E {
+		public ProcessManager execute() throws E {
 
 			// Determine if state of managed execution for thread
 			ManagedExecutionState state = ManagedExecutionFactoryImpl.threadManagedExecutionState.get();
@@ -140,7 +141,7 @@ public class ManagedExecutionFactoryImpl implements ManagedExecutionFactory {
 				}
 
 				// Undertake execution
-				this.execution.execute();
+				return this.execution.execute();
 
 			} finally {
 				// Only clean up if not previously managed (not internal call)

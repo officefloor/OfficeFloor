@@ -256,7 +256,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		this.recordReturn(objectRegistry, objectRegistry.getObject(2), UNQUALIFIED_DEPENDENCY);
 
 		// Record invoking the processes
-		executeContext.invokeProcess(0, null, null, 0, null);
+		this.recordReturn(executeContext, executeContext.invokeProcess(0, null, null, 0, null), null);
 		this.control(executeContext).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
@@ -279,7 +279,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 				return isMatch;
 			}
 		});
-		executeContext.invokeProcess(1, PROCESS_PARAMETER, null, 0, null);
+		this.recordReturn(executeContext, executeContext.invokeProcess(1, PROCESS_PARAMETER, null, 0, null), null);
 
 		// Replay mocks
 		this.replayMockObjects();

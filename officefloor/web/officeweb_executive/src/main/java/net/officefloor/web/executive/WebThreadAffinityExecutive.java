@@ -28,6 +28,7 @@ import net.officefloor.frame.api.executive.ExecutiveContext;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.TeamSourceContextWrapper;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
@@ -166,13 +167,13 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	}
 
 	@Override
-	public <T extends Throwable> void manageExecution(Execution<T> execution) throws T {
+	public <T extends Throwable> ProcessManager manageExecution(Execution<T> execution) throws T {
 
 		// Ensure associate thread to CPU
 		this.bindCurrentThreadCpuAffinity();
 
 		// Execute the execution
-		execution.execute();
+		return execution.execute();
 	}
 
 	@Override

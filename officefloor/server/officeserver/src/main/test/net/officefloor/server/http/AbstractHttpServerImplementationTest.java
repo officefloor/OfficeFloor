@@ -18,6 +18,7 @@
 package net.officefloor.server.http;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.InetAddress;
@@ -38,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -58,12 +60,16 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.BackPressureTeamSource;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -777,7 +783,6 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			context.addManagedObject("MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
 
 			// Configure teams
-			context.getOfficeFloorDeployer().enableAutoWireTeams();
 			context.getOfficeFloorDeployer().addTeam("TEAM", BackPressureTeamSource.class.getName())
 					.addTypeQualification(null, TeamMarker.class.getName());
 		});
@@ -812,6 +817,205 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		public void backPressure(@Parameter Thread serviceThread, ServerHttpConnection connection, TeamMarker marker)
 				throws Exception {
 			fail("Should not be invoked, as back pressure from Team");
+		}
+	}
+
+	/**
+	 * Ensure {@link ProcessState} instances for connection are cancelled on loss of
+	 * connection.
+	 */
+	public void testCancelConnection() throws Exception {
+		this.doCancelConnectionTest(false);
+	}
+
+	/**
+	 * Ensure {@link ProcessState} instances for connection are cancelled on loss of
+	 * secure connection.
+	 */
+	public void testSecureCancelConnection() throws Exception {
+		this.doCancelConnectionTest(true);
+	}
+
+	/**
+	 * Marker {@link ManagedObject} for identifying {@link Team}.
+	 */
+	public static class TeamTwoMarker {
+	}
+
+	/**
+	 * Indicates if handle cancel.
+	 * 
+	 * @return <code>true</code> if handle cancel.
+	 */
+	protected boolean isHandleCancel() {
+		return true;
+	}
+
+	/**
+	 * Undertakes the cancel connection test.
+	 * 
+	 * @param isSecure Indicates if secure.
+	 */
+	public void doCancelConnectionTest(boolean isSecure) throws Exception {
+
+		// Determine if handle cancel
+		if (!this.isHandleCancel()) {
+			System.out.println(this.getName() + " not handle cancel, so not running test");
+			return;
+		}
+
+		// Start the server
+		CancelConnectionManagedObjectSource mos = new CancelConnectionManagedObjectSource();
+		this.startHttpServer(CancelConnectionServicer.class, (context) -> {
+			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
+			// Load the managed object source
+			deployer.addManagedObjectSource("MOS", mos).addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);
+
+			// Configure team one
+			context.addManagedObject("MARKER_ONE", TeamMarker.class, ManagedObjectScope.PROCESS);
+			deployer.addTeam("TEAM_ONE", ExecutorCachedTeamSource.class.getName()).addTypeQualification(null,
+					TeamMarker.class.getName());
+
+			// Configure team two
+			context.addManagedObject("MARKER_TWO", TeamTwoMarker.class, ManagedObjectScope.PROCESS);
+			deployer.addTeam("TEAM_TWO", ExecutorCachedTeamSource.class.getName()).addTypeQualification(null,
+					TeamTwoMarker.class.getName());
+		});
+
+		// Reset state
+		synchronized (CancelConnectionServicer.isContinue) {
+			CancelConnectionServicer.isContinue[0] = false;
+			CancelConnectionServicer.isBlocked = false;
+		}
+
+		// Create connection to server
+		Socket socket = (isSecure
+				? OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
+						.createSocket(InetAddress.getLocalHost(), this.serverLocation.getHttpsPort())
+				: SocketFactory.getDefault().createSocket(InetAddress.getLocalHost(),
+						this.serverLocation.getHttpPort()));
+
+		// Send many requests
+		OutputStream socketOutput = socket.getOutputStream();
+		socketOutput.write(this.createPipelineRequestData());
+		socketOutput.flush();
+
+		// Wait for blocking on servicing
+		long startTime = System.currentTimeMillis();
+		synchronized (CancelConnectionServicer.isContinue) {
+			while (!CancelConnectionServicer.isBlocked) {
+				this.timeout(startTime);
+				CancelConnectionServicer.isContinue.wait(10);
+			}
+		}
+
+		// Sever (close) the connection
+		socket.close();
+
+		// Trigger servicing
+		synchronized (CancelConnectionServicer.isContinue) {
+			CancelConnectionServicer.isContinue[0] = true;
+			CancelConnectionServicer.isContinue.notifyAll();
+		}
+
+		// Wait for completion
+		this.waitForTrue(() -> mos.completed.get() == 1);
+	}
+
+	public static class CancelConnectionServicer {
+
+		private static boolean isBlocked = false;
+
+		private static final boolean[] isContinue = new boolean[] { false };
+
+		@NextFunction("loopOne")
+		public void service(CancelConnectionManagedObjectSource mos) throws Throwable {
+
+			// Only one request gets serviced, while rest chain behind
+			long endTime = System.currentTimeMillis() + 3000;
+			synchronized (isContinue) {
+
+				// Flag now blocking
+				isBlocked = true;
+				isContinue.notifyAll();
+
+				// Wait to continue
+				while (!isContinue[0]) {
+					if (endTime < System.currentTimeMillis()) {
+						fail("Timed out waiting on servicing");
+					}
+					isContinue.wait(10);
+				}
+			}
+		}
+
+		@NextFunction("loopTwo")
+		public void loopOne(TeamMarker marker) throws Exception {
+			// loops around (on different team to allow socket listener to close connection)
+			Thread.sleep(1);
+		}
+
+		@NextFunction("loopOne")
+		public void loopTwo(TeamTwoMarker marker) {
+			// loop
+		}
+	}
+
+	public static class CancelConnectionManagedObjectSource extends AbstractManagedObjectSource<None, None>
+			implements ManagedObject, ManagedObjectPool {
+
+		private AtomicInteger created = new AtomicInteger(0);
+
+		private AtomicInteger completed = new AtomicInteger(0);
+
+		/*
+		 * ==================== ManagedObjectSource ==========================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// no specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			context.setObjectClass(this.getClass());
+			context.getManagedObjectSourceContext().setDefaultManagedObjectPool((source) -> this);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			created.incrementAndGet();
+			return this;
+		}
+
+		/*
+		 * ======================= ManagedObject ==============================
+		 */
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
+		}
+
+		/*
+		 * ===================== ManagedObjectPool ============================
+		 */
+
+		@Override
+		public void returnManagedObject(ManagedObject managedObject) {
+			completed.incrementAndGet();
+		}
+
+		@Override
+		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
+			completed.incrementAndGet();
+		}
+
+		@Override
+		public void empty() {
+			// nothing to tidy up
 		}
 	}
 

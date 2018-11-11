@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadFactory;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -92,12 +93,13 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 	 */
 
 	@Override
-	public void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback) {
-		this.invokeProcess(key.ordinal(), parameter, managedObject, delay, callback);
+	public ProcessManager invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
+			FlowCallback callback) {
+		return this.invokeProcess(key.ordinal(), parameter, managedObject, delay, callback);
 	}
 
 	@Override
-	public void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
+	public ProcessManager invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
 			FlowCallback callback) {
 
 		// Obtain the flow meta-data
@@ -113,14 +115,14 @@ public class ManagedObjectExecuteContextImpl<F extends Enum<F>> implements Manag
 			try {
 
 				// Invoke the process
-				this.officeMetaData.invokeProcess(flowMetaData, parameter, delay, callback, null, managedObject,
+				return this.officeMetaData.invokeProcess(flowMetaData, parameter, delay, callback, null, managedObject,
 						this.managedObjectMetaData, this.processMoIndex);
 			} catch (InvalidParameterTypeException ex) {
 				// Propagate (unlikely so no need for checked exception)
 				throw new IllegalArgumentException(ex);
 			}
 		};
-		this.officeMetaData.getManagedExecutionFactory()
+		return this.officeMetaData.getManagedExecutionFactory()
 				.createManagedExecution(this.officeMetaData.getExecutive(), execution).managedExecute();
 	}
 

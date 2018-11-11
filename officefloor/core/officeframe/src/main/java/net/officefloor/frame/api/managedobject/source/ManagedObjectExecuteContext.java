@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadFactory;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
@@ -61,6 +62,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *                      invoked. A <code>0</code> or negative value invokes the
 	 *                      {@link Flow} immediately.
 	 * @param callback      {@link FlowCallback} on completion of the {@link Flow}.
+	 * @return {@link ProcessManager} for the {@link ProcessState}.
 	 * @throws IllegalArgumentException If
 	 *                                  <ul>
 	 *                                  <li>unknown {@link Flow} key</li>
@@ -69,8 +71,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *                                  supplied</li>
 	 *                                  </ul>
 	 */
-	void invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback)
-			throws IllegalArgumentException;
+	ProcessManager invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
+			FlowCallback callback) throws IllegalArgumentException;
 
 	/**
 	 * Instigates a {@link Flow}.
@@ -84,6 +86,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *                      invoked. A <code>0</code> or negative value invokes the
 	 *                      {@link Flow} immediately.
 	 * @param callback      {@link FlowCallback} on completion of the {@link Flow}.
+	 * @return {@link ProcessManager} for the {@link ProcessState}.
 	 * @throws IllegalArgumentException If
 	 *                                  <ul>
 	 *                                  <li>unknown {@link Flow} index</li>
@@ -92,8 +95,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *                                  supplied</li>
 	 *                                  </ul>
 	 */
-	void invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay, FlowCallback callback)
-			throws IllegalArgumentException;
+	ProcessManager invokeProcess(int flowIndex, Object parameter, ManagedObject managedObject, long delay,
+			FlowCallback callback) throws IllegalArgumentException;
 
 	/**
 	 * Obtains an {@link ExecutionStrategy}.

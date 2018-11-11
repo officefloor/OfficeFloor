@@ -9,6 +9,14 @@ export COMPOSE_INTERACTIVE_NO_CLI=1
 # Obtain the script directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+# Clear any previous results
+if [  -f "${DIR}/results.txt" ]; then
+	rm "${DIR}/results.txt"
+fi
+if [ -f "${DIR}/results.zip" ]; then
+	rm "${DIR}/results.zip"
+fi
+
 
 # Obtain latest OfficeFloor code
 if [ -d "${DIR}/OfficeFloorFrameworkBenchmarks" ]; then
