@@ -25,9 +25,11 @@ import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeSupplier;
-import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -74,7 +76,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 * Tests compiling {@link Governance} for an {@link OfficeFloorSupplier}
 	 * {@link OfficeFloorManagedObject}.
 	 */
-	public void testGovernSuppliedOfficeFloorManagedObject() {
+	public void testGovernOfficeFloorSuppliedManagedObject() {
 		this.doGovernOfficeFloorManagedObjectTest(true);
 	}
 
@@ -82,8 +84,27 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 * Tests auto-wiring {@link Governance} for an {@link OfficeFloorSupplier}
 	 * {@link OfficeFloorManagedObject}.
 	 */
-	public void testGovernSuppliedOfficeFloorManagedObjectAutowire() {
-		this.doGovernOfficeFloorManagedObjectTest(true);
+	public void testGovernOfficeFloorSuppliedManagedObjectAutowire() {
+
+		// Naming is different, so record to supplied
+
+		// Record building the OfficeFloor
+		this.record_supplierSetup();
+		this.record_init();
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
+				SimpleManagedObject.class);
+		this.record_officeFloorBuilder_addManagedObject(SimpleManagedObject.class.getName(),
+				ClassManagedObjectSource.class, 0, "class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource(SimpleManagedObject.class.getName(), SimpleManagedObject.class.getName());
+		DependencyMappingBuilder dependencies = this.record_officeBuilder_addThreadManagedObject(
+				SimpleManagedObject.class.getName(), SimpleManagedObject.class.getName());
+		dependencies.mapGovernance("GOVERNANCE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
@@ -119,26 +140,6 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 * {@link BoundManagedObject}).
 	 */
 	public void testGovernInputManagedObject() {
-		this.doGovernInputManagedObjectTest();
-	}
-
-	/**
-	 * Ensure auto-wire {@link Governance} to a
-	 * {@link OfficeFloorInputManagedObjectModel} that has multiple
-	 * {@link OfficeFloorManagedObjectSourceModel} instances (along with
-	 * {@link BoundManagedObject}).
-	 */
-	public void testGovernInputManagedObjectAutowire() {
-		this.doGovernInputManagedObjectTest();
-	}
-
-	/**
-	 * Undertakes test to provide {@link Governance} to a
-	 * {@link OfficeFloorInputManagedObject} that has multiple
-	 * {@link OfficeFloorManagedObjectSourceModel} instances (along with
-	 * {@link BoundManagedObject}).
-	 */
-	private void doGovernInputManagedObjectTest() {
 
 		// Record obtaining the section type
 		this.issues.recordCaptureIssues(false);
@@ -185,7 +186,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 * Tests compiling {@link Governance} for an {@link OfficeSupplier}
 	 * {@link OfficeManagedObject}.
 	 */
-	public void testGovernSuppliedOfficeManagedObject() {
+	public void testGovernOfficeSuppliedManagedObject() {
 		this.doGovernOfficeManagedObjectTest(true);
 	}
 
@@ -193,8 +194,26 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 * Tests auto-wiring {@link Governance} for an {@link OfficeSupplier}
 	 * {@link OfficeManagedObject}.
 	 */
-	public void testGovernSuppliedOfficeManagedObjectAutowire() {
-		this.doGovernOfficeManagedObjectTest(true);
+	public void testGovernOfficeSuppliedManagedObjectAutowire() {
+
+		// Naming is different, so record to supplied
+		this.record_supplierSetup();
+		this.record_init();
+		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
+				SimpleManagedObject.class);
+		this.record_officeFloorBuilder_addManagedObject("OFFICE." + SimpleManagedObject.class.getName(),
+				ClassManagedObjectSource.class, 0, "class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE." + SimpleManagedObject.class.getName(),
+				"OFFICE." + SimpleManagedObject.class.getName());
+		DependencyMappingBuilder dependencies = this.record_officeBuilder_addThreadManagedObject(
+				"OFFICE." + SimpleManagedObject.class.getName(), "OFFICE." + SimpleManagedObject.class.getName());
+		dependencies.mapGovernance("GOVERNANCE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
 	}
 
 	/**
@@ -447,6 +466,28 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		SimpleManagedObject managedObject;
 
 		public void doSomething() {
+		}
+	}
+
+	/**
+	 * Mock {@link SupplierSource}.
+	 */
+	public static class MockSupplierSource extends AbstractSupplierSource {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// no specification
+		}
+
+		@Override
+		public void supply(SupplierSourceContext context) throws Exception {
+			context.addManagedObjectSource(null, SimpleManagedObject.class, new ClassManagedObjectSource()).addProperty(
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, SimpleManagedObject.class.getName());
+		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
 		}
 	}
 

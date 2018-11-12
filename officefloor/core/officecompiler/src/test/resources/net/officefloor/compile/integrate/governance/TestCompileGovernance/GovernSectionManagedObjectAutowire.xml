@@ -6,7 +6,8 @@
 	</office-floor>
 	<office>
 		<governances>
-			<governance name="GOVERNANCE" source="CLASS">
+			<governance name="GOVERNANCE" source="CLASS"
+				auto-wire-extensions="true">
 				<properties>
 					<property name="class.name"
 						value="${testcase}$SimpleGovernance" />
