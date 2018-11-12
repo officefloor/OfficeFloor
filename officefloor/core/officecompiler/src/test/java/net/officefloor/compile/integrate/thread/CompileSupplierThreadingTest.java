@@ -112,6 +112,7 @@ public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 		MockSupplierSource.addSupplierThreadLocal(ThreadLocalManagedObject.class);
 
 		// Record no managed object for supplier
+		this.record_supplierSetup();
 		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.issues.recordIssue("OFFICE." + ThreadLocalManagedObject.class.getName(), SupplierThreadLocalNodeImpl.class,
@@ -132,6 +133,7 @@ public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 		MockSupplierSource.addSupplierThreadLocal(ThreadLocalManagedObject.class);
 
 		// Record no managed object for supplier
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
@@ -157,6 +159,7 @@ public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 		MockSupplierSource.addSupplierThreadLocal(ThreadLocalManagedObject.class);
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
@@ -186,6 +189,7 @@ public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(false);
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("INPUT_SOURCE", ClassManagedObjectSource.class, 0, "class.name",
@@ -215,6 +219,7 @@ public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 		MockSupplierSource.addThreadSynchroniser(threadSynchroniser);
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 

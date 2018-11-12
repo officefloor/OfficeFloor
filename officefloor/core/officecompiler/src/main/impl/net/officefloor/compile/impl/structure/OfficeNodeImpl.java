@@ -740,8 +740,14 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			final AutoWirer<ManagedObjectExtensionNode> officeFloorContextAutoWirer = this.officeFloor
 					.loadAutoWireExtensionTargets(officeFloorAutoWirer, compileContext);
 
+			// Create the Office supplier auto wirer
+			final AutoWirer<ManagedObjectExtensionNode> officeSupplierAutoWirer = officeFloorContextAutoWirer
+					.createScopeAutoWirer();
+			this.suppliers.values().forEach((supplier) -> supplier.loadAutoWireExtensions(officeSupplierAutoWirer,
+					managedObjectSourceVisitor, compileContext));
+
 			// Create the Office managed object auto wirer
-			final AutoWirer<ManagedObjectExtensionNode> officeAutoWirer = officeFloorContextAutoWirer
+			final AutoWirer<ManagedObjectExtensionNode> officeAutoWirer = officeSupplierAutoWirer
 					.createScopeAutoWirer();
 			this.managedObjects.values().forEach((mo) -> {
 

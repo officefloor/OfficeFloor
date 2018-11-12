@@ -20,6 +20,8 @@ package net.officefloor.compile.impl.structure;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
@@ -28,6 +30,7 @@ import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExtensionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceVisitor;
@@ -323,6 +326,65 @@ public class SupplierNodeImpl implements SupplierNode {
 	@Override
 	public void loadAutoWireObjects(AutoWirer<LinkObjectNode> autoWirer,
 			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext) {
+		this.loadAutoWireObjects(compileContext, managedObjectSourceVisitor,
+				(suppliedMosType, moType, targetNodeFactory) -> {
+
+					// Load the auto-wire objects
+					autoWirer.addAutoWireTarget(targetNodeFactory,
+							new AutoWire(suppliedMosType.getQualifier(), suppliedMosType.getObjectType()));
+
+				}, (mos, office) -> {
+					// nothing to decorate
+				});
+	}
+
+	@Override
+	public void loadAutoWireExtensions(AutoWirer<ManagedObjectExtensionNode> autoWirer,
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext) {
+		this.loadAutoWireObjects(compileContext, managedObjectSourceVisitor,
+				(suppliedMosType, moType, targetNodeFactory) -> {
+
+					// Load the auto-wire extensions
+					for (Class<?> extensionType : moType.getExtensionTypes()) {
+						autoWirer.addAutoWireTarget(targetNodeFactory, new AutoWire(extensionType));
+					}
+
+				}, (mos, office) -> {
+					// Decorate to the office
+					mos.autoWireToOffice(office, this.context.getCompilerIssues());
+				});
+	}
+
+	/**
+	 * {@link FunctionalInterface} to load the auto-wire objects.
+	 */
+	@FunctionalInterface
+	private static interface AutoWireObjectLoader<N extends Node> {
+
+		/**
+		 * Loads the auto-wire object.
+		 * 
+		 * @param suppliedMosType   {@link SuppliedManagedObjectSourceType}.
+		 * @param moType            {@link ManagedObjectType}.
+		 * @param targetNodeFactory {@link Function} to obtain the target {@link Node}.
+		 */
+		void load(SuppliedManagedObjectSourceType suppliedMosType, ManagedObjectType<?> moType,
+				Function<OfficeNode, N> targetNodeFactory);
+	}
+
+	/**
+	 * Loads the auto-wire objects.
+	 * 
+	 * @param compileContext             {@link CompileContext}.
+	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
+	 * @param autoWireLoader             {@link AutoWireObjectLoader}.
+	 * @param mosDecorator               Decorates the
+	 *                                   {@link ManagedObjectSourceNode}.
+	 */
+	private void loadAutoWireObjects(CompileContext compileContext,
+			ManagedObjectSourceVisitor managedObjectSourceVisitor,
+			AutoWireObjectLoader<ManagedObjectNode> autoWireLoader,
+			BiConsumer<ManagedObjectSourceNode, OfficeNode> mosDecorator) {
 
 		// Load the supplier type
 		SupplierType supplierType = compileContext.getOrLoadSupplierType(this);
@@ -331,7 +393,6 @@ public class SupplierNodeImpl implements SupplierNode {
 		}
 
 		// Load the supplied managed objects for auto-wiring
-		boolean[] isSupplierTerminateRegistered = new boolean[] { false };
 		Arrays.stream(supplierType.getSuppliedManagedObjectTypes()).forEach((suppliedMosType) -> {
 
 			// Determine if flows for managed object
@@ -342,8 +403,8 @@ public class SupplierNodeImpl implements SupplierNode {
 				return; // can not auto-wire input managed object
 			}
 
-			// Register the supplied managed object source
-			autoWirer.addAutoWireTarget((office) -> {
+			// Load the supplied managed object source
+			autoWireLoader.load(suppliedMosType, moType, (office) -> {
 
 				// Obtain the managed object name
 				String qualifier = suppliedMosType.getQualifier();
@@ -372,31 +433,13 @@ public class SupplierNodeImpl implements SupplierNode {
 				}
 
 				// Source the managed object source and managed object
+				mosDecorator.accept(mos, office);
 				mos.sourceManagedObjectSource(managedObjectSourceVisitor, compileContext);
 				mo.sourceManagedObject(compileContext);
 
-				// Register for termination of supplier
-				if (!isSupplierTerminateRegistered[0]) {
-					SupplierSource terminateSupplierSource = this.usedSupplierSource;
-					this.officeFloorNode.addOfficeFloorListener(new OfficeFloorListener() {
-
-						@Override
-						public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
-							// Nothing on startup, as supplier type triggered
-						}
-
-						@Override
-						public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
-							// Terminate the supplier
-							terminateSupplierSource.terminate();
-						}
-					});
-				}
-
 				// Return the managed object
 				return mo;
-
-			}, new AutoWire(suppliedMosType.getQualifier(), suppliedMosType.getObjectType()));
+			});
 		});
 	}
 
@@ -432,6 +475,22 @@ public class SupplierNodeImpl implements SupplierNode {
 					() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type.getName(), this),
 					(mos) -> mos.initialise());
 		}
+
+		// Register for termination
+		SupplierSource terminateSupplierSource = this.usedSupplierSource;
+		this.officeFloorNode.addOfficeFloorListener(new OfficeFloorListener() {
+
+			@Override
+			public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
+				// Nothing on startup, as supplier type triggered
+			}
+
+			@Override
+			public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
+				// Terminate the supplier
+				terminateSupplierSource.terminate();
+			}
+		});
 
 		// Successfully sourced
 		return true;

@@ -902,8 +902,13 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			}
 		});
 
+		// Load the supplied managed objects
+		final AutoWirer<ManagedObjectExtensionNode> supplierAutoWirer = managedObjectAutoWirer.createScopeAutoWirer();
+		this.suppliers.values().stream()
+				.forEach((supplier) -> supplier.loadAutoWireExtensions(supplierAutoWirer, this, compileContext));
+
 		// Return the auto wirer
-		return managedObjectAutoWirer;
+		return supplierAutoWirer;
 	}
 
 	@Override
