@@ -24,8 +24,10 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSubSection;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -58,22 +60,41 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 * Tests compiling {@link Governance} for an {@link OfficeFloorManagedObject}.
 	 */
 	public void testGovernOfficeFloorManagedObject() {
-		this.doGovernOfficeFloorManagedObjectTest();
+		this.doGovernOfficeFloorManagedObjectTest(false);
 	}
 
 	/**
 	 * Tests auto-wiring {@link Governance} for an {@link OfficeFloorManagedObject}.
 	 */
 	public void testGovernOfficeFloorManagedObjectAutowire() {
-		this.doGovernOfficeFloorManagedObjectTest();
+		this.doGovernOfficeFloorManagedObjectTest(false);
+	}
+
+	/**
+	 * Tests compiling {@link Governance} for an {@link OfficeFloorSupplier}
+	 * {@link OfficeFloorManagedObject}.
+	 */
+	public void testGovernSuppliedOfficeFloorManagedObject() {
+		this.doGovernOfficeFloorManagedObjectTest(true);
+	}
+
+	/**
+	 * Tests auto-wiring {@link Governance} for an {@link OfficeFloorSupplier}
+	 * {@link OfficeFloorManagedObject}.
+	 */
+	public void testGovernSuppliedOfficeFloorManagedObjectAutowire() {
+		this.doGovernOfficeFloorManagedObjectTest(true);
 	}
 
 	/**
 	 * Undertakes governing an {@link OfficeFloorManagedObject}.
 	 */
-	private void doGovernOfficeFloorManagedObjectTest() {
+	private void doGovernOfficeFloorManagedObjectTest(boolean isSupplied) {
 
 		// Record building the OfficeFloor
+		if (isSupplied) {
+			this.record_supplierSetup();
+		}
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
@@ -150,23 +171,42 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 * Tests compiling {@link Governance} for an {@link OfficeManagedObject}.
 	 */
 	public void testGovernOfficeManagedObject() {
-		this.doGovernOfficeManagedObjectTest();
+		this.doGovernOfficeManagedObjectTest(false);
 	}
 
 	/**
 	 * Tests auto-wiring {@link Governance} for an {@link OfficeManagedObject}.
 	 */
 	public void testGovernOfficeManagedObjectAutowire() {
-		this.doGovernOfficeManagedObjectTest();
+		this.doGovernOfficeManagedObjectTest(false);
+	}
+
+	/**
+	 * Tests compiling {@link Governance} for an {@link OfficeSupplier}
+	 * {@link OfficeManagedObject}.
+	 */
+	public void testGovernSuppliedOfficeManagedObject() {
+		this.doGovernOfficeManagedObjectTest(true);
+	}
+
+	/**
+	 * Tests auto-wiring {@link Governance} for an {@link OfficeSupplier}
+	 * {@link OfficeManagedObject}.
+	 */
+	public void testGovernSuppliedOfficeManagedObjectAutowire() {
+		this.doGovernOfficeManagedObjectTest(true);
 	}
 
 	/**
 	 * Undertakes test to compile {@link Governance} for an
 	 * {@link OfficeManagedObject}.
 	 */
-	private void doGovernOfficeManagedObjectTest() {
+	private void doGovernOfficeManagedObjectTest(boolean isSupplied) {
 
 		// Record building the OfficeFloor
+		if (isSupplied) {
+			this.record_supplierSetup();
+		}
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("TEAM", new OnePersonTeamSource());
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");

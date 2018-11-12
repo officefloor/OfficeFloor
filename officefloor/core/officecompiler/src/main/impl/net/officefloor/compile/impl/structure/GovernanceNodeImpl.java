@@ -32,6 +32,7 @@ import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.GovernanceNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExtensionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -119,6 +120,11 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	 * {@link Governance}.
 	 */
 	private final List<ManagedObjectNode> governedManagedObjects = new LinkedList<>();
+
+	/**
+	 * Flags whether to auto-wire the {@link GovernerableManagedObject} instances.
+	 */
+	private boolean isAutoWireExtensions = false;
 
 	/**
 	 * {@link GovernanceSource} used to source this {@link GovernanceNode}.
@@ -223,6 +229,35 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	}
 
 	@Override
+	public boolean isAutoWireGovernance() {
+		return this.isAutoWireExtensions;
+	}
+
+	@Override
+	public void autoWireExtensions(AutoWirer<ManagedObjectExtensionNode> autoWirer, CompileContext compileContext) {
+
+		// Do no auto wire if already extensions
+		if ((this.governedOfficeObjects.size() > 0) || (this.governedManagedObjects.size() > 0)) {
+			return;
+		}
+
+		// Build the governance type
+		GovernanceType<?, ?> governanceType = this.loadGovernanceType();
+		if (governanceType == null) {
+			return; // must load type
+		}
+
+		// Load the auto-wire extensions
+		AutoWireLink<GovernanceNode, ManagedObjectExtensionNode>[] links = autoWirer.getAutoWireLinks(this,
+				new AutoWire(governanceType.getExtensionType()));
+		for (AutoWireLink<GovernanceNode, ManagedObjectExtensionNode> link : links) {
+			ManagedObjectNode managedObjectNode = (ManagedObjectNode) link.getTargetNode(this.officeNode);
+			managedObjectNode.addGovernance(this, this.officeNode);
+			this.governedManagedObjects.add(managedObjectNode);
+		}
+	}
+
+	@Override
 	public void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
 
 		// Ignore if already specified team
@@ -316,8 +351,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 	@Override
 	public void enableAutoWireExtensions() {
-		// TODO implement OfficeGovernance.enableAutoWireExtensions(...)
-		throw new UnsupportedOperationException("TODO implement OfficeGovernance.enableAutoWireExtensions(...)");
+		this.isAutoWireExtensions = true;
 	}
 
 	/*

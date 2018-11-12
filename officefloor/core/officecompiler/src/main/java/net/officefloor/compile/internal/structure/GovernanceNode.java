@@ -39,11 +39,10 @@ public interface GovernanceNode extends LinkTeamNode, OfficeGovernance {
 	/**
 	 * Initialises the {@link GovernanceNode}.
 	 * 
-	 * @param governanceSourceClassName
-	 *            Class name of the {@link GovernanceSource}.
-	 * @param governanceSource
-	 *            Optional instantiated {@link GovernanceSource} to use. May be
-	 *            <code>null</code>.
+	 * @param governanceSourceClassName Class name of the {@link GovernanceSource}.
+	 * @param governanceSource          Optional instantiated
+	 *                                  {@link GovernanceSource} to use. May be
+	 *                                  <code>null</code>.
 	 */
 	void initialise(String governanceSourceClassName, GovernanceSource<?, ?> governanceSource);
 
@@ -56,22 +55,35 @@ public interface GovernanceNode extends LinkTeamNode, OfficeGovernance {
 	GovernanceType<?, ?> loadGovernanceType();
 
 	/**
+	 * Indicates whether to auto-wire {@link ManagedObjectExtensionNode} instances
+	 * for {@link Governance}.
+	 * 
+	 * @return <code>true</code> to auto-wire.
+	 */
+	boolean isAutoWireGovernance();
+
+	/**
+	 * Auto wires the {@link ManagedObjectExtensionNode} for this
+	 * {@link Governance}.
+	 * 
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
+	 */
+	void autoWireExtensions(AutoWirer<ManagedObjectExtensionNode> autoWirer, CompileContext compileContext);
+
+	/**
 	 * Auto wires the {@link Team} for this {@link Governance}.
 	 * 
-	 * @param autoWirer
-	 *            {@link AutoWirer}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Builds this {@link Governance} into the {@link OfficeBuilder}.
 	 * 
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param officeBuilder  {@link OfficeBuilder}.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void buildGovernance(OfficeBuilder officeBuilder, CompileContext compileContext);
 

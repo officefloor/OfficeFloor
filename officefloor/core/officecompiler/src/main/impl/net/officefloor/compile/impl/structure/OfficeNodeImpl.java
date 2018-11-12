@@ -732,7 +732,9 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		// Undertake auto-wire of administration
 		boolean isAutoWireAdministration = this.administrators.values().stream()
 				.anyMatch((administrator) -> administrator.isAutoWireAdministration());
-		if (isAutoWireAdministration) {
+		boolean isAutoWireGovernance = this.governances.values().stream()
+				.anyMatch((governance) -> governance.isAutoWireGovernance());
+		if (isAutoWireAdministration || isAutoWireGovernance) {
 
 			// Create the OfficeFloor extension auto wirer
 			final AutoWirer<ManagedObjectExtensionNode> officeFloorAutoWirer = this.context
@@ -773,6 +775,12 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 					(a, b) -> CompileUtil.sortCompare(a.getOfficeAdministrationName(), b.getOfficeAdministrationName()))
 					.filter((administrator) -> administrator.isAutoWireAdministration())
 					.forEachOrdered((administration) -> administration.autoWireExtensions(autoWirer, compileContext));
+
+			// Auto-wire governance
+			this.governances.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeGovernanceName(), b.getOfficeGovernanceName()))
+					.filter((governance) -> governance.isAutoWireGovernance())
+					.forEachOrdered((governance) -> governance.autoWireExtensions(autoWirer, compileContext));
 		}
 
 		// Undertake auto-wire of teams
