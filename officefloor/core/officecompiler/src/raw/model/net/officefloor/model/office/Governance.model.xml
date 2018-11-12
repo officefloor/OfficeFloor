@@ -2,16 +2,22 @@
 <model>
 	<field type="String" name="governance name" />
 	<field type="String" name="governance source class name" />
+	<field type="boolean" name="is auto wire extensions" />
 	<field type="GovernanceToOfficeTeamModel" name="office team" />
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="GovernanceFlowModel" name="governance flow"
 		cascade-remove="true" />
-	<list type="GovernanceEscalationModel" name="governance escalation"
-		cascade-remove="true" />
+	<list type="GovernanceEscalationModel"
+		name="governance escalation" cascade-remove="true" />
 	<list type="GovernanceAreaModel" name="governance area" />
-	<list type="GovernanceToExternalManagedObjectModel" name="external managed object" />
-	<list type="GovernanceToOfficeManagedObjectModel" name="office managed object" />
-	<list type="GovernanceToOfficeSectionManagedObjectModel" name="office section managed object" />
-	<list type="OfficeSubSectionToGovernanceModel" name="office sub section" />
-	<list type="OfficeFunctionToGovernanceModel" name="office function" />
+	<list type="GovernanceToExternalManagedObjectModel"
+		name="external managed object" />
+	<list type="GovernanceToOfficeManagedObjectModel"
+		name="office managed object" />
+	<list type="GovernanceToOfficeSectionManagedObjectModel"
+		name="office section managed object" />
+	<list type="OfficeSubSectionToGovernanceModel"
+		name="office sub section" />
+	<list type="OfficeFunctionToGovernanceModel"
+		name="office function" />
 </model>

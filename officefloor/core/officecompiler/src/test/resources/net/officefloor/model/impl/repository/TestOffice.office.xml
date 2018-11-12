@@ -139,7 +139,8 @@
 
 	<administrations>
 		<administration name="ADMINISTRATION"
-			source="net.example.ExampleAdministrationSource" x="800" y="801">
+			source="net.example.ExampleAdministrationSource"
+			auto-wire-extensions="true" x="800" y="801">
 			<properties>
 				<property name="ADMIN_ONE" value="VALUE_ONE" />
 				<property name="ADMIN_TWO" value="VALUE_TWO" />
@@ -158,7 +159,8 @@
 
 	<governances>
 		<governance name="GOVERNANCE"
-			source="net.example.ExampleGovernanceSource" x="900" y="901">
+			source="net.example.ExampleGovernanceSource"
+			auto-wire-extensions="true" x="900" y="901">
 			<properties>
 				<property name="GOV_ONE" value="VALUE_ONE" />
 				<property name="GOV_TWO" value="VALUE_TWO" />

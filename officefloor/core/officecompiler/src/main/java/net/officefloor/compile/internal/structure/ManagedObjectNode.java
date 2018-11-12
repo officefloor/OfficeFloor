@@ -33,8 +33,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObjectNode, SectionManagedObject,
-		OfficeSectionManagedObject, OfficeManagedObject, OfficeFloorManagedObject {
+public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObjectNode, ManagedObjectExtensionNode,
+		SectionManagedObject, OfficeSectionManagedObject, OfficeManagedObject, OfficeFloorManagedObject {
 
 	/**
 	 * {@link Node} type.

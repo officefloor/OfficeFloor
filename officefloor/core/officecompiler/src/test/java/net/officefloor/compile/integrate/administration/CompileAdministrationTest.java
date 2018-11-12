@@ -177,7 +177,7 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	/**
 	 * Tests auto-wiring an {@link OfficeManagedObject}.
 	 */
-	public void testAdminsterOfficeManagedObjectAutowire() {
+	public void testAdministerOfficeManagedObjectAutowire() {
 		this.doAdministerOfficeManagedObjectTest();
 	}
 

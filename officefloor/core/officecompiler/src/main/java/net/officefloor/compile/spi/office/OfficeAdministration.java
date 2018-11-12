@@ -38,9 +38,12 @@ public interface OfficeAdministration extends PropertyConfigurable, OfficeRespon
 	/**
 	 * Administers the {@link AdministerableManagedObject}.
 	 * 
-	 * @param managedObject
-	 *            {@link AdministerableManagedObject} to be administered.
+	 * @param managedObject {@link AdministerableManagedObject} to be administered.
 	 */
 	void administerManagedObject(AdministerableManagedObject managedObject);
 
+	/**
+	 * Enables auto-wiring the {@link AdministerableManagedObject} instances.
+	 */
+	void enableAutoWireExtensions();
 }

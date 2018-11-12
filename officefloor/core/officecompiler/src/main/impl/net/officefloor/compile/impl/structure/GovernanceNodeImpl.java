@@ -65,8 +65,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	private final PropertyList properties;
 
 	/**
-	 * {@link OfficeNode} of the {@link Office} containing this
-	 * {@link Governance}.
+	 * {@link OfficeNode} of the {@link Office} containing this {@link Governance}.
 	 */
 	private final OfficeNode officeNode;
 
@@ -99,11 +98,10 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param governanceSourceClassName
-		 *            Class name of the {@link GovernanceSource}.
-		 * @param governanceSource
-		 *            {@link GovernanceSource} instance to use. Should this be
-		 *            specified it overrides the {@link Class}.
+		 * @param governanceSourceClassName Class name of the {@link GovernanceSource}.
+		 * @param governanceSource          {@link GovernanceSource} instance to use.
+		 *                                  Should this be specified it overrides the
+		 *                                  {@link Class}.
 		 */
 		public InitialisedState(String governanceSourceClassName, GovernanceSource<?, ?> governanceSource) {
 			this.governanceSourceClassName = governanceSourceClassName;
@@ -112,8 +110,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	}
 
 	/**
-	 * {@link OfficeObjectNode} instances being governed by this
-	 * {@link Governance}.
+	 * {@link OfficeObjectNode} instances being governed by this {@link Governance}.
 	 */
 	private final List<OfficeObjectNode> governedOfficeObjects = new LinkedList<>();
 
@@ -131,13 +128,10 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param governanceName
-	 *            Name of this {@link OfficeGovernance}.
-	 * @param officeNode
-	 *            {@link OfficeNode} of the {@link Office} containing this
-	 *            {@link Governance}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param governanceName Name of this {@link OfficeGovernance}.
+	 * @param officeNode     {@link OfficeNode} of the {@link Office} containing
+	 *                       this {@link Governance}.
+	 * @param context        {@link NodeContext}.
 	 */
 	public GovernanceNodeImpl(String governanceName, OfficeNode officeNode, NodeContext context) {
 		this.governanceName = governanceName;
@@ -250,7 +244,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
 
 		// Attempt to auto-wire this governance
-		AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this, sourceAutoWires);
+		AutoWireLink<GovernanceNode, LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this, sourceAutoWires);
 		if (links.length == 1) {
 			LinkUtil.linkTeamNode(this, links[0].getTargetNode(this.officeNode), this.context.getCompilerIssues(),
 					(link) -> this.linkTeamNode(link));
@@ -318,6 +312,12 @@ public class GovernanceNodeImpl implements GovernanceNode {
 			this.context.getCompilerIssues().addIssue(this,
 					"Unknown " + GovernerableManagedObject.class.getSimpleName() + " node");
 		}
+	}
+
+	@Override
+	public void enableAutoWireExtensions() {
+		// TODO implement OfficeGovernance.enableAutoWireExtensions(...)
+		throw new UnsupportedOperationException("TODO implement OfficeGovernance.enableAutoWireExtensions(...)");
 	}
 
 	/*

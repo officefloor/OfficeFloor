@@ -22,7 +22,8 @@
 			</managed-object>
 		</managed-objects>
 		<administrations>
-			<administration name="ADMIN" source="CLASS">
+			<administration name="ADMIN" source="CLASS"
+				auto-wire-extensions="true">
 				<properties>
 					<property name="class.name"
 						value="${testcase}$SimpleAdmin" />

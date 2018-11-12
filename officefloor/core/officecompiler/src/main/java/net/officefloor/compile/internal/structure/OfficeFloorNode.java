@@ -105,6 +105,18 @@ public interface OfficeFloorNode extends Node, PropertyConfigurable, ManagedObje
 			CompileContext compileContext);
 
 	/**
+	 * Loads the {@link AutoWire} extension targets for the
+	 * {@link OfficeFloorManagedObject}.
+	 * 
+	 * @param autoWirer      {@link AutoWirer} to be loaded with the
+	 *                       {@link OfficeFloorManagedObject} extension targets.
+	 * @param compileContext {@link CompileContext}.
+	 * @return {@link AutoWirer} with context for the {@link OfficeFloor}.
+	 */
+	AutoWirer<ManagedObjectExtensionNode> loadAutoWireExtensionTargets(AutoWirer<ManagedObjectExtensionNode> autoWirer,
+			CompileContext compileContext);
+
+	/**
 	 * Loads the {@link AutoWire} targets for the {@link OfficeFloorTeam} instances.
 	 * 
 	 * @param autoWirer          {@link AutoWire} to be loaded with the

@@ -38,6 +38,7 @@ import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExtensionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -874,7 +875,31 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
 
 			// Add the target
-			autoWirer.addAutoWireTarget(mo, targetAutoWires);
+			managedObjectAutoWirer.addAutoWireTarget(mo, targetAutoWires);
+		});
+
+		// Return the auto wirer
+		return managedObjectAutoWirer;
+	}
+
+	@Override
+	public AutoWirer<ManagedObjectExtensionNode> loadAutoWireExtensionTargets(
+			AutoWirer<ManagedObjectExtensionNode> autoWirer, CompileContext compileContext) {
+
+		// Load the managed objects
+		final AutoWirer<ManagedObjectExtensionNode> managedObjectAutoWirer = autoWirer.createScopeAutoWirer();
+		this.managedObjects.values().forEach((mo) -> {
+
+			// Load the managed object type
+			ManagedObjectType<?> moType = mo.getManagedObjectSourceNode().loadManagedObjectType(compileContext);
+			if (moType == null) {
+				return; // must have type
+			}
+
+			// Load the auto-wiring for the extensions
+			for (Class<?> extensionType : moType.getExtensionTypes()) {
+				managedObjectAutoWirer.addAutoWireTarget(mo, new AutoWire(extensionType));
+			}
 		});
 
 		// Return the auto wirer
