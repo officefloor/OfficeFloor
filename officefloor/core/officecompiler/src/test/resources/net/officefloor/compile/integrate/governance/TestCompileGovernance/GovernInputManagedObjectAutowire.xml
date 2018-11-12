@@ -1,0 +1,89 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source
+				name="MANAGED_OBJECT_SOURCE_A" source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$ProcessManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<input-managed-object name="INPUT_MO" />
+				<flow name="doProcess">
+					<office-input office="OFFICE" section="SECTION"
+						input="INPUT" />
+				</flow>
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-object-sources>
+			<managed-object-source
+				name="MANAGED_OBJECT_SOURCE_B" source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$ProcessManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+				<input-managed-object name="INPUT_MO" />
+				<flow name="doProcess">
+					<office-input office="OFFICE" section="SECTION"
+						input="INPUT" />
+				</flow>
+			</managed-object-source>
+		</managed-object-sources>
+		<input-managed-objects>
+			<input-managed-object name="INPUT_MO">
+				<bound-managed-object-source
+					name="MANAGED_OBJECT_SOURCE_A" />
+			</input-managed-object>
+		</input-managed-objects>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<input section="SECTION" input="INPUT" />
+				<object name="EXTERNAL_MANAGED_OBJECT">
+					<input-managed-object name="INPUT_MO" />
+				</object>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<external-managed-objects>
+			<external-managed-object
+				name="EXTERNAL_MANAGED_OBJECT"
+				object-type="${testcase}$SimpleManagedObject" object-scope="PROCESS">
+				<!-- <govern governance="GOVERNANCE" /> -->
+			</external-managed-object>
+		</external-managed-objects>
+		<governances>
+			<governance name="GOVERNANCE" source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$SimpleGovernance" />
+				</properties>
+			</governance>
+		</governances>
+		<sections>
+			<section name="SECTION" source="SECTION" location="section">
+				<input name="INPUT" />
+			</section>
+		</sections>
+	</office>
+	<section>
+		<function-namespaces>
+			<function-namespace name="NAMESPACE"
+				source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$InputManagedObjectClass" />
+				</properties>
+				<managed-function name="handleInputManagedObject">
+					<managed-function-object
+						name="java.lang.Integer" parameter="true" />
+				</managed-function>
+			</function-namespace>
+		</function-namespaces>
+		<functions>
+			<function name="INPUT" function-namespace="NAMESPACE"
+				managed-function="handleInputManagedObject" public="true" />
+		</functions>
+	</section>
+</context>

@@ -72,8 +72,7 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests {@link Administration} post-administering a
-	 * {@link ManagedFunction}.
+	 * Tests {@link Administration} post-administering a {@link ManagedFunction}.
 	 */
 	public void testPostAdministerFunction() {
 
@@ -114,6 +113,20 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	 * Tests administering an {@link OfficeFloorManagedObject}.
 	 */
 	public void testAdministerOfficeFloorManagedObject() {
+		this.doAdministerOfficeFloorManagedObjectTest();
+	}
+
+	/**
+	 * Tests auto-wiring an {@link OfficeFloorManagedObject}.
+	 */
+	public void testAdministerOfficeFloorManagedObjectAutowire() {
+		this.doAdministerOfficeFloorManagedObjectTest();
+	}
+
+	/**
+	 * Undertakes administering an {@link OfficeFloorManagedObject}.
+	 */
+	private void doAdministerOfficeFloorManagedObjectTest() {
 
 		// Record obtaining the section type
 		this.issues.recordCaptureIssues(false);
@@ -158,6 +171,20 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	 * Tests administering an {@link OfficeManagedObject}.
 	 */
 	public void testAdministerOfficeManagedObject() {
+		this.doAdministerOfficeManagedObjectTest();
+	}
+
+	/**
+	 * Tests auto-wiring an {@link OfficeManagedObject}.
+	 */
+	public void testAdminsterOfficeManagedObjectAutowire() {
+		this.doAdministerOfficeManagedObjectTest();
+	}
+
+	/**
+	 * Undertakes testing administering an {@link OfficeManagedObject}.
+	 */
+	private void doAdministerOfficeManagedObjectTest() {
 
 		// Record obtaining the section type
 		this.issues.recordCaptureIssues(false);
@@ -202,6 +229,20 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	 * Tests administering an {@link OfficeSectionManagedObject}.
 	 */
 	public void testAdministerOfficeSectionManagedObject() {
+		this.doAdministerOfficeSectionManagedObjectTest();
+	}
+
+	/**
+	 * Tests auto-wiring an {@link OfficeSectionManagedObject}.
+	 */
+	public void testAdministerOfficeSectionManagedObjectAutowire() {
+		this.doAdministerOfficeSectionManagedObjectTest();
+	}
+
+	/**
+	 * Undertakes testing administering an {@link OfficeSectionManagedObject}.
+	 */
+	private void doAdministerOfficeSectionManagedObjectTest() {
 
 		// Record obtaining the section type
 		this.issues.recordCaptureIssues(false);

@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSubSection;
+import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
@@ -54,10 +55,23 @@ import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 public class CompileGovernanceTest extends AbstractCompileTestCase {
 
 	/**
-	 * Tests compiling {@link Governance} for an
-	 * {@link OfficeFloorManagedObject}.
+	 * Tests compiling {@link Governance} for an {@link OfficeFloorManagedObject}.
 	 */
 	public void testGovernOfficeFloorManagedObject() {
+		this.doGovernOfficeFloorManagedObjectTest();
+	}
+
+	/**
+	 * Tests auto-wiring {@link Governance} for an {@link OfficeFloorManagedObject}.
+	 */
+	public void testGovernOfficeFloorManagedObjectAutowire() {
+		this.doGovernOfficeFloorManagedObjectTest();
+	}
+
+	/**
+	 * Undertakes governing an {@link OfficeFloorManagedObject}.
+	 */
+	private void doGovernOfficeFloorManagedObjectTest() {
 
 		// Record building the OfficeFloor
 		this.record_init();
@@ -84,6 +98,26 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 * {@link BoundManagedObject}).
 	 */
 	public void testGovernInputManagedObject() {
+		this.doGovernInputManagedObjectTest();
+	}
+
+	/**
+	 * Ensure auto-wire {@link Governance} to a
+	 * {@link OfficeFloorInputManagedObjectModel} that has multiple
+	 * {@link OfficeFloorManagedObjectSourceModel} instances (along with
+	 * {@link BoundManagedObject}).
+	 */
+	public void testGovernInputManagedObjectAutowire() {
+		this.doGovernInputManagedObjectTest();
+	}
+
+	/**
+	 * Undertakes test to provide {@link Governance} to a
+	 * {@link OfficeFloorInputManagedObject} that has multiple
+	 * {@link OfficeFloorManagedObjectSourceModel} instances (along with
+	 * {@link BoundManagedObject}).
+	 */
+	private void doGovernInputManagedObjectTest() {
 
 		// Record obtaining the section type
 		this.issues.recordCaptureIssues(false);
@@ -116,6 +150,21 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	 * Tests compiling {@link Governance} for an {@link OfficeManagedObject}.
 	 */
 	public void testGovernOfficeManagedObject() {
+		this.doGovernOfficeManagedObjectTest();
+	}
+
+	/**
+	 * Tests auto-wiring {@link Governance} for an {@link OfficeManagedObject}.
+	 */
+	public void testGovernOfficeManagedObjectAutowire() {
+		this.doGovernOfficeManagedObjectTest();
+	}
+
+	/**
+	 * Undertakes test to compile {@link Governance} for an
+	 * {@link OfficeManagedObject}.
+	 */
+	private void doGovernOfficeManagedObjectTest() {
 
 		// Record building the OfficeFloor
 		this.record_init();
@@ -136,10 +185,25 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling {@link Governance} for a
-	 * {@link OfficeSectionManagedObject}.
+	 * Tests compiling {@link Governance} for a {@link OfficeSectionManagedObject}.
 	 */
 	public void testGovernSectionManagedObject() {
+		this.doGovernSectionManagedObjectTest();
+	}
+
+	/**
+	 * Tests auto-wiring {@link Governance} for a
+	 * {@link OfficeSectionManagedObject}.
+	 */
+	public void testGovernSectionManagedObjectAutowire() {
+		this.doGovernSectionManagedObjectTest();
+	}
+
+	/**
+	 * Undertakes test to compile {@link Governance} for a
+	 * {@link OfficeSectionManagedObject}.
+	 */
+	private void doGovernSectionManagedObjectTest() {
 
 		// Record obtaining the section, managed object and namespace types
 		this.issues.recordCaptureIssues(false);
@@ -178,8 +242,8 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling {@link Governance} over a {@link ManagedFunction} within
-	 * a {@link OfficeSection}.
+	 * Tests compiling {@link Governance} over a {@link ManagedFunction} within a
+	 * {@link OfficeSection}.
 	 */
 	public void testGovernSection() {
 
@@ -198,8 +262,7 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling {@link Governance} for a specific
-	 * {@link OfficeSubSection}.
+	 * Tests compiling {@link Governance} for a specific {@link OfficeSubSection}.
 	 */
 	public void testGovernSubSection() {
 
@@ -260,8 +323,8 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling {@link Governance} over a {@link ManagedFunction} within
-	 * a {@link OfficeSubSection}.
+	 * Tests compiling {@link Governance} over a {@link ManagedFunction} within a
+	 * {@link OfficeSubSection}.
 	 */
 	public void testSubSectionFunctionInheritGovernance() {
 
