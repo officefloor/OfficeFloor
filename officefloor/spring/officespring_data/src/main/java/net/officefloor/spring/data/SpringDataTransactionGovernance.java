@@ -18,6 +18,7 @@
 package net.officefloor.spring.data;
 
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.governance.Governance;
@@ -30,29 +31,37 @@ import net.officefloor.frame.api.governance.GovernanceContext;
  */
 public class SpringDataTransactionGovernance implements Governance<PlatformTransactionManager, None> {
 
+	/**
+	 * {@link PlatformTransactionManager}.
+	 */
+	private PlatformTransactionManager transactionManager = null;
+
+	/**
+	 * {@link TransactionStatus}.
+	 */
+	private TransactionStatus transaction = null;
+
+	/*
+	 * ================== Governance ========================
+	 */
+
 	@Override
 	public void governManagedObject(PlatformTransactionManager managedObjectExtension, GovernanceContext<None> context)
 			throws Throwable {
-		// TODO implement
-		// Governance<PlatformTransactionManager,None>.governManagedObject(...)
-		throw new UnsupportedOperationException(
-				"TODO implement Governance<PlatformTransactionManager,None>.governManagedObject(...)");
+		this.transactionManager = managedObjectExtension;
+		this.transaction = managedObjectExtension.getTransaction(null);
 	}
 
 	@Override
 	public void enforceGovernance(GovernanceContext<None> context) throws Throwable {
-		// TODO implement
-		// Governance<PlatformTransactionManager,None>.enforceGovernance(...)
-		throw new UnsupportedOperationException(
-				"TODO implement Governance<PlatformTransactionManager,None>.enforceGovernance(...)");
+		if (this.transactionManager != null) {
+			this.transactionManager.commit(this.transaction);
+		}
 	}
 
 	@Override
 	public void disregardGovernance(GovernanceContext<None> context) throws Throwable {
-		// TODO implement
-		// Governance<PlatformTransactionManager,None>.disregardGovernance(...)
-		throw new UnsupportedOperationException(
-				"TODO implement Governance<PlatformTransactionManager,None>.disregardGovernance(...)");
+		this.transactionManager.rollback(this.transaction);
 	}
 
 }

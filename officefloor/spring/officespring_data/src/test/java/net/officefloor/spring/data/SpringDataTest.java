@@ -343,6 +343,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			// Create the governance
 			OfficeGovernance governance = architect.addOfficeGovernance("TRANSACTION",
 					SpringDataTransactionGovernanceSource.class.getName());
+			governance.enableAutoWireExtensions();
 
 			// Configure section under governance
 			OfficeSection section = context.addSection("SECTION", TransactionGovernanceSection.class);

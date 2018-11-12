@@ -150,7 +150,7 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 
 							} else {
 								// Obtain the source type
-								Class<?> sourceClass = this.context.loadOptionalClass(sourceType);
+								Class<?> sourceClass = sourceAutoWire.getTypeClass(this.context);
 								if (sourceClass == null) {
 									// Only report issue once
 									if (!unknownSourceTypes.contains(sourceType)) {
@@ -162,10 +162,10 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 								}
 
 								// Obtain the target type
-								String targetType = targetAutoWire.getType();
-								Class<?> targetClass = this.context.loadOptionalClass(targetType);
+								Class<?> targetClass = targetAutoWire.getTypeClass(this.context);
 								if (targetClass == null) {
 									// Only report issue once
+									String targetType = targetAutoWire.getType();
 									if (!unknownTargetTypes.contains(targetType)) {
 										unknownTargetTypes.add(targetType);
 										this.issues.addIssue(sourceNode,
