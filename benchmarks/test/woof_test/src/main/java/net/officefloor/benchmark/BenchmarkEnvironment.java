@@ -40,7 +40,7 @@ public class BenchmarkEnvironment {
 	/**
 	 * Timeout on requests.
 	 */
-	private static final int TIMEOUT = 60 * 1000;
+	private static final int TIMEOUT = 5 * 60 * 1000;
 
 	/**
 	 * Creates {@link PostgreSqlRule} for benchmark.
