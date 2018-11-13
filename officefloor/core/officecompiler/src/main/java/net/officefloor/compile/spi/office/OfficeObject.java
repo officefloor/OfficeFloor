@@ -33,8 +33,7 @@ public interface OfficeObject extends OfficeDependencyObjectNode, OfficeFloorDep
 		DependentManagedObject, AdministerableManagedObject, GovernerableManagedObject {
 
 	/**
-	 * Obtains the name that the {@link OfficeSource} refers to this
-	 * {@link Object}.
+	 * Obtains the name that the {@link OfficeSource} refers to this {@link Object}.
 	 * 
 	 * @return Name that the {@link OfficeSource} refers to this {@link Object}.
 	 */
@@ -43,22 +42,20 @@ public interface OfficeObject extends OfficeDependencyObjectNode, OfficeFloorDep
 	/**
 	 * Specifies the type qualifier.
 	 * 
-	 * @param qualifier
-	 *            Type qualifier.
+	 * @param qualifier Type qualifier.
 	 */
 	void setTypeQualifier(String qualifier);
 
 	/**
 	 * <p>
-	 * Adds an {@link OfficeAdministration} to be done before attempting load
-	 * this {@link ManagedObject}.
+	 * Adds an {@link OfficeAdministration} to be done before attempting load this
+	 * {@link ManagedObject}.
 	 * <p>
-	 * The order that the {@link OfficeAdministration} instances are added is
-	 * the order they will be done.
+	 * The order that the {@link OfficeAdministration} instances are added is the
+	 * order they will be done.
 	 * 
-	 * @param administration
-	 *            {@link OfficeAdministration} to be done before attempting load
-	 *            this {@link ManagedObject}.
+	 * @param administration {@link OfficeAdministration} to be done before
+	 *                       attempting load this {@link ManagedObject}.
 	 */
 	void addPreLoadAdministration(OfficeAdministration administration);
 

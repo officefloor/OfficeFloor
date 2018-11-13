@@ -20,6 +20,8 @@ package net.officefloor.compile.impl.structure;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
@@ -28,6 +30,7 @@ import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExtensionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceVisitor;
@@ -140,6 +143,11 @@ public class SupplierNodeImpl implements SupplierNode {
 	}
 
 	/**
+	 * Added {@link ManagedObjectSourceNode} instances.
+	 */
+	private final Map<String, Object> addedManagedObjectSources = new HashMap<>();
+
+	/**
 	 * Used {@link SupplierSource}.
 	 */
 	private SupplierSource usedSupplierSource = null;
@@ -161,6 +169,40 @@ public class SupplierNodeImpl implements SupplierNode {
 
 		// Create the additional objects
 		this.propertyList = this.context.createPropertyList();
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorManagedObjectSource} /
+	 * {@link OfficeManagedObjectSource}.
+	 * 
+	 * @param qualifier Qualifier. May be <code>null</code>.
+	 * @param type      Type.
+	 * @param factory   Factory to create the {@link OfficeFloorManagedObjectSource}
+	 *                  / {@link OfficeManagedObjectSource}.
+	 * @return {@link OfficeFloorManagedObjectSource} /
+	 *         {@link OfficeManagedObjectSource}.
+	 */
+	@SuppressWarnings("unchecked")
+	public <S> S getManagedObjectSource(String qualifier, String type,
+			Function<SuppliedManagedObjectSourceNode, S> factory) {
+
+		// Determine if already added
+		String name = SuppliedManagedObjectSourceNodeImpl.getSuppliedManagedObjectSourceName(qualifier, type);
+		S existing = (S) this.addedManagedObjectSources.get(name);
+		if (existing != null) {
+			return existing;
+		}
+
+		// Not yet added, so create the supplied managed object node
+		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = NodeUtil.getNode(name, this.suppliedManagedObjects,
+				() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type, this));
+
+		// Add and register the managed object source
+		S added = factory.apply(suppliedManagedObjectNode);
+		this.addedManagedObjectSources.put(name, added);
+
+		// Return the managed object source
+		return added;
 	}
 
 	/*
@@ -227,14 +269,8 @@ public class SupplierNodeImpl implements SupplierNode {
 	@Override
 	public OfficeFloorManagedObjectSource getOfficeFloorManagedObjectSource(String managedObjectSourceName,
 			String qualifier, String type) {
-
-		// Create the supplied managed object node
-		String name = SuppliedManagedObjectSourceNodeImpl.getSuppliedManagedObjectSourceName(qualifier, type);
-		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = NodeUtil.getNode(name, this.suppliedManagedObjects,
-				() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type, this));
-
-		// Add and return the managed object source
-		return this.officeFloorNode.addManagedObjectSource(managedObjectSourceName, suppliedManagedObjectNode);
+		return this.getManagedObjectSource(qualifier, type, (suppliedManagedObjectNode) -> this.officeFloorNode
+				.addManagedObjectSource(managedObjectSourceName, suppliedManagedObjectNode));
 	}
 
 	/*
@@ -256,14 +292,8 @@ public class SupplierNodeImpl implements SupplierNode {
 	@Override
 	public OfficeManagedObjectSource getOfficeManagedObjectSource(String managedObjectSourceName, String qualifier,
 			String type) {
-
-		// Create the supplied managed object node
-		String name = SuppliedManagedObjectSourceNodeImpl.getSuppliedManagedObjectSourceName(qualifier, type);
-		SuppliedManagedObjectSourceNode suppliedManagedObjectNode = NodeUtil.getNode(name, this.suppliedManagedObjects,
-				() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type, this));
-
-		// Add and return the managed object source
-		return this.officeNode.addManagedObjectSource(managedObjectSourceName, suppliedManagedObjectNode);
+		return this.getManagedObjectSource(qualifier, type, (suppliedManagedObjectNode) -> this.officeNode
+				.addManagedObjectSource(managedObjectSourceName, suppliedManagedObjectNode));
 	}
 
 	/*
@@ -323,6 +353,65 @@ public class SupplierNodeImpl implements SupplierNode {
 	@Override
 	public void loadAutoWireObjects(AutoWirer<LinkObjectNode> autoWirer,
 			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext) {
+		this.loadAutoWireObjects(compileContext, managedObjectSourceVisitor,
+				(suppliedMosType, moType, targetNodeFactory) -> {
+
+					// Load the auto-wire objects
+					autoWirer.addAutoWireTarget(targetNodeFactory,
+							new AutoWire(suppliedMosType.getQualifier(), suppliedMosType.getObjectType()));
+
+				}, (mos, office) -> {
+					// nothing to decorate
+				});
+	}
+
+	@Override
+	public void loadAutoWireExtensions(AutoWirer<ManagedObjectExtensionNode> autoWirer,
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext) {
+		this.loadAutoWireObjects(compileContext, managedObjectSourceVisitor,
+				(suppliedMosType, moType, targetNodeFactory) -> {
+
+					// Load the auto-wire extensions
+					for (Class<?> extensionType : moType.getExtensionTypes()) {
+						autoWirer.addAutoWireTarget(targetNodeFactory, new AutoWire(extensionType));
+					}
+
+				}, (mos, office) -> {
+					// Decorate to the office
+					mos.autoWireToOffice(office, this.context.getCompilerIssues());
+				});
+	}
+
+	/**
+	 * {@link FunctionalInterface} to load the auto-wire objects.
+	 */
+	@FunctionalInterface
+	private static interface AutoWireObjectLoader<N extends Node> {
+
+		/**
+		 * Loads the auto-wire object.
+		 * 
+		 * @param suppliedMosType   {@link SuppliedManagedObjectSourceType}.
+		 * @param moType            {@link ManagedObjectType}.
+		 * @param targetNodeFactory {@link Function} to obtain the target {@link Node}.
+		 */
+		void load(SuppliedManagedObjectSourceType suppliedMosType, ManagedObjectType<?> moType,
+				Function<OfficeNode, N> targetNodeFactory);
+	}
+
+	/**
+	 * Loads the auto-wire objects.
+	 * 
+	 * @param compileContext             {@link CompileContext}.
+	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
+	 * @param autoWireLoader             {@link AutoWireObjectLoader}.
+	 * @param mosDecorator               Decorates the
+	 *                                   {@link ManagedObjectSourceNode}.
+	 */
+	private void loadAutoWireObjects(CompileContext compileContext,
+			ManagedObjectSourceVisitor managedObjectSourceVisitor,
+			AutoWireObjectLoader<ManagedObjectNode> autoWireLoader,
+			BiConsumer<ManagedObjectSourceNode, OfficeNode> mosDecorator) {
 
 		// Load the supplier type
 		SupplierType supplierType = compileContext.getOrLoadSupplierType(this);
@@ -331,7 +420,6 @@ public class SupplierNodeImpl implements SupplierNode {
 		}
 
 		// Load the supplied managed objects for auto-wiring
-		boolean[] isSupplierTerminateRegistered = new boolean[] { false };
 		Arrays.stream(supplierType.getSuppliedManagedObjectTypes()).forEach((suppliedMosType) -> {
 
 			// Determine if flows for managed object
@@ -342,8 +430,8 @@ public class SupplierNodeImpl implements SupplierNode {
 				return; // can not auto-wire input managed object
 			}
 
-			// Register the supplied managed object source
-			autoWirer.addAutoWireTarget((office) -> {
+			// Load the supplied managed object source
+			autoWireLoader.load(suppliedMosType, moType, (office) -> {
 
 				// Obtain the managed object name
 				String qualifier = suppliedMosType.getQualifier();
@@ -372,31 +460,13 @@ public class SupplierNodeImpl implements SupplierNode {
 				}
 
 				// Source the managed object source and managed object
+				mosDecorator.accept(mos, office);
 				mos.sourceManagedObjectSource(managedObjectSourceVisitor, compileContext);
 				mo.sourceManagedObject(compileContext);
 
-				// Register for termination of supplier
-				if (!isSupplierTerminateRegistered[0]) {
-					SupplierSource terminateSupplierSource = this.usedSupplierSource;
-					this.officeFloorNode.addOfficeFloorListener(new OfficeFloorListener() {
-
-						@Override
-						public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
-							// Nothing on startup, as supplier type triggered
-						}
-
-						@Override
-						public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
-							// Terminate the supplier
-							terminateSupplierSource.terminate();
-						}
-					});
-				}
-
 				// Return the managed object
 				return mo;
-
-			}, new AutoWire(suppliedMosType.getQualifier(), suppliedMosType.getObjectType()));
+			});
 		});
 	}
 
@@ -432,6 +502,22 @@ public class SupplierNodeImpl implements SupplierNode {
 					() -> this.context.createSuppliedManagedObjectSourceNode(qualifier, type.getName(), this),
 					(mos) -> mos.initialise());
 		}
+
+		// Register for termination
+		SupplierSource terminateSupplierSource = this.usedSupplierSource;
+		this.officeFloorNode.addOfficeFloorListener(new OfficeFloorListener() {
+
+			@Override
+			public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
+				// Nothing on startup, as supplier type triggered
+			}
+
+			@Override
+			public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
+				// Terminate the supplier
+				terminateSupplierSource.terminate();
+			}
+		});
 
 		// Successfully sourced
 		return true;
@@ -485,8 +571,8 @@ public class SupplierNodeImpl implements SupplierNode {
 					}
 
 					// Auto-wire the thread local
-					AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(threadLocal,
-							new AutoWire(threadLocal.getQualifier(), threadLocal.getType()));
+					AutoWireLink<SupplierThreadLocalNode, LinkObjectNode>[] links = autoWirer.getAutoWireLinks(
+							threadLocal, new AutoWire(threadLocal.getQualifier(), threadLocal.getType()));
 					if (links.length == 1) {
 						LinkUtil.linkAutoWireObjectNode(threadLocal, links[0].getTargetNode(office), office, autoWirer,
 								compileContext, this.context.getCompilerIssues(),

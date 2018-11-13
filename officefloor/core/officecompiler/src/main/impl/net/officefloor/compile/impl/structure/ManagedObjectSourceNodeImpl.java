@@ -688,7 +688,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					}
 
 					// Auto-wire the dependency
-					AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(dependency,
+					AutoWireLink<ManagedObjectDependencyNode, LinkObjectNode>[] links = autoWirer.getAutoWireLinks(
+							dependency,
 							new AutoWire(dependencyType.getTypeQualifier(), dependencyType.getDependencyType()));
 					if (links.length == 1) {
 						LinkUtil.linkAutoWireObjectNode(dependency, links[0].getTargetNode(office), office, autoWirer,
@@ -733,7 +734,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			AutoWire sourceAutoWire = new AutoWire(teamName, objectType);
 
 			// Attempt to auto-wire the team
-			AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(teamNode, sourceAutoWire);
+			AutoWireLink<ManagedObjectTeamNode, LinkTeamNode>[] links = autoWirer.findAutoWireLinks(teamNode,
+					sourceAutoWire);
 			if (links.length == 1) {
 				LinkUtil.linkTeamNode(teamNode, links[0].getTargetNode(managingOffice),
 						this.context.getCompilerIssues(), (link) -> teamNode.linkTeamNode(link));

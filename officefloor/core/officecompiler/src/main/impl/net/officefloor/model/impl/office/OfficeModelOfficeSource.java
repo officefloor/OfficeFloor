@@ -197,6 +197,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			for (PropertyModel property : govModel.getProperties()) {
 				governance.addProperty(property.getName(), property.getValue());
 			}
+			if (govModel.getIsAutoWireExtensions()) {
+				governance.enableAutoWireExtensions();
+			}
 
 			// Provide team responsible for governance
 			GovernanceToOfficeTeamModel govToTeam = govModel.getOfficeTeam();
@@ -221,14 +224,16 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 		Map<String, OfficeAdministration> administrations = new HashMap<String, OfficeAdministration>();
 		for (AdministrationModel adminModel : office.getAdministrations()) {
 
-			// Add the administration and register it
+			// Add the administration
 			String adminName = adminModel.getAdministrationName();
 			OfficeAdministration admin = architect.addOfficeAdministration(adminName,
 					adminModel.getAdministrationSourceClassName());
 			for (PropertyModel property : adminModel.getProperties()) {
 				admin.addProperty(property.getName(), property.getValue());
 			}
-			administrations.put(adminName, admin);
+			if (adminModel.getIsAutoWireExtensions()) {
+				admin.enableAutoWireExtensions();
+			}
 
 			// Obtain the office team responsible for this administration
 			OfficeTeam officeTeam = null;
@@ -243,6 +248,9 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 				// Assign the team responsible for administration
 				architect.link(admin, officeTeam);
 			}
+
+			// Register the administration
+			administrations.put(adminName, admin);
 		}
 
 		// Add processor to link administration with functions

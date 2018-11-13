@@ -383,6 +383,8 @@
 				<attribute method="getAdministrationName" attribute="name" />
 				<attribute method="getAdministrationSourceClassName"
 					attribute="source" />
+				<attribute method="getIsAutoWireExtensions"
+					attribute="auto-wire-extensions" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
@@ -447,6 +449,8 @@
 				<attribute method="getGovernanceName" attribute="name" />
 				<attribute method="getGovernanceSourceClassName"
 					attribute="source" />
+				<attribute method="getIsAutoWireExtensions"
+					attribute="auto-wire-extensions" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>

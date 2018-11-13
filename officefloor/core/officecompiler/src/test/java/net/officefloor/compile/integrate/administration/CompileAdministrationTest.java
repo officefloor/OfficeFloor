@@ -22,6 +22,10 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.compile.spi.supplier.source.impl.AbstractSupplierSource;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -72,8 +76,7 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests {@link Administration} post-administering a
-	 * {@link ManagedFunction}.
+	 * Tests {@link Administration} post-administering a {@link ManagedFunction}.
 	 */
 	public void testPostAdministerFunction() {
 
@@ -114,18 +117,71 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	 * Tests administering an {@link OfficeFloorManagedObject}.
 	 */
 	public void testAdministerOfficeFloorManagedObject() {
+		this.doAdministerOfficeFloorManagedObjectTest(false);
+	}
+
+	/**
+	 * Tests auto-wiring an {@link OfficeFloorManagedObject}.
+	 */
+	public void testAdministerOfficeFloorManagedObjectAutowire() {
+		this.doAdministerOfficeFloorManagedObjectTest(false);
+	}
+
+	/**
+	 * Tests administering an {@link OfficeFloorSupplier}
+	 * {@link OfficeFloorManagedObject}.
+	 */
+	public void testAdministerOfficeFloorSuppliedManagedObject() {
+		this.doAdministerOfficeFloorManagedObjectTest(true);
+	}
+
+	/**
+	 * Tests auto-wiring an {@link OfficeFloorSupplier}
+	 * {@link OfficeFloorManagedObject}.
+	 */
+	public void testAdministerOfficeFloorSuppliedManagedObjectAutowire() {
+
+		// Naming is different, so record to supplied
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_supplierSetup();
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+		AdministrationBuilder<?, ?> admin = this.record_functionBuilder_preAdministration("ADMIN",
+				SimpleManagedObject.class);
+		admin.administerManagedObject(SimpleManagedObject.class.getName());
+		this.record_officeFloorBuilder_addManagedObject(SimpleManagedObject.class.getName(),
+				ClassManagedObjectSource.class, 0, "class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource(SimpleManagedObject.class.getName(), SimpleManagedObject.class.getName());
+		this.record_officeBuilder_addThreadManagedObject(SimpleManagedObject.class.getName(),
+				SimpleManagedObject.class.getName());
+
+		// Compile
+		this.compile(true);
+	}
+
+	/**
+	 * Undertakes administering an {@link OfficeFloorManagedObject}.
+	 */
+	private void doAdministerOfficeFloorManagedObjectTest(boolean isSupplied) {
 
 		// Record obtaining the section type
 		this.issues.recordCaptureIssues(false);
 
 		// Record building the OfficeFloor
+		if (isSupplied) {
+			this.record_supplierSetup();
+		}
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
-		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT");
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 		AdministrationBuilder<?, ?> admin = this.record_functionBuilder_preAdministration("ADMIN",
 				SimpleManagedObject.class);
@@ -158,11 +214,63 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	 * Tests administering an {@link OfficeManagedObject}.
 	 */
 	public void testAdministerOfficeManagedObject() {
+		this.doAdministerOfficeManagedObjectTest(false);
+	}
+
+	/**
+	 * Tests auto-wiring an {@link OfficeManagedObject}.
+	 */
+	public void testAdministerOfficeManagedObjectAutowire() {
+		this.doAdministerOfficeManagedObjectTest(false);
+	}
+
+	/**
+	 * Tests administering an {@link OfficeSupplier} {@link OfficeManagedObject}.
+	 */
+	public void testAdministerOfficeSuppliedManagedObject() {
+		this.doAdministerOfficeManagedObjectTest(true);
+	}
+
+	/**
+	 * Tests auto-wiring an {@link OfficeSupplier} {@link OfficeManagedObject}.
+	 */
+	public void testAdministerOfficeSuppliedManagedObjectAutowire() {
+
+		// Naming is different, so record to supplied
+		this.issues.recordCaptureIssues(false);
+
+		// Record building the OfficeFloor
+		this.record_supplierSetup();
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE." + SimpleManagedObject.class.getName(),
+				ClassManagedObjectSource.class, 0, "class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE." + SimpleManagedObject.class.getName(),
+				"OFFICE." + SimpleManagedObject.class.getName());
+		this.record_officeBuilder_addThreadManagedObject("OFFICE." + SimpleManagedObject.class.getName(),
+				"OFFICE." + SimpleManagedObject.class.getName());
+		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
+		AdministrationBuilder<?, ?> admin = this.record_functionBuilder_preAdministration("ADMIN",
+				SimpleManagedObject.class);
+		admin.administerManagedObject("OFFICE." + SimpleManagedObject.class.getName());
+
+		// Compile
+		this.compile(true);
+	}
+
+	/**
+	 * Undertakes testing administering an {@link OfficeManagedObject}.
+	 */
+	private void doAdministerOfficeManagedObjectTest(boolean isSupplied) {
 
 		// Record obtaining the section type
 		this.issues.recordCaptureIssues(false);
 
 		// Record building the OfficeFloor
+		if (isSupplied) {
+			this.record_supplierSetup();
+		}
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.MANAGED_OBJECT", "OFFICE.MANAGED_OBJECT_SOURCE");
@@ -202,6 +310,20 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	 * Tests administering an {@link OfficeSectionManagedObject}.
 	 */
 	public void testAdministerOfficeSectionManagedObject() {
+		this.doAdministerOfficeSectionManagedObjectTest();
+	}
+
+	/**
+	 * Tests auto-wiring an {@link OfficeSectionManagedObject}.
+	 */
+	public void testAdministerOfficeSectionManagedObjectAutowire() {
+		this.doAdministerOfficeSectionManagedObjectTest();
+	}
+
+	/**
+	 * Undertakes testing administering an {@link OfficeSectionManagedObject}.
+	 */
+	private void doAdministerOfficeSectionManagedObjectTest() {
 
 		// Record obtaining the section type
 		this.issues.recordCaptureIssues(false);
@@ -267,6 +389,28 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 	 * Simple {@link ManagedObject}.
 	 */
 	public static class SimpleManagedObject {
+	}
+
+	/**
+	 * Mock {@link SupplierSource}.
+	 */
+	public static class MockSupplierSource extends AbstractSupplierSource {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// no specification
+		}
+
+		@Override
+		public void supply(SupplierSourceContext context) throws Exception {
+			context.addManagedObjectSource(null, SimpleManagedObject.class, new ClassManagedObjectSource()).addProperty(
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, SimpleManagedObject.class.getName());
+		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
+		}
 	}
 
 }
