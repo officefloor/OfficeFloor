@@ -48,20 +48,42 @@ public class SpringDataTransactionGovernance implements Governance<PlatformTrans
 	@Override
 	public void governManagedObject(PlatformTransactionManager managedObjectExtension, GovernanceContext<None> context)
 			throws Throwable {
+
+		// Should only be one platform transaction manager
+		if (this.transactionManager != null) {
+			throw new IllegalStateException(
+					"More than one " + PlatformTransactionManager.class.getSimpleName() + " registered");
+		}
+
+		// Start the transaction
 		this.transactionManager = managedObjectExtension;
 		this.transaction = managedObjectExtension.getTransaction(null);
 	}
 
 	@Override
 	public void enforceGovernance(GovernanceContext<None> context) throws Throwable {
+
+		// Commit the possible transaction
 		if (this.transactionManager != null) {
 			this.transactionManager.commit(this.transaction);
 		}
+
+		// Clear for possible further governance
+		this.transactionManager = null;
+		this.transaction = null;
 	}
 
 	@Override
 	public void disregardGovernance(GovernanceContext<None> context) throws Throwable {
-		this.transactionManager.rollback(this.transaction);
+
+		// Rollback the possible transaction
+		if (this.transactionManager != null) {
+			this.transactionManager.rollback(this.transaction);
+		}
+
+		// Clear for possible further governance
+		this.transactionManager = null;
+		this.transaction = null;
 	}
 
 }

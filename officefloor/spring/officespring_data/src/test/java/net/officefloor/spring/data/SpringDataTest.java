@@ -27,6 +27,8 @@ import org.springframework.transaction.TransactionStatus;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
@@ -328,8 +330,15 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		if (isDifferentTeam) {
 			compiler.officeFloor((context) -> {
-				context.getOfficeFloorDeployer().addTeam("TEAM", OnePersonTeamSource.class.getName())
-						.addTypeQualification(null, TeamMarker.class.getName());
+				OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
+				// Configure team for servicing
+				deployer.addTeam("TEAM", OnePersonTeamSource.class.getName()).addTypeQualification(null,
+						TeamMarker.class.getName());
+
+				// Configure governance team
+				OfficeFloorTeam govTeam = deployer.addTeam("GOV_TEAM", OnePersonTeamSource.class.getName());
+				deployer.link(context.getDeployedOffice().getDeployedOfficeTeam("GOV_TEAM"), govTeam);
 			});
 		}
 		compiler.office((context) -> {
@@ -343,6 +352,9 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			// Create the governance
 			OfficeGovernance governance = architect.addOfficeGovernance("TRANSACTION",
 					SpringDataTransactionGovernanceSource.class.getName());
+			if (isDifferentTeam) {
+				architect.link(governance, architect.addOfficeTeam("GOV_TEAM"));
+			}
 			governance.enableAutoWireExtensions();
 
 			// Configure section under governance
@@ -354,20 +366,20 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			// Team checks
 			Runnable clearTeams = () -> {
 				TransactionGovernanceSection.serviceThread = null;
-				TransactionGovernanceSection.transactionThread = null;
+				TransactionGovernanceSection.nextThread = null;
 			};
 			Runnable ensureTeams = () -> {
 				assertNotNull("Should have service thread", TransactionGovernanceSection.serviceThread);
-				assertNotNull("Should have transaction thread", TransactionGovernanceSection.transactionThread);
+				assertNotNull("Should have transaction thread", TransactionGovernanceSection.nextThread);
 			};
 			Runnable checkTeams = isDifferentTeam ? () -> {
 				ensureTeams.run();
 				assertNotSame("Should be different threads", TransactionGovernanceSection.serviceThread,
-						TransactionGovernanceSection.transactionThread);
+						TransactionGovernanceSection.nextThread);
 			} : () -> {
 				ensureTeams.run();
 				assertSame("Should be same thread", TransactionGovernanceSection.serviceThread,
-						TransactionGovernanceSection.transactionThread);
+						TransactionGovernanceSection.nextThread);
 			};
 
 			// Create row
@@ -376,7 +388,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", commit);
 			Row committedRow = repository.findById(commit.row.getId()).get();
 			assertNotNull("Should have committed row", committedRow);
-			assertEquals("Incorrect committed row", "INSERT", committedRow.getName());
+			assertEquals("Incorrect committed row", "COMMIT", committedRow.getName());
 			checkTeams.run();
 
 			// Roll back creating the row
@@ -389,7 +401,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			} catch (Exception ex) {
 				assertEquals("Incorrect cause", "TEST", ex.getMessage());
 			}
-			int rolledBackRowCount = repository.findByName("INSERT").size();
+			int rolledBackRowCount = repository.findByName("ROLLBACK").size();
 			assertEquals("Should rollback creating row", 0, rolledBackRowCount);
 			checkTeams.run();
 		}
@@ -410,16 +422,19 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 		private static volatile Thread serviceThread;
 
-		private static volatile Thread transactionThread;
+		private static volatile Thread nextThread;
 
 		@NextFunction("next")
 		public TransactionGovernanceRequest service(RowRepository repository,
 				@Parameter TransactionGovernanceRequest request) {
-			repository.save(new Row(null, "INSERT"));
+			serviceThread = Thread.currentThread();
+			request.row = new Row(null, request.failTransactionException != null ? "ROLLBACK" : "COMMIT");
+			repository.save(request.row);
 			return request;
 		}
 
 		public void next(@Parameter TransactionGovernanceRequest request, TeamMarker marker) throws Exception {
+			nextThread = Thread.currentThread();
 			if (request.failTransactionException != null) {
 				throw request.failTransactionException;
 			}

@@ -39,6 +39,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.plugin.section.clazz.Property;
+import net.officefloor.spring.extension.SpringBeanDecoratorContext;
 import net.officefloor.spring.extension.SpringSupplierExtension;
 import net.officefloor.spring.extension.SpringSupplierExtensionContext;
 import net.officefloor.spring.extension.SpringSupplierExtensionServiceFactory;
@@ -188,6 +189,31 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 */
 	private ConfigurableApplicationContext springContext;
 
+	/**
+	 * Decorates the Spring bean.
+	 * 
+	 * @param beanName           Name of Spring Bean.
+	 * @param beanType           Type of the Spring Bean.
+	 * @param extensions         {@link SpringSupplierExtension} instances.
+	 * @param springDependencies {@link SpringDependency} instances by their name.
+	 * @return {@link SpringDependency} instances for the Spring Bean.
+	 * @throws Exception If fails to decorate the Spring Bean.
+	 */
+	private SpringDependency[] decorateBean(String beanName, Class<?> beanType,
+			List<SpringSupplierExtension> extensions, Map<String, SpringDependency> springDependencies)
+			throws Exception {
+
+		// Decorate the beans via the extensions
+		SpringBeanDecoratorContextImpl decoratorContext = new SpringBeanDecoratorContextImpl(beanName, beanType,
+				springDependencies);
+		for (SpringSupplierExtension extension : extensions) {
+			extension.decorateSpringBean(decoratorContext);
+		}
+
+		// Return the spring dependencies
+		return decoratorContext.dependencies.values().stream().toArray(SpringDependency[]::new);
+	}
+
 	/*
 	 * ================== SupplierSource ============================
 	 */
@@ -287,10 +313,6 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 		}, dependencyFactory);
 
-		// Load the Spring dependencies
-		SpringDependency[] springDependenciesList = springDependencies.values().stream()
-				.toArray(SpringDependency[]::new);
-
 		// Load listing of all the beans (mapped by their type)
 		Map<Class<?>, List<String>> beanNamesByType = new HashMap<>();
 		NEXT_BEAN: for (String name : this.springContext.getBeanDefinitionNames()) {
@@ -299,8 +321,8 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			Class<?> beanType = this.springContext.getBean(name).getClass();
 
 			// Filter out Spring beans being loaded from OfficeFloor
-			for (SpringDependency dependency : springDependenciesList) {
-				if (beanType.isAssignableFrom(dependency.getObjectType())) {
+			for (SpringDependency dependency : springDependencies.values()) {
+				if (dependency.getObjectType().isAssignableFrom(beanType)) {
 					continue NEXT_BEAN; // OfficeFloor providing
 				}
 			}
@@ -316,11 +338,18 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 		// Load the supplied managed object sources
 		for (Class<?> beanType : beanNamesByType.keySet()) {
+
 			List<String> beanNames = beanNamesByType.get(beanType);
+			SpringDependency[] springDependenciesList;
 			switch (beanNames.size()) {
 			case 1:
 				// Only the one type (so no qualifier)
 				String singleBeanName = beanNames.get(0);
+
+				// Decorate the bean
+				springDependenciesList = this.decorateBean(singleBeanName, beanType, extensions, springDependencies);
+
+				// Load the single (unqualified) bean
 				context.addManagedObjectSource(null, beanType, new SpringBeanManagedObjectSource(singleBeanName,
 						beanType, this.springContext, springDependenciesList));
 				break;
@@ -328,6 +357,11 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			default:
 				// Multiple, so provide qualifier
 				for (String beanName : beanNames) {
+
+					// Decorate the bean
+					springDependenciesList = this.decorateBean(beanName, beanType, extensions, springDependencies);
+
+					// Load the qualified bean
 					context.addManagedObjectSource(beanName, beanType, new SpringBeanManagedObjectSource(beanName,
 							beanType, this.springContext, springDependenciesList));
 				}
@@ -341,6 +375,67 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 		// Close the spring context
 		this.springContext.close();
+	}
+
+	/**
+	 * {@link SpringBeanDecoratorContext} implementation.
+	 */
+	private static class SpringBeanDecoratorContextImpl implements SpringBeanDecoratorContext {
+
+		/**
+		 * Bean name.
+		 */
+		private final String name;
+
+		/**
+		 * Bean type.
+		 */
+		private final Class<?> type;
+
+		/**
+		 * {@link SpringDependency} instances by name.
+		 */
+		private final Map<String, SpringDependency> dependencies;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param name         Bean name.
+		 * @param type         Bean type.
+		 * @param dependencies {@link SpringDependency} instances by name.
+		 */
+		public SpringBeanDecoratorContextImpl(String name, Class<?> type, Map<String, SpringDependency> dependencies) {
+			this.name = name;
+			this.type = type;
+			this.dependencies = new HashMap<>(dependencies);
+		}
+
+		/*
+		 * ====================== SpringBeanDecoratorContext ========================
+		 */
+
+		@Override
+		public String getBeanName() {
+			return this.name;
+		}
+
+		@Override
+		public Class<?> getBeanType() {
+			return this.type;
+		}
+
+		@Override
+		public void addDependency(String qualifier, Class<?> type) {
+
+			// Obtain the dependency name
+			String dependencyName = SupplierThreadLocalNodeImpl.getSupplierThreadLocalName(qualifier, type.getName());
+			if (this.dependencies.containsKey(dependencyName)) {
+				return; // already have dependency
+			}
+
+			// Add the dependency
+			this.dependencies.put(dependencyName, new SpringDependency(qualifier, type));
+		}
 	}
 
 }
