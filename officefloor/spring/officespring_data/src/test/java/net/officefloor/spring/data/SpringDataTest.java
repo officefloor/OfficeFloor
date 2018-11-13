@@ -25,13 +25,20 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeGovernance;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.spring.SpringSupplierSource;
 
@@ -165,7 +172,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	 * Ensure can use {@link PlatformTransactionManager} across different
 	 * {@link Team} instances.
 	 */
-	public void testInjectTransactionWithDifferentTeamComplete() throws Throwable {
+	public void testInjectTransactionWithTeams() throws Throwable {
 		this.doInjectTransactionTest(true);
 	}
 
@@ -191,7 +198,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		compiler.office((context) -> {
 			OfficeArchitect architect = context.getOfficeArchitect();
 			architect.enableAutoWireTeams();
-			context.addSection("SECTION", TransactionSection.class);
+			context.addSection("SECTION", TransactionInjectSection.class);
 			context.addManagedObject("MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
 			SpringSupplierSource.configure(architect, MockSpringDataConfiguration.class);
 		});
@@ -199,26 +206,26 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 			// Team checks
 			Runnable clearTeams = () -> {
-				TransactionSection.serviceThread = null;
-				TransactionSection.transactionThread = null;
+				TransactionInjectSection.serviceThread = null;
+				TransactionInjectSection.transactionThread = null;
 			};
 			Runnable ensureTeams = () -> {
-				assertNotNull("Should have service thread", TransactionSection.serviceThread);
-				assertNotNull("Should have transaction thread", TransactionSection.transactionThread);
+				assertNotNull("Should have service thread", TransactionInjectSection.serviceThread);
+				assertNotNull("Should have transaction thread", TransactionInjectSection.transactionThread);
 			};
 			Runnable checkTeams = isDifferentTeam ? () -> {
 				ensureTeams.run();
-				assertNotSame("Should be different threads", TransactionSection.serviceThread,
-						TransactionSection.transactionThread);
+				assertNotSame("Should be different threads", TransactionInjectSection.serviceThread,
+						TransactionInjectSection.transactionThread);
 			} : () -> {
 				ensureTeams.run();
-				assertSame("Should be same thread", TransactionSection.serviceThread,
-						TransactionSection.transactionThread);
+				assertSame("Should be same thread", TransactionInjectSection.serviceThread,
+						TransactionInjectSection.transactionThread);
 			};
 
 			// Create row
 			clearTeams.run();
-			TransactionRequest commit = new TransactionRequest(true);
+			TransactionInjectRequest commit = new TransactionInjectRequest(true);
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", commit);
 			Row committedRow = repository.findById(commit.row.getId()).get();
 			assertNotNull("Should have committed row", committedRow);
@@ -227,7 +234,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 			// Roll back creating the row
 			clearTeams.run();
-			TransactionRequest rollback = new TransactionRequest(false);
+			TransactionInjectRequest rollback = new TransactionInjectRequest(false);
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", rollback);
 			int rolledBackRowCount = repository.findByName("ROLLBACK").size();
 			assertEquals("Should rollback creating row", 0, rolledBackRowCount);
@@ -235,13 +242,13 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		}
 	}
 
-	public static class TransactionRequest {
+	public static class TransactionInjectRequest {
 
 		private final boolean isCommit;
 
 		private volatile Row row;
 
-		private TransactionRequest(boolean isCommit) {
+		private TransactionInjectRequest(boolean isCommit) {
 			this.isCommit = isCommit;
 		}
 	}
@@ -257,13 +264,13 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	public static class TeamMarker {
 	}
 
-	public static class TransactionSection {
+	public static class TransactionInjectSection {
 
 		private static volatile Thread serviceThread;
 
 		private static volatile Thread transactionThread;
 
-		public void service(@Parameter TransactionRequest request, PlatformTransactionManager transactionManager,
+		public void service(@Parameter TransactionInjectRequest request, PlatformTransactionManager transactionManager,
 				RowRepository repository, TransactionFlows flows) {
 			serviceThread = Thread.currentThread();
 			TransactionStatus transaction = transactionManager.getTransaction(null);
@@ -290,6 +297,147 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			assertEquals("Should have row before rollback", 1, repository.findByName("ROLLBACK").size());
 			transactionManager.rollback(transaction);
 			assertEquals("Should NOT have row after rollback", 0, repository.findByName("ROLLBACK").size());
+		}
+	}
+
+	/**
+	 * Ensure can provide transaction {@link Governance}.
+	 */
+	public void testTransactionGovernance() throws Throwable {
+		this.doTransactionGovernanceTest(false);
+	}
+
+	/**
+	 * Ensure can provide transaction {@link Governance} with different {@link Team}
+	 * instances.
+	 */
+	public void testTransactionGovernanceWithTeams() throws Throwable {
+		this.doTransactionGovernanceTest(true);
+	}
+
+	/**
+	 * Undertakes transaction {@link Governance} test.
+	 * 
+	 * @param isDifferentTeam If use different {@link Team} to execute the
+	 *                        {@link ManagedFunction} instances.
+	 */
+	private void doTransactionGovernanceTest(boolean isDifferentTeam) throws Throwable {
+
+		// Obtain the repository
+		RowRepository repository = this.context.getBean(RowRepository.class);
+
+		// Test transaction within OfficeFloor
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		if (isDifferentTeam) {
+			compiler.officeFloor((context) -> {
+				OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+
+				// Configure team for servicing
+				deployer.addTeam("TEAM", OnePersonTeamSource.class.getName()).addTypeQualification(null,
+						TeamMarker.class.getName());
+
+				// Configure governance team
+				OfficeFloorTeam govTeam = deployer.addTeam("GOV_TEAM", OnePersonTeamSource.class.getName());
+				deployer.link(context.getDeployedOffice().getDeployedOfficeTeam("GOV_TEAM"), govTeam);
+			});
+		}
+		compiler.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+			architect.enableAutoWireTeams();
+
+			// Add marker and configure Spring
+			context.addManagedObject("MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
+			SpringSupplierSource.configure(architect, MockSpringDataConfiguration.class);
+
+			// Create the governance
+			OfficeGovernance governance = architect.addOfficeGovernance("TRANSACTION",
+					SpringDataTransactionGovernanceSource.class.getName());
+			if (isDifferentTeam) {
+				architect.link(governance, architect.addOfficeTeam("GOV_TEAM"));
+			}
+			governance.enableAutoWireExtensions();
+
+			// Configure section under governance
+			OfficeSection section = context.addSection("SECTION", TransactionGovernanceSection.class);
+			section.addGovernance(governance);
+		});
+		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+
+			// Team checks
+			Runnable clearTeams = () -> {
+				TransactionGovernanceSection.serviceThread = null;
+				TransactionGovernanceSection.nextThread = null;
+			};
+			Runnable ensureTeams = () -> {
+				assertNotNull("Should have service thread", TransactionGovernanceSection.serviceThread);
+				assertNotNull("Should have transaction thread", TransactionGovernanceSection.nextThread);
+			};
+			Runnable checkTeams = isDifferentTeam ? () -> {
+				ensureTeams.run();
+				assertNotSame("Should be different threads", TransactionGovernanceSection.serviceThread,
+						TransactionGovernanceSection.nextThread);
+			} : () -> {
+				ensureTeams.run();
+				assertSame("Should be same thread", TransactionGovernanceSection.serviceThread,
+						TransactionGovernanceSection.nextThread);
+			};
+
+			// Create row
+			clearTeams.run();
+			TransactionGovernanceRequest commit = new TransactionGovernanceRequest(null);
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", commit);
+			Row committedRow = repository.findById(commit.row.getId()).get();
+			assertNotNull("Should have committed row", committedRow);
+			assertEquals("Incorrect committed row", "COMMIT", committedRow.getName());
+			checkTeams.run();
+
+			// Roll back creating the row
+			clearTeams.run();
+			final Exception failure = new Exception("TEST");
+			TransactionGovernanceRequest rollback = new TransactionGovernanceRequest(failure);
+			try {
+				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", rollback);
+				fail("Should not be successful");
+			} catch (Exception ex) {
+				assertEquals("Incorrect cause", "TEST", ex.getMessage());
+			}
+			int rolledBackRowCount = repository.findByName("ROLLBACK").size();
+			assertEquals("Should rollback creating row", 0, rolledBackRowCount);
+			checkTeams.run();
+		}
+	}
+
+	public static class TransactionGovernanceRequest {
+
+		private final Exception failTransactionException;
+
+		private volatile Row row;
+
+		private TransactionGovernanceRequest(Exception failTransactionException) {
+			this.failTransactionException = failTransactionException;
+		}
+	}
+
+	public static class TransactionGovernanceSection {
+
+		private static volatile Thread serviceThread;
+
+		private static volatile Thread nextThread;
+
+		@NextFunction("next")
+		public TransactionGovernanceRequest service(RowRepository repository,
+				@Parameter TransactionGovernanceRequest request) {
+			serviceThread = Thread.currentThread();
+			request.row = new Row(null, request.failTransactionException != null ? "ROLLBACK" : "COMMIT");
+			repository.save(request.row);
+			return request;
+		}
+
+		public void next(@Parameter TransactionGovernanceRequest request, TeamMarker marker) throws Exception {
+			nextThread = Thread.currentThread();
+			if (request.failTransactionException != null) {
+				throw request.failTransactionException;
+			}
 		}
 	}
 

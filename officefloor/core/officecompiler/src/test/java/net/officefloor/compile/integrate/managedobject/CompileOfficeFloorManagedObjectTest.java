@@ -111,6 +111,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		MockSupplierSource.managedObjectSource = mos;
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");

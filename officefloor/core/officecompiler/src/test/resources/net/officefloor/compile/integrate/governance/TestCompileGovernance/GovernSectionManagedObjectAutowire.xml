@@ -1,0 +1,28 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<governances>
+			<governance name="GOVERNANCE" source="CLASS"
+				auto-wire-extensions="true">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$SimpleGovernance" />
+				</properties>
+			</governance>
+		</governances>
+		<sections>
+			<section name="SECTION" source="CLASS"
+				location="${testcase}$SectionWithManagedObject">
+				<sub-section>
+					<section-managed-object name="managedObject">
+						<!-- <govern governance="GOVERNANCE" /> -->
+					</section-managed-object>
+				</sub-section>
+			</section>
+		</sections>
+	</office>
+</context>

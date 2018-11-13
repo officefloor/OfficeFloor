@@ -46,6 +46,7 @@ import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionVisitor;
+import net.officefloor.compile.internal.structure.ManagedObjectExtensionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -67,6 +68,7 @@ import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
@@ -727,6 +729,60 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 					.forEachOrdered((supplier) -> supplier.autoWireObjects(autoWirer, this, compileContext));
 		}
 
+		// Undertake auto-wire of administration
+		boolean isAutoWireAdministration = this.administrators.values().stream()
+				.anyMatch((administrator) -> administrator.isAutoWireAdministration());
+		boolean isAutoWireGovernance = this.governances.values().stream()
+				.anyMatch((governance) -> governance.isAutoWireGovernance());
+		if (isAutoWireAdministration || isAutoWireGovernance) {
+
+			// Create the OfficeFloor extension auto wirer
+			final AutoWirer<ManagedObjectExtensionNode> officeFloorAutoWirer = this.context
+					.createAutoWirer(ManagedObjectExtensionNode.class);
+			final AutoWirer<ManagedObjectExtensionNode> officeFloorContextAutoWirer = this.officeFloor
+					.loadAutoWireExtensionTargets(officeFloorAutoWirer, compileContext);
+
+			// Create the Office supplier auto wirer
+			final AutoWirer<ManagedObjectExtensionNode> officeSupplierAutoWirer = officeFloorContextAutoWirer
+					.createScopeAutoWirer();
+			this.suppliers.values().forEach((supplier) -> supplier.loadAutoWireExtensions(officeSupplierAutoWirer,
+					managedObjectSourceVisitor, compileContext));
+
+			// Create the Office managed object auto wirer
+			final AutoWirer<ManagedObjectExtensionNode> officeAutoWirer = officeSupplierAutoWirer
+					.createScopeAutoWirer();
+			this.managedObjects.values().forEach((mo) -> {
+
+				// Load the type
+				ManagedObjectType<?> moType = mo.getManagedObjectSourceNode().loadManagedObjectType(compileContext);
+				if (moType == null) {
+					return;
+				}
+
+				// Load the extensions
+				for (Class<?> extensionType : moType.getExtensionTypes()) {
+					officeAutoWirer.addAutoWireTarget(mo, new AutoWire(extensionType));
+				}
+			});
+
+			// Create the Section auto-wirer
+			final AutoWirer<ManagedObjectExtensionNode> autoWirer = officeAutoWirer.createScopeAutoWirer();
+			this.sections.values()
+					.forEach((section) -> section.loadAutoWireExtensionTargets(autoWirer, compileContext));
+
+			// Auto-wire administration
+			this.administrators.values().stream().sorted(
+					(a, b) -> CompileUtil.sortCompare(a.getOfficeAdministrationName(), b.getOfficeAdministrationName()))
+					.filter((administrator) -> administrator.isAutoWireAdministration())
+					.forEachOrdered((administration) -> administration.autoWireExtensions(autoWirer, compileContext));
+
+			// Auto-wire governance
+			this.governances.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeGovernanceName(), b.getOfficeGovernanceName()))
+					.filter((governance) -> governance.isAutoWireGovernance())
+					.forEachOrdered((governance) -> governance.autoWireExtensions(autoWirer, compileContext));
+		}
+
 		// Undertake auto-wire of teams
 		if (this.isAutoWireTeams) {
 
@@ -846,7 +902,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 			String objectType = object.getOfficeObjectType();
 
 			// Auto-wire the object
-			AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
+			AutoWireLink<OfficeObjectNode, LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
 					new AutoWire(typeQualifier, objectType));
 			if (links.length == 1) {
 				LinkUtil.linkAutoWireObjectNode(object, links[0].getTargetNode(this), this, autoWirer, compileContext,
@@ -873,7 +929,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 							.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
 
 					// Auto-wire the team
-					AutoWireLink<LinkTeamNode>[] links = autoWirer.getAutoWireLinks(team, sourceAutoWires);
+					AutoWireLink<OfficeTeamNode, LinkTeamNode>[] links = autoWirer.getAutoWireLinks(team,
+							sourceAutoWires);
 					if (links.length == 1) {
 						LinkUtil.linkTeam(team, links[0].getTargetNode(this), this.context.getCompilerIssues(), this);
 					}

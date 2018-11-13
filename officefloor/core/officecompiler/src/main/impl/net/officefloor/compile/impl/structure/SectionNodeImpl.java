@@ -43,6 +43,7 @@ import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedFunctionVisitor;
+import net.officefloor.compile.internal.structure.ManagedObjectExtensionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -56,6 +57,7 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.issues.CompileError;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeAvailableSectionInputType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -725,6 +727,30 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
+	public void loadAutoWireExtensionTargets(AutoWirer<ManagedObjectExtensionNode> autoWirer,
+			CompileContext compileContext) {
+
+		// Load the objects
+		this.managedObjects.values().forEach((mo) -> {
+
+			// Load the type
+			ManagedObjectType<?> moType = mo.getManagedObjectSourceNode().loadManagedObjectType(compileContext);
+			if (moType == null) {
+				return;
+			}
+
+			// Load the extensions
+			for (Class<?> extensionType : moType.getExtensionTypes()) {
+				autoWirer.addAutoWireTarget(mo, new AutoWire(extensionType));
+			}
+		});
+
+		// Load the sub sections
+		this.subSections.values()
+				.forEach((subSection) -> subSection.loadAutoWireExtensionTargets(autoWirer, compileContext));
+	}
+
+	@Override
 	public void autoWireObjects(AutoWirer<LinkObjectNode> autoWirer, CompileContext compileContext) {
 
 		// Auto-wire the objects
@@ -742,7 +768,7 @@ public class SectionNodeImpl implements SectionNode {
 			}
 
 			// Auto-wire the object
-			AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
+			AutoWireLink<SectionObjectNode, LinkObjectNode>[] links = autoWirer.getAutoWireLinks(object,
 					new AutoWire(objectType.getTypeQualifier(), objectType.getObjectType()));
 			if (links.length == 1) {
 				LinkUtil.linkAutoWireObjectNode(object, links[0].getTargetNode(this.office), this.office, autoWirer,

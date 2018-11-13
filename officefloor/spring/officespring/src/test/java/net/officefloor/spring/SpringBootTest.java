@@ -152,9 +152,16 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		type.addSupplierThreadLocal(null, OfficeFloorManagedObject.class);
 
 		// Load the expected supplied managed object types
-		for (String beanClassName : beanNamesByType.keySet()) {
-			List<String> beanNames = beanNamesByType.get(beanClassName);
+		NEXT_BEAN: for (String beanClassName : beanNamesByType.keySet()) {
 			Class<?> beanClass = loader.loadClass(beanClassName);
+
+			// Ignore the OfficeFloor managed objects
+			if (OfficeFloorManagedObject.class.isAssignableFrom(beanClass)) {
+				continue NEXT_BEAN;
+			}
+
+			// Load the Spring beans
+			List<String> beanNames = beanNamesByType.get(beanClassName);
 			switch (beanNames.size()) {
 			case 1:
 				// No qualification as only type
@@ -421,6 +428,12 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		// Create the managed object
 		OfficeFloorManagedObject managedObject = this.createMock(OfficeFloorManagedObject.class);
 
+		// Ensure beans registered
+		final String SIMPLE_BEAN_NAME = "simpleBean";
+		final String MANAGED_OBJECT_NAME = "officeFloorManagedObject";
+		assertNotNull("Invalid test as no simple bean", this.context.getBean(SIMPLE_BEAN_NAME));
+		assertNotNull("Invalid test as no managed object", this.context.getBean(MANAGED_OBJECT_NAME));
+
 		// Record obtaining value
 		this.recordReturn(managedObject, managedObject.getValue(), "EXTENSION");
 		this.replayMockObjects();
@@ -428,6 +441,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 		// Ensure active spring extension
 		MockSpringSupplierExtension.isActive = true;
 		MockSpringSupplierExtension.officeFloorManagedObject = null;
+		MockSpringSupplierExtension.decoratedBeanTypes.clear();
 		try {
 
 			// Configure OfficeFloor to auto-wire in Spring beans
@@ -454,10 +468,22 @@ public class SpringBootTest extends OfficeFrameTestCase {
 				// Invoke the function
 				ExtensionSection.serviceThread = null;
 				ExtensionSection.threadLocalValue = null;
+				LoadBean.loadCount.set(0);
 				CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", null);
 
 				// Ensure correct value passed
 				assertEquals("Incorrect value", "SIMPLE-EXTENSION", ExtensionSection.threadLocalValue);
+
+				// Ensure have decorated beans
+				assertTrue("Should register decorated beans",
+						MockSpringSupplierExtension.decoratedBeanTypes.size() > 0);
+				assertTrue("Incorrect simple bean", SimpleBean.class
+						.isAssignableFrom(MockSpringSupplierExtension.decoratedBeanTypes.get(SIMPLE_BEAN_NAME)));
+				assertNull("Should not decorate officeFloorManagedObject",
+						MockSpringSupplierExtension.decoratedBeanTypes.get(MANAGED_OBJECT_NAME));
+
+				// Ensure after having invoked process, that added dependency loaded
+				assertEquals("Should load additional dependency", 1, LoadBean.loadCount.get());
 			}
 
 			// Verify

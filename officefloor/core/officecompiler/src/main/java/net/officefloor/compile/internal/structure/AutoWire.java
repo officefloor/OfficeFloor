@@ -19,6 +19,8 @@ package net.officefloor.compile.internal.structure;
 
 import java.lang.annotation.Annotation;
 
+import net.officefloor.frame.api.source.SourceContext;
+
 /**
  * Auto-wire.
  * 
@@ -37,23 +39,30 @@ public class AutoWire implements Comparable<AutoWire> {
 	private final String type;
 
 	/**
+	 * <p>
+	 * Type {@link Class}.
+	 * <p>
+	 * This is used (if available) in obtain the type {@link Class}, as some derived
+	 * classes can not be loaded.
+	 */
+	private final Class<?> typeClass;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param qualifier
-	 *            Qualifier. May be <code>null</code>.
-	 * @param type
-	 *            Type.
+	 * @param qualifier Qualifier. May be <code>null</code>.
+	 * @param type      Type.
 	 */
 	public AutoWire(String qualifier, String type) {
 		this.qualifier = qualifier;
 		this.type = type;
+		this.typeClass = null;
 	}
 
 	/**
 	 * Instantiate with only type.
 	 * 
-	 * @param type
-	 *            Type.
+	 * @param type Type.
 	 */
 	public AutoWire(String type) {
 		this(null, type);
@@ -62,35 +71,32 @@ public class AutoWire implements Comparable<AutoWire> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param qualifier
-	 *            Qualifier {@link Annotation}.
-	 * @param type
-	 *            Type.
+	 * @param qualifier Qualifier {@link Annotation}.
+	 * @param type      Type.
 	 */
 	public AutoWire(Class<? extends Annotation> qualifier, Class<?> type) {
-		this(qualifier.getName(), type.getName());
+		this(qualifier.getName(), type);
 	}
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param qualifier
-	 *            Qualifier.
-	 * @param type
-	 *            Type.
+	 * @param qualifier Qualifier.
+	 * @param type      Type.
 	 */
 	public AutoWire(String qualifier, Class<?> type) {
-		this(qualifier, type.getName());
+		this.qualifier = qualifier;
+		this.type = type.getName();
+		this.typeClass = type;
 	}
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param type
-	 *            Type.s
+	 * @param type Type.
 	 */
 	public AutoWire(Class<?> type) {
-		this(null, type.getName());
+		this((String) null, type);
 	}
 
 	/**
@@ -109,6 +115,16 @@ public class AutoWire implements Comparable<AutoWire> {
 	 */
 	public String getType() {
 		return this.type;
+	}
+
+	/**
+	 * Obtains the type.
+	 * 
+	 * @param sourceContext {@link SourceContext}.
+	 * @return Type {@link Class} or <code>null</code> if unable to retrieve.
+	 */
+	public Class<?> getTypeClass(SourceContext sourceContext) {
+		return this.typeClass != null ? this.typeClass : sourceContext.loadOptionalClass(this.type);
 	}
 
 	/*

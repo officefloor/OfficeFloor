@@ -250,9 +250,11 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the administrations
 		// ----------------------------------------
-		assertList(new String[] { "getAdministrationName", "getAdministrationSourceClassName", "getX", "getY" },
+		assertList(
+				new String[] { "getAdministrationName", "getAdministrationSourceClassName", "getIsAutoWireExtensions",
+						"getX", "getY" },
 				office.getAdministrations(),
-				new AdministrationModel("ADMINISTRATION", "net.example.ExampleAdministrationSource", 800, 801));
+				new AdministrationModel("ADMINISTRATION", "net.example.ExampleAdministrationSource", true, 800, 801));
 		AdministrationModel admin = office.getAdministrations().get(0);
 		assertList(new String[] { "getName", "getValue" }, admin.getProperties(),
 				new PropertyModel("ADMIN_ONE", "VALUE_ONE"), new PropertyModel("ADMIN_TWO", "VALUE_TWO"));
@@ -267,9 +269,11 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the governances
 		// ----------------------------------------
-		assertList(new String[] { "getGovernanceName", "getGovernanceSourceClassName", "getX", "getY" },
+		assertList(
+				new String[] { "getGovernanceName", "getGovernanceSourceClassName", "getIsAutoWireExtensions", "getX",
+						"getY" },
 				office.getGovernances(),
-				new GovernanceModel("GOVERNANCE", "net.example.ExampleGovernanceSource", 900, 901));
+				new GovernanceModel("GOVERNANCE", "net.example.ExampleGovernanceSource", true, 900, 901));
 		GovernanceModel gov = office.getGovernances().get(0);
 		assertList(new String[] { "getName", "getValue" }, gov.getProperties(),
 				new PropertyModel("GOV_ONE", "VALUE_ONE"), new PropertyModel("GOV_TWO", "VALUE_TWO"));
