@@ -86,6 +86,6 @@ cp "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/result
 if [ -f "${DIR}/results.zip" ]; then
 	rm "${DIR}/results.zip"
 fi
-zip -r "${DIR}/results.zip" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/officefloor*"
+zip -r "${DIR}/results.zip" "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks/results/${RESULTS_DIR}/"
 
 
