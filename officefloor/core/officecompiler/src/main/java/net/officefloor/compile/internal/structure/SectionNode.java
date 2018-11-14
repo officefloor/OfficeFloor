@@ -26,6 +26,7 @@ import net.officefloor.compile.section.OfficeSubSectionType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.ExecutionExplorer;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionTransformerContext;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -213,6 +214,16 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	 * @return {@link SectionNode} qualified name.
 	 */
 	String getSectionQualifiedName(String simpleName);
+
+	/**
+	 * Loads the {@link AutoWire} extension targets for the
+	 * {@link OfficeSectionManagedObject} extension targets..
+	 * 
+	 * @param autoWirer      {@link AutoWirer} to be loaded with the
+	 *                       {@link OfficeSectionManagedObject} extension targets.
+	 * @param compileContext {@link CompileContext}.
+	 */
+	void loadAutoWireExtensionTargets(AutoWirer<ManagedObjectExtensionNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Auto-wires the {@link SectionObjectNode} instances that are unlinked.

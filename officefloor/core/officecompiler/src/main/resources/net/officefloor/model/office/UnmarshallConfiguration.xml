@@ -247,6 +247,8 @@
 		<value method="setAdministrationName" node="administration@name" />
 		<value method="setAdministrationSourceClassName"
 			node="administration@source" />
+		<value method="setIsAutoWireExtensions"
+			node="administration@auto-wire-extensions" />
 		<value method="setX" node="administration@x" />
 		<value method="setY" node="administration@y" />
 		<object method="addProperty" node="property"
@@ -285,6 +287,8 @@
 		<value method="setGovernanceName" node="governance@name" />
 		<value method="setGovernanceSourceClassName"
 			node="governance@source" />
+		<value method="setIsAutoWireExtensions"
+			node="governance@auto-wire-extensions" />
 		<value method="setX" node="governance@x" />
 		<value method="setY" node="governance@y" />
 		<object method="addProperty" node="property"

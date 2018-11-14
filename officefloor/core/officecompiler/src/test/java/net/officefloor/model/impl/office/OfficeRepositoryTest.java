@@ -156,14 +156,14 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addOfficeSection(section);
 		OfficeSectionObjectModel object = new OfficeSectionObjectModel("OBJECT", Connection.class.getName());
 		section.addOfficeSectionObject(object);
-		AdministrationModel admin = new AdministrationModel("ADMINISTRATION",
-				"net.example.ExampleAdministrationSource");
+		AdministrationModel admin = new AdministrationModel("ADMINISTRATION", "net.example.ExampleAdministrationSource",
+				false);
 		office.addAdministration(admin);
 		AdministrationFlowModel adminFlow = new AdministrationFlowModel("ADMIN_FLOW", null, Integer.class.getName());
 		admin.addAdministrationFlow(adminFlow);
 		AdministrationEscalationModel adminEscalation = new AdministrationEscalationModel(Exception.class.getName());
 		admin.addAdministrationEscalation(adminEscalation);
-		GovernanceModel governance = new GovernanceModel("GOVERNANCE", "net.example.ExampleGovernanceSource");
+		GovernanceModel governance = new GovernanceModel("GOVERNANCE", "net.example.ExampleGovernanceSource", false);
 		office.addGovernance(governance);
 		GovernanceFlowModel govFlow = new GovernanceFlowModel("GOVERNANCE_FLOW", null, Float.class.getName());
 		governance.addGovernanceFlow(govFlow);
@@ -581,14 +581,14 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		office.addOfficeSection(section);
 		OfficeSectionObjectModel object = new OfficeSectionObjectModel("OBJECT", Connection.class.getName());
 		section.addOfficeSectionObject(object);
-		AdministrationModel admin = new AdministrationModel("ADMINISTRATION",
-				"net.example.ExampleAdministrationSource");
+		AdministrationModel admin = new AdministrationModel("ADMINISTRATION", "net.example.ExampleAdministrationSource",
+				false);
 		office.addAdministration(admin);
 		AdministrationFlowModel adminFlow = new AdministrationFlowModel("ADMIN_FLOW", null, null);
 		admin.addAdministrationFlow(adminFlow);
 		AdministrationEscalationModel adminEscalation = new AdministrationEscalationModel("java.io.IOException");
 		admin.addAdministrationEscalation(adminEscalation);
-		GovernanceModel governance = new GovernanceModel("GOVERNANCE", "net.example.ExampleGovernanceSource");
+		GovernanceModel governance = new GovernanceModel("GOVERNANCE", "net.example.ExampleGovernanceSource", false);
 		office.addGovernance(governance);
 		GovernanceFlowModel govFlow = new GovernanceFlowModel("GOV_FLOW", null, null);
 		governance.addGovernanceFlow(govFlow);

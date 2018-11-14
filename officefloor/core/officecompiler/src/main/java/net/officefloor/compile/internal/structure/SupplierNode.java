@@ -131,6 +131,17 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 			CompileContext compileContext);
 
 	/**
+	 * Loads the {@link SuppliedManagedObjectSourceNode} instances as
+	 * {@link ManagedObjectExtensionNode} instances to the {@link AutoWirer}.
+	 * 
+	 * @param autoWirer                  {@link AutoWirer}.
+	 * @param managedObjectSourceVisitor {@link ManagedObjectSourceVisitor}.
+	 * @param compileContext             {@link CompileContext}.
+	 */
+	void loadAutoWireExtensions(AutoWirer<ManagedObjectExtensionNode> autoWirer,
+			ManagedObjectSourceVisitor managedObjectSourceVisitor, CompileContext compileContext);
+
+	/**
 	 * Auto-wires the {@link SupplierThreadLocalNode} instances that are unlinked.
 	 * 
 	 * @param autoWirer      {@link AutoWirer}.

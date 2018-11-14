@@ -36,7 +36,9 @@ public interface SpringSupplierExtension {
 	 * @param context {@link SpringSupplierExtensionContext}.
 	 * @throws Exception If fails to setup.
 	 */
-	void beforeSpringLoad(SpringSupplierExtensionContext context) throws Exception;
+	default void beforeSpringLoad(SpringSupplierExtensionContext context) throws Exception {
+		// does nothing by default
+	}
 
 	/**
 	 * <p>
@@ -47,6 +49,18 @@ public interface SpringSupplierExtension {
 	 * @param context {@link SpringSupplierExtensionContext}.
 	 * @throws Exception If fails to complete extension configuration.
 	 */
-	void afterSpringLoad(SpringSupplierExtensionContext context) throws Exception;
+	default void afterSpringLoad(SpringSupplierExtensionContext context) throws Exception {
+		// does nothing by default
+	}
+
+	/**
+	 * Invoked for each registered Spring bean to further decorate integration.
+	 * 
+	 * @param context {@link SpringBeanDecoratorContext}.
+	 * @throws Exception If fails to decorate the Spring Bean.
+	 */
+	default void decorateSpringBean(SpringBeanDecoratorContext context) throws Exception {
+		// does nothing by default
+	}
 
 }

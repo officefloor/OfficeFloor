@@ -330,7 +330,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 				Connection.class.getName());
 		assertNotNull("Must have managed object source", mos);
 		assertEquals("Incorrect managed object name", "MO_SOURCE", mos.getOfficeFloorManagedObjectSourceName());
-		assertNotSame("Should obtain another managed object source", mos,
+		assertSame("Should obtain same managed object source", mos,
 				supplier.getOfficeFloorManagedObjectSource("ANOTHER", null, Connection.class.getName()));
 		this.verifyMockObjects();
 	}
@@ -341,10 +341,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	 */
 	public void testAddSuppliedOfficeFloorManagedObjectSourceTwice() {
 
-		// Record issue in adding the supplied managed object souce twice
-		this.issues.recordIssue("MO_SOURCE", ManagedObjectSourceNodeImpl.class,
-				"Managed Object Source MO_SOURCE already added");
-
+		// Managed object sources are re-used, so no issue in adding twice
 		OfficeFloorSupplier supplier = this.addSupplier(this.node, "SUPPLIER", null);
 
 		// Add the managed object twice

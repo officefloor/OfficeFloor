@@ -1,0 +1,46 @@
+<context>
+	<office-floor>
+		<teams>
+			<team name="TEAM" source="ONE_PERSON" />
+		</teams>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office">
+				<team name="OFFICE_TEAM">
+					<office-floor-team name="TEAM" />
+				</team>
+			</office>
+		</offices>
+	</office-floor>
+	<office>
+		<teams>
+			<team name="OFFICE_TEAM" />
+		</teams>
+		<suppliers>
+			<supplier name="SUPPLIER"
+				source="${testcase}$MockSupplierSource" />
+		</suppliers>
+		<managed-object-sources>
+			<managed-object-source
+				name="MANAGED_OBJECT_SOURCE">
+				<supplier name="SUPPLIER"
+					type="${testcase}$SimpleManagedObject" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="MANAGED_OBJECT" scope="PROCESS">
+				<managed-object-source
+					name="MANAGED_OBJECT_SOURCE" />
+				<govern governance="GOVERNANCE" />
+			</managed-object>
+		</managed-objects>
+		<governances>
+			<governance name="GOVERNANCE" source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$SimpleGovernance" />
+				</properties>
+				<team name="OFFICE_TEAM" />
+			</governance>
+		</governances>
+	</office>
+</context>

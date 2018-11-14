@@ -48,7 +48,7 @@ public class PlaintextTest {
 
 	@Test
 	public void stress() throws Exception {
-		BenchmarkEnvironment.doStressTest("http://localhost:8181/plaintext", 4, 10, 2500);
+		BenchmarkEnvironment.doStressTest("http://localhost:8181/plaintext", 4, 10, 250);
 	}
 
 }

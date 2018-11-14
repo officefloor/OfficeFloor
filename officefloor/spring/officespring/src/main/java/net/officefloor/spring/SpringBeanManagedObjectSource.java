@@ -81,9 +81,15 @@ public class SpringBeanManagedObjectSource extends AbstractManagedObjectSource<I
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void loadMetaData(MetaDataContext<Indexed, None> context) throws Exception {
+
+		// Configure meta-data
 		context.setObjectClass(this.objectType);
 		context.setManagedObjectClass(this.getClass());
+
+		// Provide extension
+		context.addManagedObjectExtension((Class) this.objectType, (mo) -> mo.getObject());
 
 		// Load the dependencies
 		for (SpringDependency springDependency : this.springDependencies) {

@@ -374,6 +374,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -411,6 +412,7 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 

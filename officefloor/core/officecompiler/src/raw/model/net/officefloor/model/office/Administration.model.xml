@@ -2,20 +2,28 @@
 <model>
 	<field type="String" name="administration name" />
 	<field type="String" name="administration source class name" />
+	<field type="boolean" name="is auto wire extensions" />
 	<field type="AdministrationToOfficeTeamModel" name="office team" />
 	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="AdministrationFlowModel" name="administration flow"
 		cascade-remove="true" />
-	<list type="AdministrationEscalationModel" name="administration escalation"
-		cascade-remove="true" />
-	<list type="OfficeFunctionToPreAdministrationModel" name="pre office function" />
-	<list type="OfficeFunctionToPostAdministrationModel" name="post office function" />
-	<list type="AdministrationToExternalManagedObjectModel" name="administered external managed object" />
-	<list type="AdministrationToOfficeManagedObjectModel" name="administered office managed object" />
-	<list type="AdministrationToOfficeSectionManagedObjectModel" name="administered office section managed object" />
+	<list type="AdministrationEscalationModel"
+		name="administration escalation" cascade-remove="true" />
+	<list type="OfficeFunctionToPreAdministrationModel"
+		name="pre office function" />
+	<list type="OfficeFunctionToPostAdministrationModel"
+		name="post office function" />
+	<list type="AdministrationToExternalManagedObjectModel"
+		name="administered external managed object" />
+	<list type="AdministrationToOfficeManagedObjectModel"
+		name="administered office managed object" />
+	<list type="AdministrationToOfficeSectionManagedObjectModel"
+		name="administered office section managed object" />
 	<list type="ExternalManagedObjectToPreLoadAdministrationModel"
 		name="pre load external managed object" />
-	<list type="OfficeManagedObjectToPreLoadAdministrationModel" name="pre load office managed object" />
-	<list type="OfficeSectionManagedObjectToPreLoadAdministrationModel"
+	<list type="OfficeManagedObjectToPreLoadAdministrationModel"
+		name="pre load office managed object" />
+	<list
+		type="OfficeSectionManagedObjectToPreLoadAdministrationModel"
 		name="pre load office section managed object" />
 </model>

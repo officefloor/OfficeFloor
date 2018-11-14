@@ -470,6 +470,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		AutoWireOfficeExtensionService.enableAutoWireObjects();
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 
@@ -518,6 +519,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor (auto wiring team of managed object)
+		this.record_supplierSetup();
 		this.record_init();
 		this.record_officeFloorBuilder_addTeam("OFFICEFLOOR_TEAM", new OnePersonTeamSource());
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "OFFICEFLOOR_TEAM");
