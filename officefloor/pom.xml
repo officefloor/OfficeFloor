@@ -76,7 +76,7 @@
 		<maven-plugin-version>3.6.0</maven-plugin-version>
 		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
-		<jetty-version>9.4.12.v20180830</jetty-version>
+		<jetty-version>9.4.13.v20181111</jetty-version>
 		<failsafe-version>2.22.1</failsafe-version>
 		<compiler-version>3.8.0</compiler-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
@@ -697,7 +697,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.2.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
