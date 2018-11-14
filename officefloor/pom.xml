@@ -491,7 +491,7 @@
 			<dependency>
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-client</artifactId>
-				<version>8.14.3</version>
+				<version>8.14.4</version>
 			</dependency>
 			<!-- TODO: remove once docker not having issue with org.glassfish.hk2.api.MultiException -->
 			<dependency>
