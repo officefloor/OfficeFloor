@@ -76,7 +76,7 @@
 		<maven-plugin-version>3.6.0</maven-plugin-version>
 		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
-		<jetty-version>9.4.13.v20181111</jetty-version>
+		<jetty-version>9.4.14.v20181114</jetty-version>
 		<failsafe-version>2.22.1</failsafe-version>
 		<compiler-version>3.8.0</compiler-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
