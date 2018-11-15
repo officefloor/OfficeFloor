@@ -129,6 +129,9 @@
     </security>
   </securities>
   <governances>
+    <governance name="Governance" source="net.officefloor.plugin.governance.clazz.ClassGovernanceSource" x="800" y="500">
+      <property name="class.name" value="net.officefloor.eclipse.woof.test.MockGovernance"/>
+    </governance>
   </governances>
   <resources>
     <resource path="/resource" x="997" y="581"/>
