@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
@@ -56,6 +57,7 @@ import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel;
+import net.officefloor.model.office.GovernanceModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
@@ -1457,6 +1459,56 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				administration.setAdministrationName(oldAdministrationName);
+			}
+		};
+	}
+
+	@Override
+	public Change<GovernanceModel> addGovernance(String governanceName, String governanceSourceClassName,
+			PropertyList properties, boolean isAutoWireExtensions, GovernanceType<?, ?> governanceType) {
+
+		// TODO test this method (addGovernance)
+
+		// Create the governance
+		final GovernanceModel governance = new GovernanceModel(governanceName, governanceSourceClassName,
+				isAutoWireExtensions);
+		for (Property property : properties) {
+			governance.addProperty(new PropertyModel(property.getName(), property.getValue()));
+		}
+
+		// TODO add flows for administration
+
+		// TODO add escalations for administration
+
+		// Return change to add the governance
+		return new AbstractChange<GovernanceModel>(governance, "Add governance") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office.addGovernance(governance);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office.removeGovernance(governance);
+			}
+		};
+	}
+
+	@Override
+	public Change<GovernanceModel> removeGovernance(GovernanceModel governance) {
+
+		// TODO test this method (removeGovernance)
+
+		// Return change to remove governance
+		return new AbstractChange<GovernanceModel>(governance, "Remove governance") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office.removeGovernance(governance);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office.addGovernance(governance);
 			}
 		};
 	}

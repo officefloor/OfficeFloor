@@ -18,8 +18,10 @@
 package net.officefloor.eclipse.editor.internal.models;
 
 import javafx.beans.property.Property;
+import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedArea;
 import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
+import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.Model;
 
@@ -51,6 +53,18 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 	public Property<String> style() {
 		// TODO implement AdaptedAreaBuilder<R,O,M,E>.style(...)
 		throw new UnsupportedOperationException("TODO implement AdaptedAreaBuilder<R,O,M,E>.style(...)");
+	}
+
+	@Override
+	public void create(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
+		// TODO implement AdaptedAreaBuilder<R,O,M,E>.create(...)
+		throw new UnsupportedOperationException("TODO implement AdaptedAreaBuilder<R,O,M,E>.create(...)");
+	}
+
+	@Override
+	public void action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
+		// TODO implement AdaptedAreaBuilder<R,O,M,E>.action(...)
+		throw new UnsupportedOperationException("TODO implement AdaptedAreaBuilder<R,O,M,E>.action(...)");
 	}
 
 	/**

@@ -20,6 +20,8 @@ package net.officefloor.eclipse.editor.internal.models;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.AbstractOperation;
@@ -27,12 +29,14 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.gef.geometry.planar.Dimension;
 import org.eclipse.gef.geometry.planar.Point;
 import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 
 import com.google.inject.Injector;
 
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
+import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
@@ -71,14 +75,10 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	/**
 	 * Instantiate.
 	 * 
-	 * @param configurationPathPrefix
-	 *            Prefix to the configuration path.
-	 * @param modelPrototype
-	 *            {@link Model} prototype.
-	 * @param viewFactory
-	 *            {@link AdaptedModelVisualFactory}.
-	 * @param contentFactory
-	 *            {@link OfficeFloorContentPartFactory}.
+	 * @param configurationPathPrefix Prefix to the configuration path.
+	 * @param modelPrototype          {@link Model} prototype.
+	 * @param viewFactory             {@link AdaptedModelVisualFactory}.
+	 * @param contentFactory          {@link OfficeFloorContentPartFactory}.
 	 */
 	public AdaptedParentFactory(String configurationPathPrefix, M modelPrototype,
 			AdaptedModelVisualFactory<M> viewFactory, OfficeFloorContentPartFactory<R, O> contentFactory) {
@@ -98,8 +98,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	/**
 	 * Creates the {@link AdaptedModel} from this {@link AdaptedParent} prototype.
 	 * 
-	 * @param factory
-	 *            {@link OfficeFloorContentPartFactory}.
+	 * @param factory {@link OfficeFloorContentPartFactory}.
 	 * @return {@link AdaptedModel} for the prototype.
 	 */
 	@SuppressWarnings("unchecked")
@@ -124,6 +123,14 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		this.modelToActions.add(new ModelToAction<>(action, visualFactory));
 	}
 
+	@Override
+	public <AM extends Model, AE extends Enum<AE>, RE extends Enum<RE>> AdaptedAreaBuilder<R, O, AM, AE> area(
+			AM areaPrototype, Function<M, List<AM>> getAreas, Function<AM, Dimension> getDimension,
+			BiConsumer<AM, Dimension> setDimension, AdaptedModelVisualFactory<AM> viewFactory, E... changeAreaEvents) {
+		// TODO implement AdaptedParentBuilder<R,O,M,E>.area(...)
+		throw new UnsupportedOperationException("TODO implement AdaptedParentBuilder<R,O,M,E>.area(...)");
+	}
+
 	/**
 	 * {@link Model} to {@link ModelAction}.
 	 */
@@ -142,10 +149,8 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		/**
 		 * Instantiate.
 		 * 
-		 * @param action
-		 *            {@link ModelAction}.
-		 * @param visualFactory
-		 *            {@link AdaptedActionVisualFactory}.
+		 * @param action        {@link ModelAction}.
+		 * @param visualFactory {@link AdaptedActionVisualFactory}.
 		 */
 		private ModelToAction(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
 			this.action = action;
