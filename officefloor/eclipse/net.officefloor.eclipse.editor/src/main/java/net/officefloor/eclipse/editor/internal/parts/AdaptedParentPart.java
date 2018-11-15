@@ -17,16 +17,11 @@
  */
 package net.officefloor.eclipse.editor.internal.parts;
 
-import org.eclipse.gef.geometry.convert.fx.FX2Geometry;
-import org.eclipse.gef.geometry.convert.fx.Geometry2FX;
-import org.eclipse.gef.geometry.planar.AffineTransform;
 import org.eclipse.gef.mvc.fx.parts.ITransformableContentPart;
-import org.eclipse.gef.mvc.fx.viewer.InfiniteCanvasViewer;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
-import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.transform.Affine;
 import net.officefloor.eclipse.editor.AdaptedParent;
@@ -38,8 +33,7 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 	/**
 	 * Loads the styling to the visual {@link Node}.
 	 * 
-	 * @param visualNode
-	 *            Visual {@link Node}.
+	 * @param visualNode Visual {@link Node}.
 	 */
 	public static void loadStyling(Node visualNode) {
 		visualNode.getStyleClass().remove("child");
@@ -47,17 +41,14 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 	}
 
 	/**
-	 * {@link AffineTransform} for location of the {@link AdaptedParent}.
+	 * {@link TransformContent}.
 	 */
-	private AffineTransform contentTransform = null;
+	private TransformContent<M, AdaptedParent<M>, Node> transformableContent;
 
 	@Override
 	public void init() {
 		super.init();
-
-		// Capture the initial location
-		M model = this.getContent().getModel();
-		this.contentTransform = new AffineTransform(1, 0, 0, 1, model.getX(), model.getY());
+		this.transformableContent = new TransformContent<>(this);
 	}
 
 	@Override
@@ -103,25 +94,12 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 
 	@Override
 	public Affine getContentTransform() {
-		return Geometry2FX.toFXAffine(this.contentTransform);
+		return this.transformableContent.getContentTransform();
 	}
 
 	@Override
 	public void setContentTransform(Affine totalTransform) {
-		this.contentTransform = FX2Geometry.toAffineTransform(totalTransform);
-
-		// Determine the location
-		Bounds boundsInScene = this.getVisual().localToScene(this.getVisual().getLayoutBounds());
-		Bounds boundsInParent = ((InfiniteCanvasViewer) getRoot().getViewer()).getCanvas().getScrolledOverlayGroup()
-				.sceneToLocal(boundsInScene);
-
-		// Obtain the location
-		int x = (int) boundsInParent.getMinX();
-		int y = (int) boundsInParent.getMinY();
-
-		// Update location on model (as already within change location operation)
-		this.getContent().getModel().setX(x);
-		this.getContent().getModel().setY(y);
+		this.transformableContent.setContentTransform(totalTransform);
 	}
 
 }

@@ -36,6 +36,8 @@ import org.eclipse.gef.mvc.fx.handlers.ConnectedSupport;
 import org.eclipse.gef.mvc.fx.handlers.DeleteSelectedOnTypeHandler;
 import org.eclipse.gef.mvc.fx.handlers.FocusAndSelectOnClickHandler;
 import org.eclipse.gef.mvc.fx.handlers.HoverOnHoverHandler;
+import org.eclipse.gef.mvc.fx.handlers.ResizeTransformSelectedOnHandleDragHandler;
+import org.eclipse.gef.mvc.fx.handlers.ResizeTranslateFirstAnchorageOnHandleDragHandler;
 import org.eclipse.gef.mvc.fx.handlers.RotateSelectedOnRotateHandler;
 import org.eclipse.gef.mvc.fx.handlers.SelectAllOnTypeHandler;
 import org.eclipse.gef.mvc.fx.handlers.SelectFocusedOnTypeHandler;
@@ -54,6 +56,7 @@ import org.eclipse.gef.mvc.fx.parts.DefaultSelectionFeedbackPartFactory;
 import org.eclipse.gef.mvc.fx.parts.DefaultSelectionHandlePartFactory;
 import org.eclipse.gef.mvc.fx.parts.IContentPartFactory;
 import org.eclipse.gef.mvc.fx.parts.IRootPart;
+import org.eclipse.gef.mvc.fx.parts.SquareSegmentHandlePart;
 import org.eclipse.gef.mvc.fx.policies.BendConnectionPolicy;
 import org.eclipse.gef.mvc.fx.policies.ResizePolicy;
 import org.eclipse.gef.mvc.fx.policies.TransformPolicy;
@@ -78,6 +81,7 @@ import net.officefloor.eclipse.editor.internal.handlers.CreateAdaptedConnectionO
 import net.officefloor.eclipse.editor.internal.handlers.CreateAdaptedParentOnDragHandler;
 import net.officefloor.eclipse.editor.internal.models.ActiveConnectionSourceModel;
 import net.officefloor.eclipse.editor.internal.models.ChangeExecutorImpl;
+import net.officefloor.eclipse.editor.internal.parts.AdaptedAreaPart;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectionPart;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectorPart;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedParentPart;
@@ -138,8 +142,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 	/**
 	 * Flags that the editor is select only.
 	 * 
-	 * @param selectOnly
-	 *            {@link SelectOnly}.
+	 * @param selectOnly {@link SelectOnly}.
 	 */
 	public void setSelectOnly(SelectOnly selectOnly) {
 		if (this.factory != null) {
@@ -158,8 +161,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 	/**
 	 * Creates the parent {@link Pane}.
 	 * 
-	 * @param adaptedBuilder
-	 *            {@link AdaptedBuilder}.
+	 * @param adaptedBuilder {@link AdaptedBuilder}.
 	 * @return Parent {@link Pane}.
 	 */
 	public Pane createParent(AdaptedBuilder adaptedBuilder) {
@@ -187,8 +189,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 	/**
 	 * Activates the {@link IDomain}.
 	 * 
-	 * @param rootModel
-	 *            Root {@link Model}.
+	 * @param rootModel Root {@link Model}.
 	 */
 	public void activateDomain(Model rootModel) {
 
@@ -209,10 +210,8 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 * <p>
 	 * This may be called before JavaFx has been initialised.
 	 * 
-	 * @param domain
-	 *            {@link IDomain}.
-	 * @param injector
-	 *            {@link Injector}.
+	 * @param domain   {@link IDomain}.
+	 * @param injector {@link Injector}.
 	 */
 	public void initialise(IDomain domain, Injector injector) {
 		this.injector = injector;
@@ -229,8 +228,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 * <p>
 	 * This must be called after JavaFX has been initialised.
 	 * 
-	 * @param adaptedBuilder
-	 *            {@link AdaptedBuilder}.
+	 * @param adaptedBuilder {@link AdaptedBuilder}.
 	 */
 	public void configure(AdaptedBuilder adaptedBuilder) {
 
@@ -272,8 +270,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 	/**
 	 * Loads the root {@link Model}.
 	 * 
-	 * @param rootModel
-	 *            Root {@link Model}.
+	 * @param rootModel Root {@link Model}.
 	 */
 	public void loadRootModel(Model rootModel) {
 
@@ -324,6 +321,12 @@ public class AdaptedEditorModule extends MvcFxModule {
 
 	protected void bindCircleSegmentHandlePartAdapters(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(BendFirstAnchorageOnSegmentHandleDragHandler.class);
+	}
+
+	protected void bindSquareSegmentHandlePartAdapters(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
+		adapterMapBinder.addBinding(AdapterKey.defaultRole())
+				.to(ResizeTranslateFirstAnchorageOnHandleDragHandler.class);
+		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ResizeTransformSelectedOnHandleDragHandler.class);
 	}
 
 	protected void bindContentPartPoolAsPaletteViewerAdapter(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
@@ -552,9 +555,13 @@ public class AdaptedEditorModule extends MvcFxModule {
 					}
 				});
 
-		// register transform policies (writing changes also to model)
-		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(TransformPolicy.class);
+		// Handle relocate (if part supports it)
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(TranslateSelectedOnDragHandler.class);
+		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(TransformPolicy.class);
+
+		// Handle resize (if part supports it)
+//		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ResizeTransformSelectedOnHandleDragHandler.class);
+		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ResizePolicy.class);
 	}
 
 	protected void bindAdaptedConnectorInContentViewerContext(MapBinder<AdapterKey<?>, Object> adapterMapBinder) {
@@ -586,6 +593,8 @@ public class AdaptedEditorModule extends MvcFxModule {
 		// Bind in the models
 		bindAdaptedParentInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(), AdaptedParentPart.class,
 				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
+		bindAdaptedParentInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(), AdaptedAreaPart.class,
+				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
 		bindAdaptedConnectorInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(), AdaptedConnectorPart.class,
 				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
 		bindAdaptedConnectionInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(),
@@ -596,6 +605,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 		binder().bind(ActiveConnectionSourceModel.class).toInstance(activeConnectionSource);
 
 		// Connection selection handles
+		bindSquareSegmentHandlePartAdapters(AdapterMaps.getAdapterMapBinder(binder(), SquareSegmentHandlePart.class));
 		bindCircleSegmentHandlePartAdapters(AdapterMaps.getAdapterMapBinder(binder(), CircleSegmentHandlePart.class));
 
 		// Palette

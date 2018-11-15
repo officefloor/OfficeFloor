@@ -40,16 +40,19 @@ import org.eclipse.gef.mvc.fx.viewer.IViewer;
 
 import com.google.inject.Injector;
 
+import aaa.remove.me.MockArea;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
+import net.officefloor.eclipse.editor.AdaptedArea;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
+import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
@@ -58,15 +61,15 @@ import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
+import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.PaletteIndicatorStyler;
 import net.officefloor.eclipse.editor.PaletteStyler;
 import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
+import net.officefloor.eclipse.editor.internal.models.AdaptedAreaFactory;
 import net.officefloor.eclipse.editor.internal.models.AdaptedParentFactory;
-import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
 import net.officefloor.eclipse.editor.internal.style.StyleRegistry;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -78,11 +81,10 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	/**
 	 * Indicates if contains an {@link ConnectionModel}.
 	 * 
-	 * @param targets
-	 *            Target {@link IVisualPart} instances.
-	 * @param createFeedbackParts
-	 *            {@link Function} to create the {@link IFeedbackPart} instances
-	 *            from the filtered list of targets.
+	 * @param targets             Target {@link IVisualPart} instances.
+	 * @param createFeedbackParts {@link Function} to create the
+	 *                            {@link IFeedbackPart} instances from the filtered
+	 *                            list of targets.
 	 * @return Filtered targets.
 	 */
 	public static List<IFeedbackPart<? extends Node>> createFeedbackParts(
@@ -218,24 +220,15 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	/**
 	 * Initialises.
 	 * 
-	 * @param injector
-	 *            {@link Injector}.
-	 * @param editorPane
-	 *            Editor {@link Pane}.
-	 * @param content
-	 *            {@link IViewer} content.
-	 * @param paletteIndicator
-	 *            Palette indicator {@link Pane}.
-	 * @param palette
-	 *            {@link IViewer} palette.
-	 * @param errorHandler
-	 *            {@link AdaptedErrorHandler}.
-	 * @param changeExecutor
-	 *            {@link ChangeExecutor}.
-	 * @param styleRegistry
-	 *            {@link StyleRegistry}.
-	 * @param selectOnly
-	 *            {@link SelectOnly}.
+	 * @param injector         {@link Injector}.
+	 * @param editorPane       Editor {@link Pane}.
+	 * @param content          {@link IViewer} content.
+	 * @param paletteIndicator Palette indicator {@link Pane}.
+	 * @param palette          {@link IViewer} palette.
+	 * @param errorHandler     {@link AdaptedErrorHandler}.
+	 * @param changeExecutor   {@link ChangeExecutor}.
+	 * @param styleRegistry    {@link StyleRegistry}.
+	 * @param selectOnly       {@link SelectOnly}.
 	 */
 	public void init(Injector injector, Pane editorPane, IViewer content, Pane paletteIndicator, IViewer palette,
 			AdaptedErrorHandler errorHandler, ChangeExecutor changeExecutor, StyleRegistry styleRegistry,
@@ -309,12 +302,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	/**
 	 * Registers the {@link AbstractAdaptedFactory}.
 	 *
-	 * @param <M>
-	 *            {@link Model} type.
-	 * @param <E>
-	 *            {@link Model} event type.
-	 * @param builder
-	 *            {@link AbstractAdaptedFactory}.
+	 * @param         <M> {@link Model} type.
+	 * @param         <E> {@link Model} event type.
+	 * @param builder {@link AbstractAdaptedFactory}.
 	 */
 	public <M extends Model, E extends Enum<E>> void registerModel(AbstractAdaptedFactory<R, O, M, E, ?> builder) {
 		this.models.put(builder.getModelClass(), builder);
@@ -357,8 +347,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	/**
 	 * Loads the root {@link Model}.
 	 * 
-	 * @param rootModel
-	 *            Root {@link Model}.
+	 * @param rootModel Root {@link Model}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void loadRootModel(Model rootModel) {
@@ -447,6 +436,14 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 
 		// Adapt the content models
 		List<AdaptedModel<?>> adaptedContentModels = new ArrayList<AdaptedModel<?>>();
+
+		// TODO REMOVE (load adapted area)
+		this.registerModel(new AdaptedAreaFactory("area", MockArea.class, this));
+		MockArea area = new MockArea();
+		AdaptedArea<MockArea> adaptedArea = (AdaptedArea<MockArea>) this.createAdaptedModel(area, null);
+		adaptedContentModels.add(adaptedArea);
+
+		// Adapt the parent models
 		List<AdaptedParent<?>> adaptedParents = new ArrayList<>();
 		for (Model model : contentModels) {
 
@@ -460,7 +457,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 			}
 		}
 
-		// Load the adapted connections (aferwards so z-order in front)
+		// Load the adapted connections (afterwards so z-order in front)
 		for (AdaptedParent<?> adaptedParent : adaptedParents) {
 			List<AdaptedConnection<?>> connections = adaptedParent.getConnections();
 			if (connections != null) {
@@ -486,12 +483,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	/**
 	 * Creates the wrapper for the {@link Model}.
 	 *
-	 * @param <M>
-	 *            {@link Model} type.
-	 * @param model
-	 *            {@link Model}.
-	 * @param parentAdaptedModel
-	 *            Parent {@link AdaptedModel}.
+	 * @param                    <M> {@link Model} type.
+	 * @param model              {@link Model}.
+	 * @param parentAdaptedModel Parent {@link AdaptedModel}.
 	 * @return {@link AbstractAdaptedFactory} for the {@link Model}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -526,18 +520,12 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	/**
 	 * Adds the {@link ConnectionModel} to the {@link Model} structure.
 	 * 
-	 * @param <S>
-	 *            Source {@link Model} type.
-	 * @param <T>
-	 *            Target {@link Model} type.
-	 * @param <C>
-	 *            {@link ConnectionModel} type.
-	 * @param source
-	 *            Source {@link Model}.
-	 * @param target
-	 *            Target {@link Model}.
-	 * @param createConnection
-	 *            {@link ConnectionFactory}.
+	 * @param                  <S> Source {@link Model} type.
+	 * @param                  <T> Target {@link Model} type.
+	 * @param                  <C> {@link ConnectionModel} type.
+	 * @param source           Source {@link Model}.
+	 * @param target           Target {@link Model}.
+	 * @param createConnection {@link ConnectionFactory}.
 	 */
 	public <S extends Model, T extends Model, C extends ConnectionModel> void addConnection(S source, T target,
 			ConnectionFactory<R, O, S, C, T> createConnection) {
@@ -714,14 +702,16 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 		// Provide part for adapted
 		if (content instanceof AdaptedParent) {
 			return this.injector.getInstance(AdaptedParentPart.class);
-		} else if (content instanceof ChildrenGroupImpl) {
+		} else if (content instanceof ChildrenGroup) {
 			return this.injector.getInstance(ChildrenGroupPart.class);
 		} else if (content instanceof AdaptedChild) {
 			return this.injector.getInstance(AdaptedChildPart.class);
 		} else if (content instanceof AdaptedConnection) {
 			return this.injector.getInstance(AdaptedConnectionPart.class);
-		} else if (content instanceof AdaptedConnectorImpl) {
+		} else if (content instanceof AdaptedConnector) {
 			return this.injector.getInstance(AdaptedConnectorPart.class);
+		} else if (content instanceof AdaptedArea) {
+			return this.injector.getInstance(AdaptedAreaPart.class);
 		}
 
 		// Unknown model
