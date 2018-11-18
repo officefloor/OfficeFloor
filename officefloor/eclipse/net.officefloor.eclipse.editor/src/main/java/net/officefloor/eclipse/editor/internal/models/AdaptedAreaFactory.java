@@ -17,12 +17,19 @@
  */
 package net.officefloor.eclipse.editor.internal.models;
 
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
+import org.eclipse.gef.geometry.planar.Dimension;
+
 import javafx.beans.property.Property;
+import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedArea;
 import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
+import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
+import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.ModelAction;
-import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.Model;
 
 /**
@@ -34,15 +41,41 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 		extends AbstractAdaptedFactory<R, O, M, E, AdaptedArea<M>> implements AdaptedAreaBuilder<R, O, M, E> {
 
 	/**
+	 * Obtains the {@link Dimension} from the {@link Model}.
+	 */
+	private final Function<M, Dimension> getDimension;
+
+	/**
+	 * Specifies the {@link Dimension} on the {@link Model}.
+	 */
+	private final BiConsumer<M, Dimension> setDimension;
+
+	/**
+	 * {@link AdaptedModelVisualFactory}.
+	 */
+	private final AdaptedModelVisualFactory<M> viewFactory;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param adaptedPathPrefix Prefix on the configuration path.
-	 * @param modelPrototype    {@link Model} prototype.
-	 * @param contentFactory    {@link OfficeFloorContentPartFactory}.
+	 * @param adaptedPathPrefix  Prefix on the configuration path.
+	 * @param modelPrototype     {@link Model} prototype.
+	 * @param parentAdaptedModel Parent {@link AbstractAdaptedFactory}.
+	 * @param getDimension       Obtains the {@link Dimension} from the
+	 *                           {@link Model}.
+	 * @param setDimension       Specifies the {@link Dimension} on the
+	 *                           {@link Model}.
+	 * @param viewFactory        {@link AdaptedModelVisualFactory}.
 	 */
-	public AdaptedAreaFactory(String adaptedPathPrefix, Class<M> modelClass,
-			OfficeFloorContentPartFactory<R, O> contentFactory) {
-		super(adaptedPathPrefix, modelClass, () -> new AdaptedAreaImpl<>(), contentFactory);
+	@SuppressWarnings("unchecked")
+	public AdaptedAreaFactory(String adaptedPathPrefix, M modelPrototype,
+			AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedModel, Function<M, Dimension> getDimension,
+			BiConsumer<M, Dimension> setDimension, AdaptedModelVisualFactory<M> viewFactory) {
+		super(adaptedPathPrefix, (Class<M>) modelPrototype.getClass(), () -> new AdaptedAreaImpl<>(),
+				parentAdaptedModel);
+		this.getDimension = getDimension;
+		this.setDimension = setDimension;
+		this.viewFactory = viewFactory;
 	}
 
 	/*
@@ -78,6 +111,20 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 			// nothing to initialise
 		}
 
+		@Override
+		public Dimension getDimension() {
+			return this.getFactory().getDimension.apply(this.getModel());
+		}
+
+		@Override
+		public void setDimension(Dimension dimension) {
+			this.getFactory().setDimension.accept(this.getModel(), dimension);
+		}
+
+		@Override
+		public Node createVisual(AdaptedModelVisualFactoryContext<M> context) {
+			return this.getFactory().viewFactory.createVisual(this.getModel(), context);
+		}
 	}
 
 }

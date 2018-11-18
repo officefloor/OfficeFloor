@@ -59,7 +59,7 @@ public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 	 */
 	public void setActiveConnector(boolean isActive) {
 		if (isActive) {
-			this.activeConnectionSource.setActiveSource(this.getContent().getParentAdaptedChild(),
+			this.activeConnectionSource.setActiveSource(this.getContent().getParentAdaptedConnectable(),
 					this.getContent().getAssociationRole());
 		} else {
 			this.activeConnectionSource.setActiveSource(null, null);
@@ -98,14 +98,14 @@ public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 			}
 
 			// Keep this child visible
-			if (activeSource.getSource() == this.getContent().getParentAdaptedChild()) {
+			if (activeSource.getSource() == this.getContent().getParentAdaptedConnectable()) {
 				return;
 			}
 
 			// Determine if can be connected to from the active child
 			boolean isAbleToConnect = false;
 			AdaptedPotentialConnection potentialConnection = activeSource.getSource()
-					.getPotentialConnection(this.getContent().getParentAdaptedChild());
+					.getPotentialConnection(this.getContent().getParentAdaptedConnectable());
 			if ((potentialConnection != null) && (potentialConnection.canCreateConnection())) {
 				isAbleToConnect = true;
 

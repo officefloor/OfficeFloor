@@ -20,9 +20,7 @@ package net.officefloor.eclipse.editor.internal.parts;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.gef.fx.nodes.GeometryNode;
 import org.eclipse.gef.geometry.planar.Dimension;
-import org.eclipse.gef.geometry.planar.RoundedRectangle;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import org.eclipse.gef.mvc.fx.parts.IResizableContentPart;
 import org.eclipse.gef.mvc.fx.parts.ITransformableContentPart;
@@ -30,7 +28,7 @@ import org.eclipse.gef.mvc.fx.parts.ITransformableContentPart;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
-import javafx.scene.paint.Color;
+import javafx.scene.Node;
 import javafx.scene.transform.Affine;
 import net.officefloor.eclipse.editor.AdaptedArea;
 import net.officefloor.model.Model;
@@ -40,17 +38,13 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedAreaPart<M extends Model>
-		extends AbstractAdaptedPart<M, AdaptedArea<M>, GeometryNode<RoundedRectangle>>
-		implements ITransformableContentPart<GeometryNode<RoundedRectangle>>,
-		IResizableContentPart<GeometryNode<RoundedRectangle>> {
+public class AdaptedAreaPart<M extends Model> extends AbstractAdaptedPart<M, AdaptedArea<M>, Node>
+		implements ITransformableContentPart<Node>, IResizableContentPart<Node> {
 
 	/**
 	 * {@link TransformContent}.
 	 */
-	private TransformContent<M, AdaptedArea<M>, GeometryNode<RoundedRectangle>> transformableContent;
-
-	private Dimension dimension = new Dimension(100, 100);
+	private TransformContent<M, AdaptedArea<M>> transformableContent;
 
 	/*
 	 * ===================== IContentPart =================================
@@ -73,20 +67,49 @@ public class AdaptedAreaPart<M extends Model>
 	}
 
 	@Override
-	protected GeometryNode<RoundedRectangle> doCreateVisual() {
+	protected Node doCreateVisual() {
+		return this.getContent().createVisual(
+				new AdaptedModelVisualFactoryContextImpl<>((Class<M>) this.getContent().getModel().getClass(), false,
+						(connectionClasses, role, assocations, node) -> {
 
-		RoundedRectangle rectangle = new RoundedRectangle(200, 100, 500, 400, 5, 5);
-		GeometryNode<RoundedRectangle> node = new GeometryNode<RoundedRectangle>(rectangle);
-		node.setMinWidth(100);
-		node.setMinHeight(50);
-		node.strokeProperty().set(Color.KHAKI);
-		node.fillProperty().set(Color.KHAKI);
+//							// Load the connectors for the connection classes
+//							for (Class<?> connectionClass : connectionClasses) {
+//
+//								// Obtain the adapted connector
+//								AdaptedConnector<M> connector = AdaptedChildPart.this.getContent()
+//										.getAdaptedConnector((Class<? extends ConnectionModel>) connectionClass, role);
+//								if (connector == null) {
+//									throw new IllegalStateException("Connection " + connectionClass.getName()
+//											+ " not configured to connect to model "
+//											+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
+//								}
+//
+//								// Obtain the visual
+//								AdaptedConnectorVisual visual = AdaptedChildPart.this.adaptedConnectorVisuals
+//										.get(connector);
+//								if (visual.node != null) {
+//									throw new IllegalStateException("Connection " + connectionClass.getName()
+//											+ " configured more than once for model "
+//											+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
+//								}
+//
+//								// Load the connector visual
+//								visual.node = node;
+//
+//								// Associate the connectors
+//								assocations.add(connector);
+//								connector.setAssociation(assocations, role);
+//							}
 
-		return node;
+						}, (action) -> {
+
+//							// Undertake the action
+//							this.getContent().action(action);
+						}));
 	}
 
 	@Override
-	protected void doRefreshVisual(GeometryNode<RoundedRectangle> visual) {
+	protected void doRefreshVisual(Node visual) {
 		// nothing to update
 	}
 
@@ -110,12 +133,12 @@ public class AdaptedAreaPart<M extends Model>
 
 	@Override
 	public Dimension getContentSize() {
-		return this.dimension;
+		return this.getContent().getDimension();
 	}
 
 	@Override
 	public void setContentSize(Dimension totalSize) {
-		this.dimension = totalSize;
+		this.getContent().setDimension(totalSize);
 	}
 
 }

@@ -20,17 +20,15 @@ package net.officefloor.eclipse.editor.internal.parts;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.eclipse.gef.fx.nodes.GeometryNode;
 
-import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 import net.officefloor.eclipse.editor.AdaptedConnectorVisualFactory;
@@ -42,29 +40,12 @@ import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 /**
- * {@link AdaptedModelVisualFactoryContext} implementation.
+ * {@link AdaptedChildVisualFactoryContext} implementation.
  * 
  * @author Daniel Sagenschneider
  */
 public class AdaptedModelVisualFactoryContextImpl<M extends Model>
 		implements AdaptedModelVisualFactoryContext<M>, AdaptedActionVisualFactoryContext {
-
-	/**
-	 * {@link Function} interface to register the child group.
-	 */
-	public static interface ChildGroupRegistrator {
-
-		/**
-		 * Registers the child group.
-		 * 
-		 * @param childGroupName
-		 *            Name of the child group.
-		 * @param parent
-		 *            Parent {@link Pane} for the child group.
-		 * @return <code>true</code> if registered.
-		 */
-		boolean registerChildGroup(String childGroupName, Pane parent);
-	}
 
 	/**
 	 * {@link Function} interface to load connectors.
@@ -74,14 +55,10 @@ public class AdaptedModelVisualFactoryContextImpl<M extends Model>
 		/**
 		 * Loads the connector.
 		 * 
-		 * @param connectionClasses
-		 *            {@link ConnectionModel} {@link Class} instances.
-		 * @param role
-		 *            {@link AdaptedConnectorRole}.
-		 * @param assocations
-		 *            Associations list for {@link AdaptedConnector}.
-		 * @param node
-		 *            Connector {@link GeometryNode}.
+		 * @param connectionClasses {@link ConnectionModel} {@link Class} instances.
+		 * @param role              {@link AdaptedConnectorRole}.
+		 * @param assocations       Associations list for {@link AdaptedConnector}.
+		 * @param node              Connector {@link GeometryNode}.
 		 */
 		void loadConnectors(Class<?>[] connectionClasses, AdaptedConnectorRole role,
 				List<AdaptedConnector<M>> assocations, Region node);
@@ -95,8 +72,7 @@ public class AdaptedModelVisualFactoryContextImpl<M extends Model>
 		/**
 		 * Undertakes the {@link ModelAction}.
 		 * 
-		 * @param action
-		 *            {@link ModelAction}.
+		 * @param action {@link ModelAction}.
 		 */
 		void action(ModelAction<?, ?, M> action);
 	}
@@ -104,22 +80,12 @@ public class AdaptedModelVisualFactoryContextImpl<M extends Model>
 	/**
 	 * {@link Class} of the {@link Model}.
 	 */
-	private final Class<M> modelClass;
+	protected final Class<M> modelClass;
 
 	/**
 	 * Indicates if rendering the palette prototype.
 	 */
-	private final boolean isPalettePrototype;
-
-	/**
-	 * {@link Supplier} of the label.
-	 */
-	private final Supplier<ReadOnlyProperty<String>> label;
-
-	/**
-	 * {@link ChildGroupRegistrator}.
-	 */
-	private final ChildGroupRegistrator childGroupRegistrator;
+	protected final boolean isPalettePrototype;
 
 	/**
 	 * {@link ConnectorLoader}.
@@ -134,64 +100,23 @@ public class AdaptedModelVisualFactoryContextImpl<M extends Model>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param modelClass
-	 *            {@link Class} of the {@link Model}.
-	 * @param isPalettePrototype
-	 *            Indicates if rendering the palette prototype.
-	 * @param label
-	 *            {@link Supplier} of the label.
-	 * @param childGroupRegistrator
-	 *            {@link ChildGroupRegistrator}.
-	 * @param connectorLoader
-	 *            {@link ConnectorLoader}.
-	 * @param actioner
-	 *            {@link Actioner}.
+	 * @param modelClass         {@link Class} of the {@link Model}.
+	 * @param isPalettePrototype Indicates if rendering the palette prototype.
+	 * @param connectorLoader    {@link ConnectorLoader}.
+	 * @param actioner           {@link Actioner}.
 	 */
 	public AdaptedModelVisualFactoryContextImpl(Class<M> modelClass, boolean isPalettePrototype,
-			Supplier<ReadOnlyProperty<String>> label, ChildGroupRegistrator childGroupRegistrator,
 			ConnectorLoader<M> connectorLoader, Actioner<M> actioner) {
 		this.modelClass = modelClass;
 		this.isPalettePrototype = isPalettePrototype;
-		this.label = label;
-		this.childGroupRegistrator = childGroupRegistrator;
 		this.connectorLoader = connectorLoader;
 		this.actioner = actioner;
-	}
-
-	@Override
-	public Label label(Pane parent) {
-		// Ensure label is configured
-		ReadOnlyProperty<String> labelProperty = this.label.get();
-		if (labelProperty == null) {
-			throw new IllegalStateException("No label configured for visual for model " + this.modelClass.getName());
-		}
-
-		// Configure the label
-		Label label = this.addNode(parent, new Label());
-		label.textProperty().bind(labelProperty);
-		return label;
 	}
 
 	@Override
 	public <N extends Node> N addNode(Pane parent, N node) {
 		parent.getChildren().add(node);
 		return node;
-	}
-
-	@Override
-	public <P extends Pane> P childGroup(String childGroupName, P parent) {
-		if (childGroupName == null) {
-			throw new NullPointerException("No child group name provided for view of " + this.modelClass.getName());
-		}
-
-		// Register the child group
-		if (this.childGroupRegistrator.registerChildGroup(childGroupName, parent)) {
-			return parent;
-		}
-
-		// As here, no children group registered
-		throw new IllegalStateException(
-				"No children group '" + childGroupName + "' registered for view of model " + this.modelClass.getName());
 	}
 
 	@Override
@@ -306,11 +231,6 @@ public class AdaptedModelVisualFactoryContextImpl<M extends Model>
 		node.setOnMouseClicked((event) -> this.action(action));
 		node.getStyleClass().add("action");
 		return node;
-	}
-
-	@Override
-	public boolean isPalettePrototype() {
-		return this.isPalettePrototype;
 	}
 
 }

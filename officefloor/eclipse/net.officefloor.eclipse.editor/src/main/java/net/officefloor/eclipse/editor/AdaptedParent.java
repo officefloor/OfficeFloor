@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.editor;
 
+import java.util.List;
+
 import net.officefloor.model.Model;
 
 /**
@@ -34,12 +36,17 @@ public interface AdaptedParent<M extends Model> extends AdaptedChild<M> {
 	boolean isPalettePrototype();
 
 	/**
+	 * Obtains the {@link AdaptedArea} instances.
+	 * 
+	 * @return {@link AdaptedArea} instances.
+	 */
+	List<AdaptedArea<?>> getAdaptedAreas();
+
+	/**
 	 * Obtains the adapter.
 	 * 
-	 * @param <T>
-	 *            Adapted type.
-	 * @param classKey
-	 *            {@link Class} key.
+	 * @param          <T> Adapted type.
+	 * @param classKey {@link Class} key.
 	 * @return Adapter or <code>null</code> if no adapter available.
 	 */
 	<T> T getAdapter(Class<T> classKey);
@@ -47,10 +54,8 @@ public interface AdaptedParent<M extends Model> extends AdaptedChild<M> {
 	/**
 	 * Changes the location of the {@link Model}.
 	 * 
-	 * @param x
-	 *            X.
-	 * @param y
-	 *            Y.
+	 * @param x X.
+	 * @param y Y.
 	 */
 	void changeLocation(int x, int y);
 

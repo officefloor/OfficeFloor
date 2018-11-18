@@ -40,7 +40,6 @@ import org.eclipse.gef.mvc.fx.viewer.IViewer;
 
 import com.google.inject.Injector;
 
-import aaa.remove.me.MockArea;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -56,7 +55,7 @@ import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
@@ -68,7 +67,6 @@ import net.officefloor.eclipse.editor.PaletteIndicatorStyler;
 import net.officefloor.eclipse.editor.PaletteStyler;
 import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
-import net.officefloor.eclipse.editor.internal.models.AdaptedAreaFactory;
 import net.officefloor.eclipse.editor.internal.models.AdaptedParentFactory;
 import net.officefloor.eclipse.editor.internal.style.StyleRegistry;
 import net.officefloor.model.ConnectionModel;
@@ -437,24 +435,33 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 		// Adapt the content models
 		List<AdaptedModel<?>> adaptedContentModels = new ArrayList<AdaptedModel<?>>();
 
-		// TODO REMOVE (load adapted area)
-		this.registerModel(new AdaptedAreaFactory("area", MockArea.class, this));
-		MockArea area = new MockArea();
-		AdaptedArea<MockArea> adaptedArea = (AdaptedArea<MockArea>) this.createAdaptedModel(area, null);
-		adaptedContentModels.add(adaptedArea);
-
 		// Adapt the parent models
 		List<AdaptedParent<?>> adaptedParents = new ArrayList<>();
 		for (Model model : contentModels) {
 
 			// Create the adapted parent (which has no parent adapted model)
-			AdaptedParent<?> adaptedModel = (AdaptedParent<?>) this.createAdaptedModel(model, null);
+			AdaptedParent<?> adaptedParent = (AdaptedParent<?>) this.createAdaptedModel(model, null);
 
-			// Add the adapted model (only once)
-			if (!adaptedContentModels.contains(adaptedModel)) {
-				adaptedContentModels.add(adaptedModel);
-				adaptedParents.add(adaptedModel);
+			// Add the adapted parent (only once)
+			if (!adaptedContentModels.contains(adaptedParent)) {
+				adaptedParents.add(adaptedParent);
 			}
+		}
+
+		// Load the area models into content
+		for (AdaptedParent<?> adaptedParent : adaptedParents) {
+			for (AdaptedArea<?> adaptedArea : adaptedParent.getAdaptedAreas()) {
+
+				// Add the adapted area (only once)
+				if (!adaptedContentModels.contains(adaptedArea)) {
+					adaptedContentModels.add(adaptedArea);
+				}
+			}
+		}
+
+		// Load the parent models into content (after areas to ensure z-order above)
+		for (AdaptedParent<?> adaptedParent : adaptedParents) {
+			adaptedContentModels.add(adaptedParent);
 		}
 
 		// Load the adapted connections (afterwards so z-order in front)
@@ -614,7 +621,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <M extends Model, E extends Enum<E>, RE extends Enum<RE>> AdaptedParentBuilder<R, O, M, E> parent(
-			M modelPrototype, Function<R, List<M>> getParents, AdaptedModelVisualFactory<M> viewFactory,
+			M modelPrototype, Function<R, List<M>> getParents, AdaptedChildVisualFactory<M> viewFactory,
 			RE... changeParentEvents) {
 		this.getParentFunctions.add((Function) getParents);
 		return new AdaptedParentFactory<R, O, M, E>(this.rootModelClass.getSimpleName(), modelPrototype, viewFactory,

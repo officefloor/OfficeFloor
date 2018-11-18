@@ -17,10 +17,15 @@
  */
 package net.officefloor.eclipse.editor.test;
 
+import org.eclipse.gef.fx.nodes.GeometryNode;
+import org.eclipse.gef.geometry.planar.Dimension;
+import org.eclipse.gef.geometry.planar.RoundedRectangle;
+
 import javafx.application.Application;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
@@ -28,6 +33,7 @@ import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.office.OfficeChangesImpl;
+import net.officefloor.model.office.GovernanceAreaModel;
 import net.officefloor.model.office.GovernanceModel;
 import net.officefloor.model.office.GovernanceModel.GovernanceEvent;
 import net.officefloor.model.office.OfficeChanges;
@@ -85,6 +91,21 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 			p.getChangeExecutor().execute(p.getOperations().addGovernance("Governance", null, null, false, null));
 		});
 		governance.label((g) -> g.getGovernanceName(), GovernanceEvent.CHANGE_GOVERNANCE_NAME);
+
+		// Governance Area
+		governance.area(new GovernanceAreaModel(), (p) -> p.getGovernanceAreas(),
+				(a) -> new Dimension(a.getWidth(), a.getHeight()), (a, dimension) -> {
+					a.setWidth((int) dimension.getWidth());
+					a.setHeight((int) dimension.getHeight());
+				}, (model, context) -> {
+					RoundedRectangle rectangle = new RoundedRectangle(200, 100, 20, 100, 5, 5);
+					GeometryNode<RoundedRectangle> node = new GeometryNode<RoundedRectangle>(rectangle);
+					node.setMinWidth(100);
+					node.setMinHeight(50);
+					node.strokeProperty().set(Color.KHAKI);
+					node.fillProperty().set(Color.KHAKI);
+					return node;
+				}, GovernanceEvent.ADD_GOVERNANCE_AREA, GovernanceEvent.REMOVE_GOVERNANCE_AREA);
 	}
 
 	@Override
@@ -96,6 +117,10 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 		// Governance
 		GovernanceModel governance = new GovernanceModel("Governance", null, false, 250, 75);
 		root.addGovernance(governance);
+
+		// Governance Area
+		GovernanceAreaModel area = new GovernanceAreaModel(100, 400, 100, 100);
+		governance.addGovernanceArea(area);
 
 		// Return the Office model
 		return root;

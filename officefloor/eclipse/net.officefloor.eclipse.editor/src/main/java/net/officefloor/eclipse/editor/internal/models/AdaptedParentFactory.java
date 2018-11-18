@@ -36,7 +36,9 @@ import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 import com.google.inject.Injector;
 
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
+import net.officefloor.eclipse.editor.AdaptedArea;
 import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
@@ -73,15 +75,20 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	private final List<ModelToAction<R, O, M>> modelToActions = new LinkedList<>();
 
 	/**
+	 * Listing of means to obtain areas from the parent.
+	 */
+	private final List<Function<M, List<? extends Model>>> areas = new LinkedList<>();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param configurationPathPrefix Prefix to the configuration path.
 	 * @param modelPrototype          {@link Model} prototype.
-	 * @param viewFactory             {@link AdaptedModelVisualFactory}.
+	 * @param viewFactory             {@link AdaptedChildVisualFactory}.
 	 * @param contentFactory          {@link OfficeFloorContentPartFactory}.
 	 */
 	public AdaptedParentFactory(String configurationPathPrefix, M modelPrototype,
-			AdaptedModelVisualFactory<M> viewFactory, OfficeFloorContentPartFactory<R, O> contentFactory) {
+			AdaptedChildVisualFactory<M> viewFactory, OfficeFloorContentPartFactory<R, O> contentFactory) {
 		super(configurationPathPrefix, modelPrototype, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
 		this.errorHandler = contentFactory.getErrorHandler();
 	}
@@ -124,11 +131,13 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	}
 
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <AM extends Model, AE extends Enum<AE>, RE extends Enum<RE>> AdaptedAreaBuilder<R, O, AM, AE> area(
 			AM areaPrototype, Function<M, List<AM>> getAreas, Function<AM, Dimension> getDimension,
 			BiConsumer<AM, Dimension> setDimension, AdaptedModelVisualFactory<AM> viewFactory, E... changeAreaEvents) {
-		// TODO implement AdaptedParentBuilder<R,O,M,E>.area(...)
-		throw new UnsupportedOperationException("TODO implement AdaptedParentBuilder<R,O,M,E>.area(...)");
+		this.areas.add((Function) getAreas);
+		return new AdaptedAreaFactory<>(this.getConfigurationPath(), areaPrototype, this, getDimension, setDimension,
+				viewFactory);
 	}
 
 	/**
@@ -220,6 +229,29 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		@Override
 		public boolean isPalettePrototype() {
 			return this.isPalettePrototype;
+		}
+
+		@Override
+		public List<AdaptedArea<?>> getAdaptedAreas() {
+
+			// Load the areas
+			List<AdaptedArea<?>> areas = new LinkedList<>();
+			for (Function<M, List<? extends Model>> getAreas : this.getParentFactory().areas) {
+				for (Model areaModel : getAreas.apply(this.getModel())) {
+
+					// Adapt the area
+					AdaptedArea<?> adaptedArea = (AdaptedArea<?>) this.getFactory().getContentPartFactory()
+							.createAdaptedModel(areaModel, this.getAdaptedModel());
+
+					// Only add area once
+					if (!areas.contains(adaptedArea)) {
+						areas.add(adaptedArea);
+					}
+				}
+			}
+
+			// Return the areas
+			return areas;
 		}
 
 		@Override

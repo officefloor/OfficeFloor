@@ -25,7 +25,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
@@ -123,7 +123,7 @@ public class WoofSecurityItem extends
 	}
 
 	@Override
-	public Pane visual(WoofSecurityModel model, AdaptedModelVisualFactoryContext<WoofSecurityModel> context) {
+	public Pane visual(WoofSecurityModel model, AdaptedChildVisualFactoryContext<WoofSecurityModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
 		context.addNode(heading,

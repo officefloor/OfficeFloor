@@ -19,7 +19,7 @@ package net.officefloor.eclipse.section;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.model.section.FunctionEscalationToSubSectionInputModel;
@@ -57,7 +57,7 @@ public class SubSectionInputItem extends
 	}
 
 	@Override
-	public Pane visual(SubSectionInputModel model, AdaptedModelVisualFactoryContext<SubSectionInputModel> context) {
+	public Pane visual(SubSectionInputModel model, AdaptedChildVisualFactoryContext<SubSectionInputModel> context) {
 		HBox container = new HBox();
 		context.addNode(container,
 				context.connector(DefaultConnectors.FLOW, FunctionToNextSubSectionInputModel.class,

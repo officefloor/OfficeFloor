@@ -58,12 +58,10 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	/**
 	 * Loads the styling for the child {@link Pane}.
 	 * 
-	 * @param visualNode
-	 *            Child visual {@link Node}.
-	 * @param modelClass
-	 *            {@link Class} of the {@link Model}.
-	 * @param stylesheetUrl
-	 *            {@link ReadOnlyProperty} to specific styling {@link URL}.
+	 * @param visualNode    Child visual {@link Node}.
+	 * @param modelClass    {@link Class} of the {@link Model}.
+	 * @param stylesheetUrl {@link ReadOnlyProperty} to specific styling
+	 *                      {@link URL}.
 	 */
 	public static void loadStyling(Node visualNode, Class<? extends Model> modelClass,
 			ReadOnlyProperty<URL> stylesheetUrl) {
@@ -119,8 +117,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	/**
 	 * Obtains the {@link Pane} for the {@link ChildrenGroupImpl}.
 	 * 
-	 * @param childrenGroup
-	 *            {@link ChildrenGroupImpl}.
+	 * @param childrenGroup {@link ChildrenGroupImpl}.
 	 * @return {@link Pane}.
 	 */
 	public Pane getChildrenGroupPane(ChildrenGroup<?, ?> childrenGroup) {
@@ -130,8 +127,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	/**
 	 * Obtains the {@link GeometryNode} for the {@link AdaptedConnector}.
 	 * 
-	 * @param connector
-	 *            {@link AdaptedConnector}.
+	 * @param connector {@link AdaptedConnector}.
 	 * @return {@link GeometryNode}.
 	 */
 	public Region getAdaptedConnectorNode(AdaptedConnector<?> connector) {
@@ -205,7 +201,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		}
 
 		// Create the visual node
-		Node visualNode = this.getContent().createVisual(new AdaptedModelVisualFactoryContextImpl<M>(
+		Node visualNode = this.getContent().createVisual(new AdaptedChildVisualFactoryContextImpl<M>(
 				(Class<M>) this.getContent().getModel().getClass(), this.isPalettePrototype, () -> {
 
 					// Return the label

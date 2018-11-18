@@ -182,7 +182,7 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 		}
 
 		// Determine if select only
-		if (sourceConnectorPart.getContent().getParentAdaptedChild().getSelectOnly() != null) {
+		if (sourceConnectorPart.getContent().getParentAdaptedConnectable().getSelectOnly() != null) {
 			return; // select only
 		}
 
@@ -287,7 +287,7 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 
 			// Have target so create the connection
 			AdaptedConnector<?> source = this.connection.getSourceAdaptedConnector();
-			source.getParentAdaptedChild().createConnection(target.getParentAdaptedChild(),
+			source.getParentAdaptedConnectable().createConnection(target.getParentAdaptedConnectable(),
 					this.sourceConnector.getContent().getAssociationRole());
 		}
 

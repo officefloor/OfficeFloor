@@ -17,6 +17,9 @@
  */
 package net.officefloor.eclipse.editor;
 
+import org.eclipse.gef.geometry.planar.Dimension;
+
+import javafx.scene.Node;
 import net.officefloor.model.Model;
 
 /**
@@ -25,5 +28,27 @@ import net.officefloor.model.Model;
  * @author Daniel Sagenschneider
  */
 public interface AdaptedArea<M extends Model> extends AdaptedModel<M> {
+
+	/**
+	 * Obtains the {@link Dimension}.
+	 * 
+	 * @return {@link Dimension}.
+	 */
+	Dimension getDimension();
+
+	/**
+	 * Specifies the {@link Dimension}.
+	 * 
+	 * @param dimension {@link Dimension}.
+	 */
+	void setDimension(Dimension dimension);
+
+	/**
+	 * Creates the visual {@link Node}.
+	 * 
+	 * @param context {@link AdaptedModelVisualFactoryContext}.
+	 * @return Visual {@link Node}.
+	 */
+	Node createVisual(AdaptedModelVisualFactoryContext<M> context);
 
 }

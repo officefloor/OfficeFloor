@@ -90,19 +90,15 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	/**
 	 * Instantiate.
 	 * 
-	 * @param configurationPathPrefix
-	 *            Prefix on the configuration path.
-	 * @param connectionClass
-	 *            {@link ConnectionModel} {@link Class}.
-	 * @param sourceModelClass
-	 *            Source {@link Model} {@link Class}.
-	 * @param getSource
-	 *            {@link Function} to obtain the source {@link Model}.
-	 * @param adaptedChildModelFactory
-	 *            {@link AdaptedChildFactory}.
+	 * @param configurationPathPrefix  Prefix on the configuration path.
+	 * @param connectionClass          {@link ConnectionModel} {@link Class}.
+	 * @param sourceModelClass         Source {@link Model} {@link Class}.
+	 * @param getSource                {@link Function} to obtain the source
+	 *                                 {@link Model}.
+	 * @param adaptedChildModelFactory {@link AdaptedChildFactory}.
 	 */
 	public AdaptedConnectionFactory(String configurationPathPrefix, Class<C> connectionClass, Class<S> sourceModelClass,
-			Function<C, S> getSource, AdaptedChildFactory<R, O, ?, ?, ?> adaptedChildModelFactory) {
+			Function<C, S> getSource, AbstractAdaptedConnectableFactory<R, O, ?, ?, ?> adaptedChildModelFactory) {
 		super(configurationPathPrefix, connectionClass, () -> new AdaptedConnectionImpl<>(), adaptedChildModelFactory);
 		this.sourceModelClass = sourceModelClass;
 		this.getSource = getSource;
@@ -113,10 +109,8 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 	 * Creates a {@link ConnectionModel} between the source {@link Model} and target
 	 * {@link Model}.
 	 * 
-	 * @param source
-	 *            Source {@link Model}.
-	 * @param target
-	 *            Target {@link Model}.
+	 * @param source Source {@link Model}.
+	 * @param target Target {@link Model}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void createConnection(Model source, Model target) {

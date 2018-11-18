@@ -26,7 +26,7 @@ import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.frame.api.governance.Governance;
@@ -96,7 +96,7 @@ public class WoofGovernanceItem extends
 	}
 
 	@Override
-	public Node visual(WoofGovernanceModel model, AdaptedModelVisualFactoryContext<WoofGovernanceModel> context) {
+	public Node visual(WoofGovernanceModel model, AdaptedChildVisualFactoryContext<WoofGovernanceModel> context) {
 		HBox container = new HBox();
 		context.label(container);
 		return container;

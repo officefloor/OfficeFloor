@@ -24,7 +24,6 @@ import org.eclipse.gef.mvc.fx.parts.ITransformableContentPart;
 import org.eclipse.gef.mvc.fx.viewer.InfiniteCanvasViewer;
 
 import javafx.geometry.Bounds;
-import javafx.scene.Node;
 import javafx.scene.transform.Affine;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedParent;
@@ -35,12 +34,12 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public class TransformContent<M extends Model, A extends AdaptedModel<M>, N extends Node> {
+public class TransformContent<M extends Model, A extends AdaptedModel<M>> {
 
 	/**
 	 * {@link AbstractAdaptedPart}.
 	 */
-	private final AbstractAdaptedPart<M, A, N> part;
+	private final AbstractAdaptedPart<M, A, ?> part;
 
 	/**
 	 * {@link AffineTransform} for location of the {@link AdaptedParent}.
@@ -52,7 +51,7 @@ public class TransformContent<M extends Model, A extends AdaptedModel<M>, N exte
 	 * 
 	 * @param part {@link AbstractAdaptedPart}.
 	 */
-	public TransformContent(AbstractAdaptedPart<M, A, N> part) {
+	public TransformContent(AbstractAdaptedPart<M, A, ?> part) {
 		this.part = part;
 
 		// Capture the initial location

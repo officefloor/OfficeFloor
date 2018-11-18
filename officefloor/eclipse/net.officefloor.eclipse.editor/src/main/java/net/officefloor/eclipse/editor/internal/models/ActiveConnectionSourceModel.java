@@ -19,7 +19,7 @@ package net.officefloor.eclipse.editor.internal.models;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedConnectable;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedConnectorRole;
@@ -40,16 +40,14 @@ public class ActiveConnectionSourceModel {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param activeAdaptedChild
-	 *            Active {@link AdaptedChild}.
-	 * @param role
-	 *            {@link AdaptedConnectorRole}.
+	 * @param activeAdaptedConnectable Active {@link AdaptedConnectable}.
+	 * @param role                     {@link AdaptedConnectorRole}.
 	 */
-	public void setActiveSource(AdaptedChild<?> activeAdaptedChild, AdaptedConnectorRole role) {
-		if (activeAdaptedChild == null) {
+	public void setActiveSource(AdaptedConnectable<?> activeAdaptedConnectable, AdaptedConnectorRole role) {
+		if (activeAdaptedConnectable == null) {
 			this.activeSource.set(null);
 		} else {
-			this.activeSource.set(new ActiveConnectionSource(activeAdaptedChild, role));
+			this.activeSource.set(new ActiveConnectionSource(activeAdaptedConnectable, role));
 		}
 	}
 
@@ -69,39 +67,37 @@ public class ActiveConnectionSourceModel {
 	public static class ActiveConnectionSource {
 
 		/**
-		 * Source {@link AdaptedChild}.
+		 * Source {@link AdaptedConnectable}.
 		 */
-		private final AdaptedChild<?> child;
+		private final AdaptedConnectable<?> connectable;
 
 		/**
-		 * Role of source {@link AdaptedChild}.
+		 * Role of source {@link AdaptedConnectable}.
 		 */
 		private final AdaptedConnectorRole role;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param child
-		 *            Source {@link AdaptedChild}.
-		 * @param role
-		 *            Role of source {@link AdaptedChild}.
+		 * @param connectable Source {@link AdaptedConnectable}.
+		 * @param role        Role of source {@link AdaptedConnectable}.
 		 */
-		private ActiveConnectionSource(AdaptedChild<?> child, AdaptedConnectorRole role) {
-			this.child = child;
+		private ActiveConnectionSource(AdaptedConnectable<?> connectable, AdaptedConnectorRole role) {
+			this.connectable = connectable;
 			this.role = role;
 		}
 
 		/**
-		 * Obtains the source {@link AdaptedChild}.
+		 * Obtains the source {@link AdaptedConnectable}.
 		 * 
-		 * @return Source {@link AdaptedChild}.
+		 * @return Source {@link AdaptedConnectable}.
 		 */
-		public AdaptedChild<?> getSource() {
-			return this.child;
+		public AdaptedConnectable<?> getSource() {
+			return this.connectable;
 		}
 
 		/**
-		 * Obtains the role of the source {@link AdaptedChild}.
+		 * Obtains the role of the source {@link AdaptedConnectable}.
 		 * 
 		 * @return {@link AdaptedConnectorRole}. May be <code>null</code> if fulfills
 		 *         any {@link AdaptedConnectorRole}.

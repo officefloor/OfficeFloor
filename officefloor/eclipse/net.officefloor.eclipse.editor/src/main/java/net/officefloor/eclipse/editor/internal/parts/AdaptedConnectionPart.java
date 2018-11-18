@@ -209,7 +209,7 @@ public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel
 
 			// Determine if connected to new anchors (and connect if so)
 			if ((start.isAttached()) && (end.isAttached())) {
-				startConnector.getParentAdaptedChild().createConnection(endConnector.getParentAdaptedChild(),
+				startConnector.getParentAdaptedConnectable().createConnection(endConnector.getParentAdaptedConnectable(),
 						AdaptedConnectorRole.SOURCE);
 			}
 		}

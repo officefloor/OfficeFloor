@@ -26,7 +26,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
@@ -141,7 +141,7 @@ public class ManagedObjectSourceItem extends
 
 	@Override
 	public Pane visual(SectionManagedObjectSourceModel model,
-			AdaptedModelVisualFactoryContext<SectionManagedObjectSourceModel> context) {
+			AdaptedChildVisualFactoryContext<SectionManagedObjectSourceModel> context) {
 		HBox container = new HBox();
 		context.label(container).getStyleClass().add("title");
 		context.addNode(container, context.action((ctx) -> {

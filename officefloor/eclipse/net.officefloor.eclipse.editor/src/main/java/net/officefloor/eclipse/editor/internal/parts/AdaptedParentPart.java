@@ -43,7 +43,7 @@ public class AdaptedParentPart<M extends Model> extends AdaptedChildPart<M, Adap
 	/**
 	 * {@link TransformContent}.
 	 */
-	private TransformContent<M, AdaptedParent<M>, Node> transformableContent;
+	private TransformContent<M, AdaptedParent<M>> transformableContent;
 
 	@Override
 	public void init() {
