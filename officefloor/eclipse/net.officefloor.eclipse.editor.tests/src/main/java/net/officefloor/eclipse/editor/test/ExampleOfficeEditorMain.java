@@ -24,13 +24,16 @@ import org.eclipse.gef.geometry.planar.RoundedRectangle;
 import javafx.application.Application;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
+import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
 import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
+import net.officefloor.eclipse.editor.DefaultConnectors;
+import net.officefloor.eclipse.editor.ParentToAreaConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.office.OfficeChangesImpl;
 import net.officefloor.model.office.GovernanceAreaModel;
@@ -61,6 +64,7 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 	 */
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void buildModels(AdaptedBuilderContext builder) {
 
 		// Specify the root model
@@ -83,8 +87,10 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 		// Governance
 		AdaptedParentBuilder<OfficeModel, OfficeChanges, GovernanceModel, GovernanceEvent> governance = root
 				.parent(new GovernanceModel("Governance", null, false), (r) -> r.getGovernances(), (model, context) -> {
-					VBox container = new VBox();
+					HBox container = new HBox();
 					context.label(container);
+					context.addNode(container,
+							context.connector(DefaultConnectors.OBJECT, ParentToAreaConnectionModel.class).getNode());
 					return container;
 				}, OfficeEvent.ADD_GOVERNANCE, OfficeEvent.REMOVE_GOVERNANCE);
 		governance.create((p) -> {
@@ -93,15 +99,17 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 		governance.label((g) -> g.getGovernanceName(), GovernanceEvent.CHANGE_GOVERNANCE_NAME);
 
 		// Governance Area
-		governance.area(new GovernanceAreaModel(), (p) -> p.getGovernanceAreas(),
+		AdaptedAreaBuilder<OfficeModel, OfficeChanges, GovernanceAreaModel, GovernanceEvent> area = governance.area(
+				new GovernanceAreaModel(), (p) -> p.getGovernanceAreas(),
 				(a) -> new Dimension(a.getWidth(), a.getHeight()), (a, dimension) -> {
 					a.setWidth((int) dimension.getWidth());
 					a.setHeight((int) dimension.getHeight());
 				}, (model, context) -> {
-					RoundedRectangle rectangle = new RoundedRectangle(200, 100, 20, 100, 5, 5);
-					GeometryNode<RoundedRectangle> node = new GeometryNode<RoundedRectangle>(rectangle);
-					node.setMinWidth(100);
-					node.setMinHeight(50);
+					RoundedRectangle rectangle = new RoundedRectangle(200, 100, 200, 100, 5, 5);
+					GeometryNode<RoundedRectangle> node = new GeometryNode<>(rectangle);
+					context.connector((visualContext) -> node, ParentToAreaConnectionModel.class).getNode();
+					node.setMinWidth(20);
+					node.setMinHeight(20);
 					node.strokeProperty().set(Color.KHAKI);
 					node.fillProperty().set(Color.KHAKI);
 					return node;

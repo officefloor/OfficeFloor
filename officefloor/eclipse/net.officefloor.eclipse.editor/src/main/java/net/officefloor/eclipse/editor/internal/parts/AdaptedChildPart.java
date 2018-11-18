@@ -17,34 +17,19 @@
  */
 package net.officefloor.eclipse.editor.internal.parts;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.gef.fx.nodes.GeometryNode;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
-import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
-
-import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import net.officefloor.eclipse.editor.AdaptedChild;
-import net.officefloor.eclipse.editor.AdaptedConnector;
-import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModelStyler;
 import net.officefloor.eclipse.editor.ChildrenGroup;
-import net.officefloor.eclipse.editor.SelectOnly;
-import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
 import net.officefloor.eclipse.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
-import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 /**
@@ -52,67 +37,14 @@ import net.officefloor.model.Model;
  *
  * @author Daniel Sagenschneider
  */
-public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedPart<M, A, Node>
+public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extends AbstractAdaptedConnectablePart<M, A>
 		implements AdaptedModelStyler {
-
-	/**
-	 * Loads the styling for the child {@link Pane}.
-	 * 
-	 * @param visualNode    Child visual {@link Node}.
-	 * @param modelClass    {@link Class} of the {@link Model}.
-	 * @param stylesheetUrl {@link ReadOnlyProperty} to specific styling
-	 *                      {@link URL}.
-	 */
-	public static void loadStyling(Node visualNode, Class<? extends Model> modelClass,
-			ReadOnlyProperty<URL> stylesheetUrl) {
-
-		// Determine if can style node
-		if (!(visualNode instanceof Parent)) {
-			return;
-		}
-		Parent childVisual = (Parent) visualNode;
-
-		// Provide model as class for CSS
-		childVisual.getStyleClass().add("child");
-		childVisual.getStyleClass().add(modelClass.getSimpleName());
-
-		// Determine if specific styling
-		if (stylesheetUrl != null) {
-
-			// Load initial styling
-			URL initialUrl = stylesheetUrl.getValue();
-			if (initialUrl != null) {
-				childVisual.getStylesheets().add(initialUrl.toExternalForm());
-			}
-
-			// Bind potential changes to the styling
-			stylesheetUrl.addListener((event, oldValue, newValue) -> {
-				if (oldValue != null) {
-					childVisual.getStylesheets().remove(oldValue.toExternalForm());
-				}
-				if (newValue != null) {
-					childVisual.getStylesheets().add(newValue.toExternalForm());
-				}
-			});
-		}
-	}
-
-	/**
-	 * Indicates whether a Palette prototype.
-	 */
-	protected boolean isPalettePrototype = false;
 
 	/**
 	 * {@link ChildrenGroupVisual} instances for the {@link ChildrenGroupImpl}
 	 * instances.
 	 */
 	private Map<ChildrenGroup<M, ?>, ChildrenGroupVisual> childrenGroupVisuals;
-
-	/**
-	 * {@link AdaptedConnectorVisual} instances for the {@link AdaptedConnector}
-	 * instances.
-	 */
-	private Map<AdaptedConnector<M>, AdaptedConnectorVisual> adaptedConnectorVisuals;
 
 	/**
 	 * Obtains the {@link Pane} for the {@link ChildrenGroupImpl}.
@@ -124,47 +56,9 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		return this.childrenGroupVisuals.get(childrenGroup).pane;
 	}
 
-	/**
-	 * Obtains the {@link GeometryNode} for the {@link AdaptedConnector}.
-	 * 
-	 * @param connector {@link AdaptedConnector}.
-	 * @return {@link GeometryNode}.
-	 */
-	public Region getAdaptedConnectorNode(AdaptedConnector<?> connector) {
-		return this.adaptedConnectorVisuals.get(connector).node;
-	}
-
-	/**
-	 * Obtains the {@link AdaptedErrorHandler}.
-	 * 
-	 * @return {@link AdaptedErrorHandler}.
-	 */
-	public AdaptedErrorHandler getErrorHandler() {
-		return this.getContent().getErrorHandler();
-	}
-
-	/*
-	 * ================== AdaptedModelStyler ========================
-	 */
-
-	@Override
-	public Model getModel() {
-		return this.getContent().getModel();
-	}
-
-	@Override
-	public Property<String> style() {
-		return this.getContent().getStylesheet();
-	}
-
 	/*
 	 * ================== IContentPart =========================
 	 */
-
-	@Override
-	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
-		return HashMultimap.create();
-	}
 
 	@Override
 	protected List<Object> doGetContentChildren() {
@@ -175,29 +69,13 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 	}
 
 	@Override
-	protected void doAddChildVisual(IVisualPart<? extends Node> child, int index) {
-		// Should only be children groups (already added)
-	}
-
-	@Override
-	protected void doRemoveChildVisual(IVisualPart<? extends Node> child, int index) {
-		// Should only be children groups (never removed)
-	}
-
-	@Override
 	@SuppressWarnings("unchecked")
-	public Node doCreateVisual() {
+	protected Node createVisualNode() {
 
 		// Load the children group visuals
 		this.childrenGroupVisuals = new HashMap<>();
 		for (ChildrenGroup<M, ?> childrenGroup : this.getContent().getChildrenGroups()) {
 			this.childrenGroupVisuals.put(childrenGroup, new ChildrenGroupVisual());
-		}
-
-		// Load the adapted connector visuals
-		this.adaptedConnectorVisuals = new HashMap<>();
-		for (AdaptedConnector<M> adaptedConnector : this.getContent().getAdaptedConnectors()) {
-			this.adaptedConnectorVisuals.put(adaptedConnector, new AdaptedConnectorVisual());
 		}
 
 		// Create the visual node
@@ -225,37 +103,7 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 					// Child group not registered
 					return false;
 
-				}, (connectionClasses, role, assocations, node) -> {
-
-					// Load the connectors for the connection classes
-					for (Class<?> connectionClass : connectionClasses) {
-
-						// Obtain the adapted connector
-						AdaptedConnector<M> connector = AdaptedChildPart.this.getContent()
-								.getAdaptedConnector((Class<? extends ConnectionModel>) connectionClass, role);
-						if (connector == null) {
-							throw new IllegalStateException(
-									"Connection " + connectionClass.getName() + " not configured to connect to model "
-											+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
-						}
-
-						// Obtain the visual
-						AdaptedConnectorVisual visual = AdaptedChildPart.this.adaptedConnectorVisuals.get(connector);
-						if (visual.node != null) {
-							throw new IllegalStateException(
-									"Connection " + connectionClass.getName() + " configured more than once for model "
-											+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
-						}
-
-						// Load the connector visual
-						visual.node = node;
-
-						// Associate the connectors
-						assocations.add(connector);
-						connector.setAssociation(assocations, role);
-					}
-
-				}, (action) -> {
+				}, this.getConnectorLoader(), (action) -> {
 
 					// Undertake the action
 					this.getContent().action(action);
@@ -270,35 +118,8 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 			}
 		}
 
-		// Ensure connectors for all configured connections
-		for (AdaptedConnector<M> connector : this.getContent().getAdaptedConnectors()) {
-			AdaptedConnectorVisual visual = this.adaptedConnectorVisuals.get(connector);
-			if (visual.node == null) {
-				throw new IllegalStateException("Connector to " + connector.getConnectionModelClass().getName()
-						+ " not configured in view of model " + this.getContent().getModel().getClass().getName());
-			}
-		}
-
-		// Provide styling
-		loadStyling(visualNode, this.getContent().getModel().getClass(), this.getContent().getStylesheetUrl());
-
-		// Provide select only
-		SelectOnly selectOnly = this.getContent().getSelectOnly();
-		if (selectOnly != null) {
-			visualNode.setOnMouseClicked((event) -> {
-				this.getContent().getErrorHandler().isError(() -> {
-					selectOnly.model(this);
-				});
-				event.consume();
-			});
-		}
-
-		// Return the visual
+		// Return the visual node
 		return visualNode;
-	}
-
-	@Override
-	protected void doRefreshVisual(Node visual) {
 	}
 
 	/**
@@ -310,17 +131,6 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 		 * {@link Pane} for the {@link ChildrenGroupImpl}.
 		 */
 		private Pane pane = null;
-	}
-
-	/**
-	 * {@link AdaptedConnectorImpl} visual.
-	 */
-	private static class AdaptedConnectorVisual {
-
-		/**
-		 * {@link GeometryNode} for the {@link AdaptedConnectorImpl}.
-		 */
-		private Region node = null;
 	}
 
 }

@@ -560,7 +560,6 @@ public class AdaptedEditorModule extends MvcFxModule {
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(TransformPolicy.class);
 
 		// Handle resize (if part supports it)
-//		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ResizeTransformSelectedOnHandleDragHandler.class);
 		adapterMapBinder.addBinding(AdapterKey.defaultRole()).to(ResizePolicy.class);
 	}
 

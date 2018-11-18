@@ -17,16 +17,13 @@
  */
 package net.officefloor.eclipse.editor.internal.parts;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.gef.geometry.planar.Dimension;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import org.eclipse.gef.mvc.fx.parts.IResizableContentPart;
 import org.eclipse.gef.mvc.fx.parts.ITransformableContentPart;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
 
 import javafx.scene.Node;
 import javafx.scene.transform.Affine;
@@ -38,7 +35,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedAreaPart<M extends Model> extends AbstractAdaptedPart<M, AdaptedArea<M>, Node>
+public class AdaptedAreaPart<M extends Model> extends AbstractAdaptedConnectablePart<M, AdaptedArea<M>>
 		implements ITransformableContentPart<Node>, IResizableContentPart<Node> {
 
 	/**
@@ -57,60 +54,21 @@ public class AdaptedAreaPart<M extends Model> extends AbstractAdaptedPart<M, Ada
 	}
 
 	@Override
-	protected SetMultimap<? extends Object, String> doGetContentAnchorages() {
-		return HashMultimap.create();
-	}
-
-	@Override
 	protected List<? extends Object> doGetContentChildren() {
-		return Collections.emptyList();
+		List<Object> children = new ArrayList<>();
+		children.addAll(this.getContent().getAdaptedConnectors());
+		return children;
 	}
 
 	@Override
-	protected Node doCreateVisual() {
-		return this.getContent().createVisual(
-				new AdaptedModelVisualFactoryContextImpl<>((Class<M>) this.getContent().getModel().getClass(), false,
-						(connectionClasses, role, assocations, node) -> {
+	@SuppressWarnings("unchecked")
+	protected Node createVisualNode() {
+		return this.getContent().createVisual(new AdaptedModelVisualFactoryContextImpl<>(
+				(Class<M>) this.getContent().getModel().getClass(), false, this.getConnectorLoader(), (action) -> {
 
-//							// Load the connectors for the connection classes
-//							for (Class<?> connectionClass : connectionClasses) {
-//
-//								// Obtain the adapted connector
-//								AdaptedConnector<M> connector = AdaptedChildPart.this.getContent()
-//										.getAdaptedConnector((Class<? extends ConnectionModel>) connectionClass, role);
-//								if (connector == null) {
-//									throw new IllegalStateException("Connection " + connectionClass.getName()
-//											+ " not configured to connect to model "
-//											+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
-//								}
-//
-//								// Obtain the visual
-//								AdaptedConnectorVisual visual = AdaptedChildPart.this.adaptedConnectorVisuals
-//										.get(connector);
-//								if (visual.node != null) {
-//									throw new IllegalStateException("Connection " + connectionClass.getName()
-//											+ " configured more than once for model "
-//											+ AdaptedChildPart.this.getContent().getModel().getClass().getName());
-//								}
-//
-//								// Load the connector visual
-//								visual.node = node;
-//
-//								// Associate the connectors
-//								assocations.add(connector);
-//								connector.setAssociation(assocations, role);
-//							}
-
-						}, (action) -> {
-
-//							// Undertake the action
-//							this.getContent().action(action);
-						}));
-	}
-
-	@Override
-	protected void doRefreshVisual(Node visual) {
-		// nothing to update
+					// Undertake the action
+					this.getContent().action(action);
+				}));
 	}
 
 	/*

@@ -17,10 +17,6 @@
  */
 package net.officefloor.eclipse.editor;
 
-import java.net.URL;
-
-import javafx.beans.property.Property;
-import javafx.scene.Parent;
 import net.officefloor.model.Model;
 
 /**
@@ -28,34 +24,8 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedAreaBuilder<R extends Model, O, M extends Model, E extends Enum<E>> {
-
-	/**
-	 * Obtains the configuration path.
-	 * 
-	 * @return Configuration path.
-	 */
-	String getConfigurationPath();
-
-	/**
-	 * Obtains the {@link Model} {@link Class}.
-	 * 
-	 * @return {@link Model} {@link Class}.
-	 */
-	Class<M> getModelClass();
-
-	/**
-	 * <p>
-	 * Obtains the {@link Property} to the style sheet rules for the
-	 * {@link AdaptedArea}.
-	 * <p>
-	 * Note: this is <strong>NOT</strong> the style sheet {@link URL}. This is the
-	 * style sheet rules (content of style sheet) and the {@link AdaptedArea} will
-	 * handle making available to {@link Parent} as a {@link URL}.
-	 * 
-	 * @return {@link Property} to the style sheet rules.
-	 */
-	Property<String> style();
+public interface AdaptedAreaBuilder<R extends Model, O, M extends Model, E extends Enum<E>>
+		extends AdaptedConnectableBuilder<R, O, M, E> {
 
 	/**
 	 * Configures an {@link ModelAction} for creating the area {@link Model}.

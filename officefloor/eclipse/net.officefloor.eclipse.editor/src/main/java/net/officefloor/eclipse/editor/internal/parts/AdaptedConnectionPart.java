@@ -33,6 +33,7 @@ import com.google.common.collect.SetMultimap;
 
 import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedConnectable;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedConnectorRole;
@@ -71,7 +72,7 @@ public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel
 		}
 
 		// Load the source
-		AdaptedChild<?> sourceChild = this.getContent().getSource();
+		AdaptedConnectable<?> sourceChild = this.getContent().getSource();
 		if (sourceChild != null) {
 			this.sourceConnector = sourceChild.getAdaptedConnector(this.getContent().getModel().getClass(),
 					AdaptedConnectorRole.SOURCE);
@@ -79,7 +80,7 @@ public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel
 		}
 
 		// Load the target
-		AdaptedChild<?> targetChild = this.getContent().getTarget();
+		AdaptedConnectable<?> targetChild = this.getContent().getTarget();
 		if (targetChild != null) {
 			this.targetConnector = targetChild.getAdaptedConnector(this.getContent().getModel().getClass(),
 					AdaptedConnectorRole.TARGET);
@@ -209,8 +210,8 @@ public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel
 
 			// Determine if connected to new anchors (and connect if so)
 			if ((start.isAttached()) && (end.isAttached())) {
-				startConnector.getParentAdaptedConnectable().createConnection(endConnector.getParentAdaptedConnectable(),
-						AdaptedConnectorRole.SOURCE);
+				startConnector.getParentAdaptedConnectable()
+						.createConnection(endConnector.getParentAdaptedConnectable(), AdaptedConnectorRole.SOURCE);
 			}
 		}
 	}

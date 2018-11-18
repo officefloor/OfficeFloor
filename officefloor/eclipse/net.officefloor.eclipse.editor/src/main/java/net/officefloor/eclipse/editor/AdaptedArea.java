@@ -27,7 +27,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedArea<M extends Model> extends AdaptedModel<M> {
+public interface AdaptedArea<M extends Model> extends AdaptedConnectable<M> {
 
 	/**
 	 * Obtains the {@link Dimension}.
@@ -42,6 +42,13 @@ public interface AdaptedArea<M extends Model> extends AdaptedModel<M> {
 	 * @param dimension {@link Dimension}.
 	 */
 	void setDimension(Dimension dimension);
+
+	/**
+	 * Obtains the {@link ParentToAreaConnectionModel}.
+	 * 
+	 * @return {@link ParentToAreaConnectionModel}.
+	 */
+	ParentToAreaConnectionModel getParentConnection();
 
 	/**
 	 * Creates the visual {@link Node}.

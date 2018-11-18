@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.editor.internal.models;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -27,9 +28,12 @@ import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedArea;
 import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
+import net.officefloor.eclipse.editor.AdaptedConnection;
+import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.ModelAction;
+import net.officefloor.eclipse.editor.ParentToAreaConnectionModel;
 import net.officefloor.model.Model;
 
 /**
@@ -37,8 +41,8 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends Enum<E>>
-		extends AbstractAdaptedFactory<R, O, M, E, AdaptedArea<M>> implements AdaptedAreaBuilder<R, O, M, E> {
+public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends Enum<E>> extends
+		AbstractAdaptedConnectableFactory<R, O, M, E, AdaptedArea<M>> implements AdaptedAreaBuilder<R, O, M, E> {
 
 	/**
 	 * Obtains the {@link Dimension} from the {@link Model}.
@@ -58,21 +62,19 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 	/**
 	 * Instantiate.
 	 * 
-	 * @param adaptedPathPrefix  Prefix on the configuration path.
-	 * @param modelPrototype     {@link Model} prototype.
-	 * @param parentAdaptedModel Parent {@link AbstractAdaptedFactory}.
-	 * @param getDimension       Obtains the {@link Dimension} from the
-	 *                           {@link Model}.
-	 * @param setDimension       Specifies the {@link Dimension} on the
-	 *                           {@link Model}.
-	 * @param viewFactory        {@link AdaptedModelVisualFactory}.
+	 * @param adaptedPathPrefix    Prefix on the configuration path.
+	 * @param modelPrototype       {@link Model} prototype.
+	 * @param parentAdaptedFactory Parent {@link AbstractAdaptedFactory}.
+	 * @param getDimension         Obtains the {@link Dimension} from the
+	 *                             {@link Model}.
+	 * @param setDimension         Specifies the {@link Dimension} on the
+	 *                             {@link Model}.
+	 * @param viewFactory          {@link AdaptedModelVisualFactory}.
 	 */
-	@SuppressWarnings("unchecked")
 	public AdaptedAreaFactory(String adaptedPathPrefix, M modelPrototype,
-			AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedModel, Function<M, Dimension> getDimension,
+			AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedFactory, Function<M, Dimension> getDimension,
 			BiConsumer<M, Dimension> setDimension, AdaptedModelVisualFactory<M> viewFactory) {
-		super(adaptedPathPrefix, (Class<M>) modelPrototype.getClass(), () -> new AdaptedAreaImpl<>(),
-				parentAdaptedModel);
+		super(adaptedPathPrefix, modelPrototype, () -> new AdaptedAreaImpl<>(), parentAdaptedFactory);
 		this.getDimension = getDimension;
 		this.setDimension = setDimension;
 		this.viewFactory = viewFactory;
@@ -103,12 +105,28 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 	/**
 	 * {@link AdaptedArea} implementation.
 	 */
-	public static class AdaptedAreaImpl<R extends Model, O, M extends Model, E extends Enum<E>> extends
-			AbstractAdaptedModel<R, O, M, E, AdaptedArea<M>, AdaptedAreaFactory<R, O, M, E>> implements AdaptedArea<M> {
+	public static class AdaptedAreaImpl<R extends Model, O, M extends Model, E extends Enum<E>>
+			extends AbstractAdaptedConnectable<R, O, M, E, AdaptedArea<M>, AdaptedAreaFactory<R, O, M, E>>
+			implements AdaptedArea<M> {
+
+		/**
+		 * {@link ParentToAreaConnectionModel}.
+		 */
+		private ParentToAreaConnectionModel connectionModel = null;
 
 		@Override
 		protected void init() {
-			// nothing to initialise
+			super.init();
+
+			// No connection if no parent
+			AdaptedModel<?> parent = this.getParent();
+			if (parent != null) {
+
+				// Obtain the models and create connection
+				Model parentModel = parent.getModel();
+				Model areaModel = this.getModel();
+				this.connectionModel = new ParentToAreaConnectionModel(parentModel, areaModel);
+			}
 		}
 
 		@Override
@@ -122,8 +140,18 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 		}
 
 		@Override
+		public ParentToAreaConnectionModel getParentConnection() {
+			return this.connectionModel;
+		}
+
+		@Override
 		public Node createVisual(AdaptedModelVisualFactoryContext<M> context) {
 			return this.getFactory().viewFactory.createVisual(this.getModel(), context);
+		}
+
+		@Override
+		protected void loadDescendantConnections(List<AdaptedConnection<?>> connections) {
+			// no descendant connections
 		}
 	}
 

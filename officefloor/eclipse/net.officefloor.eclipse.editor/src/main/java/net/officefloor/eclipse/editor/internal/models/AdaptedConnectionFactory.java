@@ -25,7 +25,7 @@ import java.util.function.Function;
 
 import com.google.inject.Injector;
 
-import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedConnectable;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder;
@@ -227,15 +227,15 @@ public class AdaptedConnectionFactory<R extends Model, O, S extends Model, C ext
 		}
 
 		@Override
-		public AdaptedChild<?> getSource() {
+		public AdaptedConnectable<?> getSource() {
 			Model source = this.getFactory().getSource.apply(this.getModel());
-			return (AdaptedChild<?>) this.getFactory().getAdaptedModel(source, null);
+			return (AdaptedConnectable<?>) this.getFactory().getAdaptedModel(source, null);
 		}
 
 		@Override
-		public AdaptedChild<?> getTarget() {
+		public AdaptedConnectable<?> getTarget() {
 			Model target = this.getFactory().getTarget.apply(this.getModel());
-			return (AdaptedChild<?>) this.getFactory().getAdaptedModel(target, null);
+			return (AdaptedConnectable<?>) this.getFactory().getAdaptedModel(target, null);
 		}
 
 		@Override

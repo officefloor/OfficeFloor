@@ -48,6 +48,7 @@ import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
+import net.officefloor.eclipse.editor.ParentToAreaConnectionModel;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.Model;
 
@@ -136,8 +137,24 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 			AM areaPrototype, Function<M, List<AM>> getAreas, Function<AM, Dimension> getDimension,
 			BiConsumer<AM, Dimension> setDimension, AdaptedModelVisualFactory<AM> viewFactory, E... changeAreaEvents) {
 		this.areas.add((Function) getAreas);
-		return new AdaptedAreaFactory<>(this.getConfigurationPath(), areaPrototype, this, getDimension, setDimension,
-				viewFactory);
+		AdaptedAreaFactory<R, O, AM, AE> factory = new AdaptedAreaFactory<>(this.getConfigurationPath(), areaPrototype,
+				this, getDimension, setDimension, viewFactory);
+
+		// Provide connection to area
+		factory.connectOne(ParentToAreaConnectionModel.class, (area) -> {
+			AdaptedArea<?> adaptedArea = (AdaptedArea<?>) this.getContentPartFactory().createAdaptedModel(area, null);
+			return adaptedArea.getParentConnection();
+		}, (conn) -> (AM) conn.getAreaModel()).toMany(this.getModelClass(), (parent) -> {
+			AdaptedParent<?> adaptedParent = (AdaptedParent<?>) this.getContentPartFactory().createAdaptedModel(parent,
+					null);
+			List<ParentToAreaConnectionModel> connections = new LinkedList<>();
+			for (AdaptedArea<?> adaptedArea : adaptedParent.getAdaptedAreas()) {
+				connections.add(adaptedArea.getParentConnection());
+			}
+			return connections;
+		}, (conn) -> (M) conn.getParentModel());
+
+		return factory;
 	}
 
 	/**

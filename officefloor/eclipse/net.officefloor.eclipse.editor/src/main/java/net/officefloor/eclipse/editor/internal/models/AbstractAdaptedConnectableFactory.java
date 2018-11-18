@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.eclipse.gef.mvc.fx.parts.IContentPart;
+
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -45,7 +47,6 @@ import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
 import net.officefloor.eclipse.editor.SelectOnly;
-import net.officefloor.eclipse.editor.internal.parts.AdaptedChildPart;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -55,7 +56,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractAdaptedConnectableFactory<R extends Model, O, M extends Model, E extends Enum<E>, A extends AdaptedChild<M>>
+public abstract class AbstractAdaptedConnectableFactory<R extends Model, O, M extends Model, E extends Enum<E>, A extends AdaptedModel<M>>
 		extends AbstractAdaptedFactory<R, O, M, E, A> implements AdaptedConnectableBuilder<R, O, M, E> {
 
 	/**
@@ -89,12 +90,12 @@ public abstract class AbstractAdaptedConnectableFactory<R extends Model, O, M ex
 	 * @param configurationPathPrefix Prefix on the configuration path.
 	 * @param modelPrototype          {@link Model} prototype.
 	 * @param newAdaptedModel         {@link Supplier} for the {@link AdaptedModel}.
-	 * @param parentAdaptedModel      Parent {@link AbstractAdaptedFactory}.
+	 * @param parentAdaptedFactory    Parent {@link AbstractAdaptedFactory}.
 	 */
 	@SuppressWarnings("unchecked")
 	public AbstractAdaptedConnectableFactory(String configurationPathPrefix, M modelPrototype,
-			Supplier<A> newAdaptedModel, AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedModel) {
-		super(configurationPathPrefix, (Class<M>) modelPrototype.getClass(), newAdaptedModel, parentAdaptedModel);
+			Supplier<A> newAdaptedModel, AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedFactory) {
+		super(configurationPathPrefix, (Class<M>) modelPrototype.getClass(), newAdaptedModel, parentAdaptedFactory);
 		this.modelPrototype = modelPrototype;
 	}
 
@@ -201,9 +202,9 @@ public abstract class AbstractAdaptedConnectableFactory<R extends Model, O, M ex
 		A adaptedModel = (A) this.getContentPartFactory().createAdaptedModel(this.modelPrototype, null);
 
 		// Create the visual (will ensure valid)
-		AdaptedChildPart<M, AdaptedChild<M>> childPart = this.getInjector().getInstance(AdaptedChildPart.class);
-		childPart.setContent(adaptedModel);
-		childPart.doCreateVisual();
+		IContentPart<?> contentPart = this.getContentPartFactory().createContentPart(adaptedModel, null);
+		contentPart.setContent(adaptedModel);
+		contentPart.getVisual();
 	}
 
 	/**
@@ -302,7 +303,7 @@ public abstract class AbstractAdaptedConnectableFactory<R extends Model, O, M ex
 	/**
 	 * {@link AdaptedChild} implementation.
 	 */
-	protected static abstract class AbstractAdaptedConnectable<R extends Model, O, M extends Model, E extends Enum<E>, A extends AdaptedChild<M>, F extends AbstractAdaptedConnectableFactory<R, O, M, E, A>>
+	protected static abstract class AbstractAdaptedConnectable<R extends Model, O, M extends Model, E extends Enum<E>, A extends AdaptedConnectable<M>, F extends AbstractAdaptedConnectableFactory<R, O, M, E, A>>
 			extends AbstractAdaptedModel<R, O, M, E, A, F>
 			implements AdaptedConnectable<M>, ModelActionContext<R, O, M> {
 

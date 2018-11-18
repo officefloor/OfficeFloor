@@ -54,8 +54,7 @@ public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 	 * Specifies this as the active {@link AdaptedConnectorPart} for the
 	 * {@link CreateAdaptedConnectionOnDragHandler}.
 	 * 
-	 * @param isActive
-	 *            Indicates if active.
+	 * @param isActive Indicates if active.
 	 */
 	public void setActiveConnector(boolean isActive) {
 		if (isActive) {
@@ -139,7 +138,7 @@ public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 	protected Region doCreateVisual() {
 
 		// Obtain the parent
-		AdaptedChildPart<?, ?> parent = (AdaptedChildPart<?, ?>) this.getParent();
+		AbstractAdaptedConnectablePart<?, ?> parent = (AbstractAdaptedConnectablePart<?, ?>) this.getParent();
 
 		// Obtain the node for the connector
 		Region node = parent.getAdaptedConnectorNode(this.getContent());
