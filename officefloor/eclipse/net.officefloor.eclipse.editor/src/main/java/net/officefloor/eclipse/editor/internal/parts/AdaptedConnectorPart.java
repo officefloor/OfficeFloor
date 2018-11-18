@@ -140,6 +140,11 @@ public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 		// Obtain the parent
 		AbstractAdaptedConnectablePart<?, ?> parent = (AbstractAdaptedConnectablePart<?, ?>) this.getParent();
 
+		// Determine if area (and use area)
+		if (parent instanceof AdaptedAreaPart) {
+			return (Region) parent.doCreateVisual();
+		}
+
 		// Obtain the node for the connector
 		Region node = parent.getAdaptedConnectorNode(this.getContent());
 

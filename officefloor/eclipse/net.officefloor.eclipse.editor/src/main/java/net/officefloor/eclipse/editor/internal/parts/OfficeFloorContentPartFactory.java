@@ -709,6 +709,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 		// Provide part for adapted
 		if (content instanceof AdaptedParent) {
 			return this.injector.getInstance(AdaptedParentPart.class);
+		} else if (content instanceof AdaptedArea) {
+			return this.injector.getInstance(AdaptedAreaPart.class);
 		} else if (content instanceof ChildrenGroup) {
 			return this.injector.getInstance(ChildrenGroupPart.class);
 		} else if (content instanceof AdaptedChild) {
@@ -717,8 +719,6 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 			return this.injector.getInstance(AdaptedConnectionPart.class);
 		} else if (content instanceof AdaptedConnector) {
 			return this.injector.getInstance(AdaptedConnectorPart.class);
-		} else if (content instanceof AdaptedArea) {
-			return this.injector.getInstance(AdaptedAreaPart.class);
 		}
 
 		// Unknown model
