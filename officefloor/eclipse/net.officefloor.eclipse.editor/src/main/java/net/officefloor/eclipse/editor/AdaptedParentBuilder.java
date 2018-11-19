@@ -62,8 +62,6 @@ public interface AdaptedParentBuilder<R extends Model, O, M extends Model, E ext
 	 *                         {@link Model}.
 	 * @param setDimension     Loads the {@link Dimension} of the area onto the
 	 *                         {@link Model}.
-	 * @param viewFactory      {@link AdaptedChildVisualFactory} to create the view
-	 *                         for the {@link AdaptedParent}.
 	 * @param changeAreaEvents {@link Enum} events on parent {@link Model} about
 	 *                         change in area {@link Model} listing.
 	 * @return {@link AdaptedAreaBuilder} to build the {@link AdaptedArea} over the
@@ -72,6 +70,6 @@ public interface AdaptedParentBuilder<R extends Model, O, M extends Model, E ext
 	@SuppressWarnings("unchecked")
 	<AM extends Model, AE extends Enum<AE>, RE extends Enum<RE>> AdaptedAreaBuilder<R, O, AM, AE> area(AM areaPrototype,
 			Function<M, List<AM>> getAreas, Function<AM, Dimension> getDimension,
-			BiConsumer<AM, Dimension> setDimension, AdaptedModelVisualFactory<AM> viewFactory, E... changeAreaEvents);
+			BiConsumer<AM, Dimension> setDimension, E... changeAreaEvents);
 
 }

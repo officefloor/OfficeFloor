@@ -15,45 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor;
+package net.officefloor.eclipse.editor.internal.parts;
 
-import org.eclipse.gef.geometry.planar.Dimension;
+import org.eclipse.gef.mvc.fx.parts.IContentPart;
 
-import net.officefloor.model.Model;
+import net.officefloor.eclipse.editor.AdaptedConnectable;
+import net.officefloor.eclipse.editor.AdaptedConnector;
+import net.officefloor.eclipse.editor.internal.handlers.CreateAdaptedConnectionOnDragHandler;
 
 /**
- * Adapted area.
+ * {@link IContentPart} for the {@link AdaptedConnectable}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AdaptedArea<M extends Model> extends AdaptedConnectable<M>, AdaptedConnector<M> {
+public interface AdaptedConnectablePart {
 
 	/**
-	 * Obtains the minimum {@link Dimension} for the {@link AdaptedArea}.
+	 * Obtains the {@link AdaptedConnector}.
 	 * 
-	 * @return Minimum {@link Dimension} for the {@link AdaptedArea}.
+	 * @return {@link AdaptedConnector}.
 	 */
-	Dimension getMinimumDimension();
+	AdaptedConnector<?> getContent();
 
 	/**
-	 * Obtains the {@link Dimension}.
+	 * Specifies this as the active {@link AdaptedConnectablePart} for the
+	 * {@link CreateAdaptedConnectionOnDragHandler}.
 	 * 
-	 * @return {@link Dimension}.
+	 * @param isActive Indicates if active.
 	 */
-	Dimension getDimension();
-
-	/**
-	 * Specifies the {@link Dimension}.
-	 * 
-	 * @param dimension {@link Dimension}.
-	 */
-	void setDimension(Dimension dimension);
-
-	/**
-	 * Obtains the {@link ParentToAreaConnectionModel}.
-	 * 
-	 * @return {@link ParentToAreaConnectionModel}.
-	 */
-	ParentToAreaConnectionModel getParentConnection();
+	void setActiveConnector(boolean isActive);
 
 }

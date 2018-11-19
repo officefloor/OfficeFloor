@@ -592,8 +592,10 @@ public class AdaptedEditorModule extends MvcFxModule {
 		// Bind in the models
 		bindAdaptedParentInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(), AdaptedParentPart.class,
 				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
-		bindAdaptedParentInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(), AdaptedAreaPart.class,
-				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
+		MapBinder<AdapterKey<?>, Object> areaBinder = AdapterMaps.getAdapterMapBinder(binder(), AdaptedAreaPart.class,
+				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE));
+		bindAdaptedParentInContentViewerContext(areaBinder);
+		bindAdaptedConnectorInContentViewerContext(areaBinder);
 		bindAdaptedConnectorInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(), AdaptedConnectorPart.class,
 				AdapterKey.get(IViewer.class, IDomain.CONTENT_VIEWER_ROLE)));
 		bindAdaptedConnectionInContentViewerContext(AdapterMaps.getAdapterMapBinder(binder(),

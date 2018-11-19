@@ -41,7 +41,6 @@ import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
 import net.officefloor.eclipse.editor.AdaptedChildVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
@@ -135,10 +134,12 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <AM extends Model, AE extends Enum<AE>, RE extends Enum<RE>> AdaptedAreaBuilder<R, O, AM, AE> area(
 			AM areaPrototype, Function<M, List<AM>> getAreas, Function<AM, Dimension> getDimension,
-			BiConsumer<AM, Dimension> setDimension, AdaptedModelVisualFactory<AM> viewFactory, E... changeAreaEvents) {
+			BiConsumer<AM, Dimension> setDimension, E... changeAreaEvents) {
 		this.areas.add((Function) getAreas);
+
+		// Create the factory
 		AdaptedAreaFactory<R, O, AM, AE> factory = new AdaptedAreaFactory<>(this.getConfigurationPath(), areaPrototype,
-				this, getDimension, setDimension, viewFactory);
+				this, getDimension, setDimension);
 
 		// Provide connection to area
 		factory.connectOne(ParentToAreaConnectionModel.class, (area) -> {

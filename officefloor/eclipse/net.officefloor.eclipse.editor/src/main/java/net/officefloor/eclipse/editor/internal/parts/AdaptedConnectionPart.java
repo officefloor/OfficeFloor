@@ -93,10 +93,10 @@ public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel
 
 	@Override
 	protected void doAttachToAnchorageVisual(IVisualPart<? extends Node> anchorage, String role) {
-		if (!(anchorage instanceof AdaptedConnectorPart)) {
+		if (!((anchorage instanceof AdaptedConnectorPart) || (anchorage instanceof AdaptedAreaPart))) {
 			throw new IllegalStateException("Attempting to attach non " + AdaptedConnectorPart.class.getSimpleName()
-					+ " anchor to " + this.getClass().getSimpleName() + " for model "
-					+ this.getContent().getModel().getClass().getName());
+					+ "/" + AdaptedAreaPart.class.getSimpleName() + " anchor to " + this.getClass().getSimpleName()
+					+ " for model " + this.getContent().getModel().getClass().getName());
 		}
 
 		// Anchoring

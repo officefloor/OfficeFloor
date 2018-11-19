@@ -17,6 +17,8 @@
  */
 package net.officefloor.eclipse.editor;
 
+import org.eclipse.gef.geometry.planar.Dimension;
+
 import net.officefloor.model.Model;
 
 /**
@@ -26,6 +28,14 @@ import net.officefloor.model.Model;
  */
 public interface AdaptedAreaBuilder<R extends Model, O, M extends Model, E extends Enum<E>>
 		extends AdaptedConnectableBuilder<R, O, M, E> {
+
+	/**
+	 * Specifies the minimum {@link Dimension}.
+	 * 
+	 * @param width  Minimum width.
+	 * @param height Minimum height.
+	 */
+	void setMinimumDimension(double width, double height);
 
 	/**
 	 * Configures an {@link ModelAction} for creating the area {@link Model}.

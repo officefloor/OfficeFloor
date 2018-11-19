@@ -52,17 +52,17 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.internal.models.ProxyAdaptedConnection;
+import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectablePart;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectionPart;
-import net.officefloor.eclipse.editor.internal.parts.AdaptedConnectorPart;
 import net.officefloor.model.Model;
 
 public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends AbstractHandler
 		implements IOnDragHandler {
 
 	/**
-	 * Source {@link AdaptedConnectorPart}.
+	 * Source {@link AdaptedConnectablePart}.
 	 */
-	private AdaptedConnectorPart sourceConnector;
+	private AdaptedConnectablePart sourceConnector;
 
 	/**
 	 * {@link ProxyAdaptedConnection}.
@@ -85,19 +85,18 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 	private Map<AdapterKey<? extends IOnDragHandler>, IOnDragHandler> dragPolicies;
 
 	/**
-	 * Obtains the {@link AdaptedConnectorPart} for the start of the drag.
+	 * Obtains the {@link AdaptedConnectablePart} for the start of the drag.
 	 * 
-	 * @return {@link AdaptedConnectorPart}.
+	 * @return {@link AdaptedConnectablePart}.
 	 */
-	protected AdaptedConnectorPart getAdaptedConnectorPart() {
-		return (AdaptedConnectorPart) getHost();
+	protected AdaptedConnectablePart getAdaptedConnectablePart() {
+		return (AdaptedConnectablePart) getHost();
 	}
 
 	/**
 	 * Obtains the location of the {@link MouseEvent}.
 	 * 
-	 * @param e
-	 *            {@link MouseEvent}.
+	 * @param e {@link MouseEvent}.
 	 * @return {@link Point} location of the {@link MouseEvent}.
 	 */
 	protected Point getLocation(MouseEvent e) {
@@ -113,10 +112,8 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 	/**
 	 * Finds the {@link CircleSegmentHandlePart} for the target {@link BendPoint}.
 	 * 
-	 * @param connectionPart
-	 *            {@link AdaptedConnectionPart}.
-	 * @param eventTarget
-	 *            {@link EventTarget}.
+	 * @param connectionPart {@link AdaptedConnectionPart}.
+	 * @param eventTarget    {@link EventTarget}.
 	 * @return Target {@link CircleSegmentHandlePart}.
 	 */
 	protected CircleSegmentHandlePart findBendTargetPart(AdaptedConnectionPart<R, O, ?> connectionPart,
@@ -176,18 +173,18 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 	public void startDrag(MouseEvent event) {
 
 		// Determine if able to create a connection
-		AdaptedConnectorPart sourceConnectorPart = this.getAdaptedConnectorPart();
-		if (!sourceConnectorPart.getContent().isAssociationCreateConnection()) {
+		AdaptedConnectablePart sourceConnectablePart = this.getAdaptedConnectablePart();
+		if (!sourceConnectablePart.getContent().isAssociationCreateConnection()) {
 			return;
 		}
 
 		// Determine if select only
-		if (sourceConnectorPart.getContent().getParentAdaptedConnectable().getSelectOnly() != null) {
+		if (sourceConnectablePart.getContent().getParentAdaptedConnectable().getSelectOnly() != null) {
 			return; // select only
 		}
 
 		// Create the proxy connection
-		this.sourceConnector = sourceConnectorPart;
+		this.sourceConnector = sourceConnectablePart;
 		this.connection = new ProxyAdaptedConnection<>(this.sourceConnector.getContent());
 
 		// Register the connector as active
@@ -291,7 +288,7 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 					this.sourceConnector.getContent().getAssociationRole());
 		}
 
-		// Clearn up the drag
+		// Clean up the drag
 		this.cleanupDrag();
 	}
 

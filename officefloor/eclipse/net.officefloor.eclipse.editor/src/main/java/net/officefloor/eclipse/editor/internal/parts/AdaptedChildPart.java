@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.editor.internal.parts;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,9 +61,8 @@ public class AdaptedChildPart<M extends Model, A extends AdaptedChild<M>> extend
 
 	@Override
 	protected List<Object> doGetContentChildren() {
-		List<Object> children = new ArrayList<>();
+		List<Object> children = super.doGetContentChildren();
 		children.addAll(this.getContent().getChildrenGroups());
-		children.addAll(this.getContent().getAdaptedConnectors());
 		return children;
 	}
 

@@ -17,17 +17,22 @@
  */
 package net.officefloor.eclipse.editor.internal.parts;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.gef.fx.nodes.GeometryNode;
 import org.eclipse.gef.geometry.planar.Dimension;
+import org.eclipse.gef.geometry.planar.RoundedRectangle;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import org.eclipse.gef.mvc.fx.parts.IResizableContentPart;
 import org.eclipse.gef.mvc.fx.parts.ITransformableContentPart;
 
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import net.officefloor.eclipse.editor.AdaptedArea;
+import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
+import net.officefloor.eclipse.editor.ParentToAreaConnectionModel;
 import net.officefloor.model.Model;
 
 /**
@@ -36,12 +41,21 @@ import net.officefloor.model.Model;
  * @author Daniel Sagenschneider
  */
 public class AdaptedAreaPart<M extends Model> extends AbstractAdaptedConnectablePart<M, AdaptedArea<M>>
-		implements ITransformableContentPart<Node>, IResizableContentPart<Node> {
+		implements AdaptedConnectablePart, ITransformableContentPart<Node>, IResizableContentPart<Node> {
 
 	/**
 	 * {@link TransformContent}.
 	 */
 	private TransformContent<M, AdaptedArea<M>> transformableContent;
+
+	/*
+	 * =============== AdaptedConnectablePart ============================
+	 */
+
+	@Override
+	public void setActiveConnector(boolean isActive) {
+		// no active connector
+	}
 
 	/*
 	 * ===================== IContentPart =================================
@@ -54,16 +68,28 @@ public class AdaptedAreaPart<M extends Model> extends AbstractAdaptedConnectable
 	}
 
 	@Override
-	protected List<? extends Object> doGetContentChildren() {
-		List<Object> children = new ArrayList<>();
-		children.addAll(this.getContent().getAdaptedConnectors());
-		return children;
+	protected List<Object> doGetContentChildren() {
+		return Collections.emptyList();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Node createVisualNode() {
-		return this.getContent().createVisual(new AdaptedModelVisualFactoryContextImpl<>(
+
+		// Create the view factory
+		Dimension minimum = this.getContent().getMinimumDimension();
+		AdaptedModelVisualFactory<M> viewFactory = (model, context) -> {
+			GeometryNode<RoundedRectangle> node = new GeometryNode<>(new RoundedRectangle(200, 100, 200, 100, 5, 5));
+			context.connector((visualContext) -> node, ParentToAreaConnectionModel.class).getNode();
+			node.setMinWidth(minimum.width);
+			node.setMinHeight(minimum.height);
+			node.setFill(Color.KHAKI);
+			node.setStroke(Color.KHAKI);
+			return node;
+		};
+
+		// Create and return the view
+		return viewFactory.createVisual(this.getContent().getModel(), new AdaptedModelVisualFactoryContextImpl<>(
 				(Class<M>) this.getContent().getModel().getClass(), false, this.getConnectorLoader(), (action) -> {
 
 					// Undertake the action

@@ -18,7 +18,9 @@
 package net.officefloor.eclipse.editor.internal.parts;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.gef.fx.nodes.GeometryNode;
@@ -148,13 +150,30 @@ public abstract class AbstractAdaptedConnectablePart<M extends Model, A extends 
 	}
 
 	@Override
+	protected void doAttachToAnchorageVisual(IVisualPart<? extends Node> anchorage, String role) {
+		// already attached
+	}
+
+	@Override
+	protected void doDetachFromAnchorageVisual(IVisualPart<? extends Node> anchorage, String role) {
+		// nothing to detach
+	}
+
+	@Override
+	protected List<Object> doGetContentChildren() {
+		List<Object> children = new ArrayList<>();
+		children.addAll(this.getContent().getAdaptedConnectors());
+		return children;
+	}
+
+	@Override
 	protected void doAddChildVisual(IVisualPart<? extends Node> child, int index) {
-		// Should only be children groups (already added)
+		// Should only be static connectors
 	}
 
 	@Override
 	protected void doRemoveChildVisual(IVisualPart<? extends Node> child, int index) {
-		// Should only be children groups (never removed)
+		// Should only be static connectors
 	}
 
 	/**
@@ -199,6 +218,7 @@ public abstract class AbstractAdaptedConnectablePart<M extends Model, A extends 
 
 	@Override
 	protected void doRefreshVisual(Node visual) {
+		// nothing to refresh
 	}
 
 	/**

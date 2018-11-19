@@ -369,6 +369,19 @@ public abstract class AbstractAdaptedConnectableFactory<R extends Model, O, M ex
 			}
 		}
 
+		/**
+		 * Allows overriding the {@link AdaptedConnector}.
+		 * 
+		 * @param connectionClass {@link ConnectionModel} {@link Class}.
+		 * @param role            {@link AdaptedConnectorRole}.
+		 * @param connector       {@link ModelToConnection}.
+		 * @return {@link AdaptedConnector}.
+		 */
+		protected AdaptedConnector<M> createAdaptedConnector(Class<? extends ConnectionModel> connectionClass,
+				AdaptedConnectorRole role, ModelToConnection<R, O, M, E, ?> connector) {
+			return new AdaptedConnectorImpl<>(this, connectionClass, role, connector);
+		}
+
 		/*
 		 * =================== AdaptedChild =====================
 		 */
@@ -390,16 +403,16 @@ public abstract class AbstractAdaptedConnectableFactory<R extends Model, O, M ex
 
 					// Register the source and target connector
 					this.connectors.put(new ConnectorKey(connectionClass, AdaptedConnectorRole.SOURCE),
-							new AdaptedConnectorImpl<>(this, connectionClass, AdaptedConnectorRole.SOURCE,
+							this.createAdaptedConnector(connectionClass, AdaptedConnectorRole.SOURCE,
 									selfConnector.getSourceToConnection()));
 					this.connectors.put(new ConnectorKey(connectionClass, AdaptedConnectorRole.TARGET),
-							new AdaptedConnectorImpl<>(this, connectionClass, AdaptedConnectorRole.TARGET,
+							this.createAdaptedConnector(connectionClass, AdaptedConnectorRole.TARGET,
 									selfConnector.getTargetToConnection()));
 
 				} else {
 					// Register the adapted connector (for source/target)
 					this.connectors.put(new ConnectorKey(connectionClass, null),
-							new AdaptedConnectorImpl<>(this, connectionClass, null, connector));
+							this.createAdaptedConnector(connectionClass, null, connector));
 				}
 
 				// Register the connection change events

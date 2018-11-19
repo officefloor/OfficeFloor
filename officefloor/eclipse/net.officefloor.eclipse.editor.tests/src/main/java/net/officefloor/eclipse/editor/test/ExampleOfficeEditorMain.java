@@ -17,15 +17,12 @@
  */
 package net.officefloor.eclipse.editor.test;
 
-import org.eclipse.gef.fx.nodes.GeometryNode;
 import org.eclipse.gef.geometry.planar.Dimension;
-import org.eclipse.gef.geometry.planar.RoundedRectangle;
 
 import javafx.application.Application;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
@@ -64,7 +61,6 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void buildModels(AdaptedBuilderContext builder) {
 
 		// Specify the root model
@@ -104,15 +100,6 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 				(a) -> new Dimension(a.getWidth(), a.getHeight()), (a, dimension) -> {
 					a.setWidth((int) dimension.getWidth());
 					a.setHeight((int) dimension.getHeight());
-				}, (model, context) -> {
-					RoundedRectangle rectangle = new RoundedRectangle(200, 100, 200, 100, 5, 5);
-					GeometryNode<RoundedRectangle> node = new GeometryNode<>(rectangle);
-					context.connector((visualContext) -> node, ParentToAreaConnectionModel.class).getNode();
-					node.setMinWidth(20);
-					node.setMinHeight(20);
-					node.strokeProperty().set(Color.KHAKI);
-					node.fillProperty().set(Color.KHAKI);
-					return node;
 				}, GovernanceEvent.ADD_GOVERNANCE_AREA, GovernanceEvent.REMOVE_GOVERNANCE_AREA);
 	}
 

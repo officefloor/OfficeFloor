@@ -23,17 +23,17 @@ import java.util.function.Function;
 
 import org.eclipse.gef.geometry.planar.Dimension;
 
-import javafx.beans.property.Property;
-import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedArea;
 import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
+import net.officefloor.eclipse.editor.AdaptedConnectable;
 import net.officefloor.eclipse.editor.AdaptedConnection;
+import net.officefloor.eclipse.editor.AdaptedConnector;
+import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 import net.officefloor.eclipse.editor.AdaptedModel;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.ParentToAreaConnectionModel;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 /**
@@ -55,9 +55,9 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 	private final BiConsumer<M, Dimension> setDimension;
 
 	/**
-	 * {@link AdaptedModelVisualFactory}.
+	 * Minimum {@link Dimension}.
 	 */
-	private final AdaptedModelVisualFactory<M> viewFactory;
+	private Dimension minimumDimension = new Dimension(50, 50);
 
 	/**
 	 * Instantiate.
@@ -69,15 +69,13 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 	 *                             {@link Model}.
 	 * @param setDimension         Specifies the {@link Dimension} on the
 	 *                             {@link Model}.
-	 * @param viewFactory          {@link AdaptedModelVisualFactory}.
 	 */
 	public AdaptedAreaFactory(String adaptedPathPrefix, M modelPrototype,
 			AbstractAdaptedFactory<R, O, ?, ?, ?> parentAdaptedFactory, Function<M, Dimension> getDimension,
-			BiConsumer<M, Dimension> setDimension, AdaptedModelVisualFactory<M> viewFactory) {
+			BiConsumer<M, Dimension> setDimension) {
 		super(adaptedPathPrefix, modelPrototype, () -> new AdaptedAreaImpl<>(), parentAdaptedFactory);
 		this.getDimension = getDimension;
 		this.setDimension = setDimension;
-		this.viewFactory = viewFactory;
 	}
 
 	/*
@@ -85,9 +83,8 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 	 */
 
 	@Override
-	public Property<String> style() {
-		// TODO implement AdaptedAreaBuilder<R,O,M,E>.style(...)
-		throw new UnsupportedOperationException("TODO implement AdaptedAreaBuilder<R,O,M,E>.style(...)");
+	public void setMinimumDimension(double width, double height) {
+		this.minimumDimension = new Dimension(width, height);
 	}
 
 	@Override
@@ -107,7 +104,7 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 	 */
 	public static class AdaptedAreaImpl<R extends Model, O, M extends Model, E extends Enum<E>>
 			extends AbstractAdaptedConnectable<R, O, M, E, AdaptedArea<M>, AdaptedAreaFactory<R, O, M, E>>
-			implements AdaptedArea<M> {
+			implements AdaptedArea<M>, AdaptedConnector<M> {
 
 		/**
 		 * {@link ParentToAreaConnectionModel}.
@@ -130,6 +127,25 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 		}
 
 		@Override
+		public AdaptedConnector<M> getAdaptedConnector(Class<? extends ConnectionModel> connectionClass,
+				AdaptedConnectorRole type) {
+
+			// Should only connect to parent
+			if (!ParentToAreaConnectionModel.class.equals(connectionClass)) {
+				throw new IllegalStateException(this.getClass().getSimpleName() + " should only be connected via "
+						+ ParentToAreaConnectionModel.class.getName() + " (but was " + connectionClass.getName() + ")");
+			}
+
+			// Return as the connector
+			return this;
+		}
+
+		@Override
+		public Dimension getMinimumDimension() {
+			return this.getFactory().minimumDimension;
+		}
+
+		@Override
 		public Dimension getDimension() {
 			return this.getFactory().getDimension.apply(this.getModel());
 		}
@@ -140,18 +156,45 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 		}
 
 		@Override
+		protected AdaptedConnector<M> createAdaptedConnector(Class<? extends ConnectionModel> connectionClass,
+				AdaptedConnectorRole role, ModelToConnection<R, O, M, E, ?> connector) {
+			return this;
+		}
+
+		@Override
 		public ParentToAreaConnectionModel getParentConnection() {
 			return this.connectionModel;
 		}
 
 		@Override
-		public Node createVisual(AdaptedModelVisualFactoryContext<M> context) {
-			return this.getFactory().viewFactory.createVisual(this.getModel(), context);
+		protected void loadDescendantConnections(List<AdaptedConnection<?>> connections) {
+			// no descendant connections
 		}
 
 		@Override
-		protected void loadDescendantConnections(List<AdaptedConnection<?>> connections) {
-			// no descendant connections
+		public AdaptedConnectable<M> getParentAdaptedConnectable() {
+			return this;
+		}
+
+		@Override
+		public Class<? extends ConnectionModel> getConnectionModelClass() {
+			return ParentToAreaConnectionModel.class;
+		}
+
+		@Override
+		public void setAssociation(List<AdaptedConnector<M>> associatedAdaptedConnectors,
+				AdaptedConnectorRole associatedRole) {
+			// No association
+		}
+
+		@Override
+		public boolean isAssociationCreateConnection() {
+			return false;
+		}
+
+		@Override
+		public AdaptedConnectorRole getAssociationRole() {
+			return AdaptedConnectorRole.SOURCE;
 		}
 	}
 
