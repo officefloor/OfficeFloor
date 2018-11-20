@@ -27,18 +27,18 @@ import net.officefloor.model.ConnectionModel;
 public interface AdaptedConnection<C extends ConnectionModel> extends AdaptedModel<C> {
 
 	/**
-	 * Obtains the source {@link AdaptedChild}.
+	 * Obtains the source {@link AdaptedConnectable}.
 	 * 
-	 * @return Source {@link AdaptedChild}.
+	 * @return Source {@link AdaptedConnectable}.
 	 */
-	AdaptedChild<?> getSource();
+	AdaptedConnectable<?> getSource();
 
 	/**
-	 * Obtains the target {@link AdaptedChild}.
+	 * Obtains the target {@link AdaptedConnectable}.
 	 * 
-	 * @return Target {@link AdaptedChild}.
+	 * @return Target {@link AdaptedConnectable}.
 	 */
-	AdaptedChild<?> getTarget();
+	AdaptedConnectable<?> getTarget();
 
 	/**
 	 * Indicates whether able to remove the {@link ConnectionModel}.

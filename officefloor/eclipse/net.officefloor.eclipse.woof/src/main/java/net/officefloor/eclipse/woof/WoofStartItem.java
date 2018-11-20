@@ -22,7 +22,7 @@ import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.ConnectionModel;
@@ -69,7 +69,7 @@ public class WoofStartItem extends
 	}
 
 	@Override
-	public Node visual(WoofStartModel model, AdaptedModelVisualFactoryContext<WoofStartModel> context) {
+	public Node visual(WoofStartModel model, AdaptedChildVisualFactoryContext<WoofStartModel> context) {
 		HBox container = new HBox();
 		context.addNode(container, new Label("Start"));
 		context.addNode(container,

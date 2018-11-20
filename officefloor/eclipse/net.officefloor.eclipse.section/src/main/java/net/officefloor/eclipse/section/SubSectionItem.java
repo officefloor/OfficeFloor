@@ -30,7 +30,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.model.section.SectionChanges;
@@ -131,7 +131,7 @@ public class SubSectionItem extends
 	}
 
 	@Override
-	public Pane visual(SubSectionModel model, AdaptedModelVisualFactoryContext<SubSectionModel> context) {
+	public Pane visual(SubSectionModel model, AdaptedChildVisualFactoryContext<SubSectionModel> context) {
 		VBox container = new VBox();
 		context.label(container);
 		HBox children = context.addNode(container, new HBox());

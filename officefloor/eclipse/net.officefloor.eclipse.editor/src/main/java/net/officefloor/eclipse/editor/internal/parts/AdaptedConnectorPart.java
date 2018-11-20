@@ -35,7 +35,6 @@ import javafx.scene.layout.Region;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 import net.officefloor.eclipse.editor.AdaptedPotentialConnection;
-import net.officefloor.eclipse.editor.internal.handlers.CreateAdaptedConnectionOnDragHandler;
 import net.officefloor.eclipse.editor.internal.models.ActiveConnectionSourceModel;
 import net.officefloor.eclipse.editor.internal.models.ActiveConnectionSourceModel.ActiveConnectionSource;
 import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
@@ -45,21 +44,24 @@ import net.officefloor.eclipse.editor.internal.models.AdaptedConnectorImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedConnectorPart extends AbstractContentPart<Region> {
+public class AdaptedConnectorPart<R extends Region> extends AbstractContentPart<R> implements AdaptedConnectablePart {
 
 	@Inject
 	private ActiveConnectionSourceModel activeConnectionSource;
 
-	/**
-	 * Specifies this as the active {@link AdaptedConnectorPart} for the
-	 * {@link CreateAdaptedConnectionOnDragHandler}.
-	 * 
-	 * @param isActive
-	 *            Indicates if active.
+	/*
+	 * ============ AdaptedConnectablePart =============
 	 */
+
+	@Override
+	public AdaptedConnector<?> getContent() {
+		return (AdaptedConnector<?>) super.getContent();
+	}
+
+	@Override
 	public void setActiveConnector(boolean isActive) {
 		if (isActive) {
-			this.activeConnectionSource.setActiveSource(this.getContent().getParentAdaptedChild(),
+			this.activeConnectionSource.setActiveSource(this.getContent().getParentAdaptedConnectable(),
 					this.getContent().getAssociationRole());
 		} else {
 			this.activeConnectionSource.setActiveSource(null, null);
@@ -69,11 +71,6 @@ public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 	/*
 	 * ================= IContentPart ====================
 	 */
-
-	@Override
-	public AdaptedConnector<?> getContent() {
-		return (AdaptedConnector<?>) super.getContent();
-	}
 
 	@Override
 	public void setContent(Object content) {
@@ -98,14 +95,14 @@ public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 			}
 
 			// Keep this child visible
-			if (activeSource.getSource() == this.getContent().getParentAdaptedChild()) {
+			if (activeSource.getSource() == this.getContent().getParentAdaptedConnectable()) {
 				return;
 			}
 
 			// Determine if can be connected to from the active child
 			boolean isAbleToConnect = false;
 			AdaptedPotentialConnection potentialConnection = activeSource.getSource()
-					.getPotentialConnection(this.getContent().getParentAdaptedChild());
+					.getPotentialConnection(this.getContent().getParentAdaptedConnectable());
 			if ((potentialConnection != null) && (potentialConnection.canCreateConnection())) {
 				isAbleToConnect = true;
 
@@ -136,10 +133,11 @@ public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 	}
 
 	@Override
-	protected Region doCreateVisual() {
+	@SuppressWarnings("unchecked")
+	protected R doCreateVisual() {
 
 		// Obtain the parent
-		AdaptedChildPart<?, ?> parent = (AdaptedChildPart<?, ?>) this.getParent();
+		AbstractAdaptedConnectablePart<?, ?> parent = (AbstractAdaptedConnectablePart<?, ?>) this.getParent();
 
 		// Obtain the node for the connector
 		Region node = parent.getAdaptedConnectorNode(this.getContent());
@@ -153,7 +151,7 @@ public class AdaptedConnectorPart extends AbstractContentPart<Region> {
 				.add(this.getContent().isAssociationCreateConnection() ? "connector-create" : "connector-not-create");
 
 		// Return the visual
-		return node;
+		return (R) node;
 	}
 
 	@Override

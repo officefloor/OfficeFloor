@@ -72,7 +72,7 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 	}
 
 	/*
-	 * ============ AbstractEditorMain ================
+	 * ============ AbstractEditorApplication ================
 	 */
 
 	@Override

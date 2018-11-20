@@ -17,9 +17,12 @@
  */
 package net.officefloor.eclipse.editor.internal.models;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.operations.AbstractOperation;
@@ -27,21 +30,25 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.gef.geometry.planar.Dimension;
 import org.eclipse.gef.geometry.planar.Point;
 import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 
 import com.google.inject.Injector;
 
 import net.officefloor.eclipse.editor.AdaptedActionVisualFactory;
+import net.officefloor.eclipse.editor.AdaptedArea;
+import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ModelAction;
 import net.officefloor.eclipse.editor.ModelActionContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
+import net.officefloor.eclipse.editor.ParentToAreaConnectionModel;
 import net.officefloor.eclipse.editor.internal.parts.OfficeFloorContentPartFactory;
 import net.officefloor.model.Model;
 
@@ -64,26 +71,33 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	private ModelAction<R, O, M> parentModelProvider = null;
 
 	/**
-	 * {@link ModelToAction} instances.
+	 * Listing of means to obtain areas from the parent.
 	 */
-	private final List<ModelToAction<R, O, M>> modelToActions = new LinkedList<>();
+	private final List<Function<M, List<? extends Model>>> areas = new LinkedList<>();
+
+	/**
+	 * Listing of {@link AdaptedArea} change events.
+	 */
+	private final Set<String> areaChangeEvents = new HashSet<>();
+
+	/**
+	 * {@link AdaptedActionsFactory}.
+	 */
+	private final AdaptedActionsFactory<R, O, M> actionsFactory;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param configurationPathPrefix
-	 *            Prefix to the configuration path.
-	 * @param modelPrototype
-	 *            {@link Model} prototype.
-	 * @param viewFactory
-	 *            {@link AdaptedModelVisualFactory}.
-	 * @param contentFactory
-	 *            {@link OfficeFloorContentPartFactory}.
+	 * @param configurationPathPrefix Prefix to the configuration path.
+	 * @param modelPrototype          {@link Model} prototype.
+	 * @param viewFactory             {@link AdaptedChildVisualFactory}.
+	 * @param contentFactory          {@link OfficeFloorContentPartFactory}.
 	 */
 	public AdaptedParentFactory(String configurationPathPrefix, M modelPrototype,
-			AdaptedModelVisualFactory<M> viewFactory, OfficeFloorContentPartFactory<R, O> contentFactory) {
+			AdaptedChildVisualFactory<M> viewFactory, OfficeFloorContentPartFactory<R, O> contentFactory) {
 		super(configurationPathPrefix, modelPrototype, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
 		this.errorHandler = contentFactory.getErrorHandler();
+		this.actionsFactory = new AdaptedActionsFactory<>(contentFactory);
 	}
 
 	/**
@@ -98,8 +112,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	/**
 	 * Creates the {@link AdaptedModel} from this {@link AdaptedParent} prototype.
 	 * 
-	 * @param factory
-	 *            {@link OfficeFloorContentPartFactory}.
+	 * @param factory {@link OfficeFloorContentPartFactory}.
 	 * @return {@link AdaptedModel} for the prototype.
 	 */
 	@SuppressWarnings("unchecked")
@@ -121,36 +134,38 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 
 	@Override
 	public void action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
-		this.modelToActions.add(new ModelToAction<>(action, visualFactory));
+		this.actionsFactory.addAction(action, visualFactory);
 	}
 
-	/**
-	 * {@link Model} to {@link ModelAction}.
-	 */
-	private static class ModelToAction<R extends Model, O, M extends Model> {
-
-		/**
-		 * {@link ModelAction}.
-		 */
-		private final ModelAction<R, O, M> action;
-
-		/**
-		 * {@link AdaptedActionVisualFactory}.
-		 */
-		private final AdaptedActionVisualFactory visualFactory;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param action
-		 *            {@link ModelAction}.
-		 * @param visualFactory
-		 *            {@link AdaptedActionVisualFactory}.
-		 */
-		private ModelToAction(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
-			this.action = action;
-			this.visualFactory = visualFactory;
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <AM extends Model, AE extends Enum<AE>, RE extends Enum<RE>> AdaptedAreaBuilder<R, O, AM, AE> area(
+			AM areaPrototype, Function<M, List<AM>> getAreas, Function<AM, Dimension> getDimension,
+			BiConsumer<AM, Dimension> setDimension, E... changeAreaEvents) {
+		this.areas.add((Function) getAreas);
+		for (E changeAreaEvent : changeAreaEvents) {
+			this.areaChangeEvents.add(changeAreaEvent.name());
 		}
+
+		// Create the factory
+		AdaptedAreaFactory<R, O, AM, AE> factory = new AdaptedAreaFactory<>(this.getConfigurationPath(), areaPrototype,
+				this, getDimension, setDimension);
+
+		// Provide connection to area
+		factory.connectOne(ParentToAreaConnectionModel.class, (area) -> {
+			AdaptedArea<?> adaptedArea = (AdaptedArea<?>) this.getContentPartFactory().createAdaptedModel(area, null);
+			return adaptedArea.getParentConnection();
+		}, (conn) -> (AM) conn.getAreaModel()).toMany(this.getModelClass(), (parent) -> {
+			AdaptedParent<?> adaptedParent = (AdaptedParent<?>) this.getContentPartFactory().createAdaptedModel(parent,
+					null);
+			List<ParentToAreaConnectionModel> connections = new LinkedList<>();
+			for (AdaptedArea<?> adaptedArea : adaptedParent.getAdaptedAreas()) {
+				connections.add(adaptedArea.getParentConnection());
+			}
+			return connections;
+		}, (conn) -> (M) conn.getParentModel());
+
+		return factory;
 	}
 
 	/**
@@ -167,36 +182,14 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		/**
 		 * {@link AdaptedActions}.
 		 */
-		private AdaptedActions<R, O, M> actions = null;
+		private AdaptedActions<R, O, M> actions;
 
 		@Override
 		protected void init() {
 			super.init();
 
 			// Load the adapter actions
-			if (this.getParentFactory().modelToActions.size() > 0) {
-
-				// Determine if click only
-				boolean isClickOnly = (this.getFactory().getContentPartFactory().getSelectOnly() != null);
-
-				// Load the model actions
-				List<AdaptedAction<R, O, M>> actions = new ArrayList<>(this.getParentFactory().modelToActions.size());
-				for (ModelToAction<R, O, M> action : this.getParentFactory().modelToActions) {
-
-					// Obtain the action
-					ModelAction<R, O, M> modelAction = action.action;
-					if (isClickOnly) {
-						// Click only, so dummy action
-						modelAction = (context) -> {
-						};
-					}
-
-					// Add the action
-					actions.add(new AdaptedAction<>(modelAction, this, action.visualFactory,
-							this.getParentFactory().errorHandler));
-				}
-				this.actions = new AdaptedActions<>(actions);
-			}
+			this.actions = this.getParentFactory().actionsFactory.createAdaptedActions(this);
 		}
 
 		/**
@@ -215,6 +208,34 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		@Override
 		public boolean isPalettePrototype() {
 			return this.isPalettePrototype;
+		}
+
+		@Override
+		public List<AdaptedArea<?>> getAdaptedAreas() {
+
+			// Load the areas
+			List<AdaptedArea<?>> areas = new LinkedList<>();
+			for (Function<M, List<? extends Model>> getAreas : this.getParentFactory().areas) {
+				for (Model areaModel : getAreas.apply(this.getModel())) {
+
+					// Adapt the area
+					AdaptedArea<?> adaptedArea = (AdaptedArea<?>) this.getFactory().getContentPartFactory()
+							.createAdaptedModel(areaModel, this.getAdaptedModel());
+
+					// Only add area once
+					if (!areas.contains(adaptedArea)) {
+						areas.add(adaptedArea);
+					}
+				}
+			}
+
+			// Return the areas
+			return areas;
+		}
+
+		@Override
+		public boolean isAreaChangeEvent(String eventName) {
+			return this.getParentFactory().areaChangeEvents.contains(eventName);
 		}
 
 		@Override

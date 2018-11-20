@@ -21,7 +21,7 @@ import java.util.List;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.model.ConnectionModel;
@@ -75,7 +75,7 @@ public class WoofTemplateOutputItem extends
 
 	@Override
 	public Pane visual(WoofTemplateOutputModel model,
-			AdaptedModelVisualFactoryContext<WoofTemplateOutputModel> context) {
+			AdaptedChildVisualFactoryContext<WoofTemplateOutputModel> context) {
 		HBox container = new HBox();
 		context.label(container);
 		context.addNode(container, context.connector(DefaultConnectors.FLOW)

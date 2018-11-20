@@ -33,6 +33,7 @@ import com.google.common.collect.SetMultimap;
 
 import javafx.scene.Node;
 import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedConnectable;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedConnectorRole;
@@ -71,7 +72,7 @@ public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel
 		}
 
 		// Load the source
-		AdaptedChild<?> sourceChild = this.getContent().getSource();
+		AdaptedConnectable<?> sourceChild = this.getContent().getSource();
 		if (sourceChild != null) {
 			this.sourceConnector = sourceChild.getAdaptedConnector(this.getContent().getModel().getClass(),
 					AdaptedConnectorRole.SOURCE);
@@ -79,7 +80,7 @@ public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel
 		}
 
 		// Load the target
-		AdaptedChild<?> targetChild = this.getContent().getTarget();
+		AdaptedConnectable<?> targetChild = this.getContent().getTarget();
 		if (targetChild != null) {
 			this.targetConnector = targetChild.getAdaptedConnector(this.getContent().getModel().getClass(),
 					AdaptedConnectorRole.TARGET);
@@ -92,10 +93,10 @@ public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel
 
 	@Override
 	protected void doAttachToAnchorageVisual(IVisualPart<? extends Node> anchorage, String role) {
-		if (!(anchorage instanceof AdaptedConnectorPart)) {
+		if (!((anchorage instanceof AdaptedConnectorPart) || (anchorage instanceof AdaptedAreaPart))) {
 			throw new IllegalStateException("Attempting to attach non " + AdaptedConnectorPart.class.getSimpleName()
-					+ " anchor to " + this.getClass().getSimpleName() + " for model "
-					+ this.getContent().getModel().getClass().getName());
+					+ "/" + AdaptedAreaPart.class.getSimpleName() + " anchor to " + this.getClass().getSimpleName()
+					+ " for model " + this.getContent().getModel().getClass().getName());
 		}
 
 		// Anchoring
@@ -209,8 +210,8 @@ public class AdaptedConnectionPart<R extends Model, O, C extends ConnectionModel
 
 			// Determine if connected to new anchors (and connect if so)
 			if ((start.isAttached()) && (end.isAttached())) {
-				startConnector.getParentAdaptedChild().createConnection(endConnector.getParentAdaptedChild(),
-						AdaptedConnectorRole.SOURCE);
+				startConnector.getParentAdaptedConnectable()
+						.createConnection(endConnector.getParentAdaptedConnectable(), AdaptedConnectorRole.SOURCE);
 			}
 		}
 	}

@@ -39,7 +39,7 @@ import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder;
 import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
 import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionRemover;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.ChangeExecutor;
 import net.officefloor.eclipse.editor.ChildrenGroup;
@@ -346,10 +346,10 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * @param model
 	 *            {@link Model}.
 	 * @param context
-	 *            {@link AdaptedModelVisualFactoryContext}.
+	 *            {@link AdaptedChildVisualFactoryContext}.
 	 * @return {@link Node} for the visual.
 	 */
-	public abstract Node visual(M model, AdaptedModelVisualFactoryContext<M> context);
+	public abstract Node visual(M model, AdaptedChildVisualFactoryContext<M> context);
 
 	/**
 	 * Labels the configuration item.

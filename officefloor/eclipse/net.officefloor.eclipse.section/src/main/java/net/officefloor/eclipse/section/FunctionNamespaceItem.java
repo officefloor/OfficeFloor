@@ -37,7 +37,7 @@ import net.officefloor.eclipse.configurer.ChoiceBuilder;
 import net.officefloor.eclipse.configurer.ConfigurationBuilder;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
 import net.officefloor.model.section.FunctionNamespaceModel;
@@ -177,7 +177,7 @@ public class FunctionNamespaceItem extends
 	}
 
 	@Override
-	public Pane visual(FunctionNamespaceModel model, AdaptedModelVisualFactoryContext<FunctionNamespaceModel> context) {
+	public Pane visual(FunctionNamespaceModel model, AdaptedChildVisualFactoryContext<FunctionNamespaceModel> context) {
 		VBox container = new VBox();
 		context.label(container).getStyleClass().add("title");
 		context.addNode(container, context.childGroup(ManagedFunctionItem.class.getSimpleName(), new VBox()));

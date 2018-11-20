@@ -22,7 +22,7 @@ import java.util.List;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.woof.model.woof.WoofChanges;
@@ -78,7 +78,7 @@ public class WoofResourceItem extends
 	}
 
 	@Override
-	public Pane visual(WoofResourceModel model, AdaptedModelVisualFactoryContext<WoofResourceModel> context) {
+	public Pane visual(WoofResourceModel model, AdaptedChildVisualFactoryContext<WoofResourceModel> context) {
 		HBox container = new HBox();
 		context.addNode(container,
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofResourceModel.class,

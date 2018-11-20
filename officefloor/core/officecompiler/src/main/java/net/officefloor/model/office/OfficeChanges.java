@@ -20,11 +20,13 @@ package net.officefloor.model.office;
 import java.util.Map;
 
 import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.OfficeFunctionType;
 import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
+import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -337,6 +339,45 @@ public interface OfficeChanges {
 	 * @return {@link Change} to rename the {@link AdministrationModel}.
 	 */
 	Change<AdministrationModel> renameAdministration(AdministrationModel administration, String newAdministrationName);
+
+	/**
+	 * Adds an {@link GovernanceModel} to the {@link OfficeModel}.
+	 * 
+	 * @param governanceName            Name of the {@link GovernanceModel}.
+	 * @param governanceSourceClassName Class name of the {@link GovernanceSource}.
+	 * @param properties                {@link PropertyList}.
+	 * @param isAutoWireExtensions      Indicates if auto-wire extensions.
+	 * @param governanceType            {@link GovernanceType}.
+	 * @return {@link Change} to add the {@link GovernanceModel}.
+	 */
+	Change<GovernanceModel> addGovernance(String governanceName, String governanceSourceClassName,
+			PropertyList properties, boolean isAutoWireExtensions, GovernanceType<?, ?> governanceType);
+
+	/**
+	 * Removes the {@link GovernanceModel}.
+	 * 
+	 * @param governance {@link GovernanceModel} to remove.
+	 * @return {@link Change} to remove the {@link GovernanceModel}.
+	 */
+	Change<GovernanceModel> removeGovernance(GovernanceModel governance);
+
+	/**
+	 * Adds an {@link GovernanceAreaModel} to the {@link OfficeModel}.
+	 * 
+	 * @param governance {@link GovernanceModel}.
+	 * @param width      Width.
+	 * @param height     Height.
+	 * @return {@link Change} to add the {@link GovernanceAreaModel}.
+	 */
+	Change<GovernanceAreaModel> addGovernanceArea(GovernanceModel governance, int width, int height);
+
+	/**
+	 * Removes the {@link GovernanceAreaModel}.
+	 * 
+	 * @param governance {@link GovernanceAreaModel} to remove.
+	 * @return {@link Change} to remove the {@link GovernanceAreaModel}.
+	 */
+	Change<GovernanceAreaModel> removeGovernanceArea(GovernanceAreaModel governanceArea);
 
 	/**
 	 * Adds an {@link OfficeEscalationModel} to the {@link OfficeModel}.
