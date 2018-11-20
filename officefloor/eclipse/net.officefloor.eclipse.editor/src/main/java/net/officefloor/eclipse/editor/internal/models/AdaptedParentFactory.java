@@ -17,7 +17,6 @@
  */
 package net.officefloor.eclipse.editor.internal.models;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,11 +71,6 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	private ModelAction<R, O, M> parentModelProvider = null;
 
 	/**
-	 * {@link ModelToAction} instances.
-	 */
-	private final List<ModelToAction<R, O, M>> modelToActions = new LinkedList<>();
-
-	/**
 	 * Listing of means to obtain areas from the parent.
 	 */
 	private final List<Function<M, List<? extends Model>>> areas = new LinkedList<>();
@@ -85,6 +79,11 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	 * Listing of {@link AdaptedArea} change events.
 	 */
 	private final Set<String> areaChangeEvents = new HashSet<>();
+
+	/**
+	 * {@link AdaptedActionsFactory}.
+	 */
+	private final AdaptedActionsFactory<R, O, M> actionsFactory;
 
 	/**
 	 * Instantiate.
@@ -98,6 +97,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 			AdaptedChildVisualFactory<M> viewFactory, OfficeFloorContentPartFactory<R, O> contentFactory) {
 		super(configurationPathPrefix, modelPrototype, () -> new AdaptedParentImpl<>(), viewFactory, contentFactory);
 		this.errorHandler = contentFactory.getErrorHandler();
+		this.actionsFactory = new AdaptedActionsFactory<>(contentFactory);
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 
 	@Override
 	public void action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
-		this.modelToActions.add(new ModelToAction<>(action, visualFactory));
+		this.actionsFactory.addAction(action, visualFactory);
 	}
 
 	@Override
@@ -169,33 +169,6 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	}
 
 	/**
-	 * {@link Model} to {@link ModelAction}.
-	 */
-	private static class ModelToAction<R extends Model, O, M extends Model> {
-
-		/**
-		 * {@link ModelAction}.
-		 */
-		private final ModelAction<R, O, M> action;
-
-		/**
-		 * {@link AdaptedActionVisualFactory}.
-		 */
-		private final AdaptedActionVisualFactory visualFactory;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param action        {@link ModelAction}.
-		 * @param visualFactory {@link AdaptedActionVisualFactory}.
-		 */
-		private ModelToAction(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
-			this.action = action;
-			this.visualFactory = visualFactory;
-		}
-	}
-
-	/**
 	 * {@link AdaptedParent} implementation.
 	 */
 	public static class AdaptedParentImpl<R extends Model, O, M extends Model, E extends Enum<E>>
@@ -209,36 +182,14 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 		/**
 		 * {@link AdaptedActions}.
 		 */
-		private AdaptedActions<R, O, M> actions = null;
+		private AdaptedActions<R, O, M> actions;
 
 		@Override
 		protected void init() {
 			super.init();
 
 			// Load the adapter actions
-			if (this.getParentFactory().modelToActions.size() > 0) {
-
-				// Determine if click only
-				boolean isClickOnly = (this.getFactory().getContentPartFactory().getSelectOnly() != null);
-
-				// Load the model actions
-				List<AdaptedAction<R, O, M>> actions = new ArrayList<>(this.getParentFactory().modelToActions.size());
-				for (ModelToAction<R, O, M> action : this.getParentFactory().modelToActions) {
-
-					// Obtain the action
-					ModelAction<R, O, M> modelAction = action.action;
-					if (isClickOnly) {
-						// Click only, so dummy action
-						modelAction = (context) -> {
-						};
-					}
-
-					// Add the action
-					actions.add(new AdaptedAction<>(modelAction, this, action.visualFactory,
-							this.getParentFactory().errorHandler));
-				}
-				this.actions = new AdaptedActions<>(actions);
-			}
+			this.actions = this.getParentFactory().actionsFactory.createAdaptedActions(this);
 		}
 
 		/**

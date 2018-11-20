@@ -68,6 +68,19 @@ public class AdaptedAreaPart<M extends Model> extends AbstractAdaptedConnectable
 	}
 
 	@Override
+	public <T> T getAdapter(Class<T> classKey) {
+
+		// Determine if can adapt
+		T adapter = this.getContent().getAdapter(classKey);
+		if (adapter != null) {
+			return adapter;
+		}
+
+		// Inherit adapters
+		return super.getAdapter(classKey);
+	}
+
+	@Override
 	protected List<Object> doGetContentChildren() {
 		return Collections.emptyList();
 	}

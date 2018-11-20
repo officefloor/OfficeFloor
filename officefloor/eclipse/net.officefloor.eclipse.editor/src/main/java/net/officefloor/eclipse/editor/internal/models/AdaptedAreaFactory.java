@@ -55,6 +55,11 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 	private final BiConsumer<M, Dimension> setDimension;
 
 	/**
+	 * {@link AdaptedActionsFactory}.
+	 */
+	private final AdaptedActionsFactory<R, O, M> actionsFactory;
+
+	/**
 	 * Minimum {@link Dimension}.
 	 */
 	private Dimension minimumDimension = new Dimension(50, 50);
@@ -76,6 +81,7 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 		super(adaptedPathPrefix, modelPrototype, () -> new AdaptedAreaImpl<>(), parentAdaptedFactory);
 		this.getDimension = getDimension;
 		this.setDimension = setDimension;
+		this.actionsFactory = new AdaptedActionsFactory<>(parentAdaptedFactory.getContentPartFactory());
 	}
 
 	/*
@@ -89,8 +95,7 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 
 	@Override
 	public void action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
-		// TODO implement AdaptedAreaBuilder<R,O,M,E>.action(...)
-		throw new UnsupportedOperationException("TODO implement AdaptedAreaBuilder<R,O,M,E>.action(...)");
+		this.actionsFactory.addAction(action, visualFactory);
 	}
 
 	/**
@@ -105,6 +110,11 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 		 */
 		private ParentToAreaConnectionModel connectionModel = null;
 
+		/**
+		 * {@link AdaptedActions}.
+		 */
+		private AdaptedActions<R, O, M> actions = null;
+
 		@Override
 		protected void init() {
 			super.init();
@@ -118,6 +128,22 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 				Model areaModel = this.getModel();
 				this.connectionModel = new ParentToAreaConnectionModel(parentModel, areaModel);
 			}
+
+			// Load the actions
+			this.actions = this.getFactory().actionsFactory.createAdaptedActions(this);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> T getAdapter(Class<T> classKey) {
+
+			// Attempt to handle adapting
+			if (AdaptedActions.class.equals(classKey)) {
+				return (T) this.actions;
+			}
+
+			// Not able to adapt
+			return null;
 		}
 
 		@Override

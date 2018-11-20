@@ -56,4 +56,13 @@ public interface AdaptedArea<M extends Model> extends AdaptedConnectable<M>, Ada
 	 */
 	ParentToAreaConnectionModel getParentConnection();
 
+	/**
+	 * Obtains the adapter.
+	 * 
+	 * @param          <T> Adapted type.
+	 * @param classKey {@link Class} key.
+	 * @return Adapter or <code>null</code> if no adapter available.
+	 */
+	<T> T getAdapter(Class<T> classKey);
+
 }

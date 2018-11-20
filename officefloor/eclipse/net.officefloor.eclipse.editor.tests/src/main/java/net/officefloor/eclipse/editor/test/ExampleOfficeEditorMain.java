@@ -23,6 +23,7 @@ import javafx.application.Application;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AbstractEditorApplication;
 import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
@@ -91,13 +92,18 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 					return container;
 				}, OfficeEvent.ADD_GOVERNANCE, OfficeEvent.REMOVE_GOVERNANCE);
 		governance.create((p) -> {
-			p.getChangeExecutor().execute(p.getOperations().addGovernance("Governance", null, null, false, null));
+			p.getChangeExecutor().execute(p.getOperations().addGovernance("Governance", null,
+					OfficeFloorCompiler.newPropertyList(), false, null));
 		});
 		governance.label((g) -> g.getGovernanceName(), GovernanceEvent.CHANGE_GOVERNANCE_NAME);
 		governance.action((context) -> {
 			context.getChangeExecutor()
 					.execute(context.getOperations().addGovernanceArea(context.getAdaptedModel().getModel(), 100, 100));
 		}, DefaultImages.ADD);
+		governance.action((context) -> {
+			context.getChangeExecutor()
+					.execute(context.getOperations().removeGovernance(context.getAdaptedModel().getModel()));
+		}, DefaultImages.DELETE);
 
 		// Governance Area
 		AdaptedAreaBuilder<OfficeModel, OfficeChanges, GovernanceAreaModel, GovernanceEvent> area = governance.area(
@@ -106,6 +112,25 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 					a.setWidth((int) dimension.getWidth());
 					a.setHeight((int) dimension.getHeight());
 				}, GovernanceEvent.ADD_GOVERNANCE_AREA, GovernanceEvent.REMOVE_GOVERNANCE_AREA);
+		area.action((context) -> {
+			context.getChangeExecutor()
+					.execute(context.getOperations().removeGovernanceArea(context.getAdaptedModel().getModel()));
+		}, DefaultImages.DELETE);
+		Runnable toggleAreaStyleRunnable = new Runnable() {
+
+			private boolean toggle = false;
+
+			@Override
+			public void run() {
+				String stylesheet = this.toggle ? "{ -fx-fill: blue }" : "{ -fx-fill: green }";
+				System.out.println("Toggle style sheet: " + stylesheet);
+				area.style().setValue(stylesheet);
+				this.toggle = !this.toggle;
+			}
+		};
+		area.action((ctx) -> {
+			toggleAreaStyleRunnable.run();
+		}, (visual) -> new Label("Toggle style"));
 	}
 
 	@Override
