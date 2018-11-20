@@ -445,6 +445,14 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 			// Add the adapted parent (only once)
 			if (!adaptedContentModels.contains(adaptedParent)) {
 				adaptedParents.add(adaptedParent);
+				
+				// Listen to adding areas
+				adaptedParent.getModel().addPropertyChangeListener((event) -> {
+					
+					// TODO Filter to only area events
+					
+					this.loadContentModels();
+				});
 			}
 		}
 

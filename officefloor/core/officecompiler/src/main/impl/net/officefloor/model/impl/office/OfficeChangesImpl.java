@@ -57,6 +57,7 @@ import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel;
+import net.officefloor.model.office.GovernanceAreaModel;
 import net.officefloor.model.office.GovernanceModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
@@ -398,6 +399,30 @@ public class OfficeChangesImpl implements OfficeChanges {
 				}
 			}
 		};
+	}
+
+	/**
+	 * Obtains the {@link GovernanceModel} for the {@link GovernanceAreaModel}.
+	 * 
+	 * @param area {@link GovernanceAreaModel}.
+	 * @return {@link GovernanceModel} for the {@link GovernanceAreaModel} or
+	 *         <code>null</code> if not within the {@link OfficeModel}.
+	 */
+	private GovernanceModel getGovernance(GovernanceAreaModel area) {
+
+		// Find the containing governance
+		GovernanceModel containingGovernance = null;
+		for (GovernanceModel governance : this.office.getGovernances()) {
+			for (GovernanceAreaModel check : governance.getGovernanceAreas()) {
+				if (check == area) {
+					// Found containing governance
+					containingGovernance = governance;
+				}
+			}
+		}
+
+		// Return the containing governance
+		return containingGovernance;
 	}
 
 	/*
@@ -1509,6 +1534,57 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				OfficeChangesImpl.this.office.addGovernance(governance);
+			}
+		};
+	}
+
+	@Override
+	public Change<GovernanceAreaModel> addGovernanceArea(GovernanceModel governance, int width, int height) {
+
+		// TODO test this method (addGovernanceArea)
+
+		// Create the governance area
+		final GovernanceAreaModel governanceArea = new GovernanceAreaModel(width, height, governance.getX() + 150,
+				governance.getY());
+
+		// Return change to add the governance area
+		return new AbstractChange<GovernanceAreaModel>(governanceArea, "Add governance area") {
+			@Override
+			public void apply() {
+				governance.addGovernanceArea(governanceArea);
+			}
+
+			@Override
+			public void revert() {
+				governance.removeGovernanceArea(governanceArea);
+			}
+		};
+	}
+
+	@Override
+	public Change<GovernanceAreaModel> removeGovernanceArea(GovernanceAreaModel governanceArea) {
+
+		// TODO test this method (removeGovernanceArea)
+
+		// Ensure governance area in WoOF to remove
+		final GovernanceModel governance = this.getGovernance(governanceArea);
+		if (governance == null) {
+			// Governance area not in model
+			return new NoChange<GovernanceAreaModel>(governanceArea, "Remove governance area",
+					"Governance area is not in Office model");
+		}
+
+		// Return change to remove the governance area
+		return new AbstractChange<GovernanceAreaModel>(governanceArea, "Remove governance area") {
+
+			@Override
+			public void apply() {
+				governance.removeGovernanceArea(governanceArea);
+			}
+
+			@Override
+			public void revert() {
+				governance.addGovernanceArea(governanceArea);
 			}
 		};
 	}

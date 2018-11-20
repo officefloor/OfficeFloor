@@ -362,6 +362,24 @@ public interface OfficeChanges {
 	Change<GovernanceModel> removeGovernance(GovernanceModel governance);
 
 	/**
+	 * Adds an {@link GovernanceAreaModel} to the {@link OfficeModel}.
+	 * 
+	 * @param governance {@link GovernanceModel}.
+	 * @param width      Width.
+	 * @param height     Height.
+	 * @return {@link Change} to add the {@link GovernanceAreaModel}.
+	 */
+	Change<GovernanceAreaModel> addGovernanceArea(GovernanceModel governance, int width, int height);
+
+	/**
+	 * Removes the {@link GovernanceAreaModel}.
+	 * 
+	 * @param governance {@link GovernanceAreaModel} to remove.
+	 * @return {@link Change} to remove the {@link GovernanceAreaModel}.
+	 */
+	Change<GovernanceAreaModel> removeGovernanceArea(GovernanceAreaModel governanceArea);
+
+	/**
 	 * Adds an {@link OfficeEscalationModel} to the {@link OfficeModel}.
 	 * 
 	 * @param escalationType Type of {@link Escalation}.

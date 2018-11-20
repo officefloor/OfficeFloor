@@ -30,6 +30,7 @@ import net.officefloor.eclipse.editor.AdaptedBuilderContext;
 import net.officefloor.eclipse.editor.AdaptedParentBuilder;
 import net.officefloor.eclipse.editor.AdaptedRootBuilder;
 import net.officefloor.eclipse.editor.DefaultConnectors;
+import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.eclipse.editor.ParentToAreaConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.office.OfficeChangesImpl;
@@ -93,6 +94,10 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 			p.getChangeExecutor().execute(p.getOperations().addGovernance("Governance", null, null, false, null));
 		});
 		governance.label((g) -> g.getGovernanceName(), GovernanceEvent.CHANGE_GOVERNANCE_NAME);
+		governance.action((context) -> {
+			context.getChangeExecutor()
+					.execute(context.getOperations().addGovernanceArea(context.getAdaptedModel().getModel(), 100, 100));
+		}, DefaultImages.ADD);
 
 		// Governance Area
 		AdaptedAreaBuilder<OfficeModel, OfficeChanges, GovernanceAreaModel, GovernanceEvent> area = governance.area(
