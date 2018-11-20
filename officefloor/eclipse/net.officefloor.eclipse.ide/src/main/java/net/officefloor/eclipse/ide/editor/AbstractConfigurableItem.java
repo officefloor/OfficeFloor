@@ -236,6 +236,15 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	public abstract IdeConfigurer configure();
 
 	/**
+	 * Further adapt the {@link AdaptedParentBuilder}.
+	 * 
+	 * @param builder {@link AdaptedParentBuilder}.
+	 */
+	protected void furtherAdapt(AdaptedParentBuilder<R, O, M, E> builder) {
+		super.furtherAdapt(builder);
+	}
+
+	/**
 	 * Creates the {@link AdaptedParentBuilder}.
 	 * 
 	 * @return {@link AdaptedParentBuilder}.

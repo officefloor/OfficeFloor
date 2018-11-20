@@ -19,6 +19,8 @@ package net.officefloor.eclipse.woof;
 
 import java.util.List;
 
+import org.eclipse.gef.geometry.planar.Dimension;
+
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import net.officefloor.compile.governance.GovernanceLoader;
@@ -26,13 +28,19 @@ import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.eclipse.configurer.ValueValidator;
+import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
 import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedParentBuilder;
+import net.officefloor.eclipse.editor.DefaultConnectors;
+import net.officefloor.eclipse.editor.DefaultImages;
+import net.officefloor.eclipse.editor.ParentToAreaConnectionModel;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.woof.model.woof.PropertyModel;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
 import net.officefloor.woof.model.woof.WoofGovernanceModel;
 import net.officefloor.woof.model.woof.WoofGovernanceModel.WoofGovernanceEvent;
 import net.officefloor.woof.model.woof.WoofModel;
@@ -99,6 +107,8 @@ public class WoofGovernanceItem extends
 	public Node visual(WoofGovernanceModel model, AdaptedChildVisualFactoryContext<WoofGovernanceModel> context) {
 		HBox container = new HBox();
 		context.label(container);
+		context.addNode(container,
+				context.connector(DefaultConnectors.OBJECT, ParentToAreaConnectionModel.class).getNode());
 		return container;
 	}
 
@@ -130,6 +140,29 @@ public class WoofGovernanceItem extends
 	protected void loadStyles(List<IdeStyle> styles) {
 		styles.add(new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 50.0%, khaki, darkkhaki)"));
 		styles.add(new IdeStyle(".${model} .label").rule("-fx-text-fill", "lemonchiffon"));
+	}
+
+	@Override
+	protected void furtherAdapt(
+			AdaptedParentBuilder<WoofModel, WoofChanges, WoofGovernanceModel, WoofGovernanceEvent> builder) {
+
+		// Allow adding area
+		builder.action((context) -> {
+			context.getChangeExecutor()
+					.execute(context.getOperations().addGovernanceArea(context.getAdaptedModel().getModel(), 100, 80));
+		}, DefaultImages.ADD);
+
+		// Governance Area
+		AdaptedAreaBuilder<WoofModel, WoofChanges, WoofGovernanceAreaModel, WoofGovernanceEvent> area = builder.area(
+				new WoofGovernanceAreaModel(), (p) -> p.getGovernanceAreas(),
+				(a) -> new Dimension(a.getWidth(), a.getHeight()), (a, dimension) -> {
+					a.setWidth((int) dimension.getWidth());
+					a.setHeight((int) dimension.getHeight());
+				}, WoofGovernanceEvent.ADD_GOVERNANCE_AREA, WoofGovernanceEvent.REMOVE_GOVERNANCE_AREA);
+		area.action((context) -> {
+			context.getChangeExecutor()
+					.execute(context.getOperations().removeGovernanceArea(context.getAdaptedModel().getModel()));
+		}, DefaultImages.DELETE);
 	}
 
 	@Override

@@ -23,29 +23,4 @@ package net.officefloor.eclipse.ide;
  * @author Daniel Sagenschneider
  */
 public interface ConfigurableItem<I> {
-
-	/**
-	 * Obtains the item to be configured.
-	 * 
-	 * @return Item to be configured.
-	 */
-	// I getItem();
-
-	/**
-	 * Loads the refactor configuration for the item.
-	 * 
-	 * @param builder
-	 *            {@link ConfigurationBuilder} to receive the configuration.
-	 */
-	// void loadRefactorConfiguration(ConfigurationBuilder<I> builder);
-
-	/**
-	 * Indicates whether matches the input search text.
-	 * 
-	 * @param searchText
-	 *            Search text to match against.
-	 * @return <code>true</code> if item matches the search text.
-	 */
-	// boolean isMatchSearch(String searchText);
-
 }
