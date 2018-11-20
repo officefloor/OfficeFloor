@@ -449,8 +449,12 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 				// Listen to adding areas
 				adaptedParent.getModel().addPropertyChangeListener((event) -> {
 					
-					// TODO Filter to only area events
+					// Filter to only area events
+					if (!adaptedParent.isAreaChangeEvent(event.getPropertyName())) {
+						return;
+					}
 					
+					// Area changed, so update content
 					this.loadContentModels();
 				});
 			}

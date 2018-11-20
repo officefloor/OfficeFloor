@@ -43,6 +43,14 @@ public interface AdaptedParent<M extends Model> extends AdaptedChild<M> {
 	List<AdaptedArea<?>> getAdaptedAreas();
 
 	/**
+	 * Indicates if {@link AdaptedArea} change event.
+	 * 
+	 * @param eventName Name of the event.
+	 * @return <code>true</code> if {@link AdaptedArea} change event.
+	 */
+	boolean isAreaChangeEvent(String eventName);
+
+	/**
 	 * Obtains the adapter.
 	 * 
 	 * @param          <T> Adapted type.

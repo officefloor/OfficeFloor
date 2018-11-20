@@ -88,12 +88,6 @@ public class AdaptedAreaFactory<R extends Model, O, M extends Model, E extends E
 	}
 
 	@Override
-	public void create(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
-		// TODO implement AdaptedAreaBuilder<R,O,M,E>.create(...)
-		throw new UnsupportedOperationException("TODO implement AdaptedAreaBuilder<R,O,M,E>.create(...)");
-	}
-
-	@Override
 	public void action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory) {
 		// TODO implement AdaptedAreaBuilder<R,O,M,E>.action(...)
 		throw new UnsupportedOperationException("TODO implement AdaptedAreaBuilder<R,O,M,E>.action(...)");

@@ -38,14 +38,6 @@ public interface AdaptedAreaBuilder<R extends Model, O, M extends Model, E exten
 	void setMinimumDimension(double width, double height);
 
 	/**
-	 * Configures an {@link ModelAction} for creating the area {@link Model}.
-	 * 
-	 * @param action        {@link ModelAction}.
-	 * @param visualFactory {@link AdaptedActionVisualFactory}.
-	 */
-	void create(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory);
-
-	/**
 	 * Configures an {@link ModelAction} for the area {@link Model}.
 	 * 
 	 * @param action        {@link ModelAction}.

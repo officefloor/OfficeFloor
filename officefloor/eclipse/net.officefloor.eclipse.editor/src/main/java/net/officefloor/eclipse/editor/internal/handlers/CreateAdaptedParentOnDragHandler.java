@@ -347,6 +347,11 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		}
 
 		@Override
+		public boolean isAreaChangeEvent(String eventName) {
+			return this.parent.isAreaChangeEvent(eventName);
+		}
+
+		@Override
 		public boolean isPalettePrototype() {
 			return this.parent.isPalettePrototype();
 		}

@@ -18,8 +18,10 @@
 package net.officefloor.eclipse.editor.internal.models;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -80,6 +82,11 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 	private final List<Function<M, List<? extends Model>>> areas = new LinkedList<>();
 
 	/**
+	 * Listing of {@link AdaptedArea} change events.
+	 */
+	private final Set<String> areaChangeEvents = new HashSet<>();
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param configurationPathPrefix Prefix to the configuration path.
@@ -136,6 +143,9 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 			AM areaPrototype, Function<M, List<AM>> getAreas, Function<AM, Dimension> getDimension,
 			BiConsumer<AM, Dimension> setDimension, E... changeAreaEvents) {
 		this.areas.add((Function) getAreas);
+		for (E changeAreaEvent : changeAreaEvents) {
+			this.areaChangeEvents.add(changeAreaEvent.name());
+		}
 
 		// Create the factory
 		AdaptedAreaFactory<R, O, AM, AE> factory = new AdaptedAreaFactory<>(this.getConfigurationPath(), areaPrototype,
@@ -270,6 +280,11 @@ public class AdaptedParentFactory<R extends Model, O, M extends Model, E extends
 
 			// Return the areas
 			return areas;
+		}
+
+		@Override
+		public boolean isAreaChangeEvent(String eventName) {
+			return this.getParentFactory().areaChangeEvents.contains(eventName);
 		}
 
 		@Override
