@@ -220,10 +220,12 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				this.office.addOfficeGovernance("GOVERNANCE_A", ClassGovernanceSource.class.getName()), governanceA);
 		governanceA.addProperty("name.a", "value.a");
 		governanceA.addProperty("name.b", "value.b");
+		governanceA.enableAutoWireExtensions();
 		templateA.record((template) -> template.addGovernance(governanceA));
 		sectionA.addGovernance(governanceA);
 		final OfficeGovernance governanceB = this.createMock(OfficeGovernance.class);
 		this.recordReturn(this.office, this.office.addOfficeGovernance("GOVERNANCE_B", "CLASS"), governanceB);
+		governanceB.enableAutoWireExtensions();
 
 		// Test
 		this.replayMockObjects();
@@ -365,8 +367,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes loading the configuration.
 	 * 
-	 * @param configurationFileLocation
-	 *            Location of the {@link ConfigurationItem}.
+	 * @param configurationFileLocation Location of the {@link ConfigurationItem}.
 	 */
 	private void loadConfiguration(String configurationFileLocation) throws Exception {
 		this.loader.loadWoofConfiguration(new WoofContext() {
@@ -411,8 +412,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Obtains the {@link ConfigurationItem}.
 	 * 
-	 * @param fileName
-	 *            File name for {@link ConfigurationItem}.
+	 * @param fileName File name for {@link ConfigurationItem}.
 	 * @return {@link ConfigurationItem}.
 	 */
 	private ConfigurationItem getConfiguration(String fileName) {
@@ -457,10 +457,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records {@link HttpUrlContinuation}.
 	 * 
-	 * @param isSecure
-	 *            Secure.
-	 * @param applicationPath
-	 *            Application path.
+	 * @param isSecure        Secure.
+	 * @param applicationPath Application path.
 	 * @return Mock {@link HttpUrlContinuation}.
 	 */
 	private HttpUrlContinuation recordHttpContinuation(boolean isSecure, String applicationPath) {
@@ -472,8 +470,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtain the {@link OfficeFlowSourceNode}.
 	 * 
-	 * @param continuation
-	 *            {@link HttpUrlContinuation}.
+	 * @param continuation {@link HttpUrlContinuation}.
 	 * @return Mock {@link OfficeFlowSourceNode}.
 	 */
 	private OfficeFlowSourceNode recordGetInput(HttpUrlContinuation continuation) {
@@ -485,14 +482,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records {@link HttpInput}.
 	 * 
-	 * @param isSecure
-	 *            Secure.
-	 * @param httpMethod
-	 *            {@link HttpMethod}.
-	 * @param applicationPath
-	 *            Application path.
-	 * @param flowSinkNode
-	 *            {@link OfficeFlowSinkNode}.
+	 * @param isSecure        Secure.
+	 * @param httpMethod      {@link HttpMethod}.
+	 * @param applicationPath Application path.
+	 * @param flowSinkNode    {@link OfficeFlowSinkNode}.
 	 * @return Mock {@link HttpInput}.
 	 */
 	private HttpInput recordHttpInput(boolean isSecure, String httpMethod, String applicationPath,
@@ -508,8 +501,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records creating {@link OfficeEscalation}.
 	 * 
-	 * @param escalationType
-	 *            {@link Escalation} type.
+	 * @param escalationType {@link Escalation} type.
 	 * @return {@link OfficeEscalation}.
 	 */
 	private OfficeEscalation recordEscalation(Class<? extends Throwable> escalationType) {
@@ -521,10 +513,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtain the {@link HttpUrlContinuation} redirect.
 	 * 
-	 * @param continuation
-	 *            {@link HttpUrlContinuation}.
-	 * @param parameterType
-	 *            Parameter type.
+	 * @param continuation  {@link HttpUrlContinuation}.
+	 * @param parameterType Parameter type.
 	 * @return {@link OfficeFlowSinkNode}.
 	 */
 	private OfficeFlowSinkNode recordRedirect(HttpUrlContinuation continuation, Class<?> parameterType) {
@@ -537,10 +527,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtain the {@link OfficeSectionOutput}.
 	 * 
-	 * @param section
-	 *            {@link OfficeSection}.
-	 * @param outputName
-	 *            Name of {@link OfficeSectionOutput}.
+	 * @param section    {@link OfficeSection}.
+	 * @param outputName Name of {@link OfficeSectionOutput}.
 	 * @return {@link OfficeSectionOutput}.
 	 */
 	private OfficeSectionOutput recordGetOutput(OfficeSection section, String outputName) {
@@ -552,10 +540,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtain the {@link OfficeSectionInput}.
 	 * 
-	 * @param section
-	 *            {@link OfficeSection}.
-	 * @param inputName
-	 *            Name of {@link OfficeSectionInput}.
+	 * @param section   {@link OfficeSection}.
+	 * @param inputName Name of {@link OfficeSectionInput}.
 	 * @return {@link OfficeSectionInput}.
 	 */
 	private OfficeSectionInput recordGetInput(OfficeSection section, String inputName) {
@@ -567,10 +553,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtain {@link OfficeSectionOutput}.
 	 * 
-	 * @param security
-	 *            {@link HttpSecurityBuilder}.
-	 * @param outputName
-	 *            Name of the {@link OfficeSectionOutput}.
+	 * @param security   {@link HttpSecurityBuilder}.
+	 * @param outputName Name of the {@link OfficeSectionOutput}.
 	 * @return {@link OfficeSectionOutput}.
 	 */
 	private OfficeSectionOutput recordGetOutput(HttpSecurityBuilder security, String outputName) {
@@ -582,8 +566,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtaining {@link OfficeSectionInput}.
 	 * 
-	 * @param security
-	 *            {@link HttpSecurityBuilder}.
+	 * @param security {@link HttpSecurityBuilder}.
 	 * @return {@link OfficeSectionInput}.
 	 */
 	private OfficeSectionInput recordGetInput(HttpSecurityBuilder security) {
@@ -595,8 +578,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records obtaining resource {@link OfficeFlowSinkNode}.
 	 * 
-	 * @param resourcePath
-	 *            Resource path.
+	 * @param resourcePath Resource path.
 	 * @return {@link OfficeFlowSinkNode}.
 	 */
 	private OfficeFlowSinkNode recordResource(String resourcePath) {
@@ -609,8 +591,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	 * Records implicit {@link WoofTemplateExtensionSource} on the
 	 * {@link WebTemplate}.
 	 * 
-	 * @param extensionSources
-	 *            {@link WoofTemplateExtensionSource} instances.
+	 * @param extensionSources {@link WoofTemplateExtensionSource} instances.
 	 */
 	private void recordNoImplicitTemplateExtensions() {
 		this.recordReturn(this.extensionContext,
@@ -621,10 +602,9 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Record a template extension.
 	 * 
-	 * @param extensionSourceClass
-	 *            {@link Class} of the {@link WoofTemplateExtensionSource}.
-	 * @param nameValuePairs
-	 *            Name/value {@link Property} pairs.
+	 * @param extensionSourceClass {@link Class} of the
+	 *                             {@link WoofTemplateExtensionSource}.
+	 * @param nameValuePairs       Name/value {@link Property} pairs.
 	 */
 	private void recordTemplateExtension(Class<? extends WoofTemplateExtensionSource> extensionSourceClass,
 			String... nameValuePairs) {

@@ -17,32 +17,36 @@
  */
 package net.officefloor.tutorial.transactionhttpserver;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import net.officefloor.web.HttpObject;
 
 /**
- * User entity.
+ * Post entity.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: tutorial
 @Data
 @Entity
-public class User {
+@HttpObject
+@NoArgsConstructor
+@AllArgsConstructor
+public class Post implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private Integer id;
 
-	private String userName;
+	private String content;
 
-	@OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
-	private Person person;
 }
 // END SNIPPET: tutorial
