@@ -92,6 +92,14 @@
 					</filesets>
 				</configuration>
 			</plugin>
+				<!-- Manual testing for code coverage -->
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			<plugin>
+			</plugin>
 			<plugin>
 				<!-- Use Tycho to build eclipse components -->
 				<groupId>org.eclipse.tycho</groupId>
