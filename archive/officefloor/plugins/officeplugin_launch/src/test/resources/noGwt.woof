@@ -1,7 +1,0 @@
-<woof>
-	<templates>
-		<template name="TEMPLATE" uri="noGwt" path="Template.html"
-			class="net.officefloor.launch.woof.MockTemplateLogic">
-		</template>
-	</templates>
-</woof>

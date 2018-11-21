@@ -20,7 +20,7 @@ package net.officefloor.eclipse.section;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.section.ExternalManagedObjectModel;
@@ -83,7 +83,7 @@ public class ExternalManagedObjectItem extends
 
 	@Override
 	public Pane visual(ExternalManagedObjectModel model,
-			AdaptedModelVisualFactoryContext<ExternalManagedObjectModel> context) {
+			AdaptedChildVisualFactoryContext<ExternalManagedObjectModel> context) {
 		HBox container = new HBox();
 		context.addNode(container,
 				context.connector(DefaultConnectors.OBJECT,

@@ -17,13 +17,14 @@
  */
 package net.officefloor.jdbc;
 
+import java.util.logging.Logger;
+
 import javax.sql.DataSource;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.jdbc.datasource.DataSourceFactory;
 
 /**
  * {@link ManagedObjectSource} for a {@link DataSource}.
@@ -31,6 +32,11 @@ import net.officefloor.jdbc.datasource.DataSourceFactory;
  * @author Daniel Sagenschneider
  */
 public class DataSourceManagedObjectSource extends AbstractConnectionManagedObjectSource implements ManagedObject {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = Logger.getLogger(DataSourceManagedObjectSource.class.getName());
 
 	/**
 	 * {@link DataSource}.
@@ -59,12 +65,18 @@ public class DataSourceManagedObjectSource extends AbstractConnectionManagedObje
 		}
 
 		// Obtain the data source
-		DataSourceFactory factory = this.getDataSourceFactory(mosContext);
-		this.dataSource = factory.createDataSource(mosContext);
+		this.dataSource = this.newDataSource(mosContext);
 
 		// Validate connectivity
-		this.setConnectivity(() -> this.dataSource.getConnection());
+		this.setConnectivity(() -> new ConnectionConnectivity(this.dataSource.getConnection()));
 		this.loadValidateConnectivity(context);
+	}
+
+	@Override
+	public void stop() {
+
+		// Close the DataSource
+		this.closeDataSource(this.dataSource, LOGGER);
 	}
 
 	@Override

@@ -60,7 +60,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -1683,23 +1682,42 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Predicate to check for is true.
+	 */
+	@FunctionalInterface
+	public static interface WaitForTruePredicate<T extends Throwable> {
+
+		/**
+		 * Predicate test.
+		 * 
+		 * @return <code>true</code> to indicate no further waiting.
+		 * @throws T Possible exception.
+		 */
+		boolean test() throws T;
+	}
+
+	/**
 	 * Waits for the check to be <code>true</code>.
 	 * 
+	 * @param       <T> Possible failure type.
 	 * @param check Check.
+	 * @throws T Possible failure.
 	 */
-	public void waitForTrue(Supplier<Boolean> check) {
+	public <T extends Throwable> void waitForTrue(WaitForTruePredicate<T> check) throws T {
 		this.waitForTrue(check, 3);
 	}
 
 	/**
 	 * Waits for the check to be <code>true</code>.
 	 * 
+	 * @param              <T> Possible failure type.
 	 * @param check        Check.
 	 * @param secondsToRun Seconds to wait before timing out.
+	 * @throws T Possible failure.
 	 */
-	public void waitForTrue(Supplier<Boolean> check, int secondsToRun) {
+	public <T extends Throwable> void waitForTrue(WaitForTruePredicate<T> check, int secondsToRun) throws T {
 		long startTime = System.currentTimeMillis();
-		while (!check.get()) {
+		while (!check.test()) {
 			timeout(startTime, secondsToRun);
 			try {
 				Thread.sleep(10);

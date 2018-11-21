@@ -36,14 +36,12 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 	private final int MAX_RUN_TIMES = 1000000;
 
 	/**
-	 * Number of {@link Job} instances to run in a multiple {@link Job} stress
-	 * test.
+	 * Number of {@link Job} instances to run in a multiple {@link Job} stress test.
 	 */
 	private final int MULTIPLE_JOB_NUMBER = 10;
 
 	/**
-	 * Maximum time to wait in seconds for each {@link Job} stress test to
-	 * complete.
+	 * Maximum time to wait in seconds for each {@link Job} stress test to complete.
 	 */
 	private final int MAX_WAIT_TIME_IN_SECONDS = 60;
 
@@ -121,14 +119,17 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 			}
 
 			// Assign again (as new job)
-			this.getTeam().assignJob(this.clone());
+			try {
+				this.getTeam().assignJob(this.clone());
+			} catch (Exception ex) {
+				throw fail(ex);
+			}
 		}
 	}
 
 	/**
 	 * Stress tests the {@link TeamSource} in repeating {@link Job} instances.
 	 */
-	@StressTest
 	public void testRepeatSingleJob() throws Exception {
 
 		// Create the repeat job
@@ -169,15 +170,18 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 			}
 
 			// Repeat job again
-			this.getTeam().assignJob(this);
+			try {
+				this.getTeam().assignJob(this);
+			} catch (Exception ex) {
+				throw fail(ex);
+			}
 		}
 	}
 
 	/**
 	 * Runs the {@link Job} instances.
 	 * 
-	 * @param jobs
-	 *            {@link Job} instances to run.
+	 * @param jobs {@link Job} instances to run.
 	 */
 	private void runJobs(MockStressJob... jobs) {
 
@@ -188,8 +192,12 @@ public abstract class AbstractTeamStressTest extends OfficeFrameTestCase {
 		}
 
 		// Run the jobs
-		for (int i = 0; i < jobs.length; i++) {
-			this.team.assignJob(jobs[i]);
+		try {
+			for (int i = 0; i < jobs.length; i++) {
+				this.team.assignJob(jobs[i]);
+			}
+		} catch (Exception ex) {
+			throw fail(ex);
 		}
 
 		// Capture start time for timing out

@@ -18,6 +18,7 @@
 package net.officefloor.frame.api.executive;
 
 import java.util.concurrent.ThreadFactory;
+import java.util.function.Function;
 
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
@@ -51,14 +52,19 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 	}
 
 	/**
+	 * {@link ExecutiveContext}.
+	 */
+	private final ExecutiveContext executiveContext;
+
+	/**
+	 * Calculates the {@link Team} size from the configured {@link Team} size.
+	 */
+	private final Function<Integer, Integer> teamSizeCalculator;
+
+	/**
 	 * {@link Team} name.
 	 */
 	private final String teamName;
-
-	/**
-	 * {@link Team} size.
-	 */
-	private final int teamSize;
 
 	/**
 	 * {@link ThreadFactory}.
@@ -68,16 +74,19 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 	/**
 	 * Instantiate.
 	 * 
-	 * @param context           {@link ExecutiveContext}.
-	 * @param teamSize          {@link Team} size.
-	 * @param teamNameSuffix    Optional suffix for the {@link Team} name. May be
-	 *                          <code>null</code> for no suffix.
-	 * @param workerEnvironment {@link WorkerEnvironment}. May be <code>null</code>.
+	 * @param context            {@link ExecutiveContext}.
+	 * @param teamSizeCalculator Calculates the {@link Team} size from the
+	 *                           configured {@link Team} size.
+	 * @param teamNameSuffix     Optional suffix for the {@link Team} name. May be
+	 *                           <code>null</code> for no suffix.
+	 * @param workerEnvironment  {@link WorkerEnvironment}. May be
+	 *                           <code>null</code>.
 	 */
-	public TeamSourceContextWrapper(ExecutiveContext context, int teamSize, String teamNameSuffix,
-			WorkerEnvironment workerEnvironment) {
+	public TeamSourceContextWrapper(ExecutiveContext context, Function<Integer, Integer> teamSizeCalculator,
+			String teamNameSuffix, WorkerEnvironment workerEnvironment) {
 		super(context.isLoadingType(), context, context);
-		this.teamSize = teamSize;
+		this.executiveContext = context;
+		this.teamSizeCalculator = teamSizeCalculator;
 
 		// Specify the team name
 		this.teamName = context.getTeamName() + (teamNameSuffix == null ? "" : "-" + teamNameSuffix);
@@ -103,7 +112,12 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 
 	@Override
 	public int getTeamSize() {
-		return this.teamSize;
+		return this.teamSizeCalculator.apply(this.executiveContext.getTeamSize());
+	}
+
+	@Override
+	public int getTeamSize(int defaultSize) {
+		return this.teamSizeCalculator.apply(this.executiveContext.getTeamSize(defaultSize));
 	}
 
 	@Override

@@ -23,7 +23,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.ConnectionModel;
@@ -94,7 +94,7 @@ public class ManagedObjectItem extends
 
 	@Override
 	public Pane visual(SectionManagedObjectModel model,
-			AdaptedModelVisualFactoryContext<SectionManagedObjectModel> context) {
+			AdaptedChildVisualFactoryContext<SectionManagedObjectModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
 		context.addNode(heading,

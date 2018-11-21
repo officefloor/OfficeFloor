@@ -46,6 +46,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.executor.ManagedObjectExecutorFactory;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
@@ -166,12 +167,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	 * instances cached in a core pool.
 	 */
 	public static final String PROPERTY_SERVICE_MAX_CORE_POOL_SIZE = "service.buffer.max.core.pool.size";
-
-	/**
-	 * Name of {@link Property} to specify the threshold of active requests to start
-	 * throttling new requests.
-	 */
-	public static final String PROPERTY_THROTTLE_ACTIVE_REQUEST_THRESHOLD = "throttle.active.request.threshold";
 
 	/**
 	 * Name of the {@link Flow} to handle the request.
@@ -346,19 +341,17 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		 */
 		private void dumpActiveThreadsAfter(long timeInMilliseconds) {
 			long startTime = System.currentTimeMillis();
+			long endTime = startTime + timeInMilliseconds;
 			new Thread(() -> {
 				synchronized (this.activeThreads) {
 
-					// Determine if should dump
-					if (!this.isDump) {
-						return;
-					}
-
 					// Wait the specified period of time
-					try {
-						this.activeThreads.wait(timeInMilliseconds);
-					} catch (InterruptedException ex) {
-						// ignore, and carry on
+					while ((this.isDump) && (System.currentTimeMillis() < endTime)) {
+						try {
+							this.activeThreads.wait(100);
+						} catch (InterruptedException ex) {
+							return;
+						}
 					}
 
 					// Determine if should dump
@@ -406,7 +399,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				this.isDump = false;
 
 				// Notify, so don't wait
-				this.activeThreads.notify();
+				this.activeThreads.notifyAll();
 			}
 		}
 
@@ -431,6 +424,9 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 						throw new TimeoutException("Waited more than " + waitTimeInMilliseconds
 								+ " milliseconds for HTTP socket servicing to terminate");
 					}
+
+					// Wait some time for termination
+					this.activeThreads.wait(10);
 				}
 			}
 		}
@@ -458,10 +454,14 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 					// Unregister this thread
 					synchronized (this.activeThreads) {
 						this.activeThreads.remove(currentThread);
+
+						// Notify immediately, to allow shutdown
+						this.activeThreads.notifyAll();
 					}
 				}
 			}).start();
 		}
+
 	}
 
 	/**
@@ -567,11 +567,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	 * Maximum pool size of {@link StreamBuffer} instances within the core pool.
 	 */
 	private int serviceBufferMaxCorePoolSize;
-
-	/**
-	 * Throttle active request threshold.
-	 */
-	private int throttleActiveRequestThreshold;
 
 	/**
 	 * Indicates if secure HTTP connection.
@@ -712,8 +707,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_MAX_THREAD_POOL_SIZE, String.valueOf(10000)));
 		this.serviceBufferMaxCorePoolSize = Integer
 				.parseInt(mosContext.getProperty(PROPERTY_SERVICE_MAX_CORE_POOL_SIZE, String.valueOf(10000000)));
-		this.throttleActiveRequestThreshold = Integer
-				.parseInt(mosContext.getProperty(PROPERTY_THROTTLE_ACTIVE_REQUEST_THRESHOLD, String.valueOf(100)));
 
 		// Create the request parser meta-data
 		this.httpRequestParserMetaData = new HttpRequestParserMetaData(maxHeaderCount, maxTextLength, maxEntityLength);
@@ -760,9 +753,8 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 				() -> ByteBuffer.allocateDirect(this.serviceBufferSize), this.serviceBufferMaxThreadPoolSize,
 				this.serviceBufferMaxCorePoolSize);
 		ManagedObjectSourceHttpServicerFactory servicerFactory = new ManagedObjectSourceHttpServicerFactory(context,
-				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool,
-				this.throttleActiveRequestThreshold, this.serverName, this.dateHttpHeaderClock,
-				this.isIncludeEscalationStackTrace);
+				this.serverLocation, this.isSecure, this.httpRequestParserMetaData, serviceBufferPool, this.serverName,
+				this.dateHttpHeaderClock, this.isIncludeEscalationStackTrace);
 
 		// Create the SSL servicer factory
 		SocketServicerFactory socketServicerFactory = servicerFactory;
@@ -845,36 +837,34 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		/**
 		 * Instantiate.
 		 * 
-		 * @param context                        {@link ManagedObjectExecuteContext}.
-		 * @param serverLocation                 {@link HttpServerLocation}.
-		 * @param isSecure                       Indicates if a secure
-		 *                                       {@link ServerHttpConnection}.
-		 * @param metaData                       {@link HttpRequestParserMetaData}.
-		 * @param serviceBufferPool              Service {@link StreamBufferPool}.
-		 * @param throttleActiveRequestThreshold Throttle active request threshold.
-		 * @param serverName                     <code>Server</code>
-		 *                                       {@link HttpHeaderValue}.
-		 * @param dateHttpHeaderClock            {@link DateHttpHeaderClock}.
-		 * @param isIncludeEscalationStackTrace  Indicates whether to include the
-		 *                                       {@link Escalation} stack trace in the
-		 *                                       {@link HttpResponse}.
+		 * @param context                       {@link ManagedObjectExecuteContext}.
+		 * @param serverLocation                {@link HttpServerLocation}.
+		 * @param isSecure                      Indicates if a secure
+		 *                                      {@link ServerHttpConnection}.
+		 * @param metaData                      {@link HttpRequestParserMetaData}.
+		 * @param serviceBufferPool             Service {@link StreamBufferPool}.
+		 * @param serverName                    <code>Server</code>
+		 *                                      {@link HttpHeaderValue}.
+		 * @param dateHttpHeaderClock           {@link DateHttpHeaderClock}.
+		 * @param isIncludeEscalationStackTrace Indicates whether to include the
+		 *                                      {@link Escalation} stack trace in the
+		 *                                      {@link HttpResponse}.
 		 */
 		public ManagedObjectSourceHttpServicerFactory(ManagedObjectExecuteContext<Indexed> context,
 				HttpServerLocation serverLocation, boolean isSecure, HttpRequestParserMetaData metaData,
-				StreamBufferPool<ByteBuffer> serviceBufferPool, int throttleActiveRequestThreshold,
-				HttpHeaderValue serverName, DateHttpHeaderClock dateHttpHeaderClock,
-				boolean isIncludeEscalationStackTrace) {
-			super(serverLocation, isSecure, metaData, serviceBufferPool, throttleActiveRequestThreshold, serverName,
-					dateHttpHeaderClock, isIncludeEscalationStackTrace);
+				StreamBufferPool<ByteBuffer> serviceBufferPool, HttpHeaderValue serverName,
+				DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace) {
+			super(serverLocation, isSecure, metaData, serviceBufferPool, serverName, dateHttpHeaderClock,
+					isIncludeEscalationStackTrace);
 			this.context = context;
 		}
 
 		@Override
-		protected void service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
+		protected ProcessManager service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
 				throws IOException, HttpException {
 
 			// Service request
-			this.context.invokeProcess(HttpServerSocketManagedObjectSource.this.handleRequestFlowIndex, null,
+			return this.context.invokeProcess(HttpServerSocketManagedObjectSource.this.handleRequestFlowIndex, null,
 					connection, 0, connection.getServiceFlowCallback());
 		}
 	}

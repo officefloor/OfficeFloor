@@ -62,6 +62,10 @@
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>
+			<location>SpringHttpServer/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
 			<location>TestHttpServer/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>

@@ -24,7 +24,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.editor.DefaultImages;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
@@ -64,7 +64,7 @@ public class ManagedFunctionItem extends
 	}
 
 	@Override
-	public Pane visual(ManagedFunctionModel model, AdaptedModelVisualFactoryContext<ManagedFunctionModel> context) {
+	public Pane visual(ManagedFunctionModel model, AdaptedChildVisualFactoryContext<ManagedFunctionModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
 		context.label(heading);

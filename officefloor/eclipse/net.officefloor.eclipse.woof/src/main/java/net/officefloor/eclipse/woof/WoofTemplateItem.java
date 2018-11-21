@@ -32,7 +32,7 @@ import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.ConnectionModel;
@@ -224,7 +224,7 @@ public class WoofTemplateItem extends
 	}
 
 	@Override
-	public Pane visual(WoofTemplateModel model, AdaptedModelVisualFactoryContext<WoofTemplateModel> context) {
+	public Pane visual(WoofTemplateModel model, AdaptedChildVisualFactoryContext<WoofTemplateModel> context) {
 		VBox container = new VBox();
 		HBox heading = context.addNode(container, new HBox());
 		context.addNode(heading,

@@ -46,9 +46,12 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
+import net.officefloor.frame.api.manage.ProcessManager;
 
 /**
  * Abstract Netty HTTP server.
@@ -74,8 +77,7 @@ public abstract class AbstractNettyHttpServer {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param maxRequestEntityLength
-	 *            Maximum length of the request entity.
+	 * @param maxRequestEntityLength Maximum length of the request entity.
 	 */
 	public AbstractNettyHttpServer(int maxRequestEntityLength) {
 		this.maxRequestEntityLength = maxRequestEntityLength;
@@ -84,14 +86,10 @@ public abstract class AbstractNettyHttpServer {
 	/**
 	 * Starts the HTTP Server.
 	 * 
-	 * @param httpPort
-	 *            HTTP port.
-	 * @param httpsPort
-	 *            HTTPS secure port.
-	 * @param sslContext
-	 *            {@link SSLContext}. May be <code>null</code>.
-	 * @throws Exception
-	 *             If fails to start the HTTP Server.
+	 * @param httpPort   HTTP port.
+	 * @param httpsPort  HTTPS secure port.
+	 * @param sslContext {@link SSLContext}. May be <code>null</code>.
+	 * @throws Exception If fails to start the HTTP Server.
 	 */
 	public void startHttpServer(int httpPort, int httpsPort, SSLContext sslContext) throws Exception {
 
@@ -111,8 +109,7 @@ public abstract class AbstractNettyHttpServer {
 	/**
 	 * Stops the HTTP server.
 	 * 
-	 * @throws Exception
-	 *             If fails to stop the HTTP Server.
+	 * @throws Exception If fails to stop the HTTP Server.
 	 */
 	public void stopHttpServer() throws Exception {
 		try {
@@ -127,30 +124,22 @@ public abstract class AbstractNettyHttpServer {
 	/**
 	 * Services the {@link HttpRequest}.
 	 * 
-	 * @param context
-	 *            {@link ChannelHandlerContext}.
-	 * @param request
-	 *            {@link HttpRequest}.
-	 * @throws Exception
-	 *             If fails to service the {@link HttpRequest}.
+	 * @param context {@link ChannelHandlerContext}.
+	 * @param request {@link HttpRequest}.
+	 * @return {@link ProcessManager}.
+	 * @throws Exception If fails to service the {@link HttpRequest}.
 	 */
-	protected abstract void service(ChannelHandlerContext context, HttpRequest request) throws Exception;
+	protected abstract ProcessManager service(ChannelHandlerContext context, HttpRequest request) throws Exception;
 
 	/**
 	 * Starts the HTTP Server.
 	 * 
-	 * @param httpPort
-	 *            HTTP port.
-	 * @param httpsPort
-	 *            HTTPS secure port.
-	 * @param sslContext
-	 *            {@link SSLContext}. May be <code>null</code>.
-	 * @param loopGroup
-	 *            {@link EventLoopGroup}.
-	 * @param serverChannelClass
-	 *            {@link ServerChannel} {@link Class}.
-	 * @throws InterruptedException
-	 *             If fails to start.
+	 * @param httpPort           HTTP port.
+	 * @param httpsPort          HTTPS secure port.
+	 * @param sslContext         {@link SSLContext}. May be <code>null</code>.
+	 * @param loopGroup          {@link EventLoopGroup}.
+	 * @param serverChannelClass {@link ServerChannel} {@link Class}.
+	 * @throws InterruptedException If fails to start.
 	 */
 	private void startHttpServer(int httpPort, int httpsPort, SSLContext sslContext, EventLoopGroup loopGroup,
 			Class<? extends ServerChannel> serverChannelClass) throws InterruptedException {
@@ -162,7 +151,8 @@ public abstract class AbstractNettyHttpServer {
 		// Configure and start the secure server
 		if (httpsPort > 0) {
 			ChannelInitializer<SocketChannel> channelInitialiser = (sslContext != null
-					? new SecureServerChannelInitialiser(sslContext) : new ServerChannelInitialiser());
+					? new SecureServerChannelInitialiser(sslContext)
+					: new ServerChannelInitialiser());
 			this.startPortServicing(httpsPort, channelInitialiser, serverChannelClass);
 		}
 	}
@@ -170,14 +160,10 @@ public abstract class AbstractNettyHttpServer {
 	/**
 	 * Starts servicing the port.
 	 * 
-	 * @param port
-	 *            Port.
-	 * @param channelInitializer
-	 *            {@link ChannelInitializer}.
-	 * @param serverChannelClass
-	 *            {@link ServerChannel} {@link Class}.
-	 * @throws InterruptedException
-	 *             If fails to start.
+	 * @param port               Port.
+	 * @param channelInitializer {@link ChannelInitializer}.
+	 * @param serverChannelClass {@link ServerChannel} {@link Class}.
+	 * @throws InterruptedException If fails to start.
 	 */
 	private void startPortServicing(int port, ChannelInitializer<SocketChannel> channelInitializer,
 			Class<? extends ServerChannel> serverChannelClass) throws InterruptedException {
@@ -195,8 +181,7 @@ public abstract class AbstractNettyHttpServer {
 	/**
 	 * Initialises the {@link ChannelPipeline}.
 	 * 
-	 * @param pipeline
-	 *            {@link ChannelPipeline}.
+	 * @param pipeline {@link ChannelPipeline}.
 	 */
 	private void initPipeline(ChannelPipeline pipeline) {
 		pipeline.addLast("server", new HttpServerCodec());
@@ -233,8 +218,7 @@ public abstract class AbstractNettyHttpServer {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param sslContext
-		 *            {@link SslContext}.
+		 * @param sslContext {@link SslContext}.
 		 */
 		private SecureServerChannelInitialiser(SSLContext sslContext) {
 			this.sslContext = sslContext;
@@ -263,27 +247,50 @@ public abstract class AbstractNettyHttpServer {
 	 */
 	private class ServiceServerHandler extends ChannelInboundHandlerAdapter {
 
+		/**
+		 * {@link ProcessManager} key.
+		 */
+		private final AttributeKey<ProcessManager> key = AttributeKey.valueOf("KEY");
+
 		/*
 		 * ================== ChannelInboundHandlerAdapter ============
 		 */
 
 		@Override
-		public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-			ctx.flush();
-		}
-
-		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
+			// Ensure flag process manager handling on channel
+			Attribute<ProcessManager> attribute = ctx.channel().attr(this.key);
+			ProcessManager manager = attribute.get();
+			if (manager == null) {
+
+				// First request, so load the close listener
+				ctx.channel().closeFuture().addListener((future) -> {
+					ProcessManager processManager = ctx.channel().attr(this.key).get();
+					processManager.cancel();
+				});
+			}
+
+			// Handler
 			if (msg instanceof HttpRequest) {
 				try {
 					HttpRequest request = (HttpRequest) msg;
-					AbstractNettyHttpServer.this.service(ctx, request);
+					manager = AbstractNettyHttpServer.this.service(ctx, request);
+
+					// Register for cancel handling on close
+					attribute.set(manager);
+
 				} finally {
 					ReferenceCountUtil.release(msg);
 				}
 			} else {
 				ctx.fireChannelRead(msg);
 			}
+		}
+
+		@Override
+		public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+			ctx.flush();
 		}
 
 		@Override

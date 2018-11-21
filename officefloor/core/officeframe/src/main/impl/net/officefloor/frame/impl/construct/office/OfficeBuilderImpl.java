@@ -34,6 +34,7 @@ import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.construct.function.EscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.governance.GovernanceBuilderImpl;
 import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionBuilderImpl;
@@ -170,6 +171,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private Profiler profiler = null;
 
 	/**
+	 * Listing of the {@link ThreadSynchroniserFactory} instances.
+	 */
+	private final List<ThreadSynchroniserFactory> threadSynchronisers = new LinkedList<>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeName Name of this {@link Office}.
@@ -284,6 +290,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 		this.profiler = profiler;
 	}
 
+	@Override
+	public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
+		this.threadSynchronisers.add(threadSynchroniserFactory);
+	}
+
 	/*
 	 * ================= OfficeConfiguration ==============================
 	 */
@@ -391,6 +402,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public Profiler getProfiler() {
 		return this.profiler;
+	}
+
+	@Override
+	public ThreadSynchroniserFactory[] getThreadSynchronisers() {
+		return this.threadSynchronisers.toArray(new ThreadSynchroniserFactory[0]);
 	}
 
 }

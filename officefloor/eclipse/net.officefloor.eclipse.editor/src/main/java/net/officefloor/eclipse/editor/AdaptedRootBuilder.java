@@ -45,7 +45,7 @@ public interface AdaptedRootBuilder<R extends Model, O> extends EditorStyler {
 	 * @param getParents
 	 *            {@link Function} to obtain the parent {@link Model} instances.
 	 * @param viewFactory
-	 *            {@link AdaptedModelVisualFactory} to create the view for the
+	 *            {@link AdaptedChildVisualFactory} to create the view for the
 	 *            {@link AdaptedParent}.
 	 * @param changeParentEvents
 	 *            {@link Enum} events on root {@link Model} about change in parent
@@ -55,7 +55,7 @@ public interface AdaptedRootBuilder<R extends Model, O> extends EditorStyler {
 	 */
 	@SuppressWarnings("unchecked")
 	<M extends Model, E extends Enum<E>, RE extends Enum<RE>> AdaptedParentBuilder<R, O, M, E> parent(M modelPrototype,
-			Function<R, List<M>> getParents, AdaptedModelVisualFactory<M> viewFactory, RE... changeParentEvents);
+			Function<R, List<M>> getParents, AdaptedChildVisualFactory<M> viewFactory, RE... changeParentEvents);
 
 	/**
 	 * <p>

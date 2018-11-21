@@ -19,6 +19,7 @@ package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Supplies {@link OfficeManagedObjectSource} instances within the
@@ -36,28 +37,27 @@ public interface OfficeSupplier extends PropertyConfigurable {
 	String getOfficeSupplierName();
 
 	/**
-	 * Adds an {@link OfficeManagedObjectSource}.
+	 * Obtains the {@link OfficeSupplierThreadLocal}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeManagedObjectSource}.
-	 * @param type
-	 *            Type of object required from the {@link OfficeSupplier}.
-	 * @return {@link OfficeManagedObjectSource}.
+	 * @param qualifier Qualifier of the required {@link ManagedObject}. May be
+	 *                  <code>null</code> to match only on type.
+	 * @param type      Type of object required for the
+	 *                  {@link OfficeSupplierThreadLocal}.
+	 * @return {@link OfficeSupplierThreadLocal}.
 	 */
-	OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String type);
+	OfficeSupplierThreadLocal getOfficeSupplierThreadLocal(String qualifier, String type);
 
 	/**
-	 * Adds an {@link OfficeManagedObjectSource}.
+	 * Obtains the {@link OfficeManagedObjectSource}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeManagedObjectSource}.
-	 * @param type
-	 *            Type of object required from the {@link OfficeSupplier}.
-	 * @param qualifier
-	 *            Qualifier on the object type.
+	 * @param managedObjectSourceName Name of the {@link OfficeManagedObjectSource}.
+	 * @param qualifier               Qualifier on the object type. May be
+	 *                                <code>null</code> to match only on type.
+	 * @param type                    Type of object required from the
+	 *                                {@link OfficeSupplier}.
 	 * @return {@link OfficeManagedObjectSource}.
 	 */
-	OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName, String type,
-			String qualifier);
+	OfficeManagedObjectSource getOfficeManagedObjectSource(String managedObjectSourceName, String qualifier,
+			String type);
 
 }

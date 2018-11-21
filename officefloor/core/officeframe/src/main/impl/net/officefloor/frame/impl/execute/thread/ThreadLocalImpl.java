@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.api.thread.OptionalThreadLocal;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.internal.configuration.ThreadLocalConfiguration;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -38,7 +39,7 @@ public class ThreadLocalImpl<T> implements ThreadLocalConfiguration {
 	 */
 	private static final ThreadState fallbackThreadState = new ThreadStateImpl(
 			new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0], Integer.MAX_VALUE, null,
-					null, null),
+					new ThreadSynchroniserFactory[0], null, null),
 			null, null, null, null);
 
 	/**

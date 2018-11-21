@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
+import net.officefloor.frame.api.manage.ProcessManager;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
@@ -61,14 +63,10 @@ public class OfficeManagerProcessState implements ProcessState {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param officeClock
-	 *            {@link OfficeClock}.
-	 * @param maximumFunctionChainLength
-	 *            Maximum {@link Promise} chain length.
-	 * @param breakChainTeamManagement
-	 *            Break chain {@link TeamManagement}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
+	 * @param officeClock                {@link OfficeClock}.
+	 * @param maximumFunctionChainLength Maximum {@link Promise} chain length.
+	 * @param breakChainTeamManagement   Break chain {@link TeamManagement}.
+	 * @param functionLoop               {@link FunctionLoop}.
 	 */
 	public OfficeManagerProcessState(OfficeClock officeClock, int maximumFunctionChainLength,
 			TeamManagement breakChainTeamManagement, FunctionLoop functionLoop) {
@@ -76,7 +74,8 @@ public class OfficeManagerProcessState implements ProcessState {
 
 		// Create the meta-data for the process and its main thread state
 		this.threadMetaData = new ThreadMetaDataImpl(new ManagedObjectMetaData[0], new GovernanceMetaData[0],
-				maximumFunctionChainLength, breakChainTeamManagement, new EscalationProcedureImpl(), null);
+				maximumFunctionChainLength, breakChainTeamManagement, new ThreadSynchroniserFactory[0],
+				new EscalationProcedureImpl(), null);
 
 		// Create the main thread state
 		// Note: purpose of this to enable synchronising changes to office
@@ -95,6 +94,16 @@ public class OfficeManagerProcessState implements ProcessState {
 	@Override
 	public ThreadState getMainThreadState() {
 		return this.mainThreadState;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return false; // never cancelled
+	}
+
+	@Override
+	public ProcessManager getProcessManager() {
+		throw new IllegalStateException(this.getClass().getSimpleName() + " should not be process managed");
 	}
 
 	@Override

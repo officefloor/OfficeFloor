@@ -1,5 +1,0 @@
-<objects>
-
-	<managed-object source="net.officefloor.tutorials.performance.pool.PoolSingleton" type="net.officefloor.tutorials.performance.pool.PooledDataSource" />
-
-</objects>

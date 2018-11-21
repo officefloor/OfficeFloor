@@ -29,12 +29,12 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
 import net.officefloor.eclipse.editor.AdaptedModel;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedChildPart;
-import net.officefloor.eclipse.editor.internal.parts.AdaptedModelVisualFactoryContextImpl;
+import net.officefloor.eclipse.editor.internal.parts.AdaptedChildVisualFactoryContextImpl;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedParentPart;
 import net.officefloor.eclipse.editor.internal.style.StyleRegistry;
 import net.officefloor.model.Model;
@@ -67,14 +67,14 @@ public class AdaptedEditorPreview<M extends Model> {
 	 * @param model         Model.
 	 * @param label         Label.
 	 * @param isParent      Indicates if {@link AdaptedParent}.
-	 * @param visualFactory {@link AdaptedModelVisualFactory}.
+	 * @param visualFactory {@link AdaptedChildVisualFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	public AdaptedEditorPreview(M model, String label, boolean isParent, AdaptedModelVisualFactory<M> visualFactory) {
+	public AdaptedEditorPreview(M model, String label, boolean isParent, AdaptedChildVisualFactory<M> visualFactory) {
 
 		// Create the visual
 		this.previewVisual = visualFactory.createVisual(model,
-				new AdaptedModelVisualFactoryContextImpl<>((Class<M>) model.getClass(), false, () -> {
+				new AdaptedChildVisualFactoryContextImpl<>((Class<M>) model.getClass(), false, () -> {
 					// Always have a label
 					return new SimpleStringProperty(label);
 				}, (childGroupName, node) -> {

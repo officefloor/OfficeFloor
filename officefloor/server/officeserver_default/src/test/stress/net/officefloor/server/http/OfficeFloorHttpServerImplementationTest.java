@@ -23,6 +23,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.server.SocketManager;
@@ -109,8 +110,8 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		 */
 		public RawHttpServicerFactory(HttpServerLocation serverLocation,
 				StreamBufferPool<ByteBuffer> serviceBufferPool) {
-			super(serverLocation, false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool, 1000,
-					null, null, true);
+			super(serverLocation, false, new HttpRequestParserMetaData(100, 1000, 1000000), serviceBufferPool, null,
+					null, true);
 		}
 
 		/*
@@ -118,7 +119,7 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		 */
 
 		@Override
-		protected void service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
+		protected ProcessManager service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
 				throws IOException {
 
 			// Configure process awareness
@@ -135,6 +136,9 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 			} catch (Throwable ex) {
 				throw new IOException(ex);
 			}
+
+			// No process management
+			return null;
 		}
 	}
 

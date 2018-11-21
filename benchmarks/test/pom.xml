@@ -10,7 +10,7 @@
 	<name>OfficeFloor Benchmarks</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<officefloor.version>3.1.0</officefloor.version>
+		<officefloor.version>3.3.0</officefloor.version>
 		<jackson.version>2.9.6</jackson.version>
 	</properties>
 	<modules>
@@ -126,6 +126,11 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>4.5.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.asynchttpclient</groupId>
+				<artifactId>async-http-client</artifactId>
+				<version>2.5.4</version>
 			</dependency>
 			<dependency>
 				<groupId>junit</groupId>

@@ -33,11 +33,11 @@ import net.officefloor.model.Model;
 public interface AdaptedConnector<M extends Model> {
 
 	/**
-	 * Obtains the parent {@link AdaptedChild}.
+	 * Obtains the parent {@link AdaptedConnectable}.
 	 * 
-	 * @return Parent {@link AdaptedChild}.
+	 * @return Parent {@link AdaptedConnectable}.
 	 */
-	AdaptedChild<M> getParentAdaptedChild();
+	AdaptedConnectable<M> getParentAdaptedConnectable();
 
 	/**
 	 * Obtains the {@link ConnectionModel} {@link Class}.
@@ -53,10 +53,9 @@ public interface AdaptedConnector<M extends Model> {
 	 * Visually multiple {@link AdaptedConnectionPart} instances may be connected
 	 * via the single {@link AdaptedConnectorPart} {@link Node}.
 	 * 
-	 * @param associatedAdaptedConnectors
-	 *            Associated {@link AdaptedConnector} instances.
-	 * @param associatedRole
-	 *            {@link AdaptedConnectorRole}.
+	 * @param associatedAdaptedConnectors Associated {@link AdaptedConnector}
+	 *                                    instances.
+	 * @param associatedRole              {@link AdaptedConnectorRole}.
 	 */
 	void setAssociation(List<AdaptedConnector<M>> associatedAdaptedConnectors, AdaptedConnectorRole associatedRole);
 

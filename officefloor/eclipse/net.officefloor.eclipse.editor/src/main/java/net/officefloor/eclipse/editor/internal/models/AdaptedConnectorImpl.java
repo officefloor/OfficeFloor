@@ -19,7 +19,7 @@ package net.officefloor.eclipse.editor.internal.models;
 
 import java.util.List;
 
-import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedConnectable;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 import net.officefloor.model.ConnectionModel;
@@ -33,9 +33,10 @@ import net.officefloor.model.Model;
 public class AdaptedConnectorImpl<R extends Model, O, M extends Model> implements AdaptedConnector<M> {
 
 	/**
-	 * Parent {@link AdaptedChild} containing this {@link AdaptedConnectorImpl}.
+	 * Parent {@link AdaptedConnectable} containing this
+	 * {@link AdaptedConnectorImpl}.
 	 */
-	private final AdaptedChild<M> parentAdaptedChild;
+	private final AdaptedConnectable<M> parentAdaptedConnectable;
 
 	/**
 	 * {@link ConnectionModel} {@link Class}.
@@ -65,32 +66,29 @@ public class AdaptedConnectorImpl<R extends Model, O, M extends Model> implement
 	/**
 	 * Instantiate.
 	 * 
-	 * @param parentAdaptedChild
-	 *            Parent {@link AdaptedChild} containing this
-	 *            {@link AdaptedConnectorImpl}.
-	 * @param connectionClass
-	 *            {@link ConnectionModel} {@link Class}.
-	 * @param role
-	 *            {@link AdaptedConnectorRole}.
-	 * @param modelToConnection
-	 *            {@link ModelToConnection} for the {@link ConnectionModel}
-	 *            {@link Class}.
+	 * @param parentAdaptedConnectable Parent {@link AdaptedConnectable} containing
+	 *                                 this {@link AdaptedConnectorImpl}.
+	 * @param connectionClass          {@link ConnectionModel} {@link Class}.
+	 * @param role                     {@link AdaptedConnectorRole}.
+	 * @param modelToConnection        {@link ModelToConnection} for the
+	 *                                 {@link ConnectionModel} {@link Class}.
 	 */
-	public AdaptedConnectorImpl(AdaptedChild<M> parentAdaptedChild, Class<? extends ConnectionModel> connectionClass,
-			AdaptedConnectorRole role, ModelToConnection<R, O, M, ?, ? extends ConnectionModel> modelToConnection) {
-		this.parentAdaptedChild = parentAdaptedChild;
+	public AdaptedConnectorImpl(AdaptedConnectable<M> parentAdaptedConnectable,
+			Class<? extends ConnectionModel> connectionClass, AdaptedConnectorRole role,
+			ModelToConnection<R, O, M, ?, ? extends ConnectionModel> modelToConnection) {
+		this.parentAdaptedConnectable = parentAdaptedConnectable;
 		this.connectionClass = connectionClass;
 		this.role = role;
 		this.modelToConnection = modelToConnection;
 	}
 
 	/*
-	 * ================= AdapatedConnector ==================
+	 * ================= AdaptedConnector ==================
 	 */
 
 	@Override
-	public AdaptedChild<M> getParentAdaptedChild() {
-		return this.parentAdaptedChild;
+	public AdaptedConnectable<M> getParentAdaptedConnectable() {
+		return this.parentAdaptedConnectable;
 	}
 
 	@Override
@@ -108,7 +106,7 @@ public class AdaptedConnectorImpl<R extends Model, O, M extends Model> implement
 		if ((this.role != null) && (!(this.role.equals(associatedRole)))) {
 			throw new IllegalStateException(
 					"Associated role does not match role of connector for " + this.connectionClass.getName()
-							+ " of model" + this.parentAdaptedChild.getModel().getClass().getName());
+							+ " of model" + this.parentAdaptedConnectable.getModel().getClass().getName());
 		}
 	}
 

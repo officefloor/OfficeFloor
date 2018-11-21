@@ -166,12 +166,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Asserts the {@link LinkFlowNode} source is linked to the target
 	 * {@link LinkFlowNode}.
 	 * 
-	 * @param msg
-	 *            Message.
-	 * @param linkSource
-	 *            Source {@link LinkFlowNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkFlowNode}.
+	 * @param msg        Message.
+	 * @param linkSource Source {@link LinkFlowNode}.
+	 * @param linkTarget Target {@link LinkFlowNode}.
 	 */
 	protected static void assertFlowLink(String msg, Object linkSource, Object linkTarget) {
 		assertTrue(msg + ": source must be " + LinkFlowNode.class.getSimpleName(), linkSource instanceof LinkFlowNode);
@@ -182,12 +179,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Asserts the {@link LinkObjectNode} source is linked to the target
 	 * {@link LinkObjectNode}.
 	 * 
-	 * @param msg
-	 *            Message.
-	 * @param linkSource
-	 *            Source {@link LinkObjectNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkObjectNode}.
+	 * @param msg        Message.
+	 * @param linkSource Source {@link LinkObjectNode}.
+	 * @param linkTarget Target {@link LinkObjectNode}.
 	 */
 	protected static void assertObjectLink(String msg, Object linkSource, Object linkTarget) {
 		assertTrue(msg + ": source must be " + LinkObjectNode.class.getSimpleName(),
@@ -199,12 +193,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Asserts the {@link LinkTeamNode} source is linked to the target
 	 * {@link LinkTeamNode}.
 	 * 
-	 * @param msg
-	 *            Message.
-	 * @param linkSource
-	 *            Source {@link LinkTeamNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkTeamNode}.
+	 * @param msg        Message.
+	 * @param linkSource Source {@link LinkTeamNode}.
+	 * @param linkTarget Target {@link LinkTeamNode}.
 	 */
 	protected static void assertTeamLink(String msg, Object linkSource, Object linkTarget) {
 		assertTrue(msg + ": source must be " + LinkTeamNode.class.getSimpleName(), linkSource instanceof LinkTeamNode);
@@ -215,12 +206,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Asserts the {@link LinkOfficeNode} source is linked to the target
 	 * {@link LinkOfficeNode}.
 	 * 
-	 * @param msg
-	 *            Message.
-	 * @param linkSource
-	 *            Source {@link LinkOfficeNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkOfficeNode}.
+	 * @param msg        Message.
+	 * @param linkSource Source {@link LinkOfficeNode}.
+	 * @param linkTarget Target {@link LinkOfficeNode}.
 	 */
 	protected static void assertOfficeLink(String msg, Object linkSource, Object linkTarget) {
 		assertTrue(msg + ": source must be " + LinkOfficeNode.class.getSimpleName(),
@@ -232,12 +220,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Asserts the {@link ManagedObjectSourceNode} is linked to the
 	 * {@link InputManagedObjectNode}.
 	 * 
-	 * @param msg
-	 *            Message.
-	 * @param managedObjectSourceNode
-	 *            {@link ManagedObjectSourceNode}.
-	 * @param inputManagedObjectNode
-	 *            Linked {@link InputManagedObjectNode}.
+	 * @param msg                     Message.
+	 * @param managedObjectSourceNode {@link ManagedObjectSourceNode}.
+	 * @param inputManagedObjectNode  Linked {@link InputManagedObjectNode}.
 	 */
 	protected static void assertSourceInput(String msg, Object managedObjectSourceNode, Object inputManagedObjectNode) {
 		assertTrue(msg + ": source must be " + ManagedObjectSourceNode.class.getSimpleName(),
@@ -249,10 +234,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link OfficeSectionType}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param maker
-	 *            {@link SectionMaker} to make the {@link OfficeSection}.
+	 * @param sectionName Name of the {@link OfficeSection}.
+	 * @param maker       {@link SectionMaker} to make the {@link OfficeSection}.
 	 * @return Loaded {@link OfficeSectionType}.
 	 */
 	protected OfficeSectionType loadOfficeSectionType(String sectionName, SectionMaker maker) {
@@ -262,12 +245,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link OfficeSectionType}.
 	 * 
-	 * @param isHandleMockState
-	 *            <code>true</code> for method to handle mock states.
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param maker
-	 *            {@link SectionMaker} to make the {@link OfficeSection}.
+	 * @param isHandleMockState <code>true</code> for method to handle mock states.
+	 * @param sectionName       Name of the {@link OfficeSection}.
+	 * @param maker             {@link SectionMaker} to make the
+	 *                          {@link OfficeSection}.
 	 * @return Loaded {@link OfficeSectionType}.
 	 */
 	protected OfficeSectionType loadOfficeSectionType(boolean isHandleMockState, String sectionName,
@@ -301,12 +282,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Adds the {@link OfficeSection} to the {@link OfficeArchitect}.
 	 * 
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param maker
-	 *            {@link SectionMaker}.
+	 * @param officeArchitect {@link OfficeArchitect}.
+	 * @param sectionName     Name of the {@link OfficeSection}.
+	 * @param maker           {@link SectionMaker}.
 	 * @return Added {@link OfficeSection}.
 	 */
 	protected OfficeSection addSection(OfficeArchitect officeArchitect, String sectionName, SectionMaker maker) {
@@ -326,12 +304,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Adds an {@link OfficeManagedObjectSource} to the {@link OfficeArchitect}.
 	 * 
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeManagedObjectSource}.
-	 * @param maker
-	 *            {@link ManagedObjectMaker}.
+	 * @param officeArchitect         {@link OfficeArchitect}.
+	 * @param managedObjectSourceName Name of the {@link OfficeManagedObjectSource}.
+	 * @param maker                   {@link ManagedObjectMaker}.
 	 * @return {@link OfficeManagedObjectSource}.
 	 */
 	protected OfficeManagedObjectSource addManagedObjectSource(OfficeArchitect officeArchitect,
@@ -352,12 +327,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Adds an {@link OfficeGovernance} to the {@link OfficeArchitect}.
 	 * 
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param governanceName
-	 *            Name of the {@link OfficeGovernance}.
-	 * @param maker
-	 *            {@link GovernanceMaker}.
+	 * @param officeArchitect {@link OfficeArchitect}.
+	 * @param governanceName  Name of the {@link OfficeGovernance}.
+	 * @param maker           {@link GovernanceMaker}.
 	 * @return {@link OfficeGovernance}.
 	 */
 	protected OfficeGovernance addGovernance(OfficeArchitect officeArchitect, String governanceName,
@@ -379,16 +351,11 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Adds a simple {@link OfficeAdministration} with the supplied extension
 	 * interface, allowing specification of the {@link AdministrationFactory}.
 	 * 
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param administrationName
-	 *            Name of the {@link OfficeAdministration}.
-	 * @param extensionInterface
-	 *            Extension interface.
-	 * @param administrationFactory
-	 *            {@link AdministrationFactory}.
-	 * @param maker
-	 *            {@link AdministrationMaker}.
+	 * @param officeArchitect       {@link OfficeArchitect}.
+	 * @param administrationName    Name of the {@link OfficeAdministration}.
+	 * @param extensionInterface    Extension interface.
+	 * @param administrationFactory {@link AdministrationFactory}.
+	 * @param maker                 {@link AdministrationMaker}.
 	 * @return {@link OfficeAdministration}.
 	 */
 	protected OfficeAdministration addAdministration(OfficeArchitect officeArchitect, String administrationName,
@@ -425,12 +392,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Adds an {@link OfficeFloorTeam} to the {@link OfficeFloorDeployer}.
 	 * 
-	 * @param officeFloorDeployer
-	 *            {@link OfficeFloorDeployer}.
-	 * @param teamName
-	 *            Name of the {@link OfficeFloorTeam}.
-	 * @param maker
-	 *            {@link TeamMaker}.
+	 * @param officeFloorDeployer {@link OfficeFloorDeployer}.
+	 * @param teamName            Name of the {@link OfficeFloorTeam}.
+	 * @param maker               {@link TeamMaker}.
 	 * @return {@link OfficeFloorTeam}.
 	 */
 	protected OfficeFloorTeam addTeam(OfficeFloorDeployer officeFloorDeployer, String teamName, TeamMaker maker) {
@@ -450,12 +414,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Adds an {@link OfficeFloorManagedObjectSource} to the
 	 * {@link OfficeFloorDeployer}.
 	 * 
-	 * @param officeFloorDeployer
-	 *            {@link OfficeFloorDeployer}.
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeFloorManagedObjectSource}.
-	 * @param maker
-	 *            {@link ManagedObjectMaker}.
+	 * @param officeFloorDeployer     {@link OfficeFloorDeployer}.
+	 * @param managedObjectSourceName Name of the
+	 *                                {@link OfficeFloorManagedObjectSource}.
+	 * @param maker                   {@link ManagedObjectMaker}.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
 	protected OfficeFloorManagedObjectSource addManagedObjectSource(OfficeFloorDeployer officeFloorDeployer,
@@ -476,12 +438,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Adds an {@link OfficeFloorSupplier} to the {@link OfficeFloorDeployer}.
 	 * 
-	 * @param officeFloorDeployer
-	 *            {@link OfficeFloorDeployer}.
-	 * @param supplierName
-	 *            Name of the {@link OfficeFloorSupplier}.
-	 * @param maker
-	 *            {@link SupplierMaker}.
+	 * @param officeFloorDeployer {@link OfficeFloorDeployer}.
+	 * @param supplierName        Name of the {@link OfficeFloorSupplier}.
+	 * @param maker               {@link SupplierMaker}.
 	 * @return {@link OfficeFloorSupplier}.
 	 */
 	protected OfficeFloorSupplier addSupplier(OfficeFloorDeployer officeFloorDeployer, String supplierName,
@@ -502,13 +461,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Adds a {@link DeployedOffice}.
 	 * 
-	 * @param officeFloorDeployer
-	 *            {@link OfficeFloorDeployer}.
-	 * @param officeName
-	 *            Name of the {@link DeployedOffice}. Also used as location of
-	 *            the {@link DeployedOffice}.
-	 * @param maker
-	 *            {@link OfficeMaker}.
+	 * @param officeFloorDeployer {@link OfficeFloorDeployer}.
+	 * @param officeName          Name of the {@link DeployedOffice}. Also used as
+	 *                            location of the {@link DeployedOffice}.
+	 * @param maker               {@link OfficeMaker}.
 	 * @return {@link DeployedOffice}.
 	 */
 	protected DeployedOffice addDeployedOffice(OfficeFloorDeployer officeFloorDeployer, String officeName,
@@ -534,8 +490,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Test logic to make the {@link SubSection}.
 		 * 
-		 * @param context
-		 *            {@link SectionMakerContext}.
+		 * @param context {@link SectionMakerContext}.
 		 */
 		void make(SectionMakerContext context);
 	}
@@ -562,11 +517,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link SubSection}.
 		 * 
-		 * @param subSectionName
-		 *            Name of the {@link SubSection} which is also used as the
-		 *            {@link SubSection} location.
-		 * @param maker
-		 *            {@link SectionMaker}.
+		 * @param subSectionName Name of the {@link SubSection} which is also used as
+		 *                       the {@link SubSection} location.
+		 * @param maker          {@link SectionMaker}.
 		 * @return Added {@link SubSection}.
 		 */
 		SubSection addSubSection(String subSectionName, SectionMaker maker);
@@ -574,10 +527,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link SectionManagedObjectSource}.
 		 * 
-		 * @param managedObjectSourceName
-		 *            Name of the {@link SectionManagedObjectSource}.
-		 * @param maker
-		 *            {@link ManagedObjectMaker}.
+		 * @param managedObjectSourceName Name of the
+		 *                                {@link SectionManagedObjectSource}.
+		 * @param maker                   {@link ManagedObjectMaker}.
 		 * @return Added {@link SectionManagedObjectSource}.
 		 */
 		SectionManagedObjectSource addManagedObjectSource(String managedObjectSourceName, ManagedObjectMaker maker);
@@ -585,10 +537,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link SectionFunctionNamespace}.
 		 * 
-		 * @param namespaceName
-		 *            Name of the {@link SectionFunctionNamespace}.
-		 * @param maker
-		 *            {@link NamespaceMaker}.
+		 * @param namespaceName Name of the {@link SectionFunctionNamespace}.
+		 * @param maker         {@link NamespaceMaker}.
 		 * @return {@link SectionFunctionNamespace}.
 		 */
 		SectionFunctionNamespace addFunctionNamespace(String namespaceName, NamespaceMaker maker);
@@ -596,14 +546,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link SectionFunction}.
 		 * 
-		 * @param namespace
-		 *            Name of the {@link SectionFunctionNamespace}.
-		 * @param functionName
-		 *            Name of the {@link SectionFunction}.
-		 * @param functionFactory
-		 *            {@link ManagedFunctionFactory}.
-		 * @param functionMaker
-		 *            {@link FunctionMaker} for the {@link SectionFunction}.
+		 * @param namespace       Name of the {@link SectionFunctionNamespace}.
+		 * @param functionName    Name of the {@link SectionFunction}.
+		 * @param functionFactory {@link ManagedFunctionFactory}.
+		 * @param functionMaker   {@link FunctionMaker} for the {@link SectionFunction}.
 		 * @return {@link SectionFunction}.
 		 */
 		SectionFunction addFunction(String namespace, String functionName, ManagedFunctionFactory<?, ?> functionFactory,
@@ -612,16 +558,11 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link FunctionFlow}.
 		 * 
-		 * @param namespace
-		 *            Name of the {@link SectionFunctionNamespace}.
-		 * @param functionName
-		 *            Name of the {@link SectionFunction}.
-		 * @param functionFactory
-		 *            {@link ManagedFunctionFactory}.
-		 * @param flowName
-		 *            Name of the {@link ManagedFunctionFlowType}.
-		 * @param argumentType
-		 *            Argument type.
+		 * @param namespace       Name of the {@link SectionFunctionNamespace}.
+		 * @param functionName    Name of the {@link SectionFunction}.
+		 * @param functionFactory {@link ManagedFunctionFactory}.
+		 * @param flowName        Name of the {@link ManagedFunctionFlowType}.
+		 * @param argumentType    Argument type.
 		 * @return {@link FunctionFlow}.
 		 */
 		FunctionFlow addFunctionFlow(String namespace, String functionName,
@@ -630,18 +571,12 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link FunctionObject}.
 		 * 
-		 * @param namespace
-		 *            Name of the {@link SectionFunctionNamespace}.
-		 * @param functionName
-		 *            Name of the {@link SectionFunction}.
-		 * @param functionFactory
-		 *            {@link ManagedFunctionFactory}.
-		 * @param objectName
-		 *            Name of the {@link ManagedFunctionObjectType}.
-		 * @param objectType
-		 *            Object type.
-		 * @param typeQualifier
-		 *            Type qualifier.
+		 * @param namespace       Name of the {@link SectionFunctionNamespace}.
+		 * @param functionName    Name of the {@link SectionFunction}.
+		 * @param functionFactory {@link ManagedFunctionFactory}.
+		 * @param objectName      Name of the {@link ManagedFunctionObjectType}.
+		 * @param objectType      Object type.
+		 * @param typeQualifier   Type qualifier.
 		 * @return {@link FunctionObject}.
 		 */
 		FunctionObject addFunctionObject(String namespace, String functionName,
@@ -649,19 +584,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				String typeQualifier);
 
 		/**
-		 * Adds a {@link FunctionFlow} for a
-		 * {@link ManagedFunctionEscalationType}.
+		 * Adds a {@link FunctionFlow} for a {@link ManagedFunctionEscalationType}.
 		 * 
-		 * @param namespace
-		 *            Name of the {@link SectionFunctionNamespace}.
-		 * @param functionName
-		 *            Name of the {@link SectionFunction}.
-		 * @param functionFactory
-		 *            {@link ManagedFunctionFactory}.
-		 * @param escalationName
-		 *            Name of the {@link ManagedFunctionEscalationType}.
-		 * @param escalationType
-		 *            Escalation type.
+		 * @param namespace       Name of the {@link SectionFunctionNamespace}.
+		 * @param functionName    Name of the {@link SectionFunction}.
+		 * @param functionFactory {@link ManagedFunctionFactory}.
+		 * @param escalationName  Name of the {@link ManagedFunctionEscalationType}.
+		 * @param escalationType  Escalation type.
 		 * @return {@link FunctionFlow}.
 		 */
 		<E extends Throwable> FunctionFlow addFunctionEscalation(String namespace, String functionName,
@@ -694,10 +623,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Registers a {@link SectionMaker}.
 		 * 
-		 * @param maker
-		 *            {@link SectionMaker}.
-		 * @return {@link PropertyList} to use to load the
-		 *         {@link MakerSectionSource}.
+		 * @param maker {@link SectionMaker}.
+		 * @return {@link PropertyList} to use to load the {@link MakerSectionSource}.
 		 */
 		public static PropertyList register(SectionMaker maker) {
 
@@ -901,8 +828,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Makes the {@link SectionManagedObject}.
 		 * 
-		 * @param context
-		 *            {@link ManagedObjectMakerContext}.
+		 * @param context {@link ManagedObjectMakerContext}.
 		 */
 		void make(ManagedObjectMakerContext context);
 	}
@@ -922,8 +848,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds an extension interface supported by the {@link ManagedObject}.
 		 * 
-		 * @param extensionInterface
-		 *            Extension interface supported.
+		 * @param extensionInterface Extension interface supported.
 		 */
 		void addExtensionInterface(Class<?> extensionInterface);
 	}
@@ -936,8 +861,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			implements ManagedObjectMakerContext {
 
 		/**
-		 * Name of property holding the identifier for the
-		 * {@link ManagedObjectMaker}.
+		 * Name of property holding the identifier for the {@link ManagedObjectMaker}.
 		 */
 		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "managed.object.maker";
 
@@ -956,8 +880,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Registers a {@link ManagedObjectMaker}.
 		 * 
-		 * @param maker
-		 *            {@link ManagedObjectMaker}.
+		 * @param maker {@link ManagedObjectMaker}.
 		 * @return {@link PropertyList}.
 		 */
 		public static PropertyList register(ManagedObjectMaker maker) {
@@ -1048,11 +971,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * As per {@link SupplierSource}.
 		 * 
-		 * @param context
-		 *            {@link SupplierSourceContext}.
-		 * @throws Exception
-		 *             If fails to supply the {@link ManagedObjectSource}
-		 *             instances.
+		 * @param context {@link SupplierSourceContext}.
+		 * @throws Exception If fails to supply the {@link ManagedObjectSource}
+		 *                   instances.
 		 */
 		void supply(SupplierSourceContext context) throws Exception;
 	}
@@ -1064,8 +985,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	public static class MakerSupplierSource extends AbstractSupplierSource {
 
 		/**
-		 * Name of property holding the identifier for the {@link SupplierMaker}
-		 * .
+		 * Name of property holding the identifier for the {@link SupplierMaker} .
 		 */
 		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "supplier.maker";
 
@@ -1084,8 +1004,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Registers a {@link SupplierMaker}.
 		 * 
-		 * @param maker
-		 *            {@link SupplierMaker}.
+		 * @param maker {@link SupplierMaker}.
 		 * @return {@link PropertyList}.
 		 */
 		public static PropertyList register(SupplierMaker maker) {
@@ -1128,6 +1047,11 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			// Make the supplier
 			maker.supply(context);
 		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
+		}
 	}
 
 	/**
@@ -1138,8 +1062,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Makes the {@link SectionFunctionNamespace}.
 		 * 
-		 * @param context
-		 *            {@link NamespaceMakerContext}.
+		 * @param context {@link NamespaceMakerContext}.
 		 */
 		void make(NamespaceMakerContext context);
 	}
@@ -1166,12 +1089,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link ManagedFunctionType}.
 		 * 
-		 * @param functionTypeName
-		 *            Name of the {@link ManagedFunctionType}.
-		 * @param functionFactory
-		 *            {@link ManagedFunctionFactory}.
-		 * @return {@link FunctionMakerContext} to make the
-		 *         {@link ManagedFunctionType}.
+		 * @param functionTypeName Name of the {@link ManagedFunctionType}.
+		 * @param functionFactory  {@link ManagedFunctionFactory}.
+		 * @return {@link FunctionMakerContext} to make the {@link ManagedFunctionType}.
 		 */
 		FunctionMakerContext addFunction(String functionTypeName, ManagedFunctionFactory<?, ?> functionFactory);
 	}
@@ -1184,8 +1104,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Makes the {@link ManagedFunctionType}.
 		 * 
-		 * @param context
-		 *            {@link FunctionMakerContext}.
+		 * @param context {@link FunctionMakerContext}.
 		 */
 		void make(FunctionMakerContext context);
 	}
@@ -1198,10 +1117,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link ManagedFunctionFlowType}.
 		 * 
-		 * @param flowName
-		 *            Name of the {@link ManagedFunctionFlowType}.
-		 * @param argumentType
-		 *            Argument type.
+		 * @param flowName     Name of the {@link ManagedFunctionFlowType}.
+		 * @param argumentType Argument type.
 		 * @return {@link ManagedFunctionFlowTypeBuilder}.
 		 */
 		ManagedFunctionFlowTypeBuilder<?> addFlow(String flowName, Class<?> argumentType);
@@ -1209,12 +1126,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link ManagedFunctionObjectType}.
 		 * 
-		 * @param objectName
-		 *            Name of the {@link ManagedFunctionObjectType}.
-		 * @param objectType
-		 *            Object type.
-		 * @param typeQualifier
-		 *            Type qualifier.
+		 * @param objectName    Name of the {@link ManagedFunctionObjectType}.
+		 * @param objectType    Object type.
+		 * @param typeQualifier Type qualifier.
 		 * @return {@link ManagedFunctionObjectTypeBuilder}.
 		 */
 		ManagedFunctionObjectTypeBuilder<?> addObject(String objectName, Class<?> objectType, String typeQualifier);
@@ -1222,10 +1136,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link ManagedFunctionEscalationTypeBuilder}.
 		 * 
-		 * @param escalationName
-		 *            Name of the {@link ManagedFunctionEscalationType}.
-		 * @param escalationType
-		 *            Escalation type.
+		 * @param escalationName Name of the {@link ManagedFunctionEscalationType}.
+		 * @param escalationType Escalation type.
 		 * @return {@link ManagedFunctionEscalationTypeBuilder}.
 		 */
 		<E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(String escalationName,
@@ -1258,8 +1170,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Registers a {@link NamespaceMaker}.
 		 * 
-		 * @param maker
-		 *            {@link NamespaceMaker}.
+		 * @param maker {@link NamespaceMaker}.
 		 * @return {@link PropertyList}.
 		 */
 		public static PropertyList register(NamespaceMaker maker) {
@@ -1358,12 +1269,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			/**
 			 * Initiate.
 			 * 
-			 * @param functionName
-			 *            Name of the {@link SectionFunction}.
-			 * @param functionFactory
-			 *            {@link ManagedFunctionFactory}.
-			 * @param namespaceTypeBuilder
-			 *            {@link FunctionNamespaceBuilder}.
+			 * @param functionName         Name of the {@link SectionFunction}.
+			 * @param functionFactory      {@link ManagedFunctionFactory}.
+			 * @param namespaceTypeBuilder {@link FunctionNamespaceBuilder}.
 			 */
 			public FunctionTypeMakerImpl(String functionName, ManagedFunctionFactory<?, ?> functionFactory,
 					FunctionNamespaceBuilder namespaceTypeBuilder) {
@@ -1421,8 +1329,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Makes the {@link Governance}.
 		 * 
-		 * @param context
-		 *            {@link GovernanceMakerContext}.
+		 * @param context {@link GovernanceMakerContext}.
 		 */
 		void make(GovernanceMakerContext context);
 	}
@@ -1435,8 +1342,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Specifies the extension interface.
 		 * 
-		 * @param extensionInterface
-		 *            Extension interface.
+		 * @param extensionInterface Extension interface.
 		 */
 		void setExtensionInterface(Class<?> extensionInterface);
 	}
@@ -1468,8 +1374,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Registers a {@link GovernanceMaker}.
 		 * 
-		 * @param maker
-		 *            {@link GovernanceMaker}.
+		 * @param maker {@link GovernanceMaker}.
 		 * @return {@link PropertyList}.
 		 */
 		public static PropertyList register(GovernanceMaker maker) {
@@ -1553,8 +1458,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Makes the {@link Administration}.
 		 * 
-		 * @param context
-		 *            {@link AdministratorMakerContext}.
+		 * @param context {@link AdministratorMakerContext}.
 		 */
 		void make(AdministrationMakerContext context);
 	}
@@ -1567,44 +1471,37 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Specifies the {@link AdministrationFactory}.
 		 * 
-		 * @param administrationFactory
-		 *            {@link AdministrationFactory}.
+		 * @param administrationFactory {@link AdministrationFactory}.
 		 */
 		void setAdministrationFactory(AdministrationFactory<?, ?, ?> administrationFactory);
 
 		/**
 		 * Specifies the extension interface.
 		 * 
-		 * @param extensionInterface
-		 *            Extension interface.
+		 * @param extensionInterface Extension interface.
 		 */
 		void setExtensionInterface(Class<?> extensionInterface);
 
 		/**
 		 * Adds a {@link Flow}.
 		 * 
-		 * @param flowName
-		 *            Name of {@link Flow}.
-		 * @param argumentType
-		 *            Type of argument.
+		 * @param flowName     Name of {@link Flow}.
+		 * @param argumentType Type of argument.
 		 */
 		void addFlow(String flowName, Class<?> argumentType);
 
 		/**
 		 * Adds an {@link Escalation}.
 		 * 
-		 * @param escalationName
-		 *            Name of {@link Escalation}.
-		 * @param escalationType
-		 *            Type of {@link Escalation}.
+		 * @param escalationName Name of {@link Escalation}.
+		 * @param escalationType Type of {@link Escalation}.
 		 */
 		void addEscalation(String escalationName, Class<? extends Throwable> escalationType);
 
 		/**
 		 * Adds {@link Governance}.
 		 * 
-		 * @param governanceName
-		 *            Name of {@link Governance}.
+		 * @param governanceName Name of {@link Governance}.
 		 */
 		void addGovernance(String governanceName);
 	}
@@ -1636,8 +1533,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Registers a {@link AdministrationMaker}.
 		 * 
-		 * @param maker
-		 *            {@link AdministrationMaker}.
+		 * @param maker {@link AdministrationMaker}.
 		 * @return {@link PropertyList}.
 		 */
 		public static PropertyList register(AdministrationMaker maker) {
@@ -1731,8 +1627,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Makes the {@link Team}.
 		 * 
-		 * @param context
-		 *            {@link TeamMakerContext}.
+		 * @param context {@link TeamMakerContext}.
 		 */
 		void make(TeamMakerContext context);
 	}
@@ -1769,8 +1664,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Registers a {@link TeamMaker}.
 		 * 
-		 * @param maker
-		 *            {@link TeamMaker}.
+		 * @param maker {@link TeamMaker}.
 		 * @return {@link PropertyList}.
 		 */
 		public static PropertyList register(TeamMaker maker) {
@@ -1845,8 +1739,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Makes an {@link Office}.
 		 * 
-		 * @param context
-		 *            {@link OfficeMakerContext}.
+		 * @param context {@link OfficeMakerContext}.
 		 */
 		void make(OfficeMakerContext context);
 	}
@@ -1866,10 +1759,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds a {@link OfficeSection} to the {@link Office}.
 		 * 
-		 * @param sectionName
-		 *            Name of the {@link OfficeSection}.
-		 * @param sectionMaker
-		 *            {@link SectionMaker}.
+		 * @param sectionName  Name of the {@link OfficeSection}.
+		 * @param sectionMaker {@link SectionMaker}.
 		 * @return Added {@link OfficeSection}.
 		 */
 		OfficeSection addSection(String sectionName, SectionMaker sectionMaker);
@@ -1899,8 +1790,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Resets for the next test.
 		 * 
-		 * @param testCase
-		 *            {@link AbstractStructureTestCase}.
+		 * @param testCase {@link AbstractStructureTestCase}.
 		 */
 		public static void reset(AbstractStructureTestCase testCase) {
 			officeMakers = new HashMap<String, OfficeMaker>();
@@ -1910,8 +1800,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Registers a {@link OfficeMaker}.
 		 * 
-		 * @param maker
-		 *            {@link OfficeMaker}.
+		 * @param maker {@link OfficeMaker}.
 		 * @return {@link PropertyList}.
 		 */
 		public static PropertyList register(OfficeMaker maker) {
@@ -1986,10 +1875,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Makes the {@link OfficeFloor}.
 		 * 
-		 * @param context
-		 *            {@link OfficeFloor}.
-		 * @throws Exception
-		 *             If fails to make the {@link OfficeFloor}.
+		 * @param context {@link OfficeFloor}.
+		 * @throws Exception If fails to make the {@link OfficeFloor}.
 		 */
 		void make(OfficeFloorMakerContext context) throws Exception;
 	}
@@ -2016,10 +1903,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds an {@link Office}.
 		 * 
-		 * @param officeName
-		 *            Name of the {@link Office}.
-		 * @param officeMaker
-		 *            {@link OfficeMaker}.
+		 * @param officeName  Name of the {@link Office}.
+		 * @param officeMaker {@link OfficeMaker}.
 		 * @return Added {@link DeployedOffice}.
 		 */
 		DeployedOffice addOffice(String officeName, OfficeMaker officeMaker);
@@ -2027,10 +1912,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Adds an {@link OfficeFloorTeam}.
 		 * 
-		 * @param teamName
-		 *            Name of the {@link OfficeFloorTeam}.
-		 * @param teamMaker
-		 *            {@link TeamMaker}.
+		 * @param teamName  Name of the {@link OfficeFloorTeam}.
+		 * @param teamMaker {@link TeamMaker}.
 		 * @return Added {@link OfficeFloorTeam}.
 		 */
 		OfficeFloorTeam addTeam(String teamName, TeamMaker teamMaker);
@@ -2064,8 +1947,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Resets for the next test.
 		 * 
-		 * @param testCase
-		 *            Current {@link AbstractStructureTestCase} running.
+		 * @param testCase Current {@link AbstractStructureTestCase} running.
 		 */
 		public static void reset(AbstractStructureTestCase testCase) {
 			officeFloorMakers = new HashMap<String, OfficeFloorMaker>();
@@ -2076,8 +1958,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Registers a {@link OfficeFloorMaker}.
 		 * 
-		 * @param maker
-		 *            {@link OfficeFloorMaker}.
+		 * @param maker {@link OfficeFloorMaker}.
 		 * @return {@link PropertyList}.
 		 */
 		public static PropertyList register(OfficeFloorMaker maker) {
@@ -2111,8 +1992,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		private OfficeFloorSourceContext context = null;
 
 		/**
-		 * Default constructor that may through instantiate failure if specified
-		 * to do so.
+		 * Default constructor that may through instantiate failure if specified to do
+		 * so.
 		 */
 		public MakerOfficeFloorSource() {
 			if (instantiateFailure != null) {

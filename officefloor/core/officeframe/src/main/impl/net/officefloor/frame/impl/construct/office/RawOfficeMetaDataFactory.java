@@ -30,6 +30,7 @@ import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
@@ -401,6 +402,9 @@ public class RawOfficeMetaDataFactory {
 		int startupFunctionsLength = (startupFunctionReferences == null ? 0 : startupFunctionReferences.length);
 		OfficeStartupFunction[] startupFunctions = new OfficeStartupFunction[startupFunctionsLength];
 
+		// Obtain the thread synchronisers
+		ThreadSynchroniserFactory[] threadSynchronisers = configuration.getThreadSynchronisers();
+
 		// Create the listing of escalations to later populate
 		EscalationConfiguration[] officeEscalationConfigurations = configuration.getEscalationConfiguration();
 		int officeEscalationsLength = (officeEscalationConfigurations == null ? 0
@@ -414,7 +418,8 @@ public class RawOfficeMetaDataFactory {
 		// Create the thread meta-data
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
 				this.constructDefaultManagedObjectMetaData(threadBoundManagedObjects), governanceMetaDatas,
-				maxFunctionChainLength, breakChainTeam, officeEscalationProcedure, officeFloorEscalation);
+				maxFunctionChainLength, breakChainTeam, threadSynchronisers, officeEscalationProcedure,
+				officeFloorEscalation);
 
 		// Obtain the executive
 		Executive executive = rawOfficeFloorMetaData.getExecutive();

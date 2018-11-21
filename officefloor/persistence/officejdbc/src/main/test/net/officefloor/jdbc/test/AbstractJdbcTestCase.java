@@ -40,17 +40,24 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
+import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.jdbc.AbstractConnectionManagedObjectSource;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
+import net.officefloor.jdbc.ConnectionWrapper;
 import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
@@ -78,6 +85,27 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	public static Connection getConnection(Class<? extends ConnectionManagedObjectSource> connectionMosClass,
 			Consumer<PropertyConfigurable> propertyLoader) throws Exception {
 
+		// Avoid compiling as leaves files open (avoids running out of file handles)
+		OfficeFloorJavaCompiler.runWithoutCompiler(() -> {
+			loadConnection(connectionMosClass, propertyLoader);
+		});
+
+		// Obtain connection
+		return SetupSection.connection;
+	}
+
+	/**
+	 * Loads the {@link Connection}.
+	 * 
+	 * @param connectionMosClass {@link ConnectionManagedObjectSource} {@link Class}
+	 *                           used to obtain the {@link Connection}.
+	 * @param propertyLoader     Loads the properties.
+	 * @return {@link Connection}.
+	 * @throws Exception If fails to create {@link Connection}.
+	 */
+	private static void loadConnection(Class<? extends ConnectionManagedObjectSource> connectionMosClass,
+			Consumer<PropertyConfigurable> propertyLoader) throws Exception {
+
 		// Run OfficeFloor with pool to obtain connection
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.office((context) -> {
@@ -89,9 +117,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			propertyLoader.accept(mos);
 			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
 
-			// Pool the connection (keeps it alive)
+			// Obtain the connection via pool return
 			OfficeManagedObjectPool pool = context.getOfficeArchitect().addManagedObjectPool("POOL",
-					ThreadLocalJdbcConnectionPoolSource.class.getName());
+					new GetConnectionManagedObjectPoolSource());
 			context.getOfficeArchitect().link(mos, pool);
 		});
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
@@ -102,9 +130,78 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		} finally {
 			officeFloor.closeOfficeFloor();
 		}
+	}
 
-		// Obtain connection
-		return SetupSection.connection;
+	/**
+	 * {@link ManagedObjectPoolSource} to obtain a {@link Connection}.
+	 */
+	private static class GetConnectionManagedObjectPoolSource extends AbstractManagedObjectPoolSource {
+
+		/*
+		 * ==================== ManagedObjectPoolSource =====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// no specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext context) throws Exception {
+			context.setPooledObjectType(Connection.class);
+			context.setManagedObjectPoolFactory((poolContext) -> new GetConnectionManagedObjectPool(poolContext));
+		}
+	}
+
+	/**
+	 * {@link ManagedObjectPool} to obtain a {@link Connection}.
+	 */
+	private static class GetConnectionManagedObjectPool implements ManagedObjectPool {
+
+		/**
+		 * {@link ManagedObjectPoolContext}.
+		 */
+		private final ManagedObjectPoolContext context;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param context {@link ManagedObjectPoolContext}.
+		 */
+		private GetConnectionManagedObjectPool(ManagedObjectPoolContext context) {
+			this.context = context;
+		}
+
+		/*
+		 * ===================== ManagedObjectPool ==========================
+		 */
+
+		@Override
+		public void sourceManagedObject(ManagedObjectUser user) {
+			this.context.getManagedObjectSource().sourceManagedObject(user);
+		}
+
+		@Override
+		public void returnManagedObject(ManagedObject managedObject) {
+			// Allow connection to live beyond close of OfficeFloor
+		}
+
+		@Override
+		public void lostManagedObject(ManagedObject managedObject, Throwable cause) {
+			try {
+				SetupSection.connection.close();
+			} catch (SQLException ex) {
+				// Ignore close failure
+			} finally {
+				// No connection
+				SetupSection.connection = null;
+			}
+		}
+
+		@Override
+		public void empty() {
+			// nothing to clean up
+		}
 	}
 
 	public static class SetupSection {
@@ -112,8 +209,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		private static Connection connection;
 
 		public void script(Connection connection) throws SQLException {
-			SetupSection.connection = connection;
+			SetupSection.connection = ConnectionWrapper.getRealConnection(connection);
 		}
+
 	}
 
 	/**
@@ -165,27 +263,30 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	protected abstract void cleanDatabase(Connection connection) throws SQLException;
 
 	/**
-	 * {@link Connection}.
+	 * {@link Connection}. Keep {@link Connection} to database for in memory
+	 * databases to stay alive.
 	 */
 	protected Connection connection;
 
 	@Override
 	protected void setUp() throws Exception {
+
+		// Ensure clean state (no connections from previous test)
+		ValidateConnectionDecoratorFactory.assertNoPreviousTestConnections();
+
+		// Setup test
 		synchronized (AbstractJdbcTestCase.class) {
 			super.setUp();
 
 			// Obtain connection
-			this.connection = DataSourceRule.waitForDatabaseAvailable(AbstractJdbcTestCase.class, () -> {
+			this.connection = DataSourceRule.waitForDatabaseAvailable(AbstractJdbcTestCase.class, (context) -> {
 
 				// Obtain the connection
-				this.connection = getConnection(this.getConnectionManagedObjectSourceClass(),
-						(mos) -> this.loadConnectionProperties(mos));
+				Connection connection = context.setConnection(getConnection(
+						this.getConnectionManagedObjectSourceClass(), (mos) -> this.loadConnectionProperties(mos)));
 
 				// Clean database
-				this.cleanDatabase(this.connection);
-
-				// Return the connection
-				return connection;
+				this.cleanDatabase(connection);
 			});
 		}
 	}
@@ -198,6 +299,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			// Close connection
 			this.connection.close();
 		}
+
+		// Ensure no open connections
+		ValidateConnectionDecoratorFactory.assertAllConnectionsClosed();
 	}
 
 	/**
@@ -403,9 +507,8 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		}
 
 		// As no pooling, should close the connection
-		if (!isPooled) {
-			assertTrue("Connection should be closed", ConnectivitySection.connection.isClosed());
-		}
+		Connection connection = ConnectionWrapper.getRealConnection(ConnectivitySection.connection);
+		assertTrue("Connection should be closed", (connection == null) || (connection.isClosed()));
 	}
 
 	public static class ConnectivitySection {
@@ -425,6 +528,141 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 				statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
 				statement.execute("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID, NAME ) VALUES ( 1, 'test' )");
 			}
+		}
+	}
+
+	/**
+	 * Ensure connection management for writable {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testWritableConnectionManagement() throws Throwable {
+		this.doConnectionManagementTest(this.getConnectionManagedObjectSourceClass(), false, 2);
+	}
+
+	/**
+	 * Ensure connection management for writable {@link Connection} using fallback
+	 * {@link Proxy}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testWritableConnectionManagementViaProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(
+				() -> this.doConnectionManagementTest(this.getConnectionManagedObjectSourceClass(), false, 2));
+	}
+
+	/**
+	 * Ensure connection management for writable {@link Connection} being pooled.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testPooledWritableConnectionManagement() throws Throwable {
+		this.doConnectionManagementTest(this.getConnectionManagedObjectSourceClass(), true, 2);
+	}
+
+	/**
+	 * Ensure connection management for writable {@link Connection} being pooled
+	 * using fallback {@link Proxy}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testPooledWritableConnectionManagementViaProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(
+				() -> this.doConnectionManagementTest(this.getConnectionManagedObjectSourceClass(), true, 2));
+	}
+
+	/**
+	 * Ensure connection management for read-only {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testReadOnlyConnectionManagement() throws Throwable {
+		this.doConnectionManagementTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false, 2);
+	}
+
+	/**
+	 * Ensure connection management for read-only {@link Connection}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testReadOnlyConnectionManagementViaProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(
+				() -> this.doConnectionManagementTest(this.getReadOnlyConnectionManagedObjectSourceClass(), false, 2));
+	}
+
+	/**
+	 * Ensure connection management for {@link DataSource}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testDataSourceConnectionManagement() throws Throwable {
+		this.doConnectionManagementTest(this.getDataSourceManagedObjectSourceClass(), false, 2);
+	}
+
+	/**
+	 * Ensure connection management for {@link DataSource}.
+	 * 
+	 * @throws Exception On test failure.
+	 */
+	public void testDataSourceConnectionManagementViaProxy() throws Throwable {
+		OfficeFloorJavaCompiler.runWithoutCompiler(
+				() -> this.doConnectionManagementTest(this.getDataSourceManagedObjectSourceClass(), false, 2));
+	}
+
+	/**
+	 * Ensures the {@link ValidateConnectionDecoratorFactory} is registered for
+	 * tracking open connections and that there is appropriate connection management
+	 * in place to close connections.
+	 */
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doConnectionManagementTest(
+			Class<MS> managedObjectSourceClass, boolean isPooled, int connectionIncreaseCount) throws Throwable {
+
+		// Obtain the number of registered connections
+		ConnectionDecoratorSection.expectedConnectionCount = ValidateConnectionDecoratorFactory
+				.getConnectionsRegisteredCount() + connectionIncreaseCount;
+
+		// Run connectivity to create table and add row
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			OfficeArchitect architect = context.getOfficeArchitect();
+
+			// Add connection
+			context.addSection("SECTION", ConnectionDecoratorSection.class);
+			OfficeManagedObjectSource mos = architect.addOfficeManagedObjectSource("mo",
+					this.getConnectionManagedObjectSourceClass().getName());
+			this.loadConnectionProperties(mos);
+			mos.addOfficeManagedObject("mo", ManagedObjectScope.THREAD);
+
+			// Provide pooling
+			if (isPooled) {
+				architect.link(mos,
+						architect.addManagedObjectPool("POOL", ThreadLocalJdbcConnectionPoolSource.class.getName()));
+			}
+		});
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.checkConnectionDecoration", null);
+		officeFloor.closeOfficeFloor();
+
+		// Ensure is closed with OfficeFloor
+		Connection connection = ConnectionWrapper.getRealConnection(ConnectionDecoratorSection.connection);
+		assertTrue("Should close connection with closing OfficeFloor", (connection == null) || (connection.isClosed()));
+	}
+
+	public static class ConnectionDecoratorSection {
+
+		private static Connection connection;
+
+		private static int expectedConnectionCount;
+
+		public void checkConnectionDecoration(Connection connection) throws SQLException {
+			ConnectionDecoratorSection.connection = connection;
+
+			// Ensure connection retrieved (may be pooled)
+			connection.createStatement();
+
+			// Ensure connection is registered
+			assertEquals("Incorrect number of connections registered",
+					ValidateConnectionDecoratorFactory.getConnectionsRegisteredCount(), expectedConnectionCount);
 		}
 	}
 
@@ -477,6 +715,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		// Setup table
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+			if (!this.connection.getAutoCommit()) {
+				this.connection.commit();
+			}
 		}
 
 		// Run connectivity to create table and add row
@@ -651,6 +892,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		// Setup table
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
+			if (!this.connection.getAutoCommit()) {
+				this.connection.commit();
+			}
 		}
 
 		// Identifier
@@ -701,14 +945,14 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	public static class NewThread {
 	}
 
+	@FlowInterface
+	public static interface Flows {
+		void thread(AtomicInteger id);
+	}
+
 	public static class InsertConnectionSection {
 
 		private static volatile boolean isTransaction = false;
-
-		@FlowInterface
-		public static interface Flows {
-			void thread(AtomicInteger id);
-		}
 
 		public void run(@Parameter AtomicInteger id, Connection connection, Flows flows) throws SQLException {
 			if (isTransaction) {
@@ -734,8 +978,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 
 	public static class InsertDataSourceSection {
 
-		public void run(@Parameter AtomicInteger id, DataSource dataSource, InsertConnectionSection.Flows flows)
-				throws SQLException {
+		public void run(@Parameter AtomicInteger id, DataSource dataSource, Flows flows) throws SQLException {
 			try (Connection connection = dataSource.getConnection()) {
 				InsertConnectionSection.insertRow(connection, id, "run");
 			}
@@ -859,6 +1102,9 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 		try (Statement statement = this.connection.createStatement()) {
 			statement.execute("CREATE TABLE OFFICE_FLOOR_JDBC_TEST ( ID INT, NAME VARCHAR(255) )");
 			statement.execute("INSERT INTO OFFICE_FLOOR_JDBC_TEST ( ID , NAME ) VALUES ( 1, 'test' )");
+			if (!this.connection.getAutoCommit()) {
+				this.connection.commit();
+			}
 		}
 
 		// Undertake warm up
@@ -920,7 +1166,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 			for (int i = 0; i < THREAD_COUNT; i++) {
 				SelectParameter parameter = new SelectParameter();
 				flows.thread(parameter, (exception) -> {
-					assertNull("Should be no failure in thread", exception);
+					assertNull("Should be no failure in thread (" + exception + ")", exception);
 					assertEquals("Should obtain name", "test", parameter.name);
 					completed[0]++;
 					if (completed[0] == THREAD_COUNT) {

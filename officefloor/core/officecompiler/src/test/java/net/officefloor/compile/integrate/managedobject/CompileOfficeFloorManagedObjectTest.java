@@ -111,6 +111,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		MockSupplierSource.managedObjectSource = mos;
 
 		// Record building the OfficeFloor
+		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
@@ -163,6 +164,11 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 					managedObjectSource);
 			source.addProperty("MO_NAME", "MO_VALUE");
 		}
+
+		@Override
+		public void terminate() {
+			// nothing to clean up
+		}
 	}
 
 	/**
@@ -190,8 +196,8 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
-	 * Tests compiling a {@link ManagedObject} with a dependency not registered
-	 * to the {@link Office}.
+	 * Tests compiling a {@link ManagedObject} with a dependency not registered to
+	 * the {@link Office}.
 	 */
 	public void testManagedObjectWithDependencyNotRegisteredToOffice() {
 
@@ -223,8 +229,8 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
-	 * Tests compiling a {@link ManagedObject} with a dependency registered to
-	 * the {@link Office}.
+	 * Tests compiling a {@link ManagedObject} with a dependency registered to the
+	 * {@link Office}.
 	 */
 	public void testManagedObjectWithDependencyRegisteredToOffice() {
 
@@ -304,9 +310,8 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
-	 * Ensures issue if {@link ManagedObjectFlow} but
-	 * {@link ManagedObjectSource} is not {@link ProcessState} bound the
-	 * {@link ManagingOffice}.
+	 * Ensures issue if {@link ManagedObjectFlow} but {@link ManagedObjectSource} is
+	 * not {@link ProcessState} bound the {@link ManagingOffice}.
 	 */
 	public void testManagedObjectSourceFlowNotInputBoundToManagingOffice() {
 
@@ -330,8 +335,8 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
-	 * Tests linking the {@link ManagedObjectSource} invoked
-	 * {@link ProcessState} with a {@link ManagedFunction}.
+	 * Tests linking the {@link ManagedObjectSource} invoked {@link ProcessState}
+	 * with a {@link ManagedFunction}.
 	 */
 	public void testManagedObjectSourceFlowLinkedToFunction() {
 
@@ -354,8 +359,8 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
-	 * Ensure issue if linking {@link ManagedObjectFlow} to
-	 * {@link ManagedFunction} that is not in the {@link ManagingOffice} for the
+	 * Ensure issue if linking {@link ManagedObjectFlow} to {@link ManagedFunction}
+	 * that is not in the {@link ManagingOffice} for the
 	 * {@link ManagedObjectSource}.
 	 */
 	public void testManagedObjectSourceFlowLinkedToFunctionNotInManagingOffice() {
@@ -439,8 +444,8 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
-	 * Ensure issue if {@link OfficeFloorInputManagedObject} type is not
-	 * compatible with a linked {@link ManagedObjectSource}.
+	 * Ensure issue if {@link OfficeFloorInputManagedObject} type is not compatible
+	 * with a linked {@link ManagedObjectSource}.
 	 */
 	public void testInputManagedObjectTypeNotCompatibleToManagedObjectSourceType() {
 
@@ -460,9 +465,9 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
-	 * Ensure able to link {@link OfficeFloorInputManagedObjectModel} to
-	 * multiple {@link OfficeFloorManagedObjectSourceModel} instances along with
-	 * specifying the bound {@link OfficeFloorManagedObjectSourceModel}.
+	 * Ensure able to link {@link OfficeFloorInputManagedObjectModel} to multiple
+	 * {@link OfficeFloorManagedObjectSourceModel} instances along with specifying
+	 * the bound {@link OfficeFloorManagedObjectSourceModel}.
 	 */
 	public void testInputManagedObjectLinkedToMultipleManagedObjectSources() {
 
@@ -491,8 +496,8 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
-	 * Tests compiling an Input {@link ManagedObject} with dependencies linked
-	 * via the {@link ManagedObjectSource}.
+	 * Tests compiling an Input {@link ManagedObject} with dependencies linked via
+	 * the {@link ManagedObjectSource}.
 	 */
 	public void testInputManagedObjectDependencyLinkedToManagedObject() {
 
@@ -553,8 +558,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
-	 * Class for {@link ClassManagedObjectSource} containing a
-	 * {@link Dependency}.
+	 * Class for {@link ClassManagedObjectSource} containing a {@link Dependency}.
 	 */
 	public static class DependencyManagedObject {
 
@@ -596,8 +600,8 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
-	 * Class for {@link ClassManagedObjectSource} containing a
-	 * {@link FlowInterface} and a {@link Dependency}.
+	 * Class for {@link ClassManagedObjectSource} containing a {@link FlowInterface}
+	 * and a {@link Dependency}.
 	 */
 	public static class InputManagedObject {
 

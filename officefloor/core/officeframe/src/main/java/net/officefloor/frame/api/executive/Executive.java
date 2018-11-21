@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.api.executive;
 
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.ProcessState;
 
@@ -44,10 +45,11 @@ public interface Executive {
 	 * 
 	 * @param           <T> Type of {@link Throwable} thrown.
 	 * @param execution {@link Execution} to be undertaken.
+	 * @return {@link ProcessManager} for the {@link ProcessState}.
 	 * @throws T Propagation of failure from {@link Execution}.
 	 */
-	default <T extends Throwable> void manageExecution(Execution<T> execution) throws T {
-		execution.execute();
+	default <T extends Throwable> ProcessManager manageExecution(Execution<T> execution) throws T {
+		return execution.execute();
 	}
 
 	/**

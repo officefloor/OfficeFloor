@@ -1,0 +1,93 @@
+                                               -----------------------
+                                             Spring HTTP Server Tutorial 
+                                               -----------------------
+                                                Daniel Sagenschneider
+                                               -----------------------
+
+  <<Spring HTTP Server Tutorial>>
+
+  This tutorial demonstrates wiring Spring beans into an OfficeFloor application.
+
+  The following simple output is provided via a Spring bean injected into a WoOF template:
+  
+[./images/SpringHttpServer-screenshot.png] SpringHttpServer screen shot.
+    
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/SpringHttpServer/${projectVersion}/SpringHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+Spring
+
+  In terms of Inversion of Control, Spring focuses heavily on Dependency Injection.  This makes Spring a very useful library of pre-built objects.  In actuality Spring has provided great abstract APIs across various different vendors for various key services (e.g. {{{http://spring.io/projects/spring-data}Spring Data}}, {{{http://projects.spring.io/spring-cloud}Spring Cloud}}, {{{https://cloud.spring.io/spring-cloud-stream/}Spring Cloud Stream}} ).
+
+  However, Spring is still primarily only a Dependency Injection engine.  It does not provide Continuation Injection nor Thread Injection for modelling functionality of your applications.
+
+  Therefore, rather than re-invent the wheel for these great APIs, OfficeFloor enables integrating Spring in as a {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} (supplier of objects for dependency injection).
+
+
+Supplier
+
+  Similar to suppliers providing items to a business, a {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} supplies objects to OfficeFloor dependency injection.  This is a convenient means for Dependency Injection frameworks, such as Spring, to provide their objects to OfficeFloor.
+
+  The following is the object configuration for this tutorial:
+
+%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  The {{{/apidocs/net/officefloor/spring/SpringSupplierSource.html}SpringSupplierSource}} is configured via it's {{{/apidocs/net/officefloor/spring/SpringSupplierSourceService.html}SPRING}} alias.
+
+  Similar to {{{http://spring.io/projects/spring-boot}Spring Boot}} applications, a configuration class loads the Spring beans.  The configured class is as follows:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springhttpserver/SpringBootConfiguration.java|ignoreDownloadError=false}
+
+  This provides the following single Spring bean for dependency injection via class path scanning:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springhttpserver/HelloBean.java|ignoreDownloadError=false}
+
+  The {{{/apidocs/net/officefloor/spring/SpringSupplierSource.html}SpringSupplierSource}} interogates all the registered Spring beans and makes them available for auto-wiring within OfficeFloor.
+
+  Therefore, the template logic to use the Spring beans is no different to WoOF dependency injection of {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springhttpserver/Template.java|ignoreDownloadError=false}
+
+  with the very simple template to output the bean's introduction as follows:
+
+%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
+
+
+
+Spring depending on OfficeFloor
+
+  In the previous section, the Spring bean required a dependency to be injected.  This dependency is provided by an OfficeFloor {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}}.  This enables:
+
+    * OfficeFloor to depend on Spring beans
+
+    * Spring beans to depend on the richer OfficeFloor {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances
+
+  Looking at the Spring Boot configuration class again:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springhttpserver/SpringBootConfiguration.java|ignoreDownloadError=false}
+
+  The dependency is provided from the {{{/apidocs/net/officefloor/spring/SpringSupplierSource.html}SpringSupplierSource}}.  This enables Spring factory methods to create beans from {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances within OfficeFloor.
+
+  From the application object configuration above, this resolves to the following:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springhttpserver/World.java|ignoreDownloadError=false}
+
+  Note that exposed objects from OfficeFloor must be via an interface.  The interface for this tutorial is:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springhttpserver/Other.java|ignoreDownloadError=false}
+
+  Typically, Spring depending on OfficeFloor objects should be used sparingly.  In most cases, dependency should be single direction of OfficeFloor depending on Spring beans.  However, the above reverse in dependency is available for more complex situations (e.g. staged migration of Spring beans into {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances to avoid <big bang> changes).
+
+
+Unit Test
+
+  Suppliers are integrated into OfficeFloor, so the application can be tested just like any other WoOF application:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/springhttpserver/SpringHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.
+

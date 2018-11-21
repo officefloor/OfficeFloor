@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.persistence</groupId>
 		<artifactId>persistence</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 	</parent>
 	<artifactId>officejpa_postgresql</artifactId>
 	<name>JPA Persistence on top of PostgreSql</name>
@@ -56,6 +56,18 @@
 			<artifactId>docker-client</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!-- TODO: remove once docker not having issue with org.glassfish.hk2.api.MultiException -->
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.bundles.repackaged</groupId>
+			<artifactId>jersey-guava</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<!-- END TODO -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

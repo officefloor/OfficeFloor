@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.administration.AdministrationType;
+import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
@@ -56,6 +57,8 @@ import net.officefloor.model.office.AdministrationToOfficeManagedObjectModel;
 import net.officefloor.model.office.AdministrationToOfficeTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectToPreLoadAdministrationModel;
+import net.officefloor.model.office.GovernanceAreaModel;
+import net.officefloor.model.office.GovernanceModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeEscalationToOfficeSectionInputModel;
@@ -104,8 +107,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Initiate.
 	 * 
-	 * @param office
-	 *            {@link OfficeModel} to change.
+	 * @param office {@link OfficeModel} to change.
 	 */
 	public OfficeChangesImpl(OfficeModel office) {
 		this.office = office;
@@ -114,8 +116,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Obtains the text name identifying the {@link ManagedObjectScope}.
 	 * 
-	 * @param scope
-	 *            {@link ManagedObjectScope}.
+	 * @param scope {@link ManagedObjectScope}.
 	 * @return Text name for the {@link ManagedObjectScope}.
 	 */
 	public static String getManagedObjectScope(ManagedObjectScope scope) {
@@ -142,11 +143,9 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * Cleans leaf {@link OfficeSubSectionModel} instances that do not contain
 	 * connections.
 	 * 
-	 * @param subSection
-	 *            {@link OfficeSubSectionModel} to clean.
-	 * @param changes
-	 *            List to be populated with the {@link Change} instances that
-	 *            occurred to clean up the {@link OfficeSubSectionModel}.
+	 * @param subSection {@link OfficeSubSectionModel} to clean.
+	 * @param changes    List to be populated with the {@link Change} instances that
+	 *                   occurred to clean up the {@link OfficeSubSectionModel}.
 	 * @return <code>true</code> if {@link OfficeSubSectionModel} may be cleaned.
 	 */
 	private boolean cleanSubSection(final OfficeSubSectionModel subSection, List<Change<?>> changes) {
@@ -216,8 +215,7 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * Obtains the {@link OfficeSectionModel} containing the
 	 * {@link OfficeFunctionModel}.
 	 * 
-	 * @param function
-	 *            {@link OfficeFunctionModel}.
+	 * @param function {@link OfficeFunctionModel}.
 	 * @return {@link OfficeSectionModel} containing the {@link OfficeFunctionModel}
 	 *         or <code>null</code> if {@link OfficeFunctionModel} not found in
 	 *         {@link OfficeModel}.
@@ -241,11 +239,9 @@ public class OfficeChangesImpl implements OfficeChanges {
 	 * {@link OfficeFunctionModel} on itself or any of its
 	 * {@link OfficeSubSectionModel} instances.
 	 * 
-	 * @param subSection
-	 *            {@link OfficeSubSectionModel} to check if contains
-	 *            {@link OfficeFunctionModel}.
-	 * @param function
-	 *            {@link OfficeFunctionModel}.
+	 * @param subSection {@link OfficeSubSectionModel} to check if contains
+	 *                   {@link OfficeFunctionModel}.
+	 * @param function   {@link OfficeFunctionModel}.
 	 * @return <code>true</code> if {@link OfficeSubSectionModel} or any of its
 	 *         {@link OfficeSubSectionModel} instances contains the
 	 *         {@link OfficeFunctionModel}.
@@ -275,18 +271,15 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Links the {@link OfficeFunctionModel} to the {@link AdministrationModel}.
 	 * 
-	 * @param officeSectionModel
-	 *            {@link OfficeSectionModel} containing the
-	 *            {@link OfficeSectionFunction}.
-	 * @param officeFunctionType
-	 *            {@link OfficeFunctionType} of {@link OfficeSectionFunction} to
-	 *            link to {@link AdministrationModel}.
-	 * @param administration
-	 *            {@link AdministrationModel}.
-	 * @param connectionModel
-	 *            Specific {@link ConnectionModel}.
-	 * @param connectConnection
-	 *            Configures the {@link ConnectionModel} with end points.
+	 * @param officeSectionModel {@link OfficeSectionModel} containing the
+	 *                           {@link OfficeSectionFunction}.
+	 * @param officeFunctionType {@link OfficeFunctionType} of
+	 *                           {@link OfficeSectionFunction} to link to
+	 *                           {@link AdministrationModel}.
+	 * @param administration     {@link AdministrationModel}.
+	 * @param connectionModel    Specific {@link ConnectionModel}.
+	 * @param connectConnection  Configures the {@link ConnectionModel} with end
+	 *                           points.
 	 * @return {@link Change} to link the {@link OfficeFunctionModel} to the
 	 *         {@link AdministrationModel}.
 	 */
@@ -406,6 +399,30 @@ public class OfficeChangesImpl implements OfficeChanges {
 				}
 			}
 		};
+	}
+
+	/**
+	 * Obtains the {@link GovernanceModel} for the {@link GovernanceAreaModel}.
+	 * 
+	 * @param area {@link GovernanceAreaModel}.
+	 * @return {@link GovernanceModel} for the {@link GovernanceAreaModel} or
+	 *         <code>null</code> if not within the {@link OfficeModel}.
+	 */
+	private GovernanceModel getGovernance(GovernanceAreaModel area) {
+
+		// Find the containing governance
+		GovernanceModel containingGovernance = null;
+		for (GovernanceModel governance : this.office.getGovernances()) {
+			for (GovernanceAreaModel check : governance.getGovernanceAreas()) {
+				if (check == area) {
+					// Found containing governance
+					containingGovernance = governance;
+				}
+			}
+		}
+
+		// Return the containing governance
+		return containingGovernance;
 	}
 
 	/*
@@ -885,12 +902,11 @@ public class OfficeChangesImpl implements OfficeChanges {
 	/**
 	 * Obtains the existing item for the target name.
 	 * 
-	 * @param targetItemName
-	 *            Target item name.
-	 * @param targetToExistingName
-	 *            Mapping of target item name to existing item name.
-	 * @param existingNameToItem
-	 *            Mapping of existing item name to the existing item.
+	 * @param targetItemName       Target item name.
+	 * @param targetToExistingName Mapping of target item name to existing item
+	 *                             name.
+	 * @param existingNameToItem   Mapping of existing item name to the existing
+	 *                             item.
 	 */
 	private <T> T getExistingItem(String targetItemName, Map<String, String> targetToExistingName,
 			Map<String, T> existingNameToItem) {
@@ -1399,14 +1415,14 @@ public class OfficeChangesImpl implements OfficeChanges {
 
 	@Override
 	public Change<AdministrationModel> addAdministration(String administrationName,
-			String administrationSourceClassName, PropertyList properties,
+			String administrationSourceClassName, PropertyList properties, boolean isAutoWireExtensions,
 			AdministrationType<?, ?, ?> administrationType) {
 
 		// TODO test this method (addAdministration)
 
 		// Create the administrator
 		final AdministrationModel administration = new AdministrationModel(administrationName,
-				administrationSourceClassName);
+				administrationSourceClassName, isAutoWireExtensions);
 		for (Property property : properties) {
 			administration.addProperty(new PropertyModel(property.getName(), property.getValue()));
 		}
@@ -1468,6 +1484,107 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				administration.setAdministrationName(oldAdministrationName);
+			}
+		};
+	}
+
+	@Override
+	public Change<GovernanceModel> addGovernance(String governanceName, String governanceSourceClassName,
+			PropertyList properties, boolean isAutoWireExtensions, GovernanceType<?, ?> governanceType) {
+
+		// TODO test this method (addGovernance)
+
+		// Create the governance
+		final GovernanceModel governance = new GovernanceModel(governanceName, governanceSourceClassName,
+				isAutoWireExtensions);
+		for (Property property : properties) {
+			governance.addProperty(new PropertyModel(property.getName(), property.getValue()));
+		}
+
+		// TODO add flows for administration
+
+		// TODO add escalations for administration
+
+		// Return change to add the governance
+		return new AbstractChange<GovernanceModel>(governance, "Add governance") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office.addGovernance(governance);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office.removeGovernance(governance);
+			}
+		};
+	}
+
+	@Override
+	public Change<GovernanceModel> removeGovernance(GovernanceModel governance) {
+
+		// TODO test this method (removeGovernance)
+
+		// Return change to remove governance
+		return new AbstractChange<GovernanceModel>(governance, "Remove governance") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office.removeGovernance(governance);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office.addGovernance(governance);
+			}
+		};
+	}
+
+	@Override
+	public Change<GovernanceAreaModel> addGovernanceArea(GovernanceModel governance, int width, int height) {
+
+		// TODO test this method (addGovernanceArea)
+
+		// Create the governance area
+		final GovernanceAreaModel governanceArea = new GovernanceAreaModel(width, height, governance.getX() + 150,
+				governance.getY());
+
+		// Return change to add the governance area
+		return new AbstractChange<GovernanceAreaModel>(governanceArea, "Add governance area") {
+			@Override
+			public void apply() {
+				governance.addGovernanceArea(governanceArea);
+			}
+
+			@Override
+			public void revert() {
+				governance.removeGovernanceArea(governanceArea);
+			}
+		};
+	}
+
+	@Override
+	public Change<GovernanceAreaModel> removeGovernanceArea(GovernanceAreaModel governanceArea) {
+
+		// TODO test this method (removeGovernanceArea)
+
+		// Ensure governance area in WoOF to remove
+		final GovernanceModel governance = this.getGovernance(governanceArea);
+		if (governance == null) {
+			// Governance area not in model
+			return new NoChange<GovernanceAreaModel>(governanceArea, "Remove governance area",
+					"Governance area is not in Office model");
+		}
+
+		// Return change to remove the governance area
+		return new AbstractChange<GovernanceAreaModel>(governanceArea, "Remove governance area") {
+
+			@Override
+			public void apply() {
+				governance.removeGovernanceArea(governanceArea);
+			}
+
+			@Override
+			public void revert() {
+				governance.addGovernanceArea(governanceArea);
 			}
 		};
 	}

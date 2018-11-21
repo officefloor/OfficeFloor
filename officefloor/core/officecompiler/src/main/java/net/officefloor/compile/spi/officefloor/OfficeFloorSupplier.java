@@ -19,6 +19,7 @@ package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * Supplies {@link OfficeFloorManagedObjectSource} instances within the
@@ -36,28 +37,28 @@ public interface OfficeFloorSupplier extends PropertyConfigurable {
 	String getOfficeFloorSupplierName();
 
 	/**
-	 * Adds an {@link OfficeFloorManagedObjectSource}.
+	 * Obtains the {@link OfficeFloorSupplierThreadLocal}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeFloorManagedObjectSource}.
-	 * @param type
-	 *            Type of object required from the {@link OfficeFloorSupplier}.
-	 * @return {@link OfficeFloorManagedObjectSource}.
+	 * @param qualifier Qualifier of the required {@link ManagedObject}. May be
+	 *                  <code>null</code> to match only on type.
+	 * @param type      Type of object required for the
+	 *                  {@link OfficeFloorSupplierThreadLocal}.
+	 * @return {@link OfficeFloorSupplierThreadLocal}.
 	 */
-	OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName, String type);
+	OfficeFloorSupplierThreadLocal getOfficeFloorSupplierThreadLocal(String qualifier, String type);
 
 	/**
-	 * Adds an {@link OfficeFloorManagedObjectSource}.
+	 * Obtains the {@link OfficeFloorManagedObjectSource}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeFloorManagedObjectSource}.
-	 * @param type
-	 *            Type of object required from the {@link OfficeFloorSupplier}.
-	 * @param qualifier
-	 *            Qualifier on the object type.
+	 * @param managedObjectSourceName Name of the
+	 *                                {@link OfficeFloorManagedObjectSource}.
+	 * @param qualifier               Qualifier on the object type. May be
+	 *                                <code>null</code> to match only on type.
+	 * @param type                    Type of object required from the
+	 *                                {@link OfficeFloorSupplier}.
 	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
-	OfficeFloorManagedObjectSource addOfficeFloorManagedObjectSource(String managedObjectSourceName, String type,
-			String qualifier);
+	OfficeFloorManagedObjectSource getOfficeFloorManagedObjectSource(String managedObjectSourceName, String qualifier,
+			String type);
 
 }

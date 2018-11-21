@@ -19,12 +19,15 @@ package net.officefloor.jdbc.postgresql.test;
 
 import java.net.InetAddress;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,6 +56,112 @@ import net.officefloor.jdbc.test.DataSourceRule;
  * @author Daniel Sagenschneider
  */
 public class PostgreSqlRule implements TestRule {
+
+	/**
+	 * <p>
+	 * Configuration of the PostgreSql database.
+	 * <p>
+	 * Follows builder pattern to allow configuring and passing to
+	 * {@link PostgreSqlRule} constructor.
+	 */
+	public static class Configuration {
+
+		/**
+		 * Server.
+		 */
+		private String server = "localhost";
+
+		/**
+		 * Port.
+		 */
+		private int port = 5432;
+
+		/**
+		 * Optional name of database to create.
+		 */
+		private String databaseName = null;
+
+		/**
+		 * Username.
+		 */
+		private String username = "testuser";
+
+		/**
+		 * Password.
+		 */
+		private String password = "testpassword";
+
+		/**
+		 * Max connections.
+		 */
+		private int maxConnections = 0;
+
+		/**
+		 * Specifies the server.
+		 * 
+		 * @param server Server.
+		 * @return <code>this</code>.
+		 */
+		public Configuration server(String server) {
+			this.server = server;
+			return this;
+		}
+
+		/**
+		 * Specifies the port.
+		 * 
+		 * @param port Port.
+		 * @return <code>this</code>.
+		 */
+		public Configuration port(int port) {
+			this.port = port;
+			return this;
+		}
+
+		/**
+		 * Specifies the database.
+		 * 
+		 * @param databaseName Database name.
+		 * @return <code>this</code>.
+		 */
+		public Configuration database(String databaseName) {
+			this.databaseName = databaseName;
+			return this;
+		}
+
+		/**
+		 * Specifies the user name.
+		 * 
+		 * @param username User name.
+		 * @return <code>this</code>.
+		 */
+		public Configuration username(String username) {
+			this.username = username;
+			return this;
+		}
+
+		/**
+		 * Specifies the password.
+		 * 
+		 * @param password Password.
+		 * @return <code>this</code>.
+		 */
+		public Configuration password(String password) {
+			this.password = password;
+			return this;
+		}
+
+		/**
+		 * Specifies the max connections.
+		 * 
+		 * @param maxConnections Max connections.
+		 * @return <code>this</code>.
+		 */
+		public Configuration maxConnections(int maxConnections) {
+			this.maxConnections = maxConnections;
+			return this;
+		}
+	}
 
 	/**
 	 * Pulled docker images.
@@ -113,29 +222,9 @@ public class PostgreSqlRule implements TestRule {
 	}
 
 	/**
-	 * Server.
+	 * {@link Configuration} for this {@link PostgreSqlRule}.
 	 */
-	private final String server;
-
-	/**
-	 * Port.
-	 */
-	private final int port;
-
-	/**
-	 * Optional name of database to create.
-	 */
-	private final String databaseName;
-
-	/**
-	 * Username.
-	 */
-	private final String username;
-
-	/**
-	 * Password.
-	 */
-	private final String password;
+	private final Configuration configuration;
 
 	/**
 	 * {@link DockerClient}.
@@ -148,32 +237,17 @@ public class PostgreSqlRule implements TestRule {
 	private String postgresContainerId;
 
 	/**
-	 * Instantiate.
-	 * 
-	 * @param server       Server to ensure can connect (confirms accessible from
-	 *                     127.0.0.1 address).
-	 * @param port         Port to make PostreSql available on.
-	 * @param databaseName Name of the database to create within PostgreSql.
-	 * @param username     Username to connect to PostgreSql.
-	 * @param password     Password to connect to PostgreSql.
+	 * Created {@link Connection} instances.
 	 */
-	public PostgreSqlRule(String server, int port, String databaseName, String username, String password) {
-		this.server = server;
-		this.port = port;
-		this.databaseName = databaseName;
-		this.username = username;
-		this.password = password;
-	}
+	private final Deque<Connection> connections = new ConcurrentLinkedDeque<>();
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param port     Port to make PostreSql available on.
-	 * @param username Username to connect to PostgreSql.
-	 * @param password Password to connect to PostgreSql.
+	 * @param configuration {@link Configuration}.
 	 */
-	public PostgreSqlRule(int port, String username, String password) {
-		this(null, port, null, username, password);
+	public PostgreSqlRule(Configuration configuration) {
+		this.configuration = configuration;
 	}
 
 	/**
@@ -207,11 +281,18 @@ public class PostgreSqlRule implements TestRule {
 			// Bind container port to host port
 			final String[] ports = { "5432" };
 			final Map<String, List<PortBinding>> portBindings = new HashMap<>();
-			portBindings.put("5432", Arrays.asList(PortBinding.of("0.0.0.0", String.valueOf(this.port))));
+			portBindings.put("5432", Arrays.asList(PortBinding.of("0.0.0.0", String.valueOf(this.configuration.port))));
 			final HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
-			final ContainerConfig containerConfig = ContainerConfig.builder().hostConfig(hostConfig).image(IMAGE_NAME)
-					.exposedPorts(ports).env("POSTGRES_USER=" + this.username, "POSTGRES_PASSWORD=" + this.password)
-					.build();
+			ContainerConfig.Builder builder = ContainerConfig.builder();
+			builder = builder.hostConfig(hostConfig);
+			builder = builder.image(IMAGE_NAME);
+			builder = builder.exposedPorts(ports);
+			builder = builder.env("POSTGRES_USER=" + this.configuration.username,
+					"POSTGRES_PASSWORD=" + this.configuration.password);
+			if (this.configuration.maxConnections > 0) {
+				builder = builder.cmd("postgres", "-N", String.valueOf(this.configuration.maxConnections));
+			}
+			final ContainerConfig containerConfig = builder.build();
 
 			// Start the container
 			final ContainerCreation creation = docker.createContainer(containerConfig, CONTAINER_NAME);
@@ -227,7 +308,7 @@ public class PostgreSqlRule implements TestRule {
 	 * @throws Exception If fails to obtain {@link Connection}.
 	 */
 	public Connection getConnection() throws Exception {
-		return this.getConnection(this.databaseName);
+		return this.getConnection(this.configuration.databaseName);
 	}
 
 	/**
@@ -242,9 +323,9 @@ public class PostgreSqlRule implements TestRule {
 
 		// Create DataSource
 		PGSimpleDataSource dataSource = new PGSimpleDataSource();
-		dataSource.setPortNumber(this.port);
-		dataSource.setUser(this.username);
-		dataSource.setPassword(this.password);
+		dataSource.setPortNumber(this.configuration.port);
+		dataSource.setUser(this.configuration.username);
+		dataSource.setPassword(this.configuration.password);
 		if (databaseName != null) {
 			dataSource.setDatabaseName(databaseName);
 		}
@@ -255,7 +336,10 @@ public class PostgreSqlRule implements TestRule {
 		try {
 			logger.setLevel(Level.OFF);
 			logger.setUseParentHandlers(false);
-			return DataSourceRule.waitForDatabaseAvailable(() -> dataSource.getConnection());
+			Connection connection = DataSourceRule
+					.waitForDatabaseAvailable((context) -> context.setConnection(dataSource.getConnection()));
+			this.connections.push(connection);
+			return connection;
 		} finally {
 			logger.setLevel(level);
 		}
@@ -267,6 +351,15 @@ public class PostgreSqlRule implements TestRule {
 	 * @throws Exception If fails to stop PostgreSql.
 	 */
 	public void stopPostgreSql() throws Exception {
+
+		// Close all the connections
+		for (Connection connection : this.connections) {
+			try {
+				connection.close();
+			} catch (SQLException ex) {
+				// ignore failure
+			}
+		}
 
 		// Stop PostgresSQL
 		System.out.println("Stopping PostgreSQL");
@@ -287,15 +380,15 @@ public class PostgreSqlRule implements TestRule {
 			public void evaluate() throws Throwable {
 
 				// Ensure possible server
-				if (PostgreSqlRule.this.server != null) {
+				if (PostgreSqlRule.this.configuration.server != null) {
 					InetAddress address;
 					try {
-						address = InetAddress.getByName(PostgreSqlRule.this.server);
+						address = InetAddress.getByName(PostgreSqlRule.this.configuration.server);
 					} catch (Throwable ex) {
-						throw new IllegalStateException("INVALID SETUP: need to configure " + PostgreSqlRule.this.server
-								+ " as loop back (127.0.0.1)", ex);
+						throw new IllegalStateException("INVALID SETUP: need to configure "
+								+ PostgreSqlRule.this.configuration.server + " as loop back (127.0.0.1)", ex);
 					}
-					Assert.assertTrue("INVALID SETUP: dns " + PostgreSqlRule.this.server
+					Assert.assertTrue("INVALID SETUP: dns " + PostgreSqlRule.this.configuration.server
 							+ " must be configured as loop back (127.0.0.1)", address.isLoopbackAddress());
 				}
 
@@ -304,9 +397,12 @@ public class PostgreSqlRule implements TestRule {
 				try {
 
 					// Create the possible required database
-					if (PostgreSqlRule.this.databaseName != null) {
+					if (PostgreSqlRule.this.configuration.databaseName != null) {
 						try (Connection connection = PostgreSqlRule.this.getConnection(null)) {
-							connection.createStatement().execute("CREATE DATABASE " + PostgreSqlRule.this.databaseName);
+							connection.createStatement().execute(
+									"DROP DATABASE IF EXISTS " + PostgreSqlRule.this.configuration.databaseName);
+							connection.createStatement()
+									.execute("CREATE DATABASE " + PostgreSqlRule.this.configuration.databaseName);
 						}
 					}
 

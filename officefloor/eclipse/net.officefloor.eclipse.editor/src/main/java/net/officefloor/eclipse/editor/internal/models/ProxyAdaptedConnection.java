@@ -103,7 +103,7 @@ public class ProxyAdaptedConnection<R extends Model, O> implements AdaptedConnec
 
 	@Override
 	public AdaptedErrorHandler getErrorHandler() {
-		return this.sourceConnector.getParentAdaptedChild().getErrorHandler();
+		return this.sourceConnector.getParentAdaptedConnectable().getErrorHandler();
 	}
 
 	@Override

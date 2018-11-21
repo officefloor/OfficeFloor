@@ -244,7 +244,9 @@ public class HttpServer {
 				@Override
 				public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
 					// Stop timer
-					HttpServer.this.dateTimer.cancel();
+					if (HttpServer.this.dateTimer != null) {
+						HttpServer.this.dateTimer.cancel();
+					}
 				}
 			});
 

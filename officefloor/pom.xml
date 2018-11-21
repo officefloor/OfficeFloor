@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.officefloor</groupId>
 	<artifactId>officefloor</artifactId>
-	<version>3.2.0</version>
+	<version>3.3.0</version>
 	<packaging>pom</packaging>
 	<name>OfficeFloor</name>
 	<description>Parent OfficeFloor</description>
@@ -59,9 +59,10 @@
 	</distributionManagement>
 	<modules>
 		<module>core</module>
-		<module>persistence</module>
 		<module>server</module>
 		<module>web</module>
+		<module>persistence</module>
+		<module>spring</module>
 		<module>maven</module>
 		<module>eclipse</module>
 		<module>tutorials</module>
@@ -71,20 +72,30 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<projectVersion>${project.version}</projectVersion>
 		<tycho-version>1.2.0</tycho-version>
-		<maven-version>3.5.4</maven-version>
-		<maven-plugin-version>3.5.2</maven-plugin-version>
+		<maven-version>3.6.0</maven-version>
+		<maven-plugin-version>3.6.0</maven-plugin-version>
 		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
-		<jetty-version>9.4.12.v20180830</jetty-version>
-		<failsafe-version>2.21.0</failsafe-version>
+		<jetty-version>9.4.14.v20181114</jetty-version>
+		<failsafe-version>2.22.1</failsafe-version>
 		<compiler-version>3.8.0</compiler-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
-		<netty-version>4.1.30.Final</netty-version>
+		<netty-version>4.1.31.Final</netty-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<jackson-version>2.9.7</jackson-version>
 		<jaxb-version>2.3.0</jaxb-version>
-		<asm-version>6.2.1</asm-version>
+		<asm-version>7.0</asm-version>
+		<openjfx-version>11-ea+25</openjfx-version>
+		<openjfx-swt-version>11</openjfx-swt-version>
+		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 	</properties>
+	<repositories>
+		<repository>
+			<id>OfficeFloor-build-artifacts</id>
+			<name>Build artifacts for OfficeFloor</name>
+			<url>http://officefloor.net/build2</url>
+		</repository>
+	</repositories>
 	<dependencyManagement>
 		<dependencies>
 			<!-- ================================================ -->
@@ -234,6 +245,23 @@
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_postgresql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<!-- Spring -->
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>spring</artifactId>
+				<version>${project.version}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>officespring</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>officespring_data</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<!-- Eclipse -->
@@ -393,12 +421,27 @@
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>3.2.0</version>
+				<version>${wagon-ssh-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>mx4j</groupId>
 				<artifactId>mx4j-tools</artifactId>
 				<version>3.0.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-graphics</artifactId>
+				<version>${openjfx-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-controls</artifactId>
+				<version>${openjfx-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-swt</artifactId>
+				<version>${openjfx-swt-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -409,6 +452,16 @@
 				<groupId>org.rapidoid</groupId>
 				<artifactId>rapidoid-web</artifactId>
 				<version>5.5.5</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-server</artifactId>
+				<version>${jetty-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-servlet</artifactId>
+				<version>${jetty-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -438,8 +491,22 @@
 			<dependency>
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-client</artifactId>
-				<version>8.14.1</version>
+				<version>8.14.4</version>
 			</dependency>
+			<!-- TODO: remove once docker not having issue with org.glassfish.hk2.api.MultiException -->
+			<dependency>
+				<groupId>org.glassfish.jersey.inject</groupId>
+				<artifactId>jersey-hk2</artifactId>
+				<version>2.27</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jersey.bundles.repackaged</groupId>
+				<artifactId>jersey-guava</artifactId>
+				<version>2.25.1</version>
+				<scope>provided</scope>
+			</dependency>
+			<!-- END TODO -->
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
 				<artifactId>activemq-core</artifactId>
@@ -448,7 +515,7 @@
 			<dependency>
 				<groupId>org.apache.directory.server</groupId>
 				<artifactId>apacheds-all</artifactId>
-				<version>2.0.0-M16</version>
+				<version>2.0.0.AM25</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -468,12 +535,12 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
-				<version>5.3.6.Final</version>
+				<version>5.3.7.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>org.datanucleus</groupId>
 				<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
-				<version>5.1.10</version>
+				<version>5.1.11</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
@@ -529,12 +596,19 @@
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
-				<version>1.18.2</version>
+				<version>1.18.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.5</version>
+				<version>1.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<version>2.1.0.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<!-- Following plug-ins are dependency managed to ensure available for 
 				woof-archetype to check using the latest. -->
@@ -556,7 +630,7 @@
 				<!-- Allow for scp distribution -->
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>3.2.0</version>
+				<version>${wagon-ssh-version}</version>
 			</extension>
 		</extensions>
 		<pluginManagement>
@@ -623,7 +697,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.2.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -747,11 +821,19 @@
 						<encoding>UTF-8</encoding>
 						<extraClasspathElements>
 							<extraClasspathElement>
-								<groupId>com.oracle</groupId>
-								<artifactId>javafx</artifactId>
-								<version>10.0.0-SNAPSHOT</version>
-								<systemPath>${java.home}/lib/javafx-swt.jar</systemPath>
-								<scope>system</scope>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-graphics</artifactId>
+								<version>${openjfx-version}</version>
+							</extraClasspathElement>
+							<extraClasspathElement>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-controls</artifactId>
+								<version>${openjfx-version}</version>
+							</extraClasspathElement>
+							<extraClasspathElement>
+								<groupId>org.openjfx</groupId>
+								<artifactId>javafx-swt</artifactId>
+								<version>${openjfx-swt-version}</version>
 							</extraClasspathElement>
 						</extraClasspathElements>
 					</configuration>
@@ -760,6 +842,11 @@
 					<groupId>org.datanucleus</groupId>
 					<artifactId>datanucleus-maven-plugin</artifactId>
 					<version>5.0.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.2</version>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
@@ -850,27 +937,6 @@
 					<source>10</source>
 					<target>10</target>
 				</configuration>
-			</plugin>
-
-			<plugin>
-				<!-- Code Coverage -->
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>
@@ -1174,11 +1240,13 @@
 				<version>${jetty-version}</version>
 				<inherited>false</inherited>
 				<configuration>
-					<webAppSourceDirectory>${basedir}/target/site/
-					</webAppSourceDirectory>
+					<supportedPackagings>
+						<supportedPackaging>pom</supportedPackaging>
+					</supportedPackagings>
 					<httpConnector>
 						<port>9999</port>
 					</httpConnector>
+					<webAppSourceDirectory>${basedir}/target/site/</webAppSourceDirectory>
 					<stopKey>OfficeFloor</stopKey>
 					<stopPort>9966</stopPort>
 					<stopWait>10</stopWait>
@@ -1188,7 +1256,7 @@
 						<id>Start HTTP Server of staged site for linkcheck</id>
 						<phase>pre-site</phase>
 						<goals>
-							<goal>run</goal>
+							<goal>start</goal>
 						</goals>
 						<configuration>
 							<daemon>true</daemon>
@@ -1211,12 +1279,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>${maven-project-info-reports-version}</version>
+				<inherited>true</inherited>
 				<reportSets>
 					<reportSet>
 						<reports>
 							<report>index</report>
 						</reports>
-						<inherited>true</inherited>
 						<configuration>
 							<skipEmptyReport>false</skipEmptyReport>
 						</configuration>
@@ -1231,6 +1299,13 @@
 				<configuration>
 					<runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
 				</configuration>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>changes-report</report>
+						</reports>
+					</reportSet>
+				</reportSets>
 			</plugin>
 			<plugin>
 				<!-- Report on broken links in site. -->
@@ -1269,6 +1344,38 @@
 		</plugins>
 	</reporting>
 	<profiles>
+		<profile>
+			<id>officefloor-code-coverage</id>
+			<activation>
+				<property>
+					<name>env.officefloor_code_coverage</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Code Coverage -->
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>report</id>
+								<phase>test</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<!-- Profile for deploying to SourceForge -->
 			<!-- -->

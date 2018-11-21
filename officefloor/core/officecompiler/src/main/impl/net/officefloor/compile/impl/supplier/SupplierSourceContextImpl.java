@@ -25,8 +25,11 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
+import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
+import net.officefloor.compile.supplier.SupplierThreadLocalType;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 
 /**
@@ -42,23 +45,48 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	private final NodeContext context;
 
 	/**
+	 * {@link SupplierThreadLocalTypeImpl} instances.
+	 */
+	private final List<SupplierThreadLocalTypeImpl<?>> supplierThreadLocals = new LinkedList<>();
+
+	/**
+	 * {@link ThreadSynchroniserFactory} instances.
+	 */
+	private final List<ThreadSynchroniserFactory> threadSynchronisers = new LinkedList<>();
+
+	/**
 	 * {@link SuppliedManagedObjectSourceImpl} instances.
 	 */
-	private final List<SuppliedManagedObjectSourceImpl> suppliedManagedObjectSources = new LinkedList<>();
+	private final List<SuppliedManagedObjectSourceTypeImpl> suppliedManagedObjectSources = new LinkedList<>();
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param propertyList
-	 *            {@link PropertyList}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param isLoadingType Indicates if loading type.
+	 * @param propertyList  {@link PropertyList}.
+	 * @param context       {@link NodeContext}.
 	 */
 	public SupplierSourceContextImpl(boolean isLoadingType, PropertyList propertyList, NodeContext context) {
 		super(isLoadingType, context.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
 		this.context = context;
+	}
+
+	/**
+	 * Obtains the {@link SupplierThreadLocalType} instances.
+	 * 
+	 * @return {@link SupplierThreadLocalType} instances.
+	 */
+	public SupplierThreadLocalType[] getSupplierThreadLocalTypes() {
+		return this.supplierThreadLocals.stream().toArray(SupplierThreadLocalType[]::new);
+	}
+
+	/**
+	 * Obtains the {@link ThreadSynchroniserFactory} instances.
+	 * 
+	 * @return {@link ThreadSynchroniserFactory} instances.
+	 */
+	public ThreadSynchroniserFactory[] getThreadSynchronisers() {
+		return this.threadSynchronisers.stream().toArray(ThreadSynchroniserFactory[]::new);
 	}
 
 	/**
@@ -75,9 +103,15 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	 */
 
 	@Override
-	public <D extends Enum<D>, F extends Enum<F>> SuppliedManagedObjectSource addManagedObjectSource(Class<?> type,
-			ManagedObjectSource<D, F> managedObjectSource) {
-		return this.addManagedObjectSource(null, type, managedObjectSource);
+	public <T> SupplierThreadLocal<T> addSupplierThreadLocal(String qualifier, Class<? extends T> type) {
+		SupplierThreadLocalTypeImpl<T> supplierThreadLocal = new SupplierThreadLocalTypeImpl<>(qualifier, type);
+		this.supplierThreadLocals.add(supplierThreadLocal);
+		return supplierThreadLocal.getSupplierThreadLocal();
+	}
+
+	@Override
+	public void addThreadSynchroniser(ThreadSynchroniserFactory threadSynchroniserFactory) {
+		this.threadSynchronisers.add(threadSynchroniserFactory);
 	}
 
 	@Override
@@ -86,7 +120,7 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 
 		// Create the supplied managed object source
 		PropertyList properties = this.context.createPropertyList();
-		SuppliedManagedObjectSourceImpl supplied = new SuppliedManagedObjectSourceImpl(type, qualifier,
+		SuppliedManagedObjectSourceTypeImpl supplied = new SuppliedManagedObjectSourceTypeImpl(type, qualifier,
 				managedObjectSource, properties);
 
 		// Register the supplied managed object source
@@ -94,87 +128,6 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 
 		// Return the managed object source for configuring
 		return supplied;
-	}
-
-	/**
-	 * {@link SuppliedManagedObjectSource} implementation and corresponding
-	 * {@link SuppliedManagedObjectSourceType}.
-	 */
-	private static class SuppliedManagedObjectSourceImpl
-			implements SuppliedManagedObjectSource, SuppliedManagedObjectSourceType {
-
-		/**
-		 * Object type.
-		 */
-		private final Class<?> objectType;
-
-		/**
-		 * Qualifier. May be <code>null</code>.
-		 */
-		private final String qualifier;
-
-		/**
-		 * {@link ManagedObjectSource}.
-		 */
-		private final ManagedObjectSource<?, ?> managedObjectSource;
-
-		/**
-		 * {@link PropertyList}.
-		 */
-		private final PropertyList properties;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param objectType
-		 *            Object type.
-		 * @param qualifier
-		 *            Qualifier. May be <code>null</code>.
-		 * @param managedObjectSource
-		 *            {@link ManagedObjectSource}.
-		 * @param properties
-		 *            {@link PropertyList}.
-		 */
-		public SuppliedManagedObjectSourceImpl(Class<?> objectType, String qualifier,
-				ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties) {
-			this.objectType = objectType;
-			this.qualifier = qualifier;
-			this.managedObjectSource = managedObjectSource;
-			this.properties = properties;
-		}
-
-		/*
-		 * ===================== SuppliedManagedObjectSource ================
-		 */
-
-		@Override
-		public void addProperty(String name, String value) {
-			this.properties.addProperty(name).setValue(value);
-		}
-
-		/*
-		 * =================== SuppliedManagedObjectSourceType ==============
-		 */
-
-		@Override
-		public Class<?> getObjectType() {
-			return this.objectType;
-		}
-
-		@Override
-		public String getQualifier() {
-			return this.qualifier;
-		}
-
-		@Override
-		public ManagedObjectSource<?, ?> getManagedObjectSource() {
-			return this.managedObjectSource;
-		}
-
-		@Override
-		public PropertyList getPropertyList() {
-			return this.properties;
-		}
 	}
 
 }

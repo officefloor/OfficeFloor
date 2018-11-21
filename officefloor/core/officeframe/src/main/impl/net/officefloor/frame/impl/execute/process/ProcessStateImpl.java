@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.impl.execute.function.Promise;
@@ -56,6 +57,21 @@ public class ProcessStateImpl implements ProcessState {
 	 * Identifier for this {@link ProcessState}.
 	 */
 	private final Object processIdentifier;
+
+	/**
+	 * {@link ProcessManager} for this {@link ProcessState}.
+	 */
+	private final ProcessManager processManager = new ProcessManager() {
+
+		@Override
+		public void cancel() {
+
+			// Ensure managed function sync to main thread picks up cancelled
+			synchronized (ProcessStateImpl.this.mainThreadState) {
+				ProcessStateImpl.this.isCancelled = true;
+			}
+		}
+	};
 
 	/**
 	 * Active {@link ThreadState} instances for this {@link ProcessState}.
@@ -108,6 +124,11 @@ public class ProcessStateImpl implements ProcessState {
 	 * {@link Escalation}.
 	 */
 	private FunctionState mainThreadCompletion = null;
+
+	/**
+	 * Indicates if this {@link ProcessState} has been cancelled.
+	 */
+	private boolean isCancelled = false;
 
 	/**
 	 * Initiate.
@@ -201,6 +222,16 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
+	public ProcessManager getProcessManager() {
+		return this.processManager;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return this.isCancelled;
+	}
+
+	@Override
 	public ThreadState getMainThreadState() {
 		return this.mainThreadState;
 	}
@@ -234,7 +265,7 @@ public class ProcessStateImpl implements ProcessState {
 				process.activeThreads.addEntry(threadState);
 
 				// Create the function for spawned thread state
-				Flow flow = threadState.createFlow(null);
+				Flow flow = threadState.createFlow(null, null);
 				FunctionState function = flow.createManagedFunction(parameter, managedFunctionMetaData, true, null);
 
 				// Ensure register profiling

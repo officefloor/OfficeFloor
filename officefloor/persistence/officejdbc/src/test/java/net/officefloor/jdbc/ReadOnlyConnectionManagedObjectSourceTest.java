@@ -197,4 +197,11 @@ public class ReadOnlyConnectionManagedObjectSourceTest extends AbstractConnectio
 		}
 	}
 
+	/**
+	 * Ensure appropriate management of the {@link DataSource}.
+	 */
+	public void testDataSourceManagement() throws Throwable {
+		this.doDataSourceManagementTest(ReadOnlyConnectionManagedObjectSource.class, 1);
+	}
+
 }

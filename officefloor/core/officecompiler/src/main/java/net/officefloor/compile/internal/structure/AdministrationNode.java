@@ -43,43 +43,55 @@ public interface AdministrationNode extends LinkTeamNode, OfficeAdministration {
 	/**
 	 * Initialises this {@link AdministrationNode}.
 	 * 
-	 * @param administrationSourceClassName
-	 *            Class name of the {@link AdministrationSource}.
-	 * @param administrationSource
-	 *            Optional instantiated {@link AdministrationSource}. May be
-	 *            <code>null</code>.
+	 * @param administrationSourceClassName Class name of the
+	 *                                      {@link AdministrationSource}.
+	 * @param administrationSource          Optional instantiated
+	 *                                      {@link AdministrationSource}. May be
+	 *                                      <code>null</code>.
 	 */
 	void initialise(String administrationSourceClassName, AdministrationSource<?, ?, ?> administrationSource);
 
 	/**
 	 * <p>
-	 * Obtains the {@link AdministrationType} for this
-	 * {@link AdministrationNode}.
+	 * Obtains the {@link AdministrationType} for this {@link AdministrationNode}.
 	 * <p>
-	 * The {@link OfficeAdministration} must be fully populated with the
-	 * necessary {@link Property} instances before calling this.
+	 * The {@link OfficeAdministration} must be fully populated with the necessary
+	 * {@link Property} instances before calling this.
 	 * 
 	 * @return {@link AdministrationType} for this {@link AdministrationNode}.
 	 */
 	AdministrationType<?, ?, ?> loadAdministrationType();
 
 	/**
+	 * Indicates whether to auto-wire {@link ManagedObjectExtensionNode} instances
+	 * for {@link Administration}.
+	 * 
+	 * @return <code>true</code> to auto-wire.
+	 */
+	boolean isAutoWireAdministration();
+
+	/**
+	 * Auto wires the {@link ManagedObjectExtensionNode} for this
+	 * {@link Administration}.
+	 * 
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
+	 */
+	void autoWireExtensions(AutoWirer<ManagedObjectExtensionNode> autoWirer, CompileContext compileContext);
+
+	/**
 	 * Auto wires the {@link Team} for this {@link Administration}.
 	 * 
-	 * @param autoWirer
-	 *            {@link AutoWirer}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param compileContext {@link CompileContext}.
 	 */
 	void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext);
 
 	/**
 	 * Builds the pre {@link ManagedFunction} {@link Administration}.
 	 * 
-	 * @param managedFunctionBuilder
-	 *            {@link ManagedFunctionBuilder}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param managedFunctionBuilder {@link ManagedFunctionBuilder}.
+	 * @param compileContext         {@link CompileContext}.
 	 */
 	void buildPreFunctionAdministration(ManagedFunctionBuilder<?, ?> managedFunctionBuilder,
 			CompileContext compileContext);
@@ -87,10 +99,8 @@ public interface AdministrationNode extends LinkTeamNode, OfficeAdministration {
 	/**
 	 * Builds the post {@link ManagedFunction} {@link Administration}.
 	 * 
-	 * @param managedFunctionBuilder
-	 *            {@link ManagedFunctionBuilder}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param managedFunctionBuilder {@link ManagedFunctionBuilder}.
+	 * @param compileContext         {@link CompileContext}.
 	 */
 	void buildPostFunctionAdministration(ManagedFunctionBuilder<?, ?> managedFunctionBuilder,
 			CompileContext compileContext);
@@ -98,11 +108,9 @@ public interface AdministrationNode extends LinkTeamNode, OfficeAdministration {
 	/**
 	 * Builds the pre-load {@link ManagedObject} {@link Administration}.
 	 * 
-	 * @param dependencyMappingBuilder
-	 *            {@link DependencyMappingBuilder} for the
-	 *            {@link ManagedObject}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param dependencyMappingBuilder {@link DependencyMappingBuilder} for the
+	 *                                 {@link ManagedObject}.
+	 * @param compileContext           {@link CompileContext}.
 	 */
 	void buildPreLoadManagedObjectAdministration(DependencyMappingBuilder dependencyMappingBuilder,
 			CompileContext compileContext);

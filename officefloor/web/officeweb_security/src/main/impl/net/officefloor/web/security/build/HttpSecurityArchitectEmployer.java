@@ -800,7 +800,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 						ManagedObjectScope.PROCESS);
 				office.link(httpAccessControl.getOfficeManagedObjectDependency("ACCESS_CONTROL"), accessControl);
 				if (isRequireTypeQualification) {
-					httpAccessControl.addTypeQualification(this.name, HttpAccessControl.class.getSimpleName());
+					httpAccessControl.addTypeQualification(this.name, HttpAccessControl.class.getName());
 				}
 			}
 

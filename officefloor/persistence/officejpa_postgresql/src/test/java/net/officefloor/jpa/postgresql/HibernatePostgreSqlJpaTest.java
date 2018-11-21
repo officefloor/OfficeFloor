@@ -23,10 +23,14 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.postgresql.PostgreSqlConnectionManagedObjectSource;
 import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
+import net.officefloor.jdbc.postgresql.test.PostgreSqlRule.Configuration;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource;
 import net.officefloor.jpa.test.AbstractJpaTestCase;
@@ -42,36 +46,40 @@ public class HibernatePostgreSqlJpaTest extends AbstractJpaTestCase {
 	/**
 	 * PostgreSql database.
 	 */
-	private PostgreSqlRule database = new PostgreSqlRule(5433, "testuser", "testpassword");
+	private static PostgreSqlRule database = new PostgreSqlRule(
+			new Configuration().port(5433).username("testuser").password("testpassword"));
 
-	@Override
-	protected void setUp() throws Exception {
+	/**
+	 * Manage PostgreSql before/after class (rather than each test) to improve
+	 * performance.
+	 */
+	public static Test suite() {
+		return new TestSetup(new TestSuite(HibernatePostgreSqlJpaTest.class)) {
 
-		// Set up the database
-		this.database.startPostgreSql();
+			protected void setUp() throws Exception {
+				database.startPostgreSql();
 
-		// Setup JPA
-		super.setUp();
+				// Ignore hibernate logging
+				Logger.getLogger("org.hibernate").setLevel(Level.WARNING);
+			}
 
-		// Ignore hibernate logging
-		Logger.getLogger("org.hibernate").setLevel(Level.WARNING);
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		try {
-			// Tear down
-			super.tearDown();
-		} finally {
-			// Stop PostgreSql
-			this.database.stopPostgreSql();
-		}
+			protected void tearDown() throws Exception {
+				database.stopPostgreSql();
+			}
+		};
 	}
 
 	@Override
 	protected void cleanDatabase(Connection connection) throws SQLException {
+
+		// Ensure not in transaction
+		if (!connection.getAutoCommit()) {
+			connection.setAutoCommit(true);
+		}
+
+		// Create the database
 		try (Statement statement = connection.createStatement()) {
-			statement.execute("CREATE DATABASE ALIVE"); // ensure available
+			statement.execute("DROP TABLE IF EXISTS MOCKENTITY");
 		}
 	}
 

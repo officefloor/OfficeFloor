@@ -1,0 +1,11 @@
+<context>
+	<office-floor>
+		<suppliers>
+			<supplier name="SUPPLIER"
+				source="${testcase}$MockSupplierSource">
+				<thread-local qualifier="UNKNOWN"
+					type="${testcase}$ThreadLocalManagedObject" />
+			</supplier>
+		</suppliers>
+	</office-floor>
+</context>

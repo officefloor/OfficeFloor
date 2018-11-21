@@ -362,7 +362,8 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		OfficeNode office = this.state.namespaceNode.getSectionNode().getOfficeNode();
 
 		// Attempt to obtain the responsible team
-		AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this.teamResponsible, sourceAutoWires);
+		AutoWireLink<ResponsibleTeamNode, LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this.teamResponsible,
+				sourceAutoWires);
 		if (links.length == 1) {
 			LinkUtil.linkTeam(this.teamResponsible, links[0].getTargetNode(office), this.context.getCompilerIssues(),
 					this);

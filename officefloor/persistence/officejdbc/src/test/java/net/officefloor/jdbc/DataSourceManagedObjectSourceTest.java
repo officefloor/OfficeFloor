@@ -170,4 +170,11 @@ public class DataSourceManagedObjectSourceTest extends AbstractConnectionTestCas
 		}
 	}
 
+	/**
+	 * Ensure appropriate management of the {@link DataSource}.
+	 */
+	public void testDataSourceManagement() throws Throwable {
+		this.doDataSourceManagementTest(DataSourceManagedObjectSource.class, 0);
+	}
+
 }

@@ -18,6 +18,7 @@
 package net.officefloor.server;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -38,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler.Execution;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
@@ -429,20 +431,53 @@ public class SocketManager {
 			// Create the port socket address
 			InetSocketAddress portAddress = new InetSocketAddress(port);
 
-			// Create the Server Socket
-			ServerSocketChannel channel = ServerSocketChannel.open();
-			channel.configureBlocking(false);
-			ServerSocket socket = channel.socket();
-			socket.setReuseAddress(true);
-			socket.setReceiveBufferSize(this.socketReceiveBufferSize);
-			int serverSocketBackLogSize = DEFAULT_SERVER_SOCKET_BACKLOG_SIZE;
-			if (serverSocketDecorator != null) {
-				// Override the defaults
-				serverSocketBackLogSize = serverSocketDecorator.decorate(socket);
-			}
+			// Quick start/stops can not clean socket so allow retry
+			ServerSocketChannel channel = null;
+			ServerSocket socket = null;
+			BindException exception = null;
+			int attempt = 0;
+			do {
+				// Setup for attempt
+				attempt++;
+				exception = null;
 
-			// Bind the Server Socket
-			socket.bind(portAddress, serverSocketBackLogSize);
+				// Create the Server Socket
+				channel = ServerSocketChannel.open();
+				try {
+					channel.configureBlocking(false);
+					socket = channel.socket();
+					socket.setReuseAddress(true);
+					socket.setReceiveBufferSize(this.socketReceiveBufferSize);
+					int serverSocketBackLogSize = DEFAULT_SERVER_SOCKET_BACKLOG_SIZE;
+					if (serverSocketDecorator != null) {
+						// Override the defaults
+						serverSocketBackLogSize = serverSocketDecorator.decorate(socket);
+					}
+
+					// Bind the Server Socket
+					socket.bind(portAddress, serverSocketBackLogSize);
+
+				} catch (BindException ex) {
+					exception = ex;
+
+					// Ensure clean up
+					channel.close();
+					socket.close();
+					socket = null;
+
+					// Allow some time for address to release
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException interupted) {
+						throw new IOException(interupted);
+					}
+				}
+			} while ((socket == null) && (attempt < 3));
+
+			// Ensure propagate failure
+			if (exception != null) {
+				throw exception;
+			}
 
 			// Ensure have accepted socket decorator
 			if (acceptedSocketDecorator == null) {
@@ -1387,6 +1422,13 @@ public class SocketManager {
 
 			// Release buffers for requests
 			while (this.head != null) {
+
+				// Releasing stream buffers (so end processing)
+				if (this.head.processManager != null) {
+					this.head.processManager.cancel();
+				}
+
+				// Release the stream buffers
 				StreamBuffer<ByteBuffer> headRequest = this.head.headRequestBuffer;
 				while (headRequest != null) {
 					StreamBuffer<ByteBuffer> release = headRequest;
@@ -1451,7 +1493,7 @@ public class SocketManager {
 			}
 
 			// Service the request
-			this.requestServicer.service(request, socketRequest);
+			socketRequest.processManager = this.requestServicer.service(request, socketRequest);
 		}
 
 		@Override
@@ -1682,6 +1724,11 @@ public class SocketManager {
 		 * Next {@link SocketRequest}.
 		 */
 		private SocketRequest<R> next = null;
+
+		/**
+		 * {@link ProcessManager}.
+		 */
+		private ProcessManager processManager = null;
 
 		/**
 		 * Instantiate.

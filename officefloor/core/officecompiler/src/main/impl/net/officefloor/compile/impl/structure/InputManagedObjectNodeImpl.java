@@ -35,6 +35,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.OptionalThreadLocalReceiver;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
@@ -100,6 +101,11 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	 * {@link OfficeNode}.
 	 */
 	private final Map<OfficeNode, List<AdministrationNode>> preLoadAdministrationsPerOffice = new HashMap<>();
+
+	/**
+	 * {@link OptionalThreadLocalInputLinker}.
+	 */
+	private final OptionalThreadLocalInputLinker optionalThreadLocalInputLinker = new OptionalThreadLocalInputLinker();
 
 	/**
 	 * Initiate.
@@ -223,6 +229,11 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 	}
 
 	@Override
+	public void buildSupplierThreadLocal(OptionalThreadLocalReceiver optionalThreadLocalReceiver) {
+		this.optionalThreadLocalInputLinker.addOptionalThreadLocalReceiver(optionalThreadLocalReceiver);
+	}
+
+	@Override
 	public GovernanceNode[] getGovernances(OfficeNode managingOffice) {
 
 		// Obtain the governances
@@ -308,6 +319,9 @@ public class InputManagedObjectNodeImpl implements InputManagedObjectNode {
 
 		// Bind the managed object source
 		this.boundManagedObjectSource = (ManagedObjectSourceNode) managedObjectSource;
+
+		// Allow linking optional thread local
+		this.optionalThreadLocalInputLinker.setManagedObjectSourceNode(this.boundManagedObjectSource);
 	}
 
 	/*

@@ -21,10 +21,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.concurrent.RejectedExecutionException;
 
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
+import net.officefloor.frame.api.team.TeamOverloadException;
 import net.officefloor.server.http.CleanupException;
 import net.officefloor.server.http.HttpEscalationContext;
 import net.officefloor.server.http.HttpEscalationHandler;
@@ -158,12 +160,9 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param serverHttpConnection
-	 *            {@link ServerHttpConnection}.
-	 * @param version
-	 *            {@link HttpVersion}.
-	 * @param processAwareContext
-	 *            {@link ProcessAwareContext}.
+	 * @param serverHttpConnection {@link ServerHttpConnection}.
+	 * @param version              {@link HttpVersion}.
+	 * @param processAwareContext  {@link ProcessAwareContext}.
 	 */
 	public ProcessAwareHttpResponse(ProcessAwareServerHttpConnectionManagedObject<B> serverHttpConnection,
 			HttpVersion version, ProcessAwareContext processAwareContext) {
@@ -180,12 +179,10 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Flushes the {@link HttpResponse} to the {@link HttpResponseWriter}.
 	 * 
-	 * @param escalation
-	 *            Possible escalation in servicing. Will be <code>null</code> if
-	 *            successful.
-	 * @throws IOException
-	 *             If fails to flush {@link HttpResponse} to the
-	 *             {@link HttpResponseWriter}.
+	 * @param escalation Possible escalation in servicing. Will be <code>null</code>
+	 *                   if successful.
+	 * @throws IOException If fails to flush {@link HttpResponse} to the
+	 *                     {@link HttpResponseWriter}.
 	 */
 	public void flushResponseToHttpResponseWriter(Throwable escalation) throws IOException {
 		this.safe(() -> {
@@ -197,11 +194,9 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Sets the {@link CleanupEscalation} instances.
 	 * 
-	 * @param cleanupEscalations
-	 *            {@link CleanupEscalation} instances.
-	 * @throws IOException
-	 *             If fails to send {@link CleanupEscalation} details for this
-	 *             {@link HttpResponse}.
+	 * @param cleanupEscalations {@link CleanupEscalation} instances.
+	 * @throws IOException If fails to send {@link CleanupEscalation} details for
+	 *                     this {@link HttpResponse}.
 	 */
 	void setCleanupEscalations(CleanupEscalation[] cleanupEscalations) throws IOException {
 
@@ -220,12 +215,10 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Flushes this {@link HttpResponse} to the {@link HttpResponseWriter}.
 	 * 
-	 * @param escalation
-	 *            Possible escalation in servicing. Will be <code>null</code> if
-	 *            successful.
-	 * @throws IOException
-	 *             If fails to flush {@link HttpResponse} to the
-	 *             {@link HttpResponseWriter}.
+	 * @param escalation Possible escalation in servicing. Will be <code>null</code>
+	 *                   if successful.
+	 * @throws IOException If fails to flush {@link HttpResponse} to the
+	 *                     {@link HttpResponseWriter}.
 	 */
 	private void unsafeFlushResponseToHttpResponseWriter(Throwable escalation) throws IOException {
 
@@ -262,6 +255,12 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 					HttpHeader escalationHeader = escalationHeaders[i];
 					this.headers.addHeader(escalationHeader.getName(), escalationHeader.getValue());
 				}
+
+			} else if ((escalation instanceof RejectedExecutionException)
+					|| (escalation instanceof TeamOverloadException)) {
+				// Server overloaded
+				this.status = HttpStatus.SERVICE_UNAVAILABLE;
+
 			} else {
 				// Unknown escalation, so error
 				this.status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -362,8 +361,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Unsafe send {@link HttpResponse}.
 	 * 
-	 * @throws IOException
-	 *             If fails to send.
+	 * @throws IOException If fails to send.
 	 */
 	private void unsafeSend() throws IOException {
 
@@ -384,8 +382,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Unsafe reset {@link HttpResponse}.
 	 * 
-	 * @throws IOException
-	 *             If fails to reset.
+	 * @throws IOException If fails to reset.
 	 */
 	private void unsafeReset() throws IOException {
 
@@ -426,8 +423,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Determines if can change the <code>Content-Type</code> and {@link Charset}.
 	 * 
-	 * @throws IOException
-	 *             If not able to change.
+	 * @throws IOException If not able to change.
 	 */
 	private void allowContentTypeChange() throws IOException {
 		if (this.entityWriter != null) {
@@ -439,11 +435,9 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	/**
 	 * Undertakes a {@link ProcessSafeOperation}.
 	 * 
-	 * @param operation
-	 *            {@link ProcessSafeOperation}.
+	 * @param operation {@link ProcessSafeOperation}.
 	 * @return Result of {@link ProcessSafeOperation}.
-	 * @throws T
-	 *             Possible {@link Throwable} from {@link ProcessSafeOperation}.
+	 * @throws T Possible {@link Throwable} from {@link ProcessSafeOperation}.
 	 */
 	private <R, T extends Throwable> R safe(ProcessSafeOperation<R, T> operation) throws T {
 		return this.processAwareContext.run(operation);

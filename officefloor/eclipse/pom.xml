@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 	</parent>
 	<groupId>net.officefloor.eclipse</groupId>
 	<artifactId>eclipse</artifactId>
@@ -39,12 +39,16 @@
 	</modules>
 	<dependencies>
 		<dependency>
-			<!-- Necessary for classpath of Javadoc -->
-			<groupId>com.oracle</groupId>
-			<artifactId>javafx</artifactId>
-			<version>10.0.0-SNAPSHOT</version>
-			<systemPath>${java.home}/lib/javafx-swt.jar</systemPath>
-			<scope>system</scope>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swt</artifactId>
 		</dependency>
 	</dependencies>
 	<build>
@@ -86,6 +90,14 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 					</filesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Manual testing for code coverage -->
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -138,31 +150,6 @@
 					</environments>
 				</configuration>
 			</plugin>
-			<!-- <plugin> -->
-			<!-- Provide eclipse classified artifacts for javadoc -->
-			<!-- This is work around to allow javadoc:aggregate to work -->
-			<!-- <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-antrun-plugin</artifactId> 
-				<executions> <execution> <id>tycho-javadoc-dependency</id> <phase>install</phase> 
-				<goals> <goal>run</goal> </goals> <configuration> <target> -->
-			<!-- Obtain the group directory -->
-			<!-- <property name="groupDirFile" value="${project.build.directory}/tycho-artifact/install.properties" 
-				/> <echo file="${groupDirFile}" message="groupDir=${project.groupId}" /> 
-				<replace file="${groupDirFile}" token="." value="/" /> <loadproperties srcFile="${groupDirFile}" 
-				/> -->
-
-			<!-- Obtain file details to copy -->
-			<!-- <property name="tychoSourceFile" value="${project.build.directory}/${project.build.finalName}.jar" 
-				/> <property name="tychoTargetPrefix" value="${settings.localRepository}/${groupDir}/${project.artifactId}/${project.version}/${project.build.finalName}" 
-				/> <echo>Tycho source file: ${tychoSourceFile}</echo> <echo>Tycho target 
-				prefix: ${tychoTargetPrefix}</echo> -->
-
-			<!-- Ensure jar exists (mainly for pom packaging) -->
-			<!-- <touch file="${tychoSourceFile}" /> -->
-
-			<!-- Copy files (both types to keep configuration simple) -->
-			<!-- <copy file="${tychoSourceFile}" tofile="${tychoTargetPrefix}.eclipse-plugin" 
-				/> <copy file="${tychoSourceFile}" tofile="${tychoTargetPrefix}.eclipse-feature" 
-				/> </target> </configuration> </execution> </executions> </plugin> -->
 		</plugins>
 	</build>
 </project>

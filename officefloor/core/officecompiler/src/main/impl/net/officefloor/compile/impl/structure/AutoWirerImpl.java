@@ -19,7 +19,9 @@ package net.officefloor.compile.impl.structure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 import net.officefloor.compile.internal.structure.AutoWire;
@@ -60,10 +62,8 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param context
-	 *            {@link SourceContext}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context {@link SourceContext}.
+	 * @param issues  {@link CompilerIssues}.
 	 */
 	public AutoWirerImpl(SourceContext context, CompilerIssues issues) {
 		this(context, issues, null);
@@ -72,12 +72,9 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param context
-	 *            {@link SourceContext}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
-	 * @param outerScope
-	 *            Outer scope {@link AutoWirer}.
+	 * @param context    {@link SourceContext}.
+	 * @param issues     {@link CompilerIssues}.
+	 * @param outerScope Outer scope {@link AutoWirer}.
 	 */
 	private AutoWirerImpl(SourceContext context, CompilerIssues issues, AutoWirerImpl<N> outerScope) {
 		this.context = context;
@@ -100,17 +97,17 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	}
 
 	@Override
-	public AutoWireLink<N>[] findAutoWireLinks(N sourceNode, AutoWire... sourceAutoWires) {
+	public <S extends Node> AutoWireLink<S, N>[] findAutoWireLinks(S sourceNode, AutoWire... sourceAutoWires) {
 		return this.sourceAutoWireLinks(false, sourceNode, sourceAutoWires);
 	}
 
 	@Override
-	public AutoWireLink<N>[] getAutoWireLinks(final N sourceNode, AutoWire... sourceAutoWires) {
+	public <S extends Node> AutoWireLink<S, N>[] getAutoWireLinks(final S sourceNode, AutoWire... sourceAutoWires) {
 		return this.sourceAutoWireLinks(true, sourceNode, sourceAutoWires);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private AutoWireLink<N>[] sourceAutoWireLinks(boolean isMustMatch, final N sourceNode,
+	private <S extends Node> AutoWireLink<S, N>[] sourceAutoWireLinks(boolean isMustMatch, final S sourceNode,
 			AutoWire... sourceAutoWires) {
 
 		// Ensure have at least one auto-wire
@@ -118,6 +115,10 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 			this.issues.addIssue(sourceNode, "Must specify at least one AutoWire");
 			return new AutoWireLink[0];
 		}
+
+		// Report unknown types only once
+		Set<String> unknownSourceTypes = new HashSet<>();
+		Set<String> unknownTargetTypes = new HashSet<>();
 
 		// Undertake the matching following order
 		for (int i = 0; i < 6; i++) {
@@ -148,13 +149,33 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 								}
 
 							} else {
-								// Match on child type
-								Class<?> sourceClass = this.context.loadOptionalClass(sourceType);
-								Class<?> targetClass = this.context.loadOptionalClass(targetAutoWire.getType());
-								if ((sourceClass == null) || (targetClass == null)) {
-									// TODO: Consider providing warning rather than silent failure to load type
+								// Obtain the source type
+								Class<?> sourceClass = sourceAutoWire.getTypeClass(this.context);
+								if (sourceClass == null) {
+									// Only report issue once
+									if (!unknownSourceTypes.contains(sourceType)) {
+										unknownSourceTypes.add(sourceType);
+										this.issues.addIssue(sourceNode,
+												"Unable to load source auto-wire type " + sourceType);
+									}
 									continue NEXT_AUTO_WIRE;
-								} else if (!sourceClass.isAssignableFrom(targetClass)) {
+								}
+
+								// Obtain the target type
+								Class<?> targetClass = targetAutoWire.getTypeClass(this.context);
+								if (targetClass == null) {
+									// Only report issue once
+									String targetType = targetAutoWire.getType();
+									if (!unknownTargetTypes.contains(targetType)) {
+										unknownTargetTypes.add(targetType);
+										this.issues.addIssue(sourceNode,
+												"Unable to load target auto-wire type " + targetType);
+									}
+									continue NEXT_AUTO_WIRE;
+								}
+
+								// Match on child type
+								if (!sourceClass.isAssignableFrom(targetClass)) {
 									continue NEXT_AUTO_WIRE;
 								}
 							}
@@ -275,10 +296,8 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param autoWires
-		 *            {@link AutoWire} instances for this {@link Node}.
-		 * @param node
-		 *            {@link Node}.
+		 * @param autoWires {@link AutoWire} instances for this {@link Node}.
+		 * @param node      {@link Node}.
 		 */
 		private AutoWireNodeImpl(AutoWire[] autoWires, N node) {
 			this.autoWires = autoWires;
@@ -289,10 +308,8 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param autoWires
-		 *            {@link AutoWire} instances for this {@link Node}.
-		 * @param nodeFactory
-		 *            Factory to create the {@link Node}.
+		 * @param autoWires   {@link AutoWire} instances for this {@link Node}.
+		 * @param nodeFactory Factory to create the {@link Node}.
 		 */
 		private AutoWireNodeImpl(AutoWire[] autoWires, Function<OfficeNode, ? extends N> nodeFactory) {
 			this.autoWires = autoWires;
@@ -302,8 +319,7 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		/**
 		 * Obtains the {@link Node}.
 		 * 
-		 * @param office
-		 *            {@link OfficeNode}.
+		 * @param office {@link OfficeNode}.
 		 * @return {@link Node}.
 		 */
 		public N getNode(OfficeNode office) {
@@ -317,12 +333,12 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	/**
 	 * {@link AutoWireLink} implementation.
 	 */
-	private class AutoWireLinkImpl implements AutoWireLink<N> {
+	private class AutoWireLinkImpl<S extends Node> implements AutoWireLink<S, N> {
 
 		/**
 		 * Source {@link Node}.
 		 */
-		private final N sourceNode;
+		private final S sourceNode;
 
 		/**
 		 * Source {@link AutoWire}.
@@ -342,17 +358,13 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param sourceNode
-		 *            Source {@link Node}.
-		 * @param sourceAutoWire
-		 *            Source {@link AutoWire}.
-		 * @param targetNode
-		 *            Target {@link AutoWireNodeImpl} to obtain the target
-		 *            {@link Node}.
-		 * @param targetAutoWire
-		 *            Target {@link AutoWire}.
+		 * @param sourceNode     Source {@link Node}.
+		 * @param sourceAutoWire Source {@link AutoWire}.
+		 * @param targetNode     Target {@link AutoWireNodeImpl} to obtain the target
+		 *                       {@link Node}.
+		 * @param targetAutoWire Target {@link AutoWire}.
 		 */
-		public AutoWireLinkImpl(N sourceNode, AutoWire sourceAutoWire, AutoWirerImpl<N>.AutoWireNodeImpl targetNode,
+		public AutoWireLinkImpl(S sourceNode, AutoWire sourceAutoWire, AutoWirerImpl<N>.AutoWireNodeImpl targetNode,
 				AutoWire targetAutoWire) {
 			this.sourceNode = sourceNode;
 			this.sourceAutoWire = sourceAutoWire;
@@ -365,7 +377,7 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 		 */
 
 		@Override
-		public N getSourceNode() {
+		public S getSourceNode() {
 			return this.sourceNode;
 		}
 

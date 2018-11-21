@@ -26,7 +26,7 @@ import org.eclipse.gef.common.collections.CollectionUtils;
 import javafx.collections.ObservableList;
 import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedChildBuilder;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactory;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactory;
 import net.officefloor.eclipse.editor.ChildrenGroup;
 import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
 import net.officefloor.model.Model;
@@ -114,7 +114,7 @@ public class ChildrenGroupFactory<R extends Model, O, M extends Model, E extends
 
 	@Override
 	public <CM extends Model, CE extends Enum<CE>> AdaptedChildBuilder<R, O, CM, CE> addChild(CM modelPrototype,
-			AdaptedModelVisualFactory<CM> viewFactory) {
+			AdaptedChildVisualFactory<CM> viewFactory) {
 		return new AdaptedChildFactory<>(this.configurationPath, modelPrototype, viewFactory, this.parentAdaptedModel);
 	}
 

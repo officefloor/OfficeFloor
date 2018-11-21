@@ -42,6 +42,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeBindings;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.OptionalThreadLocalReceiver;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
@@ -58,8 +59,8 @@ import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
 import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
-import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -132,11 +133,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedObjectScope
-		 *            {@link ManagedObjectScope} of this {@link ManagedObject}.
-		 * @param managedObjectSourceNode
-		 *            {@link ManagedObjectSourceNode} for the
-		 *            {@link ManagedObjectSource} to source this {@link ManagedObject}.
+		 * @param managedObjectScope      {@link ManagedObjectScope} of this
+		 *                                {@link ManagedObject}.
+		 * @param managedObjectSourceNode {@link ManagedObjectSourceNode} for the
+		 *                                {@link ManagedObjectSource} to source this
+		 *                                {@link ManagedObject}.
 		 */
 		public InitialiseState(ManagedObjectScope managedObjectScope, ManagedObjectSourceNode managedObjectSourceNode) {
 			this.managedObjectScope = managedObjectScope;
@@ -174,12 +175,15 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final Map<OfficeNode, List<AdministrationNode>> preLoadAdministrationsPerOffice = new HashMap<>();
 
 	/**
+	 * {@link OptionalThreadLocalLinker}.
+	 */
+	private final OptionalThreadLocalLinker optionalThreadLocalLinker = new OptionalThreadLocalLinker();
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectName
-	 *            Name of this {@link ManagedObject}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param managedObjectName Name of this {@link ManagedObject}.
+	 * @param context           {@link NodeContext}.
 	 */
 	public ManagedObjectNodeImpl(String managedObjectName, NodeContext context) {
 		this.managedObjectName = managedObjectName;
@@ -318,7 +322,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 					}
 
 					// Auto-wire the dependency
-					AutoWireLink<LinkObjectNode>[] links = autoWirer.getAutoWireLinks(dependency,
+					AutoWireLink<ManagedObjectDependencyNode, LinkObjectNode>[] links = autoWirer.getAutoWireLinks(
+							dependency,
 							new AutoWire(dependencyType.getTypeQualifier(), dependencyType.getDependencyType()));
 					if (links.length == 1) {
 						LinkUtil.linkAutoWireObjectNode(dependency, links[0].getTargetNode(office), office, autoWirer,
@@ -455,7 +460,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 				this.state.managedObjectSourceNode.getManagedObjectSourceName());
 
 		// Add the managed object to the office
-		DependencyMappingBuilder mapper;
+		ThreadDependencyMappingBuilder mapper;
 		switch (this.state.managedObjectScope) {
 		case PROCESS:
 			mapper = officeBuilder.addProcessManagedObject(managedObjectName, managedObjectName);
@@ -520,6 +525,14 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 				administration.buildPreLoadManagedObjectAdministration(mapper, compileContext);
 			}
 		}
+
+		// Register for optional thread locals
+		this.optionalThreadLocalLinker.setThreadDependencyMappingBuilder(mapper);
+	}
+
+	@Override
+	public void buildSupplierThreadLocal(OptionalThreadLocalReceiver optionalThreadLocalReceiver) {
+		this.optionalThreadLocalLinker.addOptionalThreadLocalReceiver(optionalThreadLocalReceiver);
 	}
 
 	/*
@@ -667,10 +680,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param node
-		 *            {@link ManagedObjectNodeImpl}.
-		 * @param compileContext
-		 *            {@link CompileContext}.
+		 * @param node           {@link ManagedObjectNodeImpl}.
+		 * @param compileContext {@link CompileContext}.
 		 */
 		public ExecutionManagedObjectImpl(ManagedObjectNodeImpl node, CompileContext compileContext) {
 			this.node = node;

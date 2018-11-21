@@ -1,5 +1,0 @@
-<teams>
-
-	<team source="ONE_PERSON" type="net.officefloor.plugin.woof.servlet.MockDependency" />
-
-</teams>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="qualifier" />
+	<field type="String" name="type" />
+	<field type="OfficeSupplierThreadLocalToOfficeManagedObjectModel"
+		name="office managed object" />
+	<field
+		type="OfficeSupplierThreadLocalToExternalManagedObjectModel"
+		name="external managed object" />
+</model>

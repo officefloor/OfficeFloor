@@ -89,7 +89,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 
 		// Wait some time before assigning tasks
 		try {
-			Thread.sleep(100);
+			Thread.sleep(10);
 		} catch (InterruptedException ex) {
 			fail("Failed to wait before assigning tasks");
 		}
@@ -104,13 +104,15 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 		// Stop processing (should have all threads finished)
 		team.stopWorking();
 
-		// Allow some time for last thread to terminate
-		Thread.sleep(1);
-
 		// Ensure all threads are stopped
-		for (Thread thread : teamThreads) {
-			assertEquals("Thread " + thread.getName() + " should be terminated", State.TERMINATED, thread.getState());
-		}
+		this.waitForTrue(() -> {
+			for (Thread thread : teamThreads) {
+				if (!State.TERMINATED.equals(thread.getState())) {
+					return false;
+				}
+			}
+			return true;
+		});
 
 		// Should have invoked each task at least once
 		for (int i = 0; i < tasks.length; i++) {

@@ -29,6 +29,7 @@ import net.officefloor.frame.api.function.OfficeAwareManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
+import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
@@ -79,10 +80,8 @@ public class OfficeFloorImpl implements OfficeFloor {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeFloorMetaData
-	 *            {@link OfficeFloorMetaData}.
-	 * @param listeners
-	 *            {@link OfficeFloorListener} instances.
+	 * @param officeFloorMetaData {@link OfficeFloorMetaData}.
+	 * @param listeners           {@link OfficeFloorListener} instances.
 	 */
 	public OfficeFloorImpl(OfficeFloorMetaData officeFloorMetaData, OfficeFloorListener[] listeners) {
 		this.officeFloorMetaData = officeFloorMetaData;
@@ -176,10 +175,8 @@ public class OfficeFloorImpl implements OfficeFloor {
 	/**
 	 * Starts the {@link ManagedObjectSourceInstance}.
 	 * 
-	 * @param mosInstance
-	 *            {@link ManagedObjectSourceInstance}.
-	 * @throws Exception
-	 *             If fails to start the {@link ManagedObjectSourceInstance}.
+	 * @param mosInstance {@link ManagedObjectSourceInstance}.
+	 * @throws Exception If fails to start the {@link ManagedObjectSourceInstance}.
 	 */
 	private <F extends Enum<F>> void startManagedObjectSourceInstance(ManagedObjectSourceInstance<F> mosInstance)
 			throws Exception {
@@ -193,8 +190,12 @@ public class OfficeFloorImpl implements OfficeFloor {
 		mos.start(executeContext);
 	}
 
+	/*
+	 * =================== AutoCloseable ===================
+	 */
+
 	@Override
-	public void closeOfficeFloor() throws Exception {
+	public void close() throws Exception {
 
 		// Ensure open to be closed
 		if (this.offices == null) {
@@ -217,6 +218,15 @@ public class OfficeFloorImpl implements OfficeFloor {
 			// Stop the teams working as closing
 			for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
 				teamManagement.getTeam().stopWorking();
+			}
+
+			// Empty the managed object pools
+			for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
+					.getManagedObjectSourceInstances()) {
+				ManagedObjectPool pool = mosInstance.getManagedObjectPool();
+				if (pool != null) {
+					pool.empty();
+				}
 			}
 
 		} finally {
@@ -264,8 +274,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	/**
 	 * Ensures open.
 	 * 
-	 * @throws IllegalStateException
-	 *             If not open.
+	 * @throws IllegalStateException If not open.
 	 */
 	private void ensureOfficeFloorOpen() throws IllegalStateException {
 		if (this.offices == null) {

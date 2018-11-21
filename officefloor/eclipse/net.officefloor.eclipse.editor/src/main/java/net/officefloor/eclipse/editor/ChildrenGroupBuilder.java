@@ -44,12 +44,12 @@ public interface ChildrenGroupBuilder<R extends Model, O> {
 	 *            {@link Model} prototype to determine {@link Class} of the
 	 *            {@link Model} and used in visual validation.
 	 * @param viewFactory
-	 *            {@link AdaptedModelVisualFactory} to create the view for the
+	 *            {@link AdaptedChildVisualFactory} to create the view for the
 	 *            {@link AdaptedChild}.
 	 * @return {@link AdaptedParentBuilder} to build the adapter over the
 	 *         {@link Model}.
 	 */
 	<M extends Model, E extends Enum<E>> AdaptedChildBuilder<R, O, M, E> addChild(M modelPrototype,
-			AdaptedModelVisualFactory<M> viewFactory);
+			AdaptedChildVisualFactory<M> viewFactory);
 
 }

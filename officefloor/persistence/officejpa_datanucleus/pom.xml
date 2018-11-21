@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor.persistence</groupId>
 		<artifactId>persistence</artifactId>
-		<version>3.2.0</version>
+		<version>3.3.0</version>
 	</parent>
 	<artifactId>officejpa_datanucleus</artifactId>
 	<name>DataNucleus JPA Persistence</name>
@@ -57,6 +58,10 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>

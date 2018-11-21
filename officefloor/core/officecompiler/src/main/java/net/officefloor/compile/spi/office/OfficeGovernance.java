@@ -38,9 +38,12 @@ public interface OfficeGovernance extends PropertyConfigurable, OfficeResponsibi
 	/**
 	 * Governs the {@link GovernerableManagedObject}.
 	 * 
-	 * @param managedObject
-	 *            {@link GovernerableManagedObject} to be governed.
+	 * @param managedObject {@link GovernerableManagedObject} to be governed.
 	 */
 	void governManagedObject(GovernerableManagedObject managedObject);
 
+	/**
+	 * Enables auto-wiring the {@link GovernerableManagedObject} instances.
+	 */
+	void enableAutoWireExtensions();
 }

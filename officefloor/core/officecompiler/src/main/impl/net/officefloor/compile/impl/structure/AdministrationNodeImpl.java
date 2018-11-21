@@ -35,6 +35,7 @@ import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExtensionNode;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -94,19 +95,19 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		private final String administrationSourceClassName;
 
 		/**
-		 * {@link AdministrationSource} instance to use. Should this be
-		 * specified it overrides the {@link Class}.
+		 * {@link AdministrationSource} instance to use. Should this be specified it
+		 * overrides the {@link Class}.
 		 */
 		private final AdministrationSource<?, ?, ?> administrationSource;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param administratorSourceClassName
-		 *            Class name of the {@link AdministrationSource}.
-		 * @param administratorSource
-		 *            {@link AdministrationSource} instance to use. Should this
-		 *            be specified it overrides the {@link Class}.
+		 * @param administratorSourceClassName Class name of the
+		 *                                     {@link AdministrationSource}.
+		 * @param administratorSource          {@link AdministrationSource} instance to
+		 *                                     use. Should this be specified it
+		 *                                     overrides the {@link Class}.
 		 */
 		public InitialisedState(String administrationSourceClassName,
 				AdministrationSource<?, ?, ?> administrationSource) {
@@ -121,20 +122,21 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	private final List<AdministerableManagedObject> administeredManagedObjects = new LinkedList<AdministerableManagedObject>();
 
 	/**
-	 * {@link AdministrationSource} used to source this
-	 * {@link AdministrationNode}.
+	 * Flags whether to auto-wire the {@link AdministerableManagedObject} instances.
+	 */
+	private boolean isAutoWireExtensions = false;
+
+	/**
+	 * {@link AdministrationSource} used to source this {@link AdministrationNode}.
 	 */
 	private AdministrationSource<?, ?, ?> usedAdministrationSource = null;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param administrationName
-	 *            Name of this {@link OfficeAdministration}.
-	 * @param officeNode
-	 *            Parent {@link OfficeNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param administrationName Name of this {@link OfficeAdministration}.
+	 * @param officeNode         Parent {@link OfficeNode}.
+	 * @param context            {@link NodeContext}.
 	 */
 	public AdministrationNodeImpl(String administrationName, OfficeNode officeNode, NodeContext context) {
 		this.administrationName = administrationName;
@@ -212,6 +214,11 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		}
 	}
 
+	@Override
+	public void enableAutoWireExtensions() {
+		this.isAutoWireExtensions = true;
+	}
+
 	/*
 	 * ===================== AdministrationNode ==============================
 	 */
@@ -251,6 +258,33 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	}
 
 	@Override
+	public boolean isAutoWireAdministration() {
+		return this.isAutoWireExtensions;
+	}
+
+	@Override
+	public void autoWireExtensions(AutoWirer<ManagedObjectExtensionNode> autoWirer, CompileContext compileContext) {
+
+		// Do no auto wire if already extensions
+		if (this.administeredManagedObjects.size() > 0) {
+			return;
+		}
+
+		// Build the administration type
+		AdministrationType<?, ?, ?> adminType = this.loadAdministrationType();
+		if (adminType == null) {
+			return; // must load type
+		}
+
+		// Load the auto-wire extensions
+		AutoWireLink<AdministrationNode, ManagedObjectExtensionNode>[] links = autoWirer.getAutoWireLinks(this,
+				new AutoWire(adminType.getExtensionType()));
+		for (AutoWireLink<AdministrationNode, ManagedObjectExtensionNode> link : links) {
+			this.administeredManagedObjects.add(link.getTargetNode(this.officeNode));
+		}
+	}
+
+	@Override
 	public void autoWireTeam(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
 
 		// Do not auto wire if already responsible team
@@ -268,7 +302,7 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		AutoWire[] sourceAutoWires = autoWires.stream().toArray(AutoWire[]::new);
 
 		// Determine if auto wire the team
-		AutoWireLink<LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this, sourceAutoWires);
+		AutoWireLink<AdministrationNode, LinkTeamNode>[] links = autoWirer.findAutoWireLinks(this, sourceAutoWires);
 		if (links.length == 1) {
 			LinkUtil.linkTeamNode(this, links[0].getTargetNode(this.officeNode), this.context.getCompilerIssues(),
 					(link) -> this.linkTeamNode(link));
@@ -304,12 +338,9 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		/**
 		 * Creates the {@link AdministrationBuilder}.
 		 * 
-		 * @param administrationName
-		 *            Name of the {@link Administration}.
-		 * @param extensionType
-		 *            Extension type.
-		 * @param adminFactory
-		 *            {@link AdministrationFactory}.
+		 * @param administrationName Name of the {@link Administration}.
+		 * @param extensionType      Extension type.
+		 * @param adminFactory       {@link AdministrationFactory}.
 		 * @return {@link AdministrationBuilder}.
 		 */
 		AdministrationBuilder<?, ?> createAdministrationBuilder(String administrationName, Class<Object> extensionType,
@@ -319,10 +350,8 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	/**
 	 * Builds the {@link Administration}.
 	 * 
-	 * @param compileContext
-	 *            {@link CompileContext}.
-	 * @param adminBuilderFactory
-	 *            {@link AdministrationBuilderFactory}.
+	 * @param compileContext      {@link CompileContext}.
+	 * @param adminBuilderFactory {@link AdministrationBuilderFactory}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void buildAdministration(CompileContext compileContext, AdministrationBuilderFactory adminBuilderFactory) {

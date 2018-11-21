@@ -38,6 +38,7 @@ import net.officefloor.compile.internal.structure.ExecutiveNode;
 import net.officefloor.compile.internal.structure.InputManagedObjectNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.ManagedObjectExtensionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -736,12 +737,31 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 			return false;
 		}
 
-		// Source all the offices
-		isSourced = this.offices.values().stream()
-				.sorted((a, b) -> CompileUtil.sortCompare(a.getDeployedOfficeName(), b.getDeployedOfficeName()))
-				.allMatch((office) -> office.sourceOfficeTree(this, compileContext));
+		// Ensure all the suppliers are sourced
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.sourceSupplier(compileContext));
 		if (!isSourced) {
 			return false;
+		}
+
+		// Source all the offices
+		isSourced = CompileUtil.source(this.offices, (office) -> office.getDeployedOfficeName(),
+				(office) -> office.sourceOfficeTree(this, compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Iterate over suppliers (ensuring no thread locals)
+		isSourced = CompileUtil.source(this.suppliers, (supplier) -> supplier.getOfficeFloorSupplierName(),
+				(supplier) -> supplier.ensureNoThreadLocals(compileContext));
+		if (!isSourced) {
+			return false;
+		}
+
+		// Ensure the OfficeFloor tree is initialised
+		this.initialise();
+		if (!NodeUtil.isNodeTreeInitialised(this, this.context.getCompilerIssues())) {
+			return false; // must have fully initialised tree
 		}
 
 		// Undertake auto-wire of objects
@@ -855,11 +875,40 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 					.map((type) -> new AutoWire(type.getQualifier(), type.getType())).toArray(AutoWire[]::new);
 
 			// Add the target
-			autoWirer.addAutoWireTarget(mo, targetAutoWires);
+			managedObjectAutoWirer.addAutoWireTarget(mo, targetAutoWires);
 		});
 
 		// Return the auto wirer
 		return managedObjectAutoWirer;
+	}
+
+	@Override
+	public AutoWirer<ManagedObjectExtensionNode> loadAutoWireExtensionTargets(
+			AutoWirer<ManagedObjectExtensionNode> autoWirer, CompileContext compileContext) {
+
+		// Load the managed objects
+		final AutoWirer<ManagedObjectExtensionNode> managedObjectAutoWirer = autoWirer.createScopeAutoWirer();
+		this.managedObjects.values().forEach((mo) -> {
+
+			// Load the managed object type
+			ManagedObjectType<?> moType = mo.getManagedObjectSourceNode().loadManagedObjectType(compileContext);
+			if (moType == null) {
+				return; // must have type
+			}
+
+			// Load the auto-wiring for the extensions
+			for (Class<?> extensionType : moType.getExtensionTypes()) {
+				managedObjectAutoWirer.addAutoWireTarget(mo, new AutoWire(extensionType));
+			}
+		});
+
+		// Load the supplied managed objects
+		final AutoWirer<ManagedObjectExtensionNode> supplierAutoWirer = managedObjectAutoWirer.createScopeAutoWirer();
+		this.suppliers.values().stream()
+				.forEach((supplier) -> supplier.loadAutoWireExtensions(supplierAutoWirer, this, compileContext));
+
+		// Return the auto wirer
+		return supplierAutoWirer;
 	}
 
 	@Override
@@ -1050,6 +1099,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 					// Build the input managed object into the office
 					bindings.buildInputManagedObjectIntoOffice(inputManagedObject);
 				});
+
+		/*
+		 * Suppliers only to provide managed objects at OfficeFloor level. There is no
+		 * threading to be built for the supplier at this level.
+		 */
 
 		// Return the built OfficeFloor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());

@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.thread;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +26,8 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.api.thread.ThreadSynchroniser;
+import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.function.AbstractDelegateFunctionState;
 import net.officefloor.frame.impl.execute.function.AbstractFunctionState;
@@ -33,6 +37,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
+import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -93,6 +98,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		// Obtain the possible existing thread state on thread
 		ActiveThreadState previous = activeThreadState.get();
 
+		// Suspend the active (soon to be previous) thread state
+		if ((previous != null) && (previous.threadState != null)) {
+			suspendThread(previous.threadState);
+		}
+
 		// Determine new depth
 		FunctionChainBreak functionChainBreak;
 		int nextThreadStateDepth;
@@ -112,6 +122,9 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 				nextThreadStateDepth, previous);
 		activeThreadState.set(context);
 
+		// Resume the thread
+		resumeThread(threadState);
+
 		// Return the function context
 		return context;
 	}
@@ -120,12 +133,24 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * Detaches the {@link ThreadState} from the {@link Thread}.
 	 */
 	public static void detachThreadStateFromThread() {
+
+		// Obtain the active thread state
 		ActiveThreadState active = activeThreadState.get();
 		if (active == null) {
 			throw new IllegalStateException(
 					"No " + ThreadState.class.getSimpleName() + " attached to " + Thread.class.getSimpleName());
 		}
+
+		// Suspend the thread
+		suspendThread(active.threadState);
+
+		// Reinstate previous thread state (detaching thread state)
 		activeThreadState.set(active.previousActiveThreadState);
+
+		// Resume the possible previous thread
+		if (active.previousActiveThreadState != null) {
+			resumeThread(active.previousActiveThreadState.threadState);
+		}
 	}
 
 	/**
@@ -147,6 +172,55 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 
 		// Return the current thread state
 		return current;
+	}
+
+	/**
+	 * Resumes the {@link Thread}.
+	 * 
+	 * @param threadState {@link ThreadState} to resume.
+	 */
+	private static void resumeThread(ThreadState threadState) {
+		ThreadStateImpl impl = (ThreadStateImpl) threadState;
+
+		// Determine if first thread (or no state to resume)
+		if (impl.synchronisers == null) {
+			return; // nothing to resume
+		}
+
+		// Resume the thread
+		ThreadSynchroniser[] synchronisers = impl.synchronisers.pop();
+		for (int i = 0; i < synchronisers.length; i++) {
+			synchronisers[i].resumeThread();
+		}
+	}
+
+	/**
+	 * Suspends the {@link Thread}.
+	 * 
+	 * @param threadState {@link ThreadState} to suspend.
+	 */
+	private static void suspendThread(ThreadState threadState) {
+		ThreadStateImpl impl = (ThreadStateImpl) threadState;
+
+		// Obtain the factories
+		ThreadSynchroniserFactory[] factories = impl.threadMetaData.getThreadSynchronisers();
+		if (factories.length == 0) {
+			return; // nothing to suspend
+		}
+
+		// Suspend the thread
+		ThreadSynchroniser[] synchronisers = new ThreadSynchroniser[factories.length];
+		for (int i = 0; i < factories.length; i++) {
+			ThreadSynchroniser synchroniser = factories[i].createThreadSynchroniser();
+			synchroniser.suspendThread();
+			synchronisers[i] = synchroniser;
+		}
+
+		// Capture state
+		if (impl.synchronisers == null) {
+			impl.synchronisers = new LinkedList<>();
+		}
+		impl.synchronisers.push(synchronisers);
 	}
 
 	/**
@@ -196,6 +270,11 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	private final ThreadProfiler profiler;
 
 	/**
+	 * {@link ThreadSynchroniser} instances.
+	 */
+	private Deque<ThreadSynchroniser[]> synchronisers = null;
+
+	/**
 	 * {@link EscalationLevel} of this {@link ThreadState}.
 	 */
 	private EscalationLevel escalationLevel = EscalationLevel.OFFICE;
@@ -204,6 +283,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	 * {@link ThreadState} {@link Escalation} to potential {@link FlowCompletion}.
 	 */
 	private Throwable threadEscalation = null;
+
+	/**
+	 * {@link ThreadState} {@link EscalationCompletion} to potential
+	 * {@link FlowCompletion}.
+	 */
+	private EscalationCompletion threadEscalationCompletion = null;
 
 	/**
 	 * Indicates if this {@link ThreadState} has been completed.
@@ -388,10 +473,10 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public Flow createFlow(FlowCompletion completion) {
+	public Flow createFlow(FlowCompletion flowCompletion, EscalationCompletion escalationCompletion) {
 
 		// Create and register the activate flow
-		Flow flow = new FlowImpl(completion, this);
+		Flow flow = new FlowImpl(flowCompletion, escalationCompletion, this);
 		this.activeFlows.addEntry(flow);
 
 		// Return the flow
@@ -399,10 +484,19 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public FunctionState handleEscalation(Throwable escalation) {
+	public FunctionState handleEscalation(Throwable escalation, EscalationCompletion escalationCompletion) {
+
+		// Undertake clean up
+		FunctionState cleanUpFunctions = null;
+
+		// Ensure existing escalation is completed
+		if (this.threadEscalationCompletion != null) {
+			cleanUpFunctions = Promise.then(cleanUpFunctions, this.threadEscalationCompletion.escalationComplete());
+		}
 
 		// Cancel all remaining flows
-		FunctionState cleanUpFunctions = LinkedListSetPromise.all(this.activeFlows, (flow) -> flow.cancel());
+		cleanUpFunctions = Promise.then(cleanUpFunctions,
+				LinkedListSetPromise.all(this.activeFlows, (flow) -> flow.cancel()));
 
 		// Handle based on escalation level
 		switch (this.escalationLevel) {
@@ -411,7 +505,10 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 					.getEscalation(escalation);
 			if (escalationFlow != null) {
 				// Create new flow, to keep thread alive
-				Flow flow = this.createFlow(null);
+				Flow flow = this.createFlow(null, escalationCompletion);
+
+				// Escalation complete on flow completion
+				escalationCompletion = null;
 
 				// Next escalation will be flow completion
 				this.escalationLevel = EscalationLevel.FLOW_COMPLETION;
@@ -438,6 +535,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			// (all further escalations are for clean up of thread state)
 			if (this.threadEscalation == null) {
 				this.threadEscalation = escalation;
+				this.threadEscalationCompletion = escalationCompletion;
 
 				// Determine if completion (as handles thread escalation)
 				if (this.completion != null) {
@@ -470,7 +568,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	@Override
-	public FunctionState flowComplete(Flow flow, Throwable threadEscalation) {
+	public FunctionState flowComplete(Flow flow, Throwable threadEscalation,
+			EscalationCompletion escalationCompletion) {
 
 		// Remove the flow
 		boolean isThreadComplete = this.activeFlows.removeEntry(flow);
@@ -478,7 +577,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		// Handle escalation
 		if (threadEscalation != null) {
 			// Will handle completion of thread (if necessary)
-			return this.handleEscalation(threadEscalation);
+			return this.handleEscalation(threadEscalation, escalationCompletion);
 		}
 
 		// Determine if handle completing thread
@@ -538,9 +637,15 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 					}
 				}
 
+				// Ensure escalation completion
+				if (threadState.threadEscalationCompletion != null) {
+					cleanUpFunctions = Promise.then(cleanUpFunctions,
+							threadState.threadEscalationCompletion.escalationComplete());
+				}
+
 				// Must handle completion at end of chain
 				// (clean up escalations can cause re-attempts until complete)
-				return Promise.then(cleanUpFunctions, new ThreadStateOperation() {
+				cleanUpFunctions = Promise.then(cleanUpFunctions, new ThreadStateOperation() {
 
 					@Override
 					public FunctionState execute(FunctionStateContext context) throws Throwable {
@@ -559,13 +664,16 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 						// Notify complete thread state (with thread escalation)
 						FunctionState threadCompletion = null;
 						if (threadState.completion != null) {
-							threadCompletion = threadState.completion.complete(threadState.threadEscalation);
+							threadCompletion = threadState.completion.flowComplete(threadState.threadEscalation);
 						}
 
 						// Complete the thread state (thread is now cleaned up)
 						return threadState.processState.threadComplete(threadState, threadCompletion);
 					}
 				});
+
+				// Return the clean up
+				return cleanUpFunctions;
 			}
 		};
 	}
@@ -672,7 +780,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		}
 
 		@Override
-		public FunctionState complete(Throwable escalation) {
+		public FunctionState flowComplete(Throwable escalation) {
 			return new CompleteFunctionState(escalation);
 		}
 
@@ -690,7 +798,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			/**
 			 * Instantiate.
 			 * 
-			 * @param escalation {@link Escalation}.
+			 * @param escalation           {@link Escalation}.
+			 * @param escalationCompletion {@link EscalationCompletion}.
 			 */
 			public CompleteFunctionState(Throwable escalation) {
 				this.escalation = escalation;
@@ -710,7 +819,7 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			@Override
 			public FunctionState execute(FunctionStateContext context) throws Throwable {
 
-				// Undertake callback
+				// Undertake the callback
 				ProcessFlowCompletion.this.callback.run(this.escalation);
 
 				// Process now complete
@@ -836,12 +945,12 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			// Determine if active thread state
 			if (this.threadState != null) {
 				// Create function on active thread state
-				Flow flow = this.threadState.createFlow(null);
+				Flow flow = this.threadState.createFlow(null, null);
 				FunctionState logicFunction = flow.createFunction(logic);
 				FunctionState completeFlow = new AbstractFunctionState(this.threadState) {
 					@Override
 					public FunctionState execute(FunctionStateContext context) throws Throwable {
-						return ActiveThreadState.this.threadState.flowComplete(flow, null);
+						return ActiveThreadState.this.threadState.flowComplete(flow, null, null);
 					}
 				};
 				return Promise.then(logicFunction, completeFlow);
@@ -849,13 +958,13 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 			} else {
 				// External thread, so use fall back thread state
 				synchronized (fallbackThreadState) {
-					Flow flow = fallbackThreadState.createFlow(null);
+					Flow flow = fallbackThreadState.createFlow(null, null);
 					FunctionState logicFunction = flow.createFunction(logic);
 					FunctionState completeFlow = new AbstractFunctionState(fallbackThreadState) {
 
 						@Override
 						public FunctionState execute(FunctionStateContext context) throws Throwable {
-							return fallbackThreadState.flowComplete(flow, null);
+							return fallbackThreadState.flowComplete(flow, null, null);
 						}
 					};
 					return Promise.then(logicFunction, completeFlow);
@@ -1004,8 +1113,8 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation) {
-			FunctionState handler = this.delegate.handleEscalation(escalation);
+		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion escalationCompletion) {
+			FunctionState handler = this.delegate.handleEscalation(escalation, escalationCompletion);
 			if (handler != null) {
 				return new ThenFunction(handler, this.thenFunction);
 			}
@@ -1095,10 +1204,10 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation) {
+		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion escalationCompletion) {
 
 			// Handle escalation
-			FunctionState next = this.delegate.handleEscalation(escalation);
+			FunctionState next = this.delegate.handleEscalation(escalation, escalationCompletion);
 
 			// Undertake possible handling and then outer thread state
 			return Promise.then(next, this.handleThenFunction);

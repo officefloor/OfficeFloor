@@ -22,14 +22,14 @@ package net.officefloor.compile.internal.structure;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AutoWireLink<N extends Node> {
+public interface AutoWireLink<S extends Node, T extends Node> {
 
 	/**
 	 * Obtains the source {@link Node}.
 	 * 
 	 * @return Source {@link Node}.
 	 */
-	N getSourceNode();
+	S getSourceNode();
 
 	/**
 	 * Obtains the matching source {@link AutoWire}.
@@ -41,11 +41,10 @@ public interface AutoWireLink<N extends Node> {
 	/**
 	 * Obtains the target {@link Node}.
 	 * 
-	 * @param office
-	 *            {@link OfficeNode}.
+	 * @param office {@link OfficeNode}.
 	 * @return Target {@link Node}.
 	 */
-	N getTargetNode(OfficeNode office);
+	T getTargetNode(OfficeNode office);
 
 	/**
 	 * Obtains the matching target {@link AutoWire}.

@@ -25,14 +25,12 @@ import net.officefloor.frame.api.function.ManagedFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeFloor {
+public interface OfficeFloor extends AutoCloseable {
 
 	/**
-	 * Opens the OfficeFloor and starts necessary {@link ManagedFunction}
-	 * instances.
+	 * Opens the OfficeFloor and starts necessary {@link ManagedFunction} instances.
 	 * 
-	 * @throws Exception
-	 *             If fails to open the OfficeFloor.
+	 * @throws Exception If fails to open the OfficeFloor.
 	 */
 	void openOfficeFloor() throws Exception;
 
@@ -40,10 +38,11 @@ public interface OfficeFloor {
 	 * Closes the OfficeFloor. This stops all {@link ManagedFunction} instances
 	 * executing within the {@link Office} instances and releases all resources.
 	 * 
-	 * @throws Exception
-	 *             If fails to close the {@link OfficeFloor}.
+	 * @throws Exception If fails to close the {@link OfficeFloor}.
 	 */
-	void closeOfficeFloor() throws Exception;
+	default void closeOfficeFloor() throws Exception {
+		this.close();
+	}
 
 	/**
 	 * <p>
@@ -60,12 +59,10 @@ public interface OfficeFloor {
 	/**
 	 * Obtains the {@link Office} for the input office name.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
+	 * @param officeName Name of the {@link Office}.
 	 * @return Specified {@link Office}.
-	 * @throws UnknownOfficeException
-	 *             If no {@link Office} by the name within this
-	 *             {@link OfficeFloor}.
+	 * @throws UnknownOfficeException If no {@link Office} by the name within this
+	 *                                {@link OfficeFloor}.
 	 */
 	Office getOffice(String officeName) throws UnknownOfficeException;
 

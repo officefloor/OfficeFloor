@@ -2,7 +2,8 @@
 <model>
 	<field type="String" name="office floor managed object name" />
 	<field type="String" name="managed object scope" />
-	<field type="OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel"
+	<field
+		type="OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel"
 		name="office floor managed object source" />
 	<list type="TypeQualificationModel" name="type qualification" />
 	<list type="DeployedOfficeObjectToOfficeFloorManagedObjectModel"
@@ -13,6 +14,7 @@
 	<list
 		type="OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel"
 		name="dependent office floor managed object source input" />
-	<list type="OfficeFloorManagedObjectDependencyModel" name="office floor managed object dependency"
+	<list type="OfficeFloorManagedObjectDependencyModel"
+		name="office floor managed object dependency"
 		plural="office floor managed object dependencies" />
 </model>

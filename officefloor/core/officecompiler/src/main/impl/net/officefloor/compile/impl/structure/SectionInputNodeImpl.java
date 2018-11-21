@@ -54,6 +54,7 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
@@ -109,8 +110,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param parameterType
-		 *            Parameter type.
+		 * @param parameterType Parameter type.
 		 */
 		public InitialisedState(String parameterType) {
 			this.parameterType = parameterType;
@@ -135,13 +135,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param inputName
-	 *            Name of the {@link SubSectionInput} (which is the name of the
-	 *            {@link SectionInputType}).
-	 * @param section
-	 *            {@link SectionNode} containing this {@link SectionInputNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param inputName Name of the {@link SubSectionInput} (which is the name of
+	 *                  the {@link SectionInputType}).
+	 * @param section   {@link SectionNode} containing this
+	 *                  {@link SectionInputNode}.
+	 * @param context   {@link NodeContext}.
 	 */
 	public SectionInputNodeImpl(String inputName, SectionNode section, NodeContext context) {
 		this.inputName = inputName;
@@ -424,8 +422,9 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		}
 
 		@Override
-		public void invokeProcess(Object parameter, FlowCallback callback) throws InvalidParameterTypeException {
-			this.delegate.invokeProcess(parameter, callback);
+		public ProcessManager invokeProcess(Object parameter, FlowCallback callback)
+				throws InvalidParameterTypeException {
+			return this.delegate.invokeProcess(parameter, callback);
 		}
 	}
 
@@ -439,8 +438,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	/**
 	 * {@link ExternalServiceInput} {@link ManagedObjectSource}.
 	 * 
-	 * @param <O>
-	 *            {@link ExternalServiceInput} object type.
+	 * @param <O> {@link ExternalServiceInput} object type.
 	 */
 	@PrivateSource
 	private static class ExternalServiceInputManagedObjectSource<O, M extends ManagedObject>
@@ -470,12 +468,9 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param objectType
-		 *            {@link ExternalServiceInput} object type.
-		 * @param managedObjectType
-		 *            {@link ManagedObject} type.
-		 * @param cleanupEscalationHandler
-		 *            {@link ExternalServiceCleanupEscalationHandler}.
+		 * @param objectType               {@link ExternalServiceInput} object type.
+		 * @param managedObjectType        {@link ManagedObject} type.
+		 * @param cleanupEscalationHandler {@link ExternalServiceCleanupEscalationHandler}.
 		 */
 		private ExternalServiceInputManagedObjectSource(Class<O> objectType, Class<? extends M> managedObjectType,
 				ExternalServiceCleanupEscalationHandler<? super M> cleanupEscalationHandler) {
@@ -489,8 +484,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		 */
 
 		@Override
-		public void service(M managedObject, FlowCallback callback) {
-			this.context.invokeProcess(Flows.SERVICE, null, managedObject, 0, callback);
+		public ProcessManager service(M managedObject, FlowCallback callback) {
+			return this.context.invokeProcess(Flows.SERVICE, null, managedObject, 0, callback);
 		}
 
 		/*

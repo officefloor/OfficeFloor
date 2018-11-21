@@ -47,14 +47,12 @@ public interface FunctionManager {
 	 * Invokes the {@link ManagedFunction} which is executed within a new
 	 * {@link ProcessState} of the {@link Office}.
 	 * 
-	 * @param parameter
-	 *            Parameter for the {@link ManagedFunction}.
-	 * @param callback
-	 *            Optional {@link FlowCallback}. May be <code>null</code>.
-	 * @throws InvalidParameterTypeException
-	 *             Should the parameter be of incorrect type for the
-	 *             {@link ManagedFunction}.
+	 * @param parameter Parameter for the {@link ManagedFunction}.
+	 * @param callback  Optional {@link FlowCallback}. May be <code>null</code>.
+	 * @return {@link ProcessManager} to manage the {@link ProcessState}.
+	 * @throws InvalidParameterTypeException Should the parameter be of incorrect
+	 *                                       type for the {@link ManagedFunction}.
 	 */
-	void invokeProcess(Object parameter, FlowCallback callback) throws InvalidParameterTypeException;
+	ProcessManager invokeProcess(Object parameter, FlowCallback callback) throws InvalidParameterTypeException;
 
 }

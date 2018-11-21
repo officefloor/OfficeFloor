@@ -28,6 +28,7 @@ import net.officefloor.frame.api.executive.ExecutiveContext;
 import net.officefloor.frame.api.executive.TeamOversight;
 import net.officefloor.frame.api.executive.TeamSourceContextWrapper;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
+import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.team.Job;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSourceContext;
@@ -166,13 +167,13 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	}
 
 	@Override
-	public <T extends Throwable> void manageExecution(Execution<T> execution) throws T {
+	public <T extends Throwable> ProcessManager manageExecution(Execution<T> execution) throws T {
 
 		// Ensure associate thread to CPU
 		this.bindCurrentThreadCpuAffinity();
 
 		// Execute the execution
-		execution.execute();
+		return execution.execute();
 	}
 
 	@Override
@@ -211,20 +212,18 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 	@Override
 	public Team createTeam(ExecutiveContext context) throws Exception {
 
-		// Determine the split of threads
-		int teamSize = Math.max(1, context.getTeamSize() / this.cpuCores.length);
-
 		// Create a team for each CPU core
 		Team[] teams = new Team[this.cpuCores.length];
 		for (int coreIndex = 0; coreIndex < teams.length; coreIndex++) {
 			CpuCore core = this.cpuCores[coreIndex];
 
 			// Create the team source context
-			TeamSourceContext teamSourceContext = new TeamSourceContextWrapper(context, teamSize,
-					"CORE-" + core.getCoreId(), (runnable) -> () -> {
-						Affinity.setAffinity(core.getCoreAffinity());
-						runnable.run();
-					});
+			TeamSourceContext teamSourceContext = new TeamSourceContextWrapper(context, (teamSize) -> {
+				return Math.max(1, teamSize / this.cpuCores.length);
+			}, "CORE-" + core.getCoreId(), (runnable) -> () -> {
+				Affinity.setAffinity(core.getCoreAffinity());
+				runnable.run();
+			});
 
 			// Create the team
 			teams[coreIndex] = context.getTeamSource().createTeam(teamSourceContext);
@@ -305,7 +304,7 @@ public class WebThreadAffinityExecutive implements Executive, ExecutionStrategy,
 		}
 
 		@Override
-		public void assignJob(Job job) {
+		public void assignJob(Job job) throws Exception {
 
 			// Obtain the CPU affinity
 			ProcessIdentifier identifier = (ProcessIdentifier) job.getProcessIdentifier();

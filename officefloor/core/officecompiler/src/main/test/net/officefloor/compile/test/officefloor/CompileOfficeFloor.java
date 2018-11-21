@@ -117,7 +117,7 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 			synchronized (isComplete) {
 				failure[0] = exception;
 				isComplete[0] = true;
-				isComplete.notify(); // wake up immediately
+				isComplete.notifyAll(); // wake up immediately
 			}
 		});
 		synchronized (isComplete) {

@@ -61,8 +61,7 @@ public class AdaptedActionHandlePart<R extends Model, O, M extends Model> extend
 	/**
 	 * Instantiate.
 	 * 
-	 * @param adaptedAction
-	 *            {@link AdaptedAction}.
+	 * @param adaptedAction {@link AdaptedAction}.
 	 */
 	public void setAdaptedAction(AdaptedAction<R, O, M> adaptedAction) {
 		this.adaptedAction = adaptedAction;
@@ -90,8 +89,7 @@ public class AdaptedActionHandlePart<R extends Model, O, M extends Model> extend
 	/**
 	 * Obtains the {@link IViewer} for the {@link IVisualPart} anchorages.
 	 * 
-	 * @param anchorages
-	 *            {@link IVisualPart} anchorages.
+	 * @param anchorages {@link IVisualPart} anchorages.
 	 * @return {@link IViewer}.
 	 */
 	private IViewer getViewer(Set<? extends IVisualPart<? extends Node>> anchorages) {
@@ -130,7 +128,7 @@ public class AdaptedActionHandlePart<R extends Model, O, M extends Model> extend
 	}
 
 	@Override
-	protected void doRefreshVisual(Node visual) {
+	public void doRefreshVisual(Node visual) {
 		// managed by parent
 	}
 

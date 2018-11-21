@@ -26,11 +26,15 @@ import org.postgresql.ds.PGSimpleDataSource;
 
 import com.zaxxer.hikari.HikariDataSource;
 
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
+import net.officefloor.jdbc.postgresql.test.PostgreSqlRule.Configuration;
 import net.officefloor.jdbc.test.AbstractJdbcTestCase;
 
 /**
@@ -58,28 +62,26 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 	/**
 	 * {@link PostgreSqlRule} to run PostgreSql.
 	 */
-	private PostgreSqlRule server = new PostgreSqlRule(PORT, USERNAME, PASSWORD);
+	private static PostgreSqlRule server = new PostgreSqlRule(
+			new Configuration().port(PORT).username(USERNAME).password(PASSWORD));
 
-	@Override
-	protected void setUp() throws Exception {
+	/**
+	 * Manage PostgreSql before/after class (rather than each test) to improve
+	 * performance.
+	 */
+	public static Test suite() {
+		return new TestSetup(new TestSuite(PostgreSqlJdbcTest.class)) {
 
-		// Start PostgreSql
-		this.server.startPostgreSql();
+			protected void setUp() throws Exception {
+				server.startPostgreSql();
+			}
 
-		// Run setup (now database available to connect)
-		super.setUp();
+			protected void tearDown() throws Exception {
+				server.stopPostgreSql();
+			}
+		};
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-
-		// Stop PostgresSQL
-		this.server.stopPostgreSql();
-
-		// Complete tear down
-		super.tearDown();
-	}
-	
 	@Override
 	protected Class<? extends ConnectionManagedObjectSource> getConnectionManagedObjectSourceClass() {
 		return PostgreSqlConnectionManagedObjectSource.class;
@@ -117,6 +119,9 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 		try (Statement statement = connection.createStatement()) {
 			statement.executeQuery("SELECT * FROM information_schema.tables");
 			statement.executeUpdate("DROP TABLE IF EXISTS OFFICE_FLOOR_JDBC_TEST");
+		}
+		if (!connection.getAutoCommit()) {
+			connection.commit();
 		}
 	}
 

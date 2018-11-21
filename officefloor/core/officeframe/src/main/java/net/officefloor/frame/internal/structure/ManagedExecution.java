@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.manage.ProcessManager;
+
 /**
  * Managed execution.
  * 
@@ -27,8 +29,9 @@ public interface ManagedExecution<E extends Throwable> {
 	/**
 	 * Undertakes the execution.
 	 * 
+	 * @return {@link ProcessManager} to manage the {@link ProcessState}.
 	 * @throws E Possible {@link Throwable} from execution.
 	 */
-	void managedExecute() throws E;
+	ProcessManager managedExecute() throws E;
 
 }

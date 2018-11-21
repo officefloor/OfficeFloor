@@ -33,6 +33,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
+import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FunctionLogic;
@@ -72,7 +73,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	/**
 	 * {@link FlowCompletion} of this {@link Flow}.
 	 */
-	private final FlowCompletion completion;
+	private final FlowCompletion flowCompletion;
 
 	/**
 	 * {@link ThreadState} that this {@link Flow} is bound.
@@ -85,6 +86,11 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	private Throwable flowEscalation = null;
 
 	/**
+	 * {@link EscalationCompletion} for this {@link Flow}.
+	 */
+	private EscalationCompletion escalationCompletion;
+
+	/**
 	 * Indicates if this {@link Flow} has been completed.
 	 */
 	private boolean isFlowComplete = false;
@@ -92,13 +98,14 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	/**
 	 * Initiate.
 	 * 
-	 * @param completion
-	 *            {@link FlowCompletion} of this {@link Flow}.
-	 * @param threadState
-	 *            {@link ThreadState} containing this {@link Flow}.
+	 * @param flowCompletion       {@link FlowCompletion} of this {@link Flow}.
+	 * @param escalationCompletion {@link EscalationCompletion} for this
+	 *                             {@link Flow}.
+	 * @param threadState          {@link ThreadState} containing this {@link Flow}.
 	 */
-	public FlowImpl(FlowCompletion completion, ThreadState threadState) {
-		this.completion = completion;
+	public FlowImpl(FlowCompletion flowCompletion, EscalationCompletion escalationCompletion, ThreadState threadState) {
+		this.flowCompletion = flowCompletion;
+		this.escalationCompletion = escalationCompletion;
 		this.threadState = threadState;
 	}
 
@@ -212,29 +219,24 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	}
 
 	/**
-	 * Creates the {@link ManagedFunctionContainer} for the
-	 * {@link Administration}.
+	 * Creates the {@link ManagedFunctionContainer} for the {@link Administration}.
 	 * 
-	 * @param administrationMetaData
-	 *            {@link AdministrationMetaData}.
-	 * @param requiredManagedObjects
-	 *            {@link ManagedObjectIndex} instances to the
-	 *            {@link ManagedObject} instances that must be loaded before the
-	 *            {@link ManagedFunction} may be executed.
-	 * @param requiredGovernance
-	 *            Identifies the required activation state of the
-	 *            {@link Governance} for this {@link ManagedFunction}.
-	 * @param isEnforceGovernance
-	 *            Whether to enforce {@link Governance}.
-	 * @param functionBoundManagedObjects
-	 *            {@link ManagedFunction} bound {@link ManagedObjectContainer}
-	 *            instances.
-	 * @param parallelOwner
-	 *            Parallel {@link ManagedFunctionContainer} owner.
-	 * @param isUnloadManagedObjects
-	 *            Whether the {@link Administration} is to unload the
-	 *            {@link ManagedObject} instances for the
-	 *            {@link ManagedFunction}.
+	 * @param administrationMetaData      {@link AdministrationMetaData}.
+	 * @param requiredManagedObjects      {@link ManagedObjectIndex} instances to
+	 *                                    the {@link ManagedObject} instances that
+	 *                                    must be loaded before the
+	 *                                    {@link ManagedFunction} may be executed.
+	 * @param requiredGovernance          Identifies the required activation state
+	 *                                    of the {@link Governance} for this
+	 *                                    {@link ManagedFunction}.
+	 * @param isEnforceGovernance         Whether to enforce {@link Governance}.
+	 * @param functionBoundManagedObjects {@link ManagedFunction} bound
+	 *                                    {@link ManagedObjectContainer} instances.
+	 * @param parallelOwner               Parallel {@link ManagedFunctionContainer}
+	 *                                    owner.
+	 * @param isUnloadManagedObjects      Whether the {@link Administration} is to
+	 *                                    unload the {@link ManagedObject} instances
+	 *                                    for the {@link ManagedFunction}.
 	 * @return {@link AdministrationFunctionLogic}.
 	 */
 	private <E> ManagedFunctionContainer createAdministrationFunction(
@@ -308,11 +310,26 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 	@Override
 	public FunctionState cancel() {
-		return LinkedListSetPromise.all(this.activeFunctions, (function) -> function.cancel());
+
+		// Undertake cancel
+		FunctionState cancelFunctions = null;
+
+		// Ensure escalation completion
+		if (this.escalationCompletion != null) {
+			cancelFunctions = Promise.then(cancelFunctions, this.escalationCompletion.escalationComplete());
+		}
+
+		// Completion functions
+		cancelFunctions = Promise.then(cancelFunctions,
+				LinkedListSetPromise.all(this.activeFunctions, (function) -> function.cancel()));
+
+		// Return the cancel
+		return cancelFunctions;
 	}
 
 	@Override
-	public FunctionState managedFunctionComplete(FunctionState function, Throwable functionEscalation) {
+	public FunctionState managedFunctionComplete(FunctionState function, Throwable functionEscalation,
+			EscalationCompletion escalationCompletion) {
 
 		// Handle completion
 		FunctionState completionFunctions = null;
@@ -325,13 +342,15 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 			// Determine if already an escalation for this flow
 			if (this.flowEscalation == null) {
+
 				// Escalation for this flow
 				this.flowEscalation = functionEscalation;
+				this.escalationCompletion = escalationCompletion;
 
 			} else {
 				// Let thread state handle additional escalations
 				completionFunctions = Promise.then(completionFunctions,
-						this.threadState.handleEscalation(functionEscalation));
+						this.threadState.handleEscalation(functionEscalation, escalationCompletion));
 			}
 		}
 
@@ -340,14 +359,23 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 			// Notify of flow completion
 			Throwable threadEscalation;
-			if (this.completion != null) {
-				completionFunctions = Promise.then(completionFunctions, this.completion.complete(this.flowEscalation));
-				threadEscalation = null; // as handle by completion
+			EscalationCompletion threadEscalationCompletion;
+			if (this.flowCompletion != null) {
+				// Handle escalation by flow completion
+				completionFunctions = Promise.then(completionFunctions,
+						this.flowCompletion.flowComplete(this.flowEscalation));
+				if (this.escalationCompletion != null) {
+					completionFunctions = Promise.then(completionFunctions,
+							this.escalationCompletion.escalationComplete());
+				}
+				threadEscalation = null;
+				threadEscalationCompletion = null;
+
 			} else {
 				// Escalate to thread escalation
 				threadEscalation = this.flowEscalation;
+				threadEscalationCompletion = this.escalationCompletion;
 			}
-			final Throwable finalThreadEscalation = threadEscalation;
 
 			// Include flow complete clean up
 			completionFunctions = Promise.then(completionFunctions, new FlowOperation() {
@@ -366,7 +394,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 					flow.isFlowComplete = true;
 
 					// Complete the flow
-					return flow.threadState.flowComplete(flow, finalThreadEscalation);
+					return flow.threadState.flowComplete(flow, threadEscalation, threadEscalationCompletion);
 				}
 			});
 		}
@@ -407,8 +435,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		/**
 		 * Instantiate.
 		 * 
-		 * @param functionLogic
-		 *            {@link FunctionLogic}.
+		 * @param functionLogic {@link FunctionLogic}.
 		 */
 		public FunctionLogicFunctionState(FunctionLogic functionLogic) {
 			this.functionLogic = functionLogic;
@@ -463,8 +490,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		}
 
 		@Override
-		public FunctionState handleEscalation(Throwable escalation) {
-			return FlowImpl.this.threadState.handleEscalation(escalation);
+		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion completion) {
+			return FlowImpl.this.threadState.handleEscalation(escalation, completion);
 		}
 	}
 

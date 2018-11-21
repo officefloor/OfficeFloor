@@ -49,13 +49,14 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import net.officefloor.eclipse.editor.AdaptedChild;
+import net.officefloor.eclipse.editor.AdaptedArea;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedConnectable;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnector;
 import net.officefloor.eclipse.editor.AdaptedConnectorRole;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.AdaptedPotentialConnection;
 import net.officefloor.eclipse.editor.ChildrenGroup;
@@ -97,8 +98,7 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 	/**
 	 * Obtains the location of the {@link MouseEvent}.
 	 * 
-	 * @param e
-	 *            {@link MouseEvent}.
+	 * @param e {@link MouseEvent}.
 	 * @return Location of the {@link MouseEvent}.
 	 */
 	protected Point getLocation(MouseEvent e) {
@@ -110,10 +110,9 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 	/**
 	 * Completes the drag.
 	 * 
-	 * @param isCreateAdaptedParent
-	 *            Indicates whether to create the {@link AdaptedParentPart}.
-	 * @param event
-	 *            {@link MouseEvent} at completion of drag.
+	 * @param isCreateAdaptedParent Indicates whether to create the
+	 *                              {@link AdaptedParentPart}.
+	 * @param event                 {@link MouseEvent} at completion of drag.
 	 */
 	protected void completeDrag(boolean isCreateAdaptedParent, MouseEvent event) {
 		this.prototypePart.getErrorHandler().isError(() -> {
@@ -286,10 +285,8 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		/**
 		 * Instantiate.
 		 * 
-		 * @param parent
-		 *            {@link AdaptedParent}.
-		 * @param prototype
-		 *            {@link AdaptedPrototype}.
+		 * @param parent    {@link AdaptedParent}.
+		 * @param prototype {@link AdaptedPrototype}.
 		 */
 		public ProxyCreateAdaptedParent(AdaptedParent<M> parent, AdaptedPrototype<M> prototype) {
 			this.parent = parent;
@@ -345,6 +342,16 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		}
 
 		@Override
+		public List<AdaptedArea<?>> getAdaptedAreas() {
+			return this.parent.getAdaptedAreas();
+		}
+
+		@Override
+		public boolean isAreaChangeEvent(String eventName) {
+			return this.parent.isAreaChangeEvent(eventName);
+		}
+
+		@Override
 		public boolean isPalettePrototype() {
 			return this.parent.isPalettePrototype();
 		}
@@ -375,17 +382,17 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 		}
 
 		@Override
-		public <T extends Model> AdaptedPotentialConnection getPotentialConnection(AdaptedChild<T> target) {
+		public <T extends Model> AdaptedPotentialConnection getPotentialConnection(AdaptedConnectable<T> target) {
 			return this.parent.getPotentialConnection(target);
 		}
 
 		@Override
-		public <T extends Model> void createConnection(AdaptedChild<T> target, AdaptedConnectorRole sourceRole) {
+		public <T extends Model> void createConnection(AdaptedConnectable<T> target, AdaptedConnectorRole sourceRole) {
 			this.parent.createConnection(target, sourceRole);
 		}
 
 		@Override
-		public Node createVisual(AdaptedModelVisualFactoryContext<M> context) {
+		public Node createVisual(AdaptedChildVisualFactoryContext<M> context) {
 			return this.parent.createVisual(context);
 		}
 

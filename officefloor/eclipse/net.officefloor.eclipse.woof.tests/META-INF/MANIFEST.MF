@@ -2,26 +2,32 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test WoOF Editor
 Bundle-SymbolicName: net.officefloor.eclipse.woof.tests;singleton:=true
-Bundle-Version: 3.2.0
+Bundle-Version: 3.3.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-10
-Require-Bundle: com.google.inject,
- org.eclipse.core.runtime,
+Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.gef.common,
  org.eclipse.gef.geometry,
+ org.eclipse.gef.geometry.convert.fx,
  org.eclipse.gef.fx,
+ org.eclipse.gef.fx.swt,
  org.eclipse.gef.mvc.fx,
  org.eclipse.gef.mvc.fx.ui,
- net.officefloor.core;bundle-version="3.2.0",
- net.officefloor.eclipse.editor;bundle-version="3.2.0",
- net.officefloor.eclipse.osgi;bundle-version="3.2.0",
- net.officefloor.eclipse.configurer;bundle-version="3.2.0",
- net.officefloor.eclipse.ide;bundle-version="3.2.0",
- net.officefloor.woof;bundle-version="3.2.0",
- net.officefloor.eclipse.woof;bundle-version="3.2.0",
+ net.officefloor.core;bundle-version="3.3.0",
+ net.officefloor.woof;bundle-version="3.3.0",
+ net.officefloor.eclipse.common;bundle-version="3.3.0",
+ net.officefloor.eclipse.editor;bundle-version="3.3.0",
+ net.officefloor.eclipse.osgi;bundle-version="3.3.0",
+ net.officefloor.eclipse.configurer;bundle-version="3.3.0",
+ net.officefloor.eclipse.ide;bundle-version="3.3.0",
+ net.officefloor.eclipse.woof;bundle-version="3.3.0",
  org.junit
+Import-Package: com.google.common.collect,
+ com.google.inject,
+ com.google.inject.util,
+ javax.inject
 Automatic-Module-Name: net.officefloor.eclipse.woof.tests

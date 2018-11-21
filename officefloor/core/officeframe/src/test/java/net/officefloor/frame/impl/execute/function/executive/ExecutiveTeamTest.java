@@ -175,7 +175,7 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 			// Create the team source context
 			TeamSourceContext teamContext = context;
 			if (isWrapWorker) {
-				teamContext = new TeamSourceContextWrapper(context, 2, "EXECUTIVE", this);
+				teamContext = new TeamSourceContextWrapper(context, (size) -> 2, "EXECUTIVE", this);
 			}
 
 			// Create the team
@@ -195,7 +195,7 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		public void assignJob(Job job) {
+		public void assignJob(Job job) throws Exception {
 
 			// Ensure using process identifier
 			assertNotNull("Should have assigned process identifier", this.processIdentifier);

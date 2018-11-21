@@ -44,8 +44,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 public class MockLoadSupplierSource extends AbstractSupplierSource {
 
 	/**
-	 * {@link Property} to ensure valid {@link SupplierType} as must be
-	 * provided.
+	 * {@link Property} to ensure valid {@link SupplierType} as must be provided.
 	 */
 	public static final String PROPERTY_TEST = "TEST";
 
@@ -53,8 +52,7 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 	 * Validates the {@link SupplierType} is correct for this
 	 * {@link MockLoadSupplierSource}.
 	 * 
-	 * @param supplierType
-	 *            {@link SupplierType}.
+	 * @param supplierType {@link SupplierType}.
 	 */
 	public static void assertSupplierType(SupplierType supplierType) {
 
@@ -71,16 +69,11 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 	/**
 	 * Asserts {@link SuppliedManagedObjectSourceType}.
 	 * 
-	 * @param moType
-	 *            {@link SuppliedManagedObjectSourceType}.
-	 * @param qualifier
-	 *            Expected qualifier.
-	 * @param objectType
-	 *            Expected object type.
-	 * @param timeout
-	 *            Expected timeout.
-	 * @param propertyNameValues
-	 *            Expected {@link Property} name/value pairs.
+	 * @param moType             {@link SuppliedManagedObjectSourceType}.
+	 * @param qualifier          Expected qualifier.
+	 * @param objectType         Expected object type.
+	 * @param timeout            Expected timeout.
+	 * @param propertyNameValues Expected {@link Property} name/value pairs.
 	 */
 	private static void assertSuppliedManagedObjectType(SuppliedManagedObjectSourceType moType, String qualifier,
 			Class<?> objectType, long timeout, String... propertyNameValues) {
@@ -118,7 +111,7 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 
 		// Load the managed object source
 		MockTypeManagedObjectSource simple = new MockTypeManagedObjectSource(Object.class);
-		context.addManagedObjectSource(Object.class, simple);
+		context.addManagedObjectSource(null, Object.class, simple);
 
 		// Load the qualified managed object source
 		MockTypeManagedObjectSource qualified = new MockTypeManagedObjectSource(Object.class);
@@ -134,6 +127,11 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 		complex.addExtensionInterface(XAResource.class);
 		SuppliedManagedObjectSource mos = context.addManagedObjectSource("COMPLEX", Map.class, complex);
 		mos.addProperty("PROPERTY", "VALUE");
+	}
+
+	@Override
+	public void terminate() {
+		// nothing to clean up
 	}
 
 }

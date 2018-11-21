@@ -23,7 +23,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -204,14 +203,24 @@ public abstract class OfficeFloorJavaCompiler {
 	public abstract boolean writeMethodSignature(Appendable appendable, Method method) throws IOException;
 
 	/**
-	 * Writes the delegate {@link Method} implementation.
+	 * Writes the delegate {@link Method} call.
+	 * 
+	 * @param source   {@link Appendable}.
+	 * @param delegate Means to access delegate.
+	 * @param method   {@link Method}.
+	 * @throws IOException If fails write delegate {@link Method} call.
+	 */
+	public abstract void writeDelegateMethodCall(Appendable source, String delegate, Method method) throws IOException;
+
+	/**
+	 * Writes the {@link Method} implementation by invoking the delegate.
 	 * 
 	 * @param source   {@link Appendable}.
 	 * @param delegate Means to access delegate.
 	 * @param method   {@link Method}.
 	 * @throws IOException If fails write delegate {@link Method} implementation.
 	 */
-	public abstract void writeDelegateMethodImplementation(Appendable source, String delegate, Method method)
+	public abstract void writeMethodImplementation(Appendable source, String delegate, Method method)
 			throws IOException;
 
 	/**
@@ -255,9 +264,66 @@ public abstract class OfficeFloorJavaCompiler {
 	public abstract JavaSource addSource(String className, String source);
 
 	/**
-	 * Wrapper context for a {@link Method} implementation.
+	 * Writes the {@link Constructor} for the wrapping implementation.
 	 */
-	public static interface WrapperContext {
+	@FunctionalInterface
+	public static interface ConstructorWriter {
+
+		/**
+		 * Writes the {@link Constructor}.
+		 * 
+		 * @param context {@link ConstructorWriterContext}.
+		 * @throws IOException If fails to write the {@link Constructor}.
+		 */
+		void write(ConstructorWriterContext context) throws IOException;
+	}
+
+	/**
+	 * Context for the {@link ConstructorWriter}.
+	 */
+	public static interface ConstructorWriterContext {
+
+		/**
+		 * Obtains the {@link ClassName} name for the {@link JavaSource}.
+		 * 
+		 * @return {@link ClassName} name for the {@link JavaSource}.
+		 */
+		ClassName getClassName();
+
+		/**
+		 * Obtains the {@link Appendable} to write additional source.
+		 * 
+		 * @return {@link Appendable} to write additional source.
+		 */
+		Appendable getSource();
+	}
+
+	/**
+	 * Writes each {@link Method} required by implementing interfaces.
+	 */
+	@FunctionalInterface
+	public static interface MethodWriter {
+
+		/**
+		 * Writes the {@link Method}.
+		 * 
+		 * @param context {@link MethodWriterContext}.
+		 * @throws IOException If fails to write the {@link Method}.
+		 */
+		void write(MethodWriterContext context) throws IOException;
+	}
+
+	/**
+	 * Context for the {@link MethodWriterContext}.
+	 */
+	public static interface MethodWriterContext {
+
+		/**
+		 * Obtains the {@link Class} of the interface being implemented.
+		 * 
+		 * @return {@link Class} of the interface being implemented.
+		 */
+		Class<?> getInterface();
 
 		/**
 		 * Obtains the {@link Method} being implemented.
@@ -302,35 +368,85 @@ public abstract class OfficeFloorJavaCompiler {
 		 * @param source Source line for custom implementation.
 		 */
 		void writeln(String source);
+
+		/**
+		 * Obtains the source to re-use {@link OfficeFloorJavaCompiler} helper methods.
+		 * 
+		 * @return Source to re-use {@link OfficeFloorJavaCompiler} helper methods.
+		 */
+		Appendable getSource();
+	}
+
+	/**
+	 * Provides means to including source.
+	 */
+	@FunctionalInterface
+	public static interface JavaSourceWriter {
+
+		/**
+		 * Provides additional source.
+		 * 
+		 * @param context {@link JavaSourceContext}.
+		 * @throws IOException If fails to write the additional source code.
+		 */
+		void write(JavaSourceContext context) throws IOException;
+	}
+
+	/**
+	 * Context for the {@link JavaSourceWriter}.
+	 */
+	public static interface JavaSourceContext {
+
+		/**
+		 * Obtains the {@link ClassName} name for the {@link JavaSource}.
+		 * 
+		 * @return {@link ClassName} name for the {@link JavaSource}.
+		 */
+		ClassName getClassName();
+
+		/**
+		 * Obtains the {@link Appendable} to write additional source.
+		 * 
+		 * @return {@link Appendable} to write additional source.
+		 */
+		Appendable getSource();
 	}
 
 	/**
 	 * Adds a wrapper {@link JavaSource}.
 	 * 
-	 * @param type           Type being wrapped.
-	 * @param wrapperContext {@link Consumer} to configure the
-	 *                       {@link WrapperContext}.
+	 * @param type                   Type being wrapped.
+	 * @param methodWriter           {@link MethodWriter}. May be <code>null</code>
+	 *                               to use default implementation.
+	 * @param additionalSourceWriter {@link JavaSourceWriter} instances.
 	 * @return {@link JavaSource} for the wrapper.
 	 * @throws IOException If fails to write the wrapper.
 	 */
-	public JavaSource addWrapper(Class<?> type, Consumer<WrapperContext> wrapperContext) throws IOException {
-		return this.addWrapper(type, type, null, wrapperContext);
+	public JavaSource addWrapper(Class<?> type, MethodWriter methodWriter, JavaSourceWriter... additionalSourceWriter)
+			throws IOException {
+		return this.addWrapper(new Class[] { type }, type, null, null, methodWriter, additionalSourceWriter);
 	}
 
 	/**
 	 * Adds a wrapper {@link JavaSource}.
 	 * 
-	 * @param wrappedType        Wrapper type.
-	 * @param delegateType       Delegate type.
-	 * @param delegateExtraction Means to extract the wrapped implementation from
-	 *                           the delegate.
-	 * @param wrapperContext     {@link Consumer} to configure the
-	 *                           {@link WrapperContext}.
+	 * @param wrappingTypes          Wrapping types.
+	 * @param delegateType           Delegate type.
+	 * @param delegateExtraction     Means to extract the wrapped implementation
+	 *                               from the delegate. May be <code>null</code> to
+	 *                               use default.
+	 * @param constructorWriter      {@link ConstructorWriter}. May be
+	 *                               <code>null</code> to use default
+	 *                               {@link Constructor}.
+	 * @param methodWriter           {@link MethodWriter}. May be <code>null</code>
+	 *                               to use default implementation.
+	 * @param additionalSourceWriter {@link JavaSourceWriter} instances.
 	 * @return {@link JavaSource} for the wrapper.
 	 * @throws IOException If fails to write the wrapper.
 	 */
-	public abstract JavaSource addWrapper(Class<?> wrappedType, Class<?> delegateType, String delegateExtraction,
-			Consumer<WrapperContext> wrapperContext) throws IOException;
+	public abstract JavaSource addWrapper(Class<?>[] wrappingTypes, Class<?> delegateType, String delegateExtraction,
+			ConstructorWriter constructorWriter, MethodWriter methodWriter, JavaSourceWriter... additionalSourceWriter)
+			throws IOException;
 
 	/**
 	 * Compiles all the added {@link JavaSource} instances.

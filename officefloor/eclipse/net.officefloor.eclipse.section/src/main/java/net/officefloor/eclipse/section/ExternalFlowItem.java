@@ -20,7 +20,7 @@ package net.officefloor.eclipse.section;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedModelVisualFactoryContext;
+import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.section.ExternalFlowModel;
@@ -82,7 +82,7 @@ public class ExternalFlowItem extends
 	}
 
 	@Override
-	public Pane visual(ExternalFlowModel model, AdaptedModelVisualFactoryContext<ExternalFlowModel> context) {
+	public Pane visual(ExternalFlowModel model, AdaptedChildVisualFactoryContext<ExternalFlowModel> context) {
 		HBox container = new HBox();
 		context.addNode(container,
 				context.connector(DefaultConnectors.FLOW, FunctionToNextExternalFlowModel.class,
