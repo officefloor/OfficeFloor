@@ -843,6 +843,11 @@
 					<artifactId>datanucleus-maven-plugin</artifactId>
 					<version>5.0.2</version>
 				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.2</version>
+				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
@@ -1353,7 +1358,6 @@
 						<!-- Code Coverage -->
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.2</version>
 						<executions>
 							<execution>
 								<goals>
