@@ -8,7 +8,7 @@
 
 		<!-- Ensure building with latest version -->
 		<file>
-			<location>${basedir}/../../pom.xml</location>
+			<location>${basedir}/../../bom/pom.xml</location>
 			<contains><![CDATA[<pluginManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</pluginManagement>]]></contains>
 		</file>
 

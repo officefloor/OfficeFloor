@@ -1,5 +1,11 @@
 <verifications>
 	<files>
+		<!-- Ensure using latest version -->
+		<file>
+			<location>${basedir}/../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+
 		<!-- Ensure releasing new version -->
 		<file>
 			<location>category.xml</location>
