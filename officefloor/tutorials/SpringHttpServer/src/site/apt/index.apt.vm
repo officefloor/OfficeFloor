@@ -89,5 +89,5 @@ Unit Test
 
 Next
 
-  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.
+  The {{{../TransactionHttpServer/index.html}next tutorial}} covers transaction ({{{/apidocs/net/officefloor/frame/spi/governance/GovernanceSource.html}GovernanceSource}}) within a WoOF web application.
 

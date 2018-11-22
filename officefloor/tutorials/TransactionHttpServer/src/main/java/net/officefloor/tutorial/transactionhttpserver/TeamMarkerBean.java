@@ -17,35 +17,15 @@
  */
 package net.officefloor.tutorial.transactionhttpserver;
 
-import java.io.EOFException;
+import org.springframework.stereotype.Component;
 
-import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.frame.api.team.Team;
 
 /**
- * Transaction logic.
+ * Marker to use a different {@link Team}.
  * 
  * @author Daniel Sagenschneider
  */
-// START SNIPPET: tutorial
-public class TransactionLogic {
-
-	@NextFunction("fail")
-	public IllegalArgumentException rollback(Post post, PostRepository repository) {
-		repository.save(post);
-		return new IllegalArgumentException("rolled back");
-	}
-
-	@NextFunction("fail")
-	public EOFException commit(Post post, PostRepository repository) throws EOFException {
-		repository.save(post);
-		return new EOFException("committed");
-	}
-
-	public void fail(@Parameter Exception failure, PostRepository repository, TeamMarkerBean marker) throws Exception {
-		repository.save(new Post(null, "Additional"));
-		throw failure;
-	}
-
+@Component
+public class TeamMarkerBean {
 }
-// END SNIPPET: tutorial

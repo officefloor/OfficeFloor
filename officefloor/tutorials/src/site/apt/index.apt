@@ -34,7 +34,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./JavaScriptApp/index.html}AJAX}}                         | Servicing AJAX requests from JavaScript.                   | @HttpObject , ObjectResponse , @NotRenderTemplateAfter
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectional rendering content.                             | \<!-- \{section\} --\>
+| {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectional rendering content.                               | \<!-- \{section\} --\>
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./InheritHttpServer/index.html}Template Inheritance}}     | Inheriting sectioned content.                              | \<!-- \{:override\} --\> , \<!-- \{!\} --\> 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -55,6 +55,8 @@ OfficeFloor Tutorials
 | {{{./ThreadAffinityHttpServer/index.html}Thread Affinity}}   | Thread Affinity                                            | Executive
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SpringHttpServer/index.html}Spring}}                    | Wiring in Spring beans                                     | Supplier
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./TransactionHttpServer/index.html}Transaction}}          | Managing transactions with Governance.                     | Governance
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit / System / Integration testing
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

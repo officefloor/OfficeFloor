@@ -63,6 +63,7 @@ public class TransactionHttpServerTest {
 				"Content-Type", "application/json");
 	}
 
+	// START SNIPPET: rollback
 	@Test
 	public void rollback() throws Exception {
 
@@ -76,7 +77,9 @@ public class TransactionHttpServerTest {
 		response = this.server.send(MockHttpServer.mockRequest("/posts"));
 		response.assertResponse(200, mapper.writeValueAsString(Arrays.asList()), "Content-Type", "application/json");
 	}
+	// END SNIPPET: rollback
 
+	// START SNIPPET: commit
 	@Test
 	public void commit() throws Exception {
 
@@ -92,5 +95,6 @@ public class TransactionHttpServerTest {
 				mapper.writeValueAsString(Arrays.asList(new Post(1, POST_CONTENT), new Post(2, "Additional"))),
 				"Content-Type", "application/json");
 	}
+	// END SNIPPET: commit
 
 }
