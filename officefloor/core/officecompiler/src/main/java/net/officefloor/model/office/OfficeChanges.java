@@ -374,7 +374,7 @@ public interface OfficeChanges {
 	/**
 	 * Removes the {@link GovernanceAreaModel}.
 	 * 
-	 * @param governance {@link GovernanceAreaModel} to remove.
+	 * @param governanceArea {@link GovernanceAreaModel} to remove.
 	 * @return {@link Change} to remove the {@link GovernanceAreaModel}.
 	 */
 	Change<GovernanceAreaModel> removeGovernanceArea(GovernanceAreaModel governanceArea);

@@ -52,6 +52,7 @@ public interface AutoWirer<N extends Node> {
 	/**
 	 * Selects the appropriate {@link AutoWireLink} instances.
 	 * 
+	 * @param                 <S> Source {@link Node} type.
 	 * @param sourceNode      Source {@link Node} to link target.
 	 * @param sourceAutoWires Source {@link AutoWire} instances to match against
 	 *                        target {@link AutoWire} instances.
@@ -63,6 +64,7 @@ public interface AutoWirer<N extends Node> {
 	 * Selects the appropriate {@link AutoWireLink} instances, and does not flag
 	 * issue if no matching {@link AutoWireLink} is found.
 	 * 
+	 * @param                 <S> Source {@link Node} type.
 	 * @param sourceNode      Source {@link Node} to link target.
 	 * @param sourceAutoWires Source {@link AutoWire} instances to match against
 	 *                        target {@link AutoWire} instances.

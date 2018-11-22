@@ -823,6 +823,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure {@link ProcessState} instances for connection are cancelled on loss of
 	 * connection.
+	 * 
+	 * @throws Exception If test failure.
 	 */
 	public void testCancelConnection() throws Exception {
 		this.doCancelConnectionTest(false);
@@ -831,6 +833,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure {@link ProcessState} instances for connection are cancelled on loss of
 	 * secure connection.
+	 * 
+	 * @throws Exception If test failure.
 	 */
 	public void testSecureCancelConnection() throws Exception {
 		this.doCancelConnectionTest(true);
@@ -856,7 +860,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * 
 	 * @param isSecure Indicates if secure.
 	 */
-	public void doCancelConnectionTest(boolean isSecure) throws Exception {
+	private void doCancelConnectionTest(boolean isSecure) throws Exception {
 
 		// Determine if handle cancel
 		if (!this.isHandleCancel()) {

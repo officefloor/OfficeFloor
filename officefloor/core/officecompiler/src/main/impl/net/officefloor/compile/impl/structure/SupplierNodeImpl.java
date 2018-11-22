@@ -174,7 +174,9 @@ public class SupplierNodeImpl implements SupplierNode {
 	/**
 	 * Obtains the {@link OfficeFloorManagedObjectSource} /
 	 * {@link OfficeManagedObjectSource}.
-	 * 
+	 *
+	 * @param           <S> {@link OfficeFloorManagedObjectSource} /
+	 *                  {@link OfficeManagedObjectSource} type.
 	 * @param qualifier Qualifier. May be <code>null</code>.
 	 * @param type      Type.
 	 * @param factory   Factory to create the {@link OfficeFloorManagedObjectSource}
