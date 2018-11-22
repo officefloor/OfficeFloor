@@ -323,6 +323,7 @@ public class WoofLoaderImpl implements WoofLoader {
 			for (PropertyModel property : govModel.getProperties()) {
 				governance.addProperty(property.getName(), property.getValue());
 			}
+			governance.enableAutoWireExtensions();
 
 			// Configure the governance of the sections
 			for (WoofGovernanceAreaModel area : govModel.getGovernanceAreas()) {

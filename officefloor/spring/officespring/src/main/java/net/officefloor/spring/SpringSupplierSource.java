@@ -68,12 +68,13 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * }
 	 * </pre>
 	 * 
+	 * @param            <O> Object type.
 	 * @param qualifier  Qualifier. May be <code>null</code>.
 	 * @param objectType Type of object required.
 	 * @return Object sourced from an {@link OfficeFloor} {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <B> B getManagedObject(String qualifier, Class<? extends B> objectType) {
+	public static <O> O getManagedObject(String qualifier, Class<? extends O> objectType) {
 
 		// Obtain the dependency factory
 		SpringDependencyFactory factory = springDependencyFactory.get();
@@ -84,7 +85,7 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 
 		// Create and return the dependency
 		try {
-			return (B) factory.createDependency(qualifier, objectType);
+			return (O) factory.createDependency(qualifier, objectType);
 
 		} catch (Throwable ex) {
 			// Propagate as fatal error
@@ -136,9 +137,13 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * Runs the {@link Runnable} in context for the {@link SpringDependencyFactory}
 	 * to create additional beans for Spring.
 	 * 
+	 * @param         <S> Loaded context.
+	 * @param         <E> Possible {@link Throwable} from loading.
 	 * @param loader  {@link SpringLoader}.
 	 * @param factory {@link SpringDependencyFactory} to create the additional
 	 *                beans.
+	 * @return Loaded context.
+	 * @throws E If fails to load.
 	 */
 	public static <S, E extends Throwable> S runInContext(SpringLoader<S, E> loader, SpringDependencyFactory factory)
 			throws E {

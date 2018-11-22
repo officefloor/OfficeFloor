@@ -614,7 +614,7 @@ public abstract class AbstractJdbcTestCase extends OfficeFrameTestCase {
 	 * tracking open connections and that there is appropriate connection management
 	 * in place to close connections.
 	 */
-	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doConnectionManagementTest(
+	private <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void doConnectionManagementTest(
 			Class<MS> managedObjectSourceClass, boolean isPooled, int connectionIncreaseCount) throws Throwable {
 
 		// Obtain the number of registered connections

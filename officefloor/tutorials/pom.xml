@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -33,11 +34,9 @@
 		<module>SpringHttpServer</module>
 		<module>TeamHttpServer</module>
 		<module>ThreadAffinityHttpServer</module>
+		<module>TransactionHttpServer</module>
 		<module>TestHttpServer</module>
 		<module>DeployHttpServer</module>
-<!--  
-		<module>TransactionHttpServer</module>
--->
 	</modules>
 	<properties>
 		<ant-jsch-version>1.8.4</ant-jsch-version>

@@ -17,31 +17,31 @@
  */
 package net.officefloor.tutorial.transactionhttpserver;
 
-import javax.persistence.EntityManager;
+import java.util.LinkedList;
+import java.util.List;
 
-import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.web.ObjectResponse;
 
 /**
- * Service to create the {@link User}.
+ * Logic for the post page.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: tutorial
-public class UserService {
+public class PostLogic {
 
-	@NextFunction("userAdded")
-	public void createUser(@Parameter UserProperties properties, EntityManager entityManager) {
-		User user = new User();
-		user.setUserName(nullBlankString(properties.getUserName()));
-		Person person = new Person();
-		person.setFullName(nullBlankString(properties.getFullName()));
-		person.setUser(user);
-		entityManager.persist(person);
+	public void getPosts(PostRepository repository, ObjectResponse<List<Post>> responder) {
+		List<Post> posts = new LinkedList<>();
+		for (Post post : repository.findAll()) {
+			posts.add(post);
+		}
+		responder.send(posts);
 	}
 
-	private static String nullBlankString(String value) {
-		return ((value == null) || (value.trim().length() == 0)) ? null : value;
+	public void create(Post post, PostRepository repository, ObjectResponse<Post> responder) {
+		repository.save(post);
+		responder.send(post);
 	}
+
 }
 // END SNIPPET: tutorial

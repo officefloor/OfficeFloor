@@ -45,7 +45,9 @@ public class CpuCore {
 	 * <p>
 	 * This for example, allows restricting access to particular CPU cores or
 	 * logical CPUs.
-	 * 
+	 *
+	 * @param                 <R> Return type.
+	 * @param                 <T> Possible {@link Throwable} type.
 	 * @param layout          {@link CpuLayout}.
 	 * @param customExecution {@link CustomExecution}.
 	 * @return Possible return value.
