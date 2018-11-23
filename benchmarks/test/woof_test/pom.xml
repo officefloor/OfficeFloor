@@ -20,10 +20,6 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
-			<artifactId>officejdbc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejdbc_postgresql</artifactId>
 		</dependency>
 		<dependency>
