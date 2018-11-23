@@ -77,7 +77,6 @@
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<failsafe-version>2.22.1</failsafe-version>
 		<compiler-version>3.8.0</compiler-version>
-		<ant-jsch-version>1.10.5</ant-jsch-version>
 		<asm-version>7.0</asm-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
