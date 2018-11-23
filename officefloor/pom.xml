@@ -4,12 +4,18 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.officefloor</groupId>
-	<version>3.4.0</version>
+
+	<name>OfficeFloor</name>
+	<description>OfficeFloor</description>
+
+	<parent>
+		<groupId>net.officefloor</groupId>
+		<artifactId>bom</artifactId>
+		<version>3.4.0</version>
+		<relativePath>bom</relativePath>
+	</parent>
 	<artifactId>officefloor</artifactId>
 	<packaging>pom</packaging>
-	<name>OfficeFloor</name>
-	<description>Parent OfficeFloor</description>
 	<url>http://officefloor.net/</url>
 	<inceptionYear>2005</inceptionYear>
 	<licenses>
@@ -49,14 +55,6 @@
 			<email>yellowduckphoto@users.sourceforge.net</email>
 		</contributor>
 	</contributors>
-	<distributionManagement>
-		<site>
-			<id>repo.officefloor.sf.net</id>
-			<name>Site on SourceForge - http://www.officefloor.net</name>
-			<url>scp://sagenschneider@shell.sourceforge.net:/home/project-web/officefloor/htdocs
-			</url>
-		</site>
-	</distributionManagement>
 	<modules>
 		<module>bom</module>
 		<module>core</module>
@@ -95,14 +93,6 @@
 	</repositories>
 	<dependencyManagement>
 		<dependencies>
-			<!-- BOM -->
-			<dependency>
-				<groupId>net.officefloor</groupId>
-				<artifactId>bom</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
 			<!-- Eclipse -->
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
@@ -300,14 +290,6 @@
 		</dependencies>
 	</dependencyManagement>
 	<build>
-		<extensions>
-			<extension>
-				<!-- Allow for scp distribution -->
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ssh</artifactId>
-				<version>${wagon-ssh-version}</version>
-			</extension>
-		</extensions>
 		<pluginManagement>
 			<plugins>
 				<!-- ================================================ -->
@@ -1029,149 +1011,6 @@
 								<phase>test</phase>
 								<goals>
 									<goal>report</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<!-- Profile for deploying to SourceForge -->
-			<!-- -->
-			<!-- mvn -Ddeploy=sourceforge deploy -->
-			<id>release-to-sourceforge</id>
-			<activation>
-				<property>
-					<name>deploy</name>
-					<value>sourceforge</value>
-				</property>
-			</activation>
-			<distributionManagement>
-				<repository>
-					<id>repo.officefloor.sf.net</id>
-					<name>Maven repository on SourceForge -
-						http://www.officefloor.net/maven2
-					</name>
-					<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/maven/maven2
-					</url>
-				</repository>
-			</distributionManagement>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- Create SourceForge Shell -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>Create SourceForge shell for deploying artifacts</id>
-								<inherited>false</inherited>
-								<phase>verify</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
-								<id>Create SourceForge shell for deploying site</id>
-								<inherited>false</inherited>
-								<phase>post-site</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
-									</target>
-								</configuration>
-							</execution>
-						</executions>
-						<dependencies>
-							<dependency>
-								<groupId>org.apache.ant</groupId>
-								<artifactId>ant-jsch</artifactId>
-								<version>${ant-jsch-version}</version>
-								<scope>runtime</scope>
-							</dependency>
-						</dependencies>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<!-- Profile for deploying to Sonatype -->
-			<!-- -->
-			<!-- mvn -Ddeploy=sonatype -Dpgp.passphrase=[passphrase] deploy -->
-			<id>release-to-sonatype</id>
-			<activation>
-				<property>
-					<name>deploy</name>
-					<value>sonatype</value>
-				</property>
-			</activation>
-			<distributionManagement>
-				<repository>
-					<id>sonatype-nexus-staging</id>
-					<name>Nexus Release Repository</name>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/
-					</url>
-				</repository>
-			</distributionManagement>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- Include source jars for release (before signing) -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-sources-for-release</id>
-								<phase>post-integration-test</phase>
-								<goals>
-									<goal>jar-no-fork</goal>
-									<goal>test-jar-no-fork</goal>
-								</goals>
-								<configuration>
-									<includePom>true</includePom>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<!-- Generate Javadoc release jar (before signing) -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-javadoc-for-release</id>
-								<phase>post-integration-test</phase>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<!-- Sign artifacts (must be after sources and javadoc to sign them) -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
 								</goals>
 							</execution>
 						</executions>

@@ -33,7 +33,7 @@
 			<id>release-beta-eclipse-update-site</id>
 			<activation>
 				<property>
-					<name>deploy</name>
+					<name>officefloor-deploy</name>
 					<value>sourceforge</value>
 				</property>
 			</activation>
@@ -69,7 +69,7 @@
 			<id>release-eclipse-update-site</id>
 			<activation>
 				<property>
-					<name>deploy</name>
+					<name>officefloor-deploy</name>
 					<value>sonatype</value>
 				</property>
 			</activation>
