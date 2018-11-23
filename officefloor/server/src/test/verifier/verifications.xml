@@ -1,5 +1,11 @@
 <verifications>
 	<files>
+		<!-- Ensure using latest version -->
+		<file>
+			<location>${basedir}/../bom/pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+		
 		<!-- Ensure all the modules inheriting latest -->
 		<file>
 			<location>officeserver/pom.xml</location>
@@ -11,6 +17,10 @@
 		</file>
 		<file>
 			<location>officeserver_netty/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
+			<location>officeserver_rapidoid/pom.xml</location>
 			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
 		</file>
 	</files>
