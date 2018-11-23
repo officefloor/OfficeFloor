@@ -81,7 +81,6 @@
 		<asm-version>7.0</asm-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
-		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 		<jetty-version>9.4.14.v20181114</jetty-version>
 	</properties>
 	<repositories>
