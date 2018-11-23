@@ -45,10 +45,6 @@
 			<artifactId>officeweb_security</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.server</groupId>
-			<artifactId>officeserver</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>provided</scope>

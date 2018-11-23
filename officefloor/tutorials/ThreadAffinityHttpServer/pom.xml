@@ -29,15 +29,7 @@
 		<!-- END SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
-			<artifactId>officejpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejpa_hibernate</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
