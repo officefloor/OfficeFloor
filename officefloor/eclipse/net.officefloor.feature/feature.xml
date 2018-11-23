@@ -49,7 +49,7 @@
       <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.e4.core.services"/>
       <import plugin="org.eclipse.swt"/>
-      <import plugin="org.eclipse.fx.ui.workbench3" version="3.3.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.fx.ui.workbench3"/>
    </requires>
 
    <plugin
