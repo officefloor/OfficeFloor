@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>bom</artifactId>
-		<version>3.3.0</version>
+		<version>3.4.0</version>
 		<relativePath>bom</relativePath>
 	</parent>
 	<artifactId>officefloor</artifactId>

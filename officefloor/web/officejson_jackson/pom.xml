@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.web</groupId>
 		<artifactId>web</artifactId>
-		<version>3.3.0</version>
+		<version>3.4.0</version>
 	</parent>
 	<artifactId>officejson_jackson</artifactId>
 	<name>JSON Jackson Plug-in for Web</name>

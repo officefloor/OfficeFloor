@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.spring</groupId>
 		<artifactId>spring</artifactId>
-		<version>3.3.0</version>
+		<version>3.4.0</version>
 	</parent>
 	<artifactId>officespring_data</artifactId>
 	<name>Spring Data Integration</name>

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.persistence</groupId>
 		<artifactId>persistence</artifactId>
-		<version>3.3.0</version>
+		<version>3.4.0</version>
 	</parent>
 	<artifactId>officejpa_postgresql</artifactId>
 	<name>JPA Persistence on top of PostgreSql</name>

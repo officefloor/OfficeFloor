@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.3.0" date="in SCM" description="Spring Data Integration">
+		<release version="3.4.0" date="In SCM" description="Maven BOM">
+			<action type="add" dev="sagenschneider">Maven BOM</action>
+		</release>
+		<release version="3.3.0" date="2018-11-23" description="Spring Data Integration">
 			<action type="add" dev="sagenschneider">Spring Data Integration</action>
 		</release>
 		<release version="3.2.0" date="2018-11-03" description="Spring Integration">

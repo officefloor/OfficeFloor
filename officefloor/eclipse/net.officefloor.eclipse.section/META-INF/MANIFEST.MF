@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Section Editor
 Bundle-SymbolicName: net.officefloor.eclipse.section;singleton:=true
-Bundle-Version: 3.3.0
+Bundle-Version: 3.4.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-10
 Export-Package: net.officefloor.eclipse.section
@@ -16,11 +16,11 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.gef.fx,
  org.eclipse.gef.mvc.fx,
  org.eclipse.gef.mvc.fx.ui,
- net.officefloor.core;bundle-version="3.3.0",
- net.officefloor.eclipse.editor;bundle-version="3.3.0",
- net.officefloor.eclipse.osgi;bundle-version="3.3.0",
- net.officefloor.eclipse.configurer;bundle-version="3.3.0",
- net.officefloor.eclipse.ide;bundle-version="3.3.0"
+ net.officefloor.core;bundle-version="3.4.0",
+ net.officefloor.eclipse.editor;bundle-version="3.4.0",
+ net.officefloor.eclipse.osgi;bundle-version="3.4.0",
+ net.officefloor.eclipse.configurer;bundle-version="3.4.0",
+ net.officefloor.eclipse.ide;bundle-version="3.4.0"
 Import-Package: com.google.inject,
  com.google.inject.util,
  javax.inject

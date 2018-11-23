@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor.server</groupId>
 		<artifactId>server</artifactId>
-		<version>3.3.0</version>
+		<version>3.4.0</version>
 	</parent>
 	<artifactId>officeserver_default</artifactId>
 	<name>Default OfficeFloor HTTP Server</name>
