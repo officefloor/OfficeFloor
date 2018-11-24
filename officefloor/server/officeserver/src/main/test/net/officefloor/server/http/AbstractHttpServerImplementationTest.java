@@ -18,6 +18,7 @@
 package net.officefloor.server.http;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -29,6 +30,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -79,7 +81,6 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
-import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.stream.ServerWriter;
@@ -429,7 +430,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			assertEquals("Incorrect header", "header", request.getHeaders().getHeader("request").getValue());
 			assertEquals("Incorrect number of cookies", 1, request.getCookies().length());
 			assertEquals("Incorrect cookie", "cookie", request.getCookies().getCookie("request").getValue());
-			assertEquals("Incorrect entity", "request", MockHttpServer.getContent(request, null));
+			assertEquals("Incorrect entity", "request", getContent(request, null));
 
 			// Send a full response
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
@@ -439,6 +440,36 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			response.getCookies().setCookie("response", "cookie");
 			response.getEntityWriter().write("response");
 		}
+	}
+
+	/**
+	 * Obtains the HTTP entity content from the {@link HttpRequest}.
+	 * 
+	 * @param request {@link HttpRequest}.
+	 * @param charset {@link Charset}. May be <code>null</code> to use default
+	 *                {@link Charset}.
+	 * @return HTTP entity content.
+	 */
+	private static String getContent(HttpRequest request, Charset charset) {
+
+		// Ensure have charset
+		if (charset == null) {
+			charset = ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
+		}
+
+		// Obtain the content
+		StringWriter content = new StringWriter();
+		try {
+			InputStreamReader reader = new InputStreamReader(request.getEntity().createBrowseInputStream(), charset);
+			for (int character = reader.read(); character != -1; character = reader.read()) {
+				content.write(character);
+			}
+		} catch (IOException ex) {
+			throw OfficeFrameTestCase.fail(ex);
+		}
+
+		// Return the content
+		return content.toString();
 	}
 
 	/**
@@ -1741,7 +1772,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Result of a {@link PipelineExecutor}.
 	 */
-	private static class PipelineResult {
+	protected static class PipelineResult {
 
 		private long startTime;
 
@@ -1749,7 +1780,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		private int requestCount;
 
-		private PipelineResult(long startTime, long endTime, int requestCount) {
+		public PipelineResult(long startTime, long endTime, int requestCount) {
 			this.startTime = startTime;
 			this.endTime = endTime;
 			this.requestCount = requestCount;
@@ -1774,7 +1805,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Compares results of {@link OfficeFloor} servicing against Raw servicing.
 	 */
-	private static class CompareResult {
+	protected static class CompareResult {
 
 		private static Class<?> testClass;
 
@@ -1784,7 +1815,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			testClass = testClazz;
 		}
 
-		private static void setResult(String prefix, Class<?> servicerClass, PipelineResult pipelineResult) {
+		public static boolean setResult(String prefix, Class<?> servicerClass, PipelineResult pipelineResult) {
 
 			// Obtain the compare result
 			Map<String, CompareResult> testResults = results.get(testClass);
@@ -1814,7 +1845,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			// Determine if have all values
 			if ((result.rawResult == null) || (result.bytesResult == null) || (result.bufferResult == null)
 					|| (result.fileResult == null)) {
-				return;
+				return false; // not complete with results
 			}
 
 			// Have both values, so print comparison
@@ -1870,6 +1901,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			out.println("=====================================================================================");
 			out.flush();
 			System.out.println(message.toString());
+
+			// Have all results
+			return true;
 		}
 
 		private PipelineResult rawResult = null;

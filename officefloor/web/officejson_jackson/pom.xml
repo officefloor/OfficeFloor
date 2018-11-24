@@ -28,6 +28,11 @@
 			<artifactId>jackson-module-afterburner</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>test</scope>

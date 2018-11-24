@@ -14,6 +14,7 @@
 	<description>HTTP Server components</description>
 	<modules>
 		<module>officeserver</module>
+		<module>officeserver_test</module>
 		<module>officeserver_default</module>
 		<module>officeserver_netty</module>
 		<module>officeserver_rapidoid</module>

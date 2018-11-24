@@ -92,4 +92,22 @@ public class ValidateHttpServerImplementationTest extends AbstractHttpServerImpl
 		return false;
 	}
 
+	/**
+	 * Ensures the multi-client pipeline test runs appropriately.
+	 */
+	public void testMultiClientPipeline() throws Exception {
+		this.doMultiClientLoadTest(BufferServicer.class, 2, 100, "Validate");
+	}
+
+	/**
+	 * Ensure validate results.
+	 */
+	public void testValidateResults() throws Exception {
+		PipelineResult result = new PipelineResult(0, 1000, 1);
+		assertFalse(CompareResult.setResult("MOCK", null, result));
+		assertFalse(CompareResult.setResult("MOCK", BytesServicer.class, result));
+		assertFalse(CompareResult.setResult("MOCK", BufferServicer.class, result));
+		assertTrue(CompareResult.setResult("MOCK", FileServicer.class, result));
+	}
+
 }

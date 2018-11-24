@@ -64,6 +64,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_test</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_default</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -245,13 +250,11 @@
 				<groupId>org.glassfish.jersey.inject</groupId>
 				<artifactId>jersey-hk2</artifactId>
 				<version>2.27</version>
-				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jersey.bundles.repackaged</groupId>
 				<artifactId>jersey-guava</artifactId>
 				<version>2.25.1</version>
-				<scope>provided</scope>
 			</dependency>
 			<!-- END TODO -->
 			<dependency>
