@@ -18,7 +18,6 @@
 package net.officefloor.server.http;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -30,7 +29,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -430,7 +428,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			assertEquals("Incorrect header", "header", request.getHeaders().getHeader("request").getValue());
 			assertEquals("Incorrect number of cookies", 1, request.getCookies().length());
 			assertEquals("Incorrect cookie", "cookie", request.getCookies().getCookie("request").getValue());
-			assertEquals("Incorrect entity", "request", getContent(request, null));
+			assertEquals("Incorrect entity", "request", EntityUtil.toString(request, null));
 
 			// Send a full response
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
@@ -440,36 +438,6 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			response.getCookies().setCookie("response", "cookie");
 			response.getEntityWriter().write("response");
 		}
-	}
-
-	/**
-	 * Obtains the HTTP entity content from the {@link HttpRequest}.
-	 * 
-	 * @param request {@link HttpRequest}.
-	 * @param charset {@link Charset}. May be <code>null</code> to use default
-	 *                {@link Charset}.
-	 * @return HTTP entity content.
-	 */
-	private static String getContent(HttpRequest request, Charset charset) {
-
-		// Ensure have charset
-		if (charset == null) {
-			charset = ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
-		}
-
-		// Obtain the content
-		StringWriter content = new StringWriter();
-		try {
-			InputStreamReader reader = new InputStreamReader(request.getEntity().createBrowseInputStream(), charset);
-			for (int character = reader.read(); character != -1; character = reader.read()) {
-				content.write(character);
-			}
-		} catch (IOException ex) {
-			throw OfficeFrameTestCase.fail(ex);
-		}
-
-		// Return the content
-		return content.toString();
 	}
 
 	/**

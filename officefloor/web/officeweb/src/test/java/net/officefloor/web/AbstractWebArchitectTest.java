@@ -35,6 +35,7 @@ import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.server.http.EntityUtil;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpMethod;
@@ -531,7 +532,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		@Override
 		public ObjectValue parse(ServerHttpConnection connection) throws HttpException {
-			String content = MockHttpServer.getContent(connection.getRequest(), null);
+			String content = EntityUtil.toString(connection.getRequest(), null);
 			return new ObjectValue(content);
 		}
 	}
@@ -607,7 +608,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		@Override
 		public ObjectAlias parse(ServerHttpConnection connection) throws HttpException {
-			String content = MockHttpServer.getContent(connection.getRequest(), null);
+			String content = EntityUtil.toString(connection.getRequest(), null);
 			return new ObjectAlias(content);
 		}
 	}
@@ -1150,10 +1151,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Adds the context path to the path.
 	 * 
-	 * @param server
-	 *            Server details (e.g. http://officefloor.net:80 ).
-	 * @param path
-	 *            Path.
+	 * @param server Server details (e.g. http://officefloor.net:80 ).
+	 * @param path   Path.
 	 * @return URL with the context path.
 	 */
 	private String contextUrl(String server, String path) {
@@ -1167,8 +1166,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	 * Creates a {@link MockHttpRequestBuilder} for the path (including context
 	 * path).
 	 * 
-	 * @param path
-	 *            Path for the {@link MockHttpRequestBuilder}.
+	 * @param path Path for the {@link MockHttpRequestBuilder}.
 	 * @return {@link MockHttpRequestBuilder}.
 	 */
 	private MockHttpRequestBuilder mockRequest(String path) {
@@ -1181,14 +1179,10 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Services the {@link MockHttpRequestBuilder}.
 	 * 
-	 * @param httpMethodName
-	 *            Name of the {@link HttpMethod}.
-	 * @param applicationPath
-	 *            Application path.
-	 * @param servicer
-	 *            {@link Class} of the servicer.
-	 * @param request
-	 *            {@link MockHttpRequestBuilder}.
+	 * @param httpMethodName  Name of the {@link HttpMethod}.
+	 * @param applicationPath Application path.
+	 * @param servicer        {@link Class} of the servicer.
+	 * @param request         {@link MockHttpRequestBuilder}.
 	 * @return {@link MockHttpResponse}.
 	 */
 	private MockHttpResponse service(String httpMethodName, String applicationPath, Class<?> servicer,
@@ -1199,16 +1193,11 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Services the {@link MockHttpRequestBuilder}.
 	 * 
-	 * @param isSecure
-	 *            Indicates if route is secure.
-	 * @param httpMethodName
-	 *            Name of the {@link HttpMethod}.
-	 * @param applicationPath
-	 *            Application path.
-	 * @param servicer
-	 *            {@link Class} of the servicer.
-	 * @param request
-	 *            {@link MockHttpRequestBuilder}.
+	 * @param isSecure        Indicates if route is secure.
+	 * @param httpMethodName  Name of the {@link HttpMethod}.
+	 * @param applicationPath Application path.
+	 * @param servicer        {@link Class} of the servicer.
+	 * @param request         {@link MockHttpRequestBuilder}.
 	 * @return {@link MockHttpResponse}.
 	 */
 	private MockHttpResponse service(boolean isSecure, String httpMethodName, String applicationPath, Class<?> servicer,
@@ -1221,16 +1210,11 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Validates the redirect for requiring a secure connection.
 	 * 
-	 * @param httpMethodName
-	 *            Name of the {@link HttpMethod}.
-	 * @param applicationPath
-	 *            Application path. May contain parameters.
-	 * @param servicer
-	 *            {@link Class} of the servicer.
-	 * @param requestPath
-	 *            Path for the {@link MockHttpRequestBuilder}.
-	 * @param expectedEntity
-	 *            Expected secure entity.
+	 * @param httpMethodName  Name of the {@link HttpMethod}.
+	 * @param applicationPath Application path. May contain parameters.
+	 * @param servicer        {@link Class} of the servicer.
+	 * @param requestPath     Path for the {@link MockHttpRequestBuilder}.
+	 * @param expectedEntity  Expected secure entity.
 	 */
 	private void secureService(String httpMethodName, String applicationPath, Class<?> servicer, String requestPath,
 			String expectedEntity) throws Exception {

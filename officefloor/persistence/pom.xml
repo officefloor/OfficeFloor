@@ -17,6 +17,7 @@
 		<module>officejdbc</module>
 		<module>officejdbc_h2</module>
 		<module>officejdbc_postgresql</module>
+		<module>officejdbc_postgresql_test</module>
 		<module>officejpa</module>
 		<module>officejpa_hibernate</module>
 		<!-- <module>officejpa_eclipselink</module> -->

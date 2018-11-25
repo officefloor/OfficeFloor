@@ -125,6 +125,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
+				<artifactId>woof_test</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
 				<artifactId>officejson_jackson</artifactId>
 				<version>${project.version}</version>
 			</dependency>
@@ -148,6 +153,11 @@
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc_postgresql</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officejdbc_postgresql_test</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

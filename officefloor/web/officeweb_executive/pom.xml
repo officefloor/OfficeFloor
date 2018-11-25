@@ -23,5 +23,10 @@
 			<groupId>net.openhft</groupId>
 			<artifactId>affinity</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

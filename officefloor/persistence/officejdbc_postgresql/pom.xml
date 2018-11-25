@@ -19,11 +19,11 @@
 			<groupId>net.officefloor.persistence</groupId>
 			<artifactId>officejdbc</artifactId>
 		</dependency>
+		<!-- Necessary for PostgreSql for Java Modules -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
-		<!-- Necessary for PostgreSql for Java Modules -->
 		<dependency>
 			<groupId>javax.activation</groupId>
 			<artifactId>javax.activation-api</artifactId>
@@ -32,28 +32,17 @@
 			<groupId>javax.transaction</groupId>
 			<artifactId>javax.transaction-api</artifactId>
 		</dependency>
+		<!-- End java modules -->
 		<dependency>
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.spotify</groupId>
-			<artifactId>docker-client</artifactId>
-			<scope>provided</scope>
+			<groupId>net.officefloor.persistence</groupId>
+			<artifactId>officejdbc_postgresql_test</artifactId>
+			<scope>test</scope>
 		</dependency>
-		<!-- TODO: remove once docker not having issue with org.glassfish.hk2.api.MultiException -->
-		<dependency>
-			<groupId>org.glassfish.jersey.inject</groupId>
-			<artifactId>jersey-hk2</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.bundles.repackaged</groupId>
-			<artifactId>jersey-guava</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!-- END TODO -->
 	</dependencies>
 	<build>
 		<plugins>
