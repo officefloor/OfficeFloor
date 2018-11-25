@@ -10,11 +10,11 @@
 	<name>OfficeFloor Benchmarks</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<officefloor.version>3.3.0</officefloor.version>
+		<officefloor.version>3.4.0</officefloor.version>
 		<jackson.version>2.9.6</jackson.version>
 	</properties>
 	<modules>
-		<module>woof_test</module>
+		<module>woof_tests</module>
 		<module>woof_benchmark_test</module>
 		<module>woof_tpr_test</module>
 		<module>woof_micro_test</module>
@@ -81,13 +81,8 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.benchmarks</groupId>
-				<artifactId>woof_test</artifactId>
+				<artifactId>woof_tests</artifactId>
 				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient</artifactId>
-				<version>4.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.asynchttpclient</groupId>
