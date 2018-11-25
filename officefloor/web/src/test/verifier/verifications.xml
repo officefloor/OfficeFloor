@@ -35,5 +35,9 @@
 			<location>woof/pom.xml</location>
 			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
 		</file>
+		<file>
+			<location>woof_test/pom.xml</location>
+			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
+		</file>
 	</files>
 </verifications>

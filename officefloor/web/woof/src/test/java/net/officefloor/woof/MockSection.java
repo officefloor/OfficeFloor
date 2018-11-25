@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.woof.mock;
+package net.officefloor.woof;
 
 import java.io.IOException;
 import java.io.Serializable;

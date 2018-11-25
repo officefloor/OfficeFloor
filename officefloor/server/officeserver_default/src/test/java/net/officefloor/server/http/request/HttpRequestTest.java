@@ -44,7 +44,6 @@ import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.OfficeFloorHttpServerImplementation;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
-import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.request.config.CommunicationConfig;
 import net.officefloor.server.http.request.config.HeaderConfig;
 import net.officefloor.server.http.request.config.ProcessConfig;
@@ -135,18 +134,12 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Loads the tests for the *Test.xml files.
 	 * 
-	 * @param testNamePrefix
-	 *            Prefix for the test name.
-	 * @param directory
-	 *            Directory to search for tests.
-	 * @param unmarshaller
-	 *            {@link XmlUnmarshaller} to unmarshal the test.
-	 * @param isSecure
-	 *            Indicates if to be secure.
-	 * @param serverLocation
-	 *            {@link HttpServerLocation}.
-	 * @param suite
-	 *            {@link TestSuite} to add the tests.
+	 * @param testNamePrefix Prefix for the test name.
+	 * @param directory      Directory to search for tests.
+	 * @param unmarshaller   {@link XmlUnmarshaller} to unmarshal the test.
+	 * @param isSecure       Indicates if to be secure.
+	 * @param serverLocation {@link HttpServerLocation}.
+	 * @param suite          {@link TestSuite} to add the tests.
 	 */
 	private static void loadTests(String testNamePrefix, File directory, XmlUnmarshaller unmarshaller, boolean isSecure,
 			HttpServerLocation serverLocation, TestSuite suite) throws Exception {
@@ -191,19 +184,16 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 	private String serverBaseUrl;
 
 	/**
-	 * Indicates if the {@link MockHttpServer} is to be secure.
+	 * Indicates if is to be secure.
 	 */
 	private final boolean isSecure;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param testName
-	 *            Name of the test.
-	 * @param configuration
-	 *            {@link RunConfig}.
-	 * @param isSecure
-	 *            Indicates if the {@link MockHttpServer} is to be secure.
+	 * @param testName      Name of the test.
+	 * @param configuration {@link RunConfig}.
+	 * @param isSecure      Indicates if is to be secure.
 	 */
 	public HttpRequestTest(String testName, RunConfig configuration, String serverBaseUrl, boolean isSecure) {
 		this.setName(testName);

@@ -79,7 +79,6 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
-import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.stream.ServerWriter;
@@ -429,7 +428,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			assertEquals("Incorrect header", "header", request.getHeaders().getHeader("request").getValue());
 			assertEquals("Incorrect number of cookies", 1, request.getCookies().length());
 			assertEquals("Incorrect cookie", "cookie", request.getCookies().getCookie("request").getValue());
-			assertEquals("Incorrect entity", "request", MockHttpServer.getContent(request, null));
+			assertEquals("Incorrect entity", "request", EntityUtil.toString(request, null));
 
 			// Send a full response
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
@@ -1741,7 +1740,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Result of a {@link PipelineExecutor}.
 	 */
-	private static class PipelineResult {
+	protected static class PipelineResult {
 
 		private long startTime;
 
@@ -1749,7 +1748,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		private int requestCount;
 
-		private PipelineResult(long startTime, long endTime, int requestCount) {
+		public PipelineResult(long startTime, long endTime, int requestCount) {
 			this.startTime = startTime;
 			this.endTime = endTime;
 			this.requestCount = requestCount;
@@ -1774,7 +1773,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Compares results of {@link OfficeFloor} servicing against Raw servicing.
 	 */
-	private static class CompareResult {
+	protected static class CompareResult {
 
 		private static Class<?> testClass;
 
@@ -1784,7 +1783,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			testClass = testClazz;
 		}
 
-		private static void setResult(String prefix, Class<?> servicerClass, PipelineResult pipelineResult) {
+		public static boolean setResult(String prefix, Class<?> servicerClass, PipelineResult pipelineResult) {
 
 			// Obtain the compare result
 			Map<String, CompareResult> testResults = results.get(testClass);
@@ -1814,7 +1813,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			// Determine if have all values
 			if ((result.rawResult == null) || (result.bytesResult == null) || (result.bufferResult == null)
 					|| (result.fileResult == null)) {
-				return;
+				return false; // not complete with results
 			}
 
 			// Have both values, so print comparison
@@ -1870,6 +1869,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			out.println("=====================================================================================");
 			out.flush();
 			System.out.println(message.toString());
+
+			// Have all results
+			return true;
 		}
 
 		private PipelineResult rawResult = null;

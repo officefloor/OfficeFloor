@@ -12,6 +12,10 @@
 			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
 		</file>
 		<file>
+			<location>officeserver_test/pom.xml</location>
+			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+		</file>
+		<file>
 			<location>officeserver_default/pom.xml</location>
 			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
 		</file>

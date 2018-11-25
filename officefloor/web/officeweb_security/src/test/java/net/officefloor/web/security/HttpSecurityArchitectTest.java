@@ -30,9 +30,11 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -41,8 +43,8 @@ import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
-import net.officefloor.web.compile.AbstractWebCompileTestCase;
 import net.officefloor.web.compile.CompileWebContext;
+import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.security.build.AbstractHttpSecurable;
 import net.officefloor.web.security.build.HttpSecurer;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
@@ -63,7 +65,45 @@ import net.officefloor.web.spi.security.HttpSecurity;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpSecurityArchitectTest extends AbstractWebCompileTestCase {
+public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
+
+	/**
+	 * {@link WebCompileOfficeFloor}.
+	 */
+	protected final WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
+
+	/**
+	 * {@link MockHttpServer}.
+	 */
+	protected MockHttpServer server;
+
+	/**
+	 * {@link OfficeFloor}.
+	 */
+	protected OfficeFloor officeFloor;
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+
+		// Configure mock server
+		this.compile.officeFloor((context) -> {
+			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
+					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
+		});
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+
+		// Ensure close OfficeFloor
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
+
+		// Complete tear down
+		super.tearDown();
+	}
 
 	/**
 	 * Ensure able to employ {@link HttpSecurityArchitect} without configuring
