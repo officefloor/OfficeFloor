@@ -90,8 +90,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * Configures the {@link MockHttpServer} to be serviced by the
 	 * {@link DeployedOfficeInput}.
 	 * 
-	 * @param input
-	 *            {@link DeployedOfficeInput}.
+	 * @param input {@link DeployedOfficeInput}.
 	 * @return {@link MockHttpServer} to send {@link HttpRequest} instances.
 	 */
 	public static MockHttpServer configureMockHttpServer(DeployedOfficeInput input) {
@@ -104,10 +103,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * Enables extending implementations to configure themselves as the
 	 * {@link MockHttpServer}.
 	 * 
-	 * @param httpServer
-	 *            {@link MockHttpServer}.
-	 * @param input
-	 *            {@link DeployedOfficeInput}.
+	 * @param httpServer {@link MockHttpServer}.
+	 * @param input      {@link DeployedOfficeInput}.
 	 */
 	protected static void configureMockHttpServer(MockHttpServer httpServer, DeployedOfficeInput input) {
 		new HttpServer(httpServer, httpServer, null, null, true, null, input, null, null);
@@ -125,8 +122,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	/**
 	 * Convenience method to create a {@link MockHttpRequestBuilder}.
 	 * 
-	 * @param requestUri
-	 *            Request URI.
+	 * @param requestUri Request URI.
 	 * @return {@link MockHttpRequestBuilder}.
 	 */
 	public static MockHttpRequestBuilder mockRequest(String requestUri) {
@@ -147,10 +143,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	/**
 	 * Creates a mock {@link HttpResponseCookie}.
 	 *
-	 * @param name
-	 *            Name.
-	 * @param value
-	 *            value.
+	 * @param name  Name.
+	 * @param value value.
 	 * @return {@link HttpResponseCookie}.
 	 */
 	public static WritableHttpCookie mockResponseCookie(String name, String value) {
@@ -170,9 +164,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	/**
 	 * Creates the {@link MockServerHttpConnection}.
 	 * 
-	 * @param request
-	 *            {@link MockHttpRequestBuilder} for the {@link HttpRequest} of the
-	 *            {@link MockServerHttpConnection}.
+	 * @param request {@link MockHttpRequestBuilder} for the {@link HttpRequest} of
+	 *                the {@link MockServerHttpConnection}.
 	 * @return {@link MockServerHttpConnection}.
 	 */
 	public static MockServerHttpConnection mockConnection(MockHttpRequestBuilder request) {
@@ -180,46 +173,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	}
 
 	/**
-	 * Obtains the HTTP entity content from the {@link HttpRequest}.
-	 * 
-	 * @param request
-	 *            {@link HttpRequest}.
-	 * @param charset
-	 *            {@link Charset}. May be <code>null</code> to use default
-	 *            {@link Charset}.
-	 * @return HTTP entity content.
-	 */
-	public static String getContent(HttpRequest request, Charset charset) {
-
-		// Ensure have charset
-		if (charset == null) {
-			charset = ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET;
-		}
-
-		// Obtain the content
-		StringWriter content = new StringWriter();
-		try {
-			InputStreamReader reader = new InputStreamReader(request.getEntity().createBrowseInputStream(), charset);
-			for (int character = reader.read(); character != -1; character = reader.read()) {
-				content.write(character);
-			}
-		} catch (IOException ex) {
-			throw OfficeFrameTestCase.fail(ex);
-		}
-
-		// Return the content
-		return content.toString();
-	}
-
-	/**
 	 * Creates the {@link ProcessAwareServerHttpConnectionManagedObject}.
 	 * 
-	 * @param request
-	 *            {@link MockHttpRequestBuilder}.
-	 * @param serverLocation
-	 *            {@link HttpServerLocation}.
-	 * @param callback
-	 *            {@link MockHttpRequestCallback}.
+	 * @param request        {@link MockHttpRequestBuilder}.
+	 * @param serverLocation {@link HttpServerLocation}.
+	 * @param callback       {@link MockHttpRequestCallback}.
 	 * @return {@link ProcessAwareServerHttpConnectionManagedObject}.
 	 */
 	private static ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> createServerHttpConnection(
@@ -277,11 +235,9 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	/**
 	 * Sends the {@link MockHttpRequestBuilder}.
 	 * 
-	 * @param request
-	 *            {@link MockHttpRequestBuilder}.
-	 * @param callback
-	 *            {@link MockHttpRequestCallback} to receive the
-	 *            {@link MockHttpResponse}.
+	 * @param request  {@link MockHttpRequestBuilder}.
+	 * @param callback {@link MockHttpRequestCallback} to receive the
+	 *                 {@link MockHttpResponse}.
 	 */
 	public void send(MockHttpRequestBuilder request, MockHttpRequestCallback callback) {
 
@@ -316,14 +272,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Instantiate.
 		 * 
-		 * @param request
-		 *            {@link MockHttpRequestBuilderImpl}.
-		 * @param callback
-		 *            {@link MockHttpRequestCallback}.
-		 * @param bufferPool
-		 *            {@link MockStreamBufferPool} to check all {@link StreamBuffer}
-		 *            instances are released on writing {@link HttpResponse}. May be
-		 *            <code>null</code>.
+		 * @param request    {@link MockHttpRequestBuilderImpl}.
+		 * @param callback   {@link MockHttpRequestCallback}.
+		 * @param bufferPool {@link MockStreamBufferPool} to check all
+		 *                   {@link StreamBuffer} instances are released on writing
+		 *                   {@link HttpResponse}. May be <code>null</code>.
 		 */
 		private MockHttpResponseWriter(MockHttpRequestBuilderImpl request, MockHttpRequestCallback callback,
 				MockStreamBufferPool bufferPool) {
@@ -399,8 +352,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * Sends the {@link MockHttpRequestBuilder} and blocks waiting for the
 	 * {@link MockHttpResponse}.
 	 * 
-	 * @param request
-	 *            {@link MockHttpRequestBuilder}.
+	 * @param request {@link MockHttpRequestBuilder}.
 	 * @return {@link MockHttpResponse}.
 	 */
 	public MockHttpResponse send(MockHttpRequestBuilder request) {
@@ -642,10 +594,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Instantiate.
 		 * 
-		 * @param name
-		 *            {@link HttpHeader} name.
-		 * @param value
-		 *            {@link HttpHeader} value.
+		 * @param name  {@link HttpHeader} name.
+		 * @param value {@link HttpHeader} value.
 		 */
 		public MockNonMaterialisedHttpHeader(String name, String value) {
 			this.name = name;
@@ -701,8 +651,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Instantiate.
 		 * 
-		 * @param request
-		 *            {@link MockHttpRequestBuilderImpl}.
+		 * @param request {@link MockHttpRequestBuilderImpl}.
 		 */
 		private MockNonMaterialisedHttpCookie(MockHttpRequestBuilderImpl request) {
 			this.request = request;
@@ -741,10 +690,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Instantiate.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param value
-		 *            Value.
+		 * @param name  Name.
+		 * @param value Value.
 		 */
 		private MockCookie(String name, String value) {
 			this.name = name;
@@ -765,8 +712,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Instantiate.
 		 * 
-		 * @param header
-		 *            {@link MockNonMaterialisedHttpCookie}.
+		 * @param header {@link MockNonMaterialisedHttpCookie}.
 		 */
 		private MockCookieHttpHeader(MockNonMaterialisedHttpCookie header) {
 			this.header = header;
@@ -834,9 +780,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Instantiate.
 		 * 
-		 * @param request
-		 *            {@link MockHttpRequestBuilderImpl} for the
-		 *            {@link MockHttpResponse}.
+		 * @param request {@link MockHttpRequestBuilderImpl} for the
+		 *                {@link MockHttpResponse}.
 		 */
 		private MockHttpResponseBuilderImpl(MockHttpRequestBuilderImpl request) {
 			this.request = request;
@@ -1000,19 +945,14 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Loads the response.
 		 *
-		 * @param request
-		 *            {@link MockHttpRequestBuilderImpl} for this
-		 *            {@link MockHttpResponse}.
-		 * @param version
-		 *            {@link HttpVersion}.
-		 * @param status
-		 *            {@link HttpStatus}.
-		 * @param headers
-		 *            {@link List} of {@link HttpHeader} instances.
-		 * @param cookies
-		 *            {@link List} of {@link HttpResponseCookie} instances.
-		 * @param entityInputStream
-		 *            HTTP entity {@link InputStream}.
+		 * @param request           {@link MockHttpRequestBuilderImpl} for this
+		 *                          {@link MockHttpResponse}.
+		 * @param version           {@link HttpVersion}.
+		 * @param status            {@link HttpStatus}.
+		 * @param headers           {@link List} of {@link HttpHeader} instances.
+		 * @param cookies           {@link List} of {@link HttpResponseCookie}
+		 *                          instances.
+		 * @param entityInputStream HTTP entity {@link InputStream}.
 		 */
 		private MockHttpResponseImpl(MockHttpRequestBuilderImpl request, HttpVersion version, HttpStatus status,
 				List<WritableHttpHeader> headers, List<WritableHttpCookie> cookies, InputStream entityInputStream) {
@@ -1028,17 +968,12 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Loads with response failure.
 		 * 
-		 * @param request
-		 *            {@link MockHttpRequestBuilderImpl} for this
-		 *            {@link MockHttpResponse}.
-		 * @param version
-		 *            {@link HttpVersion}.
-		 * @param status
-		 *            {@link HttpStatus}.
-		 * @param headers
-		 *            {@link List} of {@link HttpHeader} instances.
-		 * @param entityInputStream
-		 *            HTTP entity {@link InputStream}.
+		 * @param request           {@link MockHttpRequestBuilderImpl} for this
+		 *                          {@link MockHttpResponse}.
+		 * @param version           {@link HttpVersion}.
+		 * @param status            {@link HttpStatus}.
+		 * @param headers           {@link List} of {@link HttpHeader} instances.
+		 * @param entityInputStream HTTP entity {@link InputStream}.
 		 */
 		private MockHttpResponseImpl(MockHttpRequestBuilderImpl request, Throwable failure) {
 			this.request = request;
@@ -1203,8 +1138,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Instantiate.
 		 * 
-		 * @param request
-		 *            {@link MockHttpRequestBuilder}.
+		 * @param request {@link MockHttpRequestBuilder}.
 		 */
 		public MockServerHttpConnectionImpl(MockHttpRequestBuilder request) {
 			this.delegate = createServerHttpConnection(request, new MockHttpServer(), this);
@@ -1291,8 +1225,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Wait for the {@link MockHttpResponse}.
 		 * 
-		 * @param maxWaitTimeInMilliseconds
-		 *            Max wait time in milliseconds.
+		 * @param maxWaitTimeInMilliseconds Max wait time in milliseconds.
 		 * @return {@link MockHttpResponse}.
 		 */
 		private synchronized MockHttpResponse waitForResponse(int maxWaitTimeInMilliseconds) {

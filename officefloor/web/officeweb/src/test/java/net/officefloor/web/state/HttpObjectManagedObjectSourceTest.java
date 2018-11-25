@@ -27,6 +27,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.server.http.EntityUtil;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
@@ -177,7 +178,7 @@ public class HttpObjectManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		@Override
 		public MockObject parse(ServerHttpConnection connection) {
-			String content = MockHttpServer.getContent(connection.getRequest(), null);
+			String content = EntityUtil.toString(connection.getRequest(), null);
 			return new MockObject(content);
 		}
 	}
