@@ -16,7 +16,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.benchmarks</groupId>
-			<artifactId>woof_tests</artifactId>
+			<artifactId>woof_benchmark_tests</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

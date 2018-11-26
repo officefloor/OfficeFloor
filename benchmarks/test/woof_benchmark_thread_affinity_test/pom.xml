@@ -8,21 +8,15 @@
 		<artifactId>benchmarks_test</artifactId>
 		<version>1.0.0</version>
 	</parent>
-	<artifactId>woof_raw_test</artifactId>
+	<artifactId>woof_benchmark_thread_affinity_test</artifactId>
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.benchmarks</groupId>
-			<artifactId>woof_raw</artifactId>
-			<scope>test</scope>
+			<artifactId>woof_benchmark_thread_affinity</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.benchmarks</groupId>
-			<artifactId>woof_tests</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
+			<artifactId>woof_benchmark_tests</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

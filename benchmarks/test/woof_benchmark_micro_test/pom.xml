@@ -8,15 +8,15 @@
 		<artifactId>benchmarks_test</artifactId>
 		<version>1.0.0</version>
 	</parent>
-	<artifactId>woof_tpr_test</artifactId>
+	<artifactId>woof_benchmark_micro_test</artifactId>
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.benchmarks</groupId>
-			<artifactId>woof_tpr</artifactId>
+			<artifactId>woof_benchmark_micro</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.benchmarks</groupId>
-			<artifactId>woof_tests</artifactId>
+			<artifactId>woof_benchmark_tests</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
