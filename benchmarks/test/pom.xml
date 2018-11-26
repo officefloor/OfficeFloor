@@ -20,6 +20,7 @@
 		<module>woof_benchmark_micro_test</module>
 		<module>woof_benchmark_thread_affinity_test</module>
 		<module>woof_benchmark_raw_test</module>
+		<module>woof_benchmark_spring_test</module>
 		<module>woof_benchmark_netty_test</module>
 		<module>woof_benchmark_rapidoid_test</module>
 	</modules>
@@ -77,6 +78,11 @@
 			<dependency>
 				<groupId>net.officefloor.benchmarks</groupId>
 				<artifactId>woof_benchmark_raw</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.benchmarks</groupId>
+				<artifactId>woof_benchmark_spring</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
