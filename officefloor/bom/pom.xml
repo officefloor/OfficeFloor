@@ -18,6 +18,7 @@
 		<jaxb-version>2.3.0</jaxb-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
+		<spring-version>2.1.0.RELEASE</spring-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -356,7 +357,7 @@
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>2.1.0.RELEASE</version>
+				<version>${spring-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
