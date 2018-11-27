@@ -36,6 +36,28 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<!-- START SNIPPET: spring -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring-version}</version>
+				<configuration>
+					<mainClass>net.officefloor.OfficeFloorMain</mainClass>
+					<classifier>exec</classifier>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- END SNIPPET: spring -->
+		</plugins>
+	</build>
 	<profiles>
 		<profile>
 			<!-- Profile for building -->
