@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.http.HttpResponse;
@@ -80,33 +82,23 @@ public class UpdateTest {
 		WorldResponse[] worlds = new ObjectMapper().readValue(entity, WorldResponse[].class);
 		assertEquals("Incorrect number of worlds", 20, worlds.length);
 
-		// Allow some time for asynchronous updates
-		AssertionError failure = null;
-		for (int i = 0; i < 5; i++) {
-			try {
-				Thread.sleep(1000);
+		// Create map of results
+		Map<Integer, WorldResponse> uniqueResponses = new HashMap<>();
+		for (WorldResponse world : worlds) {
+			uniqueResponses.put(world.getId(), world);
+		}
 
-				// Ensure database updated to the values
-				try (Connection connection = dataSource.getConnection()) {
-					PreparedStatement statement = connection
-							.prepareStatement("SELECT ID, RANDOMNUMBER FROM WORLD WHERE ID = ?");
-					for (WorldResponse world : worlds) {
-						statement.setInt(1, world.getId());
-						ResultSet resultSet = statement.executeQuery();
-						assertTrue("Should find row", resultSet.next());
-						assertEquals("Should update row " + world.getId(), world.getRandomNumber(),
-								resultSet.getInt(2));
-					}
-				}
-
-				// As here successful
-				return;
-
-			} catch (AssertionError ex) {
-				failure = ex;
+		// Ensure database updated to the values
+		try (Connection connection = dataSource.getConnection()) {
+			PreparedStatement statement = connection
+					.prepareStatement("SELECT ID, RANDOMNUMBER FROM WORLD WHERE ID = ?");
+			for (WorldResponse world : uniqueResponses.values()) {
+				statement.setInt(1, world.getId());
+				ResultSet resultSet = statement.executeQuery();
+				assertTrue("Should find row", resultSet.next());
+				assertEquals("Should update row " + world.getId(), world.getRandomNumber(), resultSet.getInt(2));
 			}
 		}
-		throw failure;
 	}
 
 	@Test

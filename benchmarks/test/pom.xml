@@ -14,14 +14,15 @@
 		<jackson.version>2.9.6</jackson.version>
 	</properties>
 	<modules>
-		<module>woof_tests</module>
+		<module>woof_benchmark_tests</module>
 		<module>woof_benchmark_test</module>
-		<module>woof_tpr_test</module>
-		<module>woof_micro_test</module>
-		<module>woof_thread_affinity_test</module>
-		<module>woof_raw_test</module>
-		<module>woof_netty_test</module>
-		<module>woof_rapidoid_test</module>
+		<module>woof_benchmark_tpr_test</module>
+		<module>woof_benchmark_micro_test</module>
+		<module>woof_benchmark_thread_affinity_test</module>
+		<module>woof_benchmark_raw_test</module>
+		<module>woof_benchmark_spring_test</module>
+		<module>woof_benchmark_netty_test</module>
+		<module>woof_benchmark_rapidoid_test</module>
 	</modules>
 	<repositories>
 		<repository>
@@ -51,37 +52,42 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.benchmarks</groupId>
-				<artifactId>woof_tpr</artifactId>
+				<artifactId>woof_benchmark_tpr</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.benchmarks</groupId>
-				<artifactId>woof_micro</artifactId>
+				<artifactId>woof_benchmark_micro</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.benchmarks</groupId>
-				<artifactId>woof_thread_affinity</artifactId>
+				<artifactId>woof_benchmark_thread_affinity</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.benchmarks</groupId>
-				<artifactId>woof_netty</artifactId>
+				<artifactId>woof_benchmark_netty</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.benchmarks</groupId>
-				<artifactId>woof_rapidoid</artifactId>
+				<artifactId>woof_benchmark_rapidoid</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.benchmarks</groupId>
-				<artifactId>woof_raw</artifactId>
+				<artifactId>woof_benchmark_raw</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.benchmarks</groupId>
-				<artifactId>woof_tests</artifactId>
+				<artifactId>woof_benchmark_spring</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.benchmarks</groupId>
+				<artifactId>woof_benchmark_tests</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

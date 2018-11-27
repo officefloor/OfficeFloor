@@ -299,6 +299,16 @@ public class PostgreSqlRule implements TestRule {
 			this.postgresContainerId = creation.id();
 			this.docker.startContainer(this.postgresContainerId);
 		}
+
+		// Create the possible required database
+		if (PostgreSqlRule.this.configuration.databaseName != null) {
+			try (Connection connection = PostgreSqlRule.this.getConnection(null)) {
+				connection.createStatement()
+						.execute("DROP DATABASE IF EXISTS " + PostgreSqlRule.this.configuration.databaseName);
+				connection.createStatement()
+						.execute("CREATE DATABASE " + PostgreSqlRule.this.configuration.databaseName);
+			}
+		}
 	}
 
 	/**
@@ -395,16 +405,6 @@ public class PostgreSqlRule implements TestRule {
 				// Start PostgreSql
 				PostgreSqlRule.this.startPostgreSql();
 				try {
-
-					// Create the possible required database
-					if (PostgreSqlRule.this.configuration.databaseName != null) {
-						try (Connection connection = PostgreSqlRule.this.getConnection(null)) {
-							connection.createStatement().execute(
-									"DROP DATABASE IF EXISTS " + PostgreSqlRule.this.configuration.databaseName);
-							connection.createStatement()
-									.execute("CREATE DATABASE " + PostgreSqlRule.this.configuration.databaseName);
-						}
-					}
 
 					// Run the test
 					base.evaluate();

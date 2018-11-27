@@ -160,9 +160,12 @@ public class OfficeFloorRule implements TestRule {
 					base.evaluate();
 
 				} finally {
-					// Ensure close the OfficeFloor
-					OfficeFloorRule.this.officeFloor.closeOfficeFloor();
-					OfficeFloorRule.this.officeFloor = null;
+					// Ensure close and clear the OfficeFloor
+					try {
+						OfficeFloorRule.this.officeFloor.closeOfficeFloor();
+					} finally {
+						OfficeFloorRule.this.officeFloor = null;
+					}
 				}
 			}
 		};

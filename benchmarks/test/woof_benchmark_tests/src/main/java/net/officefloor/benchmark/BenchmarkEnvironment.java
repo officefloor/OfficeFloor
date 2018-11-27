@@ -43,6 +43,22 @@ public class BenchmarkEnvironment {
 	private static final int TIMEOUT = 5 * 60 * 1000;
 
 	/**
+	 * Starts PostgreSql for manual testing.
+	 * 
+	 * @param args Command line arguments.
+	 * @throws Exception If fails to start.
+	 */
+	public static void main(String[] args) throws Exception {
+		
+		// Start PostgreSql
+		createPostgreSqlRule().startPostgreSql();
+		
+		// Create the tables
+		new DbTest().setupDatabase();
+		new FortunesTest().setupDatabase();
+	}
+
+	/**
 	 * Creates {@link PostgreSqlRule} for benchmark.
 	 * 
 	 * @return {@link PostgreSqlRule}.
