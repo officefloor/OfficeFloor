@@ -66,7 +66,7 @@ mvn clean install
 # Run the comparison (don't fail build if run fails - as could be just temporary Internet network issue)
 cd "${DIR}/FrameworkBenchmarks/FrameworkBenchmarks"
 ./tfb --clean
-./tfb --test rapidoid-http-fast netty vertx-postgres vertx-web-postgres officefloor officefloor-raw officefloor-micro officefloor-thread_affinity officefloor-tpr officefloor-netty officefloor-rapidoid || true
+./tfb --test rapidoid-http-fast netty vertx-postgres vertx-web-postgres officefloor officefloor-raw officefloor-micro officefloor-thread_affinity officefloor-tpr officefloor-netty officefloor-rapidoid officefloor-spring_data || true
 
 # Find the latest results directory
 RESULTS_DIR=''
