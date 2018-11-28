@@ -22,7 +22,7 @@
 		<datanucleus-version>5.1.11</datanucleus-version>
 		<docker-client-version>8.14.4</docker-client-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
-		<eclipse-persistence-jpa-version>2.7.1</eclipse-persistence-jpa-version>
+		<eclipse-persistence-jpa-version>2.7.3</eclipse-persistence-jpa-version>
 		<h2database-version>1.4.197</h2database-version>
 		<hibernate-version>5.3.7.Final</hibernate-version>
 		<hikari-version>3.2.0</hikari-version>
