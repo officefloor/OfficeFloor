@@ -13,14 +13,14 @@
 	<packaging>pom</packaging>
 	<properties>
 		<officefloor-version>${project.version}</officefloor-version>
-		<affinity-version>3.1.10</affinity-version>
+		<affinity-version>3.1.11</affinity-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<commons-codec-version>1.11</commons-codec-version>
 		<commons-text-version>1.6</commons-text-version>
 		<datanucleus-version>5.1.11</datanucleus-version>
-		<docker-client-version>8.14.4</docker-client-version>
+		<docker-client-version>8.14.5</docker-client-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.3</eclipse-persistence-jpa-version>
 		<h2database-version>1.4.197</h2database-version>

@@ -5,9 +5,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor</groupId>
-		<artifactId>bom</artifactId>
+		<artifactId>officefloor</artifactId>
 		<version>3.4.0</version>
-		<relativePath>../bom</relativePath>
 	</parent>
 	<groupId>net.officefloor.tutorial</groupId>
 	<artifactId>tutorials</artifactId>
