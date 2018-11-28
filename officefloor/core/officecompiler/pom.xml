@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor.core</groupId>
 		<artifactId>core</artifactId>
-		<version>3.4.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>officecompiler</artifactId>
 	<name>OfficeCompiler</name>
@@ -30,9 +31,11 @@
 							<target>
 								<!-- Specifying properties -->
 								<property name="modelprojectdir" value="${basedir}" />
-								<property name="compile_classpath" refid="maven.compile.classpath" />
+								<property name="compile_classpath"
+									refid="maven.compile.classpath" />
 								<!-- Generating the model classes -->
-								<java classname="net.officefloor.model.generate.GenerateOfficeFloorModel">
+								<java
+									classname="net.officefloor.model.generate.GenerateOfficeFloorModel">
 									<arg value="${modelprojectdir}/src/raw/model" />
 									<arg value="${modelprojectdir}/src/auto/model" />
 									<classpath>

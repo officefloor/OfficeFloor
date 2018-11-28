@@ -9,10 +9,10 @@
 
 	<groupId>net.officefloor</groupId>
 	<artifactId>bom</artifactId>
-	<version>3.4.0</version>
+	<version>${revision}</version>
 	<packaging>pom</packaging>
 	<properties>
-		<officefloor-version>${project.version}</officefloor-version>
+		<revision>3.4.0</revision>
 		<affinity-version>3.1.11</affinity-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
 		<ant-version>1.10.5</ant-version>
@@ -23,6 +23,7 @@
 		<docker-client-version>8.14.5</docker-client-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.3</eclipse-persistence-jpa-version>
+		<flatten-maven-version>1.0.0</flatten-maven-version>
 		<h2database-version>1.4.197</h2database-version>
 		<hibernate-version>5.3.7.Final</hibernate-version>
 		<hikari-version>3.2.0</hikari-version>
@@ -51,179 +52,179 @@
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>core</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officeframe</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officexml</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officemodelgen</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officecompiler</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Server -->
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>server</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_test</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_default</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_netty</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_rapidoid</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Web -->
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>web</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_resource</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_security</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_template</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_configuration</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_executive</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>woof</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>woof_test</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officejson_jackson</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Persistence -->
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>persistence</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc_h2</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc_postgresql</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc_postgresql_test</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_datanucleus</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_hibernate</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_eclipselink</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_postgresql</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Spring -->
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>spring</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring_data</artifactId>
-				<version>${officefloor-version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- ================================================ -->
 			<!-- Additional Dependencies -->
@@ -396,41 +397,81 @@
 		</extensions>
 		<pluginManagement>
 			<plugins>
-				<!-- ================================================ -->
-				<!-- OfficeFloor -->
-				<!-- ================================================ -->
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
-					<version>${officefloor-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>woof-archetype</artifactId>
-					<version>${officefloor-version}</version>
-				</plugin>
-				<!-- Additional plugins -->
-				<plugin>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-maven-plugin</artifactId>
-					<version>${spring-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>${antrun-version}</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.ant</groupId>
-							<artifactId>ant</artifactId>
-							<version>${ant-version}</version>
-						</dependency>
-					</dependencies>
+					<version>${revision}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
 	<profiles>
+		<profile>
+			<!-- Removed in flatten -->
+			<id>officefloor-default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>net.officefloor.maven</groupId>
+							<artifactId>woof-archetype</artifactId>
+							<version>${revision}</version>
+						</plugin>
+						<!-- Additional plugins -->
+						<plugin>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-maven-plugin</artifactId>
+							<version>${spring-version}</version>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-antrun-plugin</artifactId>
+							<version>${antrun-version}</version>
+							<dependencies>
+								<dependency>
+									<groupId>org.apache.ant</groupId>
+									<artifactId>ant</artifactId>
+									<version>${ant-version}</version>
+								</dependency>
+							</dependencies>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>flatten-maven-plugin</artifactId>
+						<version>${flatten-maven-version}</version>
+						<inherited>false</inherited>
+						<configuration>
+							<flattenMode>bom</flattenMode>
+							<pomElements>
+								<pluginManagement>keep</pluginManagement>
+							</pomElements>
+						</configuration>
+						<executions>
+							<execution>
+								<id>flatten</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>flatten</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>flatten.clean</id>
+								<phase>clean</phase>
+								<goals>
+									<goal>clean</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<!-- Profile for deploying to stage (SourceForge) -->
 			<!-- -->
@@ -459,7 +500,7 @@
 			<build>
 				<plugins>
 					<plugin>
-						<!-- Create SourceForge Shell -->
+						<!-- Load in the version numbers -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
 						<executions>

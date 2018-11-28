@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.web</groupId>
 		<artifactId>web</artifactId>
-		<version>3.4.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>woof</artifactId>
 	<name>Web on OfficeFloor</name>
