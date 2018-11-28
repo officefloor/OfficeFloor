@@ -5,8 +5,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>net.officefloor</groupId>
-		<artifactId>officefloor</artifactId>
+		<artifactId>bom</artifactId>
 		<version>3.4.0</version>
+		<relativePath>../bom</relativePath>
 	</parent>
 	<groupId>net.officefloor.tutorial</groupId>
 	<artifactId>tutorials</artifactId>
@@ -38,9 +39,6 @@
 		<module>TestHttpServer</module>
 		<module>DeployHttpServer</module>
 	</modules>
-	<properties>
-		<ant-jsch-version>1.8.4</ant-jsch-version>
-	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -68,11 +66,6 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>easymock</groupId>
-			<artifactId>easymock</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
