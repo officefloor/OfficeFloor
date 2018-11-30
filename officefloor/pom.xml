@@ -73,7 +73,8 @@
 		<maven-version>3.6.0</maven-version>
 		<maven-plugin-version>3.6.0</maven-plugin-version>
 		<tycho-version>1.2.0</tycho-version>
-		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
+		<maven-project-info-reports-version>3.0.0
+		</maven-project-info-reports-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<failsafe-version>2.22.1</failsafe-version>
 		<compiler-version>3.8.0</compiler-version>
@@ -741,7 +742,8 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/verifier</outputDirectory>
+							<outputDirectory>${project.build.directory}/verifier
+							</outputDirectory>
 							<resources>
 								<resource>
 									<directory>src/test/verifier</directory>
@@ -825,6 +827,7 @@
 						</goals>
 						<configuration>
 							<target>
+								<!-- Link to paper -->
 								<replace
 									file="${project.build.directory}/site/about.html">
 									<replacetoken><![CDATA[<a class="externalLink" href="http://doi.acm.org/10.1145/2739011.2739013">http://doi.acm.org/10.1145/2739011.2739013</a>]]></replacetoken>
@@ -847,9 +850,17 @@
 </script>
 ]]></replacevalue>
 								</replace>
+
+								<!-- Version on main page -->
+								<property name="officefloor_version" refid="revision" />
 								<copy file="${basedir}/src/site/resources/index.html"
 									toFile="${project.build.directory}/site/index.html"
 									overwrite="true" />
+								<replace
+									file="${project.build.directory}/site/index.html">
+									<replacetoken>@VERSION</replacetoken>
+									<replacevalue>${officefloor_version}</replacevalue>
+								</replace>
 							</target>
 						</configuration>
 					</execution>
@@ -936,7 +947,8 @@
 					<httpConnector>
 						<port>9999</port>
 					</httpConnector>
-					<webAppSourceDirectory>${basedir}/target/site/</webAppSourceDirectory>
+					<webAppSourceDirectory>${basedir}/target/site/
+					</webAppSourceDirectory>
 					<stopKey>OfficeFloor</stopKey>
 					<stopPort>9966</stopPort>
 					<stopWait>10</stopWait>
