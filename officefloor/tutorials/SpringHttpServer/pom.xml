@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.tutorial</groupId>
 		<artifactId>tutorials</artifactId>
-		<version>3.4.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>SpringHttpServer</artifactId>
 	<name>Spring HTTP Server Tutorial</name>
@@ -42,7 +42,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${spring-version}</version>
 				<configuration>
 					<mainClass>net.officefloor.OfficeFloorMain</mainClass>
 					<classifier>exec</classifier>

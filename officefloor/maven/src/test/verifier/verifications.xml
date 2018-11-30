@@ -5,15 +5,5 @@
 			<location>${basedir}/../pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
 		</file>
-		
-		<!-- Ensure all the modules inheriting latest -->
-		<file>
-			<location>officefloor-maven-plugin/pom.xml</location>
-			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
-		</file>
-		<file>
-			<location>woof-archetype/pom.xml</location>
-			<contains><![CDATA[<version>${pom.version}</version>(\s*)</parent>]]></contains>
-		</file>
 	</files>
 </verifications>

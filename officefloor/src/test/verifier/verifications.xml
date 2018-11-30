@@ -1,35 +1,5 @@
 <verifications>
 	<files>
-		<!-- Ensure all the modules inheriting latest -->
-		<file>
-			<location>core/pom.xml</location>
-			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>server/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>web/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>persistence/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>eclipse/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>maven/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>tutorials/pom.xml</location>
-			<contains><![CDATA[<version>${project.version}</version>(\s)*</parent>]]></contains>
-		</file>
-
 		<!-- Ensure site identifying latest version and copy right -->
 		<file>
 			<location>src/site/resources/index.html</location>

@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>bom</artifactId>
-		<version>3.4.0</version>
+		<version>${revision}</version>
 		<relativePath>bom</relativePath>
 	</parent>
 	<artifactId>officefloor</artifactId>
@@ -68,7 +68,7 @@
 	</modules>
 	<properties>
 		<current.year>2018</current.year>
-		<projectVersion>${project.version}</projectVersion>
+		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-version>3.6.0</maven-version>
 		<maven-plugin-version>3.6.0</maven-plugin-version>
@@ -95,121 +95,121 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>eclipse</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.core</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.common</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.configurer</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.configurer.tests</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.editor</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.editor.tests</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.ide</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.launch</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.officefloor</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.osgi</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.section</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.section.tests</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.target</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.woof</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.woof</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.woof.tests</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.feature</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.woof.feature</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>update.site</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Maven -->
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>officefloor-maven-plugin</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>woof-archetype</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Additional build dependencies -->
 			<!-- (runtime dependencies to be in BOM) -->
@@ -293,6 +293,44 @@
 				<!-- ================================================ -->
 				<!-- Additional Plugins -->
 				<!-- ================================================ -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>flatten-maven-plugin</artifactId>
+					<version>${flatten-maven-version}</version>
+					<configuration>
+						<updatePomFile>true</updatePomFile>
+						<pomElements>
+							<parent>expand</parent>
+							<name>keep</name>
+							<description>keep</description>
+							<url>keep</url>
+							<scm>keep</scm>
+							<issueManagement>keep</issueManagement>
+							<developers>keep</developers>
+							<contributors>keep</contributors>
+							<properties>keep</properties>
+							<dependencies>keep</dependencies>
+							<pluginManagement>keep</pluginManagement>
+							<dependencyManagement>keep</dependencyManagement>
+						</pomElements>
+					</configuration>
+					<executions>
+						<execution>
+							<id>flatten</id>
+							<phase>process-resources</phase>
+							<goals>
+								<goal>flatten</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>flatten.clean</id>
+							<phase>clean</phase>
+							<goals>
+								<goal>clean</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-verifier-plugin</artifactId>
@@ -550,6 +588,25 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											flatten-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0.0,)
+										</versionRange>
+										<goals>
+											<goal>flatten</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
@@ -565,6 +622,12 @@
 					<source>10</source>
 					<target>10</target>
 				</configuration>
+			</plugin>
+
+			<!-- Flatten to release for Maven Central release -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
 			</plugin>
 
 			<plugin>
@@ -593,7 +656,7 @@
 				<artifactId>maven-scm-plugin</artifactId>
 				<configuration>
 					<connectionType>developerConnection</connectionType>
-					<tag>release-${project.version}</tag>
+					<tag>release-${revision}</tag>
 				</configuration>
 			</plugin>
 
@@ -678,8 +741,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${project.build.directory}/verifier
-							</outputDirectory>
+							<outputDirectory>${project.build.directory}/verifier</outputDirectory>
 							<resources>
 								<resource>
 									<directory>src/test/verifier</directory>
