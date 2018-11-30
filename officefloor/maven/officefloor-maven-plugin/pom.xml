@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor.maven</groupId>
 		<artifactId>maven</artifactId>
-		<version>3.4.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>officefloor-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
@@ -20,6 +20,34 @@
 	</properties>
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Provide version</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<echo file="${project.build.directory}/officefloor-version"
+									message="${revision}" />
+
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ant</groupId>
+						<artifactId>ant-optional</artifactId>
+						<version>1.5.3-1</version>
+						<scope>runtime</scope>
+					</dependency>
+				</dependencies>
+			</plugin>
 			<plugin>
 				<!-- Generate raw Maven plug-in documentation -->
 				<groupId>org.apache.maven.plugins</groupId>

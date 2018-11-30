@@ -9,16 +9,39 @@
 
 	<groupId>net.officefloor</groupId>
 	<artifactId>bom</artifactId>
-	<version>3.4.0</version>
+	<version>${revision}</version>
 	<packaging>pom</packaging>
 	<properties>
-		<netty-version>4.1.31.Final</netty-version>
-		<rapidoid-version>5.5.4</rapidoid-version>
-		<jackson-version>2.9.7</jackson-version>
-		<jaxb-version>2.3.0</jaxb-version>
-		<wagon-ssh-version>3.2.0</wagon-ssh-version>
+		<revision>3.4.0</revision>
+		<affinity-version>3.1.11</affinity-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
+		<ant-version>1.10.5</ant-version>
+		<antrun-version>1.8</antrun-version>
+		<commons-codec-version>1.11</commons-codec-version>
+		<commons-text-version>1.6</commons-text-version>
+		<datanucleus-version>5.1.11</datanucleus-version>
+		<docker-client-version>8.14.5</docker-client-version>
+		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
+		<eclipse-persistence-jpa-version>2.7.3</eclipse-persistence-jpa-version>
+		<flatten-maven-version>1.0.0</flatten-maven-version>
+		<h2database-version>1.4.197</h2database-version>
+		<hibernate-version>5.3.7.Final</hibernate-version>
+		<hikari-version>3.2.0</hikari-version>
+		<hsqldb-version>2.4.1</hsqldb-version>
+		<httpclient-version>4.5.6</httpclient-version>
+		<jackson-version>2.9.7</jackson-version>
+		<javax-activation-version>1.2.0</javax-activation-version>
+		<javax-transaction-version>1.3</javax-transaction-version>
+		<jaxb-version>2.3.0</jaxb-version>
+		<junit-version>4.12</junit-version>
+		<lombok-version>1.18.4</lombok-version>
+		<mx4j-version>3.0.1</mx4j-version>
+		<netty-version>4.1.31.Final</netty-version>
+		<postgresql-version>42.2.5</postgresql-version>
+		<rapidoid-version>5.5.4</rapidoid-version>
+		<slf4j-version>1.7.25</slf4j-version>
 		<spring-version>2.1.0.RELEASE</spring-version>
+		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -29,179 +52,179 @@
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>core</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officeframe</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officexml</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officemodelgen</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.core</groupId>
 				<artifactId>officecompiler</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Server -->
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>server</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_test</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_default</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_netty</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_rapidoid</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Web -->
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>web</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_resource</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_security</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_template</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_configuration</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_executive</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>woof</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>woof_test</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officejson_jackson</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Persistence -->
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>persistence</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc_h2</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc_postgresql</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejdbc_postgresql_test</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_datanucleus</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_hibernate</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_eclipselink</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.persistence</groupId>
 				<artifactId>officejpa_postgresql</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Spring -->
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>spring</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring_data</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- ================================================ -->
 			<!-- Additional Dependencies -->
@@ -209,12 +232,12 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.12</version>
+				<version>${junit-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>mx4j</groupId>
 				<artifactId>mx4j-tools</artifactId>
-				<version>3.0.1</version>
+				<version></version>
 			</dependency>
 			<dependency>
 				<groupId>io.netty</groupId>
@@ -224,37 +247,37 @@
 			<dependency>
 				<groupId>org.rapidoid</groupId>
 				<artifactId>rapidoid-web</artifactId>
-				<version>5.5.5</version>
+				<version>${rapidoid-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.11</version>
+				<version>${commons-codec-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
-				<version>3.2.0</version>
+				<version>${hikari-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>1.4.197</version>
+				<version>${h2database-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hsqldb</groupId>
 				<artifactId>hsqldb</artifactId>
-				<version>2.4.1</version>
+				<version>${hsqldb-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.5</version>
+				<version>${postgresql-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-client</artifactId>
-				<version>8.14.5</version>
+				<version>${docker-client-version}</version>
 			</dependency>
 			<!-- TODO: remove once docker not having issue with org.glassfish.hk2.api.MultiException -->
 			<dependency>
@@ -271,33 +294,33 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-simple</artifactId>
-				<version>1.7.25</version>
+				<version>${slf4j-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-nop</artifactId>
-				<version>1.7.25</version>
+				<version>${slf4j-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>javax.persistence</artifactId>
-				<version>2.2.1</version>
+				<version>${eclipse-persistence-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-core</artifactId>
-				<version>5.3.7.Final</version>
+				<version>${hibernate-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.datanucleus</groupId>
 				<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
-				<version>5.1.11</version>
+				<version>${datanucleus-version}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>org.eclipse.persistence.jpa</artifactId>
-				<version>2.7.3</version>
+				<version>${eclipse-persistence-jpa-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.xml.bind</groupId>
@@ -317,22 +340,22 @@
 			<dependency>
 				<groupId>javax.activation</groupId>
 				<artifactId>javax.activation-api</artifactId>
-				<version>1.2.0</version>
+				<version>${javax-activation-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.transaction</groupId>
 				<artifactId>javax.transaction-api</artifactId>
-				<version>1.3</version>
+				<version>${javax-transaction-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.5.6</version>
+				<version>${httpclient-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.openhft</groupId>
 				<artifactId>affinity</artifactId>
-				<version>3.1.11</version>
+				<version>${affinity-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -347,12 +370,12 @@
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
-				<version>1.18.4</version>
+				<version>${lombok-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
-				<version>1.6</version>
+				<version>${commons-text-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
@@ -374,36 +397,81 @@
 		</extensions>
 		<pluginManagement>
 			<plugins>
-				<!-- ================================================ -->
-				<!-- OfficeFloor -->
-				<!-- ================================================ -->
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
-					<version>${project.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.officefloor.maven</groupId>
-					<artifactId>woof-archetype</artifactId>
-					<version>${project.version}</version>
-				</plugin>
-				<!-- Additional plugins -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.8</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.ant</groupId>
-							<artifactId>ant</artifactId>
-							<version>1.10.5</version>
-						</dependency>
-					</dependencies>
+					<version>${revision}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
 	<profiles>
+		<profile>
+			<!-- Removed in flatten -->
+			<id>officefloor-default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>net.officefloor.maven</groupId>
+							<artifactId>woof-archetype</artifactId>
+							<version>${revision}</version>
+						</plugin>
+						<!-- Additional plugins -->
+						<plugin>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-maven-plugin</artifactId>
+							<version>${spring-version}</version>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-antrun-plugin</artifactId>
+							<version>${antrun-version}</version>
+							<dependencies>
+								<dependency>
+									<groupId>org.apache.ant</groupId>
+									<artifactId>ant</artifactId>
+									<version>${ant-version}</version>
+								</dependency>
+							</dependencies>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>flatten-maven-plugin</artifactId>
+						<version>${flatten-maven-version}</version>
+						<inherited>false</inherited>
+						<configuration>
+							<flattenMode>bom</flattenMode>
+							<pomElements>
+								<pluginManagement>keep</pluginManagement>
+							</pomElements>
+						</configuration>
+						<executions>
+							<execution>
+								<id>flatten</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>flatten</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>flatten.clean</id>
+								<phase>clean</phase>
+								<goals>
+									<goal>clean</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<!-- Profile for deploying to stage (SourceForge) -->
 			<!-- -->
@@ -432,7 +500,7 @@
 			<build>
 				<plugins>
 					<plugin>
-						<!-- Create SourceForge Shell -->
+						<!-- Load in the version numbers -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-antrun-plugin</artifactId>
 						<executions>

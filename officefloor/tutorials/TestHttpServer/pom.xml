@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.tutorial</groupId>
 		<artifactId>tutorials</artifactId>
-		<version>3.4.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>TestHttpServer</artifactId>
 	<name>Test HTTP Server Tutorial</name>

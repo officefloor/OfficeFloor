@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>net.officefloor</groupId>
 		<artifactId>officefloor</artifactId>
-		<version>3.4.0</version>
+		<version>${revision}</version>
 	</parent>
 	<groupId>net.officefloor.core</groupId>
 	<artifactId>core</artifactId>
