@@ -1738,7 +1738,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
-	 * Result of a {@link PipelineExecutor}.
+	 * Result of a pipeline execution.
 	 */
 	protected static class PipelineResult {
 
