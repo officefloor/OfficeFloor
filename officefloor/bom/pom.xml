@@ -35,8 +35,8 @@
 		<jaxb-version>2.3.0</jaxb-version>
 		<junit-version>4.12</junit-version>
 		<lombok-version>1.18.4</lombok-version>
-		<mx4j-version>3.0.1</mx4j-version>
-		<netty-version>4.1.31.Final</netty-version>
+		<netty-version>4.1.32.Final</netty-version>
+		<maven-site-version>3.7.1</maven-site-version>
 		<postgresql-version>42.2.5</postgresql-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<slf4j-version>1.7.25</slf4j-version>
@@ -235,14 +235,11 @@
 				<version>${junit-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>mx4j</groupId>
-				<artifactId>mx4j-tools</artifactId>
-				<version></version>
-			</dependency>
-			<dependency>
 				<groupId>io.netty</groupId>
-				<artifactId>netty-all</artifactId>
+				<artifactId>netty-bom</artifactId>
 				<version>${netty-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.rapidoid</groupId>
@@ -358,14 +355,11 @@
 				<version>${affinity-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
 				<version>${jackson-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.module</groupId>
-				<artifactId>jackson-module-afterburner</artifactId>
-				<version>${jackson-version}</version>
+				<scope>import</scope>
+				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
@@ -402,6 +396,11 @@
 					<artifactId>officefloor-maven-plugin</artifactId>
 					<version>${revision}</version>
 				</plugin>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${spring-version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -422,9 +421,9 @@
 						</plugin>
 						<!-- Additional plugins -->
 						<plugin>
-							<groupId>org.springframework.boot</groupId>
-							<artifactId>spring-boot-maven-plugin</artifactId>
-							<version>${spring-version}</version>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-site-plugin</artifactId>
+							<version>${maven-site-version}</version>
 						</plugin>
 						<plugin>
 							<groupId>org.apache.maven.plugins</groupId>

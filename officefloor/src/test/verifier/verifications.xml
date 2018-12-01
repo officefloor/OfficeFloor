@@ -1,10 +1,6 @@
 <verifications>
 	<files>
-		<!-- Ensure site identifying latest version and copy right -->
-		<file>
-			<location>src/site/resources/index.html</location>
-			<contains><![CDATA[id="version">v${project.version}<]]></contains>
-		</file>
+		<!-- Ensure site identifying latest copy right -->
 		<file>
 			<location>src/site/resources/index.html</location>
 			<contains><![CDATA[Copyright &#169; 2005-${current.year}. All Rights Reserved.]]></contains>
