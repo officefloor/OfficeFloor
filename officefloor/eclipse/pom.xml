@@ -60,7 +60,7 @@
 				<executions>
 					<execution>
 						<id>Provide linked dependencies for eclipse PDE projects</id>
-						<phase>prepare-package</phase>
+						<phase>initialize</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>

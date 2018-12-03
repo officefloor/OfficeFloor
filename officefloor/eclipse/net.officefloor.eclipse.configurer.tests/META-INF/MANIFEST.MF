@@ -6,19 +6,20 @@ Bundle-Version: 3.4.0
 Bundle-Vendor: OfficeFloor
 Require-Bundle: net.officefloor.core;bundle-version="3.4.0",
  net.officefloor.eclipse.configurer;bundle-version="3.4.0",
- net.officefloor.eclipse.osgi;bundle-version="3.4.0",
- org.eclipse.core.runtime,
- org.eclipse.swt,
- org.eclipse.jface,
- org.eclipse.e4.core.di,
- org.eclipse.e4.ui.workbench,
- org.eclipse.e4.ui.di,
+ net.officefloor.eclipse.osgi;bundle-version="3.4.0"
+Import-Package: javax.inject,
  org.eclipse.core.resources,
+ org.eclipse.core.runtime,
+ org.eclipse.e4.core.di,
+ org.eclipse.e4.ui.di,
+ org.eclipse.e4.ui.workbench,
  org.eclipse.jdt.core,
- org.junit,
- org.eclipse.gef.fx.swt;bundle-version="5.0.2"
+ org.eclipse.jface,
+ org.eclipse.swt,
+ org.eclipse.swt.layout,
+ org.eclipse.swt.widgets,
+ org.junit
 Bundle-RequiredExecutionEnvironment: JavaSE-10
 Eclipse-RegisterBuddy: net.officefloor.core
-Eclipse-BuddyPolicy: registered
-Import-Package: javax.inject
+Eclipse-BuddyPolicy: registered 
 Automatic-Module-Name: net.officefloor.eclipse.configurer.tests

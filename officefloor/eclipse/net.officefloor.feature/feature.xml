@@ -22,34 +22,38 @@
    </url>
 
    <requires>
-      <import plugin="org.eclipse.gef.mvc.fx.ui"/>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.eclipse.fx.ui.workbench3"/>
+      <import plugin="net.officefloor.core" version="3.4.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.eclipse.common" version="3.4.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.eclipse.osgi" version="3.4.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.eclipse.editor" version="3.4.0" match="greaterOrEqual"/>
+      <import plugin="com.google.inject"/>
       <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.gef.fx.swt"/>
+      <import plugin="org.eclipse.gef.mvc.fx"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jdt.ui"/>
-      <import plugin="org.eclipse.gef.mvc.fx"/>
-      <import plugin="org.eclipse.gef.fx.swt"/>
-      <import plugin="com.google.inject"/>
-      <import plugin="org.eclipse.equinox.common"/>
+      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="com.google.guava"/>
       <import plugin="org.eclipse.core.commands"/>
       <import plugin="org.eclipse.gef.common"/>
-      <import plugin="org.eclipse.gef.geometry"/>
-      <import plugin="org.eclipse.gef.geometry.convert.fx"/>
       <import plugin="org.eclipse.gef.fx"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="com.google.guava"/>
-      <import plugin="javax.inject"/>
-      <import plugin="org.eclipse.ui.forms"/>
+      <import plugin="org.eclipse.gef.geometry.convert.fx"/>
+      <import plugin="org.eclipse.gef.geometry"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.ui.workbench"/>
+      <import plugin="org.eclipse.osgi"/>
+      <import plugin="net.officefloor.eclipse.configurer" version="3.4.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.e4.ui.css.swt.theme"/>
+      <import plugin="org.eclipse.gef.mvc.fx.ui"/>
+      <import plugin="org.eclipse.ui.forms"/>
       <import plugin="org.slf4j.api"/>
-      <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.jdt.debug.ui"/>
-      <import plugin="org.eclipse.e4.core.services"/>
-      <import plugin="org.eclipse.swt"/>
-      <import plugin="org.eclipse.fx.ui.workbench3"/>
+      <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.eclipse.equinox.preferences"/>
+      <import plugin="org.eclipse.debug.core"/>
    </requires>
 
    <plugin
