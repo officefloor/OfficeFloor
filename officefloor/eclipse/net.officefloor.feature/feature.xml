@@ -22,7 +22,11 @@
    </url>
 
    <requires>
-      <import feature="org.eclipse.fx.runtime.min.feature" version="3.3.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.core" version="3.4.0" match="perfect"/>
+      <import plugin="net.officefloor.eclipse.common" version="3.4.0" match="perfect"/>
+      <import plugin="net.officefloor.eclipse.osgi" version="3.4.0" match="perfect"/>
+      <import plugin="net.officefloor.eclipse.editor" version="3.4.0" match="perfect"/>
+      <import plugin="net.officefloor.eclipse.configurer" version="3.4.0" match="perfect"/>
       <import plugin="com.google.inject"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.gef.fx.swt"/>
@@ -43,6 +47,7 @@
       <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.equinox.preferences"/>
+      <import plugin="org.eclipse.core.jobs"/>
       <import plugin="org.eclipse.e4.ui.css.swt.theme"/>
       <import plugin="org.eclipse.gef.mvc.fx.ui"/>
       <import plugin="org.eclipse.ui.forms"/>
@@ -51,11 +56,7 @@
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.jdt.launching"/>
-      <import plugin="net.officefloor.core" version="3.4.0" match="perfect"/>
-      <import plugin="net.officefloor.eclipse.common" version="3.4.0" match="perfect"/>
-      <import plugin="net.officefloor.eclipse.osgi" version="3.4.0" match="perfect"/>
-      <import plugin="net.officefloor.eclipse.editor" version="3.4.0" match="perfect"/>
-      <import plugin="net.officefloor.eclipse.configurer" version="3.4.0" match="perfect"/>
+      <import feature="org.eclipse.fx.runtime.min.feature"/>
    </requires>
 
    <plugin
