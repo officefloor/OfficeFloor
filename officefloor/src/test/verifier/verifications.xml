@@ -11,5 +11,12 @@
 			<location>src/changes/changes.xml</location>
 			<contains><![CDATA[version="${project.version}"]]></contains>
 		</file>
+
+		<!-- Ensure BOM latest -->
+		<file>
+			<location>bom/pom.xml</location>
+			<contains><![CDATA[<revision>${project.version}</revision>]]></contains>
+		</file>
+
 	</files>
 </verifications>
