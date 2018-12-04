@@ -22,33 +22,27 @@
    </url>
 
    <requires>
-      <import plugin="net.officefloor.core" version="3.4.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.woof" version="3.4.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.eclipse.editor" version="3.4.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.eclipse.osgi" version="3.4.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.eclipse.configurer" version="3.4.0" match="greaterOrEqual"/>
-      <import plugin="net.officefloor.eclipse.ide" version="3.4.0" match="greaterOrEqual"/>
+      <import plugin="com.google.guava"/>
       <import plugin="com.google.inject"/>
       <import plugin="javax.inject"/>
+      <import plugin="org.eclipse.core.commands"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.core.jobs"/>
+      <import plugin="org.eclipse.gef.common"/>
       <import plugin="org.eclipse.gef.fx"/>
+      <import plugin="org.eclipse.gef.geometry.convert.fx"/>
+      <import plugin="org.eclipse.gef.geometry"/>
       <import plugin="org.eclipse.gef.mvc.fx"/>
       <import plugin="org.eclipse.gef.mvc.fx.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import feature="net.officefloor.feature" version="0.0.0"/>
-      <import plugin="net.officefloor.eclipse.common" version="3.4.0" match="greaterOrEqual"/>
-      <import plugin="com.google.guava"/>
-      <import plugin="org.eclipse.core.commands"/>
-      <import plugin="org.eclipse.core.jobs"/>
-      <import plugin="org.eclipse.gef.common"/>
-      <import plugin="org.eclipse.gef.geometry.convert.fx"/>
-      <import plugin="org.eclipse.gef.geometry"/>
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.equinox.preferences"/>
+      <import feature="net.officefloor.feature" version="3.4.0" match="perfect"/>
+      <import plugin="net.officefloor.woof" version="3.4.0" match="perfect"/>
    </requires>
 
    <plugin
