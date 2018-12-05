@@ -612,6 +612,28 @@
 						</executions>
 					</plugin>
 					<plugin>
+						<!-- Ensure environment specified for GPG -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>Ensure GPG environment setup</id>
+								<inherited>false</inherited>
+								<phase>verify</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<property environment="env" />
+										<fail unless="env.GPG_TTY"
+											message="Must run (add to build user's shell setup): export GPG_TTY=$(tty)" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
 						<!-- Sign artifacts (must be after sources and javadoc to sign them) -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
