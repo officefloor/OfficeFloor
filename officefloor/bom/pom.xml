@@ -628,6 +628,7 @@
 										<property environment="env" />
 										<fail unless="env.GPG_TTY"
 											message="Must run (add to build user's shell setup): export GPG_TTY=$(tty)" />
+										<echo>Using GPG_TTY=${env.GPG_TTY}</echo>
 									</target>
 								</configuration>
 							</execution>
