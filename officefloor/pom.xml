@@ -37,6 +37,14 @@
 		</developerConnection>
 		<url>https://github.com/sagenschneider/OfficeFloor</url>
 	</scm>
+	<distributionManagement>
+		<site>
+			<id>repo.officefloor.sf.net</id>
+			<name>Site on SourceForge - http://www.officefloor.net</name>
+			<url>scp://sagenschneider@shell.sourceforge.net:/home/project-web/officefloor/htdocs
+			</url>
+		</site>
+	</distributionManagement>
 	<developers>
 		<developer>
 			<id>sagenschneider</id>
@@ -56,7 +64,6 @@
 		</contributor>
 	</contributors>
 	<modules>
-		<module>bom</module>
 		<module>core</module>
 		<module>server</module>
 		<module>web</module>
@@ -67,21 +74,25 @@
 		<module>tutorials</module>
 	</modules>
 	<properties>
+		<asm-version>7.0</asm-version>
+		<compiler-version>3.8.0</compiler-version>
 		<current.year>2018</current.year>
-		<projectVersion>${revision}</projectVersion>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven-version>3.6.0</maven-version>
+		<failsafe-version>2.22.1</failsafe-version>
+		<flatten-maven-version>1.0.1</flatten-maven-version>
+		<jetty-version>9.4.14.v20181114</jetty-version>
+		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven-plugin-version>3.6.0</maven-plugin-version>
-		<tycho-version>1.2.0</tycho-version>
 		<maven-project-info-reports-version>3.0.0
 		</maven-project-info-reports-version>
-		<maven-changes-version>2.12.1</maven-changes-version>
-		<failsafe-version>2.22.1</failsafe-version>
-		<compiler-version>3.8.0</compiler-version>
-		<asm-version>7.0</asm-version>
+		<maven-site-version>3.7.1</maven-site-version>
+		<maven-version>3.6.0</maven-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
-		<jetty-version>9.4.14.v20181114</jetty-version>
+		<projectVersion>${revision}</projectVersion>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spring-version>2.1.1.RELEASE</spring-version>
+		<tycho-version>1.2.0</tycho-version>
+		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 	</properties>
 	<repositories>
 		<repository>
@@ -289,8 +300,26 @@
 		</dependencies>
 	</dependencyManagement>
 	<build>
+		<extensions>
+			<extension>
+				<!-- Allow for scp distribution -->
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>${wagon-ssh-version}</version>
+			</extension>
+		</extensions>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>officefloor-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>woof-archetype</artifactId>
+					<version>${revision}</version>
+				</plugin>
 				<!-- ================================================ -->
 				<!-- Additional Plugins -->
 				<!-- ================================================ -->

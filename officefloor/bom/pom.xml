@@ -11,12 +11,14 @@
 	<artifactId>bom</artifactId>
 	<version>${revision}</version>
 	<packaging>pom</packaging>
+	<modules>
+		<module>../</module>
+	</modules>
 	<properties>
 		<revision>3.4.0</revision>
-		<affinity-version>3.1.11</affinity-version>
-		<ant-jsch-version>1.10.5</ant-jsch-version>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
+		<affinity-version>3.1.11</affinity-version>
 		<commons-codec-version>1.11</commons-codec-version>
 		<commons-text-version>1.6</commons-text-version>
 		<datanucleus-version>5.1.11</datanucleus-version>
@@ -41,7 +43,6 @@
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<slf4j-version>1.7.25</slf4j-version>
 		<spring-version>2.1.1.RELEASE</spring-version>
-		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -381,14 +382,6 @@
 		</dependencies>
 	</dependencyManagement>
 	<build>
-		<extensions>
-			<extension>
-				<!-- Allow for scp distribution -->
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ssh</artifactId>
-				<version>${wagon-ssh-version}</version>
-			</extension>
-		</extensions>
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -397,82 +390,66 @@
 					<version>${revision}</version>
 				</plugin>
 				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>woof-archetype</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${spring-version}</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>${maven-site-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${antrun-version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.ant</groupId>
+							<artifactId>ant</artifactId>
+							<version>${ant-version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
 			</plugins>
 		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>${flatten-maven-version}</version>
+				<inherited>false</inherited>
+				<configuration>
+					<flattenMode>bom</flattenMode>
+					<pomElements>
+						<pluginManagement>keep</pluginManagement>
+					</pomElements>
+				</configuration>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 	<profiles>
-		<profile>
-			<!-- Removed in flatten -->
-			<id>officefloor-default</id>
-			<activation>
-				<file>
-					<exists>${basedir}/pom.xml</exists>
-				</file>
-			</activation>
-			<build>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>net.officefloor.maven</groupId>
-							<artifactId>woof-archetype</artifactId>
-							<version>${revision}</version>
-						</plugin>
-						<!-- Additional plugins -->
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-site-plugin</artifactId>
-							<version>${maven-site-version}</version>
-						</plugin>
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-antrun-plugin</artifactId>
-							<version>${antrun-version}</version>
-							<dependencies>
-								<dependency>
-									<groupId>org.apache.ant</groupId>
-									<artifactId>ant</artifactId>
-									<version>${ant-version}</version>
-								</dependency>
-							</dependencies>
-						</plugin>
-					</plugins>
-				</pluginManagement>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>flatten-maven-plugin</artifactId>
-						<version>${flatten-maven-version}</version>
-						<inherited>false</inherited>
-						<configuration>
-							<flattenMode>bom</flattenMode>
-							<pomElements>
-								<pluginManagement>keep</pluginManagement>
-							</pomElements>
-						</configuration>
-						<executions>
-							<execution>
-								<id>flatten</id>
-								<phase>process-resources</phase>
-								<goals>
-									<goal>flatten</goal>
-								</goals>
-							</execution>
-							<execution>
-								<id>flatten.clean</id>
-								<phase>clean</phase>
-								<goals>
-									<goal>clean</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 		<profile>
 			<!-- Profile for deploying to stage (SourceForge) -->
 			<!-- -->
@@ -492,11 +469,6 @@
 					</name>
 					<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/maven/maven2</url>
 				</repository>
-				<site>
-					<id>repo.officefloor.sf.net</id>
-					<name>Site on SourceForge - http://www.officefloor.net</name>
-					<url>scp://sagenschneider@shell.sourceforge.net:/home/project-web/officefloor/htdocs</url>
-				</site>
 			</distributionManagement>
 			<build>
 				<plugins>
