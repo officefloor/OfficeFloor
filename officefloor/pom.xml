@@ -406,11 +406,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>3.0.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-scm-plugin</artifactId>
 					<version>1.11.1</version>
 				</plugin>
@@ -450,26 +445,6 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>wagon-maven-plugin</artifactId>
 					<version>2.0.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.0.1</version>
-					<configuration>
-						<!-- Ignore generated code that have no control over -->
-						<excludePackageNames>net.officefloor.web.template.parse
-						</excludePackageNames>
-						<!-- Include Google Analytics -->
-						<additionalOptions>
-							<additionalOption>--allow-script-in-comments</additionalOption>
-							<additionalOption>-html5</additionalOption>
-						</additionalOptions>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-gpg-plugin</artifactId>
-					<version>1.6</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
