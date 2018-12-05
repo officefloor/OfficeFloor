@@ -18,6 +18,7 @@
 		<revision>3.4.0</revision>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
+		<ant-jsch-version>1.10.5</ant-jsch-version>
 		<affinity-version>3.1.11</affinity-version>
 		<commons-codec-version>1.11</commons-codec-version>
 		<commons-text-version>1.6</commons-text-version>
