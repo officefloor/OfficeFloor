@@ -80,10 +80,10 @@
 		<failsafe-version>2.22.1</failsafe-version>
 		<flatten-maven-version>1.0.1</flatten-maven-version>
 		<jetty-version>9.4.14.v20181114</jetty-version>
+		<maven-version>3.6.0</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven-plugin-version>3.6.0</maven-plugin-version>
-		<maven-project-info-reports-version>3.0.0
-		</maven-project-info-reports-version>
+		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
@@ -223,6 +223,11 @@
 			</dependency>
 			<!-- Additional build dependencies -->
 			<!-- (runtime dependencies to be in BOM) -->
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-plugin-api</artifactId>
+				<version>${maven-version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-embedder</artifactId>
