@@ -44,6 +44,7 @@
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<slf4j-version>1.7.25</slf4j-version>
 		<spring-version>2.1.1.RELEASE</spring-version>
+		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -383,6 +384,14 @@
 		</dependencies>
 	</dependencyManagement>
 	<build>
+		<extensions>
+			<extension>
+				<!-- Allow for scp distribution -->
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh</artifactId>
+				<version>${wagon-ssh-version}</version>
+			</extension>
+		</extensions>
 		<pluginManagement>
 			<plugins>
 				<plugin>
