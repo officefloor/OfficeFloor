@@ -42,6 +42,7 @@
 		<lombok-version>1.18.4</lombok-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
+		<maven-version>3.6.0</maven-version>
 		<netty-version>4.1.32.Final</netty-version>
 		<postgresql-version>42.2.5</postgresql-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
@@ -383,6 +384,11 @@
 				<version>${spring-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-plugin-api</artifactId>
+				<version>${maven-version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

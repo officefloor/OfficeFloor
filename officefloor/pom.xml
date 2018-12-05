@@ -85,7 +85,6 @@
 		<maven-project-info-reports-version>3.0.0
 		</maven-project-info-reports-version>
 		<maven-site-version>3.7.1</maven-site-version>
-		<maven-version>3.6.0</maven-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
@@ -227,11 +226,6 @@
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-embedder</artifactId>
-				<version>${maven-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-plugin-api</artifactId>
 				<version>${maven-version}</version>
 			</dependency>
 			<dependency>
