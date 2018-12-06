@@ -412,51 +412,6 @@
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${spring-version}</version>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-site-plugin</artifactId>
-					<version>${maven-site-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>${antrun-version}</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.ant</groupId>
-							<artifactId>ant</artifactId>
-							<version>${ant-version}</version>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.ant</groupId>
-							<artifactId>ant-jsch</artifactId>
-							<version>${ant-jsch-version}</version>
-							<scope>runtime</scope>
-						</dependency>
-					</dependencies>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>${maven-source-version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>${javadoc-version}</version>
-					<configuration>
-						<!-- Include Google Analytics -->
-						<additionalOptions>
-							<additionalOption>--allow-script-in-comments</additionalOption>
-							<additionalOption>-html5</additionalOption>
-						</additionalOptions>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-gpg-plugin</artifactId>
-					<version>${gpg-version}</version>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -491,6 +446,67 @@
 		</plugins>
 	</build>
 	<profiles>
+		<profile>
+			<id>officefloor-default-build</id>
+			<activation>
+				<file>
+					<exists>${basedir}/pom.xml</exists>
+				</file>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-site-plugin</artifactId>
+							<version>${maven-site-version}</version>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-antrun-plugin</artifactId>
+							<version>${antrun-version}</version>
+							<dependencies>
+								<dependency>
+									<groupId>org.apache.ant</groupId>
+									<artifactId>ant</artifactId>
+									<version>${ant-version}</version>
+								</dependency>
+								<dependency>
+									<groupId>org.apache.ant</groupId>
+									<artifactId>ant-jsch</artifactId>
+									<version>${ant-jsch-version}</version>
+									<scope>runtime</scope>
+								</dependency>
+							</dependencies>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-source-plugin</artifactId>
+							<version>${maven-source-version}</version>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<version>${javadoc-version}</version>
+							<configuration>
+								<!-- Ignore generated code that have no control over -->
+								<excludePackageNames>net.officefloor.web.template.parse</excludePackageNames>
+								<!-- Include Google Analytics -->
+								<additionalOptions>
+									<additionalOption>--allow-script-in-comments</additionalOption>
+									<additionalOption>-html5</additionalOption>
+								</additionalOptions>
+							</configuration>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-gpg-plugin</artifactId>
+							<version>${gpg-version}</version>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
 		<profile>
 			<!-- Profile for deploying to stage (SourceForge) -->
 			<!-- -->
@@ -608,29 +624,6 @@
 								<goals>
 									<goal>jar</goal>
 								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<!-- Ensure environment specified for GPG -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>Ensure GPG environment setup</id>
-								<inherited>false</inherited>
-								<phase>verify</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<property environment="env" />
-										<fail unless="env.GPG_TTY"
-											message="Must run (add to build user's shell setup): export GPG_TTY=$(tty)" />
-										<echo>Using GPG_TTY=${env.GPG_TTY}</echo>
-									</target>
-								</configuration>
 							</execution>
 						</executions>
 					</plugin>
