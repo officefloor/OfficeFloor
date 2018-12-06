@@ -6,7 +6,7 @@
 
   <<Transaction HTTP Server Tutorial>>
 
-  This tutorial demonstrates providing transaction context to an OfficeFloor web application.  OfficeFloor refers to context as {{{/apidocs/net/officefloor/frame/spi/governance/Governance.html}Governance}}.
+  This tutorial demonstrates providing transaction context to an OfficeFloor web application.  OfficeFloor refers to context as {{{/apidocs/net/officefloor/frame/api/governance/Governance.html}Governance}}.
   
   The example used for this tutorial is adding posts via a REST service.
 
@@ -22,7 +22,7 @@ Configuration
 
 * Transaction (Governance) configuration
 
-  The transaction is managed via {{{/apidocs/net/officefloor/frame/spi/governance/GovernanceSource.html}GovernanceSource}}.  This is a generic means to provide context around logic with the application.
+  The transaction is managed via {{{/apidocs/net/officefloor/compile/spi/governance/source/GovernanceSource.html}GovernanceSource}}.  This is a generic means to provide context around logic with the application.
   
   In this particular case, the {{{/apidocs/net/officefloor/spring/data/SpringDataTransactionGovernanceSource.html}SpringDataTransactionGovernanceSource}} is used to provide transaction management over Spring repositories.
 

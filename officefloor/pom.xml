@@ -84,7 +84,6 @@
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven-plugin-version>3.6.0</maven-plugin-version>
 		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
-		<maven-site-version>3.7.1</maven-site-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
@@ -439,6 +438,39 @@
 							<version>${asm-version}</version>
 						</dependency>
 					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>${maven-site-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${antrun-version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.ant</groupId>
+							<artifactId>ant</artifactId>
+							<version>${ant-version}</version>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.ant</groupId>
+							<artifactId>ant-jsch</artifactId>
+							<version>${ant-jsch-version}</version>
+							<scope>runtime</scope>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${maven-source-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>${javadoc-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -895,6 +927,13 @@
 							<goal>aggregate</goal>
 						</goals>
 						<configuration>
+							<!-- Ignore generated code that have no control over -->
+							<excludePackageNames>net.officefloor.web.template.parse</excludePackageNames>
+							<!-- Include Google Analytics -->
+							<additionalOptions>
+								<additionalOption>--allow-script-in-comments</additionalOption>
+								<additionalOption>-html5</additionalOption>
+							</additionalOptions>
 							<header>
 							<![CDATA[
 			<!-- Google Analytics -->
