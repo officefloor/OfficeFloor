@@ -11,6 +11,42 @@
 	<artifactId>bom</artifactId>
 	<version>${revision}</version>
 	<packaging>pom</packaging>
+	<url>http://officefloor.net/</url>
+	<licenses>
+		<license>
+			<name>AGPL</name>
+			<url>http://www.gnu.org/licenses/agpl-3.0.en.html</url>
+			<distribution>repo</distribution>
+			<comments>Affero General Public License</comments>
+		</license>
+	</licenses>
+	<scm>
+		<connection>scm:git:https://github.com/sagenschneider/OfficeFloor.git</connection>
+		<developerConnection>scm:git:git@github.com:sagenschneider/OfficeFloor.git</developerConnection>
+		<url>https://github.com/sagenschneider/OfficeFloor</url>
+	</scm>
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/sagenschneider/OfficeFloor/issues</url>
+	</issueManagement>
+	<developers>
+		<developer>
+			<id>sagenschneider</id>
+			<name>Daniel Sagenschneider</name>
+			<email>daniel@officefloor.net</email>
+			<roles>
+				<role>Founder</role>
+				<role>Administrator</role>
+				<role>Developer</role>
+			</roles>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Matthew Brown</name>
+			<email>yellowduckphoto@users.sourceforge.net</email>
+		</contributor>
+	</contributors>
 	<modules>
 		<module>../</module>
 	</modules>
