@@ -629,6 +629,11 @@
 								<goals>
 									<goal>sign</goal>
 								</goals>
+								<configuration>
+									<args>
+										<arg>--pinentry-mode=loopback</arg>
+									</args>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
