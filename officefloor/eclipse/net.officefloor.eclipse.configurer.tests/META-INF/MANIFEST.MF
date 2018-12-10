@@ -19,7 +19,7 @@ Import-Package: javax.inject,
  org.eclipse.swt.layout,
  org.eclipse.swt.widgets,
  org.junit
-Bundle-RequiredExecutionEnvironment: JavaSE-10
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-RegisterBuddy: net.officefloor.core
 Eclipse-BuddyPolicy: registered 
 Automatic-Module-Name: net.officefloor.eclipse.configurer.tests
