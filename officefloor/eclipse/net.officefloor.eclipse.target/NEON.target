@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target includeMode="feature" name="NEON" sequenceNumber="17">
+<locations>
+	<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+		<repository location="http://download.eclipse.org/releases/neon"/>
+		<unit id="org.eclipse.equinox.sdk.feature.group" version="3.12.0.v20170209-1843"/>
+		<unit id="org.eclipse.fx.ide.feature.feature.group" version="2.4.0.201605112122"/>
+		<unit id="org.eclipse.gef4.common.sdk.feature.group" version="1.1.0.201609060946"/>
+		<unit id="org.eclipse.gef4.fx.sdk.feature.group" version="1.0.1.201609060946"/>
+		<unit id="org.eclipse.gef4.mvc.fx.ui.feature.group" version="1.0.1.201609060946"/>
+		<unit id="org.eclipse.gef4.mvc.sdk.feature.group" version="1.1.0.201609060946"/>
+		<unit id="org.eclipse.m2e.feature.feature.group" version="1.7.0.20160603-1933"/>
+		<unit id="org.eclipse.sdk.ide" version="4.6.3.M20170301-0400"/>
+	</location>
+</locations>
+</target>
