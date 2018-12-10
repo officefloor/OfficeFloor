@@ -51,7 +51,7 @@ This allows OfficeFloor to better align to how business processes actually work:
 
 In other words, people think/behave synchronously but organise asynchronously.  Hence, both thread models are in play in modelling business processes.  Furthermore, OfficeFloor makes development of asynchronous applications easier.  This is achieved by allowing the developer to avoid asynchronous coding by having synchronous functions co-ordinated asynchronously (just like workers above).
 
-Further to this, graphical configuration is used.  The configuration for the *officefloor* benchmark test is the following:
+Further to this, graphical configuration is used.  An example configuration is as follows:
 
 ![Graphical Configuration](officefloor/tutorials/TransactionHttpServer/src/site/resources/images/transaction-woof.png "OfficeFloor graphical configuration")
 
