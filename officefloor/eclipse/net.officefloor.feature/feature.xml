@@ -2,7 +2,7 @@
 <feature
       id="net.officefloor.feature"
       label="OfficeFloor Feature"
-      version="3.4.0"
+      version="3.5.0"
       provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
@@ -22,11 +22,11 @@
    </url>
 
    <requires>
-      <import plugin="net.officefloor.core" version="3.4.0" match="perfect"/>
-      <import plugin="net.officefloor.eclipse.common" version="3.4.0" match="perfect"/>
-      <import plugin="net.officefloor.eclipse.osgi" version="3.4.0" match="perfect"/>
-      <import plugin="net.officefloor.eclipse.editor" version="3.4.0" match="perfect"/>
-      <import plugin="net.officefloor.eclipse.configurer" version="3.4.0" match="perfect"/>
+      <import plugin="net.officefloor.core" version="3.5.0" match="perfect"/>
+      <import plugin="net.officefloor.eclipse.common" version="3.5.0" match="perfect"/>
+      <import plugin="net.officefloor.eclipse.osgi" version="3.5.0" match="perfect"/>
+      <import plugin="net.officefloor.eclipse.editor" version="3.5.0" match="perfect"/>
+      <import plugin="net.officefloor.eclipse.configurer" version="3.5.0" match="perfect"/>
       <import plugin="com.google.inject"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.gef.fx.swt"/>

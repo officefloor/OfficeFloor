@@ -50,8 +50,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>\${compiler-version}</version>
 				<configuration>
-					<source>${java-lowest-version}</source>
-					<target>${java-lowest-version}</target>
+					<source>\${java-lowest-version}</source>
+					<target>\${java-lowest-version}</target>
 				</configuration>
 			</plugin>
 			<plugin>

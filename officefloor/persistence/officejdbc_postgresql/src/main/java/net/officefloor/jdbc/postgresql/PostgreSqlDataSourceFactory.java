@@ -68,7 +68,7 @@ public interface PostgreSqlDataSourceFactory extends DataSourceFactory, Connecti
 	 * 
 	 * @param context {@link SpecificationContext}.
 	 */
-	public static void loadSpecification(SpecificationContext context) {
+	static void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_SERVER_NAME, "Server");
 		context.addProperty(PROPERTY_USER, "User");
 		context.addProperty(PROPERTY_PASSWORD, "Password");
@@ -81,8 +81,7 @@ public interface PostgreSqlDataSourceFactory extends DataSourceFactory, Connecti
 	 * @param context    {@link SourceContext}.
 	 * @throws Exception If fails to configure the {@link BaseDataSource}.
 	 */
-	private static <S extends BaseDataSource> S configureDataSource(S dataSource, SourceContext context)
-			throws Exception {
+	static <S extends BaseDataSource> S configureDataSource(S dataSource, SourceContext context) throws Exception {
 
 		// Load optional configuration
 		DefaultDataSourceFactory.loadProperties(dataSource, context);
