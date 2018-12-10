@@ -311,8 +311,18 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				}
 			}
 
+			// Determine if running Java 9 (or above)
+			ClassLoader platformClassLoader;
+			try {
+				// Use Platform ClassLoader (for modules of Java 9 and above)
+				Method getPlatformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader");
+				platformClassLoader = (ClassLoader) getPlatformClassLoader.invoke(null);
+			} catch (NoSuchMethodException ex) {
+				// Use Java 8 system class loader
+				platformClassLoader = ClassLoader.getSystemClassLoader();
+			}
+
 			// Ensure platform class loader not loading OfficeFloor
-			ClassLoader platformClassLoader = ClassLoader.getPlatformClassLoader();
 			boolean isOfficeFloorOnPlatformClassPath = true;
 			try {
 				platformClassLoader.loadClass(OfficeFloor.class.getName());
