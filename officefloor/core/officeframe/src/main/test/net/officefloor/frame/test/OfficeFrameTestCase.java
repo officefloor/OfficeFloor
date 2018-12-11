@@ -318,8 +318,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				Method getPlatformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader");
 				platformClassLoader = (ClassLoader) getPlatformClassLoader.invoke(null);
 			} catch (NoSuchMethodException ex) {
-				// Use Java 8 system class loader
-				platformClassLoader = ClassLoader.getSystemClassLoader();
+				// Use Java 8 boot class loader
+				platformClassLoader = new ClassLoader(null) {
+				};
 			}
 
 			// Ensure platform class loader not loading OfficeFloor
