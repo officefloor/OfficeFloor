@@ -63,12 +63,10 @@ public class GraphGeneratorTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the contents of generation correct.
 	 * 
-	 * @param javaFileDir
-	 *            Directory containing the generated java files.
-	 * @param javaFileName
-	 *            Name of the generated java file.
-	 * @param expectedContentFileName
-	 *            Name of the file containing the expected content.
+	 * @param javaFileDir             Directory containing the generated java files.
+	 * @param javaFileName            Name of the generated java file.
+	 * @param expectedContentFileName Name of the file containing the expected
+	 *                                content.
 	 */
 	private void assertContents(File javaFileDir, String javaFileName, String expectedContentFileName)
 			throws Exception {
@@ -78,6 +76,8 @@ public class GraphGeneratorTest extends OfficeFrameTestCase {
 
 		// Obtain the expected file contents
 		String expectedContents = this.getFileContents(this.findFile(this.getClass(), expectedContentFileName));
+		expectedContents = expectedContents.replace("${GeneratedClassName}",
+				GeneratedAnnotationJavaFacet.getGeneratedClassName());
 
 		// Ensure contents match
 		assertContents(new StringReader(expectedContents), new StringReader(javaFileContents));
