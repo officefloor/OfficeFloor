@@ -54,6 +54,7 @@
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven-plugin-version>3.6.0</maven-plugin-version>
 		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
+		<maven-surefire-version>2.22.1</maven-surefire-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
@@ -338,7 +339,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.22.1</version>
+					<version>${maven-surefire-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1041,6 +1042,26 @@
 		</plugins>
 	</reporting>
 	<profiles>
+		<profile>
+			<!-- Work around for jdk8 failing to find classes -->
+			<activation>
+				<jdk>1.8</jdk>
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-surefire-plugin</artifactId>
+							<version>${maven-surefire-version}</version>
+							<configuration>
+								<useSystemClassLoader>false</useSystemClassLoader>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
 		<profile>
 			<id>officefloor-code-coverage</id>
 			<activation>
