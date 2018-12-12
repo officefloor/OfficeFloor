@@ -114,5 +114,11 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>officemodelgen</artifactId>
 		</dependency>
+		<dependency>
+			<!-- Ensure compiling works with Agent -->
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 </project>
