@@ -18,7 +18,9 @@
 	</properties>
 	<modules>
 		<module>officefloor-maven-plugin</module>
+<!--  
 		<module>woof-archetype</module>
+-->
 	</modules>
 	<dependencies>
 		<dependency>
