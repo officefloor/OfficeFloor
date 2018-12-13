@@ -42,7 +42,7 @@ pipeline {
 			}
 	        steps {
 	        	dir('officefloor/bom') {
-					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor.skip.stress.tests=true verify'
+					sh 'mvn -Dofficefloor.skip.stress.tests=true verify'
 	        	}
 	        }
 	    }
