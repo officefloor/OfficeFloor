@@ -104,18 +104,19 @@ pipeline {
 				echo "Running site deploy"
 			}         
 	    }
-	    
-	    post {
-       		always {
-    	    	junit 'officefloor/**/target/surefire-reports/TEST-*.xml'
-    	    	junit 'officefloor/**/target/failsafe-reports/TEST-*.xml'
-    	    }
-    	    success {
-    	        mail to: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} successful", body: currentBuild.rawBuild.getLog(100)
-    	    }
-			failure {
-    	        mail to: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} failed", body: currentBuild.rawBuild.getLog(100)
-			}
+	}
+	
+    post {
+   		always {
+	    	junit 'officefloor/**/target/surefire-reports/TEST-*.xml'
+	    	junit 'officefloor/**/target/failsafe-reports/TEST-*.xml'
+	    }
+	    success {
+	        mail to: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} successful", body: currentBuild.rawBuild.getLog(100)
+	    }
+		failure {
+	        mail to: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} failed", body: currentBuild.rawBuild.getLog(100)
 		}
 	}
+
 }
