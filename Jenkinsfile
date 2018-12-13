@@ -3,6 +3,8 @@ pipeline {
 
     parameters {
         choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'STAGE', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
+        string(name: 'LATEST_JDK', defaultValue: 'jdk11', description: 'Tool name for the latest JDK to support')
+		string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
     }
     
 //    triggers {
@@ -15,33 +17,43 @@ pipeline {
 		timeout(time: 6, unit: 'HOURS')
     }
 
-//	tools {
-//	    maven 'apache-maven-3.6.0'
-//	}
+	tools {
+	    maven 'maven-3.6.0'
+	    jdk "${params.LATEST_JDK}"
+	}
 
 	
 	stages {
 	    stage('Test') {
 			when {
-				expression { params.BUILD_TYPE == 'TEST' }
+				allOf {
+					expression { params.BUILD_TYPE == 'TEST' }
+				}
 			}
-
-//	    	tools {
-//	    	   jdk 'jdk11' 
-//	    	}
 	    
 	        steps {
 	        	echo "Running test for ${params.BUILD_TYPE}"
+	        	sh 'java -version'
 	 			// sh 'mvn -Dmaven.test.failure.ignore=true clean install'	 			
 	        }
 	    }
+	    
+	    stage('Backwards compatible') {
+			tools {
+            	jdk "${params.OLDEST_JDK}"
+            }
+			steps {
+			    sh 'java -version'
+			}
+		}
 	    
 	    stage('Stage') {
 	        when {
 				expression { params.BUILD_TYPE == 'STAGE' }
 	        }
 	        steps {
-		        echo "Running stage"            
+		        echo "JAVA_HOME = ${env.JAVA_HOME}"
+		        sh 'java -version'            
 	        }
 	    }
 
