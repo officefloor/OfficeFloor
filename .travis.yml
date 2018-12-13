@@ -10,4 +10,4 @@ cache:
 env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
 before_install: cd officefloor/bom
 after_success: bash <(curl -s https://codecov.io/bash)
-after_install: cat officefloor/maven/woof-archetype/target/test-classes/projects/woof/project/WoofArchetypeResult/target/failsafe-reports/TEST-net.officefloor.test.RunApplicationIT.xml
+after_test: cat officefloor/maven/woof-archetype/target/test-classes/projects/woof/project/WoofArchetypeResult/target/failsafe-reports/TEST-net.officefloor.test.RunApplicationIT.xml
