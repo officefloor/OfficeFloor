@@ -32,8 +32,10 @@ pipeline {
 			}
 	    
 	        steps {
-	        	echo "Running test for ${params.BUILD_TYPE}"
+	        	echo "Running ${params.BUILD_TYPE}"
+		        echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	sh 'java -version'
+	        	sh 'mvn -version'
 	 			// sh 'mvn -Dmaven.test.failure.ignore=true clean install'	 			
 	        }
 	    }
@@ -43,7 +45,9 @@ pipeline {
             	jdk "${params.OLDEST_JDK}"
             }
 			steps {
-			    sh 'java -version'
+		        echo "JAVA_HOME = ${env.JAVA_HOME}"
+	        	sh 'java -version'
+	        	sh 'mvn -version'
 			}
 		}
 	    
@@ -53,7 +57,8 @@ pipeline {
 	        }
 	        steps {
 		        echo "JAVA_HOME = ${env.JAVA_HOME}"
-		        sh 'java -version'            
+	        	sh 'java -version'
+	        	sh 'mvn -version'
 	        }
 	    }
 
