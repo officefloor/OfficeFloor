@@ -7,9 +7,9 @@ pipeline {
 		string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
     }
     
-//    triggers {
-//        cron('0 1 * * *')
-//    }
+    triggers {
+        cron('0 1 * * *')
+    }
     
     options {
         buildDiscarder(logRotator(numToKeepStr: '20'))
@@ -24,36 +24,67 @@ pipeline {
 
 	
 	stages {
+		stage('Build') {
+		    when {
+		        expression { params.BUILD_TYPE == 'TEST' }
+		    }
+	        steps {
+	        	sh '.travis-install.sh'
+	        }
+		}
+	
 	    stage('Test') {
 			when {
 				allOf {
 					expression { params.BUILD_TYPE == 'TEST' }
+					not { branch 'master' }
 				}
 			}
-	    
 	        steps {
-	        	echo "Running ${params.BUILD_TYPE}"
-		        echo "JAVA_HOME = ${env.JAVA_HOME}"
-	        	sh 'java -version'
-	        	sh 'mvn -version'
-	 			// sh 'mvn -Dmaven.test.failure.ignore=true clean install'	 			
+	        	dir('officefloor/bom') {
+					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor.skip.stress.tests=true verify'
+	        	}
+	        }
+	    }
+	    
+	    stage('Test and Stress') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE == 'TEST' }
+					branch 'master'
+				}
+			}
+	        steps {
+	        	dir('officefloor/bom') {
+					sh 'mvn -Dmaven.test.failure.ignore=true verify'
+	        	}
 	        }
 	    }
 	    
 	    stage('Backwards compatible') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE == 'TEST' }
+					branch 'master'
+				}
+			}
 			tools {
             	jdk "${params.OLDEST_JDK}"
             }
 			steps {
-		        echo "JAVA_HOME = ${env.JAVA_HOME}"
-	        	sh 'java -version'
-	        	sh 'mvn -version'
+				dir('officefloor/eclipse') {
+				    sh 'mvn clean install -P OXYGEN.target'
+					sh 'mvn clean install -P NEON.target'
+				}
 			}
 		}
 	    
 	    stage('Stage') {
 	        when {
-				expression { params.BUILD_TYPE == 'STAGE' }
+	        	allOf {
+	        	    branch 'master'
+					expression { params.BUILD_TYPE == 'STAGE' }
+	        	}
 	        }
 	        steps {
 		        echo "JAVA_HOME = ${env.JAVA_HOME}"
@@ -61,7 +92,6 @@ pipeline {
 	        	sh 'mvn -version'
 	        }
 	    }
-
 	    
 	    stage('Deploy Site') {
 			when {
@@ -72,8 +102,20 @@ pipeline {
 			}
 			steps {
 				echo "Running site deploy"
-			}
-         
+			}         
 	    }
+	    
+	    post {
+       		always {
+    	    	junit 'officefloor/**/target/surefire-reports/TEST-*.xml'
+    	    	junit 'officefloor/**/target/failsafe-reports/TEST-*.xml'
+    	    }
+    	    success {
+    	        mail to: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} successful", body: currentBuild.rawBuild.getLog(100)
+    	    }
+			failure {
+    	        mail to: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} failed", body: currentBuild.rawBuild.getLog(100)
+			}
+		}
 	}
 }
