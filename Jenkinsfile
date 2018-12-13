@@ -23,9 +23,7 @@ pipeline {
 	stages {
 	    stage('Test') {
 			when {
-				allOf {
-				    equals expected: 'TEST', actual: "${param.BUILD_TYPE}" 
-				}
+				expression { params.BUILD_TYPE == 'TEST' }
 			}
 
 //	    	tools {
@@ -33,14 +31,14 @@ pipeline {
 //	    	}
 	    
 	        steps {
-	        	echo "Running test for ${param.BUILD_TYPE}"
+	        	echo "Running test for ${params.BUILD_TYPE}"
 	 			// sh 'mvn -Dmaven.test.failure.ignore=true clean install'	 			
 	        }
 	    }
 	    
 	    stage('Stage') {
 	        when {
-	            equals expected: 'STAGE', actual: "${param.BUILD_TYPE}"
+				expression { params.BUILD_TYPE == 'STAGE' }
 	        }
 	        steps {
 		        echo "Running stage"            
@@ -52,7 +50,7 @@ pipeline {
 			when {
 				allOf {
 				    branch 'master'
-				    equals expected: 'SITE', actual: "${param.BUILD_TYPE}" 
+					expression { params.BUILD_TYPE == 'SITE' }
 				}
 			}
 			steps {
