@@ -42,7 +42,9 @@ pipeline {
 	        when {
 	            equals expected: 'STAGE', actual: param.BUILD_TYPE
 	        }
-	        echo "Running stage"
+	        steps {
+		        echo "Running stage"            
+	        }
 	    }
 
 	    
@@ -52,7 +54,11 @@ pipeline {
 				    branch 'master'
 				    equals expected: 'SITE', actual: param.BUILD_TYPE 
 				}
-			}             
+			}
+			steps {
+				echo "Running site deploy"
+			}
+         
 	    }
 	}
 }
