@@ -115,7 +115,17 @@ pipeline {
 	    	junit 'officefloor/**/target/failsafe-reports/TEST-*.xml'
 	    }
 	    success {
-	        mail to: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} successful", body: currentBuild.rawBuild.getLog(100)
+	        mail to: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} successful", body: "
+	        
+$PROJECT_NAME - Build $BUILD_NUMBER - $BUILD_STATUS:
+
+Passed: ${TEST_COUNTS,var='pass'}
+Failed: ${TEST_COUNTS,var='fail'}
+Skipped: ${TEST_COUNTS,var='skip'}
+Total: ${TEST_COUNTS,var='total'}
+
+${FAILED_TESTS}
+"
 	    }
 		failure {
 	        mail to: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} failed", body: currentBuild.rawBuild.getLog(100)
