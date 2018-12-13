@@ -24,7 +24,7 @@ pipeline {
 	    stage('Test') {
 			when {
 				allOf {
-				    equals expected: 'TEST', actual: param.BUILD_TYPE 
+				    equals expected: 'TEST', actual: ${param.BUILD_TYPE} 
 				}
 			}
 
@@ -40,7 +40,7 @@ pipeline {
 	    
 	    stage('Stage') {
 	        when {
-	            equals expected: 'STAGE', actual: param.BUILD_TYPE
+	            equals expected: 'STAGE', actual: ${param.BUILD_TYPE}
 	        }
 	        steps {
 		        echo "Running stage"            
@@ -52,7 +52,7 @@ pipeline {
 			when {
 				allOf {
 				    branch 'master'
-				    equals expected: 'SITE', actual: param.BUILD_TYPE 
+				    equals expected: 'SITE', actual: ${param.BUILD_TYPE} 
 				}
 			}
 			steps {
