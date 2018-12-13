@@ -72,6 +72,9 @@ pipeline {
             	jdk "${params.OLDEST_JDK}"
             }
 			steps {
+	        	dir('officefloor/bom') {
+					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor.skip.stress.tests=true clean install'
+	        	}
 				dir('officefloor/eclipse') {
 				    sh 'mvn clean install -P OXYGEN.target'
 					sh 'mvn clean install -P NEON.target'
