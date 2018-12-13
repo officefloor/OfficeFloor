@@ -9,7 +9,6 @@ cache:
   directories: $HOME/.m2
 env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
 before_install: cd officefloor/bom
-install: true
-script: mvn install -B
+install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -Darchetype.test.skip=true -B -V
 after_success: bash <(curl -s https://codecov.io/bash)
 after_failure: cat officefloor/maven/woof-archetype/target/test-classes/projects/woof/project/WoofArchetypeResult/target/failsafe-reports/TEST-net.officefloor.test.RunApplicationIT.xml
