@@ -29,7 +29,7 @@ pipeline {
 		        expression { params.BUILD_TYPE == 'TEST' }
 		    }
 	        steps {
-	        	sh '.travis-install.sh'
+	        	sh './.travis-install.sh'
 	        }
 		}
 	
