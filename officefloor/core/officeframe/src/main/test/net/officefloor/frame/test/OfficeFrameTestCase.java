@@ -270,6 +270,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	public static final String CLASS_LOADER_EXTRA_CLASS_NAME = "extra.MockExtra";
 
 	/**
+	 * Indicates if mock is created.
+	 */
+	private static boolean isMockCreated = false;
+
+	/**
 	 * <p>
 	 * Creates a new {@link ClassLoader} from current process's java class path.
 	 * <p>
@@ -287,6 +292,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			File tempDir = new File(System.getProperty("java.io.tmpdir"));
 			File workingDir = new File(tempDir, "officefloor-extra-classpath");
 			if (!workingDir.isDirectory()) {
+				workingDir.mkdir();
+			} else if (!isMockCreated) {
+				// Must clear mock (may be newer incompatible JVM that created it)
+				deleteDirectory(workingDir);
 				workingDir.mkdir();
 			}
 			File extraPackageDir = new File(workingDir, "extra");
@@ -345,6 +354,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			}
 			urls[classPathEntries.length] = workingDir.toURI().toURL();
 			ClassLoader classLoader = new URLClassLoader(urls, platformClassLoader);
+
+			// Flag mock now created for testing
+			isMockCreated = true;
 
 			// Return the class loader
 			return classLoader;
@@ -1491,7 +1503,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * 
 	 * @param directory Directory to be cleared.
 	 */
-	public void clearDirectory(File directory) {
+	public static void clearDirectory(File directory) {
 
 		// Ensure have a directory
 		if (directory == null) {
@@ -1512,7 +1524,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * 
 	 * @param directory Directory to be deleted.
 	 */
-	public void deleteDirectory(File directory) {
+	public static void deleteDirectory(File directory) {
 
 		// Ensure have a directory
 		if (directory == null) {
