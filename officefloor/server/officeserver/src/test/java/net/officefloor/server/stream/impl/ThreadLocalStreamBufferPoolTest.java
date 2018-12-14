@@ -24,6 +24,7 @@ import java.nio.channels.FileChannel;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.stream.TemporaryFiles;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
@@ -42,8 +43,8 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 	private static final int BUFFER_SIZE = 4;
 
 	/**
-	 * Pool size of {@link ThreadLocal} pool before returning
-	 * {@link StreamBuffer} to core pool.
+	 * Pool size of {@link ThreadLocal} pool before returning {@link StreamBuffer}
+	 * to core pool.
 	 */
 	private static final int THREAD_LOCAL_POOL_SIZE = 1;
 
@@ -166,8 +167,8 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can get and release and obtain a large number of
-	 * {@link StreamBuffer} instances to ensure pooling.
+	 * Ensure can get and release and obtain a large number of {@link StreamBuffer}
+	 * instances to ensure pooling.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testGetReleaseLargeNumberOfBuffers() {
@@ -289,7 +290,7 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 		assertFalse("Buffer should be full", buffer.write((byte) BUFFER_SIZE));
 
 		// Ensure data in buffer
-		content.flip();
+		BufferJvmFix.flip(content);
 		for (int i = 0; i < BUFFER_SIZE; i++) {
 			assertEquals("Incorrect byte " + i, i + 1, content.get());
 		}
@@ -316,7 +317,7 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 		assertEquals("Buffer should be full", 0, buffer.write(data));
 
 		// Ensure data in buffer
-		content.flip();
+		BufferJvmFix.flip(content);
 		for (int i = 0; i < BUFFER_SIZE; i++) {
 			assertEquals("Incorrect byte " + i, i + 1, content.get());
 		}
@@ -343,7 +344,7 @@ public class ThreadLocalStreamBufferPoolTest extends OfficeFrameTestCase {
 		assertEquals("Shoud fill remaining bytes", BUFFER_SIZE - 1, buffer.write(data));
 
 		// Ensure content written
-		content.flip();
+		BufferJvmFix.flip(content);
 		for (int i = 0; i < BUFFER_SIZE; i++) {
 			assertEquals("Incrrect byte " + i, i + 1, content.get());
 		}

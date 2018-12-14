@@ -1,9 +1,16 @@
+dist: xenial
 language: java
-jdk: openjdk11
+jdk:
+  - openjdk8
+  - openjdk11
 sudo: required
 services: docker
 cache:
   directories: $HOME/.m2
 env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
-before_install: cd officefloor/bom
+install: ./.travis-install.sh
+script: ./.travis-script.sh
 after_success: bash <(curl -s https://codecov.io/bash)
+#branches:
+#  only:
+#  - master

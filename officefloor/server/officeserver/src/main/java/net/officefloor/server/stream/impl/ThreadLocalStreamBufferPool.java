@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ByteBufferFactory;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -86,12 +87,9 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	 * (<code>threadLocalPoolSize</code> * <code>active threads</code>) +
 	 * <code>corePoolSize</code>).
 	 * 
-	 * @param byteBufferFactory
-	 *            {@link ByteBufferFactory}.
-	 * @param maxThreadLocalPoolSize
-	 *            Maximum {@link ThreadLocal} pool size.
-	 * @param maxCorePoolSize
-	 *            Maximum core pool size.
+	 * @param byteBufferFactory      {@link ByteBufferFactory}.
+	 * @param maxThreadLocalPoolSize Maximum {@link ThreadLocal} pool size.
+	 * @param maxCorePoolSize        Maximum core pool size.
 	 */
 	public ThreadLocalStreamBufferPool(ByteBufferFactory byteBufferFactory, int maxThreadLocalPoolSize,
 			int maxCorePoolSize) {
@@ -112,8 +110,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	/**
 	 * Releases the {@link StreamBuffer} to the core pool.
 	 * 
-	 * @param buffer
-	 *            {@link StreamBuffer}.
+	 * @param buffer {@link StreamBuffer}.
 	 */
 	private void unsafeReleaseToCorePool(StreamBuffer<ByteBuffer> buffer) {
 
@@ -134,8 +131,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	/**
 	 * {@link Thread} safe release to core pool.
 	 * 
-	 * @param buffer
-	 *            {@link StreamBuffer}.
+	 * @param buffer {@link StreamBuffer}.
 	 */
 	private synchronized void safeReleaseToCorePool(StreamBuffer<ByteBuffer> buffer) {
 		this.unsafeReleaseToCorePool(buffer);
@@ -207,7 +203,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 
 		} else {
 			// Pooled buffer, so reset for use
-			pooledBuffer.pooledBuffer.clear();
+			BufferJvmFix.clear(pooledBuffer.pooledBuffer);
 			pooledBuffer.next = null;
 		}
 
@@ -255,8 +251,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 		/**
 		 * Instantiate.
 		 * 
-		 * @param byteBuffer
-		 *            {@link ByteBuffer}.
+		 * @param byteBuffer {@link ByteBuffer}.
 		 */
 		private PooledStreamBuffer(ByteBuffer byteBuffer) {
 			super(byteBuffer, null, null);
@@ -321,8 +316,7 @@ public class ThreadLocalStreamBufferPool extends AbstractStreamBufferPool<ByteBu
 	private static class ThreadLocalPool {
 
 		/**
-		 * Head {@link StreamBuffer} to linked list of {@link StreamBuffer}
-		 * instances.
+		 * Head {@link StreamBuffer} to linked list of {@link StreamBuffer} instances.
 		 */
 		private StreamBuffer<ByteBuffer> threadHead = null;
 

@@ -6,7 +6,7 @@ package graph.test;
 import java.util.List;
 import java.util.LinkedList;
 
-import javax.annotation.processing.Generated;
+import ${GeneratedClassName};
 
 import net.officefloor.model.AbstractModel;
 import net.officefloor.model.ConnectionModel;

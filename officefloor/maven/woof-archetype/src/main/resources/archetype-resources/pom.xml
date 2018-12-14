@@ -11,6 +11,8 @@
 		<officefloor-version>${version}</officefloor-version>
 		<compiler-version>3.8.0</compiler-version>
 		<failsafe-version>2.22.1</failsafe-version>
+		<surefire-version>2.22.1</surefire-version>
+		<java-lowest-version>8</java-lowest-version>
 		<junit-version>4.12</junit-version>
 	</properties>
 	<dependencyManagement>
@@ -49,8 +51,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>\${compiler-version}</version>
 				<configuration>
-					<source>10</source>
-					<target>10</target>
+					<source>\${java-lowest-version}</source>
+					<target>\${java-lowest-version}</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -86,6 +88,15 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>\${surefire-version}</version>
+				<configuration>
+					<!-- Fix for SUREFIRE-1588 -->
+					<useSystemClassLoader>false</useSystemClassLoader>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

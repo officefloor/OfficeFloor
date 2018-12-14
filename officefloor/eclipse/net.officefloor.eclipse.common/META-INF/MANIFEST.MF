@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Common
 Bundle-SymbolicName: net.officefloor.eclipse.common
-Bundle-Version: 3.4.0
+Bundle-Version: 3.5.0
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-10
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: net.officefloor.eclipse.common.javafx.resize,
  net.officefloor.eclipse.common.javafx.structure
 Automatic-Module-Name: net.officefloor.eclipse.common

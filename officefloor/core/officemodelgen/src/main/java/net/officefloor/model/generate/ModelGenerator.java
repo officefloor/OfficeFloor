@@ -55,10 +55,8 @@ public class ModelGenerator {
 	/**
 	 * Initiate.
 	 * 
-	 * @param metaData
-	 *            Meta-data of the Model.
-	 * @param graphNode
-	 *            {@link GraphNodeMetaData} for creating the Model.
+	 * @param metaData  Meta-data of the Model.
+	 * @param graphNode {@link GraphNodeMetaData} for creating the Model.
 	 */
 	public ModelGenerator(ModelMetaData metaData, GraphNodeMetaData graphNode) {
 		this.metaData = metaData;
@@ -68,11 +66,9 @@ public class ModelGenerator {
 	/**
 	 * Generates the Model.
 	 * 
-	 * @param context
-	 *            Context to create the Model.
+	 * @param context Context to create the Model.
 	 * @return {@link ModelFile} for the Model.
-	 * @throws Exception
-	 *             If fail.
+	 * @throws Exception If fail.
 	 */
 	public synchronized ModelFile generateModel(ModelContext context) throws Exception {
 
@@ -128,7 +124,7 @@ public class ModelGenerator {
 			writeLine("import " + importClass + ";");
 		}
 		// Write necessary extension
-		writeLine("import javax.annotation.processing.Generated;");
+		writeLine("import " + GeneratedAnnotationJavaFacet.getGeneratedClassName() + ";");
 		writeLine();
 		writeLine("import net.officefloor.model.AbstractModel;");
 		writeLine("import net.officefloor.model.ConnectionModel;");
@@ -232,8 +228,7 @@ public class ModelGenerator {
 	/**
 	 * Convenience constructor for a new non-linked instance.
 	 * 
-	 * @param isIncludeCoordinates
-	 *            Indicates if to include X/Y co-ordinates.
+	 * @param isIncludeCoordinates Indicates if to include X/Y co-ordinates.
 	 * @return <code>true</code> if constructor written.
 	 */
 	@SuppressWarnings("unchecked")
@@ -362,8 +357,7 @@ public class ModelGenerator {
 	/**
 	 * Convenience constructor.
 	 * 
-	 * @param isIncludeCoordinates
-	 *            Indicates if to include X/Y co-ordinates.
+	 * @param isIncludeCoordinates Indicates if to include X/Y co-ordinates.
 	 */
 	@SuppressWarnings("unchecked")
 	private void fullConstructor(boolean isIncludeCoordinates) throws Exception {
@@ -586,8 +580,7 @@ public class ModelGenerator {
 	/**
 	 * Remove connection method.
 	 * 
-	 * @throws Exception
-	 *             If fails to create the remove connection {@link Method}.
+	 * @throws Exception If fails to create the remove connection {@link Method}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void removeConnectionMethod() throws Exception {
@@ -688,10 +681,8 @@ public class ModelGenerator {
 		/**
 		 * Override to write the property.
 		 * 
-		 * @param property
-		 *            Property.
-		 * @throws Exception
-		 *             If fails.
+		 * @param property Property.
+		 * @throws Exception If fails.
 		 */
 		protected void writeProperty(AbstractPropertyMetaData property) throws Exception {
 			if (property instanceof FieldMetaData) {
@@ -706,10 +697,8 @@ public class ModelGenerator {
 		/**
 		 * Override to write the field.
 		 * 
-		 * @param field
-		 *            Field.
-		 * @throws Exception
-		 *             If fails.
+		 * @param field Field.
+		 * @throws Exception If fails.
 		 */
 		protected void writeField(FieldMetaData field) throws Exception {
 		}
@@ -717,10 +706,8 @@ public class ModelGenerator {
 		/**
 		 * Override to write the list.
 		 * 
-		 * @param list
-		 *            List.
-		 * @throws Exception
-		 *             If fails.
+		 * @param list List.
+		 * @throws Exception If fails.
 		 */
 		protected void writeList(ListMetaData list) throws Exception {
 		}
@@ -736,8 +723,7 @@ public class ModelGenerator {
 	/**
 	 * Writes the text followed by a end of line.
 	 * 
-	 * @param text
-	 *            Text.
+	 * @param text Text.
 	 */
 	private void writeLine(String text) {
 		this.writer.println(text);
@@ -746,8 +732,7 @@ public class ModelGenerator {
 	/**
 	 * Writes the text only.
 	 * 
-	 * @param text
-	 *            Text.
+	 * @param text Text.
 	 */
 	private void write(String text) {
 		this.writer.print(text);

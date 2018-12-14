@@ -50,8 +50,7 @@ public class StreamBufferScanner {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param value
-		 *            Target byte for scan.
+		 * @param value Target byte for scan.
 		 */
 		public ScanTarget(byte value) {
 			this.value = value;
@@ -125,8 +124,7 @@ public class StreamBufferScanner {
 	/**
 	 * Appends {@link StreamBuffer} for scanning.
 	 * 
-	 * @param buffer
-	 *            {@link StreamBuffer}.
+	 * @param buffer {@link StreamBuffer}.
 	 */
 	public void appendStreamBuffer(StreamBuffer<ByteBuffer> buffer) {
 
@@ -165,15 +163,12 @@ public class StreamBufferScanner {
 	/**
 	 * Builds a long (8 bytes) from the {@link StreamBuffer} at current position.
 	 *
-	 * @param <T>
-	 *            Illegal value {@link Exception}
-	 * @param illegalValueExceptionFactory
-	 *            {@link Supplier} to create {@link Throwable} for illegal long
-	 *            value.
+	 * @param                              <T> Illegal value {@link Exception}
+	 * @param illegalValueExceptionFactory {@link Supplier} to create
+	 *                                     {@link Throwable} for illegal long value.
 	 * @return Long value, otherwise <code>-1</code> if not enough bytes in
 	 *         {@link StreamBuffer} to build a long.
-	 * @throws T
-	 *             If invalid value.
+	 * @throws T If invalid value.
 	 */
 	public <T extends Throwable> long buildLong(Supplier<T> illegalValueExceptionFactory) throws T {
 
@@ -268,15 +263,13 @@ public class StreamBufferScanner {
 	/**
 	 * Builds a short (2 bytes) from the {@link StreamBuffer} at current position.
 	 *
-	 * @param <T>
-	 *            Illegal value {@link Exception}
-	 * @param illegalValueExceptionFactory
-	 *            {@link Supplier} to create {@link Throwable} for illegal short
-	 *            value.
+	 * @param                              <T> Illegal value {@link Exception}
+	 * @param illegalValueExceptionFactory {@link Supplier} to create
+	 *                                     {@link Throwable} for illegal short
+	 *                                     value.
 	 * @return Short value, otherwise <code>-1</code> if not enough bytes in
 	 *         {@link StreamBuffer} to build a short.
-	 * @throws T
-	 *             If invalid value.
+	 * @throws T If invalid value.
 	 */
 	public <T extends Throwable> short buildShort(Supplier<T> illegalValueExceptionFactory) throws T {
 
@@ -339,15 +332,13 @@ public class StreamBufferScanner {
 	/**
 	 * Builds a byte from the {@link StreamBuffer} at current position.
 	 *
-	 * @param <T>
-	 *            Illegal value {@link Exception}
-	 * @param illegalValueExceptionFactory
-	 *            {@link Supplier} to create {@link Throwable} for illegal short
-	 *            value.
+	 * @param                              <T> Illegal value {@link Exception}
+	 * @param illegalValueExceptionFactory {@link Supplier} to create
+	 *                                     {@link Throwable} for illegal short
+	 *                                     value.
 	 * @return Byte value, otherwise <code>-1</code> if not enough bytes in
 	 *         {@link StreamBuffer} to build a byte.
-	 * @throws T
-	 *             If invalid value.
+	 * @throws T If invalid value.
 	 */
 	public <T extends Throwable> byte buildByte(Supplier<T> illegalValueExceptionFactory) throws T {
 
@@ -399,8 +390,7 @@ public class StreamBufferScanner {
 	 * Peeks in the current {@link StreamBuffer} to attempt to find the
 	 * {@link ScanTarget}.
 	 * 
-	 * @param target
-	 *            {@link ScanTarget}.
+	 * @param target {@link ScanTarget}.
 	 * @return Position of the {@link ScanTarget} within the current
 	 *         {@link StreamBuffer} (starting at current position). Otherwise,
 	 *         <code>-1</code> to indicate did not find {@link ScanTarget} in
@@ -454,8 +444,7 @@ public class StreamBufferScanner {
 	/**
 	 * Scans a specific number of bytes.
 	 * 
-	 * @param numberOfBytes
-	 *            Number of bytes to scan.
+	 * @param numberOfBytes Number of bytes to scan.
 	 * @return {@link StreamBufferByteSequence} to the scanned bytes.
 	 */
 	public StreamBufferByteSequence scanBytes(long numberOfBytes) {
@@ -493,19 +482,15 @@ public class StreamBufferScanner {
 	 * HTTP are typically delimiters (eg. space, CR, etc) that are not included in
 	 * the bytes of interest.
 	 * 
-	 * @param <T>
-	 *            Too long {@link Exception} type.
-	 * @param target
-	 *            {@link ScanTarget}.
-	 * @param maxBytesLength
-	 *            Max bytes.
-	 * @param tooLongExceptionFactory
-	 *            {@link Supplier} to provide too long {@link Exception}.
+	 * @param                         <T> Too long {@link Exception} type.
+	 * @param target                  {@link ScanTarget}.
+	 * @param maxBytesLength          Max bytes.
+	 * @param tooLongExceptionFactory {@link Supplier} to provide too long
+	 *                                {@link Exception}.
 	 * @return {@link StreamBufferByteSequence} if found the byte. Otherwise,
 	 *         <code>null</code> indicating further {@link StreamBuffer} instances
 	 *         may contain the byte.
-	 * @throws T
-	 *             If too long {@link Exception}.
+	 * @throws T If too long {@link Exception}.
 	 */
 	public <T extends Throwable> StreamBufferByteSequence scanToTarget(ScanTarget target, int maxBytesLength,
 			Supplier<T> tooLongExceptionFactory) throws T {
@@ -580,8 +565,7 @@ public class StreamBufferScanner {
 	 * Skips forward the particular number of bytes in the current
 	 * {@link StreamBuffer}.
 	 * 
-	 * @param numberOfBytes
-	 *            Number of bytes to skip.
+	 * @param numberOfBytes Number of bytes to skip.
 	 */
 	public void skipBytes(int numberOfBytes) {
 
@@ -655,9 +639,8 @@ public class StreamBufferScanner {
 	/**
 	 * Removes past bytes from the long buffer.
 	 * 
-	 * @param numberOfBytes
-	 *            Number of bytes to remove. Value is absolute and does not take
-	 *            into account number of bytes in the buffer.
+	 * @param numberOfBytes Number of bytes to remove. Value is absolute and does
+	 *                      not take into account number of bytes in the buffer.
 	 */
 	private void removeBufferLongBytes(int numberOfBytes) {
 
@@ -779,8 +762,8 @@ public class StreamBufferScanner {
 	 * <p>
 	 * This will also reset to after the number of bytes.
 	 * 
-	 * @param numberOfBytes
-	 *            Number of bytes for the {@link StreamBufferByteSequence}.
+	 * @param numberOfBytes Number of bytes for the
+	 *                      {@link StreamBufferByteSequence}.
 	 * @return {@link StreamBufferByteSequence} with the specified number of bytes.
 	 */
 	private StreamBufferByteSequence createByteSequence(int numberOfBytes) {
@@ -877,10 +860,8 @@ public class StreamBufferScanner {
 	 * values (ASCII characters) searched for in HTTP parsing are all positive
 	 * (lower 7 bits of the byte).
 	 * 
-	 * @param bytes
-	 *            Long of 8 bytes to check for the value.
-	 * @param target
-	 *            {@link ScanTarget} for the byte to find the index.
+	 * @param bytes  Long of 8 bytes to check for the value.
+	 * @param target {@link ScanTarget} for the byte to find the index.
 	 * @return Index within the long of the first byte value. Otherwise,
 	 *         <code>-1</code> if does not find the byte.
 	 */

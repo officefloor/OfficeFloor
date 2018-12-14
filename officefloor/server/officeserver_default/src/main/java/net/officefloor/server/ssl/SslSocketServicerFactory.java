@@ -44,6 +44,7 @@ import net.officefloor.server.ResponseHeaderWriter;
 import net.officefloor.server.ResponseWriter;
 import net.officefloor.server.SocketServicer;
 import net.officefloor.server.SocketServicerFactory;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -230,7 +231,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 			// Include the read data
 			ByteBuffer buffer = readBuffer.pooledBuffer.duplicate();
-			buffer.flip();
+			BufferJvmFix.flip(buffer);
 			if (!isNewBuffer) {
 				// Same buffer, so add just the new data
 				buffer.position(this.currentSocketToUnwrapLimit);
@@ -330,7 +331,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							StreamBuffer<ByteBuffer> buffer = responseHead;
 							while (buffer != null) {
 								if (buffer.pooledBuffer != null) {
-									buffer.pooledBuffer.flip();
+									BufferJvmFix.flip(buffer.pooledBuffer);
 								}
 								buffer = buffer.next;
 							}
@@ -453,7 +454,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 							for (ByteBuffer buffer : this.socketToUnwrapBuffers) {
 								readBuffer.put(buffer);
 							}
-							readBuffer.flip();
+							BufferJvmFix.flip(readBuffer);
 							this.socketToUnwrapBuffers.clear();
 						}
 
@@ -603,7 +604,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 								for (ByteBuffer buffer : this.socketToUnwrapBuffers) {
 									appToWrapBuffer.put(buffer);
 								}
-								appToWrapBuffer.flip();
+								BufferJvmFix.flip(appToWrapBuffer);
 								this.socketToUnwrapBuffers.clear();
 							}
 
@@ -642,7 +643,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 
 								// Read bytes from file
 								int bytesRead = fileBuffer.file.read(appToWrapBuffer, position);
-								appToWrapBuffer.flip();
+								BufferJvmFix.flip(appToWrapBuffer);
 								if (bytesRead > count) {
 									// Truncate off additional read data
 									appToWrapBuffer.limit((int) count);
@@ -681,7 +682,7 @@ public class SslSocketServicerFactory<R> implements SocketServicerFactory<R>, Re
 										wrapToResponseBuffer.unpooledByteBuffer);
 
 								// Prepare for writing
-								wrapToResponseBuffer.unpooledByteBuffer.flip();
+								BufferJvmFix.flip(wrapToResponseBuffer.unpooledByteBuffer);
 
 							default:
 								// Carry on to process
