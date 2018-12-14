@@ -7,5 +7,6 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="lib" path="javafx-swt-11.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
