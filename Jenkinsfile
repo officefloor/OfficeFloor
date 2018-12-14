@@ -36,7 +36,7 @@ pipeline {
             }
 			steps {
 	        	dir('officefloor/bom') {
-					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor.skip.stress.tests=true clean install'
+					sh 'mvn -Dofficefloor.skip.stress.tests=true install'
 	        	}
 				dir('officefloor/eclipse') {
 				    sh 'mvn clean install -P OXYGEN.target'
@@ -83,30 +83,83 @@ pipeline {
 	        	}
 	        }
 	    }
-	    	    
+	    
+	    stage('Check master') {
+	        when {
+	        	allOf {
+					not { expression { params.BUILD_TYPE == 'TEST' } }
+	        	    not { branch 'master' }
+	        	}
+	        }
+            steps {
+            	error "Attempting to ${params.BUILD_TYPE} when not on master branch"
+            }
+         }
+
 	    stage('Stage') {
 	        when {
 	        	allOf {
-	        	    branch 'master'
 					expression { params.BUILD_TYPE == 'STAGE' }
+	        	    branch 'master'
 	        	}
 	        }
+			tools {
+				// Allow release to be backwards compatible to oldest JVM
+            	jdk "${params.OLDEST_JDK}"
+            }
 	        steps {
-		        echo "JAVA_HOME = ${env.JAVA_HOME}"
-	        	sh 'java -version'
-	        	sh 'mvn -version'
+	        	dir('officefloor/bom') {
+			    	sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean deploy'
+			    }
 	        }
 	    }
 	    
+	    stage('Release') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE == 'RELEASE' }
+				    branch 'master'
+				}
+			}
+			tools {
+				// Allow release to be backwards compatible to oldest JVM
+            	jdk "${params.OLDEST_JDK}"
+            }
+			steps {
+	        	dir('officefloor/bom') {
+					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor-deploy=sonatype clean deploy'
+				}
+			}         
+	    }
+
 	    stage('Deploy Site') {
 			when {
 				allOf {
-				    branch 'master'
 					expression { params.BUILD_TYPE == 'SITE' }
+				    branch 'master'
 				}
 			}
 			steps {
-				echo "Running site deploy"
+	        	dir('officefloor') {
+					sh 'mvn -DskipTests clean install'
+				}
+				dir('officefloor/bom') {
+					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean install site-deploy'
+				}
+			}
+	    }
+
+	    stage('Tag Release') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE == 'TAG_RELEASE' }
+				    branch 'master'
+				}
+			}
+			steps {
+				dir('officefloor') {
+					sh 'mvn scm:tag'
+				}
 			}         
 	    }
 	}
@@ -116,8 +169,9 @@ pipeline {
 	    	junit 'officefloor/**/target/surefire-reports/TEST-*.xml'
 	    	junit 'officefloor/**/target/failsafe-reports/TEST-*.xml'
 	    }
+
 	    success {
-			emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: 'OF ${params.BUILD_TYPE} $BUILD_STATUS! ($BRANCH_NAME $BUILD_NUMBER)', body: '''
+			emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} $BUILD_STATUS! ($BRANCH_NAME $BUILD_NUMBER)", body: '''
 $PROJECT_NAME - $BRANCH_NAME - $BUILD_NUMBER - $BUILD_STATUS
 
 Passed: ${TEST_COUNTS,var="pass"}
@@ -127,12 +181,23 @@ Total: ${TEST_COUNTS,var="total"}
 
 ${FAILED_TESTS}'''
 	    }
-		failure {
+
+		unsuccessful {
 	        emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} $BUILD_STATUS! ($BRANCH_NAME $BUILD_NUMBER)", body: '''
 $PROJECT_NAME - $BRANCH_NAME - $BUILD_NUMBER - $BUILD_STATUS
 
+Tests:
+Passed: ${TEST_COUNTS,var="pass"}
+Failed: ${TEST_COUNTS,var="fail"}
+Skipped: ${TEST_COUNTS,var="skip"}
+Total: ${TEST_COUNTS,var="total"}
+
+${FAILED_TESTS}
+
+
 Changes (since last successful build):
 ${CHANGES_SINCE_LAST_SUCCESS}
+
 
 Log (last lines):
 ...
