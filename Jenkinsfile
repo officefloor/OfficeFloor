@@ -106,7 +106,7 @@ pipeline {
 		stage('Performance') {
 			when {
 				allOf {
-					expression { params.BUILD_TYPE = 'PERFORMANCE' }
+					expression { params.BUILD_TYPE == 'PERFORMANCE' }
 					branch 'master'
 				}
 			}
