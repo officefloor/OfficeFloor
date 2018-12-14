@@ -65,7 +65,6 @@ pipeline {
 			when {
 				allOf {
 					expression { params.BUILD_TYPE == 'TEST' }
-					branch 'master'
 				}
 			}
 			tools {
@@ -77,7 +76,6 @@ pipeline {
 	        	}
 				dir('officefloor/eclipse') {
 				    sh 'mvn clean install -P OXYGEN.target'
-					sh 'mvn clean install -P NEON.target'
 				}
 			}
 		}
