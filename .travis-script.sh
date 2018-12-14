@@ -12,4 +12,3 @@ cd ../eclipse
 echo "Backwards compability for Eclipse"
 # PHOTON.target already tested by default
 mvn clean install -P OXYGEN.target
-mvn clean install -P NEON.target

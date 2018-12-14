@@ -115,8 +115,8 @@ pipeline {
 	    	junit 'officefloor/**/target/failsafe-reports/TEST-*.xml'
 	    }
 	    success {
-			emailext to: 'daniel@officefloor.net', subject: '$PROJECT_NAME $BUILD_STATUS! ($BRANCH_NAME $BUILD_NUMBER)', body: '''
-$PROJECT_NAME - $BRANCH_NAME - $BUILD_NUMBER - $BUILD_STATUS:
+			emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: 'OF ${params.BUILD_TYPE} $BUILD_STATUS! ($BRANCH_NAME $BUILD_NUMBER)', body: '''
+$PROJECT_NAME - $BRANCH_NAME - $BUILD_NUMBER - $BUILD_STATUS
 
 Passed: ${TEST_COUNTS,var="pass"}
 Failed: ${TEST_COUNTS,var="fail"}
@@ -126,7 +126,16 @@ Total: ${TEST_COUNTS,var="total"}
 ${FAILED_TESTS}'''
 	    }
 		failure {
-	        mail to: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} failed", body: currentBuild.rawBuild.getLog(100)
+	        emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} $BUILD_STATUS! ($BRANCH_NAME $BUILD_NUMBER)", body: '''
+$PROJECT_NAME - $BRANCH_NAME - $BUILD_NUMBER - $BUILD_STATUS
+
+Changes (since last successful build):
+${CHANGES_SINCE_LAST_SUCCESS}
+
+Log (last lines):
+...
+${BUILD_LOG}
+'''
 		}
 	}
 
