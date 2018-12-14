@@ -24,11 +24,34 @@ pipeline {
 
 	
 	stages {
+	
+		stage('Backwards compatible') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE == 'TEST' }
+				}
+			}
+			tools {
+            	jdk "${params.OLDEST_JDK}"
+            }
+			steps {
+	        	dir('officefloor/bom') {
+					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor.skip.stress.tests=true clean install'
+	        	}
+				dir('officefloor/eclipse') {
+				    sh 'mvn clean install -P OXYGEN.target'
+				}
+			}
+		}
+	
 		stage('Build') {
 		    when {
 		        expression { params.BUILD_TYPE == 'TEST' }
 		    }
 	        steps {
+	        	dir('officefloor/bom') {
+	        	    sh 'mvn clean'
+	        	}
 	        	sh './.travis-install.sh'
 	        }
 		}
@@ -60,26 +83,7 @@ pipeline {
 	        	}
 	        }
 	    }
-	    
-	    stage('Backwards compatible') {
-			when {
-				allOf {
-					expression { params.BUILD_TYPE == 'TEST' }
-				}
-			}
-			tools {
-            	jdk "${params.OLDEST_JDK}"
-            }
-			steps {
-	        	dir('officefloor/bom') {
-					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor.skip.stress.tests=true clean install'
-	        	}
-				dir('officefloor/eclipse') {
-				    sh 'mvn clean install -P OXYGEN.target'
-				}
-			}
-		}
-	    
+	    	    
 	    stage('Stage') {
 	        when {
 	        	allOf {
