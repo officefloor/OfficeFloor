@@ -117,6 +117,7 @@ pipeline {
 				}
 			}
 			steps {
+	        	sh 'mvn -version'
 				sh './benchmarks/run_comparison.sh'
 			}
 			post {
@@ -142,6 +143,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
             	jdk "${params.OLDEST_JDK}"
             }
 	        steps {
+	        	sh 'mvn -version'
 	        	dir('officefloor/bom') {
 			    	sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean deploy'
 			    }
@@ -160,6 +162,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
             	jdk "${params.OLDEST_JDK}"
             }
 			steps {
+	        	sh 'mvn -version'
 	        	dir('officefloor/bom') {
 					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor-deploy=sonatype clean deploy'
 				}
@@ -174,6 +177,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 				}
 			}
 			steps {
+	        	sh 'mvn -version'
 	        	dir('officefloor') {
 					sh 'mvn -DskipTests clean install'
 				}
@@ -191,6 +195,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 				}
 			}
 			steps {
+	        	sh 'mvn -version'
 				dir('officefloor') {
 					sh 'mvn scm:tag'
 				}
