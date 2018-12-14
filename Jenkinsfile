@@ -24,6 +24,33 @@ pipeline {
 
 	
 	stages {
+
+		// TODO REMOVE stage	
+		stage('TEST EMAIL') {
+           steps {
+		                   	        emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
+${PROJECT_NAME} - ${BRANCH_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
+
+Tests:
+Passed: ${TEST_COUNTS,var="pass"}
+Failed: ${TEST_COUNTS,var="fail"}
+Skipped: ${TEST_COUNTS,var="skip"}
+Total: ${TEST_COUNTS,var="total"}
+
+${FAILED_TESTS}
+
+
+Changes (since last successful build):
+${CHANGES_SINCE_LAST_SUCCESS}
+
+
+Log (last lines):
+...
+${BUILD_LOG}
+'''
+               }
+            }
+
 	
 		stage('Backwards compatible') {
 			when {
@@ -171,8 +198,8 @@ pipeline {
 	    	junit 'officefloor/**/target/surefire-reports/TEST-*.xml'
 	    	junit 'officefloor/**/target/failsafe-reports/TEST-*.xml'
 
-	        emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} $BUILD_STATUS! ($BRANCH_NAME $BUILD_NUMBER)", body: '''
-$PROJECT_NAME - $BRANCH_NAME - $BUILD_NUMBER - $BUILD_STATUS
+	        emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
+${PROJECT_NAME} - ${BRANCH_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 
 Tests:
 Passed: ${TEST_COUNTS,var="pass"}
