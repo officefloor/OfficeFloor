@@ -2,13 +2,16 @@ pipeline {
 	agent any
 
     parameters {
-        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'STAGE', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
+        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'PERFORMANCE', 'STAGE', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
         string(name: 'LATEST_JDK', defaultValue: 'jdk11', description: 'Tool name for the latest JDK to support')
 		string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
     }
     
     triggers {
-        cron('0 1 * * *')
+        parameterizedCron('''
+0 1 * * * %BUILD_TYPE=TEST
+0 4 * * * %BUILD_TYPE=PERFORMANCE
+''')
     }
     
     options {
@@ -21,7 +24,6 @@ pipeline {
 	    maven 'maven-3.6.0'
 	    jdk "${params.LATEST_JDK}"
 	}
-
 	
 	stages {
 	
@@ -84,8 +86,8 @@ pipeline {
 					sh 'mvn -Dmaven.test.failure.ignore=true verify'
 	        	}
 	        }
-	    }
-	    
+	    } 
+	    	    
 	    stage('Check master') {
 	        when {
 	        	allOf {
@@ -94,9 +96,48 @@ pipeline {
 	        	}
 	        }
             steps {
+            	currentBuild.result = 'ABORTED'
             	error "Attempting to ${params.BUILD_TYPE} when not on master branch"
             }
-         }
+        }
+
+		stage('Performance') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE = 'PERFORMANCE' }
+					branch 'master'
+				}
+			}
+			steps {
+				sh './benchmarks/run_comparison.sh'
+			}
+			post {
+			    always {
+	    			junit allowEmptyResults: true, testResults: 'benchmarks/test/**/TEST-*.xml'
+
+					emailext to: 'daniel@officefloor.net', subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS} (${BUILD_NUMBER})', attachmentsPattern: 'benchmarks/results.txt, benchmarks/results.zip', body: '''
+${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
+
+Tests:
+Passed: ${TEST_COUNTS,var="pass"}
+Failed: ${TEST_COUNTS,var="fail"}
+Skipped: ${TEST_COUNTS,var="skip"}
+Total: ${TEST_COUNTS,var="total"}
+
+${FAILED_TESTS}
+
+
+Changes (since last successful build):
+${CHANGES_SINCE_LAST_SUCCESS}
+
+
+Log (last lines):
+...
+${BUILD_LOG}
+'''
+    			}
+			}
+		}
 
 	    stage('Stage') {
 	        when {
@@ -168,11 +209,14 @@ pipeline {
 	
     post {
    		always {
-	    	junit 'officefloor/**/target/surefire-reports/TEST-*.xml'
-	    	junit 'officefloor/**/target/failsafe-reports/TEST-*.xml'
+   			script {
+				if ( params.BUILD_TYPE != 'PERFORMANCE' ) {
+      				
+	    			junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
+	    			junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
 
-	        emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
-${PROJECT_NAME} - ${BRANCH_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
+	        		emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
+${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 
 Tests:
 Passed: ${TEST_COUNTS,var="pass"}
@@ -191,6 +235,8 @@ Log (last lines):
 ...
 ${BUILD_LOG}
 '''
+				}
+			}
 		}
 	}
 
