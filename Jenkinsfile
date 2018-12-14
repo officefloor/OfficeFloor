@@ -168,21 +168,7 @@ pipeline {
    		always {
 	    	junit 'officefloor/**/target/surefire-reports/TEST-*.xml'
 	    	junit 'officefloor/**/target/failsafe-reports/TEST-*.xml'
-	    }
 
-	    success {
-			emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} $BUILD_STATUS! ($BRANCH_NAME $BUILD_NUMBER)", body: '''
-$PROJECT_NAME - $BRANCH_NAME - $BUILD_NUMBER - $BUILD_STATUS
-
-Passed: ${TEST_COUNTS,var="pass"}
-Failed: ${TEST_COUNTS,var="fail"}
-Skipped: ${TEST_COUNTS,var="skip"}
-Total: ${TEST_COUNTS,var="total"}
-
-${FAILED_TESTS}'''
-	    }
-
-		unsuccessful {
 	        emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: "OF ${params.BUILD_TYPE} $BUILD_STATUS! ($BRANCH_NAME $BUILD_NUMBER)", body: '''
 $PROJECT_NAME - $BRANCH_NAME - $BUILD_NUMBER - $BUILD_STATUS
 
