@@ -7,6 +7,12 @@ pipeline {
 		string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
     }
     
+    environment {
+        PERFORMANCE_EMAIL = credentials('performance-email')
+        RESULTS_EMAIL = credentials('results-email')
+        REPLY_TO_EMAIL = credentials('reply-to-email')
+    }
+    
     triggers {
         parameterizedCron('''
 0 1 * * * %BUILD_TYPE=TEST
@@ -117,7 +123,7 @@ pipeline {
 			    always {
 	    			junit allowEmptyResults: true, testResults: 'benchmarks/test/**/TEST-*.xml'
 
-					emailext to: 'daniel@officefloor.net', subject: 'OF ' + "${params.BUILD_TYPE}" + ' RESULTS (${BUILD_NUMBER})', attachmentsPattern: 'benchmarks/results.txt, benchmarks/results.zip', body: '''
+					emailext to: "${PERFORMANCE_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' RESULTS (${BUILD_NUMBER})', attachmentsPattern: 'benchmarks/results.txt, benchmarks/results.zip', body: '''
 ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 '''
     			}
@@ -197,7 +203,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 			junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
 			junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
 
-    		emailext to: 'daniel@officefloor.net', replyTo: 'daniel@officefloor.net', subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
+    		emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
 ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 
 Tests:
