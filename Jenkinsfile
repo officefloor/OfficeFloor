@@ -96,7 +96,9 @@ pipeline {
 	        	}
 	        }
             steps {
-            	currentBuild.result = 'ABORTED'
+            	script {
+            		currentBuild.result = 'ABORTED'
+            	}
             	error "Attempting to ${params.BUILD_TYPE} when not on master branch"
             }
         }
