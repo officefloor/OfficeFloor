@@ -18,7 +18,6 @@
 package net.officefloor.server.stress;
 
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
@@ -34,6 +33,7 @@ import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.http.impl.HttpResponseWriter;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -126,8 +126,7 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 			while (stream != null) {
 				if (stream.pooledBuffer != null) {
 					// Write the pooled byte buffer
-					// (fix for JDK8 -> JDK9 difference)
-					((Buffer) stream.pooledBuffer).flip();
+					BufferJvmFix.flip(stream.pooledBuffer);
 					byteBufferWriter.write(stream.pooledBuffer, entity);
 
 				} else if (stream.unpooledByteBuffer != null) {
@@ -144,14 +143,14 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 						long count = stream.fileBuffer.count;
 						int bytesRead;
 						do {
-							buffer.clear();
+							BufferJvmFix.clear(buffer);
 
 							// Read bytes
 							bytesRead = stream.fileBuffer.file.read(buffer, position);
 							position += bytesRead;
 
 							// Setup for bytes
-							buffer.flip();
+							BufferJvmFix.flip(buffer);
 							if (count >= 0) {
 								count -= bytesRead;
 

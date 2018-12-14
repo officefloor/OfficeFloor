@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
+import net.officefloor.server.stream.BufferJvmFix;
 
 import org.easymock.ArgumentsMatcher;
 
@@ -220,7 +221,7 @@ public class UsAsciiUtil {
 				ByteBuffer buffer = (ByteBuffer) argument;
 				if (buffer.position() > 0) {
 					buffer = buffer.duplicate();
-					buffer.flip();
+					BufferJvmFix.flip(buffer);
 				}
 				byte[] data = new byte[buffer.limit()];
 				buffer.get(data, 0, data.length);

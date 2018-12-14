@@ -36,10 +36,12 @@ pipeline {
             }
 			steps {
 	        	dir('officefloor/bom') {
+	        		sh 'mvn clean'
 					sh 'mvn -Dofficefloor.skip.stress.tests=true install'
 	        	}
 				dir('officefloor/eclipse') {
-				    sh 'mvn clean install -P OXYGEN.target'
+					sh 'mvn clean'
+				    sh 'mvn install -P OXYGEN.target'
 				}
 			}
 		}

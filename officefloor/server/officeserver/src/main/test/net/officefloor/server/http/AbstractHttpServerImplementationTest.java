@@ -81,6 +81,7 @@ import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 
@@ -333,7 +334,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			byte[] data = BytesServicer.HELLO_WORLD;
 			HELLO_WORLD = ByteBuffer.allocate(data.length);
 			HELLO_WORLD.put(data);
-			HELLO_WORLD.flip();
+			BufferJvmFix.flip(HELLO_WORLD);
 		}
 
 		public void service(ServerHttpConnection connection) throws Exception {
@@ -1523,7 +1524,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			byte[] requestData = AbstractHttpServerImplementationTest.this.createPipelineRequestData();
 			ByteBuffer requestBuffer = ByteBuffer.allocateDirect(requestData.length);
 			requestBuffer.put(requestData);
-			requestBuffer.flip();
+			BufferJvmFix.flip(requestBuffer);
 
 			// Create the expected response
 			byte[] responseData = AbstractHttpServerImplementationTest.this.createPipelineResponseData();
@@ -1581,7 +1582,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 								// Setup for next request
 								requestDataSent = 0;
-								requestBuffer.clear();
+								BufferJvmFix.clear(requestBuffer);
 							} else {
 								// Buffer full, so wait until can write again
 								break FINISHED_WRITING;
@@ -1599,7 +1600,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 						// Read in as many requests as possible
 						int bytesRead;
 						do {
-							responseBuffer.clear();
+							BufferJvmFix.clear(responseBuffer);
 							bytesRead = this.channel.read(responseBuffer);
 
 							// Determine if time out
@@ -1619,7 +1620,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 							}
 
 							// Handle the data
-							responseBuffer.flip();
+							BufferJvmFix.flip(responseBuffer);
 							responseBuffer.mark();
 							for (int i = 0; i < bytesRead; i++) {
 								byte expectedCharacter = responseData[responseDataPosition];

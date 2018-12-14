@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.server.RequestHandler.Execution;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -1094,7 +1095,7 @@ public class SocketManager {
 			StreamBuffer<ByteBuffer> prepareBuffer = headResponseBuffer;
 			while (prepareBuffer != null) {
 				if (prepareBuffer.pooledBuffer != null) {
-					prepareBuffer.pooledBuffer.flip();
+					BufferJvmFix.flip(prepareBuffer.pooledBuffer);
 				}
 				prepareBuffer = prepareBuffer.next;
 			}
@@ -1235,7 +1236,7 @@ public class SocketManager {
 			// Prepare compacted buffers for writing
 			while (this.compactedResponseHead != null) {
 				if (this.compactedResponseHead.pooledBuffer != null) {
-					this.compactedResponseHead.pooledBuffer.flip();
+					BufferJvmFix.flip(this.compactedResponseHead.pooledBuffer);
 				}
 				this.compactedResponseHead = this.compactedResponseHead.next;
 			}
@@ -1506,7 +1507,7 @@ public class SocketManager {
 			StreamBuffer<ByteBuffer> streamBuffer = immediateHead;
 			while (streamBuffer != null) {
 				if (streamBuffer.pooledBuffer != null) {
-					streamBuffer.pooledBuffer.flip();
+					BufferJvmFix.flip(streamBuffer.pooledBuffer);
 				}
 				streamBuffer = streamBuffer.next;
 			}
