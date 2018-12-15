@@ -23,7 +23,7 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: '20'))
 		disableConcurrentBuilds()
-		timeout(time: 6, unit: 'HOURS')
+		timeout(time: 8, unit: 'HOURS')
     }
 
 	tools {
@@ -44,7 +44,7 @@ pipeline {
             }
 			steps {
 	        	sh 'mvn -version'
-	        	echo "JAVA_HOME = $env.JAVA_HOME}"
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
 	        		sh 'mvn clean'
 					sh 'mvn -Dofficefloor.skip.stress.tests=true install'
@@ -62,7 +62,7 @@ pipeline {
 		    }
 	        steps {
 	        	sh 'mvn -version'
-	        	echo "JAVA_HOME = $env.JAVA_HOME}"
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
 	        	    sh 'mvn clean'
 	        	}
@@ -122,7 +122,7 @@ pipeline {
 			}
 			steps {
 	        	sh 'mvn -version'
-	        	echo "JAVA_HOME = $env.JAVA_HOME}"
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('benchmarks/test') {
 	        	    sh 'mvn clean'
 	        	}
@@ -152,7 +152,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
             }
 	        steps {
 	        	sh 'mvn -version'
-	        	echo "JAVA_HOME = $env.JAVA_HOME}"
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
 			    	sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean deploy'
 			    }
@@ -172,7 +172,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
             }
 			steps {
 	        	sh 'mvn -version'
-	        	echo "JAVA_HOME = $env.JAVA_HOME}"
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
 					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor-deploy=sonatype clean deploy'
 				}
@@ -188,7 +188,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 			}
 			steps {
 	        	sh 'mvn -version'
-	        	echo "JAVA_HOME = $env.JAVA_HOME}"
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor') {
 					sh 'mvn -DskipTests clean install'
 				}
@@ -207,7 +207,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 			}
 			steps {
 	        	sh 'mvn -version'
-	        	echo "JAVA_HOME = $env.JAVA_HOME}"
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 				dir('officefloor') {
 					sh 'mvn scm:tag'
 				}
