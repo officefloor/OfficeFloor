@@ -37,15 +37,20 @@ img {
 		modules installed. See <a href="https://openjfx.io/">JavaFx</a> for
 		more details.
 	</p>
-	<p class="note">From Java 11 many modules
-		(including JavaFx) are no longer bundled with a Java installation.</p>
-	<p class="note">Also a minimum version of Java 8
-		is required due to JavaFx.</p>
+	<p class="note">From Java 11 many modules (including JavaFx) are no
+		longer bundled with a Java installation.</p>
+	<p class="note">Also a minimum version of Java 8 is required due to
+		JavaFx.</p>
 
 	<p>
-		<strong>Step 2</strong>: ensure <a
-			href="https://www.eclipse.org/downloads/" target="_blank">Eclipse
-			Photon</a> (or higher version) is installed
+		<strong>Step 2</strong>: ensure Eclipse version is Oxygen or higher.
+		Ideally <a href="https://www.eclipse.org/downloads/" target="_blank">Eclipse
+			Photon</a>
+	</p>
+	<p class="note">
+		For older Java versions on linux the following environmental variable
+		may be required to avoid crashes in not supporting the later GTK3: <span
+			class="code">export SWT_GTK3=0</span>
 	</p>
 
 	<p>
@@ -59,7 +64,12 @@ img {
 		button to your Eclipse IDE to install <a
 			href="https://www.eclipse.org/efxclipse/index.html" target="_blank">e(fx)clipse</a>
 	</p>
-	<p class="note">Should this not find the <span class="code">E(fx)clipse IDE</span> feature, then please follow steps at <a href="https://www.eclipse.org/efxclipse/install.html" target="_blank">e(fx)clipse tooling</a> to install</p>
+	<p class="note">
+		Should this not find the <span class="code">E(fx)clipse IDE</span>
+		feature, then please follow steps at <a
+			href="https://www.eclipse.org/efxclipse/install.html" target="_blank">e(fx)clipse
+			tooling</a> to install
+	</p>
 
 	<p>
 		<strong>Step 4</strong>: drag the <a
@@ -72,10 +82,18 @@ img {
 		button to your Eclipse IDE to install <a
 			href="http://officefloor.net/" target="_blank">OfficeFloor</a>
 	</p>
-	<p class="note">Should this not find the <span class="code">OfficeFloor</span> features, please manually install with following steps:</p>
-	<p class="note">Within your Eclipse IDE go to install new software (typically Help -&gt; Install New Software ...)</p>
-	<p class="note">Add the OfficeFloor update site: <span class="code">http://officefloor.net/update</span></p>
-	<p class="note">Check <span class="code">OfficeFloor</span> and install</p>
+	<p class="note">
+		Should this not find the <span class="code">OfficeFloor</span>
+		features, please manually install with following steps:
+	</p>
+	<p class="note">Within your Eclipse IDE go to install new software
+		(typically Help -&gt; Install New Software ...)</p>
+	<p class="note">
+		Add the OfficeFloor update site: <span class="code">http://officefloor.net/update</span>
+	</p>
+	<p class="note">
+		Check <span class="code">OfficeFloor</span> and install
+	</p>
 
 	<p>
 		<strong>Step 5</strong>: build your application with OfficeFloor
