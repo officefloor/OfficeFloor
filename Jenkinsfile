@@ -118,11 +118,14 @@ pipeline {
 			}
 			steps {
 	        	sh 'mvn -version'
+	        	dir('benchmarks/test') {
+	        	    sh 'mvn clean'
+	        	}
 				sh './benchmarks/run_comparison.sh'
 			}
 			post {
 			    always {
-	    			junit allowEmptyResults: true, testResults: 'benchmarks/test/**/TEST-*.xml'
+					junit allowEmptyResults: true, testResults: 'benchmarks/test/**/target/surefire-reports/TEST-*.xml'
 
 					emailext to: "${PERFORMANCE_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' RESULTS (${BUILD_NUMBER})', attachmentsPattern: 'benchmarks/results.txt, benchmarks/results.zip', body: '''
 ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
