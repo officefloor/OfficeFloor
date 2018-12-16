@@ -2,7 +2,7 @@ pipeline {
 	agent any
 
     parameters {
-        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'PERFORMANCE', 'STAGE', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
+        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'PERFORMANCE', 'STAGE', 'PRE_RELEASE_TEST', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
         string(name: 'LATEST_JDK', defaultValue: 'jdk11', description: 'Tool name for the latest JDK to support')
 		string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
     }
@@ -159,6 +159,26 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 	        }
 	    }
 	    
+	    stage('Test release') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE == 'PRE_RELEASE_TEST' }
+				    branch 'master'
+				}
+			}
+			tools {
+				// Allow release to be backwards compatible to oldest JVM
+            	jdk "${params.OLDEST_JDK}"
+            }
+			steps {
+	        	sh 'mvn -version'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
+	        	dir('officefloor/bom') {
+					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor.skip.stress.tests=true -Dofficefloor-deploy=sonatype clean install'
+				}
+			}         
+	    }
+
 	    stage('Release') {
 			when {
 				allOf {
