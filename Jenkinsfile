@@ -213,7 +213,8 @@ Starting release
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-					sh 'mvn -DskipTests clean install'
+					// Build (and open shell to SourceForge)
+					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean install'
 				}
 				dir('officefloor') {
 					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge site-deploy'

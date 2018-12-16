@@ -217,21 +217,6 @@
 				<version>${wagon-ssh-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.openjfx</groupId>
-				<artifactId>javafx-graphics</artifactId>
-				<version>${openjfx-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openjfx</groupId>
-				<artifactId>javafx-controls</artifactId>
-				<version>${openjfx-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openjfx</groupId>
-				<artifactId>javafx-swt</artifactId>
-				<version>${openjfx-swt-version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-server</artifactId>
 				<version>${jetty-version}</version>
@@ -486,23 +471,6 @@
 					<version>${tycho-version}</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
-						<extraClasspathElements>
-							<extraClasspathElement>
-								<groupId>org.openjfx</groupId>
-								<artifactId>javafx-graphics</artifactId>
-								<version>${openjfx-version}</version>
-							</extraClasspathElement>
-							<extraClasspathElement>
-								<groupId>org.openjfx</groupId>
-								<artifactId>javafx-controls</artifactId>
-								<version>${openjfx-version}</version>
-							</extraClasspathElement>
-							<extraClasspathElement>
-								<groupId>org.openjfx</groupId>
-								<artifactId>javafx-swt</artifactId>
-								<version>${openjfx-swt-version}</version>
-							</extraClasspathElement>
-						</extraClasspathElements>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -1097,6 +1065,62 @@
 					<systemPath>${java.home}/../lib/tools.jar</systemPath>
 				</dependency>
 			</dependencies>
+		</profile>
+		<profile>
+			<id>openjfx</id>
+			<activation>
+				<jdk>[10,11)</jdk>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+					<version>${openjfx-version}</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+					<version>${openjfx-version}</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-swt</artifactId>
+					<version>${openjfx-swt-version}</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.eclipse.tycho</groupId>
+							<artifactId>tycho-compiler-plugin</artifactId>
+							<version>${tycho-version}</version>
+							<configuration>
+								<extraClasspathElements>
+									<extraClasspathElement>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-graphics</artifactId>
+										<version>${openjfx-version}</version>
+									</extraClasspathElement>
+									<extraClasspathElement>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-controls</artifactId>
+										<version>${openjfx-version}</version>
+									</extraClasspathElement>
+									<extraClasspathElement>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-swt</artifactId>
+										<version>${openjfx-swt-version}</version>
+									</extraClasspathElement>
+								</extraClasspathElements>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
 		</profile>
 	</profiles>
 </project>
