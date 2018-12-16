@@ -159,7 +159,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 	        }
 	    }
 	    
-	    stage('Test release') {
+	    stage('Pre release test') {
 			when {
 				allOf {
 					expression { params.BUILD_TYPE == 'PRE_RELEASE_TEST' }
