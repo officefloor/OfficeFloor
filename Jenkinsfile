@@ -212,11 +212,11 @@ Starting release
 			steps {
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
-	        	dir('officefloor') {
+	        	dir('officefloor/bom') {
 					sh 'mvn -DskipTests clean install'
 				}
-				dir('officefloor/bom') {
-					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean install site-deploy'
+				dir('officefloor') {
+					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge site-deploy'
 				}
 			}
 	    }
