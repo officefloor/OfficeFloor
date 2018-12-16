@@ -162,7 +162,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 	    stage('Pre release test') {
 			when {
 				allOf {
-					expression { params.BUILD_TYPE == 'PRE_RELEASE_TEST' }
+					expression { params.BUILD_TYPE == 'PRE_RELEASE_TEST' || params.BUILD_TYPE == 'RELEASE' }
 				    branch 'master'
 				}
 			}
@@ -174,9 +174,9 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor.skip.stress.tests=true -Dofficefloor-deploy=sonatype clean install'
+					sh 'mvn -Dofficefloor.skip.stress.tests=true -Dofficefloor-deploy=sonatype clean install'
 				}
-			}         
+			}
 	    }
 
 	    stage('Release') {
@@ -191,6 +191,9 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
             	jdk "${params.OLDEST_JDK}"
             }
 			steps {
+				emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF starting release (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
+Starting release
+'''
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
