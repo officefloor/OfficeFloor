@@ -33,6 +33,16 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	
 	stages {
 	
+		stage('Clean') {
+		    // Avoid stale JUnit results
+        	dir('officefloor/bom') {
+        	    sh 'mvn clean'
+        	}
+        	dir('benchmarks/test') {
+        	    sh 'mvn clean'
+        	}
+		}
+	
 		stage('Backwards compatible') {
 			when {
 				allOf {
@@ -46,10 +56,11 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-	        		sh 'mvn clean'
 					sh 'mvn -Dofficefloor.skip.stress.tests=true install'
 	        	}
 				dir('officefloor/eclipse') {
+					// Clean build with different Eclipse target
+					// Note: latest Eclipse target is default build
 					sh 'mvn clean'
 				    sh 'mvn install -P OXYGEN.target'
 				}
@@ -63,6 +74,7 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	        steps {
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
+	        	// Clean (backwards compatible)
 	        	dir('officefloor/bom') {
 	        	    sh 'mvn clean'
 	        	}
@@ -123,9 +135,6 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 			steps {
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
-	        	dir('benchmarks/test') {
-	        	    sh 'mvn clean'
-	        	}
 				sh './benchmarks/run_comparison.sh'
 			}
 			post {
