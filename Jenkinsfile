@@ -34,13 +34,15 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	stages {
 	
 		stage('Clean') {
-		    // Avoid stale JUnit results
-        	dir('officefloor/bom') {
-        	    sh 'mvn clean'
-        	}
-        	dir('benchmarks/test') {
-        	    sh 'mvn clean'
-        	}
+			steps {
+			    // Avoid stale JUnit results
+	        	dir('officefloor/bom') {
+	        	    sh 'mvn clean'
+	        	}
+	        	dir('benchmarks/test') {
+	        	    sh 'mvn clean'
+	        	}
+			}
 		}
 	
 		stage('Backwards compatible') {
