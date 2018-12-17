@@ -13,8 +13,10 @@ after_success: bash <(curl -s https://codecov.io/bash)
 # Note: due to JavaFx, not supporting prior to Java 8
 jobs:
   include:
-    - jdk: openjdk8
+    - name: Java 8
+      jdk: openjdk8
       addons:
         apt:
           packages: openjfx
-    - jdk: openjdk11
+    - name: Java 11
+      jdk: openjdk11
