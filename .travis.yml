@@ -13,6 +13,3 @@ env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
 install: ./.travis-install.sh
 script: ./.travis-script.sh
 after_success: bash <(curl -s https://codecov.io/bash)
-#branches:
-#  only:
-#  - master
