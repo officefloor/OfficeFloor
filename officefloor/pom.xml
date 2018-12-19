@@ -1065,11 +1065,33 @@
 					<systemPath>${java.home}/../lib/tools.jar</systemPath>
 				</dependency>
 			</dependencies>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.eclipse.tycho</groupId>
+							<artifactId>tycho-compiler-plugin</artifactId>
+							<version>${tycho-version}</version>
+							<configuration>
+								<extraClasspathElements>
+									<extraClasspathElement>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-swt</artifactId>
+										<version>1.8</version>
+										<scope>system</scope>
+										<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
+									</extraClasspathElement>
+								</extraClasspathElements>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
 		</profile>
 		<profile>
 			<id>openjfx</id>
 			<activation>
-				<jdk>[10,11)</jdk>
+				<jdk>[10,12)</jdk>
 			</activation>
 			<dependencies>
 				<dependency>
