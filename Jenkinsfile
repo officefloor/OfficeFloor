@@ -2,7 +2,7 @@ pipeline {
 	agent any
 
     parameters {
-        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'PERFORMANCE', 'STAGE', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
+        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'PERFORMANCE', 'STAGE', 'PRE_RELEASE_TEST', 'RELEASE', 'SITE', 'TAG_RELEASE' ], description: 'Indicates what type of build')
         string(name: 'LATEST_JDK', defaultValue: 'jdk11', description: 'Tool name for the latest JDK to support')
 		string(name: 'OLDEST_JDK', defaultValue: 'jdk8', description: 'Tool name for the oldest JDK to support')
     }
@@ -15,15 +15,15 @@ pipeline {
     
     triggers {
         parameterizedCron('''
-0 1 * * * %BUILD_TYPE=TEST
-0 4 * * * %BUILD_TYPE=PERFORMANCE
+H 1 * * * %BUILD_TYPE=TEST
+H 4 * * * %BUILD_TYPE=PERFORMANCE
 ''')
     }
     
     options {
         buildDiscarder(logRotator(numToKeepStr: '20'))
 		disableConcurrentBuilds()
-		timeout(time: 6, unit: 'HOURS')
+		timeout(time: 8, unit: 'HOURS')
     }
 
 	tools {
@@ -32,6 +32,18 @@ pipeline {
 	}
 	
 	stages {
+	
+		stage('Clean') {
+			steps {
+			    // Avoid stale JUnit results
+	        	dir('officefloor/bom') {
+	        	    sh 'mvn clean'
+	        	}
+	        	dir('benchmarks/test') {
+	        	    sh 'mvn clean'
+	        	}
+			}
+		}
 	
 		stage('Backwards compatible') {
 			when {
@@ -43,11 +55,14 @@ pipeline {
             	jdk "${params.OLDEST_JDK}"
             }
 			steps {
+	        	sh 'mvn -version'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
-	        		sh 'mvn clean'
 					sh 'mvn -Dofficefloor.skip.stress.tests=true install'
 	        	}
 				dir('officefloor/eclipse') {
+					// Clean build with different Eclipse target
+					// Note: latest Eclipse target is default build
 					sh 'mvn clean'
 				    sh 'mvn install -P OXYGEN.target'
 				}
@@ -59,6 +74,9 @@ pipeline {
 		        expression { params.BUILD_TYPE == 'TEST' }
 		    }
 	        steps {
+	        	sh 'mvn -version'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
+	        	// Clean (backwards compatible)
 	        	dir('officefloor/bom') {
 	        	    sh 'mvn clean'
 	        	}
@@ -118,11 +136,12 @@ pipeline {
 			}
 			steps {
 	        	sh 'mvn -version'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 				sh './benchmarks/run_comparison.sh'
 			}
 			post {
 			    always {
-	    			junit allowEmptyResults: true, testResults: 'benchmarks/test/**/TEST-*.xml'
+					junit allowEmptyResults: true, testResults: 'benchmarks/test/**/target/surefire-reports/TEST-*.xml'
 
 					emailext to: "${PERFORMANCE_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' RESULTS (${BUILD_NUMBER})', attachmentsPattern: 'benchmarks/results.txt, benchmarks/results.zip', body: '''
 ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
@@ -144,12 +163,33 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
             }
 	        steps {
 	        	sh 'mvn -version'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
 			    	sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean deploy'
 			    }
 	        }
 	    }
 	    
+	    stage('Pre release test') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE == 'PRE_RELEASE_TEST' || params.BUILD_TYPE == 'RELEASE' }
+				    branch 'master'
+				}
+			}
+			tools {
+				// Allow release to be backwards compatible to oldest JVM
+            	jdk "${params.OLDEST_JDK}"
+            }
+			steps {
+	        	sh 'mvn -version'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
+	        	dir('officefloor/bom') {
+					sh 'mvn -Dofficefloor.skip.stress.tests=true -Dofficefloor-deploy=sonatype clean install'
+				}
+			}
+	    }
+
 	    stage('Release') {
 			when {
 				allOf {
@@ -162,7 +202,11 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
             	jdk "${params.OLDEST_JDK}"
             }
 			steps {
+				emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF starting release (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
+Starting release
+'''
 	        	sh 'mvn -version'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
 					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor-deploy=sonatype clean deploy'
 				}
@@ -178,11 +222,13 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 			}
 			steps {
 	        	sh 'mvn -version'
-	        	dir('officefloor') {
-					sh 'mvn -DskipTests clean install'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
+	        	dir('officefloor/bom') {
+					// Build (and open shell to SourceForge)
+					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean install'
 				}
-				dir('officefloor/bom') {
-					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge clean install site-deploy'
+				dir('officefloor') {
+					sh 'mvn -DskipTests -Dofficefloor-deploy=sourceforge site-deploy'
 				}
 			}
 	    }
@@ -196,6 +242,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 			}
 			steps {
 	        	sh 'mvn -version'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 				dir('officefloor') {
 					sh 'mvn scm:tag'
 				}

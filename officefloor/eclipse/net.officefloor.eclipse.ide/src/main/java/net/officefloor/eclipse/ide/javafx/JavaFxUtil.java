@@ -32,10 +32,13 @@ import org.eclipse.swt.widgets.Text;
 import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.collections.ObservableList;
-import javafx.css.CssParser;
-import javafx.css.CssParser.ParseError;
 import javafx.scene.Scene;
 import net.officefloor.eclipse.ide.swt.SwtUtil;
+
+//import com.sun.javafx.css.CssError;
+//import com.sun.javafx.css.StyleManager;
+//import javafx.css.CssParser;
+//import javafx.css.CssParser.ParseError;
 
 /**
  * Utility methods for JavaFx.
@@ -47,7 +50,7 @@ public class JavaFxUtil {
 	/**
 	 * {@link CssError} instances.
 	 */
-	private static final ObservableList<ParseError> CSS_ERRORS = CssParser.errorsProperty();
+//	private static final ObservableList<ParseError> CSS_ERRORS = CssParser.errorsProperty();
 
 	/**
 	 * Active {@link CssManager} for {@link Scene}.
@@ -68,25 +71,35 @@ public class JavaFxUtil {
 			return;
 		}
 
-		// Listen on errors for the new scene
-		CSS_ERRORS.addListener((Observable event) -> {
-
-			// Obtain the latest CSS error
-			ParseError error = CSS_ERRORS.get(CSS_ERRORS.size() - 1);
-
-			// Strip off style sheet (as always the text in modal)
-			String message = error.getMessage();
-			if (message == null) {
-				message = "";
-			}
-			message = message.split(" in stylesheet")[0];
-
-			// Load error to active CSS manager
-			CssManager manager = activeCssManager.get(scene);
-			if (manager != null) {
-				manager.setCssError(message);
-			}
-		});
+//		StyleManager.errorsProperty().addListener((Observable event) -> {
+//			
+//			CssError error = StyleManager.errorsProperty().get(0);
+//			
+//			String message = error.getMessage();
+//			
+//			
+//			
+//		});
+//
+//		// Listen on errors for the new scene
+//		CSS_ERRORS.addListener((Observable event) -> {
+//
+//			// Obtain the latest CSS error
+//			ParseError error = CSS_ERRORS.get(CSS_ERRORS.size() - 1);
+//
+//			// Strip off style sheet (as always the text in modal)
+//			String message = error.getMessage();
+//			if (message == null) {
+//				message = "";
+//			}
+//			message = message.split(" in stylesheet")[0];
+//
+//			// Load error to active CSS manager
+//			CssManager manager = activeCssManager.get(scene);
+//			if (manager != null) {
+//				manager.setCssError(message);
+//			}
+//		});
 	}
 
 	/**
