@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.5.0" date="In SCM" description="Backwards compatability">
+		<release version="3.5.1" date="In SCM" description="Fixes for CssParser">
+			<action type="add" dev="sagenschneider">Fixes for CssParser</action>
+		</release>
+		<release version="3.5.0" date="2018-12-14" description="Backwards compatability">
 			<action type="add" dev="sagenschneider">Backwards compatibility</action>
 		</release>
 		<release version="3.4.0" date="2018-12-07" description="Maven BOM">
