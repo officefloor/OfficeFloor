@@ -36,6 +36,17 @@ public class ClassCompatibility {
 	private static final String ERROR_PREFIX = "Version compatibility issue. ";
 
 	/**
+	 * Loads an existing {@link Object}.
+	 * 
+	 * @param object {@link Object}.
+	 * @return {@link ObjectCompatibility} wrapping the {@link Object}.
+	 */
+	public static ObjectCompatibility object(Object object) {
+		Class<?> clazz = object.getClass();
+		return new ClassCompatibility(clazz.getName(), clazz.getClassLoader()).wrap(object);
+	}
+
+	/**
 	 * Loads the {@link Class}.
 	 * 
 	 * @param className   Name of the {@link Class}.
@@ -207,6 +218,16 @@ public class ClassCompatibility {
 
 		// Return the compatibility result
 		return result;
+	}
+
+	/**
+	 * Wraps the {@link ObjectCompatibility}.
+	 * 
+	 * @param object {@link Object}.
+	 * @return {@link ObjectCompatibility}.
+	 */
+	private ObjectCompatibility wrap(Object object) {
+		return new ObjectCompatibility(object);
 	}
 
 	/**

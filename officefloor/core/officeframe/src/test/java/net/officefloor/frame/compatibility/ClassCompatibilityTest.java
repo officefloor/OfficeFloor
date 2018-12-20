@@ -210,6 +210,15 @@ public class ClassCompatibilityTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure provide primitive.
+	 */
+	public void testPrimitive() {
+		ObjectCompatibility object = this.clazz._new();
+		int result = object.$("getPrimitive", this.clazz.arg(100, int.class)).get(Integer.class);
+		assertEquals("Incorrect result", 100, result);
+	}
+
+	/**
 	 * Ensure handle multiple arguments.
 	 */
 	public void testMultipleArguments() {
@@ -229,6 +238,15 @@ public class ClassCompatibilityTest extends OfficeFrameTestCase {
 				object.$("getCompatibility", value.arg(MockClass.class.getName()),
 						this.clazz.$("getStatic", 20).arg(Integer.class),
 						object.$("getInstance").arg(String.class.getName())).get(String.class));
+	}
+
+	/**
+	 * Ensure handle wrapping the object.
+	 */
+	public void testWrapObject() {
+		MockClass object = new MockClass("wrap");
+		ObjectCompatibility compatibility = ClassCompatibility.object(object);
+		assertEquals("Incorrect wrapped value", "wrap-10", compatibility.$("getInstance").get(String.class));
 	}
 
 	/**
@@ -305,6 +323,10 @@ public class ClassCompatibilityTest extends OfficeFrameTestCase {
 
 		public void exception(Exception exception) throws Exception {
 			throw exception;
+		}
+
+		public int getPrimitive(int value) {
+			return value;
 		}
 
 		public String getMultipleArguments(String prefix, Integer suffix, CharSequence sequence) {
