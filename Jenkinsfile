@@ -33,42 +33,6 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	
 	stages {
 	
-		stage('Clean') {
-			steps {
-			    // Avoid stale JUnit results
-	        	dir('officefloor/bom') {
-	        	    sh 'mvn clean'
-	        	}
-	        	dir('benchmarks/test') {
-	        	    sh 'mvn clean'
-	        	}
-			}
-		}
-	
-		stage('Backwards compatible') {
-			when {
-				allOf {
-					expression { params.BUILD_TYPE == 'TEST' }
-				}
-			}
-			tools {
-            	jdk "${params.OLDEST_JDK}"
-            }
-			steps {
-	        	sh 'mvn -version'
-	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
-	        	dir('officefloor/bom') {
-					sh 'mvn -Dofficefloor.skip.stress.tests=true install'
-	        	}
-				dir('officefloor/eclipse') {
-					// Clean build with different Eclipse target
-					// Note: latest Eclipse target is default build
-					sh 'mvn clean'
-				    sh 'mvn install -P OXYGEN.target'
-				}
-			}
-		}
-	
 		stage('Build') {
 		    when {
 		        expression { params.BUILD_TYPE == 'TEST' }
@@ -76,11 +40,11 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	        steps {
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
-	        	// Clean (backwards compatible)
-	        	dir('officefloor/bom') {
+	        	sh './.travis-install.sh'
+			// Ensure clear benchmark junit tests to avoid old tests failing build
+	        	dir('benchmarks/test') {
 	        	    sh 'mvn clean'
 	        	}
-	        	sh './.travis-install.sh'
 	        }
 		}
 	
@@ -96,6 +60,12 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 					sh 'mvn -Dofficefloor.skip.stress.tests=true verify'
 	        	}
 	        }
+		    post {
+			    always {
+				junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
+				junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
+			    }
+		    }
 	    }
 	    
 	    stage('Test and Stress') {
@@ -110,8 +80,39 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 					sh 'mvn -Dmaven.test.failure.ignore=true verify'
 	        	}
 	        }
+		    post {
+			    always {
+				junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
+				junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
+			    }
+		    }
 	    } 
 	    	    
+		stage('Backwards compatible') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE == 'TEST' }
+				}
+			}
+			tools {
+            	jdk "${params.OLDEST_JDK}"
+            }
+			steps {
+	        	sh 'mvn -version'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
+	        	dir('officefloor/bom') {
+					sh 'mvn clean'
+					sh 'mvn -Dofficefloor.skip.stress.tests=true install'
+	        	}
+				dir('officefloor/eclipse') {
+					// Clean build with different Eclipse target
+					// Note: latest Eclipse target is default build
+					sh 'mvn clean'
+				    sh 'mvn install -P OXYGEN.target'
+				}
+			}
+		}
+	
 	    stage('Check master') {
 	        when {
 	        	allOf {
@@ -252,9 +253,6 @@ Starting release
 	
     post {
    		always {
-			junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
-			junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
-
     		emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
 ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 
