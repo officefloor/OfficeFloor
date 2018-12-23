@@ -47,7 +47,7 @@
 		<compiler-version>3.8.0</compiler-version>
 		<current.year>2018</current.year>
 		<failsafe-version>2.22.1</failsafe-version>
-		<flatten-maven-version>1.0.1</flatten-maven-version>
+		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<java-lowest-version>8</java-lowest-version>
 		<jetty-version>9.4.14.v20181114</jetty-version>
 		<maven-version>3.6.0</maven-version>
