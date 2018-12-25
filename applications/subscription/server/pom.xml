@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<name>SubsciptionServer</name>
+	<description>Subscription server for OfficeFloor</description>
+
+	<parent>
+		<groupId>net.officefloor.subscription</groupId>
+		<artifactId>subscription</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	<artifactId>server</artifactId>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+		</dependency>
+	</dependencies>
+	<build>
+	</build>
+</project>
