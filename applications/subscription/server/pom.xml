@@ -37,7 +37,7 @@
 							<tasks>
 								<mkdir dir="./target/classes/PUBLIC" />
 								<copy todir="./target/classes/PUBLIC">
-									<fileset dir="../frontend/dist/my-app" />
+									<fileset dir="../frontend/dist/officefloor-subscription" />
 								</copy>
 							</tasks>
 						</configuration>
