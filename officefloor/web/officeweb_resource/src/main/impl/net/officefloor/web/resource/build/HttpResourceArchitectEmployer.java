@@ -71,6 +71,7 @@ import net.officefloor.web.resource.source.HttpResourceStoreManagedObjectSource;
 import net.officefloor.web.resource.source.SendCachedHttpFileFunction;
 import net.officefloor.web.resource.source.SendStoreHttpFileFunction;
 import net.officefloor.web.resource.source.ServiceHttpRequestFunction;
+import net.officefloor.web.resource.source.TranslateHttpPathToWebServicerFunction;
 import net.officefloor.web.resource.source.TriggerSendHttpFileFunction;
 import net.officefloor.web.resource.spi.FileCacheFactory;
 import net.officefloor.web.resource.spi.FileCacheService;
@@ -80,6 +81,7 @@ import net.officefloor.web.resource.spi.ResourceTransformer;
 import net.officefloor.web.resource.spi.ResourceTransformerFactory;
 import net.officefloor.web.resource.spi.ResourceTransformerService;
 import net.officefloor.web.route.WebRouter;
+import net.officefloor.web.route.WebServicer;
 import net.officefloor.web.security.build.AbstractHttpSecurable;
 import net.officefloor.web.security.build.HttpSecurableBuilder;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
@@ -95,14 +97,10 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	/**
 	 * Employs the {@link HttpResourceArchitect}.
 	 * 
-	 * @param webArchitect
-	 *            {@link WebArchitect}.
-	 * @param securityArchitect
-	 *            {@link HttpSecurityArchitect}.
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext}.
+	 * @param webArchitect        {@link WebArchitect}.
+	 * @param securityArchitect   {@link HttpSecurityArchitect}.
+	 * @param officeArchitect     {@link OfficeArchitect}.
+	 * @param officeSourceContext {@link OfficeSourceContext}.
 	 * @return {@link HttpResourceArchitect}.
 	 */
 	public static HttpResourceArchitect employHttpResourceArchitect(WebArchitect webArchitect,
@@ -154,14 +152,10 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param webArchitect
-	 *            {@link WebArchitect}.
-	 * @param securityArchitect
-	 *            {@link HttpSecurityArchitect}.
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext}.
+	 * @param webArchitect        {@link WebArchitect}.
+	 * @param securityArchitect   {@link HttpSecurityArchitect}.
+	 * @param officeArchitect     {@link OfficeArchitect}.
+	 * @param officeSourceContext {@link OfficeSourceContext}.
 	 */
 	private HttpResourceArchitectEmployer(WebArchitect webArchitect, HttpSecurityArchitect securityArchitect,
 			OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext) {
@@ -359,10 +353,8 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		/**
 		 * Instantiate
 		 * 
-		 * @param resourceSystemService
-		 *            {@link ResourceSystemFactory}.
-		 * @param location
-		 *            Location.
+		 * @param resourceSystemService {@link ResourceSystemFactory}.
+		 * @param location              Location.
 		 */
 		private HttpResourceSource(ResourceSystemFactory resourceSystemService, String location) {
 			this.resourceSystemService = resourceSystemService;
@@ -461,11 +453,21 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 					ServerHttpConnection.class.getName());
 
 			// Configure not found section output
-			SectionOutput notFoundOutput = designer.addSectionOutput(NOT_FOUND_OUTPUT_NAME, HttpPath.class.getName(),
+			SectionOutput notFoundOutput = designer.addSectionOutput(NOT_FOUND_OUTPUT_NAME, WebServicer.class.getName(),
 					false);
 
+			// Build translate to HTTP path to Web Servicer
+			final String translateFunctionName = "_translate_";
+			SectionFunctionNamespace translateNamespace = designer.addSectionFunctionNamespace(translateFunctionName,
+					new TranslateHttpPathToWebServicerFunctionSource());
+			SectionFunction translateFunction = translateNamespace.addSectionFunction(translateFunctionName,
+					TranslateHttpPathToWebServicerFunctionSource.FUNCTION_NAME);
+			translateFunction.getFunctionObject(TranslateHttpPathToWebServicerFunction.Dependencies.HTTP_PATH.name())
+					.flagAsParameter();
+			designer.link(translateFunction, notFoundOutput);
+
 			// Build store functions (in reverse order to get to chain input)
-			SectionFlowSinkNode nextHandler = notFoundOutput;
+			SectionFlowSinkNode nextHandler = translateFunction;
 			for (int i = 0; i < HttpResourceArchitectEmployer.this.httpResourceSources.size(); i++) {
 				HttpResourceSource source = HttpResourceArchitectEmployer.this.httpResourceSources.get(i);
 
@@ -504,7 +506,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 				}
 			}
 
-			// Build store functions (in reverse order to get to chain input)
+			// Build cache functions (in reverse order to get to chain input)
 			for (int i = 0; i < HttpResourceArchitectEmployer.this.httpResourceSources.size(); i++) {
 				HttpResourceSource source = HttpResourceArchitectEmployer.this.httpResourceSources.get(i);
 
@@ -551,7 +553,11 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 					new ServiceHttpRequestManagedFunctionSource());
 			SectionFunction serviceFunction = serviceNamespace.addSectionFunction("service",
 					ServiceHttpRequestManagedFunctionSource.FUNCTION_NAME);
-			designer.link(serviceFunction.getFunctionObject(Dependencies.SERVER_HTTP_CONNECTION.name()),
+			serviceFunction.getFunctionObject(ServiceHttpRequestFunction.Dependencies.WEB_SERVICER.name())
+					.flagAsParameter();
+			designer.link(
+					serviceFunction
+							.getFunctionObject(ServiceHttpRequestFunction.Dependencies.SERVER_HTTP_CONNECTION.name()),
 					serverHttpConnection);
 			designer.link(input, serviceFunction);
 			designer.link(serviceFunction, nextHandler);
@@ -611,6 +617,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 							ServiceHttpRequestFunction.Dependencies.class, None.class);
 			function.addObject(ServerHttpConnection.class)
 					.setKey(ServiceHttpRequestFunction.Dependencies.SERVER_HTTP_CONNECTION);
+			function.addObject(WebServicer.class).setKey(ServiceHttpRequestFunction.Dependencies.WEB_SERVICER);
 			function.setReturnType(HttpPath.class);
 		}
 	}
@@ -639,8 +646,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param sendHttpFileFunction
-		 *            {@link AbstractSendHttpFileFunction}.
+		 * @param sendHttpFileFunction {@link AbstractSendHttpFileFunction}.
 		 */
 		private SendHttpFileManagedFunctionSource(AbstractSendHttpFileFunction<R> sendHttpFileFunction,
 				Class<R> resourcesType) {
@@ -691,8 +697,7 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param path
-		 *            Path.
+		 * @param path Path.
 		 */
 		public TriggerSendHttpFileManagedFunctionSource(String path) {
 			this.path = path;
@@ -714,6 +719,39 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 			ManagedFunctionTypeBuilder<None, None> function = functionNamespaceTypeBuilder.addManagedFunctionType(
 					FUNCTION_NAME, new TriggerSendHttpFileFunction(path), None.class, None.class);
 			function.setReturnType(HttpPath.class);
+		}
+	}
+
+	/**
+	 * {@link ManagedFunctionSource} to translate the {@link HttpPath} to
+	 * {@link WebServicer}.
+	 */
+	@PrivateSource
+	private static class TranslateHttpPathToWebServicerFunctionSource extends AbstractManagedFunctionSource {
+
+		/**
+		 * Name of the {@link ManagedFunction}.
+		 */
+		private static final String FUNCTION_NAME = "function";
+
+		/*
+		 * =============== ManagedFunctionSource =================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+		}
+
+		@Override
+		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
+				ManagedFunctionSourceContext context) throws Exception {
+
+			// Add the function
+			ManagedFunctionTypeBuilder<TranslateHttpPathToWebServicerFunction.Dependencies, None> function = functionNamespaceTypeBuilder
+					.addManagedFunctionType(FUNCTION_NAME, new TranslateHttpPathToWebServicerFunction(),
+							TranslateHttpPathToWebServicerFunction.Dependencies.class, None.class);
+			function.addObject(HttpPath.class).setKey(TranslateHttpPathToWebServicerFunction.Dependencies.HTTP_PATH);
+			function.setReturnType(WebServicer.class);
 		}
 	}
 

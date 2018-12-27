@@ -19,6 +19,7 @@ package net.officefloor.web.resource.source;
 
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.resource.HttpResource;
+import net.officefloor.web.route.WebServicer;
 
 /**
  * Path for a {@link HttpResource}.
@@ -33,23 +34,28 @@ public class HttpPath {
 	private final String path;
 
 	/**
+	 * {@link WebServicer}.
+	 */
+	private final WebServicer webServicer;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param path
-	 *            Path.
+	 * @param path Path.
 	 */
 	public HttpPath(String path) {
 		this.path = path;
+		this.webServicer = null;
 	}
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param request
-	 *            {@link HttpRequest} to extract the path.
+	 * @param request {@link HttpRequest} to extract the path.
 	 */
-	public HttpPath(HttpRequest request) {
-		this(request.getUri());
+	public HttpPath(HttpRequest request, WebServicer webServicer) {
+		this.path = request.getUri();
+		this.webServicer = webServicer;
 	}
 
 	/**
@@ -59,6 +65,15 @@ public class HttpPath {
 	 */
 	public String getPath() {
 		return this.path;
+	}
+
+	/**
+	 * Obtains the {@link WebServicer}.
+	 * 
+	 * @return {@link WebServicer}.
+	 */
+	public WebServicer getWebServicer() {
+		return this.webServicer;
 	}
 
 }
