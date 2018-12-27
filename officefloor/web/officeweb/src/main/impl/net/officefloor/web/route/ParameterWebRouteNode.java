@@ -45,8 +45,8 @@ public class ParameterWebRouteNode implements WebRouteNode {
 	private final char[] terminatingCharacters;
 
 	/**
-	 * {@link Map} of terminating {@link Character} to
-	 * {@link StaticWebRouteNode} instances.
+	 * {@link Map} of terminating {@link Character} to {@link StaticWebRouteNode}
+	 * instances.
 	 */
 	private final Map<Character, WebRouteNode[]> characterToChildren;
 
@@ -58,12 +58,10 @@ public class ParameterWebRouteNode implements WebRouteNode {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param nodes
-	 *            Further {@link StaticWebRouteNode} instances.
-	 * @param leafNode
-	 *            {@link LeafWebRouteNode} should the parameter finish the path.
-	 *            May be <code>null</code> if parameter is always embedded in
-	 *            middle of the path.
+	 * @param nodes    Further {@link StaticWebRouteNode} instances.
+	 * @param leafNode {@link LeafWebRouteNode} should the parameter finish the
+	 *                 path. May be <code>null</code> if parameter is always
+	 *                 embedded in middle of the path.
 	 */
 	public ParameterWebRouteNode(StaticWebRouteNode[] nodes, LeafWebRouteNode leafNode) {
 		this.leafNode = leafNode;
@@ -120,10 +118,8 @@ public class ParameterWebRouteNode implements WebRouteNode {
 	/**
 	 * Includes the {@link HttpArgument}.
 	 * 
-	 * @param headPathArgument
-	 *            Head {@link HttpArgument}.of arguments.
-	 * @param argumentValue
-	 *            {@link HttpArgument} value.
+	 * @param headPathArgument Head {@link HttpArgument}.of arguments.
+	 * @param argumentValue    {@link HttpArgument} value.
 	 * @return Head {@link HttpArgument} of arguments including the argument.
 	 */
 	private HttpArgument includePathArgument(HttpArgument headPathArgument, String argumentValue) {
@@ -137,7 +133,7 @@ public class ParameterWebRouteNode implements WebRouteNode {
 	 */
 
 	@Override
-	public boolean handle(HttpMethod method, String path, int index, HttpArgument headPathArgument,
+	public WebServicer handle(HttpMethod method, String path, int index, HttpArgument headPathArgument,
 			ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> context) {
 
 		// Capture starting position of parameter value
@@ -159,14 +155,10 @@ public class ParameterWebRouteNode implements WebRouteNode {
 
 					// Attempt to terminate parameter
 					WebRouteNode[] nodes = this.characterToChildren.get(character);
-					for (int n = 0; n < nodes.length; n++) {
-						WebRouteNode node = nodes[n];
-
-						// Determine if handle route
-						if (node.handle(method, path, index, this.includePathArgument(headPathArgument, parameterValue),
-								connection, context)) {
-							return true; // parameter terminated (route handled)
-						}
+					WebServicer servicer = WebServicer.getBestMatch(method, path, index,
+							this.includePathArgument(headPathArgument, parameterValue), connection, context, nodes);
+					if (WebServicer.isMatch(servicer)) {
+						return servicer; // parameter terminated (route matched)
 					}
 				}
 			}
@@ -180,8 +172,10 @@ public class ParameterWebRouteNode implements WebRouteNode {
 
 			// Ignore trailing '/' characters
 			int parameterEnd = index - 1; // last index
-			while (path.charAt(parameterEnd) == '/') {
-				parameterEnd--;
+			if (path.length() > 0) {
+				while (path.charAt(parameterEnd) == '/') {
+					parameterEnd--;
+				}
 			}
 
 			// Obtain the parameter value (+1 as exclusive)
@@ -193,7 +187,7 @@ public class ParameterWebRouteNode implements WebRouteNode {
 		}
 
 		// As here, no match
-		return false;
+		return WebServicer.NO_MATCH;
 	}
 
 }

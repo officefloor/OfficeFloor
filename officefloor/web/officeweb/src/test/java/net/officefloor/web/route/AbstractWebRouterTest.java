@@ -29,6 +29,7 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.HttpInputPath;
 import net.officefloor.web.build.HttpPathFactory;
+import net.officefloor.web.escalation.NotFoundHttpException;
 import net.officefloor.web.state.HttpArgument;
 
 /**
@@ -149,8 +150,8 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure path parameter terminated by fragment. Should not occur, but
-	 * included for completeness.
+	 * Ensure path parameter terminated by fragment. Should not occur, but included
+	 * for completeness.
 	 */
 	public void testParamTermintedByFragment() {
 		this.route("/path/value#fragment", T("/path/{param}", "param", "value"));
@@ -239,8 +240,8 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure if back out down one route that parameters are not included for
-	 * that route.
+	 * Ensure if back out down one route that parameters are not included for that
+	 * route.
 	 */
 	public void testBackoutParameters() {
 		this.route("/path/value12static/backout",
@@ -249,8 +250,8 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure if back out down one route that parameters are not included for
-	 * that POST route.
+	 * Ensure if back out down one route that parameters are not included for that
+	 * POST route.
 	 */
 	public void testPostBackoutParameters() {
 		this.route(HttpMethod.POST, "/path/value12static/backout",
@@ -263,6 +264,35 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 	 */
 	public void testMatchingIgnoringRemaining() {
 		this.route("/prefix/extra", T("/prefix{}", "", "/extra"));
+	}
+
+	/**
+	 * Ensure can match whole path.
+	 */
+	public void testMatchWholePath() {
+		this.route("/path", T("{path}", "path", "/path"));
+	}
+
+	/**
+	 * Ensure can match no path.
+	 */
+	public void testMatchNoPath() {
+		this.route("", T("{path}", "path", ""));
+	}
+
+	/**
+	 * Ensure can match by extension.
+	 */
+	public void testMatchExtension() {
+		this.route("/image.png", T("{filename}.png", "filename", "/image"));
+	}
+
+	/**
+	 * Ensure can match OPTIONS request on any path with application handling.
+	 */
+	public void testMatchOptions() {
+		this.route(HttpMethod.OPTIONS, "/path", R(HttpMethod.GET, "/path"), R(HttpMethod.POST, "/{path}"),
+				T(HttpMethod.OPTIONS, "{path}", "path", "/path"));
 	}
 
 	/**
@@ -413,7 +443,16 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 		}
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest(path).method(method);
 		MockServerHttpConnection connection = MockHttpServer.mockConnection(request);
-		boolean isServiced = router.service(connection, managedFunctionContext);
+		WebServicer servicer = router.getWebServicer(connection, managedFunctionContext);
+
+		// Attempt to service
+		boolean isServiced;
+		try {
+			servicer.service(connection);
+			isServiced = true;
+		} catch (NotFoundHttpException ex) {
+			isServiced = false;
+		}
 
 		// Determine if appropriately serviced
 		assertEquals("Invalid servicing", isHandled, isServiced);

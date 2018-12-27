@@ -28,6 +28,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpRouteSectionSource.RouteInput;
 import net.officefloor.web.route.WebRouter;
+import net.officefloor.web.route.WebServicer;
 import net.officefloor.web.state.HttpArgument;
 
 /**
@@ -50,10 +51,8 @@ public class HttpRouter {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param router
-	 *            {@link WebRouter}.
-	 * @param nonHandledFlowIndex
-	 *            {@link Flow} index for non handled.
+	 * @param router              {@link WebRouter}.
+	 * @param nonHandledFlowIndex {@link Flow} index for non handled.
 	 */
 	public HttpRouter(WebRouter router, int nonHandledFlowIndex) {
 		this.router = router;
@@ -64,11 +63,10 @@ public class HttpRouter {
 	 * Configures the {@link ManagedFunctionTypeBuilder} with the {@link Flow}
 	 * instances for routing.
 	 * 
-	 * @param routes
-	 *            {@link List} of {@link RouteInput} instances for the application.
-	 * @param function
-	 *            {@link ManagedFunctionTypeBuilder} to be configured with the
-	 *            {@link Flow} instances.
+	 * @param routes   {@link List} of {@link RouteInput} instances for the
+	 *                 application.
+	 * @param function {@link ManagedFunctionTypeBuilder} to be configured with the
+	 *                 {@link Flow} instances.
 	 */
 	public void configureRoutes(List<RouteInput> routes, ManagedFunctionTypeBuilder<?, Indexed> function) {
 
@@ -86,23 +84,28 @@ public class HttpRouter {
 	/**
 	 * Routes the {@link ServerHttpConnection}.
 	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @param context
-	 *            {@link ManagedFunctionContext}.
+	 * @param connection {@link ServerHttpConnection}.
+	 * @param context    {@link ManagedFunctionContext}.
 	 * @return Argument for the next {@link ManagedFunction}.
 	 */
 	public Object route(ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> context) {
 
-		// Attempt to route the request
-		if (this.router.service(connection, context)) {
-			return null; // routed to servicing
+		// Obtain the service
+		WebServicer servicer = this.router.getWebServicer(connection, context);
+		switch (servicer.getMatchResult()) {
+		case MATCH:
+			// Service the request
+			servicer.service(connection);
+			break;
 
-		} else {
+		default:
 			// Not handled
-			context.doFlow(this.nonHandledFlowIndex, null, null);
-			return null; // flow invoked
+			context.doFlow(this.nonHandledFlowIndex, servicer, null);
+			break;
 		}
+
+		// Nothing further
+		return null;
 	}
 
 }

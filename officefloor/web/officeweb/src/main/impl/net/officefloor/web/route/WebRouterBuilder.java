@@ -45,8 +45,7 @@ public class WebRouterBuilder {
 	/**
 	 * Indicates if the path contains parameters.
 	 * 
-	 * @param path
-	 *            Path.
+	 * @param path Path.
 	 * @return <code>true</code> should the path contain parameters.
 	 */
 	public static boolean isPathParameters(String path) {
@@ -66,8 +65,7 @@ public class WebRouterBuilder {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param contextPath
-	 *            Context path.
+	 * @param contextPath Context path.
 	 */
 	public WebRouterBuilder(String contextPath) {
 		this.contextPath = contextPath;
@@ -76,12 +74,9 @@ public class WebRouterBuilder {
 	/**
 	 * Adds a route.
 	 *
-	 * @param method
-	 *            {@link HttpMethod}.
-	 * @param path
-	 *            Path. Use <code>{param}</code> to signify path parameters.
-	 * @param handler
-	 *            {@link WebRouteHandler} for the route.
+	 * @param method  {@link HttpMethod}.
+	 * @param path    Path. Use <code>{param}</code> to signify path parameters.
+	 * @param handler {@link WebRouteHandler} for the route.
 	 * @return {@link HttpInputPath} for the route.
 	 */
 	public HttpInputPath addRoute(HttpMethod method, String path, WebRouteHandler handler) {
@@ -114,7 +109,8 @@ public class WebRouterBuilder {
 
 			} else {
 				// Another parameter, so ensure static path separation
-				if ((nextParamStart - currentIndex) == 0) {
+				// (also handle parameter at start)
+				if ((currentIndex > 0) && ((nextParamStart - currentIndex) == 0)) {
 					throw new IllegalArgumentException("Must have static characters between path parameters");
 				}
 
@@ -191,10 +187,8 @@ public class WebRouterBuilder {
 	/**
 	 * Creates the {@link WebRouteNode}.
 	 * 
-	 * @param choice
-	 *            {@link WebRouteChoice}.
-	 * @param staticCharacters
-	 *            Previous static characters.
+	 * @param choice           {@link WebRouteChoice}.
+	 * @param staticCharacters Previous static characters.
 	 * @return {@link WebRouteNode}.
 	 */
 	private WebRouteNode createNode(WebRouteChoice choice, List<Character> staticCharacters) {
@@ -337,8 +331,7 @@ public class WebRouterBuilder {
 	/**
 	 * Create the {@link WebRouteChoice} values for the {@link WebRoute}.
 	 * 
-	 * @param routes
-	 *            {@link WebRoute}.
+	 * @param routes {@link WebRoute}.
 	 * @return {@link WebRouteChoice}.
 	 */
 	private WebRouteChoice[] createChoices(List<WebRoute> routes) {
@@ -453,15 +446,11 @@ public class WebRouterBuilder {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param method
-		 *            {@link HttpMethod}.
-		 * @param routePath
-		 *            Route path.
-		 * @param segmentHead
-		 *            Head {@link HttpInputPathSegment} of linked list of
-		 *            {@link HttpInputPathSegment} instances.
-		 * @param handler
-		 *            {@link WebRouteHandler}.
+		 * @param method      {@link HttpMethod}.
+		 * @param routePath   Route path.
+		 * @param segmentHead Head {@link HttpInputPathSegment} of linked list of
+		 *                    {@link HttpInputPathSegment} instances.
+		 * @param handler     {@link WebRouteHandler}.
 		 */
 		public WebRoute(HttpMethod method, String routePath, HttpInputPathSegment segmentHead,
 				WebRouteHandler handler) {
@@ -535,8 +524,7 @@ public class WebRouterBuilder {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param route
-		 *            {@link WebRoute}.
+		 * @param route {@link WebRoute}.
 		 */
 		private WebRouteChoice(WebRoute route) {
 

@@ -14,6 +14,11 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>server</artifactId>
+
+	<properties>
+		<google.version>1.25.0</google.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
@@ -22,6 +27,20 @@
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officejson_jackson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>${google.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
@@ -37,7 +56,8 @@
 							<tasks>
 								<mkdir dir="./target/classes/PUBLIC" />
 								<copy todir="./target/classes/PUBLIC">
-									<fileset dir="../frontend/dist/officefloor-subscription" />
+									<fileset
+										dir="../frontend/dist/officefloor-subscription" />
 								</copy>
 							</tasks>
 						</configuration>

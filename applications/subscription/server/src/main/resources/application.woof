@@ -1,16 +1,22 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/example" secure="false" x="119" y="129">
-      <section name="Example" input="service"/>
-    </http-continuation>
   </http-continuations>
   <http-inputs>
+    <http-input path="{path}" method="OPTIONS" secure="false" x="172" y="92">
+      <section name="Cors" input="options"/>
+    </http-input>
+    <http-input path="/authenticate" method="POST" secure="false" x="153" y="197">
+      <section name="Authenticate" input="service"/>
+    </http-input>
   </http-inputs>
   <templates>
   </templates>
   <sections>
-    <section name="Example" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.Example" x="333" y="110">
+    <section name="Authenticate" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.Authenticate" x="422" y="179">
       <input name="service" parameter-type=""/>
+    </section>
+    <section name="Cors" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.Cors" x="426" y="84">
+      <input name="options" parameter-type=""/>
     </section>
   </sections>
   <securities>

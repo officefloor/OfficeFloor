@@ -50,18 +50,16 @@ public class LeafWebRouteNode implements WebRouteNode {
 	private final Map<HttpMethodEnum, LeafWebRouteHandling> handlers;
 
 	/**
-	 * <code>Allow</code> {@link HttpHeaderValue}.
+	 * Not allowed {@link WebServicer}.
 	 */
-	private final HttpHeaderValue allowedMethods;
+	private final WebServicer notAllowedServicer;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param allowedMethods
-	 *            Allowed {@link HttpMethod} names.
-	 * @param handlers
-	 *            {@link LeafWebRouteHandling} instances by their
-	 *            {@link HttpMethod}.
+	 * @param allowedMethods Allowed {@link HttpMethod} names.
+	 * @param handlers       {@link LeafWebRouteHandling} instances by their
+	 *                       {@link HttpMethod}.
 	 */
 	public LeafWebRouteNode(String[] allowedMethods, Map<HttpMethodEnum, LeafWebRouteHandling> handlers) {
 		this.handlers = handlers;
@@ -76,7 +74,24 @@ public class LeafWebRouteNode implements WebRouteNode {
 			isFirst = false;
 			value.append(allowedMethod);
 		}
-		this.allowedMethods = new HttpHeaderValue(value.toString());
+		HttpHeaderValue allowedMethodsValue = new HttpHeaderValue(value.toString());
+
+		// Create web servicer for not allowed method
+		this.notAllowedServicer = new WebServicer() {
+
+			@Override
+			public WebRouteMatchEnum getMatchResult() {
+				return WebRouteMatchEnum.NOT_ALLOWED_METHOD;
+			}
+
+			@Override
+			public void service(ServerHttpConnection connection) {
+				// Method not allowed
+				HttpResponse response = connection.getResponse();
+				response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
+				response.getHeaders().addHeader(ALLOW, allowedMethodsValue);
+			}
+		};
 	}
 
 	/*
@@ -84,7 +99,7 @@ public class LeafWebRouteNode implements WebRouteNode {
 	 */
 
 	@Override
-	public boolean handle(HttpMethod method, String path, int index, HttpArgument headPathArgument,
+	public WebServicer handle(HttpMethod method, String path, int index, HttpArgument headPathArgument,
 			ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> context) {
 
 		// Determine if end of path
@@ -117,7 +132,7 @@ public class LeafWebRouteNode implements WebRouteNode {
 
 		// Determine if end
 		if (!isEnd) {
-			return false; // not end, so not handled
+			return WebServicer.NO_MATCH; // not end, so not handled
 		}
 
 		// Obtain the handler
@@ -154,18 +169,26 @@ public class LeafWebRouteNode implements WebRouteNode {
 				}
 			}
 
-			// Handle request
-			handler.handle(namedArguments, connection, context);
+			// Service the request
+			WebRouteHandler finalHandler = handler;
+			HttpArgument finalNamedArguments = namedArguments;
+			return new WebServicer() {
+
+				@Override
+				public WebRouteMatchEnum getMatchResult() {
+					return WebRouteMatchEnum.MATCH;
+				}
+
+				@Override
+				public void service(ServerHttpConnection connection) {
+					finalHandler.handle(finalNamedArguments, connection, context);
+				}
+			};
 
 		} else {
 			// Method not allowed
-			HttpResponse response = connection.getResponse();
-			response.setStatus(HttpStatus.METHOD_NOT_ALLOWED);
-			response.getHeaders().addHeader(ALLOW, this.allowedMethods);
+			return this.notAllowedServicer;
 		}
-
-		// Handled
-		return true;
 	}
 
 }

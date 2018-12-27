@@ -23,20 +23,21 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.escalation.NotFoundHttpException;
+import net.officefloor.web.route.WebServicer;
 
 /**
  * {@link ManagedFunction} for not handling routing.
  * 
  * @author Daniel Sagenschneider
  */
-public class NotFoundFunction implements ManagedFunctionFactory<NotFoundFunction.NotFoundDependencies, None>,
-		ManagedFunction<NotFoundFunction.NotFoundDependencies, None> {
+public class NotHandledFunction implements ManagedFunctionFactory<NotHandledFunction.NotHandledDependencies, None>,
+		ManagedFunction<NotHandledFunction.NotHandledDependencies, None> {
 
 	/**
 	 * Dependency keys.
 	 */
-	public static enum NotFoundDependencies {
-		SERVER_HTTP_CONNECTION
+	public static enum NotHandledDependencies {
+		SERVER_HTTP_CONNECTION, WEB_SERVICER
 	}
 
 	/*
@@ -44,7 +45,7 @@ public class NotFoundFunction implements ManagedFunctionFactory<NotFoundFunction
 	 */
 
 	@Override
-	public ManagedFunction<NotFoundDependencies, None> createManagedFunction() {
+	public ManagedFunction<NotHandledDependencies, None> createManagedFunction() {
 		return this;
 	}
 
@@ -53,15 +54,24 @@ public class NotFoundFunction implements ManagedFunctionFactory<NotFoundFunction
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<NotFoundDependencies, None> context) throws NotFoundHttpException {
+	public Object execute(ManagedFunctionContext<NotHandledDependencies, None> context) throws NotFoundHttpException {
 
-		// Obtain the request path
+		// Obtain details
 		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(NotFoundDependencies.SERVER_HTTP_CONNECTION);
-		String requestPath = connection.getRequest().getUri();
+				.getObject(NotHandledDependencies.SERVER_HTTP_CONNECTION);
+		WebServicer servicer = (WebServicer) context.getObject(NotHandledDependencies.WEB_SERVICER);
 
-		// Not found
-		throw new NotFoundHttpException(requestPath);
+		// Service request (if available)
+		if (servicer != null) {
+			servicer.service(connection);
+
+		} else {
+			// Provide default not match servicing
+			WebServicer.NO_MATCH.service(connection);
+		}
+
+		// Nothing further
+		return null;
 	}
 
 }
