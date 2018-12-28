@@ -170,12 +170,10 @@ public class ParameterWebRouteNode implements WebRouteNode {
 		// As here, reached end of path
 		if (this.leafNode != null) {
 
-			// Ignore trailing '/' characters
+			// Ignore trailing '/' characters (also handle / for {path} match)
 			int parameterEnd = index - 1; // last index
-			if (path.length() > 0) {
-				while (path.charAt(parameterEnd) == '/') {
-					parameterEnd--;
-				}
+			while ((parameterEnd > parameterStart) && (path.charAt(parameterEnd) == '/')) {
+				parameterEnd--;
 			}
 
 			// Obtain the parameter value (+1 as exclusive)

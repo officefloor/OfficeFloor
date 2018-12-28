@@ -274,6 +274,13 @@ public abstract class AbstractWebRouterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure match the root path.
+	 */
+	public void testMatchRoot() {
+		this.route("/", R("/path"), T("{path}", "path", "/"));
+	}
+
+	/**
 	 * Ensure can match no path.
 	 */
 	public void testMatchNoPath() {
