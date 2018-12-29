@@ -1,53 +1,84 @@
 package net.officefloor.app.subscription;
 
-import java.util.Collections;
+import java.util.List;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.googlecode.objectify.Objectify;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import net.officefloor.app.subscription.store.GoogleSignin;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpObject;
+import net.officefloor.web.ObjectResponse;
 
 /**
  * Provides authentication.
  */
 public class Authenticate {
 
-	private static HttpTransport transport = new NetHttpTransport();
-
-	private static JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-
-	private static GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-			.setAudience(Collections
-					.singletonList("443132781504-19vekci7r4t2qvqpbg9q1s32kjnp1c7t.apps.googleusercontent.com"))
-			.build();
-
 	@Data
 	@HttpObject
-	public static class Authentication {
-		String idToken;
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class AuthenticateRequest {
+		private String idToken;
 	}
 
-	public void service(Authentication authentication, ServerHttpConnection connection) throws Exception {
+	@Data
+	public static class AuthenticateResponse {
+		private final boolean isSuccessful;
+		private final String error;
+	}
+
+	public void service(AuthenticateRequest idTokenInput, GoogleIdTokenVerifier verifier, Objectify objectify,
+			ObjectResponse<AuthenticateResponse> response) throws Exception {
 
 		// Verify token
-		GoogleIdToken token = verifier.verify(authentication.getIdToken());
+		GoogleIdToken token = verifier.verify(idTokenInput.getIdToken());
+		if (token == null) {
+			throw new HttpException(HttpStatus.UNAUTHORIZED);
+		}
 
-		// Provide details
+		// Ensure using verified email
 		Payload payload = token.getPayload();
-		System.out.println(
-				"User: " + payload.get("name") + " (" + payload.getSubject() + " - " + payload.getEmail() + ")");
+		Boolean emailVerified = payload.getEmailVerified();
+		if ((emailVerified == null) || (!emailVerified)) {
+			response.send(new AuthenticateResponse(false, "Please verify your email"));
+			return;
+		}
 
-		// TODO create user in database
+		// Obtain the user details
+		String googleId = payload.getSubject();
+		String email = payload.getEmail();
+		String name = payload.get("name").toString();
+		String photoUrl = payload.get("photoUrl").toString();
 
-		// Send response
-		connection.getResponse().getEntityWriter().write("{}");
+		// Determine if the user exists
+		List<GoogleSignin> users = objectify.load().type(GoogleSignin.class).filter("googleId", googleId).list();
+
+		// Update or create the user
+		GoogleSignin user;
+		if (users.size() > 0) {
+			// Update the existing user
+			user = users.get(0);
+			user.setEmail(email);
+
+		} else {
+			// Load the new user
+			user = new GoogleSignin(googleId, email);
+		}
+		user.setName(name);
+		user.setPhotoUrl(photoUrl);
+		objectify.save().entity(user).now();
+
+		// Indicate successfully authenticated
+		response.send(new AuthenticateResponse(true, null));
 	}
 
 }

@@ -16,7 +16,8 @@
 	<artifactId>server</artifactId>
 
 	<properties>
-		<google.version>1.25.0</google.version>
+		<google.appengine.version>1.9.71</google.appengine.version>
+		<objectify.version>6.0.2</objectify.version>
 	</properties>
 
 	<dependencies>
@@ -33,9 +34,20 @@
 			<artifactId>officejson_jackson</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.google.api-client</groupId>
-			<artifactId>google-api-client</artifactId>
-			<version>${google.version}</version>
+			<groupId>com.googlecode.objectify</groupId>
+			<artifactId>objectify</artifactId>
+			<version>${objectify.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-testing</artifactId>
+			<version>${google.appengine.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
