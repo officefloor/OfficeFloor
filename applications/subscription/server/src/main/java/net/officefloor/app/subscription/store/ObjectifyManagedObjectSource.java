@@ -1,7 +1,5 @@
 package net.officefloor.app.subscription.store;
 
-import javax.naming.spi.ObjectFactoryBuilder;
-
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
