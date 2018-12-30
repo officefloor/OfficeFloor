@@ -1,0 +1,10 @@
+<objects>
+
+	<managed-object source="net.officefloor.app.subscription.authenticate.GoogleIdTokenVerifierManagedObjectSource"
+		scope="process" type="com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier">
+		<property name="google.client.id" value="443132781504-19vekci7r4t2qvqpbg9q1s32kjnp1c7t.apps.googleusercontent.com" />
+	</managed-object>
+	
+	<managed-object source="net.officefloor.app.subscription.store.ObjectifyManagedObjectSource" scope="thread" type="com.googlecode.objectify.Objectify" />
+
+</objects>

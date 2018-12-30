@@ -14,6 +14,8 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.cache.PendingFutures;
 import com.googlecode.objectify.util.Closeable;
 
+import net.officefloor.app.subscription.store.ObjectifyManagedObjectSource;
+
 /**
  * {@link Rule} for running {@link Objectify} with local {@link Datastore}.
  * 
@@ -89,7 +91,8 @@ public class ObjectifyRule implements TestRule {
 				dataStore.reset();
 
 				// Initialise Objectify
-				ObjectifyService.init(new ObjectifyFactory(dataStore.getOptions().getService()));
+				ObjectifyFactory factory = new ObjectifyFactory(dataStore.getOptions().getService());
+				ObjectifyService.init(factory);
 				for (Class<?> entity : ObjectifyRule.this.entities) {
 					ObjectifyService.register(entity);
 				}
@@ -97,8 +100,10 @@ public class ObjectifyRule implements TestRule {
 				// Run the test (with objectify session)
 				Closeable closable = ObjectifyService.begin();
 				try {
+					ObjectifyManagedObjectSource.setObjectifyFactoryManufacturer(() -> factory);
 					base.evaluate();
 				} finally {
+					ObjectifyManagedObjectSource.setObjectifyFactoryManufacturer(null);
 					PendingFutures.completeAllPendingFutures();
 					closable.close();
 				}

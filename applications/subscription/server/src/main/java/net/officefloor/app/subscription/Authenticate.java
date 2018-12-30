@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
-import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
 
