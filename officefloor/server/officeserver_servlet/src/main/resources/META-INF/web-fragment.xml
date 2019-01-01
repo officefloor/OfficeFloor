@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-fragment
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-fragment_3_0.xsd"
+	id="WebAppFragment_ID" version="3.0">
+
+	<name>OfficeFloor</name>
+
+	<filter>
+		<filter-name>OfficeFloor</filter-name>
+		<filter-class>net.officefloor.server.http.servlet.OfficeFloorFilter</filter-class>
+		<async-supported>true</async-supported>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>OfficeFloor</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+</web-fragment>

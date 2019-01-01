@@ -81,6 +81,7 @@
 		<netty-version>4.1.32.Final</netty-version>
 		<postgresql-version>42.2.5</postgresql-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
+		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.25</slf4j-version>
 		<spring-version>2.1.1.RELEASE</spring-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
@@ -136,6 +137,11 @@
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_default</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_servlet</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -360,6 +366,11 @@
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>org.eclipse.persistence.jpa</artifactId>
 				<version>${eclipse-persistence-jpa-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>${servlet-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.xml.bind</groupId>
