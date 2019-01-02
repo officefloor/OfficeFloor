@@ -20,9 +20,9 @@ Configuring for Servlet container
   
 %{snippet|id=dependency|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
-  Then package the application as a **war** to enable being deployed to Servlet container.
+  Then package the application as a <<<war>>> to enable being deployed to Servlet container.
   
-  Note that WoOF will run as a **Filter** and only intercept requests it can handle.  This means existing Servlet functionality can work side by side with WoOF.  Very useful for phased migration of existing Servlet applications to WoOF.
+  Note that WoOF will run as a <<<Filter>>> and only intercept requests it can handle.  This means existing Servlet functionality can work side by side with WoOF.  Very useful for phased migration of existing Servlet applications to WoOF.
 
 
 
