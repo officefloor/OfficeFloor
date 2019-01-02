@@ -17,6 +17,7 @@
 	</properties>
 	<build>
 		<plugins>
+			<!-- START SNIPPET: run -->
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
@@ -56,6 +57,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- END SNIPPET: run -->
 		</plugins>
 	</build>
 	<dependencies>
@@ -64,8 +66,19 @@
 			<artifactId>woof</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officejson_jackson</artifactId>
+		</dependency>
+		<!-- START SNIPPET: dependency -->
+		<dependency>
 			<groupId>net.officefloor.server</groupId>
 			<artifactId>officeserver_servlet</artifactId>
+		</dependency>
+		<!-- END SNIPPET: dependency -->
+		<dependency>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -73,9 +86,9 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<scope>test</scope>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

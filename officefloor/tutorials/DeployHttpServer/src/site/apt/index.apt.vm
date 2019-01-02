@@ -43,20 +43,6 @@ CMD ["java", "-Dhttp.port=8080", "-jar", "server.jar"]
    * {{{/apidocs/net/officefloor/server/http/HttpServer.html}HttpServer}}
 
 
-Now your turn
+Next
 
-  Should you have worked through all the tutorials, you are now ready to:
-
-   [[1]] Prototype your applications with OfficeFloor
-  
-   [[1]] Easily transform prototypes into working applications with OfficeFloor
-  
-   [[1]] Easily test your applications built with OfficeFloor
-  
-   [[1]] With graphical configuration, easily refactor your applications built with OfficeFloor
-  
-   [[1]] Tune your applications (via Thread Injection provided by OfficeFloor)
-  
-   [[1]] Deploy your applications with OfficeFloor
-
-  Return to the {{{../index.html}tutorials}}.
+  The {{{../HttpServletHttpServer/index.html}next tutorial}} looks at deploying to Servlet container (useful for PaaS cloud providers).
