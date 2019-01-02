@@ -48,17 +48,22 @@ public interface ResourceSystemContext {
 	String getLocation();
 
 	/**
+	 * Obtains the {@link HttpResourceStore}.
+	 * 
+	 * @return {@link HttpResourceStore}.
+	 */
+	HttpResourceStore getHttpResourceStore();
+
+	/**
 	 * <p>
 	 * Creates a new file.
 	 * <p>
-	 * All files required should be created via this method. This is to ensure
-	 * the files are managed.
+	 * All files required should be created via this method. This is to ensure the
+	 * files are managed.
 	 * 
-	 * @param name
-	 *            Name to aid in identifying the file for debugging.
+	 * @param name Name to aid in identifying the file for debugging.
 	 * @return {@link Path} to the new file.
-	 * @throws IOException
-	 *             If fails to create the new file.
+	 * @throws IOException If fails to create the new file.
 	 */
 	Path createFile(String name) throws IOException;
 
@@ -69,26 +74,22 @@ public interface ResourceSystemContext {
 	 * All directories should be created via this method. THis is to ensure the
 	 * directories are managed.
 	 * 
-	 * @param name
-	 *            Name to aid in identifying the directory for debugging.
+	 * @param name Name to aid in identifying the directory for debugging.
 	 * @return {@link Path} to the new directory.
-	 * @throws IOException
-	 *             If fails to create the new directory.
+	 * @throws IOException If fails to create the new directory.
 	 */
 	Path createDirectory(String name) throws IOException;
 
 	/**
 	 * <p>
-	 * Specifies the {@link Charset} for files within the
-	 * {@link ResourceSystem}.
+	 * Specifies the {@link Charset} for files within the {@link ResourceSystem}.
 	 * <p>
 	 * This is optional to invoke. If not configured (or configured with
-	 * <code>null</code>) then the {@link Charset#defaultCharset()} will be used
-	 * as the {@link Charset} for the files.
+	 * <code>null</code>) then the {@link Charset#defaultCharset()} will be used as
+	 * the {@link Charset} for the files.
 	 * 
-	 * @param charset
-	 *            {@link Charset} of the files within the
-	 *            {@link ResourceSystem}.
+	 * @param charset {@link Charset} of the files within the
+	 *                {@link ResourceSystem}.
 	 */
 	void setCharset(Charset charset);
 
@@ -96,13 +97,12 @@ public interface ResourceSystemContext {
 	 * <p>
 	 * Allows the {@link ResourceSystem} to notify that a resource has changed.
 	 * <p>
-	 * The {@link HttpResourceStore} will then discard the {@link HttpResource}
-	 * for the path. Should the path be <code>null</code> then all
-	 * {@link HttpResource} instances are discarded.
+	 * The {@link HttpResourceStore} will then discard the {@link HttpResource} for
+	 * the path. Should the path be <code>null</code> then all {@link HttpResource}
+	 * instances are discarded.
 	 * 
-	 * @param resourcePath
-	 *            Path for the resource. If <code>null</code> then all resources
-	 *            will be discarded.
+	 * @param resourcePath Path for the resource. If <code>null</code> then all
+	 *                     resources will be discarded.
 	 */
 	void notifyResourceChanged(String resourcePath);
 

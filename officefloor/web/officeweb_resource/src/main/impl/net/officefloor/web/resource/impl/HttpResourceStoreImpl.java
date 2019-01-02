@@ -136,18 +136,13 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	/**
 	 * Instantiate.
 	 * 
-	 * @param location
-	 *            Location for the {@link ResourceSystemContext}.
-	 * @param resourceSystemService
-	 *            {@link ResourceSystemFactory}.
-	 * @param fileCacheFactory
-	 *            {@link FileCacheFactory}.
-	 * @param transformers
-	 *            {@link ResourceTransformer} instances.
-	 * @param directoryDefaultResourceNames
-	 *            Directory default resource names.
-	 * @throws IOException
-	 *             If fails to instantiate the {@link HttpResourceStore}.
+	 * @param location                      Location for the
+	 *                                      {@link ResourceSystemContext}.
+	 * @param resourceSystemService         {@link ResourceSystemFactory}.
+	 * @param fileCacheFactory              {@link FileCacheFactory}.
+	 * @param transformers                  {@link ResourceTransformer} instances.
+	 * @param directoryDefaultResourceNames Directory default resource names.
+	 * @throws IOException If fails to instantiate the {@link HttpResourceStore}.
 	 */
 	public HttpResourceStoreImpl(String location, ResourceSystemFactory resourceSystemService,
 			FileCacheFactory fileCacheFactory, ResourceTransformer[] transformers,
@@ -182,33 +177,6 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	 */
 	public HttpResourceCache getCache() {
 		return this.httpResourceCache;
-	}
-
-	/**
-	 * Obtains the default {@link HttpFile} for the {@link HttpDirectory}.
-	 * 
-	 * @param directory
-	 *            {@link HttpDirectory}.
-	 * @return {@link HttpFile} for the {@link HttpDirectory} or <code>null</code>
-	 *         if no default {@link HttpFile}.
-	 * @throws IOException
-	 *             If failure in obtaining default {@link HttpFile}.
-	 */
-	HttpFile getDefaultHttpFile(HttpDirectory directory) throws IOException {
-
-		// Iterate over default file names to find file
-		for (int i = 0; i < this.directoryDefaultResourceNames.length; i++) {
-			String filePath = directory.getPath() + this.directoryDefaultResourceNames[i];
-			HttpResource resource = this.getHttpResource(filePath);
-			if ((resource != null) && (resource instanceof HttpFile)) {
-
-				// Found the default HTTP file
-				return (HttpFile) resource;
-			}
-		}
-
-		// As here, no default HTTP file
-		return null;
 	}
 
 	/*
@@ -264,6 +232,24 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		return resource;
 	}
 
+	@Override
+	public HttpFile getDefaultHttpFile(HttpDirectory directory) throws IOException {
+
+		// Iterate over default file names to find file
+		for (int i = 0; i < this.directoryDefaultResourceNames.length; i++) {
+			String filePath = directory.getPath() + this.directoryDefaultResourceNames[i];
+			HttpResource resource = this.getHttpResource(filePath);
+			if ((resource != null) && (resource instanceof HttpFile)) {
+
+				// Found the default HTTP file
+				return (HttpFile) resource;
+			}
+		}
+
+		// As here, no default HTTP file
+		return null;
+	}
+
 	/*
 	 * ================== ResourceSystemContext ====================
 	 */
@@ -271,6 +257,11 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	@Override
 	public String getLocation() {
 		return this.location;
+	}
+
+	@Override
+	public HttpResourceStore getHttpResourceStore() {
+		return this;
 	}
 
 	@Override
@@ -380,8 +371,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		/**
 		 * Obtains the {@link HttpResource} assuming input is canonical path.
 		 * 
-		 * @param canonicalPath
-		 *            Canonical path to the {@link HttpResource}.
+		 * @param canonicalPath Canonical path to the {@link HttpResource}.
 		 * @return {@link HttpResource} or <code>null</code> if no resource at path.
 		 */
 		private HttpResource getSafeHttpResource(String canonicalPath) {
@@ -429,8 +419,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		/**
 		 * Instantiate.
 		 * 
-		 * @param resourcePath
-		 *            Path for the resource within the {@link ResourceSystem}.
+		 * @param resourcePath Path for the resource within the {@link ResourceSystem}.
 		 */
 		private CreateSingleton(String resourcePath) {
 			this.resourcePath = resourcePath;
@@ -440,8 +429,7 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		 * Creates the {@link AbstractHttpResource}.
 		 * 
 		 * @return {@link AbstractHttpResource}.
-		 * @throws IOException
-		 *             If fails to create the {@link AbstractHttpResource}.
+		 * @throws IOException If fails to create the {@link AbstractHttpResource}.
 		 */
 		@SuppressWarnings("resource")
 		private synchronized AbstractHttpResource createHttpResource() throws IOException {
@@ -593,14 +581,10 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		/**
 		 * Instantiate.
 		 * 
-		 * @param resourcePath
-		 *            Path to {@link HttpResource}.
-		 * @param resource
-		 *            {@link Path} to the {@link ResourceSystem} resource.
-		 * @param contentType
-		 *            <code>Content-Type</code> {@link HttpHeaderValue}.
-		 * @param cleanupFiles
-		 *            {@link List} of cleanup files.
+		 * @param resourcePath Path to {@link HttpResource}.
+		 * @param resource     {@link Path} to the {@link ResourceSystem} resource.
+		 * @param contentType  <code>Content-Type</code> {@link HttpHeaderValue}.
+		 * @param cleanupFiles {@link List} of cleanup files.
 		 */
 		private ResourceTransformerContextImpl(String resourcePath, Path resource, HttpHeaderValue contentType,
 				List<Path> cleanupFiles) {

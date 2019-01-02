@@ -25,6 +25,7 @@ import java.nio.file.StandardCopyOption;
 
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResourceStore;
+import net.officefloor.web.resource.impl.HttpDirectoryImpl;
 import net.officefloor.web.resource.spi.ResourceSystem;
 import net.officefloor.web.resource.spi.ResourceSystemContext;
 
@@ -56,18 +57,16 @@ public class ClasspathResourceSystem implements ResourceSystem {
 	private final ResourceSystemContext context;
 
 	/**
-	 * {@link Path} to cache directory. Directory contents are not interrogated,
-	 * so can re-use the directory.
+	 * {@link Path} to cache directory. Directory contents are not interrogated, so
+	 * can re-use the directory.
 	 */
 	private final Path cacheDirectory;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param context
-	 *            {@link ResourceSystemContext}.
-	 * @throws IOException
-	 *             If fails to initiate resources from the class path.
+	 * @param context {@link ResourceSystemContext}.
+	 * @throws IOException If fails to initiate resources from the class path.
 	 */
 	public ClasspathResourceSystem(ResourceSystemContext context) throws IOException {
 		this.classPathPrefix = context.getLocation();
@@ -87,10 +86,9 @@ public class ClasspathResourceSystem implements ResourceSystem {
 	/**
 	 * Obtains the {@link ClassPathNode} for resource path.
 	 * 
-	 * @param path
-	 *            Resource path.
-	 * @return {@link ClassPathNode} for resource path or
-	 *         <code>null</code> if no resource.
+	 * @param path Resource path.
+	 * @return {@link ClassPathNode} for resource path or <code>null</code> if no
+	 *         resource.
 	 */
 	public ClassPathNode getNode(String path) {
 
@@ -138,6 +136,38 @@ public class ClasspathResourceSystem implements ResourceSystem {
 	@Override
 	public Path getResource(String path) throws IOException {
 
+		// Determine if have resources
+		if (root.getChildren().length == 0) {
+			/*
+			 * Nothing found, so fall back to class loader.
+			 * 
+			 * Typically, this is due to running within container that creates its own
+			 * ClassLoader. For example, Servlet container. Therefore, need to fallback to
+			 * just using the ClassLoader, as can not scan class path.
+			 */
+
+			// Determine if available on class loader
+			String classPath = this.root.getClassPath() + (path.startsWith("/") ? path : "/" + path);
+			Path file = this.createFile(classPath, path);
+			if (file != null) {
+
+				// Determine if directory
+				HttpResourceStore store = this.context.getHttpResourceStore();
+				try (HttpDirectoryImpl directory = new HttpDirectoryImpl(path, store)) {
+					HttpFile defaultFile = directory.getDefaultHttpFile();
+					if (defaultFile != null) {
+						return this.cacheDirectory;
+					}
+				}
+
+				// Return the direct file
+				return file;
+			}
+
+			// As here, not found
+			return null;
+		}
+
 		// Obtains the node for the path
 		ClassPathNode node = this.getNode(path);
 		if (node == null) {
@@ -150,9 +180,26 @@ public class ClasspathResourceSystem implements ResourceSystem {
 			return this.cacheDirectory;
 		}
 
-		// Obtain the input stream to resource contents
+		// Create and return the file
 		String classPath = node.getClassPath();
+		return this.createFile(classPath, path);
+	}
+
+	/**
+	 * Creates the {@link Path} to the file.
+	 * 
+	 * @param classPath Class path to the file.
+	 * @param path      Path requested.
+	 * @return {@link Path} to the file or <code>null</code> if can not find file.
+	 * @throws IOException If fails to create the file.
+	 */
+	private Path createFile(String classPath, String path) throws IOException {
+
+		// Obtain the contents of the file
 		InputStream contents = this.classLoader.getResourceAsStream(classPath);
+		if (contents == null) {
+			return null;
+		}
 
 		// Create file for resource
 		Path file = this.context.createFile(path);
