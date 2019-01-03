@@ -17,7 +17,9 @@
  */
 package net.officefloor.server.stress;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import javax.servlet.AsyncContext;
@@ -131,7 +133,12 @@ public class OfficeFloorHttpServlet extends HttpServlet {
 		NonMaterialisedHttpHeaders httpHeaders = new HttpServletNonMaterialisedHttpHeaders(asyncRequest);
 
 		// Create the entity content
-		ByteSequence entity = new ByteArrayByteSequence(asyncRequest.getInputStream().readAllBytes());
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		InputStream requestEntity = asyncRequest.getInputStream();
+		for (int value = requestEntity.read(); value != -1; value = requestEntity.read()) {
+			buffer.write(value);
+		}
+		ByteSequence entity = new ByteArrayByteSequence(buffer.toByteArray());
 
 		// Create the server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>(

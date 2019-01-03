@@ -18,14 +18,19 @@
 package net.officefloor.maven;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringWriter;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.codehaus.plexus.configuration.PlexusConfiguration;
 
 import net.officefloor.compile.mbean.OfficeFloorMBean;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -47,6 +52,11 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 	 * {@link OpenOfficeFloorMojo}.
 	 */
 	private OpenOfficeFloorMojo open;
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+	}
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -126,8 +136,7 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 	/**
 	 * Opens {@link OfficeFloor}.
 	 * 
-	 * @param pomFileName
-	 *            Name of the pom file to use.
+	 * @param pomFileName Name of the pom file to use.
 	 */
 	private void openOfficeFloor(String pomFileName) throws Exception {
 
@@ -140,8 +149,7 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 	/**
 	 * Closes {@link OfficeFloor}.
 	 * 
-	 * @param pomFileName
-	 *            Name of the pom file to use.
+	 * @param pomFileName Name of the pom file to use.
 	 */
 	private void closeOfficeFloor(String pomFileName) throws Exception {
 
@@ -178,6 +186,25 @@ public class OfficeFloorMavenPluginTest extends AbstractMojoTestCase {
 			assertTrue("Should be connection refused: " + ex.getMessage(),
 					ex.getMessage().startsWith("Connect to") && ex.getMessage().contains("failed: Connection refused"));
 		}
+	}
+
+	@Override
+	protected Mojo lookupMojo(String goal, File pluginPom) throws Exception {
+
+		// Read in the version
+		File versionFile = new File(getBasedir(), "target/officefloor-version");
+		assertTrue("Please run mvn generate-sources to create OfficeFloor version file", versionFile.exists());
+		StringWriter version = new StringWriter();
+		try (Reader reader = new FileReader(versionFile)) {
+			for (int character = reader.read(); character != -1; character = reader.read()) {
+				version.write(character);
+			}
+		}
+
+		// Look up the mojo
+		PlexusConfiguration pluginConfiguration = extractPluginConfiguration("officefloor-maven-plugin", pluginPom);
+		return this.lookupMojo("net.officefloor.maven", "officefloor-maven-plugin", version.toString(), goal,
+				pluginConfiguration);
 	}
 
 }

@@ -11,5 +11,11 @@
 			<location>feature.xml</location>
 			<contains><![CDATA[id="net.officefloor.feature"(\s+)label="OfficeFloor Feature"(\s+)version="${project.version}"]]></contains>
 		</file>
+
+		<!-- Ensure e(fx)clipse available -->
+		<file>
+			<location>feature.xml</location>
+			<contains><![CDATA[<import feature="org.eclipse.fx.runtime.min.feature"/>]]></contains>
+		</file>
 	</files>
 </verifications>

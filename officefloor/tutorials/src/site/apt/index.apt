@@ -6,7 +6,7 @@
                
 OfficeFloor Tutorials
   
-  Once you have installed the {{{../install.html}OfficeFloor Eclipse plug-ins}} (by dragging the bottom left install icon to your Eclipse IDE) you have the tools ready for the below tutorials.
+  Once you have installed the {{{../install.html}OfficeFloor Eclipse plug-ins}} you have the tools ready for the below tutorials.
   
   The tutorials are ordered so that each builds on the knowledge of the previous tutorials.  It is therefore best to work though them in order.
 
@@ -34,7 +34,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./JavaScriptApp/index.html}AJAX}}                         | Servicing AJAX requests from JavaScript.                   | @HttpObject , ObjectResponse , @NotRenderTemplateAfter
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectional rendering content.                             | \<!-- \{section\} --\>
+| {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectional rendering content.                               | \<!-- \{section\} --\>
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./InheritHttpServer/index.html}Template Inheritance}}     | Inheriting sectioned content.                              | \<!-- \{:override\} --\> , \<!-- \{!\} --\> 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -55,6 +55,8 @@ OfficeFloor Tutorials
 | {{{./ThreadAffinityHttpServer/index.html}Thread Affinity}}   | Thread Affinity                                            | Executive
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SpringHttpServer/index.html}Spring}}                    | Wiring in Spring beans                                     | Supplier
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./TransactionHttpServer/index.html}Transaction}}          | Managing transactions with Governance.                     | Governance
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit / System / Integration testing
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

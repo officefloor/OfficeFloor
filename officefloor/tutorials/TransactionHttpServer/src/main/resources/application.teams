@@ -1,0 +1,6 @@
+<teams>
+
+	<!-- Demonstrates Spring Data Transaction working across different threads -->
+	<team source="net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource" type="net.officefloor.tutorial.transactionhttpserver.TeamMarkerBean" />
+
+</teams>

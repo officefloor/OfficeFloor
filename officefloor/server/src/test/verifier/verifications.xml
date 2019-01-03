@@ -1,17 +1,9 @@
 <verifications>
 	<files>
-		<!-- Ensure all the modules inheriting latest -->
+		<!-- Ensure using latest version -->
 		<file>
-			<location>officeserver/pom.xml</location>
-			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>officeserver_default/pom.xml</location>
-			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
-		</file>
-		<file>
-			<location>officeserver_netty/pom.xml</location>
-			<contains><![CDATA[<version>${pom.version}</version>(\s)*</parent>]]></contains>
+			<location>${basedir}/../bom/pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
 		</file>
 	</files>
 </verifications>

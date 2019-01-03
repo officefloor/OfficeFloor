@@ -102,17 +102,24 @@ public class AdaptedAreaPart<M extends Model> extends AbstractAdaptedConnectable
 		};
 
 		// Create and return the view
-		Node visual = viewFactory.createVisual(this.getContent().getModel(), new AdaptedModelVisualFactoryContextImpl<>(
-				(Class<M>) this.getContent().getModel().getClass(), false, this.getConnectorLoader(), (action) -> {
+		GeometryNode<RoundedRectangle> visual = (GeometryNode<RoundedRectangle>) viewFactory.createVisual(
+				this.getContent().getModel(),
+				new AdaptedModelVisualFactoryContextImpl<>((Class<M>) this.getContent().getModel().getClass(), false,
+						this.getConnectorLoader(), (action) -> {
 
-					// Undertake the action
-					this.getContent().action(action);
-				}));
+							// Undertake the action
+							this.getContent().action(action);
+						}));
 
 		// Specify the initial location
 		M model = this.getContent().getModel();
 		visual.setLayoutX(model.getX());
 		visual.setLayoutY(model.getY());
+
+		// Specify the initial dimension
+		Dimension dimension = this.getContent().getDimension();
+		visual.setPrefWidth(dimension.width);
+		visual.setPrefHeight(dimension.height);
 
 		// Return the visual
 		return visual;

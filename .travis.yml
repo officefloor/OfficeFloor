@@ -1,9 +1,22 @@
+dist: xenial
 language: java
-jdk: openjdk11
 sudo: required
 services: docker
 cache:
   directories: $HOME/.m2
 env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
-before_install: cd officefloor
+install: ./.travis-install.sh
+script: ./.travis-script.sh
 after_success: bash <(curl -s https://codecov.io/bash)
+# Support of Java as per https://www.oracle.com/technetwork/java/java-se-support-roadmap.html
+#    (openjdk9, openjdk10 end of life)
+# Note: due to JavaFx, not supporting prior to Java 8
+jobs:
+  include:
+    - name: Java 8
+      jdk: openjdk8
+      addons:
+        apt:
+          packages: openjfx
+    - name: Java 11
+      jdk: openjdk11

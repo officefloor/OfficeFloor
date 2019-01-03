@@ -4,51 +4,19 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.officefloor</groupId>
-	<artifactId>officefloor</artifactId>
-	<version>3.3.0</version>
-	<packaging>pom</packaging>
+
 	<name>OfficeFloor</name>
-	<description>Parent OfficeFloor</description>
-	<url>http://officefloor.net/</url>
+	<description>OfficeFloor</description>
+
+	<parent>
+		<groupId>net.officefloor</groupId>
+		<artifactId>bom</artifactId>
+		<version>${revision}</version>
+		<relativePath>bom</relativePath>
+	</parent>
+	<artifactId>officefloor</artifactId>
+	<packaging>pom</packaging>
 	<inceptionYear>2005</inceptionYear>
-	<licenses>
-		<license>
-			<name>AGPL</name>
-			<url>http://www.gnu.org/licenses/agpl-3.0.en.html</url>
-			<distribution>repo</distribution>
-			<comments>Affero General Public License</comments>
-		</license>
-	</licenses>
-	<issueManagement>
-		<system>GitHub</system>
-		<url>https://github.com/sagenschneider/OfficeFloor/issues</url>
-	</issueManagement>
-	<scm>
-		<connection>scm:git:https://github.com/sagenschneider/OfficeFloor.git
-		</connection>
-		<developerConnection>scm:git:git@github.com:sagenschneider/OfficeFloor.git
-		</developerConnection>
-		<url>https://github.com/sagenschneider/OfficeFloor</url>
-	</scm>
-	<developers>
-		<developer>
-			<id>sagenschneider</id>
-			<name>Daniel Sagenschneider</name>
-			<email>daniel@officefloor.net</email>
-			<roles>
-				<role>Founder</role>
-				<role>Administrator</role>
-				<role>Developer</role>
-			</roles>
-		</developer>
-	</developers>
-	<contributors>
-		<contributor>
-			<name>Matthew Brown</name>
-			<email>yellowduckphoto@users.sourceforge.net</email>
-		</contributor>
-	</contributors>
 	<distributionManagement>
 		<site>
 			<id>repo.officefloor.sf.net</id>
@@ -57,6 +25,13 @@
 			</url>
 		</site>
 	</distributionManagement>
+	<repositories>
+		<repository>
+			<id>OfficeFloor-build-artifacts</id>
+			<name>Build artifacts for OfficeFloor</name>
+			<url>http://officefloor.net/build2</url>
+		</repository>
+	</repositories>
 	<modules>
 		<module>core</module>
 		<module>server</module>
@@ -68,339 +43,157 @@
 		<module>tutorials</module>
 	</modules>
 	<properties>
+		<asm-version>7.0</asm-version>
+		<compiler-version>3.8.0</compiler-version>
 		<current.year>2018</current.year>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<projectVersion>${project.version}</projectVersion>
-		<tycho-version>1.2.0</tycho-version>
+		<failsafe-version>2.22.1</failsafe-version>
+		<flatten-maven-version>1.1.0</flatten-maven-version>
+		<java-lowest-version>8</java-lowest-version>
+		<jetty-version>9.4.14.v20181114</jetty-version>
 		<maven-version>3.6.0</maven-version>
+		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven-plugin-version>3.6.0</maven-plugin-version>
 		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
-		<maven-changes-version>2.12.1</maven-changes-version>
-		<jetty-version>9.4.14.v20181114</jetty-version>
-		<failsafe-version>2.22.1</failsafe-version>
-		<compiler-version>3.8.0</compiler-version>
-		<ant-jsch-version>1.10.5</ant-jsch-version>
-		<netty-version>4.1.31.Final</netty-version>
-		<rapidoid-version>5.5.4</rapidoid-version>
-		<jackson-version>2.9.7</jackson-version>
-		<jaxb-version>2.3.0</jaxb-version>
-		<asm-version>7.0</asm-version>
+		<maven-surefire-version>2.22.1</maven-surefire-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
-		<wagon-ssh-version>3.2.0</wagon-ssh-version>
+		<projectVersion>${revision}</projectVersion>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<spring-version>2.1.1.RELEASE</spring-version>
+		<tycho-version>1.3.0</tycho-version>
 	</properties>
-	<repositories>
-		<repository>
-			<id>OfficeFloor-build-artifacts</id>
-			<name>Build artifacts for OfficeFloor</name>
-			<url>http://officefloor.net/build2</url>
-		</repository>
-	</repositories>
 	<dependencyManagement>
 		<dependencies>
-			<!-- ================================================ -->
-			<!-- OfficeFloor -->
-			<!-- ================================================ -->
-			<!-- Core -->
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>core</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officeframe</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officexml</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officemodelgen</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.core</groupId>
-				<artifactId>officecompiler</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<!-- Server -->
-			<dependency>
-				<groupId>net.officefloor.server</groupId>
-				<artifactId>server</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.server</groupId>
-				<artifactId>officeserver</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.server</groupId>
-				<artifactId>officeserver_default</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.server</groupId>
-				<artifactId>officeserver_netty</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.server</groupId>
-				<artifactId>officeserver_rapidoid</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<!-- Web -->
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
-				<artifactId>web</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_resource</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_security</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_template</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_configuration</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
-				<artifactId>officeweb_executive</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
-				<artifactId>woof</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.web</groupId>
-				<artifactId>officejson_jackson</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<!-- Persistence -->
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>persistence</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>officejdbc</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>officejdbc_h2</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>officejdbc_postgresql</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>officejpa</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>officejpa_datanucleus</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>officejpa_hibernate</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>officejpa_eclipselink</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.persistence</groupId>
-				<artifactId>officejpa_postgresql</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<!-- Spring -->
-			<dependency>
-				<groupId>net.officefloor.spring</groupId>
-				<artifactId>spring</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.spring</groupId>
-				<artifactId>officespring</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.spring</groupId>
-				<artifactId>officespring_data</artifactId>
-				<version>${project.version}</version>
-			</dependency>
 			<!-- Eclipse -->
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>eclipse</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.target</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.common</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.osgi</artifactId>
-				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.core</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.editor</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.editor.test</artifactId>
-				<version>${project.version}</version>
+				<artifactId>net.officefloor.eclipse.common</artifactId>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.configurer</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.configurer.test</artifactId>
-				<version>${project.version}</version>
+				<artifactId>net.officefloor.eclipse.configurer.tests</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.editor</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.editor.tests</artifactId>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.ide</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.section</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.section.test</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.officefloor</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.launch</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.officefloor</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.osgi</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.section</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.section.tests</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.target</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.woof</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.woof</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.woof.test</artifactId>
-				<version>${project.version}</version>
+				<artifactId>net.officefloor.eclipse.woof.tests</artifactId>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.feature</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.woof.feature</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>update.site</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<!-- Maven -->
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>maven</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>officefloor-maven-plugin</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>woof-archetype</artifactId>
-				<version>${project.version}</version>
+				<version>${revision}</version>
 			</dependency>
-
-			<!-- ================================================ -->
-			<!-- Additional Dependencies -->
-			<!-- ================================================ -->
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.12</version>
-			</dependency>
+			<!-- Additional build dependencies -->
+			<!-- (runtime dependencies to be in BOM) -->
 			<dependency>
 				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-embedder</artifactId>
+				<artifactId>maven-plugin-api</artifactId>
 				<version>${maven-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
-				<artifactId>maven-plugin-api</artifactId>
+				<artifactId>maven-embedder</artifactId>
 				<version>${maven-version}</version>
 			</dependency>
 			<dependency>
@@ -424,36 +217,6 @@
 				<version>${wagon-ssh-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>mx4j</groupId>
-				<artifactId>mx4j-tools</artifactId>
-				<version>3.0.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openjfx</groupId>
-				<artifactId>javafx-graphics</artifactId>
-				<version>${openjfx-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openjfx</groupId>
-				<artifactId>javafx-controls</artifactId>
-				<version>${openjfx-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.openjfx</groupId>
-				<artifactId>javafx-swt</artifactId>
-				<version>${openjfx-swt-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-all</artifactId>
-				<version>${netty-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.rapidoid</groupId>
-				<artifactId>rapidoid-web</artifactId>
-				<version>5.5.5</version>
-			</dependency>
-			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-server</artifactId>
 				<version>${jetty-version}</version>
@@ -464,151 +227,9 @@
 				<version>${jetty-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>commons-codec</groupId>
-				<artifactId>commons-codec</artifactId>
-				<version>1.11</version>
-			</dependency>
-			<dependency>
-				<groupId>com.zaxxer</groupId>
-				<artifactId>HikariCP</artifactId>
-				<version>3.2.0</version>
-			</dependency>
-			<dependency>
-				<groupId>com.h2database</groupId>
-				<artifactId>h2</artifactId>
-				<version>1.4.197</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hsqldb</groupId>
-				<artifactId>hsqldb</artifactId>
-				<version>2.4.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>42.2.5</version>
-			</dependency>
-			<dependency>
-				<groupId>com.spotify</groupId>
-				<artifactId>docker-client</artifactId>
-				<version>8.14.4</version>
-			</dependency>
-			<!-- TODO: remove once docker not having issue with org.glassfish.hk2.api.MultiException -->
-			<dependency>
-				<groupId>org.glassfish.jersey.inject</groupId>
-				<artifactId>jersey-hk2</artifactId>
-				<version>2.27</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.bundles.repackaged</groupId>
-				<artifactId>jersey-guava</artifactId>
-				<version>2.25.1</version>
-				<scope>provided</scope>
-			</dependency>
-			<!-- END TODO -->
-			<dependency>
-				<groupId>org.apache.activemq</groupId>
-				<artifactId>activemq-core</artifactId>
-				<version>5.7.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.directory.server</groupId>
-				<artifactId>apacheds-all</artifactId>
-				<version>2.0.0.AM25</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-simple</artifactId>
-				<version>1.7.25</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-nop</artifactId>
-				<version>1.7.25</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.persistence</groupId>
-				<artifactId>javax.persistence</artifactId>
-				<version>2.2.1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-core</artifactId>
-				<version>5.3.7.Final</version>
-			</dependency>
-			<dependency>
-				<groupId>org.datanucleus</groupId>
-				<artifactId>datanucleus-accessplatform-jpa-rdbms</artifactId>
-				<version>5.1.11</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>${jaxb-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-core</artifactId>
-				<version>${jaxb-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
-				<version>${jaxb-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.activation</groupId>
-				<artifactId>javax.activation-api</artifactId>
-				<version>1.2.0</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.transaction</groupId>
-				<artifactId>javax.transaction-api</artifactId>
-				<version>1.3</version>
-			</dependency>
-			<dependency>
 				<groupId>easymock</groupId>
 				<artifactId>easymock</artifactId>
 				<version>2.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient</artifactId>
-				<version>4.5.6</version>
-			</dependency>
-			<dependency>
-				<groupId>net.openhft</groupId>
-				<artifactId>affinity</artifactId>
-				<version>3.1.10</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>${jackson-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.module</groupId>
-				<artifactId>jackson-module-afterburner</artifactId>
-				<version>${jackson-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.projectlombok</groupId>
-				<artifactId>lombok</artifactId>
-				<version>1.18.4</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-text</artifactId>
-				<version>1.6</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<version>2.1.0.RELEASE</version>
-				<type>pom</type>
-				<scope>import</scope>
 			</dependency>
 			<!-- Following plug-ins are dependency managed to ensure available for 
 				woof-archetype to check using the latest. -->
@@ -622,36 +243,67 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${compiler-version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
-		<extensions>
-			<extension>
-				<!-- Allow for scp distribution -->
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ssh</artifactId>
-				<version>${wagon-ssh-version}</version>
-			</extension>
-		</extensions>
 		<pluginManagement>
 			<plugins>
-				<!-- ================================================ -->
-				<!-- OfficeFloor -->
-				<!-- ================================================ -->
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
-					<version>${project.version}</version>
+					<version>${revision}</version>
 				</plugin>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>woof-archetype</artifactId>
-					<version>${project.version}</version>
+					<version>${revision}</version>
 				</plugin>
-
 				<!-- ================================================ -->
 				<!-- Additional Plugins -->
 				<!-- ================================================ -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>flatten-maven-plugin</artifactId>
+					<version>${flatten-maven-version}</version>
+					<configuration>
+						<updatePomFile>true</updatePomFile>
+						<pomElements>
+							<parent>expand</parent>
+							<name>keep</name>
+							<description>keep</description>
+							<url>keep</url>
+							<scm>keep</scm>
+							<issueManagement>keep</issueManagement>
+							<developers>keep</developers>
+							<contributors>keep</contributors>
+							<properties>keep</properties>
+							<dependencies>keep</dependencies>
+							<pluginManagement>keep</pluginManagement>
+							<dependencyManagement>keep</dependencyManagement>
+						</pomElements>
+					</configuration>
+					<executions>
+						<execution>
+							<id>flatten</id>
+							<phase>process-resources</phase>
+							<goals>
+								<goal>flatten</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>flatten.clean</id>
+							<phase>clean</phase>
+							<goals>
+								<goal>clean</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-verifier-plugin</artifactId>
@@ -677,7 +329,11 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.22.1</version>
+					<version>${maven-surefire-version}</version>
+					<configuration>
+						<!-- Fix for SUREFIRE-1588 -->
+						<useSystemClassLoader>false</useSystemClassLoader>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -692,7 +348,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -701,35 +357,13 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-site-plugin</artifactId>
-					<version>3.7.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
 					<version>2.8.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>3.0.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-scm-plugin</artifactId>
 					<version>1.11.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.8</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.ant</groupId>
-							<artifactId>ant</artifactId>
-							<version>1.10.5</version>
-						</dependency>
-					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -764,29 +398,47 @@
 					</dependencies>
 				</plugin>
 				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>wagon-maven-plugin</artifactId>
-					<version>2.0.0</version>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>${maven-site-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${antrun-version}</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.ant</groupId>
+							<artifactId>ant</artifactId>
+							<version>${ant-version}</version>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.ant</groupId>
+							<artifactId>ant-jsch</artifactId>
+							<version>${ant-jsch-version}</version>
+							<scope>runtime</scope>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>${maven-source-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.0.1</version>
-					<configuration>
-						<!-- Ignore generated code that have no control over -->
-						<excludePackageNames>net.officefloor.web.template.parse
-						</excludePackageNames>
-						<!-- Include Google Analytics -->
-						<additionalOptions>
-							<additionalOption>--allow-script-in-comments</additionalOption>
-							<additionalOption>-html5</additionalOption>
-						</additionalOptions>
-					</configuration>
+					<version>${javadoc-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
-					<version>1.6</version>
+					<version>${gpg-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>wagon-maven-plugin</artifactId>
+					<version>2.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -819,23 +471,6 @@
 					<version>${tycho-version}</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
-						<extraClasspathElements>
-							<extraClasspathElement>
-								<groupId>org.openjfx</groupId>
-								<artifactId>javafx-graphics</artifactId>
-								<version>${openjfx-version}</version>
-							</extraClasspathElement>
-							<extraClasspathElement>
-								<groupId>org.openjfx</groupId>
-								<artifactId>javafx-controls</artifactId>
-								<version>${openjfx-version}</version>
-							</extraClasspathElement>
-							<extraClasspathElement>
-								<groupId>org.openjfx</groupId>
-								<artifactId>javafx-swt</artifactId>
-								<version>${openjfx-swt-version}</version>
-							</extraClasspathElement>
-						</extraClasspathElements>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -921,22 +556,46 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											flatten-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0.0,)
+										</versionRange>
+										<goals>
+											<goal>flatten</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
-
 		<plugins>
 			<plugin>
 				<!-- Standard JVM for compilation -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>10</source>
-					<target>10</target>
+					<source>${java-lowest-version}</source>
+					<target>${java-lowest-version}</target>
 				</configuration>
+			</plugin>
+
+			<!-- Flatten to release for Maven Central release -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
 			</plugin>
 
 			<plugin>
@@ -965,7 +624,7 @@
 				<artifactId>maven-scm-plugin</artifactId>
 				<configuration>
 					<connectionType>developerConnection</connectionType>
-					<tag>release-${project.version}</tag>
+					<tag>release-${revision}</tag>
 				</configuration>
 			</plugin>
 
@@ -1135,6 +794,7 @@
 						</goals>
 						<configuration>
 							<target>
+								<!-- Link to paper -->
 								<replace
 									file="${project.build.directory}/site/about.html">
 									<replacetoken><![CDATA[<a class="externalLink" href="http://doi.acm.org/10.1145/2739011.2739013">http://doi.acm.org/10.1145/2739011.2739013</a>]]></replacetoken>
@@ -1157,9 +817,16 @@
 </script>
 ]]></replacevalue>
 								</replace>
+
+								<!-- Version on main page -->
 								<copy file="${basedir}/src/site/resources/index.html"
 									toFile="${project.build.directory}/site/index.html"
 									overwrite="true" />
+								<replace
+									file="${project.build.directory}/site/index.html">
+									<replacetoken>@VERSION</replacetoken>
+									<replacevalue>${revision}</replacevalue>
+								</replace>
 							</target>
 						</configuration>
 					</execution>
@@ -1206,6 +873,13 @@
 							<goal>aggregate</goal>
 						</goals>
 						<configuration>
+							<!-- Ignore generated code that have no control over -->
+							<excludePackageNames>net.officefloor.web.template.parse</excludePackageNames>
+							<!-- Include Google Analytics -->
+							<additionalOptions>
+								<additionalOption>--allow-script-in-comments</additionalOption>
+								<additionalOption>-html5</additionalOption>
+							</additionalOptions>
 							<header>
 							<![CDATA[
 			<!-- Google Analytics -->
@@ -1246,7 +920,8 @@
 					<httpConnector>
 						<port>9999</port>
 					</httpConnector>
-					<webAppSourceDirectory>${basedir}/target/site/</webAppSourceDirectory>
+					<webAppSourceDirectory>${basedir}/target/site/
+					</webAppSourceDirectory>
 					<stopKey>OfficeFloor</stopKey>
 					<stopPort>9966</stopPort>
 					<stopWait>10</stopWait>
@@ -1377,146 +1052,96 @@
 			</build>
 		</profile>
 		<profile>
-			<!-- Profile for deploying to SourceForge -->
-			<!-- -->
-			<!-- mvn -Ddeploy=sourceforge deploy -->
-			<id>release-to-sourceforge</id>
+			<id>jdk8-tools-on-classpath-fix</id>
 			<activation>
-				<property>
-					<name>deploy</name>
-					<value>sourceforge</value>
-				</property>
+				<jdk>1.8</jdk>
 			</activation>
-			<distributionManagement>
-				<repository>
-					<id>repo.officefloor.sf.net</id>
-					<name>Maven repository on SourceForge -
-						http://www.officefloor.net/maven2
-					</name>
-					<url>scp://sagenschneider@shell.sourceforge.net:/home/frs/project/officefloor/maven/maven2
-					</url>
-				</repository>
-			</distributionManagement>
+			<dependencies>
+				<dependency>
+					<groupId>java.compiler</groupId>
+					<artifactId>tools</artifactId>
+					<version>1.8</version>
+					<scope>system</scope>
+					<systemPath>${java.home}/../lib/tools.jar</systemPath>
+				</dependency>
+			</dependencies>
 			<build>
-				<plugins>
-					<plugin>
-						<!-- Create SourceForge Shell -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>Create SourceForge shell for deploying artifacts</id>
-								<inherited>false</inherited>
-								<phase>verify</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
-									</target>
-								</configuration>
-							</execution>
-							<execution>
-								<id>Create SourceForge shell for deploying site</id>
-								<inherited>false</inherited>
-								<phase>post-site</phase>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<configuration>
-									<target>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
-									</target>
-								</configuration>
-							</execution>
-						</executions>
-						<dependencies>
-							<dependency>
-								<groupId>org.apache.ant</groupId>
-								<artifactId>ant-jsch</artifactId>
-								<version>${ant-jsch-version}</version>
-								<scope>runtime</scope>
-							</dependency>
-						</dependencies>
-					</plugin>
-				</plugins>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.eclipse.tycho</groupId>
+							<artifactId>tycho-compiler-plugin</artifactId>
+							<version>${tycho-version}</version>
+							<configuration>
+								<extraClasspathElements>
+									<extraClasspathElement>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-swt</artifactId>
+										<version>1.8</version>
+										<scope>system</scope>
+										<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
+									</extraClasspathElement>
+								</extraClasspathElements>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
 			</build>
 		</profile>
 		<profile>
-			<!-- Profile for deploying to Sonatype -->
-			<!-- -->
-			<!-- mvn -Ddeploy=sonatype -Dpgp.passphrase=[passphrase] deploy -->
-			<id>release-to-sonatype</id>
+			<id>openjfx</id>
 			<activation>
-				<property>
-					<name>deploy</name>
-					<value>sonatype</value>
-				</property>
+				<jdk>[10,12)</jdk>
 			</activation>
-			<distributionManagement>
-				<repository>
-					<id>sonatype-nexus-staging</id>
-					<name>Nexus Release Repository</name>
-					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/
-					</url>
-				</repository>
-			</distributionManagement>
+			<dependencies>
+				<dependency>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+					<version>${openjfx-version}</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+					<version>${openjfx-version}</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-swt</artifactId>
+					<version>${openjfx-swt-version}</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
 			<build>
-				<plugins>
-					<plugin>
-						<!-- Include source jars for release (before signing) -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-sources-for-release</id>
-								<phase>post-integration-test</phase>
-								<goals>
-									<goal>jar-no-fork</goal>
-									<goal>test-jar-no-fork</goal>
-								</goals>
-								<configuration>
-									<includePom>true</includePom>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<!-- Generate Javadoc release jar (before signing) -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-javadoc-for-release</id>
-								<phase>post-integration-test</phase>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<!-- Sign artifacts (must be after sources and javadoc to sign them) -->
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.eclipse.tycho</groupId>
+							<artifactId>tycho-compiler-plugin</artifactId>
+							<version>${tycho-version}</version>
+							<configuration>
+								<extraClasspathElements>
+									<extraClasspathElement>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-graphics</artifactId>
+										<version>${openjfx-version}</version>
+									</extraClasspathElement>
+									<extraClasspathElement>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-controls</artifactId>
+										<version>${openjfx-version}</version>
+									</extraClasspathElement>
+									<extraClasspathElement>
+										<groupId>org.openjfx</groupId>
+										<artifactId>javafx-swt</artifactId>
+										<version>${openjfx-swt-version}</version>
+									</extraClasspathElement>
+								</extraClasspathElements>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
 			</build>
 		</profile>
 	</profiles>

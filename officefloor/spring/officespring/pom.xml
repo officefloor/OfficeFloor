@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.spring</groupId>
 		<artifactId>spring</artifactId>
-		<version>3.3.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>officespring</artifactId>
 	<name>Spring Integration</name>
@@ -22,7 +22,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

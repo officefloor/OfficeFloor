@@ -66,7 +66,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java", modelFile.getLocation());
 
 		// Validate content
-		String content = this.getFileContents(this.findFile(this.getClass(), "Model_ModelExpectedContent.txt"));
+		String content = this.getExpectedFileContents("Model_ModelExpectedContent.txt");
 		assertContents(new StringReader(content), new StringReader(context.modelText));
 	}
 
@@ -95,7 +95,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect file name", "net/officefloor/EmptyModel.java", modelFile.getLocation());
 
 		// Validate content
-		String content = this.getFileContents(this.findFile(this.getClass(), "Model_EmptyModelExpectedContent.txt"));
+		String content = this.getExpectedFileContents("Model_EmptyModelExpectedContent.txt");
 		assertContents(new StringReader(content), new StringReader(context.modelText));
 	}
 
@@ -122,7 +122,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java", modelFile.getLocation());
 
 		// Validate content
-		String content = this.getFileContents(this.findFile(this.getClass(), "Model_ConnectionExpectedContent.txt"));
+		String content = this.getExpectedFileContents("Model_ConnectionExpectedContent.txt");
 		BufferedReader actual = new BufferedReader(new StringReader(content));
 		BufferedReader expected = new BufferedReader(new StringReader(context.modelText));
 		String actualLine, expectedLine;
@@ -132,6 +132,18 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect line " + lineNumber, actualLine, expectedLine);
 			lineNumber++;
 		}
+	}
+
+	/**
+	 * Obtains the expected file content.
+	 * 
+	 * @param fileName Name of the expected file.
+	 * @return Expected file content.
+	 */
+	private String getExpectedFileContents(String fileName) throws Exception {
+		String content = this.getFileContents(this.findFile(this.getClass(), fileName));
+		content = content.replace("${GeneratedClassName}", GeneratedAnnotationJavaFacet.getGeneratedClassName());
+		return content;
 	}
 
 	/**

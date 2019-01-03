@@ -20,8 +20,6 @@ package net.officefloor.eclipse.section;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.eclipse.ui.IWorkbench;
-
 import javafx.scene.control.Label;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
@@ -47,10 +45,8 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 	/**
 	 * Test editor.
 	 * 
-	 * @param args
-	 *            Command line arguments.
-	 * @throws Exception
-	 *             If fails to run.
+	 * @param args Command line arguments.
+	 * @throws Exception If fails to run.
 	 */
 	public static void main(String[] args) throws Exception {
 		SectionEditor.launch("<section />");
@@ -63,18 +59,13 @@ public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent,
 
 	/**
 	 * Convenience method to launch {@link AbstractConfigurableItem} outside
-	 * {@link IWorkbench}.
+	 * workbench.
 	 * 
-	 * @param <M>
-	 *            {@link Model} type.
-	 * @param <E>
-	 *            {@link Model} event type.
-	 * @param <I>
-	 *            Item type.
-	 * @param configurableItem
-	 *            {@link AbstractConfigurableItem}.
-	 * @param prototypeDecorator
-	 *            Optional prototype decorator.
+	 * @param                    <M> {@link Model} type.
+	 * @param                    <E> {@link Model} event type.
+	 * @param                    <I> Item type.
+	 * @param configurableItem   {@link AbstractConfigurableItem}.
+	 * @param prototypeDecorator Optional prototype decorator.
 	 */
 	public static <M extends Model, E extends Enum<E>, I> void launchConfigurer(
 			AbstractConfigurableItem<SectionModel, SectionEvent, SectionChanges, M, E, I> configurableItem,

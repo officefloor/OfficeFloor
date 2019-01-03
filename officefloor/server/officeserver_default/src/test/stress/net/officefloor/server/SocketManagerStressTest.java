@@ -24,6 +24,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
@@ -238,7 +239,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 			// Setup for reading
 			int position = readBuffer.pooledBuffer.position();
 			ByteBuffer data = readBuffer.pooledBuffer.duplicate();
-			data.flip();
+			BufferJvmFix.flip(data);
 			if (!isNewBuffer) {
 				data.position(this.previousPosition);
 			}

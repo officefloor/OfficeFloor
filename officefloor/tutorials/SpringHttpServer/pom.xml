@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.tutorial</groupId>
 		<artifactId>tutorials</artifactId>
-		<version>3.3.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>SpringHttpServer</artifactId>
 	<name>Spring HTTP Server Tutorial</name>
@@ -26,20 +26,37 @@
 			<artifactId>officespring</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-			<scope>provided</scope>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<!-- START SNIPPET: spring -->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>net.officefloor.OfficeFloorMain</mainClass>
+					<classifier>exec</classifier>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- END SNIPPET: spring -->
+		</plugins>
+	</build>
 	<profiles>
 		<profile>
 			<!-- Profile for building -->

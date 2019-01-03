@@ -26,17 +26,20 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.impl.spi.team.ExecutorFixedTeamSource;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.compile.AbstractWebCompileTestCase;
+import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.executive.CpuCore.LogicalCpu;
 import net.openhft.affinity.Affinity;
 
@@ -45,7 +48,22 @@ import net.openhft.affinity.Affinity;
  * 
  * @author Daniel Sagenschneider
  */
-public class WebThreadAffinityExecutiveSourceTest extends AbstractWebCompileTestCase {
+public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
+
+	/**
+	 * {@link WebCompileOfficeFloor}.
+	 */
+	protected final WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
+
+	/**
+	 * {@link MockHttpServer}.
+	 */
+	protected MockHttpServer server;
+
+	/**
+	 * {@link OfficeFloor}.
+	 */
+	protected OfficeFloor officeFloor;
 
 	/**
 	 * Initial {@link Affinity} to reset.
@@ -55,6 +73,12 @@ public class WebThreadAffinityExecutiveSourceTest extends AbstractWebCompileTest
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+
+		// Configure mock server
+		this.compile.officeFloor((context) -> {
+			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
+					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
+		});
 
 		// Capture initial affinity (to allow reset on tear down)
 		this.initialAffinity = Affinity.getAffinity();
@@ -78,6 +102,11 @@ public class WebThreadAffinityExecutiveSourceTest extends AbstractWebCompileTest
 
 		// Reset the thread affinity
 		Affinity.setAffinity(this.initialAffinity);
+
+		// Ensure close OfficeFloor
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
 
 		// Continue tear down
 		super.tearDown();

@@ -79,6 +79,15 @@ Spring depending on OfficeFloor
   Typically, Spring depending on OfficeFloor objects should be used sparingly.  In most cases, dependency should be single direction of OfficeFloor depending on Spring beans.  However, the above reverse in dependency is available for more complex situations (e.g. staged migration of Spring beans into {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances to avoid <big bang> changes).
 
 
+Building the application
+
+  Due to Spring Boot generating meta-data about the application to run, the following should be used to build the executable jar:
+  
+%{snippet|id=spring|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  This ensures Spring Boot can generate the necessary meta-data, while still allowing OfficeFloor to manage the execution.  It also keeps the original jar (via the classifier) to allow using as a dependency in larger applications.
+
+
 Unit Test
 
   Suppliers are integrated into OfficeFloor, so the application can be tested just like any other WoOF application:
@@ -89,5 +98,5 @@ Unit Test
 
 Next
 
-  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.
+  The {{{../TransactionHttpServer/index.html}next tutorial}} covers transaction ({{{/apidocs/net/officefloor/compile/spi/governance/source/GovernanceSource.html}GovernanceSource}}) within a WoOF web application.
 

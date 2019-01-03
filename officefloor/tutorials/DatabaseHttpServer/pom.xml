@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.tutorial</groupId>
 		<artifactId>tutorials</artifactId>
-		<version>3.3.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>DatabaseHttpServer</artifactId>
 	<name>Database HTTP Server Tutorial</name>
@@ -23,11 +23,12 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>
-			<artifactId>officejdbc</artifactId>
+			<artifactId>officejdbc_h2</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

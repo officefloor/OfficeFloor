@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.tutorial</groupId>
 		<artifactId>tutorials</artifactId>
-		<version>3.3.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>DiPojoHttpServer</artifactId>
 	<name>Dependency Injection of a POJO HTTP Server Tutorial</name>
@@ -22,8 +22,8 @@
 			<artifactId>woof</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

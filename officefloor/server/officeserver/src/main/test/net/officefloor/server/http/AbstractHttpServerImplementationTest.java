@@ -79,9 +79,9 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
-import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.stream.TemporaryFiles;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 
@@ -334,7 +334,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			byte[] data = BytesServicer.HELLO_WORLD;
 			HELLO_WORLD = ByteBuffer.allocate(data.length);
 			HELLO_WORLD.put(data);
-			HELLO_WORLD.flip();
+			BufferJvmFix.flip(HELLO_WORLD);
 		}
 
 		public void service(ServerHttpConnection connection) throws Exception {
@@ -429,7 +429,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			assertEquals("Incorrect header", "header", request.getHeaders().getHeader("request").getValue());
 			assertEquals("Incorrect number of cookies", 1, request.getCookies().length());
 			assertEquals("Incorrect cookie", "cookie", request.getCookies().getCookie("request").getValue());
-			assertEquals("Incorrect entity", "request", MockHttpServer.getContent(request, null));
+			assertEquals("Incorrect entity", "request", EntityUtil.toString(request, null));
 
 			// Send a full response
 			net.officefloor.server.http.HttpResponse response = connection.getResponse();
@@ -823,6 +823,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure {@link ProcessState} instances for connection are cancelled on loss of
 	 * connection.
+	 * 
+	 * @throws Exception If test failure.
 	 */
 	public void testCancelConnection() throws Exception {
 		this.doCancelConnectionTest(false);
@@ -831,6 +833,8 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Ensure {@link ProcessState} instances for connection are cancelled on loss of
 	 * secure connection.
+	 * 
+	 * @throws Exception If test failure.
 	 */
 	public void testSecureCancelConnection() throws Exception {
 		this.doCancelConnectionTest(true);
@@ -856,7 +860,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * 
 	 * @param isSecure Indicates if secure.
 	 */
-	public void doCancelConnectionTest(boolean isSecure) throws Exception {
+	private void doCancelConnectionTest(boolean isSecure) throws Exception {
 
 		// Determine if handle cancel
 		if (!this.isHandleCancel()) {
@@ -1520,7 +1524,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			byte[] requestData = AbstractHttpServerImplementationTest.this.createPipelineRequestData();
 			ByteBuffer requestBuffer = ByteBuffer.allocateDirect(requestData.length);
 			requestBuffer.put(requestData);
-			requestBuffer.flip();
+			BufferJvmFix.flip(requestBuffer);
 
 			// Create the expected response
 			byte[] responseData = AbstractHttpServerImplementationTest.this.createPipelineResponseData();
@@ -1578,7 +1582,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 								// Setup for next request
 								requestDataSent = 0;
-								requestBuffer.clear();
+								BufferJvmFix.clear(requestBuffer);
 							} else {
 								// Buffer full, so wait until can write again
 								break FINISHED_WRITING;
@@ -1596,7 +1600,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 						// Read in as many requests as possible
 						int bytesRead;
 						do {
-							responseBuffer.clear();
+							BufferJvmFix.clear(responseBuffer);
 							bytesRead = this.channel.read(responseBuffer);
 
 							// Determine if time out
@@ -1616,7 +1620,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 							}
 
 							// Handle the data
-							responseBuffer.flip();
+							BufferJvmFix.flip(responseBuffer);
 							responseBuffer.mark();
 							for (int i = 0; i < bytesRead; i++) {
 								byte expectedCharacter = responseData[responseDataPosition];
@@ -1735,9 +1739,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
-	 * Result of a {@link PipelineExecutor}.
+	 * Result of a pipeline execution.
 	 */
-	private static class PipelineResult {
+	protected static class PipelineResult {
 
 		private long startTime;
 
@@ -1745,7 +1749,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		private int requestCount;
 
-		private PipelineResult(long startTime, long endTime, int requestCount) {
+		public PipelineResult(long startTime, long endTime, int requestCount) {
 			this.startTime = startTime;
 			this.endTime = endTime;
 			this.requestCount = requestCount;
@@ -1770,7 +1774,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	/**
 	 * Compares results of {@link OfficeFloor} servicing against Raw servicing.
 	 */
-	private static class CompareResult {
+	protected static class CompareResult {
 
 		private static Class<?> testClass;
 
@@ -1780,7 +1784,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			testClass = testClazz;
 		}
 
-		private static void setResult(String prefix, Class<?> servicerClass, PipelineResult pipelineResult) {
+		public static boolean setResult(String prefix, Class<?> servicerClass, PipelineResult pipelineResult) {
 
 			// Obtain the compare result
 			Map<String, CompareResult> testResults = results.get(testClass);
@@ -1810,7 +1814,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			// Determine if have all values
 			if ((result.rawResult == null) || (result.bytesResult == null) || (result.bufferResult == null)
 					|| (result.fileResult == null)) {
-				return;
+				return false; // not complete with results
 			}
 
 			// Have both values, so print comparison
@@ -1866,6 +1870,9 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			out.println("=====================================================================================");
 			out.flush();
 			System.out.println(message.toString());
+
+			// Have all results
+			return true;
 		}
 
 		private PipelineResult rawResult = null;

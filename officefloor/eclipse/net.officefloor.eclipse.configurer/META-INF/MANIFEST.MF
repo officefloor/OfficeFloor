@@ -2,23 +2,26 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Configurer
 Bundle-SymbolicName: net.officefloor.eclipse.configurer
-Bundle-Version: 3.3.0
+Bundle-Version: 3.5.1
 Bundle-Vendor: OfficeFloor
-Bundle-RequiredExecutionEnvironment: JavaSE-10
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
 Eclipse-RegisterBuddy: net.officefloor.core
-Require-Bundle: net.officefloor.core;bundle-version="3.3.0",
- net.officefloor.eclipse.common;bundle-version="3.3.0",
- net.officefloor.eclipse.osgi;bundle-version="3.3.0",
- net.officefloor.eclipse.editor;bundle-version="3.3.0",
+Require-Bundle: net.officefloor.core;bundle-version="3.5.1",
+ net.officefloor.eclipse.common;bundle-version="3.5.1",
+ net.officefloor.eclipse.osgi;bundle-version="3.5.1",
+ net.officefloor.eclipse.editor;bundle-version="3.5.1"
+Import-Package: com.google.inject,
  org.eclipse.core.resources,
- org.eclipse.ui.ide,
+ org.eclipse.gef.fx.swt.canvas,
+ org.eclipse.gef.mvc.fx,
  org.eclipse.jdt.core,
  org.eclipse.jdt.ui,
- org.eclipse.fx.ui.workbench3,
- org.eclipse.gef.mvc.fx,
- org.eclipse.gef.fx.swt
-Import-Package: com.google.inject
+ org.eclipse.swt,
+ org.eclipse.swt.graphics,
+ org.eclipse.swt.layout,
+ org.eclipse.swt.widgets,
+ org.eclipse.ui.ide
 Export-Package: net.officefloor.eclipse.configurer,
  net.officefloor.eclipse.configurer.dialog
 Automatic-Module-Name: net.officefloor.eclipse.configurer

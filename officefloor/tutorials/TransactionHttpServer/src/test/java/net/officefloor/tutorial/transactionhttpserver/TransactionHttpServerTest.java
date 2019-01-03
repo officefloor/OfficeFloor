@@ -17,166 +17,84 @@
  */
 package net.officefloor.tutorial.transactionhttpserver;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
+import java.util.Arrays;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
-import javax.sql.DataSource;
+import org.junit.Rule;
+import org.junit.Test;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.hsqldb.jdbc.jdbcDataSource;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import junit.framework.TestCase;
-import net.officefloor.OfficeFloorMain;
-import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * Tests the Transaction HTTP Server.
  * 
  * @author Daniel Sagenschneider
  */
-public class TransactionHttpServerTest extends TestCase {
+public class TransactionHttpServerTest {
 
-	/**
-	 * URL for the database.
-	 */
-	private static final String DATABASE_URL = "jdbc:hsqldb:mem:exampleDb";
+	@Rule
+	public MockWoofServerRule server = new MockWoofServerRule();
 
-	/**
-	 * User for the database.
-	 */
-	private static final String DATABASE_USER = "sa";
+	private static final String POST_CONTENT = "Interesting post article";
 
-	/**
-	 * {@link CloseableHttpClient}.
-	 */
-	private final CloseableHttpClient client = HttpClientTestUtil.createHttpClient();
+	private static final ObjectMapper mapper = new ObjectMapper();
 
-	@Override
-	protected void setUp() throws Exception {
-		// Start the database and HTTP Server
-		OfficeFloorMain.open();
+	@Test
+	public void createPost() throws Exception {
+
+		// Ensure content not in database
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/posts"));
+		response.assertResponse(200, mapper.writeValueAsString(Arrays.asList()), "Content-Type", "application/json");
+
+		// Create the post entry
+		response = this.server.send(
+				MockHttpServer.mockRequest("/posts").method(HttpMethod.POST).header("Content-Type", "application/json")
+						.entity(mapper.writeValueAsString(new Post(null, POST_CONTENT))));
+		response.assertResponse(200, mapper.writeValueAsString(new Post(1, POST_CONTENT)), "Content-Type",
+				"application/json");
+
+		// Ensure post persisted
+		response = this.server.send(MockHttpServer.mockRequest("/posts"));
+		response.assertResponse(200, mapper.writeValueAsString(Arrays.asList(new Post(1, POST_CONTENT))),
+				"Content-Type", "application/json");
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		try {
-			// Disconnect client
-			this.client.close();
-		} finally {
-			try {
-				// Stop HTTP Server
-				OfficeFloorMain.close();
-			} finally {
-				// Stop database for new instance each test
-				DriverManager.getConnection(DATABASE_URL, DATABASE_USER, "").createStatement()
-						.execute("SHUTDOWN IMMEDIATELY");
-			}
-		}
+	// START SNIPPET: rollback
+	@Test
+	public void rollback() throws Exception {
+
+		// Attempt to create (but should roll back)
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/rollback").method(HttpMethod.POST)
+				.header("Content-Type", "application/json")
+				.entity(mapper.writeValueAsString(new Post(null, POST_CONTENT))));
+		response.assertResponse(500, "rolled back");
+
+		// Ensure not persisted to database
+		response = this.server.send(MockHttpServer.mockRequest("/posts"));
+		response.assertResponse(200, mapper.writeValueAsString(Arrays.asList()), "Content-Type", "application/json");
 	}
+	// END SNIPPET: rollback
 
-	/**
-	 * Ensure able to connect to database with {@link DataSource}.
-	 */
-	public void testSetupDatabase() throws Exception {
+	// START SNIPPET: commit
+	@Test
+	public void commit() throws Exception {
 
-		// Request page to allow time for database setup
-		this.doRequest("http://localhost:7878/users.woof");
+		// Create, will handle exception and commit
+		MockHttpResponse response = this.server.send(
+				MockHttpServer.mockRequest("/commit").method(HttpMethod.POST).header("Content-Type", "application/json")
+						.entity(mapper.writeValueAsString(new Post(null, POST_CONTENT))));
+		response.assertResponse(201, "committed");
 
-		// Obtain connection via DataSource
-		jdbcDataSource dataSource = new jdbcDataSource();
-		dataSource.setDatabase(DATABASE_URL);
-		dataSource.setUser(DATABASE_USER);
-		Connection connection = dataSource.getConnection();
-
-		// Ensure can get initial row
-		ResultSet resultSet = connection.createStatement().executeQuery("SELECT FULLNAME FROM PERSON");
-		assertTrue("Ensure have result", resultSet.next());
-		assertEquals("Incorrect setup name", "Daniel Sagenschneider", resultSet.getString("FULLNAME"));
-		assertFalse("Ensure no further results", resultSet.next());
-		resultSet.close();
+		// Ensure persisted to database
+		response = this.server.send(MockHttpServer.mockRequest("/posts"));
+		response.assertResponse(200,
+				mapper.writeValueAsString(Arrays.asList(new Post(1, POST_CONTENT), new Post(2, "Additional"))),
+				"Content-Type", "application/json");
 	}
-
-	/**
-	 * Ensure the JPA connects to database.
-	 */
-	public void testJpa() throws Exception {
-
-		// Request page to allow time for database setup
-		this.doRequest("http://localhost:7878/users.woof");
-
-		// Obtain entity manager
-		EntityManagerFactory factory = Persistence.createEntityManagerFactory("example");
-		EntityManager manager = factory.createEntityManager();
-
-		// Ensure can obtain user and person
-		Query query = manager.createQuery("SELECT U FROM User U");
-		User user = (User) query.getSingleResult();
-		assertEquals("Incorrect user name", "daniel", user.getUserName());
-		Person person = user.getPerson();
-		assertEquals("Incorrect person name", "Daniel Sagenschneider", person.getFullName());
-
-		// Ensure persist user and person
-		User newUser = new User();
-		newUser.setUserName("test");
-		Person newPerson = new Person();
-		newPerson.setFullName("TEST");
-		newPerson.setUser(newUser);
-		manager.persist(newPerson);
-		manager.close();
-
-		// Ensure user and person persisted
-		manager = factory.createEntityManager();
-		User retrievedUser = manager.find(User.class, newUser.getId());
-		assertEquals("Incorrect retrieved user name", "test", retrievedUser.getUserName());
-		Person retrievedPerson = retrievedUser.getPerson();
-		assertEquals("Incorrect retrieved full name", "TEST", retrievedPerson.getFullName());
-
-		// Close persistence
-		factory.close();
-	}
-
-	/**
-	 * Requests the page, creates a user and fails to create a user.
-	 */
-	// START SNIPPET: test
-	public void testCreateUser() throws Exception {
-
-		// Request page
-		this.doRequest("http://localhost:7878/users.woof");
-
-		// Create user with all details
-		this.doRequest("http://localhost:7878/users-create.woof?username=melanie&fullname=Melanie+Sagenschneider");
-
-		// Attempt to create user that will fail database constraints
-		this.doRequest("http://localhost:7878/users-create.woof?username=joe");
-
-		// Validate melanie added
-		EntityManager manager = Persistence.createEntityManagerFactory("example").createEntityManager();
-		User melanie = (User) manager.createQuery("SELECT U FROM User U WHERE U.userName = 'melanie'")
-				.getSingleResult();
-		assertEquals("Melanie created", "Melanie Sagenschneider", melanie.getPerson().getFullName());
-
-		// Validate joe not added
-		try {
-			manager.createQuery("SELECT U FROM User U WHERE U.userName = 'joe'").getSingleResult();
-			fail("Should not find Joe");
-		} catch (NoResultException ex) {
-		}
-	}
-
-	private void doRequest(String url) throws Exception {
-		HttpResponse response = this.client.execute(new HttpGet(url));
-		assertEquals("Request should be successful", 200, response.getStatusLine().getStatusCode());
-		response.getEntity().writeTo(System.out);
-	}
-	// END SNIPPET: test
+	// END SNIPPET: commit
 
 }

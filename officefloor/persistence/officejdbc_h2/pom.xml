@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.persistence</groupId>
 		<artifactId>persistence</artifactId>
-		<version>3.3.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>officejdbc_h2</artifactId>
 	<name>H2 Persistence</name>
@@ -22,7 +22,6 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>

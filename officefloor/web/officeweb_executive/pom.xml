@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>net.officefloor.web</groupId>
 		<artifactId>web</artifactId>
-		<version>3.3.0</version>
+		<version>${revision}</version>
 	</parent>
 	<artifactId>officeweb_executive</artifactId>
 	<name>Web Executive</name>
@@ -22,6 +22,11 @@
 		<dependency>
 			<groupId>net.openhft</groupId>
 			<artifactId>affinity</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_test</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

@@ -28,6 +28,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.http.stream.TemporaryFiles;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 
@@ -253,8 +254,7 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	 * Validates the {@link StreamBuffer} instances from the
 	 * {@link BufferPoolServerOutputStream}.
 	 * 
-	 * @param validators
-	 *            Listing of validators for each {@link StreamBuffer}.
+	 * @param validators Listing of validators for each {@link StreamBuffer}.
 	 */
 	@SafeVarargs
 	private final void assertBuffers(Function<StreamBuffer<ByteBuffer>, Integer>... validators) {
@@ -271,10 +271,8 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link StreamBuffer} content.
 	 * 
-	 * @param buffer
-	 *            {@link StreamBuffer}.
-	 * @param expectedBytes
-	 *            Expected bytes.
+	 * @param buffer        {@link StreamBuffer}.
+	 * @param expectedBytes Expected bytes.
 	 * @return Number of bytes in buffer.
 	 */
 	private static int assertPooledBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
@@ -293,10 +291,8 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link StreamBuffer} content.
 	 * 
-	 * @param buffer
-	 *            {@link StreamBuffer}.
-	 * @param expectedBytes
-	 *            Expected bytes.
+	 * @param buffer        {@link StreamBuffer}.
+	 * @param expectedBytes Expected bytes.
 	 * @return Number of bytes in buffer.
 	 */
 	private static int assertUnpooledBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
@@ -312,10 +308,8 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts the {@link StreamBuffer} content.
 	 * 
-	 * @param buffer
-	 *            {@link StreamBuffer}.
-	 * @param expectedBytes
-	 *            Expected bytes.
+	 * @param buffer        {@link StreamBuffer}.
+	 * @param expectedBytes Expected bytes.
 	 * @return Number of bytes in buffer.
 	 */
 	private static int assertFileBuffer(StreamBuffer<ByteBuffer> buffer, int... expectedBytes) {
@@ -326,7 +320,7 @@ public class BufferPoolServerOutputStreamTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect number of bytes", expectedBytes.length, count);
 			ByteBuffer input = ByteBuffer.allocate(1);
 			for (int i = 0; i < expectedBytes.length; i++) {
-				input.clear();
+				BufferJvmFix.clear(input);
 				assertEquals("Failed to read byte " + i, 1, fileBuffer.file.read(input));
 				assertEquals("Incorrect byte " + i, expectedBytes[i], input.get(0));
 			}

@@ -27,6 +27,7 @@ import java.util.function.Supplier;
 
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.impl.ByteSequence;
 
@@ -45,8 +46,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Specifies the maximum byte length of any {@link ByteSequence}.
 	 * 
-	 * @param length
-	 *            Maximum byte length of any {@link ByteSequence}.
+	 * @param length Maximum byte length of any {@link ByteSequence}.
 	 */
 	public static void setMaxByteLength(int length) {
 		maxByteLength = length;
@@ -86,8 +86,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param charBufferLength
-		 *            Length of the {@link CharBuffer}.
+		 * @param charBufferLength Length of the {@link CharBuffer}.
 		 */
 		private ThreadLocalState(int charBufferLength) {
 			charBuffer = CharBuffer.allocate(charBufferLength);
@@ -97,8 +96,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Obtains a {@link CharBuffer} ensuring it fits the max character length.
 	 * 
-	 * @param maxCharLength
-	 *            Maximum number of characters to fit.
+	 * @param maxCharLength Maximum number of characters to fit.
 	 * @return {@link CharBuffer}.
 	 */
 	private static CharBuffer getCharBuffer(int maxCharLength) {
@@ -112,7 +110,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 
 		} else {
 			// Use the char buffer, but clear ready for use
-			state.charBuffer.clear();
+			BufferJvmFix.clear(state.charBuffer);
 		}
 
 		// Return the char buffer
@@ -195,12 +193,9 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Instantiate with the first {@link StreamBuffer}.
 	 * 
-	 * @param buffer
-	 *            First {@link StreamBuffer} of this {@link ByteSequence}.
-	 * @param offset
-	 *            Offset into the {@link StreamBuffer} to read data.
-	 * @param length
-	 *            Length of data from the {@link StreamBuffer}.
+	 * @param buffer First {@link StreamBuffer} of this {@link ByteSequence}.
+	 * @param offset Offset into the {@link StreamBuffer} to read data.
+	 * @param length Length of data from the {@link StreamBuffer}.
 	 */
 	public StreamBufferByteSequence(StreamBuffer<ByteBuffer> buffer, int offset, int length) {
 		// Load the state (allow first buffer to be empty)
@@ -213,12 +208,9 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Appends a {@link StreamBuffer} to this {@link ByteSequence}.
 	 * 
-	 * @param buffer
-	 *            {@link StreamBuffer} to append to this {@link ByteSequence}.
-	 * @param offset
-	 *            Offset into the {@link StreamBuffer} to read data.
-	 * @param length
-	 *            Length of data from the {@link StreamBuffer}.
+	 * @param buffer {@link StreamBuffer} to append to this {@link ByteSequence}.
+	 * @param offset Offset into the {@link StreamBuffer} to read data.
+	 * @param length Length of data from the {@link StreamBuffer}.
 	 */
 	public void appendStreamBuffer(StreamBuffer<ByteBuffer> buffer, int offset, int length) {
 
@@ -319,13 +311,11 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Removes surrounding HTTP quotes.
 	 * 
-	 * @param <T>
-	 *            Invalid value {@link Exception} type.
-	 * @param invalidValueExceptionFactory
-	 *            {@link Supplier} of the invalid value {@link Exception}.
+	 * @param                              <T> Invalid value {@link Exception} type.
+	 * @param invalidValueExceptionFactory {@link Supplier} of the invalid value
+	 *                                     {@link Exception}.
 	 * @return <code>this</code>.
-	 * @throws T
-	 *             Invalid value {@link Exception}.
+	 * @throws T Invalid value {@link Exception}.
 	 */
 	public <T extends Throwable> StreamBufferByteSequence removeQuotes(Supplier<T> invalidValueExceptionFactory)
 			throws T {
@@ -400,7 +390,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		}
 
 		// Return the string value
-		temp.flip();
+		BufferJvmFix.flip(temp);
 		return temp.toString();
 	}
 
@@ -414,13 +404,12 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Decodes the URI.
 	 * 
-	 * @param <T>
-	 *            Invalid decode {@link Exception} type.
-	 * @param invalidDecodeExceptionFactory
-	 *            {@link Function} to create an invalid encoding {@link Throwable}.
+	 * @param                               <T> Invalid decode {@link Exception}
+	 *                                      type.
+	 * @param invalidDecodeExceptionFactory {@link Function} to create an invalid
+	 *                                      encoding {@link Throwable}.
 	 * @return <code>this</code>.
-	 * @throws T
-	 *             If invalid encoding.
+	 * @throws T If invalid encoding.
 	 */
 	public <T extends Throwable> StreamBufferByteSequence decodeUri(Function<String, T> invalidDecodeExceptionFactory)
 			throws T {
@@ -515,14 +504,12 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Decodes the byte to its 4 bit value.
 	 * 
-	 * @param value
-	 *            Value to be decoded.
-	 * @param invalidDecodeExceptionFactory
-	 *            {@link Function} to generate the {@link Throwable} should be
-	 *            invalid encoding.
+	 * @param value                         Value to be decoded.
+	 * @param invalidDecodeExceptionFactory {@link Function} to generate the
+	 *                                      {@link Throwable} should be invalid
+	 *                                      encoding.
 	 * @return Encoded 4 bits in the low bits of the return byte.
-	 * @throws T
-	 *             If invalid encoding.
+	 * @throws T If invalid encoding.
 	 */
 	private static <T extends Throwable> byte decodeUriByte(byte value,
 			Function<String, T> invalidDecodeExceptionFactory) throws T {
@@ -560,14 +547,12 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Obtains this {@link ByteSequence} decoded to a URI {@link String}.
 	 * 
-	 * @param <T>
-	 *            Invalid value {@link Exception} type.
-	 * @param invalidValueExceptionFactory
-	 *            Factory to create the {@link Exception} should the
-	 *            {@link ByteSequence} not be valid for the URI.
+	 * @param                              <T> Invalid value {@link Exception} type.
+	 * @param invalidValueExceptionFactory Factory to create the {@link Exception}
+	 *                                     should the {@link ByteSequence} not be
+	 *                                     valid for the URI.
 	 * @return {@link ByteSequence} decoded to a URI {@link String}.
-	 * @throws T
-	 *             If invalid {@link ByteSequence} for the URI.
+	 * @throws T If invalid {@link ByteSequence} for the URI.
 	 */
 	public <T extends Throwable> String toUriString(Function<CoderResult, T> invalidValueExceptionFactory) throws T {
 
@@ -582,16 +567,14 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	 * Obtains this {@link ByteSequence} as a {@link String} for the particular
 	 * {@link Charset}.
 	 *
-	 * @param <T>
-	 *            Invalid value {@link Exception} type.
-	 * @param charset
-	 *            {@link Charset} for the decoding the {@link StreamBuffer} data.
-	 * @param invalidValueExceptionFactory
-	 *            Factory to create the {@link Exception} should the
-	 *            {@link ByteSequence} not be valid for the {@link Charset}.
+	 * @param                              <T> Invalid value {@link Exception} type.
+	 * @param charset                      {@link Charset} for the decoding the
+	 *                                     {@link StreamBuffer} data.
+	 * @param invalidValueExceptionFactory Factory to create the {@link Exception}
+	 *                                     should the {@link ByteSequence} not be
+	 *                                     valid for the {@link Charset}.
 	 * @return {@link String} value for the {@link StreamBuffer} values.
-	 * @throws T
-	 *             If invalid {@link ByteSequence} for {@link Charset}.
+	 * @throws T If invalid {@link ByteSequence} for {@link Charset}.
 	 */
 	public <T extends Throwable> String toString(Charset charset, Function<CoderResult, T> invalidValueExceptionFactory)
 			throws T {
@@ -607,14 +590,12 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	 * Obtains this {@link ByteSequence} as a {@link String} via the
 	 * {@link CharsetDecoder}.
 	 * 
-	 * @param decoder
-	 *            {@link CharsetDecoder}.
-	 * @param invalidValueExceptionFactory
-	 *            Factory to create the {@link Exception} should the
-	 *            {@link ByteSequence} not be valid for the {@link Charset}.
+	 * @param decoder                      {@link CharsetDecoder}.
+	 * @param invalidValueExceptionFactory Factory to create the {@link Exception}
+	 *                                     should the {@link ByteSequence} not be
+	 *                                     valid for the {@link Charset}.
 	 * @return {@link String} value for the {@link StreamBuffer} values.
-	 * @throws T
-	 *             If invalid {@link ByteSequence} for {@link Charset}.
+	 * @throws T If invalid {@link ByteSequence} for {@link Charset}.
 	 */
 	private <T extends Throwable> String toString(CharsetDecoder decoder,
 			Function<CoderResult, T> invalidValueExceptionFactory) throws T {
@@ -645,7 +626,7 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		}
 
 		// Flip to get content just decoded
-		temp.flip();
+		BufferJvmFix.flip(temp);
 
 		// Return the string value
 		return temp.toString();
@@ -654,14 +635,12 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 	/**
 	 * Obtains this {@link ByteSequence} as a <code>long</code> value.
 	 * 
-	 * @param <T>
-	 *            Invalid digit {@link Exception} type.
-	 * @param invalidDigitExceptionFactory
-	 *            {@link Function} to create an {@link Throwable} should there be an
-	 *            invalid HTTP digit.
+	 * @param                              <T> Invalid digit {@link Exception} type.
+	 * @param invalidDigitExceptionFactory {@link Function} to create an
+	 *                                     {@link Throwable} should there be an
+	 *                                     invalid HTTP digit.
 	 * @return <code>long</code> value.
-	 * @throws T
-	 *             If invalid value to convert to long.
+	 * @throws T If invalid value to convert to long.
 	 */
 	public <T extends Throwable> long toLong(Function<Character, T> invalidDigitExceptionFactory) throws T {
 
@@ -799,12 +778,9 @@ public class StreamBufferByteSequence implements ByteSequence, CharSequence {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param buffer
-		 *            {@link StreamBuffer} for this segment.
-		 * @param offset
-		 *            Offset into the {@link StreamBuffer} for this segment.
-		 * @param length
-		 *            Length of data from the {@link StreamBuffer} for this segment.
+		 * @param buffer {@link StreamBuffer} for this segment.
+		 * @param offset Offset into the {@link StreamBuffer} for this segment.
+		 * @param length Length of data from the {@link StreamBuffer} for this segment.
 		 */
 		private StreamSegment(StreamBuffer<ByteBuffer> buffer, int offset, int length) {
 			this.buffer = buffer;

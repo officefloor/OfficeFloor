@@ -29,13 +29,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import javafx.beans.Observable;
 import javafx.beans.property.Property;
-import javafx.collections.ObservableList;
-import javafx.css.CssParser;
-import javafx.css.CssParser.ParseError;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.Scene;
 import net.officefloor.eclipse.ide.swt.SwtUtil;
+
+//import com.sun.javafx.css.CssError;
+//import com.sun.javafx.css.StyleManager;
+//import javafx.css.CssParser;
+//import javafx.css.CssParser.ParseError;
 
 /**
  * Utility methods for JavaFx.
@@ -43,11 +45,6 @@ import net.officefloor.eclipse.ide.swt.SwtUtil;
  * @author Daniel Sagenschneider
  */
 public class JavaFxUtil {
-
-	/**
-	 * {@link CssError} instances.
-	 */
-	private static final ObservableList<ParseError> CSS_ERRORS = CssParser.errorsProperty();
 
 	/**
 	 * Active {@link CssManager} for {@link Scene}.
@@ -68,23 +65,16 @@ public class JavaFxUtil {
 			return;
 		}
 
-		// Listen on errors for the new scene
-		CSS_ERRORS.addListener((Observable event) -> {
+		// Obtain the error property
+		ReadOnlyProperty<String> errorProperty = CssParserJavaFacet.errorProperty(JavaFxUtil.class.getClassLoader());
 
-			// Obtain the latest CSS error
-			ParseError error = CSS_ERRORS.get(CSS_ERRORS.size() - 1);
-
-			// Strip off style sheet (as always the text in modal)
-			String message = error.getMessage();
-			if (message == null) {
-				message = "";
-			}
-			message = message.split(" in stylesheet")[0];
+		// Update CSS manager with error
+		errorProperty.addListener((event) -> {
 
 			// Load error to active CSS manager
 			CssManager manager = activeCssManager.get(scene);
 			if (manager != null) {
-				manager.setCssError(message);
+				manager.setCssError(errorProperty.getValue());
 			}
 		});
 	}
@@ -105,7 +95,7 @@ public class JavaFxUtil {
 		private final Property<String> style;
 
 		/**
-		 * {@link Label} to report the {@link CssError}.
+		 * {@link Label} to report the CssError.
 		 */
 		private final Label cssErrorLabel;
 
