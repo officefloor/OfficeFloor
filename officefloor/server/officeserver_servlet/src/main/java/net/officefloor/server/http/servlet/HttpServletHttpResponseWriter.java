@@ -20,8 +20,6 @@ package net.officefloor.server.http.servlet;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.FilterChain;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
@@ -70,14 +68,9 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 	}
 
 	/**
-	 * {@link AsyncContext}.
+	 * {@link HttpServletResponse}.
 	 */
-	private final AsyncContext asyncContext;
-
-	/**
-	 * {@link FilterChain}.
-	 */
-	private final FilterChain chain;
+	private final HttpServletResponse response;
 
 	/**
 	 * {@link StreamBufferPool}.
@@ -85,17 +78,45 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 	private final StreamBufferPool<ByteBuffer> bufferPool;
 
 	/**
+	 * Indicates if serviced.
+	 */
+	private boolean isServiced = false;
+
+	/**
+	 * Possible failure.
+	 */
+	private IOException failure = null;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param asyncContext {@link AsyncContext}.
-	 * @param chain        {@link FilterChain}.
-	 * @param bufferPool   {@link StreamBufferPool}.
+	 * @param response   {@link HttpServletResponse}.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
-	public HttpServletHttpResponseWriter(AsyncContext asyncContext, FilterChain chain,
-			StreamBufferPool<ByteBuffer> bufferPool) {
-		this.asyncContext = asyncContext;
-		this.chain = chain;
+	public HttpServletHttpResponseWriter(HttpServletResponse response, StreamBufferPool<ByteBuffer> bufferPool) {
+		this.response = response;
 		this.bufferPool = bufferPool;
+	}
+
+	/**
+	 * Indicates if serviced.
+	 * 
+	 * @return <code>true</code> if serviced.
+	 * @throws IOException If fails to write response.
+	 */
+	public boolean isServiced() throws IOException {
+
+		// Sync to servlet servicing thread
+		synchronized (this.response) {
+
+			// Notify of failure
+			if (this.failure != null) {
+				throw this.failure;
+			}
+
+			// Return whether serviced
+			return this.isServiced;
+		}
 	}
 
 	/*
@@ -106,49 +127,46 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 	public void writeHttpResponse(HttpVersion version, HttpStatus status, WritableHttpHeader headHttpHeader,
 			WritableHttpCookie headHttpCookie, long contentLength, HttpHeaderValue contentType,
 			StreamBuffer<ByteBuffer> contentHeadStreamBuffer) {
-		try {
 
-			// Determine if not handled
-			switch (status.getStatusCode()) {
-			case 404:
-			case 405:
-				// Not handled by OfficeFloor, so delegate to next in Servlet chain
-				try {
-					chain.doFilter(this.asyncContext.getRequest(), this.asyncContext.getResponse());
-				} catch (Exception ex) {
+		// Determine if not handled
+		switch (status.getStatusCode()) {
+		case 404:
+		case 405:
+			// Not serviced
+			return;
+		}
 
-				}
-				return;
-			}
+		// Write the response (may be on another thread so synchronise)
+		synchronized (this.response) {
 
-			// Handled by OfficeFloor, so write out the response
-			HttpServletResponse asyncResponse = (HttpServletResponse) this.asyncContext.getResponse();
+			// Indicate serviced
+			this.isServiced = true;
 
 			// Load values to response
-			asyncResponse.setStatus(status.getStatusCode());
+			this.response.setStatus(status.getStatusCode());
 
 			// Load the headers
 			WritableHttpHeader header = headHttpHeader;
 			while (header != null) {
-				asyncResponse.setHeader(header.getName(), header.getValue());
+				this.response.setHeader(header.getName(), header.getValue());
 				header = header.next;
 			}
 
 			// Load the cookies
 			WritableHttpCookie cookie = headHttpCookie;
 			while (cookie != null) {
-				asyncResponse.addCookie(new Cookie(headHttpCookie.getName(), headHttpCookie.getValue()));
+				this.response.addCookie(new Cookie(headHttpCookie.getName(), headHttpCookie.getValue()));
 				cookie = cookie.next;
 			}
 
 			// Load the entity
 			if (contentType != null) {
-				asyncResponse.setContentType(contentType.getValue());
+				this.response.setContentType(contentType.getValue());
 			}
 
 			try {
 				// Write the entity content
-				ServletOutputStream entity = asyncResponse.getOutputStream();
+				ServletOutputStream entity = this.response.getOutputStream();
 				StreamBuffer<ByteBuffer> stream = contentHeadStreamBuffer;
 				while (stream != null) {
 					if (stream.pooledBuffer != null) {
@@ -207,13 +225,10 @@ public class HttpServletHttpResponseWriter implements HttpResponseWriter<ByteBuf
 					stream = stream.next;
 				}
 
-			} catch (IOException e) {
-				throw new IllegalStateException("Should not get failure in writing response");
+			} catch (IOException ex) {
+				// Capture failure
+				this.failure = ex;
 			}
-
-		} finally {
-			// Ensure flag complete
-			asyncContext.complete();
 		}
 	}
 

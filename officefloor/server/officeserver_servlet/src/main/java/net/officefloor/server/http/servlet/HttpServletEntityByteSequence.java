@@ -41,7 +41,7 @@ public class HttpServletEntityByteSequence implements ByteSequence {
 	private void ensureBytesLoaded() {
 		try {
 			if (this.bytes == null) {
-				synchronized (this) {
+				synchronized (this.request) {
 					ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 					InputStream requestEntity = this.request.getInputStream();
 					for (int value = requestEntity.read(); value != -1; value = requestEntity.read()) {

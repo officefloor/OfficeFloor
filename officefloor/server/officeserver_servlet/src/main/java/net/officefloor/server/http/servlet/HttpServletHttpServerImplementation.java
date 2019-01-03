@@ -18,6 +18,7 @@
 package net.officefloor.server.http.servlet;
 
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
+import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
 import net.officefloor.server.http.HttpServerLocation;
@@ -104,6 +105,9 @@ public class HttpServletHttpServerImplementation implements HttpServerImplementa
 
 		// Load the bridge
 		bridge.bridge = new HttpServletOfficeFloorBridge(location, isIncludeEscalationStackTrace, input);
+
+		// Register thread local aware team (to block invoking thread until serviced)
+		context.getOfficeFloorDeployer().addTeam("_servlet_sync_", new ThreadLocalAwareTeamSource());
 	}
 
 }
