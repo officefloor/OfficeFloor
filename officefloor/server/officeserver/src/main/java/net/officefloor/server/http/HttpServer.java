@@ -201,6 +201,11 @@ public class HttpServer {
 	private final HttpServerImplementation serverImplementation;
 
 	/**
+	 * Indicates if can create the {@link SSLContext}.
+	 */
+	private final boolean isCreateSslContext;
+
+	/**
 	 * {@link SSLContext}.
 	 */
 	private final SSLContext sslContext;
@@ -296,7 +301,8 @@ public class HttpServer {
 		this.serverImplementation = implementation;
 
 		// Obtain the SSL context
-		this.sslContext = getSslContext(context);
+		this.isCreateSslContext = true;
+		this.sslContext = null;
 
 		// Configure the HTTP server
 		this.configure(serviceInput, officeFloorDeployer, context);
@@ -318,16 +324,18 @@ public class HttpServer {
 	 *                                      the {@link ServerHttpConnection}.
 	 * @param officeFloorDeployer           {@link OfficeFloorDeployer}.
 	 * @param context                       {@link OfficeFloorSourceContext}.
+	 * @throws Exception If fails to configure the {@link HttpServerImplementation}.
 	 */
 	public HttpServer(HttpServerImplementation implementation, HttpServerLocation serverLocation, String serverName,
 			DateHttpHeaderClock dateHttpHeaderClock, boolean isIncludeEscalationStackTrace, SSLContext sslContext,
-			DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer,
-			OfficeFloorSourceContext context) {
+			DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer, OfficeFloorSourceContext context)
+			throws Exception {
 		this.serverLocation = serverLocation;
 		this.serverName = serverName;
 		this.dateHttpHeaderClock = dateHttpHeaderClock;
 		this.isIncludeEscalationStackTrace = isIncludeEscalationStackTrace;
 		this.serverImplementation = implementation;
+		this.isCreateSslContext = false;
 		this.sslContext = sslContext;
 
 		// Configure the HTTP server
@@ -341,12 +349,18 @@ public class HttpServer {
 	 *                            {@link ServerHttpConnection}.
 	 * @param officeFloorDeployer {@link OfficeFloorDeployer}.
 	 * @param context             {@link OfficeFloorSourceContext}.
+	 * @throws Exception If fails to configure the {@link HttpServerImplementation}.
 	 */
 	private void configure(DeployedOfficeInput serviceInput, OfficeFloorDeployer officeFloorDeployer,
-			OfficeFloorSourceContext context) {
+			OfficeFloorSourceContext context) throws Exception {
 
 		// Configure the HTTP server
 		this.serverImplementation.configureHttpServer(new HttpServerImplementationContext() {
+
+			/**
+			 * Cached {@link SSLContext} to return.
+			 */
+			private SSLContext sslContext = null;
 
 			/*
 			 * ================= HttpServerImplementationContext ==============
@@ -373,8 +387,21 @@ public class HttpServer {
 			}
 
 			@Override
-			public SSLContext getSslContext() {
-				return HttpServer.this.sslContext;
+			public SSLContext getSslContext() throws Exception {
+
+				// Lazy obtain the SSL context
+				if (this.sslContext == null) {
+					if (HttpServer.this.isCreateSslContext) {
+						// Create the SSL context
+						this.sslContext = HttpServer.getSslContext(context);
+					} else {
+						// Use configured SSL context
+						this.sslContext = HttpServer.this.sslContext;
+					}
+				}
+
+				// Return the SSL context
+				return this.sslContext;
 			}
 
 			@Override

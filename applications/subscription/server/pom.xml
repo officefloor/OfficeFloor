@@ -14,6 +14,7 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>server</artifactId>
+	<packaging>war</packaging>
 
 	<properties>
 		<google.appengine.version>1.9.71</google.appengine.version>
@@ -32,6 +33,10 @@
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>officejson_jackson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_servlet</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.objectify</groupId>
@@ -78,6 +83,11 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.google.appengine</groupId>
+				<artifactId>appengine-maven-plugin</artifactId>
+				<version>${google.appengine.version}</version>
 			</plugin>
 		</plugins>
 	</build>

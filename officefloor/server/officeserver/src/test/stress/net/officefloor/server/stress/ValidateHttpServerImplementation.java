@@ -112,7 +112,7 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public void configureHttpServer(HttpServerImplementationContext context) {
+	public void configureHttpServer(HttpServerImplementationContext context) throws Exception {
 
 		// Provide server
 		Server server = createServer(context.getHttpServerLocation(), context.getSslContext());

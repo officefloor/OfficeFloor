@@ -29,9 +29,9 @@ public interface HttpServerImplementation {
 	/**
 	 * Configures the {@link HttpServer}.
 	 * 
-	 * @param context
-	 *            {@link HttpServerImplementationContext}.
+	 * @param context {@link HttpServerImplementationContext}.
+	 * @throws Exception If fails to configure the {@link HttpServerImplementation}.
 	 */
-	void configureHttpServer(HttpServerImplementationContext context);
+	void configureHttpServer(HttpServerImplementationContext context) throws Exception;
 
 }

@@ -59,9 +59,8 @@ public class AuthenticateTest {
 		assertTrue("Should be successful", response.getObject().isSuccessful());
 
 		// Ensure the user is loaded into the database
-		GoogleSignin user = this.obectify.ofy().load().type(GoogleSignin.class)
-				.filter("email =", "daniel@officefloor.net").list().get(0);
-		assertNotNull("Should have user", user);
+		GoogleSignin user = this.obectify.get(GoogleSignin.class,
+				(load) -> load.filter("email", "daniel@officefloor.net"));
 
 		// Ensure correct details
 		assertUser(user, "1", "daniel@officefloor.net", "Daniel Sagenschneider", "http://officefloor.net/photo.png");
@@ -84,8 +83,7 @@ public class AuthenticateTest {
 		assertTrue("Should be successful", this.response.getObject().isSuccessful());
 
 		// Ensure the user is loaded into the database
-		user = this.obectify.ofy().load().type(GoogleSignin.class).filter("email =", "changed@officefloor.net").list()
-				.get(0);
+		user = this.obectify.get(GoogleSignin.class, (load) -> load.filter("email", "changed@officefloor.net"));
 		assertNotNull("Should have user", user);
 
 		// Ensure correct details

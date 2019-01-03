@@ -35,7 +35,7 @@ import net.officefloor.server.http.impl.DateHttpHeaderClock;
 public class OfficeFloorHttpServerImplementation implements HttpServerImplementation {
 
 	@Override
-	public void configureHttpServer(HttpServerImplementationContext context) {
+	public void configureHttpServer(HttpServerImplementationContext context) throws Exception {
 
 		// Obtain the deployer
 		OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();

@@ -52,8 +52,8 @@ public class AuthenticateITest {
 		response.assertResponse(200, this.mapper.writeValueAsString(new AuthenticateResponse(true, null)));
 
 		// Ensure login created in store
-		GoogleSignin user = this.obectify.ofy().load().type(GoogleSignin.class)
-				.filter("email", "daniel@officefloor.net").list().get(0);
+		GoogleSignin user = this.obectify.get(GoogleSignin.class,
+				(load) -> load.filter("email", "daniel@officefloor.net"));
 		assertNotNull("Should have the user", user);
 		assertEquals("Incorrect name", "Daniel Sagenschneider", user.getName());
 		assertEquals("Incorrect photoUrl", "http://officefloor.net/photo.png", user.getPhotoUrl());

@@ -92,8 +92,9 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * 
 	 * @param input {@link DeployedOfficeInput}.
 	 * @return {@link MockHttpServer} to send {@link HttpRequest} instances.
+	 * @throws Exception If fails to configure {@link MockHttpServer}.
 	 */
-	public static MockHttpServer configureMockHttpServer(DeployedOfficeInput input) {
+	public static MockHttpServer configureMockHttpServer(DeployedOfficeInput input) throws Exception {
 		MockHttpServer httpServer = new MockHttpServer();
 		configureMockHttpServer(httpServer, input);
 		return httpServer;
@@ -105,8 +106,10 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * 
 	 * @param httpServer {@link MockHttpServer}.
 	 * @param input      {@link DeployedOfficeInput}.
+	 * @throws Exception If fails to configure {@link MockHttpServer}.
 	 */
-	protected static void configureMockHttpServer(MockHttpServer httpServer, DeployedOfficeInput input) {
+	protected static void configureMockHttpServer(MockHttpServer httpServer, DeployedOfficeInput input)
+			throws Exception {
 		new HttpServer(httpServer, httpServer, null, null, true, null, input, null, null);
 	}
 
