@@ -21,13 +21,17 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.servlet.MockServerOfficeFloorExtensionService.Router;
+import net.officefloor.server.http.servlet.MockServerOfficeFloorExtensionService.TeamMarker;
 
 /**
  * Tests the {@link OfficeFloorFilter}.
@@ -53,7 +57,7 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 		ServletContextHandler handler = new ServletContextHandler();
 		handler.setContextPath("/");
 		handler.addFilter(OfficeFloorFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
-		handler.addServlet(MockHttpServlet.class, "/servlet");
+		handler.addServlet(MockHttpServlet.class, "/*");
 		this.server.setHandler(handler);
 		this.server.start();
 
@@ -72,8 +76,25 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 	 * Ensure can pass request through to {@link HttpServlet}.
 	 */
 	public void testPassThroughToServlet() throws Exception {
+		this.assertPassThroughServicing("/servlet");
+	}
+
+	/**
+	 * Ensure if another {@link Team} flags not found, that
+	 * {@link OfficeFloorFilter} waits for servicing to complete.
+	 */
+	public void testDelayedPassThroughToServlet() throws Exception {
+		this.assertPassThroughServicing(Router.DELAYED_NOT_FOUND_PATH);
+	}
+
+	/**
+	 * Asserts servicing by OfficeFloor passing through to servlet container.
+	 * 
+	 * @param path Path to request.
+	 */
+	private void assertPassThroughServicing(String path) throws Exception {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-			HttpPost post = new HttpPost("http://localhost:" + this.port + "/servlet");
+			HttpPost post = new HttpPost("http://localhost:" + this.port + path);
 			post.setEntity(new StringEntity("PassThrough"));
 			org.apache.http.HttpResponse response = client.execute(post);
 			String entity = EntityUtils.toString(response.getEntity());
@@ -86,8 +107,27 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 	 * Ensure loads the {@link OfficeFloorFilter}.
 	 */
 	public void testServiceWithOfficeFloorFilter() throws Exception {
+		this.assertOfficeFloorServicing(Router.SINGLE_TEAM_PATH);
+	}
+
+	/**
+	 * Ensures co-ordinates the threading to use synchronously within servlet
+	 * container (even if {@link Team} instances used).
+	 */
+	public void testServiceWithOfficeFloorTeams() throws Exception {
+		TeamServicer.teamsThread = null; // reset for test
+		this.assertOfficeFloorServicing(Router.MULTIPLE_TEAM_PATH);
+		assertNotNull("Should be invoked for original team", TeamServicer.teamsThread);
+	}
+
+	/**
+	 * Asserts servicing of OfficeFloor request appropriately.
+	 * 
+	 * @param path Path to request.
+	 */
+	private void assertOfficeFloorServicing(String path) throws Exception {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-			HttpPost post = new HttpPost("http://localhost:" + this.port + "/officefloor");
+			HttpPost post = new HttpPost("http://localhost:" + this.port + path);
 			post.addHeader("test", "header");
 			post.setEntity(new StringEntity("Handled"));
 			org.apache.http.HttpResponse response = client.execute(post);
@@ -102,32 +142,48 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 	 * Servicer {@link ClassSectionSource}.
 	 */
 	public static class Servicer {
-		public void input(ServerHttpConnection connection) throws IOException {
+		public void service(ServerHttpConnection connection) throws IOException {
 
-			// Only handle /officefloor
+			// Service request
 			HttpRequest request = connection.getRequest();
 			HttpResponse response = connection.getResponse();
-			if ("/officefloor".equals(request.getUri())) {
 
-				// Obtain the header
-				HttpHeader header = request.getHeaders().getHeader("test");
+			// Obtain the header
+			HttpHeader header = request.getHeaders().getHeader("test");
 
-				// Read in the entity
-				StringWriter buffer = new StringWriter();
-				Reader entity = new InputStreamReader(request.getEntity());
-				for (int character = entity.read(); character != -1; character = entity.read()) {
-					buffer.write(character);
-				}
-
-				// Handle request
-				response.setStatus(HttpStatus.CREATED);
-				response.setContentType("plain/text", null);
-				response.getEntityWriter().write("OfficeFloor-" + header.getValue() + "-" + buffer.toString());
-				return;
+			// Read in the entity
+			StringWriter buffer = new StringWriter();
+			Reader entity = new InputStreamReader(request.getEntity());
+			for (int character = entity.read(); character != -1; character = entity.read()) {
+				buffer.write(character);
 			}
 
-			// As here, not handled
-			response.setStatus(HttpStatus.NOT_FOUND);
+			// Handle request
+			response.setStatus(HttpStatus.CREATED);
+			response.setContentType("plain/text", null);
+			response.getEntityWriter().write("OfficeFloor-" + header.getValue() + "-" + buffer.toString());
+		}
+	}
+
+	/**
+	 * Service {@link ClassSectionSource} that incorporates {@link Team} to service
+	 * the request.
+	 */
+	public static class TeamServicer extends Servicer {
+
+		private static volatile Thread teamsThread = null;
+
+		@NextFunction("anotherTeam")
+		public void teams() {
+			teamsThread = Thread.currentThread();
+		}
+
+		@NextFunction("service")
+		public void anotherTeam(TeamMarker teamMarker) {
+
+			// Ensure serviced in different thread
+			assertNotNull("Should have original teams thread", teamsThread);
+			assertNotSame("Should be invoked with different thread", teamsThread, Thread.currentThread());
 		}
 	}
 

@@ -96,10 +96,16 @@ public class OfficeFloorFilter implements Filter {
 		NonMaterialisedHttpHeaders httpHeaders = new HttpServletNonMaterialisedHttpHeaders(httpRequest);
 
 		// Create the entity content
-		ByteSequence entity = new HttpServletEntityByteSequence(httpRequest);
+		ByteSequence entity;
+		synchronized (httpRequest) {
+			entity = new HttpServletEntityByteSequence(httpRequest);
+		}
 
 		// Create the writer of the response
-		HttpServletHttpResponseWriter writer = new HttpServletHttpResponseWriter(httpResponse, bufferPool);
+		HttpServletHttpResponseWriter writer;
+		synchronized (httpResponse) {
+			writer = new HttpServletHttpResponseWriter(httpResponse, bufferPool);
+		}
 
 		// Create the server HTTP connection
 		HttpMethod httpMethod = HttpMethod.getHttpMethod(httpRequest.getMethod());
@@ -109,12 +115,6 @@ public class OfficeFloorFilter implements Filter {
 				this.bridge.getHttpServerLocation(), httpRequest.isSecure(), () -> httpMethod, () -> requestUri,
 				HttpVersion.getHttpVersion(request.getProtocol()), httpHeaders, entity, null, null,
 				this.bridge.isIncludeEscalationStackTrace(), writer, bufferPool);
-
-		// Ensure state synchronized (before servicing by potentially other threads)
-		synchronized (httpRequest) {
-		}
-		synchronized (httpResponse) {
-		}
 
 		// Service request (blocks until serviced)
 		this.bridge.getInput().service(connection, connection.getServiceFlowCallback());

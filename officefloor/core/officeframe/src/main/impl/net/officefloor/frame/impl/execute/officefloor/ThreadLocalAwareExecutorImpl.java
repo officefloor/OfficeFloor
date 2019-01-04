@@ -102,6 +102,11 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		Object processIdentifier = processState.getProcessIdentifier();
 		JobQueueExecutor executor = this.processToExecutor.get(processIdentifier);
 
+		// Ignore internal processes (such as recycle managed object)
+		if (executor == null) {
+			return;
+		}
+
 		// Notify of complete process
 		executor.processComplete(processState);
 		this.processToExecutor.remove(processState);
@@ -118,8 +123,8 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		private final JobQueue jobQueue = new JobQueue(this);
 
 		/**
-		 * Registered {@link ProcessState} identifier instances. Typically
-		 * should only invoke the single {@link ProcessState}.
+		 * Registered {@link ProcessState} identifier instances. Typically should only
+		 * invoke the single {@link ProcessState}.
 		 */
 		private final Map<Object, Object> registeredProcessIdentifiers = new ConcurrentHashMap<>();
 
@@ -136,10 +141,8 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param thread
-		 *            {@link Thread}.
-		 * @param process
-		 *            {@link ProcessState}.
+		 * @param thread  {@link Thread}.
+		 * @param process {@link ProcessState}.
 		 */
 		public JobQueueExecutor(Thread thread, ProcessState process) {
 			this.thread = thread;
@@ -150,8 +153,7 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		/**
 		 * Registers another {@link ProcessState}.
 		 * 
-		 * @param process
-		 *            {@link ProcessState}.
+		 * @param process {@link ProcessState}.
 		 */
 		private void registerProcess(ProcessState process) {
 			Object processIdentifier = process.getProcessIdentifier();
@@ -161,8 +163,7 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		/**
 		 * Indicates the {@link ProcessState} has completed.
 		 * 
-		 * @param process
-		 *            {@link ProcessState} that has completed.
+		 * @param process {@link ProcessState} that has completed.
 		 */
 		private void processComplete(ProcessState process) {
 
@@ -177,9 +178,8 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		}
 
 		/**
-		 * Blocking call to execute the {@link Job} instances until completion
-		 * of all {@link ProcessState} instances registered with this
-		 * {@link JobQueueExecutor}.
+		 * Blocking call to execute the {@link Job} instances until completion of all
+		 * {@link ProcessState} instances registered with this {@link JobQueueExecutor}.
 		 */
 		public void executeJobs() {
 
