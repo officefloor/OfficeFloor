@@ -12,7 +12,7 @@ export class LoginComponent implements OnInit {
 
     constructor( private loginService: LoginService ) { }
 
-    private user: SocialUser;
+    user: SocialUser;
 
     ngOnInit() {
         this.loginService.subscribe(( user: SocialUser ) => {

@@ -19,13 +19,13 @@ package net.officefloor.web.resource.classpath;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 import net.officefloor.web.resource.HttpFile;
 import net.officefloor.web.resource.HttpResourceStore;
-import net.officefloor.web.resource.impl.HttpDirectoryImpl;
 import net.officefloor.web.resource.spi.ResourceSystem;
 import net.officefloor.web.resource.spi.ResourceSystemContext;
 
@@ -146,26 +146,30 @@ public class ClasspathResourceSystem implements ResourceSystem {
 			 * just using the ClassLoader, as can not scan class path.
 			 */
 
-			// Determine if available on class loader
+			// Obtain the class path
 			String classPath = this.root.getClassPath() + (path.startsWith("/") ? path : "/" + path);
-			Path file = this.createFile(classPath, path);
-			if (file != null) {
 
-				// Determine if directory
-				HttpResourceStore store = this.context.getHttpResourceStore();
-				try (HttpDirectoryImpl directory = new HttpDirectoryImpl(path, store)) {
-					HttpFile defaultFile = directory.getDefaultHttpFile();
-					if (defaultFile != null) {
-						return this.cacheDirectory;
-					}
+			/*
+			 * Determine if directory
+			 * 
+			 * Some class loaders will return the listing of resources in the directory,
+			 * while others will return null. Therefore, need to check if default resources
+			 * exist rather than basing on directory class path results.
+			 */
+			for (String defaultResourceName : this.context.getDirectoryDefaultResourceNames()) {
+
+				// Determine if default resource exists
+				String defaultResourcePath = classPath
+						+ (defaultResourceName.startsWith("/") ? defaultResourceName : "/" + defaultResourceName);
+				URL defaultResourceUrl = this.classLoader.getResource(defaultResourcePath);
+				if (defaultResourceUrl != null) {
+					// Directory resource
+					return this.cacheDirectory;
 				}
-
-				// Return the direct file
-				return file;
 			}
 
-			// As here, not found
-			return null;
+			// Not directory, so determine if file
+			return this.createFile(classPath, path);
 		}
 
 		// Obtains the node for the path

@@ -43,7 +43,7 @@ public class AuthenticateITest {
 
 		// Undertake authentication
 		String token = this.verifier.getMockIdToken("1", "daniel@officefloor.net", "email_verified", "true", "name",
-				"Daniel Sagenschneider", "photoUrl", "http://officefloor.net/photo.png");
+				"Daniel Sagenschneider", "picture", "http://officefloor.net/photo.png");
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/authenticate").method(HttpMethod.POST)
 				.header("Content-Type", "application/json")
 				.entity(this.mapper.writeValueAsString(new AuthenticateRequest(token))));

@@ -53,7 +53,7 @@ public class AuthenticateTest {
 
 		// Undertake authentication
 		String token = this.verifier.getMockIdToken("1", "daniel@officefloor.net", "email_verified", "true", "name",
-				"Daniel Sagenschneider", "photoUrl", "http://officefloor.net/photo.png");
+				"Daniel Sagenschneider", "picture", "http://officefloor.net/photo.png");
 		new Authenticate().service(new AuthenticateRequest(token), this.verifier.getGoogleIdTokenVerifier(),
 				this.obectify.ofy(), this.response);
 		assertTrue("Should be successful", response.getObject().isSuccessful());
@@ -77,7 +77,7 @@ public class AuthenticateTest {
 
 		// Undertake authentication
 		String token = this.verifier.getMockIdToken("1", "changed@officefloor.net", "email_verified", "true", "name",
-				"Changed Sagenschneider", "photoUrl", "http://officefloor.net/changed.png");
+				"Changed Sagenschneider", "picture", "http://officefloor.net/changed.png");
 		new Authenticate().service(new AuthenticateRequest(token), this.verifier.getGoogleIdTokenVerifier(),
 				this.obectify.ofy(), this.response);
 		assertTrue("Should be successful", this.response.getObject().isSuccessful());

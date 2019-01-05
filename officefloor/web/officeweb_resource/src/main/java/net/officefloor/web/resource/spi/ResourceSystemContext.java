@@ -48,6 +48,13 @@ public interface ResourceSystemContext {
 	String getLocation();
 
 	/**
+	 * Obtains the directory default resource names.
+	 * 
+	 * @return Directory default resource names.
+	 */
+	String[] getDirectoryDefaultResourceNames();
+
+	/**
 	 * Obtains the {@link HttpResourceStore}.
 	 * 
 	 * @return {@link HttpResourceStore}.

@@ -56,7 +56,7 @@ public class Authenticate {
 		String googleId = payload.getSubject();
 		String email = payload.getEmail();
 		String name = payload.get("name").toString();
-		String photoUrl = payload.get("photoUrl").toString();
+		String photoUrl = payload.get("picture").toString();
 
 		// Determine if the user exists
 		List<GoogleSignin> users = objectify.load().type(GoogleSignin.class).filter("googleId", googleId).list();

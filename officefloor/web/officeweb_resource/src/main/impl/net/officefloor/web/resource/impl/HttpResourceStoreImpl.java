@@ -260,6 +260,11 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	}
 
 	@Override
+	public String[] getDirectoryDefaultResourceNames() {
+		return this.directoryDefaultResourceNames;
+	}
+
+	@Override
 	public HttpResourceStore getHttpResourceStore() {
 		return this;
 	}
