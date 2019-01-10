@@ -18,46 +18,21 @@
 package net.officefloor.web.security.scheme;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockHttpRequestBuilder;
-import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.AuthenticateContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.RatifyContext;
 
 /**
- * Mock {@link AuthenticateContext} for testing {@link HttpSecuritySource}
- * instances.
+ * Mock {@link RatifyContext} for testing {@link HttpSecuritySource} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum<O>>
-		implements AuthenticateContext<AC, O> {
-
-	/**
-	 * Creates the {@link ServerHttpConnection} with authorization
-	 * {@link HttpHeader} value.
-	 * 
-	 * @param authorizationHeaderValue
-	 *            Authorization {@link HttpHeader} value.
-	 * @return {@link ServerHttpConnection}.
-	 */
-	public static ServerHttpConnection createRequestWithAuthorizationHeader(String authorizationHeaderValue) {
-
-		// Create the HTTP request
-		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
-		if (authorizationHeaderValue != null) {
-			request.header("Authorization", authorizationHeaderValue);
-		}
-
-		// Return the connection with request
-		return MockHttpServer.mockConnection(request);
-	}
+public class MockHttpRatifyContext<AC extends Serializable> implements RatifyContext<AC> {
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -70,45 +45,44 @@ public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum
 	private final HttpSession session;
 
 	/**
-	 * Dependencies.
-	 */
-	private final Map<O, Object> dependencies = new HashMap<O, Object>();
-
-	/**
 	 * Access control.
 	 */
 	private AC accessControl = null;
 
 	/**
-	 * Escalation.
+	 * {@link Escalation}.
 	 */
 	private Throwable escalation = null;
 
 	/**
+	 * Initiate with no <code>authorization</code> {@link HttpHeader}.
+	 */
+	public MockHttpRatifyContext() {
+		this((String) null);
+	}
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param authorizationHeaderValue
-	 *            <code>authorization</code> {@link HttpHeader} value.
+	 * @param authorizationHeaderValue <code>authorization</code> {@link HttpHeader}
+	 *                                 value.
 	 */
-	public MockHttpAuthenticateContext(String authorizationHeaderValue) {
-		this.connection = createRequestWithAuthorizationHeader(authorizationHeaderValue);
+	public MockHttpRatifyContext(String authorizationHeaderValue) {
+		this(MockHttpAuthenticateContext.createRequestWithAuthorizationHeader(authorizationHeaderValue));
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param connection {@link ServerHttpConnection}.
+	 */
+	public MockHttpRatifyContext(ServerHttpConnection connection) {
+		this.connection = connection;
 		this.session = MockWebApp.mockSession(this.connection);
 	}
 
 	/**
-	 * Registers and object.
-	 * 
-	 * @param key
-	 *            Key for dependency.
-	 * @param dependency
-	 *            Dependency object.
-	 */
-	public void registerObject(O key, Object dependency) {
-		this.dependencies.put(key, dependency);
-	}
-
-	/**
-	 * Obtains the registered access control.
+	 * Obtains the access control.
 	 * 
 	 * @return Access control.
 	 */
@@ -119,14 +93,14 @@ public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum
 	/**
 	 * Obtains the registered escalation.
 	 * 
-	 * @return Escalation.
+	 * @return {@link Escalation}.
 	 */
 	public Throwable getEscalation() {
 		return this.escalation;
 	}
 
 	/*
-	 * ==================== HttpAuthenticateContext =========================
+	 * ===================== HttpRatifyContext ===============================
 	 */
 
 	@Override
@@ -137,11 +111,6 @@ public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum
 	@Override
 	public HttpSession getSession() {
 		return this.session;
-	}
-
-	@Override
-	public Object getObject(O key) {
-		return this.dependencies.get(key);
 	}
 
 	@Override

@@ -88,10 +88,8 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 	/**
 	 * Instantiate.
 	 *
-	 * @param qualifier
-	 *            Qualifier for the {@link HttpSecurity}.
-	 * @param httpSecurity
-	 *            {@link HttpSecurity}.
+	 * @param qualifier    Qualifier for the {@link HttpSecurity}.
+	 * @param httpSecurity {@link HttpSecurity}.
 	 */
 	public AuthenticationContextManagedObjectSource(String qualifier, HttpSecurity<A, AC, C, O, F> httpSecurity) {
 		this.qualifier = qualifier;
@@ -142,7 +140,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		 * {@link AccessControlListener} instances. Typically 2 listeners (
 		 * {@link HttpAuthentication} and {@link HttpAccessControl} ).
 		 */
-		private final List<AccessControlListener<AC>> listeners = new ArrayList<>(2);
+		private final List<AccessControlListener<? super AC>> listeners = new ArrayList<>(2);
 
 		/**
 		 * {@link ProcessAwareContext}.
@@ -177,10 +175,8 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		/**
 		 * Loads the access control.
 		 *
-		 * @param accessControl
-		 *            Access control.
-		 * @param escalation
-		 *            {@link Throwable}.
+		 * @param accessControl Access control.
+		 * @param escalation    {@link Throwable}.
 		 */
 		private void loadAccessControl(AC accessControl, Throwable escalation) {
 			this.processAwareContext.run(() -> {
@@ -197,16 +193,16 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		/**
 		 * Notifies the change.
 		 * 
-		 * @param authenticateRequest
-		 *            Optional {@link AuthenticateRequest}. May be <code>null</code>.
-		 * @param logoutRequest
-		 *            Optional {@link LogoutRequest}. May be <code>null</code>.
+		 * @param authenticateRequest Optional {@link AuthenticateRequest}. May be
+		 *                            <code>null</code>.
+		 * @param logoutRequest       Optional {@link LogoutRequest}. May be
+		 *                            <code>null</code>.
 		 */
 		private void unsafeNotifyChange(AuthenticateRequest authenticateRequest, LogoutRequest logoutRequest) {
 
 			// Notify the registered listeners
 			for (int i = 0; i < this.listeners.size(); i++) {
-				AccessControlListener<AC> listener = this.listeners.get(i);
+				AccessControlListener<? super AC> listener = this.listeners.get(i);
 				listener.accessControlChange(this.accessControl, this.escalation);
 			}
 
@@ -222,12 +218,11 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		/**
 		 * Safely notifies the change.
 		 * 
-		 * @param escalation
-		 *            Possible {@link Escalation}.
-		 * @param authenticateRequest
-		 *            Optional {@link AuthenticateRequest}. May be <code>null</code>.
-		 * @param logoutRequest
-		 *            Optional {@link LogoutRequest}. May be <code>null</code>.
+		 * @param escalation          Possible {@link Escalation}.
+		 * @param authenticateRequest Optional {@link AuthenticateRequest}. May be
+		 *                            <code>null</code>.
+		 * @param logoutRequest       Optional {@link LogoutRequest}. May be
+		 *                            <code>null</code>.
 		 */
 		private void safeNotifyChange(Throwable escalation, AuthenticateRequest authenticateRequest,
 				LogoutRequest logoutRequest) {
@@ -285,7 +280,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		}
 
 		@Override
-		public void register(AccessControlListener<AC> accessControlListener) {
+		public void register(AccessControlListener<? super AC> accessControlListener) {
 			this.processAwareContext.run(() -> this.listeners.add(accessControlListener));
 		}
 
@@ -403,12 +398,9 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 			/**
 			 * Initiate.
 			 * 
-			 * @param connection
-			 *            {@link ServerHttpConnection}.
-			 * @param session
-			 *            {@link HttpSession}.
-			 * @param credentials
-			 *            Credentials.
+			 * @param connection  {@link ServerHttpConnection}.
+			 * @param session     {@link HttpSession}.
+			 * @param credentials Credentials.
 			 */
 			public FunctionAuthenticateContextImpl(ServerHttpConnection connection, HttpSession session,
 					C credentials) {
@@ -460,10 +452,8 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 			/**
 			 * Initiate.
 			 * 
-			 * @param connection
-			 *            {@link ServerHttpConnection}.
-			 * @param session
-			 *            {@link HttpSession}.
+			 * @param connection {@link ServerHttpConnection}.
+			 * @param session    {@link HttpSession}.
 			 */
 			private FunctionLogoutContextImpl(ServerHttpConnection connection, HttpSession session) {
 				this.connection = connection;

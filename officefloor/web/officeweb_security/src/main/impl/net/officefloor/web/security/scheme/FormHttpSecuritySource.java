@@ -81,17 +81,13 @@ public class FormHttpSecuritySource extends
 	 * This is separated out so that may be overridden to provide differing means
 	 * for authentication.
 	 * 
-	 * @param userId
-	 *            Identifier for the user.
-	 * @param realm
-	 *            Security realm.
-	 * @param password
-	 *            Password.
-	 * @param store
-	 *            {@link CredentialStore}.
+	 * @param userId   Identifier for the user.
+	 * @param realm    Security realm.
+	 * @param password Password.
+	 * @param store    {@link CredentialStore}.
 	 * @return {@link HttpAccessControl} or <code>null</code> if not authenticated.
-	 * @throws HttpException
-	 *             If fails communication with the {@link CredentialStore}.
+	 * @throws HttpException If fails communication with the
+	 *                       {@link CredentialStore}.
 	 */
 	protected HttpAccessControl authenticate(String userId, String realm, byte[] password, CredentialStore store)
 			throws HttpException {
@@ -136,7 +132,7 @@ public class FormHttpSecuritySource extends
 	/**
 	 * Form {@link HttpSecurity}.
 	 */
-	public class FormHttpSecurity implements
+	private class FormHttpSecurity implements
 			HttpSecurity<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, Dependencies, Flows> {
 
 		/**
@@ -147,8 +143,7 @@ public class FormHttpSecuritySource extends
 		/**
 		 * Instantiate.
 		 * 
-		 * @param realm
-		 *            Realm.
+		 * @param realm Realm.
 		 */
 		private FormHttpSecurity(String realm) {
 			this.realm = realm;

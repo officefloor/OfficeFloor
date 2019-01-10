@@ -87,8 +87,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyFromSession() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				null);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>();
 		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 
 		// Load access control to session
@@ -137,8 +136,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyNoAuthentication() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				null);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 
 		// Test
 		this.replayMockObjects();
@@ -160,8 +158,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testChallenge() throws IOException {
 
-		final MockHttpChallengeContext<Dependencies, None> challengeContext = new MockHttpChallengeContext<Dependencies, None>(
-				this);
+		final MockHttpChallengeContext<Dependencies, None> challengeContext = new MockHttpChallengeContext<>();
 		challengeContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
 		// Test
@@ -259,7 +256,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<Dependencies>();
+		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<>();
 		logoutContext.getSession().setAttribute("http.security.basic", this.createMock(HttpAccessControl.class));
 
 		// Create and initialise the security
@@ -277,15 +274,13 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the authentication.
 	 * 
-	 * @param authorizationHttpHeaderValue
-	 *            <code>authorize</code> {@link HttpHeader} value.
-	 * @param isLoadSession
-	 *            Indicates if load {@link HttpSession} with access control.
-	 * @param userName
-	 *            User name if authenticated. <code>null</code> if not
-	 *            authenticated.
-	 * @param roles
-	 *            Expected roles.
+	 * @param authorizationHttpHeaderValue <code>authorize</code> {@link HttpHeader}
+	 *                                     value.
+	 * @param isLoadSession                Indicates if load {@link HttpSession}
+	 *                                     with access control.
+	 * @param userName                     User name if authenticated.
+	 *                                     <code>null</code> if not authenticated.
+	 * @param roles                        Expected roles.
 	 */
 	private void doAuthenticate(String authorizationHttpHeaderValue, boolean isLoadSession, String userName,
 			String... roles) {

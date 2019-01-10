@@ -23,6 +23,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.scheme.MockFlowHttpSecuritySource.Flows;
+import net.officefloor.web.security.scheme.MockHttpChallengeContext.MockHttpChallengeContextFlow;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.web.security.type.HttpSecurityTypeBuilder;
 import net.officefloor.web.spi.security.HttpSecurity;
@@ -63,7 +64,7 @@ public class MockFlowHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyFromSession() throws IOException {
 
-		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>(null);
+		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 		MockAccessControl accessControl = new MockAccessControl("mock", "user", null);
 
 		// Load access to session
@@ -84,7 +85,7 @@ public class MockFlowHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testRatifyWithCredentials() throws IOException {
 
 		final MockCredentials credentials = new MockCredentials("user", "password");
-		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>(null);
+		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 
 		// Create and initialise the source
 		HttpSecurity<MockAuthentication, MockAccessControl, MockCredentials, None, Flows> security = HttpSecurityLoaderUtil
@@ -100,7 +101,7 @@ public class MockFlowHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyNoCredentials() throws IOException {
 
-		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>(null);
+		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 
 		// Create and initialise the security
 		HttpSecurity<MockAuthentication, MockAccessControl, MockCredentials, None, Flows> security = HttpSecurityLoaderUtil
@@ -116,10 +117,12 @@ public class MockFlowHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testChallenge() throws IOException {
 
-		final MockHttpChallengeContext<None, Flows> challengeContext = new MockHttpChallengeContext<>(this);
+		final MockHttpChallengeContext<None, Flows> challengeContext = new MockHttpChallengeContext<>();
 
 		// Record the triggering flow for challenge
-		challengeContext.recordDoFlow(Flows.CHALLENGE);
+		MockHttpChallengeContextFlow flow = this.createMock(MockHttpChallengeContextFlow.class);
+		flow.doFlow();
+		challengeContext.registerFlow(Flows.CHALLENGE, flow);
 
 		// Test
 		this.replayMockObjects();
@@ -181,19 +184,15 @@ public class MockFlowHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the authentication.
 	 * 
-	 * @param credentials
-	 *            {@link MockCredentials}.
-	 * @param userName
-	 *            User name if authenticated. <code>null</code> if not
-	 *            authenticated.
-	 * @param roles
-	 *            Expected roles.
+	 * @param credentials {@link MockCredentials}.
+	 * @param userName    User name if authenticated. <code>null</code> if not
+	 *                    authenticated.
+	 * @param roles       Expected roles.
 	 */
 	private void doAuthenticate(MockCredentials credentials, String userName, String... roles) throws IOException {
 
 		// Create the authentication context
-		MockHttpAuthenticateContext<MockAccessControl, None> authenticationContext = new MockHttpAuthenticateContext<>(
-				null);
+		MockHttpAuthenticateContext<MockAccessControl, None> authenticationContext = new MockHttpAuthenticateContext<>();
 
 		// Create and initialise the security
 		HttpSecurity<MockAuthentication, MockAccessControl, MockCredentials, None, Flows> security = HttpSecurityLoaderUtil

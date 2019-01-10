@@ -60,7 +60,7 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyFromSession() throws IOException {
 
-		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>(null);
+		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 		new MockAccessControl("scheme", "user", null);
 
 		// Make access control available in session
@@ -98,7 +98,7 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyNoAuthentication() throws IOException {
 
-		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>(null);
+		final MockHttpRatifyContext<MockAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 
 		// Create and initialise the security
 		HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
@@ -114,7 +114,7 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testChallenge() throws IOException {
 
-		final MockHttpChallengeContext<None, None> challengeContext = new MockHttpChallengeContext<None, None>(this);
+		final MockHttpChallengeContext<None, None> challengeContext = new MockHttpChallengeContext<>();
 
 		// Test
 		this.replayMockObjects();
@@ -200,13 +200,11 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the authentication.
 	 * 
-	 * @param authoriseHttpHeaderValue
-	 *            <code>Authorize</code> {@link HttpHeader} value.
-	 * @param userName
-	 *            User name if authenticated. <code>null</code> if not
-	 *            authenticated.
-	 * @param roles
-	 *            Expected roles.
+	 * @param authoriseHttpHeaderValue <code>Authorize</code> {@link HttpHeader}
+	 *                                 value.
+	 * @param userName                 User name if authenticated. <code>null</code>
+	 *                                 if not authenticated.
+	 * @param roles                    Expected roles.
 	 */
 	private void doAuthenticate(String authoriseHttpHeaderValue, String userName, String... roles) throws IOException {
 

@@ -293,7 +293,9 @@ public class ManagedObjectUserStandAlone
 		// Provide output to hint nothing happens
 		System.out.println(this.getClass().getSimpleName() + ": start");
 		try {
-			operation.run();
+			if (operation != null) {
+				operation.run();
+			}
 		} catch (Throwable ex) {
 			ex.printStackTrace();
 		}
@@ -304,7 +306,9 @@ public class ManagedObjectUserStandAlone
 		// Provide output to hint nothing happens
 		System.out.println(this.getClass().getSimpleName() + ": complete");
 		try {
-			operation.run();
+			if (operation != null) {
+				operation.run();
+			}
 		} catch (Throwable ex) {
 			ex.printStackTrace();
 		}

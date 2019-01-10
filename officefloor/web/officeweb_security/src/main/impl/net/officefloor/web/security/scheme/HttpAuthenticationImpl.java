@@ -37,7 +37,7 @@ public class HttpAuthenticationImpl<C> implements HttpAuthentication<C>, AccessC
 	/**
 	 * {@link AuthenticationContext}.
 	 */
-	private final AuthenticationContext<HttpAccessControl, C> authenticationContext;
+	private final AuthenticationContext<? extends HttpAccessControl, C> authenticationContext;
 
 	/**
 	 * Type of credentials.
@@ -57,12 +57,10 @@ public class HttpAuthenticationImpl<C> implements HttpAuthentication<C>, AccessC
 	/**
 	 * Instantiate.
 	 * 
-	 * @param authenticationContext
-	 *            {@link AuthenticationContext}.
-	 * @param credentialsType
-	 *            Type of credentials.
+	 * @param authenticationContext {@link AuthenticationContext}.
+	 * @param credentialsType       Type of credentials.
 	 */
-	public HttpAuthenticationImpl(AuthenticationContext<HttpAccessControl, C> authenticationContext,
+	public HttpAuthenticationImpl(AuthenticationContext<? extends HttpAccessControl, C> authenticationContext,
 			Class<C> credentialsType) {
 		this.authenticationContext = authenticationContext;
 		this.credentialsType = credentialsType;

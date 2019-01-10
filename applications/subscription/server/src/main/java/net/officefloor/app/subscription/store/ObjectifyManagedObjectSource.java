@@ -78,6 +78,7 @@ public class ObjectifyManagedObjectSource extends AbstractManagedObjectSource<No
 		ObjectifyService.init(objectifyFactoryManufacturer.createObjectifyFactory());
 		ObjectifyService.register(Domain.class);
 		ObjectifyService.register(GoogleSignin.class);
+		ObjectifyService.register(User.class);
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.googlecode.objectify.Ref;
 
 import net.officefloor.app.subscription.Authenticate.AuthenticateRequest;
 import net.officefloor.app.subscription.Authenticate.AuthenticateResponse;
@@ -15,6 +16,7 @@ import net.officefloor.app.subscription.rule.GoogleIdTokenRule;
 import net.officefloor.app.subscription.rule.ObjectifyRule;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.GoogleSignin;
+import net.officefloor.app.subscription.store.User;
 import net.officefloor.woof.mock.MockObjectResponse;
 
 /**
@@ -28,7 +30,7 @@ public class AuthenticateTest {
 	public GoogleIdTokenRule verifier = new GoogleIdTokenRule();
 
 	@Rule
-	public ObjectifyRule obectify = new ObjectifyRule(Domain.class, GoogleSignin.class);
+	public ObjectifyRule obectify = new ObjectifyRule(Domain.class, GoogleSignin.class, User.class);
 
 	private MockObjectResponse<AuthenticateResponse> response = new MockObjectResponse<>();
 
@@ -70,10 +72,15 @@ public class AuthenticateTest {
 	public void ensureUserUpdated() throws Exception {
 
 		// Create the existing user
-		GoogleSignin user = new GoogleSignin("1", "daniel@officefloor.net");
+		User user = new User("daniel@officefloor.net");
 		user.setName("Daniel Sagenschneider");
 		user.setPhotoUrl("http://officefloor.net/photo.png");
-		this.obectify.ofy().save().entity(user).now();
+		this.obectify.ofy().save().entities(user).now();
+		GoogleSignin login = new GoogleSignin("1", user.getEmail());
+		login.setName(user.getName());
+		login.setPhotoUrl(user.getPhotoUrl());
+		login.setUser(Ref.create(user));
+		this.obectify.ofy().save().entity(login).now();
 
 		// Undertake authentication
 		String token = this.verifier.getMockIdToken("1", "changed@officefloor.net", "email_verified", "true", "name",
@@ -83,16 +90,22 @@ public class AuthenticateTest {
 		assertTrue("Should be successful", this.response.getObject().isSuccessful());
 
 		// Ensure the user is loaded into the database
-		user = this.obectify.get(GoogleSignin.class, (load) -> load.filter("email", "changed@officefloor.net"));
-		assertNotNull("Should have user", user);
+		login = this.obectify.get(GoogleSignin.class, (load) -> load.filter("email", "changed@officefloor.net"));
+		assertNotNull("Should have user", login);
 
 		// Ensure correct details
-		assertUser(user, "1", "changed@officefloor.net", "Changed Sagenschneider",
+		assertUser(login, "1", "changed@officefloor.net", "Changed Sagenschneider",
 				"http://officefloor.net/changed.png");
 	}
 
-	private static void assertUser(GoogleSignin user, String googleId, String email, String name, String photoUrl) {
-		assertEquals("Incorrect google id", googleId, user.getGoogleId());
+	private static void assertUser(GoogleSignin login, String googleId, String email, String name, String photoUrl) {
+		assertEquals("Incorrect google id", googleId, login.getGoogleId());
+		assertEquals("Incorrect email", email, login.getEmail());
+		assertEquals("Incorrect name", name, login.getName());
+		assertEquals("Incorrect photo URL", photoUrl, login.getPhotoUrl());
+
+		// Obtain the user
+		User user = login.getUser().get();
 		assertEquals("Incorrect email", email, user.getEmail());
 		assertEquals("Incorrect name", name, user.getName());
 		assertEquals("Incorrect photo URL", photoUrl, user.getPhotoUrl());

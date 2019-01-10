@@ -21,6 +21,15 @@
 		<objectify.version>6.0.2</objectify.version>
 	</properties>
 
+	<repositories>
+		<repository>
+			<!-- Incorporate latest to obtain spring data for Google -->
+			<id>spring-milestones</id>
+			<name>Spring Milestones</name>
+			<url>https://repo.spring.io/milestone</url>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
@@ -39,6 +48,10 @@
 			<artifactId>officeserver_servlet</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.spring</groupId>
+			<artifactId>officespring_data</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.googlecode.objectify</groupId>
 			<artifactId>objectify</artifactId>
 			<version>${objectify.version}</version>
@@ -48,6 +61,23 @@
 			<artifactId>appengine-testing</artifactId>
 			<version>${google.appengine.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.10.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.10.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.10.5</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

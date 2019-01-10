@@ -1,10 +1,8 @@
 package net.officefloor.app.subscription.store;
 
-import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
-import com.googlecode.objectify.annotation.Load;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +10,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Google sign-in {@link Entity}.
+ * User {@link Entity}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -20,17 +18,10 @@ import lombok.RequiredArgsConstructor;
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
-public class GoogleSignin {
+public class User {
 
 	@Id
 	Long id;
-
-	@Load
-	Ref<User> user;
-
-	@Index
-	@NonNull
-	String googleId;
 
 	@Index
 	@NonNull

@@ -6,11 +6,14 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.Ref;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.officefloor.app.subscription.store.GoogleSignin;
+import net.officefloor.app.subscription.store.User;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpObject;
@@ -59,22 +62,37 @@ public class Authenticate {
 		String photoUrl = payload.get("picture").toString();
 
 		// Determine if the user exists
-		List<GoogleSignin> users = objectify.load().type(GoogleSignin.class).filter("googleId", googleId).list();
+		List<GoogleSignin> logins = objectify.load().type(GoogleSignin.class).filter("googleId", googleId).list();
 
 		// Update or create the user
-		GoogleSignin user;
-		if (users.size() > 0) {
-			// Update the existing user
-			user = users.get(0);
-			user.setEmail(email);
+		objectify.transact(() -> {
+			GoogleSignin login;
+			User user;
+			if (logins.size() > 0) {
+				// Update the existing user
+				login = logins.get(0);
+				login.setEmail(email);
+				login.setName(name);
+				login.setPhotoUrl(photoUrl);
+				user = login.getUser().get();
+				user.setEmail(login.getEmail());
+				user.setName(name);
+				user.setPhotoUrl(photoUrl);
+				ObjectifyService.ofy().save().entities(user, login).now();
 
-		} else {
-			// Load the new user
-			user = new GoogleSignin(googleId, email);
-		}
-		user.setName(name);
-		user.setPhotoUrl(photoUrl);
-		objectify.save().entity(user).now();
+			} else {
+				// Load the new user
+				user = new User(email);
+				user.setName(name);
+				user.setPhotoUrl(photoUrl);
+				ObjectifyService.ofy().save().entity(user).now();
+				login = new GoogleSignin(googleId, email);
+				login.setUser(Ref.create(user));
+				login.setName(name);
+				login.setPhotoUrl(photoUrl);
+				ObjectifyService.ofy().save().entity(login).now();
+			}
+		});
 
 		// Indicate successfully authenticated
 		response.send(new AuthenticateResponse(true, null));

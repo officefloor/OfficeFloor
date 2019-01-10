@@ -19,14 +19,14 @@ package net.officefloor.web.security.scheme;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Flow;
 
-import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.ChallengeContext;
+import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
@@ -37,6 +37,18 @@ import net.officefloor.web.spi.security.HttpSecuritySource;
  */
 public class MockHttpChallengeContext<O extends Enum<O>, F extends Enum<F>>
 		implements ChallengeContext<O, F>, HttpChallenge {
+
+	/**
+	 * {@link FunctionalInterface} to handle the {@link Flow}.
+	 */
+	@FunctionalInterface
+	public static interface MockHttpChallengeContextFlow {
+
+		/**
+		 * Undertakes the {@link Flow}.
+		 */
+		void doFlow();
+	}
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -51,12 +63,12 @@ public class MockHttpChallengeContext<O extends Enum<O>, F extends Enum<F>>
 	/**
 	 * Dependencies.
 	 */
-	private final Map<O, Object> dependencies = new HashMap<O, Object>();
+	private final Map<O, Object> dependencies = new HashMap<>();
 
 	/**
-	 * Flows.
+	 * {@link MockHttpChallengeContextFlow} instances.
 	 */
-	private final MockHttpChallengeContextFlows<F> flows;
+	private final Map<F, MockHttpChallengeContextFlow> flows = new HashMap<>();
 
 	/**
 	 * Challenge.
@@ -66,50 +78,38 @@ public class MockHttpChallengeContext<O extends Enum<O>, F extends Enum<F>>
 	/**
 	 * Initiate.
 	 *
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @param testCase
-	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
+	 * @param connection {@link ServerHttpConnection}.
 	 */
-	@SuppressWarnings("unchecked")
-	public MockHttpChallengeContext(ServerHttpConnection connection, OfficeFrameTestCase testCase) {
+	public MockHttpChallengeContext(ServerHttpConnection connection) {
 		this.connection = connection;
 		this.session = MockWebApp.mockSession(this.connection);
-
-		// Create the necessary mock objects
-		this.flows = testCase.createMock(MockHttpChallengeContextFlows.class);
 	}
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param testCase
-	 *            {@link OfficeFrameTestCase} to create necessary mock objects.
 	 */
-	public MockHttpChallengeContext(OfficeFrameTestCase testCase) {
-		this(MockHttpServer.mockConnection(), testCase);
+	public MockHttpChallengeContext() {
+		this(MockHttpServer.mockConnection());
 	}
 
 	/**
-	 * Registers and object.
+	 * Registers an object.
 	 * 
-	 * @param key
-	 *            Key for dependency.
-	 * @param dependency
-	 *            Dependency object.
+	 * @param key        Key for dependency.
+	 * @param dependency Dependency object.
 	 */
 	public void registerObject(O key, Object dependency) {
 		this.dependencies.put(key, dependency);
 	}
 
 	/**
-	 * Records undertaking the flow.
+	 * Registers a {@link Flow}.
 	 * 
-	 * @param key
-	 *            Key to the flow.
+	 * @param key  Key to the {@link Flow}.
+	 * @param flow {@link MockHttpChallengeContextFlow}.
 	 */
-	public void recordDoFlow(F key) {
-		this.doFlow(key);
+	public void registerFlow(F key, MockHttpChallengeContextFlow flow) {
+		this.flows.put(key, flow);
 	}
 
 	/**
@@ -148,21 +148,11 @@ public class MockHttpChallengeContext<O extends Enum<O>, F extends Enum<F>>
 
 	@Override
 	public void doFlow(F key) {
-		this.flows.doFlow(key);
-	}
-
-	/**
-	 * Interface to create mock object for mocking flows.
-	 */
-	private static interface MockHttpChallengeContextFlows<F extends Enum<F>> {
-
-		/**
-		 * Undertakes the flow.
-		 * 
-		 * @param key
-		 *            Key for the flow.
-		 */
-		void doFlow(F key);
+		MockHttpChallengeContextFlow flow = this.flows.get(key);
+		if (flow == null) {
+			throw new IllegalStateException("No flow registered for key " + key.name());
+		}
+		flow.doFlow();
 	}
 
 	/*

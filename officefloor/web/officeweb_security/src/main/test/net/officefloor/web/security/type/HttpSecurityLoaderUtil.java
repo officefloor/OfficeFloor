@@ -18,6 +18,7 @@
 package net.officefloor.web.security.type;
 
 import java.io.Serializable;
+import java.util.function.Consumer;
 
 import org.junit.Assert;
 
@@ -29,7 +30,18 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.compile.test.properties.PropertyListUtil;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.util.InvokedProcessServicer;
+import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
+import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.impl.AuthenticationContextManagedObjectSource;
+import net.officefloor.web.security.impl.FunctionAuthenticateContext;
+import net.officefloor.web.security.impl.FunctionLogoutContext;
+import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
@@ -264,6 +276,118 @@ public class HttpSecurityLoaderUtil {
 		compiler.setCompilerIssues(issues);
 		HttpSecurityLoader securityLoader = new HttpSecurityLoaderImpl(compiler);
 		return securityLoader;
+	}
+
+	/**
+	 * Creates an {@link AuthenticationContext} for testing.
+	 * 
+	 * @return {@link AuthenticationContext} for testing.
+	 * @throws Exception If fails to create the {@link AuthenticationContext}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <AC extends Serializable, C> AuthenticationContext<AC, C> createAuthenticationContext(
+			ServerHttpConnection connection, HttpSession session, HttpSecurity<?, AC, C, ?, ?> security,
+			Consumer<FunctionAuthenticateContext<AC, C>> handleAuthenticate) throws Throwable {
+
+		// Handle authentication
+		InvokedProcessServicer authenticator = (processIndex, parameter, managedObject) -> {
+			FunctionAuthenticateContext<AC, C> context = (FunctionAuthenticateContext<AC, C>) parameter;
+			if (handleAuthenticate != null) {
+				// Handle authentication
+				handleAuthenticate.accept(context);
+			} else {
+				// No handler, so no authentication
+				context.accessControlChange(null, null);
+			}
+		};
+
+		// Handle logout
+		InvokedProcessServicer logout = (processIndex, parameter, managedObject) -> {
+			FunctionLogoutContext<AC> context = (FunctionLogoutContext<AC>) parameter;
+			context.accessControlChange(null, null);
+		};
+
+		// Load the managed object source
+		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
+		loader.registerInvokeProcessServicer(AuthenticationContextManagedObjectSource.Flows.AUTHENTICATE,
+				authenticator);
+		loader.registerInvokeProcessServicer(AuthenticationContextManagedObjectSource.Flows.LOGOUT, logout);
+		AuthenticationContextManagedObjectSource<?, AC, C, ?, ?> mos = loader
+				.loadManagedObjectSource(new AuthenticationContextManagedObjectSource<>("test", security));
+
+		// Load the managed object
+		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.mapDependency(AuthenticationContextManagedObjectSource.Dependencies.SERVER_HTTP_CONNECTION, connection);
+		user.mapDependency(AuthenticationContextManagedObjectSource.Dependencies.HTTP_SESSION, session);
+		ManagedObject managedObject = user.sourceManagedObject(mos);
+
+		// Return the authentication context
+		return (AuthenticationContext<AC, C>) managedObject.getObject();
+	}
+
+	/**
+	 * Undertakes authentication.
+	 * 
+	 * @param authentication {@link HttpAuthentication}.
+	 * @param credentials    Credentials.
+	 * @throws Throwable If fails to authenticate or times out authenticating.
+	 */
+	public static <C> void authenticate(HttpAuthentication<C> authentication, C credentials) throws Throwable {
+		doAuthenticationAction((handler) -> {
+			authentication.authenticate(credentials, (error) -> handler.accept(error));
+		});
+	}
+
+	/**
+	 * Undertakes logout.
+	 * 
+	 * @param authentication {@link HttpAuthentication}.
+	 * @throws Throwable If fails to logout or times out.
+	 */
+	public static <C> void logout(HttpAuthentication<C> authentication) throws Throwable {
+		doAuthenticationAction((handler) -> {
+			authentication.logout((error) -> handler.accept(error));
+		});
+	}
+
+	/**
+	 * Undertakes the authentication action.
+	 * 
+	 * @param action Authentication action.
+	 * @throws Throwable If action fails or times out.
+	 */
+	private static void doAuthenticationAction(Consumer<Consumer<Throwable>> action) throws Throwable {
+
+		// Attempt authentication
+		boolean[] isComplete = new boolean[] { false };
+		Throwable[] failure = new Throwable[] { null };
+		action.accept((error) -> {
+			synchronized (isComplete) {
+				isComplete[0] = true;
+				failure[0] = error;
+				isComplete.notify();
+			}
+		});
+
+		// Wait for authentication
+		long endTime = System.currentTimeMillis() + 3000;
+		synchronized (isComplete) {
+			while (!isComplete[0]) {
+
+				// Determine if timed out
+				if (endTime < System.currentTimeMillis()) {
+					Assert.fail("Timed out waiting for authentication");
+				}
+
+				// Wait some time
+				isComplete.wait(10);
+			}
+
+			// Determine if failure
+			if (failure[0] != null) {
+				throw failure[0];
+			}
+		}
 	}
 
 	/**

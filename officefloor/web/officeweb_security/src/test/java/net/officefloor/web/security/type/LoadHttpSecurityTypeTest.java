@@ -18,6 +18,7 @@
 package net.officefloor.web.security.type;
 
 import java.sql.Connection;
+import java.util.Base64;
 import java.util.Properties;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -31,12 +32,20 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
+import net.officefloor.web.mock.MockWebApp;
+import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.security.scheme.AnonymousHttpSecuritySource;
+import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
+import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AuthenticateContext;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.ChallengeContext;
@@ -731,6 +740,75 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to create {@link AuthenticationContext}.
+	 */
+	public void testCreateAuthenticationContext() throws Throwable {
+
+		// Create the mocks
+		MockServerHttpConnection connection = MockHttpServer.mockConnection();
+		HttpSession session = MockWebApp.mockSession(connection);
+
+		// Ensure able to use to handle authentication
+		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
+				.loadHttpSecurity(AnonymousHttpSecuritySource.class);
+
+		// Create the authentication context
+		AuthenticationContext<HttpAccessControl, Void> context = HttpSecurityLoaderUtil
+				.createAuthenticationContext(connection, session, security, null);
+
+		// Create the authentication
+		HttpAuthentication<Void> authentication = security.createAuthentication(context);
+		assertNotNull("Should have authentication", authentication);
+
+		// Validate functionality with authentication
+		assertTrue("Should not be authenticated", authentication.isAuthenticated());
+		assertSame("Incorrect credentials type", Void.class, authentication.getCredentialsType());
+	}
+
+	/**
+	 * Ensure able to use the {@link AuthenticationContext}.
+	 */
+	public void testUseAuthenticationContext() throws Throwable {
+
+		// Create the mocks
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest().header("Authorization",
+				"Basic " + Base64.getEncoder().encodeToString("Daniel:Test".getBytes()));
+		MockServerHttpConnection connection = MockHttpServer.mockConnection(request);
+		HttpSession session = MockWebApp.mockSession(connection);
+		HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
+
+		// Ensure able to use to handle authentication
+		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, BasicHttpSecuritySource.Dependencies, None> security = HttpSecurityLoaderUtil
+				.loadHttpSecurity(BasicHttpSecuritySource.class, BasicHttpSecuritySource.PROPERTY_REALM, "test");
+
+		// Create the authentication context
+		AuthenticationContext<HttpAccessControl, Void> context = HttpSecurityLoaderUtil.createAuthenticationContext(
+				connection, session, security, (authenticate) -> authenticate.accessControlChange(accessControl, null));
+
+		// Create the authentication
+		HttpAuthentication<Void> authentication = security.createAuthentication(context);
+		assertNotNull("Should have authentication", authentication);
+
+		// Validate functionality with authentication
+		assertTrue("Should be authenticated", authentication.isAuthenticated());
+		assertSame("Incorrect access control", accessControl, authentication.getAccessControl());
+
+		// Ensure can log out
+		HttpSecurityLoaderUtil.logout(authentication);
+		assertFalse("Should not be authentiated", authentication.isAuthenticated());
+		try {
+			authentication.getAccessControl();
+			fail("Should not be successful");
+		} catch (AuthenticationRequiredException ex) {
+		}
+
+		// Ensure can log back in
+		HttpSecurityLoaderUtil.authenticate(authentication, null);
+		assertTrue("Should log back in", authentication.isAuthenticated());
+		assertSame("Should be same access control again", accessControl, authentication.getAccessControl());
+	}
+
+	/**
 	 * Two key {@link Enum}.
 	 */
 	private enum TwoKey {
@@ -758,9 +836,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 * Records obtaining simple meta-data from the
 	 * {@link HttpSecuritySourceMetaData}.
 	 * 
-	 * @param flowKeys
-	 *            Flow keys to be defined in meta-data. Provide <code>null</code>
-	 *            values for indexing.
+	 * @param flowKeys Flow keys to be defined in meta-data. Provide
+	 *                 <code>null</code> values for indexing.
 	 */
 	@SuppressWarnings("unchecked")
 	private <F extends Enum<?>> void record_basicMetaData(F... flowKeys) {
@@ -795,8 +872,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	 * @param issueDescription Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
 		this.issues.recordIssue(issueDescription);
@@ -805,10 +881,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
+	 * @param issueDescription Description of the issue.
+	 * @param cause            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
 		this.issues.recordIssue(issueDescription, cause);
@@ -817,13 +891,10 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link HttpSecurityType}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the
-	 *            {@link FunctionNamespaceType}.
-	 * @param init
-	 *            {@link Init}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link FunctionNamespaceType}.
+	 * @param init                   {@link Init}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link HttpSecurityType}.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -875,10 +946,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Implemented to init the {@link HttpSecuritySource}.
 		 * 
-		 * @param context
-		 *            {@link HttpSecuritySourceContext}.
-		 * @param util
-		 *            {@link InitUtil}.
+		 * @param context {@link HttpSecuritySourceContext}.
+		 * @param util    {@link InitUtil}.
 		 */
 		void init(HttpSecuritySourceContext context);
 	}
@@ -915,10 +984,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param metaData
-		 *            {@link HttpSecuritySourceMetaData}.
-		 * @param initUtil
-		 *            {@link InitUtil}.
+		 * @param metaData {@link HttpSecuritySourceMetaData}.
+		 * @param initUtil {@link InitUtil}.
 		 */
 		public static void reset(HttpSecuritySourceMetaData<?, ?, ?, ?, ?> metaData) {
 			instantiateFailure = null;
