@@ -1023,7 +1023,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void start(HttpSecurityExecuteContext<Flows> context) throws Exception {
 			isStarted = true;
 			final String parameter = "PARAMETER";
-			context.invokeProcess(Flows.FORM_LOGIN_PAGE, parameter, 0, (error) -> {
+			context.registerStartupProcess(Flows.FORM_LOGIN_PAGE, parameter, (error) -> {
 				if (error != null) {
 					throw error;
 				}

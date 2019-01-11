@@ -64,7 +64,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * {@link Flow} key.
 	 */
 	private enum Flows {
-	KEY, WRONG_KEY
+		KEY, WRONG_KEY
 	}
 
 	/**
@@ -514,8 +514,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure strategy available from execution context
-		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteContextFactory()
-				.createManagedObjectExecuteContext();
+		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteManagerFactory()
+				.createManagedObjectExecuteManager().getManagedObjectExecuteContext();
 		assertSame("Incorrect thread factories for execution strategy", threadFactories,
 				context.getExecutionStrategy(0));
 	}
@@ -537,8 +537,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure strategy available from execution context
-		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteContextFactory()
-				.createManagedObjectExecuteContext();
+		ManagedObjectExecuteContext<?> context = metaData.getManagedObjectExecuteManagerFactory()
+				.createManagedObjectExecuteManager().getManagedObjectExecuteContext();
 		assertSame("Incorrect thread factories for default execution strategy", threadFactories,
 				context.getExecutionStrategy(0));
 	}
@@ -609,10 +609,10 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Validate creation of execute context
 		if (isCreateExecuteContext) {
 			assertNotNull("Should have execute context available",
-					rawManagingOffice.getManagedObjectExecuteContextFactory());
+					rawManagingOffice.getManagedObjectExecuteManagerFactory());
 		} else {
 			assertNull("Execute context should not be available",
-					rawManagingOffice.getManagedObjectExecuteContextFactory());
+					rawManagingOffice.getManagedObjectExecuteManagerFactory());
 		}
 	}
 

@@ -329,7 +329,7 @@ public class RawOfficeFloorMetaDataFactory {
 		for (RawManagedObjectMetaData<?, ?> rawMoMetaData : mosListing) {
 			ManagedObjectSourceInstance mosInstance = new ManagedObjectSourceInstanceImpl(
 					rawMoMetaData.getManagedObjectSource(),
-					rawMoMetaData.getRawManagingOfficeMetaData().getManagedObjectExecuteContextFactory(),
+					rawMoMetaData.getRawManagingOfficeMetaData().getManagedObjectExecuteManagerFactory(),
 					rawMoMetaData.getManagedObjectPool());
 			mosInstances.add(mosInstance);
 		}

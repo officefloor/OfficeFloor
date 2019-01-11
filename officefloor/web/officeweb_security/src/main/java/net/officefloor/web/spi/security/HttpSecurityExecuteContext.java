@@ -35,6 +35,21 @@ import net.officefloor.frame.internal.structure.ProcessState;
 public interface HttpSecurityExecuteContext<F extends Enum<F>> {
 
 	/**
+	 * Registers a start up {@link Flow}.
+	 * 
+	 * @param key       Key identifying the {@link Flow} to instigate.
+	 * @param parameter Parameter to first {@link ManagedFunction} of the
+	 *                  {@link Flow}.
+	 * @param callback  {@link FlowCallback} on completion of the {@link Flow}.
+	 * @throws IllegalArgumentException If
+	 *                                  <ul>
+	 *                                  <li>unknown {@link Flow} key</li>
+	 *                                  <li>parameter is incorrect type</li>
+	 *                                  </ul>
+	 */
+	void registerStartupProcess(F key, Object parameter, FlowCallback callback) throws IllegalArgumentException;
+
+	/**
 	 * Instigates a {@link Flow}.
 	 * 
 	 * @param key       Key identifying the {@link Flow} to instigate.

@@ -376,6 +376,18 @@ public class ManagedObjectSourceStandAlone {
 		 */
 
 		@Override
+		public void registerStartupProcess(F key, Object parameter, ManagedObject managedObject, FlowCallback callback)
+				throws IllegalArgumentException {
+			this.process(key.ordinal(), parameter, managedObject, 0, callback);
+		}
+
+		@Override
+		public void registerStartupProcess(int flowIndex, Object parameter, ManagedObject managedObject,
+				FlowCallback callback) throws IllegalArgumentException {
+			this.process(flowIndex, parameter, managedObject, 0, callback);
+		}
+
+		@Override
 		public ProcessManager invokeProcess(F key, Object parameter, ManagedObject managedObject, long delay,
 				FlowCallback callback) {
 			return this.process(key.ordinal(), parameter, managedObject, delay, callback);
