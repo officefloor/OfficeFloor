@@ -35,6 +35,7 @@ import net.officefloor.web.spi.security.LogoutContext;
 import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
+import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
@@ -137,9 +138,19 @@ public class HttpSecuritySourceSpecificationRunnableTest extends OfficeFrameTest
 		}
 
 		@Override
+		public void start(HttpSecurityExecuteContext<None> context) throws Exception {
+			fail("Should not be required for loading specification");
+		}
+
+		@Override
 		public HttpSecurity<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, None, None> sourceHttpSecurity(
 				HttpSecurityContext context) throws HttpException {
 			return this;
+		}
+
+		@Override
+		public void stop() {
+			fail("Should not be required for loading specification");
 		}
 
 		/*

@@ -54,8 +54,7 @@ public class MockChallengeHttpSecuritySource
 	/**
 	 * Obtains the <code>WWW-Authenticate</code> {@link HttpHeader} value.
 	 * 
-	 * @param realm
-	 *            Realm.
+	 * @param realm Realm.
 	 * @return <code>WWW-Authenticate</code> {@link HttpHeader} value.
 	 */
 	public static String getHeaderChallengeValue(String realm) {
@@ -87,8 +86,7 @@ public class MockChallengeHttpSecuritySource
 	/**
 	 * Instantiate with the realm.
 	 * 
-	 * @param realm
-	 *            Realm.
+	 * @param realm Realm.
 	 */
 	public MockChallengeHttpSecuritySource(String realm) {
 		this.realm = realm;
@@ -149,8 +147,7 @@ public class MockChallengeHttpSecuritySource
 		/**
 		 * Instantiate.
 		 * 
-		 * @param realm
-		 *            Realm.
+		 * @param realm Realm.
 		 */
 		private MockChallengeHttpSecurity(String realm) {
 			this.realm = realm;

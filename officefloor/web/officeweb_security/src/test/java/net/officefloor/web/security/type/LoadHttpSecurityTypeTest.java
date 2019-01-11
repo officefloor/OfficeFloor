@@ -54,6 +54,7 @@ import net.officefloor.web.spi.security.HttpAuthenticationFactory;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecurityDependencyMetaData;
+import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecurityFlowMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
@@ -1032,9 +1033,19 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
+		public void start(HttpSecurityExecuteContext<None> context) throws Exception {
+			// Should propagate to ManagedObjectSource
+		}
+
+		@Override
 		public HttpSecurity<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, None, None> sourceHttpSecurity(
 				HttpSecurityContext context) throws HttpException {
 			return this;
+		}
+
+		@Override
+		public void stop() {
+			// Nothing to stop
 		}
 
 		/*

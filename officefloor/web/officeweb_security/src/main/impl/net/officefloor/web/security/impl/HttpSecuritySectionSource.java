@@ -53,6 +53,7 @@ import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.state.HttpRequestState;
 
@@ -82,6 +83,12 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 	public static final String OUTPUT_RECONTINUE = "Recontinue";
 
 	/**
+	 * Prefix name of the {@link SectionInput} for handling
+	 * {@link HttpSecurityExecuteContext}.
+	 */
+	public static final String INPUT_FLOW_PREFIX = "Input_";
+
+	/**
 	 * {@link HttpSecurityConfiguration}.
 	 */
 	private final HttpSecurityConfiguration<A, AC, C, O, F> configuration;
@@ -89,8 +96,7 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param configuration
-	 *            {@link HttpSecurityConfiguration}.
+	 * @param configuration {@link HttpSecurityConfiguration}.
 	 */
 	public HttpSecuritySectionSource(HttpSecurityConfiguration<A, AC, C, O, F> configuration) {
 		this.configuration = configuration;
@@ -159,10 +165,17 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 		}
 		for (HttpSecurityFlowType<?> flowType : securityType.getFlowTypes()) {
 			String flowName = flowType.getFlowName();
+
+			// Link challenge handling
 			FunctionFlow functionFlow = challengeFunction.getFunctionFlow("Flow_" + flowName);
 			SectionOutput sectionOutput = designer.addSectionOutput(flowName, flowType.getArgumentType().getName(),
 					false);
 			designer.link(functionFlow, sectionOutput, false);
+
+			// Link execution handling
+			SectionInput sectionInput = designer.addSectionInput(INPUT_FLOW_PREFIX + flowName,
+					flowType.getArgumentType().getName());
+			designer.link(sectionInput, sectionOutput);
 		}
 
 		// Configure the managed object authentication
@@ -280,10 +293,8 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param httpSecurity
-		 *            {@link HttpSecurity}.
-		 * @param httpSecurityType
-		 *            {@link HttpSecurityType}.
+		 * @param httpSecurity     {@link HttpSecurity}.
+		 * @param httpSecurityType {@link HttpSecurityType}.
 		 */
 		public HttpSecurityManagedFunctionSource(HttpSecurity<A, AC, C, O, F> httpSecurity,
 				HttpSecurityType<A, AC, C, O, F> httpSecurityType) {

@@ -31,8 +31,10 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -51,14 +53,18 @@ import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.build.section.HttpFlowSecurer;
+import net.officefloor.web.security.scheme.FormHttpSecuritySource;
 import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
 import net.officefloor.web.security.scheme.MockCredentials;
 import net.officefloor.web.security.scheme.MockFlowHttpSecuritySource;
+import net.officefloor.web.security.store.MockCredentialStoreManagedObjectSource;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
+import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
  * Tests the {@link HttpSecurityArchitect}.
@@ -959,6 +965,85 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void check(ServerHttpConnection connection, HttpAuthentication<Void> authentication) throws IOException {
 			connection.getResponse().getEntityWriter()
 					.write(authentication.isAuthenticated() ? "authenticated" : "guest");
+		}
+	}
+
+	/**
+	 * Ensure able to invoke start up {@link ProcessState} and stop
+	 * {@link HttpSecuritySource}.
+	 */
+	public void testExecuteContext() throws Exception {
+
+		// Initiate state to test
+		MockExecutionHttpSecuritySource.isStarted = false;
+		MockExecutionHttpSecuritySource.isStartupComplete = false;
+		MockExecutionHttpSecuritySource.isStopped = false;
+		MockExecutionStartupHandler.startupParameter = null;
+
+		// Compile and open
+		this.compile((context, security) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+
+			// Configure the security (for startup testing)
+			HttpSecurityBuilder httpSecurity = security.addHttpSecurity("execute",
+					new MockExecutionHttpSecuritySource());
+			httpSecurity.addProperty(MockExecutionHttpSecuritySource.PROPERTY_REALM, "test");
+
+			// Mock Credential Store
+			office.addOfficeManagedObjectSource("CREDENTIAL_STORE",
+					MockCredentialStoreManagedObjectSource.class.getName())
+					.addOfficeManagedObject("CREDENTIAL_STORE", ManagedObjectScope.PROCESS);
+
+			// Link in startup functions
+			OfficeSection section = context.addSection("section", MockExecutionStartupHandler.class);
+			office.link(httpSecurity.getOutput("form"), section.getOfficeSectionInput("startup"));
+		});
+
+		// Should be started (but not stopped)
+		assertTrue("Should be started", MockExecutionHttpSecuritySource.isStarted);
+		assertTrue("Should have completed startup (single threaded)",
+				MockExecutionHttpSecuritySource.isStartupComplete);
+		assertFalse("Should not yet be stopped", MockExecutionHttpSecuritySource.isStopped);
+
+		// Close the OfficeFloor (to stop HttpSecurity)
+		this.officeFloor.close();
+		assertTrue("Should have stopped", MockExecutionHttpSecuritySource.isStopped);
+	}
+
+	@TestSource
+	public static class MockExecutionHttpSecuritySource extends FormHttpSecuritySource {
+
+		private static boolean isStarted = false;
+
+		private static boolean isStartupComplete = false;
+
+		private static boolean isStopped = false;
+
+		@Override
+		public void start(HttpSecurityExecuteContext<Flows> context) throws Exception {
+			isStarted = true;
+			final String parameter = "PARAMETER";
+			context.invokeProcess(Flows.FORM_LOGIN_PAGE, parameter, 0, (error) -> {
+				if (error != null) {
+					throw error;
+				}
+				assertSame("Incorrect startup parameter", parameter, MockExecutionStartupHandler.startupParameter);
+				isStartupComplete = true;
+			});
+		}
+
+		@Override
+		public void stop() {
+			isStopped = true;
+		}
+	}
+
+	public static class MockExecutionStartupHandler {
+
+		private static Object startupParameter;
+
+		public void startup(@Parameter Object parameter) {
+			startupParameter = parameter;
 		}
 	}
 

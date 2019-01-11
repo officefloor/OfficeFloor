@@ -43,7 +43,6 @@ import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AccessControlListener;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.HttpSecurity;
-import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.RatifyContext;
 
 /**
@@ -76,7 +75,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 	private final String qualifier;
 
 	/**
-	 * {@link HttpSecuritySource}.
+	 * {@link HttpSecurity}.
 	 */
 	private final HttpSecurity<A, AC, C, O, F> httpSecurity;
 

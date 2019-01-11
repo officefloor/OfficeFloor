@@ -81,10 +81,12 @@ import net.officefloor.web.security.impl.HttpAccessControlManagedObjectSource;
 import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource;
 import net.officefloor.web.security.impl.HttpChallengeContextManagedObjectSource;
 import net.officefloor.web.security.impl.HttpSecurityConfiguration;
+import net.officefloor.web.security.impl.HttpSecurityExecuteManagedObjectSource;
 import net.officefloor.web.security.impl.HttpSecuritySectionSource;
 import net.officefloor.web.security.scheme.AnonymousHttpSecuritySource;
 import net.officefloor.web.security.section.HttpFlowSecurerManagedFunction;
 import net.officefloor.web.security.section.HttpFlowSecurerManagedFunction.Flows;
+import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityLoader;
 import net.officefloor.web.security.type.HttpSecurityLoaderImpl;
 import net.officefloor.web.security.type.HttpSecurityType;
@@ -809,6 +811,16 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 					authenticationContext);
 			office.link(this.section.getOfficeSectionObject("AccessControl"), accessControl);
 
+			// Wire up the execution start/stop
+			String executionName = this.name + "_HttpSecurityExecuteContext";
+			OfficeManagedObjectSource executeMos = office.addOfficeManagedObjectSource(executionName,
+					new HttpSecurityExecuteManagedObjectSource<>(this.source, this.type));
+			executeMos.addOfficeManagedObject(executionName, ManagedObjectScope.PROCESS);
+			for (HttpSecurityFlowType<?> flowType : this.type.getFlowTypes()) {
+				office.link(executeMos.getOfficeManagedObjectFlow(flowType.getKey().name()), this.section
+						.getOfficeSectionInput(HttpSecuritySectionSource.INPUT_FLOW_PREFIX + flowType.getFlowName()));
+			}
+
 			// Provide application credentials linking
 			Class<C> credentialsType = this.type.getCredentialsType();
 			if (credentialsType != null) {
@@ -818,7 +830,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		}
 
 		/*
-		 * ================== HttpSecurityBuiler =======================
+		 * ================== HttpSecurityBuilder =======================
 		 */
 
 		@Override
