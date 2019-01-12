@@ -17,7 +17,11 @@
  */
 package net.officefloor.web.spi.security;
 
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Context for the {@link HttpSecuritySource}.
@@ -25,4 +29,22 @@ import net.officefloor.frame.api.source.SourceContext;
  * @author Daniel Sagenschneider
  */
 public interface HttpSecuritySourceContext extends SourceContext {
+
+	/**
+	 * <p>
+	 * Adds a {@link HttpSecuritySupportingManagedObject}.
+	 * <p>
+	 * Note that the {@link ManagedObjectSource} can not invoke {@link Flow} or use
+	 * {@link Team} instances. Should this be required, use the
+	 * {@link HttpSecurityExecuteContext} to invoke {@link Flow} instances.
+	 * 
+	 * @param managedObjectName   Name of the {@link ManagedObject}.
+	 * @param managedObjectSource {@link ManagedObjectSource} for the
+	 *                            {@link ManagedObject}.
+	 * @return {@link HttpSecuritySupportingManagedObject} to configure the
+	 *         {@link ManagedObject}.
+	 */
+	HttpSecuritySupportingManagedObject addSupportingManagedObject(String managedObjectName,
+			ManagedObjectSource<?, ?> managedObjectSource);
+
 }

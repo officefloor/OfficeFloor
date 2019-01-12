@@ -3,7 +3,6 @@ package net.officefloor.web.jwt;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
-import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.scheme.HttpAuthenticationImpl;
 import net.officefloor.web.spi.security.AuthenticateContext;
@@ -67,7 +66,7 @@ public class JwtHttpSecuritySource<C> extends
 		@Override
 		public HttpAuthentication<Void> createAuthentication(
 				AuthenticationContext<JwtHttpAccessControl<C>, Void> context) {
-			return new HttpAuthenticationImpl<>(context);
+			return new HttpAuthenticationImpl<>(context, null);
 		}
 
 		@Override

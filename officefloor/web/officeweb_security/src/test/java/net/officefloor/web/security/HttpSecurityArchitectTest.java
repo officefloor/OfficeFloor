@@ -18,6 +18,7 @@
 package net.officefloor.web.security;
 
 import java.io.IOException;
+import java.util.function.BiConsumer;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
@@ -29,14 +30,20 @@ import net.officefloor.compile.spi.section.SectionFlowSinkNode;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.Qualified;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -53,18 +60,19 @@ import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.build.section.HttpFlowSecurer;
-import net.officefloor.web.security.scheme.FormHttpSecuritySource;
 import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
 import net.officefloor.web.security.scheme.MockCredentials;
 import net.officefloor.web.security.scheme.MockFlowHttpSecuritySource;
-import net.officefloor.web.security.store.MockCredentialStoreManagedObjectSource;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.HttpSecuritySourceContext;
+import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
+import net.officefloor.web.spi.security.HttpSecuritySupportingManagedObject;
 
 /**
  * Tests the {@link HttpSecurityArchitect}.
@@ -989,14 +997,10 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 					new MockExecutionHttpSecuritySource());
 			httpSecurity.addProperty(MockExecutionHttpSecuritySource.PROPERTY_REALM, "test");
 
-			// Mock Credential Store
-			office.addOfficeManagedObjectSource("CREDENTIAL_STORE",
-					MockCredentialStoreManagedObjectSource.class.getName())
-					.addOfficeManagedObject("CREDENTIAL_STORE", ManagedObjectScope.PROCESS);
-
 			// Link in startup functions
 			OfficeSection section = context.addSection("section", MockExecutionStartupHandler.class);
-			office.link(httpSecurity.getOutput("form"), section.getOfficeSectionInput("startup"));
+			office.link(httpSecurity.getOutput(MockExecutionHttpSecuritySource.Flows.CHALLENGE.name()),
+					section.getOfficeSectionInput("startup"));
 		});
 
 		// Should be started (but not stopped)
@@ -1011,7 +1015,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	@TestSource
-	public static class MockExecutionHttpSecuritySource extends FormHttpSecuritySource {
+	public static class MockExecutionHttpSecuritySource extends MockFlowHttpSecuritySource {
 
 		private static boolean isStarted = false;
 
@@ -1023,7 +1027,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		public void start(HttpSecurityExecuteContext<Flows> context) throws Exception {
 			isStarted = true;
 			final String parameter = "PARAMETER";
-			context.registerStartupProcess(Flows.FORM_LOGIN_PAGE, parameter, (error) -> {
+			context.registerStartupProcess(Flows.CHALLENGE, parameter, (error) -> {
 				if (error != null) {
 					throw error;
 				}
@@ -1044,6 +1048,122 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 
 		public void startup(@Parameter Object parameter) {
 			startupParameter = parameter;
+		}
+	}
+
+	/**
+	 * Ensure can use supporting {@link ManagedObject} instances.
+	 */
+	public void testSupportingManagedObject() throws Throwable {
+
+		// Compile and open
+		this.compile((context, security) -> {
+
+			// Configure the security (with supporting object)
+			HttpSecurityBuilder httpSecurity = security.addHttpSecurity("execute",
+					new MockSupportedHttpSecuritySource(""));
+			httpSecurity.addProperty(MockSupportedHttpSecuritySource.PROPERTY_REALM, "test");
+
+			// Add the section
+			context.addSection("section", MockSingleSupportingObjectSection.class);
+		});
+
+		// Ensure the supporting object is available
+		MockSingleSupportingObjectSection.supportingObject = null;
+		CompileOfficeFloor.invokeProcess(this.officeFloor, "section.service", null);
+		assertNotNull("Should make supporting object available", MockSingleSupportingObjectSection.supportingObject);
+	}
+
+	public static class MockSingleSupportingObjectSection {
+
+		private static MockSupportingObject supportingObject;
+
+		public void service(MockSupportingObject object) {
+			supportingObject = object;
+		}
+	}
+
+	@TestSource
+	public static class MockSupportedHttpSecuritySource extends MockChallengeHttpSecuritySource {
+
+		private final String identifier;
+
+		private MockSupportedHttpSecuritySource(String identifier) {
+			this.identifier = identifier;
+		}
+
+		@Override
+		public HttpSecuritySourceMetaData<MockAuthentication, MockAccessControl, Void, None, None> init(
+				HttpSecuritySourceContext context) throws Exception {
+
+			// Load the supporting object (validating properties)
+			HttpSecuritySupportingManagedObject support = context.addSupportingManagedObject("support",
+					new ClassManagedObjectSource());
+			support.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+					MockSupportingObject.class.getName());
+
+			// Load the identifier
+			context.addSupportingManagedObject("identified",
+					new Singleton(new MockIdentifiedSupportingObject(this.identifier)));
+
+			// Load default meta-data
+			return super.init(context);
+		}
+	}
+
+	public static class MockSupportingObject {
+	}
+
+	public static class MockIdentifiedSupportingObject {
+
+		private String identifier;
+
+		private MockIdentifiedSupportingObject(String identifier) {
+			this.identifier = identifier;
+		}
+	}
+
+	/**
+	 * Ensure can use supporting {@link ManagedObject} instances are qualified when
+	 * multiple by the same name.
+	 */
+	public void testQualifiedSupportingManagedObject() throws Throwable {
+
+		// Compile and open
+		this.compile((context, security) -> {
+
+			// Configure security with clashing names (so requires qualifying)
+			security.addHttpSecurity("one", new MockSupportedHttpSecuritySource("one"))
+					.addProperty(MockSupportedHttpSecuritySource.PROPERTY_REALM, "test");
+			security.addHttpSecurity("two", new MockSupportedHttpSecuritySource("two"))
+					.addProperty(MockSupportedHttpSecuritySource.PROPERTY_REALM, "test");
+
+			// Add the section
+			context.addSection("section", MockQualifiedSupportingObjectSection.class);
+		});
+
+		// Ensure the supporting object is available via qualification
+		MockQualifiedSupportingObjectSection.supportingOne = null;
+		MockQualifiedSupportingObjectSection.supportingTwo = null;
+		CompileOfficeFloor.invokeProcess(this.officeFloor, "section.service", null);
+		BiConsumer<MockIdentifiedSupportingObject, String> assertQualifiedSupportingObject = (object, identifier) -> {
+			assertNotNull("Should have qualified supporting object for " + identifier, object);
+			assertEquals("Incorrect supporting object", identifier, object.identifier);
+		};
+		assertQualifiedSupportingObject.accept(MockQualifiedSupportingObjectSection.supportingOne, "one");
+		assertQualifiedSupportingObject.accept(MockQualifiedSupportingObjectSection.supportingTwo, "two");
+	}
+
+	public static class MockQualifiedSupportingObjectSection {
+
+		private static MockIdentifiedSupportingObject supportingOne;
+
+		private static MockIdentifiedSupportingObject supportingTwo;
+
+		public void service(@Qualified("one") MockIdentifiedSupportingObject one,
+				@Qualified("two") MockIdentifiedSupportingObject two) {
+			supportingOne = one;
+			supportingTwo = two;
 		}
 	}
 

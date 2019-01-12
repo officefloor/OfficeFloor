@@ -89,6 +89,7 @@ import net.officefloor.web.security.section.HttpFlowSecurerManagedFunction.Flows
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityLoader;
 import net.officefloor.web.security.type.HttpSecurityLoaderImpl;
+import net.officefloor.web.security.type.HttpSecuritySupportingManagedObjectType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.HttpChallengeContext;
@@ -826,6 +827,26 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			if (credentialsType != null) {
 				HttpSecurityArchitectEmployer.this.webArchitect
 						.reroute(this.section.getOfficeSectionOutput(HttpSecuritySectionSource.OUTPUT_RECONTINUE));
+			}
+
+			// Provide the supporting managed objects
+			for (HttpSecuritySupportingManagedObjectType supportingManagedObjectType : this.type
+					.getSupportingManagedObjectTypes()) {
+
+				// Add the supporting managed object source
+				String supportingManagedObjectName = this.name + "_SupportingManagedObject_"
+						+ supportingManagedObjectType.getSupportingManagedObjectName();
+				OfficeManagedObjectSource supportingManagedObjectSource = office.addOfficeManagedObjectSource(
+						supportingManagedObjectName, supportingManagedObjectType.getManagedObjectSource());
+				supportingManagedObjectType.getProperties().configureProperties(supportingManagedObjectSource);
+
+				// Add the supporting managed object
+				OfficeManagedObject supportingManagedObject = supportingManagedObjectSource
+						.addOfficeManagedObject(supportingManagedObjectName, ManagedObjectScope.PROCESS);
+				if (isRequireTypeQualification) {
+					supportingManagedObject.addTypeQualification(this.name,
+							supportingManagedObjectType.getObjectType().getName());
+				}
 			}
 		}
 

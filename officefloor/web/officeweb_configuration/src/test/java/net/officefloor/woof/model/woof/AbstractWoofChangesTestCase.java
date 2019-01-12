@@ -36,6 +36,7 @@ import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.type.HttpSecurityDependencyType;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
+import net.officefloor.web.security.type.HttpSecuritySupportingManagedObjectType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpAccessControlFactory;
 import net.officefloor.web.spi.security.HttpAuthenticationFactory;
@@ -89,8 +90,8 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	/**
 	 * Initiate.
 	 * 
-	 * @param isSpecificSetupFilePerTest
-	 *            Flags if there is a specific setup file per test.
+	 * @param isSpecificSetupFilePerTest Flags if there is a specific setup file per
+	 *                                   test.
 	 */
 	public AbstractWoofChangesTestCase(boolean isSpecificSetupFilePerTest) {
 		super(isSpecificSetupFilePerTest);
@@ -158,8 +159,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	/**
 	 * Constructs an {@link SectionType} for testing.
 	 * 
-	 * @param constructor
-	 *            {@link SectionTypeConstructor}.
+	 * @param constructor {@link SectionTypeConstructor}.
 	 * @return {@link SectionType}.
 	 */
 	protected SectionType constructSectionType(SectionTypeConstructor constructor) {
@@ -173,8 +173,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	/**
 	 * Constructs the {@link WebTemplateType} for testing.
 	 * 
-	 * @param constructor
-	 *            {@link SectionTypeConstructor}.
+	 * @param constructor {@link SectionTypeConstructor}.
 	 * @return {@link WebTemplateType}.
 	 */
 	protected WebTemplateType constructWebTemplateType(SectionTypeConstructor constructor) {
@@ -194,8 +193,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		/**
 		 * Constructs the {@link SectionType}.
 		 * 
-		 * @param context
-		 *            {@link SectionType}.
+		 * @param context {@link SectionType}.
 		 */
 		void construct(SectionTypeContext context);
 	}
@@ -208,34 +206,26 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		/**
 		 * Adds an {@link SectionInputType}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param parameterType
-		 *            Parameter type.
+		 * @param name          Name.
+		 * @param parameterType Parameter type.
 		 */
 		void addSectionInput(String name, Class<?> parameterType);
 
 		/**
 		 * Adds an {@link SectionOutputType}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param argumentType
-		 *            Argument type.
-		 * @param isEscalationOnly
-		 *            Flag indicating if escalation only.
+		 * @param name             Name.
+		 * @param argumentType     Argument type.
+		 * @param isEscalationOnly Flag indicating if escalation only.
 		 */
 		void addSectionOutput(String name, Class<?> argumentType, boolean isEscalationOnly);
 
 		/**
 		 * Adds an {@link SectionObjectType}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param objectType
-		 *            Object type.
-		 * @param typeQualifier
-		 *            Type qualifier.
+		 * @param name          Name.
+		 * @param objectType    Object type.
+		 * @param typeQualifier Type qualifier.
 		 */
 		void addSectionObject(String name, Class<?> objectType, String typeQualifier);
 	}
@@ -328,10 +318,8 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		/**
 		 * Initialise for {@link SectionInputType}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param type
-		 *            Type.
+		 * @param name Name.
+		 * @param type Type.
 		 */
 		public SectionTypeItem(String name, String type) {
 			this(name, type, false);
@@ -340,12 +328,9 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		/**
 		 * Initialise for {@link SectionOutputType}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param type
-		 *            Type.
-		 * @param isEscalation
-		 *            Flag indicating if escalation only.
+		 * @param name         Name.
+		 * @param type         Type.
+		 * @param isEscalation Flag indicating if escalation only.
 		 */
 		public SectionTypeItem(String name, String type, boolean isEscalation) {
 			this.name = name;
@@ -357,12 +342,9 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		/**
 		 * Initialise for {@link SectionObjectType}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param type
-		 *            Type.
-		 * @param typeQualifier
-		 *            Type qualifier.
+		 * @param name          Name.
+		 * @param type          Type.
+		 * @param typeQualifier Type qualifier.
 		 */
 		public SectionTypeItem(String name, String type, String typeQualifier) {
 			this.name = name;
@@ -432,10 +414,8 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	/**
 	 * Constructs the {@link HttpSecurityType} for testing.
 	 * 
-	 * @param credentialsType
-	 *            Credentials type.
-	 * @param constructor
-	 *            {@link HttpSecurityTypeConstructor}.
+	 * @param credentialsType Credentials type.
+	 * @param constructor     {@link HttpSecurityTypeConstructor}.
 	 * @return {@link HttpSecurityType}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -456,8 +436,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		/**
 		 * Constructs the {@link HttpSecurityType}.
 		 * 
-		 * @param context
-		 *            {@link HttpSecurityTypeContext}.
+		 * @param context {@link HttpSecurityTypeContext}.
 		 */
 		void construct(HttpSecurityTypeContext context);
 	}
@@ -470,26 +449,19 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		/**
 		 * Adds a {@link HttpSecurityDependencyType}.
 		 * 
-		 * @param dependencyName
-		 *            Name of dependency.
-		 * @param dependencyType
-		 *            Dependency type.
-		 * @param typeQualifier
-		 *            Qualifier for dependency type.
-		 * @param key
-		 *            Dependency key.
+		 * @param dependencyName Name of dependency.
+		 * @param dependencyType Dependency type.
+		 * @param typeQualifier  Qualifier for dependency type.
+		 * @param key            Dependency key.
 		 */
 		void addDependency(String dependencyName, Class<?> dependencyType, String typeQualifier, Enum<?> key);
 
 		/**
 		 * Adds a {@link HttpSecurityFlowType}.
 		 * 
-		 * @param flowName
-		 *            Name of flow.
-		 * @param argumentType
-		 *            Argument to flow.
-		 * @param key
-		 *            Flow key.
+		 * @param flowName     Name of flow.
+		 * @param argumentType Argument to flow.
+		 * @param key          Flow key.
 		 */
 		void addFlow(String flowName, Class<?> argumentType, Enum<?> key);
 	}
@@ -518,8 +490,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		/**
 		 * Initiate.
 		 * 
-		 * @param credentialsType
-		 *            Type of credentials.
+		 * @param credentialsType Type of credentials.
 		 */
 		public HttpSecurityTypeContextImpl(Class<C> credentialsType) {
 			this.credentialsType = credentialsType;
@@ -585,6 +556,11 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		public HttpSecurityFlowType<F>[] getFlowTypes() {
 			return this.flows.toArray(new HttpSecurityFlowType[this.flows.size()]);
 		}
+
+		@Override
+		public HttpSecuritySupportingManagedObjectType[] getSupportingManagedObjectTypes() {
+			return new HttpSecuritySupportingManagedObjectType[0];
+		}
 	}
 
 	/**
@@ -621,16 +597,11 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		/**
 		 * Initiate.
 		 * 
-		 * @param itemName
-		 *            Name of item.
-		 * @param itemType
-		 *            Type for item.
-		 * @param typeQualifier
-		 *            Qualifier for item type.
-		 * @param key
-		 *            Key.
-		 * @param index
-		 *            Index.
+		 * @param itemName      Name of item.
+		 * @param itemType      Type for item.
+		 * @param typeQualifier Qualifier for item type.
+		 * @param key           Key.
+		 * @param index         Index.
 		 */
 		public HttpSecurityTypeItem(String itemName, Class<?> itemType, String typeQualifier, E key, int index) {
 			this.itemName = itemName;

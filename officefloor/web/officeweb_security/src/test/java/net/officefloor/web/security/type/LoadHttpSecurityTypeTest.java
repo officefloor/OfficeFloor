@@ -31,6 +31,7 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -807,6 +808,41 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		HttpSecurityLoaderUtil.authenticate(authentication, null);
 		assertTrue("Should log back in", authentication.isAuthenticated());
 		assertSame("Should be same access control again", accessControl, authentication.getAccessControl());
+	}
+
+	/**
+	 * Ensure {@link HttpSecuritySupportingManagedObjectType} is on
+	 * {@link HttpSecurityType}.
+	 */
+	public void testSupportingManagedObject() throws Throwable {
+
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), HttpAuthentication.class);
+		this.recordReturn(this.metaData, this.metaData.getAccessControlType(), HttpAccessControl.class);
+		this.recordReturn(this.metaData, this.metaData.getCredentialsType(), null);
+
+		// Load type with supporting object
+		ClassManagedObjectSource mos = new ClassManagedObjectSource();
+		HttpSecurityType<?, ?, ?, ?, ?> type = this.loadHttpSecurityType(true, (context) -> {
+			context.addSupportingManagedObject("object", mos).addProperty(
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockSupportingObject.class.getName());
+		});
+
+		// Ensure have supporting object type
+		HttpSecuritySupportingManagedObjectType[] supportingObjects = type.getSupportingManagedObjectTypes();
+		assertEquals("Incorrect number of supporting objects", 1, supportingObjects.length);
+		HttpSecuritySupportingManagedObjectType supportingObject = supportingObjects[0];
+		assertEquals("Incorrect name", "object", supportingObject.getSupportingManagedObjectName());
+		assertSame("Incorrect managed object source", mos, supportingObject.getManagedObjectSource());
+		PropertyList properties = supportingObject.getProperties();
+		assertEquals("Incorrect number of properties", 1, properties.getPropertyNames().length);
+		assertEquals("Incorrect property", MockSupportingObject.class.getName(),
+				properties.getProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).getValue());
+		assertSame("Incorrect object type", MockSupportingObject.class, supportingObject.getObjectType());
+	}
+
+	public static class MockSupportingObject {
 	}
 
 	/**

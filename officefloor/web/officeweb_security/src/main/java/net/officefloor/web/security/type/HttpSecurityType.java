@@ -41,13 +41,13 @@ public interface HttpSecurityType<A, AC extends Serializable, C, O extends Enum<
 	Class<A> getAuthenticationType();
 
 	/**
-	 * Should the custom authentication not implement
-	 * {@link HttpAuthentication}, then this factory provides a wrapping
-	 * {@link HttpAuthentication} implementation.
+	 * Should the custom authentication not implement {@link HttpAuthentication},
+	 * then this factory provides a wrapping {@link HttpAuthentication}
+	 * implementation.
 	 * 
 	 * @return {@link HttpAuthenticationFactory} to create wrapping
-	 *         {@link HttpAuthentication}, or <code>null</code> if custom
-	 *         already implements {@link HttpAuthentication}.
+	 *         {@link HttpAuthentication}, or <code>null</code> if custom already
+	 *         implements {@link HttpAuthentication}.
 	 */
 	HttpAuthenticationFactory<A, C> getHttpAuthenticationFactory();
 
@@ -78,8 +78,8 @@ public interface HttpSecurityType<A, AC extends Serializable, C, O extends Enum<
 	Class<C> getCredentialsType();
 
 	/**
-	 * Obtains the {@link HttpSecurityDependencyType} definitions of the
-	 * required dependencies for the {@link HttpSecuritySource}.
+	 * Obtains the {@link HttpSecurityDependencyType} definitions of the required
+	 * dependencies for the {@link HttpSecuritySource}.
 	 * 
 	 * @return {@link HttpSecurityDependencyType} definitions of the required
 	 *         dependencies for the {@link HttpSecuritySource}.
@@ -91,9 +91,19 @@ public interface HttpSecurityType<A, AC extends Serializable, C, O extends Enum<
 	 * instances required to be linked for the {@link HttpSecuritySource}.
 	 * 
 	 * @return {@link HttpSecurityFlowType} definitions of the {@link Flow}
-	 *         instances required to be linked for the
-	 *         {@link HttpSecuritySource}.
+	 *         instances required to be linked for the {@link HttpSecuritySource}.
 	 */
 	HttpSecurityFlowType<?>[] getFlowTypes();
+
+	/**
+	 * Obtains the {@link HttpSecuritySupportingManagedObjectType} definitions of
+	 * the {@link HttpSecuritySupportingManagedObject} instances provided by the
+	 * {@link HttpSecuritySource}.
+	 * 
+	 * @return {@link HttpSecuritySupportingManagedObjectType} definitions of the
+	 *         {@link HttpSecuritySupportingManagedObject} instances provided by the
+	 *         {@link HttpSecuritySource}.
+	 */
+	HttpSecuritySupportingManagedObjectType[] getSupportingManagedObjectTypes();
 
 }
