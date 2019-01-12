@@ -10,7 +10,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.jwt.JwtHttpSecuritySource.Flows;
-import net.officefloor.web.jwt.spi.JwtKeyCollector;
+import net.officefloor.web.jwt.authority.JwtAuthority;
+import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
 import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
@@ -43,10 +44,10 @@ public class JwtHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Create the expected type
 		HttpSecurityTypeBuilder type = HttpSecurityLoaderUtil.createHttpSecurityTypeBuilder();
-		type.setAuthenticationClass(JwtHttpAuthentication.class);
+		type.setAuthenticationClass(HttpAuthentication.class);
 		type.setAccessControlClass(JwtHttpAccessControl.class);
 		type.setInput(true);
-		type.addFlow(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS, JwtKeyCollector.class);
+		type.addFlow(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS, JwtDecodeCollector.class);
 
 		// Validate the type
 		HttpSecurityLoaderUtil.validateHttpSecurityType(type, JwtHttpSecuritySource.class);
@@ -132,11 +133,13 @@ public class JwtHttpSecuritySourceTest extends OfficeFrameTestCase {
 				.createAuthenticationContext(connection, session, security, (context) -> {
 
 				});
-		JwtHttpAuthentication<MockClaims> authentication = (JwtHttpAuthentication<MockClaims>) security
-				.createAuthentication(authenticationContext);
+		HttpAuthentication<Void> authentication = security.createAuthentication(authenticationContext);
+
+		// TODO load the JwtAuthority
+		JwtAuthority<MockClaims> authority = null;
 
 		// Create the JWT
-		String jwt = authentication.createJwt(new MockClaims());
+		String jwt = authority.createJwt(new MockClaims());
 
 		// Validate the JWT is correct
 		String subject = Jwts.parser().setSigningKey(keyPair.getPublic()).parseClaimsJws(jwt).getBody().getSubject();

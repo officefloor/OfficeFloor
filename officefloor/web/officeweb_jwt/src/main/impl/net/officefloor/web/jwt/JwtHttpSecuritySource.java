@@ -2,7 +2,10 @@ package net.officefloor.web.jwt;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.server.http.HttpException;
-import net.officefloor.web.jwt.spi.JwtKeyCollector;
+import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
+import net.officefloor.web.security.HttpAccessControl;
+import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.scheme.HttpAuthenticationImpl;
 import net.officefloor.web.spi.security.AuthenticateContext;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.ChallengeContext;
@@ -19,7 +22,7 @@ import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
  * @author Daniel Sagenschneider
  */
 public class JwtHttpSecuritySource<C> extends
-		AbstractHttpSecuritySource<JwtHttpAuthentication<C>, JwtHttpAccessControl<C>, Void, None, JwtHttpSecuritySource.Flows> {
+		AbstractHttpSecuritySource<HttpAuthentication<Void>, JwtHttpAccessControl<C>, Void, None, JwtHttpSecuritySource.Flows> {
 
 	/**
 	 * Flow keys.
@@ -39,18 +42,18 @@ public class JwtHttpSecuritySource<C> extends
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void loadMetaData(
-			MetaDataContext<JwtHttpAuthentication<C>, JwtHttpAccessControl<C>, Void, None, Flows> context)
+			MetaDataContext<HttpAuthentication<Void>, JwtHttpAccessControl<C>, Void, None, Flows> context)
 			throws Exception {
 
-		context.setAuthenticationClass((Class) JwtHttpAuthentication.class);
+		context.setAuthenticationClass((Class) HttpAuthentication.class);
 		context.setAccessControlClass((Class) JwtHttpAccessControl.class);
 
 		// Provide flow to retrieve keys
-		context.addFlow(Flows.RETRIEVE_KEYS, JwtKeyCollector.class);
+		context.addFlow(Flows.RETRIEVE_KEYS, JwtDecodeCollector.class);
 	}
 
 	@Override
-	public HttpSecurity<JwtHttpAuthentication<C>, JwtHttpAccessControl<C>, Void, None, Flows> sourceHttpSecurity(
+	public HttpSecurity<HttpAuthentication<Void>, JwtHttpAccessControl<C>, Void, None, Flows> sourceHttpSecurity(
 			HttpSecurityContext context) throws HttpException {
 		return new JwtHttpSecurity();
 	}
@@ -59,12 +62,12 @@ public class JwtHttpSecuritySource<C> extends
 	 * JWT {@link HttpSecurity}.
 	 */
 	private class JwtHttpSecurity
-			implements HttpSecurity<JwtHttpAuthentication<C>, JwtHttpAccessControl<C>, Void, None, Flows> {
+			implements HttpSecurity<HttpAuthentication<Void>, JwtHttpAccessControl<C>, Void, None, Flows> {
 
 		@Override
-		public JwtHttpAuthentication<C> createAuthentication(
+		public HttpAuthentication<Void> createAuthentication(
 				AuthenticationContext<JwtHttpAccessControl<C>, Void> context) {
-			return new JwtHttpAuthenticationImpl<C>(context);
+			return new HttpAuthenticationImpl<>(context);
 		}
 
 		@Override
