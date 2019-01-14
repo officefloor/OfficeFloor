@@ -115,6 +115,7 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// Obtain the security and it's type
+		String securityName = this.configuration.getHttpSecurityName();
 		HttpSecurity<A, AC, C, O, F> security = this.configuration.getHttpSecurity();
 		HttpSecurityType<A, AC, C, O, F> securityType = this.configuration.getHttpSecurityType();
 
@@ -149,7 +150,7 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 
 		// Configure the HTTP Security Managed Function Source
 		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("HttpSecuritySource",
-				new HttpSecurityManagedFunctionSource(security, securityType));
+				new HttpSecurityManagedFunctionSource(securityName, security, securityType));
 
 		// Configure the challenge handling
 		SectionFunction challengeFunction = namespace.addSectionFunction(
@@ -160,6 +161,7 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 		designer.link(challengeFunction.getFunctionObject(ServerHttpConnection.class.getSimpleName()),
 				serverHttpConnection);
 		designer.link(challengeFunction.getFunctionObject(HttpSession.class.getSimpleName()), httpSession);
+		designer.link(challengeFunction.getFunctionObject(HttpRequestState.class.getSimpleName()), httpRequestState);
 		for (SectionObject dependency : dependencyObjects) {
 			designer.link(challengeFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
 		}
@@ -281,6 +283,11 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 		private static final String FUNCTION_COMPLETE_APPLICATION_AUTHENTICATE = "CompleteApplicationAuthenticate";
 
 		/**
+		 * Name of the {@link HttpSecurity}.
+		 */
+		private final String httpSecurityName;
+
+		/**
 		 * {@link HttpSecurity}.
 		 */
 		private final HttpSecurity<A, AC, C, O, F> httpSecurity;
@@ -293,11 +300,13 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 		/**
 		 * Instantiate.
 		 * 
+		 * @param httpSecurityName Name of the {@link HttpSecurity}.
 		 * @param httpSecurity     {@link HttpSecurity}.
 		 * @param httpSecurityType {@link HttpSecurityType}.
 		 */
-		public HttpSecurityManagedFunctionSource(HttpSecurity<A, AC, C, O, F> httpSecurity,
+		public HttpSecurityManagedFunctionSource(String httpSecurityName, HttpSecurity<A, AC, C, O, F> httpSecurity,
 				HttpSecurityType<A, AC, C, O, F> httpSecurityType) {
+			this.httpSecurityName = httpSecurityName;
 			this.httpSecurity = httpSecurity;
 			this.httpSecurityType = httpSecurityType;
 		}
@@ -340,8 +349,9 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 
 			// Add the managed object authentication function
 			ManagedFunctionTypeBuilder<Indexed, None> moAuthenticate = namespaceTypeBuilder.addManagedFunctionType(
-					FUNCTION_MANAGED_OBJECT_AUTHENTICATE, new ManagedObjectAuthenticateFunction<>(this.httpSecurity),
-					Indexed.class, None.class);
+					FUNCTION_MANAGED_OBJECT_AUTHENTICATE,
+					new ManagedObjectAuthenticateFunction<>(this.httpSecurityName, this.httpSecurity), Indexed.class,
+					None.class);
 			moAuthenticate.addObject(FunctionAuthenticateContext.class)
 					.setLabel(FunctionAuthenticateContext.class.getSimpleName());
 			for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
@@ -351,7 +361,8 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 
 			// Add the managed object logout function
 			ManagedFunctionTypeBuilder<Indexed, None> logout = namespaceTypeBuilder.addManagedFunctionType(
-					FUNCTION_MANAGED_OBJECT_LOGOUT, new ManagedObjectLogoutFunction<>(this.httpSecurity), Indexed.class,
+					FUNCTION_MANAGED_OBJECT_LOGOUT,
+					new ManagedObjectLogoutFunction<>(this.httpSecurityName, this.httpSecurity), Indexed.class,
 					None.class);
 			logout.addObject(FunctionLogoutContext.class).setLabel(FunctionLogoutContext.class.getSimpleName());
 			for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
@@ -361,10 +372,12 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 
 			// Add the challenge function
 			ManagedFunctionTypeBuilder<Indexed, Indexed> challenge = namespaceTypeBuilder.addManagedFunctionType(
-					FUNCTION_CHALLENGE, new HttpChallengeFunction<>(this.httpSecurity), Indexed.class, Indexed.class);
+					FUNCTION_CHALLENGE, new HttpChallengeFunction<>(this.httpSecurityName, this.httpSecurity),
+					Indexed.class, Indexed.class);
 			challenge.addObject(HttpChallengeContext.class).setLabel(HttpChallengeContext.class.getSimpleName());
 			challenge.addObject(ServerHttpConnection.class).setLabel(ServerHttpConnection.class.getSimpleName());
 			challenge.addObject(HttpSession.class).setLabel(HttpSession.class.getSimpleName());
+			challenge.addObject(HttpRequestState.class).setLabel(HttpRequestState.class.getSimpleName());
 			for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
 				challenge.addObject(dependencyType.getDependencyType())
 						.setLabel("Dependency_" + dependencyType.getDependencyName());

@@ -29,6 +29,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link ManagedFunction} and {@link ManagedFunctionFactory} to log out.
@@ -39,6 +40,11 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 		extends StaticManagedFunction<Indexed, None> {
 
 	/**
+	 * Name of the {@link HttpSecurity}.
+	 */
+	private final String httpSecurityName;
+
+	/**
 	 * {@link HttpSecurity}.
 	 */
 	private final HttpSecurity<?, AC, ?, O, ?> httpSecurity;
@@ -46,10 +52,11 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 	/**
 	 * Instantiate.
 	 * 
-	 * @param httpSecurity
-	 *            {@link HttpSecurity}.
+	 * @param httpSecurityName Name of the {@link HttpSecurity}.
+	 * @param httpSecurity     {@link HttpSecurity}.
 	 */
-	public ManagedObjectLogoutFunction(HttpSecurity<?, AC, ?, O, ?> httpSecurity) {
+	public ManagedObjectLogoutFunction(String httpSecurityName, HttpSecurity<?, AC, ?, O, ?> httpSecurity) {
+		this.httpSecurityName = httpSecurityName;
 		this.httpSecurity = httpSecurity;
 	}
 
@@ -97,10 +104,8 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 		/**
 		 * Initiate.
 		 * 
-		 * @param logoutContext
-		 *            {@link FunctionLogoutContext}.
-		 * @param context
-		 *            {@link ManagedFunctionContext}.
+		 * @param logoutContext {@link FunctionLogoutContext}.
+		 * @param context       {@link ManagedFunctionContext}.
 		 */
 		private LogoutContextImpl(FunctionLogoutContext<AC> logoutContext,
 				ManagedFunctionContext<Indexed, None> context) {
@@ -118,8 +123,19 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 		}
 
 		@Override
+		public String getQualifiedAttributeName(String attributeName) {
+			return AuthenticationContextManagedObjectSource
+					.getQualifiedAttributeName(ManagedObjectLogoutFunction.this.httpSecurityName, attributeName);
+		}
+
+		@Override
 		public HttpSession getSession() {
 			return this.logoutContext.getSession();
+		}
+
+		@Override
+		public HttpRequestState getRequestState() {
+			return this.logoutContext.getRequestState();
 		}
 
 		@Override

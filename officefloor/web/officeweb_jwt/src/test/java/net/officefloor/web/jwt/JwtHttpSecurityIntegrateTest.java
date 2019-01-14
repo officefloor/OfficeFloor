@@ -1,72 +1,143 @@
 package net.officefloor.web.jwt;
 
 import java.security.KeyPair;
+import java.util.function.Consumer;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
+import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.compile.CompileWebContext;
+import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.jwt.JwtHttpSecuritySource.Flows;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
-import net.officefloor.web.mock.MockWebApp;
+import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.scheme.MockHttpRatifyContext;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
-import net.officefloor.web.security.type.HttpSecurityTypeBuilder;
-import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 
 /**
- * Tests the {@link JwtHttpSecuritySource}.
+ * Integrate tests the {@link JwtHttpSecuritySource}.
  * 
  * @author Daniel Sagenschneider
  */
-@SuppressWarnings("unchecked")
-public class JwtHttpSecuritySourceTest extends OfficeFrameTestCase {
+public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 
 	/**
-	 * Ensure correct specification.
+	 * {@link KeyPair} for testing.
 	 */
-	public void testSpecification() {
-		HttpSecurityLoaderUtil.validateSpecification(JwtHttpSecuritySource.class);
-	}
+	private static final KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256);
 
 	/**
-	 * Ensure correct type.
+	 * Path for server to echo the claims back to client.
 	 */
-	public void testType() {
+	private static final String ECHO_CLAIMS_PATH = "/claims";
 
-		// Create the expected type
-		HttpSecurityTypeBuilder type = HttpSecurityLoaderUtil.createHttpSecurityTypeBuilder();
-		type.setAuthenticationClass(HttpAuthentication.class);
-		type.setAccessControlClass(JwtHttpAccessControl.class);
-		type.setInput(true);
-		type.addFlow(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS, JwtDecodeCollector.class);
+	/**
+	 * Default {@link JwtDecodeCollector} handler.
+	 */
+	private static final Consumer<JwtDecodeCollector> DEFAULT_JWT_DECODE_COLLECTOR = (collector) -> {
+		collector.setKeys(10_000, new JwtDecodeKey(keyPair.getPublic()));
+	};
 
-		// Validate the type
-		HttpSecurityLoaderUtil.validateHttpSecurityType(type, JwtHttpSecuritySource.class);
+	/**
+	 * {@link JwtDecodeCollector} handler to use in provide {@link JwtDecodeKey}
+	 * instances.
+	 */
+	private static Consumer<JwtDecodeCollector> jwtDecodeCollectorHandler = DEFAULT_JWT_DECODE_COLLECTOR;
+
+	/**
+	 * {@link MockHttpServer}.
+	 */
+	private MockHttpServer server;
+
+	/**
+	 * {@link OfficeFloor}.
+	 */
+	private OfficeFloor officeFloor;
+
+	@Override
+	protected void tearDown() throws Exception {
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
 	}
 
 	/**
 	 * Ensure handle no JWT.
 	 */
-	public void testNoJwt() {
+	public void testNoJwt() throws Exception {
+		this.loadServer(null);
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<>();
+		// Ensure unauthorized (as no JWT token for access control)
+		this.server.send(MockHttpServer.mockRequest(ECHO_CLAIMS_PATH))
+				.assertResponse(HttpStatus.UNAUTHORIZED.getStatusCode(), "");
+	}
 
-		// Create and initialise the security
-		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, Flows> security = HttpSecurityLoaderUtil
-				.loadHttpSecurity(JwtHttpSecuritySource.class);
+	@FunctionalInterface
+	private static interface ServerConfigurer {
+		void configure(CompileWebContext context, HttpSecurityBuilder jwt);
+	}
 
-		// Undertake ratify
-		assertFalse("Should not need to authenticate, as always ratify JWT", security.ratify(null, ratifyContext));
-		assertNull("Should not obtain JWT", ratifyContext.getAccessControl());
+	/**
+	 * Loads the {@link MockHttpServer}.
+	 * 
+	 * @param loader {@link ServerConfigurer}.
+	 */
+	private void loadServer(ServerConfigurer loader) throws Exception {
+
+		// Compile the server
+		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+		compiler.mockHttpServer((server) -> this.server = server);
+		compiler.web((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+
+			// Load the JWT security
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
+					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
+			HttpSecurityBuilder jwt = security.addHttpSecurity("JWT", JwtHttpSecuritySource.class.getName());
+			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS.name()), context
+					.addSection("COLLECTOR", JwtDecodeKeyCollectorServicer.class).getOfficeSectionInput("service"));
+
+			// Load the server configuration
+			if (loader != null) {
+				loader.configure(context, jwt);
+			}
+
+			// Configure echo claims
+			context.link(false, ECHO_CLAIMS_PATH, EchoClaimsSection.class);
+
+			security.informWebArchitect();
+		});
+		this.officeFloor = compiler.compileAndOpenOfficeFloor();
+	}
+
+	public static class EchoClaimsSection {
+		public void service(JwtHttpAccessControl<?> accessControl, ObjectResponse<Object> response) {
+			Object claims = accessControl.getClaims();
+			response.send(claims);
+		}
+	}
+
+	public static class JwtDecodeKeyCollectorServicer {
+		public void service(@Parameter JwtDecodeCollector collector) {
+			jwtDecodeCollectorHandler.accept(collector);
+		}
 	}
 
 	/**
@@ -122,7 +193,6 @@ public class JwtHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Create the mocks
 		MockServerHttpConnection connection = MockHttpServer.mockConnection();
-		HttpSession session = MockWebApp.mockSession(connection);
 
 		// Create and initialise the security
 		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, Flows> security = HttpSecurityLoaderUtil
@@ -130,7 +200,7 @@ public class JwtHttpSecuritySourceTest extends OfficeFrameTestCase {
 
 		// Obtain the JWT authentication
 		AuthenticationContext<HttpAccessControl, Void> authenticationContext = HttpSecurityLoaderUtil
-				.createAuthenticationContext(connection, session, security, (context) -> {
+				.createAuthenticationContext(connection, security, (context) -> {
 
 				});
 		HttpAuthentication<Void> authentication = security.createAuthentication(authenticationContext);

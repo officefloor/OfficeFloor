@@ -26,9 +26,11 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.mock.MockWebApp;
+import net.officefloor.web.security.impl.AuthenticationContextManagedObjectSource;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AuthenticateContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * Mock {@link AuthenticateContext} for testing {@link HttpSecuritySource}
@@ -67,6 +69,11 @@ public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum
 	 * {@link HttpSession}.
 	 */
 	private final HttpSession session;
+
+	/**
+	 * {@link HttpRequestState}.
+	 */
+	private final HttpRequestState requestState;
 
 	/**
 	 * Dependencies.
@@ -108,6 +115,7 @@ public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum
 	public MockHttpAuthenticateContext(ServerHttpConnection connection) {
 		this.connection = connection;
 		this.session = MockWebApp.mockSession(this.connection);
+		this.requestState = MockWebApp.mockRequestState(this.connection);
 	}
 
 	/**
@@ -148,8 +156,18 @@ public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum
 	}
 
 	@Override
+	public String getQualifiedAttributeName(String attributeName) {
+		return AuthenticationContextManagedObjectSource.getQualifiedAttributeName("mock", attributeName);
+	}
+
+	@Override
 	public HttpSession getSession() {
 		return this.session;
+	}
+
+	@Override
+	public HttpRequestState getRequestState() {
+		return this.requestState;
 	}
 
 	@Override

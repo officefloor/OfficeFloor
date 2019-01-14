@@ -19,35 +19,18 @@ package net.officefloor.web.spi.security;
 
 import java.io.Serializable;
 
-import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
-
 /**
  * Context for authentication.
  * 
  * @author Daniel Sagenschneider
  */
-public interface AuthenticateContext<AC extends Serializable, O extends Enum<O>> extends AccessControlListener<AC> {
-
-	/**
-	 * Obtains the {@link ServerHttpConnection}.
-	 * 
-	 * @return {@link ServerHttpConnection}.
-	 */
-	ServerHttpConnection getConnection();
-
-	/**
-	 * Obtains the {@link HttpSession}.
-	 * 
-	 * @return {@link HttpSession}.
-	 */
-	HttpSession getSession();
+public interface AuthenticateContext<AC extends Serializable, O extends Enum<O>>
+		extends HttpSecurityActionContext, AccessControlListener<AC> {
 
 	/**
 	 * Obtains a dependency.
 	 * 
-	 * @param key
-	 *            Key for the dependency.
+	 * @param key Key for the dependency.
 	 * @return Dependency.
 	 */
 	Object getObject(O key);

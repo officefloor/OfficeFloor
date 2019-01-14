@@ -27,7 +27,6 @@ import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
-import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 
 /**
@@ -54,10 +53,7 @@ public class JacksonJsonTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.compile.officeFloor((context) -> {
-			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
-					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-		});
+		this.compile.mockHttpServer((server) -> this.server = server);
 	}
 
 	@Override

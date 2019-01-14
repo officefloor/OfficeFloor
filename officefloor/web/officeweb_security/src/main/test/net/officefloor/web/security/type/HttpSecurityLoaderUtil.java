@@ -36,6 +36,7 @@ import net.officefloor.frame.util.InvokedProcessServicer;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.impl.AuthenticationContextManagedObjectSource;
 import net.officefloor.web.security.impl.FunctionAuthenticateContext;
@@ -45,6 +46,7 @@ import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * Utility class for testing the {@link HttpSecuritySource}.
@@ -281,13 +283,20 @@ public class HttpSecurityLoaderUtil {
 	/**
 	 * Creates an {@link AuthenticationContext} for testing.
 	 * 
+	 * @param connection         {@link ServerHttpConnection}.
+	 * @param security           {@link HttpSecurity}.
+	 * @param handleAuthenticate Handles the authentication.
 	 * @return {@link AuthenticationContext} for testing.
 	 * @throws Exception If fails to create the {@link AuthenticationContext}.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <AC extends Serializable, C> AuthenticationContext<AC, C> createAuthenticationContext(
-			ServerHttpConnection connection, HttpSession session, HttpSecurity<?, AC, C, ?, ?> security,
+			ServerHttpConnection connection, HttpSecurity<?, AC, C, ?, ?> security,
 			Consumer<FunctionAuthenticateContext<AC, C>> handleAuthenticate) throws Throwable {
+
+		// Create the dependencies
+		HttpSession session = MockWebApp.mockSession(connection);
+		HttpRequestState requestState = MockWebApp.mockRequestState(connection);
 
 		// Handle authentication
 		InvokedProcessServicer authenticator = (processIndex, parameter, managedObject) -> {
@@ -319,6 +328,7 @@ public class HttpSecurityLoaderUtil {
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
 		user.mapDependency(AuthenticationContextManagedObjectSource.Dependencies.SERVER_HTTP_CONNECTION, connection);
 		user.mapDependency(AuthenticationContextManagedObjectSource.Dependencies.HTTP_SESSION, session);
+		user.mapDependency(AuthenticationContextManagedObjectSource.Dependencies.HTTP_REQUEST_STATE, requestState);
 		ManagedObject managedObject = user.sourceManagedObject(mos);
 
 		// Return the authentication context

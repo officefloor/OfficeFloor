@@ -28,7 +28,7 @@ public interface JwtDecodeCollector {
 	 *                        instances again.
 	 * @param keys            {@link JwtDecodeKey} instances.
 	 */
-	void setKeys(long timeToNextCheck, JwtDecodeKey[] keys);
+	void setKeys(long timeToNextCheck, JwtDecodeKey... keys);
 
 	/**
 	 * Indicates failure in retrieving the {@link JwtDecodeKey} instances.

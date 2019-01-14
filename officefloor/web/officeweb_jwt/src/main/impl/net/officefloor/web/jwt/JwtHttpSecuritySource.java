@@ -2,7 +2,10 @@ package net.officefloor.web.jwt;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
+import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.scheme.HttpAuthenticationImpl;
 import net.officefloor.web.spi.security.AuthenticateContext;
@@ -10,6 +13,7 @@ import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.ChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
+import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.LogoutContext;
 import net.officefloor.web.spi.security.RatifyContext;
@@ -57,6 +61,17 @@ public class JwtHttpSecuritySource<C> extends
 		return new JwtHttpSecurity();
 	}
 
+	@Override
+	public void start(HttpSecurityExecuteContext<Flows> context) throws Exception {
+
+		// Load the decode keys
+		context.registerStartupProcess(Flows.RETRIEVE_KEYS, new JwtDecodeCollectorImpl(), (error) -> {
+			if (error != null) {
+				throw error;
+			}
+		});
+	}
+
 	/**
 	 * JWT {@link HttpSecurity}.
 	 */
@@ -79,16 +94,45 @@ public class JwtHttpSecuritySource<C> extends
 		public void authenticate(Void credentials, AuthenticateContext<JwtHttpAccessControl<C>, None> context)
 				throws HttpException {
 			// TODO Auto-generated method stub
+			
 
 		}
 
 		@Override
 		public void challenge(ChallengeContext<None, Flows> context) throws HttpException {
+
+			HttpResponse response = context.getConnection().getResponse();
+			response.setStatus(HttpStatus.UNAUTHORIZED);
+
 			// TODO Auto-generated method stub
 		}
 
 		@Override
 		public void logout(LogoutContext<None> context) throws HttpException {
+			// TODO Auto-generated method stub
+
+		}
+	}
+
+	/**
+	 * {@link JwtDecodeCollector} implementation.
+	 */
+	private class JwtDecodeCollectorImpl implements JwtDecodeCollector {
+
+		@Override
+		public JwtDecodeKey[] getCurrentKeys() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void setKeys(long timeToNextCheck, JwtDecodeKey[] keys) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void setFailure(long timeToNextCheck, Throwable cause) {
 			// TODO Auto-generated method stub
 
 		}

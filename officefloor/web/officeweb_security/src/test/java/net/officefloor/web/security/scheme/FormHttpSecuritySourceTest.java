@@ -94,7 +94,8 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 
 		// Provide access control in session
-		ratifyContext.getSession().setAttribute("http.security.form", accessControl);
+		ratifyContext.getSession().setAttribute(ratifyContext.getQualifiedAttributeName("http.security.form"),
+				accessControl);
 
 		// Test
 		this.replayMockObjects();
@@ -270,7 +271,8 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<Dependencies>();
 
 		// Record logging out
-		logoutContext.getSession().setAttribute("http.security.form", this.createMock(HttpAccessControl.class));
+		logoutContext.getSession().setAttribute(logoutContext.getQualifiedAttributeName("http.security.form"),
+				this.createMock(HttpAccessControl.class));
 
 		// Replay mock objects
 		this.replayMockObjects();
@@ -286,7 +288,8 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the access control is cleared from session
-		assertNull("Should clear session", logoutContext.getSession().getAttribute("http.security.form"));
+		assertNull("Should clear session",
+				logoutContext.getSession().getAttribute(logoutContext.getQualifiedAttributeName("http.security.form")));
 	}
 
 	/**
@@ -319,7 +322,7 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Validate authentication
 		HttpAccessControl accessControl = authenticationContext.getAccessControl();
 		HttpAccessControl sessionAccessControl = (HttpAccessControl) authenticationContext.getSession()
-				.getAttribute("http.security.form");
+				.getAttribute(authenticationContext.getQualifiedAttributeName("http.security.form"));
 		if (userName == null) {
 			assertNull("Should not be authenticated", accessControl);
 			assertNull("Should not load session", sessionAccessControl);

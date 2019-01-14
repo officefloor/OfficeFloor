@@ -24,10 +24,12 @@ import java.util.concurrent.Flow;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.mock.MockWebApp;
+import net.officefloor.web.security.impl.AuthenticationContextManagedObjectSource;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.ChallengeContext;
 import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * Mock {@link ChallengeContext} for testing {@link HttpSecuritySource}
@@ -61,6 +63,11 @@ public class MockHttpChallengeContext<O extends Enum<O>, F extends Enum<F>>
 	private final HttpSession session;
 
 	/**
+	 * {@link HttpRequestState}.
+	 */
+	private final HttpRequestState requestState;
+
+	/**
 	 * Dependencies.
 	 */
 	private final Map<O, Object> dependencies = new HashMap<>();
@@ -83,6 +90,7 @@ public class MockHttpChallengeContext<O extends Enum<O>, F extends Enum<F>>
 	public MockHttpChallengeContext(ServerHttpConnection connection) {
 		this.connection = connection;
 		this.session = MockWebApp.mockSession(this.connection);
+		this.requestState = MockWebApp.mockRequestState(this.connection);
 	}
 
 	/**
@@ -162,6 +170,16 @@ public class MockHttpChallengeContext<O extends Enum<O>, F extends Enum<F>>
 	@Override
 	public void addParameter(String name, String value) {
 		this.challenge.append(", " + name + "=" + value);
+	}
+
+	@Override
+	public String getQualifiedAttributeName(String attributeName) {
+		return AuthenticationContextManagedObjectSource.getQualifiedAttributeName("mock", attributeName);
+	}
+
+	@Override
+	public HttpRequestState getRequestState() {
+		return this.requestState;
 	}
 
 }

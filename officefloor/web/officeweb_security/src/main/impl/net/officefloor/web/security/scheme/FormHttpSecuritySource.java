@@ -167,7 +167,7 @@ public class FormHttpSecuritySource extends
 
 			// Attempt to obtain from session
 			HttpAccessControl accessControl = (HttpAccessControl) context.getSession()
-					.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+					.getAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY));
 			if (accessControl != null) {
 				// Load the access control and no need to authenticate
 				context.accessControlChange(accessControl, null);
@@ -216,7 +216,7 @@ public class FormHttpSecuritySource extends
 			}
 
 			// Remember access control for further requests
-			session.setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
+			session.setAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY), accessControl);
 
 			// Return the access control
 			context.accessControlChange(accessControl, null);
@@ -236,7 +236,7 @@ public class FormHttpSecuritySource extends
 			HttpSession session = context.getSession();
 
 			// Forget HTTP Security for further requests (requires login again)
-			session.removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+			session.removeAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY));
 		}
 	}
 

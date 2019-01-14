@@ -17,35 +17,18 @@
  */
 package net.officefloor.web.spi.security;
 
-import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
-
 /**
  * Context for triggering a challenge.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ChallengeContext<O extends Enum<O>, F extends Enum<F>> extends HttpChallengeContext {
-
-	/**
-	 * Obtains the {@link ServerHttpConnection}.
-	 * 
-	 * @return {@link ServerHttpConnection}.
-	 */
-	ServerHttpConnection getConnection();
-
-	/**
-	 * Obtains the {@link HttpSession}.
-	 * 
-	 * @return {@link HttpSession}.
-	 */
-	HttpSession getSession();
+public interface ChallengeContext<O extends Enum<O>, F extends Enum<F>>
+		extends HttpSecurityActionContext, HttpChallengeContext {
 
 	/**
 	 * Obtains a dependency.
 	 * 
-	 * @param key
-	 *            Key for the dependency.
+	 * @param key Key for the dependency.
 	 * @return Dependency.
 	 */
 	Object getObject(O key);
@@ -53,8 +36,7 @@ public interface ChallengeContext<O extends Enum<O>, F extends Enum<F>> extends 
 	/**
 	 * Undertakes a flow.
 	 * 
-	 * @param key
-	 *            Key identifying the flow.
+	 * @param key Key identifying the flow.
 	 */
 	void doFlow(F key);
 

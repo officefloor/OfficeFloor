@@ -23,9 +23,11 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.mock.MockWebApp;
+import net.officefloor.web.security.impl.AuthenticationContextManagedObjectSource;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.RatifyContext;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * Mock {@link RatifyContext} for testing {@link HttpSecuritySource} instances.
@@ -43,6 +45,11 @@ public class MockHttpRatifyContext<AC extends Serializable> implements RatifyCon
 	 * {@link HttpSession}.
 	 */
 	private final HttpSession session;
+
+	/**
+	 * {@link HttpRequestState}.
+	 */
+	private final HttpRequestState requestState;
 
 	/**
 	 * Access control.
@@ -79,6 +86,7 @@ public class MockHttpRatifyContext<AC extends Serializable> implements RatifyCon
 	public MockHttpRatifyContext(ServerHttpConnection connection) {
 		this.connection = connection;
 		this.session = MockWebApp.mockSession(this.connection);
+		this.requestState = MockWebApp.mockRequestState(this.connection);
 	}
 
 	/**
@@ -109,8 +117,18 @@ public class MockHttpRatifyContext<AC extends Serializable> implements RatifyCon
 	}
 
 	@Override
+	public String getQualifiedAttributeName(String attributeName) {
+		return AuthenticationContextManagedObjectSource.getQualifiedAttributeName("mock", attributeName);
+	}
+
+	@Override
 	public HttpSession getSession() {
 		return this.session;
+	}
+
+	@Override
+	public HttpRequestState getRequestState() {
+		return this.requestState;
 	}
 
 	@Override

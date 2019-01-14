@@ -36,7 +36,6 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
-import net.officefloor.web.mock.MockWebApp;
 import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
@@ -46,7 +45,6 @@ import net.officefloor.web.security.scheme.AnonymousHttpSecuritySource;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
-import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AuthenticateContext;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.ChallengeContext;
@@ -748,7 +746,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 
 		// Create the mocks
 		MockServerHttpConnection connection = MockHttpServer.mockConnection();
-		HttpSession session = MockWebApp.mockSession(connection);
 
 		// Ensure able to use to handle authentication
 		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
@@ -756,7 +753,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 
 		// Create the authentication context
 		AuthenticationContext<HttpAccessControl, Void> context = HttpSecurityLoaderUtil
-				.createAuthenticationContext(connection, session, security, null);
+				.createAuthenticationContext(connection, security, null);
 
 		// Create the authentication
 		HttpAuthentication<Void> authentication = security.createAuthentication(context);
@@ -776,7 +773,6 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest().header("Authorization",
 				"Basic " + Base64.getEncoder().encodeToString("Daniel:Test".getBytes()));
 		MockServerHttpConnection connection = MockHttpServer.mockConnection(request);
-		HttpSession session = MockWebApp.mockSession(connection);
 		HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 
 		// Ensure able to use to handle authentication
@@ -785,7 +781,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 
 		// Create the authentication context
 		AuthenticationContext<HttpAccessControl, Void> context = HttpSecurityLoaderUtil.createAuthenticationContext(
-				connection, session, security, (authenticate) -> authenticate.accessControlChange(accessControl, null));
+				connection, security, (authenticate) -> authenticate.accessControlChange(accessControl, null));
 
 		// Create the authentication
 		HttpAuthentication<Void> authentication = security.createAuthentication(context);

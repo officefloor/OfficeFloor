@@ -91,7 +91,8 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 
 		// Load access control to session
-		ratifyContext.getSession().setAttribute("http.security.basic", accessControl);
+		ratifyContext.getSession().setAttribute(ratifyContext.getQualifiedAttributeName("http.security.basic"),
+				accessControl);
 
 		// Test
 		this.replayMockObjects();
@@ -257,7 +258,8 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testLogout() throws Exception {
 
 		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<>();
-		logoutContext.getSession().setAttribute("http.security.basic", this.createMock(HttpAccessControl.class));
+		logoutContext.getSession().setAttribute(logoutContext.getQualifiedAttributeName("http.security.basic"),
+				this.createMock(HttpAccessControl.class));
 
 		// Create and initialise the security
 		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, Dependencies, None> security = HttpSecurityLoaderUtil
@@ -306,7 +308,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Validate authentication
 		HttpAccessControl accessControl = authenticationContext.getAccessControl();
 		HttpAccessControl sessionAccessControl = (HttpAccessControl) authenticationContext.getSession()
-				.getAttribute("http.security.basic");
+				.getAttribute(authenticationContext.getQualifiedAttributeName("http.security.basic"));
 		if (userName == null) {
 			assertNull("Should not be authenticated", accessControl);
 			assertNull("Should not register HTTP Security with HTTP Session", sessionAccessControl);

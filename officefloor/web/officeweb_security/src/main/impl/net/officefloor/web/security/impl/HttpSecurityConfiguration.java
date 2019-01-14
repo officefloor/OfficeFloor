@@ -30,6 +30,13 @@ import net.officefloor.web.spi.security.HttpSecurity;
 public interface HttpSecurityConfiguration<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> {
 
 	/**
+	 * Obtains the name of the {@link HttpSecurity}.
+	 * 
+	 * @return Name of the {@link HttpSecurity}.
+	 */
+	String getHttpSecurityName();
+
+	/**
 	 * Obtains the {@link HttpSecurity}.
 	 * 
 	 * @return {@link HttpSecurity}.

@@ -895,6 +895,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		 */
 
 		@Override
+		public String getHttpSecurityName() {
+			return this.name;
+		}
+
+		@Override
 		public HttpSecurity<A, AC, C, O, F> getHttpSecurity() {
 			return this.security;
 		}

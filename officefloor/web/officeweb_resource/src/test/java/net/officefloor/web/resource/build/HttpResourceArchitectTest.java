@@ -84,10 +84,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.compile.officeFloor((context) -> {
-			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
-					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-		});
+		this.compile.mockHttpServer((server) -> this.server = server);
 	}
 
 	@Override

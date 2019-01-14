@@ -18,7 +18,11 @@
 package net.officefloor.web.security;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
@@ -47,6 +51,8 @@ import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -66,13 +72,18 @@ import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
 import net.officefloor.web.security.scheme.MockCredentials;
 import net.officefloor.web.security.scheme.MockFlowHttpSecuritySource;
 import net.officefloor.web.session.HttpSession;
+import net.officefloor.web.spi.security.AuthenticateContext;
+import net.officefloor.web.spi.security.ChallengeContext;
 import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.spi.security.HttpSecurityActionContext;
 import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySupportingManagedObject;
+import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.spi.security.RatifyContext;
 
 /**
  * Tests the {@link HttpSecurityArchitect}.
@@ -101,10 +112,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		super.setUp();
 
 		// Configure mock server
-		this.compile.officeFloor((context) -> {
-			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
-					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-		});
+		this.compile.mockHttpServer((server) -> this.server = server);
 	}
 
 	@Override
@@ -1164,6 +1172,150 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 				@Qualified("two") MockIdentifiedSupportingObject two) {
 			supportingOne = one;
 			supportingTwo = two;
+		}
+	}
+
+	/**
+	 * Ensure can provide authentication state.
+	 */
+	public void testHttpRequestState() throws Throwable {
+
+		// Compile and open
+		MockAuthentiationStateHttpSecuritySource source = new MockAuthentiationStateHttpSecuritySource();
+		this.compile((context, security) -> {
+			security.addHttpSecurity("mock", source)
+					.addProperty(MockAuthentiationStateHttpSecuritySource.PROPERTY_REALM, "test");
+			context.link(false, "/login", AuthenticateStateLogin.class);
+			context.link(false, "/logout", AuthenticateStateLogout.class);
+		});
+
+		// Ensure initial state
+		Consumer<String> setup = (previousChallengeInnvocation) -> {
+			AuthenticateStateLogin.isLoggedIn = false;
+			source.setup(previousChallengeInnvocation);
+		};
+
+		// Provides assertion of state
+		BiConsumer<String, String[]> assertState = (message, expectedInvocations) -> {
+			Set<String> invocations = new HashSet<>(Arrays.asList(expectedInvocations));
+			assertEquals(message + ": ratify", invocations.remove("RATIFY"), source.isRatifyInvoked);
+			assertEquals(message + ": authenticate", invocations.remove("AUTHENTICATE"), source.isAuthenticateInvoked);
+			assertEquals(message + ": challenge", invocations.remove("CHALLENGE"), source.isChallengeInvoked);
+			assertEquals(message + ": login", invocations.remove("LOGIN"), AuthenticateStateLogin.isLoggedIn);
+			assertEquals(message + ": logout", invocations.remove("LOGOUT"), source.isLogoutInvoked);
+			assertEquals(message + ": invalid state", 0, invocations.size());
+		};
+
+		// Attempt login without credentials
+		setup.accept("RATIFY");
+		this.server.send(MockHttpServer.mockRequest("/login")).assertResponse(HttpStatus.UNAUTHORIZED.getStatusCode(),
+				"");
+		assertState.accept("No credentials", new String[] { "RATIFY", "CHALLENGE" });
+
+		// Attempt login with invalid credentials
+		setup.accept("AUTHENTICATE");
+		this.server.send(MockHttpServer.mockRequest("/login").header("Authorization", "Mock daniel:invalid"))
+				.assertResponse(HttpStatus.UNAUTHORIZED.getStatusCode(), "");
+		assertState.accept("Invalid credentials", new String[] { "RATIFY", "AUTHENTICATE", "CHALLENGE" });
+
+		// Attempt login
+		setup.accept("AUTHENTICATE");
+		MockHttpResponse response = this.server
+				.send(MockHttpServer.mockRequest("/login").header("Authorization", "Mock daniel,daniel"));
+		response.assertResponse(200, "Logged In");
+		assertState.accept("Valid credentials", new String[] { "RATIFY", "AUTHENTICATE", "LOGIN" });
+
+		// Attempt logout
+		setup.accept("RATIFY");
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest("/logout");
+		request.cookies(response);
+		this.server.send(request).assertResponse(200, "Logged Out");
+		assertState.accept("Logout", new String[] { "RATIFY", "LOGOUT" });
+	}
+
+	public static class AuthenticateStateLogin {
+		private static boolean isLoggedIn = false;
+
+		public void service(HttpAccessControl accessControl, ServerHttpConnection connection) throws IOException {
+			isLoggedIn = true;
+			connection.getResponse().getEntityWriter().write("Logged In");
+		}
+	}
+
+	public static class AuthenticateStateLogout {
+		public void service(HttpAuthentication<?> authentication, ServerHttpConnection connection) throws IOException {
+			authentication.logout((context) -> {
+			});
+			connection.getResponse().getEntityWriter().write("Logged Out");
+		}
+	}
+
+	@TestSource
+	public static class MockAuthentiationStateHttpSecuritySource extends MockChallengeHttpSecuritySource {
+
+		private static final String ATTRIBUTE_NAME = "state";
+
+		private static final String QUALIFIED_ATTRIBUTE_NAME = HttpSecurity.class.getName() + ".mock.state";
+
+		private boolean isRatifyInvoked = false;
+
+		private boolean isAuthenticateInvoked = false;
+
+		private String previousChallengeInnvocation = null;
+
+		private boolean isChallengeInvoked = false;
+
+		private boolean isLogoutInvoked = false;
+
+		private void setup(String previousChallengeInnvocation) {
+			this.isRatifyInvoked = false;
+			this.isAuthenticateInvoked = false;
+			this.previousChallengeInnvocation = previousChallengeInnvocation;
+			this.isChallengeInvoked = false;
+			this.isLogoutInvoked = false;
+		}
+
+		private String getStateAttributeName(HttpSecurityActionContext context) {
+			String stateName = context.getQualifiedAttributeName(ATTRIBUTE_NAME);
+			assertEquals("Incorrect qualified name", QUALIFIED_ATTRIBUTE_NAME, stateName);
+			return stateName;
+		}
+
+		@Override
+		public boolean ratify(Void credentials, RatifyContext<MockAccessControl> context) {
+			String stateName = this.getStateAttributeName(context);
+			assertNull("Should not have state for ratify", context.getRequestState().getAttribute(stateName));
+			context.getRequestState().setAttribute(stateName, "RATIFY");
+			this.isRatifyInvoked = true;
+			return super.ratify(credentials, context);
+		}
+
+		@Override
+		public void authenticate(Void credentials, AuthenticateContext<MockAccessControl, None> context)
+				throws HttpException {
+			String stateName = this.getStateAttributeName(context);
+			assertEquals("Incorrect state for authenticate", "RATIFY",
+					context.getRequestState().getAttribute(stateName));
+			context.getRequestState().setAttribute(stateName, "AUTHENTICATE");
+			this.isAuthenticateInvoked = true;
+			super.authenticate(credentials, context);
+		}
+
+		@Override
+		public void challenge(ChallengeContext<None, None> context) throws HttpException {
+			String stateName = this.getStateAttributeName(context);
+			assertEquals("Incorrect state for challenge", this.previousChallengeInnvocation,
+					context.getRequestState().getAttribute(stateName));
+			this.isChallengeInvoked = true;
+			super.challenge(context);
+		}
+
+		@Override
+		public void logout(LogoutContext<None> context) throws HttpException {
+			String stateName = this.getStateAttributeName(context);
+			assertEquals("Incorrect state for logout", "RATIFY", context.getRequestState().getAttribute(stateName));
+			this.isLogoutInvoked = true;
+			super.logout(context);
 		}
 	}
 
