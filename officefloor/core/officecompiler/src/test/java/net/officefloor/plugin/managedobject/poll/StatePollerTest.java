@@ -22,6 +22,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.plugin.managedobject.poll.StatePoller.Builder;
+import net.officefloor.plugin.managedobject.poll.StatePoller.Poller;
 
 /**
  * Tests the {@link StatePoller}.
@@ -316,6 +317,38 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 		process.managedObject.pollContext.setNextState("DIFFERENT DEFAULT POLL INTERVAL", -1, null);
 		long thirtyMinutes = 30 * 60 * 1000;
 		this.assertLogs("Different efault poll interval", "Next poll in (default) " + thirtyMinutes + " milliseconds");
+	}
+
+	/**
+	 * Ensure can use custom {@link Poller}.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void testCustomPoller() {
+
+		// Create with custom poller
+		Builder builder = StatePoller.builder(String.class, (delay, context, callback) -> {
+			if (delay == 0) {
+				// Start up
+				this.registerStartupProcess(Flows.DO_FLOW, new MockParameter(context), new MockManagedObject(context),
+						callback);
+			} else {
+				// Delayed for next poll
+				this.invokeProcess(Flows.DO_FLOW, new MockParameter(context), new MockManagedObject(context), delay,
+						callback);
+			}
+		}).logger(this.logger);
+
+		// Ensure can not set parameter factory (as custom poller)
+		assertIllegalArgument("Custom Poller used so may not configure parameter factory",
+				() -> builder.parameter((context) -> null));
+
+		// Ensure can continue to poll
+		this.poller = (StatePoller) builder.build();
+		InvokedProcess process = this.invokedProcesses.remove();
+		assertEquals("Should be start up process", 0, process.parameter.id);
+		assertEquals("Should be immediate start", 0, process.delay);
+		process.parameter.pollContext.setNextState("STATE", -1, null);
+		process = this.nextInvokedProcess(1, defaultMilliseconds);
 	}
 
 	/**

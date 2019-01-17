@@ -8,12 +8,12 @@ import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -60,7 +60,7 @@ public class StatePoller<S, F extends Enum<F>> {
 		if (flowKey == null) {
 			throw new IllegalArgumentException("Must provide flow key");
 		}
-		return new Builder<S, F>(stateType, flowKey, -1, executeContext, managedObjectFactory);
+		return new Builder<S, F>(stateType, flowKey, -1, executeContext, managedObjectFactory, null);
 	}
 
 	/**
@@ -80,7 +80,39 @@ public class StatePoller<S, F extends Enum<F>> {
 		if (flowIndex < 0) {
 			throw new IllegalArgumentException("Must provide valid flow index (provided " + flowIndex + ")");
 		}
-		return new Builder<S, Indexed>(stateType, null, flowIndex, executeContext, managedObjectFactory);
+		return new Builder<S, Indexed>(stateType, null, flowIndex, executeContext, managedObjectFactory, null);
+	}
+
+	/**
+	 * <p>
+	 * Creates a {@link Builder} for custom {@link Poller}.
+	 * <p>
+	 * This allows for higher level types that rely on but do not expose the
+	 * {@link ManagedObjectSource} to use this {@link StatePoller}.
+	 * 
+	 * @param stateType State type.
+	 * @param poller    {@link Poller}.
+	 * @return {@link Builder}.
+	 */
+	public static <S> Builder<S, None> builder(Class<S> stateType, Poller<S> poller) {
+		return new Builder<S, None>(stateType, null, -1, null, null, poller);
+	}
+
+	/**
+	 * Custom poller.
+	 */
+	public static interface Poller<S> {
+
+		/**
+		 * Invoked to setup the next poll.
+		 * 
+		 * @param delay    Delay for poll. Will be <code>0</code> for start up (first)
+		 *                 poll for state.
+		 * @param context  {@link StatePollContext}.
+		 * @param callback {@link FlowCallback} to invoke on completion of the custom
+		 *                 poll.
+		 */
+		void nextPoll(long delay, StatePollContext<S> context, FlowCallback callback);
 	}
 
 	/**
@@ -114,6 +146,11 @@ public class StatePoller<S, F extends Enum<F>> {
 		private final Function<StatePollContext<S>, ManagedObject> managedObjectFactory;
 
 		/**
+		 * Custom {@link Poller}.
+		 */
+		private final Poller<S> customPoller;
+
+		/**
 		 * Default poll interval.
 		 */
 		private long defaultPollInterval = TimeUnit.HOURS.toMillis(1);
@@ -142,23 +179,29 @@ public class StatePoller<S, F extends Enum<F>> {
 		 * @param flowIndex            {@link Flow} index.
 		 * @param executeContext       {@link ManagedObjectExecuteContext}.
 		 * @param managedObjectFactory Factory to create the {@link ManagedObject}.
+		 * @param customPoller         Custom {@link Poller}.
 		 */
 		private Builder(Class<S> stateType, F flowKey, int flowIndex, ManagedObjectExecuteContext<F> executeContext,
-				Function<StatePollContext<S>, ManagedObject> managedObjectFactory) {
+				Function<StatePollContext<S>, ManagedObject> managedObjectFactory, Poller<S> customPoller) {
 			if (stateType == null) {
 				throw new IllegalArgumentException("Must provide state type");
 			}
-			if (executeContext == null) {
-				throw new IllegalArgumentException("Must provide " + ManagedObjectExecuteContext.class.getSimpleName());
-			}
-			if (managedObjectFactory == null) {
-				throw new IllegalArgumentException("Must provide " + ManagedObject.class.getSimpleName() + " factory");
+			if (customPoller == null) {
+				if (executeContext == null) {
+					throw new IllegalArgumentException(
+							"Must provide " + ManagedObjectExecuteContext.class.getSimpleName());
+				}
+				if (managedObjectFactory == null) {
+					throw new IllegalArgumentException(
+							"Must provide " + ManagedObject.class.getSimpleName() + " factory");
+				}
 			}
 			this.stateType = stateType;
 			this.flowKey = flowKey;
 			this.flowIndex = flowIndex;
 			this.executeContext = executeContext;
 			this.managedObjectFactory = managedObjectFactory;
+			this.customPoller = customPoller;
 
 			// Default logging
 			this.logger(null);
@@ -216,6 +259,10 @@ public class StatePoller<S, F extends Enum<F>> {
 		 * @return <code>this</code>.
 		 */
 		public Builder<S, F> parameter(Function<StatePollContext<S>, Object> parameterFactory) {
+			if (this.customPoller != null) {
+				throw new IllegalArgumentException(
+						"Custom " + Poller.class.getSimpleName() + " used so may not configure parameter factory");
+			}
 			this.parameterFactory = parameterFactory;
 			return this;
 		}
@@ -226,8 +273,50 @@ public class StatePoller<S, F extends Enum<F>> {
 		 * @return {@link StatePoller}.
 		 */
 		public StatePoller<S, F> build() {
-			return new StatePoller<>(this.stateType, this.flowKey, this.flowIndex, this.parameterFactory,
-					this.managedObjectFactory, this.executeContext, this.successLogLevel, this.logger,
+
+			// Obtain the poller
+			Poller<S> poller = this.customPoller;
+			if (poller == null) {
+
+				// Ensure have parameter factory
+				final Function<StatePollContext<S>, Object> parameterFactory = (this.parameterFactory != null)
+						? this.parameterFactory
+						: (context) -> null;
+
+				// No custom poller, so configure to flow key/index
+				if (this.flowKey != null) {
+
+					// Flow key poller
+					poller = (delay, context, callback) -> {
+						Object parameter = parameterFactory.apply(context);
+						ManagedObject managedObject = this.managedObjectFactory.apply(context);
+						if (delay == 0) {
+							this.executeContext.registerStartupProcess(this.flowKey, parameter, managedObject,
+									callback);
+						} else {
+							this.executeContext.invokeProcess(this.flowKey, parameter, managedObject, delay, callback);
+						}
+					};
+
+				} else {
+
+					// Flow index poller
+					poller = (delay, context, callback) -> {
+						Object parameter = parameterFactory.apply(context);
+						ManagedObject managedObject = this.managedObjectFactory.apply(context);
+						if (delay == 0) {
+							this.executeContext.registerStartupProcess(this.flowIndex, parameter, managedObject,
+									callback);
+						} else {
+							this.executeContext.invokeProcess(this.flowIndex, parameter, managedObject, delay,
+									callback);
+						}
+					};
+				}
+			}
+
+			// Create and return the poller
+			return new StatePoller<>(this.stateType, poller, this.successLogLevel, this.logger,
 					this.defaultPollInterval);
 		}
 	}
@@ -280,53 +369,21 @@ public class StatePoller<S, F extends Enum<F>> {
 	/**
 	 * Instantiate.
 	 *
-	 * @param stateType            State type.
-	 * @param flowKey              {@link Flow} key.
-	 * @param flowIndex            {@link Flow} index.
-	 * @param parameterFactory     {@link Flow} parameter factory.
-	 * @param managedObjectFactory {@link ManagedObject} factory.
-	 * @param executeContext       {@link ManagedObjectExecuteContext}.
-	 * @param su
-	 * @param logger               {@link Logger}.
+	 * @param stateType           State type.
+	 * @param poller              {@link Poller}.
+	 * @param successLogLevel     Success log {@link Level}.
+	 * @param logger              {@link Logger}.
+	 * @param defaultPollInterval Default poll interval in milliseconds.
 	 */
-	private StatePoller(Class<S> stateType, F flowKey, int flowIndex,
-			Function<StatePollContext<S>, Object> parameterFactory,
-			Function<StatePollContext<S>, ManagedObject> managedObjectFactory,
-			ManagedObjectExecuteContext<F> executeContext, Level successLogLevel, Logger logger,
+	private StatePoller(Class<S> stateType, Poller<S> poller, Level successLogLevel, Logger logger,
 			long defaultPollInterval) {
 		this.logger = logger;
 		this.stateType = stateType;
 		this.defaultPollInterval = defaultPollInterval;
 
-		// Default the parameter factory
-		final Function<StatePollContext<S>, Object> finalParameterFactory = (parameterFactory != null)
-				? parameterFactory
-				: (context) -> null;
-
-		// Invoke the start up process
+		// Invoke the start up poll
 		StatePollContextImpl startupContext = new StatePollContextImpl();
-		Object startupParameter = finalParameterFactory.apply(startupContext);
-		ManagedObject startupManagedObject = managedObjectFactory.apply(startupContext);
-		Consumer<Long> poller;
-		if (flowKey != null) {
-			// Configure for flow key
-			executeContext.registerStartupProcess(flowKey, startupParameter, startupManagedObject, startupContext);
-			poller = (delay) -> {
-				StatePollContextImpl pollContext = new StatePollContextImpl();
-				Object parameter = finalParameterFactory.apply(pollContext);
-				ManagedObject managedObject = managedObjectFactory.apply(pollContext);
-				executeContext.invokeProcess(flowKey, parameter, managedObject, delay, pollContext);
-			};
-		} else {
-			// Configure for flow index
-			executeContext.registerStartupProcess(flowIndex, startupParameter, startupManagedObject, startupContext);
-			poller = (delay) -> {
-				StatePollContextImpl pollContext = new StatePollContextImpl();
-				Object parameter = finalParameterFactory.apply(pollContext);
-				ManagedObject managedObject = managedObjectFactory.apply(pollContext);
-				executeContext.invokeProcess(flowIndex, parameter, managedObject, delay, pollContext);
-			};
-		}
+		poller.nextPoll(0, startupContext, startupContext);
 
 		// Create the date time formatter
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneId.systemDefault());
@@ -350,8 +407,9 @@ public class StatePoller<S, F extends Enum<F>> {
 				boolean isFailure = false;
 				try {
 
-					// Run next poll
-					poller.accept(delay);
+					// Setup next poll
+					StatePollContextImpl pollContext = new StatePollContextImpl();
+					poller.nextPoll(delay, pollContext, pollContext);
 
 				} catch (Throwable ex) {
 					// Severe issue as polling now stopped
