@@ -7,6 +7,7 @@ import java.security.KeyPair;
 
 import org.junit.Test;
 
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -38,7 +39,8 @@ public class JwtTest {
 		System.out.println("JWS: " + jws);
 
 		// Secure the JWT
-		String subject = Jwts.parser().setSigningKey(keyPair.getPublic()).parseClaimsJws(jws).getBody().getSubject();
+		JwtParser parser = Jwts.parser().setSigningKey(keyPair.getPublic());
+		String subject = parser.parseClaimsJws(jws).getBody().getSubject();
 		assertEquals("Incorrect subject", "Daniel", subject);
 	}
 

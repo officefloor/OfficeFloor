@@ -63,7 +63,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can accept a connection.
 	 */
-	public void testAcceptConnection() throws IOException, InterruptedException {
+	public void testAcceptConnection() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket
@@ -129,7 +129,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure can receive request on connection.
 	 */
-	public void testReceiveRequest() throws IOException, InterruptedException {
+	public void testReceiveRequest() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		final Object REQUEST = "TEST";
@@ -161,7 +161,7 @@ public abstract class AbstractSocketManagerTestCase extends AbstractSocketManage
 	/**
 	 * Ensure error if invoke request on another {@link Thread}.
 	 */
-	public void testIssueIfReceiveRequestOnAnotherThread() throws IOException, InterruptedException {
+	public void testIssueIfReceiveRequestOnAnotherThread() throws IOException {
 		this.tester = new SocketManagerTester(1);
 
 		// Bind to server socket

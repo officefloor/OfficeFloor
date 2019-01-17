@@ -250,7 +250,7 @@ public class MockHttpServerStressTest extends OfficeFrameTestCase {
 	 * @param prefix       Prefix for results.
 	 * @param requestCount Number of requests.
 	 */
-	private void doPipelineRun(String prefix, int requestCount) throws InterruptedException {
+	private void doPipelineRun(String prefix, int requestCount) {
 
 		// Create the request
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest();
