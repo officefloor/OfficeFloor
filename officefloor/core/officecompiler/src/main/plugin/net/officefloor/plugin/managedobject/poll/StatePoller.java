@@ -151,6 +151,11 @@ public class StatePoller<S, F extends Enum<F>> {
 		private final Poller<S> customPoller;
 
 		/**
+		 * Identifier.
+		 */
+		private String identifier;
+
+		/**
 		 * Default poll interval.
 		 */
 		private long defaultPollInterval = TimeUnit.HOURS.toMillis(1);
@@ -268,6 +273,18 @@ public class StatePoller<S, F extends Enum<F>> {
 		}
 
 		/**
+		 * Allows providing an identifier in the log message to identify the
+		 * {@link StatePoller}.
+		 * 
+		 * @param identifier Identifier.
+		 * @return <code>this</code>.
+		 */
+		public Builder<S, F> identifier(String identifier) {
+			this.identifier = identifier;
+			return this;
+		}
+
+		/**
 		 * Builds the {@link StatePoller}.
 		 * 
 		 * @return {@link StatePoller}.
@@ -315,8 +332,11 @@ public class StatePoller<S, F extends Enum<F>> {
 				}
 			}
 
+			// Obtain the identifier text
+			String identifierText = this.identifier != null ? " for " + this.identifier : "";
+
 			// Create and return the poller
-			return new StatePoller<>(this.stateType, poller, this.successLogLevel, this.logger,
+			return new StatePoller<>(this.stateType, identifierText, poller, this.successLogLevel, this.logger,
 					this.defaultPollInterval);
 		}
 	}
@@ -330,6 +350,11 @@ public class StatePoller<S, F extends Enum<F>> {
 	 * State type.
 	 */
 	private final Class<S> stateType;
+
+	/**
+	 * Identifier test.
+	 */
+	private final String identifierText;
 
 	/**
 	 * Default poll interval in milliseconds.
@@ -370,15 +395,17 @@ public class StatePoller<S, F extends Enum<F>> {
 	 * Instantiate.
 	 *
 	 * @param stateType           State type.
+	 * @param identifierText      Identifier text.
 	 * @param poller              {@link Poller}.
 	 * @param successLogLevel     Success log {@link Level}.
 	 * @param logger              {@link Logger}.
 	 * @param defaultPollInterval Default poll interval in milliseconds.
 	 */
-	private StatePoller(Class<S> stateType, Poller<S> poller, Level successLogLevel, Logger logger,
-			long defaultPollInterval) {
+	private StatePoller(Class<S> stateType, String identifierText, Poller<S> poller, Level successLogLevel,
+			Logger logger, long defaultPollInterval) {
 		this.logger = logger;
 		this.stateType = stateType;
+		this.identifierText = identifierText;
 		this.defaultPollInterval = defaultPollInterval;
 
 		// Invoke the start up poll
@@ -414,15 +441,16 @@ public class StatePoller<S, F extends Enum<F>> {
 				} catch (Throwable ex) {
 					// Severe issue as polling now stopped
 					isFailure = true;
-					this.logger.log(Level.SEVERE, "Polling has failed.  Restart is required to re-establish polling.",
-							ex);
+					this.logger.log(Level.SEVERE, "Polling has failed" + this.identifierText
+							+ ".  Restart is required to re-establish polling.", ex);
 				} finally {
 					// Log time of next poll (if appropriate and no failure)
 					if (!isFailure && this.logger.isLoggable(successLogLevel)) {
 						ZonedDateTime nextPollTime = Instant.ofEpochMilli(System.currentTimeMillis() + delay)
 								.atZone(ZoneId.systemDefault());
-						this.logger.log(successLogLevel, "Next poll in " + (isDefault ? "(default) " : "") + delay
-								+ " milliseconds (approx " + dateTimeFormatter.format(nextPollTime) + ")");
+						this.logger.log(successLogLevel,
+								"Next poll" + this.identifierText + " in " + (isDefault ? "(default) " : "") + delay
+										+ " milliseconds (approx " + dateTimeFormatter.format(nextPollTime) + ")");
 					}
 				}
 			}
@@ -554,7 +582,7 @@ public class StatePoller<S, F extends Enum<F>> {
 			// Load the failure
 			try {
 				// Log failure
-				StatePoller.this.logger.log(Level.WARNING, "Poll failure", cause);
+				StatePoller.this.logger.log(Level.WARNING, "Poll failure" + StatePoller.this.identifierText, cause);
 
 			} finally {
 				// Poll again
@@ -580,9 +608,11 @@ public class StatePoller<S, F extends Enum<F>> {
 				// Provide log of possible error
 				if (StatePoller.this.logger.isLoggable(Level.WARNING)) {
 					if (escalation != null) {
-						StatePoller.this.logger.log(Level.WARNING, "Poll process failed", escalation);
+						StatePoller.this.logger.log(Level.WARNING,
+								"Poll process failed" + StatePoller.this.identifierText, escalation);
 					} else {
-						StatePoller.this.logger.log(Level.WARNING, "Poll process completed without providing state");
+						StatePoller.this.logger.log(Level.WARNING, "Poll process completed"
+								+ StatePoller.this.identifierText + " without providing state");
 					}
 				}
 

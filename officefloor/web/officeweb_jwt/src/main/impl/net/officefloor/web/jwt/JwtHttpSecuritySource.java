@@ -1,12 +1,10 @@
 package net.officefloor.web.jwt;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.plugin.managedobject.poll.StatePoller;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
@@ -55,14 +53,10 @@ public class JwtHttpSecuritySource<C> extends
 	private static final String CHALLENGE_ATTRIBUTE_NAME = "challenge.reason";
 
 	/**
-	 * {@link KeyHolder} to wait on for initial load.
+	 * {@link StatePoller} to keep the {@link JwtDecoder} up to date with
+	 * appropriate keys.
 	 */
-	private final CompletableFuture<KeyHolder> initialKeyHolder = new CompletableFuture<>();
-
-	/**
-	 * {@link KeyHolder}.
-	 */
-	private final AtomicReference<KeyHolder> keyHolder = new AtomicReference<>();
+	private StatePoller<JwtDecoder, None> jwtDecoder;
 
 	/*
 	 * ==================== HttpSecuritySource ============================
@@ -97,15 +91,14 @@ public class JwtHttpSecuritySource<C> extends
 	@Override
 	public void start(HttpSecurityExecuteContext<Flows> context) throws Exception {
 
-		// Create poller for JWT keys
-		
-		
-		// Load the decode keys
-		context.registerStartupProcess(Flows.RETRIEVE_KEYS, new JwtDecodeCollectorImpl(), (error) -> {
-			if (error != null) {
-				throw error;
+		// Create poller for JWT decoder
+		this.jwtDecoder = StatePoller.builder(JwtDecoder.class, (delay, pollContext, callback) -> {
+			if (delay == 0) {
+				context.registerStartupProcess(Flows.RETRIEVE_KEYS, new JwtDecodeCollectorImpl(), callback);
+			} else {
+				context.invokeProcess(Flows.RETRIEVE_KEYS, new JwtDecodeCollectorImpl(), delay, callback);
 			}
-		});
+		}).identifier("JWT decode keys").build();
 	}
 
 	/*
@@ -137,23 +130,14 @@ public class JwtHttpSecuritySource<C> extends
 	public void authenticate(Void credentials, AuthenticateContext<JwtHttpAccessControl<C>, None> context)
 			throws HttpException {
 
-		// Obtain the initial keys
-		KeyHolder holder = this.keyHolder.get();
-		if (holder == null) {
-
-			// Block some time until initial keys are available
-			try {
-				holder = this.initialKeyHolder.get(1000, TimeUnit.MICROSECONDS);
-
-			} catch (InterruptedException | TimeoutException ex) {
-				// Indicate took too long for keys
-				context.accessControlChange(null, ex);
-
-			} catch (ExecutionException ex) {
-				// Obtain the cause and provide error
-				Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
-				context.accessControlChange(null, cause);
-			}
+		// Obtain the JWT decoder (allow time to initialise keys)
+		JwtDecoder decoder;
+		try {
+			decoder = this.jwtDecoder.getState(1, TimeUnit.SECONDS);
+		} catch (TimeoutException ex) {
+			context.accessControlChange(null, new HttpException(HttpStatus.SERVICE_UNAVAILABLE,
+					new TimeoutException("Server timed out loading JWT keys")));
+			return; // must obtain decoder
 		}
 
 	}
@@ -192,6 +176,13 @@ public class JwtHttpSecuritySource<C> extends
 	}
 
 	/**
+	 * JWT decoder.
+	 */
+	private static class JwtDecoder {
+
+	}
+
+	/**
 	 * {@link JwtDecodeCollector} implementation.
 	 */
 	private class JwtDecodeCollectorImpl implements JwtDecodeCollector {
@@ -204,8 +195,6 @@ public class JwtHttpSecuritySource<C> extends
 
 		@Override
 		public void setKeys(long timeToNextCheck, JwtDecodeKey... keys) {
-
-			
 
 		}
 

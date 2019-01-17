@@ -352,6 +352,20 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	}
 
 	/**
+	 * Ensure can customise poll logs.
+	 */
+	public void testCustomMessage() {
+
+		// Create the poller
+		this.poller = StatePoller
+				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.identifier("IDENTIFIER").logger(this.logger).build();
+		InvokedProcess process = this.invokedProcesses.remove();
+		process.managedObject.pollContext.setNextState("STATE", -1, null);
+		this.assertLogs("Name", "Next poll for IDENTIFIER in (default) " + defaultMilliseconds + " milliseconds");
+	}
+
+	/**
 	 * {@link Logger}.
 	 */
 	private Logger logger;
