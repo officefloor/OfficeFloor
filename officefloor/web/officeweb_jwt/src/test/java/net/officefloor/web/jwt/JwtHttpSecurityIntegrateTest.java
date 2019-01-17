@@ -3,6 +3,9 @@ package net.officefloor.web.jwt;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.util.Base64;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,12 +13,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -25,6 +30,7 @@ import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
+import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.web.jwt.JwtHttpSecuritySource.Flows;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
@@ -37,6 +43,7 @@ import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
  * Integrate tests the {@link JwtHttpSecuritySource}.
@@ -64,7 +71,7 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 * Default {@link JwtDecodeCollector} handler.
 	 */
 	private static final Consumer<JwtDecodeCollector> DEFAULT_JWT_DECODE_COLLECTOR = (collector) -> {
-		collector.setKeys(10_000, new JwtDecodeKey(keyPair.getPublic()));
+		collector.setKeys(new JwtDecodeKey(keyPair.getPublic()));
 	};
 
 	/**
@@ -82,6 +89,12 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;
+
+	@Override
+	protected void setUp() throws Exception {
+		// Reset default JWT decode collector
+		jwtDecodeCollectorHandler = DEFAULT_JWT_DECODE_COLLECTOR;
+	}
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -106,6 +119,18 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure timeout on no {@link JwtDecodeKey} instances.
+	 */
+	public void testTimeoutOnNoKeys() throws Exception {
+		jwtDecodeCollectorHandler = (collector) -> {
+		};
+		String errorEntity = JacksonHttpObjectResponderFactory
+				.getEntity(new HttpException(new TimeoutException("Server timed out loading JWT keys")));
+		this.doJwtTest("Bearer NO.KEYS.AVAILBLE", HttpStatus.SERVICE_UNAVAILABLE, errorEntity,
+				JwtHttpSecuritySource.PROEPRTY_STARTUP_TIMEOUT, "0");
+	}
+
+	/**
 	 * Ensure handle invalid JWT.
 	 */
 	public void testInvalidJwt() throws Exception {
@@ -113,23 +138,62 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure handle invalid JWT as not before in the future.
+	 */
+	public void testNotBeforeJwt() throws Exception {
+		long nbf = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
+		String token = Jwts.builder().setNotBefore(new Date(nbf)).signWith(keyPair.getPrivate()).compact();
+		this.doJwtTest("Bearer " + token, HttpStatus.UNAUTHORIZED, "INVALID JWT");
+	}
+
+	/**
+	 * Ensure handle expired JWT.
+	 */
+	public void testExpiredJwt() throws Exception {
+		long exp = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
+		String token = Jwts.builder().setExpiration(new Date(exp)).signWith(keyPair.getPrivate()).compact();
+		this.doJwtTest("Bearer " + token, HttpStatus.UNAUTHORIZED, "EXPIRED JWT");
+	}
+
+	/**
 	 * Ensure can parse valid JWT.
 	 */
 	public void testValidJwt() throws Exception {
-		String token = Jwts.builder().setSubject("Daniel").signWith(keyPair.getPrivate()).compact();
-		String response = mapper.writeValueAsString(new MockClaims("Daniel"));
+		MockClaims claims = new MockClaims("Daniel");
+		String token = Jwts.builder().setSubject(claims.getSub()).setExpiration(new Date(claims.getExp()))
+				.signWith(keyPair.getPrivate()).compact();
+		String response = mapper.writeValueAsString(claims);
 		this.doJwtTest("Bearer " + token, HttpStatus.OK, response);
 	}
 
-	public static class MockClaims {
-		private String subject;
+	private static class MockClaims {
 
-		public MockClaims(String subject) {
-			this.subject = subject;
+		private final String sub;
+
+		private final Long nbf;
+
+		private final long exp;
+
+		private MockClaims(String sub) {
+			this(sub, null, System.currentTimeMillis() + (20 * 60 * 1000));
 		}
 
-		public String getSubject() {
-			return this.subject;
+		private MockClaims(String sub, Long nbf, long exp) {
+			this.sub = sub;
+			this.nbf = nbf;
+			this.exp = exp;
+		}
+
+		public String getSub() {
+			return this.sub;
+		}
+
+		public Long getNbf() {
+			return this.nbf;
+		}
+
+		public long getExp() {
+			return this.exp;
 		}
 	}
 
@@ -141,12 +205,14 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 *                                 header.
 	 * @param expectedStatus           Expected {@link HttpStatus}.
 	 * @param expectedEntity           Expected entity content.
+	 * @param httpSecuirtyProperties   {@link HttpSecuritySource} {@link Property}
+	 *                                 name/value pairs.
 	 */
-	private void doJwtTest(String authorizationHeaderValue, HttpStatus expectedStatus, String expectedEntity)
-			throws Exception {
+	private void doJwtTest(String authorizationHeaderValue, HttpStatus expectedStatus, String expectedEntity,
+			String... httpSecurityProperties) throws Exception {
 
 		// Start the server
-		this.loadServer(null);
+		this.loadServer(null, httpSecurityProperties);
 
 		// Build the request
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest(ECHO_CLAIMS_PATH);
@@ -199,9 +265,11 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link MockHttpServer}.
 	 * 
-	 * @param loader {@link ServerConfigurer}.
+	 * @param loader                 {@link ServerConfigurer}.
+	 * @param httpSecuirtyProperties {@link HttpSecuritySource} {@link Property}
+	 *                               name/value pairs.
 	 */
-	private void loadServer(ServerConfigurer loader) throws Exception {
+	private void loadServer(ServerConfigurer loader, String... httpSecuirtyProperties) throws Exception {
 
 		// Compile the server
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
@@ -213,6 +281,11 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
 					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
 			HttpSecurityBuilder jwt = security.addHttpSecurity("JWT", JwtHttpSecuritySource.class.getName());
+			for (int i = 0; i < httpSecuirtyProperties.length; i += 2) {
+				String name = httpSecuirtyProperties[i];
+				String value = httpSecuirtyProperties[i + 1];
+				jwt.addProperty(name, value);
+			}
 			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS.name()), context
 					.addSection("COLLECTOR", JwtDecodeKeyCollectorServicer.class).getOfficeSectionInput("service"));
 
@@ -220,6 +293,10 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 			OfficeSection challengeSection = context.addSection("NO_JWT", JwtChallengeSection.class);
 			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.NO_JWT.name()),
 					challengeSection.getOfficeSectionInput("noJwt"));
+			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.INVALID_JWT.name()),
+					challengeSection.getOfficeSectionInput("invalidJwt"));
+			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.EXPIRED_JWT.name()),
+					challengeSection.getOfficeSectionInput("expiredJwt"));
 
 			// Load the server configuration
 			if (loader != null) {
@@ -244,6 +321,14 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	public static class JwtChallengeSection {
 		public void noJwt(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("NO JWT");
+		}
+
+		public void invalidJwt(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("INVALID JWT");
+		}
+
+		public void expiredJwt(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("EXPIRED JWT");
 		}
 	}
 
