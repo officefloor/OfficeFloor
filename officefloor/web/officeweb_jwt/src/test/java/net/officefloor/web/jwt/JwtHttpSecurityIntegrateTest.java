@@ -2,6 +2,7 @@ package net.officefloor.web.jwt;
 
 import java.io.IOException;
 import java.security.KeyPair;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +17,6 @@ import io.jsonwebtoken.security.Keys;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -26,23 +26,17 @@ import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
-import net.officefloor.web.jwt.JwtHttpSecuritySource.Flows;
-import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
-import net.officefloor.web.security.HttpAccessControl;
-import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.jwt.spi.role.JwtRoleCollector;
+import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
-import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
-import net.officefloor.web.spi.security.AuthenticationContext;
-import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**
@@ -61,6 +55,11 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 * Path for server to echo the claims back to client.
 	 */
 	private static final String ECHO_CLAIMS_PATH = "/claims";
+
+	/**
+	 * Path for server to check role.
+	 */
+	private static final String ROLE_PATH = "/role";
 
 	/**
 	 * {@link ObjectMapper}.
@@ -160,25 +159,126 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 */
 	public void testValidJwt() throws Exception {
 		MockClaims claims = new MockClaims("Daniel");
-		String token = Jwts.builder().setSubject(claims.getSub()).setExpiration(new Date(claims.getExp()))
+		String token = Jwts.builder().setSubject(claims.getSub()).setExpiration(getDate(claims.getExp()))
 				.signWith(keyPair.getPrivate()).compact();
 		String response = mapper.writeValueAsString(claims);
 		this.doJwtTest("Bearer " + token, HttpStatus.OK, response);
 	}
 
-	private static class MockClaims {
+	/**
+	 * Ensure valid <code>nbf</code> with clock skew.
+	 */
+	public void testValidNotBeforeWithClockSkew() throws Exception {
+		fail("TODO implement");
+	}
 
-		private final String sub;
+	/**
+	 * Ensure valid <code>exp</code> with clock skew.
+	 */
+	public void testValidExpiryWithClockSkew() throws Exception {
+		fail("TODO implement");
+	}
 
-		private final Long nbf;
+	/**
+	 * Ensure invalid JWT as {@link JwtDecodeKey} is old.
+	 */
+	public void testInvalidDueToOldKey() throws Exception {
+		fail("TODO implement");
+	}
 
-		private final long exp;
+	/**
+	 * Ensure invalid JWT as {@link JwtDecodeKey} is too new.
+	 */
+	public void testInvalidDueToNewKey() throws Exception {
+		fail("TODO implement");
+	}
 
-		private MockClaims(String sub) {
-			this(sub, null, System.currentTimeMillis() + (20 * 60 * 1000));
+	/**
+	 * Ensure valid JWT as {@link JwtDecodeKey} is old but within clock skew.
+	 */
+	public void testValidDueToOldKeyButWithinClockSkew() throws Exception {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure invalid JWT as {@link JwtDecodeKey} is too new but within clock skew.
+	 */
+	public void testValidDueToNewKeyButWithinClockSkew() throws Exception {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure access role enforced.
+	 */
+	public void testRole() throws Exception {
+
+		// Start the server
+		this.loadServer(null, JwtHttpSecuritySource.PROPERTY_CLAIMS_CLASS, RoleClaims.class.getName());
+
+		// No JWT so unauthorised
+		this.server.send(MockHttpServer.mockRequest(ROLE_PATH)).assertResponse(HttpStatus.UNAUTHORIZED.getStatusCode(),
+				"NO JWT");
+
+		// JWT for other role
+		String otherToken = Jwts.builder().signWith(keyPair.getPrivate()).claim("role", "other").compact();
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest(ROLE_PATH);
+		request.header("Authorization", "Bearer " + otherToken);
+		this.server.send(request).assertResponse(HttpStatus.FORBIDDEN.getStatusCode(),
+				JacksonHttpObjectResponderFactory.getEntity(new HttpException(HttpStatus.FORBIDDEN)));
+
+		// JWT for role
+		String roleToken = Jwts.builder().signWith(keyPair.getPrivate()).claim("role", "allow").compact();
+		request = MockHttpServer.mockRequest(ROLE_PATH);
+		request.header("Authorization", "Bearer " + roleToken);
+		this.server.send(request).assertResponse(HttpStatus.OK.getStatusCode(), "ROLE");
+	}
+
+	/**
+	 * Role claims.
+	 */
+	public static class RoleClaims {
+
+		private String role;
+
+		public String getRole() {
+			return this.role;
 		}
 
-		private MockClaims(String sub, Long nbf, long exp) {
+		public void setRole(String role) {
+			this.role = role;
+		}
+	}
+
+	/**
+	 * Obtains the {@link Date} from JWT time in seconds from Epoch.
+	 * 
+	 * @param timeInSeconds Time in seconds from Epoch.
+	 * @return {@link Date}.
+	 */
+	private static Date getDate(Long timeInSeconds) {
+		return timeInSeconds == null ? new Date(0) : new Date(timeInSeconds * 1000);
+	}
+
+	/**
+	 * Mock claims {@link Class}.
+	 */
+	public static class MockClaims {
+
+		private String sub;
+
+		private Long nbf;
+
+		private Long exp;
+
+		public MockClaims() {
+		}
+
+		private MockClaims(String sub) {
+			// Time measure in seconds
+			this(sub, null, (System.currentTimeMillis() + (20 * 60 * 1000)) / 1000);
+		}
+
+		private MockClaims(String sub, Long nbf, Long exp) {
 			this.sub = sub;
 			this.nbf = nbf;
 			this.exp = exp;
@@ -188,12 +288,24 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 			return this.sub;
 		}
 
+		public void setSub(String sub) {
+			this.sub = sub;
+		}
+
 		public Long getNbf() {
 			return this.nbf;
 		}
 
-		public long getExp() {
+		public void setNbf(Long nbf) {
+			this.nbf = nbf;
+		}
+
+		public Long getExp() {
 			return this.exp;
+		}
+
+		public void setExp(Long exp) {
+			this.exp = exp;
 		}
 	}
 
@@ -224,39 +336,6 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		this.server.send(request).assertResponse(expectedStatus.getStatusCode(), expectedEntity);
 	}
 
-	/**
-	 * Ensure can create JWT.
-	 */
-	public void testCreateJwt() throws Throwable {
-
-		// Create the key pair
-		KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256);
-
-		// Create the mocks
-		MockServerHttpConnection connection = MockHttpServer.mockConnection();
-
-		// Create and initialise the security
-		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, Flows> security = HttpSecurityLoaderUtil
-				.loadHttpSecurity(JwtHttpSecuritySource.class);
-
-		// Obtain the JWT authentication
-		AuthenticationContext<HttpAccessControl, Void> authenticationContext = HttpSecurityLoaderUtil
-				.createAuthenticationContext(connection, security, (context) -> {
-
-				});
-		HttpAuthentication<Void> authentication = security.createAuthentication(authenticationContext);
-
-		// TODO load the JwtAuthority
-		JwtAuthority<MockClaims> authority = null;
-
-		// Create the JWT
-		String jwt = authority.createJwt(new MockClaims("Daniel"));
-
-		// Validate the JWT is correct
-		String subject = Jwts.parser().setSigningKey(keyPair.getPublic()).parseClaimsJws(jwt).getBody().getSubject();
-		assertEquals("Incorrect subject", "Daniel", subject);
-	}
-
 	@FunctionalInterface
 	private static interface ServerConfigurer {
 		void configure(CompileWebContext context, HttpSecurityBuilder jwt);
@@ -281,13 +360,23 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer.employHttpSecurityArchitect(
 					context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
 			HttpSecurityBuilder jwt = security.addHttpSecurity("JWT", JwtHttpSecuritySource.class.getName());
+			boolean isClaimsClassConfigured = false;
 			for (int i = 0; i < httpSecuirtyProperties.length; i += 2) {
 				String name = httpSecuirtyProperties[i];
 				String value = httpSecuirtyProperties[i + 1];
 				jwt.addProperty(name, value);
+				if (JwtHttpSecuritySource.PROPERTY_CLAIMS_CLASS.equals(name)) {
+					isClaimsClassConfigured = true;
+				}
 			}
-			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS.name()), context
-					.addSection("COLLECTOR", JwtDecodeKeyCollectorServicer.class).getOfficeSectionInput("service"));
+			if (!isClaimsClassConfigured) {
+				jwt.addProperty(JwtHttpSecuritySource.PROPERTY_CLAIMS_CLASS, MockClaims.class.getName());
+			}
+			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS.name()),
+					context.addSection("DECODE_COLLECTOR", JwtDecodeKeyCollectorServicer.class)
+							.getOfficeSectionInput("service"));
+			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_ROLES.name()), context
+					.addSection("ROLE_COLLECTOR", JwtRoleCollectorServicer.class).getOfficeSectionInput("service"));
 
 			// Configure the JWT challenges
 			OfficeSection challengeSection = context.addSection("NO_JWT", JwtChallengeSection.class);
@@ -303,8 +392,9 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 				loader.configure(context, jwt);
 			}
 
-			// Configure echo claims
+			// Configure servicing
 			context.link(false, ECHO_CLAIMS_PATH, EchoClaimsSection.class);
+			context.link(false, ROLE_PATH, RoleSection.class);
 
 			security.informWebArchitect();
 		});
@@ -315,6 +405,13 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		public void service(JwtHttpAccessControl<?> accessControl, ObjectResponse<Object> response) {
 			Object claims = accessControl.getClaims();
 			response.send(claims);
+		}
+	}
+
+	public static class RoleSection {
+		@HttpAccess(ifAllRoles = "allow")
+		public void service(ServerHttpConnection connection) throws Exception {
+			connection.getResponse().getEntityWriter().write("ROLE");
 		}
 	}
 
@@ -335,6 +432,12 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	public static class JwtDecodeKeyCollectorServicer {
 		public void service(@Parameter JwtDecodeCollector collector) {
 			jwtDecodeCollectorHandler.accept(collector);
+		}
+	}
+
+	public static class JwtRoleCollectorServicer {
+		public void service(@Parameter JwtRoleCollector<RoleClaims> collector) {
+			collector.setRoles(Arrays.asList(collector.getClaims().getRole()));
 		}
 	}
 

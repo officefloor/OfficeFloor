@@ -1,9 +1,12 @@
 package net.officefloor.web.jwt;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.Key;
+import java.security.Principal;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -11,12 +14,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
+import io.jsonwebtoken.io.Decoder;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.plugin.managedobject.poll.StatePollContext;
 import net.officefloor.plugin.managedobject.poll.StatePoller;
 import net.officefloor.server.http.HttpException;
@@ -25,7 +28,9 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
+import net.officefloor.web.jwt.spi.role.JwtRoleCollector;
 import net.officefloor.web.security.HttpAuthentication;
+import net.officefloor.web.security.scheme.HttpAccessControlImpl;
 import net.officefloor.web.security.scheme.HttpAuthenticationImpl;
 import net.officefloor.web.security.scheme.HttpAuthenticationScheme;
 import net.officefloor.web.spi.security.AuthenticateContext;
@@ -57,6 +62,12 @@ public class JwtHttpSecuritySource<C> extends
 	public static final String AUTHENTICATION_SCHEME_BASIC = "Bearer";
 
 	/**
+	 * {@link Property} name for the claims {@link Class} to be loaded with claim
+	 * information of JWT.
+	 */
+	public static final String PROPERTY_CLAIMS_CLASS = "claims.class";
+
+	/**
 	 * <p>
 	 * {@link Property} name for the startup timeout in milliseconds.
 	 * <p>
@@ -74,13 +85,18 @@ public class JwtHttpSecuritySource<C> extends
 	 * Flow keys.
 	 */
 	public static enum Flows {
-		RETRIEVE_KEYS, NO_JWT, INVALID_JWT, EXPIRED_JWT
+		RETRIEVE_KEYS, RETRIEVE_ROLES, NO_JWT, INVALID_JWT, EXPIRED_JWT
 	}
 
 	/**
 	 * {@link HttpRequestState} attribute name for the {@link ChallengeReason}.
 	 */
 	private static final String CHALLENGE_ATTRIBUTE_NAME = "challenge.reason";
+
+	/**
+	 * Base64 {@link Decoder}.
+	 */
+	private Decoder<String, byte[]> base64UrlDecoder = (text) -> Base64.getUrlDecoder().decode(text);
 
 	/**
 	 * {@link ObjectMapper}.
@@ -97,11 +113,6 @@ public class JwtHttpSecuritySource<C> extends
 	 */
 	private static final JavaType jwtHeaderJavaType = mapper.constructType(JwtHeader.class);
 
-	/**
-	 * UTF-8 {@link Charset}.
-	 */
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
-
 	static {
 		// Ensure JSON deserialising is valid
 		if (!mapper.canDeserialize(jwtClaimsJavaType)) {
@@ -111,6 +122,16 @@ public class JwtHttpSecuritySource<C> extends
 			throw new IllegalStateException("Unable to deserialize " + JwtHeader.class.getSimpleName());
 		}
 	}
+
+	/**
+	 * Claims {@link Class}.
+	 */
+	private Class<?> claimsClass;
+
+	/**
+	 * Claims {@link Class} {@link JavaType}.
+	 */
+	private JavaType claimsJavaType;
 
 	/**
 	 * Start up timeout.
@@ -129,6 +150,7 @@ public class JwtHttpSecuritySource<C> extends
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty(PROPERTY_CLAIMS_CLASS, "Claims Class");
 	}
 
 	@Override
@@ -138,20 +160,29 @@ public class JwtHttpSecuritySource<C> extends
 			throws Exception {
 		HttpSecuritySourceContext securityContext = context.getHttpSecuritySourceContext();
 
+		// Load the configuration
+		this.claimsClass = securityContext.loadClass(securityContext.getProperty(PROPERTY_CLAIMS_CLASS));
+		this.startupTimeout = Long.parseLong(
+				securityContext.getProperty(PROEPRTY_STARTUP_TIMEOUT, String.valueOf(DEFAULT_STARTUP_TIMEOUT)));
+
+		// Ensure claims class can be deserialised
+		this.claimsJavaType = mapper.constructType(this.claimsClass);
+		if (!mapper.canDeserialize(this.claimsJavaType)) {
+			throw new IOException("Unable to deserialise " + this.claimsClass.getName() + " to load JWT claims");
+		}
+
+		// Load the meta-data
 		context.setAuthenticationClass((Class) HttpAuthentication.class);
 		context.setAccessControlClass((Class) JwtHttpAccessControl.class);
 
-		// Provide flow to retrieve keys
+		// Provide flow to retrieve keys and obtain roles
 		context.addFlow(Flows.RETRIEVE_KEYS, JwtDecodeCollector.class);
+		context.addFlow(Flows.RETRIEVE_ROLES, JwtRoleCollector.class);
 
 		// Provide challenge flows
 		context.addFlow(Flows.NO_JWT, null);
 		context.addFlow(Flows.INVALID_JWT, null);
 		context.addFlow(Flows.EXPIRED_JWT, null);
-
-		// Load the start up timeout
-		this.startupTimeout = Long.parseLong(
-				securityContext.getProperty(PROEPRTY_STARTUP_TIMEOUT, String.valueOf(DEFAULT_STARTUP_TIMEOUT)));
 	}
 
 	@Override
@@ -222,10 +253,15 @@ public class JwtHttpSecuritySource<C> extends
 		// Split out the JWT
 		String[] jwtParts = jwtToken.split("\\.");
 		if (jwtParts.length != 3) {
-			// Must have head, claims and signature
+			// Must have header, claims and signature
 			this.challenge(ChallengeReason.INVALID_JWT, context);
 			return;
 		}
+
+		// Obtain the parts
+		String headerBase64 = jwtParts[0];
+		String claimsBase64 = jwtParts[1];
+		String signatureBase64 = jwtParts[2];
 
 		/*
 		 * Undertake parsing out JWT claims and validating the signature.
@@ -236,11 +272,10 @@ public class JwtHttpSecuritySource<C> extends
 		 */
 
 		// Obtain the claims
-		String claimsRaw = jwtParts[1];
-		byte[] claimsBytes = Base64.getUrlDecoder().decode(claimsRaw);
-		JwtClaims claims;
+		byte[] claimsBytes = base64UrlDecoder.decode(claimsBase64);
+		JwtClaims validateClaims;
 		try {
-			claims = mapper.readValue(claimsBytes, jwtClaimsJavaType);
+			validateClaims = mapper.readValue(claimsBytes, jwtClaimsJavaType);
 		} catch (IOException e) {
 			// Must be able to parse claims
 			this.challenge(ChallengeReason.INVALID_JWT, context);
@@ -250,23 +285,24 @@ public class JwtHttpSecuritySource<C> extends
 		// Obtain the current time (in seconds)
 		long currentTime = System.currentTimeMillis() / 1000;
 
+		// TODO consider clock skew
+
 		// Ensure valid window
-		if ((claims.nbf != null) && (claims.nbf > currentTime)) {
+		if ((validateClaims.nbf != null) && (validateClaims.nbf > currentTime)) {
 			// JWT not yet active
 			this.challenge(ChallengeReason.INVALID_JWT, context);
 			return;
 		}
 
 		// Ensure not expired
-		if ((claims.exp != null) && (claims.exp < currentTime)) {
+		if ((validateClaims.exp != null) && (validateClaims.exp < currentTime)) {
 			// JWT expired
 			this.challenge(ChallengeReason.EXPIRED_JWT, context);
 			return;
 		}
 
 		// Obtain the signature algorithm
-		String headerRaw = jwtParts[0];
-		byte[] headerBytes = Base64.getUrlDecoder().decode(headerRaw);
+		byte[] headerBytes = base64UrlDecoder.decode(headerBase64);
 		JwtHeader header;
 		try {
 			header = mapper.readValue(headerBytes, jwtHeaderJavaType);
@@ -282,19 +318,58 @@ public class JwtHttpSecuritySource<C> extends
 			return;
 		}
 
-		// TODO handle algorithm
-		System.out.println("TODO: find key with algorithm " + header.alg + " from:");
-		for (JwtDecodeKey decodeKey : decoder.getJwtDecodeKeys()) {
-			Key key = decodeKey.getKey();
-			System.out.println("\t" + key.getAlgorithm() + ", " + key.getFormat() + ", " + key.toString());
+		// Obtain the algorithm
+		SignatureAlgorithm algorithm = SignatureAlgorithm.valueOf(header.alg);
+		if ((algorithm == null) || (algorithm == SignatureAlgorithm.NONE)) {
+			this.challenge(ChallengeReason.INVALID_JWT, context);
+			return;
 		}
 
-		// TODO see if implement (or re-use)
-		JwtParser parser = Jwts.parser().setSigningKey(decoder.getJwtDecodeKeys()[0].getKey());
-		Jws<Claims> jws = parser.parseClaimsJws(jwtToken);
+		// Obtain the JWT without signature
+		String jwtWithoutSignature = jwtToken.substring(0,
+				headerBase64.length() + ".".length() + claimsBase64.length());
 
-		// As here successful
-		System.out.println("TODO: valid JWT - " + jws.getBody());
+		// Loop over decode keys to determine if JWT valid
+		boolean isValid = false;
+		JWT_VALID: for (JwtDecodeKey decodeKey : decoder.getJwtDecodeKeys()) {
+
+			// TODO ensure key is still within window
+
+			// Attempt to validate the signature
+			DefaultJwtSignatureValidator validator = new DefaultJwtSignatureValidator(algorithm, decodeKey.getKey(),
+					base64UrlDecoder);
+			if (validator.isValid(jwtWithoutSignature, signatureBase64)) {
+				isValid = true;
+				break JWT_VALID;
+			}
+		}
+		if (!isValid) {
+			this.challenge(ChallengeReason.INVALID_JWT, context);
+			return;
+		}
+
+		// Load the claims object for application
+		C claims;
+		try {
+			claims = mapper.readValue(claimsBytes, this.claimsJavaType);
+		} catch (IOException ex) {
+			// Must be able to parse claims
+			this.challenge(ChallengeReason.INVALID_JWT, context);
+			return;
+		}
+		
+		// Retrieve the roles
+		
+
+		// TODO look up roles for claim
+		Set<String> roles = new HashSet<>();
+
+		// Create the Jwt HttpAccess
+		String authenticationScheme = scheme.getAuthentiationScheme();
+		String principalName = validateClaims.sub;
+		JwtHttpAccessControl<C> accessControl = new JwtHttpAccessControlImpl(authenticationScheme, principalName,
+				claims, roles);
+		context.accessControlChange(accessControl, null);
 	}
 
 	/**
@@ -414,6 +489,123 @@ public class JwtHttpSecuritySource<C> extends
 	}
 
 	/**
+	 * {@link JwtRoleCollector} implementation.
+	 */
+	private class JwtRoleCollectorImpl implements JwtRoleCollector<C>, FlowCallback {
+
+		/**
+		 * Claims.
+		 */
+		private final C claims;
+
+		/**
+		 * Authentication scheme.
+		 */
+		private final String authenticationScheme;
+
+		/**
+		 * {@link Principal} name.
+		 */
+		private final String principalName;
+
+		/**
+		 * {@link AuthenticateContext}.
+		 */
+		private final AuthenticateContext<JwtHttpAccessControl<C>, None> authenticateContext;
+
+		/**
+		 * Roles.
+		 */
+		private Set<String> roles = null;
+
+		/**
+		 * Failure.
+		 */
+		private Throwable failure = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param claims               Claims.
+		 * @param authenticationScheme Authentication scheme.
+		 * @param principalName        {@link Principal} name.
+		 * @param authenticateContext  {@link AuthenticateContext}.
+		 */
+		private JwtRoleCollectorImpl(C claims, String authenticationScheme, String principalName,
+				AuthenticateContext<JwtHttpAccessControl<C>, None> authenticateContext) {
+			this.claims = claims;
+			this.authenticationScheme = authenticationScheme;
+			this.principalName = principalName;
+			this.authenticateContext = authenticateContext;
+		}
+
+		/*
+		 * =============== JwtRoleCollector =================
+		 */
+
+		@Override
+		public C getClaims() {
+			// TODO implement JwtRoleCollector<C>.getClaims(...)
+			throw new UnsupportedOperationException("TODO implement JwtRoleCollector<C>.getClaims(...)");
+		}
+
+		@Override
+		public void setRoles(Collection<String> roles) {
+			
+		}
+
+		@Override
+		public void setFailure(Throwable cause) {
+			// TODO implement JwtRoleCollector<C>.setFailure(...)
+			throw new UnsupportedOperationException("TODO implement JwtRoleCollector<C>.setFailure(...)");
+		}
+
+		/*
+		 * ================ FlowCallback ====================
+		 */
+
+		@Override
+		public void run(Throwable escalation) throws Throwable {
+			// TODO implement FlowCallback.run(...)
+			throw new UnsupportedOperationException("TODO implement FlowCallback.run(...)");
+		}
+	}
+
+	/**
+	 * {@link JwtHttpAccessControl} implementation.
+	 */
+	private class JwtHttpAccessControlImpl extends HttpAccessControlImpl implements JwtHttpAccessControl<C> {
+
+		/**
+		 * Claims.
+		 */
+		private final C claims;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param authenticationScheme Authentication scheme.
+		 * @param principalName        {@link Principal} name.
+		 * @param claims               Claims.
+		 * @param roles                Roles.
+		 */
+		public JwtHttpAccessControlImpl(String authenticationScheme, String principalName, C claims,
+				Set<String> roles) {
+			super(authenticationScheme, principalName, roles);
+			this.claims = claims;
+		}
+
+		/*
+		 * ================ JwtHttpAccessControl =================
+		 */
+
+		@Override
+		public C getClaims() {
+			return this.claims;
+		}
+	}
+
+	/**
 	 * JWT header.
 	 */
 	@JsonIgnoreProperties(ignoreUnknown = true)
@@ -441,6 +633,11 @@ public class JwtHttpSecuritySource<C> extends
 	public static class JwtClaims {
 
 		/**
+		 * Subject.
+		 */
+		private String sub;
+
+		/**
 		 * Expiry time.
 		 */
 		private Long exp;
@@ -449,6 +646,15 @@ public class JwtHttpSecuritySource<C> extends
 		 * Not before time.
 		 */
 		private Long nbf;
+
+		/**
+		 * Specifies the subject.
+		 * 
+		 * @param sub Subject.
+		 */
+		public void setSub(String sub) {
+			this.sub = sub;
+		}
 
 		/**
 		 * Specifies expiry time.
