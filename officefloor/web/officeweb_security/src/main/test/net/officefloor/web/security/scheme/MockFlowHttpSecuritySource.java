@@ -19,6 +19,7 @@ package net.officefloor.web.security.scheme;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
@@ -38,6 +39,7 @@ import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
+@TestSource
 public class MockFlowHttpSecuritySource extends
 		AbstractHttpSecuritySource<MockAuthentication, MockAccessControl, MockCredentials, None, MockFlowHttpSecuritySource.Flows>
 		implements

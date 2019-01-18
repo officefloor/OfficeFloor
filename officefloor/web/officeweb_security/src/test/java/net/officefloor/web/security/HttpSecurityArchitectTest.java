@@ -66,6 +66,7 @@ import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
 import net.officefloor.web.security.build.section.HttpFlowSecurer;
+import net.officefloor.web.security.scheme.AbstractMockHttpSecuritySource;
 import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
 import net.officefloor.web.security.scheme.MockChallengeHttpSecuritySource;
@@ -1316,6 +1317,113 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect state for logout", "RATIFY", context.getRequestState().getAttribute(stateName));
 			this.isLogoutInvoked = true;
 			super.logout(context);
+		}
+	}
+
+	/**
+	 * Ensure able to invoke {@link Flow} from {@link AuthenticateContext} and
+	 * {@link LogoutContext}.
+	 */
+	public void testAuthenticateLogoutFlows() throws Throwable {
+
+		// Compile and open
+		MockAuthenticateLogoutFlowsHttpSecuritySource source = new MockAuthenticateLogoutFlowsHttpSecuritySource();
+		this.compile((context, security) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
+
+			// Add HTTP Security
+			HttpSecurityBuilder httpSecurity = security.addHttpSecurity("mock", source);
+
+			// Configure flow handling
+			OfficeSection section = context.addSection("section", AuthenticateLogoutSection.class);
+			office.link(httpSecurity.getOutput(AuthenticateLogoutFlows.AUTHENTICATE.name()),
+					section.getOfficeSectionInput("authenticate"));
+			office.link(httpSecurity.getOutput(AuthenticateLogoutFlows.LOGOUT.name()),
+					section.getOfficeSectionInput("logout"));
+
+			// Configure handling
+			office.link(web.getHttpInput(false, "/flows").getInput(), section.getOfficeSectionInput("service"));
+		});
+
+		// Reset state
+		AuthenticateLogoutSection.authenticatedArgument = null;
+		AuthenticateLogoutSection.logoutArgument = null;
+		source.isLogoutComplete = false;
+
+		// Undertake request
+		this.server.send(MockHttpServer.mockRequest("/flows")).assertResponse(HttpStatus.OK.getStatusCode(),
+				"serviced");
+
+		// Ensure authenticate flows invoked
+		assertEquals("Should trigger authenticate flow", "AUTHENTICATE",
+				AuthenticateLogoutSection.authenticatedArgument);
+
+		// Ensure logout flows invoked
+		assertEquals("Should trigger logout flow", "LOGOUT", AuthenticateLogoutSection.logoutArgument);
+		assertTrue("Should be logged out", source.isLogoutComplete);
+	}
+
+	public static class AuthenticateLogoutSection {
+
+		private static String authenticatedArgument = null;
+
+		private static String logoutArgument = null;
+
+		public void authenticate(@Parameter String value) {
+			authenticatedArgument = value;
+		}
+
+		public void logout(@Parameter String value) {
+			logoutArgument = value;
+		}
+
+		@HttpAccess(ifAllRoles = "test")
+		public void service(MockAuthentication authentication, ServerHttpConnection connection) throws IOException {
+			assertTrue("Should have access", authentication.getAccessControl().getRoles().contains("test"));
+			authentication.logout(null);
+			connection.getResponse().getEntityWriter().write("serviced");
+		}
+	}
+
+	public static enum AuthenticateLogoutFlows {
+		AUTHENTICATE, LOGOUT
+	}
+
+	@TestSource
+	public static class MockAuthenticateLogoutFlowsHttpSecuritySource
+			extends AbstractMockHttpSecuritySource<Void, None, AuthenticateLogoutFlows> {
+
+		private boolean isLogoutComplete = false;
+
+		@Override
+		protected void loadMetaData(
+				MetaDataContext<MockAuthentication, MockAccessControl, Void, None, AuthenticateLogoutFlows> context)
+				throws Exception {
+			super.loadMetaData(context);
+			context.addFlow(AuthenticateLogoutFlows.AUTHENTICATE, String.class);
+			context.addFlow(AuthenticateLogoutFlows.LOGOUT, String.class);
+		}
+
+		@Override
+		public void authenticate(Void credentials,
+				AuthenticateContext<MockAccessControl, None, AuthenticateLogoutFlows> context) throws HttpException {
+			context.doFlow(AuthenticateLogoutFlows.AUTHENTICATE, "AUTHENTICATE", (error) -> {
+				if (error != null) {
+					throw error;
+				}
+				context.accessControlChange(new MockAccessControl("flow", "test"), null);
+			});
+		}
+
+		@Override
+		public void logout(LogoutContext<None, AuthenticateLogoutFlows> context) throws HttpException {
+			context.doFlow(AuthenticateLogoutFlows.LOGOUT, "LOGOUT", (error) -> {
+				if (error != null) {
+					throw error;
+				}
+				this.isLogoutComplete = true;
+			});
 		}
 	}
 
