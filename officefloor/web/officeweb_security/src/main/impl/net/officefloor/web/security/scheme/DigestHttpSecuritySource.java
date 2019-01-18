@@ -357,7 +357,7 @@ public class DigestHttpSecuritySource extends
 		}
 
 		@Override
-		public void authenticate(Void credentials, AuthenticateContext<HttpAccessControl, Dependencies> context)
+		public void authenticate(Void credentials, AuthenticateContext<HttpAccessControl, Dependencies, None> context)
 				throws HttpException {
 
 			// Obtain the connection and session
@@ -570,7 +570,7 @@ public class DigestHttpSecuritySource extends
 		}
 
 		@Override
-		public void logout(LogoutContext<Dependencies> context) throws HttpException {
+		public void logout(LogoutContext<Dependencies, None> context) throws HttpException {
 
 			// Obtain the session
 			HttpSession session = context.getSession();

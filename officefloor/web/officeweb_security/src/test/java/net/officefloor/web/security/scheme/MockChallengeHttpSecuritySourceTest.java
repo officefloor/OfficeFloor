@@ -180,7 +180,7 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<None> logoutContext = new MockHttpLogoutContext<None>();
+		final MockHttpLogoutContext<None, None> logoutContext = new MockHttpLogoutContext<>();
 
 		// Provide access control in session
 		logoutContext.getSession().setAttribute("http.security.mock.challenge", new MockAccessControl("test"));
@@ -209,7 +209,7 @@ public class MockChallengeHttpSecuritySourceTest extends OfficeFrameTestCase {
 	private void doAuthenticate(String authoriseHttpHeaderValue, String userName, String... roles) throws IOException {
 
 		// Create the authentication context
-		MockHttpAuthenticateContext<MockAccessControl, None> authenticationContext = new MockHttpAuthenticateContext<MockAccessControl, None>(
+		MockHttpAuthenticateContext<MockAccessControl, None, None> authenticationContext = new MockHttpAuthenticateContext<>(
 				authoriseHttpHeaderValue);
 
 		// Create and initialise the source

@@ -285,7 +285,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<>();
+		final MockHttpLogoutContext<Dependencies, None> logoutContext = new MockHttpLogoutContext<>();
 		logoutContext.getSession().setAttribute("http.security.digest", this.createMock(HttpAccessControl.class));
 
 		// Replay mock objects
@@ -350,11 +350,11 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 * @param roles                        Expected roles.
 	 */
 	private void doAuthenticate(String authorizationHttpHeaderValue, String userName,
-			Consumer<MockHttpAuthenticateContext<HttpAccessControl, Dependencies>> initialiser, String... roles)
+			Consumer<MockHttpAuthenticateContext<HttpAccessControl, Dependencies, None>> initialiser, String... roles)
 			throws IOException {
 
 		// Create the authenticate context
-		MockHttpAuthenticateContext<HttpAccessControl, Dependencies> authenticationContext = new MockHttpAuthenticateContext<>(
+		MockHttpAuthenticateContext<HttpAccessControl, Dependencies, None> authenticationContext = new MockHttpAuthenticateContext<>(
 				authorizationHttpHeaderValue);
 		authenticationContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 

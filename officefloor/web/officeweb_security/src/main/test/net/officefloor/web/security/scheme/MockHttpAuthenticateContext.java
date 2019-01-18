@@ -18,19 +18,13 @@
 package net.officefloor.web.security.scheme;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.mock.MockWebApp;
-import net.officefloor.web.security.impl.AuthenticationContextManagedObjectSource;
-import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AuthenticateContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
-import net.officefloor.web.state.HttpRequestState;
 
 /**
  * Mock {@link AuthenticateContext} for testing {@link HttpSecuritySource}
@@ -38,8 +32,8 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum<O>>
-		implements AuthenticateContext<AC, O> {
+public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum<O>, F extends Enum<F>>
+		extends AbstractMockHttpSecurityActionContext<O, F> implements AuthenticateContext<AC, O, F> {
 
 	/**
 	 * Creates the {@link ServerHttpConnection} with authorization
@@ -59,26 +53,6 @@ public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum
 		// Return the connection with request
 		return MockHttpServer.mockConnection(request);
 	}
-
-	/**
-	 * {@link ServerHttpConnection}.
-	 */
-	private final ServerHttpConnection connection;
-
-	/**
-	 * {@link HttpSession}.
-	 */
-	private final HttpSession session;
-
-	/**
-	 * {@link HttpRequestState}.
-	 */
-	private final HttpRequestState requestState;
-
-	/**
-	 * Dependencies.
-	 */
-	private final Map<O, Object> dependencies = new HashMap<O, Object>();
 
 	/**
 	 * Access control.
@@ -113,19 +87,7 @@ public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum
 	 * @param connection {@link ServerHttpConnection}.
 	 */
 	public MockHttpAuthenticateContext(ServerHttpConnection connection) {
-		this.connection = connection;
-		this.session = MockWebApp.mockSession(this.connection);
-		this.requestState = MockWebApp.mockRequestState(this.connection);
-	}
-
-	/**
-	 * Registers and object.
-	 * 
-	 * @param key        Key for dependency.
-	 * @param dependency Dependency object.
-	 */
-	public void registerObject(O key, Object dependency) {
-		this.dependencies.put(key, dependency);
+		super(connection);
 	}
 
 	/**
@@ -149,31 +111,6 @@ public class MockHttpAuthenticateContext<AC extends Serializable, O extends Enum
 	/*
 	 * ==================== HttpAuthenticateContext =========================
 	 */
-
-	@Override
-	public ServerHttpConnection getConnection() {
-		return this.connection;
-	}
-
-	@Override
-	public String getQualifiedAttributeName(String attributeName) {
-		return AuthenticationContextManagedObjectSource.getQualifiedAttributeName("mock", attributeName);
-	}
-
-	@Override
-	public HttpSession getSession() {
-		return this.session;
-	}
-
-	@Override
-	public HttpRequestState getRequestState() {
-		return this.requestState;
-	}
-
-	@Override
-	public Object getObject(O key) {
-		return this.dependencies.get(key);
-	}
 
 	@Override
 	public void accessControlChange(AC accessControl, Throwable escalation) {

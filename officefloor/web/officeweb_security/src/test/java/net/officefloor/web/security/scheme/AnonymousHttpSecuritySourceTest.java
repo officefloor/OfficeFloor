@@ -86,7 +86,7 @@ public class AnonymousHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<None> logoutContext = new MockHttpLogoutContext<>();
+		final MockHttpLogoutContext<None, None> logoutContext = new MockHttpLogoutContext<>();
 
 		// Create and initialise the security
 		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil

@@ -1098,7 +1098,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void authenticate(HttpCredentials credentials, AuthenticateContext<HttpAccessControl, None> context) {
+		public void authenticate(HttpCredentials credentials,
+				AuthenticateContext<HttpAccessControl, None, None> context) {
 			fail("Should not be invoked for loading type");
 		}
 
@@ -1108,7 +1109,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void logout(LogoutContext<None> context) {
+		public void logout(LogoutContext<None, None> context) {
 			fail("Should not be invoked for loading type");
 		}
 	}

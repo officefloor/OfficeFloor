@@ -21,14 +21,15 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.function.BiConsumer;
 
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.scheme.FormHttpSecuritySource.Dependencies;
 import net.officefloor.web.security.scheme.FormHttpSecuritySource.Flows;
-import net.officefloor.web.security.scheme.MockHttpChallengeContext.MockHttpChallengeContextFlow;
 import net.officefloor.web.security.store.CredentialEntry;
 import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
@@ -160,14 +161,15 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can load challenge.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testChallenge() throws IOException {
 
 		final MockHttpChallengeContext<Dependencies, Flows> challengeContext = new MockHttpChallengeContext<>();
 		challengeContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
 		// Record the triggering flow for form login page
-		MockHttpChallengeContextFlow flow = this.createMock(MockHttpChallengeContextFlow.class);
-		flow.doFlow();
+		BiConsumer<Object, FlowCallback> flow = this.createMock(BiConsumer.class);
+		flow.accept(null, null);
 		challengeContext.registerFlow(Flows.FORM_LOGIN_PAGE, flow);
 
 		// Test
@@ -268,7 +270,7 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<Dependencies>();
+		final MockHttpLogoutContext<Dependencies, Flows> logoutContext = new MockHttpLogoutContext<Dependencies, Flows>();
 
 		// Record logging out
 		logoutContext.getSession().setAttribute(logoutContext.getQualifiedAttributeName("http.security.form"),
@@ -303,7 +305,7 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	private void doAuthenticate(HttpCredentials credentials, String userName, String... roles) throws IOException {
 
 		// Create the authentication context
-		MockHttpAuthenticateContext<HttpAccessControl, Dependencies> authenticationContext = new MockHttpAuthenticateContext<>();
+		MockHttpAuthenticateContext<HttpAccessControl, Dependencies, Flows> authenticationContext = new MockHttpAuthenticateContext<>();
 		authenticationContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
 		// Replay mock objects

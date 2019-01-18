@@ -18,12 +18,13 @@
 package net.officefloor.web.security.scheme;
 
 import java.io.IOException;
+import java.util.function.BiConsumer;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.scheme.MockFlowHttpSecuritySource.Flows;
-import net.officefloor.web.security.scheme.MockHttpChallengeContext.MockHttpChallengeContextFlow;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.web.security.type.HttpSecurityTypeBuilder;
 import net.officefloor.web.spi.security.HttpSecurity;
@@ -115,13 +116,14 @@ public class MockFlowHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can load challenge.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testChallenge() throws IOException {
 
 		final MockHttpChallengeContext<None, Flows> challengeContext = new MockHttpChallengeContext<>();
 
 		// Record the triggering flow for challenge
-		MockHttpChallengeContextFlow flow = this.createMock(MockHttpChallengeContextFlow.class);
-		flow.doFlow();
+		BiConsumer<Object, FlowCallback> flow = this.createMock(BiConsumer.class);
+		flow.accept(null, null);
 		challengeContext.registerFlow(Flows.CHALLENGE, flow);
 
 		// Test
@@ -164,7 +166,7 @@ public class MockFlowHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<None> logoutContext = new MockHttpLogoutContext<>();
+		final MockHttpLogoutContext<None, Flows> logoutContext = new MockHttpLogoutContext<>();
 
 		// Provide state in session (that should be cleared)
 		logoutContext.getSession().setAttribute("http.security.mock.form", new MockAccessControl("mock", "user", null));
@@ -192,7 +194,7 @@ public class MockFlowHttpSecuritySourceTest extends OfficeFrameTestCase {
 	private void doAuthenticate(MockCredentials credentials, String userName, String... roles) throws IOException {
 
 		// Create the authentication context
-		MockHttpAuthenticateContext<MockAccessControl, None> authenticationContext = new MockHttpAuthenticateContext<>();
+		MockHttpAuthenticateContext<MockAccessControl, None, Flows> authenticationContext = new MockHttpAuthenticateContext<>();
 
 		// Create and initialise the security
 		HttpSecurity<MockAuthentication, MockAccessControl, MockCredentials, None, Flows> security = HttpSecurityLoaderUtil

@@ -159,7 +159,7 @@ public class MockFlowHttpSecuritySource extends
 	}
 
 	@Override
-	public void authenticate(MockCredentials credentials, AuthenticateContext<MockAccessControl, None> context)
+	public void authenticate(MockCredentials credentials, AuthenticateContext<MockAccessControl, None, Flows> context)
 			throws HttpException {
 
 		// Ensure have credentials (and they are valid)
@@ -182,11 +182,11 @@ public class MockFlowHttpSecuritySource extends
 	public void challenge(ChallengeContext<None, Flows> context) throws HttpException {
 
 		// Trigger flow for challenge
-		context.doFlow(Flows.CHALLENGE);
+		context.doFlow(Flows.CHALLENGE, null, null);
 	}
 
 	@Override
-	public void logout(LogoutContext<None> context) throws HttpException {
+	public void logout(LogoutContext<None, Flows> context) throws HttpException {
 
 		// Forget access control for further requests (requires login again)
 		context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);

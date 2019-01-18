@@ -1291,7 +1291,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void authenticate(Void credentials, AuthenticateContext<MockAccessControl, None> context)
+		public void authenticate(Void credentials, AuthenticateContext<MockAccessControl, None, None> context)
 				throws HttpException {
 			String stateName = this.getStateAttributeName(context);
 			assertEquals("Incorrect state for authenticate", "RATIFY",
@@ -1311,7 +1311,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void logout(LogoutContext<None> context) throws HttpException {
+		public void logout(LogoutContext<None, None> context) throws HttpException {
 			String stateName = this.getStateAttributeName(context);
 			assertEquals("Incorrect state for logout", "RATIFY", context.getRequestState().getAttribute(stateName));
 			this.isLogoutInvoked = true;

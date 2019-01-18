@@ -23,21 +23,5 @@ package net.officefloor.web.spi.security;
  * @author Daniel Sagenschneider
  */
 public interface ChallengeContext<O extends Enum<O>, F extends Enum<F>>
-		extends HttpSecurityActionContext, HttpChallengeContext {
-
-	/**
-	 * Obtains a dependency.
-	 * 
-	 * @param key Key for the dependency.
-	 * @return Dependency.
-	 */
-	Object getObject(O key);
-
-	/**
-	 * Undertakes a flow.
-	 * 
-	 * @param key Key identifying the flow.
-	 */
-	void doFlow(F key);
-
+		extends HttpSecurityActionContext, HttpSecurityApplicationContext<O, F>, HttpChallengeContext {
 }

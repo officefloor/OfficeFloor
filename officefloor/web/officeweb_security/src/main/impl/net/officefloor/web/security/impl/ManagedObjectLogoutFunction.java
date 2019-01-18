@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -36,7 +37,7 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum<O>>
+public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum<O>, F extends Enum<F>>
 		extends StaticManagedFunction<Indexed, None> {
 
 	/**
@@ -47,7 +48,7 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 	/**
 	 * {@link HttpSecurity}.
 	 */
-	private final HttpSecurity<?, AC, ?, O, ?> httpSecurity;
+	private final HttpSecurity<?, AC, ?, O, F> httpSecurity;
 
 	/**
 	 * Instantiate.
@@ -55,7 +56,7 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 	 * @param httpSecurityName Name of the {@link HttpSecurity}.
 	 * @param httpSecurity     {@link HttpSecurity}.
 	 */
-	public ManagedObjectLogoutFunction(String httpSecurityName, HttpSecurity<?, AC, ?, O, ?> httpSecurity) {
+	public ManagedObjectLogoutFunction(String httpSecurityName, HttpSecurity<?, AC, ?, O, F> httpSecurity) {
 		this.httpSecurityName = httpSecurityName;
 		this.httpSecurity = httpSecurity;
 	}
@@ -89,7 +90,7 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 	/**
 	 * {@link LogoutContext} implementation.
 	 */
-	private class LogoutContextImpl implements LogoutContext<O> {
+	private class LogoutContextImpl implements LogoutContext<O, F> {
 
 		/**
 		 * {@link FunctionLogoutContext}.
@@ -143,6 +144,12 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 			// Obtain the index (offset by logout dependencies)
 			int index = key.ordinal() + 1;
 			return this.context.getObject(index);
+		}
+
+		@Override
+		public void doFlow(F key, Object parameter, FlowCallback callback) {
+			// TODO implement HttpSecurityApplicationContext<O,F>.doFlow(...)
+			throw new UnsupportedOperationException("TODO implement HttpSecurityApplicationContext<O,F>.doFlow(...)");
 		}
 	}
 

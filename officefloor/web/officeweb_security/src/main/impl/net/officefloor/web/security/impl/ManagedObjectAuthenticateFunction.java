@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -92,7 +93,8 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 	/**
 	 * {@link AuthenticateContext} implementation.
 	 */
-	private class AuthenticateContextImpl<O extends Enum<O>> implements AuthenticateContext<AC, O> {
+	private class AuthenticateContextImpl<O extends Enum<O>, F extends Enum<F>>
+			implements AuthenticateContext<AC, O, F> {
 
 		/**
 		 * {@link FunctionAuthenticateContext}.
@@ -146,6 +148,12 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 			// Offset for function dependency
 			int index = key.ordinal() + 1;
 			return this.functionContext.getObject(index);
+		}
+
+		@Override
+		public void doFlow(F key, Object parameter, FlowCallback callback) {
+			// TODO implement HttpSecurityApplicationContext<O,F>.doFlow(...)
+			throw new UnsupportedOperationException("TODO implement HttpSecurityApplicationContext<O,F>.doFlow(...)");
 		}
 
 		@Override

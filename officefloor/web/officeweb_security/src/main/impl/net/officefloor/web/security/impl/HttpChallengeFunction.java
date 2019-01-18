@@ -18,6 +18,7 @@
 package net.officefloor.web.security.impl;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
@@ -166,8 +167,8 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		}
 
 		@Override
-		public void doFlow(F key) {
-			this.context.doFlow(key.ordinal(), null, null);
+		public void doFlow(F key, Object parameter, FlowCallback callback) {
+			this.context.doFlow(key.ordinal(), parameter, callback);
 		}
 	}
 

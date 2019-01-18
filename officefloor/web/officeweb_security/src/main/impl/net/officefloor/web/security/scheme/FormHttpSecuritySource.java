@@ -25,15 +25,15 @@ import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.store.CredentialStoreUtil;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.AuthenticateContext;
+import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.ChallengeContext;
-import net.officefloor.web.spi.security.LogoutContext;
-import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
+import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**
@@ -185,7 +185,7 @@ public class FormHttpSecuritySource extends
 
 		@Override
 		public void authenticate(HttpCredentials credentials,
-				AuthenticateContext<HttpAccessControl, Dependencies> context) throws HttpException {
+				AuthenticateContext<HttpAccessControl, Dependencies, Flows> context) throws HttpException {
 
 			// Obtain the session
 			HttpSession session = context.getSession();
@@ -226,11 +226,11 @@ public class FormHttpSecuritySource extends
 		public void challenge(ChallengeContext<Dependencies, Flows> context) throws HttpException {
 
 			// Trigger flow for login page
-			context.doFlow(Flows.FORM_LOGIN_PAGE);
+			context.doFlow(Flows.FORM_LOGIN_PAGE, null, null);
 		}
 
 		@Override
-		public void logout(LogoutContext<Dependencies> context) throws HttpException {
+		public void logout(LogoutContext<Dependencies, Flows> context) throws HttpException {
 
 			// Obtain the session
 			HttpSession session = context.getSession();

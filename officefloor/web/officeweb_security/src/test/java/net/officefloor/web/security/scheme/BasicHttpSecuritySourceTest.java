@@ -257,7 +257,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<>();
+		final MockHttpLogoutContext<Dependencies, None> logoutContext = new MockHttpLogoutContext<>();
 		logoutContext.getSession().setAttribute(logoutContext.getQualifiedAttributeName("http.security.basic"),
 				this.createMock(HttpAccessControl.class));
 
@@ -288,7 +288,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 			String... roles) {
 
 		// Create the mock authenticate context
-		MockHttpAuthenticateContext<HttpAccessControl, Dependencies> authenticationContext = new MockHttpAuthenticateContext<>(
+		MockHttpAuthenticateContext<HttpAccessControl, Dependencies, None> authenticationContext = new MockHttpAuthenticateContext<>(
 				authorizationHttpHeaderValue);
 		authenticationContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 

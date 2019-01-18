@@ -24,15 +24,6 @@ import java.io.Serializable;
  * 
  * @author Daniel Sagenschneider
  */
-public interface AuthenticateContext<AC extends Serializable, O extends Enum<O>>
-		extends HttpSecurityActionContext, AccessControlListener<AC> {
-
-	/**
-	 * Obtains a dependency.
-	 * 
-	 * @param key Key for the dependency.
-	 * @return Dependency.
-	 */
-	Object getObject(O key);
-
+public interface AuthenticateContext<AC extends Serializable, O extends Enum<O>, F extends Enum<F>>
+		extends HttpSecurityActionContext, HttpSecurityApplicationContext<O, F>, AccessControlListener<AC> {
 }

@@ -169,7 +169,7 @@ public class MockChallengeHttpSecuritySource
 	}
 
 	@Override
-	public void authenticate(Void credentials, AuthenticateContext<MockAccessControl, None> context)
+	public void authenticate(Void credentials, AuthenticateContext<MockAccessControl, None, None> context)
 			throws HttpException {
 
 		// Obtain the authentication scheme
@@ -208,7 +208,7 @@ public class MockChallengeHttpSecuritySource
 	}
 
 	@Override
-	public void logout(LogoutContext<None> context) throws HttpException {
+	public void logout(LogoutContext<None, None> context) throws HttpException {
 
 		// Forget access control for further requests (requires login again)
 		context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);

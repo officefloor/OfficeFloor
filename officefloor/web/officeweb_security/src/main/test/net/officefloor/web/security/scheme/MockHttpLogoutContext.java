@@ -17,91 +17,14 @@
  */
 package net.officefloor.web.security.scheme;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.mock.MockWebApp;
-import net.officefloor.web.security.impl.AuthenticationContextManagedObjectSource;
-import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.LogoutContext;
-import net.officefloor.web.state.HttpRequestState;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.LogoutContext;
 
 /**
  * Mock {@link LogoutContext} for testing {@link HttpSecuritySource} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockHttpLogoutContext<D extends Enum<D>> implements LogoutContext<D> {
-
-	/**
-	 * {@link ServerHttpConnection}.
-	 */
-	private final ServerHttpConnection connection;
-
-	/**
-	 * {@link HttpSession}.
-	 */
-	private final HttpSession session;
-
-	/**
-	 * {@link HttpRequestState}.
-	 */
-	private final HttpRequestState requestState;
-
-	/**
-	 * Dependencies.
-	 */
-	private final Map<D, Object> dependencies = new HashMap<D, Object>();
-
-	/**
-	 * Initiate.
-	 */
-	public MockHttpLogoutContext() {
-		this.connection = MockHttpServer.mockConnection();
-		this.session = MockWebApp.mockSession(this.connection);
-		this.requestState = MockWebApp.mockRequestState(this.connection);
-	}
-
-	/**
-	 * Registers and object.
-	 * 
-	 * @param key        Key for dependency.
-	 * @param dependency Dependency object.
-	 */
-	public void registerObject(D key, Object dependency) {
-		this.dependencies.put(key, dependency);
-	}
-
-	/*
-	 * ==================== HttpLogoutContext =========================
-	 */
-
-	@Override
-	public ServerHttpConnection getConnection() {
-		return this.connection;
-	}
-
-	@Override
-	public String getQualifiedAttributeName(String attributeName) {
-		return AuthenticationContextManagedObjectSource.getQualifiedAttributeName("mock", attributeName);
-	}
-
-	@Override
-	public HttpSession getSession() {
-		return this.session;
-	}
-
-	@Override
-	public HttpRequestState getRequestState() {
-		return this.requestState;
-	}
-
-	@Override
-	public Object getObject(D key) {
-		return this.dependencies.get(key);
-	}
-
+public class MockHttpLogoutContext<O extends Enum<O>, F extends Enum<F>>
+		extends AbstractMockHttpSecurityActionContext<O, F> implements LogoutContext<O, F> {
 }

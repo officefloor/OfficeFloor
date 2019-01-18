@@ -171,7 +171,8 @@ public class HttpSecuritySourceSpecificationRunnableTest extends OfficeFrameTest
 		}
 
 		@Override
-		public void authenticate(HttpCredentials credentials, AuthenticateContext<HttpAccessControl, None> context) {
+		public void authenticate(HttpCredentials credentials,
+				AuthenticateContext<HttpAccessControl, None, None> context) {
 			fail("Should not be required for loading specification");
 		}
 
@@ -181,7 +182,7 @@ public class HttpSecuritySourceSpecificationRunnableTest extends OfficeFrameTest
 		}
 
 		@Override
-		public void logout(LogoutContext<None> context) {
+		public void logout(LogoutContext<None, None> context) {
 			fail("Should not be required for loading specification");
 		}
 	}

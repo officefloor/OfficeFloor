@@ -22,14 +22,6 @@ package net.officefloor.web.spi.security;
  * 
  * @author Daniel Sagenschneider
  */
-public interface LogoutContext<O extends Enum<O>> extends HttpSecurityActionContext {
-
-	/**
-	 * Obtains a dependency.
-	 * 
-	 * @param key Key for the dependency.
-	 * @return Dependency.
-	 */
-	Object getObject(O key);
-
+public interface LogoutContext<O extends Enum<O>, F extends Enum<F>>
+		extends HttpSecurityActionContext, HttpSecurityApplicationContext<O, F> {
 }

@@ -174,7 +174,7 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void authenticate(Object credentials, AuthenticateContext<Serializable, Indexed> context) {
+		public void authenticate(Object credentials, AuthenticateContext<Serializable, Indexed, Indexed> context) {
 			fail("Should not be invoked for loading type");
 		}
 
@@ -184,7 +184,7 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void logout(LogoutContext<Indexed> context) {
+		public void logout(LogoutContext<Indexed, Indexed> context) {
 			fail("Should not be invoked for loading type");
 		}
 	}

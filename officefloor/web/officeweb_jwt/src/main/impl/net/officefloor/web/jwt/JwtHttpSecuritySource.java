@@ -5,7 +5,6 @@ import java.security.Principal;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -232,7 +231,7 @@ public class JwtHttpSecuritySource<C> extends
 	}
 
 	@Override
-	public void authenticate(Void credentials, AuthenticateContext<JwtHttpAccessControl<C>, None> context)
+	public void authenticate(Void credentials, AuthenticateContext<JwtHttpAccessControl<C>, None, Flows> context)
 			throws HttpException {
 
 		// Obtain the JWT decoder (allow time to initialise keys)
@@ -357,9 +356,8 @@ public class JwtHttpSecuritySource<C> extends
 			this.challenge(ChallengeReason.INVALID_JWT, context);
 			return;
 		}
-		
+
 		// Retrieve the roles
-		
 
 		// TODO look up roles for claim
 		Set<String> roles = new HashSet<>();
@@ -378,7 +376,7 @@ public class JwtHttpSecuritySource<C> extends
 	 * @param reason  {@link ChallengeReason}.
 	 * @param context {@link AuthenticateContext}.
 	 */
-	private void challenge(ChallengeReason reason, AuthenticateContext<JwtHttpAccessControl<C>, None> context) {
+	private void challenge(ChallengeReason reason, AuthenticateContext<JwtHttpAccessControl<C>, None, Flows> context) {
 		context.getRequestState().setAttribute(context.getQualifiedAttributeName(CHALLENGE_ATTRIBUTE_NAME), reason);
 	}
 
@@ -394,21 +392,21 @@ public class JwtHttpSecuritySource<C> extends
 				.getAttribute(context.getQualifiedAttributeName(CHALLENGE_ATTRIBUTE_NAME));
 		switch (reason) {
 		case NO_JWT:
-			context.doFlow(Flows.NO_JWT);
+			context.doFlow(Flows.NO_JWT, null, null);
 			break;
 
 		case INVALID_JWT:
-			context.doFlow(Flows.INVALID_JWT);
+			context.doFlow(Flows.INVALID_JWT, null, null);
 			break;
 
 		case EXPIRED_JWT:
-			context.doFlow(Flows.EXPIRED_JWT);
+			context.doFlow(Flows.EXPIRED_JWT, null, null);
 			break;
 		}
 	}
 
 	@Override
-	public void logout(LogoutContext<None> context) throws HttpException {
+	public void logout(LogoutContext<None, Flows> context) throws HttpException {
 		// Not able to "logout" JWT token (as typically externally managed)
 	}
 
@@ -511,7 +509,7 @@ public class JwtHttpSecuritySource<C> extends
 		/**
 		 * {@link AuthenticateContext}.
 		 */
-		private final AuthenticateContext<JwtHttpAccessControl<C>, None> authenticateContext;
+		private final AuthenticateContext<JwtHttpAccessControl<C>, None, Flows> authenticateContext;
 
 		/**
 		 * Roles.
@@ -532,7 +530,7 @@ public class JwtHttpSecuritySource<C> extends
 		 * @param authenticateContext  {@link AuthenticateContext}.
 		 */
 		private JwtRoleCollectorImpl(C claims, String authenticationScheme, String principalName,
-				AuthenticateContext<JwtHttpAccessControl<C>, None> authenticateContext) {
+				AuthenticateContext<JwtHttpAccessControl<C>, None, Flows> authenticateContext) {
 			this.claims = claims;
 			this.authenticationScheme = authenticationScheme;
 			this.principalName = principalName;
@@ -551,7 +549,7 @@ public class JwtHttpSecuritySource<C> extends
 
 		@Override
 		public void setRoles(Collection<String> roles) {
-			
+
 		}
 
 		@Override
