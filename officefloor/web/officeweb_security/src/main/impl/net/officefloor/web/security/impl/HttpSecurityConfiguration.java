@@ -19,6 +19,7 @@ package net.officefloor.web.security.impl;
 
 import java.io.Serializable;
 
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.HttpSecurity;
 
@@ -42,6 +43,13 @@ public interface HttpSecurityConfiguration<A, AC extends Serializable, C, O exte
 	 * @return {@link HttpSecurity}.
 	 */
 	HttpSecurity<A, AC, C, O, F> getHttpSecurity();
+
+	/**
+	 * Obtains the {@link Flow} key {@link Enum} {@link Class}.
+	 * 
+	 * @return {@link Flow} key {@link Enum} {@link Class}.
+	 */
+	Class<F> getFlowKeyClass();
 
 	/**
 	 * Obtains the {@link HttpSecurityType}.

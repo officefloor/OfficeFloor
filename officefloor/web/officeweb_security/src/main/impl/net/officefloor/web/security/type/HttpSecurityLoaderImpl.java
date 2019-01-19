@@ -456,7 +456,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public HttpSecurityFlowType<?>[] getFlowTypes() {
+		public HttpSecurityFlowType<F>[] getFlowTypes() {
 			return AdaptFactory.adaptArray(this.moAccessControlType.getFlowTypes(), HttpSecurityFlowType.class,
 					new AdaptFactory<HttpSecurityFlowType, ManagedObjectFlowType>() {
 						@Override

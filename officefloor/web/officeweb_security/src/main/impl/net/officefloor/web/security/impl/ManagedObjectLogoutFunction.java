@@ -20,7 +20,6 @@ package net.officefloor.web.security.impl;
 import java.io.Serializable;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -38,7 +37,7 @@ import net.officefloor.web.state.HttpRequestState;
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum<O>, F extends Enum<F>>
-		extends StaticManagedFunction<Indexed, None> {
+		extends StaticManagedFunction<Indexed, F> {
 
 	/**
 	 * Name of the {@link HttpSecurity}.
@@ -67,7 +66,7 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
 
 		// Obtain the dependencies
 		final FunctionLogoutContext<AC> logoutContext = (FunctionLogoutContext<AC>) context.getObject(0);
@@ -100,7 +99,7 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		private final ManagedFunctionContext<Indexed, None> context;
+		private final ManagedFunctionContext<Indexed, F> context;
 
 		/**
 		 * Initiate.
@@ -108,8 +107,7 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 		 * @param logoutContext {@link FunctionLogoutContext}.
 		 * @param context       {@link ManagedFunctionContext}.
 		 */
-		private LogoutContextImpl(FunctionLogoutContext<AC> logoutContext,
-				ManagedFunctionContext<Indexed, None> context) {
+		private LogoutContextImpl(FunctionLogoutContext<AC> logoutContext, ManagedFunctionContext<Indexed, F> context) {
 			this.logoutContext = logoutContext;
 			this.context = context;
 		}
@@ -148,8 +146,7 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 
 		@Override
 		public void doFlow(F key, Object parameter, FlowCallback callback) {
-			// TODO implement HttpSecurityApplicationContext<O,F>.doFlow(...)
-			throw new UnsupportedOperationException("TODO implement HttpSecurityApplicationContext<O,F>.doFlow(...)");
+			this.context.doFlow(key, parameter, callback);
 		}
 	}
 

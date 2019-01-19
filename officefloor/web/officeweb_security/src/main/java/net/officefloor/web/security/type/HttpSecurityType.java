@@ -93,7 +93,7 @@ public interface HttpSecurityType<A, AC extends Serializable, C, O extends Enum<
 	 * @return {@link HttpSecurityFlowType} definitions of the {@link Flow}
 	 *         instances required to be linked for the {@link HttpSecuritySource}.
 	 */
-	HttpSecurityFlowType<?>[] getFlowTypes();
+	HttpSecurityFlowType<F>[] getFlowTypes();
 
 	/**
 	 * Obtains the {@link HttpSecuritySupportingManagedObjectType} definitions of

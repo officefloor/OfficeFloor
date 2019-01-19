@@ -20,7 +20,6 @@ package net.officefloor.web.security.impl;
 import java.io.Serializable;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -38,8 +37,8 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
-		extends StaticManagedFunction<Indexed, None> {
+public class ManagedObjectAuthenticateFunction<AC extends Serializable, C, F extends Enum<F>>
+		extends StaticManagedFunction<Indexed, F> {
 
 	/**
 	 * Name of the {@link HttpSecurity}.
@@ -49,7 +48,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 	/**
 	 * {@link HttpSecurity}
 	 */
-	private final HttpSecurity<?, AC, C, ?, ?> httpSecurity;
+	private final HttpSecurity<?, AC, C, ?, F> httpSecurity;
 
 	/**
 	 * Instantiate.
@@ -57,7 +56,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 	 * @param httpSecurityName Name of the {@link HttpSecurity}.
 	 * @param httpSecurity     {@link HttpSecurity}.
 	 */
-	public ManagedObjectAuthenticateFunction(String httpSecurityName, HttpSecurity<?, AC, C, ?, ?> httpSecurity) {
+	public ManagedObjectAuthenticateFunction(String httpSecurityName, HttpSecurity<?, AC, C, ?, F> httpSecurity) {
 		this.httpSecurityName = httpSecurityName;
 		this.httpSecurity = httpSecurity;
 	}
@@ -68,7 +67,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
 
 		// Obtain the function authenticate context
 		FunctionAuthenticateContext<AC, C> functionAuthenticateContext = (FunctionAuthenticateContext<AC, C>) context
@@ -93,8 +92,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 	/**
 	 * {@link AuthenticateContext} implementation.
 	 */
-	private class AuthenticateContextImpl<O extends Enum<O>, F extends Enum<F>>
-			implements AuthenticateContext<AC, O, F> {
+	private class AuthenticateContextImpl<O extends Enum<O>> implements AuthenticateContext<AC, O, F> {
 
 		/**
 		 * {@link FunctionAuthenticateContext}.
@@ -104,7 +102,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		private final ManagedFunctionContext<Indexed, None> functionContext;
+		private final ManagedFunctionContext<Indexed, F> functionContext;
 
 		/**
 		 * Initiate.
@@ -113,7 +111,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 		 * @param functionContext             {@link ManagedFunctionContext}.
 		 */
 		public AuthenticateContextImpl(FunctionAuthenticateContext<AC, C> functionAuthenticateContext,
-				ManagedFunctionContext<Indexed, None> functionContext) {
+				ManagedFunctionContext<Indexed, F> functionContext) {
 			this.functionAuthenticateContext = functionAuthenticateContext;
 			this.functionContext = functionContext;
 		}
@@ -152,8 +150,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 
 		@Override
 		public void doFlow(F key, Object parameter, FlowCallback callback) {
-			// TODO implement HttpSecurityApplicationContext<O,F>.doFlow(...)
-			throw new UnsupportedOperationException("TODO implement HttpSecurityApplicationContext<O,F>.doFlow(...)");
+			this.functionContext.doFlow(key, parameter, callback);
 		}
 
 		@Override

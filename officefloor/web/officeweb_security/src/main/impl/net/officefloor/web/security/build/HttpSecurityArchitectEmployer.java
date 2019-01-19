@@ -54,6 +54,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.internal.structure.Flow;
@@ -681,6 +682,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		private List<String> contentTypes = new LinkedList<>();
 
 		/**
+		 * {@link Flow} key {@link Enum} {@link Class}.
+		 */
+		private Class<F> flowKeys;
+
+		/**
 		 * {@link HttpSecurityType}.
 		 */
 		private HttpSecurityType<A, AC, C, O, F> type;
@@ -722,6 +728,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		 * 
 		 * @param httpChallengeContext {@link HttpChallengeContext}.
 		 */
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void build(OfficeManagedObject httpChallengeContext) {
 
 			// Create the HTTP Security loader
@@ -730,6 +737,18 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 			// Load the security type
 			this.type = loader.loadHttpSecurityType(this.source, this.properties);
+
+			// Load the flow keys
+			HttpSecurityFlowType<?>[] flowTypes = this.type.getFlowTypes();
+			if (flowTypes.length > 0) {
+				// Determine from key
+				Enum<?> flowKey = flowTypes[0].getKey();
+				this.flowKeys = (Class) ((flowKey != null) ? flowKey.getClass() : Indexed.class);
+			} else {
+				// No flows
+				this.flowKeys = (Class) None.class;
+
+			}
 
 			// Load the security
 			this.security = this.source.sourceHttpSecurity(this);
@@ -902,6 +921,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		@Override
 		public HttpSecurity<A, AC, C, O, F> getHttpSecurity() {
 			return this.security;
+		}
+
+		@Override
+		public Class<F> getFlowKeyClass() {
+			return this.flowKeys;
 		}
 
 		@Override

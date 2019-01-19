@@ -22,7 +22,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
@@ -148,6 +151,39 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 			dependencyObjects[i].setTypeQualifier(dependencyType.getTypeQualifier());
 		}
 
+		// Links the dynamic dependencies
+		Consumer<SectionFunction> dynamicDependencyLinker = (function) -> {
+			for (SectionObject dependency : dependencyObjects) {
+				designer.link(function.getFunctionObject(dependency.getSectionObjectName()), dependency);
+			}
+		};
+
+		// Link input flow handling to output flows
+		Map<String, SectionOutput> sectionOutputs = new HashMap<>();
+		for (HttpSecurityFlowType<?> flowType : securityType.getFlowTypes()) {
+			String flowName = flowType.getFlowName();
+
+			// Create and register the section outputs for flows
+			SectionOutput sectionOutput = designer.addSectionOutput(flowName, flowType.getArgumentType().getName(),
+					false);
+			sectionOutputs.put(flowName, sectionOutput);
+
+			// Create and link the section inputs
+			SectionInput sectionInput = designer.addSectionInput(INPUT_FLOW_PREFIX + flowName,
+					flowType.getArgumentType().getName());
+			designer.link(sectionInput, sectionOutput);
+		}
+
+		// Link the flow handling
+		Consumer<SectionFunction> flowsLinker = (function) -> {
+			for (HttpSecurityFlowType<?> flowType : securityType.getFlowTypes()) {
+				String flowName = flowType.getFlowName();
+				FunctionFlow functionFlow = function.getFunctionFlow("Flow_" + flowName);
+				SectionOutput sectionOutput = sectionOutputs.get(flowName);
+				designer.link(functionFlow, sectionOutput, false);
+			}
+		};
+
 		// Configure the HTTP Security Managed Function Source
 		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace("HttpSecuritySource",
 				new HttpSecurityManagedFunctionSource(securityName, security, securityType));
@@ -162,41 +198,24 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 				serverHttpConnection);
 		designer.link(challengeFunction.getFunctionObject(HttpSession.class.getSimpleName()), httpSession);
 		designer.link(challengeFunction.getFunctionObject(HttpRequestState.class.getSimpleName()), httpRequestState);
-		for (SectionObject dependency : dependencyObjects) {
-			designer.link(challengeFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
-		}
-		for (HttpSecurityFlowType<?> flowType : securityType.getFlowTypes()) {
-			String flowName = flowType.getFlowName();
-
-			// Link challenge handling
-			FunctionFlow functionFlow = challengeFunction.getFunctionFlow("Flow_" + flowName);
-			SectionOutput sectionOutput = designer.addSectionOutput(flowName, flowType.getArgumentType().getName(),
-					false);
-			designer.link(functionFlow, sectionOutput, false);
-
-			// Link execution handling
-			SectionInput sectionInput = designer.addSectionInput(INPUT_FLOW_PREFIX + flowName,
-					flowType.getArgumentType().getName());
-			designer.link(sectionInput, sectionOutput);
-		}
+		dynamicDependencyLinker.accept(challengeFunction);
+		flowsLinker.accept(challengeFunction);
 
 		// Configure the managed object authentication
 		SectionFunction moAuthFunction = namespace.addSectionFunction(
 				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_AUTHENTICATE,
 				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_AUTHENTICATE);
 		moAuthFunction.getFunctionObject(FunctionAuthenticateContext.class.getSimpleName()).flagAsParameter();
-		for (SectionObject dependency : dependencyObjects) {
-			designer.link(moAuthFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
-		}
+		dynamicDependencyLinker.accept(moAuthFunction);
+		flowsLinker.accept(moAuthFunction);
 
 		// Configure the managed object logout
 		SectionFunction moLogoutFunction = namespace.addSectionFunction(
 				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_LOGOUT,
 				HttpSecurityManagedFunctionSource.FUNCTION_MANAGED_OBJECT_LOGOUT);
 		moLogoutFunction.getFunctionObject(FunctionLogoutContext.class.getSimpleName()).flagAsParameter();
-		for (SectionObject dependency : dependencyObjects) {
-			designer.link(moLogoutFunction.getFunctionObject(dependency.getSectionObjectName()), dependency);
-		}
+		dynamicDependencyLinker.accept(moLogoutFunction);
+		flowsLinker.accept(moLogoutFunction);
 
 		// Determine if application credential login
 		if (credentialsType != null) {
@@ -338,8 +357,8 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 			});
 
 			// Obtain the index order list of flow types
-			List<HttpSecurityFlowType<?>> flowTypes = new ArrayList<HttpSecurityFlowType<?>>(
-					Arrays.asList(httpSecurityType.getFlowTypes()));
+			Class<F> flowKeys = HttpSecuritySectionSource.this.configuration.getFlowKeyClass();
+			List<HttpSecurityFlowType<F>> flowTypes = new ArrayList<>(Arrays.asList(httpSecurityType.getFlowTypes()));
 			Collections.sort(flowTypes, new Comparator<HttpSecurityFlowType<?>>() {
 				@Override
 				public int compare(HttpSecurityFlowType<?> a, HttpSecurityFlowType<?> b) {
@@ -347,46 +366,51 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 				}
 			});
 
+			// Dependency and flow loader
+			Consumer<ManagedFunctionTypeBuilder<Indexed, F>> dependencyLoader = (function) -> {
+				for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
+					function.addObject(dependencyType.getDependencyType())
+							.setLabel("Dependency_" + dependencyType.getDependencyName());
+				}
+			};
+			Consumer<ManagedFunctionTypeBuilder<Indexed, F>> flowLoader = (function) -> {
+				for (HttpSecurityFlowType<F> flowType : flowTypes) {
+					ManagedFunctionFlowTypeBuilder<F> flow = function.addFlow();
+					flow.setKey(flowType.getKey());
+					flow.setArgumentType(flowType.getArgumentType());
+					flow.setLabel("Flow_" + flowType.getFlowName());
+				}
+			};
+
 			// Add the managed object authentication function
-			ManagedFunctionTypeBuilder<Indexed, None> moAuthenticate = namespaceTypeBuilder.addManagedFunctionType(
+			ManagedFunctionTypeBuilder<Indexed, F> moAuthenticate = namespaceTypeBuilder.addManagedFunctionType(
 					FUNCTION_MANAGED_OBJECT_AUTHENTICATE,
 					new ManagedObjectAuthenticateFunction<>(this.httpSecurityName, this.httpSecurity), Indexed.class,
-					None.class);
+					flowKeys);
 			moAuthenticate.addObject(FunctionAuthenticateContext.class)
 					.setLabel(FunctionAuthenticateContext.class.getSimpleName());
-			for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
-				moAuthenticate.addObject(dependencyType.getDependencyType())
-						.setLabel("Dependency_" + dependencyType.getDependencyName());
-			}
+			dependencyLoader.accept(moAuthenticate);
+			flowLoader.accept(moAuthenticate);
 
 			// Add the managed object logout function
-			ManagedFunctionTypeBuilder<Indexed, None> logout = namespaceTypeBuilder.addManagedFunctionType(
+			ManagedFunctionTypeBuilder<Indexed, F> logout = namespaceTypeBuilder.addManagedFunctionType(
 					FUNCTION_MANAGED_OBJECT_LOGOUT,
 					new ManagedObjectLogoutFunction<>(this.httpSecurityName, this.httpSecurity), Indexed.class,
-					None.class);
+					flowKeys);
 			logout.addObject(FunctionLogoutContext.class).setLabel(FunctionLogoutContext.class.getSimpleName());
-			for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
-				logout.addObject(dependencyType.getDependencyType())
-						.setLabel("Dependency_" + dependencyType.getDependencyName());
-			}
+			dependencyLoader.accept(logout);
+			flowLoader.accept(logout);
 
 			// Add the challenge function
-			ManagedFunctionTypeBuilder<Indexed, Indexed> challenge = namespaceTypeBuilder.addManagedFunctionType(
+			ManagedFunctionTypeBuilder<Indexed, F> challenge = namespaceTypeBuilder.addManagedFunctionType(
 					FUNCTION_CHALLENGE, new HttpChallengeFunction<>(this.httpSecurityName, this.httpSecurity),
-					Indexed.class, Indexed.class);
+					Indexed.class, flowKeys);
 			challenge.addObject(HttpChallengeContext.class).setLabel(HttpChallengeContext.class.getSimpleName());
 			challenge.addObject(ServerHttpConnection.class).setLabel(ServerHttpConnection.class.getSimpleName());
 			challenge.addObject(HttpSession.class).setLabel(HttpSession.class.getSimpleName());
 			challenge.addObject(HttpRequestState.class).setLabel(HttpRequestState.class.getSimpleName());
-			for (HttpSecurityDependencyType<?> dependencyType : dependencyTypes) {
-				challenge.addObject(dependencyType.getDependencyType())
-						.setLabel("Dependency_" + dependencyType.getDependencyName());
-			}
-			for (HttpSecurityFlowType<?> flowType : flowTypes) {
-				ManagedFunctionFlowTypeBuilder<?> flow = challenge.addFlow();
-				flow.setArgumentType(flowType.getArgumentType());
-				flow.setLabel("Flow_" + flowType.getFlowName());
-			}
+			dependencyLoader.accept(challenge);
+			flowLoader.accept(challenge);
 
 			// Add the start application authentication function
 			if (credentialsType != null) {

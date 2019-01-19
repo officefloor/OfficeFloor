@@ -35,8 +35,7 @@ import net.officefloor.web.state.HttpRequestState;
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
-		extends StaticManagedFunction<Indexed, Indexed> {
+public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>> extends StaticManagedFunction<Indexed, F> {
 
 	/**
 	 * Name of the {@link HttpSecurity}.
@@ -64,7 +63,7 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
 
 		// Obtain the dependencies
 		HttpChallengeContext httpChallengeContext = (HttpChallengeContext) context.getObject(0);
@@ -103,7 +102,7 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		private final ManagedFunctionContext<Indexed, Indexed> context;
+		private final ManagedFunctionContext<Indexed, F> context;
 
 		/**
 		 * {@link HttpChallengeContext}.
@@ -120,7 +119,7 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		 * @param httpChallengeContext {@link HttpChallengeContext}.
 		 */
 		public HttpChallengeContextImpl(ServerHttpConnection connection, HttpSession session,
-				HttpRequestState requestState, ManagedFunctionContext<Indexed, Indexed> context,
+				HttpRequestState requestState, ManagedFunctionContext<Indexed, F> context,
 				HttpChallengeContext httpChallengeContext) {
 			this.connection = connection;
 			this.session = session;
@@ -168,7 +167,7 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 
 		@Override
 		public void doFlow(F key, Object parameter, FlowCallback callback) {
-			this.context.doFlow(key.ordinal(), parameter, callback);
+			this.context.doFlow(key, parameter, callback);
 		}
 	}
 
