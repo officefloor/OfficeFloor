@@ -358,16 +358,11 @@ public class JwtHttpSecuritySource<C> extends
 		}
 
 		// Retrieve the roles
-
-		// TODO look up roles for claim
-		Set<String> roles = new HashSet<>();
-
-		// Create the Jwt HttpAccess
 		String authenticationScheme = scheme.getAuthentiationScheme();
 		String principalName = validateClaims.sub;
-		JwtHttpAccessControl<C> accessControl = new JwtHttpAccessControlImpl(authenticationScheme, principalName,
-				claims, roles);
-		context.accessControlChange(accessControl, null);
+		JwtRoleCollectorImpl rolesCollector = new JwtRoleCollectorImpl(claims, authenticationScheme, principalName,
+				context);
+		context.doFlow(Flows.RETRIEVE_ROLES, rolesCollector, rolesCollector);
 	}
 
 	/**
@@ -512,14 +507,9 @@ public class JwtHttpSecuritySource<C> extends
 		private final AuthenticateContext<JwtHttpAccessControl<C>, None, Flows> authenticateContext;
 
 		/**
-		 * Roles.
+		 * Indicates if completed.
 		 */
-		private Set<String> roles = null;
-
-		/**
-		 * Failure.
-		 */
-		private Throwable failure = null;
+		private volatile boolean isComplete = false;
 
 		/**
 		 * Instantiate.
@@ -543,19 +533,39 @@ public class JwtHttpSecuritySource<C> extends
 
 		@Override
 		public C getClaims() {
-			// TODO implement JwtRoleCollector<C>.getClaims(...)
-			throw new UnsupportedOperationException("TODO implement JwtRoleCollector<C>.getClaims(...)");
+			return this.claims;
 		}
 
 		@Override
 		public void setRoles(Collection<String> roles) {
 
+			// Determine if complete
+			if (this.isComplete) {
+				return;
+			}
+			this.isComplete = true;
+
+			// Create copy of roles (to ensure serialisable)
+			Set<String> rolesSet = new HashSet<>(roles);
+
+			// Create the Jwt HttpAccess
+			JwtHttpAccessControl<C> accessControl = new JwtHttpAccessControlImpl(this.authenticationScheme,
+					this.principalName, this.claims, rolesSet);
+			this.authenticateContext.accessControlChange(accessControl, null);
+
 		}
 
 		@Override
 		public void setFailure(Throwable cause) {
-			// TODO implement JwtRoleCollector<C>.setFailure(...)
-			throw new UnsupportedOperationException("TODO implement JwtRoleCollector<C>.setFailure(...)");
+
+			// Determine if complete
+			if (this.isComplete) {
+				return;
+			}
+			this.isComplete = true;
+
+			// Flag the failure
+			this.authenticateContext.accessControlChange(null, cause);
 		}
 
 		/*
@@ -564,8 +574,20 @@ public class JwtHttpSecuritySource<C> extends
 
 		@Override
 		public void run(Throwable escalation) throws Throwable {
-			// TODO implement FlowCallback.run(...)
-			throw new UnsupportedOperationException("TODO implement FlowCallback.run(...)");
+
+			// Determine if already complete
+			if (this.isComplete) {
+				return;
+			}
+
+			// Ensure have escalation
+			if (escalation == null) {
+				escalation = new HttpException(HttpStatus.FORBIDDEN,
+						new IllegalStateException("No roles loaded for JWT claims"));
+			}
+
+			// Indicate failure to load roles
+			this.authenticateContext.accessControlChange(null, escalation);
 		}
 	}
 

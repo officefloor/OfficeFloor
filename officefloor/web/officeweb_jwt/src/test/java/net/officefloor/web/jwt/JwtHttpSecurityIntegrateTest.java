@@ -262,7 +262,7 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	/**
 	 * Mock claims {@link Class}.
 	 */
-	public static class MockClaims {
+	public static class MockClaims extends RoleClaims {
 
 		private String sub;
 
