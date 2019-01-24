@@ -42,7 +42,6 @@ import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.server.http.impl.DateHttpHeaderClock;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.ssl.OfficeFloorDefaultSslContextSource;
 import net.officefloor.server.ssl.SslContextSource;

@@ -26,7 +26,6 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.server.http.impl.DateHttpHeaderClock;
 
 /**
  * Context for the {@link HttpServerImplementation}.

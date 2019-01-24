@@ -26,6 +26,7 @@ import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpResponseCookies;
+import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.WritableHttpCookie;
 
 /**

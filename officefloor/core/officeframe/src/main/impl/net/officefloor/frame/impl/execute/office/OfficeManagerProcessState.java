@@ -31,7 +31,6 @@ import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectCleanup;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.OfficeClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
@@ -63,13 +62,12 @@ public class OfficeManagerProcessState implements ProcessState {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param officeClock                {@link OfficeClock}.
 	 * @param maximumFunctionChainLength Maximum {@link Promise} chain length.
 	 * @param breakChainTeamManagement   Break chain {@link TeamManagement}.
 	 * @param functionLoop               {@link FunctionLoop}.
 	 */
-	public OfficeManagerProcessState(OfficeClock officeClock, int maximumFunctionChainLength,
-			TeamManagement breakChainTeamManagement, FunctionLoop functionLoop) {
+	public OfficeManagerProcessState(int maximumFunctionChainLength, TeamManagement breakChainTeamManagement,
+			FunctionLoop functionLoop) {
 		this.functionLoop = functionLoop;
 
 		// Create the meta-data for the process and its main thread state

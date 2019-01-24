@@ -52,7 +52,7 @@ import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
@@ -110,13 +110,13 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to override the {@link OfficeClock}.
+	 * Ensure able to override the {@link MonitorClock}.
 	 */
 	public void testProvideOfficeClock() {
 
 		// Record
-		final OfficeClock clock = this.createMock(OfficeClock.class);
-		this.configuration.setOfficeClock(clock);
+		final MonitorClock clock = this.createMock(MonitorClock.class);
+		this.configuration.setMonitorClock(clock);
 
 		// Construct
 		this.replayMockObjects();
@@ -124,11 +124,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure override clock
-		assertSame("Should override office clock", clock, rawOfficeMetaData.getOfficeMetaData().getOfficeClock());
+		assertSame("Should override office clock", clock, rawOfficeMetaData.getOfficeMetaData().getMonitorClock());
 	}
 
 	/**
-	 * Ensure able to default the {@link OfficeClock}.
+	 * Ensure able to default the {@link MonitorClock}.
 	 */
 	public void testDefaultOfficeClock() {
 
@@ -138,7 +138,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure override clock
-		assertNotNull("Should default office clock", rawOfficeMetaData.getOfficeMetaData().getOfficeClock());
+		assertNotNull("Should default office clock", rawOfficeMetaData.getOfficeMetaData().getMonitorClock());
 	}
 
 	/**

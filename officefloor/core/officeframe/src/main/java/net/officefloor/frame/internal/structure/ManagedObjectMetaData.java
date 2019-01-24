@@ -97,11 +97,11 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	ManagedObjectPool getManagedObjectPool();
 
 	/**
-	 * Obtains the {@link OfficeClock}.
+	 * Obtains the {@link MonitorClock}.
 	 * 
-	 * @return {@link OfficeClock}.
+	 * @return {@link MonitorClock}.
 	 */
-	OfficeClock getOfficeClock();
+	MonitorClock getMonitorClock();
 
 	/**
 	 * Obtains the time out in milliseconds for the asynchronous operation to

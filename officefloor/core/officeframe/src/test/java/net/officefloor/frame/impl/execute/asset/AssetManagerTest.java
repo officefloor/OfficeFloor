@@ -34,7 +34,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -47,9 +47,9 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class AssetManagerTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link OfficeClock}.
+	 * {@link MonitorClock}.
 	 */
-	private final OfficeClock clock = this.createMock(OfficeClock.class);
+	private final MonitorClock clock = this.createMock(MonitorClock.class);
 
 	/**
 	 * {@link FunctionLoop}.
@@ -59,7 +59,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ProcessState}.
 	 */
-	private final ProcessState processState = new OfficeManagerProcessState(this.clock, 1000,
+	private final ProcessState processState = new OfficeManagerProcessState(1000,
 			new TeamManagementImpl(new ExecutorCachedTeamSource().createTeam(0)), this.loop);
 
 	/**

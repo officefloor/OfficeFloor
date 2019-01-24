@@ -63,7 +63,6 @@ import net.officefloor.server.ServerSocketDecorator;
 import net.officefloor.server.SocketManager;
 import net.officefloor.server.SocketServicer;
 import net.officefloor.server.SocketServicerFactory;
-import net.officefloor.server.http.impl.DateHttpHeaderClock;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser.HttpRequestParserMetaData;

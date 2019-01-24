@@ -33,7 +33,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -53,12 +53,12 @@ public interface OfficeConfiguration {
 	String getOfficeName();
 
 	/**
-	 * Obtains the {@link OfficeClock}.
+	 * Obtains the {@link MonitorClock}.
 	 * 
-	 * @return {@link OfficeClock}. May be <code>null</code> to use a default
+	 * @return {@link MonitorClock}. May be <code>null</code> to use a default
 	 *         implementation.
 	 */
-	OfficeClock getOfficeClock();
+	MonitorClock getMonitorClock();
 
 	/**
 	 * Obtains the interval in milli-seconds between each time the

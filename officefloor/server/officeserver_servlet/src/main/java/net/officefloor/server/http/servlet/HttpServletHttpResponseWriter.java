@@ -26,11 +26,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.server.http.HttpHeaderValue;
+import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
-import net.officefloor.server.http.impl.HttpResponseWriter;
 import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;

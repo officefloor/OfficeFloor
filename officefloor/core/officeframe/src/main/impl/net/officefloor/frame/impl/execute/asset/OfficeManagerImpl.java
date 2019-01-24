@@ -23,7 +23,7 @@ import java.util.TimerTask;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 
 /**
@@ -54,34 +54,28 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	private final Timer timer;
 
 	/**
-	 * {@link OfficeClockImpl}.
+	 * {@link MonitorClockImpl}.
 	 */
-	private final OfficeClockImpl officeClock;
+	private final MonitorClockImpl monitorClock;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office} being managed.
-	 * @param monitorInterval
-	 *            Interval in milliseconds between each check of the
-	 *            {@link Office}. Setting this high reduces overhead of managing
-	 *            the {@link Office}, however setting lower increases
-	 *            responsiveness of the {@link Office}.
-	 * @param assetManagers
-	 *            {@link AssetManager} instances to manage.
-	 * @param officeClock
-	 *            {@link OfficeClock} for the {@link Office}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop} for the {@link Office}.
-	 * @param timer
-	 *            {@link Timer} to monitor the {@link Office}.
+	 * @param officeName      Name of the {@link Office} being managed.
+	 * @param monitorInterval Interval in milliseconds between each check of the
+	 *                        {@link Office}. Setting this high reduces overhead of
+	 *                        managing the {@link Office}, however setting lower
+	 *                        increases responsiveness of the {@link Office}.
+	 * @param assetManagers   {@link AssetManager} instances to manage.
+	 * @param monitorClock    {@link MonitorClock} for the {@link Office}.
+	 * @param functionLoop    {@link FunctionLoop} for the {@link Office}.
+	 * @param timer           {@link Timer} to monitor the {@link Office}.
 	 */
 	public OfficeManagerImpl(String officeName, long monitorInterval, AssetManager[] assetManagers,
-			OfficeClockImpl officeClock, FunctionLoop functionLoop, Timer timer) {
+			MonitorClockImpl monitorClock, FunctionLoop functionLoop, Timer timer) {
 		this.monitorInterval = monitorInterval;
 		this.assetManagers = assetManagers;
-		this.officeClock = officeClock;
+		this.monitorClock = monitorClock;
 		this.functionLoop = functionLoop;
 		this.timer = timer;
 	}
@@ -120,8 +114,8 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	public void run() {
 
 		// Update the approximate time for the office
-		if (this.officeClock != null) {
-			this.officeClock.updateTime();
+		if (this.monitorClock != null) {
+			this.monitorClock.updateTime();
 		}
 
 		// Run checks on the assets

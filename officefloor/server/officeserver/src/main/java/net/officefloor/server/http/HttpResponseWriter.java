@@ -15,14 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.impl;
+package net.officefloor.server.http;
 
-import net.officefloor.server.http.HttpHeaderValue;
-import net.officefloor.server.http.HttpResponse;
-import net.officefloor.server.http.HttpStatus;
-import net.officefloor.server.http.HttpVersion;
-import net.officefloor.server.http.WritableHttpCookie;
-import net.officefloor.server.http.WritableHttpHeader;
 import net.officefloor.server.stream.StreamBuffer;
 
 /**

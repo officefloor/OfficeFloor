@@ -47,11 +47,11 @@ public interface OfficeMetaData {
 	OfficeManager getOfficeManager();
 
 	/**
-	 * Obtains the {@link OfficeClock} for the {@link Office}.
+	 * Obtains the {@link MonitorClock} for the {@link Office}.
 	 * 
-	 * @return {@link OfficeClock} for the {@link Office}.
+	 * @return {@link MonitorClock} for the {@link Office}.
 	 */
-	OfficeClock getOfficeClock();
+	MonitorClock getMonitorClock();
 
 	/**
 	 * Obtains the {@link ProcessMetaData} for processes within this {@link Office}.

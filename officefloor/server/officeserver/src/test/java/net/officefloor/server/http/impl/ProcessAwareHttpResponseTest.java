@@ -35,6 +35,7 @@ import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpResponseCookie;
+import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;

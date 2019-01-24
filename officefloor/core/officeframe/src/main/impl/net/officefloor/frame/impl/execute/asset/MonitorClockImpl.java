@@ -15,26 +15,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.internal.structure;
+package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.MonitorClock;
 
 /**
- * Clock for the {@link Office}.
+ * {@link MonitorClock} implementation.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeClock {
+public class MonitorClockImpl implements MonitorClock {
 
 	/**
-	 * <p>
-	 * Obtains the approximate current time.
-	 * <p>
-	 * This is more efficient means to obtain {@link System#currentTimeMillis()}
-	 * as complete millisecond accuracy is not required.
-	 * 
-	 * @return Approximate {@link System#currentTimeMillis()}.
+	 * Keeps approximate time for monitoring the {@link Office}.
 	 */
-	long currentTimeMillis();
+	private volatile long currentTime = System.currentTimeMillis();
+
+	/**
+	 * Updates the current time.
+	 */
+	public void updateTime() {
+		this.currentTime = System.currentTimeMillis();
+	}
+
+	/*
+	 * ======================== OfficeClock =====================
+	 */
+
+	@Override
+	public long currentTimeMillis() {
+		return this.currentTime;
+	}
 
 }

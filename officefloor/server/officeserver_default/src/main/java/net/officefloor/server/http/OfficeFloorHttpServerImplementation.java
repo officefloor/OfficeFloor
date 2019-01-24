@@ -25,7 +25,6 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
-import net.officefloor.server.http.impl.DateHttpHeaderClock;
 
 /**
  * {@link OfficeFloor} {@link HttpServerImplementation}.
