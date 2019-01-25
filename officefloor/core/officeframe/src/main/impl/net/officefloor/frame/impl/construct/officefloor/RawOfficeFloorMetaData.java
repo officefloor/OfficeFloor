@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.construct.officefloor;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -89,6 +90,11 @@ public class RawOfficeFloorMetaData {
 	private final EscalationFlow officeFloorEscalation;
 
 	/**
+	 * {@link OfficeFloorListener} instances.
+	 */
+	private final OfficeFloorListener[] officeFloorListeners;
+
+	/**
 	 * {@link OfficeFloorMetaData}.
 	 */
 	OfficeFloorMetaData officeFloorMetaData;
@@ -108,12 +114,13 @@ public class RawOfficeFloorMetaData {
 	 * @param mosRegistry              Registry of {@link RawManagedObjectMetaData}
 	 *                                 by the {@link ManagedObjectSource} name.
 	 * @param officeFloorEscalation    {@link EscalationProcedure}.
+	 * @param officeFloorListeners     {@link OfficeFloorListener} instances.
 	 */
 	public RawOfficeFloorMetaData(Executive executive, ThreadFactory[] defaultExecutionStrategy,
 			Map<String, ThreadFactory[]> executionStrategies, Map<String, RawTeamMetaData> teamRegistry,
 			TeamManagement breakChainTeamManagement, ThreadLocalAwareExecutor threadLocalAwareExecutor,
 			ManagedExecutionFactory managedExecutionFactory, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
-			EscalationFlow officeFloorEscalation) {
+			EscalationFlow officeFloorEscalation, OfficeFloorListener[] officeFloorListeners) {
 		this.executive = executive;
 		this.defaultExecutionStrategy = defaultExecutionStrategy;
 		this.executionStrategies = executionStrategies;
@@ -123,6 +130,7 @@ public class RawOfficeFloorMetaData {
 		this.managedExecutionFactory = managedExecutionFactory;
 		this.mosRegistry = mosRegistry;
 		this.officeFloorEscalation = officeFloorEscalation;
+		this.officeFloorListeners = officeFloorListeners;
 	}
 
 	/**
@@ -217,6 +225,15 @@ public class RawOfficeFloorMetaData {
 	 */
 	public OfficeFloorMetaData getOfficeFloorMetaData() {
 		return this.officeFloorMetaData;
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorListener} instances.
+	 * 
+	 * @return {@link OfficeFloorListener} instances.
+	 */
+	public OfficeFloorListener[] getOfficeFloorListeners() {
+		return this.officeFloorListeners;
 	}
 
 }

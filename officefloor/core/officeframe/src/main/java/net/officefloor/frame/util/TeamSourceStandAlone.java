@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.source.SourceContext;
@@ -35,6 +36,7 @@ import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
 import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
 import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
+import net.officefloor.frame.test.MockClockFactory;
 
 /**
  * Loads a {@link TeamSource} for stand-alone use.
@@ -67,6 +69,11 @@ public class TeamSourceStandAlone {
 	 * {@link ThreadCompletionListener} instances.
 	 */
 	private final List<ThreadCompletionListener> threadCompletionListeners = new LinkedList<>();
+
+	/**
+	 * {@link ClockFactory}.
+	 */
+	private ClockFactory clockFactory = new MockClockFactory();
 
 	/**
 	 * Default instantiation.
@@ -141,6 +148,15 @@ public class TeamSourceStandAlone {
 	}
 
 	/**
+	 * Specifies the {@link ClockFactory}.
+	 * 
+	 * @param clockFactory {@link ClockFactory}.
+	 */
+	public void setClockFactory(ClockFactory clockFactory) {
+		this.clockFactory = clockFactory;
+	}
+
+	/**
 	 * Returns a {@link Team} from the loaded {@link TeamSource}.
 	 * 
 	 * @param                 <TS> {@link TeamSource} type.
@@ -158,7 +174,8 @@ public class TeamSourceStandAlone {
 		String teamName = (this.teamName != null ? this.teamName : teamSourceClass.getSimpleName());
 
 		// Create team source context
-		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
+		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
+				this.clockFactory);
 		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
 				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));
 		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,

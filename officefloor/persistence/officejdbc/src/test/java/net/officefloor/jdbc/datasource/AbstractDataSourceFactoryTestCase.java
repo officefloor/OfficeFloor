@@ -27,6 +27,7 @@ import net.officefloor.frame.api.source.UnknownPropertyError;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.MockClockFactory;
 
 /**
  * Tests the {@link DataSourceFactory}.
@@ -119,7 +120,7 @@ public abstract class AbstractDataSourceFactoryTestCase extends AbstractOfficeCo
 	 * @return {@link SourceContext}.
 	 */
 	private SourceContext createSourceContext(String... propertyNameValuePairs) {
-		SourceContextImpl root = new SourceContextImpl(false, this.getClass().getClassLoader());
+		SourceContextImpl root = new SourceContextImpl(false, this.getClass().getClassLoader(), new MockClockFactory());
 		SourceProperties properties = new SourcePropertiesImpl(propertyNameValuePairs);
 		return new SourceContextImpl(false, root, properties);
 	}

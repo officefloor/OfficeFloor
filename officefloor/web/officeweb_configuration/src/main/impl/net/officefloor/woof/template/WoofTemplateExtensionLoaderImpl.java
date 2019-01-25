@@ -31,7 +31,6 @@ import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.impl.ConfigurationSourceContextImpl;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
-import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.ConflictImpl;
 import net.officefloor.model.impl.change.NoChange;
@@ -61,7 +60,7 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 			CompilerIssues issues = (CompilerIssues) parameters[1];
 
 			// Instantiate the woof template extension source
-			SourceContext sourceContext = new SourceContextImpl(true, compiler.getClassLoader());
+			SourceContext sourceContext = compiler.createRootSourceContext();
 			WoofTemplateExtensionSource extensionSource = CompileUtil.newInstance(woofTemplateExtensionSourceClassName,
 					WoofTemplateExtensionSource.class, null, sourceContext, compiler, issues);
 			if (extensionSource == null) {

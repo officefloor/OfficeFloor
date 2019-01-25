@@ -34,6 +34,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
@@ -61,13 +62,12 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 
 	/**
 	 * <p>
-	 * Allow enhancing the {@link CompilerIssues}. For example allows wrapping
-	 * with a {@link StderrCompilerIssuesWrapper}.
+	 * Allow enhancing the {@link CompilerIssues}. For example allows wrapping with
+	 * a {@link StderrCompilerIssuesWrapper}.
 	 * <p>
 	 * This is available for {@link TestCase} instances to override.
 	 * 
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param issues {@link CompilerIssues}.
 	 * @return By default returns input {@link CompilerIssues}.
 	 */
 	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
@@ -112,12 +112,15 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	 */
 	protected void record_initiateOfficeFloorBuilder() {
 
-		// Record adding listener for external service handling
+		// Record adding listener for clock factory and external service handling
+		this.officeFloorBuilder.addOfficeFloorListener(null);
 		this.officeFloorBuilder.addOfficeFloorListener(null);
 		this.control(this.officeFloorBuilder).setMatcher(new TypeMatcher(OfficeFloorListener.class));
 
 		// Record initiate OfficeFloor builder
 		this.officeFloorBuilder.setClassLoader(Thread.currentThread().getContextClassLoader());
+		this.officeFloorBuilder.setClockFactory(null);
+		this.control(this.officeFloorBuilder).setMatcher(new TypeMatcher(ClockFactory.class));
 		this.officeFloorBuilder.addResources(this.resourceSource);
 	}
 
@@ -129,8 +132,7 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	/**
 	 * Records adding a {@link Team}.
 	 * 
-	 * @param Name
-	 *            of the {@link Team}.
+	 * @param Name of the {@link Team}.
 	 * @return {@link TeamBuilder}.
 	 */
 	protected TeamBuilder<?> record_officefloor_addTeam(String teamName) {
@@ -157,8 +159,7 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	/**
 	 * Records adding an {@link Office}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
+	 * @param officeName Name of the {@link Office}.
 	 * @return {@link OfficeBuilder}.
 	 */
 	protected OfficeBuilder record_officefloor_addOffice(String officeName) {
@@ -176,10 +177,8 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	/**
 	 * Records adding a {@link ManagedFunction}.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param factory
-	 *            {@link ManagedFunctionFactory}.
+	 * @param functionName Name of the {@link ManagedFunction}.
+	 * @param factory      {@link ManagedFunctionFactory}.
 	 * @return {@link ManagedFunctionBuilder}.
 	 */
 	protected ManagedFunctionBuilder<?, ?> record_office_addFunction(String functionName,
@@ -198,13 +197,11 @@ public abstract class AbstractOfficeFloorTestCase extends AbstractStructureTestC
 	/**
 	 * Loads the {@link OfficeFloor}.
 	 * 
-	 * @param isExpectBuild
-	 *            If expected to build the {@link OfficeFloor}.
-	 * @param maker
-	 *            {@link OfficeFloorMaker}.
-	 * @param propertyNameValuePairs
-	 *            Name/value pairs for the necessary {@link Property} instances
-	 *            to load the {@link OfficeFloor}.
+	 * @param isExpectBuild          If expected to build the {@link OfficeFloor}.
+	 * @param maker                  {@link OfficeFloorMaker}.
+	 * @param propertyNameValuePairs Name/value pairs for the necessary
+	 *                               {@link Property} instances to load the
+	 *                               {@link OfficeFloor}.
 	 */
 	protected void loadOfficeFloor(boolean isExpectBuild, OfficeFloorMaker maker, String... propertyNameValuePairs) {
 

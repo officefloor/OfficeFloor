@@ -153,6 +153,8 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.clock.Clock;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.Office;
@@ -165,6 +167,7 @@ import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.impl.execute.clock.ClockFactoryImpl;
 
 /**
  * <p>
@@ -176,6 +179,12 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements NodeContext, TypeLoader {
+
+	/**
+	 * {@link ClockFactory} to allow capture of {@link Clock} instances to be passed
+	 * to the {@link OfficeFrame}.
+	 */
+	private ClockFactory clockFactory = new ClockFactoryImpl();
 
 	/**
 	 * {@link ResourceSource} instances.
@@ -352,6 +361,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	 */
 
 	@Override
+	public void setClockFactory(ClockFactory clockFactory) {
+		this.clockFactory = clockFactory;
+	}
+
+	@Override
 	public void addResources(ResourceSource resourceSource) {
 		this.resourceSources.add(resourceSource);
 	}
@@ -465,6 +479,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public PropertyList createPropertyList() {
 		return new PropertyListImpl();
+	}
+
+	@Override
+	public SourceContext createRootSourceContext() {
+		return new SourceContextImpl(false, this.getClassLoader(), this.clockFactory,
+				this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
 	}
 
 	@Override
@@ -627,6 +647,9 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		builder.addOfficeFloorListener(new ExternalServicingOfficeFloorListener(node));
 
 		// Add compiler configured OfficeFloor listeners
+		if (this.clockFactory instanceof OfficeFloorListener) {
+			builder.addOfficeFloorListener((OfficeFloorListener) this.clockFactory);
+		}
 		for (OfficeFloorListener listener : this.officeFloorListeners) {
 			builder.addOfficeFloorListener(listener);
 		}
@@ -731,8 +754,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	public SourceContext getRootSourceContext() {
 		// Ensure have source context
 		if (this.sourceContext == null) {
-			this.sourceContext = new SourceContextImpl(false, this.getClassLoader(),
-					this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
+			this.sourceContext = this.createRootSourceContext();
 		}
 
 		// Return the source context
@@ -765,6 +787,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	public void initiateOfficeFloorBuilder(OfficeFloorBuilder builder) {
 		builder.setClassLoader(this.getClassLoader());
+		builder.setClockFactory(this.clockFactory);
 		for (ResourceSource resourceSource : this.resourceSources) {
 			builder.addResources(resourceSource);
 		}

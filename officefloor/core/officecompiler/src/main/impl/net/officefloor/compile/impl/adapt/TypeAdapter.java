@@ -79,18 +79,13 @@ public class TypeAdapter implements InvocationHandler {
 	/**
 	 * Invokes the method expecting no {@link Exception}.
 	 * 
-	 * @param implementation
-	 *            Implementation.
-	 * @param methodName
-	 *            Name of the method.
-	 * @param arguments
-	 *            Arguments for the method.
-	 * @param paramTypes
-	 *            Parameter types for the method. May be <code>null</code>.
-	 * @param clientClassLoader
-	 *            {@link ClassLoader} of the client.
-	 * @param implClassLoader
-	 *            {@link ClassLoader} of the implementation.
+	 * @param implementation    Implementation.
+	 * @param methodName        Name of the method.
+	 * @param arguments         Arguments for the method.
+	 * @param paramTypes        Parameter types for the method. May be
+	 *                          <code>null</code>.
+	 * @param clientClassLoader {@link ClassLoader} of the client.
+	 * @param implClassLoader   {@link ClassLoader} of the implementation.
 	 * @return Return value from the {@link Method} invocation.
 	 */
 	public static Object invokeNoExceptionMethod(Object implementation, String methodName, Object[] arguments,
@@ -115,21 +110,14 @@ public class TypeAdapter implements InvocationHandler {
 	/**
 	 * Invokes the implementing method.
 	 * 
-	 * @param implementation
-	 *            Implementation.
-	 * @param methodName
-	 *            Name of the method.
-	 * @param arguments
-	 *            Arguments for the method.
-	 * @param paramTypes
-	 *            Parameter types for the method.
-	 * @param clientClassLoader
-	 *            {@link ClassLoader} of the client.
-	 * @param implClassLoader
-	 *            {@link ClassLoader} of the implementation.
+	 * @param implementation    Implementation.
+	 * @param methodName        Name of the method.
+	 * @param arguments         Arguments for the method.
+	 * @param paramTypes        Parameter types for the method.
+	 * @param clientClassLoader {@link ClassLoader} of the client.
+	 * @param implClassLoader   {@link ClassLoader} of the implementation.
 	 * @return Return value from the {@link Method} invocation.
-	 * @throws Throwable
-	 *             If fails to invoke the {@link Method}.
+	 * @throws Throwable If fails to invoke the {@link Method}.
 	 */
 	public static Object invokeMethod(Object implementation, String methodName, Object[] arguments,
 			Class<?>[] paramTypes, ClassLoader clientClassLoader, ClassLoader implClassLoader) throws Throwable {
@@ -203,17 +191,12 @@ public class TypeAdapter implements InvocationHandler {
 	/**
 	 * Adapts the object.
 	 * 
-	 * @param object
-	 *            Object to be adapted.
-	 * @param requiredType
-	 *            Required Type.
-	 * @param clientClassLoader
-	 *            Client {@link ClassLoader}.
-	 * @param implClassLoader
-	 *            Implementation {@link ClassLoader}.
+	 * @param object            Object to be adapted.
+	 * @param requiredType      Required Type.
+	 * @param clientClassLoader Client {@link ClassLoader}.
+	 * @param implClassLoader   Implementation {@link ClassLoader}.
 	 * @return Adapted object.
-	 * @throws Exception
-	 *             If fails to adapt the object.
+	 * @throws Exception If fails to adapt the object.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static Object adaptObject(Object object, Class<?> requiredType, ClassLoader clientClassLoader,
@@ -329,25 +312,22 @@ public class TypeAdapter implements InvocationHandler {
 	/**
 	 * Determine if compatible type.
 	 * 
-	 * @param type
-	 *            Type to check.
+	 * @param type Type to check.
 	 * @return <code>true</code> if compatible type.
 	 */
 	private static boolean isCompatibleType(Class<?> type) {
-		return (compatibleObjectTypes.contains(type.getName())) || (type.isPrimitive());
+		return (compatibleObjectTypes.contains(type.getName())) || (type.isPrimitive())
+				|| (ClassLoader.class.isAssignableFrom(type));
 	}
 
 	/**
 	 * Translates the {@link Class} for use with the {@link ClassLoader}.
 	 * 
-	 * @param clazz
-	 *            {@link Class}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param clazz       {@link Class}.
+	 * @param classLoader {@link ClassLoader}.
 	 * @return Translated {@link Class}. May be <code>null</code> if {@link Class}
 	 *         not available from {@link ClassLoader}.
-	 * @throws ClassNotFoundException
-	 *             If fails to obtain translated {@link Class}.
+	 * @throws ClassNotFoundException If fails to obtain translated {@link Class}.
 	 */
 	private static Class<?> translateClass(Class<?> clazz, ClassLoader classLoader) throws ClassNotFoundException {
 
@@ -386,8 +366,7 @@ public class TypeAdapter implements InvocationHandler {
 	/**
 	 * Obtains the implementing interfaces the {@link Class}.
 	 * 
-	 * @param clazz
-	 *            {@link Class}.
+	 * @param clazz {@link Class}.
 	 * @return Implementing interfaces.
 	 */
 	public static Class<?>[] getInterfaces(Class<?> clazz) {
@@ -412,8 +391,7 @@ public class TypeAdapter implements InvocationHandler {
 	 * Determines if the {@link Class} is a {@link Throwable} (i.e. an
 	 * {@link Exception}).
 	 * 
-	 * @param clazz
-	 *            {@link Class} to check.
+	 * @param clazz {@link Class} to check.
 	 * @return <code>true</code> if is a {@link Throwable}.
 	 */
 	private static boolean isThrowable(Class<?> clazz) {
@@ -430,17 +408,13 @@ public class TypeAdapter implements InvocationHandler {
 	/**
 	 * Creates a {@link Proxy}.
 	 * 
-	 * @param implementation
-	 *            Implementation behind the {@link Proxy}.
-	 * @param clientClassLoader
-	 *            {@link ClassLoader} for the client.
-	 * @param implClassLoader
-	 *            {@link ClassLoader} for the implementation.
-	 * @param interfaceTypes
-	 *            Interfaces for the {@link Proxy}.
+	 * @param implementation    Implementation behind the {@link Proxy}.
+	 * @param clientClassLoader {@link ClassLoader} for the client.
+	 * @param implClassLoader   {@link ClassLoader} for the implementation.
+	 * @param interfaceTypes    Interfaces for the {@link Proxy}.
 	 * @return {@link Proxy}.
-	 * @throws ClassNotFoundException
-	 *             If fails to load interface type for {@link Proxy}.
+	 * @throws ClassNotFoundException If fails to load interface type for
+	 *                                {@link Proxy}.
 	 */
 	public static Object createProxy(Object implementation, ClassLoader clientClassLoader, ClassLoader implClassLoader,
 			Class<?>... interfaceTypes) throws ClassNotFoundException {
@@ -489,14 +463,11 @@ public class TypeAdapter implements InvocationHandler {
 	/**
 	 * Access via staic methods.
 	 * 
-	 * @param implementation
-	 *            Type implementation.
-	 * @param clientClassLoader
-	 *            {@link ClassLoader} of the client.
-	 * @param implClassLoader
-	 *            {@link ClassLoader} of the implementation.
-	 * @param interfaceTypes
-	 *            Interface types. Keep reference to make debugging easier.
+	 * @param implementation    Type implementation.
+	 * @param clientClassLoader {@link ClassLoader} of the client.
+	 * @param implClassLoader   {@link ClassLoader} of the implementation.
+	 * @param interfaceTypes    Interface types. Keep reference to make debugging
+	 *                          easier.
 	 */
 	private TypeAdapter(Object implementation, ClassLoader clientClassLoader, ClassLoader implClassLoader,
 			Class<?>[] interfaceTypes) {

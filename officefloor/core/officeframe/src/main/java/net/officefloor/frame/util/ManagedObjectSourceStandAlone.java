@@ -25,6 +25,7 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -40,6 +41,7 @@ import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSou
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.test.MockClockFactory;
 
 /**
  * Loads {@link ManagedObjectSource} for stand-alone use.
@@ -76,6 +78,11 @@ public class ManagedObjectSourceStandAlone {
 	private final Map<Integer, ThreadFactory[]> executionStrategies = new HashMap<>();
 
 	/**
+	 * {@link ClockFactory}.
+	 */
+	private ClockFactory clockFactory = new MockClockFactory();
+
+	/**
 	 * Adds a property for the {@link ManagedObjectSource}.
 	 * 
 	 * @param name  Name of the property.
@@ -83,6 +90,15 @@ public class ManagedObjectSourceStandAlone {
 	 */
 	public void addProperty(String name, String value) {
 		this.properties.addProperty(name, value);
+	}
+
+	/**
+	 * Specifies the {@link ClockFactory}.
+	 * 
+	 * @param clockFactory {@link ClockFactory}.
+	 */
+	public void setClockFactory(ClockFactory clockFactory) {
+		this.clockFactory = clockFactory;
 	}
 
 	/**
@@ -127,7 +143,8 @@ public class ManagedObjectSourceStandAlone {
 		OfficeBuilder officeBuilder = officeFloorBuilder.addOffice(STAND_ALONE_MANAGING_OFFICE_NAME);
 
 		// Create the delegate source context
-		SourceContext context = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
+		SourceContext context = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
+				this.clockFactory);
 
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(false,

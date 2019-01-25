@@ -18,14 +18,12 @@
 package net.officefloor.server.http;
 
 import java.net.Socket;
+import java.time.Instant;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.function.Supplier;
 
 import javax.net.ssl.SSLContext;
@@ -37,8 +35,7 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationH
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.frame.api.build.OfficeFloorEvent;
-import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.source.SourceContext;
@@ -179,11 +176,6 @@ public class HttpServer {
 	private final String serverName;
 
 	/**
-	 * {@link DateHttpHeaderClock} {@link Timer}.
-	 */
-	private volatile Timer dateTimer;
-
-	/**
 	 * {@link DateHttpHeaderClock}. May be <code>null</code>.
 	 */
 	private final DateHttpHeaderClock dateHttpHeaderClock;
@@ -233,27 +225,11 @@ public class HttpServer {
 				.parseBoolean(getPropertyString(PROPERTY_HTTP_DATE_HEADER, context, () -> Boolean.toString(false)));
 		if (isDateHttpHeader) {
 			// Create date header clock
-			DateHttpHeaderCockImpl clock = new DateHttpHeaderCockImpl();
-			this.dateHttpHeaderClock = clock;
-
-			// Trigger updates to date header
-			officeFloorDeployer.addOfficeFloorListener(new OfficeFloorListener() {
-				@Override
-				public void officeFloorOpened(OfficeFloorEvent event) throws Exception {
-					// Start tracking time (update every second)
-					HttpServer.this.dateTimer = new Timer(true);
-					HttpServer.this.dateTimer.schedule(clock, 0, 1000);
-				}
-
-				@Override
-				public void officeFloorClosed(OfficeFloorEvent event) throws Exception {
-					// Stop timer
-					if (HttpServer.this.dateTimer != null) {
-						HttpServer.this.dateTimer.cancel();
-					}
-				}
-			});
-
+			this.dateHttpHeaderClock = new DateHttpHeaderCockImpl(context.getClock((time) -> {
+				String now = DateTimeFormatter.RFC_1123_DATE_TIME
+						.format(Instant.ofEpochSecond(time).atZone(ZoneOffset.UTC));
+				return new HttpHeaderValue(now);
+			}));
 		} else {
 			// No date header
 			this.dateHttpHeaderClock = null;
@@ -458,19 +434,21 @@ public class HttpServer {
 	/**
 	 * {@link DateHttpHeaderClock} implementation.
 	 */
-	private static class DateHttpHeaderCockImpl extends TimerTask implements DateHttpHeaderClock {
+	private static class DateHttpHeaderCockImpl implements DateHttpHeaderClock {
 
 		/**
-		 * <code>Date</code> {@link HttpHeaderValue}.
+		 * <code>Date</code> {@link HttpHeaderValue} {@link Clock}.
 		 */
-		private volatile HttpHeaderValue httpHeader;
+		private final Clock<HttpHeaderValue> httpHeaderClock;
 
 		/**
 		 * Instantiate.
+		 * 
+		 * @param httpHeaderClock {@link Clock} for the <code>Date</code>
+		 *                        {@link HttpHeaderValue}.
 		 */
-		public DateHttpHeaderCockImpl() {
-			// Set initial date
-			this.run();
+		private DateHttpHeaderCockImpl(Clock<HttpHeaderValue> httpHeaderClock) {
+			this.httpHeaderClock = httpHeaderClock;
 		}
 
 		/*
@@ -479,18 +457,7 @@ public class HttpServer {
 
 		@Override
 		public HttpHeaderValue getDateHttpHeaderValue() {
-			return this.httpHeader;
-		}
-
-		/*
-		 * ==================== TimerTask ======================
-		 */
-
-		@Override
-		public void run() {
-			// Update to new time
-			String now = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC));
-			this.httpHeader = new HttpHeaderValue(now);
+			return this.httpHeaderClock.getTime();
 		}
 	}
 

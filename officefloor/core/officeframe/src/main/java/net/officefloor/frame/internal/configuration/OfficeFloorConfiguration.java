@@ -18,7 +18,9 @@
 package net.officefloor.frame.internal.configuration;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.manage.Office;
@@ -46,9 +48,11 @@ public interface OfficeFloorConfiguration {
 	/**
 	 * Obtains the {@link SourceContext}.
 	 * 
+	 * @param clockFactoryProvider Provides {@link ClockFactory} if one not
+	 *                             configured.
 	 * @return {@link SourceContext}.
 	 */
-	SourceContext getSourceContext();
+	SourceContext getSourceContext(Supplier<ClockFactory> clockFactoryProvider);
 
 	/**
 	 * Obtains the decorator of {@link Thread} instances created by the

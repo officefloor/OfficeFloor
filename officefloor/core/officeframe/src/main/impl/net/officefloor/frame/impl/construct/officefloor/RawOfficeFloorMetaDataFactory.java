@@ -23,8 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.executive.Executive;
@@ -43,6 +46,7 @@ import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.clock.ClockFactoryImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationHandlerEscalationFlow;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
 import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
@@ -107,14 +111,27 @@ public class RawOfficeFloorMetaDataFactory {
 			officeFloorName = OfficeFloor.class.getSimpleName();
 		}
 
+		// Create listing of additional OfficeFloor listeners
+		List<OfficeFloorListener> officeFloorListeners = new LinkedList<>();
+
+		// Create the default clock factory
+		ClockFactoryImpl defaultClockFactory = new ClockFactoryImpl();
+		Supplier<ClockFactory> clockFactoryProvider = () -> {
+			if (!officeFloorListeners.contains(defaultClockFactory)) {
+				officeFloorListeners.add(defaultClockFactory);
+			}
+			return defaultClockFactory;
+		};
+
 		// Obtain the Source Context
-		SourceContext sourceContext = configuration.getSourceContext();
+		SourceContext sourceContext = configuration.getSourceContext(clockFactoryProvider);
 		if (sourceContext == null) {
 			issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName,
 					"No " + SourceContext.class.getSimpleName() + " provided from configuration");
 
 			// Use default source context
-			sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
+			sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
+					clockFactoryProvider.get());
 		}
 
 		// Create the managed object source factory
@@ -275,7 +292,8 @@ public class RawOfficeFloorMetaDataFactory {
 		// Create the raw office floor meta-data
 		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy,
 				executionStrategies, teamRegistry, breakChainTeamManagement, threadLocalAwareExecutor,
-				managedExecutionFactory, mosRegistry, officeFloorEscalation);
+				managedExecutionFactory, mosRegistry, officeFloorEscalation,
+				officeFloorListeners.toArray(new OfficeFloorListener[officeFloorListeners.size()]));
 
 		// Construct the office factory
 		RawOfficeMetaDataFactory rawOfficeFactory = new RawOfficeMetaDataFactory(rawMetaData);

@@ -215,7 +215,7 @@ public class RawOfficeMetaDataFactory {
 			monitorClock = monitorClockImpl;
 		}
 		FunctionLoop functionLoop = new FunctionLoopImpl(defaultTeam);
-		Timer timer = new Timer(true);
+		Timer timer = new Timer(Office.class.getSimpleName() + "_Monitor_" + officeName, true);
 
 		// Create the office manager process state
 		OfficeManagerProcessState officeManagerProcessState = new OfficeManagerProcessState(maxFunctionChainLength,

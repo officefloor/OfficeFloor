@@ -17,9 +17,12 @@
  */
 package net.officefloor.frame.impl.construct.officefloor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import net.officefloor.frame.api.build.ExecutiveBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -29,6 +32,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -106,6 +110,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	private ClassLoader classLoader = null;
 
 	/**
+	 * {@link ClockFactory}.
+	 */
+	private ClockFactory clockFactory = null;
+
+	/**
 	 * Decorator of the {@link Thread} instances created by the
 	 * {@link TeamSourceContext}.
 	 */
@@ -142,6 +151,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	@Override
 	public void setClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
+	}
+
+	@Override
+	public void setClockFactory(ClockFactory clockFactory) {
+		this.clockFactory = clockFactory;
 	}
 
 	@Override
@@ -240,9 +254,13 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaDataFactory(threadLocalAwareExecutor)
 				.constructRawOfficeFloorMetaData(this, issues);
 
-		// Obtain the office floor meta-data and return the office floor
+		// Create the listing of OfficeFloor listeners
+		List<OfficeFloorListener> listeners = new ArrayList<>(this.listeners);
+		listeners.addAll(Arrays.asList(rawMetaData.getOfficeFloorListeners()));
+
+		// Obtain the OfficeFloor meta-data and return the OfficeFloor
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();
-		return new OfficeFloorImpl(metaData, this.listeners.toArray(new OfficeFloorListener[this.listeners.size()]));
+		return new OfficeFloorImpl(metaData, listeners.toArray(new OfficeFloorListener[listeners.size()]));
 	}
 
 	/*
@@ -260,7 +278,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	}
 
 	@Override
-	public SourceContext getSourceContext() {
+	public SourceContext getSourceContext(Supplier<ClockFactory> clockFactoryProvider) {
 
 		// Obtain the class loader
 		ClassLoader classLoader = this.classLoader;
@@ -268,8 +286,14 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 			classLoader = Thread.currentThread().getContextClassLoader();
 		}
 
+		// Obtain the clock factory
+		ClockFactory clockFactory = this.clockFactory;
+		if (clockFactory == null) {
+			clockFactory = clockFactoryProvider.get();
+		}
+
 		// Create and return the source context
-		return new SourceContextImpl(false, classLoader,
+		return new SourceContextImpl(false, classLoader, clockFactory,
 				this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
 	}
 

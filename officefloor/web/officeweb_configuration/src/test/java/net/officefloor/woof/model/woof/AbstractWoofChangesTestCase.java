@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
@@ -66,11 +67,12 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	private static WoofTemplateChangeContext createWoofTemplateChangeContext() {
 
 		// Create the context
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		ClassLoader classLoader = compiler.getClassLoader();
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader, null);
 		WoofChangeIssues issues = WoofTemplateExtensionLoaderUtil.getWoofChangeIssues();
-		WoofTemplateChangeContext context = new WoofTemplateChangeContextImpl(false, classLoader, configurationContext,
-				issues);
+		WoofTemplateChangeContext context = new WoofTemplateChangeContextImpl(false, compiler.createRootSourceContext(),
+				configurationContext, issues);
 
 		// Return the context
 		return context;

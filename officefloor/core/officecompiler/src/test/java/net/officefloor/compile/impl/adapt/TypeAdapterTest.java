@@ -100,6 +100,21 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can adapt a {@link ClassLoader}.
+	 */
+	public void testAdaptClassLoader() {
+		ClassLoader classLoader = createNewClassLoader();
+		this.doParameterTest(ClassLoaderParameter.class, classLoader);
+	}
+
+	public static class ClassLoaderParameter {
+		public boolean run(ClassLoader parameter) throws Exception {
+			assertNotNull("Should load class", parameter.loadClass(CLASS_LOADER_EXTRA_CLASS_NAME));
+			return true;
+		}
+	}
+
+	/**
 	 * Ensure can adapt {@link Enum}.
 	 */
 	public void testAdaptEnum() {
@@ -276,6 +291,22 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	public static class ClassReturnValue {
 		public Class<?> run() {
 			return ClassReturnValue.class;
+		}
+	}
+
+	/**
+	 * Adapt the return {@link ClassLoader}.
+	 */
+	public void testClassLoaderReturnValue() {
+		Object value = this.doTest(ClassLoaderReturnValue.class);
+		assertTrue("Should be adapted return value", value instanceof ClassLoader);
+		ClassLoader adapted = (ClassLoader) value;
+		assertEquals("Incorrect adapted class loader return value", this.implClassLoader, adapted);
+	}
+
+	public static class ClassLoaderReturnValue {
+		public ClassLoader run() {
+			return this.getClass().getClassLoader();
 		}
 	}
 
