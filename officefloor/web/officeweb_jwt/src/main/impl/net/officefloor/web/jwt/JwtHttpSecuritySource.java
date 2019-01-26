@@ -18,6 +18,7 @@ import io.jsonwebtoken.impl.crypto.DefaultJwtSignatureValidator;
 import io.jsonwebtoken.io.Decoder;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.plugin.managedobject.poll.StatePollContext;
 import net.officefloor.plugin.managedobject.poll.StatePoller;
@@ -123,6 +124,11 @@ public class JwtHttpSecuritySource<C> extends
 	}
 
 	/**
+	 * {@link Clock}.
+	 */
+	private Clock<Long> clock;
+
+	/**
 	 * Claims {@link Class}.
 	 */
 	private Class<?> claimsClass;
@@ -160,6 +166,7 @@ public class JwtHttpSecuritySource<C> extends
 		HttpSecuritySourceContext securityContext = context.getHttpSecuritySourceContext();
 
 		// Load the configuration
+		this.clock = securityContext.getClock((time) -> time);
 		this.claimsClass = securityContext.loadClass(securityContext.getProperty(PROPERTY_CLAIMS_CLASS));
 		this.startupTimeout = Long.parseLong(
 				securityContext.getProperty(PROEPRTY_STARTUP_TIMEOUT, String.valueOf(DEFAULT_STARTUP_TIMEOUT)));
@@ -282,7 +289,7 @@ public class JwtHttpSecuritySource<C> extends
 		}
 
 		// Obtain the current time (in seconds)
-		long currentTime = System.currentTimeMillis() / 1000;
+		long currentTime = this.clock.getTime();
 
 		// TODO consider clock skew
 

@@ -2,6 +2,9 @@ package net.officefloor.web.jwt.spi.decode;
 
 import java.io.Serializable;
 import java.security.Key;
+import java.util.concurrent.TimeUnit;
+
+import net.officefloor.frame.api.clock.Clock;
 
 /**
  * JWT decode key.
@@ -28,9 +31,9 @@ public class JwtDecodeKey implements Serializable {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param startTime  Milliseconds since Epoch for when this {@link JwtDecodeKey}
+	 * @param startTime  Seconds since Epoch for when this {@link JwtDecodeKey}
 	 *                   becomes active.
-	 * @param expireTime Milliseconds since Epoch for expiry of this
+	 * @param expireTime Seconds since Epoch for expiry of this
 	 *                   {@link JwtDecodeKey}.
 	 * @param key        {@link Key} to validate the JWT.
 	 */
@@ -44,12 +47,14 @@ public class JwtDecodeKey implements Serializable {
 	 * Instantiate to become active immediately and expire within the specified
 	 * time.
 	 * 
-	 * @param millisecondsToExpire Milliseconds from now to expire.
-	 * @param key                  {@link Key}.
+	 * @param timeInSeconds  {@link Clock} to obtain the seconds since Epoch.
+	 * @param periodToExpire Period to expire the {@link Key}.
+	 * @param unit           {@link TimeUnit} for period.
+	 * @param key            {@link Key} to validate the JWT.
 	 */
-	public JwtDecodeKey(long millisecondsToExpire, Key key) {
-		this.startTime = System.currentTimeMillis();
-		this.expireTime = this.startTime + millisecondsToExpire;
+	public JwtDecodeKey(Clock<Long> timeInSeconds, long periodToExpire, TimeUnit unit, Key key) {
+		this.startTime = timeInSeconds.getTime();
+		this.expireTime = this.startTime + unit.toSeconds(periodToExpire);
 		this.key = key;
 	}
 
@@ -58,8 +63,8 @@ public class JwtDecodeKey implements Serializable {
 	 * Instantiates to (effectively) never expire.
 	 * <p>
 	 * <strong>This should only be used for testing.</strong> Within production
-	 * environments, {@link Key} instances should be rotated a semi-regular basis to
-	 * reduce impact of compromised keys.
+	 * environments, {@link Key} instances should be rotated at a semi-regular basis
+	 * to reduce impact of compromised keys.
 	 * 
 	 * @param key {@link Key}.
 	 */

@@ -1,16 +1,22 @@
 package net.officefloor.web.jwt;
 
+import static org.junit.Assert.assertNotEquals;
+
 import java.io.IOException;
+import java.security.Key;
 import java.security.KeyPair;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -18,6 +24,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.test.MockClockFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpException;
@@ -80,6 +87,16 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	private static Consumer<JwtDecodeCollector> jwtDecodeCollectorHandler = DEFAULT_JWT_DECODE_COLLECTOR;
 
 	/**
+	 * Current time in seconds since Epoch.
+	 */
+	private static final long CURRENT_TIME = 50000;
+
+	/**
+	 * {@link MockClockFactory} to enable specifying time.
+	 */
+	private final MockClockFactory clockFactory = new MockClockFactory(CURRENT_TIME);
+
+	/**
 	 * {@link MockHttpServer}.
 	 */
 	private MockHttpServer server;
@@ -137,74 +154,126 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure invalid if can not parse claims.
+	 */
+	public void testInvalidParseClaimsJwt() throws Exception {
+		this.doJwtTest("Bearer HEADER.CLAIMS.SIGNATURE", HttpStatus.UNAUTHORIZED, "INVALID JWT");
+	}
+
+	/**
+	 * Ensure invalid if can not parse header.
+	 */
+	public void testInvalidParseHeaderJwt() throws Exception {
+		String claims = Base64.getUrlEncoder().encodeToString("{}".getBytes());
+		this.doJwtTest("Bearer HEADER." + claims + ".SIGNATURE", HttpStatus.UNAUTHORIZED, "INVALID JWT");
+	}
+
+	/**
+	 * Ensure invalid signature.
+	 */
+	public void testInvalidSignatureJwt() throws Exception {
+		String token = Jwts.builder().signWith(keyPair.getPrivate()).claim("sub", "Daniel").compact();
+		String parts[] = token.split("\\.");
+		assertEquals("Invalid test, as invalid token", 3, parts.length);
+		token = parts[0] + "." + parts[1] + ".invalid";
+		this.doJwtTest("Bearer " + token, HttpStatus.UNAUTHORIZED, "INVALID JWT");
+	}
+
+	/**
 	 * Ensure handle invalid JWT as not before in the future.
 	 */
 	public void testNotBeforeJwt() throws Exception {
-		long nbf = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1);
-		String token = Jwts.builder().setNotBefore(new Date(nbf)).signWith(keyPair.getPrivate()).compact();
-		this.doJwtTest("Bearer " + token, HttpStatus.UNAUTHORIZED, "INVALID JWT");
+		this.doInvalidJwtTest(new MockClaims().setNbf(currentTimeOffset(3, TimeUnit.SECONDS)), "INVALID JWT");
 	}
 
 	/**
 	 * Ensure handle expired JWT.
 	 */
 	public void testExpiredJwt() throws Exception {
-		long exp = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1);
-		String token = Jwts.builder().setExpiration(new Date(exp)).signWith(keyPair.getPrivate()).compact();
-		this.doJwtTest("Bearer " + token, HttpStatus.UNAUTHORIZED, "EXPIRED JWT");
+		this.doInvalidJwtTest(new MockClaims().setExp(currentTimeOffset(-3, TimeUnit.SECONDS)), "EXPIRED JWT");
 	}
 
 	/**
 	 * Ensure can parse valid JWT.
 	 */
 	public void testValidJwt() throws Exception {
-		MockClaims claims = new MockClaims("Daniel");
-		String token = Jwts.builder().setSubject(claims.getSub()).setExpiration(getDate(claims.getExp()))
-				.signWith(keyPair.getPrivate()).compact();
-		String response = mapper.writeValueAsString(claims);
-		this.doJwtTest("Bearer " + token, HttpStatus.OK, response);
+		this.doValidJwtTest(new MockClaims().setSub("Daniel").setExp(currentTimeOffset(5, TimeUnit.MINUTES)));
 	}
 
 	/**
 	 * Ensure valid <code>nbf</code> with clock skew.
 	 */
 	public void testValidNotBeforeWithClockSkew() throws Exception {
-		fail("TODO implement");
+		this.doValidJwtTest(new MockClaims().setNbf(currentTimeOffset(2, TimeUnit.SECONDS)));
 	}
 
 	/**
 	 * Ensure valid <code>exp</code> with clock skew.
 	 */
 	public void testValidExpiryWithClockSkew() throws Exception {
-		fail("TODO implement");
+		this.doValidJwtTest(new MockClaims().setExp(currentTimeOffset(-2, TimeUnit.SECONDS)));
 	}
 
 	/**
 	 * Ensure invalid JWT as {@link JwtDecodeKey} is old.
 	 */
 	public void testInvalidDueToOldKey() throws Exception {
-		fail("TODO implement");
+		this.doInvalidDecodeKeyTest(-20, -3);
 	}
 
 	/**
 	 * Ensure invalid JWT as {@link JwtDecodeKey} is too new.
 	 */
 	public void testInvalidDueToNewKey() throws Exception {
-		fail("TODO implement");
+		this.doInvalidDecodeKeyTest(3, 20);
 	}
 
 	/**
 	 * Ensure valid JWT as {@link JwtDecodeKey} is old but within clock skew.
 	 */
 	public void testValidDueToOldKeyButWithinClockSkew() throws Exception {
-		fail("TODO implement");
+		this.doValidDecodeKeyTest(-20, -2);
 	}
 
 	/**
 	 * Ensure invalid JWT as {@link JwtDecodeKey} is too new but within clock skew.
 	 */
 	public void testValidDueToNewKeyButWithinClockSkew() throws Exception {
-		fail("TODO implement");
+		this.doValidDecodeKeyTest(2, 20);
+	}
+
+	/**
+	 * Ensure can use multiple active {@link JwtDecodeKey} instances.
+	 */
+	public void testMultipleDecodeKeysActive() throws Exception {
+
+		// Create two sets of keys
+		KeyPair keyPairOne = Keys.keyPairFor(SignatureAlgorithm.RS256);
+		KeyPair keyPairTwo = Keys.keyPairFor(SignatureAlgorithm.RS256);
+		assertNotEquals("Invalid test, as public keys the same", keyPairOne.getPublic(), keyPairTwo.getPublic());
+		jwtDecodeCollectorHandler = (collector) -> {
+			collector.setKeys(new JwtDecodeKey(keyPairOne.getPublic()), new JwtDecodeKey(keyPairTwo.getPublic()));
+		};
+
+		// Start the server
+		this.loadServer(null);
+
+		// No JWT so unauthorised
+		this.server.send(MockHttpServer.mockRequest(ECHO_CLAIMS_PATH))
+				.assertResponse(HttpStatus.UNAUTHORIZED.getStatusCode(), "NO JWT");
+
+		// Undertake JWT key test
+		String expectedResponse = mapper.writeValueAsString(new MockClaims().setSub("Daniel"));
+		Consumer<Key> assertValid = (key) -> {
+			String token = Jwts.builder().signWith(keyPairOne.getPrivate()).claim("sub", "Daniel").compact();
+			MockHttpRequestBuilder request = MockHttpServer.mockRequest(ECHO_CLAIMS_PATH);
+			request.header("Authorization", "Bearer " + token);
+			this.server.send(request).assertResponse(HttpStatus.OK.getStatusCode(), expectedResponse);
+		};
+
+		// Ensure valid for both keys
+		assertValid.accept(keyPairOne.getPublic());
+		assertValid.accept(keyPairTwo.getPublic());
 	}
 
 	/**
@@ -238,15 +307,28 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 */
 	public static class RoleClaims {
 
-		private String role;
+		protected String role;
 
 		public String getRole() {
 			return this.role;
 		}
 
-		public void setRole(String role) {
+		public RoleClaims setRole(String role) {
 			this.role = role;
+			return this;
 		}
+	}
+
+	/**
+	 * Creates the {@link JwtDecodeKey}.
+	 * 
+	 * @param startSecondsOffset Seconds offset from current time for start time.
+	 * @param secondsToExpire    Seconds offset from current time for expire time.
+	 * @param key                {@link Key}.
+	 * @return {@link JwtDecodeKey}.
+	 */
+	private JwtDecodeKey createJwtDecodeKey(long startSecondsOffset, long secondsToExpire, Key key) {
+		return null;
 	}
 
 	/**
@@ -260,6 +342,17 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Obtains the current time offset.
+	 * 
+	 * @param offset Offset on the current time.
+	 * @param unit   {@link TimeUnit}.
+	 * @return Current time offset.
+	 */
+	private static long currentTimeOffset(long offset, TimeUnit unit) {
+		return Instant.ofEpochSecond(CURRENT_TIME).plusSeconds(unit.toSeconds(offset)).getEpochSecond();
+	}
+
+	/**
 	 * Mock claims {@link Class}.
 	 */
 	public static class MockClaims extends RoleClaims {
@@ -270,43 +363,132 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 
 		private Long exp;
 
-		public MockClaims() {
-		}
-
-		private MockClaims(String sub) {
-			// Time measure in seconds
-			this(sub, null, (System.currentTimeMillis() + (20 * 60 * 1000)) / 1000);
-		}
-
-		private MockClaims(String sub, Long nbf, Long exp) {
-			this.sub = sub;
-			this.nbf = nbf;
-			this.exp = exp;
-		}
-
 		public String getSub() {
 			return this.sub;
 		}
 
-		public void setSub(String sub) {
+		public MockClaims setSub(String sub) {
 			this.sub = sub;
+			return this;
 		}
 
 		public Long getNbf() {
 			return this.nbf;
 		}
 
-		public void setNbf(Long nbf) {
+		public MockClaims setNbf(Long nbf) {
 			this.nbf = nbf;
+			return this;
 		}
 
 		public Long getExp() {
 			return this.exp;
 		}
 
-		public void setExp(Long exp) {
+		public MockClaims setExp(Long exp) {
 			this.exp = exp;
+			return this;
 		}
+	}
+
+	/**
+	 * Ensure valid JWT with valid {@link JwtDecodeKey}.
+	 * 
+	 * @param keyStartOffset  {@link JwtDecodeKey} start seconds offset to current
+	 *                        time.
+	 * @param keyExpireOffset {@link JwtDecodeKey} expire seconds offset to current
+	 *                        time.
+	 */
+	private void doValidDecodeKeyTest(long keyStartOffset, long keyExpireOffset) throws Exception {
+		jwtDecodeCollectorHandler = (collector) -> {
+			collector.setKeys(createJwtDecodeKey(keyStartOffset, keyExpireOffset, keyPair.getPublic()));
+		};
+		this.doValidJwtTest(new MockClaims().setSub("Daniel"));
+	}
+
+	/**
+	 * Ensure invalid JWT due to no {@link JwtDecodeKey} matching time window.
+	 * 
+	 * @param keyStartOffset  {@link JwtDecodeKey} start seconds offset to current
+	 *                        time.
+	 * @param keyExpireOffset {@link JwtDecodeKey} expire seconds offset to current
+	 *                        time.
+	 */
+	private void doInvalidDecodeKeyTest(long keyStartOffset, long keyExpireOffset) throws Exception {
+
+		final MockClaims claims = new MockClaims().setSub("Daniel");
+
+		// Ensure valid with default collector (valid key)
+		this.doValidJwtTest(claims);
+
+		// Ensure with outside window JWT that invalid
+		jwtDecodeCollectorHandler = (collector) -> {
+			collector.setKeys(createJwtDecodeKey(keyStartOffset, keyExpireOffset, keyPair.getPublic()));
+		};
+		this.doInvalidJwtTest(claims, "INVALID JWT");
+	}
+
+	/**
+	 * Decorates the {@link JwtBuilder} for the {@link MockClaims}.
+	 */
+	private static final BiConsumer<MockClaims, JwtBuilder> mockClaimsDecorator = (claims, builder) -> {
+		if (claims.sub != null) {
+			builder.setSubject(claims.sub);
+		}
+		if (claims.exp != null) {
+			builder.setExpiration(getDate(claims.exp));
+		}
+		if (claims.nbf != null) {
+			builder.setNotBefore(getDate(claims.nbf));
+		}
+		if (claims.role != null) {
+			builder.claim("role", claims.role);
+		}
+	};
+
+	/**
+	 * Convenience method to test invalid JWT with parsing JWT.
+	 * 
+	 * @param claims {@link MockClaims}.
+	 * @param reason Invalid reason.
+	 */
+	private void doInvalidJwtTest(MockClaims claims, String reason) throws Exception {
+		String token = this.createJwtToken(claims, mockClaimsDecorator);
+		this.doJwtTest("Bearer " + token, HttpStatus.UNAUTHORIZED, reason);
+	}
+
+	/**
+	 * Convenience method to test valid JWT with {@link MockClaims}.
+	 * 
+	 * @param claims {@link MockClaims}.
+	 */
+	private void doValidJwtTest(MockClaims mockClaims) throws Exception {
+		this.doValidJwtTest(mockClaims, mockClaimsDecorator);
+	}
+
+	/**
+	 * Undertakes a valid JWT test.
+	 * 
+	 * @param claims    Claims expected for response.
+	 * @param decorator Decorates the {@link JwtBuilder} with the JWT to send.
+	 */
+	private <C> void doValidJwtTest(C claims, BiConsumer<C, JwtBuilder> decorator) throws Exception {
+		String token = this.createJwtToken(claims, decorator);
+		String response = mapper.writeValueAsString(claims);
+		this.doJwtTest("Bearer " + token, HttpStatus.OK, response);
+	}
+
+	/**
+	 * Creates the JWT.
+	 * 
+	 * @param claims    Claims for JWT.
+	 * @param decorator Decorates the {@link JwtBuilder} with the JWT to send.
+	 * @return JWT.
+	 */
+	private <C> String createJwtToken(C claims, BiConsumer<C, JwtBuilder> decorator) {
+		JwtBuilder builder = Jwts.builder().signWith(keyPair.getPrivate());
+		decorator.accept(claims, builder);
+		return builder.compact();
 	}
 
 	/**
@@ -350,8 +532,14 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 */
 	private void loadServer(ServerConfigurer loader, String... httpSecuirtyProperties) throws Exception {
 
+		// Close existing server (if one created)
+		if (this.officeFloor != null) {
+			this.officeFloor.close();
+		}
+
 		// Compile the server
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+		compiler.getOfficeFloorCompiler().setClockFactory(this.clockFactory);
 		compiler.mockHttpServer((server) -> this.server = server);
 		compiler.web((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
