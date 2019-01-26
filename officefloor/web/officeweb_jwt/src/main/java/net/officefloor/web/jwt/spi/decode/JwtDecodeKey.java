@@ -36,11 +36,13 @@ public class JwtDecodeKey implements Serializable {
 	 * @param expireTime Seconds since Epoch for expiry of this
 	 *                   {@link JwtDecodeKey}.
 	 * @param key        {@link Key} to validate the JWT.
+	 * @throws IllegalArgumentException If invalid arguments.
 	 */
-	public JwtDecodeKey(long startTime, long expireTime, Key key) {
+	public JwtDecodeKey(long startTime, long expireTime, Key key) throws IllegalArgumentException {
 		this.startTime = startTime;
 		this.expireTime = expireTime;
 		this.key = key;
+		this.validate();
 	}
 
 	/**
@@ -51,11 +53,17 @@ public class JwtDecodeKey implements Serializable {
 	 * @param periodToExpire Period to expire the {@link Key}.
 	 * @param unit           {@link TimeUnit} for period.
 	 * @param key            {@link Key} to validate the JWT.
+	 * @throws IllegalArgumentException If invalid arguments.
 	 */
-	public JwtDecodeKey(Clock<Long> timeInSeconds, long periodToExpire, TimeUnit unit, Key key) {
+	public JwtDecodeKey(Clock<Long> timeInSeconds, long periodToExpire, TimeUnit unit, Key key)
+			throws IllegalArgumentException {
+		if (timeInSeconds == null) {
+			throw new IllegalArgumentException("Must provide " + Clock.class.getSimpleName());
+		}
 		this.startTime = timeInSeconds.getTime();
-		this.expireTime = this.startTime + unit.toSeconds(periodToExpire);
+		this.expireTime = this.startTime + (unit != null ? unit : TimeUnit.SECONDS).toSeconds(periodToExpire);
 		this.key = key;
+		this.validate();
 	}
 
 	/**
@@ -67,11 +75,24 @@ public class JwtDecodeKey implements Serializable {
 	 * to reduce impact of compromised keys.
 	 * 
 	 * @param key {@link Key}.
+	 * @throws IllegalArgumentException If missing {@link Key}.
 	 */
-	public JwtDecodeKey(Key key) {
+	public JwtDecodeKey(Key key) throws IllegalArgumentException {
 		this.startTime = 0;
 		this.expireTime = Long.MAX_VALUE;
 		this.key = key;
+		this.validate();
+	}
+
+	/**
+	 * Validates this {@link JwtDecodeKey}.
+	 * 
+	 * @throws IllegalArgumentException If invalid {@link JwtDecodeKey}.
+	 */
+	private void validate() throws IllegalArgumentException {
+		if (this.key == null) {
+			throw new IllegalArgumentException("Must provide " + Key.class.getSimpleName());
+		}
 	}
 
 	/**

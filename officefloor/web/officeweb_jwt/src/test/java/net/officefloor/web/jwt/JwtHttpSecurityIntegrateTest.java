@@ -69,6 +69,11 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	private static final String ROLE_PATH = "/role";
 
 	/**
+	 * Path to server to inject JWT claims.
+	 */
+	private static final String INJECT_PATH = "/inject";
+
+	/**
 	 * {@link ObjectMapper}.
 	 */
 	private static final ObjectMapper mapper = new ObjectMapper();
@@ -175,7 +180,7 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		String token = Jwts.builder().signWith(keyPair.getPrivate()).claim("sub", "Daniel").compact();
 		String parts[] = token.split("\\.");
 		assertEquals("Invalid test, as invalid token", 3, parts.length);
-		token = parts[0] + "." + parts[1] + ".invalid";
+		token = parts[0] + "." + parts[1] + "." + Base64.getUrlEncoder().encodeToString("invalid".getBytes());
 		this.doJwtTest("Bearer " + token, HttpStatus.UNAUTHORIZED, "INVALID JWT");
 	}
 
@@ -243,6 +248,16 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure handle <code>null</code> {@link JwtDecodeKey}.
+	 */
+	public void testNullDecodeKey() throws Exception {
+		jwtDecodeCollectorHandler = (collector) -> {
+			collector.setKeys(null, null, new JwtDecodeKey(keyPair.getPublic()), null, null);
+		};
+		this.doValidJwtTest(new MockClaims().setSub("Daniel"));
+	}
+
+	/**
 	 * Ensure can use multiple active {@link JwtDecodeKey} instances.
 	 */
 	public void testMultipleDecodeKeysActive() throws Exception {
@@ -303,13 +318,6 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure the JWT claims object is available for dependency injection.
-	 */
-	public void testInjectJwtClaims() {
-		fail("TODO implement inject JWT claims object");
-	}
-
-	/**
 	 * Role claims.
 	 */
 	public static class RoleClaims {
@@ -327,6 +335,21 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure the JWT claims object is available for dependency injection.
+	 */
+	public void testInjectJwtClaims() throws Exception {
+
+		// Start server
+		this.loadServer(null);
+
+		// Validate able to inject claims
+		String token = createJwtToken(new MockClaims().setSub("Daniel"), mockClaimsDecorator);
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest(INJECT_PATH);
+		request.header("Authorization", "Bearer " + token);
+		this.server.send(request).assertResponse(HttpStatus.OK.getStatusCode(), "INJECT: Daniel");
+	}
+
+	/**
 	 * Creates the {@link JwtDecodeKey}.
 	 * 
 	 * @param startSecondsOffset Seconds offset from current time for start time.
@@ -335,7 +358,9 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 * @return {@link JwtDecodeKey}.
 	 */
 	private JwtDecodeKey createJwtDecodeKey(long startSecondsOffset, long secondsToExpire, Key key) {
-		return null;
+		long startTime = CURRENT_TIME + startSecondsOffset;
+		long expireTime = CURRENT_TIME + secondsToExpire;
+		return new JwtDecodeKey(startTime, expireTime, key);
 	}
 
 	/**
@@ -590,6 +615,7 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 			// Configure servicing
 			context.link(false, ECHO_CLAIMS_PATH, EchoClaimsSection.class);
 			context.link(false, ROLE_PATH, RoleSection.class);
+			context.link(false, INJECT_PATH, InjectClaimsSection.class);
 
 			security.informWebArchitect();
 		});
@@ -607,6 +633,12 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		@HttpAccess(ifAllRoles = "allow")
 		public void service(ServerHttpConnection connection) throws Exception {
 			connection.getResponse().getEntityWriter().write("ROLE");
+		}
+	}
+
+	public static class InjectClaimsSection {
+		public void service(MockClaims claims, ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("INJECT: " + claims.getSub());
 		}
 	}
 

@@ -2,9 +2,11 @@ package net.officefloor.web.jwt;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -82,6 +84,16 @@ public class JwtHttpSecuritySource<C> extends
 	public static final long DEFAULT_STARTUP_TIMEOUT = 1 * 1000;
 
 	/**
+	 * {@link Property} name for the clock skew in seconds.
+	 */
+	public static final String PROPERTY_CLOCK_SKEW = "clock.skew";
+
+	/**
+	 * Default value for {@link #PROPERTY_CLOCK_SKEW}.
+	 */
+	public static final long DEFAULT_CLOCK_SKEW = 2;
+
+	/**
 	 * Flow keys.
 	 */
 	public static enum Flows {
@@ -129,6 +141,11 @@ public class JwtHttpSecuritySource<C> extends
 	private Clock<Long> clock;
 
 	/**
+	 * Skew in seconds for {@link Clock} time to coordinate with JWT authority.
+	 */
+	private long clockSkew;
+
+	/**
 	 * Claims {@link Class}.
 	 */
 	private Class<?> claimsClass;
@@ -167,6 +184,8 @@ public class JwtHttpSecuritySource<C> extends
 
 		// Load the configuration
 		this.clock = securityContext.getClock((time) -> time);
+		this.clockSkew = Long
+				.parseLong(securityContext.getProperty(PROPERTY_CLOCK_SKEW, String.valueOf(DEFAULT_CLOCK_SKEW)));
 		this.claimsClass = securityContext.loadClass(securityContext.getProperty(PROPERTY_CLAIMS_CLASS));
 		this.startupTimeout = Long.parseLong(
 				securityContext.getProperty(PROEPRTY_STARTUP_TIMEOUT, String.valueOf(DEFAULT_STARTUP_TIMEOUT)));
@@ -291,17 +310,17 @@ public class JwtHttpSecuritySource<C> extends
 		// Obtain the current time (in seconds)
 		long currentTime = this.clock.getTime();
 
-		// TODO consider clock skew
-
-		// Ensure valid window
-		if ((validateClaims.nbf != null) && (validateClaims.nbf > currentTime)) {
+		// Ensure valid window (taking into account clock skew)
+		// Note: signature will only confirm not yet available
+		if ((validateClaims.nbf != null) && (validateClaims.nbf > (currentTime + this.clockSkew))) {
 			// JWT not yet active
 			this.challenge(ChallengeReason.INVALID_JWT, context);
 			return;
 		}
 
-		// Ensure not expired
-		if ((validateClaims.exp != null) && (validateClaims.exp < currentTime)) {
+		// Ensure not expired (taking into account clock skew)
+		// Note: signature will only confirm expired
+		if ((validateClaims.exp != null) && (validateClaims.exp < (currentTime - this.clockSkew))) {
 			// JWT expired
 			this.challenge(ChallengeReason.EXPIRED_JWT, context);
 			return;
@@ -337,16 +356,24 @@ public class JwtHttpSecuritySource<C> extends
 
 		// Loop over decode keys to determine if JWT valid
 		boolean isValid = false;
-		JWT_VALID: for (JwtDecodeKey decodeKey : decoder.getJwtDecodeKeys()) {
+		NEXT_DECODE_KEY: for (JwtDecodeKey decodeKey : decoder.getJwtDecodeKeys()) {
 
-			// TODO ensure key is still within window
+			// Ensure key is still within window (taking into account clock skew)
+			if ((decodeKey.startTime() > (currentTime + this.clockSkew))
+					|| (decodeKey.expireTime() < (currentTime - this.clockSkew))) {
+				continue NEXT_DECODE_KEY; // decode key now outside window
+			}
 
 			// Attempt to validate the signature
 			DefaultJwtSignatureValidator validator = new DefaultJwtSignatureValidator(algorithm, decodeKey.getKey(),
 					base64UrlDecoder);
-			if (validator.isValid(jwtWithoutSignature, signatureBase64)) {
-				isValid = true;
-				break JWT_VALID;
+			try {
+				if (validator.isValid(jwtWithoutSignature, signatureBase64)) {
+					isValid = true;
+					break NEXT_DECODE_KEY; // is valid, so no further processing
+				}
+			} catch (Exception ex) {
+				// Ignore as signature not valid
 			}
 		}
 		if (!isValid) {
@@ -479,7 +506,23 @@ public class JwtHttpSecuritySource<C> extends
 
 		@Override
 		public void setKeys(JwtDecodeKey... keys) {
-			this.context.setNextState(new JwtDecoder(keys), -1, null);
+
+			// Filter the keys (also make copy so can not alter)
+			List<JwtDecodeKey> copy = new ArrayList<>(keys.length);
+			NEXT_KEY: for (JwtDecodeKey key : keys) {
+
+				// Ignore if null
+				if (key == null) {
+					continue NEXT_KEY;
+				}
+
+				// As here valid, so include decode key
+				copy.add(key);
+			}
+
+			// Load the JWT decode keys
+			JwtDecodeKey[] validKeys = copy.toArray(new JwtDecodeKey[copy.size()]);
+			this.context.setNextState(new JwtDecoder(validKeys), -1, null);
 		}
 
 		@Override
