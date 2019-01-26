@@ -303,6 +303,13 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure the JWT claims object is available for dependency injection.
+	 */
+	public void testInjectJwtClaims() {
+		fail("TODO implement inject JWT claims object");
+	}
+
+	/**
 	 * Role claims.
 	 */
 	public static class RoleClaims {
