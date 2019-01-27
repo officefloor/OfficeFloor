@@ -865,8 +865,9 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 				supportingManagedObjectType.getProperties().configureProperties(supportingManagedObjectSource);
 
 				// Add the supporting managed object
+				ManagedObjectScope supportingManagedObjectScope = supportingManagedObjectType.getManagedObjectScope();
 				OfficeManagedObject supportingManagedObject = supportingManagedObjectSource
-						.addOfficeManagedObject(supportingManagedObjectName, ManagedObjectScope.PROCESS);
+						.addOfficeManagedObject(supportingManagedObjectName, supportingManagedObjectScope);
 				if (isRequireTypeQualification) {
 					supportingManagedObject.addTypeQualification(this.name,
 							supportingManagedObjectType.getObjectType().getName());

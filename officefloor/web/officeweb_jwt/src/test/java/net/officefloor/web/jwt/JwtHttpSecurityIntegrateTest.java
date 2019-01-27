@@ -615,7 +615,9 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 			// Configure servicing
 			context.link(false, ECHO_CLAIMS_PATH, EchoClaimsSection.class);
 			context.link(false, ROLE_PATH, RoleSection.class);
-			context.link(false, INJECT_PATH, InjectClaimsSection.class);
+			if (!isClaimsClassConfigured) {
+				context.link(false, INJECT_PATH, InjectClaimsSection.class);
+			}
 
 			security.informWebArchitect();
 		});

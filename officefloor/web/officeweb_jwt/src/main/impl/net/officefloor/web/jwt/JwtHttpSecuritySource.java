@@ -22,12 +22,14 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.poll.StatePollContext;
 import net.officefloor.plugin.managedobject.poll.StatePoller;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
+import net.officefloor.web.jwt.JwtClaimsManagedObjectSource.Dependencies;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
 import net.officefloor.web.jwt.spi.role.JwtRoleCollector;
@@ -43,6 +45,7 @@ import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
+import net.officefloor.web.spi.security.HttpSecuritySupportingManagedObject;
 import net.officefloor.web.spi.security.LogoutContext;
 import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
@@ -208,6 +211,11 @@ public class JwtHttpSecuritySource<C> extends
 		context.addFlow(Flows.NO_JWT, null);
 		context.addFlow(Flows.INVALID_JWT, null);
 		context.addFlow(Flows.EXPIRED_JWT, null);
+
+		// Provide the JWT claims
+		HttpSecuritySupportingManagedObject<Dependencies> jwtClaims = securityContext.addSupportingManagedObject(
+				"JWT_CLAIMS", new JwtClaimsManagedObjectSource(this.claimsClass), ManagedObjectScope.THREAD);
+		jwtClaims.linkAccessControl(Dependencies.ACCESS_CONTROL);
 	}
 
 	@Override
