@@ -104,6 +104,6 @@ public interface HttpSecurityType<A, AC extends Serializable, C, O extends Enum<
 	 *         {@link HttpSecuritySupportingManagedObject} instances provided by the
 	 *         {@link HttpSecuritySource}.
 	 */
-	HttpSecuritySupportingManagedObjectType[] getSupportingManagedObjectTypes();
+	HttpSecuritySupportingManagedObjectType<?>[] getSupportingManagedObjectTypes();
 
 }

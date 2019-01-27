@@ -35,10 +35,14 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ObjectRegistry;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -1106,14 +1110,14 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 				HttpSecuritySourceContext context) throws Exception {
 
 			// Load the supporting object (validating properties)
-			HttpSecuritySupportingManagedObject support = context.addSupportingManagedObject("support",
-					new ClassManagedObjectSource());
+			HttpSecuritySupportingManagedObject<Indexed> support = context.addSupportingManagedObject("support",
+					new ClassManagedObjectSource(), ManagedObjectScope.THREAD);
 			support.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 					MockSupportingObject.class.getName());
 
 			// Load the identifier
 			context.addSupportingManagedObject("identified",
-					new Singleton(new MockIdentifiedSupportingObject(this.identifier)));
+					new Singleton(new MockIdentifiedSupportingObject(this.identifier)), ManagedObjectScope.PROCESS);
 
 			// Load default meta-data
 			return super.init(context);
@@ -1173,6 +1177,138 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 				@Qualified("two") MockIdentifiedSupportingObject two) {
 			supportingOne = one;
 			supportingTwo = two;
+		}
+	}
+
+	/**
+	 * Ensure can link {@link HttpSecuritySupportingManagedObject} dependencies.
+	 */
+	public void testSupportingManagedObjectDependencies() throws Throwable {
+
+		// Create the supporting objects
+		MockSupportingObject dependency = new MockSupportingObject();
+		MockDependencyManagedObjectSource supporting = new MockDependencyManagedObjectSource();
+
+		// Compile and open
+		this.compile((context, security) -> {
+
+			// Configure the security (with supporting object with dependencies)
+			security.addHttpSecurity("dependencies",
+					new MockDependencySupportedHttpSecuritySource("TEST", dependency, supporting));
+
+			// Add the section
+			context.link(false, "/dependencies", MockDependencySupportingObjectSection.class);
+		});
+
+		// Ensure the dependencies are available
+		MockDependencySupportingObjectSection.supportingObject = null;
+		this.server.send(MockHttpServer.mockRequest("/dependencies").header("Authorization", "Mock daniel,daniel"))
+				.assertResponse(200, "Loaded");
+		assertNotNull("Should make supporting object available",
+				MockDependencySupportingObjectSection.supportingObject);
+		MockDependencyManagedObjectSource object = MockDependencySupportingObjectSection.supportingObject;
+		assertNotNull("Should have authentication", object.authentication);
+		assertNotNull("Should have HTTP authentication", object.httpAuthentication);
+		assertNotNull("Should have access control", object.accessControl);
+		assertNotNull("Should have HTTP access control", object.httpAccessControl);
+		assertSame("Should have supporting dependency", dependency, object.otherSupporting);
+	}
+
+	public static class MockDependencySupportingObjectSection {
+
+		private static MockDependencyManagedObjectSource supportingObject;
+
+		public void service(MockDependencyManagedObjectSource object, ServerHttpConnection connection)
+				throws IOException {
+			supportingObject = object;
+			connection.getResponse().getEntityWriter().write("Loaded");
+		}
+	}
+
+	@TestSource
+	public static class MockDependencySupportedHttpSecuritySource extends MockChallengeHttpSecuritySource {
+
+		private final MockSupportingObject dependency;
+
+		private final MockDependencyManagedObjectSource supportingObject;
+
+		public MockDependencySupportedHttpSecuritySource(String realm, MockSupportingObject dependency,
+				MockDependencyManagedObjectSource supportingObject) {
+			super(realm);
+			this.dependency = dependency;
+			this.supportingObject = supportingObject;
+		}
+
+		@Override
+		public HttpSecuritySourceMetaData<MockAuthentication, MockAccessControl, Void, None, None> init(
+				HttpSecuritySourceContext context) throws Exception {
+
+			// Load the dependency supporting object
+			HttpSecuritySupportingManagedObject<?> dependency = context.addSupportingManagedObject("DEPENDENCY",
+					new Singleton(this.dependency), ManagedObjectScope.PROCESS);
+
+			// Load the supporting object with dependencies
+			HttpSecuritySupportingManagedObject<Dependencies> supporting = context
+					.addSupportingManagedObject("SUPPORTING", this.supportingObject, ManagedObjectScope.THREAD);
+			supporting.linkAuthentication(Dependencies.AUTHENTICATION);
+			supporting.linkHttpAuthentication(Dependencies.HTTP_AUTHENTICATION);
+			supporting.linkAccessControl(Dependencies.ACCESS_CONTROL);
+			supporting.linkHttpAccessControl(Dependencies.HTTP_ACCESS_CONTROL);
+			supporting.linkSupportingManagedObject(Dependencies.OTHER_SUPPORTING, dependency);
+
+			// Load default meta-data
+			return super.init(context);
+		}
+	}
+
+	public static enum Dependencies {
+		AUTHENTICATION, HTTP_AUTHENTICATION, ACCESS_CONTROL, HTTP_ACCESS_CONTROL, OTHER_SUPPORTING
+	}
+
+	@TestSource
+	public static class MockDependencyManagedObjectSource extends AbstractManagedObjectSource<Dependencies, None>
+			implements CoordinatingManagedObject<Dependencies> {
+
+		private MockAuthentication authentication;
+		private HttpAuthentication<Void> httpAuthentication;
+		private MockAccessControl accessControl;
+		private HttpAccessControl httpAccessControl;
+		private MockSupportingObject otherSupporting;
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<Dependencies, None> context) throws Exception {
+			context.setObjectClass(this.getClass());
+			context.setManagedObjectClass(this.getClass());
+			context.addDependency(Dependencies.AUTHENTICATION, MockAuthentication.class);
+			context.addDependency(Dependencies.HTTP_AUTHENTICATION, HttpAuthentication.class);
+			context.addDependency(Dependencies.ACCESS_CONTROL, MockAccessControl.class);
+			context.addDependency(Dependencies.HTTP_ACCESS_CONTROL, HttpAccessControl.class);
+			context.addDependency(Dependencies.OTHER_SUPPORTING, MockSupportingObject.class);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
+			this.authentication = (MockAuthentication) registry.getObject(Dependencies.AUTHENTICATION);
+			this.httpAuthentication = (HttpAuthentication<Void>) registry.getObject(Dependencies.HTTP_AUTHENTICATION);
+			this.accessControl = (MockAccessControl) registry.getObject(Dependencies.ACCESS_CONTROL);
+			this.httpAccessControl = (HttpAccessControl) registry.getObject(Dependencies.HTTP_ACCESS_CONTROL);
+			this.otherSupporting = (MockSupportingObject) registry.getObject(Dependencies.OTHER_SUPPORTING);
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
 		}
 	}
 

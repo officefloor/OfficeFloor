@@ -22,6 +22,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
  * Context for the {@link HttpSecuritySource}.
@@ -41,10 +42,12 @@ public interface HttpSecuritySourceContext extends SourceContext {
 	 * @param managedObjectName   Name of the {@link ManagedObject}.
 	 * @param managedObjectSource {@link ManagedObjectSource} for the
 	 *                            {@link ManagedObject}.
+	 * @param managedObjectScope  {@link ManagedObjectScope} for the resulting
+	 *                            {@link ManagedObject}.
 	 * @return {@link HttpSecuritySupportingManagedObject} to configure the
 	 *         {@link ManagedObject}.
 	 */
-	HttpSecuritySupportingManagedObject addSupportingManagedObject(String managedObjectName,
-			ManagedObjectSource<?, ?> managedObjectSource);
+	<O extends Enum<O>> HttpSecuritySupportingManagedObject<O> addSupportingManagedObject(String managedObjectName,
+			ManagedObjectSource<O, ?> managedObjectSource, ManagedObjectScope managedObjectScope);
 
 }

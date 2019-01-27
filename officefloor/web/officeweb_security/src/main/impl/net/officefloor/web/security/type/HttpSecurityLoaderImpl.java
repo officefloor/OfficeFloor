@@ -266,14 +266,14 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 		Class<C> credentialsType = metaData.getCredentialsType();
 
 		// Load the supporting managed object types
-		HttpSecuritySupportingManagedObjectImpl[] supportingManagedObjects = adapter
+		HttpSecuritySupportingManagedObjectImpl<?>[] supportingManagedObjects = adapter
 				.getHttpSecuritySupportingManagedObjects();
-		HttpSecuritySupportingManagedObjectType[] supportingManagedObjectTypes = new HttpSecuritySupportingManagedObjectType[supportingManagedObjects.length];
+		HttpSecuritySupportingManagedObjectType<?>[] supportingManagedObjectTypes = new HttpSecuritySupportingManagedObjectType[supportingManagedObjects.length];
 		for (int i = 0; i < supportingManagedObjectTypes.length; i++) {
-			HttpSecuritySupportingManagedObjectImpl supportingManagedObject = supportingManagedObjects[i];
+			HttpSecuritySupportingManagedObjectImpl<?> supportingManagedObject = supportingManagedObjects[i];
 
 			// Load the supporting managed object type
-			HttpSecuritySupportingManagedObjectType supportingManagedObjectType = supportingManagedObject
+			HttpSecuritySupportingManagedObjectType<?> supportingManagedObjectType = supportingManagedObject
 					.loadHttpSecuritySupportingManagedObjectType(
 							(supportingManagedObjectSource, supportingPropertyList) -> this.loader
 									.loadManagedObjectType(supportingManagedObjectSource, supportingPropertyList));
@@ -384,7 +384,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 		/**
 		 * {@link HttpSecuritySupportingManagedObjectType} instances.
 		 */
-		private final HttpSecuritySupportingManagedObjectType[] supportingManagedObjectTypes;
+		private final HttpSecuritySupportingManagedObjectType<?>[] supportingManagedObjectTypes;
 
 		/**
 		 * Initiate.
@@ -401,7 +401,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 				HttpAuthenticationFactory<A, C> httpAuthenticationFactory, Class<AC> accessControlType,
 				HttpAccessControlFactory<AC> httpAccessControlFactory, Class<C> credentialsType,
 				ManagedObjectType<O> moAccessControlType,
-				HttpSecuritySupportingManagedObjectType[] supportingManagedObjectTypes) {
+				HttpSecuritySupportingManagedObjectType<?>[] supportingManagedObjectTypes) {
 			this.authenticationType = authenticationType;
 			this.httpAuthenticationFactory = httpAuthenticationFactory;
 			this.accessControlType = accessControlType;
@@ -467,7 +467,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 		}
 
 		@Override
-		public HttpSecuritySupportingManagedObjectType[] getSupportingManagedObjectTypes() {
+		public HttpSecuritySupportingManagedObjectType<?>[] getSupportingManagedObjectTypes() {
 			return this.supportingManagedObjectTypes;
 		}
 	}

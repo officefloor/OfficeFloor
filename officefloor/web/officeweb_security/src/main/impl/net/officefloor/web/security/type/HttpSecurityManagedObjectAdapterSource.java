@@ -40,6 +40,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.web.spi.security.HttpSecurityDependencyMetaData;
 import net.officefloor.web.spi.security.HttpSecurityFlowMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -106,7 +107,7 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 	 * {@link HttpSecuritySupportingManagedObjectImpl} instances added by
 	 * {@link HttpSecuritySource}.
 	 */
-	private final List<HttpSecuritySupportingManagedObjectImpl> supportingManagedObjects = new LinkedList<>();
+	private final List<HttpSecuritySupportingManagedObjectImpl<?>> supportingManagedObjects = new LinkedList<>();
 
 	/**
 	 * {@link HttpSecuritySourceMetaData}.
@@ -163,7 +164,7 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 	 * @return {@link HttpSecuritySupportingManagedObjectImpl} instances for the
 	 *         {@link HttpSecuritySource}.
 	 */
-	public HttpSecuritySupportingManagedObjectImpl[] getHttpSecuritySupportingManagedObjects() {
+	public HttpSecuritySupportingManagedObjectImpl<?>[] getHttpSecuritySupportingManagedObjects() {
 		return this.supportingManagedObjects.toArray(new HttpSecuritySupportingManagedObjectImpl[0]);
 	}
 
@@ -310,13 +311,14 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 		 */
 
 		@Override
-		public HttpSecuritySupportingManagedObject addSupportingManagedObject(String managedObjectName,
-				ManagedObjectSource<?, ?> managedObjectSource) {
+		public <D extends Enum<D>> HttpSecuritySupportingManagedObject<D> addSupportingManagedObject(
+				String managedObjectName, ManagedObjectSource<D, ?> managedObjectSource,
+				ManagedObjectScope managedObjectScope) {
 
 			// Create and register the supporting managed object
-			HttpSecuritySupportingManagedObjectImpl supportingManagedObject = new HttpSecuritySupportingManagedObjectImpl(
+			HttpSecuritySupportingManagedObjectImpl<D> supportingManagedObject = new HttpSecuritySupportingManagedObjectImpl<>(
 					managedObjectName, managedObjectSource,
-					HttpSecurityManagedObjectAdapterSource.this.propertyListFactory);
+					HttpSecurityManagedObjectAdapterSource.this.propertyListFactory, managedObjectScope);
 			HttpSecurityManagedObjectAdapterSource.this.supportingManagedObjects.add(supportingManagedObject);
 
 			// Return the supporting managed object
