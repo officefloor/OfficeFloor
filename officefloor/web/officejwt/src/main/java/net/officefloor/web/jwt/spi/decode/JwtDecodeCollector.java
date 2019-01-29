@@ -2,17 +2,10 @@ package net.officefloor.web.jwt.spi.decode;
 
 import java.util.concurrent.TimeUnit;
 
-import net.officefloor.web.jwt.spi.encode.JwtEncodeCollector;
-
 /**
- * <p>
  * Collects {@link JwtDecodeKey} instances for JWT validation.
- * <p>
- * See {@link JwtEncodeCollector} for details regarding security.
  * 
  * @author Daniel Sagenschneider
- * 
- * @see JwtEncodeCollector
  */
 public interface JwtDecodeCollector {
 

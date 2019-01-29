@@ -8,9 +8,9 @@
 		<artifactId>web</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officeweb_jwt</artifactId>
-	<name>JWT Security</name>
-	<description>OfficeFloor JWT Security</description>
+	<artifactId>officejwt_authority</artifactId>
+	<name>JWT Authority</name>
+	<description>OfficeFloor JWT Authority</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -39,7 +39,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>officeweb_security</artifactId>
+			<artifactId>officejwt</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -48,17 +48,14 @@
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>0.10.5</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<version>0.10.5</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
-			<version>0.10.5</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
