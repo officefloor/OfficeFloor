@@ -1,7 +1,6 @@
 package net.officefloor.web.jwt.authority;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
@@ -26,8 +25,7 @@ public class JwtAuthorityOfficeExtensionService implements OfficeExtensionServic
 		// Register the JWT authority
 		OfficeManagedObjectSource jwtAuthoritySource = officeArchitect.addOfficeManagedObjectSource(
 				JwtAuthority.class.getName(), JwtAuthorityManagedObjectSource.class.getName());
-		OfficeManagedObject jwtAuthority = jwtAuthoritySource.addOfficeManagedObject(JwtAuthority.class.getName(),
-				ManagedObjectScope.THREAD);
+		jwtAuthoritySource.addOfficeManagedObject(JwtAuthority.class.getName(), ManagedObjectScope.THREAD);
 
 		// Register the handling functionality (to load keys)
 		OfficeSection section = officeArchitect.addOfficeSection(JwtAuthority.class.getName(),

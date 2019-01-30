@@ -29,13 +29,6 @@ public interface JwtEncodeKey {
 	long expireTime();
 
 	/**
-	 * Obtains the time in seconds the created JWT should be valid.
-	 * 
-	 * @return Time in seconds the created JWT should be valid.
-	 */
-	long activePeriod();
-
-	/**
 	 * Obtains the private {@link Key}.
 	 * 
 	 * @return Private {@link Key} to sign the JWT.

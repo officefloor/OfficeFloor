@@ -3,8 +3,10 @@ package net.officefloor.web.jwt.authority;
 import java.security.Key;
 import java.security.KeyPair;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -63,6 +65,17 @@ public class JwtAuthorityTest extends OfficeFrameTestCase implements JwtAuthorit
 	private OfficeFloor officeFloor;
 
 	/**
+	 * Time requested for retrieving {@link JwtEncodeKey} instances.
+	 */
+	private Instant retrieveJwtEncodeKeysTime = null;
+
+	/**
+	 * Mock {@link JwtEncodeKey} instances for testing.
+	 */
+	private List<JwtEncodeKey> mockEncodeKeys = Arrays.asList(new MockJwtEncodeKey(mockCurrentTime,
+			mockCurrentTime + TimeUnit.MINUTES.toSeconds(5), keyPair.getPrivate(), keyPair.getPublic()));
+
+	/**
 	 * Ensure able to inject {@link JwtAuthority}.
 	 */
 	public void testEnsureAuthorityAvailable() {
@@ -76,7 +89,7 @@ public class JwtAuthorityTest extends OfficeFrameTestCase implements JwtAuthorit
 	public void testCreateJwt() {
 		MockClaims claims = new MockClaims();
 		String accessToken = this.doAuthorityTest((authority) -> authority.createAccessToken(claims));
-		claims.assertAccessToken(accessToken, keyPair.getPublic());
+		claims.assertAccessToken(accessToken, keyPair.getPublic(), mockCurrentTime);
 	}
 
 	@Override
@@ -171,8 +184,9 @@ public class JwtAuthorityTest extends OfficeFrameTestCase implements JwtAuthorit
 		public long nbf = mockCurrentTime;
 		public long exp = mockCurrentTime + (20 * 60);
 
-		public void assertAccessToken(String accessToken, Key key) {
-			Claims claims = Jwts.parser().setSigningKey(key).parseClaimsJws(accessToken).getBody();
+		public void assertAccessToken(String accessToken, Key key, long currentTimeInSeconds) {
+			Claims claims = Jwts.parser().setSigningKey(key).setClock(() -> new Date(currentTimeInSeconds * 1000))
+					.parseClaimsJws(accessToken).getBody();
 			assertEquals("Incorrect subject", this.sub, claims.getSubject());
 			assertEquals("Incorrect not before", JwtAuthorityTest.getDate(this.nbf), claims.getNotBefore());
 			assertEquals("Incorrect expiry", JwtAuthorityTest.getDate(this.exp), claims.getExpiration());
@@ -189,14 +203,59 @@ public class JwtAuthorityTest extends OfficeFrameTestCase implements JwtAuthorit
 		return timeInSeconds == null ? new Date(0) : new Date(timeInSeconds * 1000);
 	}
 
+	/**
+	 * Mock {@link JwtEncodeKey}.
+	 */
+	private static class MockJwtEncodeKey implements JwtEncodeKey {
+
+		private final long startTime;
+
+		private final long expireTime;
+
+		private final Key privateKey;
+
+		private final Key publicKey;
+
+		private MockJwtEncodeKey(long startTime, long expireTime, Key privateKey, Key publicKey) {
+			this.startTime = startTime;
+			this.expireTime = expireTime;
+			this.privateKey = privateKey;
+			this.publicKey = publicKey;
+		}
+
+		/*
+		 * ==================== JwtEncodeKey =====================
+		 */
+
+		@Override
+		public long startTime() {
+			return this.startTime;
+		}
+
+		@Override
+		public long expireTime() {
+			return this.expireTime;
+		}
+
+		@Override
+		public Key getPrivateKey() {
+			return this.privateKey;
+		}
+
+		@Override
+		public Key getPublicKey() {
+			return this.publicKey;
+		}
+	}
+
 	/*
 	 * ================== JwtAuthorityRepository ===================
 	 */
 
 	@Override
 	public List<JwtEncodeKey> retrieveJwtEncodeKeys(Instant currentTime) {
-		// TODO implement JwtAuthorityRepository.retrieveJwtEncodeKeys(...)
-		throw new UnsupportedOperationException("TODO implement JwtAuthorityRepository.retrieveJwtEncodeKeys(...)");
+		this.retrieveJwtEncodeKeysTime = currentTime;
+		return this.mockEncodeKeys;
 	}
 
 	@Override

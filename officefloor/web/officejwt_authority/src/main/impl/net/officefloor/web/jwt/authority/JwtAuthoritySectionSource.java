@@ -14,6 +14,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource.Flows;
 import net.officefloor.web.jwt.spi.encode.JwtEncodeCollector;
@@ -57,6 +58,7 @@ public class JwtAuthoritySectionSource extends AbstractSectionSource {
 		SectionFunction retrieveEncodeKeysFunction = functions.addSectionFunction(INPUT_RETRIEVE_ENCODE_KEYS,
 				INPUT_RETRIEVE_ENCODE_KEYS);
 		designer.link(retrieveEncodeKeysInput, retrieveEncodeKeysFunction);
+		retrieveEncodeKeysFunction.getFunctionObject(Dependencies.COLLECTOR.name()).flagAsParameter();
 		designer.link(retrieveEncodeKeysFunction.getFunctionObject(Dependencies.JWT_AUTHORITY_REPOSITORY.name()),
 				jwtAuthorityRepository);
 	}
@@ -65,7 +67,7 @@ public class JwtAuthoritySectionSource extends AbstractSectionSource {
 	 * Dependency keys for the {@link ManagedFunction} instances.
 	 */
 	private static enum Dependencies {
-		JWT_AUTHORITY_REPOSITORY
+		COLLECTOR, JWT_AUTHORITY_REPOSITORY
 	}
 
 	/**
@@ -86,11 +88,26 @@ public class JwtAuthoritySectionSource extends AbstractSectionSource {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 
+			// Obtain the clock
+			Clock<Long> clock = context.getClock((time) -> time);
+
 			// Add the retrieve encode keys handler
 			ManagedFunctionTypeBuilder<Dependencies, None> retrieveEncodeKeysFunction = functionNamespaceTypeBuilder
 					.addManagedFunctionType(INPUT_RETRIEVE_ENCODE_KEYS, () -> (functionContext) -> {
+
+						// Obtain the JWT authority repository
+						JwtEncodeCollector collector = (JwtEncodeCollector) functionContext
+								.getObject(Dependencies.COLLECTOR);
+						JwtAuthorityRepository repository = (JwtAuthorityRepository) functionContext
+								.getObject(Dependencies.JWT_AUTHORITY_REPOSITORY);
+
+						// Load the JWT encode keys
+						JwtAuthorityManagedObjectSource.loadJwtEncodeKeys(clock, repository, collector);
+
+						// Nothing further
 						return null;
 					}, Dependencies.class, None.class);
+			retrieveEncodeKeysFunction.addObject(JwtEncodeCollector.class).setKey(Dependencies.COLLECTOR);
 			retrieveEncodeKeysFunction.addObject(JwtAuthorityRepository.class)
 					.setKey(Dependencies.JWT_AUTHORITY_REPOSITORY);
 		}
