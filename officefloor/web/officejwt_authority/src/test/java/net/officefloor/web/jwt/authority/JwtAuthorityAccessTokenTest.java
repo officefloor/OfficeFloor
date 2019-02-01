@@ -37,7 +37,7 @@ import net.officefloor.web.jwt.spi.repository.JwtAuthorityRepository;
  * 
  * @author Daniel Sagenschneider
  */
-public class JwtAuthorityTest extends OfficeFrameTestCase implements JwtAuthorityRepository {
+public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements JwtAuthorityRepository {
 
 	/**
 	 * {@link KeyPair} for testing.
@@ -65,6 +65,11 @@ public class JwtAuthorityTest extends OfficeFrameTestCase implements JwtAuthorit
 	private OfficeFloor officeFloor;
 
 	/**
+	 * {@link MockClaims}.
+	 */
+	private MockClaims claims = new MockClaims();
+
+	/**
 	 * Time requested for retrieving {@link JwtEncodeKey} instances.
 	 */
 	private Instant retrieveJwtEncodeKeysTime = null;
@@ -84,12 +89,50 @@ public class JwtAuthorityTest extends OfficeFrameTestCase implements JwtAuthorit
 	}
 
 	/**
-	 * Ensure able to generate JWT.
+	 * Ensure able to generate access token.
 	 */
-	public void testCreateJwt() {
-		MockClaims claims = new MockClaims();
-		String accessToken = this.doAuthorityTest((authority) -> authority.createAccessToken(claims));
-		claims.assertAccessToken(accessToken, keyPair.getPublic(), mockCurrentTime);
+	public void testCreateAccessToken() {
+		String accessToken = this.createAccessToken();
+		this.claims.assertAccessToken(accessToken, keyPair.getPublic(), mockCurrentTime);
+	}
+
+	/**
+	 * Ensure issue if access token not a JSON object.
+	 */
+	public void testInvalidAccessToken() {
+		AccessTokenException exception = this.doAuthorityTest((authority) -> {
+			try {
+				authority.createAccessToken(new String[] { "not", "an", "object" });
+				return null;
+			} catch (AccessTokenException ex) {
+				return ex;
+			}
+		});
+		assertNotNull("Should not successfully create access token", exception);
+		assertEquals("Incorrect cause", IllegalStateException.class.getName()
+				+ ": Access Token must be JSON object (start end with {}) - but was [\"not\",\"an\",\"object\"]",
+				exception.getMessage());
+	}
+
+	/**
+	 * Ensure default the exp time.
+	 */
+	public void testDefaultPeriodFromNow() {
+		this.claims.nbf = null;
+		this.claims.exp = null;
+		String accessToken = this.createAccessToken();
+		this.claims.exp = mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
+		this.claims.assertAccessToken(accessToken, keyPair.getPublic(), mockCurrentTime);
+	}
+
+	/**
+	 * Ensure creates the {@link JwtEncodeKey} instances (should none be available).
+	 */
+	public void testNoEncodeKeys() {
+		this.mockEncodeKeys.clear();
+		String accessToken = this.createAccessToken();
+		assertEquals("Should create the new keys", 3, this.mockEncodeKeys.size());
+		this.claims.assertAccessToken(accessToken, this.mockEncodeKeys.get(0).getPublicKey(), mockCurrentTime);
 	}
 
 	@Override
@@ -100,12 +143,21 @@ public class JwtAuthorityTest extends OfficeFrameTestCase implements JwtAuthorit
 	}
 
 	/**
+	 * Creates the access token.
+	 * 
+	 * @return Created access token.
+	 */
+	private String createAccessToken() {
+		return this.doAuthorityTest((authority) -> authority.createAccessToken(this.claims));
+	}
+
+	/**
 	 * Undertakes test with the {@link JwtAuthority}.
 	 * 
 	 * @param testLogic Logic on the {@link JwtAuthority}.
 	 * @return Result of test logic.
 	 */
-	public <T> T doAuthorityTest(Function<JwtAuthority<MockClaims>, T> testLogic) {
+	private <T> T doAuthorityTest(Function<JwtAuthority<MockClaims>, T> testLogic) {
 		try {
 
 			// Compile the server
@@ -181,15 +233,15 @@ public class JwtAuthorityTest extends OfficeFrameTestCase implements JwtAuthorit
 
 	public static class MockClaims {
 		public String sub = "Daniel";
-		public long nbf = mockCurrentTime;
-		public long exp = mockCurrentTime + (20 * 60);
+		public Long nbf = mockCurrentTime;
+		public Long exp = mockCurrentTime + (20 * 60);
 
 		public void assertAccessToken(String accessToken, Key key, long currentTimeInSeconds) {
 			Claims claims = Jwts.parser().setSigningKey(key).setClock(() -> new Date(currentTimeInSeconds * 1000))
 					.parseClaimsJws(accessToken).getBody();
 			assertEquals("Incorrect subject", this.sub, claims.getSubject());
-			assertEquals("Incorrect not before", JwtAuthorityTest.getDate(this.nbf), claims.getNotBefore());
-			assertEquals("Incorrect expiry", JwtAuthorityTest.getDate(this.exp), claims.getExpiration());
+			assertEquals("Incorrect not before", getDate(this.nbf), claims.getNotBefore());
+			assertEquals("Incorrect expiry", getDate(this.exp), claims.getExpiration());
 		}
 	}
 
@@ -200,7 +252,7 @@ public class JwtAuthorityTest extends OfficeFrameTestCase implements JwtAuthorit
 	 * @return {@link Date}.
 	 */
 	private static Date getDate(Long timeInSeconds) {
-		return timeInSeconds == null ? new Date(0) : new Date(timeInSeconds * 1000);
+		return timeInSeconds != null ? new Date(timeInSeconds * 1000) : null;
 	}
 
 	/**

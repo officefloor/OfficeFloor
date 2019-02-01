@@ -13,6 +13,8 @@ import java.util.concurrent.TimeoutException;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.JwtBuilder;
@@ -22,6 +24,7 @@ import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedobject.poll.StatePollContext;
@@ -48,19 +51,36 @@ public class JwtAuthorityManagedObjectSource
 	}
 
 	/**
+	 * Default translation.
+	 */
+	public static final String DEFAULT_TRANSLATION = "AES/CBC/PKCS5PADDING";
+
+	/**
+	 * Default expiration period for access tokens.
+	 */
+	public static final long DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD = TimeUnit.MINUTES.toSeconds(20);
+
+	/**
 	 * {@link Charset}.
 	 */
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	/**
-	 * Default translation.
-	 */
-	private static final String DEFAULT_TRANSLATION = "AES/CBC/PKCS5PADDING";
-
-	/**
 	 * {@link ObjectMapper}.
 	 */
 	private static final ObjectMapper mapper = new ObjectMapper();
+
+	/**
+	 * {@link Claims} {@link JavaType}.
+	 */
+	private static final JavaType claimsJavaType = mapper.constructType(Claims.class);
+
+	static {
+		// Ensure JSON deserialising is valid
+		if (!mapper.canDeserialize(claimsJavaType)) {
+			throw new IllegalStateException("Unable to deserialize " + Claims.class.getSimpleName());
+		}
+	}
 
 	/**
 	 * Generates a random string.
@@ -207,6 +227,11 @@ public class JwtAuthorityManagedObjectSource
 	}
 
 	/**
+	 * {@link Clock} to obtain time in seconds.
+	 */
+	private Clock<Long> timeInSeconds;
+
+	/**
 	 * {@link StatePoller} to keep the {@link JwtEncodeKey} instances up to date
 	 * with appropriate keys.
 	 */
@@ -223,6 +248,7 @@ public class JwtAuthorityManagedObjectSource
 
 	@Override
 	protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
+		ManagedObjectSourceContext<Flows> sourceContext = context.getManagedObjectSourceContext();
 
 		// Load meta-data
 		context.setObjectClass(JwtAuthority.class);
@@ -230,6 +256,9 @@ public class JwtAuthorityManagedObjectSource
 
 		// Configure flows
 		context.addFlow(Flows.RETRIEVE_ENCODE_KEYS, JwtEncodeCollector.class);
+
+		// Obtain the clock
+		this.timeInSeconds = sourceContext.getClock((time) -> time);
 	}
 
 	@Override
@@ -280,6 +309,12 @@ public class JwtAuthorityManagedObjectSource
 		}
 
 		@Override
+		public void reloadRefreshKeys() {
+			// TODO implement JwtAuthority<I>.reloadRefreshKeys(...)
+			throw new UnsupportedOperationException("TODO implement JwtAuthority<I>.reloadRefreshKeys(...)");
+		}
+
+		@Override
 		public <C> String createAccessToken(C claims) {
 
 			// Obtain the JWT encode keys
@@ -296,14 +331,48 @@ public class JwtAuthorityManagedObjectSource
 			// Obtain the claims payload
 			String payload;
 			try {
-				payload = mapper.writeValueAsString(claims);
+				payload = mapper.writeValueAsString(claims).trim();
 			} catch (Exception ex) {
 				throw new AccessTokenException(ex);
+			}
+
+			// Determine if JSON object (and where last bracket)
+			int lastBracketIndex = payload.lastIndexOf('}');
+			if (lastBracketIndex != (payload.length() - 1)) {
+				throw new AccessTokenException(new IllegalStateException(
+						"Access Token must be JSON object (start end with {}) - but was " + payload));
+			}
+
+			// Determine details for access token
+			Claims standardClaims;
+			try {
+				standardClaims = mapper.readValue(payload, claimsJavaType);
+			} catch (Exception ex) {
+				throw new AccessTokenException(ex);
+			}
+
+			// Ensure payload has expiry
+			if (standardClaims.exp == null) {
+
+				// Obtain the current time
+				long currentTime = JwtAuthorityManagedObjectSource.this.timeInSeconds.getTime();
+
+				// Calculate the default expiry time
+				long defaultedExpiryTime = currentTime + DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
+
+				// Append the expiry time
+				payload = payload.substring(0, lastBracketIndex) + ",\"exp\":" + defaultedExpiryTime + "}";
 			}
 
 			// Generate the access token
 			JwtBuilder builder = Jwts.builder().signWith(selectedKey.getPrivateKey()).setPayload(payload);
 			return builder.compact();
+		}
+
+		@Override
+		public void reloadAccessKeys() {
+			// TODO implement JwtAuthority<I>.reloadAccessKeys(...)
+			throw new UnsupportedOperationException("TODO implement JwtAuthority<I>.reloadAccessKeys(...)");
 		}
 
 		@Override
@@ -314,9 +383,44 @@ public class JwtAuthorityManagedObjectSource
 	}
 
 	/**
+	 * Claims details to determine appropriate access token.
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	private static class Claims {
+
+		/**
+		 * Not before.
+		 */
+		private Long nbf;
+
+		/**
+		 * Expiry.
+		 */
+		private Long exp;
+
+		/**
+		 * Specifies not before.
+		 * 
+		 * @param nbf Not before.
+		 */
+		public void setNbf(Long nbf) {
+			this.nbf = nbf;
+		}
+
+		/**
+		 * Specifies expirty.
+		 * 
+		 * @param exp Expirty.
+		 */
+		public void setExpirty(Long exp) {
+			this.exp = exp;
+		}
+	}
+
+	/**
 	 * {@link JwtEncodeCollector} implementation.
 	 */
-	public class JwtEncodeCollectorImpl implements JwtEncodeCollector {
+	private class JwtEncodeCollectorImpl implements JwtEncodeCollector {
 
 		/**
 		 * {@link StatePollContext}.
