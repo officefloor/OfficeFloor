@@ -20,8 +20,8 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.build.InputDependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
@@ -82,7 +82,7 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public ThreadDependencyMappingBuilder setInputManagedObjectName(String inputManagedObjectName) {
+	public InputDependencyMappingBuilder setInputManagedObjectName(String inputManagedObjectName) {
 		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(inputManagedObjectName);
 		this.inputManagedObjectConfiguration = builder;
 		return builder;

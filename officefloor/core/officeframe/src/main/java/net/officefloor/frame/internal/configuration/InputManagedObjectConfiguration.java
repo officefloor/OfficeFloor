@@ -46,6 +46,14 @@ public interface InputManagedObjectConfiguration<O extends Enum<O>> {
 	ManagedObjectDependencyConfiguration<O>[] getDependencyConfiguration();
 
 	/**
+	 * Obtains the listing of {@link ManagedObjectFunctionDependencyConfiguration}
+	 * instances.
+	 * 
+	 * @return {@link ManagedObjectFunctionDependencyConfiguration} instances.
+	 */
+	ManagedObjectFunctionDependencyConfiguration[] getFunctionDependencyConfiguration();
+
+	/**
 	 * Obtains the listing of {@link ManagedObjectGovernanceConfiguration}
 	 * instances.
 	 * 
