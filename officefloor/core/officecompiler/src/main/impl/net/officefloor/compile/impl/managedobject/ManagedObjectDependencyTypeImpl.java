@@ -55,16 +55,13 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 	/**
 	 * Initialise.
 	 * 
-	 * @param index
-	 *            Index identifying this dependency.
-	 * @param type
-	 *            Type required of the dependency.
-	 * @param typeQualifier
-	 *            Type qualifier.
-	 * @param key
-	 *            Key identifying this dependency. May be <code>null</code>.
-	 * @param label
-	 *            Label describing the dependency. May be <code>null</code>.
+	 * @param index         Index identifying this dependency.
+	 * @param type          Type required of the dependency.
+	 * @param typeQualifier Type qualifier.
+	 * @param key           Key identifying this dependency. May be
+	 *                      <code>null</code>.
+	 * @param label         Label describing the dependency. May be
+	 *                      <code>null</code>.
 	 */
 	public ManagedObjectDependencyTypeImpl(int index, Class<?> type, String typeQualifier, D key, String label) {
 		this.index = index;
@@ -89,6 +86,13 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 	@Override
 	public String getDependencyName() {
 		return this.name;
+	}
+
+	@Override
+	public boolean isFunctionDependency() {
+		// TODO implement ManagedObjectDependencyType<D>.isFunctionDependency(...)
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectDependencyType<D>.isFunctionDependency(...)");
 	}
 
 	@Override

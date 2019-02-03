@@ -17,7 +17,9 @@
  */
 package net.officefloor.compile.managedobject;
 
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 
 /**
  * <code>Type definition</code> of a dependency required by the
@@ -35,7 +37,19 @@ public interface ManagedObjectDependencyType<D extends Enum<D>> {
 	String getDependencyName();
 
 	/**
+	 * Indicates if a {@link ManagedObjectFunctionDependency}.
+	 * 
+	 * @return <code>true</code> if {@link ManagedObjectFunctionDependency},
+	 *         otherwise a {@link ManagedObjectDependency}.
+	 */
+	boolean isFunctionDependency();
+
+	/**
+	 * <p>
 	 * Obtains the index identifying the dependency.
+	 * <p>
+	 * Should this be a {@link ManagedObjectFunctionDependency}, then will return
+	 * <code>-1</code>.
 	 * 
 	 * @return Index identifying the dependency.
 	 */

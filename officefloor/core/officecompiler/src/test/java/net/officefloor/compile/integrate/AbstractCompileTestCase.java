@@ -45,6 +45,7 @@ import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ExecutiveBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.InputDependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
@@ -388,7 +389,7 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected ThreadDependencyMappingBuilder record_managingOfficeBuilder_setInputManagedObjectName(
 			String inputManagedObjectName) {
-		ThreadDependencyMappingBuilder dependencyMapper = this.createMock(ThreadDependencyMappingBuilder.class);
+		InputDependencyMappingBuilder dependencyMapper = this.createMock(InputDependencyMappingBuilder.class);
 		this.recordReturn(this.managingOfficeBuilder,
 				this.managingOfficeBuilder.setInputManagedObjectName(inputManagedObjectName), dependencyMapper);
 		return dependencyMapper;
