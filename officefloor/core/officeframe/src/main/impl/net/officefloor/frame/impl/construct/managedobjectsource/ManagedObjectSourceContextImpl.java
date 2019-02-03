@@ -164,7 +164,7 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	private String getInputBoundManagedObjectName() {
 		InputManagedObjectConfiguration<?> inputConfiguration = this.managingOfficeConfiguration
 				.getInputManagedObjectConfiguration();
-		return (inputConfiguration != null ? inputConfiguration.getBoundManagedObjectName() : null);
+		return (inputConfiguration != null ? inputConfiguration.getBoundManagedObjectName() : this.managedObjectName);
 	}
 
 	/*
@@ -223,6 +223,12 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 					scopeManagedObjectName = configuration.getScopeManagedObjectName();
 				}
 			}
+		}
+
+		// Add issue if no scope managed object
+		if (scopeManagedObjectName == null) {
+			this.issues.add("No dependency configured for " + ManagedObjectFunctionDependency.class.getSimpleName()
+					+ " '" + name + "'");
 		}
 
 		// Create the function dependency

@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.InputDependencyMappingBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -39,6 +40,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
@@ -127,6 +129,12 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		// Reset the mock managed object source state
 		MockManagedObjectSource.reset(this.functionFactory, this.metaData);
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		// Ensure appropriate issues
+
 	}
 
 	/**
@@ -453,6 +461,108 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		ManagedFunctionObjectConfiguration<?>[] parameters = function.getObjectConfiguration();
 		assertEquals("Incorrect number of parameters", 1, parameters.length);
 		assertTrue("Ensure is a parameter", parameters[0].isParameter());
+	}
+
+	/**
+	 * Ensure able to link the {@link ManagedObject} to the added
+	 * {@link ManagedFunction}.
+	 */
+	public void testLinkManagedObjectToAddedFunction() {
+
+		final String FUNCTION_NAME = MANAGED_OBJECT_NAME + ".FUNCTION";
+
+		// Record linking the managed object to the added function
+		this.configuration.setManagingOffice("OFFICE");
+		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.addFunctionName = "FUNCTION";
+		MockManagedObjectSource.isFunctionLinkManagedObject = true;
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		this.constructRawManagedObjectMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure added parameter to function
+		ManagedFunctionConfiguration<?, ?> function = office.getManagedFunctionConfiguration()[0];
+		assertEquals("Incorrect function", FUNCTION_NAME, function.getFunctionName());
+		ManagedFunctionObjectConfiguration<?>[] dependencies = function.getObjectConfiguration();
+		assertEquals("Incorrect number of dependencies", 1, dependencies.length);
+		assertEquals("Ensure is managed object", MANAGED_OBJECT_NAME, dependencies[0].getScopeManagedObjectName());
+	}
+
+	/**
+	 * Ensure able to link the input {@link ManagedObject} to the added
+	 * {@link ManagedFunction}.
+	 */
+	public void testLinkInputManagedObjectToAddedFunction() {
+
+		final String FUNCTION_NAME = MANAGED_OBJECT_NAME + ".FUNCTION";
+
+		// Record linking the managed object to the added function
+		this.configuration.setManagingOffice("OFFICE").setInputManagedObjectName("INPUT");
+		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.addFunctionName = "FUNCTION";
+		MockManagedObjectSource.isFunctionLinkManagedObject = true;
+		this.metaData.addFlow(String.class, null);
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		this.constructRawManagedObjectMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure added parameter to function
+		ManagedFunctionConfiguration<?, ?> function = office.getManagedFunctionConfiguration()[0];
+		assertEquals("Incorrect function", FUNCTION_NAME, function.getFunctionName());
+		ManagedFunctionObjectConfiguration<?>[] dependencies = function.getObjectConfiguration();
+		assertEquals("Incorrect number of dependencies", 1, dependencies.length);
+		assertEquals("Ensure is input managed object", "INPUT", dependencies[0].getScopeManagedObjectName());
+	}
+
+	/**
+	 * Ensure issue if no {@link ManagedObject} is configured for the
+	 * {@link ManagedObjectFunctionDependency}.
+	 */
+	public void testNoDependencyForAddedFunction() {
+
+		// Record no dependency available to the added function
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.addFunctionName = "FUNCTION";
+		MockManagedObjectSource.addFunctionLinkedDependency = "DEPENDENCY";
+		this.record_issue("No dependency configured for ManagedObjectFunctionDependency 'DEPENDENCY'");
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		this.constructRawManagedObjectMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to link the dependency to the added {@link ManagedFunction}.
+	 */
+	public void testLinkDependencyToAddedFunction() {
+		final String FUNCTION_NAME = MANAGED_OBJECT_NAME + ".FUNCTION";
+
+		// Record linking the managed object to the added function
+		InputDependencyMappingBuilder mapper = this.configuration.setManagingOffice("OFFICE")
+				.setInputManagedObjectName("INPUT");
+		mapper.mapFunctionDependency("DEPENDENCY", "AVAILABLE");
+		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.addFunctionName = "FUNCTION";
+		MockManagedObjectSource.addFunctionLinkedDependency = "DEPENDENCY";
+		this.metaData.addFlow(String.class, null);
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		this.constructRawManagedObjectMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure added parameter to function
+		ManagedFunctionConfiguration<?, ?> function = office.getManagedFunctionConfiguration()[0];
+		assertEquals("Incorrect function", FUNCTION_NAME, function.getFunctionName());
+		ManagedFunctionObjectConfiguration<?>[] dependencies = function.getObjectConfiguration();
+		assertEquals("Incorrect number of dependencies", 1, dependencies.length);
+		assertEquals("Ensure is dependency", "AVAILABLE", dependencies[0].getScopeManagedObjectName());
 	}
 
 	/**
@@ -864,6 +974,17 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public static Class<?> addFunctionLinkedParameter = null;
 
 		/**
+		 * Indicates for the {@link ManagedFunction} to link the {@link ManagedObject}.
+		 */
+		public static boolean isFunctionLinkManagedObject = false;
+
+		/**
+		 * Indicates for {@link ManagedObjectFunctionDependency} to link to
+		 * {@link ManagedObject}.
+		 */
+		public static String addFunctionLinkedDependency = null;
+
+		/**
 		 * Name of {@link Flow} to link to the added {@link ManagedFunction}.
 		 */
 		public static String addFunctionLinkFunctionName = null;
@@ -899,6 +1020,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			recycleFactory = null;
 			addFunctionName = null;
 			addFunctionLinkFunctionName = null;
+			addFunctionLinkedParameter = null;
+			isFunctionLinkManagedObject = false;
+			addFunctionLinkedDependency = null;
 			MockManagedObjectSource.functionFactory = functionFactory;
 			initFailure = null;
 			startupFunctionName = null;
@@ -967,6 +1091,18 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				// Link in the parameter
 				if (addFunctionLinkedParameter != null) {
 					taskBuilder.linkParameter(0, addFunctionLinkedParameter);
+				}
+
+				// Link in the managed object
+				if (isFunctionLinkManagedObject) {
+					taskBuilder.linkManagedObject(0);
+				}
+
+				// Link in the function dependency
+				if (addFunctionLinkedDependency != null) {
+					ManagedObjectFunctionDependency dependency = context
+							.addFunctionDependency(addFunctionLinkedDependency, String.class);
+					taskBuilder.linkObject(0, dependency);
 				}
 
 				// Link in the flow

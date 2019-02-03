@@ -170,7 +170,13 @@ public class RawManagedObjectMetaDataFactory {
 		}
 
 		// Flag initialising over
-		context.flagInitOver();
+		String[] contextIssues = context.flagInitOver();
+		if (contextIssues.length > 0) {
+			for (String contextIssue : contextIssues) {
+				issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName, contextIssue);
+			}
+			return null; // can not carry on
+		}
 
 		// Ensure have meta-data
 		if (metaData == null) {
