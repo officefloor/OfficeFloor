@@ -485,8 +485,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	public void testNullFunctionDependencyName() {
 
 		// Record basic meta-data
-		this.record_basicMetaData();
-		this.issues.recordIssue("Failed to source managed object",
+		this.issues.recordIssue("Failed to init",
 				new IllegalArgumentException("Must provide ManagedObjectFunctionDependency name"));
 
 		// Attempt to load
@@ -502,8 +501,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	public void testNullFunctionDependencyType() {
 
 		// Record basic meta-data
-		this.record_basicMetaData();
-		this.issues.recordIssue("Failed to source managed object",
+		this.issues.recordIssue("Failed to init",
 				new IllegalArgumentException("Must provide ManagedObjectFunctionDependency type"));
 
 		// Attempt to load
@@ -519,8 +517,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Record basic meta-data
 		this.record_basicMetaData();
-		this.issues.recordIssue("Failed to source managed object", new IllegalArgumentException(
-				"Two ManagedObjectFunctionDependency instances added by same name 'DEPENDENCY'"));
+		this.issues.recordIssue("Two ManagedObjectFunctionDependency instances added by same name 'DEPENDENCY'");
 
 		// Attempt to load
 		this.loadManagedObjectType(false, (context, util) -> {
@@ -545,6 +542,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(dependency, dependency.getKey(), null);
 		this.recordReturn(dependency, dependency.getType(), Connection.class);
 		this.recordReturn(dependency, dependency.getTypeQualifier(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), new ManagedObjectFlowMetaData[0]);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
 		this.issues.recordIssue("Name clash 'DEPENDENCY' between meta-data dependency and function dependency");
 
 		// Attempt to load
@@ -767,7 +767,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of dependencies", 3, dependencyTypes.length);
 
 		// Managed Object dependencies always first
-		ManagedObjectDependencyType<?> dependencyTypeOne = dependencyTypes[1];
+		ManagedObjectDependencyType<?> dependencyTypeOne = dependencyTypes[0];
 		assertEquals("Keys should be ordered", TwoKey.ONE, dependencyTypeOne.getKey());
 		assertEquals("Incorrect first dependency index", TwoKey.ONE.ordinal(), dependencyTypeOne.getIndex());
 		assertEquals("Incorrect first dependency name", TwoKey.ONE.toString(), dependencyTypeOne.getDependencyName());
@@ -790,8 +790,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				dependencyTypeThree.getDependencyName());
 		assertEquals("Incorrect function dependency type", URLConnection.class,
 				dependencyTypeThree.getDependencyType());
-		assertNull("Function dependency should not be qualified", dependencyTypeTwo.getTypeQualifier());
-		assertTrue("Function dependency should be function dependency", dependencyTypeTwo.isFunctionDependency());
+		assertNull("Function dependency should not be qualified", dependencyTypeThree.getTypeQualifier());
+		assertTrue("Function dependency should be function dependency", dependencyTypeThree.isFunctionDependency());
 
 		// Validate flows ordered and correct values
 		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();
@@ -876,7 +876,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect function dependency type", Short.class, dependencyTypeThree.getDependencyType());
 		assertNull("Function dependency should not be qualified", dependencyTypeThree.getTypeQualifier());
 		assertTrue("Function dependency should be function dependency", dependencyTypeThree.isFunctionDependency());
-		ManagedObjectDependencyType<?> dependencyTypeFour = dependencyTypes[2];
+		ManagedObjectDependencyType<?> dependencyTypeFour = dependencyTypes[3];
 		assertNull("Should be no key for function dependency", dependencyTypeFour.getKey());
 		assertEquals("Incorrect function dependency index", -1, dependencyTypeFour.getIndex());
 		assertEquals("Incorrect function dependency name", "B", dependencyTypeFour.getDependencyName());

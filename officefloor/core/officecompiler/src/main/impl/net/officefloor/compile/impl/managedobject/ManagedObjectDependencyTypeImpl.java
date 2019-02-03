@@ -19,6 +19,8 @@ package net.officefloor.compile.impl.managedobject;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 
 /**
  * {@link ManagedObjectDependencyType} implementation.
@@ -31,6 +33,11 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 	 * Name describing this dependency.
 	 */
 	private final String name;
+
+	/**
+	 * Indicates if {@link ManagedObjectFunctionDependency}.
+	 */
+	private final boolean isFunctionDependency;
 
 	/**
 	 * Index identifying this dependency.
@@ -53,7 +60,7 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 	private final D key;
 
 	/**
-	 * Initialise.
+	 * Initialise for {@link ManagedObjectDependency}.
 	 * 
 	 * @param index         Index identifying this dependency.
 	 * @param type          Type required of the dependency.
@@ -68,6 +75,7 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 		this.type = type;
 		this.typeQualifier = typeQualifier;
 		this.key = key;
+		this.isFunctionDependency = false;
 
 		// Determine the name
 		if (!CompileUtil.isBlank(label)) {
@@ -77,6 +85,21 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 		} else {
 			this.name = this.type.getSimpleName();
 		}
+	}
+
+	/**
+	 * Initialise for {@link ManagedObjectFunctionDependency}.
+	 * 
+	 * @param label Label describing the dependency.
+	 * @param type  Type required of the dependency.
+	 */
+	public ManagedObjectDependencyTypeImpl(String label, Class<?> type) {
+		this.index = -1;
+		this.type = type;
+		this.typeQualifier = null;
+		this.key = null;
+		this.name = label;
+		this.isFunctionDependency = true;
 	}
 
 	/*
@@ -90,9 +113,7 @@ public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements Manag
 
 	@Override
 	public boolean isFunctionDependency() {
-		// TODO implement ManagedObjectDependencyType<D>.isFunctionDependency(...)
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectDependencyType<D>.isFunctionDependency(...)");
+		return this.isFunctionDependency;
 	}
 
 	@Override

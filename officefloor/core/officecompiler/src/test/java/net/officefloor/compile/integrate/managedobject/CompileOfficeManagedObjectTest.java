@@ -41,6 +41,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -226,6 +227,93 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	 * {@link Office}.
 	 */
 	public void testManagedObjectWithDependencyOutsideOffice() {
+
+		// Record building the office
+		this.record_init();
+
+		// Register the office linked managed objects with the office
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", DependencyManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.DEPENDENT", "OFFICE.DEPENDENT_SOURCE");
+		DependencyMappingBuilder mapper = this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENT",
+				"OFFICE.DEPENDENT");
+		mapper.mapDependency(0, "SIMPLE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link ManagedObject} with a
+	 * {@link ManagedObjectFunctionDependency} not linked.
+	 */
+	public void testManagedObjectWithFunctionDependencyNotLinked() {
+
+		// Record building the OfficeFloor
+		this.record_init();
+
+		// Register the office managed object with dependency not linked
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.DEPENDENT", "OFFICE.DEPENDENT_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENT", "OFFICE.DEPENDENT");
+		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class,
+				"Managed Object Dependency dependency is not linked to a BoundManagedObjectNode");
+
+		// Add managed objects to OfficeFloor
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE",
+				FunctionDependencyManagedObject.class, 0);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link ManagedObject} with a
+	 * {@link ManagedObjectFunctionDependency} linked in {@link Office}.
+	 */
+	public void testManagedObjectWithFunctionDependencyInOffice() {
+
+		fail("TODO implement");
+
+		// Record building the office
+		this.record_init();
+
+		// Register the office linked managed objects with the office
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.DEPENDENT", "OFFICE.DEPENDENT_SOURCE");
+		DependencyMappingBuilder mapper = this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENT",
+				"OFFICE.DEPENDENT");
+		mapper.mapDependency(0, "OFFICE.SIMPLE");
+		office.registerManagedObjectSource("OFFICE.SIMPLE", "OFFICE.SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE", "OFFICE.SIMPLE");
+
+		// Add managed objects to office
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", DependencyManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link ManagedObject} with a
+	 * {@link ManagedObjectFunctionDependency} linked outside {@link Office}.
+	 */
+	public void testManagedObjectWithFunctionDependencyOutsideOffice() {
+
+		fail("TODO implement");
 
 		// Record building the office
 		this.record_init();
@@ -509,6 +597,35 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		@Override
 		public ManagedFunction<None, None> createManagedFunction() {
 			fail("Should not require function in compiling");
+			return null;
+		}
+	}
+
+	/**
+	 * {@link ManagedObjectSource} requiring a
+	 * {@link ManagedObjectFunctionDependency}.
+	 */
+	@TestSource
+	public static class FunctionDependencyManagedObject extends AbstractManagedObjectSource<None, None> {
+
+		/*
+		 * ================ ManagedObjectSource ====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			context.setObjectClass(Object.class);
+			context.getManagedObjectSourceContext().addFunctionDependency("DEPENDENCY", String.class);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			fail("Should not require obtaining managed object in compiling");
 			return null;
 		}
 	}
