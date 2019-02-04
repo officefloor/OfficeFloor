@@ -21,6 +21,7 @@ import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -40,11 +41,21 @@ public interface ManagingOfficeBuilder<F extends Enum<F>> {
 	 * @param inputManagedObjectName Name to bind the input {@link ManagedObject}
 	 *                               within the {@link ProcessState} of the
 	 *                               {@link Office}.
-	 * @return {@link InputDependencyMappingBuilder} to map the dependencies of the
+	 * @return {@link ThreadDependencyMappingBuilder} to map the dependencies of the
 	 *         {@link ManagedObject} and possible {@link ManagedObjectFunction}
 	 *         instances.
 	 */
-	InputDependencyMappingBuilder setInputManagedObjectName(String inputManagedObjectName);
+	ThreadDependencyMappingBuilder setInputManagedObjectName(String inputManagedObjectName);
+
+	/**
+	 * Specifies the {@link ManagedObject} for the
+	 * {@link ManagedObjectFunctionDependency}.
+	 * 
+	 * @param functionObjectName     Name of the
+	 *                               {@link ManagedObjectFunctionDependency}.
+	 * @param scopeManagedObjectName Name of the {@link ManagedObject}.
+	 */
+	void mapFunctionDependency(String functionObjectName, String scopeManagedObjectName);
 
 	/**
 	 * Links the {@link Flow} for the {@link ManagedObjectSource} to a

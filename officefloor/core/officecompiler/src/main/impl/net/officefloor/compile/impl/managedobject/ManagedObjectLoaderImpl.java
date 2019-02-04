@@ -33,6 +33,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectFunctionDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -220,7 +221,6 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
 			ManagedObjectSource<D, F> managedObjectSource, PropertyList propertyList) {
 
@@ -333,54 +333,39 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 		// Obtain the function dependencies
 		ManagedObjectFunctionDependencyImpl[] functionDependencies = sourceContext
 				.getManagedObjectFunctionDependencies();
-		if (functionDependencies.length > 0) {
+		ManagedObjectFunctionDependencyType[] functionDependencyTypes = Arrays.asList(functionDependencies).stream()
+				.map((functionDependency) -> new ManagedObjectFunctionDependencyTypeImpl(
+						functionDependency.getFunctionObjectName(), functionDependency.getFunctionObjectType()))
+				.toArray(ManagedObjectFunctionDependencyType[]::new);
 
-			// Create the listing of function dependency types
-			ManagedObjectDependencyType<?>[] functionDependencyTypes = Arrays.asList(functionDependencies).stream()
-					.map((functionDependency) -> new ManagedObjectDependencyTypeImpl<>(
-							functionDependency.getFunctionObjectName(), functionDependency.getFunctionObjectType()))
-					.toArray(ManagedObjectDependencyType[]::new);
-
-			// Ensure no duplicate name
-			Set<String> functionDependencyNames = new HashSet<>();
-			for (ManagedObjectDependencyType<?> functionDependencyType : functionDependencyTypes) {
-				String functionDependencyName = functionDependencyType.getDependencyName();
-				if (functionDependencyNames.contains(functionDependencyName)) {
-					this.addIssue("Two ManagedObjectFunctionDependency instances added by same name '"
-							+ functionDependencyName + "'");
-					return null; // can not carry on
-				}
-				functionDependencyNames.add(functionDependencyName);
+		// Ensure no duplicate name
+		Set<String> functionDependencyNames = new HashSet<>();
+		for (ManagedObjectFunctionDependencyType functionDependencyType : functionDependencyTypes) {
+			String functionDependencyName = functionDependencyType.getFunctionObjectName();
+			if (functionDependencyNames.contains(functionDependencyName)) {
+				this.addIssue("Two ManagedObjectFunctionDependency instances added by same name '"
+						+ functionDependencyName + "'");
+				return null; // can not carry on
 			}
-
-			// Ensure no name clash with meta-data
-			for (ManagedObjectDependencyType<?> dependencyType : dependencyTypes) {
-				String dependencyName = dependencyType.getDependencyName();
-				if (functionDependencyNames.contains(dependencyName)) {
-					this.addIssue(
-							"Name clash '" + dependencyName + "' between meta-data dependency and function dependency");
-					return null; // can not carry on
-				}
-			}
-
-			// Sort the function dependency types (by name)
-			Arrays.sort(functionDependencyTypes, (a, b) -> a.getDependencyName().compareTo(b.getDependencyName()));
-
-			// Include the function dependencies
-			ManagedObjectDependencyType<?>[] dependencyList = new ManagedObjectDependencyType[dependencyTypes.length
-					+ functionDependencyTypes.length];
-			for (int i = 0; i < dependencyTypes.length; i++) {
-				dependencyList[i] = dependencyTypes[i];
-			}
-			for (int i = 0; i < functionDependencyTypes.length; i++) {
-				dependencyList[dependencyTypes.length + i] = functionDependencyTypes[i];
-			}
-			dependencyTypes = (ManagedObjectDependencyType<D>[]) dependencyList;
+			functionDependencyNames.add(functionDependencyName);
 		}
 
+		// Ensure no name clash with meta-data
+		for (ManagedObjectDependencyType<?> dependencyType : dependencyTypes) {
+			String dependencyName = dependencyType.getDependencyName();
+			if (functionDependencyNames.contains(dependencyName)) {
+				this.addIssue(
+						"Name clash '" + dependencyName + "' between meta-data dependency and function dependency");
+				return null; // can not carry on
+			}
+		}
+
+		// Sort the function dependency types (by name)
+		Arrays.sort(functionDependencyTypes, (a, b) -> a.getFunctionObjectName().compareTo(b.getFunctionObjectName()));
+
 		// Create and return the managed object type
-		return new ManagedObjectTypeImpl<D>(objectType, isInput, dependencyTypes, unlinkedFlowTypes, teamTypes,
-				strategyTypes, extensionInterfaces);
+		return new ManagedObjectTypeImpl<D>(objectType, isInput, dependencyTypes, functionDependencyTypes,
+				unlinkedFlowTypes, teamTypes, strategyTypes, extensionInterfaces);
 	}
 
 	@Override

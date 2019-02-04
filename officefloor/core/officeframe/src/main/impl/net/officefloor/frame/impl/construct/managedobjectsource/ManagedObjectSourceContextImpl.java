@@ -241,14 +241,10 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 
 		// Attempt to determine the scope managed object for dependency
 		String scopeManagedObjectName = null;
-		InputManagedObjectConfiguration<?> inputConfiguration = this.managingOfficeConfiguration
-				.getInputManagedObjectConfiguration();
-		if (inputConfiguration != null) {
-			for (ManagedObjectFunctionDependencyConfiguration configuration : inputConfiguration
-					.getFunctionDependencyConfiguration()) {
-				if (name.equals(configuration.getFunctionObjectName())) {
-					scopeManagedObjectName = configuration.getScopeManagedObjectName();
-				}
+		for (ManagedObjectFunctionDependencyConfiguration configuration : this.managingOfficeConfiguration
+				.getFunctionDependencyConfiguration()) {
+			if (name.equals(configuration.getFunctionObjectName())) {
+				scopeManagedObjectName = configuration.getScopeManagedObjectName();
 			}
 		}
 

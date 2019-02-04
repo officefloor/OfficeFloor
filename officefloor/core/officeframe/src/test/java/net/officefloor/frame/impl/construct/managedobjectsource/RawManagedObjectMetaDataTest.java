@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.InputDependencyMappingBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -544,9 +544,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		final String FUNCTION_NAME = MANAGED_OBJECT_NAME + ".FUNCTION";
 
 		// Record linking the managed object to the added function
-		InputDependencyMappingBuilder mapper = this.configuration.setManagingOffice("OFFICE")
-				.setInputManagedObjectName("INPUT");
-		mapper.mapFunctionDependency("DEPENDENCY", "AVAILABLE");
+		ManagingOfficeBuilder<?> managingOffice = this.configuration.setManagingOffice("OFFICE");
+		managingOffice.mapFunctionDependency("DEPENDENCY", "AVAILABLE");
+		managingOffice.setInputManagedObjectName("INPUT");
 		OfficeConfiguration office = (OfficeConfiguration) this.officeFloorConfiguration.addOffice("OFFICE");
 		MockManagedObjectSource.addFunctionName = "FUNCTION";
 		MockManagedObjectSource.addFunctionLinkedDependency = "DEPENDENCY";

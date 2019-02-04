@@ -53,7 +53,8 @@ public class ManagedObjectFunctionDependencyTest extends AbstractOfficeConstruct
 		InputManagedObjectSource mos = new InputManagedObjectSource(function);
 		ManagedObjectBuilder<None> mo = this.constructManagedObject("INPUT", mos, null);
 		ManagingOfficeBuilder<None> managingOffice = mo.setManagingOffice(this.getOfficeName());
-		managingOffice.setInputManagedObjectName("INPUT").mapFunctionDependency("dependency", "DEPENDENCY");
+		managingOffice.mapFunctionDependency("dependency", "DEPENDENCY");
+		managingOffice.setInputManagedObjectName("INPUT");
 
 		// Construct the dependency
 		MockDependency dependency = new MockDependency();

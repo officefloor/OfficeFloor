@@ -932,6 +932,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				}
 			}
 
+			// TODO link the function dependencies
+
 			// Link in the flows for the managed object source
 			ManagedObjectFlowType<?>[] flowTypes = managedObjectType.getFlowTypes();
 			for (final ManagedObjectFlowType<?> flowType : flowTypes) {

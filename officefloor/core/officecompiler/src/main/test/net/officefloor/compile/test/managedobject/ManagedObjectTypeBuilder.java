@@ -20,12 +20,14 @@ package net.officefloor.compile.test.managedobject;
 import net.officefloor.compile.executive.ExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectFunctionDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
 import net.officefloor.compile.spi.managedobject.ManagedObjectTeam;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -64,6 +66,14 @@ public interface ManagedObjectTypeBuilder {
 	 * @param key           Key identifying the {@link ManagedObjectDependency}.
 	 */
 	void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key);
+
+	/**
+	 * Adds a {@link ManagedObjectFunctionDependencyType}.
+	 * 
+	 * @param name Name of the {@link ManagedObjectFunctionDependency}.
+	 * @param type Type of the {@link ManagedObjectFunctionDependency}.
+	 */
+	void addFunctionDependency(String name, Class<?> type);
 
 	/**
 	 * <p>

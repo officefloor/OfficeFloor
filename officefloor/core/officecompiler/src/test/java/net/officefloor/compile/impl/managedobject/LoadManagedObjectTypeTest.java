@@ -32,6 +32,7 @@ import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectFunctionDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -568,15 +569,13 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure has the function dependency
-		ManagedObjectDependencyType<?>[] dependencies = type.getDependencyTypes();
-		assertEquals("Incorrect number of dependencies", 1, dependencies.length);
-		ManagedObjectDependencyType<?> dependency = dependencies[0];
-		assertTrue("Function dependency should be function dependency", dependency.isFunctionDependency());
-		assertEquals("Incorrect function dependency name", "DEPENDENCY", dependency.getDependencyName());
-		assertEquals("Incorrect function dependency type", Connection.class, dependency.getDependencyType());
-		assertNull("Should be no key for function dependency", dependency.getKey());
-		assertEquals("Incorrect function dependency index", -1, dependency.getIndex());
-		assertNull("Function dependency should not be qualified", dependency.getTypeQualifier());
+		assertEquals("Should be no managed object dependencies", 0, type.getDependencyTypes().length);
+		ManagedObjectFunctionDependencyType[] functionDependencies = type.getFunctionDependencyTypes();
+		assertEquals("Should have function dependency", 1, functionDependencies.length);
+		ManagedObjectFunctionDependencyType functionDependency = functionDependencies[0];
+		assertEquals("Incorrect function dependency name", "DEPENDENCY", functionDependency.getFunctionObjectName());
+		assertEquals("Incorrect function dependency type", Connection.class,
+				functionDependency.getFunctionObjectType());
 	}
 
 	/**
@@ -764,16 +763,13 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Validate dependencies ordered and correct values
 		ManagedObjectDependencyType<?>[] dependencyTypes = moType.getDependencyTypes();
-		assertEquals("Incorrect number of dependencies", 3, dependencyTypes.length);
-
-		// Managed Object dependencies always first
+		assertEquals("Incorrect number of dependencies", 2, dependencyTypes.length);
 		ManagedObjectDependencyType<?> dependencyTypeOne = dependencyTypes[0];
 		assertEquals("Keys should be ordered", TwoKey.ONE, dependencyTypeOne.getKey());
 		assertEquals("Incorrect first dependency index", TwoKey.ONE.ordinal(), dependencyTypeOne.getIndex());
 		assertEquals("Incorrect first dependency name", TwoKey.ONE.toString(), dependencyTypeOne.getDependencyName());
 		assertEquals("Incorrect first dependency type", Connection.class, dependencyTypeOne.getDependencyType());
 		assertNull("First dependency type should not be qualified", dependencyTypeOne.getTypeQualifier());
-		assertFalse("First dependency should not be function dependency", dependencyTypeOne.isFunctionDependency());
 		ManagedObjectDependencyType<?> dependencyTypeTwo = dependencyTypes[1];
 		assertEquals("Keys should be ordered", TwoKey.TWO, dependencyTypeTwo.getKey());
 		assertEquals("Incorrect second dependency index", TwoKey.TWO.ordinal(), dependencyTypeTwo.getIndex());
@@ -782,16 +778,14 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect second dependency type qualification", "QUALIFIED",
 				dependencyTypeTwo.getTypeQualifier());
 
-		// Function dependencies listed next
-		ManagedObjectDependencyType<?> dependencyTypeThree = dependencyTypes[2];
-		assertNull("Should be no key for function dependency", dependencyTypeThree.getKey());
-		assertEquals("Incorrect function dependency index", -1, dependencyTypeThree.getIndex());
+		// Validate function dependencies
+		ManagedObjectFunctionDependencyType[] functionDependencyTypes = moType.getFunctionDependencyTypes();
+		assertEquals("Should have function dependency", 1, functionDependencyTypes.length);
+		ManagedObjectFunctionDependencyType functionDependencyType = functionDependencyTypes[0];
 		assertEquals("Incorrect function dependency name", "FUNCTION_DEPENDENCY",
-				dependencyTypeThree.getDependencyName());
+				functionDependencyType.getFunctionObjectName());
 		assertEquals("Incorrect function dependency type", URLConnection.class,
-				dependencyTypeThree.getDependencyType());
-		assertNull("Function dependency should not be qualified", dependencyTypeThree.getTypeQualifier());
-		assertTrue("Function dependency should be function dependency", dependencyTypeThree.isFunctionDependency());
+				functionDependencyType.getFunctionObjectType());
 
 		// Validate flows ordered and correct values
 		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();
@@ -849,9 +843,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Validate dependencies
 		ManagedObjectDependencyType<?>[] dependencyTypes = moType.getDependencyTypes();
-		assertEquals("Incorrect number of dependencies", 4, dependencyTypes.length);
-
-		// Managed Object dependencies always first
+		assertEquals("Incorrect number of dependencies", 2, dependencyTypes.length);
 		ManagedObjectDependencyType<?> dependencyTypeOne = dependencyTypes[0];
 		assertEquals("Incorrect first dependency index", 0, dependencyTypeOne.getIndex());
 		assertNull("Should be no dependency key", dependencyTypeOne.getKey());
@@ -868,21 +860,19 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect second dependency type", Connection.class, dependencyTypeTwo.getDependencyType());
 		assertNull("Second dependency should not be qualified", dependencyTypeTwo.getTypeQualifier());
 
-		// Function dependencies listed next (ordered by name)
-		ManagedObjectDependencyType<?> dependencyTypeThree = dependencyTypes[2];
-		assertNull("Should be no key for function dependency", dependencyTypeThree.getKey());
-		assertEquals("Incorrect function dependency index", -1, dependencyTypeThree.getIndex());
-		assertEquals("Incorrect function dependency name", "A", dependencyTypeThree.getDependencyName());
-		assertEquals("Incorrect function dependency type", Short.class, dependencyTypeThree.getDependencyType());
-		assertNull("Function dependency should not be qualified", dependencyTypeThree.getTypeQualifier());
-		assertTrue("Function dependency should be function dependency", dependencyTypeThree.isFunctionDependency());
-		ManagedObjectDependencyType<?> dependencyTypeFour = dependencyTypes[3];
-		assertNull("Should be no key for function dependency", dependencyTypeFour.getKey());
-		assertEquals("Incorrect function dependency index", -1, dependencyTypeFour.getIndex());
-		assertEquals("Incorrect function dependency name", "B", dependencyTypeFour.getDependencyName());
-		assertEquals("Incorrect function dependency type", URLConnection.class, dependencyTypeFour.getDependencyType());
-		assertNull("Function dependency should not be qualified", dependencyTypeFour.getTypeQualifier());
-		assertTrue("Function dependency should be function dependency", dependencyTypeFour.isFunctionDependency());
+		// Validate function dependencies (ordered by name)
+		ManagedObjectFunctionDependencyType[] functionDependencyTypes = moType.getFunctionDependencyTypes();
+		assertEquals("Should have function dependency", 2, functionDependencyTypes.length);
+		ManagedObjectFunctionDependencyType functionDependencyTypeOne = functionDependencyTypes[0];
+		assertEquals("Incorrect first function dependency name", "A",
+				functionDependencyTypeOne.getFunctionObjectName());
+		assertEquals("Incorrect first function dependency type", Short.class,
+				functionDependencyTypeOne.getFunctionObjectType());
+		ManagedObjectFunctionDependencyType functionDependencyTypeTwo = functionDependencyTypes[1];
+		assertEquals("Incorrect second function dependency name", "B",
+				functionDependencyTypeTwo.getFunctionObjectName());
+		assertEquals("Incorrect second function dependency type", URLConnection.class,
+				functionDependencyTypeTwo.getFunctionObjectType());
 
 		// Validate flows
 		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();

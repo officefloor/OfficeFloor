@@ -45,7 +45,6 @@ import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ExecutiveBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.InputDependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
@@ -68,6 +67,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.team.Team;
@@ -389,10 +389,22 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected ThreadDependencyMappingBuilder record_managingOfficeBuilder_setInputManagedObjectName(
 			String inputManagedObjectName) {
-		InputDependencyMappingBuilder dependencyMapper = this.createMock(InputDependencyMappingBuilder.class);
+		ThreadDependencyMappingBuilder dependencyMapper = this.createMock(ThreadDependencyMappingBuilder.class);
 		this.recordReturn(this.managingOfficeBuilder,
 				this.managingOfficeBuilder.setInputManagedObjectName(inputManagedObjectName), dependencyMapper);
 		return dependencyMapper;
+	}
+
+	/**
+	 * Records specifying the {@link ManagedObjectFunctionDependency}.
+	 * 
+	 * @param functionObjectName     Name of the
+	 *                               {@link ManagedObjectFunctionDependency}.
+	 * @param scopeManagedObjectName Name of the {@link ManagedObject}.
+	 */
+	protected void record_managingOfficeBuilder_mapFunctionDependency(String functionObjectName,
+			String scopeManagedObjectName) {
+		this.managingOfficeBuilder.mapFunctionDependency(functionObjectName, scopeManagedObjectName);
 	}
 
 	/**

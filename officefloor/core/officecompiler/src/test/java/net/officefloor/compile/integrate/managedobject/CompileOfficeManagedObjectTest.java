@@ -263,8 +263,8 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.DEPENDENT", "OFFICE.DEPENDENT_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENT", "OFFICE.DEPENDENT");
-		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class,
-				"Managed Object Dependency dependency is not linked to a BoundManagedObjectNode");
+		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
+				"Managed Object Dependency DEPENDENCY is not linked to a BoundManagedObjectNode");
 
 		// Add managed objects to OfficeFloor
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE",
@@ -281,24 +281,22 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectWithFunctionDependencyInOffice() {
 
-		fail("TODO implement");
-
 		// Record building the office
 		this.record_init();
 
 		// Register the office linked managed objects with the office
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.DEPENDENT", "OFFICE.DEPENDENT_SOURCE");
-		DependencyMappingBuilder mapper = this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENT",
-				"OFFICE.DEPENDENT");
-		mapper.mapDependency(0, "OFFICE.SIMPLE");
+		this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENT", "OFFICE.DEPENDENT");
 		office.registerManagedObjectSource("OFFICE.SIMPLE", "OFFICE.SIMPLE_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE", "OFFICE.SIMPLE");
 
 		// Add managed objects to office
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", DependencyManagedObject.class.getName());
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE",
+				FunctionDependencyManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.DEPENDENT_SOURCE");
+		this.record_managingOfficeBuilder_mapFunctionDependency("DEPENDENCY", "OFFICE.SIMPLE");
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");

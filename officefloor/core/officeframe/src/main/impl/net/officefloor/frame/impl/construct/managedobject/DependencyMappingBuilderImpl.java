@@ -25,12 +25,10 @@ import java.util.Map;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
-import net.officefloor.frame.api.build.InputDependencyMappingBuilder;
 import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.thread.OptionalThreadLocal;
 import net.officefloor.frame.impl.construct.administration.AdministrationBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
@@ -39,7 +37,6 @@ import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedObjectFunctionDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectGovernanceConfiguration;
 import net.officefloor.frame.internal.configuration.ThreadLocalConfiguration;
 
@@ -48,9 +45,8 @@ import net.officefloor.frame.internal.configuration.ThreadLocalConfiguration;
  * 
  * @author Daniel Sagenschneider
  */
-public class DependencyMappingBuilderImpl<O extends Enum<O>>
-		implements DependencyMappingBuilder, ThreadDependencyMappingBuilder, InputDependencyMappingBuilder,
-		ManagedObjectConfiguration<O>, InputManagedObjectConfiguration<O> {
+public class DependencyMappingBuilderImpl<O extends Enum<O>> implements DependencyMappingBuilder,
+		ThreadDependencyMappingBuilder, ManagedObjectConfiguration<O>, InputManagedObjectConfiguration<O> {
 
 	/**
 	 * Name of the {@link ManagedObject} is being bound.
@@ -66,12 +62,6 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 	 * {@link ManagedObjectDependencyConfiguration} by index of dependency.
 	 */
 	private final Map<Integer, ManagedObjectDependencyConfiguration<O>> dependencies = new HashMap<>();
-
-	/**
-	 * {@link ManagedObjectFunctionDependencyConfiguration} instances by
-	 * {@link ManagedObjectFunctionDependency} name.
-	 */
-	private final Map<String, ManagedObjectFunctionDependencyConfiguration> functionDependencies = new HashMap<>();
 
 	/**
 	 * Pre-load {@link AdministrationConfiguration} instances.
@@ -186,21 +176,6 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 	}
 
 	/*
-	 * ========== InputDependencyMappingBuilder ==========================
-	 */
-
-	@Override
-	public void mapFunctionDependency(String functionObjectName, String scopedManagedObjectName) {
-
-		// Create the dependency
-		ManagedObjectFunctionDependencyConfigurationImpl dependency = new ManagedObjectFunctionDependencyConfigurationImpl(
-				functionObjectName, scopedManagedObjectName);
-
-		// Map the dependency by function object name
-		this.functionDependencies.put(functionObjectName, dependency);
-	}
-
-	/*
 	 * ==== ManagedObjectConfiguration & InputManagedObjectConfiguration ====
 	 */
 
@@ -217,11 +192,6 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 	@Override
 	public ManagedObjectDependencyConfiguration<O>[] getDependencyConfiguration() {
 		return ConstructUtil.toArray(this.dependencies, new ManagedObjectDependencyConfiguration[0]);
-	}
-
-	@Override
-	public ManagedObjectFunctionDependencyConfiguration[] getFunctionDependencyConfiguration() {
-		return this.functionDependencies.values().toArray(new ManagedObjectFunctionDependencyConfiguration[0]);
 	}
 
 	@Override
@@ -273,49 +243,6 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>>
 		@Override
 		public O getDependencyKey() {
 			return this.dependencyKey;
-		}
-
-		@Override
-		public String getScopeManagedObjectName() {
-			return this.managedObjectName;
-		}
-	}
-
-	/**
-	 * {@link ManagedObjectFunctionDependencyConfiguration} implementation.
-	 */
-	private class ManagedObjectFunctionDependencyConfigurationImpl
-			implements ManagedObjectFunctionDependencyConfiguration {
-
-		/**
-		 * Name of the {@link ManagedObjectFunctionDependency}.
-		 */
-		private final String functionObjectName;
-
-		/**
-		 * {@link ManagedObject} name.
-		 */
-		private final String managedObjectName;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param functionObjectName Name of the
-		 *                           {@link ManagedObjectFunctionDependency}.
-		 * @param managedObjectName  {@link ManagedObject} name.
-		 */
-		public ManagedObjectFunctionDependencyConfigurationImpl(String functionObjectName, String managedObjectName) {
-			this.functionObjectName = functionObjectName;
-			this.managedObjectName = managedObjectName;
-		}
-
-		/*
-		 * ============= ManagedObjectFunctionDependencyConfiguration ================
-		 */
-
-		@Override
-		public String getFunctionObjectName() {
-			return this.functionObjectName;
 		}
 
 		@Override
