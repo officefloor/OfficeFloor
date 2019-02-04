@@ -26,6 +26,9 @@
 	<list type="OfficeFloorManagedObjectSourceInputDependencyModel"
 		name="office floor managed object source input dependency"
 		plural="office floor managed object source input dependencies" />
+	<list type="OfficeFloorManagedObjectSourceFunctionDependencyModel"
+		name="office floor managed object source function dependency"
+		plural="office floor managed object source function dependencies" />
 	<list type="OfficeFloorManagedObjectSourceFlowModel"
 		name="office floor managed object source flow" />
 	<list type="OfficeFloorManagedObjectSourceTeamModel"

@@ -47,6 +47,15 @@
 				<external-managed-object
 					name="EXTERNAL_MANAGED_OBJECT" />
 			</input-dependency>
+			<function-dependency
+				name="FUNCTION_DEPENDENCY_ONE" object-type="java.sql.Connection">
+				<managed-object name="MANAGED_OBJECT_TWO" />
+			</function-dependency>
+			<function-dependency
+				name="FUNCTION_DEPENDENCY_TWO" object-type="java.sql.Connection">
+				<external-managed-object
+					name="EXTERNAL_MANAGED_OBJECT" />
+			</function-dependency>
 			<flow name="FLOW" argument-type="java.lang.Integer">
 				<section-input section="SECTION" input="INPUT_A" />
 			</flow>
@@ -73,6 +82,15 @@
 				<external-managed-object
 					name="EXTERNAL_MANAGED_OBJECT" />
 			</input-dependency>
+			<function-dependency
+				name="FUNCTION_DEPENDENCY_ONE" object-type="java.sql.Connection">
+				<managed-object name="MANAGED_OBJECT_TWO" />
+			</function-dependency>
+			<function-dependency
+				name="FUNCTION_DEPENDENCY_TWO" object-type="java.sql.Connection">
+				<external-managed-object
+					name="EXTERNAL_MANAGED_OBJECT" />
+			</function-dependency>
 			<flow name="FLOW" argument-type="java.lang.Integer">
 				<section-input section="SECTION" input="INPUT_A" />
 			</flow>
