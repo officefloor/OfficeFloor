@@ -20,6 +20,7 @@ package net.officefloor.compile.spi.officefloor;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectFunctionDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.frame.api.manage.Office;
@@ -95,6 +96,17 @@ public interface OfficeFloorManagedObjectSource extends PropertyConfigurable {
 	 * @return {@link OfficeFloorManagedObjectDependency}.
 	 */
 	OfficeFloorManagedObjectDependency getInputOfficeFloorManagedObjectDependency(String managedObjectDependencyName);
+
+	/**
+	 * Obtains the {@link OfficeFloorManagedObjectFunctionDependency} for the
+	 * {@link ManagedObjectFunctionDependencyType} for the {@link ManagedObjects}.
+	 * 
+	 * @param managedObjectFunctionDependencyName Name of the
+	 *                                            {@link ManagedObjectFunctionDependencyType}.
+	 * @return {@link OfficeFloorManagedObjectFunctionDependency}.
+	 */
+	OfficeFloorManagedObjectFunctionDependency getOfficeFloorManagedObjectFunctionDependency(
+			String managedObjectFunctionDependencyName);
 
 	/**
 	 * Obtains the {@link OfficeFloorManagedObject} representing an instance use of

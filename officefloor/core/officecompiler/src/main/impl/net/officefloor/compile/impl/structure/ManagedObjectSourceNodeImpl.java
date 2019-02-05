@@ -91,6 +91,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFunctionDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
@@ -390,6 +391,19 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private ManagedObjectDependencyNode getManagedObjectDependencyNode(String managedObjectDependencyName) {
 		return NodeUtil.getNode(managedObjectDependencyName, this.inputDependencies,
 				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectDependencyNode}.
+	 * 
+	 * @param managedObjectDependencyName Name of the
+	 *                                    {@link ManagedObjectDependencyNode}.
+	 * @return {@link ManagedObjectDependencyNode}.
+	 */
+	private ManagedObjectFunctionDependencyNode getManagedObjectFunctionDependencyNode(
+			String managedObjectFunctionDependencyName) {
+		return NodeUtil.getNode(managedObjectFunctionDependencyName, this.functionDependencies, () -> this.context
+				.createManagedObjectFunctionDependencyNode(managedObjectFunctionDependencyName, this));
 	}
 
 	/**
@@ -1175,8 +1189,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@Override
 	public OfficeManagedObjectFunctionDependency getOfficeManagedObjectFunctionDependency(
 			String managedObjectFunctionDependencyName) {
-		return NodeUtil.getNode(managedObjectFunctionDependencyName, this.functionDependencies, () -> this.context
-				.createManagedObjectFunctionDependencyNode(managedObjectFunctionDependencyName, this));
+		return this.getManagedObjectFunctionDependencyNode(managedObjectFunctionDependencyName);
 	}
 
 	@Override
@@ -1213,6 +1226,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public OfficeFloorManagedObjectDependency getInputOfficeFloorManagedObjectDependency(
 			String managedObjectDependencyName) {
 		return this.getManagedObjectDependencyNode(managedObjectDependencyName);
+	}
+
+	@Override
+	public OfficeFloorManagedObjectFunctionDependency getOfficeFloorManagedObjectFunctionDependency(
+			String managedObjectFunctionDependencyName) {
+		return this.getManagedObjectFunctionDependencyNode(managedObjectFunctionDependencyName);
 	}
 
 	@Override
