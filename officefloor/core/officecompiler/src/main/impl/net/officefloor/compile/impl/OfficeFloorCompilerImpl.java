@@ -62,6 +62,7 @@ import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectExecutionStrategyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectFunctionDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectPoolNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
@@ -103,6 +104,7 @@ import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
+import net.officefloor.compile.internal.structure.ManagedObjectFunctionDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -983,6 +985,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	public ManagedObjectDependencyNode createManagedObjectDependencyNode(String dependencyName,
 			ManagedObjectSourceNode managedObjectSource) {
 		return new ManagedObjectDependencyNodeImpl(dependencyName, managedObjectSource, this);
+	}
+
+	@Override
+	public ManagedObjectFunctionDependencyNode createManagedObjectFunctionDependencyNode(String dependencyName,
+			ManagedObjectSourceNode managedObjectSource) {
+		return new ManagedObjectFunctionDependencyNodeImpl(dependencyName, managedObjectSource, this);
 	}
 
 	@Override

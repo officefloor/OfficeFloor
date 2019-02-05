@@ -56,6 +56,9 @@ import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeMa
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
@@ -405,15 +408,16 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				"getExternalManagedObjectName");
 
 		// Validate the function dependencies
-		assertList(new String[] { "getOfficeFunctionManagedObjectDependencyName", "getDependencyType" },
-				mos.getOfficeInputManagedObjectDependencies(),
-				new OfficeInputManagedObjectDependencyModel("INPUT_DEPENDENCY_ONE", Connection.class.getName()),
-				new OfficeInputManagedObjectDependencyModel("INPUT_DEPENDENCY_TWO", Connection.class.getName()));
-		assertProperties(new OfficeInputManagedObjectDependencyToOfficeManagedObjectModel("MANAGED_OBJECT_TWO"),
-				mos.getOfficeInputManagedObjectDependencies().get(0).getOfficeManagedObject(),
+		assertList(new String[] { "getOfficeManagedObjectFunctionDependencyName", "getDependencyType" },
+				mos.getOfficeManagedObjectFunctionDependencies(),
+				new OfficeManagedObjectFunctionDependencyModel("FUNCTION_DEPENDENCY_ONE", Connection.class.getName()),
+				new OfficeManagedObjectFunctionDependencyModel("FUNCTION_DEPENDENCY_TWO", Connection.class.getName()));
+		assertProperties(new OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel("MANAGED_OBJECT_TWO"),
+				mos.getOfficeManagedObjectFunctionDependencies().get(0).getOfficeManagedObject(),
 				"getOfficeManagedObjectName");
-		assertProperties(new OfficeInputManagedObjectDependencyToExternalManagedObjectModel("EXTERNAL_MANAGED_OBJECT"),
-				mos.getOfficeInputManagedObjectDependencies().get(1).getExternalManagedObject(),
+		assertProperties(
+				new OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel("EXTERNAL_MANAGED_OBJECT"),
+				mos.getOfficeManagedObjectFunctionDependencies().get(1).getExternalManagedObject(),
 				"getExternalManagedObjectName");
 
 		// Validate the flows

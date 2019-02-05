@@ -433,6 +433,18 @@ public interface NodeContext {
 			ManagedObjectSourceNode managedObjectSource);
 
 	/**
+	 * Creates a {@link ManagedObjectFunctionDependencyNode} for a
+	 * {@link ManagedObjectSourceNode}.
+	 * 
+	 * @param dependencyName      Name of the
+	 *                            {@link ManagedObjectFunctionDependencyNode}.
+	 * @param managedObjectSource Parent {@link ManagedObjectSourceNode}.
+	 * @return {@link ManagedObjectFunctionDependencyNode}.
+	 */
+	ManagedObjectFunctionDependencyNode createManagedObjectFunctionDependencyNode(String dependencyName,
+			ManagedObjectSourceNode managedObjectSource);
+
+	/**
 	 * Creates the {@link ManagedObjectFlowNode}.
 	 * 
 	 * @param flowName            Name of the {@link ManagedObjectFlowNode}.

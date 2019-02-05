@@ -21,6 +21,7 @@ import java.sql.Connection;
 
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectFlowNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectFunctionDependencyNodeImpl;
 import net.officefloor.compile.impl.supplier.MockTypeManagedObjectSource;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.spi.managedobject.ManagedObjectFlow;
@@ -263,8 +264,8 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("OFFICE.DEPENDENT", "OFFICE.DEPENDENT_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENT", "OFFICE.DEPENDENT");
-		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
-				"Managed Object Dependency DEPENDENCY is not linked to a BoundManagedObjectNode");
+		this.issues.recordIssue("DEPENDENCY", ManagedObjectFunctionDependencyNodeImpl.class,
+				"Managed Object Function Dependency DEPENDENCY is not linked to a BoundManagedObjectNode");
 
 		// Add managed objects to OfficeFloor
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE",
@@ -286,20 +287,19 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 
 		// Register the office linked managed objects with the office
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.DEPENDENT", "OFFICE.DEPENDENT_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENT", "OFFICE.DEPENDENT");
-		office.registerManagedObjectSource("OFFICE.SIMPLE", "OFFICE.SIMPLE_SOURCE");
-		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE", "OFFICE.SIMPLE");
-
-		// Add managed objects to office
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE",
 				FunctionDependencyManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.DEPENDENT_SOURCE");
+
+		// Map in function dependencies
 		this.record_managingOfficeBuilder_mapFunctionDependency("DEPENDENCY", "OFFICE.SIMPLE");
+
+		// Register remaining
 		this.record_officeFloorBuilder_addManagedObject("OFFICE.SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
 				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("OFFICE.SIMPLE", "OFFICE.SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("OFFICE.SIMPLE", "OFFICE.SIMPLE");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -311,8 +311,6 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 	 */
 	public void testManagedObjectWithFunctionDependencyOutsideOffice() {
 
-		fail("TODO implement");
-
 		// Record building the office
 		this.record_init();
 
@@ -323,13 +321,12 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE", ClassManagedObjectSource.class, 0,
-				"class.name", DependencyManagedObject.class.getName());
+		this.record_officeFloorBuilder_addManagedObject("OFFICE.DEPENDENT_SOURCE",
+				FunctionDependencyManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE.DEPENDENT", "OFFICE.DEPENDENT_SOURCE");
-		DependencyMappingBuilder mapper = this.record_officeBuilder_addProcessManagedObject("OFFICE.DEPENDENT",
-				"OFFICE.DEPENDENT");
-		mapper.mapDependency(0, "SIMPLE");
+
+		// Map in function dependency
+		this.record_managingOfficeBuilder_mapFunctionDependency("DEPENDENCY", "SIMPLE");
 
 		// Compile the OfficeFloor
 		this.compile(true);
