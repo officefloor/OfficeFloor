@@ -21,8 +21,11 @@ import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.clock.Clock;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -48,6 +51,14 @@ public class JwtAuthorityManagedObjectSource
 	 */
 	public static enum Flows {
 		RETRIEVE_ENCODE_KEYS
+	}
+
+	/**
+	 * Dependencies for {@link ManagedFunction} to retrieve the {@link JwtEncodeKey}
+	 * instances.
+	 */
+	private static enum RetrieveEncodeKeysDependencies {
+		COLLECTOR, JWT_AUTHORITY_REPOSITORY
 	}
 
 	/**
@@ -202,31 +213,6 @@ public class JwtAuthorityManagedObjectSource
 	}
 
 	/**
-	 * Loads the {@link JwtEncodeKey} instances.
-	 * 
-	 * @param clockTimeSeconds {@link Clock} for current time in seconds.
-	 * @param repository       {@link JwtAuthorityRepository}.
-	 * @param collector        {@link JwtEncodeCollector}.
-	 */
-	public static void loadJwtEncodeKeys(Clock<Long> clockTimeSeconds, JwtAuthorityRepository repository,
-			JwtEncodeCollector collector) {
-
-		// Retrieve the keys
-		long currentTimeSeconds = clockTimeSeconds.getTime();
-		// TODO determine period for all active keys for start time
-		List<JwtEncodeKey> keys = repository.retrieveJwtEncodeKeys(Instant.ofEpochSecond(currentTimeSeconds));
-
-		// Load the keys (keeping only valid keys)
-		JwtEncodeKeyImpl[] encodeKeys = keys.stream().map((key) -> new JwtEncodeKeyImpl(key))
-				.filter((key) -> key.isValid()).toArray(JwtEncodeKeyImpl[]::new);
-
-		// TODO determine if need to create new key
-
-		// Load the JWT encoder
-		collector.setEncoding(encodeKeys);
-	}
-
-	/**
 	 * {@link Clock} to obtain time in seconds.
 	 */
 	private Clock<Long> timeInSeconds;
@@ -259,6 +245,42 @@ public class JwtAuthorityManagedObjectSource
 
 		// Obtain the clock
 		this.timeInSeconds = sourceContext.getClock((time) -> time);
+
+		// Obtain the JWT Authority Repository dependency
+		ManagedObjectFunctionDependency jwtAuthorityRepository = sourceContext
+				.addFunctionDependency(JwtAuthorityRepository.class.getSimpleName(), JwtAuthorityRepository.class);
+
+		// Function to handle retrieving encode keys
+		ManagedObjectFunctionBuilder<RetrieveEncodeKeysDependencies, None> retrieveEncodeKeys = sourceContext
+				.addManagedFunction(Flows.RETRIEVE_ENCODE_KEYS.name(), () -> (functionContext) -> {
+
+					// Obtain the JWT authority repository
+					JwtEncodeCollector collector = (JwtEncodeCollector) functionContext
+							.getObject(RetrieveEncodeKeysDependencies.COLLECTOR);
+					JwtAuthorityRepository repository = (JwtAuthorityRepository) functionContext
+							.getObject(RetrieveEncodeKeysDependencies.JWT_AUTHORITY_REPOSITORY);
+
+					// Retrieve the keys
+					long currentTimeSeconds = this.timeInSeconds.getTime();
+					// TODO determine period for all active keys for start time
+					List<JwtEncodeKey> keys = repository
+							.retrieveJwtEncodeKeys(Instant.ofEpochSecond(currentTimeSeconds));
+
+					// Load the keys (keeping only valid keys)
+					JwtEncodeKeyImpl[] encodeKeys = keys.stream().map((key) -> new JwtEncodeKeyImpl(key))
+							.filter((key) -> key.isValid()).toArray(JwtEncodeKeyImpl[]::new);
+
+					// TODO determine if need to create new key
+
+					// Load the JWT encoder
+					collector.setEncoding(encodeKeys);
+
+					// Nothing further
+					return null;
+				});
+		retrieveEncodeKeys.linkParameter(RetrieveEncodeKeysDependencies.COLLECTOR, JwtEncodeCollector.class);
+		retrieveEncodeKeys.linkObject(RetrieveEncodeKeysDependencies.JWT_AUTHORITY_REPOSITORY, jwtAuthorityRepository);
+		sourceContext.getFlow(Flows.RETRIEVE_ENCODE_KEYS).linkFunction(Flows.RETRIEVE_ENCODE_KEYS.name());
 	}
 
 	@Override
@@ -397,24 +419,6 @@ public class JwtAuthorityManagedObjectSource
 		 * Expiry.
 		 */
 		private Long exp;
-
-		/**
-		 * Specifies not before.
-		 * 
-		 * @param nbf Not before.
-		 */
-		public void setNbf(Long nbf) {
-			this.nbf = nbf;
-		}
-
-		/**
-		 * Specifies expirty.
-		 * 
-		 * @param exp Expirty.
-		 */
-		public void setExpirty(Long exp) {
-			this.exp = exp;
-		}
 	}
 
 	/**

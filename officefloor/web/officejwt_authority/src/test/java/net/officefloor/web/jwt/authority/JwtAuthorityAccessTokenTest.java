@@ -3,6 +3,7 @@ package net.officefloor.web.jwt.authority;
 import java.security.Key;
 import java.security.KeyPair;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -77,8 +78,8 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	/**
 	 * Mock {@link JwtEncodeKey} instances for testing.
 	 */
-	private List<JwtEncodeKey> mockEncodeKeys = Arrays.asList(new MockJwtEncodeKey(mockCurrentTime,
-			mockCurrentTime + TimeUnit.MINUTES.toSeconds(5), keyPair.getPrivate(), keyPair.getPublic()));
+	private List<JwtEncodeKey> mockEncodeKeys = new ArrayList<>(Arrays.asList(new MockJwtEncodeKey(mockCurrentTime,
+			mockCurrentTime + TimeUnit.MINUTES.toSeconds(5), keyPair.getPrivate(), keyPair.getPublic())));
 
 	/**
 	 * Ensure able to inject {@link JwtAuthority}.
@@ -168,6 +169,8 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 				OfficeArchitect office = context.getOfficeArchitect();
 
 				// JWT Authority registered through extension
+				office.addOfficeManagedObjectSource("JWT_AUTHORITY", JwtAuthorityManagedObjectSource.class.getName())
+						.addOfficeManagedObject("JWT_AUTHORITY", ManagedObjectScope.THREAD);
 
 				// Register the JWT authority repository
 				office.addOfficeManagedObjectSource("REPOSITORY", new Singleton(this))
