@@ -713,14 +713,18 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 							(managedObject) -> managedObject.autoWireDependencies(autoWirer, this, compileContext));
 
 			// Iterate over mo sources (auto-wiring unlinked input dependencies)
-			this.managedObjectSources.values().stream().sorted((a, b) -> CompileUtil
-					.sortCompare(a.getOfficeFloorManagedObjectSourceName(), b.getOfficeFloorManagedObjectSourceName()))
+			this.managedObjectSources.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorManagedObjectSourceName(),
+							b.getOfficeFloorManagedObjectSourceName()))
 					.forEachOrdered((managedObjectSource) -> {
 						// This office will manage the managed object
 						OfficeNode officeNode = this;
 
 						// Load input dependencies for managed object source
 						managedObjectSource.autoWireInputDependencies(autoWirer, officeNode, compileContext);
+
+						// Load the function dependencies for managed object source
+						managedObjectSource.autoWireFunctionDependencies(autoWirer, officeNode, compileContext);
 					});
 
 			// Iterate over suppliers (auto-wiring unlinked thread locals)

@@ -38,6 +38,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorInputManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFunctionDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunction;
@@ -58,6 +59,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
@@ -242,6 +244,40 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		// Link the input
 		managingOffice.linkFlow(0, "SECTION.FUNCTION");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure can auto-wire {@link ManagedObjectFunctionDependency} for an
+	 * {@link OfficeFloorManagedObjectFunctionDependency}.
+	 */
+	public void testAutoWireOfficeFloorManagedObjectFunctionDependency() {
+
+		// Flag to enable auto-wiring of the objects
+		AutoWireOfficeFloorExtensionService.enableAutoWireObjects();
+
+		// Record building the OfficeFloor
+		this.record_init();
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Build the dependency
+		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("SIMPLE_OBJECT", "SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("SIMPLE_OBJECT", "SIMPLE_OBJECT");
+
+		// Build the function dependency on managed object
+		this.record_officeFloorBuilder_addManagedObject("DEPENDENCY_SOURCE", FunctionDependencyManagedObject.class, 0);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+
+		// Map the function dependency
+		this.record_managingOfficeBuilder_mapFunctionDependency("DEPENDENCY", "SIMPLE_OBJECT");
+
+		// Build the office
+		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, "SIMPLE_OBJECT", null, this);
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -739,6 +775,31 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 
 		@Override
 		public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
+			return null;
+		}
+	}
+
+	@TestSource
+	public static class FunctionDependencyManagedObject extends AbstractManagedObjectSource<None, None> {
+
+		/*
+		 * ================ ManagedObjectSource ====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			context.setObjectClass(Object.class);
+			context.getManagedObjectSourceContext().addFunctionDependency("DEPENDENCY", CompileManagedObject.class);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			fail("Should not require obtaining managed object in compiling");
 			return null;
 		}
 	}

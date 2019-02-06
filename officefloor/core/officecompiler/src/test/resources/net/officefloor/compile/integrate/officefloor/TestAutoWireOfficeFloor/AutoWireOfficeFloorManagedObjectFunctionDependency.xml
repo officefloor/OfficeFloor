@@ -1,0 +1,30 @@
+<context>
+	<office-floor>
+		<managed-object-sources>
+			<managed-object-source name="DEPENDENCY_SOURCE"
+				source="${testcase}$FunctionDependencyManagedObject">
+				<managing-office name="OFFICE" />
+				<function-dependency name="DEPENDENCY">
+					<!-- auto-wire the dependency -->
+					<!-- <managed-object name="SIMPLE_OBJECT" /> -->
+				</function-dependency>
+			</managed-object-source>
+			<managed-object-source name="SIMPLE_SOURCE"
+				source="CLASS">
+				<properties>
+					<property name="class.name"
+						value="${testcase}$CompileManagedObject" />
+				</properties>
+				<managing-office name="OFFICE" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="SIMPLE_OBJECT" scope="PROCESS">
+				<managed-object-source name="SIMPLE_SOURCE" />
+			</managed-object>
+		</managed-objects>
+		<offices>
+			<office name="OFFICE" source="${testcase}$CompileOfficeSource" />
+		</offices>
+	</office-floor>
+</context>

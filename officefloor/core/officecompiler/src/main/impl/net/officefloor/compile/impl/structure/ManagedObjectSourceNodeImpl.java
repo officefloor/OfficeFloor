@@ -733,6 +733,51 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
+	public void autoWireFunctionDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office,
+			CompileContext compileContext) {
+
+		// Obtain the managed object type
+		ManagedObjectType<?> managedObjectType = compileContext.getOrLoadManagedObjectType(this);
+		if (managedObjectType == null) {
+			return; // must have type
+		}
+
+		// Create the map of function dependency types by names
+		Map<String, ManagedObjectFunctionDependencyType> functionDependencyTypes = new HashMap<>();
+		Arrays.stream(managedObjectType.getFunctionDependencyTypes())
+				.forEach((functionDependencyType) -> functionDependencyTypes
+						.put(functionDependencyType.getFunctionObjectName(), functionDependencyType));
+
+		// Auto-wire function dependencies
+		this.functionDependencies.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getManagedObjectDependencyName(), b.getManagedObjectDependencyName()))
+				.forEachOrdered((functionDependency) -> {
+
+					// Ignore if already configured
+					if (functionDependency.getLinkedObjectNode() != null) {
+						return;
+					}
+
+					// Obtain the function dependency type
+					ManagedObjectFunctionDependencyType functionDependencyType = functionDependencyTypes
+							.get(functionDependency.getManagedObjectDependencyName());
+					if (functionDependencyType == null) {
+						return; // must have type
+					}
+
+					// Auto-wire the dependency
+					AutoWireLink<ManagedObjectFunctionDependencyNode, LinkObjectNode>[] links = autoWirer
+							.getAutoWireLinks(functionDependency,
+									new AutoWire(functionDependencyType.getFunctionObjectType()));
+					if (links.length == 1) {
+						LinkUtil.linkAutoWireObjectNode(functionDependency, links[0].getTargetNode(office), office,
+								autoWirer, compileContext, this.context.getCompilerIssues(),
+								(link) -> functionDependency.linkObjectNode(link));
+					}
+				});
+	}
+
+	@Override
 	public void autoWireTeams(AutoWirer<LinkTeamNode> autoWirer, CompileContext compileContext) {
 
 		// Obtain the managed object type
