@@ -326,16 +326,12 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	public void testCustomPoller() {
 
 		// Create with custom poller
-		Builder builder = StatePoller.builder(String.class, (delay, context, callback) -> {
-			if (delay == 0) {
-				// Start up
-				this.registerStartupProcess(Flows.DO_FLOW, new MockParameter(context), new MockManagedObject(context),
-						callback);
-			} else {
-				// Delayed for next poll
-				this.invokeProcess(Flows.DO_FLOW, new MockParameter(context), new MockManagedObject(context), delay,
-						callback);
-			}
+		Builder builder = StatePoller.builder(String.class, (context, callback) -> {
+			this.registerStartupProcess(Flows.DO_FLOW, new MockParameter(context), new MockManagedObject(context),
+					callback);
+		}, (delay, context, callback) -> {
+			this.invokeProcess(Flows.DO_FLOW, new MockParameter(context), new MockManagedObject(context), delay,
+					callback);
 		}).logger(this.logger);
 
 		// Ensure can not set parameter factory (as custom poller)
@@ -363,6 +359,27 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 		InvokedProcess process = this.invokedProcesses.remove();
 		process.managedObject.pollContext.setNextState("STATE", -1, null);
 		this.assertLogs("Name", "Next poll for IDENTIFIER in (default) " + defaultMilliseconds + " milliseconds");
+	}
+
+	/**
+	 * Ensure can manually trigger a poll.
+	 */
+	public void testManuallyPoll() {
+
+		// Create the poller
+		this.poller = StatePoller
+				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.identifier("IDENTIFIER").logger(this.logger).build();
+		this.invokedProcesses.remove();
+		assertEquals("Should be no further processes", 0, this.invokedProcesses.size());
+
+		// Manually trigger the poll
+		this.poller.poll();
+
+		// Ensure manually polled
+		InvokedProcess process = this.invokedProcesses.remove();
+		process.managedObject.pollContext.setNextState("STATE", -1, null);
+		this.assertLogs("Name", "Manual poll for IDENTIFIER");
 	}
 
 	/**

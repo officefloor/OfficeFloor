@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,7 +59,7 @@ public class StatePoller<S, F extends Enum<F>> {
 		if (flowKey == null) {
 			throw new IllegalArgumentException("Must provide flow key");
 		}
-		return new Builder<S, F>(stateType, flowKey, -1, executeContext, managedObjectFactory, null);
+		return new Builder<S, F>(stateType, flowKey, -1, executeContext, managedObjectFactory, null, null);
 	}
 
 	/**
@@ -80,7 +79,7 @@ public class StatePoller<S, F extends Enum<F>> {
 		if (flowIndex < 0) {
 			throw new IllegalArgumentException("Must provide valid flow index (provided " + flowIndex + ")");
 		}
-		return new Builder<S, Indexed>(stateType, null, flowIndex, executeContext, managedObjectFactory, null);
+		return new Builder<S, Indexed>(stateType, null, flowIndex, executeContext, managedObjectFactory, null, null);
 	}
 
 	/**
@@ -90,17 +89,35 @@ public class StatePoller<S, F extends Enum<F>> {
 	 * This allows for higher level types that rely on but do not expose the
 	 * {@link ManagedObjectSource} to use this {@link StatePoller}.
 	 * 
-	 * @param stateType State type.
-	 * @param poller    {@link Poller}.
+	 * @param stateType   State type.
+	 * @param initialiser {@link Initialiser}.
+	 * @param poller      {@link Poller}.
 	 * @return {@link Builder}.
 	 */
-	public static <S> Builder<S, None> builder(Class<S> stateType, Poller<S> poller) {
-		return new Builder<S, None>(stateType, null, -1, null, null, poller);
+	public static <S> Builder<S, None> builder(Class<S> stateType, Initialiser<S> initialiser, Poller<S> poller) {
+		return new Builder<S, None>(stateType, null, -1, null, null, initialiser, poller);
+	}
+
+	/**
+	 * Initialiser for polling state.
+	 */
+	@FunctionalInterface
+	public static interface Initialiser<S> {
+
+		/**
+		 * Invoked to initialise polling state.
+		 * 
+		 * @param context  {@link StatePollContext}.
+		 * @param callback {@link FlowCallback} to invoke on completion of the custom
+		 *                 poll.
+		 */
+		void initialise(StatePollContext<S> context, FlowCallback callback);
 	}
 
 	/**
 	 * Custom poller.
 	 */
+	@FunctionalInterface
 	public static interface Poller<S> {
 
 		/**
@@ -146,6 +163,11 @@ public class StatePoller<S, F extends Enum<F>> {
 		private final Function<StatePollContext<S>, ManagedObject> managedObjectFactory;
 
 		/**
+		 * {@link Initialiser}.
+		 */
+		private final Initialiser<S> customInitialiser;
+
+		/**
 		 * Custom {@link Poller}.
 		 */
 		private final Poller<S> customPoller;
@@ -184,10 +206,12 @@ public class StatePoller<S, F extends Enum<F>> {
 		 * @param flowIndex            {@link Flow} index.
 		 * @param executeContext       {@link ManagedObjectExecuteContext}.
 		 * @param managedObjectFactory Factory to create the {@link ManagedObject}.
+		 * @param initialiser          {@link Initialiser}.
 		 * @param customPoller         Custom {@link Poller}.
 		 */
 		private Builder(Class<S> stateType, F flowKey, int flowIndex, ManagedObjectExecuteContext<F> executeContext,
-				Function<StatePollContext<S>, ManagedObject> managedObjectFactory, Poller<S> customPoller) {
+				Function<StatePollContext<S>, ManagedObject> managedObjectFactory, Initialiser<S> initialiser,
+				Poller<S> customPoller) {
 			if (stateType == null) {
 				throw new IllegalArgumentException("Must provide state type");
 			}
@@ -206,6 +230,7 @@ public class StatePoller<S, F extends Enum<F>> {
 			this.flowIndex = flowIndex;
 			this.executeContext = executeContext;
 			this.managedObjectFactory = managedObjectFactory;
+			this.customInitialiser = initialiser;
 			this.customPoller = customPoller;
 
 			// Default logging
@@ -292,6 +317,7 @@ public class StatePoller<S, F extends Enum<F>> {
 		public StatePoller<S, F> build() {
 
 			// Obtain the poller
+			Initialiser<S> initialiser = this.customInitialiser;
 			Poller<S> poller = this.customPoller;
 			if (poller == null) {
 
@@ -303,31 +329,34 @@ public class StatePoller<S, F extends Enum<F>> {
 				// No custom poller, so configure to flow key/index
 				if (this.flowKey != null) {
 
+					// Flow key initialiser
+					initialiser = (context, callback) -> {
+						Object parameter = parameterFactory.apply(context);
+						ManagedObject managedObject = this.managedObjectFactory.apply(context);
+						this.executeContext.registerStartupProcess(this.flowKey, parameter, managedObject, callback);
+					};
+
 					// Flow key poller
 					poller = (delay, context, callback) -> {
 						Object parameter = parameterFactory.apply(context);
 						ManagedObject managedObject = this.managedObjectFactory.apply(context);
-						if (delay == 0) {
-							this.executeContext.registerStartupProcess(this.flowKey, parameter, managedObject,
-									callback);
-						} else {
-							this.executeContext.invokeProcess(this.flowKey, parameter, managedObject, delay, callback);
-						}
+						this.executeContext.invokeProcess(this.flowKey, parameter, managedObject, delay, callback);
 					};
 
 				} else {
+
+					// Flow index initialiser
+					initialiser = (context, callback) -> {
+						Object parameter = parameterFactory.apply(context);
+						ManagedObject managedObject = this.managedObjectFactory.apply(context);
+						this.executeContext.registerStartupProcess(this.flowIndex, parameter, managedObject, callback);
+					};
 
 					// Flow index poller
 					poller = (delay, context, callback) -> {
 						Object parameter = parameterFactory.apply(context);
 						ManagedObject managedObject = this.managedObjectFactory.apply(context);
-						if (delay == 0) {
-							this.executeContext.registerStartupProcess(this.flowIndex, parameter, managedObject,
-									callback);
-						} else {
-							this.executeContext.invokeProcess(this.flowIndex, parameter, managedObject, delay,
-									callback);
-						}
+						this.executeContext.invokeProcess(this.flowIndex, parameter, managedObject, delay, callback);
 					};
 				}
 			}
@@ -336,8 +365,8 @@ public class StatePoller<S, F extends Enum<F>> {
 			String identifierText = this.identifier != null ? " for " + this.identifier : "";
 
 			// Create and return the poller
-			return new StatePoller<>(this.stateType, identifierText, poller, this.successLogLevel, this.logger,
-					this.defaultPollInterval);
+			return new StatePoller<>(this.stateType, identifierText, initialiser, poller, this.successLogLevel,
+					this.logger, this.defaultPollInterval);
 		}
 	}
 
@@ -362,9 +391,25 @@ public class StatePoller<S, F extends Enum<F>> {
 	private final long defaultPollInterval;
 
 	/**
-	 * Triggers the next poll within the specified interval.
+	 * {@link PollScedular}.
 	 */
-	private final BiConsumer<Long, TimeUnit> invokePoll;
+	private final PollScedular pollSchedular;
+
+	/**
+	 * Schedules a poll.
+	 */
+	@FunctionalInterface
+	private interface PollScedular {
+
+		/**
+		 * Schedules a poll.
+		 * 
+		 * @param isManualPoll Indicates if manually triggered.
+		 * @param delay        Delay until the poll is fired.
+		 * @param timeUnit     {@link TimeUnit} for the delay.
+		 */
+		void schedulePoll(boolean isManualPoll, Long delay, TimeUnit timeUnit);
+	}
 
 	/**
 	 * State being refreshed by polling.
@@ -396,30 +441,38 @@ public class StatePoller<S, F extends Enum<F>> {
 	 *
 	 * @param stateType           State type.
 	 * @param identifierText      Identifier text.
+	 * @param initialiser         {@link Initialiser}.
 	 * @param poller              {@link Poller}.
 	 * @param successLogLevel     Success log {@link Level}.
 	 * @param logger              {@link Logger}.
 	 * @param defaultPollInterval Default poll interval in milliseconds.
 	 */
-	private StatePoller(Class<S> stateType, String identifierText, Poller<S> poller, Level successLogLevel,
-			Logger logger, long defaultPollInterval) {
+	private StatePoller(Class<S> stateType, String identifierText, Initialiser<S> initialiser, Poller<S> poller,
+			Level successLogLevel, Logger logger, long defaultPollInterval) {
 		this.logger = logger;
 		this.stateType = stateType;
 		this.identifierText = identifierText;
 		this.defaultPollInterval = defaultPollInterval;
 
 		// Invoke the start up poll
-		StatePollContextImpl startupContext = new StatePollContextImpl();
-		poller.nextPoll(0, startupContext, startupContext);
+		if (initialiser != null) {
+			StatePollContextImpl startupContext = new StatePollContextImpl(false);
+			initialiser.initialise(startupContext, startupContext);
+		}
 
 		// Create the date time formatter
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneId.systemDefault());
 
 		// Create invoke for new process
-		this.invokePoll = (nextPollInterval, unit) -> {
+		this.pollSchedular = (isManualPoll, nextPollInterval, unit) -> {
 			long delay = this.defaultPollInterval;
 			boolean isDefault = true;
 			try {
+
+				// Indicate if manual poll
+				if (isManualPoll) {
+					this.logger.log(successLogLevel, "Manual poll" + this.identifierText);
+				}
 
 				// Calculate the delay
 				unit = unit != null ? unit : TimeUnit.MILLISECONDS;
@@ -435,7 +488,7 @@ public class StatePoller<S, F extends Enum<F>> {
 				try {
 
 					// Setup next poll
-					StatePollContextImpl pollContext = new StatePollContextImpl();
+					StatePollContextImpl pollContext = new StatePollContextImpl(isManualPoll);
 					poller.nextPoll(delay, pollContext, pollContext);
 
 				} catch (Throwable ex) {
@@ -445,7 +498,7 @@ public class StatePoller<S, F extends Enum<F>> {
 							+ ".  Restart is required to re-establish polling.", ex);
 				} finally {
 					// Log time of next poll (if appropriate and no failure)
-					if (!isFailure && this.logger.isLoggable(successLogLevel)) {
+					if (!isManualPoll && !isFailure && this.logger.isLoggable(successLogLevel)) {
 						ZonedDateTime nextPollTime = Instant.ofEpochMilli(System.currentTimeMillis() + delay)
 								.atZone(ZoneId.systemDefault());
 						this.logger.log(successLogLevel,
@@ -513,14 +566,35 @@ public class StatePoller<S, F extends Enum<F>> {
 	}
 
 	/**
+	 * Manually trigger poll.
+	 */
+	public void poll() {
+		this.pollSchedular.schedulePoll(true, 0L, null);
+	}
+
+	/**
 	 * {@link StatePollContext} implementation.
 	 */
 	private class StatePollContextImpl implements StatePollContext<S>, FlowCallback {
 
 		/**
+		 * Indicates if manually triggered.
+		 */
+		private final boolean isManualPoll;
+
+		/**
 		 * Flags whether complete.
 		 */
 		private boolean isComplete = false;
+
+		/**
+		 * Indicates if manual poll.
+		 * 
+		 * @param isManualPoll <code>true</code> if manual poll.
+		 */
+		private StatePollContextImpl(boolean isManualPoll) {
+			this.isManualPoll = isManualPoll;
+		}
 
 		/*
 		 * ================ StatePollContext =========================
@@ -565,8 +639,10 @@ public class StatePoller<S, F extends Enum<F>> {
 				}
 
 			} finally {
-				// Poll again
-				StatePoller.this.invokePoll.accept(nextPollInterval, unit);
+				// Poll again (if not manually triggered)
+				if (!this.isManualPoll) {
+					StatePoller.this.pollSchedular.schedulePoll(false, nextPollInterval, unit);
+				}
 			}
 		}
 
@@ -585,8 +661,10 @@ public class StatePoller<S, F extends Enum<F>> {
 				StatePoller.this.logger.log(Level.WARNING, "Poll failure" + StatePoller.this.identifierText, cause);
 
 			} finally {
-				// Poll again
-				StatePoller.this.invokePoll.accept(nextPollInterval, unit);
+				// Poll again (if not manually triggered)
+				if (!this.isManualPoll) {
+					StatePoller.this.pollSchedular.schedulePoll(false, nextPollInterval, unit);
+				}
 			}
 		}
 
@@ -617,8 +695,10 @@ public class StatePoller<S, F extends Enum<F>> {
 				}
 
 			} finally {
-				// Poll again (by default poll interval)
-				StatePoller.this.invokePoll.accept(-1L, null);
+				// Poll again (by default poll interval if not manually triggered)
+				if (!this.isManualPoll) {
+					StatePoller.this.pollSchedular.schedulePoll(false, -1L, null);
+				}
 			}
 		}
 	}

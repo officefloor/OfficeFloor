@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -65,6 +66,12 @@ public class JwtAuthorityManagedObjectSource
 	 * Default translation.
 	 */
 	public static final String DEFAULT_TRANSLATION = "AES/CBC/PKCS5PADDING";
+
+	/**
+	 * {@link Property} name for the expiration period for access token. Period
+	 * measures in seconds.
+	 */
+	public static final String PROPERTY_ACCESS_TOKEN_EXPIRATION_PERIOD = "access.token.expiration.period";
 
 	/**
 	 * Default expiration period for access tokens.
@@ -213,9 +220,19 @@ public class JwtAuthorityManagedObjectSource
 	}
 
 	/**
+	 * Default time in seconds expire the access token.
+	 */
+	private long accessTokenExpirationPeriod;
+
+	/**
 	 * {@link Clock} to obtain time in seconds.
 	 */
 	private Clock<Long> timeInSeconds;
+
+	/**
+	 * {@link ManagedObjectExecuteContext}.
+	 */
+	private ManagedObjectExecuteContext<Flows> executeContext;
 
 	/**
 	 * {@link StatePoller} to keep the {@link JwtEncodeKey} instances up to date
@@ -235,6 +252,10 @@ public class JwtAuthorityManagedObjectSource
 	@Override
 	protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
 		ManagedObjectSourceContext<Flows> sourceContext = context.getManagedObjectSourceContext();
+
+		// Obtain the properties
+		this.accessTokenExpirationPeriod = Long.parseLong(sourceContext.getProperty(
+				PROPERTY_ACCESS_TOKEN_EXPIRATION_PERIOD, String.valueOf(DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD)));
 
 		// Load meta-data
 		context.setObjectClass(JwtAuthority.class);
@@ -285,6 +306,7 @@ public class JwtAuthorityManagedObjectSource
 
 	@Override
 	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
+		this.executeContext = context;
 
 		// Keep JWT encoding keys up to date
 		this.jwtEncodeKeys = StatePoller
@@ -339,16 +361,63 @@ public class JwtAuthorityManagedObjectSource
 		@Override
 		public <C> String createAccessToken(C claims) {
 
+			// Easy access to source
+			JwtAuthorityManagedObjectSource source = JwtAuthorityManagedObjectSource.this;
+
 			// Obtain the JWT encode keys
 			JwtEncodeKey[] encodeKeys;
 			try {
-				encodeKeys = JwtAuthorityManagedObjectSource.this.jwtEncodeKeys.getState(1, TimeUnit.SECONDS);
+				encodeKeys = source.jwtEncodeKeys.getState(1, TimeUnit.SECONDS);
 			} catch (TimeoutException ex) {
 				throw new AccessTokenException(HttpStatus.SERVICE_UNAVAILABLE, ex);
 			}
 
-			// TODO look through keys to find the most appropriate (based on current time)
-			JwtEncodeKey selectedKey = encodeKeys[0];
+			// Obtain the current time
+			long currentTime = JwtAuthorityManagedObjectSource.this.timeInSeconds.getTime();
+
+			/*
+			 * Find the most appropriate key:
+			 * 
+			 * - key must be active
+			 * 
+			 * - key must be active for so many default refreshes from now (allows key to be
+			 * superseded by another).
+			 * 
+			 * - key is shortest time to expire (least risk if compromised)
+			 */
+			JwtEncodeKey selectedKey = null;
+			long minimumExpireTime = currentTime + (2 * source.accessTokenExpirationPeriod);
+			NEXT_KEY: for (JwtEncodeKey candidateKey : encodeKeys) {
+
+				// Ensure key is active
+				if (candidateKey.startTime() > currentTime) {
+					continue NEXT_KEY; // key not active
+				}
+
+				// Ensure key will not expire too early
+				if (candidateKey.expireTime() > minimumExpireTime) {
+					continue NEXT_KEY; // key expires too early
+				}
+
+				// Determine if shortest time
+				if ((selectedKey != null) && (selectedKey.expireTime() < candidateKey.expireTime())) {
+					continue NEXT_KEY; // expires later
+				}
+
+				// Use the key
+				selectedKey = candidateKey;
+			}
+
+			// Ensure have key
+			if (selectedKey == null) {
+
+				// Trigger loading keys (to generate new key)
+				source.jwtEncodeKeys.poll();
+
+				// Indicate no keys
+				throw new AccessTokenException(new IllegalStateException(
+						"No " + JwtEncodeKey.class.getSimpleName() + " available for encoding"));
+			}
 
 			// Obtain the claims payload
 			String payload;
@@ -376,11 +445,8 @@ public class JwtAuthorityManagedObjectSource
 			// Ensure payload has expiry
 			if (standardClaims.exp == null) {
 
-				// Obtain the current time
-				long currentTime = JwtAuthorityManagedObjectSource.this.timeInSeconds.getTime();
-
 				// Calculate the default expiry time
-				long defaultedExpiryTime = currentTime + DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
+				long defaultedExpiryTime = currentTime + source.accessTokenExpirationPeriod;
 
 				// Append the expiry time
 				payload = payload.substring(0, lastBracketIndex) + ",\"exp\":" + defaultedExpiryTime + "}";
@@ -518,14 +584,12 @@ public class JwtAuthorityManagedObjectSource
 
 		@Override
 		public long startTime() {
-			// TODO implement JwtEncodeKey.startTime(...)
-			throw new UnsupportedOperationException("TODO implement JwtEncodeKey.startTime(...)");
+			return this.startTime;
 		}
 
 		@Override
 		public long expireTime() {
-			// TODO implement JwtEncodeKey.expireTime(...)
-			throw new UnsupportedOperationException("TODO implement JwtEncodeKey.expireTime(...)");
+			return this.expireTime;
 		}
 
 		@Override

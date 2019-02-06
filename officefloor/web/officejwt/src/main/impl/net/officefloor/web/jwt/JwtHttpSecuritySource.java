@@ -228,12 +228,10 @@ public class JwtHttpSecuritySource<C> extends
 	public void start(HttpSecurityExecuteContext<Flows> context) throws Exception {
 
 		// Create poller for JWT decoder
-		this.jwtDecoder = StatePoller.builder(JwtDecoder.class, (delay, pollContext, callback) -> {
-			if (delay == 0) {
-				context.registerStartupProcess(Flows.RETRIEVE_KEYS, new JwtDecodeCollectorImpl(pollContext), callback);
-			} else {
-				context.invokeProcess(Flows.RETRIEVE_KEYS, new JwtDecodeCollectorImpl(pollContext), delay, callback);
-			}
+		this.jwtDecoder = StatePoller.builder(JwtDecoder.class, (pollContext, callback) -> {
+			context.registerStartupProcess(Flows.RETRIEVE_KEYS, new JwtDecodeCollectorImpl(pollContext), callback);
+		}, (delay, pollContext, callback) -> {
+			context.invokeProcess(Flows.RETRIEVE_KEYS, new JwtDecodeCollectorImpl(pollContext), delay, callback);
 		}).identifier("JWT decode keys").build();
 	}
 
