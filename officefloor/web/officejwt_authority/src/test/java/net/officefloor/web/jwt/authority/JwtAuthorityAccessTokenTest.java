@@ -3,6 +3,8 @@ package net.officefloor.web.jwt.authority;
 import java.security.Key;
 import java.security.KeyPair;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -54,6 +56,12 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	 * {@link MockClockFactory}.
 	 */
 	private final MockClockFactory clockFactory = new MockClockFactory(mockCurrentTime);
+
+	/**
+	 * {@link DateTimeFormatter} for writing out times.
+	 */
+	private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME
+			.withZone(ZoneId.systemDefault());
 
 	/**
 	 * {@link MockHttpServer}.
@@ -131,9 +139,18 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	 */
 	public void testNoEncodeKeys() {
 		this.mockEncodeKeys.clear();
-		String accessToken = this.createAccessToken();
-		assertEquals("Should create the new keys", 3, this.mockEncodeKeys.size());
-		this.claims.assertAccessToken(accessToken, this.mockEncodeKeys.get(0).getPublicKey(), mockCurrentTime);
+		try {
+			this.createAccessToken();
+			fail("Should not be successful");
+		} catch (AccessTokenException ex) {
+			assertEquals("Incorrect cause",
+					IllegalStateException.class.getName() + ": No JwtEncodeKey available for encoding (nbf: "
+							+ getDateText(mockCurrentTime) + ", exp: "
+							+ getDateText(mockCurrentTime
+									+ JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD)
+							+ ")",
+					ex.getMessage());
+		}
 	}
 
 	@Override
@@ -192,7 +209,11 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 			return closure.get();
 
 		} catch (Throwable ex) {
-			throw fail(ex);
+			if (ex instanceof AccessTokenException) {
+				throw (AccessTokenException) ex;
+			} else {
+				throw fail(ex);
+			}
 		}
 	}
 
@@ -256,6 +277,16 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	 */
 	private static Date getDate(Long timeInSeconds) {
 		return timeInSeconds != null ? new Date(timeInSeconds * 1000) : null;
+	}
+
+	/**
+	 * Obtains the date formatted to text.
+	 * 
+	 * @param timeInSeconds Time in seconds from Epoch.
+	 * @return Date formatted to text.
+	 */
+	private static String getDateText(long timeInSeconds) {
+		return dateTimeFormatter.format(Instant.ofEpochSecond(timeInSeconds).atZone(ZoneId.systemDefault()));
 	}
 
 	/**

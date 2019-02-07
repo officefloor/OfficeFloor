@@ -3,6 +3,8 @@ package net.officefloor.web.jwt.authority;
 import java.nio.charset.Charset;
 import java.security.Key;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 import java.util.Random;
@@ -82,6 +84,12 @@ public class JwtAuthorityManagedObjectSource
 	 * {@link Charset}.
 	 */
 	private static final Charset UTF8 = Charset.forName("UTF-8");
+
+	/**
+	 * {@link DateTimeFormatter} for writing out times.
+	 */
+	private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME
+			.withZone(ZoneId.systemDefault());
 
 	/**
 	 * {@link ObjectMapper}.
@@ -230,11 +238,6 @@ public class JwtAuthorityManagedObjectSource
 	private Clock<Long> timeInSeconds;
 
 	/**
-	 * {@link ManagedObjectExecuteContext}.
-	 */
-	private ManagedObjectExecuteContext<Flows> executeContext;
-
-	/**
 	 * {@link StatePoller} to keep the {@link JwtEncodeKey} instances up to date
 	 * with appropriate keys.
 	 */
@@ -306,15 +309,13 @@ public class JwtAuthorityManagedObjectSource
 
 	@Override
 	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
-		this.executeContext = context;
 
 		// Keep JWT encoding keys up to date
 		this.jwtEncodeKeys = StatePoller
 				.builder(JwtEncodeKey[].class, Flows.RETRIEVE_ENCODE_KEYS, context,
 						(pollContext) -> new JwtAuthorityManagedObject<>())
 				.parameter((pollContext) -> new JwtEncodeCollectorImpl(pollContext)).identifier("JWT Encode Keys")
-				.build();
-
+				.defaultPollInterval(this.accessTokenExpirationPeriod, TimeUnit.SECONDS).build();
 	}
 
 	@Override
@@ -364,61 +365,6 @@ public class JwtAuthorityManagedObjectSource
 			// Easy access to source
 			JwtAuthorityManagedObjectSource source = JwtAuthorityManagedObjectSource.this;
 
-			// Obtain the JWT encode keys
-			JwtEncodeKey[] encodeKeys;
-			try {
-				encodeKeys = source.jwtEncodeKeys.getState(1, TimeUnit.SECONDS);
-			} catch (TimeoutException ex) {
-				throw new AccessTokenException(HttpStatus.SERVICE_UNAVAILABLE, ex);
-			}
-
-			// Obtain the current time
-			long currentTime = JwtAuthorityManagedObjectSource.this.timeInSeconds.getTime();
-
-			/*
-			 * Find the most appropriate key:
-			 * 
-			 * - key must be active
-			 * 
-			 * - key must be active for so many default refreshes from now (allows key to be
-			 * superseded by another).
-			 * 
-			 * - key is shortest time to expire (least risk if compromised)
-			 */
-			JwtEncodeKey selectedKey = null;
-			long minimumExpireTime = currentTime + (2 * source.accessTokenExpirationPeriod);
-			NEXT_KEY: for (JwtEncodeKey candidateKey : encodeKeys) {
-
-				// Ensure key is active
-				if (candidateKey.startTime() > currentTime) {
-					continue NEXT_KEY; // key not active
-				}
-
-				// Ensure key will not expire too early
-				if (candidateKey.expireTime() > minimumExpireTime) {
-					continue NEXT_KEY; // key expires too early
-				}
-
-				// Determine if shortest time
-				if ((selectedKey != null) && (selectedKey.expireTime() < candidateKey.expireTime())) {
-					continue NEXT_KEY; // expires later
-				}
-
-				// Use the key
-				selectedKey = candidateKey;
-			}
-
-			// Ensure have key
-			if (selectedKey == null) {
-
-				// Trigger loading keys (to generate new key)
-				source.jwtEncodeKeys.poll();
-
-				// Indicate no keys
-				throw new AccessTokenException(new IllegalStateException(
-						"No " + JwtEncodeKey.class.getSimpleName() + " available for encoding"));
-			}
-
 			// Obtain the claims payload
 			String payload;
 			try {
@@ -442,14 +388,82 @@ public class JwtAuthorityManagedObjectSource
 				throw new AccessTokenException(ex);
 			}
 
-			// Ensure payload has expiry
-			if (standardClaims.exp == null) {
+			// Obtain the current time
+			long currentTime = JwtAuthorityManagedObjectSource.this.timeInSeconds.getTime();
 
-				// Calculate the default expiry time
-				long defaultedExpiryTime = currentTime + source.accessTokenExpirationPeriod;
+			// Obtain the not before time
+			long notBeforeTime = currentTime;
+			if (standardClaims.nbf != null) {
+				notBeforeTime = standardClaims.nbf;
+			}
 
-				// Append the expiry time
-				payload = payload.substring(0, lastBracketIndex) + ",\"exp\":" + defaultedExpiryTime + "}";
+			// Obtain the expire time (and ensure access token expires)
+			long expireTime;
+			if (standardClaims.exp != null) {
+				expireTime = standardClaims.exp;
+
+			} else {
+				// No expire, so calculate the default expire time
+				expireTime = currentTime + source.accessTokenExpirationPeriod;
+
+				// Append the expire time
+				payload = payload.substring(0, lastBracketIndex) + ",\"exp\":" + expireTime + "}";
+			}
+
+			// Obtain the JWT encode keys
+			JwtEncodeKey[] encodeKeys;
+			try {
+				encodeKeys = source.jwtEncodeKeys.getState(1, TimeUnit.SECONDS);
+			} catch (TimeoutException ex) {
+				throw new AccessTokenException(HttpStatus.SERVICE_UNAVAILABLE, ex);
+			}
+
+			/*
+			 * Find the most appropriate key:
+			 * 
+			 * - key must be active
+			 * 
+			 * - key must be active for so many default refreshes from now (allows key to be
+			 * superseded by another).
+			 * 
+			 * - key is shortest time to expire (least risk if compromised)
+			 */
+			JwtEncodeKey selectedKey = null;
+			long minimumExpireTime = expireTime + (2 * (expireTime - notBeforeTime));
+			NEXT_KEY: for (JwtEncodeKey candidateKey : encodeKeys) {
+
+				// Ensure key is active
+				if (candidateKey.startTime() > notBeforeTime) {
+					continue NEXT_KEY; // key not active
+				}
+
+				// Ensure key will not expire too early
+				if (candidateKey.expireTime() > minimumExpireTime) {
+					continue NEXT_KEY; // key expires too early
+				}
+
+				// Determine if shortest time
+				if ((selectedKey != null) && (selectedKey.expireTime() < candidateKey.expireTime())) {
+					continue NEXT_KEY; // expires later
+				}
+
+				// Use the key
+				selectedKey = candidateKey;
+			}
+
+			// Ensure have key
+			if (selectedKey == null) {
+
+				// Trigger loading keys (to possibly generate new key)
+				source.jwtEncodeKeys.poll();
+
+				// Indicate no keys
+				String notBeforeDateTime = dateTimeFormatter
+						.format(Instant.ofEpochSecond(notBeforeTime).atZone(ZoneId.systemDefault()));
+				String expireDateTime = dateTimeFormatter
+						.format(Instant.ofEpochSecond(expireTime).atZone(ZoneId.systemDefault()));
+				throw new AccessTokenException(new IllegalStateException("No " + JwtEncodeKey.class.getSimpleName()
+						+ " available for encoding (nbf: " + notBeforeDateTime + ", exp: " + expireDateTime + ")"));
 			}
 
 			// Generate the access token
