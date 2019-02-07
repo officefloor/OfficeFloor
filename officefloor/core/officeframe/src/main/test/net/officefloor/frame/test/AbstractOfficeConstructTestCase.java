@@ -51,7 +51,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaDat
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.api.team.source.TeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 
 /**
  * Abstract {@link TestCase} for construction testing of an Office.
@@ -59,7 +59,7 @@ import net.officefloor.frame.internal.structure.OfficeClock;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCase
-		implements EscalationHandler, OfficeClock {
+		implements EscalationHandler, MonitorClock {
 
 	/**
 	 * Index of the current {@link OfficeFloor} being constructed.
@@ -120,7 +120,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	private final Object exceptionLock = new Object();
 
 	/**
-	 * Current time for the {@link OfficeClock}.
+	 * Current time for the {@link MonitorClock}.
 	 */
 	private AtomicLong currentTime;
 
@@ -142,7 +142,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 
 		// Initiate to control the time to be deterministic
 		this.currentTime = new AtomicLong(System.currentTimeMillis());
-		this.getOfficeBuilder().setOfficeClock(this);
+		this.getOfficeBuilder().setMonitorClock(this);
 
 		// No monitoring by default
 		this.getOfficeBuilder().setMonitorOfficeInterval(0);

@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.function.BiConsumer;
 
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
@@ -89,12 +91,12 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyFromSession() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				null);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 
 		// Provide access control in session
-		ratifyContext.getSession().setAttribute("http.security.form", accessControl);
+		ratifyContext.getSession().setAttribute(ratifyContext.getQualifiedAttributeName("http.security.form"),
+				accessControl);
 
 		// Test
 		this.replayMockObjects();
@@ -117,8 +119,7 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	public void testRatifyWithCredentials() throws IOException {
 
 		final HttpCredentials credentials = this.createMock(HttpCredentials.class);
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				null);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 
 		// Test
 		this.replayMockObjects();
@@ -140,8 +141,7 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyNoCredentials() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				null);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 
 		// Test
 		this.replayMockObjects();
@@ -161,14 +161,16 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can load challenge.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testChallenge() throws IOException {
 
-		final MockHttpChallengeContext<Dependencies, Flows> challengeContext = new MockHttpChallengeContext<Dependencies, Flows>(
-				this);
+		final MockHttpChallengeContext<Dependencies, Flows> challengeContext = new MockHttpChallengeContext<>();
 		challengeContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
 		// Record the triggering flow for form login page
-		challengeContext.recordDoFlow(Flows.FORM_LOGIN_PAGE);
+		BiConsumer<Object, FlowCallback> flow = this.createMock(BiConsumer.class);
+		flow.accept(null, null);
+		challengeContext.registerFlow(Flows.FORM_LOGIN_PAGE, flow);
 
 		// Test
 		this.replayMockObjects();
@@ -268,10 +270,11 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<Dependencies>();
+		final MockHttpLogoutContext<Dependencies, Flows> logoutContext = new MockHttpLogoutContext<Dependencies, Flows>();
 
 		// Record logging out
-		logoutContext.getSession().setAttribute("http.security.form", this.createMock(HttpAccessControl.class));
+		logoutContext.getSession().setAttribute(logoutContext.getQualifiedAttributeName("http.security.form"),
+				this.createMock(HttpAccessControl.class));
 
 		// Replay mock objects
 		this.replayMockObjects();
@@ -287,25 +290,22 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the access control is cleared from session
-		assertNull("Should clear session", logoutContext.getSession().getAttribute("http.security.form"));
+		assertNull("Should clear session",
+				logoutContext.getSession().getAttribute(logoutContext.getQualifiedAttributeName("http.security.form")));
 	}
 
 	/**
 	 * Undertakes the authentication.
 	 * 
-	 * @param credentials
-	 *            {@link HttpCredentials}.
-	 * @param userName
-	 *            User name if authenticated. <code>null</code> if not
-	 *            authenticated.
-	 * @param roles
-	 *            Expected roles.
+	 * @param credentials {@link HttpCredentials}.
+	 * @param userName    User name if authenticated. <code>null</code> if not
+	 *                    authenticated.
+	 * @param roles       Expected roles.
 	 */
 	private void doAuthenticate(HttpCredentials credentials, String userName, String... roles) throws IOException {
 
 		// Create the authentication context
-		MockHttpAuthenticateContext<HttpAccessControl, Dependencies> authenticationContext = new MockHttpAuthenticateContext<HttpAccessControl, Dependencies>(
-				null);
+		MockHttpAuthenticateContext<HttpAccessControl, Dependencies, Flows> authenticationContext = new MockHttpAuthenticateContext<>();
 		authenticationContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
 		// Replay mock objects
@@ -324,7 +324,7 @@ public class FormHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Validate authentication
 		HttpAccessControl accessControl = authenticationContext.getAccessControl();
 		HttpAccessControl sessionAccessControl = (HttpAccessControl) authenticationContext.getSession()
-				.getAttribute("http.security.form");
+				.getAttribute(authenticationContext.getQualifiedAttributeName("http.security.form"));
 		if (userName == null) {
 			assertNull("Should not be authenticated", accessControl);
 			assertNull("Should not load session", sessionAccessControl);

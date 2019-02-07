@@ -34,6 +34,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFunctionDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
@@ -68,6 +69,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecution
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
@@ -332,6 +335,39 @@ public class OfficeFloorModelOfficeFloorSource extends AbstractOfficeFloorSource
 						// Link the input dependency to managed object
 						deployer.link(inputDependency, dependentManagedObject);
 					}
+				}
+			}
+		}
+
+		// Link the function dependencies for the managed object sources
+		for (OfficeFloorManagedObjectSourceModel mosModel : officeFloor.getOfficeFloorManagedObjectSources()) {
+
+			// Obtain the managed object source
+			OfficeFloorManagedObjectSource mos = managedObjectSources
+					.get(mosModel.getOfficeFloorManagedObjectSourceName());
+
+			// Link each function dependency for the managed object source
+			for (OfficeFloorManagedObjectSourceFunctionDependencyModel dependencyModel : mosModel
+					.getOfficeFloorManagedObjectSourceFunctionDependencies()) {
+
+				// Add the dependency
+				String dependencyName = dependencyModel.getOfficeFloorManagedObjectSourceFunctionDependencyName();
+				OfficeFloorManagedObjectFunctionDependency dependency = mos
+						.getOfficeFloorManagedObjectFunctionDependency(dependencyName);
+
+				// Link the dependent managed object
+				OfficeFloorManagedObject dependentManagedObject = null;
+				OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel dependencyToMo = dependencyModel
+						.getOfficeFloorManagedObject();
+				if (dependencyToMo != null) {
+					OfficeFloorManagedObjectModel dependentMoModel = dependencyToMo.getOfficeFloorManagedObject();
+					if (dependentMoModel != null) {
+						dependentManagedObject = managedObjects.get(dependentMoModel.getOfficeFloorManagedObjectName());
+					}
+				}
+				if (dependentManagedObject != null) {
+					// Link the function dependency to the managed object
+					deployer.link(dependency, dependentManagedObject);
 				}
 			}
 		}

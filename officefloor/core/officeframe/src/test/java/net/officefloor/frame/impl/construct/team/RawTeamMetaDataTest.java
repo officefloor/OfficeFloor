@@ -41,6 +41,7 @@ import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
+import net.officefloor.frame.test.MockClockFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -74,7 +75,7 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 	 * {@link SourceContext}.
 	 */
 	private final SourceContextImpl sourceContext = new SourceContextImpl(false,
-			Thread.currentThread().getContextClassLoader());
+			Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 	/**
 	 * {@link ThreadLocalAwareExecutor}.

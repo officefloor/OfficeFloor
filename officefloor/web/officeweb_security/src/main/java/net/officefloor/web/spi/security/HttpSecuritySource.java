@@ -19,6 +19,8 @@ package net.officefloor.web.spi.security;
 
 import java.io.Serializable;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.server.http.HttpException;
 
 /**
@@ -36,9 +38,9 @@ public interface HttpSecuritySource<A, AC extends Serializable, C, O extends Enu
 	 * <p>
 	 * Obtains the specification for this.
 	 * <p>
-	 * This will be called before any other methods, therefore this method must
-	 * be able to return the specification immediately after a default
-	 * constructor instantiation.
+	 * This will be called before any other methods, therefore this method must be
+	 * able to return the specification immediately after a default constructor
+	 * instantiation.
 	 * 
 	 * @return Specification of this.
 	 */
@@ -47,24 +49,44 @@ public interface HttpSecuritySource<A, AC extends Serializable, C, O extends Enu
 	/**
 	 * Initialises the {@link HttpSecuritySource}.
 	 * 
-	 * @param context
-	 *            {@link HttpSecuritySourceContext} to use in initialising.
+	 * @param context {@link HttpSecuritySourceContext} to use in initialising.
 	 * @return Meta-data to describe this.
-	 * @throws Exception
-	 *             Should the {@link HttpSecuritySource} fail to configure
-	 *             itself from the input properties.
+	 * @throws Exception Should the {@link HttpSecuritySource} fail to configure
+	 *                   itself from the input properties.
 	 */
 	HttpSecuritySourceMetaData<A, AC, C, O, F> init(HttpSecuritySourceContext context) throws Exception;
 
 	/**
+	 * <p>
+	 * Called once after {@link #init(HttpSecuritySourceContext)} to indicate this
+	 * {@link HttpSecuritySource} should start execution.
+	 * <p>
+	 * On invocation of this method, {@link ProcessState} instances may be invoked
+	 * via the {@link HttpSecurityExecuteContext}.
+	 * 
+	 * @param context {@link HttpSecurityExecuteContext} to use in starting this
+	 *                {@link HttpSecuritySource}.
+	 * @throws Exception Should the {@link HttpSecuritySourceSource} fail to start
+	 *                   execution.
+	 */
+	void start(HttpSecurityExecuteContext<F> context) throws Exception;
+
+	/**
 	 * Sources the {@link HttpSecurity}.
 	 * 
-	 * @param context
-	 *            {@link HttpSecurity}.
+	 * @param context {@link HttpSecurity}.
 	 * @return {@link HttpSecurity}.
-	 * @throws HttpException
-	 *             If fails to source the {@link HttpSecurity}.
+	 * @throws HttpException If fails to source the {@link HttpSecurity}.
 	 */
 	HttpSecurity<A, AC, C, O, F> sourceHttpSecurity(HttpSecurityContext context) throws HttpException;
+
+	/**
+	 * <p>
+	 * Called to notify that the {@link OfficeFloor} is being closed.
+	 * <p>
+	 * On return from this method, no further {@link ProcessState} instances may be
+	 * invoked.
+	 */
+	void stop();
 
 }

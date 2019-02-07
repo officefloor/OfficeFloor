@@ -46,14 +46,11 @@ public class WebRouter {
 	 * Available for routing to call directly to avoid {@link ManagedObject}
 	 * creation.
 	 * 
-	 * @param path
-	 *            Path to be transformed.
-	 * @param contextPath
-	 *            Context path of the application. May be <code>null</code> if
-	 *            context at root.
+	 * @param path        Path to be transformed.
+	 * @param contextPath Context path of the application. May be <code>null</code>
+	 *                    if context at root.
 	 * @return Canonical path for the application.
-	 * @throws HttpException
-	 *             If path is invalid.
+	 * @throws HttpException If path is invalid.
 	 */
 	public static String transformToApplicationCanonicalPath(String path, String contextPath) throws HttpException {
 
@@ -94,11 +91,9 @@ public class WebRouter {
 	/**
 	 * Transforms the input Request URI path to a canonical path.
 	 * 
-	 * @param path
-	 *            Path to transform.
+	 * @param path Path to transform.
 	 * @return Canonical path.
-	 * @throws HttpException
-	 *             Should the Request URI path be invalid.
+	 * @throws HttpException Should the Request URI path be invalid.
 	 */
 	public static String transformToCanonicalPath(String path) throws HttpException {
 
@@ -221,20 +216,14 @@ public class WebRouter {
 	/**
 	 * Processes the segment of the path.
 	 * 
-	 * @param path
-	 *            Path.
-	 * @param beginIndex
-	 *            Index of beginning of segment within the path.
-	 * @param endIndex
-	 *            Index of end of segment within the path.
-	 * @param canonicalSegments
-	 *            List of segments making up the canonical path.
+	 * @param path              Path.
+	 * @param beginIndex        Index of beginning of segment within the path.
+	 * @param endIndex          Index of end of segment within the path.
+	 * @param canonicalSegments List of segments making up the canonical path.
 	 * @return Flag indicating if the path continues to be canonical for the
-	 *         segment. <code>false</code> indicates the path is not canonical
-	 *         and must be constructed from the resulting segments to be
-	 *         canonical.
-	 * @throws BadRequestHttpException
-	 *             Should the segment result in an invalid path.
+	 *         segment. <code>false</code> indicates the path is not canonical and
+	 *         must be constructed from the resulting segments to be canonical.
+	 * @throws BadRequestHttpException Should the segment result in an invalid path.
 	 */
 	private static boolean processSegment(String path, int beginIndex, int endIndex, Deque<String> canonicalSegments)
 			throws BadRequestHttpException {
@@ -276,43 +265,30 @@ public class WebRouter {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param nodes
-	 *            Root {@link WebRouteNode} instances.
+	 * @param nodes Root {@link WebRouteNode} instances.
 	 */
 	public WebRouter(WebRouteNode[] nodes) {
 		this.nodes = nodes;
 	}
 
 	/**
-	 * Services the {@link HttpRequest}.
+	 * Obtains the {@link WebServicer} for the {@link HttpRequest}.
 	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @param managedFunctionContext
-	 *            {@link ManagedFunctionContext}.
+	 * @param connection             {@link ServerHttpConnection}.
+	 * @param managedFunctionContext {@link ManagedFunctionContext}.
 	 * @return <code>true</code> if {@link HttpRequest} was routed to a
-	 *         {@link WebRouteHandler}. <code>false</code> indicates not
-	 *         handled.
+	 *         {@link WebRouteHandler}. <code>false</code> indicates not handled.
 	 */
-	public boolean service(ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> managedFunctionContext) {
+	public WebServicer getWebServicer(ServerHttpConnection connection,
+			ManagedFunctionContext<?, Indexed> managedFunctionContext) {
 
 		// Obtain the request details
 		HttpRequest request = connection.getRequest();
 		HttpMethod method = request.getMethod();
 		String requestUri = request.getUri();
 
-		// Attempt to match to a route
-		for (int i = 0; i < this.nodes.length; i++) {
-			WebRouteNode node = this.nodes[i];
-
-			// Determine if handled by node
-			if (node.handle(method, requestUri, 0, null, connection, managedFunctionContext)) {
-				return true; // servicing request
-			}
-		}
-
-		// As here, not handling request
-		return false;
+		// Obtain the best matching
+		return WebServicer.getBestMatch(method, requestUri, 0, null, connection, managedFunctionContext, this.nodes);
 	}
 
 }

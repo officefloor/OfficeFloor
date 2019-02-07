@@ -38,6 +38,7 @@ import net.officefloor.compile.spi.office.OfficeGovernance;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
+import net.officefloor.compile.spi.office.OfficeManagedObjectFunctionDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeManagedObjectTeam;
@@ -90,6 +91,9 @@ import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeMa
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
@@ -486,7 +490,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 			}
 		}
 
-		// Link the input managed object dependencies
+		// Link the input managed object dependencies and function dependencies
 		for (OfficeManagedObjectSourceModel mosModel : office.getOfficeManagedObjectSources()) {
 
 			// Obtain the managed object source
@@ -521,6 +525,45 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource
 				// Determine if linked to external managed object
 				OfficeObject linkedObject = null;
 				OfficeInputManagedObjectDependencyToExternalManagedObjectModel dependencyToExtMo = dependencyModel
+						.getExternalManagedObject();
+				if (dependencyToExtMo != null) {
+					ExternalManagedObjectModel linkedExtMoModel = dependencyToExtMo.getExternalManagedObject();
+					if (linkedExtMoModel != null) {
+						linkedObject = officeObjects.get(linkedExtMoModel.getExternalManagedObjectName());
+					}
+				}
+				if (linkedObject != null) {
+					// Link to external managed object
+					architect.link(dependency, linkedObject);
+				}
+			}
+
+			// Link the function dependencies
+			for (OfficeManagedObjectFunctionDependencyModel dependencyModel : mosModel
+					.getOfficeManagedObjectFunctionDependencies()) {
+
+				// Obtain the function dependency
+				OfficeManagedObjectFunctionDependency dependency = mos.getOfficeManagedObjectFunctionDependency(
+						dependencyModel.getOfficeManagedObjectFunctionDependencyName());
+
+				// Determine if linked to managed object
+				OfficeManagedObject linkedManagedObject = null;
+				OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel dependencyToMo = dependencyModel
+						.getOfficeManagedObject();
+				if (dependencyToMo != null) {
+					OfficeManagedObjectModel linkedMoModel = dependencyToMo.getOfficeManagedObject();
+					if (linkedMoModel != null) {
+						linkedManagedObject = managedObjects.get(linkedMoModel.getOfficeManagedObjectName());
+					}
+				}
+				if (linkedManagedObject != null) {
+					// Link to managed object
+					architect.link(dependency, linkedManagedObject);
+				}
+
+				// Determine if linked to external managed object
+				OfficeObject linkedObject = null;
+				OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel dependencyToExtMo = dependencyModel
 						.getExternalManagedObject();
 				if (dependencyToExtMo != null) {
 					ExternalManagedObjectModel linkedExtMoModel = dependencyToExtMo.getExternalManagedObject();

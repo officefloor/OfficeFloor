@@ -92,7 +92,7 @@ public class AnonymousHttpSecuritySource
 	}
 
 	@Override
-	public void authenticate(Void credentials, AuthenticateContext<HttpAccessControl, None> context)
+	public void authenticate(Void credentials, AuthenticateContext<HttpAccessControl, None, None> context)
 			throws HttpException {
 		throw new IllegalStateException(
 				"Should always obtain " + HttpAccessControl.class.getSimpleName() + " from ratify");
@@ -104,7 +104,7 @@ public class AnonymousHttpSecuritySource
 	}
 
 	@Override
-	public void logout(LogoutContext<None> context) throws HttpException {
+	public void logout(LogoutContext<None, None> context) throws HttpException {
 		// Always logged in, so no operation
 	}
 

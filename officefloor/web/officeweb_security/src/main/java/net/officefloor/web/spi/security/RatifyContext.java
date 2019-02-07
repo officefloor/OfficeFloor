@@ -19,28 +19,10 @@ package net.officefloor.web.spi.security;
 
 import java.io.Serializable;
 
-import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
-
 /**
  * HTTP ratify context.
  * 
  * @author Daniel Sagenschneider
  */
-public interface RatifyContext<AC extends Serializable> extends AccessControlListener<AC> {
-
-	/**
-	 * Obtains the {@link ServerHttpConnection}.
-	 * 
-	 * @return {@link ServerHttpConnection}.
-	 */
-	ServerHttpConnection getConnection();
-
-	/**
-	 * Obtains the {@link HttpSession}.
-	 * 
-	 * @return {@link HttpSession}.
-	 */
-	HttpSession getSession();
-
+public interface RatifyContext<AC extends Serializable> extends HttpSecurityActionContext, AccessControlListener<AC> {
 }

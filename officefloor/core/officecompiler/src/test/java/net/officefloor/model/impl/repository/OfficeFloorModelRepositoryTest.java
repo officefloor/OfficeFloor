@@ -47,6 +47,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecution
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
@@ -290,6 +292,18 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(
 				new OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel("MANAGED_OBJECT_TWO"),
 				inputDependency.getOfficeFloorManagedObject(), "getOfficeFloorManagedObjectName");
+
+		// Function managed object and dependencies
+		assertList(new String[] { "getOfficeFloorManagedObjectSourceFunctionDependencyName", "getDependencyType" },
+				moSource.getOfficeFloorManagedObjectSourceFunctionDependencies(),
+				new OfficeFloorManagedObjectSourceFunctionDependencyModel("FUNCTION_DEPENDENCY",
+						"java.net.URLConnection"));
+		OfficeFloorManagedObjectSourceFunctionDependencyModel functionDependency = moSource
+				.getOfficeFloorManagedObjectSourceFunctionDependencies().get(0);
+		assertProperties(
+				new OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel(
+						"MANAGED_OBJECT_THREE"),
+				functionDependency.getOfficeFloorManagedObject(), "getOfficeFloorManagedObjectName");
 
 		// Flows
 		assertList(new String[] { "getOfficeFloorManagedObjectSourceFlowName", "getArgumentType" },

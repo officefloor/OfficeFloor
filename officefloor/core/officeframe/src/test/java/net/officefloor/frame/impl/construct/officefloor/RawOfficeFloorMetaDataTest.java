@@ -26,12 +26,14 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.util.function.Supplier;
 
 import org.junit.Assert;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -56,6 +58,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
+import net.officefloor.frame.test.MockClockFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -107,8 +110,13 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 		this.configuration.addResources((location) -> new ByteArrayInputStream(location.getBytes()));
 
+		// Obtain the source context
+		long mockCurrentTime = 1000;
+		Supplier<ClockFactory> defaultClockFactoryProvider = () -> new MockClockFactory(mockCurrentTime);
+		SourceContext context = this.configuration.getSourceContext(defaultClockFactoryProvider);
+
 		// Obtain resource
-		InputStream resource = this.configuration.getSourceContext().getResource("test");
+		InputStream resource = context.getResource("test");
 		assertNotNull("Should have resource", resource);
 		Reader reader = new InputStreamReader(resource);
 		StringWriter buffer = new StringWriter();
@@ -116,6 +124,16 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			buffer.write(character);
 		}
 		assertEquals("Incorrect resource", "test", buffer.toString());
+
+		// Validate default clock
+		assertEquals("Incorrect default clock", Long.valueOf(mockCurrentTime),
+				context.getClock((time) -> time).getTime());
+
+		// Override the clock
+		long mockOverrideTime = 2000;
+		this.configuration.setClockFactory(new MockClockFactory(mockOverrideTime));
+		assertEquals("Incorrect override clock", Long.valueOf(mockOverrideTime),
+				this.configuration.getSourceContext(defaultClockFactoryProvider).getClock((time) -> time).getTime());
 	}
 
 	/**
@@ -266,8 +284,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no managing {@link Office} for
-	 * {@link ManagedObjectSource}.
+	 * Ensures issue if no managing {@link Office} for {@link ManagedObjectSource}.
 	 */
 	public void testNoManagingOfficeForManagedObjectSource() {
 
@@ -438,8 +455,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue for the {@link OfficeFloor}.
 	 * 
-	 * @param issueDescription
-	 *            Description of issue.
+	 * @param issueDescription Description of issue.
 	 */
 	private void record_issue(String issueDescription) {
 		this.issues.addIssue(AssetType.OFFICE_FLOOR, OFFICE_FLOOR_NAME, issueDescription);
@@ -448,9 +464,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Constructs the {@link RawOfficeFloorMetaData}.
 	 * 
-	 * @param isConstruct
-	 *            Indicates if the {@link RawOfficeFloorMetaData} should be
-	 *            returned.
+	 * @param isConstruct Indicates if the {@link RawOfficeFloorMetaData} should be
+	 *                    returned.
 	 * @return {@link RawOfficeFloorMetaData}.
 	 */
 	private RawOfficeFloorMetaData constructRawOfficeFloorMetaData(boolean isConstruct) {

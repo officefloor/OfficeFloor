@@ -56,6 +56,9 @@ import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeMa
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
@@ -387,8 +390,12 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 	 * @param mos {@link OfficeManagedObjectSourceModel}.
 	 */
 	private static void assertOfficeManagedObjectSource(OfficeManagedObjectSourceModel mos) {
+
+		// Validate properties
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
 				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel("MO_TWO", "VALUE_TWO"));
+
+		// Validate the input dependencies
 		assertList(new String[] { "getOfficeInputManagedObjectDependencyName", "getDependencyType" },
 				mos.getOfficeInputManagedObjectDependencies(),
 				new OfficeInputManagedObjectDependencyModel("INPUT_DEPENDENCY_ONE", Connection.class.getName()),
@@ -399,12 +406,29 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(new OfficeInputManagedObjectDependencyToExternalManagedObjectModel("EXTERNAL_MANAGED_OBJECT"),
 				mos.getOfficeInputManagedObjectDependencies().get(1).getExternalManagedObject(),
 				"getExternalManagedObjectName");
+
+		// Validate the function dependencies
+		assertList(new String[] { "getOfficeManagedObjectFunctionDependencyName", "getDependencyType" },
+				mos.getOfficeManagedObjectFunctionDependencies(),
+				new OfficeManagedObjectFunctionDependencyModel("FUNCTION_DEPENDENCY_ONE", Connection.class.getName()),
+				new OfficeManagedObjectFunctionDependencyModel("FUNCTION_DEPENDENCY_TWO", Connection.class.getName()));
+		assertProperties(new OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel("MANAGED_OBJECT_TWO"),
+				mos.getOfficeManagedObjectFunctionDependencies().get(0).getOfficeManagedObject(),
+				"getOfficeManagedObjectName");
+		assertProperties(
+				new OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel("EXTERNAL_MANAGED_OBJECT"),
+				mos.getOfficeManagedObjectFunctionDependencies().get(1).getExternalManagedObject(),
+				"getExternalManagedObjectName");
+
+		// Validate the flows
 		assertList(new String[] { "getOfficeManagedObjectSourceFlowName", "getArgumentType" },
 				mos.getOfficeManagedObjectSourceFlows(),
 				new OfficeManagedObjectSourceFlowModel("FLOW", Integer.class.getName()));
 		OfficeManagedObjectSourceFlowModel flow = mos.getOfficeManagedObjectSourceFlows().get(0);
 		assertProperties(new OfficeManagedObjectSourceFlowToOfficeSectionInputModel("SECTION", "INPUT_A"),
 				flow.getOfficeSectionInput(), "getOfficeSectionName", "getOfficeSectionInputName");
+
+		// Validate the teams
 		assertList(new String[] { "getOfficeManagedObjectSourceTeamName" }, mos.getOfficeManagedObjectSourceTeams(),
 				new OfficeManagedObjectSourceTeamModel("MO_TEAM"));
 		OfficeManagedObjectSourceTeamModel moTeam = mos.getOfficeManagedObjectSourceTeams().get(0);

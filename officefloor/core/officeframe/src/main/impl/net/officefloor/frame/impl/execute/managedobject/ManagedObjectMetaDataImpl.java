@@ -44,7 +44,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectReadyCheck;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -106,8 +106,7 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	private final boolean isCoordinatingManagedObject;
 
 	/**
-	 * {@link ManagedObjectIndex} for the dependencies in the index order
-	 * required.
+	 * {@link ManagedObjectIndex} for the dependencies in the index order required.
 	 */
 	private final ManagedObjectIndex[] dependencyMapping;
 
@@ -157,45 +156,40 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	/**
 	 * Instantiate.
 	 * 
-	 * @param boundManagedObjectName
-	 *            Name of the {@link ManagedObject} bound within the
-	 *            {@link ManagedObjectScope}.
-	 * @param objectType
-	 *            Type of the {@link Object} returned from the
-	 *            {@link ManagedObject}.
-	 * @param instanceIndex
-	 *            Instance index.
-	 * @param source
-	 *            {@link ManagedObjectSource} of the {@link ManagedObject}.
-	 * @param pool
-	 *            {@link ManagedObjectPool} of the {@link ManagedObject}.
-	 * @param isProcessAwareManagedObject
-	 *            <code>true</code> if the {@link ManagedObject} is
-	 *            {@link ProcessAwareManagedObject}.
-	 * @param isNameAwareManagedObject
-	 *            <code>true</code> if the {@link ManagedObject} is
-	 *            {@link NameAwareManagedObject}.
-	 * @param sourcingManager
-	 *            {@link AssetManager} to manage the sourcing of the
-	 *            {@link ManagedObject} instances.
-	 * @param isManagedObjectAsynchronous
-	 *            <code>true</code> if the {@link ManagedObject} is
-	 *            {@link AsynchronousManagedObject}.
-	 * @param operationsManager
-	 *            {@link AssetManager} to manage the asynchronous operations on
-	 *            the {@link ManagedObject} instances.
-	 * @param isCoordinatingManagedObject
-	 *            <code>true</code> if the {@link ManagedObject} is
-	 *            {@link CoordinatingManagedObject}.
-	 * @param dependencyMapping
-	 *            {@link ManagedObjectIndex} for the dependencies in the index
-	 *            order required.
-	 * @param timeout
-	 *            Timeout of an asynchronous operation by the
-	 *            {@link ManagedObject} being managed.
-	 * @param governanceMetaData
-	 *            {@link ManagedObjectGovernanceMetaData} instances applicable
-	 *            to this {@link ManagedObject}.
+	 * @param boundManagedObjectName      Name of the {@link ManagedObject} bound
+	 *                                    within the {@link ManagedObjectScope}.
+	 * @param objectType                  Type of the {@link Object} returned from
+	 *                                    the {@link ManagedObject}.
+	 * @param instanceIndex               Instance index.
+	 * @param source                      {@link ManagedObjectSource} of the
+	 *                                    {@link ManagedObject}.
+	 * @param pool                        {@link ManagedObjectPool} of the
+	 *                                    {@link ManagedObject}.
+	 * @param isProcessAwareManagedObject <code>true</code> if the
+	 *                                    {@link ManagedObject} is
+	 *                                    {@link ProcessAwareManagedObject}.
+	 * @param isNameAwareManagedObject    <code>true</code> if the
+	 *                                    {@link ManagedObject} is
+	 *                                    {@link NameAwareManagedObject}.
+	 * @param sourcingManager             {@link AssetManager} to manage the
+	 *                                    sourcing of the {@link ManagedObject}
+	 *                                    instances.
+	 * @param isManagedObjectAsynchronous <code>true</code> if the
+	 *                                    {@link ManagedObject} is
+	 *                                    {@link AsynchronousManagedObject}.
+	 * @param operationsManager           {@link AssetManager} to manage the
+	 *                                    asynchronous operations on the
+	 *                                    {@link ManagedObject} instances.
+	 * @param isCoordinatingManagedObject <code>true</code> if the
+	 *                                    {@link ManagedObject} is
+	 *                                    {@link CoordinatingManagedObject}.
+	 * @param dependencyMapping           {@link ManagedObjectIndex} for the
+	 *                                    dependencies in the index order required.
+	 * @param timeout                     Timeout of an asynchronous operation by
+	 *                                    the {@link ManagedObject} being managed.
+	 * @param governanceMetaData          {@link ManagedObjectGovernanceMetaData}
+	 *                                    instances applicable to this
+	 *                                    {@link ManagedObject}.
 	 */
 	public ManagedObjectMetaDataImpl(String boundManagedObjectName, Class<?> objectType, int instanceIndex,
 			ManagedObjectSource<?, ?> source, ManagedObjectPool pool, boolean isProcessAwareManagedObject,
@@ -221,14 +215,12 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	/**
 	 * Loads the remaining state of this {@link ManagedObjectMetaData}.
 	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData} of the {@link Office} containing this
-	 *            {@link ManagedObjectMetaData}.
-	 * @param recycleFlowMetaData
-	 *            {@link FlowMetaData} for the recycling of this
-	 *            {@link ManagedObject}.
-	 * @param preloadAdministration
-	 *            Pre-load {@link ManagedObjectAdministrationMetaData}.
+	 * @param officeMetaData        {@link OfficeMetaData} of the {@link Office}
+	 *                              containing this {@link ManagedObjectMetaData}.
+	 * @param recycleFlowMetaData   {@link FlowMetaData} for the recycling of this
+	 *                              {@link ManagedObject}.
+	 * @param preloadAdministration Pre-load
+	 *                              {@link ManagedObjectAdministrationMetaData}.
 	 */
 	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData recycleFlowMetaData,
 			ManagedObjectAdministrationMetaData<?, ?, ?>[] preloadAdministration) {
@@ -307,8 +299,8 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	}
 
 	@Override
-	public OfficeClock getOfficeClock() {
-		return this.officeMetaData.getOfficeClock();
+	public MonitorClock getMonitorClock() {
+		return this.officeMetaData.getMonitorClock();
 	}
 
 	@Override
@@ -362,8 +354,7 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 		/**
 		 * Instantiate.
 		 * 
-		 * @param delegate
-		 *            Delegate {@link ManagedObjectReadyCheck}.
+		 * @param delegate Delegate {@link ManagedObjectReadyCheck}.
 		 */
 		public ManagedObjectReadyCheckWrapper(ManagedObjectReadyCheck delegate) {
 			this.delegate = delegate;
@@ -406,8 +397,8 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 		private final ManagedObjectReadyCheckWrapper readyCheck;
 
 		/**
-		 * {@link FunctionState} instances to check the necessary
-		 * {@link ManagedObject} instances are ready.
+		 * {@link FunctionState} instances to check the necessary {@link ManagedObject}
+		 * instances are ready.
 		 */
 		private final FunctionState[] checkFunctions;
 
@@ -419,13 +410,12 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 		/**
 		 * Instantiate.
 		 * 
-		 * @param readyCheck
-		 *            {@link ManagedObjectReadyCheckWrapper}.
-		 * @param checkFunctions
-		 *            {@link FunctionState} instances to check the necessary
-		 *            {@link ManagedObject} instances are ready.
-		 * @param currentFunctionIndex
-		 *            Index of the {@link FunctionState} to use for checking.
+		 * @param readyCheck           {@link ManagedObjectReadyCheckWrapper}.
+		 * @param checkFunctions       {@link FunctionState} instances to check the
+		 *                             necessary {@link ManagedObject} instances are
+		 *                             ready.
+		 * @param currentFunctionIndex Index of the {@link FunctionState} to use for
+		 *                             checking.
 		 */
 		public CheckReadyFunctionState(ManagedObjectReadyCheckWrapper readyCheck, FunctionState[] checkFunctions,
 				int currentFunctionIndex) {

@@ -38,7 +38,6 @@ import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.executive.CpuCore.LogicalCpu;
 import net.openhft.affinity.Affinity;
@@ -75,10 +74,7 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 		super.setUp();
 
 		// Configure mock server
-		this.compile.officeFloor((context) -> {
-			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
-					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-		});
+		this.compile.mockHttpServer((server) -> this.server = server);
 
 		// Capture initial affinity (to allow reset on tear down)
 		this.initialAffinity = Affinity.getAffinity();

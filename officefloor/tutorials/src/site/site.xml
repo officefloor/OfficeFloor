@@ -39,6 +39,8 @@
 				href="./TransactionHttpServer/index.html" />
 			<item name="Test" href="./TestHttpServer/index.html" />
 			<item name="Deploy" href="./DeployHttpServer/index.html" />
+			<item name="Servlet / PaaS"
+				href="./HttpServletHttpServer/index.html" />
 		</menu>
 		<menu ref="parent" />
 	</body>

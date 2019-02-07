@@ -42,9 +42,8 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 * This may be overridden by {@link ManagedObjectBuilder} configuration, however
 	 * allows for a default {@link ManagedObjectPool} should one not be configured.
 	 * 
-	 * @param poolFactory
-	 *            {@link ManagedObjectPoolFactory} for the default
-	 *            {@link ManagedObjectPool}.
+	 * @param poolFactory {@link ManagedObjectPoolFactory} for the default
+	 *                    {@link ManagedObjectPool}.
 	 * @return {@link ManagedObjectPoolBuilder}.
 	 */
 	ManagedObjectPoolBuilder setDefaultManagedObjectPool(ManagedObjectPoolFactory poolFactory);
@@ -52,8 +51,7 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	/**
 	 * Obtains the {@link ManagedObjectSourceFlow}.
 	 * 
-	 * @param key
-	 *            Key identifying {@link Flow} being invoked by the
+	 * @param key Key identifying {@link Flow} being invoked by the
 	 *            {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectSourceFlow} for the key.
 	 */
@@ -62,8 +60,7 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	/**
 	 * Obtains the {@link ManagedObjectSourceFlow}.
 	 * 
-	 * @param flowIndex
-	 *            Index identifying the {@link Flow}.
+	 * @param flowIndex Index identifying the {@link Flow}.
 	 * @return {@link ManagedObjectSourceFlow} for the index.
 	 */
 	ManagedObjectSourceFlow getFlow(int flowIndex);
@@ -78,13 +75,10 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 * The initial {@link ManagedFunction} will be used as the recycle starting
 	 * point for this {@link ManagedObject}.
 	 *
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <f>
-	 *            Flow key type.
-	 * @param managedFunctionFactory
-	 *            {@link ManagedFunctionFactory} to create the recycle
-	 *            {@link ManagedFunction}.
+	 * @param                        <O> Dependency key type.
+	 * @param                        <f> Flow key type.
+	 * @param managedFunctionFactory {@link ManagedFunctionFactory} to create the
+	 *                               recycle {@link ManagedFunction}.
 	 * @return {@link ManagedObjectFunctionBuilder} to recycle this
 	 *         {@link ManagedObject}.
 	 */
@@ -95,19 +89,24 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 * Creates the {@link ManagedObjectFunctionBuilder} to build a
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param <O>
-	 *            Dependency key type.
-	 * @param <f>
-	 *            Flow key type.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param managedFunctionFactory
-	 *            {@link ManagedFunctionFactory} to create the
-	 *            {@link ManagedFunction}.
+	 * @param                        <O> Dependency key type.
+	 * @param                        <f> Flow key type.
+	 * @param functionName           Name of the {@link ManagedFunction}.
+	 * @param managedFunctionFactory {@link ManagedFunctionFactory} to create the
+	 *                               {@link ManagedFunction}.
 	 * @return Specific {@link ManagedObjectFunctionBuilder}.
 	 */
 	<O extends Enum<O>, f extends Enum<f>> ManagedObjectFunctionBuilder<O, f> addManagedFunction(String functionName,
 			ManagedFunctionFactory<O, f> managedFunctionFactory);
+
+	/**
+	 * Adds a {@link ManagedObjectFunctionDependency}.
+	 * 
+	 * @param name       Name of the {@link ManagedObjectFunctionDependency}.
+	 * @param objectType Object type.
+	 * @return {@link ManagedObjectFunctionDependency}.
+	 */
+	ManagedObjectFunctionDependency addFunctionDependency(String name, Class<?> objectType);
 
 	/**
 	 * <p>
@@ -116,9 +115,8 @@ public interface ManagedObjectSourceContext<F extends Enum<F>> extends SourceCon
 	 * The {@link ManagedFunction} must be registered by this
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param functionName
-	 *            Name of {@link ManagedFunction} registered by this
-	 *            {@link ManagedObjectSource}.
+	 * @param functionName Name of {@link ManagedFunction} registered by this
+	 *                     {@link ManagedObjectSource}.
 	 */
 	void addStartupFunction(String functionName);
 

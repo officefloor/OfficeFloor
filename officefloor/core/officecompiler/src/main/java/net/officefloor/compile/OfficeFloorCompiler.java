@@ -55,6 +55,8 @@ import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.clock.Clock;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -426,6 +428,18 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 	/**
 	 * <p>
+	 * Specifies the {@link ClockFactory}.
+	 * <p>
+	 * This will be added to the {@link OfficeFrame} before compiling the
+	 * {@link OfficeFloor} and will be available in the {@link SourceContext} for
+	 * retrieving {@link Clock} instances.
+	 * 
+	 * @param clockFactory {@link ClockFactory}.
+	 */
+	public abstract void setClockFactory(ClockFactory clockFactory);
+
+	/**
+	 * <p>
 	 * Adds a {@link ResourceSource}.
 	 * <p>
 	 * This will be added to the {@link OfficeFrame} before compiling the
@@ -742,6 +756,13 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	 * @return New empty {@link PropertyList}.
 	 */
 	public abstract PropertyList createPropertyList();
+
+	/**
+	 * Creates a root {@link SourceContext}.
+	 * 
+	 * @return Root {@link SourceContext}.
+	 */
+	public abstract SourceContext createRootSourceContext();
 
 	/**
 	 * Obtains the {@link CompilerIssues}.

@@ -20,7 +20,7 @@ package net.officefloor.web.security.impl;
 import java.io.Serializable;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -29,6 +29,7 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AuthenticateContext;
 import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link ManagedFunction} and {@link ManagedFunctionFactory} for
@@ -36,21 +37,27 @@ import net.officefloor.web.spi.security.HttpSecurity;
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
-		extends StaticManagedFunction<Indexed, None> {
+public class ManagedObjectAuthenticateFunction<AC extends Serializable, C, F extends Enum<F>>
+		extends StaticManagedFunction<Indexed, F> {
+
+	/**
+	 * Name of the {@link HttpSecurity}.
+	 */
+	private final String httpSecurityName;
 
 	/**
 	 * {@link HttpSecurity}
 	 */
-	private final HttpSecurity<?, AC, C, ?, ?> httpSecurity;
+	private final HttpSecurity<?, AC, C, ?, F> httpSecurity;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param httpSecurity
-	 *            {@link HttpSecurity}.
+	 * @param httpSecurityName Name of the {@link HttpSecurity}.
+	 * @param httpSecurity     {@link HttpSecurity}.
 	 */
-	public ManagedObjectAuthenticateFunction(HttpSecurity<?, AC, C, ?, ?> httpSecurity) {
+	public ManagedObjectAuthenticateFunction(String httpSecurityName, HttpSecurity<?, AC, C, ?, F> httpSecurity) {
+		this.httpSecurityName = httpSecurityName;
 		this.httpSecurity = httpSecurity;
 	}
 
@@ -60,7 +67,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
 
 		// Obtain the function authenticate context
 		FunctionAuthenticateContext<AC, C> functionAuthenticateContext = (FunctionAuthenticateContext<AC, C>) context
@@ -85,8 +92,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 	/**
 	 * {@link AuthenticateContext} implementation.
 	 */
-	private static class AuthenticateContextImpl<AC extends Serializable, C, O extends Enum<O>>
-			implements AuthenticateContext<AC, O> {
+	private class AuthenticateContextImpl<O extends Enum<O>> implements AuthenticateContext<AC, O, F> {
 
 		/**
 		 * {@link FunctionAuthenticateContext}.
@@ -96,18 +102,16 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		private final ManagedFunctionContext<Indexed, None> functionContext;
+		private final ManagedFunctionContext<Indexed, F> functionContext;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param functionAuthenticateContext
-		 *            {@link FunctionAuthenticateContext}.
-		 * @param functionContext
-		 *            {@link ManagedFunctionContext}.
+		 * @param functionAuthenticateContext {@link FunctionAuthenticateContext}.
+		 * @param functionContext             {@link ManagedFunctionContext}.
 		 */
 		public AuthenticateContextImpl(FunctionAuthenticateContext<AC, C> functionAuthenticateContext,
-				ManagedFunctionContext<Indexed, None> functionContext) {
+				ManagedFunctionContext<Indexed, F> functionContext) {
 			this.functionAuthenticateContext = functionAuthenticateContext;
 			this.functionContext = functionContext;
 		}
@@ -122,8 +126,19 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 		}
 
 		@Override
+		public String getQualifiedAttributeName(String attributeName) {
+			return AuthenticationContextManagedObjectSource
+					.getQualifiedAttributeName(ManagedObjectAuthenticateFunction.this.httpSecurityName, attributeName);
+		}
+
+		@Override
 		public HttpSession getSession() {
 			return this.functionAuthenticateContext.getSession();
+		}
+
+		@Override
+		public HttpRequestState getRequestState() {
+			return this.functionAuthenticateContext.getRequestState();
 		}
 
 		@Override
@@ -131,6 +146,11 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C>
 			// Offset for function dependency
 			int index = key.ordinal() + 1;
 			return this.functionContext.getObject(index);
+		}
+
+		@Override
+		public void doFlow(F key, Object parameter, FlowCallback callback) {
+			this.functionContext.doFlow(key, parameter, callback);
 		}
 
 		@Override

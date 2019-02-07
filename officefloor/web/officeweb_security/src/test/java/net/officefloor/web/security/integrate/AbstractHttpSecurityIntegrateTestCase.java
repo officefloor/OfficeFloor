@@ -64,10 +64,7 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 
 		// Configure the application
 		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
-		compiler.officeFloor((context) -> {
-			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
-					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-		});
+		compiler.mockHttpServer((server) -> this.server = server);
 		compiler.web((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
@@ -95,10 +92,8 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 	/**
 	 * Configures the {@link HttpSecurity}.
 	 * 
-	 * @param context
-	 *            {@link CompileWebContext}.
-	 * @param securityArchitect
-	 *            {@link HttpSecurityArchitect}
+	 * @param context           {@link CompileWebContext}.
+	 * @param securityArchitect {@link HttpSecurityArchitect}
 	 * @return Configured {@link HttpSecurity}.
 	 */
 	protected abstract HttpSecurityBuilder configureHttpSecurity(CompileWebContext context,
@@ -115,12 +110,9 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 	/**
 	 * Undertakes the request.
 	 * 
-	 * @param path
-	 *            Path.
-	 * @param status
-	 *            Expected status.
-	 * @param entity
-	 *            Expected entity.
+	 * @param path   Path.
+	 * @param status Expected status.
+	 * @param entity Expected entity.
 	 * @return {@link MockHttpResponse}.
 	 */
 	protected MockHttpResponse doRequest(String path, int status, String entity) {
@@ -132,14 +124,10 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 	/**
 	 * Undertakes the request with cookies from previous request.
 	 * 
-	 * @param path
-	 *            Path.
-	 * @param response
-	 *            Previous response.
-	 * @param status
-	 *            Expected response status.
-	 * @param entity
-	 *            Expected response entity.
+	 * @param path     Path.
+	 * @param response Previous response.
+	 * @param status   Expected response status.
+	 * @param entity   Expected response entity.
 	 */
 	protected MockHttpResponse doRequest(String path, MockHttpResponse response, int status, String entity) {
 
@@ -162,13 +150,10 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 		/**
 		 * Services the {@link HttpRequest}.
 		 * 
-		 * @param acessControl
-		 *            {@link HttpAccessControl} dependency ensures
-		 *            authentication before servicing.
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 * @throws IOException
-		 *             If fails.
+		 * @param acessControl {@link HttpAccessControl} dependency ensures
+		 *                     authentication before servicing.
+		 * @param connection   {@link ServerHttpConnection}.
+		 * @throws IOException If fails.
 		 */
 		public void service(HttpAccessControl acessControl, ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("Serviced for " + acessControl.getPrincipal().getName());
@@ -177,12 +162,9 @@ public abstract class AbstractHttpSecurityIntegrateTestCase extends OfficeFrameT
 		/**
 		 * Undertakes logging out.
 		 * 
-		 * @param authentication
-		 *            {@link HttpAuthentication}.
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 * @throws IOException
-		 *             If fails.
+		 * @param authentication {@link HttpAuthentication}.
+		 * @param connection     {@link ServerHttpConnection}.
+		 * @throws IOException If fails.
 		 */
 		public void logout(HttpAuthentication<HttpCredentials> authentication, ServerHttpConnection connection)
 				throws IOException {

@@ -52,7 +52,7 @@ import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -148,9 +148,9 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<ManagedFunctionReference> startupFunctions = new LinkedList<ManagedFunctionReference>();
 
 	/**
-	 * {@link OfficeClock}.
+	 * {@link MonitorClock}.
 	 */
-	private OfficeClock clock = null;
+	private MonitorClock clock = null;
 
 	/**
 	 * Interval in milli-seconds to monitor the {@link Office}. Default is 1 second.
@@ -189,7 +189,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 */
 
 	@Override
-	public void setOfficeClock(OfficeClock clock) {
+	public void setMonitorClock(MonitorClock clock) {
 		this.clock = clock;
 	}
 
@@ -305,7 +305,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public OfficeClock getOfficeClock() {
+	public MonitorClock getMonitorClock() {
 		return this.clock;
 	}
 

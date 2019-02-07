@@ -44,6 +44,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecution
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
@@ -191,6 +193,17 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"INPUT_MO_DEPENDENCY");
 		inputDependency.setOfficeFloorManagedObject(inputDependencyToMo);
 
+		// managed object source function dependency -> managed object
+		OfficeFloorManagedObjectSourceFunctionDependencyModel functionDependency = new OfficeFloorManagedObjectSourceFunctionDependencyModel(
+				"FUNCTION_DEPENDENCY", Connection.class.getName());
+		officeFloorManagedObjectSource.addOfficeFloorManagedObjectSourceFunctionDependency(functionDependency);
+		OfficeFloorManagedObjectModel function_dependency = new OfficeFloorManagedObjectModel("MO_FUNCTION_DEPENDENCY",
+				"PROCESS");
+		officeFloor.addOfficeFloorManagedObject(function_dependency);
+		OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel functionDependencyToMo = new OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel(
+				"MO_FUNCTION_DEPENDENCY");
+		functionDependency.setOfficeFloorManagedObject(functionDependencyToMo);
+
 		// OfficeFloor managed object source flow -> office input
 		OfficeFloorManagedObjectSourceFlowModel flow = new OfficeFloorManagedObjectSourceFlowModel("FLOW",
 				Integer.class.getName());
@@ -308,6 +321,12 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				inputDependencyToMo.getOfficeFloorManagedObjectDependency());
 		assertSame("input dependency -> managed object", input_dependency,
 				inputDependencyToMo.getOfficeFloorManagedObject());
+
+		// Ensure function dependency connected to managed object
+		assertSame("function dependency <- managed object", functionDependency,
+				functionDependencyToMo.getOfficeFloorManagedObjectFunctionDependency());
+		assertSame("function dependency -> managed object", function_dependency,
+				functionDependencyToMo.getOfficeFloorManagedObject());
 
 		// Ensure managed object source flow connected to office input
 		assertSame("OfficeFloor managed object source flow <- office input", flow,
@@ -468,6 +487,18 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		inputDependencyToMo.setOfficeFloorManagedObject(input_dependency);
 		inputDependencyToMo.connect();
 
+		// managed object source function dependency -> managed object
+		OfficeFloorManagedObjectSourceFunctionDependencyModel functionDependency = new OfficeFloorManagedObjectSourceFunctionDependencyModel(
+				"FUNCTION_DEPENDENCY", Connection.class.getName());
+		officeFloorManagedObjectSource.addOfficeFloorManagedObjectSourceFunctionDependency(functionDependency);
+		OfficeFloorManagedObjectModel function_dependency = new OfficeFloorManagedObjectModel("MO_FUNCTION_DEPENDENCY",
+				"PROCESS");
+		officeFloor.addOfficeFloorManagedObject(function_dependency);
+		OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel functionDependencyToMo = new OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel();
+		functionDependencyToMo.setOfficeFloorManagedObjectFunctionDependency(functionDependency);
+		functionDependencyToMo.setOfficeFloorManagedObject(function_dependency);
+		functionDependencyToMo.connect();
+
 		// OfficeFloor managed object source flow -> office input
 		OfficeFloorManagedObjectSourceFlowModel flow = new OfficeFloorManagedObjectSourceFlowModel("FLOW",
 				Integer.class.getName());
@@ -544,6 +575,8 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				moSourceToInputMo.getOfficeFloorInputManagedObjectName());
 		assertEquals("managed object source input dependency - managed object", "INPUT_MO_DEPENDENCY",
 				inputDependencyToMo.getOfficeFloorManagedObjectName());
+		assertEquals("managed object source function dependency - managed object", "MO_FUNCTION_DEPENDENCY",
+				functionDependencyToMo.getOfficeFloorManagedObjectName());
 		assertEquals("OfficeFloor managed object source flow - office input (office)", "OFFICE",
 				flowToInput.getDeployedOfficeName());
 		assertEquals("OfficeFloor managed object source flow - office input (section)", "SECTION",

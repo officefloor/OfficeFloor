@@ -18,6 +18,7 @@
 package net.officefloor.web.security.impl;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
@@ -27,14 +28,19 @@ import net.officefloor.web.spi.security.ChallengeContext;
 import net.officefloor.web.spi.security.HttpChallenge;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link ManagedFunctionFactory} to challenge the client.
  * 
  * @author Daniel Sagenschneider
  */
-public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
-		extends StaticManagedFunction<Indexed, Indexed> {
+public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>> extends StaticManagedFunction<Indexed, F> {
+
+	/**
+	 * Name of the {@link HttpSecurity}.
+	 */
+	private final String httpSecurityName;
 
 	/**
 	 * {@link HttpSecurity}.
@@ -44,10 +50,11 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 	/**
 	 * Initiate.
 	 * 
-	 * @param httpSecurity
-	 *            {@link HttpSecurity}.
+	 * @param httpSecurityName Name of the {@link HttpSecurity}.
+	 * @param httpSecurity     {@link HttpSecurity}.
 	 */
-	public HttpChallengeFunction(HttpSecurity<?, ?, ?, O, F> httpSecurity) {
+	public HttpChallengeFunction(String httpSecurityName, HttpSecurity<?, ?, ?, O, F> httpSecurity) {
+		this.httpSecurityName = httpSecurityName;
 		this.httpSecurity = httpSecurity;
 	}
 
@@ -56,15 +63,17 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
 
 		// Obtain the dependencies
 		HttpChallengeContext httpChallengeContext = (HttpChallengeContext) context.getObject(0);
 		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(1);
 		HttpSession session = (HttpSession) context.getObject(2);
+		HttpRequestState requestState = (HttpRequestState) context.getObject(3);
 
 		// Undertake challenge
-		this.httpSecurity.challenge(new HttpChallengeContextImpl(connection, session, context, httpChallengeContext));
+		this.httpSecurity.challenge(
+				new HttpChallengeContextImpl(connection, session, requestState, context, httpChallengeContext));
 
 		// No further functions
 		return null;
@@ -86,9 +95,14 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		private final HttpSession session;
 
 		/**
+		 * {@link HttpRequestState}.
+		 */
+		private final HttpRequestState requestState;
+
+		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		private final ManagedFunctionContext<Indexed, Indexed> context;
+		private final ManagedFunctionContext<Indexed, F> context;
 
 		/**
 		 * {@link HttpChallengeContext}.
@@ -98,19 +112,18 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		/**
 		 * Initiate.
 		 * 
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
-		 * @param session
-		 *            {@link HttpSession}.
-		 * @param context
-		 *            {@link ManagedFunctionContext}.
-		 * @param httpChallengeContext
-		 *            {@link HttpChallengeContext}.
+		 * @param connection           {@link ServerHttpConnection}.
+		 * @param session              {@link HttpSession}.
+		 * @param requestState         {@link HttpRequestState}.
+		 * @param context              {@link ManagedFunctionContext}.
+		 * @param httpChallengeContext {@link HttpChallengeContext}.
 		 */
 		public HttpChallengeContextImpl(ServerHttpConnection connection, HttpSession session,
-				ManagedFunctionContext<Indexed, Indexed> context, HttpChallengeContext httpChallengeContext) {
+				HttpRequestState requestState, ManagedFunctionContext<Indexed, F> context,
+				HttpChallengeContext httpChallengeContext) {
 			this.connection = connection;
 			this.session = session;
+			this.requestState = requestState;
 			this.context = context;
 			this.httpChallengeContext = httpChallengeContext;
 		}
@@ -130,20 +143,31 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>>
 		}
 
 		@Override
+		public String getQualifiedAttributeName(String attributeName) {
+			return AuthenticationContextManagedObjectSource
+					.getQualifiedAttributeName(HttpChallengeFunction.this.httpSecurityName, attributeName);
+		}
+
+		@Override
 		public HttpSession getSession() {
 			return this.session;
 		}
 
 		@Override
+		public HttpRequestState getRequestState() {
+			return this.requestState;
+		}
+
+		@Override
 		public Object getObject(O key) {
 			// Obtain the index (offset by challenge dependencies)
-			int index = key.ordinal() + 3;
+			int index = key.ordinal() + 4;
 			return this.context.getObject(index);
 		}
 
 		@Override
-		public void doFlow(F key) {
-			this.context.doFlow(key.ordinal(), null, null);
+		public void doFlow(F key, Object parameter, FlowCallback callback) {
+			this.context.doFlow(key, parameter, callback);
 		}
 	}
 

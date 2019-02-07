@@ -51,7 +51,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.5.1</revision>
+		<revision>3.5.2</revision>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
@@ -74,6 +74,7 @@
 		<javax-activation-version>1.2.0</javax-activation-version>
 		<javax-transaction-version>1.3</javax-transaction-version>
 		<jaxb-version>2.3.0</jaxb-version>
+		<jsonwebtoken-version>0.10.5</jsonwebtoken-version>
 		<junit-version>4.12</junit-version>
 		<lombok-version>1.18.4</lombok-version>
 		<maven-site-version>3.7.1</maven-site-version>
@@ -81,6 +82,7 @@
 		<netty-version>4.1.33.Final</netty-version>
 		<postgresql-version>42.2.5</postgresql-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
+		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.25</slf4j-version>
 		<spring-version>2.1.2.RELEASE</spring-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
@@ -136,6 +138,11 @@
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
 				<artifactId>officeserver_default</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.server</groupId>
+				<artifactId>officeserver_servlet</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -197,6 +204,16 @@
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officejson_jackson</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officejwt</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officejwt_authority</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Persistence -->
@@ -362,6 +379,11 @@
 				<version>${eclipse-persistence-jpa-version}</version>
 			</dependency>
 			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>${servlet-version}</version>
+			</dependency>
+			<dependency>
 				<groupId>javax.xml.bind</groupId>
 				<artifactId>jaxb-api</artifactId>
 				<version>${jaxb-version}</version>
@@ -395,6 +417,21 @@
 				<groupId>net.openhft</groupId>
 				<artifactId>affinity</artifactId>
 				<version>${affinity-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt-api</artifactId>
+				<version>${jsonwebtoken-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt-impl</artifactId>
+				<version>${jsonwebtoken-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt-jackson</artifactId>
+				<version>${jsonwebtoken-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>

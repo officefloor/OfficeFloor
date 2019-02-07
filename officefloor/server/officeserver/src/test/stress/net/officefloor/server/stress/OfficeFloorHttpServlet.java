@@ -30,13 +30,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.impl.DateHttpHeaderClock;
-import net.officefloor.server.http.impl.HttpResponseWriter;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.stream.StreamBufferPool;

@@ -60,8 +60,7 @@ public class AnonymousHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatify() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				null);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 
 		// Test
 		this.replayMockObjects();
@@ -87,7 +86,7 @@ public class AnonymousHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<None> logoutContext = new MockHttpLogoutContext<None>();
+		final MockHttpLogoutContext<None, None> logoutContext = new MockHttpLogoutContext<>();
 
 		// Create and initialise the security
 		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil

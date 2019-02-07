@@ -80,6 +80,22 @@
 					node="managed-object@name" />
 			</object>
 		</object>
+		<object
+			method="addOfficeFloorManagedObjectSourceFunctionDependency"
+			node="function-dependency"
+			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyModel">
+			<value
+				method="setOfficeFloorManagedObjectSourceFunctionDependencyName"
+				node="function-dependency@name" />
+			<value method="setDependencyType"
+				node="function-dependency@object-type" />
+			<object method="setOfficeFloorManagedObject"
+				node="managed-object"
+				class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel">
+				<value method="setOfficeFloorManagedObjectName"
+					node="managed-object@name" />
+			</object>
+		</object>
 		<object method="addOfficeFloorManagedObjectSourceFlow"
 			node="flow"
 			class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel">

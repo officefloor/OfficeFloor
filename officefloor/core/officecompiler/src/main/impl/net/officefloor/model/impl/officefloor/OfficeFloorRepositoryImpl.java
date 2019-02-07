@@ -44,6 +44,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecution
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceExecutionStrategyToOfficeFloorExecutionStrategyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
@@ -254,6 +256,24 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 							.get(conn.getOfficeFloorManagedObjectName());
 					if (managedObject != null) {
 						conn.setOfficeFloorManagedObjectDependency(inputDependency);
+						conn.setOfficeFloorManagedObject(managedObject);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connect the function dependencies to the OfficeFloor managed objects
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceFunctionDependencyModel functionDependency : moSource
+					.getOfficeFloorManagedObjectSourceFunctionDependencies()) {
+				OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel conn = functionDependency
+						.getOfficeFloorManagedObject();
+				if (conn != null) {
+					OfficeFloorManagedObjectModel managedObject = managedObjects
+							.get(conn.getOfficeFloorManagedObjectName());
+					if (managedObject != null) {
+						conn.setOfficeFloorManagedObjectFunctionDependency(functionDependency);
 						conn.setOfficeFloorManagedObject(managedObject);
 						conn.connect();
 					}
@@ -472,6 +492,14 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 		for (OfficeFloorManagedObjectModel managedObject : officeFloor.getOfficeFloorManagedObjects()) {
 			for (OfficeFloorManagedObjectSourceInputDependencyToOfficeFloorManagedObjectModel conn : managedObject
 					.getDependentOfficeFloorManagedObjectSourceInputs()) {
+				conn.setOfficeFloorManagedObjectName(managedObject.getOfficeFloorManagedObjectName());
+			}
+		}
+
+		// Specify function dependencies for OfficeFloor managed object sources
+		for (OfficeFloorManagedObjectModel managedObject : officeFloor.getOfficeFloorManagedObjects()) {
+			for (OfficeFloorManagedObjectSourceFunctionDependencyToOfficeFloorManagedObjectModel conn : managedObject
+					.getDependentOfficeFloorManagedObjectSourceFunctionDependencys()) {
 				conn.setOfficeFloorManagedObjectName(managedObject.getOfficeFloorManagedObjectName());
 			}
 		}

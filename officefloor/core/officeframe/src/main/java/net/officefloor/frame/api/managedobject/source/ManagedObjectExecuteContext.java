@@ -51,6 +51,46 @@ import net.officefloor.frame.internal.structure.ProcessState;
 public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 
 	/**
+	 * Registers a start up {@link Flow}.
+	 * 
+	 * @param key           Key identifying the {@link Flow} to instigate.
+	 * @param parameter     Parameter to first {@link ManagedFunction} of the
+	 *                      {@link Flow}.
+	 * @param managedObject {@link ManagedObject} for the {@link ProcessState} of
+	 *                      the {@link Flow}.
+	 * @param callback      {@link FlowCallback} on completion of the {@link Flow}.
+	 * @throws IllegalArgumentException If
+	 *                                  <ul>
+	 *                                  <li>unknown {@link Flow} key</li>
+	 *                                  <li>parameter is incorrect type</li>
+	 *                                  <li>no {@link ManagedObject} is
+	 *                                  supplied</li>
+	 *                                  </ul>
+	 */
+	void registerStartupProcess(F key, Object parameter, ManagedObject managedObject, FlowCallback callback)
+			throws IllegalArgumentException;
+
+	/**
+	 * Registers a start up {@link Flow}.
+	 * 
+	 * @param flowIndex     Index identifying the {@link Flow} to instigate.
+	 * @param parameter     Parameter to first {@link ManagedFunction} of the
+	 *                      {@link Flow}.
+	 * @param managedObject {@link ManagedObject} for the {@link ProcessState} of
+	 *                      the {@link Flow}.
+	 * @param callback      {@link FlowCallback} on completion of the {@link Flow}.
+	 * @throws IllegalArgumentException If
+	 *                                  <ul>
+	 *                                  <li>unknown {@link Flow} key</li>
+	 *                                  <li>parameter is incorrect type</li>
+	 *                                  <li>no {@link ManagedObject} is
+	 *                                  supplied</li>
+	 *                                  </ul>
+	 */
+	void registerStartupProcess(int flowIndex, Object parameter, ManagedObject managedObject, FlowCallback callback)
+			throws IllegalArgumentException;
+
+	/**
 	 * Instigates a {@link Flow}.
 	 * 
 	 * @param key           Key identifying the {@link Flow} to instigate.

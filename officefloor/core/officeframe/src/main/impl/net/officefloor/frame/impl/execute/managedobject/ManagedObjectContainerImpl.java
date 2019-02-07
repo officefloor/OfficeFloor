@@ -322,7 +322,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 			if (container.asynchronousStartTime != NO_ASYNC_OPERATION) {
 
 				// Determine if timed out
-				long idleTime = container.metaData.getOfficeClock().currentTimeMillis()
+				long idleTime = container.metaData.getMonitorClock().currentTimeMillis()
 						- container.asynchronousStartTime;
 				if (idleTime > container.metaData.getTimeout()) {
 
@@ -414,7 +414,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					container.isRequireThreadStateSafety = true;
 
 					// Record time that attempted to source the managed object
-					container.asynchronousStartTime = container.metaData.getOfficeClock().currentTimeMillis();
+					container.asynchronousStartTime = container.metaData.getMonitorClock().currentTimeMillis();
 
 					// Register on sourcing latch to proceed
 					return container.sourcingLatch.awaitOnAsset(this);
@@ -744,7 +744,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 					}
 
 					// Flag start of asynchronous operation
-					container.asynchronousStartTime = container.metaData.getOfficeClock().currentTimeMillis();
+					container.asynchronousStartTime = container.metaData.getMonitorClock().currentTimeMillis();
 					return null;
 
 				}
@@ -1099,7 +1099,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		if (this.asynchronousStartTime != NO_ASYNC_OPERATION) {
 
 			// Determine if asynchronous operation has timed out
-			long idleTime = this.metaData.getOfficeClock().currentTimeMillis() - this.asynchronousStartTime;
+			long idleTime = this.metaData.getMonitorClock().currentTimeMillis() - this.asynchronousStartTime;
 			if (idleTime > this.metaData.getTimeout()) {
 
 				// Obtain the time out failure

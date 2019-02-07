@@ -35,6 +35,7 @@ import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.ChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
+import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
@@ -246,8 +247,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 	/**
 	 * Records an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	 * @param issueDescription Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
 		this.issues.recordIssue(issueDescription);
@@ -256,10 +256,8 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 	/**
 	 * Records an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
+	 * @param issueDescription Description of the issue.
+	 * @param cause            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
 		this.issues.recordIssue(issueDescription, cause);
@@ -268,11 +266,9 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 	/**
 	 * Loads the {@link HttpSecuritySourceSpecification}.
 	 * 
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link HttpSecuritySourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param isExpectToLoad Flag indicating if expect to obtain the
+	 *                       {@link HttpSecuritySourceSpecification}.
+	 * @param propertyNames  Expected {@link Property} names for being returned.
 	 */
 	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
@@ -315,8 +311,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param specification
-		 *            {@link HttpSecuritySourceSpecification}.
+		 * @param specification {@link HttpSecuritySourceSpecification}.
 		 */
 		public static void reset(HttpSecuritySourceSpecification specification) {
 			specificationFailure = null;
@@ -346,9 +341,19 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		}
 
 		@Override
+		public void start(HttpSecurityExecuteContext<None> context) throws Exception {
+			fail("Should not be invoked for obtaining specification");
+		}
+
+		@Override
 		public HttpSecurity<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, None, None> sourceHttpSecurity(
 				HttpSecurityContext context) throws HttpException {
 			return this;
+		}
+
+		@Override
+		public void stop() {
+			fail("Should not be invoked for obtaining specification");
 		}
 
 		/*
@@ -369,7 +374,8 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		}
 
 		@Override
-		public void authenticate(HttpCredentials credentials, AuthenticateContext<HttpAccessControl, None> context) {
+		public void authenticate(HttpCredentials credentials,
+				AuthenticateContext<HttpAccessControl, None, None> context) {
 			fail("Should not be invoked for obtaining specification");
 		}
 
@@ -379,7 +385,7 @@ public class LoadHttpSecuritySourceSpecificationTest extends OfficeFrameTestCase
 		}
 
 		@Override
-		public void logout(LogoutContext<None> context) {
+		public void logout(LogoutContext<None, None> context) {
 			fail("Should not be invoked for obtaining specification");
 		}
 	}

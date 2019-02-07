@@ -49,6 +49,17 @@ public interface ManagedObjectType<D extends Enum<D>> {
 	ManagedObjectDependencyType<D>[] getDependencyTypes();
 
 	/**
+	 * Obtains the {@link ManagedObjectFunctionDependencyType} definitions of the
+	 * required dependencies of the added {@link ManagedFunction} instances of the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ManagedObjectFunctionDependencyType} definitions of the
+	 *         required dependencies of the added {@link ManagedFunction} instances
+	 *         of the {@link ManagedObjectSource}.
+	 */
+	ManagedObjectFunctionDependencyType[] getFunctionDependencyTypes();
+
+	/**
 	 * <p>
 	 * Indicates if the {@link ManagedObjectSource} may trigger a {@link Flow}.
 	 * <p>

@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.officefloor;
 
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
+import net.officefloor.frame.internal.structure.ManagedObjectExecuteManagerFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 
 /**
@@ -35,10 +35,10 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements Manag
 	private final ManagedObjectSource<?, F> managedObjectSource;
 
 	/**
-	 * {@link ManagedObjectExecuteContextFactory} for the
+	 * {@link ManagedObjectExecuteManagerFactory} for the
 	 * {@link ManagedObjectSource}.
 	 */
-	private final ManagedObjectExecuteContextFactory<F> managedObjectExecuteContextFactory;
+	private final ManagedObjectExecuteManagerFactory<F> managedObjectExecuteContextFactory;
 
 	/**
 	 * {@link ManagedObjectPool}.
@@ -51,13 +51,13 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements Manag
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource}.
 	 * @param managedObjectExecuteContextFactory
-	 *            {@link ManagedObjectExecuteContextFactory} for the
+	 *            {@link ManagedObjectExecuteManagerFactory} for the
 	 *            {@link ManagedObjectSource}.
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.
 	 */
 	public ManagedObjectSourceInstanceImpl(ManagedObjectSource<?, F> managedObjectSource,
-			ManagedObjectExecuteContextFactory<F> managedObjectExecuteContextFactory,
+			ManagedObjectExecuteManagerFactory<F> managedObjectExecuteContextFactory,
 			ManagedObjectPool managedObjectPool) {
 		this.managedObjectSource = managedObjectSource;
 		this.managedObjectExecuteContextFactory = managedObjectExecuteContextFactory;
@@ -74,7 +74,7 @@ public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements Manag
 	}
 
 	@Override
-	public ManagedObjectExecuteContextFactory<F> getManagedObjectExecuteContextFactory() {
+	public ManagedObjectExecuteManagerFactory<F> getManagedObjectExecuteManagerFactory() {
 		return this.managedObjectExecuteContextFactory;
 	}
 

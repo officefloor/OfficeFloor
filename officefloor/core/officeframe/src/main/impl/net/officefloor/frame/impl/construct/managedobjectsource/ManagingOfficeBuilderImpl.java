@@ -26,6 +26,7 @@ import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.impl.construct.managedfunction.ManagedFunctionReferenceImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
@@ -33,6 +34,7 @@ import net.officefloor.frame.internal.configuration.InputManagedObjectConfigurat
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectExecutionConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedObjectFunctionDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -55,6 +57,12 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 	 * {@link ManagedObject} to the {@link ProcessState}.
 	 */
 	private InputManagedObjectConfiguration<?> inputManagedObjectConfiguration = null;
+
+	/**
+	 * {@link ManagedObjectFunctionDependencyConfiguration} instances by
+	 * {@link ManagedObjectFunctionDependency} name.
+	 */
+	private final Map<String, ManagedObjectFunctionDependencyConfiguration> functionDependencies = new HashMap<>();
 
 	/**
 	 * {@link ManagedObjectFlowConfiguration} instances by their index.
@@ -86,6 +94,17 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 		DependencyMappingBuilderImpl<?> builder = new DependencyMappingBuilderImpl(inputManagedObjectName);
 		this.inputManagedObjectConfiguration = builder;
 		return builder;
+	}
+
+	@Override
+	public void mapFunctionDependency(String functionObjectName, String scopedManagedObjectName) {
+
+		// Create the dependency
+		ManagedObjectFunctionDependencyConfigurationImpl dependency = new ManagedObjectFunctionDependencyConfigurationImpl(
+				functionObjectName, scopedManagedObjectName);
+
+		// Map the dependency by function object name
+		this.functionDependencies.put(functionObjectName, dependency);
 	}
 
 	@Override
@@ -147,6 +166,11 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 	}
 
 	@Override
+	public ManagedObjectFunctionDependencyConfiguration[] getFunctionDependencyConfiguration() {
+		return this.functionDependencies.values().toArray(new ManagedObjectFunctionDependencyConfiguration[0]);
+	}
+
+	@Override
 	public ManagedObjectFlowConfiguration<F>[] getFlowConfiguration() {
 		return ConstructUtil.toArray(this.flows, new ManagedObjectFlowConfiguration[0]);
 	}
@@ -154,6 +178,49 @@ public class ManagingOfficeBuilderImpl<F extends Enum<F>>
 	@Override
 	public ManagedObjectExecutionConfiguration[] getExecutionConfiguration() {
 		return ConstructUtil.toArray(this.executions, new ManagedObjectExecutionConfiguration[0]);
+	}
+
+	/**
+	 * {@link ManagedObjectFunctionDependencyConfiguration} implementation.
+	 */
+	private class ManagedObjectFunctionDependencyConfigurationImpl
+			implements ManagedObjectFunctionDependencyConfiguration {
+
+		/**
+		 * Name of the {@link ManagedObjectFunctionDependency}.
+		 */
+		private final String functionObjectName;
+
+		/**
+		 * {@link ManagedObject} name.
+		 */
+		private final String managedObjectName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param functionObjectName Name of the
+		 *                           {@link ManagedObjectFunctionDependency}.
+		 * @param managedObjectName  {@link ManagedObject} name.
+		 */
+		private ManagedObjectFunctionDependencyConfigurationImpl(String functionObjectName, String managedObjectName) {
+			this.functionObjectName = functionObjectName;
+			this.managedObjectName = managedObjectName;
+		}
+
+		/*
+		 * ============= ManagedObjectFunctionDependencyConfiguration ================
+		 */
+
+		@Override
+		public String getFunctionObjectName() {
+			return this.functionObjectName;
+		}
+
+		@Override
+		public String getScopeManagedObjectName() {
+			return this.managedObjectName;
+		}
 	}
 
 	/**

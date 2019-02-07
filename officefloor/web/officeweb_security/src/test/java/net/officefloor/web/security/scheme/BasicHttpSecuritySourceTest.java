@@ -87,12 +87,12 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyFromSession() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				null);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>();
 		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 
 		// Load access control to session
-		ratifyContext.getSession().setAttribute("http.security.basic", accessControl);
+		ratifyContext.getSession().setAttribute(ratifyContext.getQualifiedAttributeName("http.security.basic"),
+				accessControl);
 
 		// Test
 		this.replayMockObjects();
@@ -137,8 +137,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyNoAuthentication() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				null);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 
 		// Test
 		this.replayMockObjects();
@@ -160,8 +159,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testChallenge() throws IOException {
 
-		final MockHttpChallengeContext<Dependencies, None> challengeContext = new MockHttpChallengeContext<Dependencies, None>(
-				this);
+		final MockHttpChallengeContext<Dependencies, None> challengeContext = new MockHttpChallengeContext<>();
 		challengeContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
 		// Test
@@ -259,8 +257,9 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<Dependencies>();
-		logoutContext.getSession().setAttribute("http.security.basic", this.createMock(HttpAccessControl.class));
+		final MockHttpLogoutContext<Dependencies, None> logoutContext = new MockHttpLogoutContext<>();
+		logoutContext.getSession().setAttribute(logoutContext.getQualifiedAttributeName("http.security.basic"),
+				this.createMock(HttpAccessControl.class));
 
 		// Create and initialise the security
 		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, Dependencies, None> security = HttpSecurityLoaderUtil
@@ -277,21 +276,19 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the authentication.
 	 * 
-	 * @param authorizationHttpHeaderValue
-	 *            <code>authorize</code> {@link HttpHeader} value.
-	 * @param isLoadSession
-	 *            Indicates if load {@link HttpSession} with access control.
-	 * @param userName
-	 *            User name if authenticated. <code>null</code> if not
-	 *            authenticated.
-	 * @param roles
-	 *            Expected roles.
+	 * @param authorizationHttpHeaderValue <code>authorize</code> {@link HttpHeader}
+	 *                                     value.
+	 * @param isLoadSession                Indicates if load {@link HttpSession}
+	 *                                     with access control.
+	 * @param userName                     User name if authenticated.
+	 *                                     <code>null</code> if not authenticated.
+	 * @param roles                        Expected roles.
 	 */
 	private void doAuthenticate(String authorizationHttpHeaderValue, boolean isLoadSession, String userName,
 			String... roles) {
 
 		// Create the mock authenticate context
-		MockHttpAuthenticateContext<HttpAccessControl, Dependencies> authenticationContext = new MockHttpAuthenticateContext<>(
+		MockHttpAuthenticateContext<HttpAccessControl, Dependencies, None> authenticationContext = new MockHttpAuthenticateContext<>(
 				authorizationHttpHeaderValue);
 		authenticationContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
@@ -311,7 +308,7 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Validate authentication
 		HttpAccessControl accessControl = authenticationContext.getAccessControl();
 		HttpAccessControl sessionAccessControl = (HttpAccessControl) authenticationContext.getSession()
-				.getAttribute("http.security.basic");
+				.getAttribute(authenticationContext.getQualifiedAttributeName("http.security.basic"));
 		if (userName == null) {
 			assertNull("Should not be authenticated", accessControl);
 			assertNull("Should not register HTTP Security with HTTP Session", sessionAccessControl);

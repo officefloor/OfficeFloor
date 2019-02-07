@@ -128,6 +128,28 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to obtain the path.
+	 */
+	public void testParamGetRoot() throws Exception {
+		MockHttpResponse response = this.service("GET", "{path}", MockParamSection.class, this.mockRequest("/"));
+		response.assertResponse(200, "/");
+	}
+
+	public static class MockParamSection {
+		public void service(ServerHttpConnection connection, @HttpPathParameter("path") String parameter)
+				throws IOException {
+			connection.getResponse().getEntityWriter().write(parameter);
+		}
+	}
+
+	/**
+	 * Ensure able to GET secure param root.
+	 */
+	public void testSecureParamGetRoot() throws Exception {
+		this.secureService("GET", "{path}", MockParamSection.class, "/", "/");
+	}
+
+	/**
 	 * Ensure sends 404 if resource not found.
 	 */
 	public void testResourceNotFound() throws Exception {

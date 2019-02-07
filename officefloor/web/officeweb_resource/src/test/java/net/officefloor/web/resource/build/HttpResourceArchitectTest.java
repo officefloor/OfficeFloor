@@ -31,9 +31,13 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.Qualified;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
@@ -44,6 +48,7 @@ import net.officefloor.web.resource.HttpResourceStore;
 import net.officefloor.web.resource.classpath.ClasspathResourceSystemService;
 import net.officefloor.web.resource.spi.ResourceSystemService;
 import net.officefloor.web.resource.spi.ResourceTransformerFactory;
+import net.officefloor.web.route.WebServicer;
 import net.officefloor.web.security.build.HttpSecurableBuilder;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
@@ -79,10 +84,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.compile.officeFloor((context) -> {
-			this.server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
-					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-		});
+		this.compile.mockHttpServer((server) -> this.server = server);
 	}
 
 	@Override
@@ -403,6 +405,43 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure propagates method not allowed via {@link WebServicer}.
+	 */
+	public void testPropagateNotAllowedMethod() throws Exception {
+		this.compile((context, resource) -> {
+
+			// Ensure resource
+			resource.addHttpResources(new ClasspathResourceSystemService(), "PUBLIC");
+
+			// Provide route
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
+			HttpUrlContinuation input = web.getHttpInput(false, "/path");
+			OfficeSection section = context.getOfficeArchitect().addOfficeSection("servicer",
+					ClassSectionSource.class.getName(), NotAllowedMethodServicer.class.getName());
+			office.link(input.getInput(), section.getOfficeSectionInput("service"));
+		});
+
+		// Ensure obtain resource (so have chained handler)
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/resource.html"));
+		response.assertResponse(200, "TEST RESOURCE");
+
+		// Ensure can get configured resource
+		response = this.server.send(MockHttpServer.mockRequest("/path"));
+		response.assertResponse(200, "SERVICED");
+
+		// Ensure pass through web servicer (for METHOD NOT ALLOWED)
+		response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST));
+		response.assertResponse(HttpStatus.METHOD_NOT_ALLOWED.getStatusCode(), "", "allow", "GET, HEAD, OPTIONS");
+	}
+
+	public static class NotAllowedMethodServicer {
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("SERVICED");
+		}
+	}
+
+	/**
 	 * Initialises the {@link HttpResourceArchitect}.
 	 */
 	private static interface Initialiser {
@@ -410,10 +449,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 		/**
 		 * Initialises the {@link HttpResourceArchitect}.
 		 * 
-		 * @param context
-		 *            {@link CompileWebContext}.
-		 * @param resource
-		 *            {@link HttpResourceArchitect}.
+		 * @param context  {@link CompileWebContext}.
+		 * @param resource {@link HttpResourceArchitect}.
 		 */
 		void initialise(CompileWebContext context, HttpResourceArchitect resource);
 	}
@@ -421,8 +458,7 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Compiles with the {@link Initialiser}.
 	 * 
-	 * @param initialiser
-	 *            {@link Initialiser}.
+	 * @param initialiser {@link Initialiser}.
 	 */
 	private void compile(Initialiser initialiser) throws Exception {
 		this.compile.web((context) -> {
@@ -441,10 +477,8 @@ public class HttpResourceArchitectTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure issue with compiling.
 	 * 
-	 * @param issueRecorder
-	 *            Records the {@link CompilerIssue}.
-	 * @param initialiser
-	 *            {@link Initialiser}.
+	 * @param issueRecorder Records the {@link CompilerIssue}.
+	 * @param initialiser   {@link Initialiser}.
 	 */
 	private void issue(Consumer<MockCompilerIssues> issueRecorder, Initialiser initialiser) throws Exception {
 

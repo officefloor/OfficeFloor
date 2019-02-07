@@ -38,6 +38,7 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.test.MockClockFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.change.Change;
 import net.officefloor.web.build.WebArchitect;
@@ -347,7 +348,7 @@ public class WoofTemplateExtensionLoaderUtil {
 		}
 
 		// Return the source context
-		return new SourceContextImpl(false, classLoader, resourceSources);
+		return new SourceContextImpl(false, classLoader, new MockClockFactory(), resourceSources);
 	}
 
 	/**

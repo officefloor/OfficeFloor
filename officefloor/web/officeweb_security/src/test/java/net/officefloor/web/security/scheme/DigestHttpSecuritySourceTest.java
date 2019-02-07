@@ -105,12 +105,12 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyFromSession() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				null);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 		final HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
 
 		// Load access control to session
-		ratifyContext.getSession().setAttribute("http.security.digest", accessControl);
+		ratifyContext.getSession().setAttribute(ratifyContext.getQualifiedAttributeName("http.security.digest"),
+				accessControl);
 
 		// Test
 		this.replayMockObjects();
@@ -133,7 +133,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyWithAuthorizationHeader() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<>(
 				"Digest credentials");
 
 		// Test
@@ -157,8 +157,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testRatifyNoAuthentication() throws IOException {
 
-		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<HttpAccessControl>(
-				null);
+		final MockHttpRatifyContext<HttpAccessControl> ratifyContext = new MockHttpRatifyContext<>();
 
 		// Test
 		this.replayMockObjects();
@@ -191,8 +190,8 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		ServerHttpConnection connection = MockHttpServer.mockConnection(request);
 
 		// Create challenge context
-		final MockHttpChallengeContext<Dependencies, None> challengeContext = new MockHttpChallengeContext<Dependencies, None>(
-				connection, this);
+		final MockHttpChallengeContext<Dependencies, None> challengeContext = new MockHttpChallengeContext<>(
+				connection);
 		challengeContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
 		// Mock
@@ -230,8 +229,8 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 				challengeContext.getChallenge());
 
 		// Ensure loaded security store
-		assertNotNull("Should have security store",
-				session.getAttribute("#" + DigestHttpSecuritySource.class.getName() + "#"));
+		assertNotNull("Should have security store", session.getAttribute(
+				challengeContext.getQualifiedAttributeName("#" + DigestHttpSecuritySource.class.getName() + "#")));
 	}
 
 	/**
@@ -265,7 +264,8 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 				+ " opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"", "Mufasa", (context) -> {
 
 					// Load session with digest session key
-					context.getSession().setAttribute(DigestHttpSecuritySource.SECURITY_STATE_SESSION_KEY,
+					context.getSession().setAttribute(
+							context.getQualifiedAttributeName(DigestHttpSecuritySource.SECURITY_STATE_SESSION_KEY),
 							DigestHttpSecuritySource.Mock.MOCK_SECURITY_STATE);
 
 					// Mock values
@@ -285,7 +285,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLogout() throws Exception {
 
-		final MockHttpLogoutContext<Dependencies> logoutContext = new MockHttpLogoutContext<Dependencies>();
+		final MockHttpLogoutContext<Dependencies, None> logoutContext = new MockHttpLogoutContext<>();
 		logoutContext.getSession().setAttribute("http.security.digest", this.createMock(HttpAccessControl.class));
 
 		// Replay mock objects
@@ -303,16 +303,15 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure clear session
-		assertNull("Should clear access control", logoutContext.getSession().getAttribute("http.security.digest"));
+		assertNull("Should clear access control", logoutContext.getSession()
+				.getAttribute(logoutContext.getQualifiedAttributeName("http.security.digest")));
 	}
 
 	/**
 	 * Creates the digest.
 	 * 
-	 * @param algorithm
-	 *            Algorithm.
-	 * @param values
-	 *            Values to load into the digest.
+	 * @param algorithm Algorithm.
+	 * @param values    Values to load into the digest.
 	 * @return Digest.
 	 */
 	private byte[] createDigest(String algorithm, String... values) {
@@ -343,22 +342,19 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the authentication.
 	 * 
-	 * @param authorizationHttpHeaderValue
-	 *            <code>Authenticate</code> {@link HttpHeader} value.
-	 * @param userName
-	 *            User name if authenticated. <code>null</code> if not
-	 *            authenticated.
-	 * @param initialiser
-	 *            Initialiser.
-	 * @param roles
-	 *            Expected roles.
+	 * @param authorizationHttpHeaderValue <code>Authenticate</code>
+	 *                                     {@link HttpHeader} value.
+	 * @param userName                     User name if authenticated.
+	 *                                     <code>null</code> if not authenticated.
+	 * @param initialiser                  Initialiser.
+	 * @param roles                        Expected roles.
 	 */
 	private void doAuthenticate(String authorizationHttpHeaderValue, String userName,
-			Consumer<MockHttpAuthenticateContext<HttpAccessControl, Dependencies>> initialiser, String... roles)
+			Consumer<MockHttpAuthenticateContext<HttpAccessControl, Dependencies, None>> initialiser, String... roles)
 			throws IOException {
 
 		// Create the authenticate context
-		MockHttpAuthenticateContext<HttpAccessControl, Dependencies> authenticationContext = new MockHttpAuthenticateContext<HttpAccessControl, Dependencies>(
+		MockHttpAuthenticateContext<HttpAccessControl, Dependencies, None> authenticationContext = new MockHttpAuthenticateContext<>(
 				authorizationHttpHeaderValue);
 		authenticationContext.registerObject(Dependencies.CREDENTIAL_STORE, this.store);
 
@@ -384,7 +380,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 		// Validate authentication
 		HttpAccessControl accessControl = authenticationContext.getAccessControl();
 		HttpAccessControl sessionAccessControl = (HttpAccessControl) authenticationContext.getSession()
-				.getAttribute("http.security.digest");
+				.getAttribute(authenticationContext.getQualifiedAttributeName("http.security.digest"));
 		if (userName == null) {
 			assertNull("Should not be authenticated", accessControl);
 			assertNull("Should not load session", sessionAccessControl);
@@ -401,8 +397,7 @@ public class DigestHttpSecuritySourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link DigestHttpSecuritySource} for testing to provide consistent
-	 * values.
+	 * {@link DigestHttpSecuritySource} for testing to provide consistent values.
 	 */
 	public static class MockDigestHttpSecuritySource extends DigestHttpSecuritySource {
 

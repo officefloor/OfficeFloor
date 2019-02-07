@@ -206,6 +206,16 @@ public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObj
 			CompileContext compileContext);
 
 	/**
+	 * Auto-wires the function dependencies for this {@link ManagedObjectSource}.
+	 * 
+	 * @param autoWirer      {@link AutoWirer}.
+	 * @param office         {@link OfficeNode} requiring the auto-wiring.
+	 * @param compileContext {@link CompileContext}.
+	 */
+	void autoWireFunctionDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office,
+			CompileContext compileContext);
+
+	/**
 	 * Auto-wires the {@link Team} instances for this {@link ManagedObjectSource}.
 	 * 
 	 * @param autoWirer      {@link AutoWirer}.

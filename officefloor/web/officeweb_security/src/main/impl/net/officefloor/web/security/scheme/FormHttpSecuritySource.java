@@ -25,15 +25,15 @@ import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.store.CredentialStore;
 import net.officefloor.web.security.store.CredentialStoreUtil;
 import net.officefloor.web.session.HttpSession;
-import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.AuthenticateContext;
+import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.ChallengeContext;
-import net.officefloor.web.spi.security.LogoutContext;
-import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
+import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
 
 /**
@@ -81,17 +81,13 @@ public class FormHttpSecuritySource extends
 	 * This is separated out so that may be overridden to provide differing means
 	 * for authentication.
 	 * 
-	 * @param userId
-	 *            Identifier for the user.
-	 * @param realm
-	 *            Security realm.
-	 * @param password
-	 *            Password.
-	 * @param store
-	 *            {@link CredentialStore}.
+	 * @param userId   Identifier for the user.
+	 * @param realm    Security realm.
+	 * @param password Password.
+	 * @param store    {@link CredentialStore}.
 	 * @return {@link HttpAccessControl} or <code>null</code> if not authenticated.
-	 * @throws HttpException
-	 *             If fails communication with the {@link CredentialStore}.
+	 * @throws HttpException If fails communication with the
+	 *                       {@link CredentialStore}.
 	 */
 	protected HttpAccessControl authenticate(String userId, String realm, byte[] password, CredentialStore store)
 			throws HttpException {
@@ -136,7 +132,7 @@ public class FormHttpSecuritySource extends
 	/**
 	 * Form {@link HttpSecurity}.
 	 */
-	public class FormHttpSecurity implements
+	private class FormHttpSecurity implements
 			HttpSecurity<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, Dependencies, Flows> {
 
 		/**
@@ -147,8 +143,7 @@ public class FormHttpSecuritySource extends
 		/**
 		 * Instantiate.
 		 * 
-		 * @param realm
-		 *            Realm.
+		 * @param realm Realm.
 		 */
 		private FormHttpSecurity(String realm) {
 			this.realm = realm;
@@ -172,7 +167,7 @@ public class FormHttpSecuritySource extends
 
 			// Attempt to obtain from session
 			HttpAccessControl accessControl = (HttpAccessControl) context.getSession()
-					.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+					.getAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY));
 			if (accessControl != null) {
 				// Load the access control and no need to authenticate
 				context.accessControlChange(accessControl, null);
@@ -190,7 +185,7 @@ public class FormHttpSecuritySource extends
 
 		@Override
 		public void authenticate(HttpCredentials credentials,
-				AuthenticateContext<HttpAccessControl, Dependencies> context) throws HttpException {
+				AuthenticateContext<HttpAccessControl, Dependencies, Flows> context) throws HttpException {
 
 			// Obtain the session
 			HttpSession session = context.getSession();
@@ -221,7 +216,7 @@ public class FormHttpSecuritySource extends
 			}
 
 			// Remember access control for further requests
-			session.setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
+			session.setAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY), accessControl);
 
 			// Return the access control
 			context.accessControlChange(accessControl, null);
@@ -231,17 +226,17 @@ public class FormHttpSecuritySource extends
 		public void challenge(ChallengeContext<Dependencies, Flows> context) throws HttpException {
 
 			// Trigger flow for login page
-			context.doFlow(Flows.FORM_LOGIN_PAGE);
+			context.doFlow(Flows.FORM_LOGIN_PAGE, null, null);
 		}
 
 		@Override
-		public void logout(LogoutContext<Dependencies> context) throws HttpException {
+		public void logout(LogoutContext<Dependencies, Flows> context) throws HttpException {
 
 			// Obtain the session
 			HttpSession session = context.getSession();
 
 			// Forget HTTP Security for further requests (requires login again)
-			session.removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+			session.removeAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY));
 		}
 	}
 

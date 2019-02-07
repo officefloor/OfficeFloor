@@ -23,7 +23,10 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
+import java.util.function.Function;
 
+import net.officefloor.frame.api.clock.Clock;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.source.LoadServiceError;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.ServiceContext;
@@ -48,30 +51,26 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	private final SourceContext delegate;
 
 	/**
-	 * Initiate the raw {@link SourceContext} to seed other
-	 * {@link SourceContext} instances.
+	 * Initiate the raw {@link SourceContext} to seed other {@link SourceContext}
+	 * instances.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param resourceSources
-	 *            {@link ResourceSource} instances.
+	 * @param isLoadingType   Indicates if loading type.
+	 * @param classLoader     {@link ClassLoader}.
+	 * @param clockFactory    {@link ClockFactory}.
+	 * @param resourceSources {@link ResourceSource} instances.
 	 */
-	public SourceContextImpl(boolean isLoadingType, ClassLoader classLoader, ResourceSource... resourceSources) {
-		this.delegate = new DelegateSourceContext(isLoadingType, classLoader, resourceSources);
+	public SourceContextImpl(boolean isLoadingType, ClassLoader classLoader, ClockFactory clockFactory,
+			ResourceSource... resourceSources) {
+		this.delegate = new DelegateSourceContext(isLoadingType, classLoader, clockFactory, resourceSources);
 	}
 
 	/**
 	 * Initiate specific {@link SourceContext} with necessary
 	 * {@link SourceProperties}.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param delegate
-	 *            Delegate {@link SourceContext}.
-	 * @param sourceProperties
-	 *            {@link SourceProperties}.
+	 * @param isLoadingType    Indicates if loading type.
+	 * @param delegate         Delegate {@link SourceContext}.
+	 * @param sourceProperties {@link SourceProperties}.
 	 */
 	public SourceContextImpl(boolean isLoadingType, SourceContext delegate, SourceProperties sourceProperties) {
 		super(sourceProperties);
@@ -131,6 +130,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	}
 
 	@Override
+	public <T> Clock<T> getClock(Function<Long, T> translator) {
+		return this.delegate.getClock(translator);
+	}
+
+	@Override
 	public ClassLoader getClassLoader() {
 		return this.delegate.getClassLoader();
 	}
@@ -153,10 +157,8 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		/**
 		 * Initiate.
 		 * 
-		 * @param isLoadingType
-		 *            Indicates if loading type.
-		 * @param delegate
-		 *            Delegate {@link SourceContext}.
+		 * @param isLoadingType Indicates if loading type.
+		 * @param delegate      Delegate {@link SourceContext}.
 		 */
 		public DelegateWrapSourceContext(boolean isLoadingType, SourceContext delegate) {
 			this.isLoadingType = isLoadingType;
@@ -213,6 +215,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		}
 
 		@Override
+		public <T> Clock<T> getClock(Function<Long, T> translator) {
+			return this.delegate.getClock(translator);
+		}
+
+		@Override
 		public ClassLoader getClassLoader() {
 			return this.delegate.getClassLoader();
 		}
@@ -258,6 +265,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		private final ClassLoader classLoader;
 
 		/**
+		 * {@link ClockFactory}.
+		 */
+		private final ClockFactory clockFactory;
+
+		/**
 		 * {@link ResourceSource} instances.
 		 */
 		private final ResourceSource[] resourceSources;
@@ -265,16 +277,16 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		/**
 		 * Initiate.
 		 * 
-		 * @param isLoadingType
-		 *            Indicates if loading type.
-		 * @param classLoader
-		 *            {@link ClassLoader}.
-		 * @param resourceSources
-		 *            {@link ResourceSource} instances.
+		 * @param isLoadingType   Indicates if loading type.
+		 * @param classLoader     {@link ClassLoader}.
+		 * @param clockFactory    {@link ClockFactory}.
+		 * @param resourceSources {@link ResourceSource} instances.
 		 */
-		public DelegateSourceContext(boolean isLoadingType, ClassLoader classLoader, ResourceSource[] resourceSources) {
+		public DelegateSourceContext(boolean isLoadingType, ClassLoader classLoader, ClockFactory clockFactory,
+				ResourceSource[] resourceSources) {
 			this.isLoadingType = isLoadingType;
 			this.classLoader = classLoader;
+			this.clockFactory = clockFactory;
 			this.resourceSources = resourceSources;
 		}
 
@@ -420,12 +432,16 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		/**
 		 * Loads the {@link Iterator} over the {@link ServiceFactory} instances.
 		 * 
-		 * @param serviceFactoryType
-		 *            Type of {@link ServiceFactory}.
+		 * @param serviceFactoryType Type of {@link ServiceFactory}.
 		 * @return {@link Iterator} over the {@link ServiceFactory} instances.
 		 */
 		private <S, F extends ServiceFactory<S>> Iterator<F> loadServiceFactories(Class<F> serviceFactoryType) {
 			return ServiceLoader.load(serviceFactoryType, this.classLoader).iterator();
+		}
+
+		@Override
+		public <T> Clock<T> getClock(Function<Long, T> translator) {
+			return this.clockFactory.createClock(translator);
 		}
 
 		@Override
@@ -437,10 +453,9 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	/**
 	 * Loads the next service from the {@link Iterator}.
 	 * 
-	 * @param serviceFactories
-	 *            {@link Iterator} over the {@link ServiceFactory} instances.
-	 * @param serviceContext
-	 *            {@link ServiceContext}.
+	 * @param serviceFactories {@link Iterator} over the {@link ServiceFactory}
+	 *                         instances.
+	 * @param serviceContext   {@link ServiceContext}.
 	 * @return Next service.
 	 */
 	private static <S, F extends ServiceFactory<S>> S nextService(Iterator<F> serviceFactories,
@@ -462,10 +477,8 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	/**
 	 * Creates the service from the {@link ServiceFactory}.
 	 * 
-	 * @param serviceFactory
-	 *            {@link ServiceFactory}.
-	 * @param serviceContext
-	 *            {@link ServiceContext}.
+	 * @param serviceFactory {@link ServiceFactory}.
+	 * @param serviceContext {@link ServiceContext}.
 	 * @return Service.
 	 */
 	private static <S> S createService(ServiceFactory<S> serviceFactory, ServiceContext serviceContext) {
@@ -517,13 +530,10 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		/**
 		 * Instantiate.
 		 * 
-		 * @param serviceFactories
-		 *            {@link Iterator} over the {@link ServiceFactory}
-		 *            instances.
-		 * @param serviceFactoryType
-		 *            Type of {@link ServiceFactory}.
-		 * @param serviceContext
-		 *            {@link ServiceContext}.
+		 * @param serviceFactories   {@link Iterator} over the {@link ServiceFactory}
+		 *                           instances.
+		 * @param serviceFactoryType Type of {@link ServiceFactory}.
+		 * @param serviceContext     {@link ServiceContext}.
 		 */
 		private ServiceIterator(Iterator<F> serviceFactories, Class<F> serviceFactoryType,
 				ServiceContext serviceContext) {
@@ -565,10 +575,8 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		/**
 		 * Instantiate.
 		 * 
-		 * @param defaultServiceFactory
-		 *            Default {@link ServiceFactory}.
-		 * @param serviceContext
-		 *            {@link ServiceContext}.
+		 * @param defaultServiceFactory Default {@link ServiceFactory}.
+		 * @param serviceContext        {@link ServiceContext}.
 		 */
 		private DefaultServiceIterator(F defaultServiceFactory, ServiceContext serviceContext) {
 			this.defaultServiceFactory = defaultServiceFactory;

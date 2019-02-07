@@ -30,8 +30,6 @@ import net.officefloor.server.RequestServicerFactory;
 import net.officefloor.server.ResponseWriter;
 import net.officefloor.server.SocketServicer;
 import net.officefloor.server.SocketServicerFactory;
-import net.officefloor.server.http.impl.DateHttpHeaderClock;
-import net.officefloor.server.http.impl.HttpResponseWriter;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.parse.HttpRequestParser;

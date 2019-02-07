@@ -17,7 +17,10 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -30,11 +33,11 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectExecuteManager;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -131,8 +134,10 @@ public class OfficeFloorImpl implements OfficeFloor {
 		}
 
 		// Start the managed object source instances
+		List<Runnable> managedObjectSourceStartupProcesses = new LinkedList<>();
 		for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData.getManagedObjectSourceInstances()) {
-			this.startManagedObjectSourceInstance(mosInstance);
+			Runnable[] startupProcesses = this.startManagedObjectSourceInstance(mosInstance);
+			managedObjectSourceStartupProcesses.addAll(Arrays.asList(startupProcesses));
 		}
 
 		// Start the office managers
@@ -143,6 +148,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 		// Start the teams working within the offices
 		for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
 			teamManagement.getTeam().startWorking();
+		}
+
+		// Invoke the managed object source startup processes
+		for (Runnable startupProcess : managedObjectSourceStartupProcesses) {
+			startupProcess.run();
 		}
 
 		// Invoke the startup functions for each office
@@ -176,18 +186,22 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * Starts the {@link ManagedObjectSourceInstance}.
 	 * 
 	 * @param mosInstance {@link ManagedObjectSourceInstance}.
+	 * @return {@link Runnable} instances to invoke once ready to process.
 	 * @throws Exception If fails to start the {@link ManagedObjectSourceInstance}.
 	 */
-	private <F extends Enum<F>> void startManagedObjectSourceInstance(ManagedObjectSourceInstance<F> mosInstance)
+	private <F extends Enum<F>> Runnable[] startManagedObjectSourceInstance(ManagedObjectSourceInstance<F> mosInstance)
 			throws Exception {
 
 		// Obtain the managed object source
 		ManagedObjectSource<?, F> mos = mosInstance.getManagedObjectSource();
 
 		// Start the managed object source
-		ManagedObjectExecuteContext<F> executeContext = mosInstance.getManagedObjectExecuteContextFactory()
-				.createManagedObjectExecuteContext();
-		mos.start(executeContext);
+		ManagedObjectExecuteManager<F> executeManager = mosInstance.getManagedObjectExecuteManagerFactory()
+				.createManagedObjectExecuteManager();
+		mos.start(executeManager.getManagedObjectExecuteContext());
+
+		// Flag start completed and return further startup executions
+		return executeManager.startComplete();
 	}
 
 	/*

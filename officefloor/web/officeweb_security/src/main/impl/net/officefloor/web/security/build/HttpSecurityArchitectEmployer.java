@@ -39,6 +39,7 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -54,6 +55,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.internal.structure.Flow;
@@ -81,18 +83,24 @@ import net.officefloor.web.security.impl.HttpAccessControlManagedObjectSource;
 import net.officefloor.web.security.impl.HttpAuthenticationManagedObjectSource;
 import net.officefloor.web.security.impl.HttpChallengeContextManagedObjectSource;
 import net.officefloor.web.security.impl.HttpSecurityConfiguration;
+import net.officefloor.web.security.impl.HttpSecurityExecuteManagedObjectSource;
 import net.officefloor.web.security.impl.HttpSecuritySectionSource;
 import net.officefloor.web.security.scheme.AnonymousHttpSecuritySource;
 import net.officefloor.web.security.section.HttpFlowSecurerManagedFunction;
 import net.officefloor.web.security.section.HttpFlowSecurerManagedFunction.Flows;
+import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityLoader;
 import net.officefloor.web.security.type.HttpSecurityLoaderImpl;
+import net.officefloor.web.security.type.HttpSecuritySupportingManagedObjectDependencyContext;
+import net.officefloor.web.security.type.HttpSecuritySupportingManagedObjectDependencyType;
+import net.officefloor.web.security.type.HttpSecuritySupportingManagedObjectType;
 import net.officefloor.web.security.type.HttpSecurityType;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.HttpChallengeContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.HttpSecuritySupportingManagedObject;
 
 /**
  * Employs the {@link HttpSecurityArchitect}.
@@ -678,6 +686,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		private List<String> contentTypes = new LinkedList<>();
 
 		/**
+		 * {@link Flow} key {@link Enum} {@link Class}.
+		 */
+		private Class<F> flowKeys;
+
+		/**
 		 * {@link HttpSecurityType}.
 		 */
 		private HttpSecurityType<A, AC, C, O, F> type;
@@ -719,6 +732,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		 * 
 		 * @param httpChallengeContext {@link HttpChallengeContext}.
 		 */
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void build(OfficeManagedObject httpChallengeContext) {
 
 			// Create the HTTP Security loader
@@ -727,6 +741,18 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 			// Load the security type
 			this.type = loader.loadHttpSecurityType(this.source, this.properties);
+
+			// Load the flow keys
+			HttpSecurityFlowType<?>[] flowTypes = this.type.getFlowTypes();
+			if (flowTypes.length > 0) {
+				// Determine from key
+				Enum<?> flowKey = flowTypes[0].getKey();
+				this.flowKeys = (Class) ((flowKey != null) ? flowKey.getClass() : Indexed.class);
+			} else {
+				// No flows
+				this.flowKeys = (Class) None.class;
+
+			}
 
 			// Load the security
 			this.security = this.source.sourceHttpSecurity(this);
@@ -809,16 +835,112 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 					authenticationContext);
 			office.link(this.section.getOfficeSectionObject("AccessControl"), accessControl);
 
+			// Wire up the execution start/stop
+			String executionName = this.name + "_HttpSecurityExecuteContext";
+			OfficeManagedObjectSource executeMos = office.addOfficeManagedObjectSource(executionName,
+					new HttpSecurityExecuteManagedObjectSource<>(this.source, this.type));
+			executeMos.addOfficeManagedObject(executionName, ManagedObjectScope.PROCESS);
+			for (HttpSecurityFlowType<?> flowType : this.type.getFlowTypes()) {
+				office.link(executeMos.getOfficeManagedObjectFlow(flowType.getKey().name()), this.section
+						.getOfficeSectionInput(HttpSecuritySectionSource.INPUT_FLOW_PREFIX + flowType.getFlowName()));
+			}
+
 			// Provide application credentials linking
 			Class<C> credentialsType = this.type.getCredentialsType();
 			if (credentialsType != null) {
 				HttpSecurityArchitectEmployer.this.webArchitect
 						.reroute(this.section.getOfficeSectionOutput(HttpSecuritySectionSource.OUTPUT_RECONTINUE));
 			}
+
+			// Provide the supporting managed objects
+			Map<HttpSecuritySupportingManagedObjectType, OfficeManagedObject> dependencies = new HashMap<>();
+			for (HttpSecuritySupportingManagedObjectType supportingManagedObjectType : this.type
+					.getSupportingManagedObjectTypes()) {
+
+				// Add the supporting managed object source
+				String supportingManagedObjectName = this.name + "_SupportingManagedObject_"
+						+ supportingManagedObjectType.getSupportingManagedObjectName();
+				OfficeManagedObjectSource supportingManagedObjectSource = office.addOfficeManagedObjectSource(
+						supportingManagedObjectName, supportingManagedObjectType.getManagedObjectSource());
+				supportingManagedObjectType.getProperties().configureProperties(supportingManagedObjectSource);
+
+				// Add the supporting managed object
+				ManagedObjectScope supportingManagedObjectScope = supportingManagedObjectType.getManagedObjectScope();
+				OfficeManagedObject supportingManagedObject = supportingManagedObjectSource
+						.addOfficeManagedObject(supportingManagedObjectName, supportingManagedObjectScope);
+				if (isRequireTypeQualification) {
+					supportingManagedObject.addTypeQualification(this.name,
+							supportingManagedObjectType.getObjectType().getName());
+				}
+
+				// Register the dependency
+				dependencies.put(supportingManagedObjectType, supportingManagedObject);
+			}
+
+			// Create the dependency context
+			HttpSecuritySupportingManagedObjectDependencyContext dependencyContext = new HttpSecuritySupportingManagedObjectDependencyContext() {
+
+				@Override
+				public OfficeManagedObject getAuthentication() {
+					return authentication;
+				}
+
+				@Override
+				public OfficeManagedObject getHttpAuthentication() {
+					return HttpSecurityBuilderImpl.this.httpAuthentication;
+				}
+
+				@Override
+				public OfficeManagedObject getAccessControl() {
+					return accessControl;
+				}
+
+				@Override
+				public OfficeManagedObject getHttpAccessControl() {
+					return HttpSecurityBuilderImpl.this.httpAccessControl;
+				}
+
+				@Override
+				public OfficeManagedObject getSupportingManagedObject(
+						HttpSecuritySupportingManagedObject<?> supportingManagedObject) {
+					HttpSecuritySupportingManagedObjectType type = (HttpSecuritySupportingManagedObjectType) supportingManagedObject;
+					return dependencies.get(type);
+				}
+			};
+
+			// Link the dependencies
+			for (HttpSecuritySupportingManagedObjectType supportingManagedObjectType : this.type
+					.getSupportingManagedObjectTypes()) {
+
+				// Obtain the managed object
+				OfficeManagedObject managedObject = dependencies.get(supportingManagedObjectType);
+
+				// Link the dependencies
+				NEXT_DEPENDENCY: for (HttpSecuritySupportingManagedObjectDependencyType<?> dependencyType : supportingManagedObjectType
+						.getDependencyTypes()) {
+
+					// Obtain the dependency
+					String dependencyName = dependencyType.getKey().name();
+					OfficeManagedObjectDependency dependency = managedObject
+							.getOfficeManagedObjectDependency(dependencyName);
+
+					// Obtain the dependency to link
+					OfficeManagedObject dependent = dependencyType.getOfficeManagedObject(dependencyContext);
+					if (dependent == null) {
+						HttpSecurityArchitectEmployer.this.officeArchitect
+								.addIssue("No dependency for " + dependencyName + " of supporting object "
+										+ supportingManagedObjectType.getSupportingManagedObjectName());
+						continue NEXT_DEPENDENCY;
+					}
+
+					// Link the dependency
+					HttpSecurityArchitectEmployer.this.officeArchitect.link(dependency, dependent);
+				}
+			}
 		}
 
 		/*
-		 * ================== HttpSecurityBuiler =======================
+		 * ================== HttpSecurityBuilder =======================
 		 */
 
 		@Override
@@ -862,8 +984,18 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		 */
 
 		@Override
+		public String getHttpSecurityName() {
+			return this.name;
+		}
+
+		@Override
 		public HttpSecurity<A, AC, C, O, F> getHttpSecurity() {
 			return this.security;
+		}
+
+		@Override
+		public Class<F> getFlowKeyClass() {
+			return this.flowKeys;
 		}
 
 		@Override

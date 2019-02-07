@@ -37,6 +37,7 @@ import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
+import net.officefloor.compile.internal.structure.ManagedObjectFunctionDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -227,6 +228,19 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		ManagedObjectDependencyNode node = this
 				.doTest(() -> this.context.createManagedObjectDependencyNode("DEPENDENCY", mos));
 		assertNode(node, "DEPENDENCY", "Managed Object Dependency", null, mos);
+		assertEquals("Incorrect managed object dependency name", "DEPENDENCY", node.getManagedObjectDependencyName());
+		assertInitialise(node, (n) -> n.initialise());
+	}
+
+	/*
+	 * Ensure create {@link ManagedObjectFunctionDependencyNode} for a {@link
+	 * ManagedObjectSource}.
+	 */
+	public void testCreateManagedObjectFunctionDependencyNode() {
+		ManagedObjectSourceNode mos = this.createMock(ManagedObjectSourceNode.class);
+		ManagedObjectFunctionDependencyNode node = this
+				.doTest(() -> this.context.createManagedObjectFunctionDependencyNode("DEPENDENCY", mos));
+		assertNode(node, "DEPENDENCY", "Managed Object Function Dependency", null, mos);
 		assertEquals("Incorrect managed object dependency name", "DEPENDENCY", node.getManagedObjectDependencyName());
 		assertInitialise(node, (n) -> n.initialise());
 	}

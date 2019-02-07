@@ -1,0 +1,57 @@
+                                               -----------------------
+                                             Servlet Container Integration 
+                                               -----------------------
+					        Daniel Sagenschneider
+                                               -----------------------
+
+  <<Servlet Container Tutorial>>
+
+  This tutorial demonstrates the ease of embedding a WoOF application into a Servlet container.  This is typically necessary to run with PaaS Cloud providers.
+  
+  The tutorial will demonstrate this with a simple increment service. 
+  
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/HttpServletHttpServer/${projectVersion}/HttpServletHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Configuring for Servlet container
+
+  To run within a Servlet container, add the following dependency:
+  
+%{snippet|id=dependency|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  Then package the application as a <<<war>>> to enable being deployed to Servlet container.
+  
+  Note that WoOF will run as a <<<Filter>>> and only intercept requests it can handle.  This means existing Servlet functionality can work side by side with WoOF.  Very useful for phased migration of existing Servlet applications to WoOF.
+
+
+
+Integration Test
+
+  The following integration test has the project started as follows:
+  
+%{snippet|id=run|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  This will allow the following integration test to call the WoOF application within the Servlet container to increment the value:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/httpservlet/OfficeFloorFilterIT.java|ignoreDownloadError=false}
+
+  
+
+Now your turn
+
+  Should you have worked through all the tutorials, you are now ready to:
+
+   [[1]] Prototype your applications with OfficeFloor
+  
+   [[1]] Easily transform prototypes into working applications with OfficeFloor
+  
+   [[1]] Easily test your applications built with OfficeFloor
+  
+   [[1]] With graphical configuration, easily refactor your applications built with OfficeFloor
+  
+   [[1]] Tune your applications (via Thread Injection provided by OfficeFloor)
+  
+   [[1]] Deploy your applications with OfficeFloor
+
+  Return to the {{{../index.html}tutorials}}.

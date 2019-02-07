@@ -31,7 +31,7 @@ import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -53,9 +53,9 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	private final AssetManagerImpl assetManager;
 
 	/**
-	 * {@link OfficeClock}.
+	 * {@link MonitorClock}.
 	 */
-	private final OfficeClock clock;
+	private final MonitorClock clock;
 
 	/**
 	 * Flag indicating to permanently activate waiting {@link FunctionState}
@@ -91,9 +91,9 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	 * @param assetManager
 	 *            {@link AssetManager} for managing this.
 	 * @param clock
-	 *            {@link OfficeClock}.
+	 *            {@link MonitorClock}.
 	 */
-	public AssetLatchImpl(Asset asset, AssetManagerImpl assetManager, OfficeClock clock) {
+	public AssetLatchImpl(Asset asset, AssetManagerImpl assetManager, MonitorClock clock) {
 		this.asset = asset;
 		this.assetManager = assetManager;
 		this.clock = clock;

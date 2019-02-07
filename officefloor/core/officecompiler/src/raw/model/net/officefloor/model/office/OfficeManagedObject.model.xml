@@ -20,6 +20,9 @@
 	<list
 		type="OfficeInputManagedObjectDependencyToOfficeManagedObjectModel"
 		name="dependent office input managed object" />
+	<list
+		type="OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel"
+		name="dependent office managed object function object" />
 	<list type="OfficeSupplierThreadLocalToOfficeManagedObjectModel"
 		name="dependent office supplier thread local" />
 	<list type="OfficeManagedObjectToPreLoadAdministrationModel"

@@ -20,6 +20,7 @@
 		<module>DynamicHttpServer</module>
 		<module>ExceptionHttpServer</module>
 		<module>GraphicalConfigurationExample</module>
+		<module>HttpServletHttpServer</module>
 		<module>InheritHttpServer</module>
 		<module>InteractiveHttpServer</module>
 		<module>JavaScriptApp</module>

@@ -1,0 +1,26 @@
+<woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/increment" method="POST" secure="false" x="86" y="79">
+      <section name="Increment" input="increment"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="Increment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.httpservlet.Increment" x="371" y="58">
+      <input name="increment" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

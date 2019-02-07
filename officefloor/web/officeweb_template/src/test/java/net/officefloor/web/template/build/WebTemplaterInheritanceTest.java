@@ -28,7 +28,6 @@ import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.template.parse.ParsedTemplateSection;
 import net.officefloor.web.template.parse.WebTemplateParser;
@@ -154,13 +153,11 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the inheritance test.
 	 * 
-	 * @param parentSectionNames
-	 *            Parent {@link ParsedTemplateSection} names.
-	 * @param childSectionNames
-	 *            Child {@link ParsedTemplateSection} names.
-	 * @param resultingSections
-	 *            Resulting {@link ParsedTemplateSection} contents. Allows to
-	 *            distinguish between parent and child by same name for inheritance.
+	 * @param parentSectionNames Parent {@link ParsedTemplateSection} names.
+	 * @param childSectionNames  Child {@link ParsedTemplateSection} names.
+	 * @param resultingSections  Resulting {@link ParsedTemplateSection} contents.
+	 *                           Allows to distinguish between parent and child by
+	 *                           same name for inheritance.
 	 */
 	private void doTest(String[] parentSectionNames, String[] childSectionNames, String... resultingSections) {
 
@@ -173,10 +170,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 		OfficeFloor officeFloor;
 		try {
 			WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
-			compile.officeFloor((context) -> {
-				server.value = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
-						.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-			});
+			compile.mockHttpServer((mockHttpServer) -> server.value = mockHttpServer);
 			compile.web((context) -> {
 				WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(
 						context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
@@ -225,15 +219,13 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes grand parent inheritance test.
 	 * 
-	 * @param grandParentSectionNames
-	 *            Grand parent {@link ParsedTemplateSection} names.
-	 * @param parentSectionNames
-	 *            Parent {@link ParsedTemplateSection} names.
-	 * @param childSectionNames
-	 *            Child {@link ParsedTemplateSection} names.
-	 * @param resultingSections
-	 *            Resulting {@link ParsedTemplateSection} contents. Allows to
-	 *            distinguish between parent and child by same name for inheritance.
+	 * @param grandParentSectionNames Grand parent {@link ParsedTemplateSection}
+	 *                                names.
+	 * @param parentSectionNames      Parent {@link ParsedTemplateSection} names.
+	 * @param childSectionNames       Child {@link ParsedTemplateSection} names.
+	 * @param resultingSections       Resulting {@link ParsedTemplateSection}
+	 *                                contents. Allows to distinguish between parent
+	 *                                and child by same name for inheritance.
 	 */
 	private void doTest(String[] grandParentSectionNames, String[] parentSectionNames, String[] childSectionNames,
 			String... resultingSections) {
@@ -248,10 +240,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 		OfficeFloor officeFloor;
 		try {
 			WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
-			compile.officeFloor((context) -> {
-				server.value = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
-						.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-			});
+			compile.mockHttpServer((mockHttpServer) -> server.value = mockHttpServer);
 			compile.web((context) -> {
 				WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(
 						context.getWebArchitect(), context.getOfficeArchitect(), context.getOfficeSourceContext());
@@ -287,12 +276,10 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes test for invalid configuration.
 	 * 
-	 * @param parentSectionNames
-	 *            Parent {@link ParsedTemplateSection} names.
-	 * @param childSectionNames
-	 *            Child {@link ParsedTemplateSection} names.
-	 * @param configureIssues
-	 *            {@link Consumer} to configure the {@link MockCompilerIssues}.
+	 * @param parentSectionNames Parent {@link ParsedTemplateSection} names.
+	 * @param childSectionNames  Child {@link ParsedTemplateSection} names.
+	 * @param configureIssues    {@link Consumer} to configure the
+	 *                           {@link MockCompilerIssues}.
 	 */
 	private void doInvalid(String[] parentSectionNames, String[] childSectionNames,
 			Consumer<MockCompilerIssues> configureIssues) throws Exception {
@@ -310,10 +297,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 		Closure<MockHttpServer> server = new Closure<>();
 		WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
 		compile.getOfficeFloorCompiler().setCompilerIssues(issues);
-		compile.officeFloor((context) -> {
-			server.value = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
-					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-		});
+		compile.mockHttpServer((mockHttpServer) -> server.value = mockHttpServer);
 		compile.web((context) -> {
 			WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(context.getWebArchitect(),
 					context.getOfficeArchitect(), context.getOfficeSourceContext());
@@ -332,10 +316,8 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	/**
 	 * Creates the mock {@link WebTemplate} content.
 	 * 
-	 * @param sectionNames
-	 *            Names of the {@link ParsedTemplateSection} instances.
-	 * @param contentPrefix
-	 *            Prefix for the {@link ParsedTemplateSection} content.
+	 * @param sectionNames  Names of the {@link ParsedTemplateSection} instances.
+	 * @param contentPrefix Prefix for the {@link ParsedTemplateSection} content.
 	 * @return Mock {@link WebTemplate} content.
 	 */
 	private static String createMockTemplateContent(String[] sectionNames, String contentPrefix) {
@@ -367,8 +349,7 @@ public class WebTemplaterInheritanceTest extends OfficeFrameTestCase {
 	/**
 	 * Creates the expected {@link WebTemplate} result.
 	 * 
-	 * @param sections
-	 *            Section content expected to be rendered.
+	 * @param sections Section content expected to be rendered.
 	 * @return Expected {@link WebTemplate} result.
 	 */
 	private static String createExpectedTemplateResult(String[] sections) {

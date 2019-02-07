@@ -43,10 +43,8 @@ public class StaticWebRouteNode implements WebRouteNode {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param characters
-	 *            Static characters.
-	 * @param nodes
-	 *            Further {@link WebRouteNode} instances.
+	 * @param characters Static characters.
+	 * @param nodes      Further {@link WebRouteNode} instances.
 	 */
 	public StaticWebRouteNode(char[] characters, WebRouteNode[] nodes) {
 		this.characters = characters;
@@ -67,12 +65,12 @@ public class StaticWebRouteNode implements WebRouteNode {
 	 */
 
 	@Override
-	public boolean handle(HttpMethod method, String path, int index, HttpArgument headPathParameter,
+	public WebServicer handle(HttpMethod method, String path, int index, HttpArgument headPathParameter,
 			ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> context) {
 
 		// Determine if enough characters
 		if (this.characters.length + index > path.length()) {
-			return false; // not enough characters to match
+			return WebServicer.NO_MATCH; // not enough characters to match
 		}
 
 		// Determine if match on characters
@@ -80,20 +78,13 @@ public class StaticWebRouteNode implements WebRouteNode {
 			char staticCharacter = this.characters[i];
 			char pathCharacter = path.charAt(index + i);
 			if (staticCharacter != pathCharacter) {
-				return false; // not match static route
+				return WebServicer.NO_MATCH; // not match static route
 			}
 		}
 
 		// As here, match on paths, so continue matching
-		for (int i = 0; i < this.nodes.length; i++) {
-			WebRouteNode node = this.nodes[i];
-			if (node.handle(method, path, index + this.characters.length, headPathParameter, connection, context)) {
-				return true; // handled
-			}
-		}
-
-		// As here, not handled by this branch of route tree
-		return false;
+		return WebServicer.getBestMatch(method, path, index + this.characters.length, headPathParameter, connection,
+				context, this.nodes);
 	}
 
 }

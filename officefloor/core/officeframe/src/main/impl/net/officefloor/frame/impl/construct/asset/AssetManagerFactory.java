@@ -27,7 +27,7 @@ import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -36,7 +36,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel Sagenschneider
  */
-public class AssetManagerFactory  {
+public class AssetManagerFactory {
 
 	/**
 	 * Registry of the {@link AssetManager} instances by their name.
@@ -44,15 +44,15 @@ public class AssetManagerFactory  {
 	private final Map<String, AssetManager> registry = new HashMap<String, AssetManager>();
 
 	/**
-	 * {@link ProcessState} for managing the {@link Office} where all mutations
-	 * of the {@link Office} are undertaken on its main {@link ThreadState}.
+	 * {@link ProcessState} for managing the {@link Office} where all mutations of
+	 * the {@link Office} are undertaken on its main {@link ThreadState}.
 	 */
 	private final ProcessState officeManagerProcessState;
 
 	/**
-	 * {@link OfficeClock}.
+	 * {@link MonitorClock}.
 	 */
-	private final OfficeClock officeClock;
+	private final MonitorClock monitorClock;
 
 	/**
 	 * {@link FunctionLoop}.
@@ -60,27 +60,25 @@ public class AssetManagerFactory  {
 	private final FunctionLoop functionLoop;
 
 	/**
-	 * Flag to ensure no further {@link AssetManager} instances are created once
-	 * the {@link AssetManager} array is created.
+	 * Flag to ensure no further {@link AssetManager} instances are created once the
+	 * {@link AssetManager} array is created.
 	 */
 	private boolean isAssetManagerListCreated = false;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param officeManagerProcessState
-	 *            {@link ProcessState} for managing the {@link Office} where all
-	 *            mutations of the {@link Office} are undertaken on its main
-	 *            {@link ThreadState}.
-	 * @param officeClock
-	 *            {@link OfficeClock}.
-	 * @param functionLoop
-	 *            {@link FunctionLoop}.
+	 * @param officeManagerProcessState {@link ProcessState} for managing the
+	 *                                  {@link Office} where all mutations of the
+	 *                                  {@link Office} are undertaken on its main
+	 *                                  {@link ThreadState}.
+	 * @param monitorClock              {@link MonitorClock}.
+	 * @param functionLoop              {@link FunctionLoop}.
 	 */
-	public AssetManagerFactory(ProcessState officeManagerProcessState, OfficeClock officeClock,
+	public AssetManagerFactory(ProcessState officeManagerProcessState, MonitorClock monitorClock,
 			FunctionLoop functionLoop) {
 		this.officeManagerProcessState = officeManagerProcessState;
-		this.officeClock = officeClock;
+		this.monitorClock = monitorClock;
 		this.functionLoop = functionLoop;
 	}
 
@@ -97,18 +95,14 @@ public class AssetManagerFactory  {
 	/**
 	 * Creates the {@link AssetManager}.
 	 * 
-	 * @param assetType
-	 *            {@link AssetType}.
-	 * @param assetName
-	 *            Name of the {@link Asset}.
-	 * @param responsibility
-	 *            Responsibility of the {@link AssetManager} for the
-	 *            {@link Asset}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param assetType      {@link AssetType}.
+	 * @param assetName      Name of the {@link Asset}.
+	 * @param responsibility Responsibility of the {@link AssetManager} for the
+	 *                       {@link Asset}.
+	 * @param issues         {@link OfficeFloorIssues}.
 	 * @return {@link AssetManager} or <code>null</code> if {@link AssetManager}
-	 *         already created for the {@link Asset} with
-	 *         {@link OfficeFloorIssues} informed.
+	 *         already created for the {@link Asset} with {@link OfficeFloorIssues}
+	 *         informed.
 	 */
 	public AssetManager createAssetManager(AssetType assetType, String assetName, String responsibility,
 			OfficeFloorIssues issues) {
@@ -130,7 +124,7 @@ public class AssetManagerFactory  {
 		}
 
 		// Create the asset manager
-		AssetManager assetManager = new AssetManagerImpl(this.officeManagerProcessState, this.officeClock,
+		AssetManager assetManager = new AssetManagerImpl(this.officeManagerProcessState, this.monitorClock,
 				this.functionLoop);
 
 		// Register the asset manager

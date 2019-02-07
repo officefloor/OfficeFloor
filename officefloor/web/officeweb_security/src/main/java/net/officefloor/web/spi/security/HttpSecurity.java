@@ -35,8 +35,7 @@ public interface HttpSecurity<A, AC extends Serializable, C, O extends Enum<O>, 
 	/**
 	 * Creates the custom authentication.
 	 * 
-	 * @param context
-	 *            {@link AuthenticateContext}.
+	 * @param context {@link AuthenticateContext}.
 	 * @return Custom authentication.
 	 */
 	A createAuthentication(AuthenticationContext<AC, C> context);
@@ -54,10 +53,8 @@ public interface HttpSecurity<A, AC extends Serializable, C, O extends Enum<O>, 
 	 * {@link HttpSession} to cache details and not require the authentication
 	 * dependencies causing the swap in {@link Team}.
 	 * 
-	 * @param credentials
-	 *            Credentials.
-	 * @param context
-	 *            {@link RatifyContext}.
+	 * @param credentials Credentials.
+	 * @param context     {@link RatifyContext}.
 	 * @return <code>true</code> should enough information be available to undertake
 	 *         authentication. <code>false</code> if not enough information is
 	 *         available for authentication.
@@ -67,33 +64,29 @@ public interface HttpSecurity<A, AC extends Serializable, C, O extends Enum<O>, 
 	/**
 	 * Undertakes authentication.
 	 * 
-	 * @param credentials
-	 *            Credentials.
-	 * @param context
-	 *            {@link AuthenticateContext}.
-	 * @throws HttpException
-	 *             If failure in communicating to necessary security services.
+	 * @param credentials Credentials.
+	 * @param context     {@link AuthenticateContext}.
+	 * @throws HttpException If failure in communicating to necessary security
+	 *                       services.
 	 */
-	void authenticate(C credentials, AuthenticateContext<AC, O> context) throws HttpException;
+	void authenticate(C credentials, AuthenticateContext<AC, O, F> context) throws HttpException;
 
 	/**
 	 * Triggers the authentication challenge to the client.
 	 * 
-	 * @param context
-	 *            {@link ChallengeContext}.
-	 * @throws HttpException
-	 *             If failure in communicating to necessary security services.
+	 * @param context {@link ChallengeContext}.
+	 * @throws HttpException If failure in communicating to necessary security
+	 *                       services.
 	 */
 	void challenge(ChallengeContext<O, F> context) throws HttpException;
 
 	/**
 	 * Logs out.
 	 * 
-	 * @param context
-	 *            {@link LogoutContext}.
-	 * @throws HttpException
-	 *             If failure in communicating to necessary security services.
+	 * @param context {@link LogoutContext}.
+	 * @throws HttpException If failure in communicating to necessary security
+	 *                       services.
 	 */
-	void logout(LogoutContext<O> context) throws HttpException;
+	void logout(LogoutContext<O, F> context) throws HttpException;
 
 }

@@ -790,14 +790,18 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 					});
 
 			// Iterate over mo sources (auto-wiring unlinked input dependencies)
-			this.managedObjectSources.values().stream().sorted((a, b) -> CompileUtil
-					.sortCompare(a.getOfficeFloorManagedObjectSourceName(), b.getOfficeFloorManagedObjectSourceName()))
+			this.managedObjectSources.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorManagedObjectSourceName(),
+							b.getOfficeFloorManagedObjectSourceName()))
 					.forEachOrdered((managedObjectSource) -> {
 						// Obtain the managing office for the managed object
 						OfficeNode officeNode = managedObjectSource.getManagingOfficeNode();
 
 						// Load input dependencies for managed object source
 						managedObjectSource.autoWireInputDependencies(autoWirer, officeNode, compileContext);
+
+						// Load the function dependencies for managed object source
+						managedObjectSource.autoWireFunctionDependencies(autoWirer, officeNode, compileContext);
 					});
 		}
 

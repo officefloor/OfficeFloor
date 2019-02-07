@@ -19,6 +19,7 @@ package net.officefloor.web.security.scheme;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.security.HttpAccessControl;
@@ -38,8 +39,11 @@ import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
+@TestSource
 public class MockFlowHttpSecuritySource extends
-		AbstractHttpSecuritySource<MockAuthentication, MockAccessControl, MockCredentials, None, MockFlowHttpSecuritySource.Flows> {
+		AbstractHttpSecuritySource<MockAuthentication, MockAccessControl, MockCredentials, None, MockFlowHttpSecuritySource.Flows>
+		implements
+		HttpSecurity<MockAuthentication, MockAccessControl, MockCredentials, None, MockFlowHttpSecuritySource.Flows> {
 
 	/**
 	 * {@link Flow} keys.
@@ -73,8 +77,7 @@ public class MockFlowHttpSecuritySource extends
 	/**
 	 * Instantiate with the realm.
 	 * 
-	 * @param realm
-	 *            Realm.
+	 * @param realm Realm.
 	 */
 	public MockFlowHttpSecuritySource(String realm) {
 		this.realm = realm;
@@ -121,91 +124,74 @@ public class MockFlowHttpSecuritySource extends
 	public HttpSecurity<MockAuthentication, MockAccessControl, MockCredentials, None, Flows> sourceHttpSecurity(
 			HttpSecurityContext context) throws HttpException {
 
-		// Create and return the mock HTTP security
-		return new MockFlowHttpSecurity(this.realm);
+		// Return the mock HTTP security
+		return this;
 	}
 
-	/**
-	 * Mock {@link HttpSecurity}.
+	/*
+	 * =================== HttpSecurity ===========================
 	 */
-	private class MockFlowHttpSecurity
-			implements HttpSecurity<MockAuthentication, MockAccessControl, MockCredentials, None, Flows> {
 
-		/**
-		 * Instantiate.
-		 * 
-		 * @param realm
-		 *            Realm.
-		 */
-		private MockFlowHttpSecurity(String realm) {
-		}
+	@Override
+	public MockAuthentication createAuthentication(AuthenticationContext<MockAccessControl, MockCredentials> context) {
+		MockAuthentication authentication = new MockAuthentication(context);
+		context.authenticate(null, null); // attempt authentication
+		return authentication;
+	}
 
-		/*
-		 * =================== HttpSecurity ===========================
-		 */
+	@Override
+	public boolean ratify(MockCredentials credentials, RatifyContext<MockAccessControl> context) {
 
-		@Override
-		public MockAuthentication createAuthentication(
-				AuthenticationContext<MockAccessControl, MockCredentials> context) {
-			MockAuthentication authentication = new MockAuthentication(context);
-			context.authenticate(null, null); // attempt authentication
-			return authentication;
-		}
-
-		@Override
-		public boolean ratify(MockCredentials credentials, RatifyContext<MockAccessControl> context) {
-
-			// Attempt to obtain from session
-			MockAccessControl accessControl = (MockAccessControl) context.getSession()
-					.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
-			if (accessControl != null) {
-				// Load the access control and no need to authenticate
-				context.accessControlChange(accessControl, null);
-				return false;
-			}
-
-			// Determine if credentials
-			if (credentials != null) {
-				return true;
-			}
-
-			// As here, then not able to authenticate
+		// Attempt to obtain from session
+		MockAccessControl accessControl = (MockAccessControl) context.getSession()
+				.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+		if (accessControl != null) {
+			// Load the access control and no need to authenticate
+			context.accessControlChange(accessControl, null);
 			return false;
 		}
 
-		@Override
-		public void authenticate(MockCredentials credentials, AuthenticateContext<MockAccessControl, None> context)
-				throws HttpException {
-
-			// Ensure have credentials (and they are valid)
-			if ((credentials == null) || (credentials.getUserName() == null)
-					|| (!(credentials.getUserName().equals(credentials.getPassword())))) {
-				return;
-			}
-
-			// Create the access control
-			MockAccessControl accessControl = new MockAccessControl(credentials);
-
-			// Remember access control for further requests
-			context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
-
-			// Return the access control
-			context.accessControlChange(accessControl, null);
+		// Determine if credentials
+		if (credentials != null) {
+			return true;
 		}
 
-		@Override
-		public void challenge(ChallengeContext<None, Flows> context) throws HttpException {
+		// As here, then not able to authenticate
+		return false;
+	}
 
-			// Trigger flow for challenge
-			context.doFlow(Flows.CHALLENGE);
+	@Override
+	public void authenticate(MockCredentials credentials, AuthenticateContext<MockAccessControl, None, Flows> context)
+			throws HttpException {
+
+		// Ensure have credentials (and they are valid)
+		if ((credentials == null) || (credentials.getUserName() == null)
+				|| (!(credentials.getUserName().equals(credentials.getPassword())))) {
+			return;
 		}
 
-		@Override
-		public void logout(LogoutContext<None> context) throws HttpException {
+		// Create the access control
+		MockAccessControl accessControl = new MockAccessControl(credentials);
 
-			// Forget access control for further requests (requires login again)
-			context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
-		}
+		// Remember access control for further requests
+		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
+
+		// Return the access control
+		context.accessControlChange(accessControl, null);
+	}
+
+	@Override
+	public void challenge(ChallengeContext<None, Flows> context) throws HttpException {
+
+		// Trigger flow for challenge
+		context.doFlow(Flows.CHALLENGE, null, null);
+	}
+
+	@Override
+	public void logout(LogoutContext<None, Flows> context) throws HttpException {
+
+		// Forget access control for further requests (requires login again)
+		context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
 	}
 
 }

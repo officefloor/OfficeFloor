@@ -17,12 +17,15 @@
  */
 package net.officefloor.web.json;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -36,6 +39,39 @@ import net.officefloor.web.build.HttpObjectResponderFactory;
  * @author Daniel Sagenschneider
  */
 public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFactory {
+
+	/**
+	 * Obtains the entity for the {@link Escalation}.
+	 * 
+	 * @param escalation {@link Throwable} {@link Escalation}.
+	 * @return Entity for the {@link Escalation}.
+	 * @throws IOException If fails to write {@link Escalation}.
+	 */
+	public static String getEntity(Throwable escalation) throws IOException {
+		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		writeError(buffer, escalation);
+		return buffer.toString();
+	}
+
+	/**
+	 * Writes the {@link Escalation}.
+	 * 
+	 * @param output     {@link OutputStream} to write the {@link Escalation}.
+	 * @param escalation {@link Throwable} {@link Escalation}.
+	 * @throws IOException If fails to write.
+	 */
+	private static void writeError(OutputStream output, Throwable escalation) throws IOException {
+		output.write(ERROR_MESSAGE_PREFIX);
+
+		// Write the error detail
+		String message = escalation.getMessage();
+		if ((message == null) || (message.trim().length() == 0)) {
+			message = escalation.getClass().getSimpleName();
+		}
+		mapper.writeValue(output, message);
+
+		output.write(ERROR_MESSAGE_SUFFIX);
+	}
 
 	/**
 	 * {@link ObjectMapper}.
@@ -125,16 +161,7 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 				HttpResponse response = connection.getResponse();
 				response.setContentType(contentType, null);
 				ServerOutputStream output = response.getEntity();
-				output.write(ERROR_MESSAGE_PREFIX);
-
-				// Write the error detail
-				String message = escalation.getMessage();
-				if ((message == null) || (message.trim().length() == 0)) {
-					message = escalation.getClass().getSimpleName();
-				}
-				mapper.writeValue(output, message);
-
-				output.write(ERROR_MESSAGE_SUFFIX);
+				writeError(output, escalation);
 			}
 		};
 	}

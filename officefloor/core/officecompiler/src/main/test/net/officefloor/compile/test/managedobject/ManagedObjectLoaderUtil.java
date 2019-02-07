@@ -26,11 +26,13 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.managedobject.ManagedObjectDependencyTypeImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectExecutionStrategyTypeImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectFlowTypeImpl;
+import net.officefloor.compile.impl.managedobject.ManagedObjectFunctionDependencyTypeImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectTeamTypeImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectFunctionDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
@@ -206,6 +208,20 @@ public class ManagedObjectLoaderUtil {
 					aDependency.getTypeQualifier());
 			Assert.assertEquals("Incorrect index for dependency " + i, eDependency.getIndex(), aDependency.getIndex());
 			Assert.assertEquals("Incorrect key for dependency " + i, eDependency.getKey(), aDependency.getKey());
+		}
+
+		// Verify the function dependencies
+		ManagedObjectFunctionDependencyType[] eFunctionDependencies = eType.getFunctionDependencyTypes();
+		ManagedObjectFunctionDependencyType[] aFunctionDependencies = aType.getFunctionDependencyTypes();
+		Assert.assertEquals("Incorrect number of function dependencies", eFunctionDependencies.length,
+				aFunctionDependencies.length);
+		for (int i = 0; i < eFunctionDependencies.length; i++) {
+			ManagedObjectFunctionDependencyType eFunctionDependency = eFunctionDependencies[i];
+			ManagedObjectFunctionDependencyType aFunctionDependency = aFunctionDependencies[i];
+			Assert.assertEquals("Incorrect name for function dependency " + i,
+					eFunctionDependency.getFunctionObjectName(), aFunctionDependency.getFunctionObjectName());
+			Assert.assertEquals("Incorrect type for function dependency " + i,
+					eFunctionDependency.getFunctionObjectType(), aFunctionDependency.getFunctionObjectType());
 		}
 
 		// Verify the flows
@@ -444,17 +460,22 @@ public class ManagedObjectLoaderUtil {
 		/**
 		 * {@link ManagedObjectDependencyType} instances.
 		 */
-		private final List<ManagedObjectDependencyType<?>> dependencies = new LinkedList<ManagedObjectDependencyType<?>>();
+		private final List<ManagedObjectDependencyType<?>> dependencies = new LinkedList<>();
+
+		/**
+		 * {@link ManagedObjectFunctionDependencyType} instances.
+		 */
+		private final List<ManagedObjectFunctionDependencyType> functionDependencies = new LinkedList<>();
 
 		/**
 		 * {@link ManagedObjectFlowType} instances.
 		 */
-		private final List<ManagedObjectFlowType<?>> flows = new LinkedList<ManagedObjectFlowType<?>>();
+		private final List<ManagedObjectFlowType<?>> flows = new LinkedList<>();
 
 		/**
 		 * {@link ManagedObjectTeamType} instances.
 		 */
-		private final List<ManagedObjectTeamType> teams = new LinkedList<ManagedObjectTeamType>();
+		private final List<ManagedObjectTeamType> teams = new LinkedList<>();
 
 		/**
 		 * {@link ManagedObjectExecutionStrategyType} instances.
@@ -484,6 +505,11 @@ public class ManagedObjectLoaderUtil {
 		@SuppressWarnings("unchecked")
 		public ManagedObjectDependencyType<M>[] getDependencyTypes() {
 			return (ManagedObjectDependencyType<M>[]) this.dependencies.toArray(new ManagedObjectDependencyType[0]);
+		}
+
+		@Override
+		public ManagedObjectFunctionDependencyType[] getFunctionDependencyTypes() {
+			return this.functionDependencies.toArray(new ManagedObjectFunctionDependencyType[0]);
 		}
 
 		@Override
@@ -529,6 +555,11 @@ public class ManagedObjectLoaderUtil {
 		@Override
 		public void addDependency(Enum<?> key, Class<?> type, String typeQualifier) {
 			this.addDependency(key.name(), type, typeQualifier, key.ordinal(), key);
+		}
+
+		@Override
+		public void addFunctionDependency(String name, Class<?> type) {
+			this.functionDependencies.add(new ManagedObjectFunctionDependencyTypeImpl(name, type));
 		}
 
 		@Override

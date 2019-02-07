@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.impl.managedobject;
 
+import java.net.URLConnection;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -31,6 +32,7 @@ import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectFunctionDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -50,6 +52,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecutionMeta
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
@@ -477,6 +480,105 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if <code>null</code> or blank
+	 * {@link ManagedObjectFunctionDependency} name.
+	 */
+	public void testNullFunctionDependencyName() {
+
+		// Record basic meta-data
+		this.issues.recordIssue("Failed to init",
+				new IllegalArgumentException("Must provide ManagedObjectFunctionDependency name"));
+
+		// Attempt to load
+		this.loadManagedObjectType(false, (context, util) -> {
+			context.addFunctionDependency(null, String.class);
+		});
+	}
+
+	/**
+	 * Ensure issue if <code>null</code> {@link ManagedObjectFunctionDependency}
+	 * type.
+	 */
+	public void testNullFunctionDependencyType() {
+
+		// Record basic meta-data
+		this.issues.recordIssue("Failed to init",
+				new IllegalArgumentException("Must provide ManagedObjectFunctionDependency type"));
+
+		// Attempt to load
+		this.loadManagedObjectType(false, (context, util) -> {
+			context.addFunctionDependency("DEPENDENCY", null);
+		});
+	}
+
+	/**
+	 * Ensure issue if duplicate {@link ManagedObjectFunctionDependency} name.
+	 */
+	public void testDuplicateFunctionDependencyName() {
+
+		// Record basic meta-data
+		this.record_basicMetaData();
+		this.issues.recordIssue("Two ManagedObjectFunctionDependency instances added by same name 'DEPENDENCY'");
+
+		// Attempt to load
+		this.loadManagedObjectType(false, (context, util) -> {
+			context.addFunctionDependency("DEPENDENCY", String.class);
+			context.addFunctionDependency("DEPENDENCY", Connection.class);
+		});
+	}
+
+	/**
+	 * Ensure issue of the {@link ManagedObjectDependencyMetaData} name clashes with
+	 * the {@link ManagedObjectFunctionDependency} name.
+	 */
+	public void testDependencyNameClashBetweenMetaDataAndFunction() {
+
+		final ManagedObjectDependencyMetaData<?> dependency = this.createMock(ManagedObjectDependencyMetaData.class);
+
+		// Record missing dependency key
+		this.record_objectAndManagedObject();
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(),
+				new ManagedObjectDependencyMetaData[] { dependency });
+		this.recordReturn(dependency, dependency.getLabel(), "DEPENDENCY");
+		this.recordReturn(dependency, dependency.getKey(), null);
+		this.recordReturn(dependency, dependency.getType(), Connection.class);
+		this.recordReturn(dependency, dependency.getTypeQualifier(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), new ManagedObjectFlowMetaData[0]);
+		this.recordReturn(this.metaData, this.metaData.getExecutionMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
+		this.issues.recordIssue("Name clash 'DEPENDENCY' between meta-data dependency and function dependency");
+
+		// Attempt to load
+		this.loadManagedObjectType(false, (context, util) -> {
+			context.addFunctionDependency("DEPENDENCY", String.class);
+		});
+	}
+
+	/**
+	 * Ensure able to provide only {@link ManagedObjectFunctionDependency} (and no
+	 * other dependencies).
+	 */
+	public void testOnlyFunctionDependency() {
+
+		// Record basic meta-data
+		this.record_basicMetaData();
+
+		// Load the managed object type
+		ManagedObjectType<?> type = this.loadManagedObjectType(true, (context, util) -> {
+			context.addFunctionDependency("DEPENDENCY", Connection.class);
+		});
+
+		// Ensure has the function dependency
+		assertEquals("Should be no managed object dependencies", 0, type.getDependencyTypes().length);
+		ManagedObjectFunctionDependencyType[] functionDependencies = type.getFunctionDependencyTypes();
+		assertEquals("Should have function dependency", 1, functionDependencies.length);
+		ManagedObjectFunctionDependencyType functionDependency = functionDependencies[0];
+		assertEquals("Incorrect function dependency name", "DEPENDENCY", functionDependency.getFunctionObjectName());
+		assertEquals("Incorrect function dependency type", Connection.class,
+				functionDependency.getFunctionObjectType());
+	}
+
+	/**
 	 * Ensure issue if <code>null</code> {@link ManagedObjectFlowMetaData} in array.
 	 */
 	public void testNullFlowMetaData() {
@@ -624,7 +726,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link ManagedObjectType} correct with keyed dependencies and flows.
 	 */
-	public void testKeyedDependenciesAndFlows() {
+	public void testKeyedDependenciesFunctionDependenciesAndFlows() {
 
 		final ManagedObjectDependencyMetaData<?> dependencyOne = this.createMock(ManagedObjectDependencyMetaData.class);
 		final ManagedObjectDependencyMetaData<?> dependencyTwo = this.createMock(ManagedObjectDependencyMetaData.class);
@@ -655,7 +757,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (Init<None>) null);
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
+			context.addFunctionDependency("FUNCTION_DEPENDENCY", URLConnection.class);
+		});
 
 		// Validate dependencies ordered and correct values
 		ManagedObjectDependencyType<?>[] dependencyTypes = moType.getDependencyTypes();
@@ -673,6 +777,15 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect second dependency type", Integer.class, dependencyTypeTwo.getDependencyType());
 		assertEquals("Incorrect second dependency type qualification", "QUALIFIED",
 				dependencyTypeTwo.getTypeQualifier());
+
+		// Validate function dependencies
+		ManagedObjectFunctionDependencyType[] functionDependencyTypes = moType.getFunctionDependencyTypes();
+		assertEquals("Should have function dependency", 1, functionDependencyTypes.length);
+		ManagedObjectFunctionDependencyType functionDependencyType = functionDependencyTypes[0];
+		assertEquals("Incorrect function dependency name", "FUNCTION_DEPENDENCY",
+				functionDependencyType.getFunctionObjectName());
+		assertEquals("Incorrect function dependency type", URLConnection.class,
+				functionDependencyType.getFunctionObjectType());
 
 		// Validate flows ordered and correct values
 		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();
@@ -692,7 +805,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link ManagedObjectType} correct with indexed dependencies and flows.
 	 */
-	public void testIndexedDependenciesAndFlows() {
+	public void testIndexedDependenciesFunctionDependenciesAndFlows() {
 
 		final ManagedObjectDependencyMetaData<?> dependencyOne = this.createMock(ManagedObjectDependencyMetaData.class);
 		final ManagedObjectDependencyMetaData<?> dependencyTwo = this.createMock(ManagedObjectDependencyMetaData.class);
@@ -723,7 +836,10 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterfacesMetaData(), null);
 
 		// Attempt to load
-		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (Init<None>) null);
+		ManagedObjectType<?> moType = this.loadManagedObjectType(true, (context, util) -> {
+			context.addFunctionDependency("B", URLConnection.class);
+			context.addFunctionDependency("A", Short.class);
+		});
 
 		// Validate dependencies
 		ManagedObjectDependencyType<?>[] dependencyTypes = moType.getDependencyTypes();
@@ -743,6 +859,20 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				dependencyTypeTwo.getDependencyName());
 		assertEquals("Incorrect second dependency type", Connection.class, dependencyTypeTwo.getDependencyType());
 		assertNull("Second dependency should not be qualified", dependencyTypeTwo.getTypeQualifier());
+
+		// Validate function dependencies (ordered by name)
+		ManagedObjectFunctionDependencyType[] functionDependencyTypes = moType.getFunctionDependencyTypes();
+		assertEquals("Should have function dependency", 2, functionDependencyTypes.length);
+		ManagedObjectFunctionDependencyType functionDependencyTypeOne = functionDependencyTypes[0];
+		assertEquals("Incorrect first function dependency name", "A",
+				functionDependencyTypeOne.getFunctionObjectName());
+		assertEquals("Incorrect first function dependency type", Short.class,
+				functionDependencyTypeOne.getFunctionObjectType());
+		ManagedObjectFunctionDependencyType functionDependencyTypeTwo = functionDependencyTypes[1];
+		assertEquals("Incorrect second function dependency name", "B",
+				functionDependencyTypeTwo.getFunctionObjectName());
+		assertEquals("Incorrect second function dependency type", URLConnection.class,
+				functionDependencyTypeTwo.getFunctionObjectType());
 
 		// Validate flows
 		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();

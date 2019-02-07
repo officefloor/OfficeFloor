@@ -45,7 +45,7 @@ public interface AuthenticationContext<AC extends Serializable, C> {
 	 * @param accessControlListener
 	 *            {@link AccessControlListener}.
 	 */
-	void register(AccessControlListener<AC> accessControlListener);
+	void register(AccessControlListener<? super AC> accessControlListener);
 
 	/**
 	 * Undertakes authentication.

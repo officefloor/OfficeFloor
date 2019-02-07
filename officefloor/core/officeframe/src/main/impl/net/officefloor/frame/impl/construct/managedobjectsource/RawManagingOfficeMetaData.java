@@ -39,7 +39,7 @@ import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministr
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteContextFactoryImpl;
+import net.officefloor.frame.impl.execute.officefloor.ManagedObjectExecuteManagerFactoryImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionReference;
 import net.officefloor.frame.internal.configuration.ManagedObjectExecutionConfiguration;
@@ -49,7 +49,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectExecuteContextFactory;
+import net.officefloor.frame.internal.structure.ManagedObjectExecuteManagerFactory;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -139,9 +139,9 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 	private OfficeFloorIssues issues = null;
 
 	/**
-	 * {@link ManagedObjectExecuteContextFactory}.
+	 * {@link ManagedObjectExecuteManagerFactory}.
 	 */
-	private ManagedObjectExecuteContextFactory<F> managedObjectExecuteContextFactory = null;
+	private ManagedObjectExecuteManagerFactory<F> managedObjectExecuteContextFactory = null;
 
 	/**
 	 * Initialise.
@@ -437,7 +437,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 			}
 
 			// No flows, so provide empty execution context
-			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(threadFactories);
+			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteManagerFactoryImpl<F>(threadFactories);
 			return;
 		}
 
@@ -546,18 +546,18 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 		}
 
 		// Specify the managed object execute context
-		this.managedObjectExecuteContextFactory = new ManagedObjectExecuteContextFactoryImpl<F>(managedObjectMetaData,
+		this.managedObjectExecuteContextFactory = new ManagedObjectExecuteManagerFactoryImpl<F>(managedObjectMetaData,
 				processBoundIndex, flows, threadFactories, officeMetaData);
 	}
 
 	/**
-	 * Obtains the {@link ManagedObjectExecuteContextFactory} for the
+	 * Obtains the {@link ManagedObjectExecuteManagerFactory} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link ManagedObjectExecuteContextFactory} for the
+	 * @return {@link ManagedObjectExecuteManagerFactory} for the
 	 *         {@link ManagedObjectSource}.
 	 */
-	public ManagedObjectExecuteContextFactory<F> getManagedObjectExecuteContextFactory() {
+	public ManagedObjectExecuteManagerFactory<F> getManagedObjectExecuteManagerFactory() {
 		return this.managedObjectExecuteContextFactory;
 	}
 

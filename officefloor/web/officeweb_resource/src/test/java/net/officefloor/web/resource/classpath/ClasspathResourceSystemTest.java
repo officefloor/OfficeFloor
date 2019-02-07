@@ -32,8 +32,7 @@ import net.officefloor.web.resource.impl.AbstractHttpResourceStoreTestCase;
 public class ClasspathResourceSystemTest extends AbstractHttpResourceStoreTestCase {
 
 	/**
-	 * Tests retrieving directory from a JAR (as most tests are using
-	 * directories).
+	 * Tests retrieving directory from a JAR (as most tests are using directories).
 	 * 
 	 * Note test expects JUnit on class path.
 	 */
@@ -75,8 +74,52 @@ public class ClasspathResourceSystemTest extends AbstractHttpResourceStoreTestCa
 		assertEquals("Incorrect file", path, file.getPath());
 	}
 
+	/**
+	 * Tests fallback to {@link ClassLoader}.
+	 */
+	public void testFallbackToClassLoader() throws Exception {
+
+		// Derive the path
+		String[] paths = CLASS_LOADER_EXTRA_CLASS_NAME.split("\\.");
+		String location = paths[0];
+		String fileName = "/" + paths[1] + ".class";
+
+		// Ensure not on java class path
+		ClassPathNode tree = ClassPathNode.createClassPathResourceTree(location);
+		assertEquals("Invalid test as should not find location", 0, tree.getChildren().length);
+
+		// Provide class loader
+		ClassLoader existingClassLoader = Thread.currentThread().getContextClassLoader();
+		try {
+			Thread.currentThread().setContextClassLoader(createNewClassLoader());
+
+			// Setup to find extra class
+			this.setupNewHttpResourceStore(location, null, fileName);
+
+			// Test obtain file via class loader
+			HttpResource resource = this.getHttpResourceStore().getHttpResource(fileName);
+			assertTrue("Should be file", resource instanceof HttpFile);
+			HttpFile file = (HttpFile) resource;
+			assertEquals("Incorrect file", fileName, file.getPath());
+
+			// Obtain default file via class loader
+			resource = this.getHttpResourceStore().getHttpResource("/");
+			assertTrue("Should be directory", resource instanceof HttpDirectory);
+			HttpDirectory directory = (HttpDirectory) resource;
+			file = directory.getDefaultHttpFile();
+			assertEquals("Incorrect default file", fileName, file.getPath());
+
+			// Ensure not find resource
+			resource = this.getHttpResourceStore().getHttpResource("/not-found");
+			assertFalse("Should not find resource", resource.isExist());
+
+		} finally {
+			Thread.currentThread().setContextClassLoader(existingClassLoader);
+		}
+	}
+
 	/*
-	 * ============== AbstractHttpResourceStoreTestCase ==================
+	 * ============== AbstractHttpResourceStoreTestCase =================
 	 */
 
 	@Override
