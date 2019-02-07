@@ -29,6 +29,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
+import net.officefloor.frame.test.MockClockFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -41,7 +42,8 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link SourceContext}.
 	 */
-	private final SourceContext context = new SourceContextImpl(false, AutoWirerTest.class.getClassLoader());
+	private final SourceContext context = new SourceContextImpl(false, AutoWirerTest.class.getClassLoader(),
+			new MockClockFactory());
 
 	/**
 	 * Mock {@link CompilerIssues}.

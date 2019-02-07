@@ -18,7 +18,12 @@
 package net.officefloor.web.security.type;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Supplier;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectDependencyMetaData;
@@ -35,6 +40,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.web.spi.security.HttpSecurityDependencyMetaData;
 import net.officefloor.web.spi.security.HttpSecurityFlowMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySource;
@@ -42,6 +48,7 @@ import net.officefloor.web.spi.security.HttpSecuritySourceContext;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySourceProperty;
 import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
+import net.officefloor.web.spi.security.HttpSecuritySupportingManagedObject;
 
 /**
  * Adapts the {@link HttpSecuritySource} to be a {@link ManagedObjectSource}.
@@ -92,6 +99,17 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 	private final HttpSecuritySource<?, ?, ?, O, ?> securitySource;
 
 	/**
+	 * Factory to create a {@link PropertyList}.
+	 */
+	private final Supplier<PropertyList> propertyListFactory;
+
+	/**
+	 * {@link HttpSecuritySupportingManagedObjectImpl} instances added by
+	 * {@link HttpSecuritySource}.
+	 */
+	private final List<HttpSecuritySupportingManagedObjectImpl<?>> supportingManagedObjects = new LinkedList<>();
+
+	/**
 	 * {@link HttpSecuritySourceMetaData}.
 	 */
 	private HttpSecuritySourceMetaData<?, ?, ?, O, ?> securitySourceMetaData;
@@ -114,16 +132,20 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 
 			// Specify the HTTP security source
 			this.securitySource = (HttpSecuritySource<?, ?, ?, O, ?>) operationInstance;
+			this.propertyListFactory = () -> OfficeFloorCompiler.newPropertyList();
 		}
 	}
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param httpSecuritySource {@link HttpSecuritySource}.
+	 * @param httpSecuritySource  {@link HttpSecuritySource}.
+	 * @param propertyListFactory Factory to create a {@link PropertyList}.
 	 */
-	public HttpSecurityManagedObjectAdapterSource(HttpSecuritySource<?, ?, ?, O, ?> httpSecuritySource) {
+	public HttpSecurityManagedObjectAdapterSource(HttpSecuritySource<?, ?, ?, O, ?> httpSecuritySource,
+			Supplier<PropertyList> propertyListFactory) {
 		this.securitySource = httpSecuritySource;
+		this.propertyListFactory = propertyListFactory;
 	}
 
 	/**
@@ -133,6 +155,17 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 	 */
 	public HttpSecuritySourceMetaData<?, ?, ?, O, ?> getHttpSecuritySourceMetaData() {
 		return this.securitySourceMetaData;
+	}
+
+	/**
+	 * Obtains the {@link HttpSecuritySupportingManagedObjectImpl} instances for the
+	 * {@link HttpSecuritySource}.
+	 * 
+	 * @return {@link HttpSecuritySupportingManagedObjectImpl} instances for the
+	 *         {@link HttpSecuritySource}.
+	 */
+	public HttpSecuritySupportingManagedObjectImpl<?>[] getHttpSecuritySupportingManagedObjects() {
+		return this.supportingManagedObjects.toArray(new HttpSecuritySupportingManagedObjectImpl[0]);
 	}
 
 	/*
@@ -260,7 +293,7 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 	 * {@link HttpSecuritySourceContext} adapting the
 	 * {@link ManagedObjectSourceContext}.
 	 */
-	private static class ManagedObjectHttpSecuritySourceContext<F extends Enum<F>> extends SourceContextImpl
+	private class ManagedObjectHttpSecuritySourceContext<F extends Enum<F>> extends SourceContextImpl
 			implements HttpSecuritySourceContext {
 
 		/**
@@ -271,6 +304,25 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 		 */
 		public ManagedObjectHttpSecuritySourceContext(boolean isLoadingType, ManagedObjectSourceContext<F> context) {
 			super(isLoadingType, context, context);
+		}
+
+		/*
+		 * ================== HttpSecuritySourceContext ===================
+		 */
+
+		@Override
+		public <D extends Enum<D>> HttpSecuritySupportingManagedObject<D> addSupportingManagedObject(
+				String managedObjectName, ManagedObjectSource<D, ?> managedObjectSource,
+				ManagedObjectScope managedObjectScope) {
+
+			// Create and register the supporting managed object
+			HttpSecuritySupportingManagedObjectImpl<D> supportingManagedObject = new HttpSecuritySupportingManagedObjectImpl<>(
+					managedObjectName, managedObjectSource,
+					HttpSecurityManagedObjectAdapterSource.this.propertyListFactory, managedObjectScope);
+			HttpSecurityManagedObjectAdapterSource.this.supportingManagedObjects.add(supportingManagedObject);
+
+			// Return the supporting managed object
+			return supportingManagedObject;
 		}
 	}
 

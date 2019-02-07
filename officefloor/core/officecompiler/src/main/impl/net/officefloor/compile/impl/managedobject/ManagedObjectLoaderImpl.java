@@ -33,6 +33,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectFunctionDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -49,13 +50,13 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecutionMeta
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExtensionMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceSpecification;
 import net.officefloor.frame.api.source.AbstractSourceError;
 import net.officefloor.frame.api.source.IssueTarget;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
+import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl.ManagedObjectFunctionDependencyImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagingOfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
@@ -228,7 +229,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 		ManagingOfficeConfiguration<F> managingOffice = new ManagingOfficeBuilderImpl<F>(officeName);
 		OfficeConfiguration office = new OfficeBuilderImpl(officeName);
 		String namespaceName = null; // stops the name spacing
-		ManagedObjectSourceContext<F> sourceContext = new ManagedObjectSourceContextImpl<F>(true, namespaceName,
+		ManagedObjectSourceContextImpl<F> sourceContext = new ManagedObjectSourceContextImpl<F>(true, namespaceName,
 				managingOffice, new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext(),
 				managingOffice.getBuilder(), office.getBuilder());
 
@@ -329,9 +330,42 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 			return null; // issue in filter meta-data flow types
 		}
 
+		// Obtain the function dependencies
+		ManagedObjectFunctionDependencyImpl[] functionDependencies = sourceContext
+				.getManagedObjectFunctionDependencies();
+		ManagedObjectFunctionDependencyType[] functionDependencyTypes = Arrays.asList(functionDependencies).stream()
+				.map((functionDependency) -> new ManagedObjectFunctionDependencyTypeImpl(
+						functionDependency.getFunctionObjectName(), functionDependency.getFunctionObjectType()))
+				.toArray(ManagedObjectFunctionDependencyType[]::new);
+
+		// Ensure no duplicate name
+		Set<String> functionDependencyNames = new HashSet<>();
+		for (ManagedObjectFunctionDependencyType functionDependencyType : functionDependencyTypes) {
+			String functionDependencyName = functionDependencyType.getFunctionObjectName();
+			if (functionDependencyNames.contains(functionDependencyName)) {
+				this.addIssue("Two ManagedObjectFunctionDependency instances added by same name '"
+						+ functionDependencyName + "'");
+				return null; // can not carry on
+			}
+			functionDependencyNames.add(functionDependencyName);
+		}
+
+		// Ensure no name clash with meta-data
+		for (ManagedObjectDependencyType<?> dependencyType : dependencyTypes) {
+			String dependencyName = dependencyType.getDependencyName();
+			if (functionDependencyNames.contains(dependencyName)) {
+				this.addIssue(
+						"Name clash '" + dependencyName + "' between meta-data dependency and function dependency");
+				return null; // can not carry on
+			}
+		}
+
+		// Sort the function dependency types (by name)
+		Arrays.sort(functionDependencyTypes, (a, b) -> a.getFunctionObjectName().compareTo(b.getFunctionObjectName()));
+
 		// Create and return the managed object type
-		return new ManagedObjectTypeImpl<D>(objectType, isInput, dependencyTypes, unlinkedFlowTypes, teamTypes,
-				strategyTypes, extensionInterfaces);
+		return new ManagedObjectTypeImpl<D>(objectType, isInput, dependencyTypes, functionDependencyTypes,
+				unlinkedFlowTypes, teamTypes, strategyTypes, extensionInterfaces);
 	}
 
 	@Override

@@ -30,7 +30,7 @@ import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLoop;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.LinkedListSet;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 
@@ -47,9 +47,9 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 	private final ProcessState officeManagerProcess;
 
 	/**
-	 * {@link OfficeClock}.
+	 * {@link MonitorClock}.
 	 */
-	private final OfficeClock clock;
+	private final MonitorClock clock;
 
 	/**
 	 * {@link FunctionLoop}.
@@ -72,11 +72,11 @@ public class AssetManagerImpl extends AbstractLinkedListSetEntry<FunctionState, 
 	 * @param officeManagerProcess
 	 *            {@link ProcessState} that is managing the {@link Office}.
 	 * @param clock
-	 *            {@link OfficeClock}.
+	 *            {@link MonitorClock}.
 	 * @param loop
 	 *            {@link FunctionLoop}.
 	 */
-	public AssetManagerImpl(ProcessState officeManagerProcess, OfficeClock clock, FunctionLoop loop) {
+	public AssetManagerImpl(ProcessState officeManagerProcess, MonitorClock clock, FunctionLoop loop) {
 		this.officeManagerProcess = officeManagerProcess;
 		this.clock = clock;
 		this.loop = loop;

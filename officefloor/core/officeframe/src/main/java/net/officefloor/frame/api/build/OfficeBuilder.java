@@ -32,7 +32,7 @@ import net.officefloor.frame.api.thread.ThreadSynchroniser;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.FunctionState;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -46,19 +46,19 @@ public interface OfficeBuilder {
 
 	/**
 	 * <p>
-	 * Allows providing an {@link OfficeClock} implementation to obtain the current
+	 * Allows providing an {@link MonitorClock} implementation to obtain the current
 	 * time.
 	 * <p>
-	 * Should no {@link OfficeClock} be provided, a default implementation will be
+	 * Should no {@link MonitorClock} be provided, a default implementation will be
 	 * used.
 	 * <p>
 	 * Typically this is useful in testing to fix to a deterministic time. However,
 	 * should there be native implementations of keeping time that is efficient,
 	 * this enables overriding the default implementation.
 	 * 
-	 * @param clock {@link OfficeClock}.
+	 * @param clock {@link MonitorClock}.
 	 */
-	void setOfficeClock(OfficeClock clock);
+	void setMonitorClock(MonitorClock clock);
 
 	/**
 	 * Specifies the interval in milli-seconds between each time the

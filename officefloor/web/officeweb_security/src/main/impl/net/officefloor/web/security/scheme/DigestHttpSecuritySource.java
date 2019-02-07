@@ -112,8 +112,7 @@ public class DigestHttpSecuritySource extends
 	/**
 	 * Parses out the parameters.
 	 * 
-	 * @param text
-	 *            Text to parse out the parameters.
+	 * @param text Text to parse out the parameters.
 	 * @return Parameters parsed from text.
 	 */
 	private Properties parseParameters(String text) {
@@ -316,8 +315,7 @@ public class DigestHttpSecuritySource extends
 		/**
 		 * Instantiate.
 		 * 
-		 * @param realm
-		 *            Realm.
+		 * @param realm Realm.
 		 */
 		private DigestHttpSecurity(String realm) {
 			this.realm = realm;
@@ -339,7 +337,7 @@ public class DigestHttpSecuritySource extends
 
 			// Attempt to obtain from session
 			HttpAccessControl accessControl = (HttpAccessControl) context.getSession()
-					.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+					.getAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY));
 			if (accessControl != null) {
 				// Load the access control and no need to authenticate
 				context.accessControlChange(accessControl, null);
@@ -359,7 +357,7 @@ public class DigestHttpSecuritySource extends
 		}
 
 		@Override
-		public void authenticate(Void credentials, AuthenticateContext<HttpAccessControl, Dependencies> context)
+		public void authenticate(Void credentials, AuthenticateContext<HttpAccessControl, Dependencies, None> context)
 				throws HttpException {
 
 			// Obtain the connection and session
@@ -380,7 +378,8 @@ public class DigestHttpSecuritySource extends
 			// Authenticate Digest as per RFC2617
 
 			// Obtain the nounce
-			SecurityState securityState = (SecurityState) session.getAttribute(SECURITY_STATE_SESSION_KEY);
+			SecurityState securityState = (SecurityState) session
+					.getAttribute(context.getQualifiedAttributeName(SECURITY_STATE_SESSION_KEY));
 			if (securityState == null) {
 				// No challenge (i.e. no nounce), so not authenticated
 				return;
@@ -513,7 +512,7 @@ public class DigestHttpSecuritySource extends
 			HttpAccessControl accessControl = new HttpAccessControlImpl(AUTHENTICATION_SCHEME_DIGEST, username, roles);
 
 			// Remember access control for further requests
-			session.setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
+			session.setAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY), accessControl);
 
 			// Return the access control
 			context.accessControlChange(accessControl, null);
@@ -566,17 +565,18 @@ public class DigestHttpSecuritySource extends
 			challenge.addParameter("algorithm", "\"" + algorithm + "\"");
 
 			// Record details for authentication
-			session.setAttribute(SECURITY_STATE_SESSION_KEY, new SecurityState(nonce, opaque));
+			session.setAttribute(context.getQualifiedAttributeName(SECURITY_STATE_SESSION_KEY),
+					new SecurityState(nonce, opaque));
 		}
 
 		@Override
-		public void logout(LogoutContext<Dependencies> context) throws HttpException {
+		public void logout(LogoutContext<Dependencies, None> context) throws HttpException {
 
 			// Obtain the session
 			HttpSession session = context.getSession();
 
 			// Forget HTTP Security for further requests (requires login again)
-			session.removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+			session.removeAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY));
 		}
 	}
 
@@ -624,10 +624,8 @@ public class DigestHttpSecuritySource extends
 		/**
 		 * Initiate.
 		 * 
-		 * @param nonce
-		 *            Nounce for authentication.
-		 * @param opaque
-		 *            Opaque for authentication.
+		 * @param nonce  Nounce for authentication.
+		 * @param opaque Opaque for authentication.
 		 */
 		private SecurityState(String nonce, String opaque) {
 			this.nonce = nonce;
@@ -653,10 +651,8 @@ public class DigestHttpSecuritySource extends
 		/**
 		 * Initiate.
 		 * 
-		 * @param algorithm
-		 *            Algorithm.
-		 * @throws HttpException
-		 *             If fails to initiate for algorithm.
+		 * @param algorithm Algorithm.
+		 * @throws HttpException If fails to initiate for algorithm.
 		 */
 		public Digest(String algorithm) throws HttpException {
 			this.digest = CredentialStoreUtil.createDigest(algorithm);
@@ -676,8 +672,7 @@ public class DigestHttpSecuritySource extends
 		/**
 		 * Appends the text.
 		 * 
-		 * @param text
-		 *            Text.
+		 * @param text Text.
 		 */
 		public void append(String text) {
 
@@ -693,8 +688,7 @@ public class DigestHttpSecuritySource extends
 		/**
 		 * Appends the data.
 		 * 
-		 * @param data
-		 *            Data.
+		 * @param data Data.
 		 */
 		public void append(byte[] data) {
 			this.digest.update(data);
@@ -703,10 +697,8 @@ public class DigestHttpSecuritySource extends
 		/**
 		 * Appends all the data of the {@link InputStream}.
 		 * 
-		 * @param stream
-		 *            {@link InputStream} of data to append.
-		 * @throws HttpException
-		 *             If fails to append the {@link InputStream} data.
+		 * @param stream {@link InputStream} of data to append.
+		 * @throws HttpException If fails to append the {@link InputStream} data.
 		 */
 		public void append(InputStream stream) throws HttpException {
 			try {

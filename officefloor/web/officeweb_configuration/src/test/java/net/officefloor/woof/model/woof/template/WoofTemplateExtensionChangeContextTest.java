@@ -31,6 +31,7 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.test.MockClockFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.woof.model.woof.WoofChangeIssues;
 import net.officefloor.woof.model.woof.WoofTemplateExtension;
@@ -74,7 +75,7 @@ public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase 
 				}
 			}
 		};
-		SourceContext sourceContext = new SourceContextImpl(false, classLoader, resourceSource);
+		SourceContext sourceContext = new SourceContextImpl(false, classLoader, new MockClockFactory(), resourceSource);
 
 		// Create the configuration context
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader, null);
@@ -123,7 +124,7 @@ public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase 
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		// Create the source context
-		SourceContext sourceContext = new SourceContextImpl(false, classLoader);
+		SourceContext sourceContext = new SourceContextImpl(false, classLoader, new MockClockFactory());
 
 		// Create the configuration context
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader, null);
@@ -147,8 +148,7 @@ public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase 
 	/**
 	 * Validates the resource is correct.
 	 * 
-	 * @param resource
-	 *            Contents of the resource.
+	 * @param resource Contents of the resource.
 	 */
 	private static void assertWoofTemplateExtensionChangeContextResource(InputStream resource) throws IOException {
 		assertNotNull("Should find resource", resource);
@@ -163,12 +163,10 @@ public class WoofTemplateExtensionChangeContextTest extends OfficeFrameTestCase 
 	/**
 	 * Validates the {@link WoofTemplateExtensionConfiguration}.
 	 * 
-	 * @param configuration
-	 *            {@link WoofTemplateExtensionConfiguration} to validate.
-	 * @param expectedUri
-	 *            Expected URI.
-	 * @param expectedPropertyNameValues
-	 *            Expected property name/value pairs.
+	 * @param configuration              {@link WoofTemplateExtensionConfiguration}
+	 *                                   to validate.
+	 * @param expectedUri                Expected URI.
+	 * @param expectedPropertyNameValues Expected property name/value pairs.
 	 */
 	private static void assertConfiguration(WoofTemplateExtensionConfiguration configuration, String expectedUri,
 			String... expectedPropertyNameValues) {

@@ -41,6 +41,7 @@ import net.officefloor.compile.internal.structure.ManagedFunctionNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectExecutionStrategyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
+import net.officefloor.compile.internal.structure.ManagedObjectFunctionDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectPoolNode;
 import net.officefloor.compile.internal.structure.ManagedObjectRegistry;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
@@ -61,6 +62,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectExecutionStrategyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectFunctionDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -77,6 +79,7 @@ import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectFlow;
+import net.officefloor.compile.spi.office.OfficeManagedObjectFunctionDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectTeam;
@@ -88,6 +91,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectExecutionStrategy;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFlow;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectFunctionDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectTeam;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectDependency;
@@ -102,6 +106,7 @@ import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
@@ -210,13 +215,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * {@link ManagedObjectFlowNode} instances by their {@link ManagedObjectFlow}
 	 * names.
 	 */
-	private final Map<String, ManagedObjectFlowNode> flows = new HashMap<String, ManagedObjectFlowNode>();
+	private final Map<String, ManagedObjectFlowNode> flows = new HashMap<>();
 
 	/**
 	 * {@link ManagedObjectTeamNode} instances by their {@link ManagedObjectTeam}
 	 * names.
 	 */
-	private final Map<String, ManagedObjectTeamNode> teams = new HashMap<String, ManagedObjectTeamNode>();
+	private final Map<String, ManagedObjectTeamNode> teams = new HashMap<>();
 
 	/**
 	 * {@link ManagedObjectExecutionStrategyNode} instances by their
@@ -229,7 +234,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 * {@link ManagedObjectDependency} names. This is for the Input
 	 * {@link ManagedObject} dependencies.
 	 */
-	private final Map<String, ManagedObjectDependencyNode> inputDependencies = new HashMap<String, ManagedObjectDependencyNode>();
+	private final Map<String, ManagedObjectDependencyNode> inputDependencies = new HashMap<>();
+
+	/**
+	 * {@link ManagedObjectFunctionDependencyNode} instances by their
+	 * {@link ManagedObjectFunctionDependency} names.
+	 */
+	private final Map<String, ManagedObjectFunctionDependencyNode> functionDependencies = new HashMap<>();
 
 	/**
 	 * {@link OptionalThreadLocalLinker}.
@@ -383,6 +394,19 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	/**
+	 * Obtains the {@link ManagedObjectDependencyNode}.
+	 * 
+	 * @param managedObjectDependencyName Name of the
+	 *                                    {@link ManagedObjectDependencyNode}.
+	 * @return {@link ManagedObjectDependencyNode}.
+	 */
+	private ManagedObjectFunctionDependencyNode getManagedObjectFunctionDependencyNode(
+			String managedObjectFunctionDependencyName) {
+		return NodeUtil.getNode(managedObjectFunctionDependencyName, this.functionDependencies, () -> this.context
+				.createManagedObjectFunctionDependencyNode(managedObjectFunctionDependencyName, this));
+	}
+
+	/**
 	 * Obtains the {@link ManagedObjectFlowNode}.
 	 * 
 	 * @param managedObjectSourceFlowName Name of the {@link ManagedObjectFlowNode}.
@@ -446,7 +470,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public Node[] getChildNodes() {
-		return NodeUtil.getChildNodes(this.flows, this.teams, this.inputDependencies);
+		return NodeUtil.getChildNodes(this.flows, this.teams, this.inputDependencies, this.functionDependencies);
 	}
 
 	@Override
@@ -519,6 +543,15 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						() -> this.context.createManagedObjectDependencyNode(dependencyName, this),
 						(dependency) -> dependency.initialise());
 			}
+		}
+
+		// Initialise the function dependencies
+		for (ManagedObjectFunctionDependencyType functionDependencyType : managedObjectType
+				.getFunctionDependencyTypes()) {
+			String functionDependencyName = functionDependencyType.getFunctionObjectName();
+			NodeUtil.getInitialisedNode(functionDependencyName, this.functionDependencies, this.context,
+					() -> this.context.createManagedObjectFunctionDependencyNode(functionDependencyName, this),
+					(dependency) -> dependency.initialise());
 		}
 
 		// Visit this managed object source
@@ -695,6 +728,51 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 						LinkUtil.linkAutoWireObjectNode(dependency, links[0].getTargetNode(office), office, autoWirer,
 								compileContext, this.context.getCompilerIssues(),
 								(link) -> dependency.linkObjectNode(link));
+					}
+				});
+	}
+
+	@Override
+	public void autoWireFunctionDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office,
+			CompileContext compileContext) {
+
+		// Obtain the managed object type
+		ManagedObjectType<?> managedObjectType = compileContext.getOrLoadManagedObjectType(this);
+		if (managedObjectType == null) {
+			return; // must have type
+		}
+
+		// Create the map of function dependency types by names
+		Map<String, ManagedObjectFunctionDependencyType> functionDependencyTypes = new HashMap<>();
+		Arrays.stream(managedObjectType.getFunctionDependencyTypes())
+				.forEach((functionDependencyType) -> functionDependencyTypes
+						.put(functionDependencyType.getFunctionObjectName(), functionDependencyType));
+
+		// Auto-wire function dependencies
+		this.functionDependencies.values().stream().sorted((a, b) -> CompileUtil
+				.sortCompare(a.getManagedObjectDependencyName(), b.getManagedObjectDependencyName()))
+				.forEachOrdered((functionDependency) -> {
+
+					// Ignore if already configured
+					if (functionDependency.getLinkedObjectNode() != null) {
+						return;
+					}
+
+					// Obtain the function dependency type
+					ManagedObjectFunctionDependencyType functionDependencyType = functionDependencyTypes
+							.get(functionDependency.getManagedObjectDependencyName());
+					if (functionDependencyType == null) {
+						return; // must have type
+					}
+
+					// Auto-wire the dependency
+					AutoWireLink<ManagedObjectFunctionDependencyNode, LinkObjectNode>[] links = autoWirer
+							.getAutoWireLinks(functionDependency,
+									new AutoWire(functionDependencyType.getFunctionObjectType()));
+					if (links.length == 1) {
+						LinkUtil.linkAutoWireObjectNode(functionDependency, links[0].getTargetNode(office), office,
+								autoWirer, compileContext, this.context.getCompilerIssues(),
+								(link) -> functionDependency.linkObjectNode(link));
 					}
 				});
 	}
@@ -932,6 +1010,31 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				}
 			}
 
+			// Link the function dependencies
+			ManagedObjectFunctionDependencyType[] functionDependencyTypes = managedObjectType
+					.getFunctionDependencyTypes();
+			for (ManagedObjectFunctionDependencyType functionDependencyType : functionDependencyTypes) {
+
+				// Obtain the dependency details
+				String functionDependencyName = functionDependencyType.getFunctionObjectName();
+
+				// Obtain the function dependency
+				ManagedObjectFunctionDependencyNode dependencyNode = this.functionDependencies
+						.get(functionDependencyName);
+				BoundManagedObjectNode dependency = LinkUtil.retrieveTarget(dependencyNode,
+						BoundManagedObjectNode.class, this.context.getCompilerIssues());
+				if (dependency == null) {
+					continue; // must have dependency
+				}
+
+				// Ensure dependent managed object built into office
+				officeBindings.buildManagedObjectIntoOffice(dependency);
+
+				// Link the function dependency
+				String dependentManagedObjectName = dependency.getBoundManagedObjectName();
+				managingOfficeBuilder.mapFunctionDependency(functionDependencyName, dependentManagedObjectName);
+			}
+
 			// Link in the flows for the managed object source
 			ManagedObjectFlowType<?>[] flowTypes = managedObjectType.getFlowTypes();
 			for (final ManagedObjectFlowType<?> flowType : flowTypes) {
@@ -1129,6 +1232,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
+	public OfficeManagedObjectFunctionDependency getOfficeManagedObjectFunctionDependency(
+			String managedObjectFunctionDependencyName) {
+		return this.getManagedObjectFunctionDependencyNode(managedObjectFunctionDependencyName);
+	}
+
+	@Override
 	public OfficeManagedObjectTeam getOfficeManagedObjectTeam(String managedObjectSourceTeamName) {
 		return this.getManagedObjectTeamNode(managedObjectSourceTeamName);
 	}
@@ -1162,6 +1271,12 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public OfficeFloorManagedObjectDependency getInputOfficeFloorManagedObjectDependency(
 			String managedObjectDependencyName) {
 		return this.getManagedObjectDependencyNode(managedObjectDependencyName);
+	}
+
+	@Override
+	public OfficeFloorManagedObjectFunctionDependency getOfficeFloorManagedObjectFunctionDependency(
+			String managedObjectFunctionDependencyName) {
+		return this.getManagedObjectFunctionDependencyNode(managedObjectFunctionDependencyName);
 	}
 
 	@Override

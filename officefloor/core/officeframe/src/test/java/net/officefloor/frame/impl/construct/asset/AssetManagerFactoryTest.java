@@ -22,7 +22,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FunctionLoop;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -39,9 +39,9 @@ public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 	private final ProcessState processState = this.createMock(ProcessState.class);
 
 	/**
-	 * {@link OfficeClock}.
+	 * {@link MonitorClock}.
 	 */
-	private final OfficeClock clock = this.createMock(OfficeClock.class);
+	private final MonitorClock clock = this.createMock(MonitorClock.class);
 
 	/**
 	 * {@link FunctionLoop}.

@@ -1,0 +1,114 @@
+package net.officefloor.app.subscription;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Rule;
+import org.junit.Test;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.googlecode.objectify.Ref;
+
+import net.officefloor.app.subscription.Authenticate.AuthenticateRequest;
+import net.officefloor.app.subscription.Authenticate.AuthenticateResponse;
+import net.officefloor.app.subscription.rule.GoogleIdTokenRule;
+import net.officefloor.app.subscription.rule.ObjectifyRule;
+import net.officefloor.app.subscription.store.Domain;
+import net.officefloor.app.subscription.store.GoogleSignin;
+import net.officefloor.app.subscription.store.User;
+import net.officefloor.woof.mock.MockObjectResponse;
+
+/**
+ * Ensure can load authentication to the database.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class AuthenticateTest {
+
+	@Rule
+	public GoogleIdTokenRule verifier = new GoogleIdTokenRule();
+
+	@Rule
+	public ObjectifyRule obectify = new ObjectifyRule(Domain.class, GoogleSignin.class, User.class);
+
+	private MockObjectResponse<AuthenticateResponse> response = new MockObjectResponse<>();
+
+	@Test
+	public void ensureTokenRulePasses() throws Exception {
+
+		// Create the mock token
+		String token = this.verifier.getMockIdToken("1", "daniel@officefloor.net", "name", "Daniel Sagenschneider");
+
+		// Verify the token
+		GoogleIdToken idToken = this.verifier.getGoogleIdTokenVerifier().verify(token);
+		assertNotNull("Should have token", idToken);
+
+		// Ensure correct details
+		assertEquals("Incorrect google Id", "1", idToken.getPayload().getSubject());
+		assertEquals("Incorrect email", "daniel@officefloor.net", idToken.getPayload().getEmail());
+		assertEquals("Incorrect name", "Daniel Sagenschneider", idToken.getPayload().get("name"));
+	}
+
+	@Test
+	public void ensureUserCreated() throws Exception {
+
+		// Undertake authentication
+		String token = this.verifier.getMockIdToken("1", "daniel@officefloor.net", "email_verified", "true", "name",
+				"Daniel Sagenschneider", "picture", "http://officefloor.net/photo.png");
+		new Authenticate().service(new AuthenticateRequest(token), this.verifier.getGoogleIdTokenVerifier(),
+				this.obectify.ofy(), this.response);
+		assertTrue("Should be successful", response.getObject().isSuccessful());
+
+		// Ensure the user is loaded into the database
+		GoogleSignin user = this.obectify.get(GoogleSignin.class,
+				(load) -> load.filter("email", "daniel@officefloor.net"));
+
+		// Ensure correct details
+		assertUser(user, "1", "daniel@officefloor.net", "Daniel Sagenschneider", "http://officefloor.net/photo.png");
+	}
+
+	@Test
+	public void ensureUserUpdated() throws Exception {
+
+		// Create the existing user
+		User user = new User("daniel@officefloor.net");
+		user.setName("Daniel Sagenschneider");
+		user.setPhotoUrl("http://officefloor.net/photo.png");
+		this.obectify.ofy().save().entities(user).now();
+		GoogleSignin login = new GoogleSignin("1", user.getEmail());
+		login.setName(user.getName());
+		login.setPhotoUrl(user.getPhotoUrl());
+		login.setUser(Ref.create(user));
+		this.obectify.ofy().save().entity(login).now();
+
+		// Undertake authentication
+		String token = this.verifier.getMockIdToken("1", "changed@officefloor.net", "email_verified", "true", "name",
+				"Changed Sagenschneider", "picture", "http://officefloor.net/changed.png");
+		new Authenticate().service(new AuthenticateRequest(token), this.verifier.getGoogleIdTokenVerifier(),
+				this.obectify.ofy(), this.response);
+		assertTrue("Should be successful", this.response.getObject().isSuccessful());
+
+		// Ensure the user is loaded into the database
+		login = this.obectify.get(GoogleSignin.class, (load) -> load.filter("email", "changed@officefloor.net"));
+		assertNotNull("Should have user", login);
+
+		// Ensure correct details
+		assertUser(login, "1", "changed@officefloor.net", "Changed Sagenschneider",
+				"http://officefloor.net/changed.png");
+	}
+
+	private static void assertUser(GoogleSignin login, String googleId, String email, String name, String photoUrl) {
+		assertEquals("Incorrect google id", googleId, login.getGoogleId());
+		assertEquals("Incorrect email", email, login.getEmail());
+		assertEquals("Incorrect name", name, login.getName());
+		assertEquals("Incorrect photo URL", photoUrl, login.getPhotoUrl());
+
+		// Obtain the user
+		User user = login.getUser().get();
+		assertEquals("Incorrect email", email, user.getEmail());
+		assertEquals("Incorrect name", name, user.getName());
+		assertEquals("Incorrect photo URL", photoUrl, user.getPhotoUrl());
+	}
+
+}

@@ -36,12 +36,12 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.impl.DateHttpHeaderClock;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.stream.StreamBufferPool;
 import net.officefloor.server.stream.impl.ThreadLocalStreamBufferPool;
@@ -112,7 +112,7 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public void configureHttpServer(HttpServerImplementationContext context) {
+	public void configureHttpServer(HttpServerImplementationContext context) throws Exception {
 
 		// Provide server
 		Server server = createServer(context.getHttpServerLocation(), context.getSslContext());

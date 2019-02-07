@@ -20,7 +20,7 @@ package net.officefloor.web.security.impl;
 import java.io.Serializable;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -29,27 +29,34 @@ import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.LogoutContext;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link ManagedFunction} and {@link ManagedFunctionFactory} to log out.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum<O>>
-		extends StaticManagedFunction<Indexed, None> {
+public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum<O>, F extends Enum<F>>
+		extends StaticManagedFunction<Indexed, F> {
+
+	/**
+	 * Name of the {@link HttpSecurity}.
+	 */
+	private final String httpSecurityName;
 
 	/**
 	 * {@link HttpSecurity}.
 	 */
-	private final HttpSecurity<?, AC, ?, O, ?> httpSecurity;
+	private final HttpSecurity<?, AC, ?, O, F> httpSecurity;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param httpSecurity
-	 *            {@link HttpSecurity}.
+	 * @param httpSecurityName Name of the {@link HttpSecurity}.
+	 * @param httpSecurity     {@link HttpSecurity}.
 	 */
-	public ManagedObjectLogoutFunction(HttpSecurity<?, AC, ?, O, ?> httpSecurity) {
+	public ManagedObjectLogoutFunction(String httpSecurityName, HttpSecurity<?, AC, ?, O, F> httpSecurity) {
+		this.httpSecurityName = httpSecurityName;
 		this.httpSecurity = httpSecurity;
 	}
 
@@ -59,7 +66,7 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+	public Object execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
 
 		// Obtain the dependencies
 		final FunctionLogoutContext<AC> logoutContext = (FunctionLogoutContext<AC>) context.getObject(0);
@@ -82,7 +89,7 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 	/**
 	 * {@link LogoutContext} implementation.
 	 */
-	private class LogoutContextImpl implements LogoutContext<O> {
+	private class LogoutContextImpl implements LogoutContext<O, F> {
 
 		/**
 		 * {@link FunctionLogoutContext}.
@@ -92,18 +99,15 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 		/**
 		 * {@link ManagedFunctionContext}.
 		 */
-		private final ManagedFunctionContext<Indexed, None> context;
+		private final ManagedFunctionContext<Indexed, F> context;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param logoutContext
-		 *            {@link FunctionLogoutContext}.
-		 * @param context
-		 *            {@link ManagedFunctionContext}.
+		 * @param logoutContext {@link FunctionLogoutContext}.
+		 * @param context       {@link ManagedFunctionContext}.
 		 */
-		private LogoutContextImpl(FunctionLogoutContext<AC> logoutContext,
-				ManagedFunctionContext<Indexed, None> context) {
+		private LogoutContextImpl(FunctionLogoutContext<AC> logoutContext, ManagedFunctionContext<Indexed, F> context) {
 			this.logoutContext = logoutContext;
 			this.context = context;
 		}
@@ -118,8 +122,19 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 		}
 
 		@Override
+		public String getQualifiedAttributeName(String attributeName) {
+			return AuthenticationContextManagedObjectSource
+					.getQualifiedAttributeName(ManagedObjectLogoutFunction.this.httpSecurityName, attributeName);
+		}
+
+		@Override
 		public HttpSession getSession() {
 			return this.logoutContext.getSession();
+		}
+
+		@Override
+		public HttpRequestState getRequestState() {
+			return this.logoutContext.getRequestState();
 		}
 
 		@Override
@@ -127,6 +142,11 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 			// Obtain the index (offset by logout dependencies)
 			int index = key.ordinal() + 1;
 			return this.context.getObject(index);
+		}
+
+		@Override
+		public void doFlow(F key, Object parameter, FlowCallback callback) {
+			this.context.doFlow(key, parameter, callback);
 		}
 	}
 

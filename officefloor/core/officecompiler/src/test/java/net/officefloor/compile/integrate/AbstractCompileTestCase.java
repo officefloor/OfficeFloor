@@ -55,6 +55,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
@@ -66,6 +67,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.team.Team;
@@ -172,12 +174,17 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 	 */
 	protected void record_init(ResourceSource... resourceSources) {
 
-		// Record adding listener for external service handling
+		// Record adding listener for clock factory and external service handling
+		this.officeFloorBuilder.addOfficeFloorListener(null);
 		this.officeFloorBuilder.addOfficeFloorListener(null);
 		this.control(this.officeFloorBuilder).setMatcher(new TypeMatcher(OfficeFloorListener.class));
 
 		// Record setting the default class loader
 		this.officeFloorBuilder.setClassLoader(Thread.currentThread().getContextClassLoader());
+
+		// Record setting the clock factory
+		this.officeFloorBuilder.setClockFactory(null);
+		this.control(this.officeFloorBuilder).setMatcher(new TypeMatcher(ClockFactory.class));
 
 		// Record adding the resources
 		for (ResourceSource resourceSource : resourceSources) {
@@ -386,6 +393,18 @@ public abstract class AbstractCompileTestCase extends AbstractModelCompilerTestC
 		this.recordReturn(this.managingOfficeBuilder,
 				this.managingOfficeBuilder.setInputManagedObjectName(inputManagedObjectName), dependencyMapper);
 		return dependencyMapper;
+	}
+
+	/**
+	 * Records specifying the {@link ManagedObjectFunctionDependency}.
+	 * 
+	 * @param functionObjectName     Name of the
+	 *                               {@link ManagedObjectFunctionDependency}.
+	 * @param scopeManagedObjectName Name of the {@link ManagedObject}.
+	 */
+	protected void record_managingOfficeBuilder_mapFunctionDependency(String functionObjectName,
+			String scopeManagedObjectName) {
+		this.managingOfficeBuilder.mapFunctionDependency(functionObjectName, scopeManagedObjectName);
 	}
 
 	/**

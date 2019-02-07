@@ -18,6 +18,7 @@
 package net.officefloor.web.security.type;
 
 import java.io.Serializable;
+import java.util.function.Supplier;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.OfficeFloorCompilerRunnable;
@@ -39,6 +40,7 @@ import net.officefloor.web.spi.security.HttpAccessControlFactory;
 import net.officefloor.web.spi.security.HttpAuthenticationFactory;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
+import net.officefloor.web.spi.security.HttpSecuritySupportingManagedObject;
 
 /**
  * {@link HttpSecurityLoader} implementation.
@@ -62,8 +64,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 	/**
 	 * Initiate.
 	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
+	 * @param compiler {@link OfficeFloorCompiler}.
 	 */
 	public HttpSecurityLoaderImpl(OfficeFloorCompiler compiler) {
 		ManagedObjectLoader managedObjectLoader = compiler.getManagedObjectLoader();
@@ -84,9 +85,14 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 			}
 
 			@Override
-			public <D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(
-					HttpSecurityManagedObjectAdapterSource<D> source, PropertyList properties) {
+			public <D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(ManagedObjectSource<D, ?> source,
+					PropertyList properties) {
 				return managedObjectLoader.loadManagedObjectType(source, properties);
+			}
+
+			@Override
+			public Supplier<PropertyList> getPropertyListFactory() {
+				return () -> compiler.createPropertyList();
 			}
 
 			@Override
@@ -99,12 +105,9 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param officeSourceContext
-	 *            {@link OfficeFloorSourceContext}.
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
+	 * @param officeArchitect         {@link OfficeArchitect}.
+	 * @param officeSourceContext     {@link OfficeFloorSourceContext}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
 	 */
 	public HttpSecurityLoaderImpl(OfficeArchitect officeArchitect, OfficeSourceContext officeSourceContext,
 			final String managedObjectSourceName) {
@@ -126,10 +129,15 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 
 			@Override
 			@SuppressWarnings("unchecked")
-			public <D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(
-					HttpSecurityManagedObjectAdapterSource<D> source, PropertyList properties) {
+			public <D extends Enum<D>> ManagedObjectType<D> loadManagedObjectType(ManagedObjectSource<D, ?> source,
+					PropertyList properties) {
 				return (ManagedObjectType<D>) officeSourceContext.loadManagedObjectType(managedObjectSourceName, source,
 						properties);
+			}
+
+			@Override
+			public Supplier<PropertyList> getPropertyListFactory() {
+				return () -> officeSourceContext.createPropertyList();
 			}
 
 			@Override
@@ -208,7 +216,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 
 		// Create the adaptation over the security source
 		HttpSecurityManagedObjectAdapterSource<O> adapter = new HttpSecurityManagedObjectAdapterSource<>(
-				httpSecuritySource);
+				httpSecuritySource, this.loader.getPropertyListFactory());
 
 		// Load the managed object access control type
 		ManagedObjectType<O> moAccessControlType = this.loader.loadManagedObjectType(adapter, propertyList);
@@ -257,9 +265,33 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 		// Obtain the credentials type
 		Class<C> credentialsType = metaData.getCredentialsType();
 
+		// Load the supporting managed object types
+		HttpSecuritySupportingManagedObjectImpl<?>[] supportingManagedObjects = adapter
+				.getHttpSecuritySupportingManagedObjects();
+		HttpSecuritySupportingManagedObjectType<?>[] supportingManagedObjectTypes = new HttpSecuritySupportingManagedObjectType[supportingManagedObjects.length];
+		for (int i = 0; i < supportingManagedObjectTypes.length; i++) {
+			HttpSecuritySupportingManagedObjectImpl<?> supportingManagedObject = supportingManagedObjects[i];
+
+			// Load the supporting managed object type
+			HttpSecuritySupportingManagedObjectType<?> supportingManagedObjectType = supportingManagedObject
+					.loadHttpSecuritySupportingManagedObjectType(
+							(supportingManagedObjectSource, supportingPropertyList) -> this.loader
+									.loadManagedObjectType(supportingManagedObjectSource, supportingPropertyList));
+			if (supportingManagedObjectType == null) {
+				this.loader.addIssue("Failed to load " + HttpSecuritySupportingManagedObjectType.class.getSimpleName()
+						+ " for " + HttpSecuritySupportingManagedObject.class.getSimpleName() + " "
+						+ supportingManagedObject.getSupportingManagedObjectName());
+				return null;
+			}
+
+			// Add the supporting managed object type
+			supportingManagedObjectTypes[i] = supportingManagedObjectType;
+		}
+
 		// Return the adapted type
 		return new HttpSecurityTypeImpl<A, AC, C, O, F>(authenticationType, httpAuthenticationFactory,
-				accessControlType, httpAccessControlFactory, credentialsType, moAccessControlType);
+				accessControlType, httpAccessControlFactory, credentialsType, moAccessControlType,
+				supportingManagedObjectTypes);
 	}
 
 	/**
@@ -270,8 +302,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 		/**
 		 * Creates a new instance of the {@link HttpSecuritySource}.
 		 * 
-		 * @param httpSecuritySourceClass
-		 *            {@link HttpSecuritySource} {@link Class}.
+		 * @param httpSecuritySourceClass {@link HttpSecuritySource} {@link Class}.
 		 * @return New {@link HttpSecuritySource}.
 		 */
 		<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>, S extends HttpSecuritySource<A, AC, C, O, F>> S newInstance(
@@ -280,8 +311,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 		/**
 		 * Loads the specification.
 		 * 
-		 * @param managedObjectSourceClass
-		 *            {@link ManagedObjectSource} {@link Class}.
+		 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
 		 * @return {@link PropertyList} specification.
 		 */
 		@SuppressWarnings("rawtypes")
@@ -290,20 +320,24 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 		/**
 		 * Loads the {@link ManagedObjectType}.
 		 * 
-		 * @param source
-		 *            {@link HttpSecurityManagedObjectAdapterSource}.
-		 * @param properties
-		 *            {@link PropertyList}.
+		 * @param source     {@link ManagedObjectSource}.
+		 * @param properties {@link PropertyList}.
 		 * @return {@link ManagedObjectType}.
 		 */
-		<O extends Enum<O>> ManagedObjectType<O> loadManagedObjectType(HttpSecurityManagedObjectAdapterSource<O> source,
+		<O extends Enum<O>> ManagedObjectType<O> loadManagedObjectType(ManagedObjectSource<O, ?> source,
 				PropertyList properties);
+
+		/**
+		 * Obtains the factory to create a {@link PropertyList}.
+		 * 
+		 * @return Factory to create a {@link PropertyList}.
+		 */
+		Supplier<PropertyList> getPropertyListFactory();
 
 		/**
 		 * Adds a {@link CompilerIssue}.
 		 * 
-		 * @param issueDescription
-		 *            Description of the issue.
+		 * @param issueDescription Description of the issue.
 		 * @return {@link CompileError}.
 		 */
 		CompileError addIssue(String issueDescription);
@@ -348,29 +382,33 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 		private final ManagedObjectType<O> moAccessControlType;
 
 		/**
+		 * {@link HttpSecuritySupportingManagedObjectType} instances.
+		 */
+		private final HttpSecuritySupportingManagedObjectType<?>[] supportingManagedObjectTypes;
+
+		/**
 		 * Initiate.
 		 * 
-		 * @param authenticationType
-		 *            Authentication type.
-		 * @param httpAuthenticationFactory
-		 *            {@link HttpAccessControlFactory}.
-		 * @param moAccessControlType
-		 *            {@link ManagedObjectType}.
-		 * @param httpAccessControlFactory
-		 *            {@link HttpAccessControlFactory}.
-		 * @param credentialsType
-		 *            Credentials type.
+		 * @param authenticationType           Authentication type.
+		 * @param httpAuthenticationFactory    {@link HttpAccessControlFactory}.
+		 * @param moAccessControlType          {@link ManagedObjectType}.
+		 * @param httpAccessControlFactory     {@link HttpAccessControlFactory}.
+		 * @param credentialsType              Credentials type.
+		 * @param supportingManagedObjectTypes {@link HttpSecuritySupportingManagedObjectType}
+		 *                                     instances.
 		 */
 		private HttpSecurityTypeImpl(Class<A> authenticationType,
 				HttpAuthenticationFactory<A, C> httpAuthenticationFactory, Class<AC> accessControlType,
 				HttpAccessControlFactory<AC> httpAccessControlFactory, Class<C> credentialsType,
-				ManagedObjectType<O> moAccessControlType) {
+				ManagedObjectType<O> moAccessControlType,
+				HttpSecuritySupportingManagedObjectType<?>[] supportingManagedObjectTypes) {
 			this.authenticationType = authenticationType;
 			this.httpAuthenticationFactory = httpAuthenticationFactory;
 			this.accessControlType = accessControlType;
 			this.httpAccessControlFactory = httpAccessControlFactory;
 			this.credentialsType = credentialsType;
 			this.moAccessControlType = moAccessControlType;
+			this.supportingManagedObjectTypes = supportingManagedObjectTypes;
 		}
 
 		/*
@@ -418,7 +456,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		public HttpSecurityFlowType<?>[] getFlowTypes() {
+		public HttpSecurityFlowType<F>[] getFlowTypes() {
 			return AdaptFactory.adaptArray(this.moAccessControlType.getFlowTypes(), HttpSecurityFlowType.class,
 					new AdaptFactory<HttpSecurityFlowType, ManagedObjectFlowType>() {
 						@Override
@@ -426,6 +464,11 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 							return new HttpSecurityFlowTypeImpl<F>(delegate);
 						}
 					});
+		}
+
+		@Override
+		public HttpSecuritySupportingManagedObjectType<?>[] getSupportingManagedObjectTypes() {
+			return this.supportingManagedObjectTypes;
 		}
 	}
 
@@ -443,8 +486,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 		/**
 		 * Initiate.
 		 * 
-		 * @param dependency
-		 *            {@link ManagedObjectDependencyType}.
+		 * @param dependency {@link ManagedObjectDependencyType}.
 		 */
 		public HttpSecurityDependencyTypeImpl(ManagedObjectDependencyType<O> dependency) {
 			this.dependency = dependency;
@@ -493,8 +535,7 @@ public class HttpSecurityLoaderImpl implements HttpSecurityLoader, OfficeFloorCo
 		/**
 		 * Initiate.
 		 * 
-		 * @param flow
-		 *            {@link ManagedObjectFlowType}.
+		 * @param flow {@link ManagedObjectFlowType}.
 		 */
 		public HttpSecurityFlowTypeImpl(ManagedObjectFlowType<F> flow) {
 			this.flow = flow;

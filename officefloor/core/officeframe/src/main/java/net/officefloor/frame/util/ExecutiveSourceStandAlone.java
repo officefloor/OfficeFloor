@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
 import net.officefloor.frame.api.executive.source.ExecutiveSourceContext;
@@ -34,6 +35,7 @@ import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 import net.officefloor.frame.impl.execute.execution.ManagedExecutionFactoryImpl;
 import net.officefloor.frame.impl.execute.execution.ThreadFactoryManufacturer;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
+import net.officefloor.frame.test.MockClockFactory;
 
 /**
  * Loads {@link ExecutiveSource} for stand-alone use.
@@ -56,6 +58,11 @@ public class ExecutiveSourceStandAlone {
 	 * {@link ThreadCompletionListener} instances.
 	 */
 	private final List<ThreadCompletionListener> threadCompletionListeners = new LinkedList<>();
+
+	/**
+	 * {@link ClockFactory}.
+	 */
+	private ClockFactory clockFactory = new MockClockFactory();
 
 	/**
 	 * Adds a property for the {@link ManagedObjectSource}.
@@ -87,6 +94,15 @@ public class ExecutiveSourceStandAlone {
 	}
 
 	/**
+	 * Specifies the {@link ClockFactory}.
+	 * 
+	 * @param clockFactory {@link ClockFactory}.
+	 */
+	public void setClockFactory(ClockFactory clockFactory) {
+		this.clockFactory = clockFactory;
+	}
+
+	/**
 	 * Creates the {@link Executive}.
 	 * 
 	 * @param                      <XS> {@link ExecutiveSource} type.
@@ -113,7 +129,8 @@ public class ExecutiveSourceStandAlone {
 	public Executive loadExecutive(ExecutiveSource executiveSource) throws Exception {
 
 		// Create executive source context
-		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader());
+		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
+				this.clockFactory);
 		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
 				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));
 		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,

@@ -26,7 +26,6 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.server.http.impl.DateHttpHeaderClock;
 
 /**
  * Context for the {@link HttpServerImplementation}.
@@ -87,8 +86,9 @@ public interface HttpServerImplementationContext {
 	 * @return {@link SSLContext} to use for HTTPS. May be <code>null</code> if
 	 *         behind Reverse Proxy handling SSL (with communication from Reverse
 	 *         Proxy over non-secure HTTP).
+	 * @throws Exception If fails to create the {@link SSLContext}.
 	 */
-	SSLContext getSslContext();
+	SSLContext getSslContext() throws Exception;
 
 	/**
 	 * Obtains the {@link DeployedOfficeInput} for internal invoked servicing.
@@ -100,12 +100,9 @@ public interface HttpServerImplementationContext {
 	/**
 	 * Obtains the {@link ExternalServiceInput}.
 	 * 
-	 * @param <M>
-	 *            {@link ManagedObject} type.
-	 * @param managedObjectType
-	 *            Type of the {@link ManagedObject}.
-	 * @param cleanupEscalationHandler
-	 *            {@link ExternalServiceCleanupEscalationHandler}.
+	 * @param                          <M> {@link ManagedObject} type.
+	 * @param managedObjectType        Type of the {@link ManagedObject}.
+	 * @param cleanupEscalationHandler {@link ExternalServiceCleanupEscalationHandler}.
 	 * @return {@link ExternalServiceInput}.
 	 */
 	<M extends ManagedObject> ExternalServiceInput<ServerHttpConnection, M> getExternalServiceInput(

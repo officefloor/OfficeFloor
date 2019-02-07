@@ -49,12 +49,13 @@ import net.officefloor.web.HttpHandleRedirectFunction.HttpHandleRedirectDependen
 import net.officefloor.web.HttpRedirectFunction.HttpRedirectDependencies;
 import net.officefloor.web.HttpRouteFunction.HttpRouteDependencies;
 import net.officefloor.web.InitialiseHttpRequestStateFunction.InitialiseHttpRequestStateDependencies;
-import net.officefloor.web.NotFoundFunction.NotFoundDependencies;
+import net.officefloor.web.NotHandledFunction.NotHandledDependencies;
 import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.escalation.NotFoundHttpException;
 import net.officefloor.web.route.WebRouter;
 import net.officefloor.web.route.WebRouterBuilder;
+import net.officefloor.web.route.WebServicer;
 import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.state.HttpArgument;
 import net.officefloor.web.state.HttpRequestState;
@@ -115,10 +116,8 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param outputName
-		 *            {@link SectionOutput} name to link the interception.
-		 * @param inputName
-		 *            {@link SectionInput} name to link the routing.
+		 * @param outputName {@link SectionOutput} name to link the interception.
+		 * @param inputName  {@link SectionInput} name to link the routing.
 		 */
 		private Interception(String outputName, String inputName) {
 			this.outputName = outputName;
@@ -172,14 +171,10 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param flowIndex
-		 *            {@link Flow} index of the route.
-		 * @param method
-		 *            {@link HttpMethod} for the route.
-		 * @param path
-		 *            Path for the route.
-		 * @param inputPath
-		 *            {@link HttpInputPath}.
+		 * @param flowIndex {@link Flow} index of the route.
+		 * @param method    {@link HttpMethod} for the route.
+		 * @param path      Path for the route.
+		 * @param inputPath {@link HttpInputPath}.
 		 */
 		private RouteInput(int flowIndex, HttpMethod method, String path, HttpInputPath inputPath) {
 			this.flowIndex = flowIndex;
@@ -230,15 +225,13 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param isSecure
-		 *            Indicates if redirect to a secure port.
-		 * @param httpPathFactory
-		 *            {@link HttpPathFactory} for this redirect.
-		 * @param inputName
-		 *            Name of the {@link SectionInput} to handle the redirect.
-		 * @param parameterType
-		 *            Type of parameter passed to the {@link ManagedFunction} to
-		 *            retrieve the values to construct the path.
+		 * @param isSecure        Indicates if redirect to a secure port.
+		 * @param httpPathFactory {@link HttpPathFactory} for this redirect.
+		 * @param inputName       Name of the {@link SectionInput} to handle the
+		 *                        redirect.
+		 * @param parameterType   Type of parameter passed to the
+		 *                        {@link ManagedFunction} to retrieve the values to
+		 *                        construct the path.
 		 */
 		private Redirect(boolean isSecure, HttpPathFactory<?> httpPathFactory, String inputName) {
 			this.isSecure = isSecure;
@@ -284,8 +277,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param contextPath
-	 *            Context path. May be <code>null</code>.
+	 * @param contextPath Context path. May be <code>null</code>.
 	 */
 	public HttpRouteSectionSource(String contextPath) {
 		this.builder = new WebRouterBuilder(contextPath);
@@ -294,8 +286,8 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * Specifies the {@link HttpEscalationHandler}
 	 * 
-	 * @param escalationHandler
-	 *            {@link HttpEscalationHandler}. May be <code>null</code>.
+	 * @param escalationHandler {@link HttpEscalationHandler}. May be
+	 *                          <code>null</code>.
 	 */
 	public void setHttpEscalationHandler(HttpEscalationHandler escalationHandler) {
 		this.escalationHandler = escalationHandler;
@@ -316,8 +308,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * Indicates if the path contains parameters.
 	 * 
-	 * @param path
-	 *            Path.
+	 * @param path Path.
 	 * @return <code>true</code> should the path contain parameters.
 	 */
 	public boolean isPathParameters(String path) {
@@ -327,12 +318,9 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * Adds a route.
 	 * 
-	 * @param isSecure
-	 *            Indicates if a secure connection is required for the route.
-	 * @param method
-	 *            {@link HttpMethod}.
-	 * @param path
-	 *            Route path.
+	 * @param isSecure Indicates if a secure connection is required for the route.
+	 * @param method   {@link HttpMethod}.
+	 * @param path     Route path.
 	 * @return {@link RouteInput} for the route.
 	 */
 	public RouteInput addRoute(boolean isSecure, HttpMethod method, String path) {
@@ -354,17 +342,13 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	/**
 	 * Adds a {@link Redirect}.
 	 * 
-	 * @param isSecure
-	 *            Indicates to redirect to a secure port.
-	 * @param routeInput
-	 *            {@link RouteInput} to redirect to.
-	 * @param parameterType
-	 *            Type of parameter passed to the redirect {@link ManagedFunction}
-	 *            to source values for constructing the path. May be
-	 *            <code>null</code>.
+	 * @param isSecure      Indicates to redirect to a secure port.
+	 * @param routeInput    {@link RouteInput} to redirect to.
+	 * @param parameterType Type of parameter passed to the redirect
+	 *                      {@link ManagedFunction} to source values for
+	 *                      constructing the path. May be <code>null</code>.
 	 * @return {@link Redirect}.
-	 * @throws Exception
-	 *             If fails to add the redirect.
+	 * @throws Exception If fails to add the redirect.
 	 */
 	public Redirect addRedirect(boolean isSecure, RouteInput routeInput, Class<?> parameterType) throws Exception {
 
@@ -493,16 +477,17 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		designer.link(handleRedirect.getFunctionFlow(UNHANDLED_OUTPUT_NAME), unhandled, false);
 
 		// Configure the not found input
-		SectionInput notFoundInput = designer.addSectionInput(NOT_FOUND_INPUT_NAME, null);
-		SectionFunctionNamespace notFoundNamespace = designer.addSectionFunctionNamespace("NOT_FOUND",
-				new NotFoundManagedFunctionSource());
-		SectionFunction notFound = notFoundNamespace.addSectionFunction(NOT_FOUND_INPUT_NAME, NOT_FOUND_INPUT_NAME);
-		designer.link(notFoundInput, notFound);
+		SectionInput notHandledInput = designer.addSectionInput(NOT_FOUND_INPUT_NAME, null);
+		SectionFunctionNamespace notHandledNamespace = designer.addSectionFunctionNamespace("NOT_HANDLED",
+				new NotHandledManagedFunctionSource());
+		SectionFunction notHandled = notHandledNamespace.addSectionFunction(NOT_FOUND_INPUT_NAME, NOT_FOUND_INPUT_NAME);
+		designer.link(notHandledInput, notHandled);
 
 		// Escalate not found to office
 		SectionOutput notFoundEscalation = designer.addSectionOutput(NotFoundHttpException.class.getSimpleName(),
 				NotFoundHttpException.class.getName(), true);
-		designer.link(notFound.getFunctionEscalation(NotFoundHttpException.class.getName()), notFoundEscalation, true);
+		designer.link(notHandled.getFunctionEscalation(NotFoundHttpException.class.getName()), notFoundEscalation,
+				true);
 
 		// Configure routing dependencies
 		designer.link(route.getFunctionObject(HttpRouteDependencies.SERVER_HTTP_CONNECTION.name()),
@@ -516,9 +501,10 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 				requestState);
 		designer.link(handleRedirect.getFunctionObject(HttpHandleRedirectDependencies.SESSION.name()), session);
 
-		// Configure not found dependencies
-		designer.link(notFound.getFunctionObject(NotFoundDependencies.SERVER_HTTP_CONNECTION.name()),
+		// Configure not handled dependencies
+		designer.link(notHandled.getFunctionObject(NotHandledDependencies.SERVER_HTTP_CONNECTION.name()),
 				serverHttpConnection);
+		notHandled.getFunctionObject(NotHandledDependencies.WEB_SERVICER.name()).flagAsParameter();
 
 		// Configure the redirects
 		for (Redirect redirect : this.redirects) {
@@ -587,8 +573,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param router
-		 *            {@link HttpRouter}.
+		 * @param router {@link HttpRouter}.
 		 */
 		private HttpRouteManagedFunctionSource(HttpRouter router) {
 			this.router = router;
@@ -644,8 +629,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param router
-		 *            {@link HttpRouter}.
+		 * @param router {@link HttpRouter}.
 		 */
 		private HttpHandleRedirectFunctionSource(HttpRouter router) {
 			this.router = router;
@@ -727,8 +711,7 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param redirect
-		 *            {@link Redirect}.
+		 * @param redirect {@link Redirect}.
 		 */
 		private RedirectManagedFunctionSource(Redirect redirect) {
 			this.redirect = redirect;
@@ -765,10 +748,10 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 	}
 
 	/**
-	 * {@link ManagedFunctionSource} for the {@link NotFoundFunction}.
+	 * {@link ManagedFunctionSource} for the {@link NotHandledFunction}.
 	 */
 	@PrivateSource
-	private class NotFoundManagedFunctionSource extends AbstractManagedFunctionSource {
+	private class NotHandledManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		/*
 		 * ============ ManagedFunctionSource ==============
@@ -782,13 +765,14 @@ public class HttpRouteSectionSource extends AbstractSectionSource {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 
-			// Add the not found function
-			ManagedFunctionTypeBuilder<NotFoundDependencies, None> builder = functionNamespaceTypeBuilder
-					.addManagedFunctionType(NOT_FOUND_INPUT_NAME, new NotFoundFunction(), NotFoundDependencies.class,
-							None.class);
+			// Add the not handled function
+			ManagedFunctionTypeBuilder<NotHandledDependencies, None> builder = functionNamespaceTypeBuilder
+					.addManagedFunctionType(NOT_FOUND_INPUT_NAME, new NotHandledFunction(),
+							NotHandledDependencies.class, None.class);
 
-			// Configure dependency on server HTTP connection
-			builder.addObject(ServerHttpConnection.class).setKey(NotFoundDependencies.SERVER_HTTP_CONNECTION);
+			// Configure dependencies
+			builder.addObject(ServerHttpConnection.class).setKey(NotHandledDependencies.SERVER_HTTP_CONNECTION);
+			builder.addObject(WebServicer.class).setKey(NotHandledDependencies.WEB_SERVICER);
 
 			// Configure not found escalation
 			builder.addEscalation(NotFoundHttpException.class);

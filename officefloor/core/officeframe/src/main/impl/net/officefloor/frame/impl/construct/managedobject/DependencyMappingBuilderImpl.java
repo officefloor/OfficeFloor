@@ -101,6 +101,28 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>> implements Dependen
 		this(boundManagedObjectName, null);
 	}
 
+	/**
+	 * Maps in the dependency.
+	 * 
+	 * @param index                  Index to map the dependency under.
+	 * @param key                    Key for the dependency. May be
+	 *                               <code>null</code>.
+	 * @param scopeManagedObjectName Scope name for the {@link ManagedObject}.
+	 */
+	@SuppressWarnings("unchecked")
+	private <d extends Enum<d>> void mapDependency(int index, d key, String scopeManagedObjectName) {
+
+		// Cast key to expected type
+		O castKey = (O) key;
+
+		// Create the dependency
+		ManagedObjectDependencyConfigurationImpl dependency = new ManagedObjectDependencyConfigurationImpl(castKey,
+				scopeManagedObjectName);
+
+		// Map the dependency at the index
+		this.dependencies.put(Integer.valueOf(index), dependency);
+	}
+
 	/*
 	 * ============= DependencyMappingBuilder =============================
 	 */
@@ -151,28 +173,6 @@ public class DependencyMappingBuilderImpl<O extends Enum<O>> implements Dependen
 
 		// Return the optional thread local
 		return (OptionalThreadLocal<T>) this.threadLocal.getOptionalThreadLocal();
-	}
-
-	/**
-	 * Maps in the dependency.
-	 * 
-	 * @param index                  Index to map the dependency under.
-	 * @param key                    Key for the dependency. May be
-	 *                               <code>null</code>.
-	 * @param scopeManagedObjectName Scope name for the {@link ManagedObject}.
-	 */
-	@SuppressWarnings("unchecked")
-	private <d extends Enum<d>> void mapDependency(int index, d key, String scopeManagedObjectName) {
-
-		// Cast key to expected type
-		O castKey = (O) key;
-
-		// Create the dependency
-		ManagedObjectDependencyConfigurationImpl dependency = new ManagedObjectDependencyConfigurationImpl(castKey,
-				scopeManagedObjectName);
-
-		// Map the dependency at the index
-		this.dependencies.put(Integer.valueOf(index), dependency);
 	}
 
 	/*

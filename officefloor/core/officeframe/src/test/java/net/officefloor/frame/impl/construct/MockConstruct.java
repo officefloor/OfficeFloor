@@ -31,6 +31,7 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -1561,7 +1562,8 @@ public class MockConstruct {
 				// Build
 				this.built = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy, executionStrategies,
 						this.teamRegistry, this.breakChainTeamManagement, this.threadLocalAwareExecutor,
-						this.managedExecutionFactory, mosRegistry, this.officeFloorEscalation);
+						this.managedExecutionFactory, mosRegistry, this.officeFloorEscalation,
+						new OfficeFloorListener[0]);
 			}
 			return this.built;
 		}

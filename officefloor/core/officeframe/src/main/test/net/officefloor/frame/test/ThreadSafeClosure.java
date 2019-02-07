@@ -21,8 +21,6 @@ import java.util.function.Function;
 
 import org.junit.Assert;
 
-import junit.framework.AssertionFailedError;
-
 /**
  * {@link Thread} safe capture of a free variable for closure state of a
  * {@link Function}.
@@ -35,6 +33,11 @@ public class ThreadSafeClosure<T> {
 	 * {@link Closure} free variable value.
 	 */
 	private T value;
+
+	/**
+	 * Possible failure.
+	 */
+	private Throwable failure;
 
 	/**
 	 * Indicates if value provided. Allows for <code>null</code> value to be
@@ -52,8 +55,7 @@ public class ThreadSafeClosure<T> {
 	/**
 	 * Initialise with initial value.
 	 * 
-	 * @param initialValue
-	 *            Initial value.
+	 * @param initialValue Initial value.
 	 */
 	public ThreadSafeClosure(T initialValue) {
 		this.value = initialValue;
@@ -62,13 +64,27 @@ public class ThreadSafeClosure<T> {
 	/**
 	 * Sets the value.
 	 * 
-	 * @param value
-	 *            Value.
+	 * @param value Value.
 	 */
 	public synchronized void set(T value) {
 
 		// Set value
 		this.value = value;
+		this.isValueProvided = true;
+
+		// Notify value available
+		this.notifyAll();
+	}
+
+	/**
+	 * Flags a failure.
+	 * 
+	 * @param cause Cause of the failure.
+	 */
+	public synchronized void failure(Throwable cause) {
+
+		// Set failure
+		this.failure = cause;
 		this.isValueProvided = true;
 
 		// Notify value available
@@ -88,27 +104,18 @@ public class ThreadSafeClosure<T> {
 	 * Convenience method to wait 3 seconds and then get value.
 	 * 
 	 * @return Value.
-	 * @throws AssertionFailedError
-	 *             If times out waiting for the value.
-	 * @throws InterruptedException
-	 *             If {@link Thread} interrupted.
 	 */
-	public synchronized T waitAndGet() throws InterruptedException {
+	public synchronized T waitAndGet() {
 		return this.waitAndGet(3000);
 	}
 
 	/**
 	 * Obtains the value.
 	 * 
-	 * @param timeout
-	 *            Timeout to wait for the value.
+	 * @param timeout Timeout to wait for the value.
 	 * @return Value.
-	 * @throws AssertionFailedError
-	 *             If times out waiting for the value.
-	 * @throws InterruptedException
-	 *             If interrupted in waiting for value.
 	 */
-	public synchronized T waitAndGet(long timeout) throws InterruptedException {
+	public synchronized T waitAndGet(long timeout) {
 
 		// Capture time for time out
 		long startTime = System.currentTimeMillis();
@@ -120,7 +127,16 @@ public class ThreadSafeClosure<T> {
 			}
 
 			// Wait some time for value
-			this.wait(10);
+			try {
+				this.wait(10);
+			} catch (InterruptedException ex) {
+				OfficeFrameTestCase.fail(ex);
+			}
+		}
+
+		// Determine if failure
+		if (this.failure != null) {
+			OfficeFrameTestCase.fail(this.failure);
 		}
 
 		// As here have value

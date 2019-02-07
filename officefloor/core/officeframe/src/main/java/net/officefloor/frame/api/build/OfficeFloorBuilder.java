@@ -19,6 +19,8 @@ package net.officefloor.frame.api.build;
 
 import java.util.function.Consumer;
 
+import net.officefloor.frame.api.clock.Clock;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.source.ExecutiveSource;
@@ -46,6 +48,14 @@ public interface OfficeFloorBuilder {
 	 * @param classLoader {@link ClassLoader}.
 	 */
 	void setClassLoader(ClassLoader classLoader);
+
+	/**
+	 * Allows overriding the {@link ClockFactory} to create {@link Clock} instances
+	 * by the {@link SourceContext}.
+	 * 
+	 * @param clockFactory {@link ClockFactory}.
+	 */
+	void setClockFactory(ClockFactory clockFactory);
 
 	/**
 	 * Decorates all the {@link Thread} instances created by the

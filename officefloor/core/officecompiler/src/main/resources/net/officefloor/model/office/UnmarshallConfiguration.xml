@@ -115,6 +115,25 @@
 					node="external-managed-object@name" />
 			</object>
 		</object>
+		<object method="addOfficeManagedObjectFunctionDependency"
+			node="function-dependency"
+			class="net.officefloor.model.office.OfficeManagedObjectFunctionDependencyModel">
+			<value method="setOfficeManagedObjectFunctionDependencyName"
+				node="function-dependency@name" />
+			<value method="setDependencyType"
+				node="function-dependency@object-type" />
+			<object method="setOfficeManagedObject" node="managed-object"
+				class="net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel">
+				<value method="setOfficeManagedObjectName"
+					node="managed-object@name" />
+			</object>
+			<object method="setExternalManagedObject"
+				node="external-managed-object"
+				class="net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel">
+				<value method="setExternalManagedObjectName"
+					node="external-managed-object@name" />
+			</object>
+		</object>
 		<object method="addOfficeManagedObjectSourceFlow" node="flow"
 			class="net.officefloor.model.office.OfficeManagedObjectSourceFlowModel">
 			<value method="setOfficeManagedObjectSourceFlowName"

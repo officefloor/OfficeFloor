@@ -58,6 +58,9 @@ import net.officefloor.model.office.OfficeInputManagedObjectDependencyToOfficeMa
 import net.officefloor.model.office.OfficeManagedObjectDependencyModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectDependencyToOfficeManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectModel;
 import net.officefloor.model.office.OfficeManagedObjectPoolModel;
 import net.officefloor.model.office.OfficeManagedObjectSourceFlowModel;
@@ -141,6 +144,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeInputManagedObjectDependencyModel inputDependency = new OfficeInputManagedObjectDependencyModel(
 				"INPUT_DEPENDENCY", Connection.class.getName());
 		mos.addOfficeInputManagedObjectDependency(inputDependency);
+		OfficeManagedObjectFunctionDependencyModel functionDependency = new OfficeManagedObjectFunctionDependencyModel(
+				"FUNCTION_DEPENDENCY", Connection.class.getName());
+		mos.addOfficeManagedObjectFunctionDependency(functionDependency);
 		OfficeManagedObjectSourceFlowModel moFlow = new OfficeManagedObjectSourceFlowModel("FLOW",
 				Integer.class.getName());
 		mos.addOfficeManagedObjectSourceFlow(moFlow);
@@ -226,6 +232,16 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeInputManagedObjectDependencyToOfficeManagedObjectModel inputDependencyToMo = new OfficeInputManagedObjectDependencyToOfficeManagedObjectModel(
 				"MANAGED_OBJECT");
 		inputDependency.setOfficeManagedObject(inputDependencyToMo);
+
+		// managed object function dependency -> external managed object
+		OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel functionDependencyToExtMo = new OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel(
+				"EXTERNAL_MANAGED_OBJECT");
+		functionDependency.setExternalManagedObject(functionDependencyToExtMo);
+
+		// input managed object dependency -> office managed object
+		OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel functionDependencyToMo = new OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel(
+				"MANAGED_OBJECT");
+		functionDependency.setOfficeManagedObject(functionDependencyToMo);
 
 		// managed object -> pre-load administration
 		OfficeManagedObjectToPreLoadAdministrationModel moToPreLoadAdmin = new OfficeManagedObjectToPreLoadAdministrationModel(
@@ -426,6 +442,16 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				inputDependencyToMo.getOfficeInputManagedObjectDependency());
 		assertEquals("input dependency -> managed object", mo, inputDependencyToMo.getOfficeManagedObject());
 
+		// Ensure function dependency connected to external managed object
+		assertEquals("function dependency <- external mo", functionDependency,
+				functionDependencyToExtMo.getOfficeManagedObjectFunctionDependency());
+		assertEquals("function dependency -> external mo", extMo, functionDependencyToExtMo.getExternalManagedObject());
+
+		// Ensure function dependency connected to office managed object
+		assertEquals("function dependency <- managed object", functionDependency,
+				functionDependencyToMo.getOfficeManagedObjectFunctionDependency());
+		assertEquals("function dependency -> managed object", mo, functionDependencyToMo.getOfficeManagedObject());
+
 		// Ensure managed object connected to its pre-load administration
 		assertEquals("managed object <- pre-load admin", mo, moToPreLoadAdmin.getOfficeManagedObject());
 		assertEquals("managed object -> pre-load admin", admin, moToPreLoadAdmin.getAdministration());
@@ -567,6 +593,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeInputManagedObjectDependencyModel inputDependency = new OfficeInputManagedObjectDependencyModel(
 				"INPUT_DEPENDENCY", Connection.class.getName());
 		mos.addOfficeInputManagedObjectDependency(inputDependency);
+		OfficeManagedObjectFunctionDependencyModel functionDependency = new OfficeManagedObjectFunctionDependencyModel(
+				"FUNCTION_DEPENDENCY", Connection.class.getName());
+		mos.addOfficeManagedObjectFunctionDependency(functionDependency);
 		OfficeManagedObjectSourceFlowModel moFlow = new OfficeManagedObjectSourceFlowModel("FLOW",
 				Integer.class.getName());
 		mos.addOfficeManagedObjectSourceFlow(moFlow);
@@ -663,6 +692,18 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		inputDependencyToMo.setOfficeInputManagedObjectDependency(inputDependency);
 		inputDependencyToMo.setOfficeManagedObject(mo);
 		inputDependencyToMo.connect();
+
+		// function dependency -> external managed object
+		OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel functionDependencyToExtMo = new OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel();
+		functionDependencyToExtMo.setOfficeManagedObjectFunctionDependency(functionDependency);
+		functionDependencyToExtMo.setExternalManagedObject(extMo);
+		functionDependencyToExtMo.connect();
+
+		// function dependency -> office managed object
+		OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel functionDependencyToMo = new OfficeManagedObjectFunctionDependencyToOfficeManagedObjectModel();
+		functionDependencyToMo.setOfficeManagedObjectFunctionDependency(functionDependency);
+		functionDependencyToMo.setOfficeManagedObject(mo);
+		functionDependencyToMo.connect();
 
 		// managed object -> pre-load administration
 		OfficeManagedObjectToPreLoadAdministrationModel moToPreLoadAdmin = new OfficeManagedObjectToPreLoadAdministrationModel();
@@ -862,6 +903,10 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				inputDependencyToExtMo.getExternalManagedObjectName());
 		assertEquals("input dependency - managed object", "MANAGED_OBJECT",
 				inputDependencyToMo.getOfficeManagedObjectName());
+		assertEquals("function dependency - external managed object", "EXTERNAL_MANAGED_OBJECT",
+				functionDependencyToExtMo.getExternalManagedObjectName());
+		assertEquals("function dependency - managed object", "MANAGED_OBJECT",
+				functionDependencyToMo.getOfficeManagedObjectName());
 		assertEquals("managed object - pre-load administration", "ADMINISTRATION",
 				moToPreLoadAdmin.getAdministrationName());
 		assertEquals("managed object source team - office team", "TEAM", moTeamToTeam.getOfficeTeamName());

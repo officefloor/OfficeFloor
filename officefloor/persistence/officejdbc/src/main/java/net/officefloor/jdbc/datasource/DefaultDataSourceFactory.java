@@ -33,6 +33,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
+import net.officefloor.frame.test.MockClockFactory;
 
 /**
  * Default {@link DataSourceFactory}.
@@ -91,7 +92,8 @@ public class DefaultDataSourceFactory implements DataSourceFactory, ConnectionPo
 		}
 
 		// Create the source context
-		SourceContext rootContext = new SourceContextImpl(false, DefaultDataSourceFactory.class.getClassLoader());
+		SourceContext rootContext = new SourceContextImpl(false, DefaultDataSourceFactory.class.getClassLoader(),
+				new MockClockFactory());
 		SourceContext configuredContext = new SourceContextImpl(false, rootContext,
 				new SourcePropertiesImpl(sourceProperties));
 

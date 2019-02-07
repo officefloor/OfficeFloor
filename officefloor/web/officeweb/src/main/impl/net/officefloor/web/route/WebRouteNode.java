@@ -31,23 +31,24 @@ import net.officefloor.web.state.HttpArgument;
 public interface WebRouteNode {
 
 	/**
+	 * Indicates possible matching of {@link WebRouteNode}.
+	 */
+	public enum WebRouteResultEnum {
+		NO_MATCH, MATCH_PATH_NOT_METHOD, MATCH
+	}
+
+	/**
 	 * Attempts to handle the path.
 	 * 
-	 * @param method
-	 *            {@link HttpMethod}.
-	 * @param path
-	 *            Path.
-	 * @param index
-	 *            Index into the path.
-	 * @param headPathArgument
-	 *            Head {@link HttpArgument} from the path.
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
-	 * @param context
-	 *            {@link ManagedFunctionContext}.
-	 * @return <code>true</code> if handled the path.
+	 * @param method           {@link HttpMethod}.
+	 * @param path             Path.
+	 * @param index            Index into the path.
+	 * @param headPathArgument Head {@link HttpArgument} from the path.
+	 * @param connection       {@link ServerHttpConnection}.
+	 * @param context          {@link ManagedFunctionContext}.
+	 * @return {@link WebServicer}.
 	 */
-	boolean handle(HttpMethod method, String path, int index, HttpArgument headPathArgument,
+	WebServicer handle(HttpMethod method, String path, int index, HttpArgument headPathArgument,
 			ServerHttpConnection connection, ManagedFunctionContext<?, Indexed> context);
 
 }

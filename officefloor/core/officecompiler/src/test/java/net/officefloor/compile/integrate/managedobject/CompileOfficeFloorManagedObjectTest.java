@@ -44,6 +44,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -530,6 +531,34 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	}
 
 	/**
+	 * Tests compiling an {@link ManagedObjectFunctionDependency} linked via the
+	 * {@link ManagedObjectSource}.
+	 */
+	public void testManagedObjectFunctionDependencyLinkedToManagedObject() {
+
+		// Record building the OfficeFloor
+		this.record_init();
+
+		// Register the managed object function dependency
+		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeFloorBuilder_addManagedObject("DEPENDENT_SOURCE", FunctionDependencyManagedObject.class, 0);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		
+		// Map the function dependency
+		this.record_managingOfficeBuilder_mapFunctionDependency("DEPENDENCY", "SIMPLE");
+
+		// Register remaining
+		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE", ClassManagedObjectSource.class, 0,
+				"class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
+		this.record_officeBuilder_addProcessManagedObject("SIMPLE", "SIMPLE");
+
+		// Compile the OfficeFloor
+		this.compile(true);
+	}
+
+	/**
 	 * Tests to ensure can link {@link ManagedObject} with
 	 * {@link ManagedObjectPool}.
 	 */
@@ -654,6 +683,35 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		@Override
 		public ManagedFunction<None, None> createManagedFunction() {
 			fail("Should not require function in compiling");
+			return null;
+		}
+	}
+
+	/**
+	 * {@link ManagedObjectSource} requiring a
+	 * {@link ManagedObjectFunctionDependency}.
+	 */
+	@TestSource
+	public static class FunctionDependencyManagedObject extends AbstractManagedObjectSource<None, None> {
+
+		/*
+		 * ================ ManagedObjectSource ====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+			context.setObjectClass(Object.class);
+			context.getManagedObjectSourceContext().addFunctionDependency("DEPENDENCY", String.class);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			fail("Should not require obtaining managed object in compiling");
 			return null;
 		}
 	}

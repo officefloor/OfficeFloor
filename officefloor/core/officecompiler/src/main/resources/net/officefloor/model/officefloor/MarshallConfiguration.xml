@@ -112,6 +112,27 @@
 				</item>
 			</collection>
 			<collection
+				method="getOfficeFloorManagedObjectSourceFunctionDependencies">
+				<item
+					type="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFunctionDependencyModel"
+					element="function-dependency">
+					<attributes>
+						<attribute
+							method="getOfficeFloorManagedObjectSourceFunctionDependencyName"
+							attribute="name" />
+						<attribute method="getDependencyType"
+							attribute="object-type" />
+					</attributes>
+					<object method="getOfficeFloorManagedObject"
+						element="managed-object">
+						<attributes>
+							<attribute method="getOfficeFloorManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+			<collection
 				method="getOfficeFloorManagedObjectSourceFlows">
 				<item
 					type="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel"

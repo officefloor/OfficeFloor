@@ -19,6 +19,7 @@ package net.officefloor.web.security.scheme;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.web.security.HttpAccessControl;
@@ -48,14 +49,15 @@ import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
  * 
  * @author Daniel Sagenschneider
  */
+@TestSource
 public class MockChallengeHttpSecuritySource
-		extends AbstractHttpSecuritySource<MockAuthentication, MockAccessControl, Void, None, None> {
+		extends AbstractHttpSecuritySource<MockAuthentication, MockAccessControl, Void, None, None>
+		implements HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> {
 
 	/**
 	 * Obtains the <code>WWW-Authenticate</code> {@link HttpHeader} value.
 	 * 
-	 * @param realm
-	 *            Realm.
+	 * @param realm Realm.
 	 * @return <code>WWW-Authenticate</code> {@link HttpHeader} value.
 	 */
 	public static String getHeaderChallengeValue(String realm) {
@@ -87,8 +89,7 @@ public class MockChallengeHttpSecuritySource
 	/**
 	 * Instantiate with the realm.
 	 * 
-	 * @param realm
-	 *            Realm.
+	 * @param realm Realm.
 	 */
 	public MockChallengeHttpSecuritySource(String realm) {
 		this.realm = realm;
@@ -131,110 +132,88 @@ public class MockChallengeHttpSecuritySource
 	public HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> sourceHttpSecurity(
 			HttpSecurityContext context) throws HttpException {
 
-		// Create and return the mock HTTP security
-		return new MockChallengeHttpSecurity(this.realm);
+		// Return the mock HTTP security
+		return this;
 	}
 
-	/**
-	 * Mock {@link HttpSecurity}.
+	/*
+	 * =================== HttpSecurity ===========================
 	 */
-	private class MockChallengeHttpSecurity
-			implements HttpSecurity<MockAuthentication, MockAccessControl, Void, None, None> {
 
-		/**
-		 * Realm.
-		 */
-		private final String realm;
+	@Override
+	public MockAuthentication createAuthentication(AuthenticationContext<MockAccessControl, Void> context) {
+		MockAuthentication authentication = new MockAuthentication(context);
+		context.authenticate(null, null); // attempt authentication
+		return authentication;
+	}
 
-		/**
-		 * Instantiate.
-		 * 
-		 * @param realm
-		 *            Realm.
-		 */
-		private MockChallengeHttpSecurity(String realm) {
-			this.realm = realm;
-		}
+	@Override
+	public boolean ratify(Void credentials, RatifyContext<MockAccessControl> context) {
 
-		/*
-		 * =================== HttpSecurity ===========================
-		 */
-
-		@Override
-		public MockAuthentication createAuthentication(AuthenticationContext<MockAccessControl, Void> context) {
-			MockAuthentication authentication = new MockAuthentication(context);
-			context.authenticate(null, null); // attempt authentication
-			return authentication;
-		}
-
-		@Override
-		public boolean ratify(Void credentials, RatifyContext<MockAccessControl> context) {
-
-			// Attempt to obtain from session
-			MockAccessControl accessControl = (MockAccessControl) context.getSession()
-					.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
-			if (accessControl != null) {
-				// Load the security and no need to authenticate
-				context.accessControlChange(accessControl, null);
-				return false;
-			}
-
-			// Determine if basic credentials on request
-			HttpAuthenticationScheme scheme = HttpAuthenticationScheme
-					.getHttpAuthenticationScheme(context.getConnection().getRequest());
-			if ((scheme == null) || (!(AUTHENTICATION_SCHEME.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
-				return false; // must be mock authentication
-			}
-
-			// As here, then have mock authentication details
-			return true;
-		}
-
-		@Override
-		public void authenticate(Void credentials, AuthenticateContext<MockAccessControl, None> context)
-				throws HttpException {
-
-			// Obtain the authentication scheme
-			HttpAuthenticationScheme scheme = HttpAuthenticationScheme
-					.getHttpAuthenticationScheme(context.getConnection().getRequest());
-			if ((scheme == null) || (!(AUTHENTICATION_SCHEME.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
-				return; // no/incorrect authentication scheme
-			}
-
-			// Parse out user and roles
-			String[] parameters = scheme.getParameters().split(",");
-			String userName = parameters[0].trim();
-			String password = parameters.length > 1 ? parameters[1].trim() : null;
-			if (!(userName.equals(password))) {
-				return; // must match to authenticate
-			}
-			String[] roles = new String[parameters.length - 1];
-			for (int i = 1; i < parameters.length; i++) {
-				roles[i - 1] = parameters[i].trim();
-			}
-
-			// Create the access control
-			MockAccessControl accessControl = new MockAccessControl(userName, roles);
-
-			// Remember access control for further requests
-			context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
-
-			// Return the access control
+		// Attempt to obtain from session
+		MockAccessControl accessControl = (MockAccessControl) context.getSession()
+				.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+		if (accessControl != null) {
+			// Load the security and no need to authenticate
 			context.accessControlChange(accessControl, null);
+			return false;
 		}
 
-		@Override
-		public void challenge(ChallengeContext<None, None> context) throws HttpException {
-			// Load the challenge
-			context.setChallenge(AUTHENTICATION_SCHEME, this.realm);
+		// Determine if basic credentials on request
+		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
+				.getHttpAuthenticationScheme(context.getConnection().getRequest());
+		if ((scheme == null) || (!(AUTHENTICATION_SCHEME.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
+			return false; // must be mock authentication
 		}
 
-		@Override
-		public void logout(LogoutContext<None> context) throws HttpException {
+		// As here, then have mock authentication details
+		return true;
+	}
 
-			// Forget access control for further requests (requires login again)
-			context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+	@Override
+	public void authenticate(Void credentials, AuthenticateContext<MockAccessControl, None, None> context)
+			throws HttpException {
+
+		// Obtain the authentication scheme
+		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
+				.getHttpAuthenticationScheme(context.getConnection().getRequest());
+		if ((scheme == null) || (!(AUTHENTICATION_SCHEME.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
+			return; // no/incorrect authentication scheme
 		}
+
+		// Parse out user and roles
+		String[] parameters = scheme.getParameters().split(",");
+		String userName = parameters[0].trim();
+		String password = parameters.length > 1 ? parameters[1].trim() : null;
+		if (!(userName.equals(password))) {
+			return; // must match to authenticate
+		}
+		String[] roles = new String[parameters.length - 1];
+		for (int i = 1; i < parameters.length; i++) {
+			roles[i - 1] = parameters[i].trim();
+		}
+
+		// Create the access control
+		MockAccessControl accessControl = new MockAccessControl(userName, roles);
+
+		// Remember access control for further requests
+		context.getSession().setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
+
+		// Return the access control
+		context.accessControlChange(accessControl, null);
+	}
+
+	@Override
+	public void challenge(ChallengeContext<None, None> context) throws HttpException {
+		// Load the challenge
+		context.setChallenge(AUTHENTICATION_SCHEME, this.realm);
+	}
+
+	@Override
+	public void logout(LogoutContext<None, None> context) throws HttpException {
+
+		// Forget access control for further requests (requires login again)
+		context.getSession().removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
 	}
 
 }

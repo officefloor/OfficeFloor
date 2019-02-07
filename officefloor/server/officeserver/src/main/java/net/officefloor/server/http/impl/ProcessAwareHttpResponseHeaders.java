@@ -27,6 +27,7 @@ import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponseHeaders;
+import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.WritableHttpHeader;
 
 /**

@@ -121,8 +121,7 @@ public class BasicHttpSecuritySource extends
 		/**
 		 * Instantiate.
 		 * 
-		 * @param realm
-		 *            Realm.
+		 * @param realm Realm.
 		 */
 		private BasicHttpSecurity(String realm) {
 			this.realm = realm;
@@ -144,7 +143,7 @@ public class BasicHttpSecuritySource extends
 
 			// Attempt to obtain from session
 			HttpAccessControl accessControl = (HttpAccessControl) context.getSession()
-					.getAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+					.getAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY));
 			if (accessControl != null) {
 				// Load the security and no need to authenticate
 				context.accessControlChange(accessControl, null);
@@ -164,7 +163,7 @@ public class BasicHttpSecuritySource extends
 		}
 
 		@Override
-		public void authenticate(Void credentials, AuthenticateContext<HttpAccessControl, Dependencies> context)
+		public void authenticate(Void credentials, AuthenticateContext<HttpAccessControl, Dependencies, None> context)
 				throws HttpException {
 
 			// Obtain the connection and session
@@ -202,7 +201,7 @@ public class BasicHttpSecuritySource extends
 			}
 
 			// Remember access control for further requests
-			session.setAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY, accessControl);
+			session.setAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY), accessControl);
 
 			// Return the access control
 			context.accessControlChange(accessControl, null);
@@ -216,13 +215,13 @@ public class BasicHttpSecuritySource extends
 		}
 
 		@Override
-		public void logout(LogoutContext<Dependencies> context) throws HttpException {
+		public void logout(LogoutContext<Dependencies, None> context) throws HttpException {
 
 			// Obtain the session
 			HttpSession session = context.getSession();
 
 			// Forget HTTP Security for further requests (requires login again)
-			session.removeAttribute(SESSION_ATTRIBUTE_HTTP_SECURITY);
+			session.removeAttribute(context.getQualifiedAttributeName(SESSION_ATTRIBUTE_HTTP_SECURITY));
 		}
 	}
 

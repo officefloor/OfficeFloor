@@ -47,11 +47,13 @@ import net.officefloor.compile.supplier.SupplierLoader;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.profile.Profiler;
 import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
@@ -122,6 +124,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	public <T> T run(Class<? extends OfficeFloorCompilerRunnable<T>> runnableClass, Object... parameters)
 			throws Exception {
 		return (T) this.invokeMethod("run", new Object[] { runnableClass, parameters }, Class.class, Object[].class);
+	}
+
+	@Override
+	public void setClockFactory(ClockFactory clockFactory) {
+		this.invokeMethod("setClockFactory", new Object[] { clockFactory }, ClockFactory.class);
 	}
 
 	@Override
@@ -246,6 +253,11 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	@Override
 	public PropertyList createPropertyList() {
 		return (PropertyList) this.invokeMethod("createPropertyList", null);
+	}
+
+	@Override
+	public SourceContext createRootSourceContext() {
+		return (SourceContext) this.invokeMethod("createRootSourceContext", null);
 	}
 
 	@Override

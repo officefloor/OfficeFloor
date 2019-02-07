@@ -61,6 +61,15 @@ public interface ManagingOfficeConfiguration<F extends Enum<F>> {
 	ManagingOfficeBuilder<F> getBuilder();
 
 	/**
+	 * Obtains the {@link ManagedObjectFunctionDependencyConfiguration} for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ManagedObjectFunctionDependencyConfiguration} for the
+	 *         {@link ManagedObjectSource}.
+	 */
+	ManagedObjectFunctionDependencyConfiguration[] getFunctionDependencyConfiguration();
+
+	/**
 	 * Obtains the {@link ManagedObjectFlowConfiguration} for the
 	 * {@link ManagedObjectSource}.
 	 *

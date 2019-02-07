@@ -18,10 +18,9 @@
 package net.officefloor.woof.model.woof;
 
 import net.officefloor.configuration.ConfigurationContext;
-import net.officefloor.frame.api.source.ResourceSource;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
-import net.officefloor.woof.model.woof.WoofChangeIssues;
-import net.officefloor.woof.model.woof.WoofTemplateChangeContext;
+import net.officefloor.frame.impl.construct.source.SourcePropertiesImpl;
 
 /**
  * {@link WoofTemplateChangeContext} implementation.
@@ -43,20 +42,14 @@ public class WoofTemplateChangeContextImpl extends SourceContextImpl implements 
 	/**
 	 * Initiate.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param issues
-	 *            {@link WoofChangeIssues}.
-	 * @param resourceSources
-	 *            {@link ResourceSource} instances.
+	 * @param isLoadingType        Indicates if loading type.
+	 * @param sourceContext        {@link SourceContext}.
+	 * @param configurationContext {@link ConfigurationContext}.
+	 * @param issues               {@link WoofChangeIssues}.
 	 */
-	public WoofTemplateChangeContextImpl(boolean isLoadingType, ClassLoader classLoader,
-			ConfigurationContext configurationContext, WoofChangeIssues issues, ResourceSource... resourceSources) {
-		super(isLoadingType, classLoader, resourceSources);
+	public WoofTemplateChangeContextImpl(boolean isLoadingType, SourceContext sourceContext,
+			ConfigurationContext configurationContext, WoofChangeIssues issues) {
+		super(isLoadingType, sourceContext, new SourcePropertiesImpl());
 		this.configurationContext = configurationContext;
 		this.issues = issues;
 	}

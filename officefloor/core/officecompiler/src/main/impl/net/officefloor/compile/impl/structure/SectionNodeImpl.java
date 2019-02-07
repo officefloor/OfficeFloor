@@ -389,7 +389,7 @@ public class SectionNodeImpl implements SectionNode {
 		this.usedSectionSource = source;
 
 		// Create the section source context
-		SectionSourceContext context = new SectionSourceContextImpl(true, this.state.sectionLocation,
+		SectionSourceContext context = new SectionSourceContextImpl(false, this.state.sectionLocation,
 				this.getProperties(), this, this.context);
 
 		try {

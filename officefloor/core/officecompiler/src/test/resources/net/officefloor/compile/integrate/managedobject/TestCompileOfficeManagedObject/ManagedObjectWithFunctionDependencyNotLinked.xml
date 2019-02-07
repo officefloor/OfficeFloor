@@ -1,0 +1,20 @@
+<context>
+	<office-floor>
+		<offices>
+			<office name="OFFICE" source="OFFICE" location="office" />
+		</offices>
+	</office-floor>
+	<office>
+		<managed-object-sources>
+			<managed-object-source name="DEPENDENT_SOURCE"
+				source="${testcase}$FunctionDependencyManagedObject">
+				<function-dependency name="DEPENDENCY" />
+			</managed-object-source>
+		</managed-object-sources>
+		<managed-objects>
+			<managed-object name="DEPENDENT" scope="PROCESS">
+				<managed-object-source name="DEPENDENT_SOURCE" />
+			</managed-object>
+		</managed-objects>
+	</office>
+</context>

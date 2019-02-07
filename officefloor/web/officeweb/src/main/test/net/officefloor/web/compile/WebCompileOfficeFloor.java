@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.compile;
 
+import java.util.function.Consumer;
+
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -25,6 +27,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpUrlContinuation;
@@ -53,8 +56,7 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 	/**
 	 * Instantiate with context path.
 	 * 
-	 * @param contextPath
-	 *            Context path.
+	 * @param contextPath Context path.
 	 */
 	public WebCompileOfficeFloor(String contextPath) {
 		this.contextPath = contextPath;
@@ -63,8 +65,7 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 	/**
 	 * Adds a {@link CompileWebExtension}.
 	 * 
-	 * @param extension
-	 *            {@link CompileWebExtension}.
+	 * @param extension {@link CompileWebExtension}.
 	 */
 	public void web(CompileWebExtension extension) {
 		// Wrap web extension into office extension
@@ -75,6 +76,19 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 				extension.extend(web);
 			}
 			web.webArchitect.informOfficeArchitect();
+		});
+	}
+
+	/**
+	 * Loads {@link MockHttpServer}.
+	 * 
+	 * @param consumeMockhttpServer Receives the {@link MockHttpServer}.
+	 */
+	public void mockHttpServer(Consumer<MockHttpServer> consumeMockhttpServer) {
+		this.officeFloor((context) -> {
+			MockHttpServer server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
+					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
+			consumeMockhttpServer.accept(server);
 		});
 	}
 
@@ -101,8 +115,7 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param officeContext
-		 *            {@link CompileOfficeContext}.
+		 * @param officeContext {@link CompileOfficeContext}.
 		 */
 		public CompileWebContextImpl(CompileOfficeContext officeContext) {
 			this.officeContext = officeContext;

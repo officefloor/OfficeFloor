@@ -173,6 +173,34 @@
 					</object>
 				</item>
 			</collection>
+			<collection
+				method="getOfficeManagedObjectFunctionDependencies">
+				<item
+					type="net.officefloor.model.office.OfficeManagedObjectFunctionDependencyModel"
+					element="function-dependency">
+					<attributes>
+						<attribute
+							method="getOfficeManagedObjectFunctionDependencyName"
+							attribute="name" />
+						<attribute method="getDependencyType"
+							attribute="object-type" />
+					</attributes>
+					<object method="getOfficeManagedObject"
+						element="managed-object">
+						<attributes>
+							<attribute method="getOfficeManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+					<object method="getExternalManagedObject"
+						element="external-managed-object">
+						<attributes>
+							<attribute method="getExternalManagedObjectName"
+								attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
 			<collection method="getOfficeManagedObjectSourceFlows">
 				<item
 					type="net.officefloor.model.office.OfficeManagedObjectSourceFlowModel"

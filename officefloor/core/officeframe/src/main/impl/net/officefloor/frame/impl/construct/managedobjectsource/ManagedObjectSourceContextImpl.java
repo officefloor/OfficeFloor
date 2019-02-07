@@ -17,6 +17,10 @@
  */
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.BiConsumer;
+
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.ManagedObjectPoolBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -27,6 +31,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionDependency;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceFlow;
@@ -37,6 +42,7 @@ import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.source.SourceContextImpl;
 import net.officefloor.frame.internal.configuration.InputManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectFlowConfiguration;
+import net.officefloor.frame.internal.configuration.ManagedObjectFunctionDependencyConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectPoolConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.structure.Flow;
@@ -65,6 +71,16 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	private final ManagingOfficeConfiguration<F> managingOfficeConfiguration;
 
 	/**
+	 * {@link ManagedObjectFunctionDependency} instances.
+	 */
+	private final List<ManagedObjectFunctionDependencyImpl> functionDependencies = new LinkedList<>();
+
+	/**
+	 * Possible issues in sourcing the {@link ManagedObjectSource}.
+	 */
+	private final List<String> issues = new LinkedList<>();
+
+	/**
 	 * {@link ManagingOfficeBuilder}.
 	 */
 	private ManagingOfficeBuilder<F> managingOfficeBuilder;
@@ -87,21 +103,14 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	/**
 	 * Initiate.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @param managingOfficeConfiguration
-	 *            {@link ManagingOfficeConfiguration}.
-	 * @param properties
-	 *            Properties.
-	 * @param sourceContext
-	 *            Delegate {@link SourceContext}.
-	 * @param managingOfficeBuilder
-	 *            {@link ManagingOfficeBuilder}.
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder} for the office using the
-	 *            {@link ManagedObjectSource}.
+	 * @param isLoadingType               Indicates if loading type.
+	 * @param managedObjectName           Name of the {@link ManagedObject}.
+	 * @param managingOfficeConfiguration {@link ManagingOfficeConfiguration}.
+	 * @param properties                  Properties.
+	 * @param sourceContext               Delegate {@link SourceContext}.
+	 * @param managingOfficeBuilder       {@link ManagingOfficeBuilder}.
+	 * @param officeBuilder               {@link OfficeBuilder} for the office using
+	 *                                    the {@link ManagedObjectSource}.
 	 */
 	public ManagedObjectSourceContextImpl(boolean isLoadingType, String managedObjectName,
 			ManagingOfficeConfiguration<F> managingOfficeConfiguration, SourceProperties properties,
@@ -117,11 +126,17 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 * Indicates that the
 	 * {@link ManagedObjectSource#init(ManagedObjectSourceContext)} method has
 	 * completed.
+	 * 
+	 * @return Listing of issues in sourcing the {@link ManagedObjectSource}.
 	 */
-	public void flagInitOver() {
+	public String[] flagInitOver() {
+
 		// Disallow further configuration
 		this.managingOfficeBuilder = null;
 		this.officeBuilder = null;
+
+		// Return any issues
+		return this.issues.toArray(new String[this.issues.size()]);
 	}
 
 	/**
@@ -147,6 +162,16 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	}
 
 	/**
+	 * Obtains the {@link ManagedObjectFunctionDependencyImpl} instances.
+	 * 
+	 * @return {@link ManagedObjectFunctionDependencyImpl} instances.
+	 */
+	public ManagedObjectFunctionDependencyImpl[] getManagedObjectFunctionDependencies() {
+		return this.functionDependencies
+				.toArray(new ManagedObjectFunctionDependencyImpl[this.functionDependencies.size()]);
+	}
+
+	/**
 	 * Obtains the input bound {@link ManagedObject} name.
 	 * 
 	 * @return Input bound {@link ManagedObject} name.
@@ -154,7 +179,7 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	private String getInputBoundManagedObjectName() {
 		InputManagedObjectConfiguration<?> inputConfiguration = this.managingOfficeConfiguration
 				.getInputManagedObjectConfiguration();
-		return (inputConfiguration != null ? inputConfiguration.getBoundManagedObjectName() : null);
+		return (inputConfiguration != null ? inputConfiguration.getBoundManagedObjectName() : this.managedObjectName);
 	}
 
 	/*
@@ -200,6 +225,47 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	}
 
 	@Override
+	public ManagedObjectFunctionDependency addFunctionDependency(String name, Class<?> objectType) {
+
+		// Ensure have name
+		if ((name == null) || (name.trim().length() == 0)) {
+			throw new IllegalArgumentException(
+					"Must provide " + ManagedObjectFunctionDependency.class.getSimpleName() + " name");
+		}
+
+		// Ensure have type
+		if (objectType == null) {
+			throw new IllegalArgumentException(
+					"Must provide " + ManagedObjectFunctionDependency.class.getSimpleName() + " type");
+		}
+
+		// Attempt to determine the scope managed object for dependency
+		String scopeManagedObjectName = null;
+		for (ManagedObjectFunctionDependencyConfiguration configuration : this.managingOfficeConfiguration
+				.getFunctionDependencyConfiguration()) {
+			if (name.equals(configuration.getFunctionObjectName())) {
+				scopeManagedObjectName = configuration.getScopeManagedObjectName();
+			}
+		}
+
+		// Add issue if no scope managed object
+		if (scopeManagedObjectName == null) {
+			this.issues.add("No dependency configured for " + ManagedObjectFunctionDependency.class.getSimpleName()
+					+ " '" + name + "'");
+		}
+
+		// Create the function dependency
+		ManagedObjectFunctionDependencyImpl dependency = new ManagedObjectFunctionDependencyImpl(name, objectType,
+				scopeManagedObjectName);
+
+		// Register the function dependency
+		this.functionDependencies.add(dependency);
+
+		// Return the function dependency
+		return dependency;
+	}
+
+	@Override
 	public void addStartupFunction(String functionName) {
 		this.officeBuilder.addStartupFunction(this.getNamespacedName(functionName));
 	}
@@ -218,12 +284,67 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 * Obtains the name including the name space for this
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param name
-	 *            Name to add name space.
+	 * @param name Name to add name space.
 	 * @return Name including the name space.
 	 */
 	private String getNamespacedName(String name) {
 		return OfficeBuilderImpl.getNamespacedName(this.managedObjectName, name);
+	}
+
+	/**
+	 * {@link ManagedObjectFunctionDependency} implementation.
+	 */
+	public static class ManagedObjectFunctionDependencyImpl implements ManagedObjectFunctionDependency {
+
+		/**
+		 * Name of the {@link ManagedObjectFunctionDependency}.
+		 */
+		private final String functionObjectName;
+
+		/**
+		 * Type of {@link ManagedObjectFunctionDependency}.
+		 */
+		private final Class<?> type;
+
+		/**
+		 * Name of the scoped {@link ManagedObject} for this dependency.
+		 */
+		private final String scopeManagedObjectName;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param functionObjectName     Name of the
+		 *                               {@link ManagedObjectFunctionDependency}.
+		 * @param type                   Type of
+		 *                               {@link ManagedObjectFunctionDependency}.
+		 * @param scopeManagedObjectName Name of the scoped {@link ManagedObject} for
+		 *                               this dependency.
+		 */
+		private ManagedObjectFunctionDependencyImpl(String functionObjectName, Class<?> type,
+				String scopeManagedObjectName) {
+			this.functionObjectName = functionObjectName;
+			this.type = type;
+			this.scopeManagedObjectName = scopeManagedObjectName;
+		}
+
+		/**
+		 * Obtains the name of the {@link ManagedObjectFunctionDependency}.
+		 * 
+		 * @return Name of the {@link ManagedObjectFunctionDependency}.
+		 */
+		public String getFunctionObjectName() {
+			return this.functionObjectName;
+		}
+
+		/**
+		 * Obtains the type of {@link ManagedObjectFunctionDependency}.
+		 * 
+		 * @return Type of {@link ManagedObjectFunctionDependency}.
+		 */
+		public Class<?> getFunctionObjectType() {
+			return this.type;
+		}
 	}
 
 	/**
@@ -244,12 +365,10 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 		/**
 		 * Instantiate.
 		 * 
-		 * @param key
-		 *            {@link Flow} key.
-		 * @param flowIndex
-		 *            {@link Flow} index.
+		 * @param key       {@link Flow} key.
+		 * @param flowIndex {@link Flow} index.
 		 */
-		public ManagedObjectSourceFlowImpl(F key, int flowIndex) {
+		private ManagedObjectSourceFlowImpl(F key, int flowIndex) {
 			this.key = key;
 			this.flowIndex = flowIndex;
 		}
@@ -317,10 +436,9 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 		/**
 		 * Initiate.
 		 * 
-		 * @param functionBuilder
-		 *            {@link ManagedFunctionBuilder}.
+		 * @param functionBuilder {@link ManagedFunctionBuilder}.
 		 */
-		public ManagedObjectFunctionBuilderImpl(ManagedFunctionBuilder<o, f> functionBuilder) {
+		private ManagedObjectFunctionBuilderImpl(ManagedFunctionBuilder<o, f> functionBuilder) {
 			this.functionBuilder = functionBuilder;
 		}
 
@@ -348,6 +466,39 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 		public void linkManagedObject(int index) {
 			this.functionBuilder.linkManagedObject(index,
 					ManagedObjectSourceContextImpl.this.getInputBoundManagedObjectName(), Object.class);
+		}
+
+		@Override
+		public void linkObject(o key, ManagedObjectFunctionDependency dependency) {
+			this.linkObject(dependency, (scopeManagedObjectName, objectType) -> {
+				this.functionBuilder.linkManagedObject(key, scopeManagedObjectName, objectType);
+			});
+		}
+
+		@Override
+		public void linkObject(int index, ManagedObjectFunctionDependency dependency) {
+			this.linkObject(dependency, (scopeManagedObjectName, objectType) -> {
+				this.functionBuilder.linkManagedObject(index, scopeManagedObjectName, objectType);
+			});
+		}
+
+		/**
+		 * Links the {@link ManagedObjectFunctionDependency}.
+		 * 
+		 * @param dependency {@link ManagedObjectFunctionDependency}.
+		 * @param linker     Linker for the {@link ManagedObjectFunctionDependency}.
+		 */
+		private void linkObject(ManagedObjectFunctionDependency dependency, BiConsumer<String, Class<?>> linker) {
+
+			// Obtain the mapped managed function
+			if (!(dependency instanceof ManagedObjectFunctionDependencyImpl)) {
+				throw new IllegalArgumentException(ManagedObjectFunctionDependency.class.getSimpleName()
+						+ " must be added from " + ManagedObjectSourceContext.class.getSimpleName());
+			}
+			ManagedObjectFunctionDependencyImpl dependencyImpl = (ManagedObjectFunctionDependencyImpl) dependency;
+
+			// Link the managed object function dependency
+			linker.accept(dependencyImpl.scopeManagedObjectName, dependencyImpl.type);
 		}
 
 		@Override

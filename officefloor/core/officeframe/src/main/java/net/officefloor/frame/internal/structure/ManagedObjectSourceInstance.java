@@ -35,13 +35,13 @@ public interface ManagedObjectSourceInstance<F extends Enum<F>> {
 	ManagedObjectSource<?, F> getManagedObjectSource();
 
 	/**
-	 * Obtains the {@link ManagedObjectExecuteContextFactory} for the
+	 * Obtains the {@link ManagedObjectExecuteManagerFactory} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link ManagedObjectExecuteContextFactory} for the
+	 * @return {@link ManagedObjectExecuteManagerFactory} for the
 	 *         {@link ManagedObjectSource}.
 	 */
-	ManagedObjectExecuteContextFactory<F> getManagedObjectExecuteContextFactory();
+	ManagedObjectExecuteManagerFactory<F> getManagedObjectExecuteManagerFactory();
 
 	/**
 	 * Obtains the {@link ManagedObjectPool}.

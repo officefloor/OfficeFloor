@@ -32,6 +32,7 @@ import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.CleanupException;
+import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -41,6 +42,7 @@ import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.HttpVersion;
@@ -102,8 +104,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	/**
 	 * Creates a {@link ProcessAwareServerHttpConnectionManagedObject} for testing.
 	 * 
-	 * @param requestEntityContent
-	 *            Content for the {@link HttpRequest} entity.
+	 * @param requestEntityContent Content for the {@link HttpRequest} entity.
 	 */
 	private ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> createServerHttpConnection(
 			String requestEntityContent) {
@@ -113,12 +114,10 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	/**
 	 * Creates a {@link ProcessAwareServerHttpConnectionManagedObject} for testing.
 	 * 
-	 * @param requestEntityContent
-	 *            Content for the {@link HttpRequest} entity.
-	 * @param serverName
-	 *            Name of the server. May be <code>null</code>.
-	 * @param dateHttpHeaderClock
-	 *            {@link DateHttpHeaderClock}. May be <code>null</code>.
+	 * @param requestEntityContent Content for the {@link HttpRequest} entity.
+	 * @param serverName           Name of the server. May be <code>null</code>.
+	 * @param dateHttpHeaderClock  {@link DateHttpHeaderClock}. May be
+	 *                             <code>null</code>.
 	 */
 	private ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> createServerHttpConnection(
 			String requestEntityContent, String serverName, DateHttpHeaderClock dateHttpHeaderClock) {
@@ -261,7 +260,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	/**
 	 * Ensure able to send Server, Date and Custom {@link HttpHeader} without issue.
 	 */
-	public void testServerDateCustomerHttpHeaders() throws Throwable {
+	public void testServerDateCustomHttpHeaders() throws Throwable {
 
 		// Create with server name
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("TEST",
@@ -660,25 +659,23 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 	/**
 	 * Asserts the content of the {@link HttpRequest}.
 	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection} containing the {@link HttpRequest}.
-	 * @param requestMethod
-	 *            Expected {@link HttpRequest} {@link HttpMethod}.
-	 * @param requestUri
-	 *            Expected {@link HttpRequest} URI.
-	 * @param requestVersion
-	 *            Expected {@link HttpRequest} {@link HttpVersion}.
-	 * @param requestHeaderNameValuePairs
-	 *            Expected {@link HttpRequest} {@link HttpRequestHeaders} name/value
-	 *            pairs.
-	 * @param enityContent
-	 *            Expected {@link HttpRequest} entity content.
-	 * @param clientMethod
-	 *            Expected client {@link HttpMethod}.
-	 * @param clientHeaderNameValuePairs
-	 *            Expected client {@link HttpRequestHeaders}.
-	 * @param clientCookieNameValuePairs
-	 *            Expected client {@link HttpRequestCookies}.
+	 * @param connection                  {@link ServerHttpConnection} containing
+	 *                                    the {@link HttpRequest}.
+	 * @param requestMethod               Expected {@link HttpRequest}
+	 *                                    {@link HttpMethod}.
+	 * @param requestUri                  Expected {@link HttpRequest} URI.
+	 * @param requestVersion              Expected {@link HttpRequest}
+	 *                                    {@link HttpVersion}.
+	 * @param requestHeaderNameValuePairs Expected {@link HttpRequest}
+	 *                                    {@link HttpRequestHeaders} name/value
+	 *                                    pairs.
+	 * @param enityContent                Expected {@link HttpRequest} entity
+	 *                                    content.
+	 * @param clientMethod                Expected client {@link HttpMethod}.
+	 * @param clientHeaderNameValuePairs  Expected client
+	 *                                    {@link HttpRequestHeaders}.
+	 * @param clientCookieNameValuePairs  Expected client
+	 *                                    {@link HttpRequestCookies}.
 	 */
 	private void assertServerHttpConnection(ServerHttpConnection connection, HttpMethod requestMethod,
 			String requestUri, HttpVersion requestVersion, String[] requestHeaderNameValuePairs, String enityContent,

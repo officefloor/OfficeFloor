@@ -48,7 +48,7 @@ import net.officefloor.frame.impl.construct.managedobjectsource.RawManagingOffic
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.asset.OfficeClockImpl;
+import net.officefloor.frame.impl.execute.asset.MonitorClockImpl;
 import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
@@ -79,7 +79,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.OfficeClock;
+import net.officefloor.frame.internal.structure.MonitorClock;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
@@ -207,22 +207,22 @@ public class RawOfficeMetaDataFactory {
 		}
 
 		// Create the office details
-		OfficeClockImpl officeClockImpl = null;
-		OfficeClock officeClock = configuration.getOfficeClock();
-		if (officeClock == null) {
+		MonitorClockImpl monitorClockImpl = null;
+		MonitorClock monitorClock = configuration.getMonitorClock();
+		if (monitorClock == null) {
 			// Default the office clock
-			officeClockImpl = new OfficeClockImpl();
-			officeClock = officeClockImpl;
+			monitorClockImpl = new MonitorClockImpl();
+			monitorClock = monitorClockImpl;
 		}
 		FunctionLoop functionLoop = new FunctionLoopImpl(defaultTeam);
-		Timer timer = new Timer(true);
+		Timer timer = new Timer(Office.class.getSimpleName() + "_Monitor_" + officeName, true);
 
 		// Create the office manager process state
-		OfficeManagerProcessState officeManagerProcessState = new OfficeManagerProcessState(officeClock,
-				maxFunctionChainLength, breakChainTeam, functionLoop);
+		OfficeManagerProcessState officeManagerProcessState = new OfficeManagerProcessState(maxFunctionChainLength,
+				breakChainTeam, functionLoop);
 
 		// Create the asset manager factory
-		AssetManagerFactory officeAssetManagerFactory = new AssetManagerFactory(officeManagerProcessState, officeClock,
+		AssetManagerFactory officeAssetManagerFactory = new AssetManagerFactory(officeManagerProcessState, monitorClock,
 				functionLoop);
 
 		// Determine if manually manage governance
@@ -480,13 +480,13 @@ public class RawOfficeMetaDataFactory {
 
 		// Create the office manager
 		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName, monitorOfficeInterval, assetManagers,
-				officeClockImpl, functionLoop, timer);
+				monitorClockImpl, functionLoop, timer);
 
 		// Obtain the managed execution factory
 		ManagedExecutionFactory managedExecutionFactory = this.rawOfficeFloorMetaData.getManagedExecutionFactory();
 
 		// Load the office meta-data
-		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, officeClock, timer,
+		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, monitorClock, timer,
 				functionLoop, threadLocalAwareExecutor, executive, managedExecutionFactory,
 				functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), functionLocator, processMetaData,
 				startupFunctions, profiler);

@@ -36,6 +36,7 @@ import net.officefloor.web.spi.security.LogoutContext;
 import net.officefloor.web.spi.security.RatifyContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
+import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
@@ -141,9 +142,19 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		}
 
 		@Override
+		public void start(HttpSecurityExecuteContext<Indexed> context) throws Exception {
+			// Nothing to start
+		}
+
+		@Override
 		public HttpSecurity<Object, Serializable, Object, Indexed, Indexed> sourceHttpSecurity(
 				HttpSecurityContext context) throws HttpException {
 			return this;
+		}
+
+		@Override
+		public void stop() {
+			// Nothing to stop
 		}
 
 		/*
@@ -163,7 +174,7 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void authenticate(Object credentials, AuthenticateContext<Serializable, Indexed> context) {
+		public void authenticate(Object credentials, AuthenticateContext<Serializable, Indexed, Indexed> context) {
 			fail("Should not be invoked for loading type");
 		}
 
@@ -173,7 +184,7 @@ public class HttpSecurityTypeRunnableTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void logout(LogoutContext<Indexed> context) {
+		public void logout(LogoutContext<Indexed, Indexed> context) {
 			fail("Should not be invoked for loading type");
 		}
 	}

@@ -43,8 +43,8 @@ import net.officefloor.web.session.HttpSession;
 import net.officefloor.web.spi.security.AccessControlListener;
 import net.officefloor.web.spi.security.AuthenticationContext;
 import net.officefloor.web.spi.security.HttpSecurity;
-import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.RatifyContext;
+import net.officefloor.web.state.HttpRequestState;
 
 /**
  * {@link ManagedObjectSource} for the custom authentication.
@@ -57,10 +57,21 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		AbstractManagedObjectSource<AuthenticationContextManagedObjectSource.Dependencies, AuthenticationContextManagedObjectSource.Flows> {
 
 	/**
+	 * Obtains the qualified attribute name.
+	 * 
+	 * @param qualifier     {@link HttpSecurity} qualifier.
+	 * @param attributeName Attribute name.
+	 * @return Qualified attribute name.
+	 */
+	public static String getQualifiedAttributeName(String qualifier, String attributeName) {
+		return HttpSecurity.class.getName() + "." + qualifier + "." + attributeName;
+	}
+
+	/**
 	 * Dependency keys.
 	 */
 	public static enum Dependencies {
-		SERVER_HTTP_CONNECTION, HTTP_SESSION
+		SERVER_HTTP_CONNECTION, HTTP_SESSION, HTTP_REQUEST_STATE
 	}
 
 	/**
@@ -76,7 +87,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 	private final String qualifier;
 
 	/**
-	 * {@link HttpSecuritySource}.
+	 * {@link HttpSecurity}.
 	 */
 	private final HttpSecurity<A, AC, C, O, F> httpSecurity;
 
@@ -88,10 +99,8 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 	/**
 	 * Instantiate.
 	 *
-	 * @param qualifier
-	 *            Qualifier for the {@link HttpSecurity}.
-	 * @param httpSecurity
-	 *            {@link HttpSecurity}.
+	 * @param qualifier    Qualifier for the {@link HttpSecurity}.
+	 * @param httpSecurity {@link HttpSecurity}.
 	 */
 	public AuthenticationContextManagedObjectSource(String qualifier, HttpSecurity<A, AC, C, O, F> httpSecurity) {
 		this.qualifier = qualifier;
@@ -116,6 +125,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		// Provide the dependencies
 		context.addDependency(Dependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class);
 		context.addDependency(Dependencies.HTTP_SESSION, HttpSession.class);
+		context.addDependency(Dependencies.HTTP_REQUEST_STATE, HttpRequestState.class);
 
 		// Configure flows
 		context.addFlow(Flows.AUTHENTICATE, FunctionAuthenticateContext.class);
@@ -142,7 +152,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		 * {@link AccessControlListener} instances. Typically 2 listeners (
 		 * {@link HttpAuthentication} and {@link HttpAccessControl} ).
 		 */
-		private final List<AccessControlListener<AC>> listeners = new ArrayList<>(2);
+		private final List<AccessControlListener<? super AC>> listeners = new ArrayList<>(2);
 
 		/**
 		 * {@link ProcessAwareContext}.
@@ -165,6 +175,11 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		private HttpSession session;
 
 		/**
+		 * {@link HttpRequestState}.
+		 */
+		private HttpRequestState requestState;
+
+		/**
 		 * Cached access control.
 		 */
 		private AC accessControl = null;
@@ -177,10 +192,8 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		/**
 		 * Loads the access control.
 		 *
-		 * @param accessControl
-		 *            Access control.
-		 * @param escalation
-		 *            {@link Throwable}.
+		 * @param accessControl Access control.
+		 * @param escalation    {@link Throwable}.
 		 */
 		private void loadAccessControl(AC accessControl, Throwable escalation) {
 			this.processAwareContext.run(() -> {
@@ -197,16 +210,16 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		/**
 		 * Notifies the change.
 		 * 
-		 * @param authenticateRequest
-		 *            Optional {@link AuthenticateRequest}. May be <code>null</code>.
-		 * @param logoutRequest
-		 *            Optional {@link LogoutRequest}. May be <code>null</code>.
+		 * @param authenticateRequest Optional {@link AuthenticateRequest}. May be
+		 *                            <code>null</code>.
+		 * @param logoutRequest       Optional {@link LogoutRequest}. May be
+		 *                            <code>null</code>.
 		 */
 		private void unsafeNotifyChange(AuthenticateRequest authenticateRequest, LogoutRequest logoutRequest) {
 
 			// Notify the registered listeners
 			for (int i = 0; i < this.listeners.size(); i++) {
-				AccessControlListener<AC> listener = this.listeners.get(i);
+				AccessControlListener<? super AC> listener = this.listeners.get(i);
 				listener.accessControlChange(this.accessControl, this.escalation);
 			}
 
@@ -222,12 +235,11 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		/**
 		 * Safely notifies the change.
 		 * 
-		 * @param escalation
-		 *            Possible {@link Escalation}.
-		 * @param authenticateRequest
-		 *            Optional {@link AuthenticateRequest}. May be <code>null</code>.
-		 * @param logoutRequest
-		 *            Optional {@link LogoutRequest}. May be <code>null</code>.
+		 * @param escalation          Possible {@link Escalation}.
+		 * @param authenticateRequest Optional {@link AuthenticateRequest}. May be
+		 *                            <code>null</code>.
+		 * @param logoutRequest       Optional {@link LogoutRequest}. May be
+		 *                            <code>null</code>.
 		 */
 		private void safeNotifyChange(Throwable escalation, AuthenticateRequest authenticateRequest,
 				LogoutRequest logoutRequest) {
@@ -268,6 +280,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		public void loadObjects(ObjectRegistry<Dependencies> registry) throws Throwable {
 			this.connection = (ServerHttpConnection) registry.getObject(Dependencies.SERVER_HTTP_CONNECTION);
 			this.session = (HttpSession) registry.getObject(Dependencies.HTTP_SESSION);
+			this.requestState = (HttpRequestState) registry.getObject(Dependencies.HTTP_REQUEST_STATE);
 		}
 
 		@Override
@@ -285,7 +298,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		}
 
 		@Override
-		public void register(AccessControlListener<AC> accessControlListener) {
+		public void register(AccessControlListener<? super AC> accessControlListener) {
 			this.processAwareContext.run(() -> this.listeners.add(accessControlListener));
 		}
 
@@ -309,8 +322,19 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 							}
 
 							@Override
+							public String getQualifiedAttributeName(String attributeName) {
+								return AuthenticationContextManagedObjectSource.getQualifiedAttributeName(
+										AuthenticationContextManagedObjectSource.this.qualifier, attributeName);
+							}
+
+							@Override
 							public HttpSession getSession() {
 								return AuthenticationContextManagedObject.this.session;
+							}
+
+							@Override
+							public HttpRequestState getRequestState() {
+								return AuthenticationContextManagedObject.this.requestState;
 							}
 
 							@Override
@@ -335,7 +359,8 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 					// Attempt authentication
 					this.asynchronousContext.start(null);
 					AuthenticationContextManagedObjectSource.this.executeContext.invokeProcess(Flows.AUTHENTICATE,
-							new FunctionAuthenticateContextImpl(this.connection, this.session, credentials),
+							new FunctionAuthenticateContextImpl(this.connection, this.session, this.requestState,
+									credentials),
 							executeManagedObject, 0,
 							(failure) -> this.safeNotifyChange(failure, authenticateRequest, null));
 					return null;
@@ -367,8 +392,8 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 				// Trigger logout
 				this.asynchronousContext.start(null);
 				AuthenticationContextManagedObjectSource.this.executeContext.invokeProcess(Flows.LOGOUT,
-						new FunctionLogoutContextImpl(this.connection, this.session), executeManagedObject, 0,
-						(failure) -> this.safeNotifyChange(failure, null, logoutRequest));
+						new FunctionLogoutContextImpl(this.connection, this.session, this.requestState),
+						executeManagedObject, 0, (failure) -> this.safeNotifyChange(failure, null, logoutRequest));
 
 				// Void return
 				return null;
@@ -396,6 +421,11 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 			private final HttpSession session;
 
 			/**
+			 * {@link HttpRequestState}.
+			 */
+			private final HttpRequestState requestState;
+
+			/**
 			 * Credentials.
 			 */
 			private final C credentials;
@@ -403,17 +433,16 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 			/**
 			 * Initiate.
 			 * 
-			 * @param connection
-			 *            {@link ServerHttpConnection}.
-			 * @param session
-			 *            {@link HttpSession}.
-			 * @param credentials
-			 *            Credentials.
+			 * @param connection   {@link ServerHttpConnection}.
+			 * @param session      {@link HttpSession}.
+			 * @param requestState {@link HttpRequestState}.
+			 * @param credentials  Credentials.
 			 */
 			public FunctionAuthenticateContextImpl(ServerHttpConnection connection, HttpSession session,
-					C credentials) {
+					HttpRequestState requestState, C credentials) {
 				this.connection = connection;
 				this.session = session;
+				this.requestState = requestState;
 				this.credentials = credentials;
 			}
 
@@ -434,6 +463,11 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 			@Override
 			public HttpSession getSession() {
 				return this.session;
+			}
+
+			@Override
+			public HttpRequestState getRequestState() {
+				return this.requestState;
 			}
 
 			@Override
@@ -458,16 +492,22 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 			private final HttpSession session;
 
 			/**
+			 * {@link HttpRequestState}.
+			 */
+			private final HttpRequestState requestState;
+
+			/**
 			 * Initiate.
 			 * 
-			 * @param connection
-			 *            {@link ServerHttpConnection}.
-			 * @param session
-			 *            {@link HttpSession}.
+			 * @param connection   {@link ServerHttpConnection}.
+			 * @param session      {@link HttpSession}.
+			 * @param requestState {@link HttpRequestState}.
 			 */
-			private FunctionLogoutContextImpl(ServerHttpConnection connection, HttpSession session) {
+			private FunctionLogoutContextImpl(ServerHttpConnection connection, HttpSession session,
+					HttpRequestState requestState) {
 				this.connection = connection;
 				this.session = session;
+				this.requestState = requestState;
 			}
 
 			/*
@@ -483,6 +523,11 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 			@Override
 			public HttpSession getSession() {
 				return this.session;
+			}
+
+			@Override
+			public HttpRequestState getRequestState() {
+				return this.requestState;
 			}
 
 			@Override

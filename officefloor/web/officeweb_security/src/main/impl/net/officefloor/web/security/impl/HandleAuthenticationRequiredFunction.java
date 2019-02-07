@@ -68,11 +68,9 @@ public class HandleAuthenticationRequiredFunction
 	/**
 	 * Instantiate.
 	 * 
-	 * @param httpSecurityNameToFlowIndex
-	 *            {@link HttpSecurity} name to {@link Flow} index (by array
-	 *            index).
-	 * @param challengeNegotiator
-	 *            Challenge {@link AcceptNegotiator}.
+	 * @param httpSecurityNameToFlowIndex {@link HttpSecurity} name to {@link Flow}
+	 *                                    index (by array index).
+	 * @param challengeNegotiator         Challenge {@link AcceptNegotiator}.
 	 */
 	public HandleAuthenticationRequiredFunction(String[] httpSecurityNameToFlowIndex,
 			AcceptNegotiator<int[]> challengeNegotiator) {
@@ -110,7 +108,8 @@ public class HandleAuthenticationRequiredFunction
 			// Obtain the handling flow
 			boolean isSecurityFound = false;
 			for (int i = 0; i < this.httpSecurityNameToFlowIndex.length; i++) {
-				if (requiredHttpSecurityName.equals(this.httpSecurityNameToFlowIndex[i])) {
+				String httpSecurityName = this.httpSecurityNameToFlowIndex[i];
+				if (requiredHttpSecurityName.equals(httpSecurityName)) {
 					context.doFlow(i, null, null);
 					isSecurityFound = true;
 				}

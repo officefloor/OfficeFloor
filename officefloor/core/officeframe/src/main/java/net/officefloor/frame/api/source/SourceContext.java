@@ -20,6 +20,9 @@ package net.officefloor.frame.api.source;
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
 import java.util.ServiceLoader;
+import java.util.function.Function;
+
+import net.officefloor.frame.api.clock.Clock;
 
 /**
  * Generic context for a source.
@@ -45,8 +48,7 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Attempts to load the specified {@link Class}.
 	 * 
-	 * @param name
-	 *            Name of the {@link Class}.
+	 * @param name Name of the {@link Class}.
 	 * @return {@link Class} or <code>null</code> if the {@link Class} can not be
 	 *         found.
 	 */
@@ -55,20 +57,17 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Loads the {@link Class}.
 	 * 
-	 * @param name
-	 *            Name of the {@link Class}.
+	 * @param name Name of the {@link Class}.
 	 * @return {@link Class}.
-	 * @throws UnknownClassError
-	 *             If {@link Class} is not available. Let this propagate as
-	 *             OfficeFloor will handle it.
+	 * @throws UnknownClassError If {@link Class} is not available. Let this
+	 *                           propagate as OfficeFloor will handle it.
 	 */
 	Class<?> loadClass(String name) throws UnknownClassError;
 
 	/**
 	 * Attempts to obtain the resource at the specified location.
 	 * 
-	 * @param location
-	 *            Location of the resource.
+	 * @param location Location of the resource.
 	 * @return {@link InputStream} to the contents of the resource or
 	 *         <code>null</code> if the resource can not be found.
 	 */
@@ -77,36 +76,29 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Obtains the resource.
 	 * 
-	 * @param location
-	 *            Location of the resource.
+	 * @param location Location of the resource.
 	 * @return {@link InputStream} to the contents of the resource.
-	 * @throws UnknownResourceError
-	 *             If resource is not found. Let this propagate as OfficeFloor will
-	 *             handle it.
+	 * @throws UnknownResourceError If resource is not found. Let this propagate as
+	 *                              OfficeFloor will handle it.
 	 */
 	InputStream getResource(String location) throws UnknownResourceError;
 
 	/**
 	 * Loads a single service.
 	 * 
-	 * @param <S>
-	 *            Service type
-	 * @param <F>
-	 *            {@link ServiceFactory} type to create service.
-	 * @param <D>
-	 *            Default {@link ServiceFactory} type.
-	 * @param serviceFactoryType
-	 *            Type of {@link ServiceFactory}.
-	 * @param defaultServiceFactory
-	 *            Default {@link ServiceFactory} implementation. May be
-	 *            <code>null</code> to indicate no default service (one must be
-	 *            configured).
+	 * @param                       <S> Service type
+	 * @param                       <F> {@link ServiceFactory} type to create
+	 *                              service.
+	 * @param                       <D> Default {@link ServiceFactory} type.
+	 * @param serviceFactoryType    Type of {@link ServiceFactory}.
+	 * @param defaultServiceFactory Default {@link ServiceFactory} implementation.
+	 *                              May be <code>null</code> to indicate no default
+	 *                              service (one must be configured).
 	 * @return Service.
-	 * @throws UnknownServiceError
-	 *             If service is not configured and no default provided. Will also
-	 *             be thrown if more than one service is configured.
-	 * @throws LoadServiceError
-	 *             If fails to load the service.
+	 * @throws UnknownServiceError If service is not configured and no default
+	 *                             provided. Will also be thrown if more than one
+	 *                             service is configured.
+	 * @throws LoadServiceError    If fails to load the service.
 	 */
 	<S, F extends ServiceFactory<S>, D extends F> S loadService(Class<F> serviceFactoryType, D defaultServiceFactory)
 			throws UnknownServiceError, LoadServiceError;
@@ -114,39 +106,32 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Optionally loads a single service.
 	 *
-	 * @param <S>
-	 *            Service type
-	 * @param <F>
-	 *            {@link ServiceFactory} type to create service.
-	 * @param serviceFactoryType
-	 *            Type of {@link ServiceFactory}.
+	 * @param                    <S> Service type
+	 * @param                    <F> {@link ServiceFactory} type to create service.
+	 * @param serviceFactoryType Type of {@link ServiceFactory}.
 	 * @return Service or <code>null</code> if no service configured.
-	 * @throws LoadServiceError
-	 *             If fails to load the service or {@link ServiceLoader} finds more
-	 *             than one service configured.
+	 * @throws LoadServiceError If fails to load the service or
+	 *                          {@link ServiceLoader} finds more than one service
+	 *                          configured.
 	 */
 	<S, F extends ServiceFactory<S>> S loadOptionalService(Class<F> serviceFactoryType) throws LoadServiceError;
 
 	/**
 	 * Loads multiple services.
 	 * 
-	 * @param <S>
-	 *            Service type
-	 * @param <F>
-	 *            {@link ServiceFactory} type to create service.
-	 * @param <D>
-	 *            Default {@link ServiceFactory} type.
-	 * @param serviceFactoryType
-	 *            Type of {@link ServiceFactory}.
-	 * @param defaultServiceFactory
-	 *            Default {@link ServiceFactory} implementation. May be
-	 *            <code>null</code> to indicate no default service.
+	 * @param                       <S> Service type
+	 * @param                       <F> {@link ServiceFactory} type to create
+	 *                              service.
+	 * @param                       <D> Default {@link ServiceFactory} type.
+	 * @param serviceFactoryType    Type of {@link ServiceFactory}.
+	 * @param defaultServiceFactory Default {@link ServiceFactory} implementation.
+	 *                              May be <code>null</code> to indicate no default
+	 *                              service.
 	 * @return {@link Iterable} over the services. The {@link Iterable} may also
 	 *         throw {@link LoadServiceError} if fails to create next service.
-	 * @throws UnknownServiceError
-	 *             If no services are configured and no default provided.
-	 * @throws LoadServiceError
-	 *             If fails to load a service.
+	 * @throws UnknownServiceError If no services are configured and no default
+	 *                             provided.
+	 * @throws LoadServiceError    If fails to load a service.
 	 */
 	<S, F extends ServiceFactory<S>, D extends F> Iterable<S> loadServices(Class<F> serviceFactoryType,
 			D defaultServiceFactory) throws UnknownServiceError, LoadServiceError;
@@ -154,17 +139,13 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Optionally loads multiple services.
 	 * 
-	 * @param <S>
-	 *            Service type
-	 * @param <F>
-	 *            {@link ServiceFactory} type to create service.
-	 * @param serviceFactoryType
-	 *            Type of {@link ServiceFactory}.
+	 * @param                    <S> Service type
+	 * @param                    <F> {@link ServiceFactory} type to create service.
+	 * @param serviceFactoryType Type of {@link ServiceFactory}.
 	 * @return {@link Iterable} over the services. May be no entries available. The
 	 *         {@link Iterable} may also throw {@link LoadServiceError} if fails to
 	 *         create next service.
-	 * @throws LoadServiceError
-	 *             If fails to load a service.
+	 * @throws LoadServiceError If fails to load a service.
 	 */
 	<S, F extends ServiceFactory<S>> Iterable<S> loadOptionalServices(Class<F> serviceFactoryType)
 			throws LoadServiceError;
@@ -180,5 +161,14 @@ public interface SourceContext extends SourceProperties {
 	 * @return {@link ClassLoader}.
 	 */
 	ClassLoader getClassLoader();
+
+	/**
+	 * Obtains the {@link Clock}.
+	 * 
+	 * @param translator Translate the seconds since Epoch to "time" returned from
+	 *                   the {@link Clock}.
+	 * @return {@link Clock}.
+	 */
+	<T> Clock<T> getClock(Function<Long, T> translator);
 
 }

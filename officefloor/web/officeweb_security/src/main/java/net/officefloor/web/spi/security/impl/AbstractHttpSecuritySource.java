@@ -29,6 +29,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.web.spi.security.HttpAccessControlFactory;
 import net.officefloor.web.spi.security.HttpAuthenticationFactory;
 import net.officefloor.web.spi.security.HttpSecurityDependencyMetaData;
+import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecurityFlowMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
@@ -497,6 +498,16 @@ public abstract class AbstractHttpSecuritySource<A, AC extends Serializable, C, 
 		public HttpSecurityFlowMetaData<F>[] getFlowMetaData() {
 			return ConstructUtil.toArray(this.flows, new HttpSecurityFlowMetaData[0]);
 		}
+	}
+
+	@Override
+	public void start(HttpSecurityExecuteContext<F> context) throws Exception {
+		// Override to provide start functionality
+	}
+
+	@Override
+	public void stop() {
+		// Override to provide start functionality
 	}
 
 }

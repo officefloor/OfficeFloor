@@ -10,6 +10,9 @@
 	<list
 		type="OfficeInputManagedObjectDependencyToExternalManagedObjectModel"
 		name="dependent office input managed object" />
+	<list
+		type="OfficeManagedObjectFunctionDependencyToExternalManagedObjectModel"
+		name="dependent office managed object function object" />
 	<list type="OfficeSupplierThreadLocalToExternalManagedObjectModel"
 		name="dependent office supplier thread local" />
 	<list type="AdministrationToExternalManagedObjectModel"

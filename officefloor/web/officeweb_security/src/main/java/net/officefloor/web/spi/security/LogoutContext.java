@@ -17,37 +17,11 @@
  */
 package net.officefloor.web.spi.security;
 
-import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.web.session.HttpSession;
-
 /**
  * Context for logging out.
  * 
  * @author Daniel Sagenschneider
  */
-public interface LogoutContext<O extends Enum<O>> {
-
-	/**
-	 * Obtains the {@link ServerHttpConnection}.
-	 * 
-	 * @return {@link ServerHttpConnection}.
-	 */
-	ServerHttpConnection getConnection();
-
-	/**
-	 * Obtains the {@link HttpSession}.
-	 * 
-	 * @return {@link HttpSession}.
-	 */
-	HttpSession getSession();
-
-	/**
-	 * Obtains a dependency.
-	 * 
-	 * @param key
-	 *            Key for the dependency.
-	 * @return Dependency.
-	 */
-	Object getObject(O key);
-
+public interface LogoutContext<O extends Enum<O>, F extends Enum<F>>
+		extends HttpSecurityActionContext, HttpSecurityApplicationContext<O, F> {
 }

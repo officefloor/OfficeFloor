@@ -56,10 +56,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
-import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -74,6 +79,7 @@ import net.officefloor.frame.test.BackPressureTeamSource;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -264,48 +270,84 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * 
 	 * @param sectionServicer {@link Class} of the {@link ClassSectionSource} to
 	 *                        service the {@link HttpRequest}.
-	 * @param extension       Additional {@link CompileOfficeFloorExtension}. May be
+	 * @param extension       Additional {@link OfficeFloorExtensionService}. May be
 	 *                        <code>null</code>.
 	 * @throws Exception If fails to start the {@link HttpServer}.
 	 */
-	protected void startHttpServer(Class<?> sectionServicer, CompileOfficeFloorExtension extension) throws Exception {
+	protected void startHttpServer(Class<?> sectionServicer, OfficeFloorExtensionService extension) throws Exception {
 
 		// Compile the OfficeFloor
 		Closure<HttpServer> httpServer = new Closure<>();
-		CompileOfficeFloor compile = new CompileOfficeFloor();
-		compile.officeFloor((context) -> {
-
-			// Obtain the deployer
-			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+		this.startHttpServer((deployer, context) -> {
 
 			// Obtain the input
-			DeployedOfficeInput serviceHandler = context.getOfficeFloorDeployer().getDeployedOffice("OFFICE")
-					.getDeployedOfficeInput("SERVICER", "service");
+			DeployedOfficeInput serviceHandler = deployer.getDeployedOffice("OFFICE").getDeployedOfficeInput("SERVICER",
+					"service");
 
 			// Configure the HTTP Server
-			httpServer.value = new HttpServer(serviceHandler, deployer, context.getOfficeFloorSourceContext());
+			httpServer.value = new HttpServer(serviceHandler, deployer, context);
 
 			// Provide thread object
 			if (sectionServicer == ThreadedServicer.class) {
-				context.addManagedObject("ThreadedManagedObject", ThreadedManagedObject.class,
+				addManagedObject(deployer, "ThreadedManagedObject", ThreadedManagedObject.class,
 						ManagedObjectScope.THREAD);
 				deployer.addTeam("Threaded", ExecutorCachedTeamSource.class.getName()).addTypeQualification(null,
 						ThreadedManagedObject.class.getName());
 			}
-		});
-		if (extension != null) {
-			compile.officeFloor(extension);
-		}
-		compile.office((context) -> {
-			context.getOfficeArchitect().enableAutoWireTeams();
-			context.addSection("SERVICER", sectionServicer);
-		});
-		this.officeFloor = compile.compileAndOpenOfficeFloor();
+
+			// Undertake extension
+			if (extension != null) {
+				extension.extendOfficeFloor(deployer, context);
+			}
+		}, (architect, context) -> {
+			architect.enableAutoWireObjects();
+			architect.enableAutoWireTeams();
+			architect.addOfficeSection("SERVICER", ClassSectionSource.class.getName(), sectionServicer.getName());
+		}, (officeFloor) -> this.officeFloor = officeFloor);
 
 		// Ensure correct HTTP server implementation
 		Class<? extends HttpServerImplementation> expectedImplementation = this.getHttpServerImplementationClass();
 		assertEquals("Incorrect HTTP Server implementation", expectedImplementation,
 				httpServer.value.getHttpServerImplementation().getClass());
+	}
+
+	/**
+	 * Starts the {@link HttpServer}.
+	 * 
+	 * @param officeFloorExtension {@link OfficeFloorExtensionService} to configure
+	 *                             the {@link OfficeFloor}.
+	 * @param officeExtension      {@link OfficeExtensionService} to configure the
+	 *                             {@link OfficeFloor}.
+	 * @param officeFloorListener  {@link Consumer} to receive the
+	 *                             {@link OfficeFloor}.
+	 * @throws Exception If fails to start the {@link HttpServer}.
+	 */
+	protected void startHttpServer(OfficeFloorExtensionService officeFloorExtension,
+			OfficeExtensionService officeExtension, Consumer<OfficeFloor> officeFloorListener) throws Exception {
+		CompileOfficeFloor compile = new CompileOfficeFloor();
+		compile.officeFloor((context) -> officeFloorExtension.extendOfficeFloor(context.getOfficeFloorDeployer(),
+				(OfficeFloorExtensionContext) context.getOfficeFloorSourceContext()));
+		compile.office((context) -> officeExtension.extendOffice(context.getOfficeArchitect(),
+				(OfficeExtensionContext) context.getOfficeSourceContext()));
+		OfficeFloor officeFloor = compile.compileAndOpenOfficeFloor();
+		officeFloorListener.accept(officeFloor);
+	}
+
+	/**
+	 * Convenience method to add an {@link OfficeFloorManagedObject}.
+	 * 
+	 * @param deployer           {@link OfficeFloorDeployer}.
+	 * @param managedObjectName  Name of the {@link ManagedObject}.
+	 * @param managedObjectClass Type of the {@link Object}.
+	 * @param scope              {@link ManagedObjectScope}.
+	 * @return {@link OfficeFloorManagedObject}.
+	 */
+	private static OfficeFloorManagedObject addManagedObject(OfficeFloorDeployer deployer, String managedObjectName,
+			Class<?> managedObjectClass, ManagedObjectScope scope) {
+		OfficeFloorManagedObjectSource mos = deployer.addManagedObjectSource(managedObjectName + "_SOURCE",
+				ClassManagedObjectSource.class.getName());
+		mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, managedObjectClass.getName());
+		return mos.addOfficeFloorManagedObject(managedObjectName, scope);
 	}
 
 	public static class Servicer {
@@ -547,8 +589,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 				HttpServer.PROPERTY_HTTP_DATE_HEADER, "true").run(() -> {
 
 					// Obtain the server name
-					String serverNameSuffix = this.getServerNameSuffix();
-					String serverName = "OfficeFloorServer" + (serverNameSuffix == null ? "" : " " + serverNameSuffix);
+					String serverName = this.getServerName();
 
 					// Should setup server with System properties
 					this.startHttpServer(BufferServicer.class);
@@ -558,6 +599,16 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 						assertNotNull("Should have Date HTTP header", response.getFirstHeader("Date"));
 					});
 				});
+	}
+
+	/**
+	 * Obtains the server name.
+	 * 
+	 * @return Server name.
+	 */
+	protected String getServerName() {
+		String serverNameSuffix = this.getServerNameSuffix();
+		return "OfficeFloorServer" + (serverNameSuffix == null ? "" : " " + serverNameSuffix);
 	}
 
 	/**
@@ -777,14 +828,14 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 * @throws Exception If test failure.
 	 */
 	public void testTeamPressureOverload() throws Exception {
-		this.startHttpServer(PressureOverloadServicer.class, (context) -> {
+		this.startHttpServer(PressureOverloadServicer.class, (deployer, context) -> {
 
 			// Configure marker
-			context.addManagedObject("MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
+			addManagedObject(deployer, "MARKER", TeamMarker.class, ManagedObjectScope.THREAD);
 
 			// Configure teams
-			context.getOfficeFloorDeployer().addTeam("TEAM", BackPressureTeamSource.class.getName())
-					.addTypeQualification(null, TeamMarker.class.getName());
+			deployer.addTeam("TEAM", BackPressureTeamSource.class.getName()).addTypeQualification(null,
+					TeamMarker.class.getName());
 		});
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 			HttpResponse response = client.execute(new HttpGet(this.serverLocation.createClientUrl(false, "/test")));
@@ -870,19 +921,18 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		// Start the server
 		CancelConnectionManagedObjectSource mos = new CancelConnectionManagedObjectSource();
-		this.startHttpServer(CancelConnectionServicer.class, (context) -> {
-			OfficeFloorDeployer deployer = context.getOfficeFloorDeployer();
+		this.startHttpServer(CancelConnectionServicer.class, (deployer, context) -> {
 
 			// Load the managed object source
 			deployer.addManagedObjectSource("MOS", mos).addOfficeFloorManagedObject("MO", ManagedObjectScope.PROCESS);
 
 			// Configure team one
-			context.addManagedObject("MARKER_ONE", TeamMarker.class, ManagedObjectScope.PROCESS);
+			addManagedObject(deployer, "MARKER_ONE", TeamMarker.class, ManagedObjectScope.PROCESS);
 			deployer.addTeam("TEAM_ONE", ExecutorCachedTeamSource.class.getName()).addTypeQualification(null,
 					TeamMarker.class.getName());
 
 			// Configure team two
-			context.addManagedObject("MARKER_TWO", TeamTwoMarker.class, ManagedObjectScope.PROCESS);
+			addManagedObject(deployer, "MARKER_TWO", TeamTwoMarker.class, ManagedObjectScope.PROCESS);
 			deployer.addTeam("TEAM_TWO", ExecutorCachedTeamSource.class.getName()).addTypeQualification(null,
 					TeamTwoMarker.class.getName());
 		});

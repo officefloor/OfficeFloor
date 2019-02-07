@@ -18,7 +18,11 @@
 package net.officefloor.web.security.type;
 
 import java.sql.Connection;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.function.BiConsumer;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
@@ -26,15 +30,27 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.server.http.mock.MockServerHttpConnection;
+import net.officefloor.web.security.AuthenticationRequiredException;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
+import net.officefloor.web.security.scheme.AnonymousHttpSecuritySource;
+import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.web.security.scheme.MockAccessControl;
 import net.officefloor.web.security.scheme.MockAuthentication;
 import net.officefloor.web.spi.security.AuthenticateContext;
@@ -45,11 +61,13 @@ import net.officefloor.web.spi.security.HttpAuthenticationFactory;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.spi.security.HttpSecurityContext;
 import net.officefloor.web.spi.security.HttpSecurityDependencyMetaData;
+import net.officefloor.web.spi.security.HttpSecurityExecuteContext;
 import net.officefloor.web.spi.security.HttpSecurityFlowMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySourceContext;
 import net.officefloor.web.spi.security.HttpSecuritySourceMetaData;
 import net.officefloor.web.spi.security.HttpSecuritySourceSpecification;
+import net.officefloor.web.spi.security.HttpSecuritySupportingManagedObject;
 import net.officefloor.web.spi.security.LogoutContext;
 import net.officefloor.web.spi.security.RatifyContext;
 
@@ -731,6 +749,279 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to create {@link AuthenticationContext}.
+	 */
+	public void testCreateAuthenticationContext() throws Throwable {
+
+		// Create the mocks
+		MockServerHttpConnection connection = MockHttpServer.mockConnection();
+
+		// Ensure able to use to handle authentication
+		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, None, None> security = HttpSecurityLoaderUtil
+				.loadHttpSecurity(AnonymousHttpSecuritySource.class);
+
+		// Create the authentication context
+		AuthenticationContext<HttpAccessControl, Void> context = HttpSecurityLoaderUtil
+				.createAuthenticationContext(connection, security, null);
+
+		// Create the authentication
+		HttpAuthentication<Void> authentication = security.createAuthentication(context);
+		assertNotNull("Should have authentication", authentication);
+
+		// Validate functionality with authentication
+		assertTrue("Should not be authenticated", authentication.isAuthenticated());
+		assertSame("Incorrect credentials type", Void.class, authentication.getCredentialsType());
+	}
+
+	/**
+	 * Ensure able to use the {@link AuthenticationContext}.
+	 */
+	public void testUseAuthenticationContext() throws Throwable {
+
+		// Create the mocks
+		MockHttpRequestBuilder request = MockHttpServer.mockRequest().header("Authorization",
+				"Basic " + Base64.getEncoder().encodeToString("Daniel:Test".getBytes()));
+		MockServerHttpConnection connection = MockHttpServer.mockConnection(request);
+		HttpAccessControl accessControl = this.createMock(HttpAccessControl.class);
+
+		// Ensure able to use to handle authentication
+		HttpSecurity<HttpAuthentication<Void>, HttpAccessControl, Void, BasicHttpSecuritySource.Dependencies, None> security = HttpSecurityLoaderUtil
+				.loadHttpSecurity(BasicHttpSecuritySource.class, BasicHttpSecuritySource.PROPERTY_REALM, "test");
+
+		// Create the authentication context
+		AuthenticationContext<HttpAccessControl, Void> context = HttpSecurityLoaderUtil.createAuthenticationContext(
+				connection, security, (authenticate) -> authenticate.accessControlChange(accessControl, null));
+
+		// Create the authentication
+		HttpAuthentication<Void> authentication = security.createAuthentication(context);
+		assertNotNull("Should have authentication", authentication);
+
+		// Validate functionality with authentication
+		assertTrue("Should be authenticated", authentication.isAuthenticated());
+		assertSame("Incorrect access control", accessControl, authentication.getAccessControl());
+
+		// Ensure can log out
+		HttpSecurityLoaderUtil.logout(authentication);
+		assertFalse("Should not be authentiated", authentication.isAuthenticated());
+		try {
+			authentication.getAccessControl();
+			fail("Should not be successful");
+		} catch (AuthenticationRequiredException ex) {
+		}
+
+		// Ensure can log back in
+		HttpSecurityLoaderUtil.authenticate(authentication, null);
+		assertTrue("Should log back in", authentication.isAuthenticated());
+		assertSame("Should be same access control again", accessControl, authentication.getAccessControl());
+	}
+
+	/**
+	 * Ensure {@link HttpSecuritySupportingManagedObjectType} is on
+	 * {@link HttpSecurityType}.
+	 */
+	public void testSupportingManagedObject() throws Throwable {
+
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), HttpAuthentication.class);
+		this.recordReturn(this.metaData, this.metaData.getAccessControlType(), HttpAccessControl.class);
+		this.recordReturn(this.metaData, this.metaData.getCredentialsType(), null);
+
+		// Load type with supporting object
+		ClassManagedObjectSource mos = new ClassManagedObjectSource();
+		HttpSecurityType<?, ?, ?, ?, ?> type = this.loadHttpSecurityType(true, (context) -> {
+			context.addSupportingManagedObject("object", mos, ManagedObjectScope.THREAD).addProperty(
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, MockSupportingObject.class.getName());
+		});
+
+		// Ensure have supporting object type
+		HttpSecuritySupportingManagedObjectType<?>[] supportingObjects = type.getSupportingManagedObjectTypes();
+		assertEquals("Incorrect number of supporting objects", 1, supportingObjects.length);
+		HttpSecuritySupportingManagedObjectType<?> supportingObject = supportingObjects[0];
+		assertEquals("Incorrect name", "object", supportingObject.getSupportingManagedObjectName());
+		assertSame("Incorrect managed object source", mos, supportingObject.getManagedObjectSource());
+		PropertyList properties = supportingObject.getProperties();
+		assertEquals("Incorrect number of properties", 1, properties.getPropertyNames().length);
+		assertEquals("Incorrect property", MockSupportingObject.class.getName(),
+				properties.getProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME).getValue());
+		assertSame("Incorrect object type", MockSupportingObject.class, supportingObject.getObjectType());
+		assertEquals("Incorrect managed object scope", ManagedObjectScope.THREAD,
+				supportingObject.getManagedObjectScope());
+		assertEquals("Should be no dependencies", 0, supportingObject.getDependencyTypes().length);
+	}
+
+	public static class MockSupportingObject {
+	}
+
+	/**
+	 * Ensure {@link HttpSecuritySupportingManagedObjectDependencyType} is on
+	 * {@link HttpSecuritySupportingManagedObjectType}.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testSupportingManagedObjectDependencies() throws Throwable {
+
+		// Record loading type
+		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), null);
+		this.recordReturn(this.metaData, this.metaData.getAuthenticationType(), HttpAuthentication.class);
+		this.recordReturn(this.metaData, this.metaData.getAccessControlType(), HttpAccessControl.class);
+		this.recordReturn(this.metaData, this.metaData.getCredentialsType(), null);
+
+		// Load type with supporting object
+		Closure<HttpSecuritySupportingManagedObject<?>> dependencySupportingObject = new Closure<>();
+		HttpSecurityType<?, ?, ?, ?, ?> type = this.loadHttpSecurityType(true, (context) -> {
+
+			// Add the dependency
+			HttpSecuritySupportingManagedObject<?> dependency = context.addSupportingManagedObject("object",
+					new ClassManagedObjectSource(), ManagedObjectScope.PROCESS);
+			dependency.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+					MockSupportingObject.class.getName());
+			dependencySupportingObject.value = dependency;
+
+			// Add with dependencies
+			HttpSecuritySupportingManagedObject<MockHttpSecuritySupportingManagedObjectDependencies> object = context
+					.addSupportingManagedObject("object", new MockHttpSecuritySupportingManagedObjectSource(),
+							ManagedObjectScope.FUNCTION);
+			object.linkAuthentication(MockHttpSecuritySupportingManagedObjectDependencies.AUTHENTICATION);
+			object.linkHttpAuthentication(MockHttpSecuritySupportingManagedObjectDependencies.HTTP_AUTHENTICATION);
+			object.linkAccessControl(MockHttpSecuritySupportingManagedObjectDependencies.ACCESS_CONTROL);
+			object.linkHttpAccessControl(MockHttpSecuritySupportingManagedObjectDependencies.HTTP_ACCESS_CONTROL);
+			object.linkSupportingManagedObject(MockHttpSecuritySupportingManagedObjectDependencies.DEPENDENCY,
+					dependency);
+		});
+
+		// Ensure correct supporting object
+		HttpSecuritySupportingManagedObjectType<MockHttpSecuritySupportingManagedObjectDependencies> supportingObject = (HttpSecuritySupportingManagedObjectType<MockHttpSecuritySupportingManagedObjectDependencies>) type
+				.getSupportingManagedObjectTypes()[1];
+		assertEquals("Incorrect object", "object", supportingObject.getSupportingManagedObjectName());
+		assertEquals("Incorrect scope", ManagedObjectScope.FUNCTION, supportingObject.getManagedObjectScope());
+
+		// Ensure have supporting object dependencies
+		Map<MockHttpSecuritySupportingManagedObjectDependencies, HttpSecuritySupportingManagedObjectDependencyType<?>> dependencies = new HashMap<>();
+		for (HttpSecuritySupportingManagedObjectDependencyType<MockHttpSecuritySupportingManagedObjectDependencies> dependencyType : supportingObject
+				.getDependencyTypes()) {
+			dependencies.put(dependencyType.getKey(), dependencyType);
+		}
+		assertEquals("Incorrect number of dependencies", 5, dependencies.size());
+
+		// Create assertion on getting dependency managed object
+		MockHttpSecuritySupportingManagedObjectDependencyContext context = new MockHttpSecuritySupportingManagedObjectDependencyContext(
+				dependencySupportingObject.value);
+		BiConsumer<MockHttpSecuritySupportingManagedObjectDependencies, OfficeManagedObject> assertDependency = (key,
+				expected) -> {
+			HttpSecuritySupportingManagedObjectDependencyType<?> dependencyType = dependencies.get(key);
+			assertNotNull("No dependency for key " + key, dependencyType);
+			assertSame("Incorrect dependency managed object for key " + key, expected,
+					dependencyType.getOfficeManagedObject(context));
+		};
+
+		// Assert the dependencies
+		assertDependency.accept(MockHttpSecuritySupportingManagedObjectDependencies.AUTHENTICATION,
+				context.authentication);
+		assertDependency.accept(MockHttpSecuritySupportingManagedObjectDependencies.HTTP_AUTHENTICATION,
+				context.httpAuthentication);
+		assertDependency.accept(MockHttpSecuritySupportingManagedObjectDependencies.ACCESS_CONTROL,
+				context.accessControl);
+		assertDependency.accept(MockHttpSecuritySupportingManagedObjectDependencies.HTTP_ACCESS_CONTROL,
+				context.httpAccessControl);
+		assertDependency.accept(MockHttpSecuritySupportingManagedObjectDependencies.DEPENDENCY, context.dependency);
+	}
+
+	public static enum MockHttpSecuritySupportingManagedObjectDependencies {
+		AUTHENTICATION, HTTP_AUTHENTICATION, ACCESS_CONTROL, HTTP_ACCESS_CONTROL, DEPENDENCY
+	}
+
+	@TestSource
+	public static class MockHttpSecuritySupportingManagedObjectSource
+			extends AbstractManagedObjectSource<MockHttpSecuritySupportingManagedObjectDependencies, None>
+			implements ManagedObject {
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<MockHttpSecuritySupportingManagedObjectDependencies, None> context)
+				throws Exception {
+			context.setObjectClass(this.getClass());
+			context.addDependency(MockHttpSecuritySupportingManagedObjectDependencies.AUTHENTICATION,
+					MockAuthentication.class);
+			context.addDependency(MockHttpSecuritySupportingManagedObjectDependencies.HTTP_AUTHENTICATION,
+					HttpAuthentication.class);
+			context.addDependency(MockHttpSecuritySupportingManagedObjectDependencies.ACCESS_CONTROL,
+					MockAccessControl.class);
+			context.addDependency(MockHttpSecuritySupportingManagedObjectDependencies.HTTP_ACCESS_CONTROL,
+					HttpAccessControl.class);
+			context.addDependency(MockHttpSecuritySupportingManagedObjectDependencies.DEPENDENCY,
+					MockSupportingObject.class);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			return this;
+		}
+
+		@Override
+		public Object getObject() throws Throwable {
+			return this;
+		}
+	}
+
+	private class MockHttpSecuritySupportingManagedObjectDependencyContext
+			implements HttpSecuritySupportingManagedObjectDependencyContext {
+
+		private final OfficeManagedObject authentication = LoadHttpSecurityTypeTest.this
+				.createMock(OfficeManagedObject.class);
+
+		private final OfficeManagedObject httpAuthentication = LoadHttpSecurityTypeTest.this
+				.createMock(OfficeManagedObject.class);
+
+		private final OfficeManagedObject accessControl = LoadHttpSecurityTypeTest.this
+				.createMock(OfficeManagedObject.class);
+
+		private final OfficeManagedObject httpAccessControl = LoadHttpSecurityTypeTest.this
+				.createMock(OfficeManagedObject.class);
+
+		private final OfficeManagedObject dependency = LoadHttpSecurityTypeTest.this
+				.createMock(OfficeManagedObject.class);
+
+		private final HttpSecuritySupportingManagedObject<?> dependencySupportingObject;
+
+		private MockHttpSecuritySupportingManagedObjectDependencyContext(
+				HttpSecuritySupportingManagedObject<?> dependencySupportingObject) {
+			this.dependencySupportingObject = dependencySupportingObject;
+		}
+
+		@Override
+		public OfficeManagedObject getAuthentication() {
+			return this.authentication;
+		}
+
+		@Override
+		public OfficeManagedObject getHttpAuthentication() {
+			return this.httpAuthentication;
+		}
+
+		@Override
+		public OfficeManagedObject getAccessControl() {
+			return this.accessControl;
+		}
+
+		@Override
+		public OfficeManagedObject getHttpAccessControl() {
+			return this.httpAccessControl;
+		}
+
+		@Override
+		public OfficeManagedObject getSupportingManagedObject(
+				HttpSecuritySupportingManagedObject<?> supportingManagedObject) {
+			assertSame("Incorrect supporting object", this.dependencySupportingObject, supportingManagedObject);
+			return this.dependency;
+		}
+	}
+
+	/**
 	 * Two key {@link Enum}.
 	 */
 	private enum TwoKey {
@@ -758,9 +1049,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	 * Records obtaining simple meta-data from the
 	 * {@link HttpSecuritySourceMetaData}.
 	 * 
-	 * @param flowKeys
-	 *            Flow keys to be defined in meta-data. Provide <code>null</code>
-	 *            values for indexing.
+	 * @param flowKeys Flow keys to be defined in meta-data. Provide
+	 *                 <code>null</code> values for indexing.
 	 */
 	@SuppressWarnings("unchecked")
 	private <F extends Enum<?>> void record_basicMetaData(F... flowKeys) {
@@ -795,8 +1085,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	 * @param issueDescription Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
 		this.issues.recordIssue(issueDescription);
@@ -805,10 +1094,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
+	 * @param issueDescription Description of the issue.
+	 * @param cause            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
 		this.issues.recordIssue(issueDescription, cause);
@@ -817,13 +1104,10 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link HttpSecurityType}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the
-	 *            {@link FunctionNamespaceType}.
-	 * @param init
-	 *            {@link Init}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link FunctionNamespaceType}.
+	 * @param init                   {@link Init}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link HttpSecurityType}.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -875,10 +1159,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Implemented to init the {@link HttpSecuritySource}.
 		 * 
-		 * @param context
-		 *            {@link HttpSecuritySourceContext}.
-		 * @param util
-		 *            {@link InitUtil}.
+		 * @param context {@link HttpSecuritySourceContext}.
+		 * @param util    {@link InitUtil}.
 		 */
 		void init(HttpSecuritySourceContext context);
 	}
@@ -915,10 +1197,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param metaData
-		 *            {@link HttpSecuritySourceMetaData}.
-		 * @param initUtil
-		 *            {@link InitUtil}.
+		 * @param metaData {@link HttpSecuritySourceMetaData}.
+		 * @param initUtil {@link InitUtil}.
 		 */
 		public static void reset(HttpSecuritySourceMetaData<?, ?, ?, ?, ?> metaData) {
 			instantiateFailure = null;
@@ -965,9 +1245,19 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
+		public void start(HttpSecurityExecuteContext<None> context) throws Exception {
+			// Should propagate to ManagedObjectSource
+		}
+
+		@Override
 		public HttpSecurity<HttpAuthentication<HttpCredentials>, HttpAccessControl, HttpCredentials, None, None> sourceHttpSecurity(
 				HttpSecurityContext context) throws HttpException {
 			return this;
+		}
+
+		@Override
+		public void stop() {
+			// Nothing to stop
 		}
 
 		/*
@@ -988,7 +1278,8 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void authenticate(HttpCredentials credentials, AuthenticateContext<HttpAccessControl, None> context) {
+		public void authenticate(HttpCredentials credentials,
+				AuthenticateContext<HttpAccessControl, None, None> context) {
 			fail("Should not be invoked for loading type");
 		}
 
@@ -998,7 +1289,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void logout(LogoutContext<None> context) {
+		public void logout(LogoutContext<None, None> context) {
 			fail("Should not be invoked for loading type");
 		}
 	}

@@ -24,6 +24,10 @@ import net.officefloor.compile.internal.structure.AutoWire;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
@@ -43,12 +47,60 @@ public class Singleton extends AbstractManagedObjectSource<None, None>
 	/**
 	 * Convenience method to load singleton {@link Object}.
 	 * 
-	 * @param architect
-	 *            {@link OfficeArchitect}.
-	 * @param singleton
-	 *            Singleton {@link Object}.
-	 * @param autoWires
-	 *            Optional {@link AutoWire} instances for the singleton.
+	 * @param deployer       {@link OfficeFloorDeployer}.
+	 * @param singleton      Singleton {@link Object}.
+	 * @param managingOffice Managing {@link DeployedOffice}.
+	 * @param autoWires      Optional {@link AutoWire} instances for the singleton.
+	 * @return {@link OfficeFloorManagedObject} for the singleton.
+	 */
+	public static OfficeFloorManagedObject load(OfficeFloorDeployer deployer, Object singleton,
+			DeployedOffice managingOffice, AutoWire... autoWires) {
+		return load(deployer, null, singleton, managingOffice, autoWires);
+	}
+
+	/**
+	 * Convenience method to load singleton {@link Object}.
+	 * 
+	 * @param deployer          {@link OfficeFloorDeployer}.
+	 * @param managedObjectName Name of {@link OfficeManagedObject}.
+	 * @param singleton         Singleton {@link Object}.
+	 * @param managingOffice    Managing {@link DeployedOffice}.
+	 * @param autoWires         Optional {@link AutoWire} instances for the
+	 *                          singleton.
+	 * @return {@link OfficeFloorManagedObject} for the singleton.
+	 */
+	public static OfficeFloorManagedObject load(OfficeFloorDeployer deployer, String managedObjectName,
+			Object singleton, DeployedOffice managingOffice, AutoWire... autoWires) {
+
+		// Ensure have a managed object name
+		if (managedObjectName == null) {
+			managedObjectName = singleton.getClass().getSimpleName();
+		}
+
+		// Load the managed object source
+		OfficeFloorManagedObjectSource managedObjectSource = deployer.addManagedObjectSource(managedObjectName,
+				new Singleton(singleton));
+		deployer.link(managedObjectSource.getManagingOffice(), managingOffice);
+
+		// Load the managed object
+		OfficeFloorManagedObject managedObject = managedObjectSource.addOfficeFloorManagedObject(managedObjectName,
+				ManagedObjectScope.PROCESS);
+
+		// Load auto wire information to managed object
+		for (AutoWire autoWire : autoWires) {
+			managedObject.addTypeQualification(autoWire.getQualifier(), autoWire.getType());
+		}
+
+		// Return the managed object
+		return managedObject;
+	}
+
+	/**
+	 * Convenience method to load singleton {@link Object}.
+	 * 
+	 * @param architect {@link OfficeArchitect}.
+	 * @param singleton Singleton {@link Object}.
+	 * @param autoWires Optional {@link AutoWire} instances for the singleton.
 	 * @return {@link OfficeManagedObject} for the singleton.
 	 */
 	public static OfficeManagedObject load(OfficeArchitect architect, Object singleton, AutoWire... autoWires) {
@@ -58,14 +110,11 @@ public class Singleton extends AbstractManagedObjectSource<None, None>
 	/**
 	 * Convenience method to load singleton {@link Object}.
 	 * 
-	 * @param architect
-	 *            {@link OfficeArchitect}.
-	 * @param managedObjectName
-	 *            Name of {@link OfficeManagedObject}.
-	 * @param singleton
-	 *            Singleton {@link Object}.
-	 * @param autoWires
-	 *            Optional {@link AutoWire} instances for the singleton.
+	 * @param architect         {@link OfficeArchitect}.
+	 * @param managedObjectName Name of {@link OfficeManagedObject}.
+	 * @param singleton         Singleton {@link Object}.
+	 * @param autoWires         Optional {@link AutoWire} instances for the
+	 *                          singleton.
 	 * @return {@link OfficeManagedObject} for the singleton.
 	 */
 	public static OfficeManagedObject load(OfficeArchitect architect, String managedObjectName, Object singleton,
@@ -101,8 +150,7 @@ public class Singleton extends AbstractManagedObjectSource<None, None>
 	/**
 	 * Initiate.
 	 * 
-	 * @param object
-	 *            Singleton object.
+	 * @param object Singleton object.
 	 */
 	public Singleton(Object object) {
 		this.object = object;
@@ -161,10 +209,8 @@ public class Singleton extends AbstractManagedObjectSource<None, None>
 	/**
 	 * Loads all extension interfaces from type.
 	 * 
-	 * @param type
-	 *            Type.
-	 * @param interfaces
-	 *            Listing of interfaces to be loaded.
+	 * @param type       Type.
+	 * @param interfaces Listing of interfaces to be loaded.
 	 */
 	private void loadAllExtensionInterfaces(Class<?> type, List<Class<?>> interfaces) {
 
