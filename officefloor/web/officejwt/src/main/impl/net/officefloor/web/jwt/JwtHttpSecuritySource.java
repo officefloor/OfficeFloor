@@ -365,8 +365,8 @@ public class JwtHttpSecuritySource<C> extends
 		NEXT_DECODE_KEY: for (JwtDecodeKey decodeKey : decoder.getJwtDecodeKeys()) {
 
 			// Ensure key is still within window (taking into account clock skew)
-			if ((decodeKey.startTime() > (currentTime + this.clockSkew))
-					|| (decodeKey.expireTime() < (currentTime - this.clockSkew))) {
+			if ((decodeKey.getStartTime() > (currentTime + this.clockSkew))
+					|| (decodeKey.getExpireTime() < (currentTime - this.clockSkew))) {
 				continue NEXT_DECODE_KEY; // decode key now outside window
 			}
 

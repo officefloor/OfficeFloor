@@ -25,12 +25,12 @@ public interface JwtAuthorityRepository {
 	List<JwtEncodeKey> retrieveJwtEncodeKeys(Instant activeAfter) throws Exception;
 
 	/**
-	 * Saves a new {@link JwtEncodeKey} instance.
+	 * Saves new {@link JwtEncodeKey} instances.
 	 * 
-	 * @param encodeKey New {@link JwtEncodeKey}.
+	 * @param encodeKeys New {@link JwtEncodeKey} instances.
 	 * @throws Exception If fails to save the {@link JwtEncodeKey} instance.
 	 */
-	void saveJwtEncodeKey(JwtEncodeKey encodeKey) throws Exception;
+	void saveJwtEncodeKeys(JwtEncodeKey... encodeKeys) throws Exception;
 
 	/**
 	 * Retrieves the list of {@link JwtRefreshKey} instances.
@@ -44,12 +44,12 @@ public interface JwtAuthorityRepository {
 	List<JwtRefreshKey> retrieveJwtRefreshKeys(Instant activeAfter) throws Exception;
 
 	/**
-	 * Saves a new {@link JwtRefreshKey} instances.
+	 * Saves new {@link JwtRefreshKey} instances.
 	 * 
-	 * @param refreshKey New {@link JwtRefreshKey} instance.
+	 * @param refreshKeys New {@link JwtRefreshKey} instances.
 	 * @throws Exception If fails to save the {@link JwtRefreshKey} instance.
 	 */
-	void saveJwtRefreshKey(JwtRefreshKey refreshKey);
+	void saveJwtRefreshKeys(JwtRefreshKey... refreshKeys);
 
 	/**
 	 * <p>

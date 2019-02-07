@@ -19,14 +19,14 @@ public interface JwtEncodeKey {
 	 * @return Seconds since Epoch for when this {@link JwtEncodeKey} becomes
 	 *         active.
 	 */
-	long startTime();
+	long getStartTime();
 
 	/**
 	 * Obtains the seconds since Epoch for expiry of this {@link JwtEncodeKey}.
 	 * 
 	 * @return Seconds since Epoch for expiry of this {@link JwtEncodeKey}.
 	 */
-	long expireTime();
+	long getExpireTime();
 
 	/**
 	 * Obtains the private {@link Key}.

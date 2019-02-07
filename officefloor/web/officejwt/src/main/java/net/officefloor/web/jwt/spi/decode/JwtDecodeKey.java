@@ -102,7 +102,7 @@ public class JwtDecodeKey implements Serializable {
 	 * @return Milliseconds since Epoch for when this {@link JwtDecodeKey} becomes
 	 *         active.
 	 */
-	public long startTime() {
+	public long getStartTime() {
 		return this.startTime;
 	}
 
@@ -111,7 +111,7 @@ public class JwtDecodeKey implements Serializable {
 	 * 
 	 * @return Milliseconds since Epoch for expiry of this {@link JwtDecodeKey}.
 	 */
-	public long expireTime() {
+	public long getExpireTime() {
 		return this.expireTime;
 	}
 

@@ -84,6 +84,11 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	private Instant retrieveJwtEncodeKeysTime = null;
 
 	/**
+	 * Indicates if within cluster critical section.
+	 */
+	private boolean isWithinClusterCriticalSection = false;
+
+	/**
 	 * Mock {@link JwtEncodeKey} instances for testing.
 	 */
 	private List<JwtEncodeKey> mockEncodeKeys = new ArrayList<>(Arrays.asList(new MockJwtEncodeKey(mockCurrentTime,
@@ -151,6 +156,14 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 							+ ")",
 					ex.getMessage());
 		}
+
+		// Should generate keys
+		assertEquals("Should generate new encode key", 1, this.mockEncodeKeys.size());
+		JwtEncodeKey newKey = this.mockEncodeKeys.get(0);
+		assertEquals("Incorrect start", mockCurrentTime - (3 * TimeUnit.MINUTES.toSeconds(20)), newKey.getStartTime());
+		assertEquals("Incorrect expire",
+				mockCurrentTime - (3 * TimeUnit.MINUTES.toSeconds(20)) + TimeUnit.DAYS.toSeconds(7),
+				newKey.getExpireTime());
 	}
 
 	@Override
@@ -314,12 +327,12 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 		 */
 
 		@Override
-		public long startTime() {
+		public long getStartTime() {
 			return this.startTime;
 		}
 
 		@Override
-		public long expireTime() {
+		public long getExpireTime() {
 			return this.expireTime;
 		}
 
@@ -339,27 +352,38 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	 */
 
 	@Override
-	public List<JwtEncodeKey> retrieveJwtEncodeKeys(Instant currentTime) {
-		this.retrieveJwtEncodeKeysTime = currentTime;
+	public List<JwtEncodeKey> retrieveJwtEncodeKeys(Instant activeAfter) {
+		this.retrieveJwtEncodeKeysTime = activeAfter;
 		return this.mockEncodeKeys;
 	}
 
 	@Override
-	public void saveJwtEncodeKey(JwtEncodeKey encodeKey) {
-		// TODO implement JwtAuthorityRepository.saveJwtEncodeKey(...)
-		throw new UnsupportedOperationException("TODO implement JwtAuthorityRepository.saveJwtEncodeKey(...)");
+	public void saveJwtEncodeKeys(JwtEncodeKey... encodeKeys) throws Exception {
+		for (JwtEncodeKey encodeKey : encodeKeys) {
+			this.mockEncodeKeys.add(encodeKey);
+		}
 	}
 
 	@Override
-	public List<JwtRefreshKey> retrieveJwtRefreshKeys(Instant currentTime) {
+	public List<JwtRefreshKey> retrieveJwtRefreshKeys(Instant activeAfter) {
 		// TODO implement JwtAuthorityRepository.retrieveJwtRefreshKeys(...)
 		throw new UnsupportedOperationException("TODO implement JwtAuthorityRepository.retrieveJwtRefreshKeys(...)");
 	}
 
 	@Override
-	public void saveJwtRefreshKey(JwtRefreshKey refreshKey) {
+	public void saveJwtRefreshKeys(JwtRefreshKey... refreshKeys) {
 		// TODO implement JwtAuthorityRepository.saveJwtRefreshKey(...)
 		throw new UnsupportedOperationException("TODO implement JwtAuthorityRepository.saveJwtRefreshKey(...)");
+	}
+
+	@Override
+	public void doClusterCriticalSection(ClusterCriticalSection clusterCriticalSection) throws Exception {
+		this.isWithinClusterCriticalSection = true;
+		try {
+			clusterCriticalSection.doClusterCriticalSection(this);
+		} finally {
+			this.isWithinClusterCriticalSection = false;
+		}
 	}
 
 }

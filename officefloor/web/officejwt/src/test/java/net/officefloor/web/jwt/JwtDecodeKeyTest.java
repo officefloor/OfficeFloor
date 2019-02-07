@@ -78,8 +78,8 @@ public class JwtDecodeKeyTest extends OfficeFrameTestCase {
 	 */
 	private static void assertJwtDecodeKey(JwtDecodeKey decodeKey, long expectedStartTime, long expectedExpireTime,
 			Key key) {
-		assertEquals("Incorrect start time", expectedStartTime, decodeKey.startTime());
-		assertEquals("Incorrect expire time", expectedExpireTime, decodeKey.expireTime());
+		assertEquals("Incorrect start time", expectedStartTime, decodeKey.getStartTime());
+		assertEquals("Incorrect expire time", expectedExpireTime, decodeKey.getExpireTime());
 		assertSame("Incorrect key", key, decodeKey.getKey());
 	}
 

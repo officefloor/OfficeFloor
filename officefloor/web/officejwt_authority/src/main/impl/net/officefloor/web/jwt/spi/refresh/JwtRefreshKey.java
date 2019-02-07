@@ -16,21 +16,21 @@ public interface JwtRefreshKey {
 	 * @return Seconds since Epoch for when this {@link JwtRefreshKey} becomes
 	 *         active.
 	 */
-	long startTime();
+	long getStartTime();
 
 	/**
 	 * Obtains the seconds since Epoch for expiry of this {@link JwtRefreshKey}.
 	 * 
 	 * @return Seconds since Epoch for expiry of this {@link JwtRefreshKey}.
 	 */
-	long expireTime();
+	long getExpireTime();
 
 	/**
 	 * Obtains the time in seconds the created refresh token should be valid.
 	 * 
 	 * @return Time in seconds the created refresh token should be valid.
 	 */
-	long activePeriod();
+	long getActivePeriod();
 
 	/**
 	 * Obtains the {@link Key}.
