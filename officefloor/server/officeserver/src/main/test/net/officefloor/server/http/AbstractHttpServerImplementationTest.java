@@ -425,7 +425,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	public static class EncodedUrlServicer {
 		public void service(ServerHttpConnection connection) throws IOException {
 			String requestUri = connection.getRequest().getUri();
-			assertEquals("Should have encoded ? #", "/encoded-%3f-%23-+?query=string", requestUri);
+			assertEquals("Should have encoded ? #", "/encoded-%3F-%23-+?query=string", requestUri);
 			connection.getResponse().getEntityWriter().write("success");
 		}
 	}
@@ -688,9 +688,10 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		this.startHttpServer(EncodedUrlServicer.class);
 		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
 			HttpResponse response = client.execute(new HttpGet(
-					this.serverLocation.createClientUrl(false, "/encoded-%3f-%23-+?query=string#fragment")));
-			assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect response", "success", HttpClientTestUtil.entityToString(response));
+					this.serverLocation.createClientUrl(false, "/encoded-%3F-%23-+?query=string#fragment")));
+			String responseEntity = HttpClientTestUtil.entityToString(response);
+			assertEquals("Incorrect status: " + responseEntity, 200, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect response", "success", responseEntity);
 		}
 	}
 
