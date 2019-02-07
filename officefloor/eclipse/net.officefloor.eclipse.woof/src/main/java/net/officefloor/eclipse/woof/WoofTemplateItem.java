@@ -28,6 +28,7 @@ import java.util.Set;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.eclipse.configurer.ListBuilder;
@@ -35,6 +36,7 @@ import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.eclipse.editor.DefaultConnectors;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.web.template.build.WebTemplate;
@@ -91,8 +93,7 @@ public class WoofTemplateItem extends
 	/**
 	 * Test configuration.
 	 * 
-	 * @param args
-	 *            Command line arguments.
+	 * @param args Command line arguments.
 	 */
 	public static void main(String[] args) {
 		WoofEditor.launchConfigurer(new WoofTemplateItem(), (model) -> {
@@ -174,8 +175,7 @@ public class WoofTemplateItem extends
 	/**
 	 * Obtains the {@link Map} of links secure.
 	 * 
-	 * @param item
-	 *            {@link WoofTemplateItem}.
+	 * @param item {@link WoofTemplateItem}.
 	 * @return {@link Map} of link to secure.
 	 */
 	private Map<String, Boolean> getLinksSecure(WoofTemplateItem item) {
@@ -191,19 +191,19 @@ public class WoofTemplateItem extends
 	/**
 	 * Obtains the {@link WoofTemplateChangeContext}.
 	 * 
-	 * @param context
-	 *            {@link ConfigurableContext}.
+	 * @param context {@link ConfigurableContext}.
 	 * @return {@link WoofTemplateChangeContext}.
-	 * @throws Exception
-	 *             If fails to create {@link WoofTemplateChangeContext}.
+	 * @throws Exception If fails to create {@link WoofTemplateChangeContext}.
 	 */
 	private WoofTemplateChangeContext getWoofTemplateChangeContext(ConfigurableContext<WoofModel, WoofChanges> context)
 			throws Exception {
 		// Create the template change
 		ClassLoader classLoader = context.getOsgiBridge().getClassLoader();
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
+		SourceContext sourceContext = compiler.createRootSourceContext();
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader, null);
 		WoofChangeIssues issues = WoofTemplateExtensionLoaderUtil.getWoofChangeIssues();
-		WoofTemplateChangeContext changeContext = new WoofTemplateChangeContextImpl(false, classLoader,
+		WoofTemplateChangeContext changeContext = new WoofTemplateChangeContextImpl(false, sourceContext,
 				configurationContext, issues);
 		return changeContext;
 	}
@@ -475,8 +475,7 @@ public class WoofTemplateItem extends
 		/**
 		 * Load from {@link WoofTemplateLinkModel}.
 		 * 
-		 * @param link
-		 *            {@link WoofTemplateLinkModel}.
+		 * @param link {@link WoofTemplateLinkModel}.
 		 */
 		private LinkSecure(WoofTemplateLinkModel link) {
 			this.linkName = link.getWoofTemplateLinkName();
