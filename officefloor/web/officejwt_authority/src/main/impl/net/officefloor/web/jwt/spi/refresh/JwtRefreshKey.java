@@ -26,13 +26,6 @@ public interface JwtRefreshKey {
 	long getExpireTime();
 
 	/**
-	 * Obtains the time in seconds the created refresh token should be valid.
-	 * 
-	 * @return Time in seconds the created refresh token should be valid.
-	 */
-	long getActivePeriod();
-
-	/**
 	 * Obtains the {@link Key}.
 	 * 
 	 * @return {@link Key} to encrypt/decrypt the refresh token.

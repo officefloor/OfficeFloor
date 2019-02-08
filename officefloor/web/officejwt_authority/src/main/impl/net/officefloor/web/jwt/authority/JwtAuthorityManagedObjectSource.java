@@ -84,7 +84,7 @@ public class JwtAuthorityManagedObjectSource
 
 	/**
 	 * {@link Property} name for the expiration period for access token. Period
-	 * measures in seconds.
+	 * measured in seconds.
 	 */
 	public static final String PROPERTY_ACCESS_TOKEN_EXPIRATION_PERIOD = "access.token.expiration.period";
 
@@ -92,6 +92,39 @@ public class JwtAuthorityManagedObjectSource
 	 * Default expiration period for access tokens.
 	 */
 	public static final long DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD = TimeUnit.MINUTES.toSeconds(20);
+
+	/**
+	 * {@link Property} name for number of overlap access token periods for the
+	 * {@link JwtEncodeKey} instances.
+	 */
+	public static final String PROPERTY_ENCODE_KEY_OVERLAP_PERIODS = "access.token.overlap.periods";
+
+	/**
+	 * Minimum number of overlap access token periods for he {@link JwtEncodeKey}
+	 * instances.
+	 */
+	public static final int MINIMUM_ENCODE_KEY_OVERLAP_PERIODS = 3;
+
+	/**
+	 * {@link Property} name for the expiration period for the {@link JwtEncodeKey}.
+	 * Period measured in seconds.
+	 */
+	public static final String PROPERTY_ENCODE_KEY_EXPIRATION_PERIOD = "encode.key.expiration.period";
+
+	/**
+	 * Default expiration period for {@link JwtEncodeKey}.
+	 */
+	public static final long DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD = TimeUnit.DAYS.toSeconds(7);
+
+	/**
+	 * {@link Property} for the {@link SignatureAlgorithm} for {@link JwtEncodeKey}.
+	 */
+	public static final String PROPERTY_ENCODE_KEY_SIGNATURE_ALGORITHM = "encode.key.signature.algorithm";
+
+	/**
+	 * Default {@link JwtEncodeKey} {@link SignatureAlgorithm}.
+	 */
+	public static final String DEFAULT_ENCODE_KEY_SIGNATURE_ALGORITHM = SignatureAlgorithm.RS256.name();
 
 	/**
 	 * {@link Charset}.
@@ -246,6 +279,22 @@ public class JwtAuthorityManagedObjectSource
 	private long accessTokenExpirationPeriod;
 
 	/**
+	 * Time in seconds to expire the {@link JwtEncodeKey}.
+	 */
+	private long encodeKeyExpirationPeriod;
+
+	/**
+	 * Number of overlap access token periods for the {@link JwtEncodeKey}
+	 * instances.
+	 */
+	private int encodeKeyOverlapPeriods;
+
+	/**
+	 * {@link JwtEncodeKey} {@link SignatureAlgorithm}.
+	 */
+	private SignatureAlgorithm encodeKeySignatureAlgorithm;
+
+	/**
 	 * {@link Clock} to obtain time in seconds.
 	 */
 	private Clock<Long> timeInSeconds;
@@ -331,6 +380,12 @@ public class JwtAuthorityManagedObjectSource
 		// Obtain the properties
 		this.accessTokenExpirationPeriod = Long.parseLong(sourceContext.getProperty(
 				PROPERTY_ACCESS_TOKEN_EXPIRATION_PERIOD, String.valueOf(DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD)));
+		this.encodeKeyExpirationPeriod = Long.parseLong(sourceContext.getProperty(PROPERTY_ENCODE_KEY_EXPIRATION_PERIOD,
+				String.valueOf(DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD)));
+		this.encodeKeyOverlapPeriods = Integer.parseInt(sourceContext.getProperty(PROPERTY_ENCODE_KEY_OVERLAP_PERIODS,
+				String.valueOf(MINIMUM_ENCODE_KEY_OVERLAP_PERIODS)));
+		this.encodeKeySignatureAlgorithm = SignatureAlgorithm.valueOf(sourceContext
+				.getProperty(PROPERTY_ENCODE_KEY_SIGNATURE_ALGORITHM, DEFAULT_ENCODE_KEY_SIGNATURE_ALGORITHM));
 
 		// Load meta-data
 		context.setObjectClass(JwtAuthority.class);
@@ -350,11 +405,6 @@ public class JwtAuthorityManagedObjectSource
 		ManagedObjectFunctionBuilder<RetrieveEncodeKeysDependencies, None> retrieveEncodeKeys = sourceContext
 				.addManagedFunction(Flows.RETRIEVE_ENCODE_KEYS.name(), () -> (functionContext) -> {
 
-					// TODO configuration items
-					long encodeKeyExpirePeriod = TimeUnit.DAYS.toSeconds(7);
-					int encodeKeyOverlapPeriods = 3;
-					SignatureAlgorithm encodeSignatureAlgorithm = SignatureAlgorithm.RS256;
-
 					// Obtain the JWT authority repository
 					JwtEncodeCollector collector = (JwtEncodeCollector) functionContext
 							.getObject(RetrieveEncodeKeysDependencies.COLLECTOR);
@@ -368,7 +418,7 @@ public class JwtAuthorityManagedObjectSource
 					JwtEncodeKeyImpl[] encodeKeys = this.getActiveJwtEncodeKeys(currentTimeSeconds, repository);
 
 					// Determine minimum period to have active keys
-					long overlapTime = this.accessTokenExpirationPeriod * encodeKeyOverlapPeriods;
+					long overlapTime = this.accessTokenExpirationPeriod * this.encodeKeyOverlapPeriods;
 					long activeUntilTime = currentTimeSeconds + overlapTime;
 
 					// Determine if have coverage
@@ -393,8 +443,8 @@ public class JwtAuthorityManagedObjectSource
 
 								// Create the JWT encode key
 								long startTime = coverage - overlapTime;
-								long expireTime = startTime + encodeKeyExpirePeriod;
-								KeyPair keyPair = Keys.keyPairFor(encodeSignatureAlgorithm);
+								long expireTime = startTime + this.encodeKeyExpirationPeriod;
+								KeyPair keyPair = Keys.keyPairFor(this.encodeKeySignatureAlgorithm);
 								JwtEncodeKeyImpl newEncodeKey = new JwtEncodeKeyImpl(startTime, expireTime,
 										keyPair.getPrivate(), keyPair.getPrivate());
 
@@ -611,7 +661,7 @@ public class JwtAuthorityManagedObjectSource
 	 * Claims details to determine appropriate access token.
 	 */
 	@JsonIgnoreProperties(ignoreUnknown = true)
-	private static class Claims {
+	protected static class Claims {
 
 		/**
 		 * Not before.
@@ -622,6 +672,24 @@ public class JwtAuthorityManagedObjectSource
 		 * Expiry.
 		 */
 		private Long exp;
+
+		/**
+		 * Specifies the not before.
+		 * 
+		 * @param nbf Not before.
+		 */
+		public void setNbf(Long nbf) {
+			this.nbf = nbf;
+		}
+
+		/**
+		 * Specifies the expire.
+		 * 
+		 * @param exp Expires.
+		 */
+		public void setExp(Long exp) {
+			this.exp = exp;
+		}
 	}
 
 	/**

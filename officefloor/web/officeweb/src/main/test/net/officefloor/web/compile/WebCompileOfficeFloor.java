@@ -88,7 +88,9 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		this.officeFloor((context) -> {
 			MockHttpServer server = MockHttpServer.configureMockHttpServer(context.getDeployedOffice()
 					.getDeployedOfficeInput(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
-			consumeMockhttpServer.accept(server);
+			if (consumeMockhttpServer != null) {
+				consumeMockhttpServer.accept(server);
+			}
 		});
 	}
 
