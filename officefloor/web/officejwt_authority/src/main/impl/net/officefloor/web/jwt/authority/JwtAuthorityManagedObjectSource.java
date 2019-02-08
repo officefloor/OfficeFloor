@@ -561,7 +561,7 @@ public class JwtAuthorityManagedObjectSource
 				}
 
 				// Ensure key will not expire too early
-				if (candidateKey.getExpireTime() > minimumExpireTime) {
+				if (candidateKey.getExpireTime() < minimumExpireTime) {
 					continue NEXT_KEY; // key expires too early
 				}
 
@@ -751,8 +751,7 @@ public class JwtAuthorityManagedObjectSource
 
 		@Override
 		public Key getPublicKey() {
-			// TODO implement JwtEncodeKey.getPublicKey(...)
-			throw new UnsupportedOperationException("TODO implement JwtEncodeKey.getPublicKey(...)");
+			return this.publicKey;
 		}
 	}
 

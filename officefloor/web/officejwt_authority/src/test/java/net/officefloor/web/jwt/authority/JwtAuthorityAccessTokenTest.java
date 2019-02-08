@@ -92,7 +92,7 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	 * Mock {@link JwtEncodeKey} instances for testing.
 	 */
 	private List<JwtEncodeKey> mockEncodeKeys = new ArrayList<>(Arrays.asList(new MockJwtEncodeKey(mockCurrentTime,
-			mockCurrentTime + TimeUnit.MINUTES.toSeconds(5), keyPair.getPrivate(), keyPair.getPublic())));
+			mockCurrentTime + TimeUnit.DAYS.toSeconds(1), keyPair.getPrivate(), keyPair.getPublic())));
 
 	/**
 	 * Ensure able to inject {@link JwtAuthority}.
@@ -143,9 +143,30 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	 * Ensure creates the {@link JwtEncodeKey} instances (should none be available).
 	 */
 	public void testNoEncodeKeys() {
+
+		// Clear keys and start server (should generate keys)
 		this.mockEncodeKeys.clear();
+		String accessToken = this.createAccessToken();
+
+		// Should generate keys
+		assertEquals("Should generate new encode key", 1, this.mockEncodeKeys.size());
+		JwtEncodeKey newKey = this.mockEncodeKeys.get(0);
+		long overlapStart = mockCurrentTime - (3 * TimeUnit.MINUTES.toSeconds(20));
+		assertEquals("Incorrect start", overlapStart, newKey.getStartTime());
+		assertEquals("Incorrect expire", overlapStart + TimeUnit.DAYS.toSeconds(7), newKey.getExpireTime());
+
+		// Ensure able to use new key
+		this.claims.assertAccessToken(accessToken, newKey.getPublicKey(), mockCurrentTime);
+	}
+
+	/**
+	 * Ensure fails if creating {@link JwtEncodeKey} instances in the past.
+	 */
+	public void testFailOnAttemptingPastAccessToken() {
+		this.claims.nbf = mockCurrentTime - JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
+		this.claims.exp = mockCurrentTime;
 		try {
-			this.createAccessToken();
+			this.doAuthorityTest((authority) -> authority.createAccessToken(this.claims));
 			fail("Should not be successful");
 		} catch (AccessTokenException ex) {
 			assertEquals("Incorrect cause",
@@ -156,14 +177,6 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 							+ ")",
 					ex.getMessage());
 		}
-
-		// Should generate keys
-		assertEquals("Should generate new encode key", 1, this.mockEncodeKeys.size());
-		JwtEncodeKey newKey = this.mockEncodeKeys.get(0);
-		assertEquals("Incorrect start", mockCurrentTime - (3 * TimeUnit.MINUTES.toSeconds(20)), newKey.getStartTime());
-		assertEquals("Incorrect expire",
-				mockCurrentTime - (3 * TimeUnit.MINUTES.toSeconds(20)) + TimeUnit.DAYS.toSeconds(7),
-				newKey.getExpireTime());
 	}
 
 	@Override
@@ -191,25 +204,28 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	private <T> T doAuthorityTest(Function<JwtAuthority<MockClaims>, T> testLogic) {
 		try {
 
-			// Compile the server
-			WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
-			compiler.getOfficeFloorCompiler().setClockFactory(this.clockFactory);
-			compiler.mockHttpServer((server) -> this.server = server);
-			compiler.web((context) -> {
-				OfficeArchitect office = context.getOfficeArchitect();
+			// Compile the server (only once)
+			if (this.officeFloor == null) {
+				WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+				compiler.getOfficeFloorCompiler().setClockFactory(this.clockFactory);
+				compiler.mockHttpServer((server) -> this.server = server);
+				compiler.web((context) -> {
+					OfficeArchitect office = context.getOfficeArchitect();
 
-				// JWT Authority registered through extension
-				office.addOfficeManagedObjectSource("JWT_AUTHORITY", JwtAuthorityManagedObjectSource.class.getName())
-						.addOfficeManagedObject("JWT_AUTHORITY", ManagedObjectScope.THREAD);
+					// JWT Authority registered through extension
+					office.addOfficeManagedObjectSource("JWT_AUTHORITY",
+							JwtAuthorityManagedObjectSource.class.getName())
+							.addOfficeManagedObject("JWT_AUTHORITY", ManagedObjectScope.THREAD);
 
-				// Register the JWT authority repository
-				office.addOfficeManagedObjectSource("REPOSITORY", new Singleton(this))
-						.addOfficeManagedObject("REPOSITORY", ManagedObjectScope.THREAD);
+					// Register the JWT authority repository
+					office.addOfficeManagedObjectSource("REPOSITORY", new Singleton(this))
+							.addOfficeManagedObject("REPOSITORY", ManagedObjectScope.THREAD);
 
-				// Provide section for handling
-				context.addSection("handle", HandlerSection.class);
-			});
-			this.officeFloor = compiler.compileAndOpenOfficeFloor();
+					// Provide section for handling
+					context.addSection("handle", HandlerSection.class);
+				});
+				this.officeFloor = compiler.compileAndOpenOfficeFloor();
+			}
 
 			// Undertake the test logic
 			ThreadSafeClosure<T> closure = new ThreadSafeClosure<>();
