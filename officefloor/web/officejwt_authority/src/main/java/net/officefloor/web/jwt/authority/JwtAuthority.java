@@ -2,9 +2,9 @@ package net.officefloor.web.jwt.authority;
 
 import net.officefloor.web.jwt.JwtHttpSecuritySource;
 import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
-import net.officefloor.web.jwt.spi.encode.JwtEncodeKey;
-import net.officefloor.web.jwt.spi.refresh.JwtRefreshKey;
 import net.officefloor.web.jwt.spi.repository.JwtAuthorityRepository;
+import net.officefloor.web.jwt.spi.repository.JwtEncodeKey;
+import net.officefloor.web.jwt.spi.repository.JwtRefreshKey;
 
 /**
  * Authority for JWT.
@@ -20,16 +20,18 @@ public interface JwtAuthority<I> {
 	 * 
 	 * @param identity Identity.
 	 * @return Refresh token.
+	 * @throws RefreshTokenException If fails to create the refresh token.
 	 */
-	String createRefreshToken(I identity);
+	String createRefreshToken(I identity) throws RefreshTokenException;
 
 	/**
 	 * Decodes the refresh token for the identity.
 	 * 
 	 * @param refreshToken Refresh token.
 	 * @return Identity within the refresh token.
+	 * @throws RefreshTokenException If fails to decode refresh token.
 	 */
-	I decodeRefreshToken(String refreshToken);
+	I decodeRefreshToken(String refreshToken) throws RefreshTokenException;
 
 	/**
 	 * <p>

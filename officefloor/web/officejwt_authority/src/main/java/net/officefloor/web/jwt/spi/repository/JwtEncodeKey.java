@@ -1,32 +1,15 @@
-package net.officefloor.web.jwt.spi.encode;
+package net.officefloor.web.jwt.spi.repository;
 
 import java.security.Key;
 
 import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
-import net.officefloor.web.jwt.spi.repository.JwtAuthorityRepository;
 
 /**
  * JWT encode key.
  * 
  * @author Daniel Sagenschneider
  */
-public interface JwtEncodeKey {
-
-	/**
-	 * Obtains the seconds since Epoch for when this {@link JwtEncodeKey} becomes
-	 * active.
-	 * 
-	 * @return Seconds since Epoch for when this {@link JwtEncodeKey} becomes
-	 *         active.
-	 */
-	long getStartTime();
-
-	/**
-	 * Obtains the seconds since Epoch for expiry of this {@link JwtEncodeKey}.
-	 * 
-	 * @return Seconds since Epoch for expiry of this {@link JwtEncodeKey}.
-	 */
-	long getExpireTime();
+public interface JwtEncodeKey extends JwtAuthorityKey {
 
 	/**
 	 * Obtains the private {@link Key}.

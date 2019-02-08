@@ -1,8 +1,7 @@
-package net.officefloor.web.jwt.spi.encode;
-
-import java.util.concurrent.TimeUnit;
+package net.officefloor.web.jwt.authority;
 
 import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
+import net.officefloor.web.jwt.spi.repository.JwtEncodeKey;
 
 /**
  * <p>
@@ -52,30 +51,12 @@ import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
 public interface JwtEncodeCollector {
 
 	/**
-	 * Obtains the current {@link JwtEncodeKey} instances.
-	 * 
-	 * @return Current {@link JwtEncodeKey} instances.
-	 */
-	JwtEncodeKey[] getCurrentKeys();
-
-	/**
 	 * Specifies the {@link JwtEncodeKey} instances.
 	 * 
 	 * @param timeToNextCheck Time in milliseconds to collect {@link JwtEncodeKey}
 	 *                        instances again.
 	 * @param keys            {@link JwtEncodeKey} instances.
 	 */
-	void setEncoding(JwtEncodeKey[] keys);
-
-	/**
-	 * Indicates failure in retrieving the {@link JwtEncodeKey} instances.
-	 * 
-	 * @param cause           Cause of the failure.
-	 * @param timeToNextCheck Allows overriding the default poll refresh interval.
-	 *                        This typically allows retrying earlier than the
-	 *                        default refresh period.
-	 * @param unit            {@link TimeUnit} for the next time to check.
-	 */
-	void setFailure(Throwable cause, long timeToNextCheck, TimeUnit unit);
+	void setKeys(JwtEncodeKey[] keys);
 
 }
