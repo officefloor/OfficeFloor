@@ -387,6 +387,17 @@ public class JwtAuthorityManagedObjectSource
 		this.encodeKeySignatureAlgorithm = SignatureAlgorithm.valueOf(sourceContext
 				.getProperty(PROPERTY_ENCODE_KEY_SIGNATURE_ALGORITHM, DEFAULT_ENCODE_KEY_SIGNATURE_ALGORITHM));
 
+		// Ensure appropriate timings
+		long overlapPeriod = this.encodeKeyOverlapPeriods * this.accessTokenExpirationPeriod;
+		long minimumEncodeKeyPeriod = 2 * overlapPeriod;
+		if (this.encodeKeyExpirationPeriod <= minimumEncodeKeyPeriod) {
+			throw new IllegalArgumentException(
+					JwtEncodeKey.class.getSimpleName() + " expiration period (" + this.encodeKeyExpirationPeriod
+							+ " seconds) is below overlap period ((" + this.accessTokenExpirationPeriod
+							+ " seconds period * " + this.encodeKeyOverlapPeriods + " periods = " + overlapPeriod
+							+ " seconds) * 2 for overlap start/end = " + minimumEncodeKeyPeriod + " seconds)");
+		}
+
 		// Load meta-data
 		context.setObjectClass(JwtAuthority.class);
 		context.setManagedObjectClass(JwtAuthorityManagedObject.class);
@@ -414,12 +425,16 @@ public class JwtAuthorityManagedObjectSource
 					// Obtain time
 					long currentTimeSeconds = this.timeInSeconds.getTime();
 
+					// Obtain the reload time
+					long reloadTime = currentTimeSeconds - this.accessTokenExpirationPeriod;
+
 					// Obtain the active encode keys
-					JwtEncodeKeyImpl[] encodeKeys = this.getActiveJwtEncodeKeys(currentTimeSeconds, repository);
+					JwtEncodeKeyImpl[] encodeKeys = this.getActiveJwtEncodeKeys(reloadTime, repository);
 
 					// Determine minimum period to have active keys
 					long overlapTime = this.accessTokenExpirationPeriod * this.encodeKeyOverlapPeriods;
-					long activeUntilTime = currentTimeSeconds + overlapTime;
+					long activeUntilTime = currentTimeSeconds - overlapPeriod + this.encodeKeyExpirationPeriod
+							- overlapTime + this.encodeKeyExpirationPeriod;
 
 					// Determine if have coverage
 					long coverageTime = this.getKeyCoverageUntil(currentTimeSeconds, activeUntilTime, encodeKeys);
@@ -432,14 +447,14 @@ public class JwtAuthorityManagedObjectSource
 						repository.doClusterCriticalSection((contextRepository) -> {
 
 							// As potential cluster lock, reload state
-							JwtEncodeKeyImpl[] coverageKeys = this.getActiveJwtEncodeKeys(currentTimeSeconds,
+							JwtEncodeKeyImpl[] coverageKeys = this.getActiveJwtEncodeKeys(reloadTime,
 									contextRepository);
 
 							// Determine coverage (as may have changed keys)
 							long coverage = this.getKeyCoverageUntil(currentTimeSeconds, activeUntilTime, coverageKeys);
 
 							// Ensure full coverage (creating keys as necessary)
-							while (coverage <= activeUntilTime) {
+							while (coverage < activeUntilTime) {
 
 								// Create the JWT encode key
 								long startTime = coverage - overlapTime;
@@ -583,6 +598,12 @@ public class JwtAuthorityManagedObjectSource
 				payload = payload.substring(0, lastBracketIndex) + ",\"exp\":" + expireTime + "}";
 			}
 
+			// Ensure valid time period
+			if (notBeforeTime > expireTime) {
+				throw new AccessTokenException(new IllegalArgumentException(
+						"nbf (" + notBeforeTime + ") must not be after exp (" + expireTime + ")"));
+			}
+
 			// Obtain the JWT encode keys
 			JwtEncodeKey[] encodeKeys;
 			try {
@@ -646,8 +667,8 @@ public class JwtAuthorityManagedObjectSource
 
 		@Override
 		public void reloadAccessKeys() {
-			// TODO implement JwtAuthority<I>.reloadAccessKeys(...)
-			throw new UnsupportedOperationException("TODO implement JwtAuthority<I>.reloadAccessKeys(...)");
+			JwtAuthorityManagedObjectSource.this.jwtEncodeKeys.clear();
+			JwtAuthorityManagedObjectSource.this.jwtEncodeKeys.poll();
 		}
 
 		@Override

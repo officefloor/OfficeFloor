@@ -21,6 +21,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -33,7 +34,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.jwt.spi.encode.JwtEncodeKey;
 import net.officefloor.web.jwt.spi.refresh.JwtRefreshKey;
@@ -95,9 +95,13 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	/**
 	 * Mock {@link JwtEncodeKey} instances for testing.
 	 */
-	private List<JwtEncodeKey> mockEncodeKeys = new ArrayList<>(Arrays.asList(new MockJwtEncodeKey(mockCurrentTime,
-			mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD,
-			keyPair.getPrivate(), keyPair.getPublic())));
+	private List<JwtEncodeKey> mockEncodeKeys = new ArrayList<>(
+			Arrays.asList(new MockJwtEncodeKey(mockCurrentTime, keyPair),
+					new MockJwtEncodeKey(
+							mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD
+									- (JwtAuthorityManagedObjectSource.MINIMUM_ENCODE_KEY_OVERLAP_PERIODS
+											* JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD),
+							Keys.keyPairFor(SignatureAlgorithm.RS256))));
 
 	/**
 	 * Ensure able to inject {@link JwtAuthority}.
@@ -123,8 +127,9 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 		// Record issue in configuration
 		this.compilerIssues = new MockCompilerIssues(this);
 		this.compilerIssues.recordCaptureIssues(false);
-		this.compilerIssues.recordIssue(
-				"JwtEncodeKey expiration period (8 seconds) is below overlap period ((1 seconds period * 4 periods = 4 seconds) * 2 for overlap start/end = 8 seconds)");
+		this.compilerIssues.recordIssue("JWT_AUTHORITY", ManagedObjectSourceNodeImpl.class, "Failed to init",
+				new IllegalArgumentException(
+						"JwtEncodeKey expiration period (8 seconds) is below overlap period ((1 seconds period * 4 periods = 4 seconds) * 2 for overlap start/end = 8 seconds)"));
 
 		// Ensure issue if encode key period too short (no overlap buffer)
 		this.replayMockObjects();
@@ -132,7 +137,7 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 				JwtAuthorityManagedObjectSource.PROPERTY_ENCODE_KEY_OVERLAP_PERIODS, String.valueOf(4),
 				JwtAuthorityManagedObjectSource.PROPERTY_ENCODE_KEY_EXPIRATION_PERIOD, String.valueOf(8));
 		this.verifyMockObjects();
-		assertNull("Should not compile OfficeFloor");
+		assertNull("Should not compile OfficeFloor", this.officeFloor);
 	}
 
 	/**
@@ -170,7 +175,7 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	public void testInvalidClaimTimes() {
 		this.claims.nbf = this.claims.exp + 1;
 		this.assertInvalidAccessToken(IllegalArgumentException.class.getName() + ": nbf (" + this.claims.nbf
-				+ " ) must not be after exp (" + this.claims.exp + ")");
+				+ ") must not be after exp (" + this.claims.exp + ")");
 	}
 
 	/**
@@ -186,7 +191,7 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 	 * Ensure fails if creating access token too far into future.
 	 */
 	public void testFailOnAttemptingAccessTokenTooFarIntoFuture() {
-		JwtEncodeKey key = this.mockEncodeKeys.get(0);
+		JwtEncodeKey key = this.mockEncodeKeys.get(1);
 		this.claims.exp = key.getExpireTime();
 		this.claims.nbf = this.claims.exp - JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
 		this.assertInvalidAccessToken(this.claims.getInvalidAccessTokenCause());
@@ -211,18 +216,35 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 		this.mockEncodeKeys.clear();
 		String accessToken = this.createAccessToken();
 
+		// Ensure correct request time loaded
+		assertEquals("Incorrect request time for keys",
+				mockCurrentTime - JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD,
+				this.retrieveJwtEncodeKeysTime.getEpochSecond());
+
+		// Determine default overlap time
+		long overlapTime = JwtAuthorityManagedObjectSource.MINIMUM_ENCODE_KEY_OVERLAP_PERIODS
+				* JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
+
 		// Should generate keys
-		assertEquals("Should generate new encode key", 1, this.mockEncodeKeys.size());
-		JwtEncodeKey newKey = this.mockEncodeKeys.get(0);
-		long overlapStart = mockCurrentTime - (JwtAuthorityManagedObjectSource.MINIMUM_ENCODE_KEY_OVERLAP_PERIODS
-				* JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD);
-		assertEquals("Incorrect start", overlapStart, newKey.getStartTime());
-		assertEquals("Incorrect expire",
-				overlapStart + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD,
-				newKey.getExpireTime());
+		assertEquals("Should generate new encode keys", 2, this.mockEncodeKeys.size());
+		JwtEncodeKey firstKey = this.mockEncodeKeys.get(0);
+		long firstKeyStart = mockCurrentTime - overlapTime;
+		assertEquals("Incorrect first key start", firstKeyStart, firstKey.getStartTime());
+		assertEquals("Incorrect first key expire",
+				firstKeyStart + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD,
+				firstKey.getExpireTime());
 
 		// Ensure able to use new key
-		this.claims.assertAccessToken(accessToken, newKey.getPublicKey(), mockCurrentTime);
+		this.claims.assertAccessToken(accessToken, firstKey.getPublicKey(), mockCurrentTime);
+
+		// Ensure second key overlaps
+		long secondKeyStart = firstKeyStart + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD
+				- overlapTime;
+		JwtEncodeKey secondKey = this.mockEncodeKeys.get(1);
+		assertEquals("Incorrect second key start", secondKeyStart, secondKey.getStartTime());
+		assertEquals("Incorrect second key expire",
+				secondKeyStart + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD,
+				secondKey.getExpireTime());
 	}
 
 	/**
@@ -233,26 +255,38 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 		// Obtain the access token
 		String accessToken = this.createAccessToken();
 		this.claims.assertAccessToken(accessToken, keyPair.getPublic(), mockCurrentTime);
-		assertEquals("Should just be the one key", 1, this.mockEncodeKeys.size());
+		assertEquals("Should just be the two setup keys", 2, this.mockEncodeKeys.size());
 
 		// Move time forward and refresh (so loads new key)
-		long renewKeyTime = mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD
-				- (JwtAuthorityManagedObjectSource.MINIMUM_ENCODE_KEY_OVERLAP_PERIODS
-						* JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD);
+		long renewKeyTime = mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD;
 		this.clockFactory.setCurrentTimeSeconds(renewKeyTime);
 		this.doAuthorityTest((authority) -> {
 			authority.reloadAccessKeys();
-			return null;
+
+			// Create access token (waits for keys to be reloaded)
+			return authority.createAccessToken(this.claims);
 		});
 
-		// Ensure now have two keys
-		assertEquals("Should create new key (as old about to expire)", 2, this.mockEncodeKeys.size());
+		// Ensure now have three keys
+		assertEquals("Should create new key (as old about to expire)", 3, this.mockEncodeKeys.size());
+
+		// Third key should appropriately overlap second key
+		JwtEncodeKey secondKey = this.mockEncodeKeys.get(1);
+		long expectedStartTime = secondKey.getExpireTime()
+				- (JwtAuthorityManagedObjectSource.MINIMUM_ENCODE_KEY_OVERLAP_PERIODS
+						* JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD);
+		JwtEncodeKey newKey = this.mockEncodeKeys.get(2);
+		assertEquals("Incorrect new key start", expectedStartTime, newKey.getStartTime());
+		assertEquals("Incorrect new key expire",
+				expectedStartTime + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD,
+				newKey.getExpireTime());
 
 		// Ensure as time moved forward (that uses second key to encode)
 		this.claims.nbf = null;
 		this.claims.exp = null;
 		accessToken = this.createAccessToken();
-		this.claims.assertAccessToken(accessToken, this.mockEncodeKeys.get(1).getPublicKey(), renewKeyTime);
+		this.claims.exp = renewKeyTime + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
+		this.claims.assertAccessToken(accessToken, secondKey.getPublicKey(), renewKeyTime);
 	}
 
 	@Override
@@ -352,7 +386,10 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 				// Provide section for handling
 				context.addSection("handle", HandlerSection.class);
 			});
-			this.officeFloor = compiler.compileAndOpenOfficeFloor();
+			this.officeFloor = compiler.compileOfficeFloor();
+			if (this.officeFloor != null) {
+				this.officeFloor.openOfficeFloor();
+			}
 		}
 	}
 
@@ -447,6 +484,11 @@ public class JwtAuthorityAccessTokenTest extends OfficeFrameTestCase implements 
 		private final Key privateKey;
 
 		private final Key publicKey;
+
+		private MockJwtEncodeKey(long startTime, KeyPair keyPair) {
+			this(startTime, startTime + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD,
+					keyPair.getPrivate(), keyPair.getPublic());
+		}
 
 		private MockJwtEncodeKey(long startTime, long expireTime, Key privateKey, Key publicKey) {
 			this.startTime = startTime;

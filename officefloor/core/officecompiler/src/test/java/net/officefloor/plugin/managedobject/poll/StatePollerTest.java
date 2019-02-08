@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -380,6 +381,33 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 		InvokedProcess process = this.invokedProcesses.remove();
 		process.managedObject.pollContext.setNextState("STATE", -1, null);
 		this.assertLogs("Name", "Manual poll for IDENTIFIER");
+	}
+
+	/**
+	 * Ensure can clear state.
+	 */
+	public void testClearState() throws Exception {
+
+		// Create the state
+		InvokedProcess process = this.startupProcess();
+		process.managedObject.pollContext.setNextState("STATE", -1, null);
+		assertEquals("Should have state", "STATE", this.poller.getStateNow());
+		assertEquals("Should have waiting state", "STATE", this.poller.getState(0, TimeUnit.SECONDS));
+
+		// Clear state
+		this.poller.clear();
+		assertNull("Should not have state after clear", this.poller.getStateNow());
+		try {
+			this.poller.getState(0, TimeUnit.SECONDS);
+			fail("Should not be successful");
+		} catch (TimeoutException ex) {
+		}
+
+		// Manual poll should trigger load again
+		this.poller.poll();
+		process = this.invokedProcesses.remove();
+		process.managedObject.pollContext.setNextState("RELOAD", -1, null);
+		assertEquals("Should have state after poll", "RELOAD", this.poller.getStateNow());
 	}
 
 	/**

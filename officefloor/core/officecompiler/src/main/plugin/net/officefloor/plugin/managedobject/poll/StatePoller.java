@@ -477,7 +477,7 @@ public class StatePoller<S, F extends Enum<F>> {
 				// Calculate the delay
 				unit = unit != null ? unit : TimeUnit.MILLISECONDS;
 				nextPollInterval = unit.toMillis(nextPollInterval);
-				if (nextPollInterval >= 1) {
+				if (nextPollInterval >= 0) {
 					isDefault = false;
 					delay = nextPollInterval;
 				}
@@ -521,8 +521,8 @@ public class StatePoller<S, F extends Enum<F>> {
 	 * @return Current state or <code>null</code> if not yet initialised.
 	 */
 	public S getStateNow() {
-		InitialisedState initialised = this.initialised;
-		return (initialised != null) ? initialised.state : null;
+		InitialisedState state = this.initialised;
+		return (state != null) ? state.state : null;
 	}
 
 	/**
@@ -536,14 +536,15 @@ public class StatePoller<S, F extends Enum<F>> {
 	public S getState(long timeout, TimeUnit unit) throws TimeoutException {
 
 		// Ensure initialised
-		if (this.initialised == null) {
+		InitialisedState state = this.initialised;
+		if (state == null) {
 
 			// Wait until initialised or times out
 			long millisecondsToWait = unit.toMillis(timeout);
 			long endTime = System.currentTimeMillis() + millisecondsToWait;
 			long waitTime = Math.max(100, millisecondsToWait / 10);
 			synchronized (this) {
-				while (this.initialised == null) {
+				while (state == null) {
 
 					// Determine if timed out
 					if (endTime < System.currentTimeMillis()) {
@@ -557,12 +558,15 @@ public class StatePoller<S, F extends Enum<F>> {
 						// Likely forcing shutdown, so consider it timeout
 						throw new TimeoutException("Thread interrupted");
 					}
+
+					// Capture if initialised
+					state = this.initialised;
 				}
 			}
 		}
 
 		// Return the initialised value
-		return this.initialised.state;
+		return state.state;
 	}
 
 	/**
@@ -570,6 +574,13 @@ public class StatePoller<S, F extends Enum<F>> {
 	 */
 	public void poll() {
 		this.pollSchedular.schedulePoll(true, 0L, null);
+	}
+
+	/**
+	 * Allows clearing the state.
+	 */
+	public void clear() {
+		this.initialised = null;
 	}
 
 	/**
