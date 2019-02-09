@@ -30,9 +30,9 @@ import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.jwt.JwtClaimsManagedObjectSource.Dependencies;
-import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
-import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
-import net.officefloor.web.jwt.spi.role.JwtRoleCollector;
+import net.officefloor.web.jwt.role.JwtRoleCollector;
+import net.officefloor.web.jwt.validate.JwtValidateKey;
+import net.officefloor.web.jwt.validate.JwtValidateKeyCollector;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.scheme.HttpAccessControlImpl;
 import net.officefloor.web.security.scheme.HttpAuthenticationImpl;
@@ -77,7 +77,7 @@ public class JwtHttpSecuritySource<C> extends
 	 * {@link Property} name for the startup timeout in milliseconds.
 	 * <p>
 	 * This is the time that {@link HttpRequest} instances are held up waiting the
-	 * for the initial {@link JwtDecodeKey} instances to be loaded.
+	 * for the initial {@link JwtValidateKey} instances to be loaded.
 	 */
 	public static final String PROEPRTY_STARTUP_TIMEOUT = "startup.timeout";
 
@@ -204,7 +204,7 @@ public class JwtHttpSecuritySource<C> extends
 		context.setAccessControlClass((Class) JwtHttpAccessControl.class);
 
 		// Provide flow to retrieve keys and obtain roles
-		context.addFlow(Flows.RETRIEVE_KEYS, JwtDecodeCollector.class);
+		context.addFlow(Flows.RETRIEVE_KEYS, JwtValidateKeyCollector.class);
 		context.addFlow(Flows.RETRIEVE_ROLES, JwtRoleCollector.class);
 
 		// Provide challenge flows
@@ -362,7 +362,7 @@ public class JwtHttpSecuritySource<C> extends
 
 		// Loop over decode keys to determine if JWT valid
 		boolean isValid = false;
-		NEXT_DECODE_KEY: for (JwtDecodeKey decodeKey : decoder.getJwtDecodeKeys()) {
+		NEXT_DECODE_KEY: for (JwtValidateKey decodeKey : decoder.getJwtDecodeKeys()) {
 
 			// Ensure key is still within window (taking into account clock skew)
 			if ((decodeKey.getStartTime() > (currentTime + this.clockSkew))
@@ -458,33 +458,33 @@ public class JwtHttpSecuritySource<C> extends
 	private static class JwtDecoder {
 
 		/**
-		 * {@link JwtDecodeKey} instances.
+		 * {@link JwtValidateKey} instances.
 		 */
-		private final JwtDecodeKey[] decodeKeys;
+		private final JwtValidateKey[] decodeKeys;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param decodeKeys {@link JwtDecodeKey} instances.
+		 * @param decodeKeys {@link JwtValidateKey} instances.
 		 */
-		private JwtDecoder(JwtDecodeKey[] decodeKeys) {
+		private JwtDecoder(JwtValidateKey[] decodeKeys) {
 			this.decodeKeys = decodeKeys;
 		}
 
 		/**
-		 * Obtains the {@link JwtDecodeKey} instances being used.
+		 * Obtains the {@link JwtValidateKey} instances being used.
 		 * 
-		 * @return {@link JwtDecodeKey} instances being used.
+		 * @return {@link JwtValidateKey} instances being used.
 		 */
-		private JwtDecodeKey[] getJwtDecodeKeys() {
+		private JwtValidateKey[] getJwtDecodeKeys() {
 			return this.decodeKeys;
 		}
 	}
 
 	/**
-	 * {@link JwtDecodeCollector} implementation.
+	 * {@link JwtValidateKeyCollector} implementation.
 	 */
-	private class JwtDecodeCollectorImpl implements JwtDecodeCollector {
+	private class JwtDecodeCollectorImpl implements JwtValidateKeyCollector {
 
 		/**
 		 * {@link StatePollContext} for the {@link JwtDecoder}.
@@ -505,17 +505,17 @@ public class JwtHttpSecuritySource<C> extends
 		 */
 
 		@Override
-		public JwtDecodeKey[] getCurrentKeys() {
+		public JwtValidateKey[] getCurrentKeys() {
 			JwtDecoder decoder = JwtHttpSecuritySource.this.jwtDecoder.getStateNow();
 			return decoder != null ? decoder.getJwtDecodeKeys() : null;
 		}
 
 		@Override
-		public void setKeys(JwtDecodeKey... keys) {
+		public void setKeys(JwtValidateKey... keys) {
 
 			// Filter the keys (also make copy so can not alter)
-			List<JwtDecodeKey> copy = new ArrayList<>(keys.length);
-			NEXT_KEY: for (JwtDecodeKey key : keys) {
+			List<JwtValidateKey> copy = new ArrayList<>(keys.length);
+			NEXT_KEY: for (JwtValidateKey key : keys) {
 
 				// Ignore if null
 				if (key == null) {
@@ -527,7 +527,7 @@ public class JwtHttpSecuritySource<C> extends
 			}
 
 			// Load the JWT decode keys
-			JwtDecodeKey[] validKeys = copy.toArray(new JwtDecodeKey[copy.size()]);
+			JwtValidateKey[] validKeys = copy.toArray(new JwtValidateKey[copy.size()]);
 			this.context.setNextState(new JwtDecoder(validKeys), -1, null);
 		}
 

@@ -1,15 +1,15 @@
-package net.officefloor.web.jwt.spi.repository;
+package net.officefloor.web.jwt.repository;
 
 import java.security.Key;
 
-import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
+import net.officefloor.web.jwt.validate.JwtValidateKey;
 
 /**
- * JWT encode key.
+ * JWT key to encode access token.
  * 
  * @author Daniel Sagenschneider
  */
-public interface JwtEncodeKey extends JwtAuthorityKey {
+public interface JwtAccessKey extends JwtAuthorityKey {
 
 	/**
 	 * Obtains the private {@link Key}.
@@ -24,7 +24,7 @@ public interface JwtEncodeKey extends JwtAuthorityKey {
 	 * <p>
 	 * While not used for encoding, is kept together to enable
 	 * {@link JwtAuthorityRepository} to associate public/private {@link Key}
-	 * instances for {@link JwtEncodeKey} to {@link JwtDecodeKey} relationships.
+	 * instances for {@link JwtAccessKey} to {@link JwtValidateKey} relationships.
 	 * 
 	 * @return Public {@link Key} to validate the JWT.
 	 */

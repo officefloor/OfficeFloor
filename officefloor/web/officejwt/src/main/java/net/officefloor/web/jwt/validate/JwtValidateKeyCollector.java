@@ -1,30 +1,30 @@
-package net.officefloor.web.jwt.spi.decode;
+package net.officefloor.web.jwt.validate;
 
 import java.util.concurrent.TimeUnit;
 
 /**
- * Collects {@link JwtDecodeKey} instances for JWT validation.
+ * Collects {@link JwtValidateKey} instances for JWT validation.
  * 
  * @author Daniel Sagenschneider
  */
-public interface JwtDecodeCollector {
+public interface JwtValidateKeyCollector {
 
 	/**
-	 * Obtains the current {@link JwtDecodeKey} instances.
+	 * Obtains the current {@link JwtValidateKey} instances.
 	 * 
-	 * @return Current {@link JwtDecodeKey} instances.
+	 * @return Current {@link JwtValidateKey} instances.
 	 */
-	JwtDecodeKey[] getCurrentKeys();
+	JwtValidateKey[] getCurrentKeys();
 
 	/**
-	 * Specifies the {@link JwtDecodeKey} instances.
+	 * Specifies the {@link JwtValidateKey} instances.
 	 * 
-	 * @param keys {@link JwtDecodeKey} instances.
+	 * @param keys {@link JwtValidateKey} instances.
 	 */
-	void setKeys(JwtDecodeKey... keys);
+	void setKeys(JwtValidateKey... keys);
 
 	/**
-	 * Indicates failure in retrieving the {@link JwtDecodeKey} instances.
+	 * Indicates failure in retrieving the {@link JwtValidateKey} instances.
 	 * 
 	 * @param cause           Cause of the failure.
 	 * @param timeToNextCheck Allows overriding the default poll refresh interval.

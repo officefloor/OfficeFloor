@@ -1,10 +1,10 @@
 package net.officefloor.web.jwt.authority;
 
 import net.officefloor.web.jwt.JwtHttpSecuritySource;
-import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
-import net.officefloor.web.jwt.spi.repository.JwtAuthorityRepository;
-import net.officefloor.web.jwt.spi.repository.JwtEncodeKey;
-import net.officefloor.web.jwt.spi.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.repository.JwtAccessKey;
+import net.officefloor.web.jwt.repository.JwtAuthorityRepository;
+import net.officefloor.web.jwt.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.validate.JwtValidateKey;
 
 /**
  * Authority for JWT.
@@ -57,22 +57,22 @@ public interface JwtAuthority<I> {
 
 	/**
 	 * <p>
-	 * Allows manually triggering a reload of the {@link JwtEncodeKey} instances.
+	 * Allows manually triggering a reload of the {@link JwtAccessKey} instances.
 	 * <p>
-	 * Similar to {@link #reloadRefreshKeys()}, except for {@link JwtEncodeKey}
+	 * Similar to {@link #reloadRefreshKeys()}, except for {@link JwtAccessKey}
 	 * instances.
 	 */
 	void reloadAccessKeys();
 
 	/**
 	 * <p>
-	 * Obtains the current active {@link JwtDecodeKey} instances.
+	 * Obtains the current active {@link JwtValidateKey} instances.
 	 * <p>
-	 * This allows publishing the {@link JwtDecodeKey} instances to
+	 * This allows publishing the {@link JwtValidateKey} instances to
 	 * {@link JwtHttpSecuritySource} implementations.
 	 * 
-	 * @return Current active {@link JwtDecodeKey} instances.
+	 * @return Current active {@link JwtValidateKey} instances.
 	 */
-	JwtDecodeKey[] getActiveJwtDecodeKeys();
+	JwtValidateKey[] getActiveJwtValidateKeys();
 
 }

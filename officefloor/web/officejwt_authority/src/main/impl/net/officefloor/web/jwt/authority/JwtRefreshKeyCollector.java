@@ -1,18 +1,18 @@
 package net.officefloor.web.jwt.authority;
 
-import net.officefloor.web.jwt.spi.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.repository.JwtRefreshKey;
 
 /**
  * <p>
  * Collects {@link JwtRefreshKey} instances for generating refresh tokens.
  * <p>
- * See {@link JwtEncodeCollector} for details regarding security.
+ * See {@link JwtAccessKeyCollector} for details regarding security.
  * 
  * @author Daniel Sagenschneider
  * 
- * @see JwtEncodeCollector
+ * @see JwtAccessKeyCollector
  */
-public interface JwtRefreshCollector {
+public interface JwtRefreshKeyCollector {
 
 	/**
 	 * Specifies the {@link JwtRefreshKey} instances.

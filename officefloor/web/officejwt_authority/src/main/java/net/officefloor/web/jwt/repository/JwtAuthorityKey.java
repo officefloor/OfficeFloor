@@ -1,4 +1,4 @@
-package net.officefloor.web.jwt.spi.repository;
+package net.officefloor.web.jwt.repository;
 
 /**
  * Common attributes for authority key.

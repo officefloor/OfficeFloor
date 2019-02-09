@@ -1,4 +1,4 @@
-package net.officefloor.web.jwt.spi.repository;
+package net.officefloor.web.jwt.repository;
 
 import java.time.Instant;
 import java.util.List;
@@ -11,23 +11,23 @@ import java.util.List;
 public interface JwtAuthorityRepository {
 
 	/**
-	 * Retrieves the list of {@link JwtEncodeKey} instances.
+	 * Retrieves the list of {@link JwtAccessKey} instances.
 	 * 
-	 * @param activeAfter Time in seconds to obtain all active {@link JwtEncodeKey}
+	 * @param activeAfter Time in seconds to obtain all active {@link JwtAccessKey}
 	 *                    instances.
-	 * @return {@link JwtEncodeKey} instances.
-	 * @throws Exception Possible failure in retrieving the {@link JwtEncodeKey}
+	 * @return {@link JwtAccessKey} instances.
+	 * @throws Exception Possible failure in retrieving the {@link JwtAccessKey}
 	 *                   instances.
 	 */
-	List<JwtEncodeKey> retrieveJwtEncodeKeys(Instant activeAfter) throws Exception;
+	List<JwtAccessKey> retrieveJwtAccessKeys(Instant activeAfter) throws Exception;
 
 	/**
-	 * Saves new {@link JwtEncodeKey} instances.
+	 * Saves new {@link JwtAccessKey} instances.
 	 * 
-	 * @param encodeKeys New {@link JwtEncodeKey} instances.
-	 * @throws Exception If fails to save the {@link JwtEncodeKey} instance.
+	 * @param encodeKeys New {@link JwtAccessKey} instances.
+	 * @throws Exception If fails to save the {@link JwtAccessKey} instance.
 	 */
-	void saveJwtEncodeKeys(JwtEncodeKey... encodeKeys) throws Exception;
+	void saveJwtEncodeKeys(JwtAccessKey... encodeKeys) throws Exception;
 
 	/**
 	 * Retrieves the list of {@link JwtRefreshKey} instances.

@@ -1,4 +1,4 @@
-package net.officefloor.web.jwt.spi.repository;
+package net.officefloor.web.jwt.repository;
 
 import java.security.Key;
 

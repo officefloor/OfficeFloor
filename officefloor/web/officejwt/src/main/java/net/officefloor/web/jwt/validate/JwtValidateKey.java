@@ -1,4 +1,4 @@
-package net.officefloor.web.jwt.spi.decode;
+package net.officefloor.web.jwt.validate;
 
 import java.io.Serializable;
 import java.security.Key;
@@ -7,11 +7,11 @@ import java.util.concurrent.TimeUnit;
 import net.officefloor.frame.api.clock.Clock;
 
 /**
- * JWT decode key.
+ * JWT validate key.
  * 
  * @author Daniel Sagenschneider
  */
-public class JwtDecodeKey implements Serializable {
+public class JwtValidateKey implements Serializable {
 
 	/**
 	 * Start time.
@@ -31,14 +31,14 @@ public class JwtDecodeKey implements Serializable {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param startTime  Seconds since Epoch for when this {@link JwtDecodeKey}
+	 * @param startTime  Seconds since Epoch for when this {@link JwtValidateKey}
 	 *                   becomes active.
 	 * @param expireTime Seconds since Epoch for expiry of this
-	 *                   {@link JwtDecodeKey}.
+	 *                   {@link JwtValidateKey}.
 	 * @param key        {@link Key} to validate the JWT.
 	 * @throws IllegalArgumentException If invalid arguments.
 	 */
-	public JwtDecodeKey(long startTime, long expireTime, Key key) throws IllegalArgumentException {
+	public JwtValidateKey(long startTime, long expireTime, Key key) throws IllegalArgumentException {
 		this.startTime = startTime;
 		this.expireTime = expireTime;
 		this.key = key;
@@ -55,7 +55,7 @@ public class JwtDecodeKey implements Serializable {
 	 * @param key            {@link Key} to validate the JWT.
 	 * @throws IllegalArgumentException If invalid arguments.
 	 */
-	public JwtDecodeKey(Clock<Long> timeInSeconds, long periodToExpire, TimeUnit unit, Key key)
+	public JwtValidateKey(Clock<Long> timeInSeconds, long periodToExpire, TimeUnit unit, Key key)
 			throws IllegalArgumentException {
 		if (timeInSeconds == null) {
 			throw new IllegalArgumentException("Must provide " + Clock.class.getSimpleName());
@@ -77,7 +77,7 @@ public class JwtDecodeKey implements Serializable {
 	 * @param key {@link Key}.
 	 * @throws IllegalArgumentException If missing {@link Key}.
 	 */
-	public JwtDecodeKey(Key key) throws IllegalArgumentException {
+	public JwtValidateKey(Key key) throws IllegalArgumentException {
 		this.startTime = 0;
 		this.expireTime = Long.MAX_VALUE;
 		this.key = key;
@@ -85,9 +85,9 @@ public class JwtDecodeKey implements Serializable {
 	}
 
 	/**
-	 * Validates this {@link JwtDecodeKey}.
+	 * Validates this {@link JwtValidateKey}.
 	 * 
-	 * @throws IllegalArgumentException If invalid {@link JwtDecodeKey}.
+	 * @throws IllegalArgumentException If invalid {@link JwtValidateKey}.
 	 */
 	private void validate() throws IllegalArgumentException {
 		if (this.key == null) {
@@ -96,10 +96,10 @@ public class JwtDecodeKey implements Serializable {
 	}
 
 	/**
-	 * Obtains the milliseconds since Epoch for when this {@link JwtDecodeKey}
+	 * Obtains the milliseconds since Epoch for when this {@link JwtValidateKey}
 	 * becomes active.
 	 * 
-	 * @return Milliseconds since Epoch for when this {@link JwtDecodeKey} becomes
+	 * @return Milliseconds since Epoch for when this {@link JwtValidateKey} becomes
 	 *         active.
 	 */
 	public long getStartTime() {
@@ -107,9 +107,10 @@ public class JwtDecodeKey implements Serializable {
 	}
 
 	/**
-	 * Obtains the milliseconds since Epoch for expiry of this {@link JwtDecodeKey}.
+	 * Obtains the milliseconds since Epoch for expiry of this
+	 * {@link JwtValidateKey}.
 	 * 
-	 * @return Milliseconds since Epoch for expiry of this {@link JwtDecodeKey}.
+	 * @return Milliseconds since Epoch for expiry of this {@link JwtValidateKey}.
 	 */
 	public long getExpireTime() {
 		return this.expireTime;

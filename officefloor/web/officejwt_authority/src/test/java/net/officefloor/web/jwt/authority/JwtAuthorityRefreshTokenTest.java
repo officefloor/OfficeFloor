@@ -28,9 +28,9 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 
 		// Encrypt and decrypt
 		String encrypted = JwtAuthorityManagedObjectSource.encrypt(refreshKey, initVector, startSalt, lace, endSalt,
-				message);
+				message, mockCipherFactory);
 		String decrypted = JwtAuthorityManagedObjectSource.decrypt(refreshKey, initVector, startSalt, endSalt,
-				encrypted);
+				encrypted, mockCipherFactory);
 
 		// Indicate values
 		System.out.println("encrypted: " + encrypted + "\ndecrypted: " + decrypted);
@@ -42,7 +42,7 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 	 */
 	public void testCreateRefreshToken() {
 		String refreshToken = this.createRefreshToken();
-		this.identity.assertRefreshToken(refreshToken, this.mockRefreshKeys.get(0));
+		this.identity.assertRefreshToken(refreshToken, this.mockRefreshKeys.get(0), mockCipherFactory);
 	}
 
 }

@@ -1,4 +1,4 @@
-package net.officefloor.web.jwt.spi.role;
+package net.officefloor.web.jwt.role;
 
 import java.util.Collection;
 

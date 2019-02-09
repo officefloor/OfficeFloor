@@ -15,7 +15,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -25,8 +24,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.clock.Clock;
@@ -42,11 +39,17 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedobject.poll.StatePollContext;
 import net.officefloor.plugin.managedobject.poll.StatePoller;
 import net.officefloor.server.http.HttpStatus;
-import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
-import net.officefloor.web.jwt.spi.repository.JwtAuthorityKey;
-import net.officefloor.web.jwt.spi.repository.JwtAuthorityRepository;
-import net.officefloor.web.jwt.spi.repository.JwtEncodeKey;
-import net.officefloor.web.jwt.spi.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.key.AesCipherFactory;
+import net.officefloor.web.jwt.key.AesSynchronousKeyFactory;
+import net.officefloor.web.jwt.key.AsynchronousKeyFactory;
+import net.officefloor.web.jwt.key.CipherFactory;
+import net.officefloor.web.jwt.key.Rsa256AynchronousKeyFactory;
+import net.officefloor.web.jwt.key.SynchronousKeyFactory;
+import net.officefloor.web.jwt.repository.JwtAccessKey;
+import net.officefloor.web.jwt.repository.JwtAuthorityKey;
+import net.officefloor.web.jwt.repository.JwtAuthorityRepository;
+import net.officefloor.web.jwt.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.validate.JwtValidateKey;
 
 /**
  * <p>
@@ -72,17 +75,12 @@ public class JwtAuthorityManagedObjectSource
 	}
 
 	/**
-	 * Dependencies for {@link ManagedFunction} to retrieve the {@link JwtEncodeKey}
+	 * Dependencies for {@link ManagedFunction} to retrieve the {@link JwtAccessKey}
 	 * instances.
 	 */
 	private static enum RetrieveKeysDependencies {
 		COLLECTOR, JWT_AUTHORITY_REPOSITORY
 	}
-
-	/**
-	 * Default translation.
-	 */
-	public static final String DEFAULT_TRANSLATION = "AES/CBC/PKCS5PADDING";
 
 	/**
 	 * {@link Property} name for the expiration period for access token. Period
@@ -97,36 +95,37 @@ public class JwtAuthorityManagedObjectSource
 
 	/**
 	 * {@link Property} name for number of overlap access token periods for the
-	 * {@link JwtEncodeKey} instances.
+	 * {@link JwtAccessKey} instances.
 	 */
-	public static final String PROPERTY_ENCODE_KEY_OVERLAP_PERIODS = "access.token.overlap.periods";
+	public static final String PROPERTY_ACCESS_KEY_OVERLAP_PERIODS = "access.key.token.overlap.periods";
 
 	/**
-	 * Minimum number of overlap access token periods for he {@link JwtEncodeKey}
+	 * Minimum number of overlap access token periods for he {@link JwtAccessKey}
 	 * instances.
 	 */
-	public static final int MINIMUM_ENCODE_KEY_OVERLAP_PERIODS = 3;
+	public static final int MINIMUM_ACCESS_KEY_OVERLAP_PERIODS = 3;
 
 	/**
-	 * {@link Property} name for the expiration period for the {@link JwtEncodeKey}.
+	 * {@link Property} name for the expiration period for the {@link JwtAccessKey}.
 	 * Period measured in seconds.
 	 */
-	public static final String PROPERTY_ENCODE_KEY_EXPIRATION_PERIOD = "encode.key.expiration.period";
+	public static final String PROPERTY_ACCESS_KEY_EXPIRATION_PERIOD = "access.key.expiration.period";
 
 	/**
-	 * Default expiration period for {@link JwtEncodeKey}.
+	 * Default expiration period for {@link JwtAccessKey}.
 	 */
-	public static final long DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD = TimeUnit.DAYS.toSeconds(7);
+	public static final long DEFAULT_ACCESS_KEY_EXPIRATION_PERIOD = TimeUnit.DAYS.toSeconds(7);
 
 	/**
-	 * {@link Property} for the {@link SignatureAlgorithm} for {@link JwtEncodeKey}.
+	 * {@link Property} for the {@link AsynchronousKeyFactory} {@link Class} for the
+	 * {@link JwtAccessKey}.
 	 */
-	public static final String PROPERTY_ENCODE_KEY_SIGNATURE_ALGORITHM = "encode.key.signature.algorithm";
+	public static final String PROPERTY_ACCESS_TOKEN_KEY_FACTORY = "access.token.key.factory";
 
 	/**
-	 * Default {@link JwtEncodeKey} {@link SignatureAlgorithm}.
+	 * Default {@link JwtAccessKey} {@link AsynchronousKeyFactory}.
 	 */
-	public static final String DEFAULT_ENCODE_KEY_SIGNATURE_ALGORITHM = SignatureAlgorithm.RS256.name();
+	public static final String DEFAULT_ACCESS_TOKEN_KEY_FACTORY = Rsa256AynchronousKeyFactory.class.getName();
 
 	/**
 	 * {@link Property} name for the expiration period for refresh token. Period
@@ -138,6 +137,50 @@ public class JwtAuthorityManagedObjectSource
 	 * Default expiration period for refresh tokens.
 	 */
 	public static final long DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD = TimeUnit.HOURS.toSeconds(8);
+
+	/**
+	 * {@link Property} name for number of overlap refresh token periods for the
+	 * {@link JwtRefreshKey} instances.
+	 */
+	public static final String PROPERTY_REFRESH_KEY_OVERLAP_PERIODS = "refresh.key.token.overlap.periods";
+
+	/**
+	 * Minimum number of overlap refresh token periods for he {@link JwtRefreshKey}
+	 * instances.
+	 */
+	public static final int MINIMUM_REFRESH_KEY_OVERLAP_PERIODS = 3;
+
+	/**
+	 * {@link Property} name for the expiration period for the
+	 * {@link JwtRefreshKey}. Period measured in seconds.
+	 */
+	public static final String PROPERTY_REFESH_KEY_EXPIRATION_PERIOD = "refresh.key.expiration.period";
+
+	/**
+	 * Default expiration period for {@link JwtRefreshKey}.
+	 */
+	public static final long DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD = TimeUnit.DAYS.toSeconds(28);
+
+	/**
+	 * {@link Property} for the {@link JwtRefreshKey} {@link CipherFactory}.
+	 */
+	public static final String PROPERTY_REFRESH_TOKEN_CIPHER_FACTORY = "refresh.token.cipher.factory";
+
+	/**
+	 * Default {@link JwtRefreshKey} {@link CipherFactory}.
+	 */
+	public static final String DEFAULT_REFRESH_TOKEN_CIPHER_FACTORY = AesCipherFactory.class.getName();
+
+	/**
+	 * {@link Property} for the {@link SynchronousKeyFactory} {@link Class} for the
+	 * {@link JwtRefreshKey}.
+	 */
+	public static final String PROPERTY_REFRESH_TOKEN_KEY_FACTORY = "refresh.token.key.factory";
+
+	/**
+	 * Default {@link JwtRefreshKey} {@link SynchronousKeyFactory}.
+	 */
+	public static final String DEFAULT_REFRESH_TOKEN_KEY_FACTORY = AesSynchronousKeyFactory.class.getName();
 
 	/**
 	 * {@link Charset}.
@@ -205,19 +248,20 @@ public class JwtAuthorityManagedObjectSource
 	/**
 	 * Encrypts the value.
 	 * 
-	 * @param key        {@link Key}.
-	 * @param initVector Initialise vector.
-	 * @param startSalt  Start salt.
-	 * @param lace       Lace.
-	 * @param endSalt    End salt.
-	 * @param value      Value.
+	 * @param key           {@link Key}.
+	 * @param initVector    Initialise vector.
+	 * @param startSalt     Start salt.
+	 * @param lace          Lace.
+	 * @param endSalt       End salt.
+	 * @param value         Value.
+	 * @param cipherFactory {@link CipherFactory}.
 	 * @return Encrypted value.
 	 * @throws Exception If fails to encrypt value.
 	 */
 	public static String encrypt(Key key, String initVector, String startSalt, String lace, String endSalt,
-			String value) throws Exception {
+			String value, CipherFactory cipherFactory) throws Exception {
 		IvParameterSpec iv = new IvParameterSpec(initVector.getBytes(UTF8));
-		Cipher cipher = Cipher.getInstance(DEFAULT_TRANSLATION);
+		Cipher cipher = cipherFactory.createCipher();
 		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 		byte[] encrypted = cipher.doFinal((startSalt + laceString(value, lace) + endSalt).getBytes());
 		return Base64.getUrlEncoder().encodeToString(encrypted);
@@ -226,18 +270,19 @@ public class JwtAuthorityManagedObjectSource
 	/**
 	 * Decrypts the value.
 	 * 
-	 * @param key        {@link Key}.
-	 * @param initVector Initialise vector.
-	 * @param startSalt  Start salt.
-	 * @param endSalt    End salt.
-	 * @param encrypted  Encrypted value.
+	 * @param key           {@link Key}.
+	 * @param initVector    Initialise vector.
+	 * @param startSalt     Start salt.
+	 * @param endSalt       End salt.
+	 * @param encrypted     Encrypted value.
+	 * @param cipherFactory {@link CipherFactory}.
 	 * @return Plaintext value.
 	 * @throws Exception If fails to decrypt value.
 	 */
-	public static String decrypt(Key key, String initVector, String startSalt, String endSalt, String encrypted)
-			throws Exception {
+	public static String decrypt(Key key, String initVector, String startSalt, String endSalt, String encrypted,
+			CipherFactory cipherFactory) throws Exception {
 		IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-		Cipher cipher = Cipher.getInstance(DEFAULT_TRANSLATION);
+		Cipher cipher = cipherFactory.createCipher();
 		cipher.init(Cipher.DECRYPT_MODE, key, iv);
 		byte[] original = cipher.doFinal(Base64.getUrlDecoder().decode(encrypted));
 		String value = new String(original);
@@ -292,20 +337,20 @@ public class JwtAuthorityManagedObjectSource
 	private long accessTokenExpirationPeriod;
 
 	/**
-	 * Time in seconds to expire the {@link JwtEncodeKey}.
+	 * Time in seconds to expire the {@link JwtAccessKey}.
 	 */
-	private long encodeKeyExpirationPeriod;
+	private long accessKeyExpirationPeriod;
 
 	/**
-	 * Number of overlap access token periods for the {@link JwtEncodeKey}
+	 * Number of overlap access token periods for the {@link JwtAccessKey}
 	 * instances.
 	 */
-	private int encodeKeyOverlapPeriods;
+	private int accessKeyOverlapPeriods;
 
 	/**
-	 * {@link JwtEncodeKey} {@link SignatureAlgorithm}.
+	 * {@link JwtAccessKey} {@link AsynchronousKeyFactory}.
 	 */
-	private SignatureAlgorithm encodeKeySignatureAlgorithm;
+	private AsynchronousKeyFactory accessTokenKeyFactory;
 
 	/**
 	 * Default time in seconds expire the refresh token.
@@ -324,15 +369,25 @@ public class JwtAuthorityManagedObjectSource
 	private int refreshKeyOverlapPeriods;
 
 	/**
+	 * {@link JwtRefreshKey} {@link CipherFactory}.
+	 */
+	private CipherFactory refreshTokenCipherFactory;
+
+	/**
+	 * {@link JwtRefreshKey} {@link SynchronousKeyFactory}.
+	 */
+	private SynchronousKeyFactory refreshTokenKeyFactory;
+
+	/**
 	 * {@link Clock} to obtain time in seconds.
 	 */
 	private Clock<Long> timeInSeconds;
 
 	/**
-	 * {@link StatePoller} to keep the {@link JwtEncodeKey} instances up to date
+	 * {@link StatePoller} to keep the {@link JwtAccessKey} instances up to date
 	 * with appropriate keys.
 	 */
-	private StatePoller<JwtEncodeKey[], Flows> jwtEncodeKeys;
+	private StatePoller<JwtAccessKey[], Flows> jwtEncodeKeys;
 
 	/**
 	 * {@link StatePoller} to keep the {@link JwtRefreshKey} instances up to date
@@ -374,6 +429,22 @@ public class JwtAuthorityManagedObjectSource
 	}
 
 	/**
+	 * Creates a new {@link JwtAuthorityKey}.
+	 */
+	@FunctionalInterface
+	private static interface JwtAuthorityKeyFactory<K extends JwtAuthorityKey> {
+
+		/**
+		 * Creates a new {@link JwtAuthorityKey}.
+		 * 
+		 * @param startTime Start time for the {@link JwtAuthorityKey}.
+		 * @return New {@link JwtAuthorityKey}.
+		 * @throws Exception If fails to create new {@link JwtAuthorityKey}.
+		 */
+		K createJwtAuthorityKey(long startTime) throws Exception;
+	}
+
+	/**
 	 * Loads the {@link JwtAuthorityKey} instances to cover the up coming time
 	 * period.
 	 * 
@@ -384,14 +455,14 @@ public class JwtAuthorityManagedObjectSource
 	 * @param keyExpirationPeriod   Key expiration period.
 	 * @param keyRetriever          {@link JwtAuthorityKeyRetriever}.
 	 * @param keySaver              {@link JwtAuthorityKeySaver}.
-	 * @param keyFactory            Factory for new {@link JwtAuthorityKey}.
+	 * @param keyFactory            {@link JwtAuthorityKeyFactory}.
 	 * @return {@link JwtAuthorityKey} instances to cover the up coming time period.
 	 * @throws Exception If fails to load the {@link JwtAuthorityKey} instances.
 	 */
 	private <K extends JwtAuthorityKey> K[] loadKeysForCoverage(JwtAuthorityRepository repository,
 			long tokenExpirationPeriod, int overlapPeriods, long keyExpirationPeriod,
-			JwtAuthorityKeyRetriever<K> keyRetriever, JwtAuthorityKeySaver<K> keySaver, Function<Long, K> keyFactory)
-			throws Exception {
+			JwtAuthorityKeyRetriever<K> keyRetriever, JwtAuthorityKeySaver<K> keySaver,
+			JwtAuthorityKeyFactory<K> keyFactory) throws Exception {
 
 		// Obtain time
 		long currentTimeSeconds = this.timeInSeconds.getTime();
@@ -428,7 +499,7 @@ public class JwtAuthorityManagedObjectSource
 
 					// Create the key
 					long startTime = coverage - overlapTime;
-					K newKey = keyFactory.apply(startTime);
+					K newKey = keyFactory.createJwtAuthorityKey(startTime);
 
 					// Include key
 					newKeys.add(newKey);
@@ -656,24 +727,48 @@ public class JwtAuthorityManagedObjectSource
 	protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
 		ManagedObjectSourceContext<Flows> sourceContext = context.getManagedObjectSourceContext();
 
-		// Obtain the properties
+		// Obtain access token properties
 		this.accessTokenExpirationPeriod = Long.parseLong(sourceContext.getProperty(
 				PROPERTY_ACCESS_TOKEN_EXPIRATION_PERIOD, String.valueOf(DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD)));
-		this.encodeKeyExpirationPeriod = Long.parseLong(sourceContext.getProperty(PROPERTY_ENCODE_KEY_EXPIRATION_PERIOD,
-				String.valueOf(DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD)));
-		this.encodeKeyOverlapPeriods = Integer.parseInt(sourceContext.getProperty(PROPERTY_ENCODE_KEY_OVERLAP_PERIODS,
-				String.valueOf(MINIMUM_ENCODE_KEY_OVERLAP_PERIODS)));
-		this.encodeKeySignatureAlgorithm = SignatureAlgorithm.valueOf(sourceContext
-				.getProperty(PROPERTY_ENCODE_KEY_SIGNATURE_ALGORITHM, DEFAULT_ENCODE_KEY_SIGNATURE_ALGORITHM));
+		this.accessKeyExpirationPeriod = Long.parseLong(sourceContext.getProperty(PROPERTY_ACCESS_KEY_EXPIRATION_PERIOD,
+				String.valueOf(DEFAULT_ACCESS_KEY_EXPIRATION_PERIOD)));
+		this.accessKeyOverlapPeriods = Integer.parseInt(sourceContext.getProperty(PROPERTY_ACCESS_KEY_OVERLAP_PERIODS,
+				String.valueOf(MINIMUM_ACCESS_KEY_OVERLAP_PERIODS)));
+
+		// Obtain the refresh token properties
+		this.refreshTokenExpirationPeriod = Long.parseLong(sourceContext.getProperty(
+				PROPERTY_REFRESH_TOKEN_EXPIRATION_PERIOD, String.valueOf(DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD)));
+		this.refreshKeyExpirationPeriod = Long.parseLong(sourceContext.getProperty(
+				PROPERTY_REFESH_KEY_EXPIRATION_PERIOD, String.valueOf(DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD)));
+		this.refreshKeyOverlapPeriods = Integer.parseInt(sourceContext.getProperty(PROPERTY_REFRESH_KEY_OVERLAP_PERIODS,
+				String.valueOf(MINIMUM_REFRESH_KEY_OVERLAP_PERIODS)));
+
+		// Load the access key factory
+		String asynchronousKeyFactoryClassName = sourceContext.getProperty(PROPERTY_ACCESS_TOKEN_KEY_FACTORY,
+				DEFAULT_ACCESS_TOKEN_KEY_FACTORY);
+		this.accessTokenKeyFactory = (AsynchronousKeyFactory) sourceContext.loadClass(asynchronousKeyFactoryClassName)
+				.getDeclaredConstructor().newInstance();
+
+		// Load the refresh cipher factory
+		String cipherFactoryClassName = sourceContext.getProperty(PROPERTY_REFRESH_TOKEN_CIPHER_FACTORY,
+				DEFAULT_REFRESH_TOKEN_CIPHER_FACTORY);
+		this.refreshTokenCipherFactory = (CipherFactory) sourceContext.loadClass(cipherFactoryClassName)
+				.getDeclaredConstructor().newInstance();
+
+		// Load the refresh key factory
+		String synchronousKeyFactoryClassName = sourceContext.getProperty(PROPERTY_REFRESH_TOKEN_KEY_FACTORY,
+				DEFAULT_REFRESH_TOKEN_KEY_FACTORY);
+		this.refreshTokenKeyFactory = (SynchronousKeyFactory) sourceContext.loadClass(synchronousKeyFactoryClassName)
+				.getDeclaredConstructor().newInstance();
 
 		// Ensure appropriate timings
-		long overlapPeriod = this.encodeKeyOverlapPeriods * this.accessTokenExpirationPeriod;
+		long overlapPeriod = this.accessKeyOverlapPeriods * this.accessTokenExpirationPeriod;
 		long minimumEncodeKeyPeriod = 2 * overlapPeriod;
-		if (this.encodeKeyExpirationPeriod <= minimumEncodeKeyPeriod) {
+		if (this.accessKeyExpirationPeriod <= minimumEncodeKeyPeriod) {
 			throw new IllegalArgumentException(
-					JwtEncodeKey.class.getSimpleName() + " expiration period (" + this.encodeKeyExpirationPeriod
+					JwtAccessKey.class.getSimpleName() + " expiration period (" + this.accessKeyExpirationPeriod
 							+ " seconds) is below overlap period ((" + this.accessTokenExpirationPeriod
-							+ " seconds period * " + this.encodeKeyOverlapPeriods + " periods = " + overlapPeriod
+							+ " seconds period * " + this.accessKeyOverlapPeriods + " periods = " + overlapPeriod
 							+ " seconds) * 2 for overlap start/end = " + minimumEncodeKeyPeriod + " seconds)");
 		}
 
@@ -682,8 +777,8 @@ public class JwtAuthorityManagedObjectSource
 		context.setManagedObjectClass(JwtAuthorityManagedObject.class);
 
 		// Configure flows
-		context.addFlow(Flows.RETRIEVE_ENCODE_KEYS, JwtEncodeCollector.class);
-		context.addFlow(Flows.RETRIEVE_REFRESH_KEYS, JwtRefreshCollector.class);
+		context.addFlow(Flows.RETRIEVE_ENCODE_KEYS, JwtAccessKeyCollector.class);
+		context.addFlow(Flows.RETRIEVE_REFRESH_KEYS, JwtRefreshKeyCollector.class);
 
 		// Obtain the clock
 		this.timeInSeconds = sourceContext.getClock((time) -> time);
@@ -697,21 +792,21 @@ public class JwtAuthorityManagedObjectSource
 				.addManagedFunction(Flows.RETRIEVE_ENCODE_KEYS.name(), () -> (functionContext) -> {
 
 					// Obtain the JWT authority repository
-					JwtEncodeCollector collector = (JwtEncodeCollector) functionContext
+					JwtAccessKeyCollector collector = (JwtAccessKeyCollector) functionContext
 							.getObject(RetrieveKeysDependencies.COLLECTOR);
 					JwtAuthorityRepository repository = (JwtAuthorityRepository) functionContext
 							.getObject(RetrieveKeysDependencies.JWT_AUTHORITY_REPOSITORY);
 
 					// Obtain the keys
-					JwtEncodeKey[] encodeKeys = this.loadKeysForCoverage(repository, this.accessTokenExpirationPeriod,
-							this.encodeKeyOverlapPeriods, this.encodeKeyExpirationPeriod, (loadTime, repo) -> {
+					JwtAccessKey[] encodeKeys = this.loadKeysForCoverage(repository, this.accessTokenExpirationPeriod,
+							this.accessKeyOverlapPeriods, this.accessKeyExpirationPeriod, (loadTime, repo) -> {
 
 								// Load keys from repository
-								List<JwtEncodeKey> keys = repo.retrieveJwtEncodeKeys(Instant.ofEpochSecond(loadTime));
+								List<JwtAccessKey> keys = repo.retrieveJwtAccessKeys(Instant.ofEpochSecond(loadTime));
 
 								// Keep only the valid keys
-								JwtEncodeKey[] validKeys = keys.stream().map((key) -> new JwtEncodeKeyImpl(key))
-										.filter((key) -> key.isValid()).toArray(JwtEncodeKey[]::new);
+								JwtAccessKey[] validKeys = keys.stream().map((key) -> new JwtEncodeKeyImpl(key))
+										.filter((key) -> key.isValid()).toArray(JwtAccessKey[]::new);
 
 								// Return the valid keys
 								return validKeys;
@@ -720,13 +815,13 @@ public class JwtAuthorityManagedObjectSource
 							(newKeys, repo) -> {
 
 								// Save the new keys
-								repo.saveJwtEncodeKeys(newKeys.toArray(new JwtEncodeKey[newKeys.size()]));
+								repo.saveJwtEncodeKeys(newKeys.toArray(new JwtAccessKey[newKeys.size()]));
 
 							}, (startTime) -> {
 
 								// Create the JWT encode key
-								long expireTime = startTime + this.encodeKeyExpirationPeriod;
-								KeyPair keyPair = Keys.keyPairFor(this.encodeKeySignatureAlgorithm);
+								long expireTime = startTime + this.accessKeyExpirationPeriod;
+								KeyPair keyPair = this.accessTokenKeyFactory.createAsynchronousKeyPair();
 								JwtEncodeKeyImpl newEncodeKey = new JwtEncodeKeyImpl(startTime, expireTime,
 										keyPair.getPrivate(), keyPair.getPrivate());
 
@@ -740,7 +835,7 @@ public class JwtAuthorityManagedObjectSource
 					// Nothing further
 					return null;
 				});
-		retrieveEncodeKeys.linkParameter(RetrieveKeysDependencies.COLLECTOR, JwtEncodeCollector.class);
+		retrieveEncodeKeys.linkParameter(RetrieveKeysDependencies.COLLECTOR, JwtAccessKeyCollector.class);
 		retrieveEncodeKeys.linkObject(RetrieveKeysDependencies.JWT_AUTHORITY_REPOSITORY, jwtAuthorityRepository);
 		sourceContext.getFlow(Flows.RETRIEVE_ENCODE_KEYS).linkFunction(Flows.RETRIEVE_ENCODE_KEYS.name());
 
@@ -749,7 +844,7 @@ public class JwtAuthorityManagedObjectSource
 				.addManagedFunction(Flows.RETRIEVE_REFRESH_KEYS.name(), () -> (functionContext) -> {
 
 					// Obtain the JWT authority repository
-					JwtRefreshCollector collector = (JwtRefreshCollector) functionContext
+					JwtRefreshKeyCollector collector = (JwtRefreshKeyCollector) functionContext
 							.getObject(RetrieveKeysDependencies.COLLECTOR);
 					JwtAuthorityRepository repository = (JwtAuthorityRepository) functionContext
 							.getObject(RetrieveKeysDependencies.JWT_AUTHORITY_REPOSITORY);
@@ -779,7 +874,7 @@ public class JwtAuthorityManagedObjectSource
 							(startTime) -> {
 
 								// TODO create new key
-								throw new UnsupportedOperationException("TODO implement");
+								throw new UnsupportedOperationException("TODO implement create JwtRefreshKey");
 							});
 
 					// Load the keys
@@ -788,7 +883,7 @@ public class JwtAuthorityManagedObjectSource
 					// Nothing further
 					return null;
 				});
-		retrieveRefreshKeys.linkParameter(RetrieveKeysDependencies.COLLECTOR, JwtRefreshCollector.class);
+		retrieveRefreshKeys.linkParameter(RetrieveKeysDependencies.COLLECTOR, JwtRefreshKeyCollector.class);
 		retrieveRefreshKeys.linkObject(RetrieveKeysDependencies.JWT_AUTHORITY_REPOSITORY, jwtAuthorityRepository);
 		sourceContext.getFlow(Flows.RETRIEVE_REFRESH_KEYS).linkFunction(Flows.RETRIEVE_REFRESH_KEYS.name());
 	}
@@ -798,7 +893,7 @@ public class JwtAuthorityManagedObjectSource
 
 		// Keep JWT encoding keys up to date
 		this.jwtEncodeKeys = StatePoller
-				.builder(JwtEncodeKey[].class, Flows.RETRIEVE_ENCODE_KEYS, context,
+				.builder(JwtAccessKey[].class, Flows.RETRIEVE_ENCODE_KEYS, context,
 						(pollContext) -> new JwtAuthorityManagedObject<>())
 				.parameter((pollContext) -> new JwtEncodeCollectorImpl(pollContext)).identifier("JWT Encode Keys")
 				.defaultPollInterval(this.accessTokenExpirationPeriod, TimeUnit.SECONDS).build();
@@ -846,7 +941,8 @@ public class JwtAuthorityManagedObjectSource
 					(status, ex) -> status != null ? new RefreshTokenException(status, ex)
 							: new RefreshTokenException(ex),
 					(payload, key) -> JwtAuthorityManagedObjectSource.encrypt(key.getKey(), key.getInitVector(),
-							key.getStartSalt(), key.getLace(), key.getEndSalt(), payload));
+							key.getStartSalt(), key.getLace(), key.getEndSalt(), payload,
+							source.refreshTokenCipherFactory));
 		}
 
 		@Override
@@ -881,7 +977,7 @@ public class JwtAuthorityManagedObjectSource
 		}
 
 		@Override
-		public JwtDecodeKey[] getActiveJwtDecodeKeys() {
+		public JwtValidateKey[] getActiveJwtValidateKeys() {
 			// TODO implement JwtAuthority<C>.getActiveJwtDecodeKeys(...)
 			throw new UnsupportedOperationException("TODO implement JwtAuthority<C>.getActiveJwtDecodeKeys(...)");
 		}
@@ -923,9 +1019,9 @@ public class JwtAuthorityManagedObjectSource
 	}
 
 	/**
-	 * {@link JwtRefreshCollector} implementation.
+	 * {@link JwtRefreshKeyCollector} implementation.
 	 */
-	private class JwtRefreshCollectorImpl implements JwtRefreshCollector {
+	private class JwtRefreshCollectorImpl implements JwtRefreshKeyCollector {
 
 		/**
 		 * {@link StatePollContext}.
@@ -957,20 +1053,69 @@ public class JwtAuthorityManagedObjectSource
 	private static class JwtRefreshKeyImpl implements JwtRefreshKey {
 
 		/**
+		 * Start time.
+		 */
+		private final long startTime;
+
+		/**
+		 * Expire time.
+		 */
+		private final long expireTime;
+
+		/**
+		 * Init vector.
+		 */
+		private final String initVector;
+
+		/**
+		 * Start salt.
+		 */
+		private final String startSalt;
+
+		/**
+		 * Lace.
+		 */
+		private final String lace;
+
+		/**
+		 * End salt.
+		 */
+		private final String endSalt;
+
+		/**
+		 * {@link Key}.
+		 */
+		private final Key key;
+
+		/**
 		 * Instantiate from {@link JwtRefreshKey}.
 		 * 
 		 * @param key {@link JwtRefreshKey}.
 		 */
 		private JwtRefreshKeyImpl(JwtRefreshKey key) {
+			this.startTime = key.getStartTime();
+			this.expireTime = key.getExpireTime();
+			this.initVector = key.getInitVector();
+			this.startSalt = key.getStartSalt();
+			this.lace = key.getLace();
+			this.endSalt = key.getEndSalt();
+			this.key = key.getKey();
 		}
 
 		/**
-		 * Indicates if the {@link JwtEncodeKey} is valid to use.
+		 * Indicates if the {@link JwtAccessKey} is valid to use.
 		 * 
 		 * @return <code>true</code> if valid to use.
 		 */
 		public boolean isValid() {
-			return true;
+			boolean isValid = this.startTime > 0;
+			isValid &= this.expireTime > this.startTime;
+			isValid &= (this.initVector != null) & (this.initVector.length() > 0);
+			isValid &= (this.startSalt != null) & (this.startSalt.length() > 0);
+			isValid &= (this.lace != null) & (this.lace.length() > 0);
+			isValid &= (this.endSalt != null) & (this.endSalt.length() > 0);
+			isValid &= this.key != null;
+			return isValid;
 		}
 
 		/*
@@ -979,63 +1124,56 @@ public class JwtAuthorityManagedObjectSource
 
 		@Override
 		public long getStartTime() {
-			// TODO implement JwtAuthorityKey.getStartTime(...)
-			throw new UnsupportedOperationException("TODO implement JwtAuthorityKey.getStartTime(...)");
+			return this.startTime;
 		}
 
 		@Override
 		public long getExpireTime() {
-			// TODO implement JwtAuthorityKey.getExpireTime(...)
-			throw new UnsupportedOperationException("TODO implement JwtAuthorityKey.getExpireTime(...)");
+			return this.expireTime;
 		}
 
 		@Override
 		public String getInitVector() {
-			// TODO implement JwtRefreshKey.getInitVector(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getInitVector(...)");
+			return this.initVector;
 		}
 
 		@Override
 		public String getStartSalt() {
-			// TODO implement JwtRefreshKey.getStartSalt(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getStartSalt(...)");
+			return this.startSalt;
 		}
 
 		@Override
 		public String getLace() {
-			// TODO implement JwtRefreshKey.getLace(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getLace(...)");
+			return this.lace;
 		}
 
 		@Override
 		public String getEndSalt() {
-			// TODO implement JwtRefreshKey.getEndSalt(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getEndSalt(...)");
+			return this.endSalt;
 		}
 
 		@Override
 		public Key getKey() {
-			// TODO implement JwtRefreshKey.getKey(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getKey(...)");
+			return this.key;
 		}
 	}
 
 	/**
-	 * {@link JwtEncodeCollector} implementation.
+	 * {@link JwtAccessKeyCollector} implementation.
 	 */
-	private class JwtEncodeCollectorImpl implements JwtEncodeCollector {
+	private class JwtEncodeCollectorImpl implements JwtAccessKeyCollector {
 
 		/**
 		 * {@link StatePollContext}.
 		 */
-		private final StatePollContext<JwtEncodeKey[]> pollContext;
+		private final StatePollContext<JwtAccessKey[]> pollContext;
 
 		/**
 		 * Instantiate.
 		 * 
 		 * @param pollContext {@link StatePollContext}.
 		 */
-		public JwtEncodeCollectorImpl(StatePollContext<JwtEncodeKey[]> pollContext) {
+		public JwtEncodeCollectorImpl(StatePollContext<JwtAccessKey[]> pollContext) {
 			this.pollContext = pollContext;
 		}
 
@@ -1044,15 +1182,15 @@ public class JwtAuthorityManagedObjectSource
 		 */
 
 		@Override
-		public void setKeys(JwtEncodeKey[] keys) {
+		public void setKeys(JwtAccessKey[] keys) {
 			this.pollContext.setNextState(keys, -1, null);
 		}
 	}
 
 	/**
-	 * {@link JwtEncodeKey} implementation that ensure the data is available.
+	 * {@link JwtAccessKey} implementation that ensure the data is available.
 	 */
-	private static class JwtEncodeKeyImpl implements JwtEncodeKey {
+	private static class JwtEncodeKeyImpl implements JwtAccessKey {
 
 		/**
 		 * Start time.
@@ -1075,11 +1213,11 @@ public class JwtAuthorityManagedObjectSource
 		private final Key publicKey;
 
 		/**
-		 * Instantiate from {@link JwtEncodeKey}.
+		 * Instantiate from {@link JwtAccessKey}.
 		 * 
-		 * @param key {@link JwtEncodeKey}.
+		 * @param key {@link JwtAccessKey}.
 		 */
-		private JwtEncodeKeyImpl(JwtEncodeKey key) {
+		private JwtEncodeKeyImpl(JwtAccessKey key) {
 			this.startTime = key.getStartTime();
 			this.expireTime = key.getExpireTime();
 			this.privateKey = key.getPrivateKey();
@@ -1102,7 +1240,7 @@ public class JwtAuthorityManagedObjectSource
 		}
 
 		/**
-		 * Indicates if the {@link JwtEncodeKey} is valid to use.
+		 * Indicates if the {@link JwtAccessKey} is valid to use.
 		 * 
 		 * @return <code>true</code> if valid to use.
 		 */

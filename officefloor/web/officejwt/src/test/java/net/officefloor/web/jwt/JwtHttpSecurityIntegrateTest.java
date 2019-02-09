@@ -37,9 +37,9 @@ import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.compile.CompileWebContext;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
-import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
-import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
-import net.officefloor.web.jwt.spi.role.JwtRoleCollector;
+import net.officefloor.web.jwt.role.JwtRoleCollector;
+import net.officefloor.web.jwt.validate.JwtValidateKey;
+import net.officefloor.web.jwt.validate.JwtValidateKeyCollector;
 import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
@@ -79,17 +79,17 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	/**
-	 * Default {@link JwtDecodeCollector} handler.
+	 * Default {@link JwtValidateKeyCollector} handler.
 	 */
-	private static final Consumer<JwtDecodeCollector> DEFAULT_JWT_DECODE_COLLECTOR = (collector) -> {
-		collector.setKeys(new JwtDecodeKey(keyPair.getPublic()));
+	private static final Consumer<JwtValidateKeyCollector> DEFAULT_JWT_DECODE_COLLECTOR = (collector) -> {
+		collector.setKeys(new JwtValidateKey(keyPair.getPublic()));
 	};
 
 	/**
-	 * {@link JwtDecodeCollector} handler to use in provide {@link JwtDecodeKey}
+	 * {@link JwtValidateKeyCollector} handler to use in provide {@link JwtValidateKey}
 	 * instances.
 	 */
-	private static Consumer<JwtDecodeCollector> jwtDecodeCollectorHandler = DEFAULT_JWT_DECODE_COLLECTOR;
+	private static Consumer<JwtValidateKeyCollector> jwtDecodeCollectorHandler = DEFAULT_JWT_DECODE_COLLECTOR;
 
 	/**
 	 * Current time in seconds since Epoch.
@@ -140,7 +140,7 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure timeout on no {@link JwtDecodeKey} instances.
+	 * Ensure timeout on no {@link JwtValidateKey} instances.
 	 */
 	public void testTimeoutOnNoKeys() throws Exception {
 		jwtDecodeCollectorHandler = (collector) -> {
@@ -220,45 +220,45 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure invalid JWT as {@link JwtDecodeKey} is old.
+	 * Ensure invalid JWT as {@link JwtValidateKey} is old.
 	 */
 	public void testInvalidDueToOldKey() throws Exception {
 		this.doInvalidDecodeKeyTest(-20, -3);
 	}
 
 	/**
-	 * Ensure invalid JWT as {@link JwtDecodeKey} is too new.
+	 * Ensure invalid JWT as {@link JwtValidateKey} is too new.
 	 */
 	public void testInvalidDueToNewKey() throws Exception {
 		this.doInvalidDecodeKeyTest(3, 20);
 	}
 
 	/**
-	 * Ensure valid JWT as {@link JwtDecodeKey} is old but within clock skew.
+	 * Ensure valid JWT as {@link JwtValidateKey} is old but within clock skew.
 	 */
 	public void testValidDueToOldKeyButWithinClockSkew() throws Exception {
 		this.doValidDecodeKeyTest(-20, -2);
 	}
 
 	/**
-	 * Ensure invalid JWT as {@link JwtDecodeKey} is too new but within clock skew.
+	 * Ensure invalid JWT as {@link JwtValidateKey} is too new but within clock skew.
 	 */
 	public void testValidDueToNewKeyButWithinClockSkew() throws Exception {
 		this.doValidDecodeKeyTest(2, 20);
 	}
 
 	/**
-	 * Ensure handle <code>null</code> {@link JwtDecodeKey}.
+	 * Ensure handle <code>null</code> {@link JwtValidateKey}.
 	 */
 	public void testNullDecodeKey() throws Exception {
 		jwtDecodeCollectorHandler = (collector) -> {
-			collector.setKeys(null, null, new JwtDecodeKey(keyPair.getPublic()), null, null);
+			collector.setKeys(null, null, new JwtValidateKey(keyPair.getPublic()), null, null);
 		};
 		this.doValidJwtTest(new MockClaims().setSub("Daniel"));
 	}
 
 	/**
-	 * Ensure can use multiple active {@link JwtDecodeKey} instances.
+	 * Ensure can use multiple active {@link JwtValidateKey} instances.
 	 */
 	public void testMultipleDecodeKeysActive() throws Exception {
 
@@ -267,7 +267,7 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		KeyPair keyPairTwo = Keys.keyPairFor(SignatureAlgorithm.RS256);
 		assertNotEquals("Invalid test, as public keys the same", keyPairOne.getPublic(), keyPairTwo.getPublic());
 		jwtDecodeCollectorHandler = (collector) -> {
-			collector.setKeys(new JwtDecodeKey(keyPairOne.getPublic()), new JwtDecodeKey(keyPairTwo.getPublic()));
+			collector.setKeys(new JwtValidateKey(keyPairOne.getPublic()), new JwtValidateKey(keyPairTwo.getPublic()));
 		};
 
 		// Start the server
@@ -350,17 +350,17 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Creates the {@link JwtDecodeKey}.
+	 * Creates the {@link JwtValidateKey}.
 	 * 
 	 * @param startSecondsOffset Seconds offset from current time for start time.
 	 * @param secondsToExpire    Seconds offset from current time for expire time.
 	 * @param key                {@link Key}.
-	 * @return {@link JwtDecodeKey}.
+	 * @return {@link JwtValidateKey}.
 	 */
-	private JwtDecodeKey createJwtDecodeKey(long startSecondsOffset, long secondsToExpire, Key key) {
+	private JwtValidateKey createJwtDecodeKey(long startSecondsOffset, long secondsToExpire, Key key) {
 		long startTime = CURRENT_TIME + startSecondsOffset;
 		long expireTime = CURRENT_TIME + secondsToExpire;
-		return new JwtDecodeKey(startTime, expireTime, key);
+		return new JwtValidateKey(startTime, expireTime, key);
 	}
 
 	/**
@@ -424,11 +424,11 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure valid JWT with valid {@link JwtDecodeKey}.
+	 * Ensure valid JWT with valid {@link JwtValidateKey}.
 	 * 
-	 * @param keyStartOffset  {@link JwtDecodeKey} start seconds offset to current
+	 * @param keyStartOffset  {@link JwtValidateKey} start seconds offset to current
 	 *                        time.
-	 * @param keyExpireOffset {@link JwtDecodeKey} expire seconds offset to current
+	 * @param keyExpireOffset {@link JwtValidateKey} expire seconds offset to current
 	 *                        time.
 	 */
 	private void doValidDecodeKeyTest(long keyStartOffset, long keyExpireOffset) throws Exception {
@@ -439,11 +439,11 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure invalid JWT due to no {@link JwtDecodeKey} matching time window.
+	 * Ensure invalid JWT due to no {@link JwtValidateKey} matching time window.
 	 * 
-	 * @param keyStartOffset  {@link JwtDecodeKey} start seconds offset to current
+	 * @param keyStartOffset  {@link JwtValidateKey} start seconds offset to current
 	 *                        time.
-	 * @param keyExpireOffset {@link JwtDecodeKey} expire seconds offset to current
+	 * @param keyExpireOffset {@link JwtValidateKey} expire seconds offset to current
 	 *                        time.
 	 */
 	private void doInvalidDecodeKeyTest(long keyStartOffset, long keyExpireOffset) throws Exception {
@@ -659,7 +659,7 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	public static class JwtDecodeKeyCollectorServicer {
-		public void service(@Parameter JwtDecodeCollector collector) {
+		public void service(@Parameter JwtValidateKeyCollector collector) {
 			jwtDecodeCollectorHandler.accept(collector);
 		}
 	}

@@ -12,15 +12,11 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.crypto.KeyGenerator;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -34,9 +30,15 @@ import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
-import net.officefloor.web.jwt.spi.repository.JwtAuthorityRepository;
-import net.officefloor.web.jwt.spi.repository.JwtEncodeKey;
-import net.officefloor.web.jwt.spi.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.key.AesCipherFactory;
+import net.officefloor.web.jwt.key.AesSynchronousKeyFactory;
+import net.officefloor.web.jwt.key.AsynchronousKeyFactory;
+import net.officefloor.web.jwt.key.CipherFactory;
+import net.officefloor.web.jwt.key.Rsa256AynchronousKeyFactory;
+import net.officefloor.web.jwt.key.SynchronousKeyFactory;
+import net.officefloor.web.jwt.repository.JwtAccessKey;
+import net.officefloor.web.jwt.repository.JwtAuthorityRepository;
+import net.officefloor.web.jwt.repository.JwtRefreshKey;
 
 /**
  * Abstract test functionality for {@link JwtAuthority}.
@@ -48,24 +50,47 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	/**
 	 * {@link KeyPair} for testing.
 	 */
-	protected static final KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256);
+	protected static final KeyPair keyPair;
+
+	/**
+	 * {@link KeyPair} for testing.
+	 */
+	protected static final KeyPair secondKeyPair;
 
 	/**
 	 * Refresh {@link Key} for testing.
 	 */
 	protected static final Key refreshKey;
 
+	/**
+	 * Refresh {@link Key} for testing.
+	 */
+	protected static final Key secondRefreshKey;
+
 	static {
-		Key key;
+		KeyPair pairOne = null;
+		KeyPair pairTwo = null;
+		Key keyOne = null;
+		Key keyTwo = null;
 		try {
-			KeyGenerator kgen = KeyGenerator.getInstance("AES");
-			kgen.init(256);
-			key = kgen.generateKey();
+
+			// Create the key pairs
+			AsynchronousKeyFactory keyPairFactory = new Rsa256AynchronousKeyFactory();
+			pairOne = keyPairFactory.createAsynchronousKeyPair();
+			pairTwo = keyPairFactory.createAsynchronousKeyPair();
+
+			// Create the keys
+			SynchronousKeyFactory keyFactory = new AesSynchronousKeyFactory();
+			keyOne = keyFactory.createSynchronousKey();
+			keyTwo = keyFactory.createSynchronousKey();
+
 		} catch (Exception ex) {
-			key = null;
 			fail(ex);
 		}
-		refreshKey = key;
+		keyPair = pairOne;
+		secondKeyPair = pairTwo;
+		refreshKey = keyOne;
+		secondRefreshKey = keyTwo;
 	}
 
 	/**
@@ -77,6 +102,11 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	 * {@link ObjectMapper}.
 	 */
 	private static final ObjectMapper mapper = new ObjectMapper();
+
+	/**
+	 * Mock {@link CipherFactory}.
+	 */
+	protected static CipherFactory mockCipherFactory = new AesCipherFactory();
 
 	/**
 	 * {@link MockClockFactory}.
@@ -110,30 +140,41 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	protected MockClaims claims = new MockClaims();
 
 	/**
-	 * Time requested for retrieving {@link JwtEncodeKey} instances.
-	 */
-	protected Instant retrieveJwtEncodeKeysTime = null;
-
-	/**
 	 * Indicates if within cluster critical section.
 	 */
 	private boolean isWithinClusterCriticalSection = false;
 
 	/**
-	 * Mock {@link JwtRefreshKey} instances for testing.
+	 * Time requested for retrieving {@link JwtRefreshKey} instances.
 	 */
-	protected List<JwtRefreshKey> mockRefreshKeys = new ArrayList<>(Arrays.asList(new MockJwtRefreshKey()));
+	protected Instant retrieveJwtRefreshKeysTime = null;
 
 	/**
-	 * Mock {@link JwtEncodeKey} instances for testing.
+	 * Mock {@link JwtRefreshKey} instances for testing.
 	 */
-	protected List<JwtEncodeKey> mockEncodeKeys = new ArrayList<>(
+	protected List<JwtRefreshKey> mockRefreshKeys = new ArrayList<>(
+			Arrays.asList(new MockJwtRefreshKey(mockCurrentTime, refreshKey),
+					new MockJwtRefreshKey(
+							mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD
+									- (JwtAuthorityManagedObjectSource.MINIMUM_REFRESH_KEY_OVERLAP_PERIODS
+											* JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD),
+							secondRefreshKey)));
+
+	/**
+	 * Time requested for retrieving {@link JwtAccessKey} instances.
+	 */
+	protected Instant retrieveJwtAccessKeysTime = null;
+
+	/**
+	 * Mock {@link JwtAccessKey} instances for testing.
+	 */
+	protected List<JwtAccessKey> mockAccessKeys = new ArrayList<>(
 			Arrays.asList(new MockJwtEncodeKey(mockCurrentTime, keyPair),
 					new MockJwtEncodeKey(
-							mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD
-									- (JwtAuthorityManagedObjectSource.MINIMUM_ENCODE_KEY_OVERLAP_PERIODS
+							mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_KEY_EXPIRATION_PERIOD
+									- (JwtAuthorityManagedObjectSource.MINIMUM_ACCESS_KEY_OVERLAP_PERIODS
 											* JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD),
-							Keys.keyPairFor(SignatureAlgorithm.RS256))));
+							secondKeyPair)));
 
 	@Override
 	protected void tearDown() throws Exception {
@@ -263,11 +304,12 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 		public Long exp = mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD;
 
 		@JsonIgnore
-		public void assertRefreshToken(String refreshToken, JwtRefreshKey refreshKey) {
+		public void assertRefreshToken(String refreshToken, JwtRefreshKey refreshKey, CipherFactory cipherFactory) {
 			MockIdentity token;
 			try {
 				String identityJson = JwtAuthorityManagedObjectSource.decrypt(refreshKey.getKey(),
-						refreshKey.getInitVector(), refreshKey.getStartSalt(), refreshKey.getEndSalt(), refreshToken);
+						refreshKey.getInitVector(), refreshKey.getStartSalt(), refreshKey.getEndSalt(), refreshToken,
+						cipherFactory);
 				token = mapper.readValue(identityJson, MockIdentity.class);
 			} catch (Exception ex) {
 				throw fail(ex);
@@ -321,9 +363,9 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	}
 
 	/**
-	 * Mock {@link JwtEncodeKey}.
+	 * Mock {@link JwtAccessKey}.
 	 */
-	private static class MockJwtEncodeKey implements JwtEncodeKey {
+	private static class MockJwtEncodeKey implements JwtAccessKey {
 
 		private final long startTime;
 
@@ -334,7 +376,7 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 		private final Key publicKey;
 
 		private MockJwtEncodeKey(long startTime, KeyPair keyPair) {
-			this(startTime, startTime + JwtAuthorityManagedObjectSource.DEFAULT_ENCODE_KEY_EXPIRATION_PERIOD,
+			this(startTime, startTime + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_KEY_EXPIRATION_PERIOD,
 					keyPair.getPrivate(), keyPair.getPublic());
 		}
 
@@ -375,50 +417,73 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	 */
 	private static class MockJwtRefreshKey implements JwtRefreshKey {
 
+		private final long startTime;
+
+		private final long expireTime;
+
+		private final String initVector;
+
+		private final String startSalt;
+
+		private final String lace;
+
+		private final String endSalt;
+
+		private final Key key;
+
+		private MockJwtRefreshKey(long startTime, Key key) {
+			this(startTime, startTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD,
+					"initinitinitinit", "start", "lace", "end", key);
+		}
+
+		private MockJwtRefreshKey(long startTime, long expireTime, String initVector, String startSalt, String lace,
+				String endSalt, Key key) {
+			this.startTime = startTime;
+			this.expireTime = expireTime;
+			this.initVector = initVector;
+			this.startSalt = startSalt;
+			this.lace = lace;
+			this.endSalt = endSalt;
+			this.key = key;
+		}
+
 		/*
 		 * ==================== JwtRefreshKey =====================
 		 */
 
 		@Override
 		public long getStartTime() {
-			// TODO implement JwtRefreshKey.getStartTime(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getStartTime(...)");
+			return this.startTime;
 		}
 
 		@Override
 		public long getExpireTime() {
-			// TODO implement JwtRefreshKey.getExpireTime(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getExpireTime(...)");
+			return this.expireTime;
 		}
 
 		@Override
 		public String getInitVector() {
-			// TODO implement JwtRefreshKey.getInitVector(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getInitVector(...)");
+			return this.initVector;
 		}
 
 		@Override
 		public String getStartSalt() {
-			// TODO implement JwtRefreshKey.getStartSalt(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getStartSalt(...)");
+			return this.startSalt;
 		}
 
 		@Override
 		public String getLace() {
-			// TODO implement JwtRefreshKey.getLace(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getLace(...)");
+			return this.lace;
 		}
 
 		@Override
 		public String getEndSalt() {
-			// TODO implement JwtRefreshKey.getEndSalt(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getEndSalt(...)");
+			return this.endSalt;
 		}
 
 		@Override
 		public Key getKey() {
-			// TODO implement JwtRefreshKey.getKey(...)
-			throw new UnsupportedOperationException("TODO implement JwtRefreshKey.getKey(...)");
+			return this.key;
 		}
 	}
 
@@ -427,23 +492,23 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	 */
 
 	@Override
-	public List<JwtEncodeKey> retrieveJwtEncodeKeys(Instant activeAfter) {
-		this.retrieveJwtEncodeKeysTime = activeAfter;
-		return this.mockEncodeKeys;
+	public List<JwtAccessKey> retrieveJwtAccessKeys(Instant activeAfter) {
+		this.retrieveJwtAccessKeysTime = activeAfter;
+		return this.mockAccessKeys;
 	}
 
 	@Override
-	public void saveJwtEncodeKeys(JwtEncodeKey... encodeKeys) throws Exception {
+	public void saveJwtEncodeKeys(JwtAccessKey... encodeKeys) throws Exception {
 		assertTrue("Should only save keys within cluster critical section", this.isWithinClusterCriticalSection);
-		for (JwtEncodeKey encodeKey : encodeKeys) {
-			this.mockEncodeKeys.add(encodeKey);
+		for (JwtAccessKey encodeKey : encodeKeys) {
+			this.mockAccessKeys.add(encodeKey);
 		}
 	}
 
 	@Override
 	public List<JwtRefreshKey> retrieveJwtRefreshKeys(Instant activeAfter) {
-		// TODO implement JwtAuthorityRepository.retrieveJwtRefreshKeys(...)
-		throw new UnsupportedOperationException("TODO implement JwtAuthorityRepository.retrieveJwtRefreshKeys(...)");
+		this.retrieveJwtRefreshKeysTime = activeAfter;
+		return this.mockRefreshKeys;
 	}
 
 	@Override
