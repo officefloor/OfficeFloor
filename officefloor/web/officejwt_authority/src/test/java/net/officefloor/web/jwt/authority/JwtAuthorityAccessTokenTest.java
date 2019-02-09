@@ -30,7 +30,7 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 	/**
 	 * Ensure issue if {@link JwtAccessKey} expiration period is too short.
 	 */
-	public void testEncodeKeyExpirationTooShort() throws Exception {
+	public void testAccessKeyExpirationTooShort() throws Exception {
 
 		// Record issue in configuration
 		this.compilerIssues = new MockCompilerIssues(this);
@@ -39,7 +39,7 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 				new IllegalArgumentException(
 						"JwtAccessKey expiration period (8 seconds) is below overlap period ((1 seconds period * 4 periods = 4 seconds) * 2 for overlap start/end = 8 seconds)"));
 
-		// Ensure issue if encode key period too short (no overlap buffer)
+		// Ensure issue if key period too short (no overlap buffer)
 		this.replayMockObjects();
 		this.loadOfficeFloor(JwtAuthorityManagedObjectSource.PROPERTY_ACCESS_TOKEN_EXPIRATION_PERIOD, String.valueOf(1),
 				JwtAuthorityManagedObjectSource.PROPERTY_ACCESS_KEY_OVERLAP_PERIODS, String.valueOf(4),
@@ -119,7 +119,7 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 	 * Ensure creates the {@link JwtAccessKey} instances (should none be available
 	 * at start up).
 	 */
-	public void testNoEncodeKeysOnStartup() {
+	public void testNoAccessKeysOnStartup() {
 
 		// Clear keys and start server (should generate keys)
 		this.mockAccessKeys.clear();
@@ -135,7 +135,7 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 				* JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
 
 		// Should generate keys
-		assertEquals("Should generate new encode keys", 2, this.mockAccessKeys.size());
+		assertEquals("Should generate new keys", 2, this.mockAccessKeys.size());
 		JwtAccessKey firstKey = this.mockAccessKeys.get(0);
 		long firstKeyStart = mockCurrentTime - overlapTime;
 		assertEquals("Incorrect first key start", firstKeyStart, firstKey.getStartTime());
@@ -159,7 +159,7 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 	/**
 	 * Ensure creates new key as required on refresh.
 	 */
-	public void testCreateNextEncodeKey() {
+	public void testCreateNextAccessKey() {
 
 		// Obtain the access token
 		String accessToken = this.createAccessToken();

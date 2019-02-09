@@ -154,7 +154,7 @@ public class JwtAuthorityManagedObjectSource
 	 * {@link Property} name for the expiration period for the
 	 * {@link JwtRefreshKey}. Period measured in seconds.
 	 */
-	public static final String PROPERTY_REFESH_KEY_EXPIRATION_PERIOD = "refresh.key.expiration.period";
+	public static final String PROPERTY_REFRESH_KEY_EXPIRATION_PERIOD = "refresh.key.expiration.period";
 
 	/**
 	 * Default expiration period for {@link JwtRefreshKey}.
@@ -281,7 +281,7 @@ public class JwtAuthorityManagedObjectSource
 	 */
 	public static String decrypt(Key key, String initVector, String startSalt, String endSalt, String encrypted,
 			CipherFactory cipherFactory) throws Exception {
-		IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+		IvParameterSpec iv = new IvParameterSpec(initVector.getBytes(UTF8));
 		Cipher cipher = cipherFactory.createCipher();
 		cipher.init(Cipher.DECRYPT_MODE, key, iv);
 		byte[] original = cipher.doFinal(Base64.getUrlDecoder().decode(encrypted));
@@ -739,7 +739,7 @@ public class JwtAuthorityManagedObjectSource
 		this.refreshTokenExpirationPeriod = Long.parseLong(sourceContext.getProperty(
 				PROPERTY_REFRESH_TOKEN_EXPIRATION_PERIOD, String.valueOf(DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD)));
 		this.refreshKeyExpirationPeriod = Long.parseLong(sourceContext.getProperty(
-				PROPERTY_REFESH_KEY_EXPIRATION_PERIOD, String.valueOf(DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD)));
+				PROPERTY_REFRESH_KEY_EXPIRATION_PERIOD, String.valueOf(DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD)));
 		this.refreshKeyOverlapPeriods = Integer.parseInt(sourceContext.getProperty(PROPERTY_REFRESH_KEY_OVERLAP_PERIODS,
 				String.valueOf(MINIMUM_REFRESH_KEY_OVERLAP_PERIODS)));
 

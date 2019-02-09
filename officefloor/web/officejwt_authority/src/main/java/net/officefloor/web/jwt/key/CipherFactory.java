@@ -22,6 +22,15 @@ public interface CipherFactory {
 	}
 
 	/**
+	 * Allows overriding the init vector size.
+	 * 
+	 * @return Init vector size.
+	 */
+	default int getInitVectorSize() {
+		return 16;
+	}
+
+	/**
 	 * Creates a {@link Cipher}.
 	 * 
 	 * @return {@link Cipher}.

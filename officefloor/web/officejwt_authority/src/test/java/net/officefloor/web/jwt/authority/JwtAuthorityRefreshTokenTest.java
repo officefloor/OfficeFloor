@@ -2,6 +2,10 @@ package net.officefloor.web.jwt.authority;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.web.jwt.repository.JwtRefreshKey;
+
 /**
  * Tests the {@link JwtAuthority} implementation for refresh tokens.
  * 
@@ -43,6 +47,196 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 	public void testCreateRefreshToken() {
 		String refreshToken = this.createRefreshToken();
 		this.identity.assertRefreshToken(refreshToken, this.mockRefreshKeys.get(0), mockCipherFactory);
+	}
+
+	/**
+	 * Ensure issue if {@link JwtRefreshKey} expiration period is too short.
+	 */
+	public void testRefreshKeyExpirationTooShort() throws Exception {
+
+		// Record issue in configuration
+		this.compilerIssues = new MockCompilerIssues(this);
+		this.compilerIssues.recordCaptureIssues(false);
+		this.compilerIssues.recordIssue("JWT_AUTHORITY", ManagedObjectSourceNodeImpl.class, "Failed to init",
+				new IllegalArgumentException(
+						"JwtRefreshKey expiration period (8 seconds) is below overlap period ((1 seconds period * 4 periods = 4 seconds) * 2 for overlap start/end = 8 seconds)"));
+
+		// Ensure issue if key period too short (no overlap buffer)
+		this.replayMockObjects();
+		this.loadOfficeFloor(JwtAuthorityManagedObjectSource.PROPERTY_REFRESH_TOKEN_EXPIRATION_PERIOD,
+				String.valueOf(1), JwtAuthorityManagedObjectSource.PROPERTY_REFRESH_KEY_OVERLAP_PERIODS,
+				String.valueOf(4), JwtAuthorityManagedObjectSource.PROPERTY_REFRESH_KEY_EXPIRATION_PERIOD,
+				String.valueOf(8));
+		this.verifyMockObjects();
+		assertNull("Should not compile OfficeFloor", this.officeFloor);
+	}
+
+	/**
+	 * Ensure issue if invalid identity object.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void testInvalidIdentity() {
+		AccessTokenException exception = this.doAuthorityTest((authority) -> {
+			try {
+				((JwtAuthority) authority).createRefreshToken("Invalid identity");
+				return null;
+			} catch (AccessTokenException ex) {
+				return ex;
+			}
+		});
+		assertNotNull("Should not successfully create access token", exception);
+		assertEquals("Incorrect cause", IllegalArgumentException.class.getName() + ": Identity was "
+				+ String.class.getName() + " but required to be " + MockIdentity.class.getName(),
+				exception.getMessage());
+	}
+
+	/**
+	 * Ensure issue if refresh token not a JSON object.
+	 */
+	public void testInvalidRefreshToken() {
+		RefreshTokenException exception = this.doAuthorityTest((authority) -> {
+			try {
+				authority.createRefreshToken(null);
+				return null;
+			} catch (RefreshTokenException ex) {
+				return ex;
+			}
+		});
+		assertNotNull("Should not successfully create access token", exception);
+		assertEquals("Incorrect cause",
+				IllegalArgumentException.class.getName() + ": Must be JSON object (start end with {}) - but was null",
+				exception.getMessage());
+	}
+
+	/**
+	 * Ensure default the exp time.
+	 */
+	public void testDefaultPeriodFromNow() {
+		this.identity.nbf = null;
+		this.identity.exp = null;
+		String refreshToken = this.createRefreshToken();
+		this.identity.exp = mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD;
+		this.identity.assertRefreshToken(refreshToken, mockJwtRefreshKey, mockCipherFactory);
+	}
+
+	/**
+	 * Ensure nbf is always before exp.
+	 */
+	public void testInvalidIdentityTimes() {
+		this.identity.nbf = this.identity.exp + 1;
+		this.assertInvalidRefreshToken(IllegalArgumentException.class.getName() + ": nbf (" + this.identity.nbf
+				+ ") must not be after exp (" + this.identity.exp + ")");
+	}
+
+	/**
+	 * Ensure fails if creating refresh token instances in the past.
+	 */
+	public void testFailOnAttemptingPastRefreshToken() {
+		this.identity.nbf = mockCurrentTime - JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD;
+		this.identity.exp = mockCurrentTime;
+		this.assertInvalidRefreshToken(this.identity.getInvalidRefreshTokenCause());
+	}
+
+	/**
+	 * Ensure fails if creating refresh token too far into future.
+	 */
+	public void testFailOnAttemptingRefreshTokenTooFarIntoFuture() {
+		JwtRefreshKey key = this.mockRefreshKeys.get(1);
+		this.identity.exp = key.getExpireTime();
+		this.identity.nbf = this.identity.exp - JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD;
+		this.assertInvalidRefreshToken(this.identity.getInvalidRefreshTokenCause());
+	}
+
+	/**
+	 * Ensure if refresh token spans longer than {@link JwtRefreshKey} period that
+	 * invalid.
+	 */
+	public void testFailOnAttemptingRefreshTokenWithTooLongerPeriod() {
+		this.identity.exp = JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD + 1;
+		this.assertInvalidRefreshToken(this.identity.getInvalidRefreshTokenCause());
+	}
+
+	/**
+	 * Ensure creates the {@link JwtRefreshKey} instances (should none be available
+	 * at start up).
+	 */
+	public void testNoRefreshKeysOnStartup() {
+
+		// Clear keys and start server (should generate keys)
+		this.mockRefreshKeys.clear();
+		String refreshToken = this.createRefreshToken();
+
+		// Ensure correct request time loaded
+		assertEquals("Incorrect request time for keys",
+				mockCurrentTime - JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD,
+				this.retrieveJwtRefreshKeysTime.getEpochSecond());
+
+		// Determine default overlap time
+		long overlapTime = JwtAuthorityManagedObjectSource.MINIMUM_REFRESH_KEY_OVERLAP_PERIODS
+				* JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD;
+
+		// Should generate keys
+		assertEquals("Should generate new keys", 2, this.mockRefreshKeys.size());
+		JwtRefreshKey firstKey = this.mockRefreshKeys.get(0);
+		long firstKeyStart = mockCurrentTime - overlapTime;
+		assertEquals("Incorrect first key start", firstKeyStart, firstKey.getStartTime());
+		assertEquals("Incorrect first key expire",
+				firstKeyStart + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD,
+				firstKey.getExpireTime());
+
+		// Ensure able to use new key
+		this.identity.assertRefreshToken(refreshToken, firstKey, mockCipherFactory);
+
+		// Ensure second key overlaps
+		long secondKeyStart = firstKeyStart + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD
+				- overlapTime;
+		JwtRefreshKey secondKey = this.mockRefreshKeys.get(1);
+		assertEquals("Incorrect second key start", secondKeyStart, secondKey.getStartTime());
+		assertEquals("Incorrect second key expire",
+				secondKeyStart + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD,
+				secondKey.getExpireTime());
+	}
+
+	/**
+	 * Ensure creates new key as required on refresh.
+	 */
+	public void testCreateNextRefreshKey() {
+
+		// Obtain the refresh token
+		String refreshToken = this.createAccessToken();
+		this.identity.assertRefreshToken(refreshToken, mockJwtRefreshKey, mockCipherFactory);
+		assertEquals("Should just be the two setup keys", 2, this.mockRefreshKeys.size());
+
+		// Move time forward and refresh (so loads new key)
+		long renewKeyTime = mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD;
+		this.clockFactory.setCurrentTimeSeconds(renewKeyTime);
+		this.doAuthorityTest((authority) -> {
+			authority.reloadRefreshKeys();
+
+			// Create refresh token (waits for keys to be reloaded)
+			return authority.createRefreshToken(this.identity);
+		});
+
+		// Ensure now have three keys
+		assertEquals("Should create new key (as old about to expire)", 3, this.mockRefreshKeys.size());
+
+		// Third key should appropriately overlap second key
+		JwtRefreshKey secondKey = this.mockRefreshKeys.get(1);
+		long expectedStartTime = secondKey.getExpireTime()
+				- (JwtAuthorityManagedObjectSource.MINIMUM_REFRESH_KEY_OVERLAP_PERIODS
+						* JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD);
+		JwtRefreshKey newKey = this.mockRefreshKeys.get(2);
+		assertEquals("Incorrect new key start", expectedStartTime, newKey.getStartTime());
+		assertEquals("Incorrect new key expire",
+				expectedStartTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD,
+				newKey.getExpireTime());
+
+		// Ensure as time moved forward (that uses second key to encode)
+		this.identity.nbf = null;
+		this.identity.exp = null;
+		refreshToken = this.createRefreshToken();
+		this.identity.exp = renewKeyTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD;
+		this.identity.assertRefreshToken(refreshToken, secondKey, mockCipherFactory);
 	}
 
 }

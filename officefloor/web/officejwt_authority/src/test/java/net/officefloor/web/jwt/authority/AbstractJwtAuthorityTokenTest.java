@@ -99,6 +99,11 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	protected static final long mockCurrentTime = 40000;
 
 	/**
+	 * Mock {@link JwtRefreshKey}.
+	 */
+	protected static final JwtRefreshKey mockJwtRefreshKey = new MockJwtRefreshKey(mockCurrentTime, refreshKey);
+
+	/**
 	 * {@link ObjectMapper}.
 	 */
 	private static final ObjectMapper mapper = new ObjectMapper();
@@ -152,13 +157,12 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	/**
 	 * Mock {@link JwtRefreshKey} instances for testing.
 	 */
-	protected List<JwtRefreshKey> mockRefreshKeys = new ArrayList<>(
-			Arrays.asList(new MockJwtRefreshKey(mockCurrentTime, refreshKey),
-					new MockJwtRefreshKey(
-							mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD
-									- (JwtAuthorityManagedObjectSource.MINIMUM_REFRESH_KEY_OVERLAP_PERIODS
-											* JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD),
-							secondRefreshKey)));
+	protected List<JwtRefreshKey> mockRefreshKeys = new ArrayList<>(Arrays.asList(mockJwtRefreshKey,
+			new MockJwtRefreshKey(
+					mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD
+							- (JwtAuthorityManagedObjectSource.MINIMUM_REFRESH_KEY_OVERLAP_PERIODS
+									* JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD),
+					secondRefreshKey)));
 
 	/**
 	 * Time requested for retrieving {@link JwtAccessKey} instances.
@@ -216,6 +220,20 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	}
 
 	/**
+	 * Asserts that refresh token can not be created.
+	 * 
+	 * @param expectedCause Expected cause.
+	 */
+	protected void assertInvalidRefreshToken(String expectedCause) {
+		try {
+			this.createRefreshToken();
+			fail("Should not be successful");
+		} catch (RefreshTokenException ex) {
+			assertEquals("Incorrect cause", expectedCause, ex.getMessage());
+		}
+	}
+
+	/**
 	 * Undertakes test with the {@link JwtAuthority}.
 	 * 
 	 * @param testLogic              Logic on the {@link JwtAuthority}.
@@ -243,6 +261,8 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 		} catch (Throwable ex) {
 			if (ex instanceof AccessTokenException) {
 				throw (AccessTokenException) ex;
+			} else if (ex instanceof RefreshTokenException) {
+				throw (RefreshTokenException) ex;
 			} else {
 				throw fail(ex);
 			}
@@ -318,6 +338,12 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 			assertEquals("Incorrect name", this.name, token.name);
 			assertEquals("Incorrect not before", this.nbf, token.nbf);
 			assertEquals("Incorrect expiry", this.exp, token.exp);
+		}
+
+		@JsonIgnore
+		public String getInvalidRefreshTokenCause() {
+			return IllegalStateException.class.getName() + ": No key available for encoding (nbf: "
+					+ getDateText(this.nbf) + ", exp: " + getDateText(this.exp) + ")";
 		}
 	}
 
