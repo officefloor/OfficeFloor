@@ -24,10 +24,10 @@ public interface JwtAuthorityRepository {
 	/**
 	 * Saves new {@link JwtAccessKey} instances.
 	 * 
-	 * @param encodeKeys New {@link JwtAccessKey} instances.
+	 * @param accessKeys New {@link JwtAccessKey} instances.
 	 * @throws Exception If fails to save the {@link JwtAccessKey} instance.
 	 */
-	void saveJwtEncodeKeys(JwtAccessKey... encodeKeys) throws Exception;
+	void saveJwtAccessKeys(JwtAccessKey... accessKeys) throws Exception;
 
 	/**
 	 * Retrieves the list of {@link JwtRefreshKey} instances.

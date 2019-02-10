@@ -291,8 +291,18 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 				// JWT Authority registered through extension
 				OfficeManagedObjectSource jwtAuthoritySource = office.addOfficeManagedObjectSource("JWT_AUTHORITY",
 						JwtAuthorityManagedObjectSource.class.getName());
+				boolean isIdentityClassSpecified = false;
 				for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
-					jwtAuthoritySource.addProperty(propertyNameValuePairs[i], propertyNameValuePairs[i + 1]);
+					String name = propertyNameValuePairs[i];
+					String value = propertyNameValuePairs[i + 1];
+					jwtAuthoritySource.addProperty(name, value);
+					if (JwtAuthorityManagedObjectSource.PROPERTY_IDENTITY_CLASS.equals(name)) {
+						isIdentityClassSpecified = true;
+					}
+				}
+				if (!isIdentityClassSpecified) {
+					jwtAuthoritySource.addProperty(JwtAuthorityManagedObjectSource.PROPERTY_IDENTITY_CLASS,
+							MockIdentity.class.getName());
 				}
 				jwtAuthoritySource.addOfficeManagedObject("JWT_AUTHORITY", ManagedObjectScope.THREAD);
 
@@ -524,10 +534,10 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	}
 
 	@Override
-	public void saveJwtEncodeKeys(JwtAccessKey... encodeKeys) throws Exception {
+	public void saveJwtAccessKeys(JwtAccessKey... accessKeys) throws Exception {
 		assertTrue("Should only save keys within cluster critical section", this.isWithinClusterCriticalSection);
-		for (JwtAccessKey encodeKey : encodeKeys) {
-			this.mockAccessKeys.add(encodeKey);
+		for (JwtAccessKey accessKey : accessKeys) {
+			this.mockAccessKeys.add(accessKey);
 		}
 	}
 
@@ -539,8 +549,10 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 
 	@Override
 	public void saveJwtRefreshKeys(JwtRefreshKey... refreshKeys) {
-		// TODO implement JwtAuthorityRepository.saveJwtRefreshKey(...)
-		throw new UnsupportedOperationException("TODO implement JwtAuthorityRepository.saveJwtRefreshKey(...)");
+		assertTrue("Should only save keys within cluster critical section", this.isWithinClusterCriticalSection);
+		for (JwtRefreshKey refreshKey : refreshKeys) {
+			this.mockRefreshKeys.add(refreshKey);
+		}
 	}
 
 	@Override

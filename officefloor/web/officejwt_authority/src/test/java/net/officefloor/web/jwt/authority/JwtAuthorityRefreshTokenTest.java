@@ -76,11 +76,11 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testInvalidIdentity() {
-		AccessTokenException exception = this.doAuthorityTest((authority) -> {
+		RefreshTokenException exception = this.doAuthorityTest((authority) -> {
 			try {
 				((JwtAuthority) authority).createRefreshToken("Invalid identity");
 				return null;
-			} catch (AccessTokenException ex) {
+			} catch (RefreshTokenException ex) {
 				return ex;
 			}
 		});
@@ -93,18 +93,21 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 	/**
 	 * Ensure issue if refresh token not a JSON object.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testInvalidRefreshToken() {
 		RefreshTokenException exception = this.doAuthorityTest((authority) -> {
 			try {
-				authority.createRefreshToken(null);
+				JwtAuthority configured = authority;
+				configured.createRefreshToken("not an object");
 				return null;
 			} catch (RefreshTokenException ex) {
 				return ex;
 			}
-		});
+		}, JwtAuthorityManagedObjectSource.PROPERTY_IDENTITY_CLASS, String.class.getName());
 		assertNotNull("Should not successfully create access token", exception);
 		assertEquals("Incorrect cause",
-				IllegalArgumentException.class.getName() + ": Must be JSON object (start end with {}) - but was null",
+				IllegalArgumentException.class.getName()
+						+ ": Must be JSON object (start end with {}) - but was \"not an object\"",
 				exception.getMessage());
 	}
 
@@ -203,7 +206,7 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 	public void testCreateNextRefreshKey() {
 
 		// Obtain the refresh token
-		String refreshToken = this.createAccessToken();
+		String refreshToken = this.createRefreshToken();
 		this.identity.assertRefreshToken(refreshToken, mockJwtRefreshKey, mockCipherFactory);
 		assertEquals("Should just be the two setup keys", 2, this.mockRefreshKeys.size());
 
