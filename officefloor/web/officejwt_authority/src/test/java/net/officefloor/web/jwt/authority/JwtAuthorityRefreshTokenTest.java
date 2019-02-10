@@ -1,9 +1,12 @@
 package net.officefloor.web.jwt.authority;
 
+import java.security.Key;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.web.jwt.key.AesSynchronousKeyFactory;
 import net.officefloor.web.jwt.repository.JwtRefreshKey;
 
 /**
@@ -240,6 +243,73 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 		refreshToken = this.createRefreshToken();
 		this.identity.exp = renewKeyTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD;
 		this.identity.assertRefreshToken(refreshToken, secondKey, mockCipherFactory);
+	}
+
+	/**
+	 * Ensure can decode refresh token.
+	 */
+	public void testDecodeRefreshToken() {
+		MockJwtRefreshKey key = new MockJwtRefreshKey(mockJwtRefreshKey);
+		String refreshToken = key.createRefreshToken(this.identity, mockCipherFactory);
+		MockIdentity decoded = this.decodeRefreshToken(refreshToken);
+		this.identity.assertEquals(decoded);
+	}
+
+	/**
+	 * Ensure can round trip the identity via refresh token.
+	 */
+	public void testRefreshTokenRoundTrip() {
+		String refreshToken = this.createRefreshToken();
+		MockIdentity decoded = this.decodeRefreshToken(refreshToken);
+		this.identity.assertEquals(decoded);
+	}
+
+	/**
+	 * Ensure handle non-base64 refresh token.
+	 */
+	public void testNonBase64RefreshToken() {
+		this.assertInvalidDecodeRefreshToken("NotBase64 - !@#$%^");
+	}
+
+	/**
+	 * Ensure handle invalid refresh token.
+	 */
+	public void testInvalidDecodeRefreshToken() {
+		this.assertInvalidDecodeRefreshToken("invalid");
+	}
+
+	/**
+	 * Ensure not match if wrong start salt.
+	 */
+	public void testWrongStartSalt() {
+		this.assertInvalidDecodeRefreshToken((key) -> key.startSalt = "wrong");
+	}
+
+	/**
+	 * Ensure not match if wrong lace.
+	 */
+	public void testWrongLace() {
+		this.assertInvalidDecodeRefreshToken((key) -> key.lace = "wrong");
+	}
+
+	/**
+	 * Ensure not match if wrong end salt.
+	 */
+	public void testWrongEndSalt() {
+		this.assertInvalidDecodeRefreshToken((key) -> key.endSalt = "wrong");
+	}
+
+	/**
+	 * Ensure not match if wrong {@link Key}.
+	 */
+	public void testWrongKey() {
+		this.assertInvalidDecodeRefreshToken((key) -> {
+			try {
+				key.key = new AesSynchronousKeyFactory().createSynchronousKey();
+			} catch (Exception ex) {
+				throw fail(ex);
+			}
+		});
 	}
 
 }

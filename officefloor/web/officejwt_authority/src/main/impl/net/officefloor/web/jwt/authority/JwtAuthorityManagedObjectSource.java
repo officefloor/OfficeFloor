@@ -931,7 +931,7 @@ public class JwtAuthorityManagedObjectSource
 		this.jwtEncodeKeys = StatePoller
 				.builder(JwtAccessKey[].class, Flows.RETRIEVE_ENCODE_KEYS, context,
 						(pollContext) -> new JwtAuthorityManagedObject<>())
-				.parameter((pollContext) -> new JwtEncodeCollectorImpl(pollContext)).identifier("JWT Encode Keys")
+				.parameter((pollContext) -> new JwtEncodeCollectorImpl(pollContext)).identifier("JWT Access Keys")
 				.defaultPollInterval(this.accessTokenExpirationPeriod, TimeUnit.SECONDS).build();
 
 		// Keep JWT refresh keys up to date

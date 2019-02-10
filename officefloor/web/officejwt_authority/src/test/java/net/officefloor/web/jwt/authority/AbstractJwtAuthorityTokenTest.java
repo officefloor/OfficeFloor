@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.junit.Assert;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -29,6 +31,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.jwt.key.AesCipherFactory;
 import net.officefloor.web.jwt.key.AesSynchronousKeyFactory;
@@ -173,8 +176,8 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	 * Mock {@link JwtAccessKey} instances for testing.
 	 */
 	protected List<JwtAccessKey> mockAccessKeys = new ArrayList<>(
-			Arrays.asList(new MockJwtEncodeKey(mockCurrentTime, keyPair),
-					new MockJwtEncodeKey(
+			Arrays.asList(new MockJwtAccessKey(mockCurrentTime, keyPair),
+					new MockJwtAccessKey(
 							mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_KEY_EXPIRATION_PERIOD
 									- (JwtAuthorityManagedObjectSource.MINIMUM_ACCESS_KEY_OVERLAP_PERIODS
 											* JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD),
@@ -230,6 +233,45 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 			fail("Should not be successful");
 		} catch (RefreshTokenException ex) {
 			assertEquals("Incorrect cause", expectedCause, ex.getMessage());
+		}
+	}
+
+	/**
+	 * Decodes the refresh token.
+	 * 
+	 * @param refreshToken Refresh token.
+	 * @return Decoded {@link MockIdentity}.
+	 */
+	protected MockIdentity decodeRefreshToken(String refreshToken) {
+		return this.doAuthorityTest((authority) -> authority.decodeRefreshToken(refreshToken));
+	}
+
+	/**
+	 * Asserts invalid refresh token for decoding.
+	 * 
+	 * @param adjust Adjusts the {@link MockJwtRefreshKey} to create invalid refresh
+	 *               token.
+	 */
+	protected void assertInvalidDecodeRefreshToken(Consumer<MockJwtRefreshKey> adjust) {
+		MockJwtRefreshKey key = new MockJwtRefreshKey(mockJwtRefreshKey);
+		adjust.accept(key);
+		String refreshToken = key.createRefreshToken(this.identity, mockCipherFactory);
+		assertInvalidDecodeRefreshToken(refreshToken);
+	}
+
+	/**
+	 * Asserts invalid refresh token for decoding
+	 * 
+	 * @param refreshToken Refresh token.
+	 */
+	protected void assertInvalidDecodeRefreshToken(String refreshToken) {
+		try {
+			this.decodeRefreshToken(refreshToken);
+			fail("Should not be successful");
+		} catch (RefreshTokenException ex) {
+			assertEquals("Incorrect status", HttpStatus.UNAUTHORIZED, ex.getHttpStatus());
+			assertEquals("Incorrect cause",
+					IllegalArgumentException.class.getName() + ": Unable to decode refresh token");
 		}
 	}
 
@@ -344,10 +386,15 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 			} catch (Exception ex) {
 				throw fail(ex);
 			}
-			assertEquals("Incorrect id", this.id, token.id);
-			assertEquals("Incorrect name", this.name, token.name);
-			assertEquals("Incorrect not before", this.nbf, token.nbf);
-			assertEquals("Incorrect expiry", this.exp, token.exp);
+			this.assertEquals(token);
+		}
+
+		@JsonIgnore
+		public void assertEquals(MockIdentity decoded) {
+			Assert.assertEquals("Incorrect id", this.id, decoded.id);
+			Assert.assertEquals("Incorrect name", this.name, decoded.name);
+			Assert.assertEquals("Incorrect not before", this.nbf, decoded.nbf);
+			Assert.assertEquals("Incorrect expiry", this.exp, decoded.exp);
 		}
 
 		@JsonIgnore
@@ -401,7 +448,7 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	/**
 	 * Mock {@link JwtAccessKey}.
 	 */
-	private static class MockJwtEncodeKey implements JwtAccessKey {
+	private static class MockJwtAccessKey implements JwtAccessKey {
 
 		private final long startTime;
 
@@ -411,12 +458,12 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 
 		private final Key publicKey;
 
-		private MockJwtEncodeKey(long startTime, KeyPair keyPair) {
+		private MockJwtAccessKey(long startTime, KeyPair keyPair) {
 			this(startTime, startTime + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_KEY_EXPIRATION_PERIOD,
 					keyPair.getPrivate(), keyPair.getPublic());
 		}
 
-		private MockJwtEncodeKey(long startTime, long expireTime, Key privateKey, Key publicKey) {
+		private MockJwtAccessKey(long startTime, long expireTime, Key privateKey, Key publicKey) {
 			this.startTime = startTime;
 			this.expireTime = expireTime;
 			this.privateKey = privateKey;
@@ -451,21 +498,21 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	/**
 	 * Mock {@link JwtRefreshKey}.
 	 */
-	private static class MockJwtRefreshKey implements JwtRefreshKey {
+	protected static class MockJwtRefreshKey implements JwtRefreshKey {
 
 		private final long startTime;
 
 		private final long expireTime;
 
-		private final String initVector;
+		protected String initVector;
 
-		private final String startSalt;
+		protected String startSalt;
 
-		private final String lace;
+		protected String lace;
 
-		private final String endSalt;
+		protected String endSalt;
 
-		private final Key key;
+		protected Key key;
 
 		private MockJwtRefreshKey(long startTime, Key key) {
 			this(startTime, startTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD,
@@ -481,6 +528,26 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 			this.lace = lace;
 			this.endSalt = endSalt;
 			this.key = key;
+		}
+
+		protected MockJwtRefreshKey(JwtRefreshKey refreshKey) {
+			this.startTime = refreshKey.getStartTime();
+			this.expireTime = refreshKey.getExpireTime();
+			this.initVector = refreshKey.getInitVector();
+			this.startSalt = refreshKey.getStartSalt();
+			this.lace = refreshKey.getLace();
+			this.endSalt = refreshKey.getEndSalt();
+			this.key = refreshKey.getKey();
+		}
+
+		protected String createRefreshToken(Object identity, CipherFactory cipherFactory) {
+			try {
+				String payload = mapper.writeValueAsString(identity);
+				return JwtAuthorityManagedObjectSource.encrypt(this.key, this.initVector, this.startSalt, this.lace,
+						this.endSalt, payload, cipherFactory);
+			} catch (Exception ex) {
+				throw fail(ex);
+			}
 		}
 
 		/*
