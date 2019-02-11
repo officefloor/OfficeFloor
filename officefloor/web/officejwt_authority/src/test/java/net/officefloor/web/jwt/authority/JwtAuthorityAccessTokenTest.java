@@ -3,6 +3,7 @@ package net.officefloor.web.jwt.authority;
 import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.web.jwt.repository.JwtAccessKey;
+import net.officefloor.web.jwt.validate.JwtValidateKey;
 
 /**
  * Tests the {@link JwtAuthority} implementation for access tokens.
@@ -154,6 +155,19 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 		assertEquals("Incorrect second key expire",
 				secondKeyStart + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_KEY_EXPIRATION_PERIOD,
 				secondKey.getExpireTime());
+
+		// Ensure valid validate keys
+		JwtValidateKey[] validateKeys = this.doAuthorityTest((authority) -> authority.getActiveJwtValidateKeys());
+		assertEquals("Incorrect number of validate keys", 2, validateKeys.length);
+		for (int i = 0; i < this.mockAccessKeys.size(); i++) {
+			JwtAccessKey accessKey = this.mockAccessKeys.get(i);
+			JwtValidateKey validateKey = validateKeys[i];
+			assertNotSame("Should wrap key to avoid easy class cast access to private key: " + i, accessKey,
+					validateKey);
+			assertEquals("Incorrect start time: " + i, accessKey.getStartTime(), validateKey.getStartTime());
+			assertEquals("Incorrect expire time: " + i, accessKey.getExpireTime(), validateKey.getExpireTime());
+			assertSame("Incorrect public key: " + i, accessKey.getPublicKey(), validateKey.getKey());
+		}
 	}
 
 	/**
@@ -196,6 +210,19 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 		accessToken = this.createAccessToken();
 		this.claims.exp = renewKeyTime + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
 		this.claims.assertAccessToken(accessToken, secondKey.getPublicKey(), renewKeyTime);
+
+		// Ensure valid validate keys
+		JwtValidateKey[] validateKeys = this.doAuthorityTest((authority) -> authority.getActiveJwtValidateKeys());
+		assertEquals("Incorrect number of validate keys", 3, validateKeys.length);
+		for (int i = 0; i < this.mockAccessKeys.size(); i++) {
+			JwtAccessKey accessKey = this.mockAccessKeys.get(i);
+			JwtValidateKey validateKey = validateKeys[i];
+			assertNotSame("Should wrap key to avoid easy class cast access to private key: " + i, accessKey,
+					validateKey);
+			assertEquals("Incorrect start time: " + i, accessKey.getStartTime(), validateKey.getStartTime());
+			assertEquals("Incorrect expire time: " + i, accessKey.getExpireTime(), validateKey.getExpireTime());
+			assertSame("Incorrect public key: " + i, accessKey.getPublicKey(), validateKey.getKey());
+		}
 	}
 
 }

@@ -188,6 +188,18 @@ public class JwtAuthorityManagedObjectSource
 	public static final String DEFAULT_REFRESH_TOKEN_KEY_FACTORY = AesSynchronousKeyFactory.class.getName();
 
 	/**
+	 * {@link Property} for the wait time for loading {@link JwtRefreshKey} and
+	 * {@link JwtAccessKey} instances. Time measured in seconds.
+	 */
+	public static final String PROPERTY_KEY_LOAD_WAIT_TIME = "key.load.wait.time";
+
+	/**
+	 * Default wait time for the {@link JwtRefreshKey} and {@link JwtAccessKey}
+	 * instances to be available.
+	 */
+	public static final int DEFAULT_KEY_LOAD_WAIT_TIME = 3;
+
+	/**
 	 * {@link Charset}.
 	 */
 	private static final Charset UTF8 = Charset.forName("UTF-8");
@@ -232,9 +244,7 @@ public class JwtAuthorityManagedObjectSource
 		if (minLength == maxLength) {
 			length = maxLength;
 		} else {
-			do {
-				length = random.nextInt(maxLength);
-			} while (length < minLength);
+			length = minLength + random.nextInt(maxLength - minLength);
 		}
 
 		// Generate the random string
@@ -242,7 +252,7 @@ public class JwtAuthorityManagedObjectSource
 		for (;;) {
 			byte[] bytes = new byte[length * increase];
 			random.nextBytes(bytes);
-			String value = Base64.getEncoder().encodeToString(bytes);
+			String value = Base64.getUrlEncoder().encodeToString(bytes);
 			if (value.length() >= length) {
 				return value.substring(0, length);
 			}
@@ -256,19 +266,46 @@ public class JwtAuthorityManagedObjectSource
 	 * @param key           {@link Key}.
 	 * @param initVector    Initialise vector.
 	 * @param startSalt     Start salt.
-	 * @param lace          Lace.
+	 * @param laceBytes     Lace.
 	 * @param endSalt       End salt.
 	 * @param value         Value.
 	 * @param cipherFactory {@link CipherFactory}.
 	 * @return Encrypted value.
 	 * @throws Exception If fails to encrypt value.
 	 */
-	public static String encrypt(Key key, String initVector, String startSalt, String lace, String endSalt,
+	public static String encrypt(Key key, byte[] initVector, byte[] startSalt, byte[] laceBytes, byte[] endSalt,
 			String value, CipherFactory cipherFactory) throws Exception {
-		IvParameterSpec iv = new IvParameterSpec(initVector.getBytes(UTF8));
+
+		// Obtain the bytes to encrypt
+		byte[] valueBytes = value.getBytes(UTF8);
+
+		// Create array for salted value
+		byte[] salted = new byte[startSalt.length + (valueBytes.length * 2) + endSalt.length];
+
+		// Copy in the start salt
+		System.arraycopy(startSalt, 0, salted, 0, startSalt.length);
+
+		// Copy in the laced value
+		for (int i = 0; i < valueBytes.length; i++) {
+			int laceIndex = i % laceBytes.length;
+			byte laceByte = laceBytes[laceIndex];
+
+			// Load the values
+			int pairIndex = startSalt.length + (i * 2);
+			salted[pairIndex] = laceByte;
+			salted[pairIndex + 1] = valueBytes[i];
+		}
+
+		// Copy in the end salt
+		System.arraycopy(endSalt, 0, salted, startSalt.length + (valueBytes.length * 2), endSalt.length);
+
+		// Encrypt
+		IvParameterSpec iv = new IvParameterSpec(initVector);
 		Cipher cipher = cipherFactory.createCipher();
 		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-		byte[] encrypted = cipher.doFinal((startSalt + laceString(value, lace) + endSalt).getBytes());
+		byte[] encrypted = cipher.doFinal(salted);
+
+		// Return in URL safe content
 		return Base64.getUrlEncoder().encodeToString(encrypted);
 	}
 
@@ -278,68 +315,80 @@ public class JwtAuthorityManagedObjectSource
 	 * @param key           {@link Key}.
 	 * @param initVector    Initialise vector.
 	 * @param startSalt     Start salt.
+	 * @param laceBytes     Lace.
 	 * @param endSalt       End salt.
-	 * @param encrypted     Encrypted value.
+	 * @param cipherText    Encrypted value.
 	 * @param cipherFactory {@link CipherFactory}.
 	 * @return Plaintext value.
 	 * @throws Exception If fails to decrypt value.
 	 */
-	public static String decrypt(Key key, String initVector, String startSalt, String endSalt, String encrypted,
-			CipherFactory cipherFactory) throws Exception {
-		IvParameterSpec iv = new IvParameterSpec(initVector.getBytes(UTF8));
+	public static String decrypt(Key key, byte[] initVector, byte[] startSalt, byte[] laceBytes, byte[] endSalt,
+			String cipherText, CipherFactory cipherFactory) throws Exception {
+
+		// Obtain the encrypted bytes
+		byte[] encrypted = Base64.getUrlDecoder().decode(cipherText);
+
+		// Decrypt
+		IvParameterSpec iv = new IvParameterSpec(initVector);
 		Cipher cipher = cipherFactory.createCipher();
 		cipher.init(Cipher.DECRYPT_MODE, key, iv);
-		byte[] original = cipher.doFinal(Base64.getUrlDecoder().decode(encrypted));
-		String value = new String(original);
-		value = value.substring(startSalt.length());
-		value = value.substring(0, value.length() - endSalt.length());
-		return unlaceString(value);
-	}
+		byte[] salted = cipher.doFinal(encrypted);
 
-	/**
-	 * As the JWT claims is known string, this can reduce effectiveness of cipher.
-	 * Therefore, randomly insert values so each section of the AES encryption is
-	 * not derivable.
-	 * 
-	 * @param value Value.
-	 * @param lace  Random data to lace the value.
-	 * @return Laced value.
-	 */
-	public static String laceString(String value, String lace) {
-		byte[] valueBytes = value.getBytes(UTF8);
-		byte[] laceBytes = lace.getBytes(UTF8);
-		byte[] laced = new byte[valueBytes.length * 2];
-		for (int i = 0; i < valueBytes.length; i++) {
-			int laceIndex = i % lace.length();
-			byte laceByte = laceBytes[laceIndex];
-
-			// Load the values
-			int pairIndex = i * 2;
-			laced[pairIndex] = laceByte;
-			laced[pairIndex + 1] = valueBytes[i];
+		// Ensure starts with start salt
+		if ((startSalt.length + endSalt.length) > salted.length) {
+			return null; // too short
 		}
-		return Base64.getEncoder().encodeToString(laced);
-	}
 
-	/**
-	 * Unlaces the laced value.
-	 * 
-	 * @param laced Laced value.
-	 * @return Unlaced value.
-	 */
-	public static String unlaceString(String laced) {
-		byte[] lacedBytes = Base64.getDecoder().decode(laced);
-		byte[] value = new byte[lacedBytes.length / 2];
-		for (int i = 0; i < value.length; i++) {
-			value[i] = lacedBytes[(i * 2) + 1];
+		// Ensure start salt matches
+		for (int i = 0; i < startSalt.length; i++) {
+			if (salted[i] != startSalt[i]) {
+				return null; // not match start salt
+			}
 		}
-		return new String(value, Charset.forName("UTF-8"));
+
+		// Ensure the end salt matches
+		int endSaltOffset = salted.length - endSalt.length;
+		for (int i = 0; i < endSalt.length; i++) {
+			if (salted[endSaltOffset + i] != endSalt[i]) {
+				return null; // not match end salt
+			}
+		}
+
+		// Pull out value (ensuring correct lacing)
+		int valueLength = (salted.length - startSalt.length - endSalt.length) / 2;
+		byte[] value = new byte[valueLength];
+		for (int i = 0; i < valueLength; i++) {
+
+			// Obtain expected lace byte
+			int laceIndex = i % laceBytes.length;
+			byte expectedLaceByte = laceBytes[laceIndex];
+
+			// Determine pair index
+			int pairIndex = startSalt.length + (i * 2);
+
+			// Ensure correct lace byte
+			byte checkLaceByte = salted[pairIndex];
+			if (checkLaceByte != expectedLaceByte) {
+				return null; // invalid
+			}
+
+			// Obtain the value
+			value[i] = salted[pairIndex + 1];
+		}
+
+		// Return the value
+		return new String(value, UTF8);
 	}
 
 	/**
 	 * Identity {@link Class}.
 	 */
 	private Class<?> identityClass;
+
+	/**
+	 * Identity {@link JavaType}.
+	 */
+	private JavaType identityJavaType;
 
 	/**
 	 * Default time in seconds expire the access token.
@@ -394,10 +443,16 @@ public class JwtAuthorityManagedObjectSource
 	private Clock<Long> timeInSeconds;
 
 	/**
+	 * Wait time in seconds for the {@link JwtRefreshKey} and {@link JwtAccessKey}
+	 * instances.
+	 */
+	private long keyLoadWaitTime;
+
+	/**
 	 * {@link StatePoller} to keep the {@link JwtAccessKey} instances up to date
 	 * with appropriate keys.
 	 */
-	private StatePoller<JwtAccessKey[], Flows> jwtEncodeKeys;
+	private StatePoller<JwtAccessKey[], Flows> jwtAccessKeys;
 
 	/**
 	 * {@link StatePoller} to keep the {@link JwtRefreshKey} instances up to date
@@ -740,6 +795,15 @@ public class JwtAuthorityManagedObjectSource
 		// Obtain the identity class
 		this.identityClass = sourceContext.loadClass(sourceContext.getProperty(PROPERTY_IDENTITY_CLASS));
 
+		// Load and ensure valid identity class
+		this.identityJavaType = mapper.constructType(this.identityClass);
+		if (!mapper.canSerialize(this.identityClass)) {
+			throw new IllegalStateException("Unable to serialize " + this.identityClass.getName());
+		}
+		if (!mapper.canDeserialize(this.identityJavaType)) {
+			throw new IllegalStateException("Unable to deserialize " + this.identityClass.getName());
+		}
+
 		// Obtain access token properties
 		this.accessTokenExpirationPeriod = Long.parseLong(sourceContext.getProperty(
 				PROPERTY_ACCESS_TOKEN_EXPIRATION_PERIOD, String.valueOf(DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD)));
@@ -755,6 +819,10 @@ public class JwtAuthorityManagedObjectSource
 				PROPERTY_REFRESH_KEY_EXPIRATION_PERIOD, String.valueOf(DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD)));
 		this.refreshKeyOverlapPeriods = Integer.parseInt(sourceContext.getProperty(PROPERTY_REFRESH_KEY_OVERLAP_PERIODS,
 				String.valueOf(MINIMUM_REFRESH_KEY_OVERLAP_PERIODS)));
+
+		// Obtain the key load wait time
+		this.keyLoadWaitTime = Long.parseLong(
+				sourceContext.getProperty(PROPERTY_KEY_LOAD_WAIT_TIME, String.valueOf(DEFAULT_KEY_LOAD_WAIT_TIME)));
 
 		// Load the access key factory
 		String asynchronousKeyFactoryClassName = sourceContext.getProperty(PROPERTY_ACCESS_TOKEN_KEY_FACTORY,
@@ -928,7 +996,7 @@ public class JwtAuthorityManagedObjectSource
 	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
 
 		// Keep JWT encoding keys up to date
-		this.jwtEncodeKeys = StatePoller
+		this.jwtAccessKeys = StatePoller
 				.builder(JwtAccessKey[].class, Flows.RETRIEVE_ENCODE_KEYS, context,
 						(pollContext) -> new JwtAuthorityManagedObject<>())
 				.parameter((pollContext) -> new JwtEncodeCollectorImpl(pollContext)).identifier("JWT Access Keys")
@@ -980,18 +1048,58 @@ public class JwtAuthorityManagedObjectSource
 			}
 
 			// Create the refresh token
-			return source.createToken(identity, source.refreshTokenExpirationPeriod, source.jwtRefreshKeys,
-					(status, ex) -> status != null ? new RefreshTokenException(status, ex)
-							: new RefreshTokenException(ex),
-					(payload, key) -> JwtAuthorityManagedObjectSource.encrypt(key.getKey(), key.getInitVector(),
-							key.getStartSalt(), key.getLace(), key.getEndSalt(), payload,
-							source.refreshTokenCipherFactory));
+			return source.createToken(identity, source.refreshTokenExpirationPeriod, source.jwtRefreshKeys, (status,
+					ex) -> status != null ? new RefreshTokenException(status, ex) : new RefreshTokenException(ex),
+					(payload, key) -> {
+						JwtRefreshKeyImpl impl = (JwtRefreshKeyImpl) key;
+						return JwtAuthorityManagedObjectSource.encrypt(key.getKey(), impl.initVectorBytes,
+								impl.startSaltBytes, impl.laceBytes, impl.endSaltBytes, payload,
+								source.refreshTokenCipherFactory);
+					});
 		}
 
 		@Override
 		public I decodeRefreshToken(String refreshToken) {
-			// TODO implement JwtAuthority<C>.decodeRefreshToken(...)
-			throw new UnsupportedOperationException("TODO implement JwtAuthority<C>.decodeRefreshToken(...)");
+
+			// Easy access to source
+			JwtAuthorityManagedObjectSource source = JwtAuthorityManagedObjectSource.this;
+
+			// Obtain the refresh keys
+			JwtRefreshKey[] refreshKeys;
+			try {
+				refreshKeys = source.jwtRefreshKeys.getState(1, TimeUnit.SECONDS);
+			} catch (TimeoutException ex) {
+				throw new RefreshTokenException(HttpStatus.SERVICE_UNAVAILABLE, ex);
+			}
+
+			// Attempt to decode the refresh token
+			NEXT_KEY: for (JwtRefreshKey refreshKey : refreshKeys) {
+				try {
+
+					// Downcast to implementation to pull in pre-computed bytes
+					JwtRefreshKeyImpl implKey = (JwtRefreshKeyImpl) refreshKey;
+
+					// Attempt to decrypt refresh token
+					String json = decrypt(refreshKey.getKey(), implKey.initVectorBytes, implKey.startSaltBytes,
+							implKey.laceBytes, implKey.endSaltBytes, refreshToken, source.refreshTokenCipherFactory);
+					if (json == null) {
+						continue NEXT_KEY; // unable to decrypt with refresh key
+					}
+
+					// Read in the identity
+					I identity = mapper.readValue(json, source.identityJavaType);
+
+					// Return the identity
+					return identity;
+
+				} catch (Exception ex) {
+					continue NEXT_KEY; // unable decrypt with refresh key
+				}
+			}
+
+			// As here, not able to decode refresh token
+			throw new RefreshTokenException(HttpStatus.UNAUTHORIZED,
+					new IllegalArgumentException("Unable to decode refresh token"));
 		}
 
 		@Override
@@ -1007,7 +1115,7 @@ public class JwtAuthorityManagedObjectSource
 			JwtAuthorityManagedObjectSource source = JwtAuthorityManagedObjectSource.this;
 
 			// Create the access token
-			return source.createToken(claims, source.accessTokenExpirationPeriod, source.jwtEncodeKeys,
+			return source.createToken(claims, source.accessTokenExpirationPeriod, source.jwtAccessKeys,
 					(status, ex) -> status != null ? new AccessTokenException(status, ex)
 							: new AccessTokenException(ex),
 					(payload, key) -> Jwts.builder().signWith(key.getPrivateKey()).setPayload(payload).compact());
@@ -1015,14 +1123,34 @@ public class JwtAuthorityManagedObjectSource
 
 		@Override
 		public void reloadAccessKeys() {
-			JwtAuthorityManagedObjectSource.this.jwtEncodeKeys.clear();
-			JwtAuthorityManagedObjectSource.this.jwtEncodeKeys.poll();
+			JwtAuthorityManagedObjectSource.this.jwtAccessKeys.clear();
+			JwtAuthorityManagedObjectSource.this.jwtAccessKeys.poll();
 		}
 
 		@Override
 		public JwtValidateKey[] getActiveJwtValidateKeys() {
-			// TODO implement JwtAuthority<C>.getActiveJwtDecodeKeys(...)
-			throw new UnsupportedOperationException("TODO implement JwtAuthority<C>.getActiveJwtDecodeKeys(...)");
+
+			// Easy access to source
+			JwtAuthorityManagedObjectSource source = JwtAuthorityManagedObjectSource.this;
+
+			// Obtain the access keys
+			JwtAccessKey[] accessKeys;
+			try {
+				accessKeys = source.jwtAccessKeys.getState(source.keyLoadWaitTime, TimeUnit.SECONDS);
+			} catch (TimeoutException ex) {
+				throw new ValidateKeysException(HttpStatus.SERVICE_UNAVAILABLE, ex);
+			}
+
+			// Create the validate keys
+			JwtValidateKey[] validateKeys = new JwtValidateKey[accessKeys.length];
+			for (int i = 0; i < validateKeys.length; i++) {
+				JwtAccessKey accessKey = accessKeys[i];
+				validateKeys[i] = new JwtValidateKey(accessKey.getStartTime(), accessKey.getExpireTime(),
+						accessKey.getPublicKey());
+			}
+
+			// Return the validate keys
+			return validateKeys;
 		}
 	}
 
@@ -1096,6 +1224,16 @@ public class JwtAuthorityManagedObjectSource
 	private static class JwtRefreshKeyImpl implements JwtRefreshKey {
 
 		/**
+		 * Translates the string to bytes.
+		 * 
+		 * @param value Value.
+		 * @return Bytes for the value.
+		 */
+		private static byte[] bytes(String value) {
+			return (value != null) ? value.getBytes(UTF8) : null;
+		}
+
+		/**
 		 * Start time.
 		 */
 		private final long startTime;
@@ -1111,9 +1249,19 @@ public class JwtAuthorityManagedObjectSource
 		private final String initVector;
 
 		/**
+		 * Init vector bytes.
+		 */
+		private final byte[] initVectorBytes;
+
+		/**
 		 * Start salt.
 		 */
 		private final String startSalt;
+
+		/**
+		 * Start salt bytes.
+		 */
+		private final byte[] startSaltBytes;
 
 		/**
 		 * Lace.
@@ -1121,9 +1269,19 @@ public class JwtAuthorityManagedObjectSource
 		private final String lace;
 
 		/**
+		 * Lace bytes.
+		 */
+		private final byte[] laceBytes;
+
+		/**
 		 * End salt.
 		 */
 		private final String endSalt;
+
+		/**
+		 * End salt bytes.
+		 */
+		private final byte[] endSaltBytes;
 
 		/**
 		 * {@link Key}.
@@ -1136,13 +1294,8 @@ public class JwtAuthorityManagedObjectSource
 		 * @param key {@link JwtRefreshKey}.
 		 */
 		private JwtRefreshKeyImpl(JwtRefreshKey key) {
-			this.startTime = key.getStartTime();
-			this.expireTime = key.getExpireTime();
-			this.initVector = key.getInitVector();
-			this.startSalt = key.getStartSalt();
-			this.lace = key.getLace();
-			this.endSalt = key.getEndSalt();
-			this.key = key.getKey();
+			this(key.getStartTime(), key.getExpireTime(), key.getInitVector(), key.getStartSalt(), key.getLace(),
+					key.getEndSalt(), key.getKey());
 		}
 
 		/**
@@ -1158,13 +1311,16 @@ public class JwtAuthorityManagedObjectSource
 		 */
 		private JwtRefreshKeyImpl(long startTime, long expireTime, String initVector, String startSalt, String lace,
 				String endSalt, Key key) {
-			super();
 			this.startTime = startTime;
 			this.expireTime = expireTime;
 			this.initVector = initVector;
+			this.initVectorBytes = bytes(initVector);
 			this.startSalt = startSalt;
+			this.startSaltBytes = bytes(startSalt);
 			this.lace = lace;
+			this.laceBytes = bytes(lace);
 			this.endSalt = endSalt;
+			this.endSaltBytes = bytes(endSalt);
 			this.key = key;
 		}
 

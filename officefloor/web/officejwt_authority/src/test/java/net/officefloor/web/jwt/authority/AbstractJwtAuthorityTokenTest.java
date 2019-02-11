@@ -1,5 +1,6 @@
 package net.officefloor.web.jwt.authority;
 
+import java.nio.charset.Charset;
 import java.security.Key;
 import java.security.KeyPair;
 import java.time.Instant;
@@ -49,6 +50,11 @@ import net.officefloor.web.jwt.repository.JwtRefreshKey;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase implements JwtAuthorityRepository {
+
+	/**
+	 * UTF8 {@link Charset}.
+	 */
+	protected static final Charset UTF8 = Charset.forName("UTF-8");
 
 	/**
 	 * {@link KeyPair} for testing.
@@ -271,7 +277,7 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 		} catch (RefreshTokenException ex) {
 			assertEquals("Incorrect status", HttpStatus.UNAUTHORIZED, ex.getHttpStatus());
 			assertEquals("Incorrect cause",
-					IllegalArgumentException.class.getName() + ": Unable to decode refresh token");
+					IllegalArgumentException.class.getName() + ": Unable to decode refresh token", ex.getMessage());
 		}
 	}
 
@@ -380,7 +386,8 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 			MockIdentity token;
 			try {
 				String identityJson = JwtAuthorityManagedObjectSource.decrypt(refreshKey.getKey(),
-						refreshKey.getInitVector(), refreshKey.getStartSalt(), refreshKey.getEndSalt(), refreshToken,
+						refreshKey.getInitVector().getBytes(UTF8), refreshKey.getStartSalt().getBytes(UTF8),
+						refreshKey.getLace().getBytes(UTF8), refreshKey.getEndSalt().getBytes(UTF8), refreshToken,
 						cipherFactory);
 				token = mapper.readValue(identityJson, MockIdentity.class);
 			} catch (Exception ex) {
@@ -543,8 +550,9 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 		protected String createRefreshToken(Object identity, CipherFactory cipherFactory) {
 			try {
 				String payload = mapper.writeValueAsString(identity);
-				return JwtAuthorityManagedObjectSource.encrypt(this.key, this.initVector, this.startSalt, this.lace,
-						this.endSalt, payload, cipherFactory);
+				return JwtAuthorityManagedObjectSource.encrypt(this.key, this.initVector.getBytes(UTF8),
+						this.startSalt.getBytes(UTF8), this.lace.getBytes(UTF8), this.endSalt.getBytes(UTF8), payload,
+						cipherFactory);
 			} catch (Exception ex) {
 				throw fail(ex);
 			}

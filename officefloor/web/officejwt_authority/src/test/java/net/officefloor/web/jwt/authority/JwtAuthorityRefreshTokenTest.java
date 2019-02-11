@@ -33,11 +33,17 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 				+ ", Lace: " + lace + " (" + lace.length() + ")," + "(" + startSalt.length() + "), End Salt: " + endSalt
 				+ "(" + endSalt.length() + ")");
 
+		// Obtain the bytes
+		byte[] initVectorBytes = initVector.getBytes(UTF8);
+		byte[] startSaltBytes = startSalt.getBytes(UTF8);
+		byte[] laceBytes = lace.getBytes(UTF8);
+		byte[] endSaltBytes = endSalt.getBytes(UTF8);
+
 		// Encrypt and decrypt
-		String encrypted = JwtAuthorityManagedObjectSource.encrypt(refreshKey, initVector, startSalt, lace, endSalt,
-				message, mockCipherFactory);
-		String decrypted = JwtAuthorityManagedObjectSource.decrypt(refreshKey, initVector, startSalt, endSalt,
-				encrypted, mockCipherFactory);
+		String encrypted = JwtAuthorityManagedObjectSource.encrypt(refreshKey, initVectorBytes, startSaltBytes,
+				laceBytes, endSaltBytes, message, mockCipherFactory);
+		String decrypted = JwtAuthorityManagedObjectSource.decrypt(refreshKey, initVectorBytes, startSaltBytes,
+				laceBytes, endSaltBytes, encrypted, mockCipherFactory);
 
 		// Indicate values
 		System.out.println("encrypted: " + encrypted + "\ndecrypted: " + decrypted);

@@ -72,7 +72,9 @@ public interface JwtAuthority<I> {
 	 * {@link JwtHttpSecuritySource} implementations.
 	 * 
 	 * @return Current active {@link JwtValidateKey} instances.
+	 * @throws ValidateKeysException If fails to retrieve the active
+	 *                               {@link JwtValidateKey} instances.
 	 */
-	JwtValidateKey[] getActiveJwtValidateKeys();
+	JwtValidateKey[] getActiveJwtValidateKeys() throws ValidateKeysException;
 
 }
