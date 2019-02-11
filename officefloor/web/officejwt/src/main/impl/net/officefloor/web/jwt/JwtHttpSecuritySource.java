@@ -64,7 +64,7 @@ public class JwtHttpSecuritySource<C> extends
 	/**
 	 * Authentication scheme Bearer.
 	 */
-	public static final String AUTHENTICATION_SCHEME_BASIC = "Bearer";
+	public static final String AUTHENTICATION_SCHEME_BEARER = "Bearer";
 
 	/**
 	 * {@link Property} name for the claims {@link Class} to be loaded with claim
@@ -250,7 +250,7 @@ public class JwtHttpSecuritySource<C> extends
 		// Determine if bearer credentials on request
 		HttpAuthenticationScheme scheme = HttpAuthenticationScheme
 				.getHttpAuthenticationScheme(context.getConnection().getRequest());
-		if ((scheme == null) || (!(AUTHENTICATION_SCHEME_BASIC.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
+		if ((scheme == null) || (!(AUTHENTICATION_SCHEME_BEARER.equalsIgnoreCase(scheme.getAuthentiationScheme())))) {
 
 			// Flag for potential challenge that no JWT
 			context.getRequestState().setAttribute(context.getQualifiedAttributeName(CHALLENGE_ATTRIBUTE_NAME),

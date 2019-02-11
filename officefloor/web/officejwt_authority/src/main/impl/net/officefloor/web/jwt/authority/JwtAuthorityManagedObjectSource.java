@@ -718,7 +718,7 @@ public class JwtAuthorityManagedObjectSource
 		// Obtain the keys
 		K[] keys;
 		try {
-			keys = poller.getState(1, TimeUnit.SECONDS);
+			keys = poller.getState(this.keyLoadWaitTime, TimeUnit.SECONDS);
 		} catch (TimeoutException ex) {
 			throw exceptionFactory.apply(HttpStatus.SERVICE_UNAVAILABLE, ex);
 		}
@@ -1067,7 +1067,7 @@ public class JwtAuthorityManagedObjectSource
 			// Obtain the refresh keys
 			JwtRefreshKey[] refreshKeys;
 			try {
-				refreshKeys = source.jwtRefreshKeys.getState(1, TimeUnit.SECONDS);
+				refreshKeys = source.jwtRefreshKeys.getState(source.keyLoadWaitTime, TimeUnit.SECONDS);
 			} catch (TimeoutException ex) {
 				throw new RefreshTokenException(HttpStatus.SERVICE_UNAVAILABLE, ex);
 			}
