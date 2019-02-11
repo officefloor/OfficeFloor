@@ -1109,7 +1109,7 @@ public class JwtAuthorityManagedObjectSource
 		}
 
 		@Override
-		public <C> String createAccessToken(C claims) {
+		public String createAccessToken(Object claims) {
 
 			// Easy access to source
 			JwtAuthorityManagedObjectSource source = JwtAuthorityManagedObjectSource.this;

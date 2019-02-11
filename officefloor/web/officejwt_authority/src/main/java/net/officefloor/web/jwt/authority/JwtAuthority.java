@@ -48,12 +48,11 @@ public interface JwtAuthority<I> {
 	/**
 	 * Create the access token for the claims.
 	 * 
-	 * @param        <C> Claims type.
 	 * @param claims Claims.
 	 * @return Access token.
 	 * @throws AccessTokenException If fails to create the access token.
 	 */
-	<C> String createAccessToken(C claims) throws AccessTokenException;
+	String createAccessToken(Object claims) throws AccessTokenException;
 
 	/**
 	 * <p>

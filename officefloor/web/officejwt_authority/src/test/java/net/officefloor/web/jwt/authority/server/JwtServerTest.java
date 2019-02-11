@@ -65,12 +65,17 @@ public class JwtServerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OfficeFloor}.
 	 */
-	private OfficeFloor officeFloor;
+	private OfficeFloor authorityOfficeFloor;
 
 	/**
 	 * {@link MockHttpServer} for {@link JwtAuthority}.
 	 */
 	private MockHttpServer authorityServer;
+
+	/**
+	 * {@link OfficeFloor}.
+	 */
+	private OfficeFloor resourceOfficeFloor;
 
 	/**
 	 * {@link MockHttpResponse} to obtain resource.
@@ -79,8 +84,11 @@ public class JwtServerTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void tearDown() throws Exception {
-		if (this.officeFloor != null) {
-			this.officeFloor.closeOfficeFloor();
+		if (this.authorityOfficeFloor != null) {
+			this.authorityOfficeFloor.closeOfficeFloor();
+		}
+		if (this.resourceOfficeFloor != null) {
+			this.resourceOfficeFloor.closeOfficeFloor();
 		}
 	}
 
@@ -151,7 +159,89 @@ public class JwtServerTest extends OfficeFrameTestCase {
 			// Invoke web architect
 			security.informWebArchitect();
 		});
-		this.officeFloor = compiler.compileAndOpenOfficeFloor();
+		this.authorityOfficeFloor = compiler.compileAndOpenOfficeFloor();
+
+		// Test the server
+		this.doJwtServerTest();
+	}
+
+	/**
+	 * Ensure separate {@link JwtAuthority} server.
+	 */
+	public void testSeparateJwtAuthorityServer() throws Exception {
+
+		// Compile the JWT authority server
+		WebCompileOfficeFloor authorityCompiler = new WebCompileOfficeFloor();
+		authorityCompiler.mockHttpServer((server) -> this.authorityServer = server);
+		authorityCompiler.web((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer
+					.employHttpSecurityArchitect(context.getWebArchitect(), office, context.getOfficeSourceContext());
+
+			// Add the basic authentication
+			security.addHttpSecurity(BASIC.class.getName(), BasicHttpSecuritySource.class.getName())
+					.addProperty(BasicHttpSecuritySource.PROPERTY_REALM, "secure");
+
+			// Add the mock credentials store for basic authentication
+			office.addOfficeManagedObjectSource("CREDENTIALS", MockCredentialStoreManagedObjectSource.class.getName())
+					.addOfficeManagedObject("CREDENTIALS", ManagedObjectScope.THREAD);
+
+			// Add the JWT authority
+			OfficeManagedObjectSource jwtAuthoritySource = office.addOfficeManagedObjectSource("JWT_AUTHORITY",
+					JwtAuthorityManagedObjectSource.class.getName());
+			jwtAuthoritySource.addProperty(JwtAuthorityManagedObjectSource.PROPERTY_IDENTITY_CLASS,
+					Identity.class.getName());
+			jwtAuthoritySource.addOfficeManagedObject("JWT_AUTHORITY", ManagedObjectScope.THREAD);
+
+			// Add mock JWT authority repository
+			office.addOfficeManagedObjectSource("JWT_AUTHORITY_REPOSITORY",
+					new Singleton(new MockJwtAuthorityRepository()))
+					.addOfficeManagedObject("JWT_AUTHORITY_REPOSITORY", ManagedObjectScope.THREAD);
+
+			// Configure the login
+			context.link(true, "/login", LoginService.class);
+
+			// Configure the refresh of access token
+			context.link(true, "/refresh", RefreshAccessTokenService.class);
+
+			// Invoke web architect
+			security.informWebArchitect();
+		});
+		this.authorityOfficeFloor = authorityCompiler.compileAndOpenOfficeFloor();
+
+		// Compile the resource server
+		WebCompileOfficeFloor resourceCompiler = new WebCompileOfficeFloor();
+		resourceCompiler.mockHttpServer((server) -> this.resourceServer = server);
+		resourceCompiler.web((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			HttpSecurityArchitect security = HttpSecurityArchitectEmployer
+					.employHttpSecurityArchitect(context.getWebArchitect(), office, context.getOfficeSourceContext());
+
+			// Create JWT handlers
+			OfficeSectionInput retrieveKeys = context.addSection("RETRIEVE_KEYS", SingleServerRetrieveKeysService.class)
+					.getOfficeSectionInput("service");
+			OfficeSectionInput retrieveRoles = context.addSection("RETRIEVE_ROLES", RetrieveRolesService.class)
+					.getOfficeSectionInput("service");
+			OfficeSectionInput noJwt = context.addSection("NO_JWT", NoJwtService.class)
+					.getOfficeSectionInput("service");
+
+			// Add the JWT authentication
+			HttpSecurityBuilder jwt = security.addHttpSecurity("JWT", JwtHttpSecuritySource.class.getName());
+			jwt.addProperty(JwtHttpSecuritySource.PROPERTY_CLAIMS_CLASS, Claims.class.getName());
+			jwt.addContentType("application/json");
+			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS.name()), retrieveKeys);
+			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_ROLES.name()), retrieveRoles);
+			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.NO_JWT.name()), noJwt);
+			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.INVALID_JWT.name()), noJwt);
+			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.EXPIRED_JWT.name()), noJwt);
+
+			// Configure the resource
+			context.link(true, "/resource", ResourceService.class);
+
+			// Invoke web architect
+			security.informWebArchitect();
+		});
+		this.resourceOfficeFloor = resourceCompiler.compileAndOpenOfficeFloor();
 
 		// Test the server
 		this.doJwtServerTest();
