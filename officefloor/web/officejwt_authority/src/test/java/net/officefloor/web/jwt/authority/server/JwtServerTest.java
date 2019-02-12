@@ -2,6 +2,7 @@ package net.officefloor.web.jwt.authority.server;
 
 import static org.junit.Assert.assertNotEquals;
 
+import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Instant;
@@ -20,6 +21,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -33,9 +35,13 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
+import net.officefloor.web.jwt.DefaultJwtChallengeSectionSource;
 import net.officefloor.web.jwt.JwtHttpSecuritySource;
+import net.officefloor.web.jwt.JwtHttpSecuritySource.Flows;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource;
+import net.officefloor.web.jwt.jwks.JwksRetriever;
+import net.officefloor.web.jwt.jwks.JwksSectionSource;
 import net.officefloor.web.jwt.repository.JwtAccessKey;
 import net.officefloor.web.jwt.repository.JwtAuthorityRepository;
 import net.officefloor.web.jwt.repository.JwtRefreshKey;
@@ -134,8 +140,8 @@ public class JwtServerTest extends OfficeFrameTestCase {
 					.getOfficeSectionInput("service");
 			OfficeSectionInput retrieveRoles = context.addSection("RETRIEVE_ROLES", RetrieveRolesService.class)
 					.getOfficeSectionInput("service");
-			OfficeSectionInput noJwt = context.addSection("NO_JWT", NoJwtService.class)
-					.getOfficeSectionInput("service");
+			OfficeSection jwtChallenger = office.addOfficeSection("JWT_CHALLENGER",
+					DefaultJwtChallengeSectionSource.class.getName(), null);
 
 			// Add the JWT authentication
 			HttpSecurityBuilder jwt = security.addHttpSecurity("JWT", JwtHttpSecuritySource.class.getName());
@@ -143,9 +149,9 @@ public class JwtServerTest extends OfficeFrameTestCase {
 			jwt.addContentType("application/json");
 			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS.name()), retrieveKeys);
 			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_ROLES.name()), retrieveRoles);
-			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.NO_JWT.name()), noJwt);
-			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.INVALID_JWT.name()), noJwt);
-			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.EXPIRED_JWT.name()), noJwt);
+			for (Flows flow : new Flows[] { Flows.NO_JWT, Flows.INVALID_JWT, Flows.EXPIRED_JWT }) {
+				office.link(jwt.getOutput(flow.name()), jwtChallenger.getOfficeSectionInput(flow.name()));
+			}
 
 			// Configure the login
 			context.link(true, "/login", LoginService.class);
@@ -204,6 +210,9 @@ public class JwtServerTest extends OfficeFrameTestCase {
 			// Configure the refresh of access token
 			context.link(true, "/refresh", RefreshAccessTokenService.class);
 
+			// Configure publishing the keys
+			
+
 			// Invoke web architect
 			security.informWebArchitect();
 		});
@@ -218,22 +227,36 @@ public class JwtServerTest extends OfficeFrameTestCase {
 					.employHttpSecurityArchitect(context.getWebArchitect(), office, context.getOfficeSourceContext());
 
 			// Create JWT handlers
-			OfficeSectionInput retrieveKeys = context.addSection("RETRIEVE_KEYS", SingleServerRetrieveKeysService.class)
-					.getOfficeSectionInput("service");
+			OfficeSectionInput retrieveKeys = office
+					.addOfficeSection("RETRIEVE_KEYS", JwksSectionSource.class.getName(), null)
+					.getOfficeSectionInput(JwksSectionSource.INPUT);
 			OfficeSectionInput retrieveRoles = context.addSection("RETRIEVE_ROLES", RetrieveRolesService.class)
 					.getOfficeSectionInput("service");
-			OfficeSectionInput noJwt = context.addSection("NO_JWT", NoJwtService.class)
-					.getOfficeSectionInput("service");
+			OfficeSection jwtChallenger = office.addOfficeSection("JWT_CHALLENGER",
+					DefaultJwtChallengeSectionSource.class.getName(), null);
 
 			// Add the JWT authentication
 			HttpSecurityBuilder jwt = security.addHttpSecurity("JWT", JwtHttpSecuritySource.class.getName());
 			jwt.addProperty(JwtHttpSecuritySource.PROPERTY_CLAIMS_CLASS, Claims.class.getName());
 			jwt.addContentType("application/json");
-			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS.name()), retrieveKeys);
-			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.RETRIEVE_ROLES.name()), retrieveRoles);
-			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.NO_JWT.name()), noJwt);
-			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.INVALID_JWT.name()), noJwt);
-			office.link(jwt.getOutput(JwtHttpSecuritySource.Flows.EXPIRED_JWT.name()), noJwt);
+			office.link(jwt.getOutput(Flows.RETRIEVE_KEYS.name()), retrieveKeys);
+			office.link(jwt.getOutput(Flows.RETRIEVE_ROLES.name()), retrieveRoles);
+			for (Flows flow : new Flows[] { Flows.NO_JWT, Flows.INVALID_JWT, Flows.EXPIRED_JWT }) {
+				office.link(jwt.getOutput(flow.name()), jwtChallenger.getOfficeSectionInput(flow.name()));
+			}
+
+			// Add the JWKS retriever
+			JwksRetriever retriever = new JwksRetriever() {
+				@Override
+				public InputStream retrieveJwks() throws Exception {
+					MockHttpResponse response = JwtServerTest.this.authorityServer
+							.send(MockHttpServer.mockRequest("/keys").secure(true));
+					assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+					return response.getEntity();
+				}
+			};
+			office.addOfficeManagedObjectSource("JWKS_RETRIEVER", new Singleton(retriever))
+					.addOfficeManagedObject("JWKS_RETRIEVER", ManagedObjectScope.THREAD);
 
 			// Configure the resource
 			context.link(true, "/resource", ResourceService.class);
@@ -392,12 +415,6 @@ public class JwtServerTest extends OfficeFrameTestCase {
 				roles[i] = roles[i] + "_jwt";
 			}
 			collector.setRoles(Arrays.asList(roles));
-		}
-	}
-
-	public static class NoJwtService {
-		public void service() {
-			// nothing required as status already set
 		}
 	}
 
