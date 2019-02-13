@@ -56,7 +56,7 @@
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
 		<affinity-version>3.1.11</affinity-version>
-		<commons-codec-version>1.11</commons-codec-version>
+		<commons-codec-version>1.12</commons-codec-version>
 		<commons-text-version>1.6</commons-text-version>
 		<datanucleus-version>5.1.11</datanucleus-version>
 		<docker-client-version>8.15.0</docker-client-version>
