@@ -34,12 +34,15 @@ import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.build.HttpUrlContinuation;
+import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.jwt.DefaultJwtChallengeSectionSource;
 import net.officefloor.web.jwt.JwtHttpSecuritySource;
 import net.officefloor.web.jwt.JwtHttpSecuritySource.Flows;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource;
+import net.officefloor.web.jwt.authority.jwks.JwksPublishSectionSource;
 import net.officefloor.web.jwt.authority.repository.JwtAccessKey;
 import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository;
 import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
@@ -181,6 +184,7 @@ public class JwtServerTest extends OfficeFrameTestCase {
 		authorityCompiler.mockHttpServer((server) -> this.authorityServer = server);
 		authorityCompiler.web((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
 			HttpSecurityArchitect security = HttpSecurityArchitectEmployer
 					.employHttpSecurityArchitect(context.getWebArchitect(), office, context.getOfficeSourceContext());
 
@@ -211,7 +215,10 @@ public class JwtServerTest extends OfficeFrameTestCase {
 			context.link(true, "/refresh", RefreshAccessTokenService.class);
 
 			// Configure publishing the keys
-			
+			OfficeSection jwksPublish = office.addOfficeSection("JWKS_PUBLISH",
+					JwksPublishSectionSource.class.getName(), null);
+			HttpUrlContinuation keysPath = web.getHttpInput(true, "/keys");
+			office.link(keysPath.getInput(), jwksPublish.getOfficeSectionInput(JwksPublishSectionSource.INPUT));
 
 			// Invoke web architect
 			security.informWebArchitect();
@@ -251,7 +258,10 @@ public class JwtServerTest extends OfficeFrameTestCase {
 				public InputStream retrieveJwks() throws Exception {
 					MockHttpResponse response = JwtServerTest.this.authorityServer
 							.send(MockHttpServer.mockRequest("/keys").secure(true));
-					assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+					if (response.getStatus().getStatusCode() != 200) {
+						assertEquals("Should be successful: " + response.getEntity(null), 200,
+								response.getStatus().getStatusCode());
+					}
 					return response.getEntity();
 				}
 			};

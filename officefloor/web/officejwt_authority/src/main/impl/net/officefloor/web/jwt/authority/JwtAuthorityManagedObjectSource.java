@@ -918,7 +918,7 @@ public class JwtAuthorityManagedObjectSource
 								long expireTime = startTime + this.accessKeyExpirationPeriod;
 								KeyPair keyPair = this.accessTokenKeyFactory.createAsynchronousKeyPair();
 								JwtAccessKeyImpl newAccessKey = new JwtAccessKeyImpl(startTime, expireTime,
-										keyPair.getPrivate(), keyPair.getPrivate());
+										keyPair.getPrivate(), keyPair.getPublic());
 
 								// Return the JWT access key
 								return newAccessKey;
@@ -999,7 +999,7 @@ public class JwtAuthorityManagedObjectSource
 		this.jwtAccessKeys = StatePoller
 				.builder(JwtAccessKey[].class, Flows.RETRIEVE_ENCODE_KEYS, context,
 						(pollContext) -> new JwtAuthorityManagedObject<>())
-				.parameter((pollContext) -> new JwtEncodeCollectorImpl(pollContext)).identifier("JWT Access Keys")
+				.parameter((pollContext) -> new JwtAccesKeysCollectorImpl(pollContext)).identifier("JWT Access Keys")
 				.defaultPollInterval(this.accessTokenExpirationPeriod, TimeUnit.SECONDS).build();
 
 		// Keep JWT refresh keys up to date
@@ -1383,7 +1383,7 @@ public class JwtAuthorityManagedObjectSource
 	/**
 	 * {@link JwtAccessKeyCollector} implementation.
 	 */
-	private class JwtEncodeCollectorImpl implements JwtAccessKeyCollector {
+	private class JwtAccesKeysCollectorImpl implements JwtAccessKeyCollector {
 
 		/**
 		 * {@link StatePollContext}.
@@ -1395,7 +1395,7 @@ public class JwtAuthorityManagedObjectSource
 		 * 
 		 * @param pollContext {@link StatePollContext}.
 		 */
-		public JwtEncodeCollectorImpl(StatePollContext<JwtAccessKey[]> pollContext) {
+		public JwtAccesKeysCollectorImpl(StatePollContext<JwtAccessKey[]> pollContext) {
 			this.pollContext = pollContext;
 		}
 

@@ -1,6 +1,8 @@
 package net.officefloor.web.jwt.authority.jwks;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.Key;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 import java.util.List;
@@ -18,11 +20,14 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
+import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.web.jwt.authority.AccessTokenException;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.authority.RefreshTokenException;
@@ -151,6 +156,30 @@ public class JwksPublishSectionSourceTest extends OfficeFrameTestCase implements
 	}
 
 	/**
+	 * Fail on unknown key.
+	 */
+	public void testFailOnUnknownKey() throws IOException {
+
+		// Create the mock unknown key
+		Key unknownKey = this.createMock(Key.class);
+
+		// Record unknown
+		this.recordReturn(unknownKey, unknownKey.getAlgorithm(), "UNKNOWN");
+		this.replayMockObjects();
+
+		// Attempt to obtain the keys
+		MockHttpResponse response = this.getJwksKeys(new JwtValidateKey[] { new JwtValidateKey(unknownKey) },
+				HttpStatus.INTERNAL_SERVER_ERROR, (mockResponse) -> mockResponse);
+		assertEquals("Incorrect response",
+				JacksonHttpObjectResponderFactory
+						.getEntity(new HttpException(new Exception("No JwksKeyWriter for key UNKNOWN"))),
+				response.getEntity(null));
+
+		// Ensure verify
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure can serialise to JSON and then deserialise back to
 	 * {@link JwtValidateKey}.
 	 */
@@ -160,7 +189,7 @@ public class JwksPublishSectionSourceTest extends OfficeFrameTestCase implements
 		JwtValidateKey[] validateKeys = new JwtValidateKey[] { new JwtValidateKey(5000L, 10000L, publicKey) };
 
 		// Retrieve the raw JWKS content
-		this.jwksContent = this.getJwksKeys(validateKeys, (response) -> response.getEntity());
+		this.jwksContent = this.getJwksKeys(validateKeys, HttpStatus.OK, (response) -> response.getEntity());
 
 		// Ensure receive the same JWK validate keys
 		Closure<JwtValidateKey[]> roundTripKeys = new Closure<>();
@@ -211,7 +240,7 @@ public class JwksPublishSectionSourceTest extends OfficeFrameTestCase implements
 	 * @return {@link JwksKey} instances.
 	 */
 	private List<JwksKey> getJwksKeys(JwtValidateKey... validateKeys) {
-		return this.getJwksKeys(validateKeys, (response) -> {
+		return this.getJwksKeys(validateKeys, HttpStatus.OK, (response) -> {
 
 			// Parse out the JWKS content
 			JwksKeys keys = mapper.readValue(response.getEntity(), JwksKeys.class);
@@ -224,11 +253,13 @@ public class JwksPublishSectionSourceTest extends OfficeFrameTestCase implements
 	/**
 	 * Obtains the {@link JwksKey} instances.
 	 * 
-	 * @param validateKeys {@link JwtValidateKey} instances.
-	 * @param translator   {@link TranslateResponse}.
+	 * @param validateKeys   {@link JwtValidateKey} instances.
+	 * @param expectedStatus Expected {@link HttpStatus}.
+	 * @param translator     {@link TranslateResponse}.
 	 * @return
 	 */
-	private <T> T getJwksKeys(JwtValidateKey[] validateKeys, TranslateResponse<T> translator) {
+	private <T> T getJwksKeys(JwtValidateKey[] validateKeys, HttpStatus expectedStatus,
+			TranslateResponse<T> translator) {
 		try {
 
 			// Load the keys
@@ -260,7 +291,8 @@ public class JwksPublishSectionSourceTest extends OfficeFrameTestCase implements
 
 			// Obtain the JWKS data
 			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/jwks.json").secure(true));
-			assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+			assertEquals("Incorrect response status", expectedStatus.getStatusCode(),
+					response.getStatus().getStatusCode());
 
 			// Return the translated response
 			return translator.translate(response);

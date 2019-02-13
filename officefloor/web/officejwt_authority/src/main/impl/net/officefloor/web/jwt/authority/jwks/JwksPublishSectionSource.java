@@ -23,6 +23,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.jwks.JwksSectionSource;
@@ -130,6 +131,7 @@ public class JwksPublishSectionSource extends AbstractSectionSource {
 
 							// Write the JWKS key
 							Key key = validateKey.getKey();
+							boolean isKeyLoaded = false;
 							NEXT_KEY_WRITER: for (JwksKeyWriter<?> keyWriter : keyWriters) {
 
 								// Determine if can be written
@@ -164,6 +166,13 @@ public class JwksPublishSectionSource extends AbstractSectionSource {
 
 								// Include the key
 								keysNode.add(keyNode);
+								isKeyLoaded = true;
+							}
+
+							// Ensure the key was loaded
+							if (!isKeyLoaded) {
+								throw new HttpException(new Exception("No " + JwksKeyWriter.class.getSimpleName()
+										+ " for key " + key.getAlgorithm()));
 							}
 						}
 
