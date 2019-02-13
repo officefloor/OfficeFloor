@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.web.jwt.key.AesSynchronousKeyFactory;
-import net.officefloor.web.jwt.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.authority.key.AesSynchronousKeyFactory;
+import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
 
 /**
  * Tests the {@link JwtAuthority} implementation for refresh tokens.

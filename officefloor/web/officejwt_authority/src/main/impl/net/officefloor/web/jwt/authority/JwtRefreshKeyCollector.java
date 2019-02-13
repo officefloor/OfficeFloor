@@ -1,6 +1,6 @@
 package net.officefloor.web.jwt.authority;
 
-import net.officefloor.web.jwt.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
 
 /**
  * <p>

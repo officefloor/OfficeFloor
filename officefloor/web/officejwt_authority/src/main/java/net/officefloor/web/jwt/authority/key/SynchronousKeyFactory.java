@@ -1,4 +1,4 @@
-package net.officefloor.web.jwt.key;
+package net.officefloor.web.jwt.authority.key;
 
 import java.security.Key;
 

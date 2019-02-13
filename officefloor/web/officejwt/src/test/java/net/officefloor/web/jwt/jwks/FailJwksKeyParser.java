@@ -2,8 +2,6 @@ package net.officefloor.web.jwt.jwks;
 
 import java.security.Key;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.IOException;
 import io.jsonwebtoken.security.Keys;
@@ -35,11 +33,10 @@ public class FailJwksKeyParser implements JwksKeyParserServiceFactory, JwksKeyPa
 	 */
 
 	@Override
-	public Key parseKey(JsonNode keyNode) throws Exception {
+	public Key parseKey(JwksKeyParserContext context) throws Exception {
 
 		// Ensure correct key type
-		String kty = JwksKeyParser.getString(keyNode, KTY, null);
-		if (!"FAIL".equalsIgnoreCase(kty)) {
+		if (!"FAIL".equalsIgnoreCase(context.getKty())) {
 			return null;
 		}
 

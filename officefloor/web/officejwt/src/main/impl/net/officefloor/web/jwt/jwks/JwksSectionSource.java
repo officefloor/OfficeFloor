@@ -129,15 +129,18 @@ public class JwksSectionSource extends AbstractSectionSource {
 								// Load the keys
 								for (JsonNode keyNode : keysNode) {
 
+									// Create the JWKS key parse context
+									JwksKeyParserContext parseContext = () -> keyNode;
+
 									// Obtain the time window
-									long nbf = JwksKeyParser.getLong(keyNode, "nbf", 0L);
-									long exp = JwksKeyParser.getLong(keyNode, "exp", Long.MAX_VALUE);
+									long nbf = parseContext.getLong(keyNode, "nbf", 0L);
+									long exp = parseContext.getLong(keyNode, "exp", Long.MAX_VALUE);
 
 									// Parse out the key
 									Key key = null;
 									PARSED_KEY: for (JwksKeyParser parser : parsers) {
 										try {
-											key = parser.parseKey(keyNode);
+											key = parser.parseKey(parseContext);
 											if (key != null) {
 												break PARSED_KEY;
 											}

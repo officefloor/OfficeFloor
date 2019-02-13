@@ -34,15 +34,15 @@ import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
-import net.officefloor.web.jwt.key.AesCipherFactory;
-import net.officefloor.web.jwt.key.AesSynchronousKeyFactory;
-import net.officefloor.web.jwt.key.AsynchronousKeyFactory;
-import net.officefloor.web.jwt.key.CipherFactory;
-import net.officefloor.web.jwt.key.Rsa256AynchronousKeyFactory;
-import net.officefloor.web.jwt.key.SynchronousKeyFactory;
-import net.officefloor.web.jwt.repository.JwtAccessKey;
-import net.officefloor.web.jwt.repository.JwtAuthorityRepository;
-import net.officefloor.web.jwt.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.authority.key.AesCipherFactory;
+import net.officefloor.web.jwt.authority.key.AesSynchronousKeyFactory;
+import net.officefloor.web.jwt.authority.key.AsynchronousKeyFactory;
+import net.officefloor.web.jwt.authority.key.CipherFactory;
+import net.officefloor.web.jwt.authority.key.Rsa256AynchronousKeyFactory;
+import net.officefloor.web.jwt.authority.key.SynchronousKeyFactory;
+import net.officefloor.web.jwt.authority.repository.JwtAccessKey;
+import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository;
+import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
 
 /**
  * Abstract test functionality for {@link JwtAuthority}.

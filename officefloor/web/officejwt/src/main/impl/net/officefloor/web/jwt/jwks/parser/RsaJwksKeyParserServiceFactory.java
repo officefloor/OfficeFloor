@@ -5,10 +5,9 @@ import java.security.Key;
 import java.security.KeyFactory;
 import java.security.spec.RSAPublicKeySpec;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.web.jwt.jwks.JwksKeyParser;
+import net.officefloor.web.jwt.jwks.JwksKeyParserContext;
 import net.officefloor.web.jwt.jwks.JwksKeyParserServiceFactory;
 
 /**
@@ -32,21 +31,21 @@ public class RsaJwksKeyParserServiceFactory implements JwksKeyParserServiceFacto
 	 */
 
 	@Override
-	public Key parseKey(JsonNode keyNode) throws Exception {
+	public Key parseKey(JwksKeyParserContext context) throws Exception {
 
 		// Ensure correct key type
-		String kty = JwksKeyParser.getString(keyNode, KTY, null);
-		if (!"RSA".equalsIgnoreCase(kty)) {
+		String keyType = context.getKty();
+		if (!"RSA".equalsIgnoreCase(keyType)) {
 			return null;
 		}
 
 		// Obtain the modulus and exponent
-		BigInteger modulus = JwksKeyParser.getBase64BigInteger(keyNode, "n", null);
-		BigInteger exponent = JwksKeyParser.getBase64BigInteger(keyNode, "e", null);
+		BigInteger modulus = context.getBase64BigInteger("n");
+		BigInteger exponent = context.getBase64BigInteger("e");
 
 		// Create new RSA public key
 		RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, exponent);
-		Key key = KeyFactory.getInstance(kty).generatePublic(keySpec);
+		Key key = KeyFactory.getInstance(keyType).generatePublic(keySpec);
 
 		// Return the key
 		return key;

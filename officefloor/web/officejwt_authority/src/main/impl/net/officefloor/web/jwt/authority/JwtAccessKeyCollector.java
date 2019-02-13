@@ -1,6 +1,6 @@
 package net.officefloor.web.jwt.authority;
 
-import net.officefloor.web.jwt.repository.JwtAccessKey;
+import net.officefloor.web.jwt.authority.repository.JwtAccessKey;
 import net.officefloor.web.jwt.validate.JwtValidateKey;
 
 /**

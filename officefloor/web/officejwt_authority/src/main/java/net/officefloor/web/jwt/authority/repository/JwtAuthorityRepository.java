@@ -1,4 +1,4 @@
-package net.officefloor.web.jwt.repository;
+package net.officefloor.web.jwt.authority.repository;
 
 import java.time.Instant;
 import java.util.List;
