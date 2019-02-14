@@ -24,6 +24,7 @@
 		<module>InheritHttpServer</module>
 		<module>InteractiveHttpServer</module>
 		<module>JavaScriptApp</module>
+		<module>JwtHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>

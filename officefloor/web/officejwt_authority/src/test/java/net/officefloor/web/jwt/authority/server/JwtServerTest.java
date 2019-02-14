@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.AllArgsConstructor;
@@ -42,6 +41,7 @@ import net.officefloor.web.jwt.JwtHttpSecuritySource;
 import net.officefloor.web.jwt.JwtHttpSecuritySource.Flows;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource;
+import net.officefloor.web.jwt.authority.combined.CombinedServerRetrieveValidateKeysSectionSource;
 import net.officefloor.web.jwt.authority.jwks.JwksPublishSectionSource;
 import net.officefloor.web.jwt.authority.repository.JwtAccessKey;
 import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository;
@@ -49,7 +49,6 @@ import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
 import net.officefloor.web.jwt.jwks.JwksRetriever;
 import net.officefloor.web.jwt.jwks.JwksSectionSource;
 import net.officefloor.web.jwt.role.JwtRoleCollector;
-import net.officefloor.web.jwt.validate.JwtValidateKeyCollector;
 import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
@@ -139,8 +138,9 @@ public class JwtServerTest extends OfficeFrameTestCase {
 					.addOfficeManagedObject("JWT_AUTHORITY_REPOSITORY", ManagedObjectScope.THREAD);
 
 			// Create JWT handlers
-			OfficeSectionInput retrieveKeys = context.addSection("RETRIEVE_KEYS", SingleServerRetrieveKeysService.class)
-					.getOfficeSectionInput("service");
+			OfficeSectionInput retrieveKeys = office.addOfficeSection("RETRIEVE_KEYS",
+					CombinedServerRetrieveValidateKeysSectionSource.class.getName(), null)
+					.getOfficeSectionInput(CombinedServerRetrieveValidateKeysSectionSource.INPUT);
 			OfficeSectionInput retrieveRoles = context.addSection("RETRIEVE_ROLES", RetrieveRolesService.class)
 					.getOfficeSectionInput("service");
 			OfficeSection jwtChallenger = office.addOfficeSection("JWT_CHALLENGER",
@@ -340,7 +340,6 @@ public class JwtServerTest extends OfficeFrameTestCase {
 	@Data
 	@RequiredArgsConstructor
 	@AllArgsConstructor
-	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Identity {
 		private String name;
 	}
@@ -348,7 +347,6 @@ public class JwtServerTest extends OfficeFrameTestCase {
 	@Data
 	@RequiredArgsConstructor
 	@AllArgsConstructor
-	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class Claims {
 		private String[] roles;
 		private int random; // trigger different access tokens
@@ -409,12 +407,6 @@ public class JwtServerTest extends OfficeFrameTestCase {
 		@HttpAccess(ifRole = "test_jwt")
 		public void service(ObjectResponse<Resource> response) {
 			response.send(new Resource("Hello JWT secured World"));
-		}
-	}
-
-	public static class SingleServerRetrieveKeysService {
-		public void service(@Parameter JwtValidateKeyCollector collector, JwtAuthority<Identity> authority) {
-			collector.setKeys(authority.getActiveJwtValidateKeys());
 		}
 	}
 

@@ -16,6 +16,7 @@
 	<modules>
 		<module>officejson_jackson</module>
 		<module>officejwt</module>
+		<module>officejwt_authority</module>
 		<module>officeweb</module>
 		<module>officeweb_configuration</module>
 		<module>officeweb_executive</module>

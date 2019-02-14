@@ -59,8 +59,7 @@ public class WoofSecurityItem extends
 	/**
 	 * Test configuration.
 	 * 
-	 * @param args
-	 *            Command line arguments.
+	 * @param args Command line arguments.
 	 */
 	public static void main(String[] args) {
 		WoofEditor.launchConfigurer(new WoofSecurityItem(), (model) -> {
@@ -132,7 +131,7 @@ public class WoofSecurityItem extends
 						WoofSecurityOutputToWoofSecurityModel.class, WoofSectionOutputToWoofSecurityModel.class,
 						WoofExceptionToWoofSecurityModel.class).getNode());
 		context.label(heading);
-		context.addNode(container, context.childGroup(WoofSecurityOutputItem.class.getSimpleName(), new HBox()));
+		context.addNode(container, context.childGroup(WoofSecurityOutputItem.class.getSimpleName(), new VBox()));
 		return container;
 	}
 

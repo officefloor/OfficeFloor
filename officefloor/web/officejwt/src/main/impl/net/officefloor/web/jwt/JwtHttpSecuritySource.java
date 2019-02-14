@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -136,6 +137,9 @@ public class JwtHttpSecuritySource<C> extends
 		if (!mapper.canDeserialize(jwtHeaderJavaType)) {
 			throw new IllegalStateException("Unable to deserialize " + JwtHeader.class.getSimpleName());
 		}
+
+		// Ensure ignore unknown properties (avoid added "exp" causing problems)
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
 	/**

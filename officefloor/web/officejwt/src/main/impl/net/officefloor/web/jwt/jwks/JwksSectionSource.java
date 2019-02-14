@@ -37,14 +37,14 @@ import net.officefloor.web.jwt.validate.JwtValidateKeyCollector;
 public class JwksSectionSource extends AbstractSectionSource {
 
 	/**
-	 * {@link ObjectMapper}.
-	 */
-	private static ObjectMapper mapper = new ObjectMapper();
-
-	/**
 	 * Name of {@link SectionInput} to collect the {@link JwtValidateKey} instances.
 	 */
 	public static final String INPUT = "retrieveJwtValidateKeys";
+
+	/**
+	 * {@link ObjectMapper}.
+	 */
+	private static ObjectMapper mapper = new ObjectMapper();
 
 	/*
 	 * =================== SectionSource =======================

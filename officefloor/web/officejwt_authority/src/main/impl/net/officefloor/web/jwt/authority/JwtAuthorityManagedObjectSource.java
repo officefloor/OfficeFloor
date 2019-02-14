@@ -20,6 +20,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -225,6 +226,9 @@ public class JwtAuthorityManagedObjectSource
 		if (!mapper.canDeserialize(timeWindowJavaType)) {
 			throw new IllegalStateException("Unable to deserialize " + TimeWindow.class.getSimpleName());
 		}
+
+		// Ensure ignore unknown properties (avoid added "exp" causing problems)
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	}
 
 	/**
