@@ -1,27 +1,31 @@
-package net.officefloor.tutorial.jwthttpserver;
+package net.officefloor.tutorial.jwtauthorityhttpserver;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+
+import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.Data;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.tutorial.jwthttpserver.JwtTokens.Credentials;
-import net.officefloor.tutorial.jwthttpserver.JwtTokens.Token;
-import net.officefloor.tutorial.jwthttpserver.JwtTokens.Tokens;
+import net.officefloor.tutorial.jwtauthorityhttpserver.JwtTokens.Credentials;
+import net.officefloor.tutorial.jwtauthorityhttpserver.JwtTokens.Token;
+import net.officefloor.tutorial.jwtauthorityhttpserver.JwtTokens.Tokens;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
- * Tests the JWT HTTP Server.
+ * Tests the JWT Authority HTTP Server.
  * 
  * @author Daniel Sagenschneider
  */
-public class JwtHttpServerTest {
+public class JwtAuthorityHttpServerTest {
 
 	private static ObjectMapper mapper = new ObjectMapper();
 
@@ -30,14 +34,10 @@ public class JwtHttpServerTest {
 
 	private String refreshToken;
 
-	@Test
-	public void ensureResourceSecured() throws Exception {
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/resource").secure(true));
-		response.assertResponse(401, "");
-	}
+	private String accessToken;
 
 	@Test
-	public void loginAndAccessSecureResource() throws Exception {
+	public void login() throws Exception {
 
 		// Undertake login
 		Credentials credentials = new Credentials("daniel", "daniel");
@@ -48,21 +48,17 @@ public class JwtHttpServerTest {
 
 		// Extract the access token
 		Tokens tokens = mapper.readValue(response.getEntity(), Tokens.class);
-		assertNotNull("Should have access token", tokens.getAccessToken());
 		assertNotNull("Should have refresh token", tokens.getRefreshToken());
+		assertNotNull("Should have access token", tokens.getAccessToken());
 		this.refreshToken = tokens.getRefreshToken();
-
-		// Access the secured resource
-		response = this.server.send(MockHttpServer.mockRequest("/resource").secure(true).header("authorization",
-				"Bearer " + tokens.getAccessToken()));
-		response.assertResponse(200, "Hello JWT secured World");
+		this.accessToken = tokens.getAccessToken();
 	}
 
 	@Test
-	public void refreshAccessTokenToAccessSecureResource() throws Exception {
+	public void refreshAccessToken() throws Exception {
 
-		// Undertake login and access with original access token
-		this.loginAndAccessSecureResource();
+		// Undertake login to obtain refresh token
+		this.login();
 
 		// Obtain new access token
 		Token refreshToken = new Token(this.refreshToken);
@@ -74,11 +70,37 @@ public class JwtHttpServerTest {
 		// Extract the access token
 		Token token = mapper.readValue(response.getEntity(), Token.class);
 		assertNotNull("Should have access token", token.getToken());
+		assertNotEquals("Should be new access token", this.accessToken, token.getToken());
+	}
 
-		// Access the secured resource with refreshed access token
-		response = this.server.send(MockHttpServer.mockRequest("/resource").secure(true).header("authorization",
-				"Bearer " + token.getToken()));
-		response.assertResponse(200, "Hello JWT secured World");
+	@Test
+	public void jwksPublishing() throws Exception {
+
+		// Ensure can publish keys via JWKS
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/jwks.json").secure(true));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+
+		// Should have two keys available (one active and one in future rotation)
+		JwksKeys keys = mapper.readValue(response.getEntity(), JwksKeys.class);
+		assertEquals("Incorrect number of keys", 2, keys.getKeys().size());
+	}
+
+	@Data
+	public static class JwksKeys {
+		private List<RsaJwksKey> keys;
+	}
+
+	@Data
+	public static class RsaJwksKey {
+		
+		// As per RFC 7517 for RSA public key
+		private String kty;
+		private String n;
+		private String e;
+		
+		// Additional to allow rotating keys
+		private Long nbf; // epoch start time in seconds
+		private Long exp; // epoch expire time in seconds
 	}
 
 }

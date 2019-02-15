@@ -8,9 +8,9 @@
 		<artifactId>tutorials</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>JwtHttpServer</artifactId>
-	<name>JWT Tutorial</name>
-	<description>Tutorial of implementing JWT</description>
+	<artifactId>JwtAuthorityHttpServer</artifactId>
+	<name>JWT Separate Authority Server Tutorial (Authority Server)</name>
+	<description>Tutorial of implementing JWT with separate Authority Server</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>

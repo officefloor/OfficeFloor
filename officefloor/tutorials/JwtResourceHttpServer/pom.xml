@@ -8,9 +8,9 @@
 		<artifactId>tutorials</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>JwtHttpServer</artifactId>
-	<name>JWT Tutorial</name>
-	<description>Tutorial of implementing JWT</description>
+	<artifactId>JwtResourceHttpServer</artifactId>
+	<name>JWT Separate Authority Server Tutorial (Resource Server)</name>
+	<description>Tutorial of implementing JWT with separate Authority Server</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<basedir>${basedir}</basedir>
@@ -25,16 +25,10 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>officejson_jackson</artifactId>
 		</dependency>
-		<!-- START SNIPPET: JWT -->
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>officejwt</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>officejwt_authority</artifactId>
-		</dependency>
-		<!-- END SNIPPET: JWT -->
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
@@ -44,6 +38,11 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<profiles>

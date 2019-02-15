@@ -63,6 +63,86 @@ public class JwtHttpSecuritySource<C> extends
 		HttpSecurity<HttpAuthentication<Void>, JwtHttpAccessControl<C>, Void, None, JwtHttpSecuritySource.Flows> {
 
 	/**
+	 * Allows overriding the creation of {@link JwtValidateKey} instances.
+	 */
+	@FunctionalInterface
+	public static interface JwtValidateKeysFactory {
+
+		/**
+		 * Obtains the {@link JwtValidateKey} instances to use.
+		 * 
+		 * @return {@link JwtValidateKey} instances to use.
+		 * @throws Exception If fails to create the {@link JwtValidateKey} instances.
+		 */
+		JwtValidateKey[] createJwtValidateKeys() throws Exception;
+	}
+
+	/**
+	 * {@link Runnable} within the context of the {@link JwtValidateKeysFactory}
+	 */
+	@FunctionalInterface
+	public static interface ContextRunnable<T extends Throwable> {
+
+		/**
+		 * Logic to run within the context of the {@link JwtValidateKeysFactory}.
+		 */
+		void run() throws T;
+	}
+
+	/**
+	 * <p>
+	 * Runs the {@link ContextRunnable} using the {@link JwtValidateKeysFactory}.
+	 * <p>
+	 * This is typically used for testing to allow overriding the
+	 * {@link JwtValidateKey} instances being used.
+	 * 
+	 * @param validateKeysFactory {@link JwtValidateKeysFactory}. May be
+	 *                            <code>null</code> to not override.
+	 * @param runnable            {@link ContextRunnable}.
+	 * @throws T If failure in {@link ContextRunnable}.
+	 */
+	public static <T extends Throwable> void runWithKeys(JwtValidateKeysFactory validateKeysFactory,
+			ContextRunnable<T> runnable) throws T {
+
+		// Initialise the overrides
+		threadLocalKeysOverride.set(new JwtKeysFactoryOverride(validateKeysFactory));
+		try {
+
+			// Undertake the logic
+			runnable.run();
+
+		} finally {
+			// Clear the keys override
+			threadLocalKeysOverride.remove();
+		}
+	}
+
+	/**
+	 * {@link ThreadLocal} for the {@link JwtKeysFactoryOverride}.
+	 */
+	private static ThreadLocal<JwtKeysFactoryOverride> threadLocalKeysOverride = new ThreadLocal<>();
+
+	/**
+	 * Possible override for creation of {@link JwtValidateKey} instances.
+	 */
+	private static class JwtKeysFactoryOverride {
+
+		/**
+		 * {@link JwtValidateKeysFactory}.
+		 */
+		private final JwtValidateKeysFactory validateKeysFactory;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param validateKeysFactory {@link JwtValidateKeysFactory}.
+		 */
+		private JwtKeysFactoryOverride(JwtValidateKeysFactory validateKeysFactory) {
+			this.validateKeysFactory = validateKeysFactory;
+		}
+	}
+
+	/**
 	 * Authentication scheme Bearer.
 	 */
 	public static final String AUTHENTICATION_SCHEME_BEARER = "Bearer";
@@ -168,10 +248,14 @@ public class JwtHttpSecuritySource<C> extends
 	private long startupTimeout;
 
 	/**
-	 * {@link StatePoller} to keep the {@link JwtDecoder} up to date with
-	 * appropriate keys.
+	 * {@link StatePoller} to keep the {@link JwtValidateKey} instances up to date.
 	 */
-	private StatePoller<JwtDecoder, None> jwtDecoder;
+	private StatePoller<JwtValidateKey[], None> jwtValidateKeys;
+
+	/**
+	 * {@link JwtKeysFactoryOverride}. Will be <code>null</code> if not overriding.
+	 */
+	private JwtKeysFactoryOverride keysOverride;
 
 	/*
 	 * ==================== HttpSecuritySource ============================
@@ -203,6 +287,13 @@ public class JwtHttpSecuritySource<C> extends
 			throw new IOException("Unable to deserialise " + this.claimsClass.getName() + " to load JWT claims");
 		}
 
+		// Load the possible JWT keys override
+		this.keysOverride = threadLocalKeysOverride.get();
+		if ((this.keysOverride == null) || (this.keysOverride.validateKeysFactory == null)) {
+			// Only override if have key factory
+			this.keysOverride = null;
+		}
+
 		// Load the meta-data
 		context.setAuthenticationClass((Class) HttpAuthentication.class);
 		context.setAccessControlClass((Class) JwtHttpAccessControl.class);
@@ -231,11 +322,16 @@ public class JwtHttpSecuritySource<C> extends
 	@Override
 	public void start(HttpSecurityExecuteContext<Flows> context) throws Exception {
 
+		// Only poll if not overriding JWT keys
+		if (this.keysOverride != null) {
+			return; // override so do not poll for keys
+		}
+
 		// Create poller for JWT decoder
-		this.jwtDecoder = StatePoller.builder(JwtDecoder.class, (pollContext, callback) -> {
-			context.registerStartupProcess(Flows.RETRIEVE_KEYS, new JwtDecodeCollectorImpl(pollContext), callback);
+		this.jwtValidateKeys = StatePoller.builder(JwtValidateKey[].class, (pollContext, callback) -> {
+			context.registerStartupProcess(Flows.RETRIEVE_KEYS, new JwtValidateKeyCollectorImpl(pollContext), callback);
 		}, (delay, pollContext, callback) -> {
-			context.invokeProcess(Flows.RETRIEVE_KEYS, new JwtDecodeCollectorImpl(pollContext), delay, callback);
+			context.invokeProcess(Flows.RETRIEVE_KEYS, new JwtValidateKeyCollectorImpl(pollContext), delay, callback);
 		}).identifier("JWT decode keys").build();
 	}
 
@@ -270,14 +366,26 @@ public class JwtHttpSecuritySource<C> extends
 	public void authenticate(Void credentials, AuthenticateContext<JwtHttpAccessControl<C>, None, Flows> context)
 			throws HttpException {
 
-		// Obtain the JWT decoder (allow time to initialise keys)
-		JwtDecoder decoder;
-		try {
-			decoder = this.jwtDecoder.getState(this.startupTimeout, TimeUnit.MILLISECONDS);
-		} catch (TimeoutException ex) {
-			context.accessControlChange(null, new HttpException(HttpStatus.SERVICE_UNAVAILABLE,
-					new TimeoutException("Server timed out loading JWT keys")));
-			return; // must obtain decoder
+		// Obtain the JWT validate keys (allowing time to intialise)
+		JwtValidateKey[] validateKeys;
+		if (this.keysOverride != null) {
+			// Override the keys
+			try {
+				validateKeys = this.keysOverride.validateKeysFactory.createJwtValidateKeys();
+			} catch (Exception ex) {
+				context.accessControlChange(null, new HttpException(HttpStatus.SERVICE_UNAVAILABLE, ex));
+				return; // must obtain validate keys
+			}
+
+		} else {
+			// Use polled keys
+			try {
+				validateKeys = this.jwtValidateKeys.getState(this.startupTimeout, TimeUnit.MILLISECONDS);
+			} catch (TimeoutException ex) {
+				context.accessControlChange(null, new HttpException(HttpStatus.SERVICE_UNAVAILABLE,
+						new TimeoutException("Server timed out loading JWT keys")));
+				return; // must obtain validate keys
+			}
 		}
 
 		// Obtain the scheme
@@ -366,7 +474,7 @@ public class JwtHttpSecuritySource<C> extends
 
 		// Loop over decode keys to determine if JWT valid
 		boolean isValid = false;
-		NEXT_DECODE_KEY: for (JwtValidateKey decodeKey : decoder.getJwtDecodeKeys()) {
+		NEXT_DECODE_KEY: for (JwtValidateKey decodeKey : validateKeys) {
 
 			// Ensure key is still within window (taking into account clock skew)
 			if ((decodeKey.getStartTime() > (currentTime + this.clockSkew))
@@ -457,50 +565,22 @@ public class JwtHttpSecuritySource<C> extends
 	}
 
 	/**
-	 * JWT decoder.
-	 */
-	private static class JwtDecoder {
-
-		/**
-		 * {@link JwtValidateKey} instances.
-		 */
-		private final JwtValidateKey[] decodeKeys;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param decodeKeys {@link JwtValidateKey} instances.
-		 */
-		private JwtDecoder(JwtValidateKey[] decodeKeys) {
-			this.decodeKeys = decodeKeys;
-		}
-
-		/**
-		 * Obtains the {@link JwtValidateKey} instances being used.
-		 * 
-		 * @return {@link JwtValidateKey} instances being used.
-		 */
-		private JwtValidateKey[] getJwtDecodeKeys() {
-			return this.decodeKeys;
-		}
-	}
-
-	/**
 	 * {@link JwtValidateKeyCollector} implementation.
 	 */
-	private class JwtDecodeCollectorImpl implements JwtValidateKeyCollector {
+	private class JwtValidateKeyCollectorImpl implements JwtValidateKeyCollector {
 
 		/**
-		 * {@link StatePollContext} for the {@link JwtDecoder}.
+		 * {@link StatePollContext} for the {@link JwtValidateKey} instances.
 		 */
-		private final StatePollContext<JwtDecoder> context;
+		private final StatePollContext<JwtValidateKey[]> context;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param context {@link StatePollContext} for the {@link JwtDecoder}.
+		 * @param context {@link StatePollContext} for the {@link JwtValidateKey}
+		 *                instances.
 		 */
-		private JwtDecodeCollectorImpl(StatePollContext<JwtDecoder> context) {
+		private JwtValidateKeyCollectorImpl(StatePollContext<JwtValidateKey[]> context) {
 			this.context = context;
 		}
 
@@ -510,8 +590,7 @@ public class JwtHttpSecuritySource<C> extends
 
 		@Override
 		public JwtValidateKey[] getCurrentKeys() {
-			JwtDecoder decoder = JwtHttpSecuritySource.this.jwtDecoder.getStateNow();
-			return decoder != null ? decoder.getJwtDecodeKeys() : null;
+			return JwtHttpSecuritySource.this.jwtValidateKeys.getStateNow();
 		}
 
 		@Override
@@ -532,7 +611,7 @@ public class JwtHttpSecuritySource<C> extends
 
 			// Load the JWT decode keys
 			JwtValidateKey[] validKeys = copy.toArray(new JwtValidateKey[copy.size()]);
-			this.context.setNextState(new JwtDecoder(validKeys), -1, null);
+			this.context.setNextState(validKeys, -1, null);
 		}
 
 		@Override

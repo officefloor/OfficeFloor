@@ -1,47 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
 	<body>
-		<menu name="Tutorials">
-			<item name="My First WoOF app"
-				href="../maven/woof-archetype/index.html" />
-			<item name="Wireframe Prototyping"
-				href="./PrototypeHttpServer/index.html" />
-			<item name="Dynamic web page"
-				href="./DynamicHttpServer/index.html" />
-			<item name="Interactive web page"
-				href="./InteractiveHttpServer/index.html" />
-			<item name="Navigate between pages"
-				href="./NavigateHttpServer/index.html" />
-			<item name="Session state" href="./SessionHttpServer/index.html" />
-			<item name="Exception handling"
-				href="./ExceptionHttpServer/index.html" />
-			<item name="Generating HTML" href="./RawHttpServer/index.html" />
-			<item name="AJAX" href="./JavaScriptApp/index.html" />
-			<item name="Sectioning" href="./SectionHttpServer/index.html" />
-			<item name="Template Inheritance"
-				href="./InheritHttpServer/index.html" />
-			<item name="Secure Page"
-				href="./SecurePageHttpServer/index.html" />
-			<item name="Secure Link"
-				href="./SecureLinkHttpServer/index.html" />
-			<item name="Authentication"
-				href="./AuthenticationHttpServer/index.html" />
-			<item name="AJAX / JSON" href="./JavaScriptApp/index.html" />
-			<item name="DI (POJO)" href="./DiPojoHttpServer/index.html" />
-			<item name="DI (Managed Object)"
-				href="./DatabaseHttpServer/index.html" />
-			<item name="Thread Injection" href="./TeamHttpServer/index.html" />
-			<item name="REST" href="./RestHttpServer/index.html" />
-			<item name="Thread Affinity"
-				href="./ThreadAffinityHttpServer/index.html" />
-			<item name="Spring" href="./SpringHttpServer/index.html" />
-			<item name="Governance (Transaction)"
-				href="./TransactionHttpServer/index.html" />
-			<item name="Test" href="./TestHttpServer/index.html" />
-			<item name="Deploy" href="./DeployHttpServer/index.html" />
-			<item name="Servlet / PaaS"
-				href="./HttpServletHttpServer/index.html" />
-		</menu>
 		<menu ref="parent" />
 	</body>
 </project>

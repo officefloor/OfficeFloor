@@ -10,7 +10,12 @@ OfficeFloor Tutorials
   
   The tutorials are ordered so that each builds on the knowledge of the previous tutorials.  It is therefore best to work though them in order.
 
-  The following tutorials cover developing OfficeFloor (WoOF) web applications.  The acronym <WoOF> standards for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to work as a high performance Web Application Server.  As you become more familiar with OfficeFloor, you will realise OfficeFloor is a very light weight and versatile plug-in application framework.
+
+*Introduction
+
+  The following tutorials demonstrate the basic structures available within OfficeFloor.  They use old style dynamic web pages to keep the focus on an introduction to OfficeFloor (and WoOF).
+
+  The acronym <WoOF> standards for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to work as a high performance Web Application Server.  As you become more familiar with OfficeFloor, you will realise OfficeFloor is a very light weight and versatile plug-in application framework.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
@@ -32,8 +37,6 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./RawHttpServer/index.html}Generating HTML}}              | Render generated HTML.                                     | @UnescapedHtml
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./JavaScriptApp/index.html}AJAX}}                         | Servicing AJAX requests from JavaScript.                   | @HttpObject , ObjectResponse , @NotRenderTemplateAfter
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectional rendering content.                               | \<!-- \{section\} --\>
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./InheritHttpServer/index.html}Template Inheritance}}     | Inheriting sectioned content.                              | \<!-- \{:override\} --\> , \<!-- \{!\} --\> 
@@ -50,9 +53,20 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TeamHttpServer/index.html}Thread Injection}}            | Thread injection to performance tune the application.      | Thread Injection
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./RestHttpServer/index.html}REST}}                        | REST                                                       | REST , @PathParameter , HttpException
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ThreadAffinityHttpServer/index.html}Thread Affinity}}   | Thread Affinity                                            | Executive
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+*REST Server for Single Page Applications in the Cloud
+
+  Now that there is an understanding of the OfficeFloor basics, the following tutorials look at more contemporary development of single page applications. 
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./JavaScriptApp/index.html}AJAX}}                         | Servicing AJAX requests from JavaScript.                   | @HttpObject , ObjectResponse , @NotRenderTemplateAfter
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./RestHttpServer/index.html}REST}}                        | REST                                                       | REST , @PathParameter , HttpException
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SpringHttpServer/index.html}Spring}}                    | Wiring in Spring beans                                     | Supplier
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
