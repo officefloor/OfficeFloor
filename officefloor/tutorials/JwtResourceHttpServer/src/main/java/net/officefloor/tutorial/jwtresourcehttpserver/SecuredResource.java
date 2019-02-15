@@ -10,11 +10,13 @@ import net.officefloor.web.security.HttpAccess;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class SecuredResource {
 
 	@HttpAccess(ifRole = "tutorial")
-	public void secure(ServerHttpConnection connection) throws IOException {
-		connection.getResponse().getEntityWriter().write("Hello JWT secured World");
+	public void secure(Claims claims, ServerHttpConnection connection) throws IOException {
+		connection.getResponse().getEntityWriter().write("Hello " + claims.getId());
 	}
 
 }
+// END SNIPPET: tutorial

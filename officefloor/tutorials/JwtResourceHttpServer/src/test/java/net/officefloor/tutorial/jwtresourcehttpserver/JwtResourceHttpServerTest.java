@@ -14,8 +14,10 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class JwtResourceHttpServerTest {
 
+	// Sets up server to accept created JWT access tokens for testing
 	public MockJwtAccessTokenRule authority = new MockJwtAccessTokenRule();
 
 	public MockWoofServerRule server = new MockWoofServerRule();
@@ -32,13 +34,14 @@ public class JwtResourceHttpServerTest {
 	@Test
 	public void accessSecureResource() throws Exception {
 
-		// Create access token
+		// Create mock access token
 		String accessToken = this.authority.createAccessToken(new Claims("daniel", new String[] { "tutorial" }));
 
 		// Access the secured resource
 		MockHttpResponse response = this.server.send(
 				MockHttpServer.mockRequest("/resource").secure(true).header("authorization", "Bearer " + accessToken));
-		response.assertResponse(200, "Hello JWT secured World");
+		response.assertResponse(200, "Hello daniel");
 	}
 
 }
+// END SNIPPET: tutorial

@@ -1,6 +1,6 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/resource" secure="true" x="103" y="213">
+    <http-continuation path="/resource" secure="true" x="69" y="70">
       <section name="Resource" input="secure"/>
     </http-continuation>
   </http-continuations>
@@ -14,7 +14,7 @@
       <input name="INVALID_JWT" parameter-type=""/>
       <input name="NO_JWT" parameter-type=""/>
     </section>
-    <section name="Resource" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.jwtresourcehttpserver.SecuredResource" x="297" y="193">
+    <section name="Resource" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.jwtresourcehttpserver.SecuredResource" x="267" y="50">
       <input name="secure" parameter-type=""/>
     </section>
     <section name="RetrieveKeys" source="net.officefloor.web.jwt.jwks.JwksSectionSource" location="" x="798" y="188">

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Data
 @RequiredArgsConstructor
 @AllArgsConstructor
@@ -16,3 +17,4 @@ public class Claims {
 	private String id;
 	private String[] roles;
 }
+// END SNIPPET: tutorial

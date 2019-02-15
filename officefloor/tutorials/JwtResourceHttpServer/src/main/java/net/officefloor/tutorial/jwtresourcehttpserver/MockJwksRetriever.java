@@ -23,6 +23,7 @@ import net.officefloor.web.jwt.jwks.JwksRetriever;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class MockJwksRetriever implements JwksRetriever {
 
 	@Override
@@ -59,3 +60,4 @@ public class MockJwksRetriever implements JwksRetriever {
 	}
 
 }
+// END SNIPPET: tutorial
