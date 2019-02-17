@@ -25,6 +25,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class JwtAuthorityHttpServerTest {
 
 	private static ObjectMapper mapper = new ObjectMapper();
@@ -92,15 +93,16 @@ public class JwtAuthorityHttpServerTest {
 
 	@Data
 	public static class RsaJwksKey {
-		
+
 		// As per RFC 7517 for RSA public key
 		private String kty;
 		private String n;
 		private String e;
-		
+
 		// Additional to allow rotating keys
 		private Long nbf; // epoch start time in seconds
 		private Long exp; // epoch expire time in seconds
 	}
 
 }
+// END SNIPPET: tutorial

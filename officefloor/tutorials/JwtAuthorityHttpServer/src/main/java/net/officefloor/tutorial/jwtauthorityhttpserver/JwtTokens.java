@@ -18,6 +18,7 @@ import net.officefloor.web.jwt.authority.JwtAuthority;
  */
 public class JwtTokens {
 
+	// START SNIPPET: login
 	@Data
 	@HttpObject
 	@RequiredArgsConstructor
@@ -46,7 +47,7 @@ public class JwtTokens {
 
 		// Create the identity and claims
 		Identity identity = new Identity(credentials.username);
-		Claims claims = this.createClaims(credentials.username);
+		Claims claims = createClaims(credentials.username);
 
 		// Create the refresh and access tokens
 		String refreshToken = authority.createRefreshToken(identity);
@@ -56,6 +57,22 @@ public class JwtTokens {
 		response.send(new Tokens(refreshToken, accessToken));
 	}
 
+	private static Claims createClaims(String username) {
+
+		// Mock claims
+		// (claim information should be pulled from user store)
+		String[] roles = new String[] { "tutorial" };
+
+		// Provide random value (so access tokens are different)
+		// (not necessary but due to speed of tests, gets same access token)
+		int randomValue = ThreadLocalRandom.current().nextInt();
+
+		// Return the claims
+		return new Claims(username, randomValue, roles);
+	}
+	// END SNIPPET: login
+
+	// START SNIPPET: refresh
 	@Data
 	@HttpObject
 	@AllArgsConstructor
@@ -70,25 +87,12 @@ public class JwtTokens {
 		Identity identity = authority.decodeRefreshToken(request.token);
 
 		// Create a new access token
-		Claims claims = this.createClaims(identity.getId());
+		Claims claims = createClaims(identity.getId());
 		String accessToken = authority.createAccessToken(claims);
 
 		// Send refreshed access token
 		response.send(new Token(accessToken));
 	}
-
-	private Claims createClaims(String username) {
-
-		// Mock claims
-		// (claim information should be pulled from user store)
-		String[] roles = new String[] { "tutorial" };
-		
-		// Provide random value (so access tokens are different)
-		// (not necessary but due to speed of tests, gets same access token)
-		int randomValue = ThreadLocalRandom.current().nextInt();
-
-		// Return the claims
-		return new Claims(username, randomValue, roles);
-	}
+	// END SNIPPET: refresh
 
 }

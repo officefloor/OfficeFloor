@@ -26,7 +26,13 @@ WoOF configuration
   
 [./images/JwtResourceHttpServer-configuration.png] JwtResourceHttpServer screen shot.
 
-  Many of the handlers for JWT are already available with default implementations.  These just need to be configured in as per this tutorial.
+  Many of the handlers for JWT are already available with default implementations:
+  
+   * {{{/apidocs/net/officefloor/web/jwt/DefaultJwtChallengeSectionSource.html}DefaultJwtChallengeSectionSource}} : for default JWT challenge handling
+
+   * {{{/apidocs/net/officefloor/web/jwt/jwks/JwksSectionSource.html}JwksSectionSource}} : see JWKS below
+  
+  These just need to be configured in as per this tutorial.
   
   The claims is application specific so must be coded by the application.  The tutorial claims is:
 
