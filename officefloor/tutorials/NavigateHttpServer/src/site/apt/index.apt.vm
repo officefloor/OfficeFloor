@@ -78,5 +78,5 @@ Unit Test
 
 Next
 
-  The {{{../SessionHttpServer/index.html}next tutorial}} looks at storing state between requests within a HTTP session.
+  The {{{../ExceptionHttpServer/index.html}next tutorial}} looks at exception handling.
 

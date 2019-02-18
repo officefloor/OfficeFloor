@@ -34,4 +34,4 @@ Testing
 
 Next
 
-  The {{{../ThreadAffinityHttpServer/index.html}next tutorial}} covers using {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}} for thread affinity.
+  The {{{../JwtResourceHttpServer/index.html}next tutorial}} covers JWT security.

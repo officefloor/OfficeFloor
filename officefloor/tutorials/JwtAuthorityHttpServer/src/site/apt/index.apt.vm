@@ -69,4 +69,4 @@ Testing
 
 Next
 
-  The {{{../ThreadAffinityHttpServer/index.html}next tutorial}} covers using {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}} for thread affinity.
+  The {{{../JwtHttpServer/index.html}next tutorial}} covers combining JWT security and JWT authority server together for smaller applications.

@@ -83,4 +83,4 @@ Testing
 
 Next
 
-  The {{{../ThreadAffinityHttpServer/index.html}next tutorial}} covers using {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}} for thread affinity.
+  The {{{../StaticContentHttpServer/index.html}next tutorial}} covers serving static (files) content for single page applications.

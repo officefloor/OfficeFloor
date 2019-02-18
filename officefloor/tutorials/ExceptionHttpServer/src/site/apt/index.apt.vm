@@ -95,5 +95,4 @@ Unit Test
 
 Next
 
-  The {{{../RawHttpServer/index.html}next tutorial}} looks at rendering generated HTML.
-
+  The {{{../DiPojoHttpServer/index.html}next tutorial}} covers dependency injection.

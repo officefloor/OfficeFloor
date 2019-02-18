@@ -59,4 +59,4 @@ Unit Test
 
 Next
 
-  The {{{../DatabaseHttpServer/index.html}next tutorial}} covers injecting managed objects.
+  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.
