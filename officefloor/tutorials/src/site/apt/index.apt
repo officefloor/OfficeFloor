@@ -42,7 +42,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./DeployHttpServer/index.html}Deploy}}                    | Deploying the application                                  | Deploy , Docker
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./HttpServletHttpServer/index.html}Servlet Container}}    | Deploying to Servlet container (PaaS cloud)                | Servlet, PaaS
+| {{{./HttpServletHttpServer/index.html}Servlet / PaaS / Cloud}} | Deploying to Servlet container (PaaS / cloud)            | Servlet, PaaS / Cloud
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
