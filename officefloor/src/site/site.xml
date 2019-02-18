@@ -32,7 +32,7 @@
 		]]></head>
 		<breadcrumbs>
 			<item name="OfficeFloor"
-				href="http://officefloor.net/index.html" />
+				href="./index.html" />
 		</breadcrumbs>
 		<menu name="Getting Started">
 			<item name="About" href="./about.html" />
