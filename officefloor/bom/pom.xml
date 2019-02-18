@@ -84,7 +84,7 @@
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.25</slf4j-version>
-		<spring-version>2.1.2.RELEASE</spring-version>
+		<spring-version>2.1.3.RELEASE</spring-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 	</properties>
 	<dependencyManagement>
