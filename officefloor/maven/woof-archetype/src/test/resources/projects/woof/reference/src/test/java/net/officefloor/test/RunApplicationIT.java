@@ -1,12 +1,14 @@
 package net.officefloor.test;
 
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.net.URL;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.Assert;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
+import org.junit.Rule;
 import org.junit.Test;
+
+import net.officefloor.server.http.HttpClientRule;
 
 /**
  * <p>
@@ -16,19 +18,22 @@ import org.junit.Test;
  */
 public class RunApplicationIT {
 
+	@Rule
+	public HttpClientRule httpClient = new HttpClientRule();
+
 	@Test
 	public void ensureApplicationAvailable() throws Exception {
 
 		// Connect to application and obtain page
-		URL url = new URL("http://localhost:7878/form");
-		Reader response = new InputStreamReader(url.openStream());
-		StringWriter content = new StringWriter();
-		for (int character = response.read(); character != -1; character = response.read()) {
-			content.write(character);
-		}
+		HttpGet get = new HttpGet("http://localhost:7878/hi/Integration");
+		get.addHeader("accept", "application/json");
+		HttpResponse response = this.httpClient.execute(get);
 
-		// Ensure correct page
-		Assert.assertTrue("Incorrect page", content.toString().contains("<title>Page with form submission</title>"));
+		// Ensure correct response
+		assertEquals("Incorrect status", 200, response.getStatusLine().getStatusCode());
+		assertEquals("Incorrect content type", "application/json", response.getFirstHeader("content-type").getValue());
+		assertEquals("Incorrect response", "{\"message\":\"Hello Integration\"}",
+				EntityUtils.toString(response.getEntity()));
 	}
 
 }

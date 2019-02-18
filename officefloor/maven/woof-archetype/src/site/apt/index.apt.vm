@@ -24,7 +24,7 @@ Setup
 
 Creating the WoOF project
 
-  The create a WoOF project use the Maven WoOF archetype.  Run the following within an empty directory:
+  To create a WoOF project use the Maven WoOF archetype.  Run the following within an empty directory:
 
 +-----------------------------------------+
     mvn archetype:generate -DarchetypeGroupId=${projectGroupId} -DarchetypeArtifactId=${projectArtifactId}
@@ -49,16 +49,22 @@ Running the WoOF project from Maven
   Once the project is built, run the following within the project directory to start the application:
 
 +-----------------------------------------+
-    mvn officefloor:open
+    mvn net.officefloor.maven:officefloor-maven-plugin:${projectVersion}:open
 +-----------------------------------------+
 
-  The following may be needed to add to your maven settings.xml file to default the group:
+  Or add the following to maven <settings.xml>:
   
 +-----------------------------------------+
   <pluginGroups>
     <pluginGroup>net.officefloor.maven</pluginGroup>
   </pluginGroups>
-+-----------------------------------------+  
++-----------------------------------------+
+
+  to run the simpler command:
+
++-----------------------------------------+
+    mvn officefloor:open
++-----------------------------------------+
 
   The application will now be available at <<<http://localhost:7878/static>>>  and look as follows:
   
@@ -86,7 +92,7 @@ WoOF graphical configuration
 
 [./images/woof-archetype-configuration.png] WoOF archetype project configuration.
 
-  The very simple configuration shows two web pages with navigation back and forth between the pages.
+  The very simple configuration shows two web pages with navigation back and forth between the pages.  This is a simple application.  See the {{{../../tutorials/index.html}other tutorials}} for other features (such as REST applications).
   
     * <<<static>>> : example static HTML page (useful for static content and wire framing a prototype web application)
     

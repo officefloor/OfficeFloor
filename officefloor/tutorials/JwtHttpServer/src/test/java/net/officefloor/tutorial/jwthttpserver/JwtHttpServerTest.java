@@ -21,6 +21,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class JwtHttpServerTest {
 
 	private static ObjectMapper mapper = new ObjectMapper();
@@ -82,3 +83,4 @@ public class JwtHttpServerTest {
 	}
 
 }
+// END SNIPPET: tutorial

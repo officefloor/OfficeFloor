@@ -7,20 +7,91 @@
 OfficeFloor Tutorials
   
   Once you have installed the {{{../install.html}OfficeFloor Eclipse plug-ins}} you have the tools ready for the below tutorials.
+    
+  The tutorials refer to <WoOF>, which stands for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to act as a high performance Web Application Server.  Due to "true" inversion of control, you will see that the prefabricated plug-ins are much more re-usable than simple Dependency Injection framework objects.
   
-  The tutorials are ordered so that each builds on the knowledge of the previous tutorials.  It is therefore best to work though them in order.
-
 
 *Introduction
 
-  The following tutorials demonstrate the basic structures available within OfficeFloor.  They use old style dynamic web pages to keep the focus on an introduction to OfficeFloor (and WoOF).
-
-  The acronym <WoOF> standards for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to work as a high performance Web Application Server.  As you become more familiar with OfficeFloor, you will realise OfficeFloor is a very light weight and versatile plug-in application framework.
+  The following tutorials demonstrate the basic structures available within OfficeFloor.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{../maven/woof-archetype/index.html}My first WoOF application}} | Walks through the simple steps to create and run an OfficeFloor (WoOF) web application. | {{{http://maven.apache.org}Maven}} and {{{http://eclipse.org}Eclipse}} plug-ins |
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./NavigateHttpServer/index.html}Configuring flows}}       | Controlling execution flow (avoiding need for refactoring). | @NextFunction , @FlowInterface\
+|                                                              |                                                            | (Continuation Injection)
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./ExceptionHttpServer/index.html}Exception handling}}     | Handling exceptions.                                       | @Parameter
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./DiPojoHttpServer/index.html}Dependency Injection (POJO)}} | Dependency injecting a plain old java object (POJO).     | Dependency Injection
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+*Test and Deploy
+
+  Many frameworks focus on features and how wonderful they are in production.  While this is important, much of the application costs can be in development and maintaining the application in production.
+  
+  As production is typically the least complicated environment (just needs to handle scale), OfficeFloor ensures the road to production is also easy for development teams.  The following tutorials show the ease of testing an application and getting it deployed.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit / System / Integration testing
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./DeployHttpServer/index.html}Deploy}}                    | Deploying the application                                  | Deploy , Docker
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./HttpServletHttpServer/index.html}Servlet Container}}    | Deploying to Servlet container (PaaS cloud)                | Servlet, PaaS
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+*REST server for single page applications in the cloud
+
+  Now that there is an understanding of the OfficeFloor basics, the following tutorials look at supporting single page applications. 
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./JavaScriptApp/index.html}AJAX}}                         | Servicing AJAX requests from JavaScript.                   | @HttpObject , ObjectResponse , @NotRenderTemplateAfter
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./RestHttpServer/index.html}REST}}                        | REST                                                       | REST , @PathParameter , HttpException
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./StaticContentHttpServer/index.html}Static content}}     | Serving the single page files                              | /PUBLIC
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./JwtResourceHttpServer/index.html}JWT}}                  | JWT Security                                               | JWT Security
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./JwtAuthorityHttpServer/index.html}JWT Authority}}       | JWT Authority                                              | JWT Authority
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./JwtHttpServer/index.html}Small JWT Application}}        | Single server with JWT Security and JWT Authority          | Multiple Security
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+*More in depth concepts
+
+  Once your single page application is communicating to your OfficeFloor application, the following tutorials focus on building out functionality of your application.  This includes supporting your application's non-functional requirements such as load and performance.
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./SpringHttpServer/index.html}Spring}}                    | Wiring in Spring beans (ease of re-using code from dependency injection only frameworks) | Supplier
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./TransactionHttpServer/index.html}Transaction}}          | Managing transactions with Governance.                     | Governance
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./DatabaseHttpServer/index.html}Dependency Injection (Managed Object)}} | Dependency injecting a customised managed object. | ManagedObjectSource
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./TeamHttpServer/index.html}Thread Injection}}            | Thread injection to performance tune the application.      | Thread Injection
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./ThreadAffinityHttpServer/index.html}Thread Affinity}}   | Thread Affinity                                            | Executive
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+
+
+*Dynamic web page for prototyping and simpler applications
+
+  While richer applications are expected, sometimes you just need something up and running.  The following tutorials demonstrate the ease of getting dynamic web pages running with OfficeFloor. 
+
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+|| Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./PrototypeHttpServer/index.html}Wireframe prototyping}}  | Build working web prototypes and then later extend into a working web application.  | #\{link\}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -28,12 +99,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./InteractiveHttpServer/index.html}Interactive web page}} | Handling of requests to provide interactive pages.         | #\{link\} , @HttpParameters
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./NavigateHttpServer/index.html}Dynamic navigation between pages}}  | Controlling the navigation between pages.        | @NextFunction , @FlowInterface\
-|                                                              |                                                            | (Continuation Injection)
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SessionHttpServer/index.html}Session state}}            | Storing state between requests within the HTTP session.    | @HttpSessionStateful
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./ExceptionHttpServer/index.html}Exception handling}}     | Handling exceptions.                                       | @Parameter
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./RawHttpServer/index.html}Generating HTML}}              | Render generated HTML.                                     | @UnescapedHtml
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -47,35 +113,3 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./AuthenticationHttpServer/index.html}Authentication}}    | Easy means to provide authentication                       | Authentication
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./DiPojoHttpServer/index.html}Dependency Injection (POJO)}} | Dependency injecting a plain old java object (POJO).     | Dependency Injection
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./DatabaseHttpServer/index.html}Dependency Injection (Managed Object)}} | Dependency injecting a customised managed object. | ManagedObjectSource
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./TeamHttpServer/index.html}Thread Injection}}            | Thread injection to performance tune the application.      | Thread Injection
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./ThreadAffinityHttpServer/index.html}Thread Affinity}}   | Thread Affinity                                            | Executive
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-
-
-*REST Server for Single Page Applications in the Cloud
-
-  Now that there is an understanding of the OfficeFloor basics, the following tutorials look at more contemporary development of single page applications. 
-
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-|| Tutorial                                                    || Description                                               || Covered
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./JavaScriptApp/index.html}AJAX}}                         | Servicing AJAX requests from JavaScript.                   | @HttpObject , ObjectResponse , @NotRenderTemplateAfter
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./RestHttpServer/index.html}REST}}                        | REST                                                       | REST , @PathParameter , HttpException
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./SpringHttpServer/index.html}Spring}}                    | Wiring in Spring beans                                     | Supplier
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./TransactionHttpServer/index.html}Transaction}}          | Managing transactions with Governance.                     | Governance
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./TestHttpServer/index.html}Test}}                        | Testing the application                                    | Unit / System / Integration testing
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./DeployHttpServer/index.html}Deploy}}                    | Deploying the application                                  | Deploy , Docker
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./HttpServletHttpServer/index.html}Servlet Container}}    | Deploying to Servlet container (PaaS cloud)                | Servlet, PaaS
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-

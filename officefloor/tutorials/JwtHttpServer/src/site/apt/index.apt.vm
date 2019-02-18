@@ -1,0 +1,36 @@
+                                               -----------------------
+                                     Combined JWT Resource and Authority Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<Combined JWT Resource and Authority Tutorial>>
+
+  For smaller applications, the JWT Resource (application) server and JWT Authority server may be combined.
+
+  This tutorial demonstrates combining them.
+   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/JwtHttpServer/${projectVersion}/JwtHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+WoOF configuration
+
+  The configuration contains both the {{{../JwtResourceHttpServer/index.html}JWT Resource}} and {{{../JwtAuthorityHttpServer/index.html}JWT Authority}}.  It is joined by the {{{/apidocs/net/officefloor/web/jwt/authority/combined/CombinedServerRetrieveValidateKeysSectionSource.html}CombinedServerRetrieveValidateKeysSectionSource}} that handles the JWT keys being loaded from the {{{/apidocs/net/officefloor/web/jwt/authority/JwtAuthority.html}JwtAuthority}}.
+
+[./images/JwtHttpServer-configuration.png] JwtHttpServer screen shot.
+
+  As the JWT Authority can be clustered, it allows the application to also be clustered.
+    
+
+Testing
+
+  The following shows the ease of using the application:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/jwthttpserver/JwtHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../ThreadAffinityHttpServer/index.html}next tutorial}} covers using {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}} for thread affinity.

@@ -2,8 +2,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.5.2" date="In SCM" description="Fixes for building OfficeFloor Subscription">
+		<release version="3.6.1" date="In SCM" description="Fixes for building OfficeFloor Subscription">
 			<action type="add" dev="sagenschneider">Fixes for building OfficeFloor Subscription</action>
+		</release>
+		<release version="3.6.0" date="In SCM" description="JWT">
+			<action type="add" dev="sagenschneider">JWT</action>
 		</release>
 		<release version="3.5.1" date="2018-12-24" description="Fixes for CssParser">
 			<action type="add" dev="sagenschneider">Fixes for CssParser</action>

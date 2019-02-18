@@ -1,8 +1,5 @@
 package ${package};
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -21,10 +18,9 @@ public class RunApplicationTest {
 	@Test
 	public void ensureApplicationAvailable() throws Exception {
 
-		// Ensure can obtain static page
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/static"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertTrue("Incorrect page", response.getEntity(null).contains("<title>Static Page</title>"));
+		// Ensure can obtain response
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/hi/UnitTest"));
+		response.assertResponse(200, "{\"message\":\"Hello UnitTest\"}", "content-type", "application/json");
 	}
 
 }
