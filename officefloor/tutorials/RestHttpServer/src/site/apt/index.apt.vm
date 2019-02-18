@@ -38,7 +38,7 @@ WoOF configuration
 
 Object parsing / responding
 
-  Similar to {{{../JavaScriptApp/index.html}AJAX with templates tutorial}} object parsing and responding is via the <<<@HttpObject>>>.  The below is the object used in this tutorial:
+  Similar to {{{../JavaScriptApp/index.html}AJAX with templates tutorial}} object parsing and responding is via the {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}} and {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse}}.  The below is the object used in this tutorial:
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/resthttpserver/Vehicle.java|ignoreDownloadError=false}
 
@@ -66,7 +66,7 @@ Path parameters
   
 %{snippet|id=get|file=${basedir}/src/main/java/net/officefloor/tutorial/resthttpserver/RestLogic.java|ignoreDownloadError=false}
 
-  The <<<@PathParameter>>> annotation on the parameter specifies the argument value to be the path parameter value.
+  The <<<@HttpPathParameter>>> annotation on the parameter specifies the argument value to be the path parameter value.
 
 
 Testing

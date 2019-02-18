@@ -31,9 +31,9 @@ OfficeFloor Tutorials
 
 *Test and Deploy
 
-  Many frameworks focus on features and how wonderful they are in production.  While this is important, much of the application costs can be in development and maintaining the application in production.
+  Many frameworks focus on features and how wonderful they are in production.  While this is important, much of the application costs can be in maintaining and testing changes to the application outside production.  Many frameworks forget this and this creates increased difficulty for developers and subsequently extra costs.
   
-  As production is typically the least complicated environment (just needs to handle scale), OfficeFloor ensures the road to production is also easy for development teams.  The following tutorials show the ease of testing an application and getting it deployed.
+  As production is typically the least complicated environment (just needs to handle scale), OfficeFloor ensures the road to production is also easy for development teams.  Therefore, in the importance of test driven development and continuous integration / DevOps cycles, the next tutorials focus on testing and deploying.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
@@ -46,14 +46,14 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
-*REST server for single page applications in the cloud
+*REST server for mobile / single page applications in the cloud
 
-  Now that there is an understanding of the OfficeFloor basics, the following tutorials look at supporting single page applications. 
+  Now that there is an understanding of the OfficeFloor basics, the following tutorials look at supporting mobile / single page applications.
+  
+  Tutorials focus on web based single page applications (for ease of running).  However, the REST functionality works just as effectively for mobile applications. 
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
-*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./JavaScriptApp/index.html}AJAX}}                         | Servicing AJAX requests from JavaScript.                   | @HttpObject , ObjectResponse , @NotRenderTemplateAfter
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./RestHttpServer/index.html}REST}}                        | REST                                                       | REST , @PathParameter , HttpException
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
@@ -63,13 +63,13 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./JwtAuthorityHttpServer/index.html}JWT Authority}}       | JWT Authority                                              | JWT Authority
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./JwtHttpServer/index.html}Small JWT Application}}        | Single server with JWT Security and JWT Authority          | Multiple Security
+| {{{./JwtHttpServer/index.html}Small JWT Application}}        | Single server with JWT Security and JWT Authority          | Combined JWT Security / Authority
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
 *More in depth concepts
 
-  Once your single page application is communicating to your OfficeFloor application, the following tutorials focus on building out functionality of your application.  This includes supporting your application's non-functional requirements such as load and performance.
+  The following tutorials focus on building out functionality of your application.  This includes supporting your application's non-functional requirements such as load and performance.
 
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
@@ -106,6 +106,8 @@ OfficeFloor Tutorials
 | {{{./SectionHttpServer/index.html}Sectioning content}}       | Sectional rendering content.                               | \<!-- \{section\} --\>
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./InheritHttpServer/index.html}Template Inheritance}}     | Inheriting sectioned content.                              | \<!-- \{:override\} --\> , \<!-- \{!\} --\> 
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./JavaScriptApp/index.html}AJAX}}                         | Servicing AJAX requests from JavaScript.                   | @HttpObject , ObjectResponse , @NotRenderTemplateAfter
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SecurePageHttpServer/index.html}Secure Page}}           | Shows the ease of securing a page                          | Template Secure
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

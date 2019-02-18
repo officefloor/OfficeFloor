@@ -52,9 +52,9 @@ Exception handling configuration
 
 @Parameter
   
-  The <<<@Parameter>>> annotation identifies a value to be passed from the previous task.
+  The <<<@Parameter>>> annotation identifies a value to be passed from the previous function.
   
-  The handling of an exception is actually via OfficeFloor functionality.  The exception is caught by WoOF and passed as a parameter to the configured task.  In this case, the <<<handleSqlException(...)>>> method.
+  The handling of an exception is actually via OfficeFloor functionality.  The exception is caught by WoOF and passed as a parameter to the configured function.  In this case, the <<<handleSqlException(...)>>> method.
   
   The <<<@Parameter>>> annotation can also be used to obtain the value from the following:
   

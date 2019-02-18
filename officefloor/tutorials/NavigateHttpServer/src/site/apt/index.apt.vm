@@ -1,12 +1,12 @@
                                                -----------------------
-                                             Dynamic Navigation Tutorial 
+                                             Configuring Flow Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                     					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Dynamic Navigation Tutorial>>
+  <<Configuring Flow Tutorial>>
 
-  This tutorial demonstrates controlling navigation back and forth between the following two pages:
+  This tutorial demonstrates configuring flows within a WoOF application.  To simplify demonostrating this feature, the following two web pages are used in this tutorial:
   
 [./images/NavigateHttpServer-one-screenshot.png] NavigateHttpServer one screen shot.
 
@@ -32,11 +32,11 @@ application.woof
 
 %{snippet|file=${basedir}/src/main/resources/TemplateOne.woof.html|ignoreDownloadError=false}
 
-  The link is handled by the following method.  The annotation indicates the next task within the flow.
+  The link is handled by the following method.  The annotation indicates the next function within the flow.
 
 %{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java|ignoreDownloadError=false}
 
-  As the next task name is not a name of another method (and not a template section name, see later tutorials) it becomes an output from the template.  From the configuration above the output is configured to navigate to the other template.
+  As the next function name is not a name of another method (and not a template section name) it becomes an output from the template.  From the configuration above the output is configured to navigate to the other template.
   
   This is useful should some action be required to be taken when the user clicks to navigate to the next page.
 
@@ -56,13 +56,13 @@ application.woof
   
    * a method on the template logic class
    
-   * a section of the template (see later tutorials)
+   * a section of the template
    
    * an external flow from the template.  This is then linked by the <<<application.woof>>> configuration (as is the case above)
    
-  This allows programmatically determining which is the next task.  It is possible to add further methods to the interface to provide alternate navigation paths.  Navigation only occurs if the method is invoked.  Please also be aware that navigation to the page happens after the method has completed.
+  This allows programmatically determining which is the next function.  It is possible to add further methods to the interface to provide alternate navigation paths.  Navigation only occurs if the method is invoked.  Please also be aware that navigation to the page happens after the method has completed.
   
-  Both <<<@NextFunction>>> and <<<@FlowInterface>>> may also be used in combination. <<<@NextFunction>>> will provide the default next task unless overridden by a method of a <<<@FlowInterface>>> being invoked.
+  Both <<<@NextFunction>>> and <<<@FlowInterface>>> may also be used in combination. <<<@NextFunction>>> will provide the default next function unless overridden by a method of a <<<@FlowInterface>>> being invoked.
 
   The above configuration has the external flow linked back to the first template.
 
