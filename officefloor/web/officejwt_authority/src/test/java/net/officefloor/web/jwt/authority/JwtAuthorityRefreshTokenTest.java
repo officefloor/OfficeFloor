@@ -180,8 +180,8 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 
 		// Ensure correct request time loaded
 		assertEquals("Incorrect request time for keys",
-				mockCurrentTime - JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD,
-				this.retrieveJwtRefreshKeysTime.getEpochSecond());
+				Long.valueOf(mockCurrentTime - JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD),
+				this.retrieveJwtRefreshKeysTime);
 
 		// Determine default overlap time
 		long overlapTime = JwtAuthorityManagedObjectSource.MINIMUM_REFRESH_KEY_OVERLAP_PERIODS

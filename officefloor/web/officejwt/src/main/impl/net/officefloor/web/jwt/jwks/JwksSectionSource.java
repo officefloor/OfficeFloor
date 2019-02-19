@@ -22,6 +22,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.web.jwt.validate.JwtValidateKey;
 import net.officefloor.web.jwt.validate.JwtValidateKeyCollector;
 
@@ -35,6 +36,73 @@ import net.officefloor.web.jwt.validate.JwtValidateKeyCollector;
  * @author Daniel Sagenschneider
  */
 public class JwksSectionSource extends AbstractSectionSource {
+
+	/**
+	 * Loads the {@link JwksKeyParser} instances.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return {@link JwksKeyParser} instances.
+	 */
+	public static JwksKeyParser[] loadJwksKeyParsers(SourceContext context) {
+
+		// Retrieve the JWKS key parsers
+		List<JwksKeyParser> parserList = new ArrayList<>();
+		for (JwksKeyParser parser : context.loadServices(JwksKeyParserServiceFactory.class, null)) {
+			parserList.add(parser);
+		}
+		JwksKeyParser[] parsers = parserList.toArray(new JwksKeyParser[parserList.size()]);
+
+		// Return the key parsers
+		return parsers;
+	}
+
+	/**
+	 * Parses out the {@link Key}.
+	 * 
+	 * @param serialisedKey Serialised {@link Key} in JWKS format.
+	 * @param parsers       {@link JwksKeyParser} instances.
+	 * @return {@link Key} or <code>null</code> if unable to parse out the
+	 *         {@link Key}.
+	 */
+	public static Key parseKey(String serialisedKey, JwksKeyParser[] parsers) {
+
+		// Parse out the JSON
+		JsonNode keyNode;
+		try {
+			keyNode = mapper.readTree(serialisedKey);
+		} catch (Exception ex) {
+			throw new IllegalArgumentException(ex);
+		}
+
+		// Return the parsed key
+		return parseKey(parsers, () -> keyNode);
+	}
+
+	/**
+	 * Parses out the {@link Key}.
+	 * 
+	 * @param parsers       {@link JwksKeyParser} instances.
+	 * @param parserContext {@link JwksKeyParserContext}.
+	 * @return {@link Key} or <code>null</code> if unable to parse out the
+	 *         {@link Key}.
+	 */
+	private static Key parseKey(JwksKeyParser[] parsers, JwksKeyParserContext parserContext) {
+
+		// Parse out the key
+		PARSED_KEY: for (JwksKeyParser parser : parsers) {
+			try {
+				Key key = parser.parseKey(parserContext);
+				if (key != null) {
+					return key; // key parsed
+				}
+			} catch (Exception ex) {
+				continue PARSED_KEY;
+			}
+		}
+
+		// As here, no key able to be parsed out
+		return null;
+	}
 
 	/**
 	 * Name of {@link SectionInput} to collect the {@link JwtValidateKey} instances.
@@ -97,11 +165,7 @@ public class JwksSectionSource extends AbstractSectionSource {
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Retrieve the JWKS key parsers
-			List<JwksKeyParser> parserList = new ArrayList<>();
-			for (JwksKeyParser parser : context.loadServices(JwksKeyParserServiceFactory.class, null)) {
-				parserList.add(parser);
-			}
-			JwksKeyParser[] parsers = parserList.toArray(new JwksKeyParser[parserList.size()]);
+			JwksKeyParser[] parsers = JwksSectionSource.loadJwksKeyParsers(context);
 
 			// Provide function to collect JWT validate keys
 			ManagedFunctionTypeBuilder<Dependencies, None> retrieveJwtValidateKeys = functionNamespaceTypeBuilder
@@ -137,17 +201,7 @@ public class JwksSectionSource extends AbstractSectionSource {
 									long exp = parseContext.getLong(keyNode, "exp", Long.MAX_VALUE);
 
 									// Parse out the key
-									Key key = null;
-									PARSED_KEY: for (JwksKeyParser parser : parsers) {
-										try {
-											key = parser.parseKey(parseContext);
-											if (key != null) {
-												break PARSED_KEY;
-											}
-										} catch (Exception ex) {
-											continue PARSED_KEY;
-										}
-									}
+									Key key = parseKey(parsers, parseContext);
 
 									// Add in the validate key
 									if (key != null) {

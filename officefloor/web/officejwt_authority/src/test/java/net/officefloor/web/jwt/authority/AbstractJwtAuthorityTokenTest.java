@@ -161,7 +161,7 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	/**
 	 * Time requested for retrieving {@link JwtRefreshKey} instances.
 	 */
-	protected Instant retrieveJwtRefreshKeysTime = null;
+	protected Long retrieveJwtRefreshKeysTime = null;
 
 	/**
 	 * Mock {@link JwtRefreshKey} instances for testing.
@@ -176,7 +176,7 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	/**
 	 * Time requested for retrieving {@link JwtAccessKey} instances.
 	 */
-	protected Instant retrieveJwtAccessKeysTime = null;
+	protected Long retrieveJwtAccessKeysTime = null;
 
 	/**
 	 * Mock {@link JwtAccessKey} instances for testing.
@@ -603,13 +603,13 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	 */
 
 	@Override
-	public List<JwtAccessKey> retrieveJwtAccessKeys(Instant activeAfter) {
-		this.retrieveJwtAccessKeysTime = activeAfter;
+	public List<JwtAccessKey> retrieveJwtAccessKeys(RetrieveKeysContext context) {
+		this.retrieveJwtAccessKeysTime = context.getActiveAfter();
 		return this.mockAccessKeys;
 	}
 
 	@Override
-	public void saveJwtAccessKeys(JwtAccessKey... accessKeys) throws Exception {
+	public void saveJwtAccessKeys(SaveKeysContext context, JwtAccessKey... accessKeys) throws Exception {
 		assertTrue("Should only save keys within cluster critical section", this.isWithinClusterCriticalSection);
 		for (JwtAccessKey accessKey : accessKeys) {
 			this.mockAccessKeys.add(accessKey);
@@ -617,13 +617,13 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	}
 
 	@Override
-	public List<JwtRefreshKey> retrieveJwtRefreshKeys(Instant activeAfter) {
-		this.retrieveJwtRefreshKeysTime = activeAfter;
+	public List<JwtRefreshKey> retrieveJwtRefreshKeys(RetrieveKeysContext context) {
+		this.retrieveJwtRefreshKeysTime = context.getActiveAfter();
 		return this.mockRefreshKeys;
 	}
 
 	@Override
-	public void saveJwtRefreshKeys(JwtRefreshKey... refreshKeys) {
+	public void saveJwtRefreshKeys(SaveKeysContext context, JwtRefreshKey... refreshKeys) {
 		assertTrue("Should only save keys within cluster critical section", this.isWithinClusterCriticalSection);
 		for (JwtRefreshKey refreshKey : refreshKeys) {
 			this.mockRefreshKeys.add(refreshKey);

@@ -1,0 +1,2 @@
+net.officefloor.web.jwt.authority.jwks.parser.RsaPrivateJwksKeyParserServiceFactory
+net.officefloor.web.jwt.authority.jwks.parser.SecretJwksKeyParserServiceFactory

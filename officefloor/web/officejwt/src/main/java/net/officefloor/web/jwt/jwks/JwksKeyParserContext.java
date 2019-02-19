@@ -103,6 +103,31 @@ public interface JwksKeyParserContext {
 	}
 
 	/**
+	 * Convenience method to obtain bytes from key {@link JsonNode}.
+	 * 
+	 * @param fieldName Field name.
+	 * @return Bytes from key {@link JsonNode} or <code>null</code>.
+	 */
+	default byte[] getBase64Bytes(String fieldName) {
+		return this.getBase64Bytes(this.getKeyNode(), fieldName, null);
+	}
+
+	/**
+	 * Obtains the field byes.
+	 * 
+	 * @param node         {@link JsonNode}.
+	 * @param fieldName    Field name.
+	 * @param defaultValue Default value.
+	 * @return Field {@link BigInteger} value.
+	 */
+	default byte[] getBase64Bytes(JsonNode node, String fieldName, byte[] defaultValue) {
+		return this.getValue(node, fieldName, defaultValue, (field) -> {
+			String base64Value = field.asText();
+			return Base64.getUrlDecoder().decode(base64Value);
+		});
+	}
+
+	/**
 	 * Obtains the field value from the {@link JsonNode}.
 	 * 
 	 * @param node         {@link JsonNode}.

@@ -9,12 +9,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -22,6 +24,7 @@ import javax.crypto.spec.IvParameterSpec;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Jwts;
@@ -40,6 +43,8 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedobject.poll.StatePollContext;
 import net.officefloor.plugin.managedobject.poll.StatePoller;
 import net.officefloor.server.http.HttpStatus;
+import net.officefloor.web.jwt.authority.jwks.JwksKeyWriter;
+import net.officefloor.web.jwt.authority.jwks.JwksPublishSectionSource;
 import net.officefloor.web.jwt.authority.key.AesCipherFactory;
 import net.officefloor.web.jwt.authority.key.AesSynchronousKeyFactory;
 import net.officefloor.web.jwt.authority.key.AsynchronousKeyFactory;
@@ -49,7 +54,11 @@ import net.officefloor.web.jwt.authority.key.SynchronousKeyFactory;
 import net.officefloor.web.jwt.authority.repository.JwtAccessKey;
 import net.officefloor.web.jwt.authority.repository.JwtAuthorityKey;
 import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository;
+import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository.RetrieveKeysContext;
+import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository.SaveKeysContext;
 import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.jwks.JwksKeyParser;
+import net.officefloor.web.jwt.jwks.JwksSectionSource;
 import net.officefloor.web.jwt.validate.JwtValidateKey;
 
 /**
@@ -463,6 +472,16 @@ public class JwtAuthorityManagedObjectSource
 	 * with appropriate keys.
 	 */
 	private StatePoller<JwtRefreshKey[], Flows> jwtRefreshKeys;
+
+	/**
+	 * Factory to create the {@link RetrieveKeysContext}.
+	 */
+	private Function<Long, RetrieveKeysContext> retrieveKeysContextFactory;
+
+	/**
+	 * {@link SaveKeysContext}.
+	 */
+	private SaveKeysContext saveKeysContext;
 
 	/**
 	 * {@link JwtAuthorityKey} retriever.
@@ -883,6 +902,82 @@ public class JwtAuthorityManagedObjectSource
 		ManagedObjectFunctionDependency jwtAuthorityRepository = sourceContext
 				.addFunctionDependency(JwtAuthorityRepository.class.getSimpleName(), JwtAuthorityRepository.class);
 
+		// Create the factory for retrieve keys context
+		JwksKeyParser[] keyParsers = JwksSectionSource.loadJwksKeyParsers(sourceContext);
+		this.retrieveKeysContextFactory = (activeAfter) -> new RetrieveKeysContext() {
+			@Override
+			public long getActiveAfter() {
+				return activeAfter;
+			}
+
+			@Override
+			public Key deserialise(String serialisedKeyContent) {
+				Key key = JwksSectionSource.parseKey(serialisedKeyContent, keyParsers);
+				if (key == null) {
+
+					// Obtain the error message
+					StringBuilder msg = new StringBuilder();
+					msg.append("No ");
+					msg.append(JwksKeyParser.class.getSimpleName());
+					msg.append(" available for key ");
+					try {
+						JsonNode keyNode = mapper.readTree(serialisedKeyContent);
+						msg.append("{ ");
+						Iterator<String> fieldNames = keyNode.fieldNames();
+						boolean isFirst = true;
+						while (fieldNames.hasNext()) {
+							String fieldName = fieldNames.next();
+							if (!isFirst) {
+								msg.append(", ");
+							}
+							isFirst = false;
+							msg.append("\"");
+							msg.append(fieldName);
+							msg.append("\":");
+							switch (fieldName) {
+							case "kty":
+							case "alg":
+								msg.append("\"");
+								msg.append(keyNode.get(fieldName).asText());
+								msg.append("\"");
+								break;
+							default:
+								msg.append("***");
+								break;
+							}
+						}
+						msg.append(" }");
+					} catch (Exception ex) {
+						// Not JSON, so no content
+						msg.append("<Non JSON>");
+					}
+
+					// Indicate invalid
+					throw new IllegalArgumentException(msg.toString());
+				}
+				return key;
+			}
+		};
+
+		// Create the save keys context
+		JwksKeyWriter<?>[] keyWriters = JwksPublishSectionSource.loadJwksKeyWriters(sourceContext);
+		this.saveKeysContext = new SaveKeysContext() {
+			@Override
+			public String serialise(Key key) {
+				try {
+					String serialisedKey = JwksPublishSectionSource.writeKey(key, keyWriters);
+					if (serialisedKey == null) {
+						throw new IllegalArgumentException("No " + JwksKeyWriter.class.getSimpleName()
+								+ " available for key (algorithm " + key.getAlgorithm() + ", format " + key.getFormat()
+								+ ", type " + key.getClass().getName() + ")");
+					}
+					return serialisedKey;
+				} catch (Exception ex) {
+					throw new IllegalArgumentException(ex);
+				}
+			}
+		};
+
 		// Obtain the init vector size
 		int initVectorSize = this.refreshTokenCipherFactory.getInitVectorSize();
 
@@ -901,7 +996,8 @@ public class JwtAuthorityManagedObjectSource
 							this.accessKeyOverlapPeriods, this.accessKeyExpirationPeriod, (loadTime, repo) -> {
 
 								// Load keys from repository
-								List<JwtAccessKey> keys = repo.retrieveJwtAccessKeys(Instant.ofEpochSecond(loadTime));
+								List<JwtAccessKey> keys = repo
+										.retrieveJwtAccessKeys(this.retrieveKeysContextFactory.apply(loadTime));
 
 								// Keep only the valid keys
 								JwtAccessKey[] validKeys = keys.stream().map((key) -> new JwtAccessKeyImpl(key))
@@ -914,7 +1010,8 @@ public class JwtAuthorityManagedObjectSource
 							(newKeys, repo) -> {
 
 								// Save the new keys
-								repo.saveJwtAccessKeys(newKeys.toArray(new JwtAccessKey[newKeys.size()]));
+								repo.saveJwtAccessKeys(this.saveKeysContext,
+										newKeys.toArray(new JwtAccessKey[newKeys.size()]));
 
 							}, (startTime) -> {
 
@@ -954,7 +1051,8 @@ public class JwtAuthorityManagedObjectSource
 							this.refreshKeyExpirationPeriod, (loadTime, repo) -> {
 
 								// Load keys from repository
-								List<JwtRefreshKey> keys = repo.retrieveJwtRefreshKeys(Instant.ofEpochSecond(loadTime));
+								List<JwtRefreshKey> keys = repo
+										.retrieveJwtRefreshKeys(this.retrieveKeysContextFactory.apply(loadTime));
 
 								// Keep only the valid keys
 								JwtRefreshKey[] validKeys = keys.stream().map((key) -> new JwtRefreshKeyImpl(key))
@@ -967,7 +1065,8 @@ public class JwtAuthorityManagedObjectSource
 							(newKeys, repo) -> {
 
 								// Save the new keys
-								repo.saveJwtRefreshKeys(newKeys.toArray(new JwtRefreshKey[newKeys.size()]));
+								repo.saveJwtRefreshKeys(this.saveKeysContext,
+										newKeys.toArray(new JwtRefreshKey[newKeys.size()]));
 
 							}, (startTime) -> {
 

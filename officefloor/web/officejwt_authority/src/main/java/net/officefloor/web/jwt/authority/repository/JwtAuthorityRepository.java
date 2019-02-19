@@ -1,7 +1,10 @@
 package net.officefloor.web.jwt.authority.repository;
 
-import java.time.Instant;
+import java.security.Key;
 import java.util.List;
+
+import net.officefloor.web.jwt.authority.jwks.JwksKeyWriter;
+import net.officefloor.web.jwt.jwks.JwksKeyParser;
 
 /**
  * JWT repository.
@@ -11,42 +14,79 @@ import java.util.List;
 public interface JwtAuthorityRepository {
 
 	/**
+	 * Context for retrieving keys.
+	 */
+	public static interface RetrieveKeysContext {
+
+		/**
+		 * Obtains the time in seconds since Epoch for keys to be active.
+		 * 
+		 * @return Time in seconds since Epoch for keys to be active.
+		 */
+		long getActiveAfter();
+
+		/**
+		 * Convenience method to use the registered {@link JwksKeyParser} instances to
+		 * deserialise the {@link Key}.
+		 * 
+		 * @param serialisedKeyContent Serialised {@link Key} content.
+		 * @return {@link Key}.
+		 */
+		Key deserialise(String serialisedKeyContent);
+	}
+
+	/**
+	 * Context for saving keys.
+	 */
+	public static interface SaveKeysContext {
+
+		/**
+		 * Convenience method to use the registered {@link JwksKeyWriter} instances to
+		 * serialise the {@link Key}.
+		 * 
+		 * @param key {@link Key} to be serialised.
+		 * @return Serialised {@link Key} content.
+		 */
+		String serialise(Key key);
+	}
+
+	/**
 	 * Retrieves the list of {@link JwtAccessKey} instances.
 	 * 
-	 * @param activeAfter Time in seconds to obtain all active {@link JwtAccessKey}
-	 *                    instances.
+	 * @param context {@link RetrieveKeysContext}.
 	 * @return {@link JwtAccessKey} instances.
 	 * @throws Exception Possible failure in retrieving the {@link JwtAccessKey}
 	 *                   instances.
 	 */
-	List<JwtAccessKey> retrieveJwtAccessKeys(Instant activeAfter) throws Exception;
+	List<JwtAccessKey> retrieveJwtAccessKeys(RetrieveKeysContext context) throws Exception;
 
 	/**
 	 * Saves new {@link JwtAccessKey} instances.
 	 * 
+	 * @param context    {@link SaveKeysContext}.
 	 * @param accessKeys New {@link JwtAccessKey} instances.
 	 * @throws Exception If fails to save the {@link JwtAccessKey} instance.
 	 */
-	void saveJwtAccessKeys(JwtAccessKey... accessKeys) throws Exception;
+	void saveJwtAccessKeys(SaveKeysContext context, JwtAccessKey... accessKeys) throws Exception;
 
 	/**
 	 * Retrieves the list of {@link JwtRefreshKey} instances.
 	 * 
-	 * @param activeAfter Time in seconds to obtain all active {@link JwtRefreshKey}
-	 *                    instances.
+	 * @param context {@link RetrieveKeysContext}.
 	 * @return {@link JwtRefreshKey} instances.
 	 * @throws Exception Possible failure in retrieving the {@link JwtRefreshKey}
 	 *                   instances.
 	 */
-	List<JwtRefreshKey> retrieveJwtRefreshKeys(Instant activeAfter) throws Exception;
+	List<JwtRefreshKey> retrieveJwtRefreshKeys(RetrieveKeysContext context) throws Exception;
 
 	/**
 	 * Saves new {@link JwtRefreshKey} instances.
 	 * 
+	 * @param context     {@link SaveKeysContext}.
 	 * @param refreshKeys New {@link JwtRefreshKey} instances.
 	 * @throws Exception If fails to save the {@link JwtRefreshKey} instance.
 	 */
-	void saveJwtRefreshKeys(JwtRefreshKey... refreshKeys);
+	void saveJwtRefreshKeys(SaveKeysContext context, JwtRefreshKey... refreshKeys);
 
 	/**
 	 * <p>
@@ -54,8 +94,8 @@ public interface JwtAuthorityRepository {
 	 * duplicate keys being generated. This is <strong>optional</strong> to
 	 * implement.
 	 * <p>
-	 * Default is to allow duplicate keys to be created. However, logic of JWT
-	 * should allow handling multiple active keys.
+	 * Default is to allow duplicate keys to be created. This is handled by logic of
+	 * JWT allowing multiple active keys.
 	 * 
 	 * @param clusterCriticalSection {@link ClusterCriticalSection}.
 	 * @throws Exception If fails to undertake {@link ClusterCriticalSection}.

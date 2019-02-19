@@ -5,13 +5,14 @@ import static org.junit.Assert.assertNotEquals;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.time.Instant;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,6 +46,8 @@ import net.officefloor.web.jwt.authority.combined.CombinedServerRetrieveValidate
 import net.officefloor.web.jwt.authority.jwks.JwksPublishSectionSource;
 import net.officefloor.web.jwt.authority.repository.JwtAccessKey;
 import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository;
+import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository.RetrieveKeysContext;
+import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository.SaveKeysContext;
 import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
 import net.officefloor.web.jwt.jwks.JwksRetriever;
 import net.officefloor.web.jwt.jwks.JwksSectionSource;
@@ -90,6 +93,11 @@ public class JwtServerTest extends OfficeFrameTestCase {
 	 */
 	private MockHttpServer resourceServer;
 
+	/**
+	 * {@link MockJwtAuthorityRepository}.
+	 */
+	private final MockJwtAuthorityRepository jwtAuthorityRepsoitory = new MockJwtAuthorityRepository();
+
 	@Override
 	protected void tearDown() throws Exception {
 		if (this.authorityOfficeFloor != null) {
@@ -133,8 +141,7 @@ public class JwtServerTest extends OfficeFrameTestCase {
 			jwtAuthoritySource.addOfficeManagedObject("JWT_AUTHORITY", ManagedObjectScope.THREAD);
 
 			// Add mock JWT authority repository
-			office.addOfficeManagedObjectSource("JWT_AUTHORITY_REPOSITORY",
-					new Singleton(new MockJwtAuthorityRepository()))
+			office.addOfficeManagedObjectSource("JWT_AUTHORITY_REPOSITORY", new Singleton(this.jwtAuthorityRepsoitory))
 					.addOfficeManagedObject("JWT_AUTHORITY_REPOSITORY", ManagedObjectScope.THREAD);
 
 			// Create JWT handlers
@@ -204,8 +211,7 @@ public class JwtServerTest extends OfficeFrameTestCase {
 			jwtAuthoritySource.addOfficeManagedObject("JWT_AUTHORITY", ManagedObjectScope.THREAD);
 
 			// Add mock JWT authority repository
-			office.addOfficeManagedObjectSource("JWT_AUTHORITY_REPOSITORY",
-					new Singleton(new MockJwtAuthorityRepository()))
+			office.addOfficeManagedObjectSource("JWT_AUTHORITY_REPOSITORY", new Singleton(this.jwtAuthorityRepsoitory))
 					.addOfficeManagedObject("JWT_AUTHORITY_REPOSITORY", ManagedObjectScope.THREAD);
 
 			// Configure the login
@@ -278,6 +284,24 @@ public class JwtServerTest extends OfficeFrameTestCase {
 
 		// Test the server
 		this.doJwtServerTest();
+	}
+
+	/**
+	 * Ensure can load keys for server.
+	 */
+	public void testReuseKeysFromRepository() throws Exception {
+
+		// Load the server (creates and saves keys)
+		this.testSingleServer();
+
+		// Ensure have keys
+		assertEquals("Should have access keys", 2, this.jwtAuthorityRepsoitory.accessKeys.size());
+		assertEquals("Should have refresh keys", 2, this.jwtAuthorityRepsoitory.refreshKeys.size());
+
+		// Ensure can re-use keys (may create extra key on edge of time)
+		this.testSingleServer();
+		assertTrue("Should re-use access keys", this.jwtAuthorityRepsoitory.accessKeys.size() <= 3);
+		assertTrue("Should re-use refresh keys", this.jwtAuthorityRepsoitory.refreshKeys.size() <= 3);
 	}
 
 	/**
@@ -432,28 +456,161 @@ public class JwtServerTest extends OfficeFrameTestCase {
 
 	private static class MockJwtAuthorityRepository implements JwtAuthorityRepository {
 
-		private List<JwtAccessKey> accessKeys = Collections.synchronizedList(new ArrayList<>());
+		private List<MockStoredJwtAccessKey> accessKeys = Collections.synchronizedList(new ArrayList<>());
 
-		private List<JwtRefreshKey> refreshKeys = Collections.synchronizedList(new ArrayList<>());
+		private List<MockStoredJwtRefreshKey> refreshKeys = Collections.synchronizedList(new ArrayList<>());
 
 		@Override
-		public List<JwtAccessKey> retrieveJwtAccessKeys(Instant activeAfter) throws Exception {
-			return this.accessKeys;
+		public List<JwtAccessKey> retrieveJwtAccessKeys(RetrieveKeysContext context) throws Exception {
+			return this.accessKeys.stream().map((storedKey) -> new MockJwtAccessKey(storedKey, context))
+					.collect(Collectors.toList());
 		}
 
 		@Override
-		public void saveJwtAccessKeys(JwtAccessKey... accessKeys) throws Exception {
-			this.accessKeys.addAll(Arrays.asList(accessKeys));
+		public void saveJwtAccessKeys(SaveKeysContext context, JwtAccessKey... accessKeys) throws Exception {
+			for (JwtAccessKey accessKey : accessKeys) {
+				this.accessKeys.add(new MockStoredJwtAccessKey(accessKey, context));
+			}
 		}
 
 		@Override
-		public List<JwtRefreshKey> retrieveJwtRefreshKeys(Instant activeAfter) throws Exception {
-			return this.refreshKeys;
+		public List<JwtRefreshKey> retrieveJwtRefreshKeys(RetrieveKeysContext context) throws Exception {
+			return this.refreshKeys.stream().map((storedKey) -> new MockJwtRefreshKey(storedKey, context))
+					.collect(Collectors.toList());
 		}
 
 		@Override
-		public void saveJwtRefreshKeys(JwtRefreshKey... refreshKeys) {
-			this.refreshKeys.addAll(Arrays.asList(refreshKeys));
+		public void saveJwtRefreshKeys(SaveKeysContext context, JwtRefreshKey... refreshKeys) {
+			for (JwtRefreshKey refreshKey : refreshKeys) {
+				this.refreshKeys.add(new MockStoredJwtRefreshKey(refreshKey, context));
+			}
+		}
+	}
+
+	private static class MockStoredJwtAccessKey {
+
+		private final long startTime;
+
+		private final long expireTime;
+
+		private final String publicKey;
+
+		private final String privateKey;
+
+		private MockStoredJwtAccessKey(JwtAccessKey accessKey, SaveKeysContext context) {
+			this.startTime = accessKey.getStartTime();
+			this.expireTime = accessKey.getExpireTime();
+			this.publicKey = context.serialise(accessKey.getPublicKey());
+			this.privateKey = context.serialise(accessKey.getPrivateKey());
+		}
+	}
+
+	private static class MockJwtAccessKey implements JwtAccessKey {
+
+		private final MockStoredJwtAccessKey storedKey;
+
+		private final Key publicKey;
+
+		private final Key privateKey;
+
+		private MockJwtAccessKey(MockStoredJwtAccessKey storedKey, RetrieveKeysContext context) {
+			this.storedKey = storedKey;
+			this.publicKey = context.deserialise(storedKey.publicKey);
+			this.privateKey = context.deserialise(storedKey.privateKey);
+		}
+
+		@Override
+		public long getStartTime() {
+			return this.storedKey.startTime;
+		}
+
+		@Override
+		public long getExpireTime() {
+			return this.storedKey.expireTime;
+		}
+
+		@Override
+		public Key getPrivateKey() {
+			return this.privateKey;
+		}
+
+		@Override
+		public Key getPublicKey() {
+			return this.publicKey;
+		}
+	}
+
+	private static class MockStoredJwtRefreshKey {
+
+		private final long startTime;
+
+		private final long expireTime;
+
+		private final String initVector;
+
+		private final String startSalt;
+
+		private final String lace;
+
+		private final String endSalt;
+
+		private final String serialisedKey;
+
+		private MockStoredJwtRefreshKey(JwtRefreshKey refreshKey, SaveKeysContext context) {
+			this.startTime = refreshKey.getStartTime();
+			this.expireTime = refreshKey.getExpireTime();
+			this.initVector = refreshKey.getInitVector();
+			this.startSalt = refreshKey.getStartSalt();
+			this.lace = refreshKey.getLace();
+			this.endSalt = refreshKey.getEndSalt();
+			this.serialisedKey = context.serialise(refreshKey.getKey());
+		}
+	}
+
+	private static class MockJwtRefreshKey implements JwtRefreshKey {
+
+		private final MockStoredJwtRefreshKey storedKey;
+
+		private final Key key;
+
+		private MockJwtRefreshKey(MockStoredJwtRefreshKey storedKey, RetrieveKeysContext context) {
+			this.storedKey = storedKey;
+			this.key = context.deserialise(storedKey.serialisedKey);
+		}
+
+		@Override
+		public long getStartTime() {
+			return this.storedKey.startTime;
+		}
+
+		@Override
+		public long getExpireTime() {
+			return this.storedKey.expireTime;
+		}
+
+		@Override
+		public String getInitVector() {
+			return this.storedKey.initVector;
+		}
+
+		@Override
+		public String getStartSalt() {
+			return this.storedKey.startSalt;
+		}
+
+		@Override
+		public String getLace() {
+			return this.storedKey.lace;
+		}
+
+		@Override
+		public String getEndSalt() {
+			return this.storedKey.endSalt;
+		}
+
+		@Override
+		public Key getKey() {
+			return this.key;
 		}
 	}
 

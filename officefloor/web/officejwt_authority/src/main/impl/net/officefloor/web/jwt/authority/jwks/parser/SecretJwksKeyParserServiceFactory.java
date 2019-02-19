@@ -1,9 +1,8 @@
-package net.officefloor.web.jwt.jwks.parser;
+package net.officefloor.web.jwt.authority.jwks.parser;
 
-import java.math.BigInteger;
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.spec.RSAPublicKeySpec;
+
+import javax.crypto.spec.SecretKeySpec;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.web.jwt.jwks.JwksKeyParser;
@@ -11,11 +10,11 @@ import net.officefloor.web.jwt.jwks.JwksKeyParserContext;
 import net.officefloor.web.jwt.jwks.JwksKeyParserServiceFactory;
 
 /**
- * RSA {@link JwksKeyParserServiceFactory}.
+ * {@link SecretKeySpec} {@link JwksKeyParserServiceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RsaJwksKeyParserServiceFactory implements JwksKeyParserServiceFactory, JwksKeyParser {
+public class SecretJwksKeyParserServiceFactory implements JwksKeyParserServiceFactory, JwksKeyParser {
 
 	/*
 	 * ================= JwksKeyParserServiceFactory ==================
@@ -35,20 +34,19 @@ public class RsaJwksKeyParserServiceFactory implements JwksKeyParserServiceFacto
 
 		// Ensure correct key type
 		String keyType = context.getKty();
-		if (!"RSA".equalsIgnoreCase(keyType)) {
+		if (!"oct".equalsIgnoreCase(keyType)) {
 			return null;
 		}
 
-		// Obtain the modulus and exponent
-		BigInteger modulus = context.getBase64BigInteger("n");
-		BigInteger exponent = context.getBase64BigInteger("e");
+		// Obtain the key details
+		String algorithm = context.getString("alg");
+		byte[] encoding = context.getBase64Bytes("k");
 
-		// Create new RSA public key
-		RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, exponent);
-		Key key = KeyFactory.getInstance(keyType).generatePublic(keySpec);
+		// Create secret key spec
+		SecretKeySpec keySpec = new SecretKeySpec(encoding, algorithm);
 
 		// Return the key
-		return key;
+		return keySpec;
 	}
 
 }

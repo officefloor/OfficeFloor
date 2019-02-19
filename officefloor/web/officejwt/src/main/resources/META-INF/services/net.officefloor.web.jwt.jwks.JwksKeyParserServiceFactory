@@ -1,1 +1,1 @@
-net.officefloor.web.jwt.jwks.parser.RsaJwksKeyParserServiceFactory
+net.officefloor.web.jwt.jwks.parser.RsaPublicJwksKeyParserServiceFactory

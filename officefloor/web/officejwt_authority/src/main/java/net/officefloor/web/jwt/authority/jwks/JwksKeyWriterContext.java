@@ -98,8 +98,8 @@ public interface JwksKeyWriterContext<K> {
 	 * @param fieldName Field name.
 	 * @param value     Value.
 	 */
-	default void setBase64BigInteger(String fieldName, BigInteger value) {
-		this.setBase64BigInteger(this.getKeyNode(), fieldName, value);
+	default void setBase64(String fieldName, BigInteger value) {
+		this.setBase64(this.getKeyNode(), fieldName, value);
 	}
 
 	/**
@@ -110,9 +110,31 @@ public interface JwksKeyWriterContext<K> {
 	 * @param fieldName Field name.
 	 * @param value     Value.
 	 */
-	default void setBase64BigInteger(ObjectNode node, String fieldName, BigInteger value) {
+	default void setBase64(ObjectNode node, String fieldName, BigInteger value) {
 		byte[] bytes = value.toByteArray();
 		String base64Value = Base64.getUrlEncoder().encodeToString(bytes);
+		this.setString(node, fieldName, base64Value);
+	}
+
+	/**
+	 * Convenience method to set bytes as Base64 on key {@link ObjectNode}.
+	 * 
+	 * @param fieldName Field name.
+	 * @param value     Value.
+	 */
+	default void setBase64(String fieldName, byte[] value) {
+		this.setBase64(this.getKeyNode(), fieldName, value);
+	}
+
+	/**
+	 * Specifies the field bytes as Base64 on the {@link ObjectNode}.
+	 * 
+	 * @param node      {@link ObjectNode}.
+	 * @param fieldName Field name.
+	 * @param value     Value.
+	 */
+	default void setBase64(ObjectNode node, String fieldName, byte[] value) {
+		String base64Value = Base64.getUrlEncoder().encodeToString(value);
 		this.setString(node, fieldName, base64Value);
 	}
 

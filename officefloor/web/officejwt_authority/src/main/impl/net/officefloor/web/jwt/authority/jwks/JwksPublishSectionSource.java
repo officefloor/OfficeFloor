@@ -4,6 +4,7 @@ import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -23,6 +24,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.jwt.authority.JwtAuthority;
@@ -39,6 +41,95 @@ import net.officefloor.web.jwt.validate.JwtValidateKey;
  * @author Daniel Sagenschneider
  */
 public class JwksPublishSectionSource extends AbstractSectionSource {
+
+	/**
+	 * Loads the {@link JwksKeyWriter} instances.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return {@link JwksKeyWriter} instances.
+	 */
+	public static JwksKeyWriter<?>[] loadJwksKeyWriters(SourceContext context) {
+
+		// Load the JWKS key writers
+		List<JwksKeyWriter<?>> keyWritersList = new ArrayList<>();
+		for (JwksKeyWriter<?> keyWriter : context.loadServices(JwksKeyWriterServiceFactory.class, null)) {
+			keyWritersList.add(keyWriter);
+		}
+		JwksKeyWriter<?>[] keyWriters = keyWritersList.toArray(new JwksKeyWriter[keyWritersList.size()]);
+
+		// Return the key writers
+		return keyWriters;
+	}
+
+	/**
+	 * Writes the {@link Key}.
+	 * 
+	 * @param key        {@link Key}.
+	 * @param keyWriters {@link JwksKeyWriter} instances.
+	 * @return Written {@link Key} or <code>null</code> if unable to write the
+	 *         {@link Key}.
+	 * @throws Exception If fails to write the {@link Key}.
+	 */
+	public static String writeKey(Key key, JwksKeyWriter<?>[] keyWriters) throws Exception {
+
+		// Write out the key node
+		JwksKeyWriterContext<?> keyContext = writeKeyNode(key, keyWriters);
+		if (keyContext == null) {
+			return null; // unable to write key
+		}
+
+		// Return the key
+		return mapper.writeValueAsString(keyContext.getKeyNode());
+	}
+
+	/**
+	 * Writes the {@link Key} to a {@link JsonNode}.
+	 * 
+	 * @param key        {@link Key}.
+	 * @param keyWriters {@link JwksKeyWriter} instances.
+	 * @return {@link JsonNode} for the {@link Key} or <code>null</code> if unable
+	 *         to write the {@link Key}.
+	 * @throws Exception If fails to write the {@link Key}.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static JwksKeyWriterContext<?> writeKeyNode(Key key, JwksKeyWriter<?>[] keyWriters) throws Exception {
+
+		// Write the JWKS key
+		NEXT_KEY_WRITER: for (JwksKeyWriter<?> keyWriter : keyWriters) {
+
+			// Determine if can be written
+			if (!keyWriter.canWriteKey(key)) {
+				continue NEXT_KEY_WRITER;
+			}
+
+			// Able to write key
+			ObjectNode keyNode = mapper.getNodeFactory().objectNode();
+			JwksKeyWriterContext writerContext = new JwksKeyWriterContext() {
+
+				@Override
+				public Object getKey() {
+					return key;
+				}
+
+				@Override
+				public ObjectNode getKeyNode() {
+					return keyNode;
+				}
+
+				@Override
+				public JsonNodeFactory getNodeFactory() {
+					return mapper.getNodeFactory();
+				}
+			};
+			keyWriter.writeKey(writerContext);
+
+			// Return the context (for access to key node)
+			return writerContext;
+		}
+
+		// As here, unable to write the key
+		return null;
+	}
 
 	/**
 	 * Name of {@link SectionInput} to publish the {@link JwtValidateKey} instances.
@@ -96,16 +187,11 @@ public class JwksPublishSectionSource extends AbstractSectionSource {
 		}
 
 		@Override
-		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Load the JWKS key writers
-			List<JwksKeyWriter<?>> keyWritersList = new ArrayList<>();
-			for (JwksKeyWriter<?> keyWriter : context.loadServices(JwksKeyWriterServiceFactory.class, null)) {
-				keyWritersList.add(keyWriter);
-			}
-			JwksKeyWriter<?>[] keyWriters = keyWritersList.toArray(new JwksKeyWriter[keyWritersList.size()]);
+			JwksKeyWriter<?>[] keyWriters = JwksPublishSectionSource.loadJwksKeyWriters(context);
 
 			// Add the function
 			ManagedFunctionTypeBuilder<Dependencies, None> function = functionNamespaceTypeBuilder
@@ -131,49 +217,20 @@ public class JwksPublishSectionSource extends AbstractSectionSource {
 
 							// Write the JWKS key
 							Key key = validateKey.getKey();
-							boolean isKeyLoaded = false;
-							NEXT_KEY_WRITER: for (JwksKeyWriter<?> keyWriter : keyWriters) {
+							JwksKeyWriterContext<?> keyContext = writeKeyNode(key, keyWriters);
 
-								// Determine if can be written
-								if (!keyWriter.canWriteKey(key)) {
-									continue NEXT_KEY_WRITER;
-								}
-
-								// Able to write key
-								ObjectNode keyNode = nodeFactory.objectNode();
-								JwksKeyWriterContext writerContext = new JwksKeyWriterContext() {
-
-									@Override
-									public Object getKey() {
-										return key;
-									}
-
-									@Override
-									public ObjectNode getKeyNode() {
-										return keyNode;
-									}
-
-									@Override
-									public JsonNodeFactory getNodeFactory() {
-										return nodeFactory;
-									}
-								};
-								keyWriter.writeKey(writerContext);
-
-								// Provide time window for key
-								writerContext.setLong("nbf", validateKey.getStartTime());
-								writerContext.setLong("exp", validateKey.getExpireTime());
-
-								// Include the key
-								keysNode.add(keyNode);
-								isKeyLoaded = true;
-							}
-
-							// Ensure the key was loaded
-							if (!isKeyLoaded) {
+							// Ensure the key is written
+							if (keyContext == null) {
 								throw new HttpException(new Exception("No " + JwksKeyWriter.class.getSimpleName()
 										+ " for key " + key.getAlgorithm()));
 							}
+
+							// Provide time window for key
+							keyContext.setLong("nbf", validateKey.getStartTime());
+							keyContext.setLong("exp", validateKey.getExpireTime());
+
+							// Include the key
+							keysNode.add(keyContext.getKeyNode());
 						}
 
 						// Write out the JWKS response

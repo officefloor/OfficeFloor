@@ -1,7 +1,8 @@
 package net.officefloor.web.jwt.authority.jwks.writer;
 
 import java.security.Key;
-import java.security.interfaces.RSAPublicKey;
+
+import javax.crypto.spec.SecretKeySpec;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.web.jwt.authority.jwks.JwksKeyWriter;
@@ -9,18 +10,18 @@ import net.officefloor.web.jwt.authority.jwks.JwksKeyWriterContext;
 import net.officefloor.web.jwt.authority.jwks.JwksKeyWriterServiceFactory;
 
 /**
- * RSA {@link JwksKeyWriterServiceFactory}.
+ * {@link SecretKeySpec} {@link JwksKeyWriterServiceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class RsaJwksKeyWriterServiceFactory implements JwksKeyWriterServiceFactory, JwksKeyWriter<RSAPublicKey> {
+public class SecretJwksKeyWriterServiceFactory implements JwksKeyWriterServiceFactory, JwksKeyWriter<SecretKeySpec> {
 
 	/*
 	 * ==================== JwksKeyWriterServiceFactory =====================
 	 */
 
 	@Override
-	public JwksKeyWriter<RSAPublicKey> createService(ServiceContext context) throws Throwable {
+	public JwksKeyWriter<SecretKeySpec> createService(ServiceContext context) throws Throwable {
 		return this;
 	}
 
@@ -30,17 +31,17 @@ public class RsaJwksKeyWriterServiceFactory implements JwksKeyWriterServiceFacto
 
 	@Override
 	public boolean canWriteKey(Key key) {
-		return key instanceof RSAPublicKey;
+		return key instanceof SecretKeySpec;
 	}
 
 	@Override
-	public void writeKey(JwksKeyWriterContext<RSAPublicKey> context) throws Exception {
+	public void writeKey(JwksKeyWriterContext<SecretKeySpec> context) throws Exception {
 
 		// Write the key details
-		RSAPublicKey key = context.getKey();
-		context.setKty("RSA");
-		context.setBase64BigInteger("n", key.getModulus());
-		context.setBase64BigInteger("e", key.getPublicExponent());
+		SecretKeySpec key = context.getKey();
+		context.setKty("oct");
+		context.setString("alg", key.getAlgorithm());
+		context.setBase64("k", key.getEncoded());
 	}
 
 }
