@@ -49,7 +49,7 @@
 		<failsafe-version>2.22.1</failsafe-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<java-lowest-version>8</java-lowest-version>
-		<jetty-version>9.4.14.v20181114</jetty-version>
+		<jetty-version>9.4.15.v20190215</jetty-version>
 		<maven-version>3.6.0</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven-plugin-version>3.6.0</maven-plugin-version>
