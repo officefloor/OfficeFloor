@@ -55,4 +55,4 @@ Unit Test
 
 Next
 
-  The {{{../NavigateHttpServer/index.html}next tutorial}} looks at controlling navigation between pages (templates).
+  The {{{../SessionHttpServer/index.html}next tutorial}} looks at storing state between requests within a HTTP session.

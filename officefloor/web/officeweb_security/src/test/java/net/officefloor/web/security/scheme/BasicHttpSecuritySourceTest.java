@@ -274,6 +274,15 @@ public class BasicHttpSecuritySourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure convenience method for creating {@link HttpHeader} value works and
+	 * available for testing.
+	 */
+	public void testConvenienceCreateHttpHeaderValue() {
+		String headerValue = BasicHttpSecuritySource.createAuthorizationHttpHeaderValue("Aladdin", "open sesame");
+		assertEquals("Incorrect HTTP Header value", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", headerValue);
+	}
+
+	/**
 	 * Undertakes the authentication.
 	 * 
 	 * @param authorizationHttpHeaderValue <code>authorize</code> {@link HttpHeader}

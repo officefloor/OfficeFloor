@@ -47,7 +47,6 @@ Dependency Injection
   
   A <<<type>>> attribute can be added to auto-wire the POJO based on one of its super types (e.g. an interface).
 
-  <<<Watch this space>>>: An IDE editor plug-in is in focus to make creation and management of this file easier. 
 
 
 Unit Test
@@ -60,4 +59,4 @@ Unit Test
 
 Next
 
-  The {{{../DatabaseHttpServer/index.html}next tutorial}} covers injecting managed objects.
+  The {{{../TestHttpServer/index.html}next tutorial}} covers testing a WoOF web application.

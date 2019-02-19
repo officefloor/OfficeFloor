@@ -128,5 +128,4 @@ Unit Test
 
 Next
 
-  The {{{../RestHttpServer/index.html}next tutorial}} covers REST.
-
+  The {{{../ThreadAffinityHttpServer/index.html}next tutorial}} covers using {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}} for thread affinity.

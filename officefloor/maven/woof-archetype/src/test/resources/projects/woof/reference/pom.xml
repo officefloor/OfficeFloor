@@ -8,12 +8,11 @@
 	<name>WoofArchetypeResult</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<officefloor-version>3.5.2</officefloor-version>
+		<officefloor-version>3.6.0</officefloor-version>
 		<compiler-version>3.8.0</compiler-version>
 		<failsafe-version>2.22.1</failsafe-version>
 		<surefire-version>2.22.1</surefire-version>
 		<java-lowest-version>8</java-lowest-version>
-		<junit-version>4.12</junit-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -33,13 +32,16 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
+			<artifactId>officejson_jackson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit-version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

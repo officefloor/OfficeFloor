@@ -24,7 +24,7 @@ Setup
 
 Creating the WoOF project
 
-  The create a WoOF project use the Maven WoOF archetype.  Run the following within an empty directory:
+  To create a WoOF project use the Maven WoOF archetype.  Run the following within an empty directory:
 
 +-----------------------------------------+
     mvn archetype:generate -DarchetypeGroupId=${projectGroupId} -DarchetypeArtifactId=${projectArtifactId}
@@ -49,20 +49,22 @@ Running the WoOF project from Maven
   Once the project is built, run the following within the project directory to start the application:
 
 +-----------------------------------------+
-    mvn officefloor:open
+    mvn net.officefloor.maven:officefloor-maven-plugin:${projectVersion}:open
 +-----------------------------------------+
 
-  The following may be needed to add to your maven settings.xml file to default the group:
+  Or add the following to maven <settings.xml>:
   
 +-----------------------------------------+
   <pluginGroups>
     <pluginGroup>net.officefloor.maven</pluginGroup>
   </pluginGroups>
-+-----------------------------------------+  
++-----------------------------------------+
 
-  The application will now be available at <<<http://localhost:7878/static>>>  and look as follows:
-  
-[./images/woof-archetype-static-screenshot.png] WoOF Archetype Static Page Screen Shot
+  to run the simpler command:
+
++-----------------------------------------+
+    mvn officefloor:open
++-----------------------------------------+
   
   To stop the application, run:
 
@@ -86,31 +88,13 @@ WoOF graphical configuration
 
 [./images/woof-archetype-configuration.png] WoOF archetype project configuration.
 
-  The very simple configuration shows two web pages with navigation back and forth between the pages.
+  The very simple configuration shows servicing a REST call.
   
-    * <<<static>>> : example static HTML page (useful for static content and wire framing a prototype web application)
-    
-    * <<<form>>> : example dynamic form to enter and validate information
-     
-  There are various other configuration items that can be added by dragging from the palette (hover over the bar on the left).  Please see the {{{../../tutorials/index.html}other tutorials}} for further details.
-
+  This is a simple application with the following servicing code:
   
+%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/main/java/net/officefloor/test/HelloLogic.java|ignoreDownloadError=false}
 
-HTML templating and Java server logic
-
-  The form page looks as follows:
-  
-[./images/woof-archetype-form-screenshot.png] WoOF Archetype Form Page Screen Shot
-
-  The following is the HTML for the form page.
-
-%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/main/resources/form.woof.html|ignoreDownloadError=false}
-
-  The instrumentation of HTML page is through the <#\{link\}>, <#\{bean ... $\}>, and <$\{property\}> tags that are mapped by name to methods on the following server POJO (plain old java object): 
-
-%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/main/java/net/officefloor/test/form/FormLogic.java|ignoreDownloadError=false}
-
-  Beyond a few annotations the logic class is straight forward Java.
+  There are various other configuration items that can be added by dragging from the palette (hover over the bar on the left).
   
   Please see the {{{../../tutorials/index.html}other tutorials}} for explanation of the code and the further features available.
 
@@ -128,5 +112,5 @@ Congratulations
 
   Congratulations you have just created and run your first WoOF web application.
   
-  The {{{../../tutorials/PrototypeHttpServer/index.html}next tutorial}} covers prototyping a web application with WoOF.
+  The {{{../../tutorials/NavigateHttpServer/index.html}next tutorial}} covers configuring flows of the WoOF application.
 

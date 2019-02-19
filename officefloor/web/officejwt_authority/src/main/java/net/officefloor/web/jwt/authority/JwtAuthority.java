@@ -1,10 +1,10 @@
 package net.officefloor.web.jwt.authority;
 
 import net.officefloor.web.jwt.JwtHttpSecuritySource;
-import net.officefloor.web.jwt.spi.decode.JwtDecodeKey;
-import net.officefloor.web.jwt.spi.encode.JwtEncodeKey;
-import net.officefloor.web.jwt.spi.refresh.JwtRefreshKey;
-import net.officefloor.web.jwt.spi.repository.JwtAuthorityRepository;
+import net.officefloor.web.jwt.authority.repository.JwtAccessKey;
+import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository;
+import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
+import net.officefloor.web.jwt.validate.JwtValidateKey;
 
 /**
  * Authority for JWT.
@@ -20,16 +20,18 @@ public interface JwtAuthority<I> {
 	 * 
 	 * @param identity Identity.
 	 * @return Refresh token.
+	 * @throws RefreshTokenException If fails to create the refresh token.
 	 */
-	String createRefreshToken(I identity);
+	String createRefreshToken(I identity) throws RefreshTokenException;
 
 	/**
 	 * Decodes the refresh token for the identity.
 	 * 
 	 * @param refreshToken Refresh token.
 	 * @return Identity within the refresh token.
+	 * @throws RefreshTokenException If fails to decode refresh token.
 	 */
-	I decodeRefreshToken(String refreshToken);
+	I decodeRefreshToken(String refreshToken) throws RefreshTokenException;
 
 	/**
 	 * <p>
@@ -46,31 +48,32 @@ public interface JwtAuthority<I> {
 	/**
 	 * Create the access token for the claims.
 	 * 
-	 * @param        <C> Claims type.
 	 * @param claims Claims.
 	 * @return Access token.
 	 * @throws AccessTokenException If fails to create the access token.
 	 */
-	<C> String createAccessToken(C claims) throws AccessTokenException;
+	String createAccessToken(Object claims) throws AccessTokenException;
 
 	/**
 	 * <p>
-	 * Allows manually triggering a reload of the {@link JwtEncodeKey} instances.
+	 * Allows manually triggering a reload of the {@link JwtAccessKey} instances.
 	 * <p>
-	 * Similar to {@link #reloadRefreshKeys()}, except for {@link JwtEncodeKey}
+	 * Similar to {@link #reloadRefreshKeys()}, except for {@link JwtAccessKey}
 	 * instances.
 	 */
 	void reloadAccessKeys();
 
 	/**
 	 * <p>
-	 * Obtains the current active {@link JwtDecodeKey} instances.
+	 * Obtains the current active {@link JwtValidateKey} instances.
 	 * <p>
-	 * This allows publishing the {@link JwtDecodeKey} instances to
+	 * This allows publishing the {@link JwtValidateKey} instances to
 	 * {@link JwtHttpSecuritySource} implementations.
 	 * 
-	 * @return Current active {@link JwtDecodeKey} instances.
+	 * @return Current active {@link JwtValidateKey} instances.
+	 * @throws ValidateKeysException If fails to retrieve the active
+	 *                               {@link JwtValidateKey} instances.
 	 */
-	JwtDecodeKey[] getActiveJwtDecodeKeys();
+	JwtValidateKey[] getActiveJwtValidateKeys() throws ValidateKeysException;
 
 }

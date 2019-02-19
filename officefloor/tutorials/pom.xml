@@ -24,6 +24,9 @@
 		<module>InheritHttpServer</module>
 		<module>InteractiveHttpServer</module>
 		<module>JavaScriptApp</module>
+		<module>JwtAuthorityHttpServer</module>
+		<module>JwtHttpServer</module>
+		<module>JwtResourceHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
@@ -33,6 +36,7 @@
 		<module>SecureLinkHttpServer</module>
 		<module>SessionHttpServer</module>
 		<module>SpringHttpServer</module>
+		<module>StaticContentHttpServer</module>
 		<module>TeamHttpServer</module>
 		<module>ThreadAffinityHttpServer</module>
 		<module>TransactionHttpServer</module>

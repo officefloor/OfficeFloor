@@ -1,0 +1,36 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/jwks.json" secure="true" x="41" y="223">
+      <section name="JwksPublisher" input="publish"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/login" method="POST" secure="true" x="39" y="51">
+      <section name="JwtTokens" input="login"/>
+    </http-input>
+    <http-input path="/refresh" method="POST" secure="true" x="32" y="106">
+      <section name="JwtTokens" input="refreshAccessToken"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="JwksPublisher" source="net.officefloor.web.jwt.authority.jwks.JwksPublishSectionSource" location="" x="263" y="207">
+      <input name="publish" parameter-type=""/>
+    </section>
+    <section name="JwtTokens" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.jwtauthorityhttpserver.JwtTokens" x="255" y="43">
+      <input name="login" parameter-type=""/>
+      <input name="refreshAccessToken" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

@@ -21,6 +21,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
@@ -45,6 +46,24 @@ import net.officefloor.web.spi.security.impl.AbstractHttpSecuritySource;
  */
 public class BasicHttpSecuritySource extends
 		AbstractHttpSecuritySource<HttpAuthentication<Void>, HttpAccessControl, Void, BasicHttpSecuritySource.Dependencies, None> {
+
+	/**
+	 * Creates the <code>Authorization</code> {@link HttpHeader} value.
+	 * 
+	 * @param username Username.
+	 * @param password Password.
+	 * @return <code>Authorization</code> {@link HttpHeader} value.
+	 */
+	public static String createAuthorizationHttpHeaderValue(String username, String password) {
+
+		// Encode the username/password
+		String credentials = username + ":" + password;
+		byte[] credentialBytes = credentials.getBytes(UTF_8);
+		String encoded = Base64.encodeBase64String(credentialBytes);
+
+		// Return the HTTP header
+		return AUTHENTICATION_SCHEME_BASIC + " " + encoded;
+	}
 
 	/**
 	 * Authentication scheme Basic.

@@ -35,10 +35,16 @@ public class OfficeFloorFilterIT {
 
 	@Test
 	public void woofInput() throws Exception {
+		
+		// Create request
 		HttpPost post = new HttpPost(SERVER_URL + "/increment");
 		post.addHeader("Content-Type", "application/json");
 		post.setEntity(new StringEntity(this.mapper.writeValueAsString(new Increment.Request("1"))));
+		
+		// Execute request
 		HttpResponse response = this.client.execute(post);
+		
+		// Confirm expected response
 		String entity = EntityUtils.toString(response.getEntity());
 		assertEquals("Incorrect status: " + entity, 200, response.getStatusLine().getStatusCode());
 		assertEquals("Incorrect content type", "application/json", response.getFirstHeader("Content-Type").getValue());

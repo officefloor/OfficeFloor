@@ -1,0 +1,67 @@
+                                               -----------------------
+                                                    JWT Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<JWT Tutorial>>
+
+  This tutorial demonstrates securing resources with JWT.
+                                                                                                                          
+  The example used in this tutorial is the end point:
+        
+   * <<<GET /resource>>> to obtain the secured resource
+   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/JwtResourceHttpServer/${projectVersion}/JwtResourceHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+WoOF configuration
+
+  The resource is configured with access restriction to prevent unauthorized access.  The claims object may also be injected for more specific security logic.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/jwtresourcehttpserver/SecuredResource.java|ignoreDownloadError=false}
+  
+  The JWT security is configured with the {{{/apidocs/net/officefloor/web/jwt/JwtHttpSecuritySource.html}JwtHttpSecuritySource}}.  The below is the configuration of the tutorial.
+  
+[./images/JwtResourceHttpServer-configuration.png] JwtResourceHttpServer screen shot.
+
+  Many of the handlers for JWT are already available with default implementations:
+  
+   * {{{/apidocs/net/officefloor/web/jwt/DefaultJwtChallengeSectionSource.html}DefaultJwtChallengeSectionSource}} : for default JWT challenge handling
+
+   * {{{/apidocs/net/officefloor/web/jwt/jwks/JwksSectionSource.html}JwksSectionSource}} : see JWKS below
+  
+  These just need to be configured in as per this tutorial.
+  
+  The claims is application specific so must be coded by the application.  The tutorial claims is:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/jwtresourcehttpserver/Claims.java|ignoreDownloadError=false}
+ 
+  The translation of JWT claims to roles is also very application specific.  Therefore, it needs to be coded specifically for the application.  The following is the example tutorial's translation of claims to roles:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/jwtresourcehttpserver/JwtRoles.java|ignoreDownloadError=false}
+
+
+JWKS
+
+  RFC 7517 defines a format for publishing keys.  The tutorial uses the default {{{/apidocs/net/officefloor/web/jwt/jwks/JwksSectionSource.html}JwksSectionSource}} that adheres to this format to retrieve keys.
+  
+  It, however, requires connecting to a server to retrieve JWKS content.  The following is the mock implementation used by the tutorial.  Production implementations would make HTTPS calls to the JWT Authority server to retrieve the keys.
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/jwtresourcehttpserver/MockJwksRetriever.java|ignoreDownloadError=false}
+  
+
+
+
+Testing
+
+  The following shows the ease of testing with JWT security:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/jwtresourcehttpserver/JwtResourceHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../JwtAuthorityHttpServer/index.html}next tutorial}} covers providing a JWT authority server.

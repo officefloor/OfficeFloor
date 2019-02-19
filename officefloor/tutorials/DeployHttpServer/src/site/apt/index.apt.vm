@@ -15,11 +15,15 @@
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
   This will create an executable jar that can be run with the following:
-                                                                                                                          
+  
+---------------
+    java -jar <project-jar-file>
 ---------------
 
+  In the case of this tutorial, it is:
+                                                                                                                          
+---------------
     java -jar DeployHttpServer-${project.version}.jar
-    
 ---------------
 
 Docker

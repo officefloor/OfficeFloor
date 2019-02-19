@@ -1,0 +1,72 @@
+                                               -----------------------
+                                                JWT Authority Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<JWT Authority Tutorial>>
+
+  This tutorial demonstrates providing a JWT authority server.
+
+  The example used in this tutorial has the end points:
+        
+   * <<<POST /login>>> to login to retrieve the JWT refresh and access tokens
+   
+   * <<<POST /refresh>>> to refresh the access token
+   
+   * <<<GET /jwks.json>>> to retrieve the JWT keys as per JWKS
+   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/JwtAuthorityHttpServer/${projectVersion}/JwtAuthorityHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+WoOF configuration
+
+  The configuration is the following:
+  
+[./images/JwtAuthorityHttpServer-configuration.png] JwtAuthorityHttpServer screen shot.
+
+  with the following objects:
+  
+%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+
+JWT Authority
+
+  As per the objects above, the {{{/apidocs/net/officefloor/web/jwt/authority/JwtAuthorityManagedObjectSource.html}JwtAuthorityManagedObjectSource}} provides the {{{/apidocs/net/officefloor/web/jwt/authority/JwtAuthority.html}JwtAuthority}}.  This provides the necessary means for creating and refreshing the tokens for a JWT authority server.
+  
+  This requires persisting the keys and depends on a {{{/apidocs/net/officefloor/web/jwt/authority/repository/JwtAuthorityRepository.html}JwtAuthorityRepository}} to provide this persistence.  This allows a cluster of JWT authority servers sharing the same persistent storage of keys.
+
+
+Login
+
+  Login is specific to the JWT authentication server.  It can use it's own store of credentials.  It may use third party Open ID servers.  Once authenticated, then the tokens may be created:
+  
+%{snippet|id=login|file=${basedir}/src/main/java/net/officefloor/tutorial/jwtauthorityhttpserver/JwtTokens.java|ignoreDownloadError=false}
+
+
+Refreshing Access Tokens
+
+  Access tokens, as per JWT, should be short lived.  Refresh tokens maintain the length of the session for the user.  Using a refresh token, access tokens can be obtained until the refresh token expires:
+  
+%{snippet|id=refresh|file=${basedir}/src/main/java/net/officefloor/tutorial/jwtauthorityhttpserver/JwtTokens.java|ignoreDownloadError=false}
+  
+  Once the refresh token is expired, the user is likely required to re-authenticate.  However, this again is application specific, as refresh tokens may be recreated also.
+  
+
+JWKS publishing  
+
+  RFC 7517 defines a format for publishing keys.  The tutorial uses the default {{{/apidocs/net/officefloor/web/jwt/authority/jwks/JwksPublishSectionSource.html}JwksPublishSectionSource}} that adheres to this format to publish keys.
+    
+
+Testing
+
+  The following shows the ease of using the JWT authority:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/jwtauthorityhttpserver/JwtAuthorityHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../JwtHttpServer/index.html}next tutorial}} covers combining JWT security and JWT authority server together for smaller applications.

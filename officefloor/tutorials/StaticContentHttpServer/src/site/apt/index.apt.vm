@@ -1,0 +1,37 @@
+                                               -----------------------
+                                               Static Content Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<Static Content Tutorial>>
+
+  This tutorial demonstrates servicing static content (files) with WoOF.
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/StaticContentHttpServer/${projectVersion}/StaticContentHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  
+
+/PUBLIC
+
+  To have static files served by WoOF, create a <<<PUBLIC>>> folder on the class path.  Any files within this directory will be served as static files by WoOF.
+
+  As anything on the class path <<</PUBLIC/**>>> is served as static files, this gives a lot of flexibility in making the static files of the single page application available:
+  
+   * by copying the files into the built jar
+   
+   * by creating a separate jar containing the static files and adding to the runtime class path
+   
+   * other mechanisms, so the static files can be found by class path lookup
+
+ 
+Testing
+
+  The following shows obtaining the <<<index.html>>> static file:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/staticcontenthttpserver/StaticContentHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../JwtResourceHttpServer/index.html}next tutorial}} covers JWT security.

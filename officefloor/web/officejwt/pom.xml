@@ -29,6 +29,7 @@
 						<configuration>
 							<sources>
 								<source>src/main/impl</source>
+								<source>src/main/test</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -60,7 +61,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

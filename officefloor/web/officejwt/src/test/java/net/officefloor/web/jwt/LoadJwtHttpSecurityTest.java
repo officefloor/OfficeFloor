@@ -1,8 +1,8 @@
 package net.officefloor.web.jwt;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.web.jwt.spi.decode.JwtDecodeCollector;
-import net.officefloor.web.jwt.spi.role.JwtRoleCollector;
+import net.officefloor.web.jwt.role.JwtRoleCollector;
+import net.officefloor.web.jwt.validate.JwtValidateKeyCollector;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.type.HttpSecurityLoaderUtil;
 import net.officefloor.web.security.type.HttpSecurityTypeBuilder;
@@ -33,7 +33,7 @@ public class LoadJwtHttpSecurityTest extends OfficeFrameTestCase {
 		type.setAuthenticationClass(HttpAuthentication.class);
 		type.setAccessControlClass(JwtHttpAccessControl.class);
 		type.setInput(true);
-		type.addFlow(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS, JwtDecodeCollector.class);
+		type.addFlow(JwtHttpSecuritySource.Flows.RETRIEVE_KEYS, JwtValidateKeyCollector.class);
 		type.addFlow(JwtHttpSecuritySource.Flows.RETRIEVE_ROLES, JwtRoleCollector.class);
 		type.addFlow(JwtHttpSecuritySource.Flows.NO_JWT, null);
 		type.addFlow(JwtHttpSecuritySource.Flows.INVALID_JWT, null);
