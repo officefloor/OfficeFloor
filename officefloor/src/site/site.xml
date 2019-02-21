@@ -23,16 +23,30 @@
 			<googleSearch />
 			<sourceLineNumbersEnabled>false</sourceLineNumbersEnabled>
 			<copyrightClass>pull-right</copyrightClass>
+			<gitHub>
+				<projectId>sagenschneider/OfficeFloor</projectId>
+				<ribbonOrientation>right</ribbonOrientation>
+				<ribbonColor>green</ribbonColor>
+			</gitHub>
 		</fluidoSkin>
 	</custom>
 	<body>
 		<head><![CDATA[
 			<!-- shortcut icon -->
 			<link rel="shortcut icon" href="/favicon.ico" />
+			
+			<!-- www.addthis.com (for sharing) -->
+			<script type="text/javascript">
+				$(document).ready(function() {
+					var addThisScript = document.createElement("script");
+					addThisScript.type = 'text/javascript';
+					addThisScript.src = '//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5c6e0c0bac25d2cf';
+					document.body.appendChild(addThisScript);
+				})
+			</script>
 		]]></head>
 		<breadcrumbs>
-			<item name="OfficeFloor"
-				href="./index.html" />
+			<item name="OfficeFloor" href="./index.html" />
 		</breadcrumbs>
 		<menu name="Getting Started">
 			<item name="About" href="./about.html" />
