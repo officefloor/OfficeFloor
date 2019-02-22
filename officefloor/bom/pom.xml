@@ -286,6 +286,18 @@
 				<artifactId>officespring_data</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!-- Identity -->
+			<dependency>
+				<groupId>net.officefloor.identity</groupId>
+				<artifactId>identity</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.identity</groupId>
+				<artifactId>officeidentity_google</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- ================================================ -->
 			<!-- Additional Dependencies -->
 			<!-- ================================================ -->
