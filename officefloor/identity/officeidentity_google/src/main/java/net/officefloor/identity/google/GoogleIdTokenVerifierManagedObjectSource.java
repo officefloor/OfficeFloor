@@ -23,34 +23,6 @@ public class GoogleIdTokenVerifierManagedObjectSource extends AbstractManagedObj
 		implements ManagedObject {
 
 	/**
-	 * Name of {@link Property} for the Google client id.
-	 */
-	private static final String PROPERTY_CLIENT_ID = "google.client.id";
-
-	/**
-	 * {@link JsonFactory}.
-	 */
-	private static final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-
-	/**
-	 * {@link HttpTransport}.
-	 */
-	private static final HttpTransport transport = new NetHttpTransport();
-
-	/**
-	 * Default {@link GoogleIdTokenVerifierFactory}.
-	 */
-	private static final GoogleIdTokenVerifierFactory DEFAULT_FACTORY = (
-			audienceId) -> new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-					.setAudience(Collections.singletonList(audienceId)).build();
-
-	/**
-	 * {@link GoogleIdTokenVerifierFactory} to create the
-	 * {@link GoogleIdTokenVerifier}.
-	 */
-	private static volatile GoogleIdTokenVerifierFactory verifierFactory = DEFAULT_FACTORY;
-
-	/**
 	 * Factory {@link FunctionalInterface} to create the
 	 * {@link GoogleIdTokenVerifier}.
 	 */
@@ -62,18 +34,53 @@ public class GoogleIdTokenVerifierManagedObjectSource extends AbstractManagedObj
 		 *
 		 * @param audienceId Audience identifier.
 		 * @return {@link GoogleIdTokenVerifier}.
+		 * @throws Exception If fails to create the {@link GoogleIdTokenVerifier}.
 		 */
-		GoogleIdTokenVerifier create(String audienceId);
+		GoogleIdTokenVerifier create(String audienceId) throws Exception;
 	}
 
 	/**
-	 * Specifies the {@link GoogleIdTokenVerifierFactory}.
-	 * 
-	 * @param factory {@link GoogleIdTokenVerifierFactory}.
+	 * Context {@link Runnable}.
 	 */
-	public static void setGoogleIdTokenVerifierFactory(GoogleIdTokenVerifierFactory factory) {
-		verifierFactory = (factory != null) ? factory : DEFAULT_FACTORY;
+	@FunctionalInterface
+	public static interface ContextRunnable<T extends Throwable> {
+
+		/**
+		 * {@link Runnable} logic.
+		 * 
+		 * @throws T Potential failure.
+		 */
+		void run() throws T;
 	}
+
+	/**
+	 * Runs the {@link ContextRunnable} with the
+	 * {@link GoogleIdTokenVerifierFactory}.
+	 * 
+	 * @param factory  {@link GoogleIdTokenVerifierFactory}.
+	 * @param runnable {@link ContextRunnable}.
+	 * @throws T Possible failure from {@link ContextRunnable}.
+	 */
+	public static <T extends Throwable> void runWithFactory(GoogleIdTokenVerifierFactory factory,
+			ContextRunnable<T> runnable) throws T {
+		threadLocalVerifierFactory.set(factory);
+		try {
+			runnable.run();
+		} finally {
+			threadLocalVerifierFactory.remove();
+		}
+	}
+
+	/**
+	 * Name of {@link Property} for the Google client id.
+	 */
+	public static final String PROPERTY_CLIENT_ID = "google.client.id";
+
+	/**
+	 * {@link GoogleIdTokenVerifierFactory} to create the
+	 * {@link GoogleIdTokenVerifier}.
+	 */
+	private static ThreadLocal<GoogleIdTokenVerifierFactory> threadLocalVerifierFactory = new ThreadLocal<>();
 
 	/**
 	 * {@link GoogleIdTokenVerifier}.
@@ -93,9 +100,20 @@ public class GoogleIdTokenVerifierManagedObjectSource extends AbstractManagedObj
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 		context.setObjectClass(GoogleIdTokenVerifier.class);
 
+		// Obtain the verifier factory
+		GoogleIdTokenVerifierFactory factory = threadLocalVerifierFactory.get();
+		if (factory == null) {
+
+			// Default verifier factory
+			JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+			HttpTransport transport = new NetHttpTransport();
+			factory = (audienceId) -> new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+					.setAudience(Collections.singletonList(audienceId)).build();
+		}
+
 		// Load the verifier
 		String audienceId = context.getManagedObjectSourceContext().getProperty(PROPERTY_CLIENT_ID);
-		this.verifier = verifierFactory.create(audienceId);
+		this.verifier = factory.create(audienceId);
 	}
 
 	@Override

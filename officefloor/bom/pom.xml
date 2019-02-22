@@ -63,6 +63,7 @@
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.4</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
+		<google-api-version>1.28.0</google-api-version>
 		<gpg-version>1.6</gpg-version>
 		<h2database-version>1.4.197</h2database-version>
 		<hibernate-version>5.4.1.Final</hibernate-version>
@@ -449,6 +450,11 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
 				<version>${commons-text-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.api-client</groupId>
+				<artifactId>google-api-client</artifactId>
+				<version>${google-api-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
