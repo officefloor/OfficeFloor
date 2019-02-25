@@ -64,6 +64,7 @@
 		<eclipse-persistence-jpa-version>2.7.4</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<google-api-version>1.28.0</google-api-version>
+		<google-appengine-version>1.9.71</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<h2database-version>1.4.197</h2database-version>
 		<hibernate-version>5.4.1.Final</hibernate-version>
@@ -81,6 +82,7 @@
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.33.Final</netty-version>
+		<objectify-version>6.0.2</objectify-version>
 		<postgresql-version>42.2.5</postgresql-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<servlet-version>4.0.1</servlet-version>
@@ -467,6 +469,17 @@
 				<groupId>com.google.api-client</groupId>
 				<artifactId>google-api-client</artifactId>
 				<version>${google-api-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.googlecode.objectify</groupId>
+				<artifactId>objectify</artifactId>
+				<version>${objectify-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.appengine</groupId>
+				<artifactId>appengine-testing</artifactId>
+				<version>${google-appengine-version}</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
