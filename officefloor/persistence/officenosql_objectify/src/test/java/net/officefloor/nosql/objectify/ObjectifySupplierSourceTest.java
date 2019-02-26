@@ -11,10 +11,10 @@ import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.annotation.Entity;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
-import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
-import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.supplier.SupplierLoaderUtil;
+import net.officefloor.compile.test.supplier.SupplierTypeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
@@ -28,11 +28,11 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
- * Tests {@link ObjectifyManagedObjectSource}.
+ * Tests {@link ObjectifySupplierSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ObjectifyManagedObjectSourceTest extends OfficeFrameTestCase {
+public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link OfficeFloor}.
@@ -50,16 +50,17 @@ public class ObjectifyManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Validate specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil.validateSpecification(ObjectifyManagedObjectSource.class);
+		SupplierLoaderUtil.validateSpecification(ObjectifySupplierSource.class);
 	}
 
 	/**
 	 * Validate type.
 	 */
 	public void testType() {
-		ManagedObjectTypeBuilder type = ManagedObjectLoaderUtil.createManagedObjectTypeBuilder();
-		type.setObjectClass(Objectify.class);
-		ManagedObjectLoaderUtil.validateManagedObjectType(type, ObjectifyManagedObjectSource.class);
+		SupplierTypeBuilder type = SupplierLoaderUtil.createSupplierTypeBuilder();
+		type.addSuppliedManagedObjectSource(null, Objectify.class, null);
+		type.addThreadSynchroniser();
+		SupplierLoaderUtil.validateSupplierType(type, ObjectifySupplierSource.class);
 	}
 
 	/**
@@ -204,7 +205,7 @@ public class ObjectifyManagedObjectSourceTest extends OfficeFrameTestCase {
 		try {
 
 			// Easy access to test
-			ObjectifyManagedObjectSourceTest test = this;
+			ObjectifySupplierSourceTest test = this;
 
 			// Configure rule
 			ObjectifyRule rule = new ObjectifyRule();
@@ -228,11 +229,10 @@ public class ObjectifyManagedObjectSourceTest extends OfficeFrameTestCase {
 						office.enableAutoWireTeams();
 
 						// Add Objectify
-						OfficeManagedObjectSource objectify = office.addOfficeManagedObjectSource("OBJECTIFY",
-								ObjectifyManagedObjectSource.class.getName());
-						objectify.addProperty(ObjectifyManagedObjectSource.PROPERTY_ENTITY_LOCATORS,
+						OfficeSupplier objectify = office.addSupplier("OBJECTIFY",
+								ObjectifySupplierSource.class.getName());
+						objectify.addProperty(ObjectifySupplierSource.PROPERTY_ENTITY_LOCATORS,
 								MockEntity.class.getName());
-						objectify.addOfficeManagedObject("OBJECTIFY", ManagedObjectScope.THREAD);
 
 						// Add capture of return value
 						office.addOfficeManagedObjectSource("RETURN", new Singleton(returnResult))

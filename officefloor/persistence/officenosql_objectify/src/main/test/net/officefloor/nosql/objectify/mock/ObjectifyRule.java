@@ -1,5 +1,7 @@
 package net.officefloor.nosql.objectify.mock;
 
+import java.io.IOException;
+import java.util.Deque;
 import java.util.List;
 
 import org.junit.Rule;
@@ -17,7 +19,8 @@ import com.googlecode.objectify.cmd.LoadType;
 import com.googlecode.objectify.cmd.Query;
 import com.googlecode.objectify.util.Closeable;
 
-import net.officefloor.nosql.objectify.ObjectifyManagedObjectSource;
+import net.officefloor.nosql.objectify.ObjectifySupplierSource;
+import net.officefloor.nosql.objectify.ObjectifyThreadSynchroniserFactory;
 
 /**
  * {@link Rule} for running {@link Objectify} with local {@link Datastore}.
@@ -32,6 +35,12 @@ public class ObjectifyRule implements TestRule {
 	private static LocalDatastoreHelper dataStore = null;
 
 	/**
+	 * Failure to start the {@link LocalDatastoreHelper}. Typically because emulator
+	 * not available.
+	 */
+	private static IOException dataStoreFailure = null;
+
+	/**
 	 * Timeout in obtaining entities.
 	 */
 	private long timeout = 3 * 1000;
@@ -42,11 +51,34 @@ public class ObjectifyRule implements TestRule {
 	private long retry = 10;
 
 	/**
+	 * {@link ObjectifyFactory}. Only available within context of rule.
+	 */
+	private ObjectifyFactory objectifyFactory = null;
+
+	/**
+	 * Possible {@link Closeable} for {@link Objectify}.
+	 */
+	private Closeable closable = null;
+
+	/**
 	 * Obtains the {@link Objectify}.
 	 * 
 	 * @return {@link Objectify}.
 	 */
 	public Objectify ofy() {
+
+		// Ensure within context
+		this.ensureWithinRule("ofy()");
+
+		// Determine if need to start context
+		Deque<Objectify> stack = ObjectifyThreadSynchroniserFactory.getStack(this.objectifyFactory);
+		if (stack.isEmpty()) {
+
+			// Start for running within rule
+			this.closable = ObjectifyService.begin();
+		}
+
+		// Return context specific objectify
 		return ObjectifyService.ofy();
 	}
 
@@ -95,6 +127,9 @@ public class ObjectifyRule implements TestRule {
 	 */
 	public <E> List<E> get(Class<E> type, int expectedSize, TypeLoader<E> loader) throws TimeoutException {
 
+		// Ensure within rule
+		this.ensureWithinRule("get(...)");
+
 		// Attempt to load entities
 		long endTime = System.currentTimeMillis() + this.timeout;
 		List<E> entities = null;
@@ -126,6 +161,17 @@ public class ObjectifyRule implements TestRule {
 		return entities;
 	}
 
+	/**
+	 * Ensures within rule.
+	 * 
+	 * @param methodName Name of method attempting to be invoked.
+	 */
+	private void ensureWithinRule(String methodName) {
+		if (this.objectifyFactory == null) {
+			throw new IllegalStateException("Must execute " + methodName + " within context of rule");
+		}
+	}
+
 	/*
 	 * ================= TestRule =======================
 	 */
@@ -135,6 +181,7 @@ public class ObjectifyRule implements TestRule {
 
 		// Ensure start up the local data store
 		boolean isStart = false;
+		boolean[] isStarted = new boolean[] { false };
 		if (dataStore == null) {
 			dataStore = LocalDatastoreHelper.create();
 			isStart = true;
@@ -142,7 +189,11 @@ public class ObjectifyRule implements TestRule {
 			// Add shutdown hook
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 				try {
-					dataStore.stop();
+					synchronized (isStarted) {
+						if (isStarted[0]) {
+							dataStore.stop();
+						}
+					}
 				} catch (Exception ex) {
 					System.err.println("Failed to shutdown " + LocalDatastoreHelper.class.getSimpleName());
 					ex.printStackTrace();
@@ -157,27 +208,66 @@ public class ObjectifyRule implements TestRule {
 			@Override
 			public void evaluate() throws Throwable {
 
+				// Easy access to rule
+				ObjectifyRule rule = ObjectifyRule.this;
+
+				// Determine if data store failure
+				if (dataStoreFailure != null) {
+					throw dataStoreFailure;
+				}
+
 				// Start DataStore (if required)
 				if (finalIsStart) {
-					dataStore.start();
+					try {
+						dataStore.start();
+
+						// Indicated successfully started
+						synchronized (isStarted) {
+							isStarted[0] = true;
+						}
+
+					} catch (IOException ex) {
+
+						// Indicate that needs Internet connection to download emulator
+						String message = "ERROR: " + ex.getMessage() + " (" + LocalDatastoreHelper.class.getSimpleName()
+								+ " typically requires Internet access to download the emulator)";
+						System.err.println(message);
+						dataStoreFailure = new IOException(message);
+						throw dataStoreFailure;
+					}
 				}
 
 				// Reset DataStore for test
 				dataStore.reset();
 
 				// Initialise Objectify
-				ObjectifyFactory factory = new ObjectifyFactory(dataStore.getOptions().getService());
-				ObjectifyService.init(factory);
+				rule.objectifyFactory = new ObjectifyFactory(dataStore.getOptions().getService());
 
 				// Run the test (with objectify session)
-				Closeable closable = ObjectifyService.begin();
 				try {
-					ObjectifyManagedObjectSource.setObjectifyFactoryManufacturer(() -> factory);
+
+					// Initialise service with factory (in case of use before managed object source)
+					ObjectifyService.init(rule.objectifyFactory);
+
+					// Flag to use the objectify factory
+					ObjectifySupplierSource.setObjectifyFactoryManufacturer(() -> rule.objectifyFactory);
+
+					// Undertake test
 					base.evaluate();
+
 				} finally {
-					ObjectifyManagedObjectSource.setObjectifyFactoryManufacturer(null);
+
+					// Clear factory from being used
+					ObjectifySupplierSource.setObjectifyFactoryManufacturer(null);
+
+					// Complete all pending futures
 					PendingFutures.completeAllPendingFutures();
-					closable.close();
+
+					// Ensure close possible active stack
+					if (rule.closable != null) {
+						rule.closable.close();
+						rule.closable = null;
+					}
 				}
 			}
 		};

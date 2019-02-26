@@ -182,8 +182,12 @@ public class SupplierLoaderUtil {
 			ManagedObjectSource<?, ?> aManagedObjectSource = aMos.getManagedObjectSource();
 			Assert.assertNotNull("Should have " + ManagedObjectSource.class.getSimpleName() + suffix,
 					aManagedObjectSource);
-			Assert.assertEquals("Incorrect " + ManagedObjectSource.class.getSimpleName() + suffix,
-					eMos.getManagedObjectSource().getClass(), aManagedObjectSource.getClass());
+			ManagedObjectSource<?, ?> eMosSource = eMos.getManagedObjectSource();
+			if (eMosSource != null) {
+				// Only check if provided (null to match anything)
+				Assert.assertEquals("Incorrect " + ManagedObjectSource.class.getSimpleName() + suffix,
+						eMos.getManagedObjectSource().getClass(), aManagedObjectSource.getClass());
+			}
 
 			// Ensure correct properties
 			Iterator<Property> eProperties = eMos.getPropertyList().iterator();
