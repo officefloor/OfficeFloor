@@ -153,7 +153,8 @@ public class ObjectifyRule implements TestRule {
 			}
 
 			// Load the entity list
-			entities = loader.load(this.ofy().load().type(type)).list();
+			LoadType<E> loadType = this.ofy().load().type(type);
+			entities = ((loader != null) ? loader.load(loadType) : loadType).list();
 
 		} while (entities.size() < expectedSize);
 
@@ -265,7 +266,11 @@ public class ObjectifyRule implements TestRule {
 
 					// Ensure close possible active stack
 					if (rule.closable != null) {
-						rule.closable.close();
+						try {
+							rule.closable.close();
+						} catch (IllegalStateException ex) {
+							// best attempt to close (as may already be closed by managed object
+						}
 						rule.closable = null;
 					}
 				}

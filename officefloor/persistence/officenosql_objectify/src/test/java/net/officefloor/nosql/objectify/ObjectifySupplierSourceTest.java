@@ -147,14 +147,14 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	 * Ensure can work across methods.
 	 */
 	public void testAcrossMethods() {
-		this.doObjectifyTest(AcrossMethods.class, (ObjectifyRule rule, MockEntity result) -> {
+		this.doObjectifyTest(AcrossMethodsSection.class, (ObjectifyRule rule, MockEntity result) -> {
 			List<MockEntity> entities = rule.get(MockEntity.class, 2, (loader) -> loader.order("indexedIntegerValue"));
 			assertEquals("Incorrect first entity", "one", entities.get(0).getStringValue());
 			assertEquals("Incorrect second entry", "two", entities.get(1).getStringValue());
 		});
 	}
 
-	public static class AcrossMethods {
+	public static class AcrossMethodsSection {
 
 		@NextFunction("other")
 		public void service(Objectify objectify) {
@@ -170,14 +170,14 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	 * Ensure can work across {@link Team} instances.
 	 */
 	public void testAcrossTeams() {
-		this.doObjectifyTest(AcrossTeams.class, (ObjectifyRule rule, MockEntity result) -> {
+		this.doObjectifyTest(AcrossTeamsSection.class, (ObjectifyRule rule, MockEntity result) -> {
 			List<MockEntity> entities = rule.get(MockEntity.class, 2, (loader) -> loader.order("indexedIntegerValue"));
 			assertEquals("Incorrect first entity", "one", entities.get(0).getStringValue());
 			assertEquals("Incorrect second entry", "two", entities.get(1).getStringValue());
 		});
 	}
 
-	public static class AcrossTeams {
+	public static class AcrossTeamsSection {
 
 		@NextFunction("otherTeam")
 		public Thread service(Objectify objectify) {
@@ -189,6 +189,47 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 			assertNotNull("Should have original thread", originalThread);
 			assertNotEquals("Should be different thread", originalThread, Thread.currentThread());
 			objectify.save().entities(new MockEntity(null, "two", "second", 4, 8)).now();
+		}
+	}
+
+	/**
+	 * Ensure can register {@link Entity} instances via
+	 * {@link ObjectifyEntityLocatorServiceFactory}.
+	 */
+	public void testServiceRegisteredEntity() {
+		this.doObjectifyTest(ServiceRegisteredEntitySection.class,
+				(ObjectifyRule rule, ServiceRegisteredEntity entity) -> {
+					ServiceRegisteredEntity retrieved = rule.get(ServiceRegisteredEntity.class, null);
+					assertEquals("Incorrect retrieved", entity.getId(), retrieved.getId());
+					assertEquals("Incorrect value", "TEST", retrieved.getTest());
+				});
+	}
+
+	public static class ServiceRegisteredEntitySection {
+		public void service(Objectify objectify, ThreadSafeClosure<ServiceRegisteredEntity> closure) {
+			ServiceRegisteredEntity entity = new ServiceRegisteredEntity(null, "TEST");
+			objectify.save().entities(entity).now();
+			closure.set(entity);
+		}
+	}
+
+	/**
+	 * Ensure can use {@link ObjectifyEntityLocator} configured in properties.
+	 */
+	public void testLocatedEntity() {
+		this.doObjectifyTest(LocatedEntitySection.class, (ObjectifyRule rule, LocatedEntity entity) -> {
+			LocatedEntity retrieved = rule.get(LocatedEntity.class, null);
+			assertEquals("Incorrect retrieved", entity.getId(), retrieved.getId());
+			assertEquals("Incorrect value", "TEST", retrieved.getLocation());
+		}, ObjectifySupplierSource.PROPERTY_ENTITY_LOCATORS,
+				MockEntity.class.getName() + " , " + MockObjectifyEntityLocator.class.getName() + " ");
+	}
+
+	public static class LocatedEntitySection {
+		public void service(Objectify objectify, ThreadSafeClosure<LocatedEntity> closure) {
+			LocatedEntity entity = new LocatedEntity(null, "TEST");
+			objectify.save().entities(entity).now();
+			closure.set(entity);
 		}
 	}
 
@@ -231,8 +272,18 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 						// Add Objectify
 						OfficeSupplier objectify = office.addSupplier("OBJECTIFY",
 								ObjectifySupplierSource.class.getName());
-						objectify.addProperty(ObjectifySupplierSource.PROPERTY_ENTITY_LOCATORS,
-								MockEntity.class.getName());
+						if (propertyConfiguredEntityTypes.length == 0) {
+							// Load the default entity for testing
+							objectify.addProperty(ObjectifySupplierSource.PROPERTY_ENTITY_LOCATORS,
+									MockEntity.class.getName());
+						} else {
+							// Load the test properties
+							for (int i = 0; i < propertyConfiguredEntityTypes.length; i += 2) {
+								String name = propertyConfiguredEntityTypes[i];
+								String value = propertyConfiguredEntityTypes[i + 1];
+								objectify.addProperty(name, value);
+							}
+						}
 
 						// Add capture of return value
 						office.addOfficeManagedObjectSource("RETURN", new Singleton(returnResult))

@@ -1,0 +1,34 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/posts" secure="false" x="79" y="35">
+      <section name="Logic" input="retrieveAllPosts"/>
+    </http-continuation>
+    <http-continuation path="/posts/{id}" secure="false" x="55" y="82">
+      <section name="Logic" input="retrievePost"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/posts" method="POST" secure="false" x="71" y="141">
+      <section name="Logic" input="savePost"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="Logic" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.objectifyhttpserver.ObjectifyLogic" x="278" y="52">
+      <input name="retrieveAllPosts" parameter-type=""/>
+      <input name="retrievePost" parameter-type=""/>
+      <input name="savePost" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

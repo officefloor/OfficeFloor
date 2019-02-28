@@ -117,7 +117,29 @@ public class ObjectifySupplierSource extends AbstractSupplierSource {
 
 				// Include the entity class
 				Class<?> entityLocatorClass = context.loadClass(entityLocatorClassName.trim());
-				entityTypes.add(entityLocatorClass);
+
+				// Determine if entity locator
+				if (ObjectifyEntityLocator.class.isAssignableFrom(entityLocatorClass)) {
+
+					// Load the located entities
+					ObjectifyEntityLocator locator = (ObjectifyEntityLocator) entityLocatorClass.getConstructor()
+							.newInstance();
+					for (Class<?> entity : locator.locateEntities()) {
+						entityTypes.add(entity);
+					}
+
+				} else {
+					// Not locator, so assume the entity
+					entityTypes.add(entityLocatorClass);
+				}
+			}
+		}
+
+		// Load from services
+		for (ObjectifyEntityLocator locator : context
+				.loadOptionalServices(ObjectifyEntityLocatorServiceFactory.class)) {
+			for (Class<?> entity : locator.locateEntities()) {
+				entityTypes.add(entity);
 			}
 		}
 

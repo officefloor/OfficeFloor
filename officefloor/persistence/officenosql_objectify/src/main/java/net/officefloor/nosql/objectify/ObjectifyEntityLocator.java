@@ -17,6 +17,6 @@ public interface ObjectifyEntityLocator {
 	 * @throws Exception If fails to locate the {@link Objectify} {@link Entity}
 	 *                   types.
 	 */
-	Class<?> locateEntities() throws Exception;
+	Class<?>[] locateEntities() throws Exception;
 
 }
