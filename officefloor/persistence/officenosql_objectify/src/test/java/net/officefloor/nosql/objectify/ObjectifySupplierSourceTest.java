@@ -56,11 +56,19 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Validate type.
 	 */
-	public void testType() {
-		SupplierTypeBuilder type = SupplierLoaderUtil.createSupplierTypeBuilder();
-		type.addSuppliedManagedObjectSource(null, Objectify.class, null);
-		type.addThreadSynchroniser();
-		SupplierLoaderUtil.validateSupplierType(type, ObjectifySupplierSource.class);
+	public void testType() throws Throwable {
+		ObjectifyRule rule = new ObjectifyRule();
+		Closure<SupplierTypeBuilder> type = new Closure<>();
+		rule.apply(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				SupplierTypeBuilder buider = SupplierLoaderUtil.createSupplierTypeBuilder();
+				buider.addSuppliedManagedObjectSource(null, Objectify.class, null);
+				buider.addThreadSynchroniser();
+				type.value = buider;
+			}
+		}, null).evaluate();
+		SupplierLoaderUtil.validateSupplierType(type.value, ObjectifySupplierSource.class);
 	}
 
 	/**
