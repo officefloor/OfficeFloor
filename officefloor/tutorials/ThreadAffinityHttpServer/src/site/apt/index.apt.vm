@@ -69,5 +69,5 @@ ExecutiveSource
 
 Next
 
-  The {{{../PrototypeHttpServer/index.html}next tutorial}} covers creating quick prototype applications.
+  The {{{../ObjectifyHttpServer/index.html}next tutorial}} covers using Objectify for the Google App Engine DataStore.
 
