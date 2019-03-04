@@ -21,14 +21,15 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class GoogleSigninHttpServerTest {
 
-	private static ObjectMapper mapper = new ObjectMapper();
-
+	// START SNIPPET: tutorial
 	private GoogleIdTokenRule googleSignin = new GoogleIdTokenRule();
 
 	private MockWoofServerRule server = new MockWoofServerRule();
 
 	@Rule
 	public RuleChain order = RuleChain.outerRule(this.googleSignin).around(this.server);
+
+	private static ObjectMapper mapper = new ObjectMapper();
 
 	@Test
 	public void ensureLogin() throws Exception {
@@ -41,5 +42,6 @@ public class GoogleSigninHttpServerTest {
 				.header("Content-Type", "application/json").entity(mapper.writeValueAsString(new LoginRequest(token))));
 		response.assertResponse(200, mapper.writeValueAsString(new LoginResponse("mock@officefloor.net")));
 	}
+	// END SNIPPET: tutorial
 
 }

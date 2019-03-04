@@ -14,6 +14,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class LoginLogic {
 
 	@HttpObject
@@ -41,3 +42,4 @@ public class LoginLogic {
 	}
 
 }
+// END SNIPPET: tutorial
