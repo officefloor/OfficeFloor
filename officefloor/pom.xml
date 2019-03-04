@@ -37,6 +37,7 @@
 		<module>server</module>
 		<module>web</module>
 		<module>persistence</module>
+		<module>identity</module>
 		<module>spring</module>
 		<module>maven</module>
 		<module>eclipse</module>

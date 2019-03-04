@@ -10,6 +10,8 @@ OfficeFloor Tutorials
     
   The tutorials refer to <WoOF>, which stands for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to act as a high performance Web Application Server.  Due to "true" inversion of control, you will see that the prefabricated plug-ins are much more re-usable than simple Dependency Injection framework objects.
   
+  All tutorials are part of the OfficeFloor continuous builds and their source can be found {{{http://github.com/sagenschneider/OfficeFloor/tree/master/officefloor/tutorials}here}}.
+  
 
 *Introduction
 
@@ -65,6 +67,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./JwtHttpServer/index.html}Small JWT Application}}        | Single server with JWT Security and JWT Authority          | Combined JWT Security / Authority
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./GoogleSigninHttpServer/index.html}Google Sign-in}}      | OpenID sign-in via Google                                  | Google OpenID
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
 *More in depth concepts
@@ -83,6 +87,8 @@ OfficeFloor Tutorials
 | {{{./TeamHttpServer/index.html}Thread Injection}}            | Thread injection to performance tune the application.      | Thread Injection
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ThreadAffinityHttpServer/index.html}Thread Affinity}}   | Thread Affinity                                            | Executive
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./ObjectifyHttpServer/index.html}Objectify}}              | Objectify for Google App Engine datastore                  | {{{http://github.com/objectify/objectify/wiki}Objectify}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 

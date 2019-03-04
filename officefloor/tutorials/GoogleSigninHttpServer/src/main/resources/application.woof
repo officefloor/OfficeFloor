@@ -1,0 +1,26 @@
+<woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/login" method="POST" secure="false" x="60" y="66">
+      <section name="Login" input="login"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="Login" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.googlesigninhttpserver.LoginLogic" x="232" y="48">
+      <input name="login" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>
