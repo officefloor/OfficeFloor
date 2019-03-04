@@ -40,7 +40,7 @@ public class Authenticate {
 
 	public void service(AuthenticateRequest idTokenInput, GoogleIdTokenVerifier verifier, Objectify objectify,
 			ObjectResponse<AuthenticateResponse> response) throws Exception {
-
+		
 		// Verify token
 		GoogleIdToken token = verifier.verify(idTokenInput.getIdToken());
 		if (token == null) {

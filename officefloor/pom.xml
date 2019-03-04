@@ -37,6 +37,7 @@
 		<module>server</module>
 		<module>web</module>
 		<module>persistence</module>
+		<module>identity</module>
 		<module>spring</module>
 		<module>maven</module>
 		<module>eclipse</module>
@@ -476,7 +477,7 @@
 				<plugin>
 					<groupId>org.datanucleus</groupId>
 					<artifactId>datanucleus-maven-plugin</artifactId>
-					<version>5.0.2</version>
+					<version>5.2.0-release</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>

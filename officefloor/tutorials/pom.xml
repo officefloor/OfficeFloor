@@ -19,6 +19,7 @@
 		<module>DiPojoHttpServer</module>
 		<module>DynamicHttpServer</module>
 		<module>ExceptionHttpServer</module>
+		<module>GoogleSigninHttpServer</module>
 		<module>GraphicalConfigurationExample</module>
 		<module>HttpServletHttpServer</module>
 		<module>InheritHttpServer</module>
@@ -28,6 +29,7 @@
 		<module>JwtHttpServer</module>
 		<module>JwtResourceHttpServer</module>
 		<module>NavigateHttpServer</module>
+		<module>ObjectifyHttpServer</module>
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
 		<module>RestHttpServer</module>
