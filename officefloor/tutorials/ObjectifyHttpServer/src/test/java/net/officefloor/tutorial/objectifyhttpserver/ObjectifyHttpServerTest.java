@@ -22,6 +22,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class ObjectifyHttpServerTest {
 
+	// START SNIPPET: tutorial
 	private ObjectifyRule objectify = new ObjectifyRule();
 
 	private MockWoofServerRule server = new MockWoofServerRule();
@@ -44,6 +45,7 @@ public class ObjectifyHttpServerTest {
 		Post created = this.objectify.get(Post.class, null);
 		assertEquals("Incorrect post", "TEST", created.getMessage());
 	}
+	// END SNIPPET: tutorial
 
 	@Test
 	public void ensureRetrievePost() throws Exception {

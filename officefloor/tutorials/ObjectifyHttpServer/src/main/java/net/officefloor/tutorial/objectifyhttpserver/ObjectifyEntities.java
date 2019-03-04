@@ -10,6 +10,7 @@ import net.officefloor.nosql.objectify.ObjectifyEntityLocator;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class ObjectifyEntities implements ObjectifyEntityLocator {
 
 	@Override
@@ -18,3 +19,4 @@ public class ObjectifyEntities implements ObjectifyEntityLocator {
 	}
 
 }
+// END SNIPPET: tutorial

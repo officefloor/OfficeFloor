@@ -13,9 +13,10 @@ import net.officefloor.web.HttpObject;
  * 
  * @author Daniel Sagenschneider
  */
-@Data
-@HttpObject
+// START SNIPPET: tutorial
 @Entity
+@HttpObject
+@Data
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Post {
@@ -25,3 +26,4 @@ public class Post {
 
 	private String message;
 }
+// END SNIPPET: tutorial

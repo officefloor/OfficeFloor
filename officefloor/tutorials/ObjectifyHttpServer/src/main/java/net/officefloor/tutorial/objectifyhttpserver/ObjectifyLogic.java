@@ -12,6 +12,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class ObjectifyLogic {
 
 	public void savePost(Post post, Objectify objectify) {
@@ -30,3 +31,4 @@ public class ObjectifyLogic {
 	}
 
 }
+// END SNIPPET: tutorial
