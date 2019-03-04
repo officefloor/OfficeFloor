@@ -74,19 +74,19 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		for (String name : this.context.getBeanDefinitionNames()) {
 			Object bean = this.context.getBean(name);
 			System.out.println(
-					"  " + name + "\t\t(" + bean.getClass().getName() + ") - " + (bean instanceof RowRepository));
+					"  " + name + "\t\t(" + bean.getClass().getName() + ") - " + (bean instanceof RowEntityRepository));
 		}
 
 		// Ensure can obtain repository
-		RowRepository repository = this.context.getBean(RowRepository.class);
+		RowEntityRepository repository = this.context.getBean(RowEntityRepository.class);
 		assertNotNull("Should obtain repository", repository);
 
 		// Add rows
-		repository.save(new Row(null, "One"));
-		repository.save(new Row(null, "Two"));
+		repository.save(new RowEntity(null, "One"));
+		repository.save(new RowEntity(null, "Two"));
 
 		// Ensure can obtain the row
-		List<Row> rows = repository.findByName("One");
+		List<RowEntity> rows = repository.findByName("One");
 		assertEquals("Should find a row", 1, rows.size());
 	}
 
@@ -103,8 +103,8 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		TransactionStatus transaction = transactionManager.getTransaction(null);
 
 		// Save item within the transaction
-		RowRepository repository = this.context.getBean(RowRepository.class);
-		repository.save(new Row(null, "One"));
+		RowEntityRepository repository = this.context.getBean(RowEntityRepository.class);
+		repository.save(new RowEntity(null, "One"));
 
 		// Ensure can find row
 		assertEquals("Should find row", 1, repository.findByName("One").size());
@@ -117,7 +117,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can use {@link RowRepository}.
+	 * Ensure can use {@link RowEntityRepository}.
 	 */
 	public void testInjectRepository() throws Throwable {
 
@@ -129,8 +129,8 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 
 			// Create row
-			Row row = new Row(null, "TEST");
-			this.context.getBean(RowRepository.class).save(row);
+			RowEntity row = new RowEntity(null, "TEST");
+			this.context.getBean(RowEntityRepository.class).save(row);
 
 			// Trigger function to use repository within OfficeFloor
 			Request request = new Request(row.getId());
@@ -147,7 +147,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 		private final Long id;
 
-		private volatile Row row;
+		private volatile RowEntity row;
 
 		private Request(Long id) {
 			this.id = id;
@@ -156,7 +156,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 	public static class GetRowSection {
 
-		public void service(@Parameter Request request, RowRepository repository) {
+		public void service(@Parameter Request request, RowEntityRepository repository) {
 			request.row = repository.findById(request.id).get();
 		}
 	}
@@ -185,7 +185,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	private void doInjectTransactionTest(boolean isDifferentTeam) throws Throwable {
 
 		// Obtain the repository
-		RowRepository repository = this.context.getBean(RowRepository.class);
+		RowEntityRepository repository = this.context.getBean(RowEntityRepository.class);
 
 		// Test transaction within OfficeFloor
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -227,7 +227,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			clearTeams.run();
 			TransactionInjectRequest commit = new TransactionInjectRequest(true);
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", commit);
-			Row committedRow = repository.findById(commit.row.getId()).get();
+			RowEntity committedRow = repository.findById(commit.row.getId()).get();
 			assertNotNull("Should have committed row", committedRow);
 			assertEquals("Incorrect committed row", "COMMIT", committedRow.getName());
 			checkTeams.run();
@@ -246,7 +246,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 		private final boolean isCommit;
 
-		private volatile Row row;
+		private volatile RowEntity row;
 
 		private TransactionInjectRequest(boolean isCommit) {
 			this.isCommit = isCommit;
@@ -271,10 +271,10 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		private static volatile Thread transactionThread;
 
 		public void service(@Parameter TransactionInjectRequest request, PlatformTransactionManager transactionManager,
-				RowRepository repository, TransactionFlows flows) {
+				RowEntityRepository repository, TransactionFlows flows) {
 			serviceThread = Thread.currentThread();
 			TransactionStatus transaction = transactionManager.getTransaction(null);
-			request.row = new Row(null, request.isCommit ? "COMMIT" : "ROLLBACK");
+			request.row = new RowEntity(null, request.isCommit ? "COMMIT" : "ROLLBACK");
 			repository.save(request.row);
 			if (request.isCommit) {
 				flows.commit(transaction);
@@ -284,7 +284,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		}
 
 		public void commit(@Parameter TransactionStatus transaction, PlatformTransactionManager transactionManager,
-				RowRepository repository, TeamMarker marker) {
+				RowEntityRepository repository, TeamMarker marker) {
 			transactionThread = Thread.currentThread();
 			assertEquals("Should have row before commit", 1, repository.findByName("COMMIT").size());
 			transactionManager.commit(transaction);
@@ -292,7 +292,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		}
 
 		public void rollback(@Parameter TransactionStatus transaction, PlatformTransactionManager transactionManager,
-				RowRepository repository, TeamMarker marker) {
+				RowEntityRepository repository, TeamMarker marker) {
 			transactionThread = Thread.currentThread();
 			assertEquals("Should have row before rollback", 1, repository.findByName("ROLLBACK").size());
 			transactionManager.rollback(transaction);
@@ -324,7 +324,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 	private void doTransactionGovernanceTest(boolean isDifferentTeam) throws Throwable {
 
 		// Obtain the repository
-		RowRepository repository = this.context.getBean(RowRepository.class);
+		RowEntityRepository repository = this.context.getBean(RowEntityRepository.class);
 
 		// Test transaction within OfficeFloor
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -386,7 +386,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 			clearTeams.run();
 			TransactionGovernanceRequest commit = new TransactionGovernanceRequest(null);
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", commit);
-			Row committedRow = repository.findById(commit.row.getId()).get();
+			RowEntity committedRow = repository.findById(commit.row.getId()).get();
 			assertNotNull("Should have committed row", committedRow);
 			assertEquals("Incorrect committed row", "COMMIT", committedRow.getName());
 			checkTeams.run();
@@ -411,7 +411,7 @@ public class SpringDataTest extends OfficeFrameTestCase {
 
 		private final Exception failTransactionException;
 
-		private volatile Row row;
+		private volatile RowEntity row;
 
 		private TransactionGovernanceRequest(Exception failTransactionException) {
 			this.failTransactionException = failTransactionException;
@@ -425,10 +425,10 @@ public class SpringDataTest extends OfficeFrameTestCase {
 		private static volatile Thread nextThread;
 
 		@NextFunction("next")
-		public TransactionGovernanceRequest service(RowRepository repository,
+		public TransactionGovernanceRequest service(RowEntityRepository repository,
 				@Parameter TransactionGovernanceRequest request) {
 			serviceThread = Thread.currentThread();
-			request.row = new Row(null, request.failTransactionException != null ? "ROLLBACK" : "COMMIT");
+			request.row = new RowEntity(null, request.failTransactionException != null ? "ROLLBACK" : "COMMIT");
 			repository.save(request.row);
 			return request;
 		}

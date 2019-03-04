@@ -17,30 +17,19 @@
  */
 package net.officefloor.spring.data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 /**
- * Row in database.
+ * {@link Repository} for {@link RowEntity}.
  * 
  * @author Daniel Sagenschneider
  */
-@Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class Row {
+@Repository
+public interface RowEntityRepository extends CrudRepository<RowEntity, Long> {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
-
-	private String name;
+	List<RowEntity> findByName(String name);
 
 }
