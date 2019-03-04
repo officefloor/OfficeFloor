@@ -1,0 +1,47 @@
+                                               -----------------------
+                                               Google Sign-in Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<Google Sign-in Tutorial>>
+
+  This tutorial demonstrates {{{https://developers.google.com/identity/sign-in/web/}Google Sign-in}} integrated into WoOF.
+   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/GoogleSigninHttpServer/${projectVersion}/GoogleSigninHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Sign-in JavaScript
+
+  The Google Sign-on tutorial page is the following, as per {{{https://developers.google.com/identity/sign-in/web/}Google Sign-in}}.  Note that JQuery has been used, however any supported web / mobile front-end technology can be used.
+      
+%{snippet|file=${basedir}/src/main/resources/PUBLIC/index.html|ignoreDownloadError=false}
+
+  This will use the Google sign-in features and send the Google Id Token to WoOF to login in the user.  This is confirmed by displaying the user's email (sent back from the WoOF server).
+
+
+
+Configuring Google Sign-in Integration
+
+  Google sign-in is configured in <<<application.objects>>> as follows:
+  
+%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  This is used by the following service method to verify the user login and send back the email:
+    
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/googlesigninhttpserver/LoginLogic.java|ignoreDownloadError=false}
+    
+
+
+Testing
+
+  To avoid having to call Google with real users, the {{{/apidocs/net/officefloor/identity/google/mock/GoogleIdTokenRule.html}GoogleIdTokenRule}} creates mock tokens for unit testing.
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/googlesigninhttpserver/GoogleSigninHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringHttpServer/index.html}next tutorial}} covers integrating Spring beans into OfficeFloor.
