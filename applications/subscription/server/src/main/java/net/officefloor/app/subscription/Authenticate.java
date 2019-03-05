@@ -12,12 +12,14 @@ import com.googlecode.objectify.Ref;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.officefloor.app.subscription.jwt.JwtCredentials;
 import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.jwt.authority.JwtAuthority;
 
 /**
  * Provides authentication.
@@ -33,14 +35,16 @@ public class Authenticate {
 	}
 
 	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class AuthenticateResponse {
-		private final boolean isSuccessful;
-		private final String error;
+		private String refreshToken;
+		private String accessToken;
 	}
 
 	public void service(AuthenticateRequest idTokenInput, GoogleIdTokenVerifier verifier, Objectify objectify,
-			ObjectResponse<AuthenticateResponse> response) throws Exception {
-		
+			JwtAuthority<JwtCredentials> authority, ObjectResponse<AuthenticateResponse> response) throws Exception {
+
 		// Verify token
 		GoogleIdToken token = verifier.verify(idTokenInput.getIdToken());
 		if (token == null) {
@@ -51,8 +55,7 @@ public class Authenticate {
 		Payload payload = token.getPayload();
 		Boolean emailVerified = payload.getEmailVerified();
 		if ((emailVerified == null) || (!emailVerified)) {
-			response.send(new AuthenticateResponse(false, "Please verify your email"));
-			return;
+			throw new HttpException(HttpStatus.FORBIDDEN, new IllegalStateException("Must verify your email"));
 		}
 
 		// Obtain the user details
@@ -65,7 +68,7 @@ public class Authenticate {
 		List<GoogleSignin> logins = objectify.load().type(GoogleSignin.class).filter("googleId", googleId).list();
 
 		// Update or create the user
-		objectify.transact(() -> {
+		User loggedInUser = objectify.transact(() -> {
 			GoogleSignin login;
 			User user;
 			if (logins.size() > 0) {
@@ -92,10 +95,16 @@ public class Authenticate {
 				login.setPhotoUrl(photoUrl);
 				ObjectifyService.ofy().save().entity(login).now();
 			}
+			return user;
 		});
 
+		// Create the JWT refresh and access token
+		JwtCredentials credentials = new JwtCredentials(loggedInUser.getId());
+		String refreshToken = authority.createRefreshToken(credentials);
+		String accessToken = authority.createAccessToken(credentials);
+
 		// Indicate successfully authenticated
-		response.send(new AuthenticateResponse(true, null));
+		response.send(new AuthenticateResponse(refreshToken, accessToken));
 	}
 
 }

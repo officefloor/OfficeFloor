@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.officefloor.app.subscription.Authenticate.AuthenticateRequest;
 import net.officefloor.app.subscription.Authenticate.AuthenticateResponse;
 import net.officefloor.app.subscription.store.GoogleSignin;
+import net.officefloor.app.subscription.store.User;
 import net.officefloor.identity.google.mock.GoogleIdTokenRule;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.server.http.HttpMethod;
@@ -46,16 +47,26 @@ public class AuthenticateTest {
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/authenticate").method(HttpMethod.POST)
 				.header("Content-Type", "application/json")
 				.entity(this.mapper.writeValueAsString(new AuthenticateRequest(token))));
-
-		// Ensure successfully authenticated
-		response.assertResponse(200, this.mapper.writeValueAsString(new AuthenticateResponse(true, null)));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure login created in store
-		GoogleSignin user = this.obectify.get(GoogleSignin.class,
+		GoogleSignin login = this.obectify.get(GoogleSignin.class,
 				(load) -> load.filter("email", "daniel@officefloor.net"));
-		assertNotNull("Should have the user", user);
+		assertNotNull("Should have the login", login);
+		assertEquals("Incorrect name", "Daniel Sagenschneider", login.getName());
+		assertEquals("Incorrect photoUrl", "http://officefloor.net/photo.png", login.getPhotoUrl());
+
+		// Ensure user created in store
+		User user = this.obectify.get(User.class, (load) -> load.filter("email", "daniel@officefloor.net"));
+		assertEquals("Incorrect user", user.getId(), login.getUser().get().getId());
 		assertEquals("Incorrect name", "Daniel Sagenschneider", user.getName());
 		assertEquals("Incorrect photoUrl", "http://officefloor.net/photo.png", user.getPhotoUrl());
+
+		// Ensure refresh and access token point to user
+		String entity = response.getEntity(null);
+		AuthenticateResponse authenticateResponse = mapper.readValue(entity, AuthenticateResponse.class);
+		assertNotNull("Should have refresh token", authenticateResponse.getRefreshToken());
+		assertNotNull("Should have access token", authenticateResponse.getAccessToken());
 	}
 
 }

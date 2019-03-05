@@ -11,7 +11,7 @@ public class ObjectifyEntities implements ObjectifyEntityLocator {
 
 	@Override
 	public Class<?>[] locateEntities() throws Exception {
-		return new Class[] { GoogleSignin.class, User.class, Domain.class };
+		return new Class[] { AccessKey.class, RefreshKey.class, GoogleSignin.class, User.class, Domain.class };
 	}
 
 }
