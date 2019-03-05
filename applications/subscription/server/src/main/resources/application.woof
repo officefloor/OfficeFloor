@@ -5,15 +5,19 @@
     <http-input path="{path}" method="OPTIONS" secure="false" x="172" y="92">
       <section name="Cors" input="options"/>
     </http-input>
-    <http-input path="/authenticate" method="POST" secure="false" x="153" y="197">
-      <section name="Authenticate" input="service"/>
+    <http-input path="/authenticate" method="POST" secure="true" x="153" y="197">
+      <section name="Authenticate" input="authenticate"/>
+    </http-input>
+    <http-input path="/refreshAccessToken" method="POST" secure="true" x="133" y="254">
+      <section name="Authenticate" input="refreshAccessToken"/>
     </http-input>
   </http-inputs>
   <templates>
   </templates>
   <sections>
     <section name="Authenticate" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.Authenticate" x="422" y="179">
-      <input name="service" parameter-type=""/>
+      <input name="authenticate" parameter-type=""/>
+      <input name="refreshAccessToken" parameter-type=""/>
     </section>
     <section name="Cors" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.Cors" x="426" y="84">
       <input name="options" parameter-type=""/>

@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.app.subscription.Authenticate.AuthenticateRequest;
 import net.officefloor.app.subscription.Authenticate.AuthenticateResponse;
+import net.officefloor.app.subscription.Authenticate.RefreshRequest;
+import net.officefloor.app.subscription.Authenticate.RefreshResponse;
 import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.identity.google.mock.GoogleIdTokenRule;
@@ -38,14 +40,16 @@ public class AuthenticateTest {
 
 	private final ObjectMapper mapper = new ObjectMapper();
 
+	private AuthenticateResponse authenticateResponse = null;
+
 	@Test
 	public void authenticate() throws Exception {
 
 		// Undertake authentication
 		String token = this.verifier.getMockIdToken("1", "daniel@officefloor.net", "email_verified", "true", "name",
 				"Daniel Sagenschneider", "picture", "http://officefloor.net/photo.png");
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/authenticate").method(HttpMethod.POST)
-				.header("Content-Type", "application/json")
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/authenticate").secure(true)
+				.method(HttpMethod.POST).header("Content-Type", "application/json")
 				.entity(this.mapper.writeValueAsString(new AuthenticateRequest(token))));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
@@ -64,9 +68,28 @@ public class AuthenticateTest {
 
 		// Ensure refresh and access token point to user
 		String entity = response.getEntity(null);
-		AuthenticateResponse authenticateResponse = mapper.readValue(entity, AuthenticateResponse.class);
-		assertNotNull("Should have refresh token", authenticateResponse.getRefreshToken());
-		assertNotNull("Should have access token", authenticateResponse.getAccessToken());
+		this.authenticateResponse = mapper.readValue(entity, AuthenticateResponse.class);
+		assertNotNull("Should have refresh token", this.authenticateResponse.getRefreshToken());
+		assertNotNull("Should have access token", this.authenticateResponse.getAccessToken());
+	}
+
+	@Test
+	public void refreshAccessToken() throws Exception {
+
+		// Authenticate (to get refresh token)
+		this.authenticate();
+		String refreshToken = this.authenticateResponse.getRefreshToken();
+
+		// Refresh the token
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/refreshAccessToken").secure(true)
+				.method(HttpMethod.POST).header("Content-Type", "application/json")
+				.entity(this.mapper.writeValueAsString(new RefreshRequest(refreshToken))));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		RefreshResponse refreshResponse = mapper.readValue(response.getEntity(null), RefreshResponse.class);
+
+		// As using same keys, should be same access token (times to second)
+		assertEquals("Should be same token", this.authenticateResponse.getAccessToken(),
+				refreshResponse.getAccessToken());
 	}
 
 }

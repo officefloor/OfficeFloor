@@ -6,7 +6,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Ref;
 
 import lombok.AllArgsConstructor;
@@ -42,7 +41,7 @@ public class Authenticate {
 		private String accessToken;
 	}
 
-	public void service(AuthenticateRequest idTokenInput, GoogleIdTokenVerifier verifier, Objectify objectify,
+	public void authenticate(AuthenticateRequest idTokenInput, GoogleIdTokenVerifier verifier, Objectify objectify,
 			JwtAuthority<JwtCredentials> authority, ObjectResponse<AuthenticateResponse> response) throws Exception {
 
 		// Verify token
@@ -81,19 +80,19 @@ public class Authenticate {
 				user.setEmail(login.getEmail());
 				user.setName(name);
 				user.setPhotoUrl(photoUrl);
-				ObjectifyService.ofy().save().entities(user, login).now();
+				objectify.save().entities(user, login).now();
 
 			} else {
 				// Load the new user
 				user = new User(email);
 				user.setName(name);
 				user.setPhotoUrl(photoUrl);
-				ObjectifyService.ofy().save().entity(user).now();
+				objectify.save().entity(user).now();
 				login = new GoogleSignin(googleId, email);
 				login.setUser(Ref.create(user));
 				login.setName(name);
 				login.setPhotoUrl(photoUrl);
-				ObjectifyService.ofy().save().entity(login).now();
+				objectify.save().entity(login).now();
 			}
 			return user;
 		});
@@ -103,8 +102,36 @@ public class Authenticate {
 		String refreshToken = authority.createRefreshToken(credentials);
 		String accessToken = authority.createAccessToken(credentials);
 
-		// Indicate successfully authenticated
+		// Send back the tokens
 		response.send(new AuthenticateResponse(refreshToken, accessToken));
+	}
+
+	@Data
+	@HttpObject
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class RefreshRequest {
+		private String refreshToken;
+	}
+
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class RefreshResponse {
+		private String accessToken;
+	}
+
+	public void refreshAccessToken(RefreshRequest refreshRequest, JwtAuthority<JwtCredentials> authority,
+			ObjectResponse<RefreshResponse> response) throws Exception {
+
+		// Obtain the JWT credentials
+		JwtCredentials credentials = authority.decodeRefreshToken(refreshRequest.getRefreshToken());
+
+		// Create new access token
+		String accessToken = authority.createAccessToken(credentials);
+
+		// Send back the access token
+		response.send(new RefreshResponse(accessToken));
 	}
 
 }
