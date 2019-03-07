@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -112,7 +112,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 
 		// Determine if java compiler
 		ClassLoader classLoader = this.mosContext.getClassLoader();
-		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(this.mosContext);
 		if (compiler == null) {
 
 			// Fall back to proxy implementation

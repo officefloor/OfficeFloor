@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.compile;
+package net.officefloor.compile.classes;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -24,7 +24,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * Java compiler to avoid {@link Proxy} implementations.
@@ -40,19 +42,63 @@ public abstract class OfficeFloorJavaCompiler {
 	public static final String SYSTEM_PROPERTY_JAVA_COMPILING = "officefloor.java.compiling";
 
 	/**
+	 * Default {@link OfficeFloorJavaCompiler} implementation {@link Class} name.
+	 */
+	public static final String DEFAULT_OFFICE_FLOOR_JAVA_COMPILER_IMPLEMENTATION = "net.officefloor.compile.impl.classes.OfficeFloorJavaCompilerImpl";
+
+	/**
+	 * {@link OfficeFloorJavaCompiler} implementation {@link Class} name.
+	 */
+	private static final ThreadLocal<String> officeFloorJavaCompilerImplementationClassNameThreadLocal = new ThreadLocal<>();
+
+	/**
 	 * Indicates if the compiler is available.
 	 */
 	private static boolean isCompilerAvailable = true;
 
 	/**
+	 * {@link Runnable} to use with the specified {@link OfficeFloorJavaCompiler}
+	 * implementation.
+	 */
+	@FunctionalInterface
+	public static interface ImplementationRunnable<T extends Throwable> {
+		void run() throws T;
+	}
+
+	/**
+	 * Runs with a particular {@link OfficeFloorJavaCompiler} implementation.
+	 * 
+	 * @param officeFloorJavaCompilerImplementationClassName {@link Class} name of
+	 *                                                       the
+	 *                                                       {@link OfficeFloorJavaCompiler}
+	 *                                                       implementation.
+	 * @param runnable                                       {@link ImplementationRunnable}.
+	 * @throws T Possible {@link Throwable} from {@link ImplementationRunnable}.
+	 */
+	public static <T extends Throwable> void runWithImplementation(
+			String officeFloorJavaCompilerImplementationClassName, ImplementationRunnable<T> runnable) throws T {
+		try {
+			// Specify implementation
+			officeFloorJavaCompilerImplementationClassNameThreadLocal
+					.set(officeFloorJavaCompilerImplementationClassName);
+
+			// Undertake logic
+			runnable.run();
+
+		} finally {
+			// Clear implementation
+			officeFloorJavaCompilerImplementationClassNameThreadLocal.remove();
+		}
+	}
+
+	/**
 	 * Creates a new instance of the {@link OfficeFloorJavaCompiler}.
 	 * 
-	 * @param classLoader {@link ClassLoader} to load existing {@link Class}
-	 *                    instances.
+	 * @param sourceContext {@link SourceContext}.
 	 * @return {@link OfficeFloorJavaCompiler} or <code>null</code> if Java
 	 *         compiling not available.
 	 */
-	public static OfficeFloorJavaCompiler newInstance(ClassLoader classLoader) {
+	public static OfficeFloorJavaCompiler newInstance(SourceContext sourceContext) {
 
 		// Determine if compiling active
 		boolean isActiveCompiling = Boolean
@@ -63,8 +109,16 @@ public abstract class OfficeFloorJavaCompiler {
 
 		// Attempt to load (will fail if Java compiler not available)
 		try {
-			Class<?> implClass = classLoader.loadClass(OfficeFloorJavaCompiler.class.getName() + "Impl");
-			return (OfficeFloorJavaCompiler) implClass.getConstructor(ClassLoader.class).newInstance(classLoader);
+
+			// Obtain the implementation
+			String implementationClassName = officeFloorJavaCompilerImplementationClassNameThreadLocal.get();
+			if (CompileUtil.isBlank(implementationClassName)) {
+				implementationClassName = DEFAULT_OFFICE_FLOOR_JAVA_COMPILER_IMPLEMENTATION;
+			}
+
+			// Load the implementation
+			Class<?> implClass = sourceContext.getClassLoader().loadClass(implementationClassName);
+			return (OfficeFloorJavaCompiler) implClass.getConstructor(SourceContext.class).newInstance(sourceContext);
 
 		} catch (Exception ex) {
 			// Java compiling module not available

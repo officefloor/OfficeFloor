@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
@@ -43,35 +44,28 @@ public class ClassFlowBuilder<A extends Annotation> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param annotationClass
-	 *            {@link Class} of the {@link Annotation}.
+	 * @param annotationClass {@link Class} of the {@link Annotation}.
 	 */
 	public ClassFlowBuilder(Class<A> annotationClass) {
 		this.annotationClass = annotationClass;
 	}
 
 	/**
-	 * Builds the {@link ClassFlowParameterFactory} for the
-	 * {@link FlowInterface} parameter.
+	 * Builds the {@link ClassFlowParameterFactory} for the {@link FlowInterface}
+	 * parameter.
 	 * 
-	 * @param functionName
-	 *            Name of {@link Method} containing the {@link FlowInterface}
-	 *            parameter.
-	 * @param parameterType
-	 *            Interface {@link Class} for the {@link FlowInterface}.
-	 * @param flowSequence
-	 *            {@link Sequence} for the {@link Flow} instances.
-	 * @param flowRegistry
-	 *            {@link ClassFlowRegistry}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @return {@link ClassFlowParameterFactory} or <code>null</code> if
-	 *         parameter is not a {@link FlowInterface}.
-	 * @throws Exception
-	 *             If fails to build the {@link ClassFlowParameterFactory}.
+	 * @param functionName  Name of {@link Method} containing the
+	 *                      {@link FlowInterface} parameter.
+	 * @param parameterType Interface {@link Class} for the {@link FlowInterface}.
+	 * @param flowSequence  {@link Sequence} for the {@link Flow} instances.
+	 * @param flowRegistry  {@link ClassFlowRegistry}.
+	 * @param sourceContext {@link SourceContext}.
+	 * @return {@link ClassFlowParameterFactory} or <code>null</code> if parameter
+	 *         is not a {@link FlowInterface}.
+	 * @throws Exception If fails to build the {@link ClassFlowParameterFactory}.
 	 */
 	public ClassFlowParameterFactory buildFlowParameterFactory(String functionName, Class<?> parameterType,
-			Sequence flowSequence, ClassFlowRegistry flowRegistry, ClassLoader classLoader) throws Exception {
+			Sequence flowSequence, ClassFlowRegistry flowRegistry, SourceContext sourceContext) throws Exception {
 
 		// Determine if flow interface
 		if (!parameterType.isAnnotationPresent(this.annotationClass)) {
@@ -167,7 +161,7 @@ public class ClassFlowBuilder<A extends Annotation> {
 		}
 
 		// Create and return the flow interface parameter factory
-		return new ClassFlowParameterFactory(classLoader, parameterType, flowMethodMetaDatas);
+		return new ClassFlowParameterFactory(sourceContext, parameterType, flowMethodMetaDatas);
 	}
 
 }

@@ -34,7 +34,7 @@ import java.util.function.Consumer;
 import javax.sql.DataSource;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;

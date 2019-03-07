@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.compile;
+package net.officefloor.compile.impl.classes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.tools.Diagnostic;
@@ -45,7 +47,10 @@ import javax.tools.SimpleJavaFileObject;
 import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
 
+import net.officefloor.compile.classes.OfficeFloorClassPathScanner;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.issues.CompileError;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * {@link OfficeFloorJavaCompiler} implementation.
@@ -71,9 +76,9 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	private static final AtomicInteger nextClassIndex = new AtomicInteger(1);
 
 	/**
-	 * {@link ClassLoader}.
+	 * {@link SourceContext}.
 	 */
-	private final ClassLoader classLoader;
+	private final SourceContext sourceContext;
 
 	/**
 	 * {@link JavaCompiler}.
@@ -98,11 +103,11 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param classLoader {@link ClassLoader}.
+	 * @param sourceContext {@link SourceContext}.
 	 */
-	public OfficeFloorJavaCompilerImpl(ClassLoader classLoader) {
-		this.classLoader = classLoader;
-		this.compiledClassLoader = new CompiledClassLoader(this.classLoader);
+	public OfficeFloorJavaCompilerImpl(SourceContext sourceContext) {
+		this.sourceContext = sourceContext;
+		this.compiledClassLoader = new CompiledClassLoader(this.sourceContext.getClassLoader());
 
 		// Obtain the Java Compiler
 		this.javaCompiler = ToolProvider.getSystemJavaCompiler();
@@ -524,7 +529,7 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 
 		// Create in memory file manager
 		OfficeFloorJavaFileManager fileManager = new OfficeFloorJavaFileManager(
-				this.javaCompiler.getStandardFileManager(null, null, null));
+				this.javaCompiler.getStandardFileManager(null, null, null), this.sourceContext);
 		try {
 
 			// Undertake compiling
@@ -654,7 +659,7 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		 */
 
 		@Override
-		protected Class<?> findClass(String name) throws ClassNotFoundException {
+		public Class<?> loadClass(String name) throws ClassNotFoundException {
 
 			// Determine if compiled class
 			ByteArrayOutputStream classDefinition = OfficeFloorJavaCompilerImpl.this.compiledClasses.get(name);
@@ -674,12 +679,21 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	private class OfficeFloorJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> {
 
 		/**
+		 * {@link OfficeFloorClassPathScanner}.
+		 */
+		private OfficeFloorClassPathScanner scanner;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param fileManager {@link JavaFileManager}.
+		 * @param context     {@link SourceContext}.
 		 */
-		protected OfficeFloorJavaFileManager(JavaFileManager fileManager) {
+		protected OfficeFloorJavaFileManager(JavaFileManager fileManager, SourceContext context) {
 			super(fileManager);
+
+			// Create the class path scanner
+			this.scanner = new OfficeFloorClassPathScanner(context);
 		}
 
 		/*
@@ -687,13 +701,61 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		 */
 
 		@Override
+		public Iterable<JavaFileObject> list(Location location, String packageName, Set<Kind> kinds, boolean recurse)
+				throws IOException {
+
+			// Obtain the default list
+			List<JavaFileObject> javaFileObjects = new LinkedList<>();
+			for (JavaFileObject javaFileObject : super.list(location, packageName, kinds, recurse)) {
+				javaFileObjects.add(javaFileObject);
+			}
+
+			// Determine if able to list for package
+			if (javaFileObjects.size() > 0) {
+				return javaFileObjects;
+			}
+
+			// Attempt to scan classes from class path
+			Set<String> classNames = this.scanner.scanClasses(packageName);
+			for (String className : classNames) {
+
+				// Obtain the class resource path
+				String classResourcePath = className.replace('.', '/') + ".class";
+
+				// Add the class
+				try {
+					javaFileObjects.add(new ClassLoadedJavaFileObject(className, Kind.CLASS) {
+						@Override
+						public InputStream openInputStream() throws IOException {
+							return OfficeFloorJavaCompilerImpl.this.sourceContext.getClassLoader()
+									.getResourceAsStream(classResourcePath);
+						}
+					});
+				} catch (URISyntaxException ex) {
+					// Should not occur
+				}
+			}
+
+			// Return list
+			return javaFileObjects;
+		}
+
+		@Override
+		public String inferBinaryName(Location location, JavaFileObject file) {
+			if (file instanceof ClassLoadedJavaFileObject) {
+				return ((ClassLoadedJavaFileObject) file).className;
+			} else {
+				return super.inferBinaryName(location, file);
+			}
+		}
+
+		@Override
 		public JavaFileObject getJavaFileForOutput(Location location, String className, Kind kind, FileObject sibling)
 				throws IOException {
 			try {
 				ByteArrayOutputStream byteCode = new ByteArrayOutputStream();
 				OfficeFloorJavaCompilerImpl.this.compiledClasses.put(className, byteCode);
-				return new SimpleJavaFileObject(new URI(className), kind) {
-
+				return new ClassLoadedJavaFileObject(className, kind) {
 					@Override
 					public OutputStream openOutputStream() throws IOException {
 						return byteCode;
@@ -707,13 +769,37 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 		@Override
 		public ClassLoader getClassLoader(Location location) {
 
-			// Override class loader
+			// Override class loader (to provide existing compiled classes)
 			if (StandardLocation.CLASS_PATH.name().equals(location.getName())) {
 				return OfficeFloorJavaCompilerImpl.this.compiledClassLoader;
 			}
 
 			// Default class loader
 			return super.getClassLoader(location);
+		}
+	}
+
+	/**
+	 * Class loaded {@link JavaFileObject}.
+	 */
+	private static class ClassLoadedJavaFileObject extends SimpleJavaFileObject {
+
+		/**
+		 * {@link Class} name.
+		 */
+		private final String className;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param className {@link Class} name.
+		 * @param kind      {@link Kind}.
+		 * @throws URISyntaxException If fails to create {@link URI} for {@link Class}
+		 *                            name.
+		 */
+		public ClassLoadedJavaFileObject(String className, Kind kind) throws URISyntaxException {
+			super(new URI(className), kind);
+			this.className = className;
 		}
 	}
 

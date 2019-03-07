@@ -26,12 +26,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
@@ -84,23 +85,23 @@ public class ProcessMetaData {
 	 * @param field          {@link Field} receiving the injected process interface.
 	 * @param methodMetaData {@link ProcessMetaData} for the {@link Method}
 	 *                       instances of the process interface.
-	 * @param classLoader    {@link ClassLoader}.
+	 * @param sourceContext  {@link SourceContext}.
 	 * @param executeContext {@link ManagedObjectExecuteContext}.
 	 * @throws Exception If fails to create the proxy for the process interface.
 	 */
-	public ProcessMetaData(Field field, Map<String, ProcessMethodMetaData> methodMetaData, ClassLoader classLoader,
+	public ProcessMetaData(Field field, Map<String, ProcessMethodMetaData> methodMetaData, SourceContext sourceContext,
 			ManagedObjectExecuteContext<Indexed> executeContext) throws Exception {
 		this.field = field;
 		this.methodMetaData = methodMetaData;
 		this.executeContext = executeContext;
 
 		// Determine if the compiler is available
-		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(sourceContext);
 		if (compiler == null) {
 
 			// Compiler not available so fallback to proxy
 			Class<?>[] interfaces = new Class[] { field.getType() };
-			this.flowFactory = (managedObject) -> Proxy.newProxyInstance(classLoader, interfaces,
+			this.flowFactory = (managedObject) -> Proxy.newProxyInstance(sourceContext.getClassLoader(), interfaces,
 					new ProcessInvocationHandler(managedObject));
 		} else {
 			// Create compiled implementation (for performance and reduced GC pressure)

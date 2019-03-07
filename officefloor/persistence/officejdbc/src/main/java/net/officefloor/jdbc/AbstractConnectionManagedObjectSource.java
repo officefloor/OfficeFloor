@@ -31,8 +31,8 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.JavaSource;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler.JavaSource;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -94,7 +94,7 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 		}
 
 		// Provide compiled DataSource
-		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(context.getClassLoader());
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(context);
 		if (compiler == null) {
 
 			// Fall back to proxy implementation
@@ -220,7 +220,7 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 		}
 
 		// Provide compiled ConnectionPooledDataSource
-		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(context.getClassLoader());
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(context);
 		if (compiler == null) {
 
 			// Fall back to proxy implementation

@@ -21,7 +21,7 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectPool;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;

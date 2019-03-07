@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.compile;
+package net.officefloor.compile.impl.classes;
 
 import static org.junit.Assert.assertNotEquals;
 
@@ -24,15 +24,21 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.JavaSourceWriter;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.JavaSource;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler.ClassName;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler.JavaSource;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler.JavaSourceWriter;
+import net.officefloor.compile.impl.classes.OfficeFloorJavaCompilerImpl;
+import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -42,6 +48,26 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
+
+	/**
+	 * Obtains the {@link SourceContext}.
+	 * 
+	 * @param classLoader {@link ClassLoader}.
+	 * @return {@link SourceContext}.
+	 */
+	private static SourceContext getSourceContext(ClassLoader classLoader) {
+		return OfficeFloorCompiler.newOfficeFloorCompiler(classLoader).createRootSourceContext();
+	}
+
+	/**
+	 * Obtains the {@link SourceContext} with default {@link ClassLoader} for
+	 * testing.
+	 * 
+	 * @return {@link SourceContext}.
+	 */
+	private static SourceContext getSourceContext() {
+		return getSourceContext(getClassLoader());
+	}
 
 	/**
 	 * Obtains the {@link ClassLoader}.
@@ -70,13 +96,52 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OfficeFloorJavaCompiler} being tested.
 	 */
-	private final OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(getClassLoader());
+	private OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(getSourceContext());
 
 	/**
 	 * Ensure invalid to compiler.
 	 */
 	public void testInvalid() {
 		assertNotNull("Should have compiler available (for testing to be available)", this.compiler);
+	}
+
+	/**
+	 * Ensure uses correct default implementation.
+	 */
+	public void testCorrectDefaultImplementation() {
+		assertEquals("Incorrect default implementation", OfficeFloorJavaCompilerImpl.class.getName(),
+				OfficeFloorJavaCompiler.DEFAULT_OFFICE_FLOOR_JAVA_COMPILER_IMPLEMENTATION);
+	}
+
+	/**
+	 * Ensure able to run with different {@link OfficeFloorJavaCompiler}
+	 * implementation.
+	 */
+	public void testRunWithDifferentImplementation() {
+		Closure<Boolean> isRun = new Closure<>(false);
+		OfficeFloorJavaCompiler.runWithImplementation(MockOfficeFloorJavaCompilerImpl.class.getName(), () -> {
+			// Ensure correctly uses mock
+			OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(getSourceContext());
+			assertTrue("Compiler implementation should be overridden",
+					compiler instanceof MockOfficeFloorJavaCompilerImpl);
+			isRun.value = true;
+		});
+		assertTrue("Should be run", isRun.value);
+	}
+
+	/**
+	 * Mock {@link OfficeFloorJavaCompiler} implementation for testing.
+	 */
+	public static class MockOfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompilerImpl {
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param sourceContext {@link SourceContext}.
+		 */
+		public MockOfficeFloorJavaCompilerImpl(SourceContext sourceContext) {
+			super(sourceContext);
+		}
 	}
 
 	/**
@@ -90,7 +155,7 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 			System.setProperty(OfficeFloorJavaCompiler.SYSTEM_PROPERTY_JAVA_COMPILING, "false");
 
 			// Ensure no Java compiler
-			assertNull("Ensure no compiling", OfficeFloorJavaCompiler.newInstance(getClassLoader()));
+			assertNull("Ensure no compiling", OfficeFloorJavaCompiler.newInstance(getSourceContext()));
 
 		} finally {
 			if (originalValue == null) {
@@ -108,7 +173,7 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 		OfficeFloorJavaCompiler.runWithoutCompiler(() -> {
 
 			// Ensure no Java compiler
-			assertNull("Ensure no compiling", OfficeFloorJavaCompiler.newInstance(getClassLoader()));
+			assertNull("Ensure no compiling", OfficeFloorJavaCompiler.newInstance(getSourceContext()));
 		});
 	}
 
@@ -175,6 +240,46 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 		// Ensure can use
 		Simple multiple = (Simple) clazz.getConstructor().newInstance();
 		assertEquals("Incorrect compiled result", "MULTIPLE", multiple.getMessage());
+	}
+
+	/**
+	 * Ensure can compile object implementing class on different class path.
+	 */
+	public void testNewClassPathImplementation() throws Exception {
+
+		// Create the source
+		StringWriter buffer = new StringWriter();
+		PrintWriter source = new PrintWriter(buffer);
+		source.println("package net.officefloor.test;");
+		source.println("public class ExtraImpl extends " + CLASS_LOADER_EXTRA_CLASS_NAME + " {");
+		source.println("   public String getMessage() {");
+		source.println("       return \"TEST\";");
+		source.println("   }");
+		source.println("}");
+		source.flush();
+
+		// Override compiler with extra class path
+		URLClassLoader extraClassLoader = (URLClassLoader) createNewClassLoader();
+		ClassLoader classLoader = new URLClassLoader(extraClassLoader.getURLs()) {
+			@Override
+			public Class<?> loadClass(String name) throws ClassNotFoundException {
+				if (OfficeFloorJavaCompilerImpl.class.getName().equals(name)) {
+					return OfficeFloorJavaCompilerImpl.class;
+				} else {
+					return extraClassLoader.loadClass(name);
+				}
+			}
+		};
+		this.compiler = OfficeFloorJavaCompiler.newInstance(getSourceContext(classLoader));
+
+		// Compile the source
+		JavaSource javaSource = this.compiler.addSource("net.officefloor.test.ExtraImpl", buffer.toString());
+		Class<?> clazz = javaSource.compile();
+
+		// Ensure appropriate compile to extra class
+		Object object = clazz.getConstructor().newInstance();
+		assertEquals("Incorrect parent class from class path", CLASS_LOADER_EXTRA_CLASS_NAME,
+				object.getClass().getSuperclass().getName());
 	}
 
 	/**

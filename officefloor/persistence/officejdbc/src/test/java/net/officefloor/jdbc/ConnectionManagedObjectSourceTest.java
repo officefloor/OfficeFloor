@@ -27,7 +27,7 @@ import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcDataSource;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;

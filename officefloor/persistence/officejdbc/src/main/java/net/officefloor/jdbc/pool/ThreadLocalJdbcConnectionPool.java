@@ -39,12 +39,13 @@ import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.jdbc.AbstractConnectionManagedObject;
 import net.officefloor.jdbc.ConnectionWrapper;
 
@@ -60,19 +61,20 @@ public class ThreadLocalJdbcConnectionPool implements ManagedObjectPool, ThreadC
 	/**
 	 * Creates the {@link PooledConnectionWrapperFactory}.
 	 * 
-	 * @param classLoader {@link ClassLoader}.
+	 * @param sourceContext {@link SourceContext}.
 	 * @return {@link PooledConnectionWrapperFactory}.
 	 * @throws Exception If fails to create {@link PooledConnectionWrapperFactory}.
 	 */
-	public static PooledConnectionWrapperFactory createWrapperFactory(ClassLoader classLoader) throws Exception {
+	public static PooledConnectionWrapperFactory createWrapperFactory(SourceContext sourceContext) throws Exception {
 
 		// Determine if compiler available
-		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(sourceContext);
 		if (compiler == null) {
 
 			// Fall back to proxy implementation
 			Class<?>[] interfaces = new Class[] { Connection.class, ConnectionWrapper.class };
-			return (wrapperContext) -> (Connection) Proxy.newProxyInstance(classLoader, interfaces, wrapperContext);
+			return (wrapperContext) -> (Connection) Proxy.newProxyInstance(sourceContext.getClassLoader(), interfaces,
+					wrapperContext);
 
 		} else {
 			// Use compiler to create wrapper

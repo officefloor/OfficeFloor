@@ -167,9 +167,9 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	private DependencyMetaData[] dependencyMetaData;
 
 	/**
-	 * {@link ClassLoader}.
+	 * {@link ManagedObjectSourceContext}.
 	 */
-	private ClassLoader classLoader;
+	private ManagedObjectSourceContext<Indexed> mosContext;
 
 	/**
 	 * {@link ProcessStruct} instances.
@@ -309,7 +309,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		}
 
 		// Hold reference to class loader for start method
-		this.classLoader = mosContext.getClassLoader();
+		this.mosContext = mosContext;
 
 		// Add the object class as extension interface.
 		ClassExtensionFactory.registerExtension(context, objectClass);
@@ -331,12 +331,12 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 			}
 
 			// Create and add the process meta-data
-			processListing.add(new ProcessMetaData(struct.field, methodMetaData, this.classLoader, context));
+			processListing.add(new ProcessMetaData(struct.field, methodMetaData, this.mosContext, context));
 		}
 
 		// Only required process meta-data
 		this.processMetaData = processListing.toArray(new ProcessMetaData[0]);
-		this.classLoader = null; // discard as no longer required
+		this.mosContext = null; // discard as no longer required
 		this.processStructs = null; // discard to allow garbage collection
 	}
 

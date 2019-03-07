@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -46,9 +46,9 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 	private static final Logger LOGGER = Logger.getLogger(ReadOnlyConnectionManagedObjectSource.class.getName());
 
 	/**
-	 * {@link ClassLoader}.
+	 * {@link ManagedObjectSourceContext}.
 	 */
-	private ClassLoader classLoader;
+	private ManagedObjectSourceContext<None> mosContext;
 
 	/**
 	 * {@link DataSource}.
@@ -73,8 +73,8 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 	protected void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
-		// Obtain class loader for wrapping connection
-		this.classLoader = mosContext.getClassLoader();
+		// Obtain context for wrapping connection
+		this.mosContext = mosContext;
 
 		// Obtain the data source
 		this.dataSource = this.newDataSource(mosContext);
@@ -92,11 +92,11 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 		this.connection.setReadOnly(true);
 
 		// Wrap connection to avoid changing
-		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(this.classLoader);
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(this.mosContext);
 		if (compiler == null) {
 
 			// Fall back to proxy
-			this.wrappedConnection = (Connection) Proxy.newProxyInstance(this.classLoader,
+			this.wrappedConnection = (Connection) Proxy.newProxyInstance(this.mosContext.getClassLoader(),
 					new Class[] { Connection.class, ConnectionWrapper.class }, (object, method, args) -> {
 
 						// Determine if get real connection
