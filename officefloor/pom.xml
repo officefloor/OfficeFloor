@@ -44,7 +44,7 @@
 		<module>tutorials</module>
 	</modules>
 	<properties>
-		<asm-version>7.0</asm-version>
+		<asm-version>7.1</asm-version>
 		<compiler-version>3.8.0</compiler-version>
 		<current.year>2018</current.year>
 		<failsafe-version>2.22.1</failsafe-version>
