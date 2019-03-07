@@ -25,7 +25,8 @@ import net.officefloor.frame.api.source.SourceContext;
 public class OfficeFloorClassPathScanner {
 
 	/**
-	 * Translates the {@link Package} name to class path entry path.
+	 * Convenience method to translates the {@link Package} name to class path entry
+	 * path.
 	 * 
 	 * @param packageName {@link Package} name.
 	 * @return Class path entry path for {@link Package}.
