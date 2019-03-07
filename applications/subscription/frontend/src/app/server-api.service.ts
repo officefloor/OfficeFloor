@@ -7,7 +7,7 @@ import { HttpClient } from '@angular/common/http';
 export class ServerApiService {
 
     // Direct to OfficeFloor default port when running in development
-    private serverUrl: string = window.location.href.startsWith('http://localhost:4200') ? 'http://localhost:7878' : '';
+    private serverUrl: string = window.location.href.startsWith('http://localhost:4200') ? 'http://localhost:8080' : '';
 
     constructor( private http: HttpClient ) {
     }

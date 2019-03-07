@@ -68,6 +68,8 @@ public class Authenticate {
 
 		// Update or create the user
 		User loggedInUser = objectify.transact(() -> {
+
+			// Ensure login exists
 			GoogleSignin login;
 			User user;
 			if (logins.size() > 0) {
@@ -76,11 +78,29 @@ public class Authenticate {
 				login.setEmail(email);
 				login.setName(name);
 				login.setPhotoUrl(photoUrl);
-				user = login.getUser().get();
+
+				// Determine the user
+				boolean isNewUser;
+				if (login.getUser() == null) {
+					user = new User(email);
+					isNewUser = true;
+				} else {
+					user = login.getUser().get();
+					isNewUser = false;
+				}
 				user.setEmail(login.getEmail());
 				user.setName(name);
 				user.setPhotoUrl(photoUrl);
-				objectify.save().entities(user, login).now();
+				if (isNewUser) {
+					// Save the user (to obtain identifier)
+					objectify.save().entities(user).now();
+					login.setUser(Ref.create(user));
+					objectify.save().entities(login).now();
+
+				} else {
+					// Save updates to existing
+					objectify.save().entities(user, login).now();
+				}
 
 			} else {
 				// Load the new user

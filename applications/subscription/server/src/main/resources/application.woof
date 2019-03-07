@@ -5,10 +5,10 @@
     <http-input path="{path}" method="OPTIONS" secure="false" x="172" y="92">
       <section name="Cors" input="options"/>
     </http-input>
-    <http-input path="/authenticate" method="POST" secure="true" x="153" y="197">
+    <http-input path="/authenticate" method="POST" secure="false" x="153" y="197">
       <section name="Authenticate" input="authenticate"/>
     </http-input>
-    <http-input path="/refreshAccessToken" method="POST" secure="true" x="133" y="254">
+    <http-input path="/refreshAccessToken" method="POST" secure="false" x="133" y="254">
       <section name="Authenticate" input="refreshAccessToken"/>
     </http-input>
   </http-inputs>
