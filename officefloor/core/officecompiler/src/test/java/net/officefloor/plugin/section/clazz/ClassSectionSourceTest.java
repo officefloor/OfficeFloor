@@ -110,6 +110,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testIgnoreNonFunctionMethods() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockIgnoreInputSection.class,
+
 				this.configureClassSectionFunction("includedInput"));
 		expected.addSectionInput("includedInput", null);
 
@@ -170,7 +171,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure and provide {@link SectionOutput}.
+	 * Ensure provide {@link SectionOutput}.
 	 */
 	public void testOutput() {
 		// Create the expected section
@@ -189,6 +190,38 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public static class MockOutputSection {
 		@NextFunction("doOutput")
 		public void doInput() {
+		}
+	}
+
+	/**
+	 * Ensure provide single {@link SectionOutput} from multiple methods.
+	 */
+	public void testOutputsToSameOutput() {
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockOutputsToSameOutputSection.class,
+				(designer, namespace) -> {
+					this.addClassSectionFunction(designer, namespace, "one", "one");
+					this.addClassSectionFunction(designer, namespace, "two", "two");
+				});
+		expected.addSectionInput("one", null);
+		expected.addSectionInput("two", null);
+		expected.addSectionOutput("doOutput", null, false);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockOutputsToSameOutputSection.class.getName());
+	}
+
+	/**
+	 * Section with an output.
+	 */
+	public static class MockOutputsToSameOutputSection {
+		@NextFunction("doOutput")
+		public void one() {
+		}
+
+		@NextFunction("doOutput")
+		public void two() {
 		}
 	}
 

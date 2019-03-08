@@ -16,6 +16,7 @@ import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.jwt.authority.JwtAuthority;
@@ -42,8 +43,11 @@ public class Authenticate {
 	}
 
 	public void authenticate(AuthenticateRequest idTokenInput, GoogleIdTokenVerifier verifier, Objectify objectify,
-			JwtAuthority<JwtCredentials> authority, ObjectResponse<AuthenticateResponse> response) throws Exception {
+			JwtAuthority<JwtCredentials> authority, ObjectResponse<AuthenticateResponse> response, ServerHttpConnection connection) throws Exception {
 
+		// TODO REMOVE
+		connection.getResponse().getHeaders().addHeader("Access-Control-Allow-Origin", "*");
+		
 		// Verify token
 		GoogleIdToken token = verifier.verify(idTokenInput.getIdToken());
 		if (token == null) {

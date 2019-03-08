@@ -30,6 +30,9 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.section.OfficeSectionInputType;
+import net.officefloor.compile.section.OfficeSectionOutputType;
+import net.officefloor.compile.section.OfficeSectionType;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
@@ -38,8 +41,10 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.web.HttpRouteSectionSource.Interception;
@@ -56,6 +61,7 @@ import net.officefloor.web.build.HttpObjectResponderServiceFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.build.WebInterceptServiceFactory;
 import net.officefloor.web.response.ObjectResponseManagedObjectSource;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
@@ -82,11 +88,10 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * Employs a {@link WebArchitect}.
 	 * 
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext} used to source {@link Property} values
-	 *            to configure the {@link WebArchitect}.
+	 * @param officeArchitect     {@link OfficeArchitect}.
+	 * @param officeSourceContext {@link OfficeSourceContext} used to source
+	 *                            {@link Property} values to configure the
+	 *                            {@link WebArchitect}.
 	 * @return {@link WebArchitect}.
 	 */
 	public static WebArchitect employWebArchitect(OfficeArchitect officeArchitect,
@@ -102,14 +107,12 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * Employs a {@link WebArchitect}.
 	 * 
-	 * @param contextPath
-	 *            Context path for the web application. May be <code>null</code> for
-	 *            no context path.
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext} used to source {@link Property} values
-	 *            to configure the {@link WebArchitect}.
+	 * @param contextPath         Context path for the web application. May be
+	 *                            <code>null</code> for no context path.
+	 * @param officeArchitect     {@link OfficeArchitect}.
+	 * @param officeSourceContext {@link OfficeSourceContext} used to source
+	 *                            {@link Property} values to configure the
+	 *                            {@link WebArchitect}.
 	 * @return {@link WebArchitect}.
 	 */
 	public static WebArchitect employWebArchitect(String contextPath, OfficeArchitect officeArchitect,
@@ -203,13 +206,10 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param contextPath
-	 *            Context path for the web application. May be <code>null</code> for
-	 *            no context path.
-	 * @param officeArchitect
-	 *            {@link OfficeArchitect}.
-	 * @param officeSourceContext
-	 *            {@link OfficeSourceContext}.
+	 * @param contextPath         Context path for the web application. May be
+	 *                            <code>null</code> for no context path.
+	 * @param officeArchitect     {@link OfficeArchitect}.
+	 * @param officeSourceContext {@link OfficeSourceContext}.
 	 */
 	private WebArchitectEmployer(String contextPath, OfficeArchitect officeArchitect,
 			OfficeSourceContext officeSourceContext) {
@@ -237,10 +237,8 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * Obtains the bind name for the {@link OfficeManagedObject}.
 	 * 
-	 * @param objectClass
-	 *            {@link Class} of the {@link Object}.
-	 * @param bindName
-	 *            Optional bind name. May be <code>null</code>.
+	 * @param objectClass {@link Class} of the {@link Object}.
+	 * @param bindName    Optional bind name. May be <code>null</code>.
 	 * @return Bind name for the {@link OfficeManagedObject};
 	 */
 	private static String getBindName(Class<?> objectClass, String bindName) {
@@ -473,6 +471,73 @@ public class WebArchitectEmployer implements WebArchitect {
 			this.routing.setHttpEscalationHandler(objectResponseMos);
 		}
 
+		// Load the intercept services
+		NEXT_INTERCEPTOR: for (Class<?> interceptClass : this.officeSourceContext
+				.loadOptionalServices(WebInterceptServiceFactory.class)) {
+
+			// Ignore void intercept (allows dynamic determining if need to intercept)
+			if (Void.TYPE.isAssignableFrom(interceptClass)) {
+				continue NEXT_INTERCEPTOR;
+			}
+
+			// Obtain the intercept section name
+			String sectionName = "_INTERCEPT_" + interceptClass.getName().replace('.', '_');
+
+			// Load the type
+			OfficeSectionType interceptSectionType = this.officeSourceContext.loadOfficeSectionType(sectionName,
+					ClassSectionSource.class.getName(), interceptClass.getName(),
+					this.officeSourceContext.createPropertyList());
+
+			// Obtain the input name (ensuring only one input)
+			String inputName = null;
+			if (interceptSectionType.getOfficeSectionInputTypes().length == 1) {
+				// Capture the input name
+				inputName = interceptSectionType.getOfficeSectionInputTypes()[0].getOfficeSectionInputName();
+			} else {
+				// Provide error regarding the inputs
+				StringBuilder message = new StringBuilder();
+				message.append("Web intercept " + interceptClass.getName() + " must only have one input (inputs:");
+				for (OfficeSectionInputType inputType : interceptSectionType.getOfficeSectionInputTypes()) {
+					message.append(" " + inputType.getOfficeSectionInputName());
+				}
+				message.append(")");
+				this.officeArchitect.addIssue(message.toString());
+				continue NEXT_INTERCEPTOR; // can not load this intercepter
+			}
+
+			// Obtain the output name (ensuring only one output ignoring escalation only)
+			String outputName = null;
+			int outputCount = 0;
+			StringBuilder message = new StringBuilder();
+			NEXT_OUTPUT: for (OfficeSectionOutputType outputType : interceptSectionType.getOfficeSectionOutputTypes()) {
+
+				// Ignore escalation only
+				if (outputType.isEscalationOnly()) {
+					continue NEXT_OUTPUT;
+				}
+
+				// Include output
+				outputName = outputType.getOfficeSectionOutputName();
+				outputCount++;
+				message.append(" " + outputName);
+			}
+			if (outputCount != 1) {
+				// Provide error regarding the outputs
+				this.officeArchitect.addIssue("Web intercept " + interceptClass.getName()
+						+ " must only have one output (outputs:" + message.toString() + ")");
+				continue NEXT_INTERCEPTOR; // can not load this intercepter
+			}
+
+			// Add the intercept section
+			OfficeSection interceptSection = this.officeArchitect.addOfficeSection(sectionName,
+					ClassSectionSource.class.getName(), interceptClass.getName());
+
+			// Register the intercept
+			OfficeSectionInput interceptInput = interceptSection.getOfficeSectionInput(inputName);
+			OfficeSectionOutput interceptOutput = interceptSection.getOfficeSectionOutput(outputName);
+			this.interceptors.add(new Interceptor(interceptInput, interceptOutput));
+		}
+
 		// Determine if intercept
 		if (this.interceptors.size() > 0) {
 
@@ -594,20 +659,14 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * Loads the in-line HTTP argument.
 	 * 
-	 * @param annotation
-	 *            {@link Annotation}.
-	 * @param annotationType
-	 *            Type of {@link Annotation}.
-	 * @param valueLocation
-	 *            {@link HttpValueLocation}.
-	 * @param objectType
-	 *            Parameter object type.
-	 * @param context
-	 *            {@link ManagedFunctionAugmentorContext}.
-	 * @param getParameterName
-	 *            {@link Function} to obtain the parameter name.
-	 * @param getQualifierName
-	 *            {@link Function} to obtain the type qualification name.
+	 * @param annotation       {@link Annotation}.
+	 * @param annotationType   Type of {@link Annotation}.
+	 * @param valueLocation    {@link HttpValueLocation}.
+	 * @param objectType       Parameter object type.
+	 * @param context          {@link ManagedFunctionAugmentorContext}.
+	 * @param getParameterName {@link Function} to obtain the parameter name.
+	 * @param getQualifierName {@link Function} to obtain the type qualification
+	 *                         name.
 	 */
 	private <P extends Annotation> void loadInlineHttpArgument(Object annotation, Class<P> annotationType,
 			HttpValueLocation valueLocation, Class<?> objectType, ManagedFunctionAugmentorContext context,
@@ -670,12 +729,9 @@ public class WebArchitectEmployer implements WebArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param isSecure
-		 *            Indicates if secure.
-		 * @param httpMethod
-		 *            {@link HttpMethod}.
-		 * @param applicationPath
-		 *            Application path.
+		 * @param isSecure        Indicates if secure.
+		 * @param httpMethod      {@link HttpMethod}.
+		 * @param applicationPath Application path.
 		 */
 		private HttpInputImpl(boolean isSecure, HttpMethod httpMethod, String applicationPath) {
 			this.isSecure = isSecure;
@@ -715,10 +771,8 @@ public class WebArchitectEmployer implements WebArchitect {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param isSecure
-		 *            Indicates if secure.
-		 * @param applicationPath
-		 *            Application path.
+		 * @param isSecure        Indicates if secure.
+		 * @param applicationPath Application path.
 		 */
 		private HttpUrlContinuationImpl(boolean isSecure, String applicationPath) {
 			super(isSecure, HttpMethod.GET, applicationPath);
@@ -781,10 +835,8 @@ public class WebArchitectEmployer implements WebArchitect {
 		/**
 		 * Initiate.
 		 * 
-		 * @param flowSinkNode
-		 *            {@link OfficeFlowSinkNode}.
-		 * @param flowSourceNode
-		 *            {@link OfficeFlowSourceNode}.
+		 * @param flowSinkNode   {@link OfficeFlowSinkNode}.
+		 * @param flowSourceNode {@link OfficeFlowSourceNode}.
 		 */
 		private Interceptor(OfficeFlowSinkNode flowSinkNode, OfficeFlowSourceNode flowSourceNode) {
 			this.flowSinkNode = flowSinkNode;
@@ -810,10 +862,9 @@ public class WebArchitectEmployer implements WebArchitect {
 		/**
 		 * Initiate.
 		 * 
-		 * @param flowSinkNode
-		 *            {@link OfficeFlowSinkNode}.
-		 * @param notHandledOutput
-		 *            {@link OfficeFlowSourceNode}. May be <code>null</code>.
+		 * @param flowSinkNode     {@link OfficeFlowSinkNode}.
+		 * @param notHandledOutput {@link OfficeFlowSourceNode}. May be
+		 *                         <code>null</code>.
 		 */
 		private ChainedServicer(OfficeFlowSinkNode flowSinkNode, OfficeFlowSourceNode notHandledOutput) {
 			this.flowSinkNode = flowSinkNode;
