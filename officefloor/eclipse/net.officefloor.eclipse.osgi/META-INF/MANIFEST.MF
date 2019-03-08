@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor OSGi Bridge
 Bundle-SymbolicName: net.officefloor.eclipse.osgi
-Bundle-Version: 3.6.1
+Bundle-Version: 3.6.2
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: net.officefloor.eclipse.osgi
@@ -20,4 +20,4 @@ Import-Package: org.eclipse.core.resources,
  org.eclipse.ui.dialogs,
  org.eclipse.ui.ide
 Automatic-Module-Name: net.officefloor.eclipse.osgi
-Require-Bundle: net.officefloor.core;bundle-version="3.6.1"
+Require-Bundle: net.officefloor.core;bundle-version="3.6.2"

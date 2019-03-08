@@ -3,17 +3,17 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse WoOF
 Bundle-SymbolicName: net.officefloor.woof
 Bundle-Vendor: OfficeFloor
-Bundle-Version: 3.6.1
+Bundle-Version: 3.6.2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- officeserver-3.6.1.jar,
- officeserver_default-3.6.1.jar,
- officeweb-3.6.1.jar,
- officeweb_security-3.6.1.jar,
- officeweb_resource-3.6.1.jar,
- officeweb_template-3.6.1.jar,
- officeweb_configuration-3.6.1.jar,
- woof-3.6.1.jar
+ officeserver-3.6.2.jar,
+ officeserver_default-3.6.2.jar,
+ officeweb-3.6.2.jar,
+ officeweb_security-3.6.2.jar,
+ officeweb_resource-3.6.2.jar,
+ officeweb_template-3.6.2.jar,
+ officeweb_configuration-3.6.2.jar,
+ woof-3.6.2.jar
 Export-Package: net.officefloor.server,
  net.officefloor.server.buffer,
  net.officefloor.server.http,
@@ -75,5 +75,5 @@ Export-Package: net.officefloor.server,
  net.officefloor.woof.teams,
  net.officefloor.woof.template,
  net.officefloor.woof.template.impl
-Require-Bundle: net.officefloor.core;bundle-version="3.6.1"
+Require-Bundle: net.officefloor.core;bundle-version="3.6.2"
 Automatic-Module-Name: net.officefloor.woof
