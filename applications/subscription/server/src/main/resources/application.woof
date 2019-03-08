@@ -19,7 +19,7 @@
       <input name="authenticate" parameter-type=""/>
       <input name="refreshAccessToken" parameter-type=""/>
     </section>
-    <section name="Cors" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.Cors" x="426" y="84">
+    <section name="Cors" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.cors.Cors" x="426" y="84">
       <input name="options" parameter-type=""/>
     </section>
   </sections>

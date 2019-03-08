@@ -1,4 +1,4 @@
-package net.officefloor.app.subscription;
+package net.officefloor.app.subscription.cors;
 
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -16,7 +16,7 @@ public class Cors {
 
 	public static HttpHeaderValue ALL = new HttpHeaderValue("*");
 
-	public void options(ServerHttpConnection connection) {
+	public static void options(ServerHttpConnection connection) {
 		HttpResponse response = connection.getResponse();
 		HttpResponseHeaders headers = response.getHeaders();
 		headers.addHeader(ALLOW_ORIGIN, ALL);
