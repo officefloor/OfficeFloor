@@ -101,6 +101,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockInputSection {
 		public void doInput() {
+			// Testing type
 		}
 	}
 
@@ -110,6 +111,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testIgnoreNonFunctionMethods() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockIgnoreInputSection.class,
+
 				this.configureClassSectionFunction("includedInput"));
 		expected.addSectionInput("includedInput", null);
 
@@ -122,14 +124,17 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockIgnoreInputSection {
 		public void includedInput() {
+			// Testing type
 		}
 
 		@NonFunctionMethod
 		public void nonIncludedInput() {
+			// Testing type
 		}
 
 		@NonFunctionMethod
 		public void nonIncludedStaticInput() {
+			// Testing type
 		}
 	}
 
@@ -166,11 +171,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockChildSection extends MockParentSection {
 		public void function(@Parameter Integer parameter) {
+			// Testing type
 		}
 	}
 
 	/**
-	 * Ensure and provide {@link SectionOutput}.
+	 * Ensure provide {@link SectionOutput}.
 	 */
 	public void testOutput() {
 		// Create the expected section
@@ -189,6 +195,41 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public static class MockOutputSection {
 		@NextFunction("doOutput")
 		public void doInput() {
+			// Testing type
+		}
+	}
+
+	/**
+	 * Ensure provide single {@link SectionOutput} from multiple methods.
+	 */
+	public void testOutputsToSameOutput() {
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockOutputsToSameOutputSection.class,
+				(designer, namespace) -> {
+					this.addClassSectionFunction(designer, namespace, "one", "one");
+					this.addClassSectionFunction(designer, namespace, "two", "two");
+				});
+		expected.addSectionInput("one", null);
+		expected.addSectionInput("two", null);
+		expected.addSectionOutput("doOutput", null, false);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockOutputsToSameOutputSection.class.getName());
+	}
+
+	/**
+	 * Section with an output.
+	 */
+	public static class MockOutputsToSameOutputSection {
+		@NextFunction("doOutput")
+		public void one() {
+			// Testing type
+		}
+
+		@NextFunction("doOutput")
+		public void two() {
+			// Testing type
 		}
 	}
 
@@ -219,6 +260,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockFlowInterfaceSection {
 		public void doInput(MockFlowInterface flows) {
+			// Testing type
 		}
 	}
 
@@ -252,6 +294,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockSpawnFlowInterfaceSection {
 		public void doInput(MockFlowInterface flows) {
+			// Testing type
 		}
 	}
 
@@ -274,6 +317,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockEscalationSection {
 		public void doInput() throws SQLException {
+			// Testing type
 		}
 	}
 
@@ -329,6 +373,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockObjectSection {
 		public void doInput(Connection connection) {
+			// Testing type
 		}
 	}
 
@@ -379,6 +424,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockQualifiedObjectSection {
 		public void doInput(@MockQualification Connection qualified, Connection unqualified) {
+			// Testing type
 		}
 	}
 
@@ -417,6 +463,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 	public static class MockQualifiedObjectByNameSection {
 		public void doInput(@Qualified("test") Connection qualified, Connection unqualified) {
+			// Testing type
 		}
 	}
 
@@ -460,6 +507,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockSameQualifierObjectSection {
 		public void doInput(@MockQualification Connection connection, @MockQualification String string) {
+			// Testing type
 		}
 	}
 
@@ -519,6 +567,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockMultipleQualifiedObjectSection {
 		public void doInput(@MockAnotherQualification @MockQualification Connection connection) {
+			// Testing type
 		}
 	}
 
@@ -544,6 +593,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		Connection connection;
 
 		public void doInput() {
+			// Testing type
 		}
 	}
 
@@ -574,6 +624,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		Connection connection;
 
 		public void doInput() {
+			// Testing type
 		}
 	}
 
@@ -604,6 +655,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		Connection connection;
 
 		public void doInput() {
+			// Testing type
 		}
 	}
 
@@ -644,6 +696,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		Connection connection;
 
 		public void doInput() {
+			// Testing type
 		}
 	}
 
@@ -667,6 +720,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockChangeFunctionNameSection {
 		public void oldName() {
+			// Testing type
 		}
 	}
 

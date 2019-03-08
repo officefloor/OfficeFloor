@@ -64,7 +64,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
 import net.officefloor.eclipse.editor.AdaptedBuilder;

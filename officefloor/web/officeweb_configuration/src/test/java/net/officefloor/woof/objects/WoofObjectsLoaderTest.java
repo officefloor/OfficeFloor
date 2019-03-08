@@ -44,15 +44,13 @@ import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.woof.model.objects.WoofObjectsRepositoryImpl;
-import net.officefloor.woof.objects.WoofObjectsLoader;
-import net.officefloor.woof.objects.WoofObjectsLoaderContext;
 
 /**
  * Tests the {@link WoofObjectsLoader}.
@@ -236,8 +234,7 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records initialising the {@link WoofObjectsLoader}.
 	 * 
-	 * @param fileName
-	 *            File name for {@link ConfigurationItem}.
+	 * @param fileName File name for {@link ConfigurationItem}.
 	 */
 	private void recordInitLoader(String fileName) throws Exception {
 
@@ -256,14 +253,12 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records the {@link OfficeManagedObjectSource}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeManagedObjectSource}.
-	 * @param managedObjectSourceClassName
-	 *            {@link OfficeManagedObjectSource} {@link Class} name.
-	 * @param timeout
-	 *            Timeout.
-	 * @param propertyNameValuePairs
-	 *            {@link PropertyList} name/value pairs.
+	 * @param managedObjectSourceName      Name of the
+	 *                                     {@link OfficeManagedObjectSource}.
+	 * @param managedObjectSourceClassName {@link OfficeManagedObjectSource}
+	 *                                     {@link Class} name.
+	 * @param timeout                      Timeout.
+	 * @param propertyNameValuePairs       {@link PropertyList} name/value pairs.
 	 * @return Mock {@link OfficeManagedObjectSource}.
 	 */
 	private OfficeManagedObjectSource recordManagedObjectSource(String managedObjectSourceName,
@@ -281,15 +276,15 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records the {@link OfficeManagedObjectPool}.
 	 * 
-	 * @param managedObjectPoolName
-	 *            Name of the {@link OfficeManagedObjectPool}.
-	 * @param managedObjectPoolSourceClassName
-	 *            {@link ManagedObjectPoolSource} {@link Class} name.
-	 * @param managedObjectSource
-	 *            {@link OfficeManagedObjectSource} to link the
-	 *            {@link OfficeManagedObjectPool}.
-	 * @param propertyNameValuePairs
-	 *            {@link PropertyList} name/value pairs.
+	 * @param managedObjectPoolName            Name of the
+	 *                                         {@link OfficeManagedObjectPool}.
+	 * @param managedObjectPoolSourceClassName {@link ManagedObjectPoolSource}
+	 *                                         {@link Class} name.
+	 * @param managedObjectSource              {@link OfficeManagedObjectSource} to
+	 *                                         link the
+	 *                                         {@link OfficeManagedObjectPool}.
+	 * @param propertyNameValuePairs           {@link PropertyList} name/value
+	 *                                         pairs.
 	 * @return Mock {@link OfficeManagedObjectPool}.
 	 */
 	private OfficeManagedObjectPool recordManagedObjectPool(String managedObjectPoolName,
@@ -306,14 +301,11 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records the {@link ManagedObjectFlow}.
 	 * 
-	 * @param mos
-	 *            Mock {@link OfficeManagedObjectSource}.
-	 * @param flowName
-	 *            Name of {@link ManagedObjectFlow}.
-	 * @param sectionName
-	 *            Name of {@link OfficeSection} handling the {@link Flow}.
-	 * @param inputName
-	 *            Name of the {@link OfficeSectionInput} handling the {@link Flow}.
+	 * @param mos         Mock {@link OfficeManagedObjectSource}.
+	 * @param flowName    Name of {@link ManagedObjectFlow}.
+	 * @param sectionName Name of {@link OfficeSection} handling the {@link Flow}.
+	 * @param inputName   Name of the {@link OfficeSectionInput} handling the
+	 *                    {@link Flow}.
 	 */
 	private void recordManagedObjectFlow(OfficeManagedObjectSource mos, String flowName, String sectionName,
 			String inputName) {
@@ -329,14 +321,10 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records the {@link OfficeManagedObject}.
 	 * 
-	 * @param mos
-	 *            Mock {@link OfficeManagedObjectSource}.
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeManagedObject}.
-	 * @param scope
-	 *            {@link ManagedObjectScope}.
-	 * @param typeQualifierPairs
-	 *            Type qualifier name/value pairs.
+	 * @param mos                Mock {@link OfficeManagedObjectSource}.
+	 * @param managedObjectName  Name of the {@link OfficeManagedObject}.
+	 * @param scope              {@link ManagedObjectScope}.
+	 * @param typeQualifierPairs Type qualifier name/value pairs.
 	 * @return Mock {@link OfficeManagedObject}.
 	 */
 	private OfficeManagedObject recordManagedObject(OfficeManagedObjectSource mos, String managedObjectName,
@@ -352,14 +340,10 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records the {@link ManagedObjectDependency}.
 	 * 
-	 * @param mo
-	 *            Mock {@link OfficeManagedObject}.
-	 * @param dependencyName
-	 *            Name of the {@link ManagedObjectDependency}.
-	 * @param qualifier
-	 *            Qualifier.
-	 * @param type
-	 *            Type.
+	 * @param mo             Mock {@link OfficeManagedObject}.
+	 * @param dependencyName Name of the {@link ManagedObjectDependency}.
+	 * @param qualifier      Qualifier.
+	 * @param type           Type.
 	 */
 	private void recordManagedObjectDependency(OfficeManagedObject mo, String dependencyName, String qualifier,
 			String type) {
@@ -372,12 +356,9 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records the {@link OfficeSupplier}.
 	 * 
-	 * @param supplierName
-	 *            Name of the {@link OfficeSupplier}.
-	 * @param supplierSourceClassName
-	 *            {@link SupplierSource} {@link Class} name.
-	 * @param propertyNameValuePairs
-	 *            {@link PropertyList} name/value pairs.
+	 * @param supplierName            Name of the {@link OfficeSupplier}.
+	 * @param supplierSourceClassName {@link SupplierSource} {@link Class} name.
+	 * @param propertyNameValuePairs  {@link PropertyList} name/value pairs.
 	 * @return Mock {@link OfficeSupplier}.
 	 */
 	private OfficeSupplier recordSupplier(String supplierName, String supplierSourceClassName,
@@ -391,10 +372,8 @@ public class WoofObjectsLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Records properties.
 	 * 
-	 * @param propertyNameValuePairs
-	 *            Property name/value pairs.
-	 * @param recordProperty
-	 *            {@link BiConsumer} to record the property.
+	 * @param propertyNameValuePairs Property name/value pairs.
+	 * @param recordProperty         {@link BiConsumer} to record the property.
 	 */
 	private void recordProperties(String[] propertyNameValuePairs, BiConsumer<String, String> recordProperty) {
 		for (int i = 0; i < propertyNameValuePairs.length; i += 2) {

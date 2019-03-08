@@ -40,6 +40,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.clazz.ClassFlowBuilder;
 import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
 import net.officefloor.plugin.clazz.ClassFlowRegistry;
@@ -150,9 +151,6 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceBuilder, ManagedFunctionSourceContext context)
 			throws Exception {
 
-		// Obtain the class loader
-		ClassLoader classLoader = context.getClassLoader();
-
 		// Obtain the class
 		String className = context.getProperty(CLASS_NAME_PROPERTY_NAME);
 		Class<?> clazz = context.loadClass(className);
@@ -244,7 +242,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 					ManagedFunctionParameterFactory parameterFactory = null;
 					CREATED: for (ParameterManufacturer manufacturer : this.manufacturers) {
 						parameterFactory = manufacturer.createParameterFactory(methodName, paramType,
-								functionTypeBuilder, objectSequence, flowSequence, classLoader);
+								functionTypeBuilder, objectSequence, flowSequence, context);
 						if (parameterFactory != null) {
 							// Created parameter factory, so use
 							break CREATED;
@@ -330,7 +328,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 		 * @param functionTypeBuilder {@link ManagedFunctionTypeBuilder}.
 		 * @param objectSequence      Object {@link Sequence}.
 		 * @param flowSequence        Flow {@link Sequence}.
-		 * @param classLoader         {@link ClassLoader}.
+		 * @param sourceContext       {@link SourceContext}.
 		 * @return {@link ManagedFunctionParameterFactory} or <code>null</code> if not
 		 *         appropriate for this to manufacture a
 		 *         {@link ManagedFunctionParameterFactory}.
@@ -339,7 +337,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 		 */
 		ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
-				Sequence flowSequence, ClassLoader classLoader) throws Exception;
+				Sequence flowSequence, SourceContext sourceContext) throws Exception;
 	}
 
 	/**
@@ -349,7 +347,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 		@Override
 		public ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
-				Sequence flowSequence, ClassLoader classLoader) {
+				Sequence flowSequence, SourceContext sourceContext) {
 
 			// Determine if task context
 			if (ManagedFunctionContext.class.equals(parameterType)) {
@@ -388,7 +386,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 		@Override
 		public ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
-				Sequence flowSequence, ClassLoader classLoader) throws Exception {
+				Sequence flowSequence, SourceContext sourceContext) throws Exception {
 
 			// Create the flow registry
 			ClassFlowRegistry flowRegistry = (label, flowParameterType) -> {
@@ -402,7 +400,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 
 			// Attempt to build flow parameter factory
 			ClassFlowParameterFactory flowParameterFactory = new ClassFlowBuilder<A>(this.annotationClass)
-					.buildFlowParameterFactory(functionName, parameterType, flowSequence, flowRegistry, classLoader);
+					.buildFlowParameterFactory(functionName, parameterType, flowSequence, flowRegistry, sourceContext);
 			if (flowParameterFactory == null) {
 				return null; // not flow interface
 			}

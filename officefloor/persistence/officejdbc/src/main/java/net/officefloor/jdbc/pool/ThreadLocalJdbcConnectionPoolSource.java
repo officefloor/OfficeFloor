@@ -89,8 +89,7 @@ public class ThreadLocalJdbcConnectionPoolSource extends AbstractManagedObjectPo
 		context.addThreadCompleteListener((pool) -> (ThreadLocalJdbcConnectionPool) pool);
 
 		// Create the wrapper factory
-		ClassLoader classLoader = context.getManagedObjectPoolSourceContext().getClassLoader();
-		this.wrapperFactory = ThreadLocalJdbcConnectionPool.createWrapperFactory(classLoader);
+		this.wrapperFactory = ThreadLocalJdbcConnectionPool.createWrapperFactory(poolContext);
 
 		// Load configuration
 		this.maximumConnections = Integer.parseInt(

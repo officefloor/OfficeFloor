@@ -26,7 +26,7 @@ import org.easymock.AbstractMatcher;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -37,11 +37,11 @@ import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSourceTest;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 
@@ -224,8 +224,9 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	 * Ensure can inject the {@link FlowInterface} with compiled implementations.
 	 */
 	public void testInjectProcessInterfacesWithCompiling() throws Throwable {
-		assertNotNull("Ensure Java compiler available",
-				OfficeFloorJavaCompiler.newInstance(ClassManagedFunctionSourceTest.class.getClassLoader()));
+		SourceContext sourceContext = OfficeFloorCompiler.newOfficeFloorCompiler(this.getClass().getClassLoader())
+				.createRootSourceContext();
+		assertNotNull("Ensure Java compiler available", OfficeFloorJavaCompiler.newInstance(sourceContext));
 		this.doInjectProcessInterfacesTest();
 	}
 

@@ -77,8 +77,7 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 	/**
 	 * Override to add additional {@link ParameterManufacturer} instances.
 	 * 
-	 * @param manufacturers
-	 *            List of {@link ParameterManufacturer} instances to use.
+	 * @param manufacturers List of {@link ParameterManufacturer} instances to use.
 	 */
 	protected void loadParameterManufacturers(List<ParameterManufacturer> manufacturers) {
 		// By default adds no further manufacturers
@@ -207,23 +206,19 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 		/**
 		 * Creates the {@link AdministrationParameterFactory}.
 		 * 
-		 * @param functionName
-		 *            Name of the {@link Method}.
-		 * @param parameterType
-		 *            Parameter type.
-		 * @param context
-		 *            {@link MetaDataContext}.
-		 * @param flowSequence
-		 *            {@link Sequence} for the {@link Flow}.
-		 * @param governanceSequence
-		 *            {@link Sequence} for the {@link Governance}.
-		 * @param extensionInterfaceConsumer
-		 *            {@link Consumer} to optionally be provided the extension type.
+		 * @param functionName               Name of the {@link Method}.
+		 * @param parameterType              Parameter type.
+		 * @param context                    {@link MetaDataContext}.
+		 * @param flowSequence               {@link Sequence} for the {@link Flow}.
+		 * @param governanceSequence         {@link Sequence} for the
+		 *                                   {@link Governance}.
+		 * @param extensionInterfaceConsumer {@link Consumer} to optionally be provided
+		 *                                   the extension type.
 		 * @return {@link AdministrationParameterFactory} or <code>null</code> if not
 		 *         appropriate for this to manufacture a
 		 *         {@link AdministrationParameterFactory}.
-		 * @throws Exception
-		 *             If fails to create the {@link AdministrationParameterFactory}.
+		 * @throws Exception If fails to create the
+		 *                   {@link AdministrationParameterFactory}.
 		 */
 		AdministrationParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
 				MetaDataContext<Object, Indexed, Indexed> context, Sequence flowSequence, Sequence governanceSequence,
@@ -289,8 +284,7 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 		/**
 		 * Instantiate.
 		 * 
-		 * @param annotationClass
-		 *            {@link Class} of the {@link Annotation}.
+		 * @param annotationClass {@link Class} of the {@link Annotation}.
 		 */
 		public FlowParameterManufacturer(Class<A> annotationClass) {
 			this.annotationClass = annotationClass;
@@ -306,11 +300,11 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 				// Register the flow
 				context.addFlow(flowParameterType).setLabel(label);
 			};
-			ClassLoader classLoader = context.getAdministrationSourceContext().getClassLoader();
 
 			// Build the flow parameter factory
 			ClassFlowParameterFactory flowParameterFactory = new ClassFlowBuilder<A>(this.annotationClass)
-					.buildFlowParameterFactory(functionName, parameterType, flowSequence, flowRegistry, classLoader);
+					.buildFlowParameterFactory(functionName, parameterType, flowSequence, flowRegistry,
+							context.getAdministrationSourceContext());
 			if (flowParameterFactory == null) {
 				return null; // not flow interface
 			}

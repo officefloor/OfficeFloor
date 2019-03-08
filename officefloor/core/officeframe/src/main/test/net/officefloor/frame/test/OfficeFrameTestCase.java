@@ -265,9 +265,14 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * {@link Package} name of the extra class for the new {@link ClassLoader}.
+	 */
+	public static final String CLASS_LOADER_EXTRA_PACKAGE_NAME = "extra";
+
+	/**
 	 * {@link Class} name of the extra class for the new {@link ClassLoader}.
 	 */
-	public static final String CLASS_LOADER_EXTRA_CLASS_NAME = "extra.MockExtra";
+	public static final String CLASS_LOADER_EXTRA_CLASS_NAME = CLASS_LOADER_EXTRA_PACKAGE_NAME + ".MockExtra";
 
 	/**
 	 * Indicates if mock is created.

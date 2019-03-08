@@ -10,4 +10,4 @@ cat << EnvInfo
 EnvInfo
 
 # Start the datastore emulator
-gcloud beta emulators datastore start
+gcloud beta emulators datastore start --no-store-on-disk

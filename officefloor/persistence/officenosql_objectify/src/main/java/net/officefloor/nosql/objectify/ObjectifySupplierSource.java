@@ -11,8 +11,8 @@ import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.util.Closeable;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.JavaSource;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler.JavaSource;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -149,7 +149,7 @@ public class ObjectifySupplierSource extends AbstractSupplierSource {
 		// Obtain the objectify wrapper factory
 		ObjectifyWrapperFactory objectifyWrapperFactory;
 		ClassLoader classLoader = context.getClassLoader();
-		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(context);
 		if (compiler == null) {
 
 			// No compiler, fall back to proxy

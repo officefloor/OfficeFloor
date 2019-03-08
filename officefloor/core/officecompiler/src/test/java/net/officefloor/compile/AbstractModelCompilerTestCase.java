@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.spi.pool.source.impl.AbstractManagedObjectPoolSource;
-import net.officefloor.configuration.impl.xml.XmlFileConfigurationContext;
+import net.officefloor.configuration.impl.configuration.XmlFileConfigurationContext;
 import net.officefloor.extension.AutoWireOfficeExtensionService;
 import net.officefloor.extension.AutoWireOfficeFloorExtensionService;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;

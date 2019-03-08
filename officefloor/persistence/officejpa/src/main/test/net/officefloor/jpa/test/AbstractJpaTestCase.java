@@ -33,7 +33,8 @@ import javax.sql.DataSource;
 
 import org.h2.jdbcx.JdbcDataSource;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.spi.office.OfficeManagedObjectPool;
@@ -44,6 +45,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
@@ -339,8 +341,9 @@ public abstract class AbstractJpaTestCase extends OfficeFrameTestCase {
 	 * @throws Throwable On test failure.
 	 */
 	public void testConnectionReadWithCompiler() throws Throwable {
-		assertNotNull("Invalid test as java compiler is not available",
-				OfficeFloorJavaCompiler.newInstance(AbstractJpaTestCase.class.getClassLoader()));
+		SourceContext context = OfficeFloorCompiler.newOfficeFloorCompiler(this.getClass().getClassLoader())
+				.createRootSourceContext();
+		assertNotNull("Invalid test as java compiler is not available", OfficeFloorJavaCompiler.newInstance(context));
 		this.doReadTest(true);
 	}
 

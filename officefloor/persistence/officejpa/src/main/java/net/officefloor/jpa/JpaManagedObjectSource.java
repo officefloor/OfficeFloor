@@ -34,8 +34,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.sql.DataSource;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -315,7 +315,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 			this.jpaConnectionFactory = (registry) -> (Connection) registry.getObject(0);
 
 			// Determine compiler available
-			OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+			OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(mosContext);
 			if (compiler == null) {
 
 				// Fall back to proxy for data source wrapper
@@ -441,7 +441,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 		}
 
 		// Determine compiler available
-		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(mosContext);
 		if (compiler == null) {
 
 			// Create fall back proxy entity manager wrapper

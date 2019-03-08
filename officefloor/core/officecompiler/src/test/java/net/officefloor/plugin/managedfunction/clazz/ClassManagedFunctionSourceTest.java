@@ -26,7 +26,7 @@ import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
@@ -40,6 +40,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -375,8 +376,9 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * {@link FlowInterface} implementations.
 	 */
 	public void testInvokeInstanceMethodWithCompiling() throws Throwable {
-		assertNotNull("Ensure Java compiler available",
-				OfficeFloorJavaCompiler.newInstance(ClassManagedFunctionSourceTest.class.getClassLoader()));
+		SourceContext sourceContext = OfficeFloorCompiler.newOfficeFloorCompiler(this.getClass().getClassLoader())
+				.createRootSourceContext();
+		assertNotNull("Ensure Java compiler available", OfficeFloorJavaCompiler.newInstance(sourceContext));
 		this.doInvokeInstanceMethodTest();
 	}
 

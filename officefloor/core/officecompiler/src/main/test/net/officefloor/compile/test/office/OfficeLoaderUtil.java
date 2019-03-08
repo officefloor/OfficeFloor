@@ -39,7 +39,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
-import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
 import net.officefloor.frame.api.manage.Office;
 
 /**

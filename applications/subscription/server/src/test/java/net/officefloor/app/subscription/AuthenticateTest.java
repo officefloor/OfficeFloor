@@ -2,113 +2,94 @@ package net.officefloor.app.subscription;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.googlecode.objectify.Ref;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.app.subscription.Authenticate.AuthenticateRequest;
 import net.officefloor.app.subscription.Authenticate.AuthenticateResponse;
-import net.officefloor.app.subscription.rule.GoogleIdTokenRule;
-import net.officefloor.app.subscription.rule.ObjectifyRule;
-import net.officefloor.app.subscription.store.Domain;
+import net.officefloor.app.subscription.Authenticate.RefreshRequest;
+import net.officefloor.app.subscription.Authenticate.RefreshResponse;
 import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.app.subscription.store.User;
-import net.officefloor.woof.mock.MockObjectResponse;
+import net.officefloor.identity.google.mock.GoogleIdTokenRule;
+import net.officefloor.nosql.objectify.mock.ObjectifyRule;
+import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
- * Ensure can load authentication to the database.
+ * Tests integration of authentication.
  * 
  * @author Daniel Sagenschneider
  */
 public class AuthenticateTest {
 
-	@Rule
-	public GoogleIdTokenRule verifier = new GoogleIdTokenRule();
+	private GoogleIdTokenRule verifier = new GoogleIdTokenRule();
+
+	private ObjectifyRule obectify = new ObjectifyRule();
+
+	private MockWoofServerRule server = new MockWoofServerRule();
 
 	@Rule
-	public ObjectifyRule obectify = new ObjectifyRule(Domain.class, GoogleSignin.class, User.class);
+	public RuleChain chain = RuleChain.outerRule(this.verifier).around(this.obectify).around(this.server);
 
-	private MockObjectResponse<AuthenticateResponse> response = new MockObjectResponse<>();
+	private final ObjectMapper mapper = new ObjectMapper();
 
-	@Test
-	public void ensureTokenRulePasses() throws Exception {
-
-		// Create the mock token
-		String token = this.verifier.getMockIdToken("1", "daniel@officefloor.net", "name", "Daniel Sagenschneider");
-
-		// Verify the token
-		GoogleIdToken idToken = this.verifier.getGoogleIdTokenVerifier().verify(token);
-		assertNotNull("Should have token", idToken);
-
-		// Ensure correct details
-		assertEquals("Incorrect google Id", "1", idToken.getPayload().getSubject());
-		assertEquals("Incorrect email", "daniel@officefloor.net", idToken.getPayload().getEmail());
-		assertEquals("Incorrect name", "Daniel Sagenschneider", idToken.getPayload().get("name"));
-	}
+	private AuthenticateResponse authenticateResponse = null;
 
 	@Test
-	public void ensureUserCreated() throws Exception {
+	public void authenticate() throws Exception {
 
 		// Undertake authentication
 		String token = this.verifier.getMockIdToken("1", "daniel@officefloor.net", "email_verified", "true", "name",
 				"Daniel Sagenschneider", "picture", "http://officefloor.net/photo.png");
-		new Authenticate().service(new AuthenticateRequest(token), this.verifier.getGoogleIdTokenVerifier(),
-				this.obectify.ofy(), this.response);
-		assertTrue("Should be successful", response.getObject().isSuccessful());
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/authenticate").secure(true)
+				.method(HttpMethod.POST).header("Content-Type", "application/json")
+				.entity(this.mapper.writeValueAsString(new AuthenticateRequest(token))));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
-		// Ensure the user is loaded into the database
-		GoogleSignin user = this.obectify.get(GoogleSignin.class,
+		// Ensure login created in store
+		GoogleSignin login = this.obectify.get(GoogleSignin.class,
 				(load) -> load.filter("email", "daniel@officefloor.net"));
+		assertNotNull("Should have the login", login);
+		assertEquals("Incorrect name", "Daniel Sagenschneider", login.getName());
+		assertEquals("Incorrect photoUrl", "http://officefloor.net/photo.png", login.getPhotoUrl());
 
-		// Ensure correct details
-		assertUser(user, "1", "daniel@officefloor.net", "Daniel Sagenschneider", "http://officefloor.net/photo.png");
+		// Ensure user created in store
+		User user = this.obectify.get(User.class, (load) -> load.filter("email", "daniel@officefloor.net"));
+		assertEquals("Incorrect user", user.getId(), login.getUser().get().getId());
+		assertEquals("Incorrect name", "Daniel Sagenschneider", user.getName());
+		assertEquals("Incorrect photoUrl", "http://officefloor.net/photo.png", user.getPhotoUrl());
+
+		// Ensure refresh and access token point to user
+		String entity = response.getEntity(null);
+		this.authenticateResponse = mapper.readValue(entity, AuthenticateResponse.class);
+		assertNotNull("Should have refresh token", this.authenticateResponse.getRefreshToken());
+		assertNotNull("Should have access token", this.authenticateResponse.getAccessToken());
 	}
 
 	@Test
-	public void ensureUserUpdated() throws Exception {
+	public void refreshAccessToken() throws Exception {
 
-		// Create the existing user
-		User user = new User("daniel@officefloor.net");
-		user.setName("Daniel Sagenschneider");
-		user.setPhotoUrl("http://officefloor.net/photo.png");
-		this.obectify.ofy().save().entities(user).now();
-		GoogleSignin login = new GoogleSignin("1", user.getEmail());
-		login.setName(user.getName());
-		login.setPhotoUrl(user.getPhotoUrl());
-		login.setUser(Ref.create(user));
-		this.obectify.ofy().save().entity(login).now();
+		// Authenticate (to get refresh token)
+		this.authenticate();
+		String refreshToken = this.authenticateResponse.getRefreshToken();
 
-		// Undertake authentication
-		String token = this.verifier.getMockIdToken("1", "changed@officefloor.net", "email_verified", "true", "name",
-				"Changed Sagenschneider", "picture", "http://officefloor.net/changed.png");
-		new Authenticate().service(new AuthenticateRequest(token), this.verifier.getGoogleIdTokenVerifier(),
-				this.obectify.ofy(), this.response);
-		assertTrue("Should be successful", this.response.getObject().isSuccessful());
+		// Refresh the token
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/refreshAccessToken").secure(true)
+				.method(HttpMethod.POST).header("Content-Type", "application/json")
+				.entity(this.mapper.writeValueAsString(new RefreshRequest(refreshToken))));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		RefreshResponse refreshResponse = mapper.readValue(response.getEntity(null), RefreshResponse.class);
 
-		// Ensure the user is loaded into the database
-		login = this.obectify.get(GoogleSignin.class, (load) -> load.filter("email", "changed@officefloor.net"));
-		assertNotNull("Should have user", login);
-
-		// Ensure correct details
-		assertUser(login, "1", "changed@officefloor.net", "Changed Sagenschneider",
-				"http://officefloor.net/changed.png");
-	}
-
-	private static void assertUser(GoogleSignin login, String googleId, String email, String name, String photoUrl) {
-		assertEquals("Incorrect google id", googleId, login.getGoogleId());
-		assertEquals("Incorrect email", email, login.getEmail());
-		assertEquals("Incorrect name", name, login.getName());
-		assertEquals("Incorrect photo URL", photoUrl, login.getPhotoUrl());
-
-		// Obtain the user
-		User user = login.getUser().get();
-		assertEquals("Incorrect email", email, user.getEmail());
-		assertEquals("Incorrect name", name, user.getName());
-		assertEquals("Incorrect photo URL", photoUrl, user.getPhotoUrl());
+		// As using same keys, should be same access token (times to second)
+		assertEquals("Should be same token", this.authenticateResponse.getAccessToken(),
+				refreshResponse.getAccessToken());
 	}
 
 }

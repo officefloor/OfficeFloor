@@ -21,18 +21,12 @@ import java.util.List;
 
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.configuration.impl.filesystem.FileSystemConfigurationContext;
-import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.configuration.impl.configuration.FileSystemConfigurationContext;
+import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ModelRepository;
-import net.officefloor.woof.model.teams.PropertyFileModel;
-import net.officefloor.woof.model.teams.PropertyModel;
-import net.officefloor.woof.model.teams.PropertySourceModel;
-import net.officefloor.woof.model.teams.TypeQualificationModel;
-import net.officefloor.woof.model.teams.WoofTeamModel;
-import net.officefloor.woof.model.teams.WoofTeamsModel;
 
 /**
  * Tests the marshaling/unmarshaling of the {@link WoofTeamsModel} via the

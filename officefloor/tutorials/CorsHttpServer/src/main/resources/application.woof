@@ -1,0 +1,32 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/path" secure="false" x="103" y="181">
+      <section name="Logic" input="service"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="{any}" method="OPTIONS" secure="false" x="55" y="57">
+      <section name="CORS" input="cors"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="CORS" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.corshttpserver.Cors" x="254" y="39">
+      <input name="cors" parameter-type=""/>
+    </section>
+    <section name="Logic" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.corshttpserver.Logic" x="259" y="162">
+      <input name="service" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

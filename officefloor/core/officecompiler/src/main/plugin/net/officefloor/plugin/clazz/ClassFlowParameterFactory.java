@@ -25,10 +25,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler;
-import net.officefloor.compile.impl.compile.OfficeFloorJavaCompiler.ClassName;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
+import net.officefloor.compile.classes.OfficeFloorJavaCompiler.ClassName;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.FunctionFlowContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
@@ -70,23 +71,23 @@ public class ClassFlowParameterFactory {
 	/**
 	 * Initiate.
 	 * 
-	 * @param classLoader     {@link ClassLoader}.
+	 * @param sourceContext   {@link SourceContext}.
 	 * @param flowInterface   {@link FlowInterface} class.
 	 * @param methodMetaDatas {@link ClassFlowMethodMetaData} instances by its
 	 *                        {@link Method} name.
 	 * @throws Exception If fails to create the {@link Proxy}.
 	 */
-	public ClassFlowParameterFactory(ClassLoader classLoader, Class<?> flowInterface,
+	public ClassFlowParameterFactory(SourceContext sourceContext, Class<?> flowInterface,
 			Map<String, ClassFlowMethodMetaData> methodMetaDatas) throws Exception {
 		this.methodMetaDatas = methodMetaDatas;
 
 		// Determine if the compiler is available
-		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(classLoader);
+		OfficeFloorJavaCompiler compiler = OfficeFloorJavaCompiler.newInstance(sourceContext);
 		if (compiler == null) {
 
 			// Fallback to proxy class
 			Class<?>[] interfaces = new Class[] { flowInterface };
-			this.flowFactory = (context) -> Proxy.newProxyInstance(classLoader, interfaces,
+			this.flowFactory = (context) -> Proxy.newProxyInstance(sourceContext.getClassLoader(), interfaces,
 					new FlowInvocationHandler(context));
 
 		} else {

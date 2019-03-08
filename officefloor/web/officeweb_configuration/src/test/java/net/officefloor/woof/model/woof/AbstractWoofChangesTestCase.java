@@ -29,8 +29,8 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
 import net.officefloor.web.security.HttpAccessControl;
@@ -43,13 +43,6 @@ import net.officefloor.web.spi.security.HttpAccessControlFactory;
 import net.officefloor.web.spi.security.HttpAuthenticationFactory;
 import net.officefloor.web.template.type.WebTemplateType;
 import net.officefloor.web.template.type.WebTemplateTypeImpl;
-import net.officefloor.woof.model.woof.WoofChangeIssues;
-import net.officefloor.woof.model.woof.WoofChanges;
-import net.officefloor.woof.model.woof.WoofChangesImpl;
-import net.officefloor.woof.model.woof.WoofModel;
-import net.officefloor.woof.model.woof.WoofRepositoryImpl;
-import net.officefloor.woof.model.woof.WoofTemplateChangeContext;
-import net.officefloor.woof.model.woof.WoofTemplateChangeContextImpl;
 import net.officefloor.woof.template.WoofTemplateExtensionLoaderUtil;
 
 /**
@@ -560,7 +553,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		}
 
 		@Override
-		public HttpSecuritySupportingManagedObjectType[] getSupportingManagedObjectTypes() {
+		public HttpSecuritySupportingManagedObjectType<?>[] getSupportingManagedObjectTypes() {
 			return new HttpSecuritySupportingManagedObjectType[0];
 		}
 	}

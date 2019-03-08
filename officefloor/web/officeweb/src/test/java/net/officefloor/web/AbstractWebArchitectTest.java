@@ -27,8 +27,10 @@ import java.lang.annotation.Target;
 import java.net.HttpCookie;
 
 import lombok.Data;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
@@ -54,6 +56,7 @@ import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.build.WebInterceptServiceFactory;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.session.HttpSession;
 
@@ -1106,14 +1109,109 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Send request and confirm it is intercepted
 		MockHttpResponse response = this.server.send(this.mockRequest("/path"));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		assertEquals("Should be intercepted", "intercepted TEST", response.getEntity(null));
+		response.assertResponse(200, "intercepted TEST");
 	}
 
 	public static class MockIntercept {
 		@NextFunction("service")
 		public void intercept(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("intercepted ");
+		}
+	}
+
+	/**
+	 * Ensure an load intercept via service.
+	 */
+	public void testInterceptService() throws Exception {
+		this.doInterceptService(MockIntercept.class, "intercepted TEST");
+	}
+
+	/**
+	 * Ensure issue if multiple inputs for intercepter.
+	 */
+	public void testInterceptService_multipleInputs() throws Exception {
+		MockCompilerIssues issues = new MockCompilerIssues(this);
+		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
+		issues.recordIssue("OFFICE", OfficeNodeImpl.class, "Web intercept " + MockMultipleInputIntercept.class.getName()
+				+ " must only have one input (inputs: interceptOne interceptTwo)");
+		issues.recordCaptureIssues(false);
+		this.compile.getOfficeFloorCompiler().setCompilerIssues(issues);
+		this.replayMockObjects();
+		this.doInterceptService(MockMultipleInputIntercept.class, null);
+		this.verifyMockObjects();
+	}
+
+	public static class MockMultipleInputIntercept {
+		@NextFunction("output")
+		public void interceptOne() {
+			// Testing error
+		}
+
+		@NextFunction("output")
+		public void interceptTwo() {
+			// Testing error
+		}
+	}
+
+	/**
+	 * Ensure issue if multiple outputs for intercepter.
+	 */
+	public void testInterceptService_multipleOutputs() throws Exception {
+		MockCompilerIssues issues = new MockCompilerIssues(this);
+		issues.recordCaptureIssues(false);
+		issues.recordCaptureIssues(false);
+		issues.recordIssue("OFFICE", OfficeNodeImpl.class,
+				"Web intercept " + MockMultipleOutputIntercept.class.getName()
+						+ " must only have one output (outputs: outputOne outputTwo)");
+		issues.recordCaptureIssues(false);
+		this.compile.getOfficeFloorCompiler().setCompilerIssues(issues);
+		this.replayMockObjects();
+		this.doInterceptService(MockMultipleOutputIntercept.class, null);
+		this.verifyMockObjects();
+	}
+
+	@FlowInterface
+	public static interface MockMultipleOutputFlows {
+		void outputOne();
+
+		void outputTwo();
+	}
+
+	public static class MockMultipleOutputIntercept {
+		public void intercept(MockMultipleOutputFlows flows) {
+			// Testing error
+		}
+	}
+
+	/**
+	 * Undertakes {@link WebInterceptServiceFactory} test.
+	 * 
+	 * @param interceptClass Intercept {@link Class}.
+	 * @param expectedEntity Expected entity.
+	 */
+	private void doInterceptService(Class<?> interceptClass, String expectedEntity) throws Exception {
+
+		// Configure the intercept
+		MockWebInterceptServiceFactory.interceptor = interceptClass;
+		try {
+
+			// Configure the server
+			// (will register interceptor via service)
+			this.compile.web((context) -> {
+				context.link(false, "/path", MockSection.class);
+			});
+			this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+			// Send request and confirm it is intercepted
+			if (expectedEntity != null) {
+				MockHttpResponse response = this.server.send(this.mockRequest("/path"));
+				response.assertResponse(200, expectedEntity);
+			}
+
+		} finally {
+			// Clear interceptor
+			MockWebInterceptServiceFactory.interceptor = null;
 		}
 	}
 

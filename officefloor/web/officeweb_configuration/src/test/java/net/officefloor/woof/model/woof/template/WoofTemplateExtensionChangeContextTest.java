@@ -25,7 +25,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 
 import net.officefloor.configuration.ConfigurationContext;
-import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;

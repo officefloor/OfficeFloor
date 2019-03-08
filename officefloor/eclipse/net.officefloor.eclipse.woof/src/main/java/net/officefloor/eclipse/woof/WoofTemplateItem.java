@@ -30,7 +30,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.configuration.ConfigurationContext;
-import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
 import net.officefloor.eclipse.configurer.ListBuilder;
 import net.officefloor.eclipse.configurer.ValueValidator;
 import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
