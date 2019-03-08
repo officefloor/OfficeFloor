@@ -40,7 +40,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
 import net.officefloor.model.Model;
 
