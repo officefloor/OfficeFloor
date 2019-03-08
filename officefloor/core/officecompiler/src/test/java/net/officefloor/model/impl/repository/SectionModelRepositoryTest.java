@@ -24,8 +24,8 @@ import java.util.List;
 
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.configuration.impl.filesystem.FileSystemConfigurationContext;
-import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.configuration.impl.configuration.FileSystemConfigurationContext;
+import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.repository.ModelRepository;

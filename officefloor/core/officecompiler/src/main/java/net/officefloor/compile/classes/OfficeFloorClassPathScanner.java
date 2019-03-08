@@ -36,6 +36,16 @@ public class OfficeFloorClassPathScanner {
 	}
 
 	/**
+	 * Translates the resource {@link URL} to the JAR file path.
+	 * 
+	 * @param resourceUrl Resource {@link URL}.
+	 * @return {@link File} path.
+	 */
+	public static String translateResourceUrlToFilePath(URL resourceUrl) {
+		return resourceUrl.getFile().replaceFirst("\\.jar\\!.*", ".jar").substring("file:".length());
+	}
+
+	/**
 	 * {@link ClassPathScanner} that attempts to resolve to files on disk to then
 	 * interrogate directories/jars for the class path entries.
 	 */
@@ -90,7 +100,7 @@ public class OfficeFloorClassPathScanner {
 			if ((urlFilePath.startsWith("file:")) && (urlFilePath.endsWith(".jar!/" + packagePath))) {
 
 				// Extract jar file name
-				String jarFilePath = urlFilePath.replaceFirst("\\.jar\\!.*", ".jar").substring("file:".length());
+				String jarFilePath = translateResourceUrlToFilePath(packageUrl);
 
 				// Scan the jar for package entries
 				try (JarFile jarFile = new JarFile(jarFilePath)) {

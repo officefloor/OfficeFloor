@@ -22,7 +22,7 @@ import java.io.StringWriter;
 
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.configuration.impl.xml.XmlFileConfigurationContext;
+import net.officefloor.configuration.impl.configuration.XmlFileConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

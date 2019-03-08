@@ -22,7 +22,7 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.Model;
 import net.officefloor.model.RemoveConnectionsAction;

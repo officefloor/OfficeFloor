@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.configuration.impl.memory;
+package net.officefloor.configuration.impl.configuration;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

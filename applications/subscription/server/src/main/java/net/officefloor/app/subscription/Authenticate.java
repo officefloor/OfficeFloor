@@ -43,11 +43,9 @@ public class Authenticate {
 	}
 
 	public void authenticate(AuthenticateRequest idTokenInput, GoogleIdTokenVerifier verifier, Objectify objectify,
-			JwtAuthority<JwtCredentials> authority, ObjectResponse<AuthenticateResponse> response, ServerHttpConnection connection) throws Exception {
+			JwtAuthority<JwtCredentials> authority, ObjectResponse<AuthenticateResponse> response,
+			ServerHttpConnection connection) throws Exception {
 
-		// TODO REMOVE
-		connection.getResponse().getHeaders().addHeader("Access-Control-Allow-Origin", "*");
-		
 		// Verify token
 		GoogleIdToken token = verifier.verify(idTokenInput.getIdToken());
 		if (token == null) {
