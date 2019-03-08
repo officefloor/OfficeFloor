@@ -21,7 +21,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.web.resource.build.HttpResourceArchitect;
@@ -58,8 +58,7 @@ public class WoofResourcesLoaderTest extends OfficeFrameTestCase {
 	private final HttpResourceArchitect resourceArchitect = this.createMock(HttpResourceArchitect.class);
 
 	/**
-	 * Ensure can load configuration to {@link OfficeFloorDeployer} with the
-	 * teams.
+	 * Ensure can load configuration to {@link OfficeFloorDeployer} with the teams.
 	 */
 	public void testLoading() throws Exception {
 
@@ -99,8 +98,7 @@ public class WoofResourcesLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Obtains the {@link ConfigurationItem}.
 	 * 
-	 * @param fileName
-	 *            File name for {@link ConfigurationItem}.
+	 * @param fileName File name for {@link ConfigurationItem}.
 	 * @return {@link ConfigurationItem}.
 	 */
 	private ConfigurationItem getConfiguration(String fileName) throws Exception {

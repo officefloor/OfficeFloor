@@ -38,7 +38,7 @@ import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.configuration.impl.classloader.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;

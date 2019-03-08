@@ -19,43 +19,12 @@ package net.officefloor.woof.model.woof;
 
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.configuration.impl.filesystem.FileSystemConfigurationContext;
-import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.configuration.impl.configuration.FileSystemConfigurationContext;
+import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ModelRepository;
-import net.officefloor.woof.model.woof.PropertyModel;
-import net.officefloor.woof.model.woof.WoofExceptionModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofExceptionToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
-import net.officefloor.woof.model.woof.WoofGovernanceModel;
-import net.officefloor.woof.model.woof.WoofModel;
-import net.officefloor.woof.model.woof.WoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSectionModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofSectionOutputToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofStartModel;
-import net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofTemplateExtensionModel;
-import net.officefloor.woof.model.woof.WoofTemplateLinkModel;
-import net.officefloor.woof.model.woof.WoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSectionInputModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofTemplateModel;
 
 /**
  * Tests the marshaling/unmarshaling of the {@link WoofModel} via the

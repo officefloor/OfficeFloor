@@ -32,7 +32,7 @@ import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.configuration.impl.memory.MemoryConfigurationContext;
+import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
@@ -44,10 +44,6 @@ import net.officefloor.model.change.Change;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.woof.model.woof.WoofChangeIssues;
-import net.officefloor.woof.template.WoofTemplateExtensionLoader;
-import net.officefloor.woof.template.WoofTemplateExtensionLoaderImpl;
-import net.officefloor.woof.template.WoofTemplateExtensionSource;
-import net.officefloor.woof.template.WoofTemplateExtensionSourceSpecification;
 
 /**
  * Utility functions for testing a {@link WoofTemplateExtensionSource}
