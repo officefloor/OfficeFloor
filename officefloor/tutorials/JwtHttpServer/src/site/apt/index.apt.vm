@@ -33,4 +33,4 @@ Testing
 
 Next
 
-  The {{{../GoogleSigninHttpServer/index.html}next tutorial}} covers login via Google sign-in.
+  The {{{../CorsHttpServer/index.html}next tutorial}} covers CORS.

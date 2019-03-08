@@ -1,0 +1,65 @@
+                                               -----------------------
+                                                   CORS Tutorial
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<CORS Tutorial>>
+
+  This tutorial demonstrates configuring Cross-Origin Resource Sharing (CORS) handling.
+  
+  CORS, typically, allows hosting the WoOF server on a different domain to the web site.  For example, serving single page static site from a CDN, while logic handled by WoOF servers.
+
+  The example used in this tutorial is a simple end point <<<GET /path>>> that will add CORS headers. 
+   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/CorsHttpServer/${projectVersion}/CorsHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+OPTIONS
+
+  CORS will make <<<OPTIONS>>> calls to determine if able to make the request.  This can be configured as follows:
+
+[./images/CorsHttpServer-configuration.png] CorsHttpServer screen shot.
+  
+  The generic path parameter will match any path.  This allows servicing CORS OPTIONS requests for any path.
+  
+  The handling of the request is the following:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/corshttpserver/Cors.java|ignoreDownloadError=false}
+
+  The above provides very generic CORS handling.  More specific CORS handling can use the request path and other aspects of the request.
+
+
+
+Intercepting Requests
+
+  CORS headers are also required on servicing requests.  The {{{/apidocs/net/officefloor/web/build/WebInterceptServiceFactory.html}WebInterceptServiceFactory}} provides means to register intercepting requests before being serviced.  This is similar to <Servlet Filters>.
+  
+  The CORS intercepting is the following:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/corshttpserver/CorsWebIntercepterServiceFactory.java|ignoreDownloadError=false}
+
+  This will reuse the CORS logic to add the same CORS headers.
+  
+  Note that the intercepting logic may only have one input and one output.  This is so that the input/output can be hooked into the flow.  This does allow other wiring internally within the class.
+
+  While this tutorial focuses on CORS, this intercepting can be used for other generic features (e.g. custom security, logging requests, etc).  
+
+
+
+Testing
+
+  The following confirms the handling of the OPTIONS requests:
+  
+%{snippet|id=options|file=${basedir}/src/test/java/net/officefloor/tutorial/corshttpserver/CorsHttpServerTest.java|ignoreDownloadError=false}
+
+  The following confirms intercepting the request to add the CORS headers:
+  
+%{snippet|id=intercept|file=${basedir}/src/test/java/net/officefloor/tutorial/corshttpserver/CorsHttpServerTest.java|ignoreDownloadError=false}
+  
+
+
+Next
+
+  The {{{../GoogleSigninHttpServer/index.html}next tutorial}} covers login via Google sign-in.

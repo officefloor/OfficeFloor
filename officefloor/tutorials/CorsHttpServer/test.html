@@ -1,0 +1,32 @@
+<html>
+<head>
+<!-- JQuery (but can be any other library) -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
+
+</head>
+<body>
+	<p>
+		<a href="#" onclick="sendRequest()">Send request</a>
+	</p>
+	<p>
+		<span id="message"></span>
+	</p>
+	<script type="text/javascript">
+		function sendRequest() {
+			// Send request
+			$.ajax({
+				type : "GET",
+				url : 'http://localhost:7878/path',
+				headers : {
+					Accept : 'application/json'
+				},
+				success : function(result) {
+					$('#message').text('Message: ' + result.message)
+				}
+			})
+		}
+	</script>
+</body>
+</html>
