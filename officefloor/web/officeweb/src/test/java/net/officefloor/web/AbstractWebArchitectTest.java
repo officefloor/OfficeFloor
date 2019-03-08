@@ -1145,10 +1145,12 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public static class MockMultipleInputIntercept {
 		@NextFunction("output")
 		public void interceptOne() {
+			// Testing error
 		}
 
 		@NextFunction("output")
 		public void interceptTwo() {
+			// Testing error
 		}
 	}
 
@@ -1178,6 +1180,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 	public static class MockMultipleOutputIntercept {
 		public void intercept(MockMultipleOutputFlows flows) {
+			// Testing error
 		}
 	}
 
