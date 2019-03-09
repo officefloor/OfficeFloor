@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { JwtHttpInterceptor } from './jwt-http.interceptor';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -33,6 +34,10 @@ export function provideConfig() {
     providers: [{
         provide: AuthServiceConfig,
         useFactory: provideConfig
+    }, {
+        provide: HTTP_INTERCEPTORS,
+        useClass: JwtHttpInterceptor,
+        multi: true
     }],
     bootstrap: [AppComponent]
 } )
