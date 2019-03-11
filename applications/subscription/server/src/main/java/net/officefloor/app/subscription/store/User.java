@@ -30,5 +30,7 @@ public class User {
 	String name;
 
 	String photoUrl;
+	
+	String[] roles = new String[0];
 
 }

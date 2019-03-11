@@ -58,11 +58,15 @@ export class JwtHttpInterceptor implements HttpInterceptor {
                             this.refreshedAccessToken = new BehaviorSubject<string>( null );
 
                             // Attempt to refresh access token
+                            let isRefreshed: boolean = false;
                             this.authenticationService.refreshAccessToken().pipe(
                                 map(( refreshResponse: AccessTokenResponse ) => {
 
-                                    // Notify of refresh token
-                                    this.refreshedAccessToken.next( refreshResponse.accessToken );
+                                    // Notify of refreshed access token
+                                    if ( refreshResponse.accessToken ) {
+                                        this.refreshedAccessToken.next( refreshResponse.accessToken );
+                                        isRefreshed = true;
+                                    }
 
                                     return refreshResponse;
                                 } ),
@@ -70,6 +74,12 @@ export class JwtHttpInterceptor implements HttpInterceptor {
                                     // Clear to allow refresh again
                                     // Note; if failure then existing requests are not made
                                     this.refreshedAccessToken = null;
+
+                                    // Determine if refreshed
+                                    if ( !isRefreshed ) {
+                                        // Not refreshed, so log out
+                                        this.authenticationService.signOut();
+                                    }
                                 } )
                             ).subscribe();
                         }

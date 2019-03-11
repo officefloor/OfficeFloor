@@ -9,10 +9,10 @@ import org.junit.rules.RuleChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import net.officefloor.app.subscription.Authenticate.AuthenticateRequest;
-import net.officefloor.app.subscription.Authenticate.AuthenticateResponse;
-import net.officefloor.app.subscription.Authenticate.RefreshRequest;
-import net.officefloor.app.subscription.Authenticate.RefreshResponse;
+import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateRequest;
+import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateResponse;
+import net.officefloor.app.subscription.AuthenticateLogic.RefreshRequest;
+import net.officefloor.app.subscription.AuthenticateLogic.RefreshResponse;
 import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.identity.google.mock.GoogleIdTokenRule;
@@ -27,7 +27,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class AuthenticateTest {
+public class AuthenticateLogicTest {
 
 	private GoogleIdTokenRule verifier = new GoogleIdTokenRule();
 

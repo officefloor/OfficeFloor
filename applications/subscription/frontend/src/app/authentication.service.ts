@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AuthService, SocialUser } from "angularx-social-login";
 import { GoogleLoginProvider } from "angularx-social-login";
 import { ServerApiService, AuthenticateResponse, AccessTokenResponse } from './server-api.service';
-import { Observable, Observer, of } from 'rxjs';
+import { Observable, BehaviorSubject, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Injectable( {
@@ -11,13 +11,7 @@ import { map } from 'rxjs/operators';
 export class AuthenticationService {
 
     // Login state
-    private stateNext: Observer<SocialUser>;
-    private state: Observable<SocialUser> = new Observable(( observe: Observer<SocialUser> ) => {
-        this.stateNext = observe;
-
-        // Initiate to logout
-        this.stateNext.next( null );
-    } )
+    private state: BehaviorSubject<SocialUser> = new BehaviorSubject<SocialUser>( null );
 
     constructor(
         private authService: AuthService,
@@ -41,12 +35,12 @@ export class AuthenticationService {
                     localStorage.setItem( 'accessToken', accessToken );
 
                     // Notify logged in
-                    this.stateNext.next( user );
+                    this.state.next( user );
                 } )
 
             } else {
                 // Notify of logout
-                this.stateNext.next( user );
+                this.state.next( user );
             }
         } );
     }

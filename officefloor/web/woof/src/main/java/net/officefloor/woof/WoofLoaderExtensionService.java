@@ -20,6 +20,8 @@ package net.officefloor.woof;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
@@ -80,13 +82,13 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	public static final String APPLICATION_WOOF = "application.woof";
 
 	/**
-	 * Determines if a WoOF application.
+	 * Determines if the WoOF configuration available.
 	 * 
 	 * @param context {@link SourceContext}.
-	 * @return <code>true</code> if a WoOF application.
-	 * @throws IOException If fails to check if WoOF application.
+	 * @return <code>true</code> if WoOF configuration available.
+	 * @throws IOException If fails to check if WoOF application available.
 	 */
-	private static boolean isWoofApplication(SourceContext context) throws IOException {
+	private static boolean isApplicationWoofAvailable(SourceContext context) throws IOException {
 
 		// Obtain configuration file
 		InputStream config = context.getOptionalResource(APPLICATION_WOOF);
@@ -96,6 +98,24 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 
 		// WoOF application if configuration file
 		return config != null;
+	}
+
+	/**
+	 * Determines if a WoOF application.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return <code>true</code> if a WoOF application.
+	 * @throws IOException If fails to check if WoOF application.
+	 */
+	private static boolean isWoofApplication(SourceContext context) throws IOException {
+
+		// Determine if configuring extensions
+		if (contextualExtensions.size() > 0) {
+			return true; // configures WoOF
+		}
+
+		// No extension, so determine if configuration available
+		return isApplicationWoofAvailable(context);
 	}
 
 	/**
@@ -117,6 +137,11 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	 * {@link WoofLoaderRunnable} context.
 	 */
 	public static interface WoofLoaderRunnableContext {
+
+		/**
+		 * Flags to not load any configuration.
+		 */
+		void notLoad();
 
 		/**
 		 * Flags to not load the {@link HttpServer}.
@@ -147,6 +172,13 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		 * Flags not to load the {@link WoofExtensionService} instances.
 		 */
 		void notLoadWoofExtensions();
+
+		/**
+		 * Adds {@link WoofExtensionService}.
+		 * 
+		 * @param extension {@link WoofExtensionService}.
+		 */
+		void extend(WoofExtensionService extension);
 	}
 
 	/**
@@ -180,6 +212,11 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	private static boolean isLoadWoofExtensions = true;
 
 	/**
+	 * Contextually added {@link WoofExtensionService} instances.
+	 */
+	private static List<WoofExtensionService> contextualExtensions = new LinkedList<>();
+
+	/**
 	 * Undertakes a contextual load.
 	 *
 	 * @param          <R> Return type from {@link WoofLoaderRunnable}.
@@ -194,6 +231,16 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 
 			// Undertake runnable
 			return runnable.run(new WoofLoaderRunnableContext() {
+
+				@Override
+				public void notLoad() {
+					this.notLoadWoof();
+					this.notLoadTeams();
+					this.notLoadResources();
+					this.notLoadObjects();
+					this.notLoadHttpServer();
+					this.notLoadWoofExtensions();
+				}
 
 				@Override
 				public void notLoadWoof() {
@@ -224,6 +271,11 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 				public void notLoadWoofExtensions() {
 					isLoadWoofExtensions = false;
 				}
+
+				@Override
+				public void extend(WoofExtensionService extension) {
+					contextualExtensions.add(extension);
+				}
 			});
 
 		} finally {
@@ -234,6 +286,7 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 			isLoadObjects = true;
 			isLoadResources = true;
 			isLoadWoofExtensions = true;
+			contextualExtensions.clear();
 		}
 	}
 
@@ -368,7 +421,7 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		};
 
 		// Load the WoOF configuration to the application
-		if (isLoadWoof) {
+		if (isLoadWoof && isApplicationWoofAvailable(context)) {
 			WoofLoader woofLoader = new WoofLoaderImpl(new WoofRepositoryImpl(new ModelRepositoryImpl()));
 			woofLoader.loadWoofConfiguration(woofContext);
 		}
@@ -500,6 +553,11 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 							+ extensionService.getClass().getName() + " configuration failure: " + ex.getMessage(), ex);
 				}
 			}
+		}
+
+		// Load the contextual extensions
+		for (WoofExtensionService contextualExtension : contextualExtensions) {
+			contextualExtension.extend(woofContext);
 		}
 
 		// Inform Office Architect

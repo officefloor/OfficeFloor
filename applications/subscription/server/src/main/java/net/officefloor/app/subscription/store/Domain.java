@@ -1,5 +1,6 @@
 package net.officefloor.app.subscription.store;
 
+import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -26,5 +27,9 @@ public class Domain {
 	@Index
 	@NonNull
 	String domain;
+
+	@Index
+	@NonNull
+	Ref<User> user;
 
 }

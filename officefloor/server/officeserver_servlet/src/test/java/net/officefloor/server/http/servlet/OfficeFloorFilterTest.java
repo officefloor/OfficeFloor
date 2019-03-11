@@ -39,6 +39,7 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.woof.WoofLoaderExtensionService;
 
 /**
  * Tests the {@link OfficeFloorFilter}.
@@ -69,64 +70,72 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		// Start the server (using application extension)
-		MockServerOfficeFloorExtensionService.runWithinContext((officeFloorDeployer, context) -> {
+		WoofLoaderExtensionService.contextualLoad((loadContext) -> {
+			loadContext.notLoad();
 
-			// Obtain the input to service the HTTP requests
-			DeployedOffice office = officeFloorDeployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
-			DeployedOfficeInput officeInput = office.getDeployedOfficeInput(HANDLER_SECTION_NAME, HANDLER_INPUT_NAME);
+			// Start the server (using application extension)
+			MockServerOfficeFloorExtensionService.runWithinContext((officeFloorDeployer, context) -> {
 
-			// Load the HTTP server
-			HttpServer server = new HttpServer(officeInput, officeFloorDeployer, context);
+				// Obtain the input to service the HTTP requests
+				DeployedOffice office = officeFloorDeployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
+				DeployedOfficeInput officeInput = office.getDeployedOfficeInput(HANDLER_SECTION_NAME,
+						HANDLER_INPUT_NAME);
 
-			// Indicate the server
-			System.out
-					.println("HTTP server implementation " + server.getHttpServerImplementation().getClass().getName());
+				// Load the HTTP server
+				HttpServer server = new HttpServer(officeInput, officeFloorDeployer, context);
 
-			// Load the team marker and team
-			Singleton.load(officeFloorDeployer, new TeamMarker(), office);
-			officeFloorDeployer.addTeam("TEAM", OnePersonTeamSource.class.getName()).addTypeQualification(null,
-					TeamMarker.class.getName());
+				// Indicate the server
+				System.out.println(
+						"HTTP server implementation " + server.getHttpServerImplementation().getClass().getName());
 
-		}, (officeArchitect, context) -> {
+				// Load the team marker and team
+				Singleton.load(officeFloorDeployer, new TeamMarker(), office);
+				officeFloorDeployer.addTeam("TEAM", OnePersonTeamSource.class.getName()).addTypeQualification(null,
+						TeamMarker.class.getName());
 
-			// Enable auto-wiring
-			officeArchitect.enableAutoWireObjects();
-			officeArchitect.enableAutoWireTeams();
+			}, (officeArchitect, context) -> {
 
-			// Add section to service requests
-			OfficeSection router = officeArchitect.addOfficeSection(HANDLER_SECTION_NAME,
-					ClassSectionSource.class.getName(), Router.class.getName());
+				// Enable auto-wiring
+				officeArchitect.enableAutoWireObjects();
+				officeArchitect.enableAutoWireTeams();
 
-			// Create the service handlers
-			OfficeSection officeFloorHandler = officeArchitect.addOfficeSection("officefloor",
-					ClassSectionSource.class.getName(), OfficeFloorFilterTest.Servicer.class.getName());
-			OfficeSection officeFloorTeamHandler = officeArchitect.addOfficeSection("officefloorTeam",
-					ClassSectionSource.class.getName(), OfficeFloorFilterTest.TeamServicer.class.getName());
-			OfficeSection delayedFallbackHandler = officeArchitect.addOfficeSection("delayedFallback",
-					ClassSectionSource.class.getName(), DelayedFallbackServicer.class.getName());
+				// Add section to service requests
+				OfficeSection router = officeArchitect.addOfficeSection(HANDLER_SECTION_NAME,
+						ClassSectionSource.class.getName(), Router.class.getName());
 
-			// Wire servicing
-			officeArchitect.link(router.getOfficeSectionOutput("service"),
-					officeFloorHandler.getOfficeSectionInput("service"));
-			officeArchitect.link(router.getOfficeSectionOutput("serviceTeams"),
-					officeFloorTeamHandler.getOfficeSectionInput("teams"));
-			officeArchitect.link(router.getOfficeSectionOutput("delayedFallback"),
-					delayedFallbackHandler.getOfficeSectionInput("service"));
+				// Create the service handlers
+				OfficeSection officeFloorHandler = officeArchitect.addOfficeSection("officefloor",
+						ClassSectionSource.class.getName(), OfficeFloorFilterTest.Servicer.class.getName());
+				OfficeSection officeFloorTeamHandler = officeArchitect.addOfficeSection("officefloorTeam",
+						ClassSectionSource.class.getName(), OfficeFloorFilterTest.TeamServicer.class.getName());
+				OfficeSection delayedFallbackHandler = officeArchitect.addOfficeSection("delayedFallback",
+						ClassSectionSource.class.getName(), DelayedFallbackServicer.class.getName());
 
-		}, () -> {
+				// Wire servicing
+				officeArchitect.link(router.getOfficeSectionOutput("service"),
+						officeFloorHandler.getOfficeSectionInput("service"));
+				officeArchitect.link(router.getOfficeSectionOutput("serviceTeams"),
+						officeFloorTeamHandler.getOfficeSectionInput("teams"));
+				officeArchitect.link(router.getOfficeSectionOutput("delayedFallback"),
+						delayedFallbackHandler.getOfficeSectionInput("service"));
 
-			// Start the server
-			this.server = new Server(0);
-			ServletContextHandler handler = new ServletContextHandler();
-			handler.setContextPath("/");
-			handler.addFilter(OfficeFloorFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
-			handler.addServlet(MockHttpServlet.class, "/*");
-			this.server.setHandler(handler);
-			this.server.start();
+			}, () -> {
 
-			// Obtain the port
-			this.port = ((ServerConnector) (this.server.getConnectors()[0])).getLocalPort();
+				// Start the server
+				this.server = new Server(0);
+				ServletContextHandler handler = new ServletContextHandler();
+				handler.setContextPath("/");
+				handler.addFilter(OfficeFloorFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
+				handler.addServlet(MockHttpServlet.class, "/*");
+				this.server.setHandler(handler);
+				this.server.start();
+
+				// Obtain the port
+				this.port = ((ServerConnector) (this.server.getConnectors()[0])).getLocalPort();
+			});
+
+			// No return
+			return null;
 		});
 	}
 

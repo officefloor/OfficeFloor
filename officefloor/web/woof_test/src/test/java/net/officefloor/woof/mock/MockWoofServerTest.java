@@ -17,10 +17,17 @@
  */
 package net.officefloor.woof.mock;
 
+import java.io.IOException;
+
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.web.build.HttpInput;
 import net.officefloor.woof.WoofLoaderExtensionService;
 
 /**
@@ -86,9 +93,6 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	 */
 	public void testMultipleRequests() throws Exception {
 
-		// Start WoOF application for testing
-		this.server = MockWoofServer.open();
-
 		// Run multiple requests ensuring appropriately handles
 		MockHttpResponse response = null;
 		for (int i = 0; i < 100; i++) {
@@ -100,6 +104,39 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 			}
 			response = this.server.send(request);
 			response.assertResponse(200, "param=" + i + ", previous=" + (i - 1) + ", object=mock");
+		}
+	}
+
+	/**
+	 * Ensure can configure {@link MockWoofServer}.
+	 */
+	public void testOverrideConfiguration() throws Exception {
+
+		// Start with additional functionality
+		this.server.close();
+		this.server = MockWoofServer.open((context, compiler) -> {
+			context.notLoadWoof();
+			context.extend((woofContext) -> {
+				OfficeArchitect office = woofContext.getOfficeArchitect();
+
+				// Add the section
+				OfficeSection section = office.addOfficeSection("SECTION", ClassSectionSource.class.getName(),
+						OverrideSection.class.getName());
+
+				// Configure servicing the request
+				HttpInput input = woofContext.getWebArchitect().getHttpInput(false, "GET", "/");
+				office.link(input.getInput(), section.getOfficeSectionInput("service"));
+			});
+		});
+
+		// Ensure can obtain overridden response
+		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest());
+		response.assertResponse(200, "TEST");
+	}
+
+	public static class OverrideSection {
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("TEST");
 		}
 	}
 
