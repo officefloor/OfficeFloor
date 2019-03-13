@@ -59,6 +59,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param managedObject {@link ManagedObject} for the {@link ProcessState} of
 	 *                      the {@link Flow}.
 	 * @param callback      {@link FlowCallback} on completion of the {@link Flow}.
+	 * @return {@link ManagedObjectStartupProcess}.
 	 * @throws IllegalArgumentException If
 	 *                                  <ul>
 	 *                                  <li>unknown {@link Flow} key</li>
@@ -67,8 +68,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *                                  supplied</li>
 	 *                                  </ul>
 	 */
-	void registerStartupProcess(F key, Object parameter, ManagedObject managedObject, FlowCallback callback)
-			throws IllegalArgumentException;
+	ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, ManagedObject managedObject,
+			FlowCallback callback) throws IllegalArgumentException;
 
 	/**
 	 * Registers a start up {@link Flow}.
@@ -79,6 +80,7 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 * @param managedObject {@link ManagedObject} for the {@link ProcessState} of
 	 *                      the {@link Flow}.
 	 * @param callback      {@link FlowCallback} on completion of the {@link Flow}.
+	 * @return {@link ManagedObjectStartupProcess}.
 	 * @throws IllegalArgumentException If
 	 *                                  <ul>
 	 *                                  <li>unknown {@link Flow} key</li>
@@ -87,8 +89,8 @@ public interface ManagedObjectExecuteContext<F extends Enum<F>> {
 	 *                                  supplied</li>
 	 *                                  </ul>
 	 */
-	void registerStartupProcess(int flowIndex, Object parameter, ManagedObject managedObject, FlowCallback callback)
-			throws IllegalArgumentException;
+	ManagedObjectStartupProcess registerStartupProcess(int flowIndex, Object parameter, ManagedObject managedObject,
+			FlowCallback callback) throws IllegalArgumentException;
 
 	/**
 	 * Instigates a {@link Flow}.

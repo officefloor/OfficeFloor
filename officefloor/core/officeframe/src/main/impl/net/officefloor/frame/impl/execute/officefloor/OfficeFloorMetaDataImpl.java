@@ -48,22 +48,31 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	private final OfficeMetaData[] officeMetaData;
 
 	/**
+	 * Maximum time in milliseconds to wait for {@link OfficeFloor} to start.
+	 */
+	private final long maxStartupWaitTime;
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param teams
-	 *            Listing of {@link TeamManagement} instances.
-	 * @param managedObjectSourceInstances
-	 *            Listing of {@link ManagedObjectSourceInstance} instances.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData} for the {@link Office} instances within
-	 *            the {@link OfficeFloor}.
+	 * @param teams                        Listing of {@link TeamManagement}
+	 *                                     instances.
+	 * @param managedObjectSourceInstances Listing of
+	 *                                     {@link ManagedObjectSourceInstance}
+	 *                                     instances.
+	 * @param officeMetaData               {@link OfficeMetaData} for the
+	 *                                     {@link Office} instances within the
+	 *                                     {@link OfficeFloor}.
+	 * @param maxStartupWaitTime           Maximum time in milliseconds to wait for
+	 *                                     {@link OfficeFloor} to start.
 	 */
 	public OfficeFloorMetaDataImpl(TeamManagement[] teams,
-			ManagedObjectSourceInstance<?>[] managedObjectSourceInstances,
-			OfficeMetaData[] officeMetaData) {
+			ManagedObjectSourceInstance<?>[] managedObjectSourceInstances, OfficeMetaData[] officeMetaData,
+			long maxStartupWaitTime) {
 		this.teams = teams;
 		this.managedObjectSourceInstances = managedObjectSourceInstances;
 		this.officeMetaData = officeMetaData;
+		this.maxStartupWaitTime = maxStartupWaitTime;
 	}
 
 	/*
@@ -83,6 +92,11 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	@Override
 	public ManagedObjectSourceInstance<?>[] getManagedObjectSourceInstances() {
 		return this.managedObjectSourceInstances;
+	}
+
+	@Override
+	public long getMaxStartupWaitTime() {
+		return this.maxStartupWaitTime;
 	}
 
 }

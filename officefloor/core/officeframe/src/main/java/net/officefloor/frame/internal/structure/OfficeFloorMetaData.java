@@ -29,16 +29,16 @@ import net.officefloor.frame.api.team.Team;
 public interface OfficeFloorMetaData {
 
 	/**
-	 * Obtains the {@link OfficeMetaData} instances of the {@link Office}
-	 * instances contained within the {@link OfficeFloor}.
+	 * Obtains the {@link OfficeMetaData} instances of the {@link Office} instances
+	 * contained within the {@link OfficeFloor}.
 	 * 
 	 * @return {@link OfficeMetaData} instances.
 	 */
 	OfficeMetaData[] getOfficeMetaData();
 
 	/**
-	 * Obtains the {@link ManagedObjectSourceInstance} instances contained
-	 * within the {@link OfficeFloor}.
+	 * Obtains the {@link ManagedObjectSourceInstance} instances contained within
+	 * the {@link OfficeFloor}.
 	 * 
 	 * @return {@link ManagedObjectSourceInstance} instances.
 	 */
@@ -52,5 +52,14 @@ public interface OfficeFloorMetaData {
 	 *         {@link OfficeFloor}.
 	 */
 	TeamManagement[] getTeams();
+
+	/**
+	 * Obtains the maximum amount of time in milliseconds for {@link OfficeFloor} to
+	 * start.
+	 * 
+	 * @return Maximum amount of time in milliseconds for {@link OfficeFloor} to
+	 *         start.
+	 */
+	long getMaxStartupWaitTime();
 
 }

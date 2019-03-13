@@ -88,6 +88,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	private final List<TeamConfiguration<?>> teams = new LinkedList<TeamConfiguration<?>>();
 
 	/**
+	 * Maximum time in milliseconds to wait for {@link OfficeFloor} to start.
+	 */
+	private long maxStartupWaitTime = 10 * 1000;
+
+	/**
 	 * {@link ExecutiveConfiguration}.
 	 */
 	private ExecutiveConfiguration<?> executiveConfiguration = null;
@@ -156,6 +161,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	@Override
 	public void setClockFactory(ClockFactory clockFactory) {
 		this.clockFactory = clockFactory;
+	}
+
+	@Override
+	public void setMaxStartupWaitTime(long maxStartupWaitTime) {
+		this.maxStartupWaitTime = maxStartupWaitTime;
 	}
 
 	@Override
@@ -270,6 +280,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	@Override
 	public String getOfficeFloorName() {
 		return this.officeFloorName;
+	}
+
+	@Override
+	public long getMaxStartupWaitTime() {
+		return this.maxStartupWaitTime;
 	}
 
 	@Override

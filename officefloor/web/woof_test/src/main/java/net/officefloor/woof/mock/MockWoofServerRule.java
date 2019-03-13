@@ -39,7 +39,11 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 	 * @param configurers {@link MockWoofServerConfigurer} instances.
 	 */
 	public MockWoofServerRule(MockWoofServerConfigurer... configurers) {
-		this.configurers = configurers;
+
+		// Ensure always have at least one configurer to load WoOF
+		this.configurers = configurers != null ? configurers
+				: new MockWoofServerConfigurer[] { (woofContext, compiler) -> {
+				} };
 	}
 
 	/*

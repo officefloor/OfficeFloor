@@ -111,6 +111,13 @@ public class RawOfficeFloorMetaDataFactory {
 			officeFloorName = OfficeFloor.class.getSimpleName();
 		}
 
+		// Obtain the maximum time to wait for OfficeFloor to start
+		long maxStartupWaitTime = configuration.getMaxStartupWaitTime();
+		if (maxStartupWaitTime <= 0) {
+			issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName, "Must provide positive startup wait time");
+			return null; // must have positive startup time
+		}
+
 		// Create listing of additional OfficeFloor listeners
 		List<OfficeFloorListener> officeFloorListeners = new LinkedList<>();
 
@@ -355,7 +362,7 @@ public class RawOfficeFloorMetaDataFactory {
 		// Create the office floor meta-data
 		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(teamListing.toArray(new TeamManagement[0]),
 				mosInstances.toArray(new ManagedObjectSourceInstance[0]),
-				officeMetaDatas.toArray(new OfficeMetaData[0]));
+				officeMetaDatas.toArray(new OfficeMetaData[0]), maxStartupWaitTime);
 
 		// Return the raw meta-data
 		return rawMetaData;
