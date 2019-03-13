@@ -23,6 +23,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.poll.StatePollContext;
 import net.officefloor.plugin.managedobject.poll.StatePoller;
@@ -329,7 +330,11 @@ public class JwtHttpSecuritySource<C> extends
 
 		// Create poller for JWT decoder
 		this.jwtValidateKeys = StatePoller.builder(JwtValidateKey[].class, (pollContext, callback) -> {
-			context.registerStartupProcess(Flows.RETRIEVE_KEYS, new JwtValidateKeyCollectorImpl(pollContext), callback);
+			ManagedObjectStartupProcess startup = context.registerStartupProcess(Flows.RETRIEVE_KEYS,
+					new JwtValidateKeyCollectorImpl(pollContext), callback);
+
+			// Run concurrently (may wait on local JWT Authority initialised later)
+			startup.setConcurrent(true);
 		}, (delay, pollContext, callback) -> {
 			context.invokeProcess(Flows.RETRIEVE_KEYS, new JwtValidateKeyCollectorImpl(pollContext), delay, callback);
 		}).identifier("JWT decode keys").build();

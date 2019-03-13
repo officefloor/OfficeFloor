@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +19,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 
@@ -193,6 +195,11 @@ public class StatePoller<S, F extends Enum<F>> {
 		private Logger logger;
 
 		/**
+		 * Decorator for the {@link ManagedObjectStartupProcess}.
+		 */
+		private Consumer<ManagedObjectStartupProcess> startupProcessDecorator;
+
+		/**
 		 * Optional factory to create a parameter for the invoked {@link ProcessState}
 		 * of the {@link ManagedObjectExecuteContext}.
 		 */
@@ -310,6 +317,18 @@ public class StatePoller<S, F extends Enum<F>> {
 		}
 
 		/**
+		 * Provides a decorator of the {@link ManagedObjectStartupProcess}.
+		 * 
+		 * @param startupProcessDecorator Decorate of the
+		 *                                {@link ManagedObjectStartupProcess}.
+		 * @return <code>this</code>.
+		 */
+		public Builder<S, F> startup(Consumer<ManagedObjectStartupProcess> startupProcessDecorator) {
+			this.startupProcessDecorator = startupProcessDecorator;
+			return this;
+		}
+
+		/**
 		 * Builds the {@link StatePoller}.
 		 * 
 		 * @return {@link StatePoller}.
@@ -326,6 +345,13 @@ public class StatePoller<S, F extends Enum<F>> {
 						? this.parameterFactory
 						: (context) -> null;
 
+				// Capture the decorator
+				Consumer<ManagedObjectStartupProcess> startupDecorator = this.startupProcessDecorator != null
+						? this.startupProcessDecorator
+						: (startupProcess) -> {
+							// No decoration
+						};
+
 				// No custom poller, so configure to flow key/index
 				if (this.flowKey != null) {
 
@@ -333,7 +359,9 @@ public class StatePoller<S, F extends Enum<F>> {
 					initialiser = (context, callback) -> {
 						Object parameter = parameterFactory.apply(context);
 						ManagedObject managedObject = this.managedObjectFactory.apply(context);
-						this.executeContext.registerStartupProcess(this.flowKey, parameter, managedObject, callback);
+						ManagedObjectStartupProcess process = this.executeContext.registerStartupProcess(this.flowKey,
+								parameter, managedObject, callback);
+						startupDecorator.accept(process);
 					};
 
 					// Flow key poller
@@ -349,7 +377,9 @@ public class StatePoller<S, F extends Enum<F>> {
 					initialiser = (context, callback) -> {
 						Object parameter = parameterFactory.apply(context);
 						ManagedObject managedObject = this.managedObjectFactory.apply(context);
-						this.executeContext.registerStartupProcess(this.flowIndex, parameter, managedObject, callback);
+						ManagedObjectStartupProcess process = this.executeContext.registerStartupProcess(this.flowIndex,
+								parameter, managedObject, callback);
+						startupDecorator.accept(process);
 					};
 
 					// Flow index poller

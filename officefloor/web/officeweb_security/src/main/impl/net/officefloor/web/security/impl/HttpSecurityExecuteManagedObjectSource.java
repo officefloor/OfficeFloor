@@ -6,6 +6,7 @@ import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
@@ -118,9 +119,10 @@ public class HttpSecurityExecuteManagedObjectSource<F extends Enum<F>> extends A
 		 */
 
 		@Override
-		public void registerStartupProcess(F key, Object parameter, FlowCallback callback)
+		public ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, FlowCallback callback)
 				throws IllegalArgumentException {
-			this.context.registerStartupProcess(key, parameter, HttpSecurityExecuteManagedObjectSource.this, callback);
+			return this.context.registerStartupProcess(key, parameter, HttpSecurityExecuteManagedObjectSource.this,
+					callback);
 		}
 
 		@Override

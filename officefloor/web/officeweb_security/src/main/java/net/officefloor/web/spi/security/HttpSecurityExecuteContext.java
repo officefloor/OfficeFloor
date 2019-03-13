@@ -21,6 +21,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 
@@ -41,13 +42,15 @@ public interface HttpSecurityExecuteContext<F extends Enum<F>> {
 	 * @param parameter Parameter to first {@link ManagedFunction} of the
 	 *                  {@link Flow}.
 	 * @param callback  {@link FlowCallback} on completion of the {@link Flow}.
+	 * @return {@link ManagedObjectStartupProcess}.
 	 * @throws IllegalArgumentException If
 	 *                                  <ul>
 	 *                                  <li>unknown {@link Flow} key</li>
 	 *                                  <li>parameter is incorrect type</li>
 	 *                                  </ul>
 	 */
-	void registerStartupProcess(F key, Object parameter, FlowCallback callback) throws IllegalArgumentException;
+	ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, FlowCallback callback)
+			throws IllegalArgumentException;
 
 	/**
 	 * Instigates a {@link Flow}.

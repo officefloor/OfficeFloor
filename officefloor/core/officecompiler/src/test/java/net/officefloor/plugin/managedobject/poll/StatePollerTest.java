@@ -323,6 +323,17 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	}
 
 	/**
+	 * Ensure can decorate the {@link ManagedObjectStartupProcess}.
+	 */
+	public void testDecorateStartupProcess() {
+		this.poller = StatePoller
+				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.startup((startupProcess) -> startupProcess.setConcurrent(true)).build();
+		InvokedProcess process = this.invokedProcesses.remove();
+		assertTrue("Should be concurrently started", process.isConcurrent);
+	}
+
+	/**
 	 * Ensure can use custom {@link Poller}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
