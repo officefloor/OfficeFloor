@@ -1,5 +1,0 @@
-<teams>
-
-	<team source="net.officefloor.frame.impl.spi.team.ExecutorCachedTeamSource" type="net.officefloor.web.jwt.authority.JwtAuthority" />
-
-</teams>

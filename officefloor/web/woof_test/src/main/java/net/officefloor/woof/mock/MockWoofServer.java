@@ -23,6 +23,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.woof.WoofLoaderExtensionService;
+import net.officefloor.woof.WoofLoaderExtensionService.WoofLoaderRunnableContext;
 
 /**
  * <p>
@@ -35,31 +36,47 @@ import net.officefloor.woof.WoofLoaderExtensionService;
 public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 
 	/**
-	 * Opens the {@link MockWoofServer}.
-	 * 
-	 * @return {@link MockWoofServer}.
-	 * @throws Exception
-	 *             If fails to start the {@link MockWoofServer}.
+	 * Enables configuring the {@link MockWoofServer}.
 	 */
-	public static MockWoofServer open() throws Exception {
+	@FunctionalInterface
+	public static interface MockWoofServerConfigurer {
 
-		// Create the server
-		MockWoofServer server = new MockWoofServer();
-
-		// Return the open server
-		return open(server);
+		/**
+		 * Allows overriding the configuration of the {@link MockWoofServer}.
+		 * 
+		 * @param context  {@link WoofLoaderRunnableContext}.
+		 * @param compiler {@link CompileOfficeFloor}.
+		 * @throws Exception If fails to configure.
+		 */
+		void configure(WoofLoaderRunnableContext context, CompileOfficeFloor compiler) throws Exception;
 	}
 
 	/**
 	 * Opens the {@link MockWoofServer}.
 	 * 
-	 * @param server
-	 *            {@link MockWoofServer}.
-	 * @return Input {@link MockWoofServer}.
-	 * @throws Exception
-	 *             If fails to open the {@link MockWoofServer}.
+	 * @param configurers {@link MockWoofServerConfigurer} instances.
+	 * @return {@link MockWoofServer}.
+	 * @throws Exception If fails to start the {@link MockWoofServer}.
 	 */
-	protected static MockWoofServer open(MockWoofServer server) throws Exception {
+	public static MockWoofServer open(MockWoofServerConfigurer... configurers) throws Exception {
+
+		// Create the server
+		MockWoofServer server = new MockWoofServer();
+
+		// Return the open server
+		return open(server, configurers);
+	}
+
+	/**
+	 * Opens the {@link MockWoofServer}.
+	 * 
+	 * @param server      {@link MockWoofServer}.
+	 * @param configurers {@link MockWoofServerConfigurer} instances.
+	 * @return Input {@link MockWoofServer}.
+	 * @throws Exception If fails to open the {@link MockWoofServer}.
+	 */
+	protected static MockWoofServer open(MockWoofServer server, MockWoofServerConfigurer... configurers)
+			throws Exception {
 
 		// Undertake compiling (without HTTP Server loading)
 		return WoofLoaderExtensionService.contextualLoad((loadContext) -> {
@@ -79,6 +96,9 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 			compiler.office((context) -> {
 				// Configured by WoOF extension
 			});
+			for (MockWoofServerConfigurer configurer : configurers) {
+				configurer.configure(loadContext, compiler);
+			}
 			server.officeFloor = compiler.compileAndOpenOfficeFloor();
 
 			// Return the server

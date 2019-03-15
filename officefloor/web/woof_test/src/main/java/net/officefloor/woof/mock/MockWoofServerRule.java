@@ -28,6 +28,24 @@ import org.junit.runners.model.Statement;
  */
 public class MockWoofServerRule extends MockWoofServer implements TestRule {
 
+	/**
+	 * {@link MockWoofServerConfigurer} instances.
+	 */
+	private final MockWoofServerConfigurer[] configurers;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param configurers {@link MockWoofServerConfigurer} instances.
+	 */
+	public MockWoofServerRule(MockWoofServerConfigurer... configurers) {
+
+		// Ensure always have at least one configurer to load WoOF
+		this.configurers = configurers != null ? configurers
+				: new MockWoofServerConfigurer[] { (woofContext, compiler) -> {
+				} };
+	}
+
 	/*
 	 * =================== TestRule =======================
 	 */
@@ -38,7 +56,8 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 
 			@Override
 			public void evaluate() throws Throwable {
-				try (MockWoofServer server = MockWoofServer.open(MockWoofServerRule.this)) {
+				try (MockWoofServer server = MockWoofServer.open(MockWoofServerRule.this,
+						MockWoofServerRule.this.configurers)) {
 					base.evaluate();
 				}
 			}

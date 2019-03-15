@@ -46,6 +46,15 @@ public interface OfficeFloorConfiguration {
 	String getOfficeFloorName();
 
 	/**
+	 * Obtains the maximum time in milliseconds to wait for {@link OfficeFloor} to
+	 * start.
+	 * 
+	 * @return Maximum time in milliseconds to wait for {@link OfficeFloor} to
+	 *         start.
+	 */
+	long getMaxStartupWaitTime();
+
+	/**
 	 * Obtains the {@link SourceContext}.
 	 * 
 	 * @param clockFactoryProvider Provides {@link ClockFactory} if one not

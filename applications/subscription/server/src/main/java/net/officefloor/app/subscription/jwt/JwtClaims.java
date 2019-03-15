@@ -13,7 +13,9 @@ import net.officefloor.web.jwt.JwtHttpSecuritySource;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class JwtCredentials {
+public class JwtClaims {
 
 	private long userId;
+
+	private String[] roles;
 }

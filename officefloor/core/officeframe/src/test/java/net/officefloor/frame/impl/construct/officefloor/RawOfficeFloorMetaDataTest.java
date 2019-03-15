@@ -104,6 +104,32 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure issue if non-positive startup wait time.
+	 */
+	public void testNonPositiveStartupWaitTime() {
+
+		// Record
+		this.configuration.setMaxStartupWaitTime(0);
+		this.issues.addIssue(AssetType.OFFICE_FLOOR, OFFICE_FLOOR_NAME, "Must provide positive startup wait time");
+
+		// Construct
+		this.replayMockObjects();
+		this.constructRawOfficeFloorMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure provide default startup wait time.
+	 */
+	public void testDefaultStartupWaitTime() {
+		this.replayMockObjects();
+		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
+		this.verifyMockObjects();
+		assertEquals("Incorrect default startup wait time", 10_000,
+				metaData.getOfficeFloorMetaData().getMaxStartupWaitTime());
+	}
+
+	/**
 	 * Ensures appropriate {@link SourceContext}.
 	 */
 	public void testSourceContext() throws IOException {

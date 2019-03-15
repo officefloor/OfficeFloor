@@ -19,6 +19,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.ThreadSafeClosure;
@@ -89,6 +90,7 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 		process.parameter.pollContext.setNextState("TEST", 1, TimeUnit.HOURS);
 		assertEquals("Incorrect startup state", "TEST", this.poller.getState(10, TimeUnit.MILLISECONDS));
 		this.assertLogs("Startup Process", "Next poll in ");
+		assertFalse("Should not be concurrent by default", process.isConcurrent);
 	}
 
 	/**
@@ -321,6 +323,17 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	}
 
 	/**
+	 * Ensure can decorate the {@link ManagedObjectStartupProcess}.
+	 */
+	public void testDecorateStartupProcess() {
+		this.poller = StatePoller
+				.builder(String.class, Flows.DO_FLOW, this, (context) -> new MockManagedObject(context))
+				.startup((startupProcess) -> startupProcess.setConcurrent(true)).build();
+		InvokedProcess process = this.invokedProcesses.remove();
+		assertTrue("Should be concurrently started", process.isConcurrent);
+	}
+
+	/**
 	 * Ensure can use custom {@link Poller}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -328,8 +341,9 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 
 		// Create with custom poller
 		Builder builder = StatePoller.builder(String.class, (context, callback) -> {
-			this.registerStartupProcess(Flows.DO_FLOW, new MockParameter(context), new MockManagedObject(context),
-					callback);
+			ManagedObjectStartupProcess startup = this.registerStartupProcess(Flows.DO_FLOW, new MockParameter(context),
+					new MockManagedObject(context), callback);
+			startup.setConcurrent(true);
 		}, (delay, context, callback) -> {
 			this.invokeProcess(Flows.DO_FLOW, new MockParameter(context), new MockManagedObject(context), delay,
 					callback);
@@ -344,6 +358,7 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 		InvokedProcess process = this.invokedProcesses.remove();
 		assertEquals("Should be start up process", 0, process.parameter.id);
 		assertEquals("Should be immediate start", 0, process.delay);
+		assertTrue("Should be concurrent start up", process.isConcurrent);
 		process.parameter.pollContext.setNextState("STATE", -1, null);
 		process = this.nextInvokedProcess(1, defaultMilliseconds);
 	}
@@ -558,7 +573,7 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 
 	private Deque<InvokedProcess> invokedProcesses = new LinkedList<>();
 
-	private static class InvokedProcess implements ProcessManager {
+	private static class InvokedProcess implements ProcessManager, ManagedObjectStartupProcess {
 
 		private final Integer index;
 
@@ -571,6 +586,8 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 		private final long delay;
 
 		private final FlowCallback callback;
+
+		private boolean isConcurrent = false;
 
 		private InvokedProcess(Integer index, Flows key, Object parameter, ManagedObject managedObject, long delay,
 				FlowCallback callback) {
@@ -590,6 +607,15 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 		public void cancel() {
 			fail("Should not cancel poll processes");
 		}
+
+		/*
+		 * ========== ManagedObjectStartupProcess ==============
+		 */
+
+		@Override
+		public void setConcurrent(boolean isConcurrent) {
+			this.isConcurrent = isConcurrent;
+		}
 	}
 
 	protected InvokedProcess addInvokedProcess(Integer index, Flows key, Object parameter, ManagedObject managedObject,
@@ -604,17 +630,17 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	 */
 
 	@Override
-	public void registerStartupProcess(Flows key, Object parameter, ManagedObject managedObject, FlowCallback callback)
-			throws IllegalArgumentException {
+	public ManagedObjectStartupProcess registerStartupProcess(Flows key, Object parameter, ManagedObject managedObject,
+			FlowCallback callback) throws IllegalArgumentException {
 		assertEquals("Should be no invoked process on start up", 0, this.invokedProcesses.size());
-		this.addInvokedProcess(null, key, parameter, managedObject, 0, callback);
+		return this.addInvokedProcess(null, key, parameter, managedObject, 0, callback);
 	}
 
 	@Override
-	public void registerStartupProcess(int flowIndex, Object parameter, ManagedObject managedObject,
-			FlowCallback callback) throws IllegalArgumentException {
+	public ManagedObjectStartupProcess registerStartupProcess(int flowIndex, Object parameter,
+			ManagedObject managedObject, FlowCallback callback) throws IllegalArgumentException {
 		assertEquals("Should be no invoked process on start up", 0, this.invokedProcesses.size());
-		this.addInvokedProcess(flowIndex, null, parameter, managedObject, 0, callback);
+		return this.addInvokedProcess(flowIndex, null, parameter, managedObject, 0, callback);
 	}
 
 	@Override

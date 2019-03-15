@@ -23,21 +23,21 @@ import lombok.RequiredArgsConstructor;
 public class GoogleSignin {
 
 	@Id
-	Long id;
+	private Long id;
 
 	@Load
-	Ref<User> user;
+	private Ref<User> user;
 
 	@Index
 	@NonNull
-	String googleId;
+	private String googleId;
 
 	@Index
 	@NonNull
-	String email;
+	private String email;
 
-	String name;
+	private String name;
 
-	String photoUrl;
+	private String photoUrl;
 
 }

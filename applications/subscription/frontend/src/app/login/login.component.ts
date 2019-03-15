@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SocialUser } from "angularx-social-login";
-import { LoginService, LoginListener } from '../login.service';
+import { AuthenticationService } from '../authentication.service';
 import { GoogleLoginProvider } from "angularx-social-login";
 
 @Component( {
@@ -10,22 +10,22 @@ import { GoogleLoginProvider } from "angularx-social-login";
 } )
 export class LoginComponent implements OnInit {
 
-    constructor( private loginService: LoginService ) { }
+    constructor( private authenticationService: AuthenticationService ) { }
 
     user: SocialUser;
 
     ngOnInit() {
-        this.loginService.subscribe(( user: SocialUser ) => {
+        this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => {
             this.user = user;
         } );
     }
 
     signIn(): void {
-        this.loginService.signIn();
+        this.authenticationService.signIn();
     }
 
     signOut(): void {
-        this.loginService.signOut();
+        this.authenticationService.signOut();
     }
 
 }

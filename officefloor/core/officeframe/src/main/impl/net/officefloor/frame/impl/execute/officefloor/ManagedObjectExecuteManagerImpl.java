@@ -28,10 +28,12 @@ import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.internal.structure.Execution;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteManager;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectStartupRunnable;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 
@@ -74,9 +76,9 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	private final ManagedObjectExecuteContext<F> executeContext = new ManagedObjectExecuteContextImpl();
 
 	/**
-	 * Registered start up {@link ProcessState} instances.
+	 * Registered {@link ManagedObjectStartupRunnable} instances.
 	 */
-	private final List<Runnable> startupProcesses = new LinkedList<>();
+	private final List<ManagedObjectStartupRunnable> startupProcesses = new LinkedList<>();
 
 	/**
 	 * Indicate if processing.
@@ -164,13 +166,13 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	}
 
 	@Override
-	public Runnable[] startComplete() {
+	public ManagedObjectStartupRunnable[] startComplete() {
 
 		// Indicate processing (as start complete)
 		this.isProcessing = true;
 
 		// Obtain and clear the start up processes
-		Runnable[] startup = this.startupProcesses.toArray(new Runnable[0]);
+		ManagedObjectStartupRunnable[] startup = this.startupProcesses.toArray(new ManagedObjectStartupRunnable[0]);
 		this.startupProcesses.clear();
 
 		// Return the startup processes
@@ -187,14 +189,14 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		 */
 
 		@Override
-		public void registerStartupProcess(F key, Object parameter, ManagedObject managedObject, FlowCallback callback)
-				throws IllegalArgumentException {
-			this.registerStartupProcess(key.ordinal(), parameter, managedObject, callback);
+		public ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, ManagedObject managedObject,
+				FlowCallback callback) throws IllegalArgumentException {
+			return this.registerStartupProcess(key.ordinal(), parameter, managedObject, callback);
 		}
 
 		@Override
-		public void registerStartupProcess(int flowIndex, Object parameter, ManagedObject managedObject,
-				FlowCallback callback) throws IllegalArgumentException {
+		public ManagedObjectStartupProcess registerStartupProcess(int flowIndex, Object parameter,
+				ManagedObject managedObject, FlowCallback callback) throws IllegalArgumentException {
 
 			// Easy access to manager
 			ManagedObjectExecuteManagerImpl<F> manager = ManagedObjectExecuteManagerImpl.this;
@@ -208,9 +210,12 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 			FlowMetaData flowMetaData = manager.getFlowMetaData(flowIndex);
 
 			// Register execution of start up process
-			manager.startupProcesses.add(() -> {
-				manager.invokeProcess(flowMetaData, parameter, managedObject, 0, callback);
-			});
+			ManagedObjectStartupRunnableImpl startupProcess = new ManagedObjectStartupRunnableImpl(manager,
+					flowMetaData, parameter, managedObject, callback);
+			manager.startupProcesses.add(startupProcess);
+
+			// Return the start up process
+			return startupProcess;
 		}
 
 		@Override
@@ -254,6 +259,84 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 
 			// Return the execution strategy
 			return manager.executionStrategies[executionStrategyIndex];
+		}
+	}
+
+	/**
+	 * {@link ManagedObjectStartupRunnable} implementation.
+	 */
+	private static class ManagedObjectStartupRunnableImpl
+			implements ManagedObjectStartupProcess, ManagedObjectStartupRunnable {
+
+		/**
+		 * {@link ManagedObjectExecuteManagerImpl}.
+		 */
+		private final ManagedObjectExecuteManagerImpl<?> manager;
+
+		/**
+		 * {@link FlowMetaData} for the {@link ProcessState}.
+		 */
+		private FlowMetaData flowMetaData;
+
+		/**
+		 * Parameter. May be <code>null</code>.
+		 */
+		private final Object parameter;
+
+		/**
+		 * {@link ManagedObject} for the {@link ProcessState}.
+		 */
+		private final ManagedObject managedObject;
+
+		/**
+		 * {@link FlowCallback}. May be <code>null</code>.
+		 */
+		private final FlowCallback callback;
+
+		/**
+		 * Indicates if to undertake concurrently.
+		 */
+		private boolean isConcurrent = false;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param manager       {@link ManagedObjectExecuteManagerImpl}.
+		 * @param flowMetaData  {@link FlowMetaData} for the {@link ProcessState}.
+		 * @param parameter     Parameter. May be <code>null</code>.
+		 * @param managedObject {@link ManagedObject} for the {@link ProcessState}.
+		 * @param callback      {@link FlowCallback}. May be <code>null</code>.
+		 */
+		private ManagedObjectStartupRunnableImpl(ManagedObjectExecuteManagerImpl<?> manager, FlowMetaData flowMetaData,
+				Object parameter, ManagedObject managedObject, FlowCallback callback) {
+			this.manager = manager;
+			this.flowMetaData = flowMetaData;
+			this.parameter = parameter;
+			this.managedObject = managedObject;
+			this.callback = callback;
+		}
+
+		/*
+		 * ================= ManagedObjectStartupProcess =====================
+		 */
+
+		@Override
+		public void setConcurrent(boolean isConcurrent) {
+			this.isConcurrent = isConcurrent;
+		}
+
+		/*
+		 * ================= ManagedObjectStartupRunnable ====================
+		 */
+
+		@Override
+		public boolean isConcurrent() {
+			return this.isConcurrent;
+		}
+
+		@Override
+		public void run() {
+			this.manager.invokeProcess(this.flowMetaData, this.parameter, this.managedObject, 0, this.callback);
 		}
 	}
 

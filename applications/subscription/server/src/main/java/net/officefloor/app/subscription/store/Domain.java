@@ -1,5 +1,6 @@
 package net.officefloor.app.subscription.store;
 
+import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -21,10 +22,14 @@ import lombok.RequiredArgsConstructor;
 public class Domain {
 
 	@Id
-	Long id;
+	private Long id;
 
 	@Index
 	@NonNull
-	String domain;
+	private String domain;
+
+	@Index
+	@NonNull
+	private Ref<User> user;
 
 }

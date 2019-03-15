@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.OfficeFloorEvent;
@@ -39,6 +40,7 @@ import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectExecuteManager;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
+import net.officefloor.frame.internal.structure.ManagedObjectStartupRunnable;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupFunction;
@@ -134,9 +136,9 @@ public class OfficeFloorImpl implements OfficeFloor {
 		}
 
 		// Start the managed object source instances
-		List<Runnable> managedObjectSourceStartupProcesses = new LinkedList<>();
+		List<ManagedObjectStartupRunnable> managedObjectSourceStartupProcesses = new LinkedList<>();
 		for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData.getManagedObjectSourceInstances()) {
-			Runnable[] startupProcesses = this.startManagedObjectSourceInstance(mosInstance);
+			ManagedObjectStartupRunnable[] startupProcesses = this.startManagedObjectSourceInstance(mosInstance);
 			managedObjectSourceStartupProcesses.addAll(Arrays.asList(startupProcesses));
 		}
 
@@ -151,8 +153,49 @@ public class OfficeFloorImpl implements OfficeFloor {
 		}
 
 		// Invoke the managed object source startup processes
-		for (Runnable startupProcess : managedObjectSourceStartupProcesses) {
-			startupProcess.run();
+		int[] concurrentStartups = new int[] { 0 };
+		for (ManagedObjectStartupRunnable startupProcess : managedObjectSourceStartupProcesses) {
+
+			// Determine if concurrent
+			if (!startupProcess.isConcurrent()) {
+				// Run sequentially
+				startupProcess.run();
+
+			} else {
+				// Run concurrently
+				concurrentStartups[0]++;
+				Thread concurrentThread = new Thread(() -> {
+
+					// Start concurrently
+					startupProcess.run();
+
+					// Notify once complete
+					synchronized (concurrentStartups) {
+						concurrentStartups[0]--;
+						concurrentStartups.notify();
+					}
+				}, "STARTUP");
+				concurrentThread.setDaemon(true);
+				concurrentThread.start();
+			}
+		}
+		if (concurrentStartups[0] > 0) {
+			// Wait until concurrent start ups complete
+			long maxWaitTime = this.officeFloorMetaData.getMaxStartupWaitTime();
+			long maxTime = System.currentTimeMillis() + maxWaitTime;
+			synchronized (concurrentStartups) {
+				while (concurrentStartups[0] > 0) {
+
+					// Determine if timed out
+					if (System.currentTimeMillis() > maxTime) {
+						throw new TimeoutException(OfficeFloor.class.getSimpleName() + " took longer than "
+								+ maxWaitTime + " milliseconds to start");
+					}
+
+					// Sleep some time to check again
+					concurrentStartups.wait(100);
+				}
+			}
 		}
 
 		// Invoke the startup functions for each office
@@ -186,11 +229,12 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * Starts the {@link ManagedObjectSourceInstance}.
 	 * 
 	 * @param mosInstance {@link ManagedObjectSourceInstance}.
-	 * @return {@link Runnable} instances to invoke once ready to process.
+	 * @return {@link ManagedObjectStartupRunnable} instances to invoke once ready
+	 *         to process.
 	 * @throws Exception If fails to start the {@link ManagedObjectSourceInstance}.
 	 */
-	private <F extends Enum<F>> Runnable[] startManagedObjectSourceInstance(ManagedObjectSourceInstance<F> mosInstance)
-			throws Exception {
+	private <F extends Enum<F>> ManagedObjectStartupRunnable[] startManagedObjectSourceInstance(
+			ManagedObjectSourceInstance<F> mosInstance) throws Exception {
 
 		// Obtain the managed object source
 		ManagedObjectSource<?, F> mos = mosInstance.getManagedObjectSource();

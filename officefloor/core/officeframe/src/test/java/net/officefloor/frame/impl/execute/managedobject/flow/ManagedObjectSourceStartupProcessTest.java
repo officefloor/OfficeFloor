@@ -1,7 +1,11 @@
 package net.officefloor.frame.impl.execute.managedobject.flow;
 
+import static org.junit.Assert.assertNotEquals;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -10,6 +14,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Job;
@@ -34,13 +39,30 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 	 * {@link ManagedObjectSource} instances and {@link Team} instances are started.
 	 */
 	public void testStartupProcess() throws Exception {
+		this.doStartupProcessTest(false);
+	}
+
+	/**
+	 * Ensure can concurrently run startup {@link ProcessState} instances.
+	 */
+	public void testConcurrentStartupProcess() throws Exception {
+		this.doStartupProcessTest(true);
+	}
+
+	/**
+	 * Undertakes start up process testing.
+	 * 
+	 * @param isConcurrent Indicates if concurrent start up.
+	 */
+	private void doStartupProcessTest(boolean isConcurrent) throws Exception {
 
 		// Obtain Office name
 		String officeName = this.getOfficeName();
 
 		// Load the managed object sources
 		MockStartupManagedObjectSource[] sources = new MockStartupManagedObjectSource[] {
-				new MockStartupManagedObjectSource("One"), new MockStartupManagedObjectSource("Two") };
+				new MockStartupManagedObjectSource("One", isConcurrent),
+				new MockStartupManagedObjectSource("Two", isConcurrent) };
 		for (MockStartupManagedObjectSource source : sources) {
 
 			// Construct the managed object
@@ -92,6 +114,24 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 		for (MockStartupManagedObjectSource source : sources) {
 			assertTrue("Start up process for source " + source.name + " is not complete",
 					source.isStartupProcessComplete);
+			synchronized (handler.executingThreads) {
+				if (isConcurrent) {
+					// Should be started on another thread
+					assertNotEquals("Start up process for source " + source.name + " should be on another thread",
+							Thread.currentThread(), source.startupProcessThread);
+					assertFalse("Handling method should be invoked by same thread",
+							handler.executingThreads.contains(Thread.currentThread()));
+					assertTrue("Should have other threads invoke", handler.executingThreads.size() > 0);
+				} else {
+					// Not concurrent, so should be same thread
+					assertSame("Should be same startup thread for source " + source.name, Thread.currentThread(),
+							source.startupProcessThread);
+					assertTrue("Handling method should be invoked by this thread",
+							handler.executingThreads.contains(Thread.currentThread()));
+					assertEquals("Should be no other threads invoking start up processes", 1,
+							handler.executingThreads.size());
+				}
+			}
 		}
 
 		// Ensure no longer able to invoke start up process
@@ -116,11 +156,18 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 
 		private final List<MockStartupManagedObjectSource> startedSources = new ArrayList<>(2);
 
+		private Set<Thread> executingThreads = new HashSet<>();
+
 		private MockWork(MockStartupManagedObjectSource[] sources) {
 			this.sources = sources;
 		}
 
 		public void handle(MockStartupManagedObjectSource startedSource) {
+
+			// Capture the executing thread
+			synchronized (this.executingThreads) {
+				this.executingThreads.add(Thread.currentThread());
+			}
 
 			// Ensure all sources are started
 			for (MockStartupManagedObjectSource source : this.sources) {
@@ -142,14 +189,19 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 
 		private final String name;
 
+		private final boolean isConcurrent;
+
 		private boolean isStarted = false;
 
-		private boolean isStartupProcessComplete = false;
+		private volatile Thread startupProcessThread = null;
+
+		private volatile boolean isStartupProcessComplete = false;
 
 		private ManagedObjectExecuteContext<Flows> context;
 
-		private MockStartupManagedObjectSource(String name) {
+		private MockStartupManagedObjectSource(String name, boolean isConcurrent) {
 			this.name = name;
+			this.isConcurrent = isConcurrent;
 		}
 
 		/*
@@ -172,9 +224,13 @@ public class ManagedObjectSourceStartupProcessTest extends AbstractOfficeConstru
 			this.context = context;
 
 			// Ensure can register startup processes
-			context.registerStartupProcess(Flows.FLOW, this, this, (error) -> {
+			ManagedObjectStartupProcess startup = context.registerStartupProcess(Flows.FLOW, this, this, (error) -> {
+				this.startupProcessThread = Thread.currentThread();
 				this.isStartupProcessComplete = true;
 			});
+
+			// Flag appropriately concurrent
+			startup.setConcurrent(this.isConcurrent);
 
 			// Ensure not able to invoke process immediately
 			try {

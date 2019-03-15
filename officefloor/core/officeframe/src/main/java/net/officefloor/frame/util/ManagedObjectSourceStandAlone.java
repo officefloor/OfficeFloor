@@ -35,6 +35,7 @@ import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectStartupProcess;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.api.source.SourceProperties;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
@@ -327,7 +328,8 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
-	private class LoadExecuteContext<F extends Enum<F>> implements ManagedObjectExecuteContext<F> {
+	private class LoadExecuteContext<F extends Enum<F>>
+			implements ManagedObjectExecuteContext<F>, ManagedObjectStartupProcess {
 
 		/**
 		 * Processes the {@link ManagedFunction} for the invoked {@link ProcessState}.
@@ -393,15 +395,17 @@ public class ManagedObjectSourceStandAlone {
 		 */
 
 		@Override
-		public void registerStartupProcess(F key, Object parameter, ManagedObject managedObject, FlowCallback callback)
-				throws IllegalArgumentException {
+		public ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, ManagedObject managedObject,
+				FlowCallback callback) throws IllegalArgumentException {
 			this.process(key.ordinal(), parameter, managedObject, 0, callback);
+			return this;
 		}
 
 		@Override
-		public void registerStartupProcess(int flowIndex, Object parameter, ManagedObject managedObject,
-				FlowCallback callback) throws IllegalArgumentException {
+		public ManagedObjectStartupProcess registerStartupProcess(int flowIndex, Object parameter,
+				ManagedObject managedObject, FlowCallback callback) throws IllegalArgumentException {
 			this.process(flowIndex, parameter, managedObject, 0, callback);
+			return this;
 		}
 
 		@Override
@@ -419,6 +423,16 @@ public class ManagedObjectSourceStandAlone {
 		@Override
 		public ThreadFactory[] getExecutionStrategy(int executionStrategyIndex) {
 			return ManagedObjectSourceStandAlone.this.executionStrategies.get(executionStrategyIndex);
+		}
+
+		/*
+		 * =================== ManagedObjectStartupProcess =================
+		 */
+
+		@Override
+		public void setConcurrent(boolean isConcurrent) {
+			// Do nothing, as already invoked.
+			// Plus stand-alone so no concurrency co-ordination required.
 		}
 	}
 

@@ -23,10 +23,15 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.build.HttpInput;
 
 /**
  * Tests the WoOF server.
@@ -78,6 +83,54 @@ public class WoofServerTest extends OfficeFrameTestCase {
 			// Ensure can obtain template
 			HttpResponse response = client.execute(new HttpGet("http://localhost:8787/template"));
 			assertEquals("Incorrect template", "TEMPLATE", HttpClientTestUtil.entityToString(response));
+		}
+	}
+
+	/**
+	 * Ensure can override context.
+	 */
+	public void testContextualOverload() throws IOException {
+
+		// Run within context (without WoOF loads)
+		this.officeFloor = WoofLoaderExtensionService.contextualLoad((context) -> {
+
+			// Don't load WoOF
+			context.notLoadWoof();
+
+			// Register handling
+			context.extend((woofContext) -> {
+				OfficeArchitect office = woofContext.getOfficeArchitect();
+
+				// Add the section
+				OfficeSection section = office.addOfficeSection("SECTION", ClassSectionSource.class.getName(),
+						ContextualOverloadSection.class.getName());
+
+				// Configure to service request
+				HttpInput input = woofContext.getWebArchitect().getHttpInput(false, "GET", "/extended");
+				office.link(input.getInput(), section.getOfficeSectionInput("service"));
+			});
+
+			// Start the OfficeFloor
+			return WoOF.open();
+		});
+
+		// Create the client
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+
+			// Ensure WoOF template not loaded
+			HttpResponse response = client.execute(new HttpGet("http://localhost:7878/template"));
+			assertEquals("Should not be found", 404, response.getStatusLine().getStatusCode());
+
+			// Ensure can obtain configured in service
+			response = client.execute(new HttpGet("http://localhost:7878/extended"));
+			assertEquals("Should obtain value", 200, response.getStatusLine().getStatusCode());
+			assertEquals("Incorrect entity", "OVERRIDE", HttpClientTestUtil.entityToString(response));
+		}
+	}
+
+	public static class ContextualOverloadSection {
+		public void service(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("OVERRIDE");
 		}
 	}
 

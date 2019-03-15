@@ -58,6 +58,15 @@ public interface OfficeFloorBuilder {
 	void setClockFactory(ClockFactory clockFactory);
 
 	/**
+	 * Specifies the maximum time in milliseconds to wait for {@link OfficeFloor} to
+	 * start.
+	 * 
+	 * @param maxStartupWaitTime Maximum time in milliseconds to wait for
+	 *                           {@link OfficeFloor} to start.
+	 */
+	void setMaxStartupWaitTime(long maxStartupWaitTime);
+
+	/**
 	 * Decorates all the {@link Thread} instances created by the
 	 * {@link TeamSourceContext}.
 	 * 

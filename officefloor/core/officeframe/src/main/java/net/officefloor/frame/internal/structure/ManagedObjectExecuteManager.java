@@ -38,8 +38,9 @@ public interface ManagedObjectExecuteManager<F extends Enum<F>> {
 	 * Invoked to indicate start for the corresponding {@link ManagedObjectSource}
 	 * has completed.
 	 * 
-	 * @return {@link Runnable} instances to execute once ready to start processing.
+	 * @return {@link ManagedObjectStartupRunnable} instances to execute once ready
+	 *         to start processing.
 	 */
-	Runnable[] startComplete();
+	ManagedObjectStartupRunnable[] startComplete();
 
 }

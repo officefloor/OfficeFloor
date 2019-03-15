@@ -6,7 +6,7 @@
 	</managed-object>
 
 	<managed-object source="net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource" type="net.officefloor.web.jwt.authority.JwtAuthority">
-		<property name="identity.class" value="net.officefloor.app.subscription.jwt.JwtCredentials" />
+		<property name="identity.class" value="net.officefloor.app.subscription.jwt.JwtClaims" />
 	</managed-object>
 	<managed-object class="net.officefloor.app.subscription.jwt.JwtAuthorityRepositoryImpl" />
 

@@ -91,7 +91,7 @@ public class HttpServletHttpServerImplementation implements HttpServerImplementa
 			loader.load();
 			return bridge.bridge;
 		} finally {
-			threadLocalBridge.set(null);
+			threadLocalBridge.remove();
 		}
 	}
 
@@ -136,6 +136,22 @@ public class HttpServletHttpServerImplementation implements HttpServerImplementa
 
 	@Override
 	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {
+
+		/*
+		 * Only extend if running within filter.
+		 * 
+		 * Note: running via MockWoofServerRule causes failure as:
+		 * 
+		 * - above configure HTTP server is not run (loading team)
+		 * 
+		 * - below team is configured without type for auto-wiring
+		 * 
+		 * - therefore, when teams added the below team fails the rule
+		 */
+		Bridge bridge = threadLocalBridge.get();
+		if (bridge == null) {
+			return;
+		}
 
 		// Add the team
 		officeArchitect.addOfficeTeam(SYNC_TEAM_NAME);

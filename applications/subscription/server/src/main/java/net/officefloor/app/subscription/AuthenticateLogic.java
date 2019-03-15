@@ -11,7 +11,7 @@ import com.googlecode.objectify.Ref;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.officefloor.app.subscription.jwt.JwtCredentials;
+import net.officefloor.app.subscription.jwt.JwtClaims;
 import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.server.http.HttpException;
@@ -24,7 +24,7 @@ import net.officefloor.web.jwt.authority.JwtAuthority;
 /**
  * Provides authentication.
  */
-public class Authenticate {
+public class AuthenticateLogic {
 
 	@Data
 	@HttpObject
@@ -43,7 +43,7 @@ public class Authenticate {
 	}
 
 	public void authenticate(AuthenticateRequest idTokenInput, GoogleIdTokenVerifier verifier, Objectify objectify,
-			JwtAuthority<JwtCredentials> authority, ObjectResponse<AuthenticateResponse> response,
+			JwtAuthority<JwtClaims> authority, ObjectResponse<AuthenticateResponse> response,
 			ServerHttpConnection connection) throws Exception {
 
 		// Verify token
@@ -120,7 +120,7 @@ public class Authenticate {
 		});
 
 		// Create the JWT refresh and access token
-		JwtCredentials credentials = new JwtCredentials(loggedInUser.getId());
+		JwtClaims credentials = new JwtClaims(loggedInUser.getId(), loggedInUser.getRoles());
 		String refreshToken = authority.createRefreshToken(credentials);
 		String accessToken = authority.createAccessToken(credentials);
 
@@ -143,11 +143,11 @@ public class Authenticate {
 		private String accessToken;
 	}
 
-	public void refreshAccessToken(RefreshRequest refreshRequest, JwtAuthority<JwtCredentials> authority,
+	public void refreshAccessToken(RefreshRequest refreshRequest, JwtAuthority<JwtClaims> authority,
 			ObjectResponse<RefreshResponse> response) throws Exception {
 
 		// Obtain the JWT credentials
-		JwtCredentials credentials = authority.decodeRefreshToken(refreshRequest.getRefreshToken());
+		JwtClaims credentials = authority.decodeRefreshToken(refreshRequest.getRefreshToken());
 
 		// Create new access token
 		String accessToken = authority.createAccessToken(credentials);
