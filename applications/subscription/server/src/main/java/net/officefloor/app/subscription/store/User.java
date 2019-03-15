@@ -21,16 +21,16 @@ import lombok.RequiredArgsConstructor;
 public class User {
 
 	@Id
-	Long id;
+	private Long id;
 
 	@Index
 	@NonNull
-	String email;
+	private String email;
 
-	String name;
+	private String name;
 
-	String photoUrl;
-	
-	String[] roles = new String[0];
+	private String photoUrl;
+
+	private String[] roles = new String[0];
 
 }

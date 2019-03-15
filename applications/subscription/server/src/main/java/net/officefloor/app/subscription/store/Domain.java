@@ -22,14 +22,14 @@ import lombok.RequiredArgsConstructor;
 public class Domain {
 
 	@Id
-	Long id;
+	private Long id;
 
 	@Index
 	@NonNull
-	String domain;
+	private String domain;
 
 	@Index
 	@NonNull
-	Ref<User> user;
+	private Ref<User> user;
 
 }
