@@ -634,6 +634,11 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 	public static class NonAdaptableException extends Exception {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param message           Message.

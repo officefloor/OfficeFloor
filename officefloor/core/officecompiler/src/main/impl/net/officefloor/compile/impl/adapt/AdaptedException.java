@@ -31,6 +31,11 @@ import net.officefloor.compile.issues.CompilerIssues;
 public class AdaptedException extends RuntimeException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Stack trace.
 	 */
 	private final String stackTrace;
@@ -38,10 +43,8 @@ public class AdaptedException extends RuntimeException {
 	/**
 	 * Initiate.
 	 * 
-	 * @param message
-	 *            Message with adapted details of the cause.
-	 * @param stackTrace
-	 *            Stack trace to adapt.
+	 * @param message    Message with adapted details of the cause.
+	 * @param stackTrace Stack trace to adapt.
 	 */
 	public AdaptedException(String message, String stackTrace) {
 		super(message);

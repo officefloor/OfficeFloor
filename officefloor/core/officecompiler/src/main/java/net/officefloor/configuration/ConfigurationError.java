@@ -31,22 +31,25 @@ import net.officefloor.frame.api.source.AbstractSourceError;
 public class ConfigurationError extends AbstractSourceError {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Location of the configuration.
 	 */
 	private final String configurationLocation;
 
 	/**
-	 * Name of tag in configuration that is not configured. May be
-	 * <code>null</code> to indicate {@link Throwable} cause to configuration
-	 * issue.
+	 * Name of tag in configuration that is not configured. May be <code>null</code>
+	 * to indicate {@link Throwable} cause to configuration issue.
 	 */
 	private final String nonconfiguredTagName;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param missingLocation
-	 *            Location of missing {@link ConfigurationItem}.
+	 * @param missingLocation Location of missing {@link ConfigurationItem}.
 	 */
 	public ConfigurationError(String missingLocation) {
 		super("Can not obtain " + ConfigurationItem.class.getSimpleName() + " at location '" + missingLocation + "'");
@@ -57,10 +60,8 @@ public class ConfigurationError extends AbstractSourceError {
 	/**
 	 * Initiate.
 	 * 
-	 * @param configurationLocation
-	 *            Location of the {@link ConfigurationItem}.
-	 * @param cause
-	 *            {@link Throwable} cause.
+	 * @param configurationLocation Location of the {@link ConfigurationItem}.
+	 * @param cause                 {@link Throwable} cause.
 	 */
 	public ConfigurationError(String configurationLocation, Throwable cause) {
 		super("Failed to obtain " + ConfigurationItem.class.getSimpleName() + " at location '" + configurationLocation
@@ -72,10 +73,9 @@ public class ConfigurationError extends AbstractSourceError {
 	/**
 	 * Initiate.
 	 * 
-	 * @param configurationLocation
-	 *            Location of the {@link ConfigurationItem}.
-	 * @param nonconfiguredTagName
-	 *            Name of tag in configuration that is not configured.
+	 * @param configurationLocation Location of the {@link ConfigurationItem}.
+	 * @param nonconfiguredTagName  Name of tag in configuration that is not
+	 *                              configured.
 	 */
 	public ConfigurationError(String configurationLocation, String nonconfiguredTagName) {
 		super("Can not obtain " + ConfigurationItem.class.getSimpleName() + " at location '" + configurationLocation
