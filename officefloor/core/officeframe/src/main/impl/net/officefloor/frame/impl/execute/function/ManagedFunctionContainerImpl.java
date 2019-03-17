@@ -18,10 +18,10 @@
 package net.officefloor.frame.impl.execute.function;
 
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.escalate.ProcessCancelledEscalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.frame.api.manage.ProcessCancelledException;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
@@ -404,7 +404,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 			// As now synchronised to process state, ensure not cancelled
 			if (processState.isCancelled()) {
-				throw new ProcessCancelledException();
+				throw new ProcessCancelledEscalation();
 			}
 
 			// Setup

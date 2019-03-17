@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.managedfunction;
 
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -185,6 +186,12 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 
 			// Invoke the Flow
 			this.context.doFlow(dynamicFlowMetaData, parameter, callback);
+		}
+
+		@Override
+		public AsynchronousFlow createAsynchronousFlow() {
+			// TODO implement ManagedFunctionContext<O,F>.createAsynchronousFlow
+			throw new UnsupportedOperationException("TODO implement ManagedFunctionContext<O,F>.createAsynchronousFlow");
 		}
 	}
 

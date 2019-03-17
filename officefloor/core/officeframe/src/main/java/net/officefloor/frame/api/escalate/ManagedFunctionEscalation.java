@@ -17,23 +17,18 @@
  */
 package net.officefloor.frame.api.escalate;
 
-import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.managedobject.ManagedObject;
 
 /**
  * <p>
- * Internal failures within the {@link OfficeFrame} extend {@link Escalation}.
+ * {@link Escalation} from managing a {@link ManagedFunction}.
  * <p>
- * However, all {@link Throwable} instances thrown from {@link ManagedFunction}
- * and {@link ManagedObject} instances are considered to follow the
- * {@link Escalation} paradigm. This is that the invoker need not deal with
- * {@link Escalation} instances, and these are handled by other
- * {@link ManagedFunction} instances.
+ * This enables generic handling of {@link ManagedFunction} {@link Escalation}
+ * failures.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class Escalation extends Throwable {
+public abstract class ManagedFunctionEscalation extends Escalation {
 
 	/**
 	 * Serial version UID.
@@ -41,19 +36,37 @@ public abstract class Escalation extends Throwable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Default constructor.
+	 * Name of the {@link ManagedFunction}.
 	 */
-	public Escalation() {
-		super();
+	private final String managedFunctionName;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param managedFunctionName Name of the {@link ManagedFunction}.
+	 */
+	public ManagedFunctionEscalation(String managedFunctionName) {
+		this.managedFunctionName = managedFunctionName;
 	}
 
 	/**
 	 * Allows for a cause of the {@link Escalation}.
 	 * 
-	 * @param cause Cause of the {@link Escalation}.
+	 * @param managedFunctionName Name of the {@link ManagedFunction}.
+	 * @param cause               Cause of the {@link Escalation}.
 	 */
-	public Escalation(Throwable cause) {
+	public ManagedFunctionEscalation(String managedFunctionName, Throwable cause) {
 		super(cause);
+		this.managedFunctionName = managedFunctionName;
+	}
+
+	/**
+	 * Obtains the name of the {@link ManagedFunction}.
+	 * 
+	 * @return Name of the {@link ManagedFunction}.
+	 */
+	public String getManagedFunctionName() {
+		return this.managedFunctionName;
 	}
 
 }

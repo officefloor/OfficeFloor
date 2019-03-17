@@ -27,6 +27,11 @@ import net.officefloor.frame.api.function.ManagedFunction;
 public class UnknownFunctionException extends Exception {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Name of the unknown {@link ManagedFunction}.
 	 */
 	private final String unknownFunctionName;
@@ -34,8 +39,7 @@ public class UnknownFunctionException extends Exception {
 	/**
 	 * Initiate.
 	 * 
-	 * @param unknownFunctionName
-	 *            Name of the unknown {@link ManagedFunction}.
+	 * @param unknownFunctionName Name of the unknown {@link ManagedFunction}.
 	 */
 	public UnknownFunctionException(String unknownFunctionName) {
 		super("Unknown Function '" + unknownFunctionName + "'");

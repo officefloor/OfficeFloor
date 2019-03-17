@@ -29,6 +29,11 @@ package net.officefloor.frame.api.source;
 public class UnknownClassError extends AbstractSourceError {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Name of the unknown {@link Class}.
 	 */
 	private final String unknownClassName;
@@ -36,8 +41,7 @@ public class UnknownClassError extends AbstractSourceError {
 	/**
 	 * Initiate.
 	 * 
-	 * @param unknownClassName
-	 *            Name of the unknown {@link Class}.
+	 * @param unknownClassName Name of the unknown {@link Class}.
 	 */
 	public UnknownClassError(String unknownClassName) {
 		super("Can not load class '" + unknownClassName + "'");
@@ -47,10 +51,8 @@ public class UnknownClassError extends AbstractSourceError {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param unknownClassError
-	 *            Triggering {@link UnknownClassError}.
-	 * @param serviceFactory
-	 *            {@link ServiceFactory} requiring the property.
+	 * @param unknownClassError Triggering {@link UnknownClassError}.
+	 * @param serviceFactory    {@link ServiceFactory} requiring the property.
 	 */
 	public UnknownClassError(UnknownClassError unknownClassError, ServiceFactory<?> serviceFactory) {
 		super(unknownClassError, serviceFactory);

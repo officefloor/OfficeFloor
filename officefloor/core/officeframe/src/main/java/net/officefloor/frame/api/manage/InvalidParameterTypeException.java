@@ -27,10 +27,14 @@ import net.officefloor.frame.api.function.ManagedFunction;
 public class InvalidParameterTypeException extends Exception {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param message
-	 *            Message.
+	 * @param message Message.
 	 */
 	public InvalidParameterTypeException(String message) {
 		super(message);

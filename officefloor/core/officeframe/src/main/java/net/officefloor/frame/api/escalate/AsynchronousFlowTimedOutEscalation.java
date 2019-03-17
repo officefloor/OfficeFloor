@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,14 +15,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.manage;
+package net.officefloor.frame.api.escalate;
+
+import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
- * Indicates an unknown {@link Office} was requested.
+ * {@link Escalation} indicating the {@link AsynchronousFlow} timed out.
  * 
  * @author Daniel Sagenschneider
  */
-public class UnknownOfficeException extends Exception {
+public class AsynchronousFlowTimedOutEscalation extends ManagedFunctionEscalation {
 
 	/**
 	 * Serial version UID.
@@ -30,26 +33,12 @@ public class UnknownOfficeException extends Exception {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Name of the unknown {@link Office}.
-	 */
-	private final String unknownOfficeName;
-
-	/**
-	 * Initiate.
+	 * Instantiate.
 	 * 
-	 * @param unknownOfficeName Name of the unknown {@link Office}.
+	 * @param managedFunctionName Name of the {@link ManagedFunction}.
 	 */
-	public UnknownOfficeException(String unknownOfficeName) {
-		super("Unknown Office '" + unknownOfficeName + "'");
-		this.unknownOfficeName = unknownOfficeName;
+	public AsynchronousFlowTimedOutEscalation(String managedFunctionName) {
+		super(managedFunctionName);
 	}
 
-	/**
-	 * Obtains the name of the unknown {@link Office}.
-	 * 
-	 * @return Name of the unknown {@link Office}.
-	 */
-	public String getUnknownOfficeName() {
-		return this.unknownOfficeName;
-	}
 }

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,32 +15,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.escalate;
+package net.officefloor.frame.api.function;
 
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * {@link Escalation} indicating that the {@link ManagedObjectSource} was timed
- * out in providing a {@link ManagedObject}.
+ * <p>
+ * Allows {@link ThreadState} safe logic to run on the completion of the
+ * {@link AsynchronousFlow}.
+ * <p>
+ * As the {@link AsynchronousFlow} is very likely to use other {@link Thread}
+ * instances (and likely call the completion of {@link AsynchronousFlow} on
+ * another {@link Thread}), this allows {@link ThreadState} logic to synchronise
+ * the results back into the {@link ManagedFunction} and its dependent
+ * {@link ManagedObject} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class SourceManagedObjectTimedOutEscalation extends ManagedObjectEscalation {
+public interface AsynchronousFlowCompletion {
 
 	/**
-	 * Serial version UID.
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
-	 * Initiate.
+	 * Contains the {@link ThreadState} safe logic.
 	 * 
-	 * @param objectType {@link Class} of the {@link Object} returned from the timed
-	 *                   out {@link ManagedObject}.
+	 * @throws Throwable Indicate a failure in the {@link AsynchronousFlow}.
 	 */
-	public SourceManagedObjectTimedOutEscalation(Class<?> objectType) {
-		super(objectType);
-	}
+	void run() throws Throwable;
 
 }

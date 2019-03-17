@@ -17,10 +17,10 @@
  */
 package net.officefloor.frame.impl.execute.process;
 
+import net.officefloor.frame.api.escalate.ProcessCancelledEscalation;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.ProcessCancelledException;
 import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -74,7 +74,7 @@ public class ProcessCancelTest extends AbstractOfficeConstructTestCase {
 		assertFalse("Should not invoke the next function: " + failure, work.isNextInvoked);
 		assertNotNull("Should have failure, process cancelled", failure);
 		assertTrue("Incorrect failure: " + failure.getMessage() + " [" + failure.getClass().getName() + "]",
-				failure instanceof ProcessCancelledException);
+				failure instanceof ProcessCancelledEscalation);
 	}
 
 	public class TestWork {

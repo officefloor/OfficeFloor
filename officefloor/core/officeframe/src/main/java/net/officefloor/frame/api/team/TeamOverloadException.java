@@ -33,6 +33,11 @@ import java.util.concurrent.RejectedExecutionException;
 public class TeamOverloadException extends Exception {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param message Message.

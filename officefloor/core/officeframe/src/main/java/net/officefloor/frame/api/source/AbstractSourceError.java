@@ -25,6 +25,11 @@ package net.officefloor.frame.api.source;
 public abstract class AbstractSourceError extends Error {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Potential {@link ServiceFactory} requiring the property.
 	 */
 	private final ServiceFactory<?> serviceFactory;
@@ -32,8 +37,7 @@ public abstract class AbstractSourceError extends Error {
 	/**
 	 * Instantiate with message.
 	 * 
-	 * @param message
-	 *            Message.
+	 * @param message Message.
 	 */
 	public AbstractSourceError(String message) {
 		super(message);
@@ -43,10 +47,8 @@ public abstract class AbstractSourceError extends Error {
 	/**
 	 * Instantiate with message and cause.
 	 * 
-	 * @param message
-	 *            Message.
-	 * @param cause
-	 *            Cause.
+	 * @param message Message.
+	 * @param cause   Cause.
 	 */
 	public AbstractSourceError(String message, Throwable cause) {
 		super(message, cause);
@@ -56,10 +58,9 @@ public abstract class AbstractSourceError extends Error {
 	/**
 	 * Instantiate to propagate {@link ServiceFactory} source error.
 	 * 
-	 * @param error
-	 *            {@link AbstractSourceError} from the {@link ServiceFactory}.
-	 * @param serviceFactory
-	 *            {@link ServiceFactory}.
+	 * @param error          {@link AbstractSourceError} from the
+	 *                       {@link ServiceFactory}.
+	 * @param serviceFactory {@link ServiceFactory}.
 	 */
 	public AbstractSourceError(AbstractSourceError error, ServiceFactory<?> serviceFactory) {
 		super(error.getMessage() + " for service factory " + serviceFactory.getClass().getName());
@@ -80,8 +81,7 @@ public abstract class AbstractSourceError extends Error {
 	/**
 	 * Adds the issue to the {@link IssueTarget}.
 	 * 
-	 * @param issueTarget
-	 *            {@link IssueTarget}.
+	 * @param issueTarget {@link IssueTarget}.
 	 */
 	public void addIssue(IssueTarget issueTarget) {
 		Throwable cause = this.getCause();

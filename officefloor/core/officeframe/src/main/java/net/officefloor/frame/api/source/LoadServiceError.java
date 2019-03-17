@@ -27,6 +27,11 @@ package net.officefloor.frame.api.source;
 public class LoadServiceError extends AbstractSourceError {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * {@link ServiceFactory} {@link Class} name that failed to load.
 	 */
 	private final String serviceFactoryClassName;
@@ -34,10 +39,9 @@ public class LoadServiceError extends AbstractSourceError {
 	/**
 	 * Initiate.
 	 * 
-	 * @param serviceFactoryClassName
-	 *            {@link ServiceFactory} {@link Class} name that failed to load.
-	 * @param failure
-	 *            Cause.
+	 * @param serviceFactoryClassName {@link ServiceFactory} {@link Class} name that
+	 *                                failed to load.
+	 * @param failure                 Cause.
 	 */
 	public LoadServiceError(String serviceFactoryClassName, Throwable failure) {
 		super("Failed to create service from " + serviceFactoryClassName, failure);
