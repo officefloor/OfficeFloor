@@ -72,6 +72,8 @@ public class Template {
 	@Data
 	@HttpParameters
 	public static class DeleteRow implements Serializable {
+		private static final long serialVersionUID = 1L;
+
 		private String id;
 	}
 

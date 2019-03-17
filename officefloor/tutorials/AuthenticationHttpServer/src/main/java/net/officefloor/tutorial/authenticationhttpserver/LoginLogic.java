@@ -36,6 +36,7 @@ public class LoginLogic {
 	@Data
 	@HttpParameters
 	public static class Form implements Serializable {
+		private static final long serialVersionUID = 1L;
 
 		private String username;
 

@@ -60,10 +60,8 @@ public class DefaultHttpAuthenticationManagedObjectSource extends AbstractManage
 	/**
 	 * Instantiate.
 	 * 
-	 * @param negotiator
-	 *            {@link AcceptNegotiator}.
-	 * @param httpSecurityNames
-	 *            Names of the {@link HttpSecurity} instances.
+	 * @param negotiator        {@link AcceptNegotiator}.
+	 * @param httpSecurityNames Names of the {@link HttpSecurity} instances.
 	 */
 	public DefaultHttpAuthenticationManagedObjectSource(AcceptNegotiator<int[]> negotiator,
 			String[] httpSecurityNames) {
@@ -229,6 +227,11 @@ public class DefaultHttpAuthenticationManagedObjectSource extends AbstractManage
 	private static class DefaultHttpAccessControl implements HttpAccessControl {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * {@link HttpAccessControl} instances.
 		 */
 		private final HttpAccessControl[] httpAccessControls;
@@ -236,9 +239,8 @@ public class DefaultHttpAuthenticationManagedObjectSource extends AbstractManage
 		/**
 		 * Instantiate.
 		 * 
-		 * @param httpAuthentications
-		 *            {@link HttpAuthentication} instances available for the
-		 *            {@link HttpRequest}.
+		 * @param httpAuthentications {@link HttpAuthentication} instances available for
+		 *                            the {@link HttpRequest}.
 		 */
 		private DefaultHttpAccessControl(HttpAuthentication<?>[] httpAuthentications) {
 

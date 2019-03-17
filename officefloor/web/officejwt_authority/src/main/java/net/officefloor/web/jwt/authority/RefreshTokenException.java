@@ -11,6 +11,11 @@ import net.officefloor.server.http.HttpStatus;
 public class RefreshTokenException extends HttpException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param status {@link HttpStatus}.

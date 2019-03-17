@@ -29,6 +29,11 @@ import net.officefloor.server.http.HttpStatus;
 public class StoringSessionHttpException extends HttpException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Instantiate.
 	 */
 	public StoringSessionHttpException() {
@@ -38,8 +43,7 @@ public class StoringSessionHttpException extends HttpException {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param cause
-	 *            {@link Throwable} cause.
+	 * @param cause {@link Throwable} cause.
 	 */
 	public StoringSessionHttpException(Throwable cause) {
 		super(HttpStatus.INTERNAL_SERVER_ERROR, cause);

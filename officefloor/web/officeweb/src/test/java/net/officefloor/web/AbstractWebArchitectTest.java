@@ -215,6 +215,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	@Data
 	@HttpParameters
 	public static class PathParameter implements Serializable {
+		private static final long serialVersionUID = 1L;
+
 		@HttpPathParameter("") // default to field property name
 		protected String param;
 	}
@@ -259,6 +261,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 	@HttpParameters
 	public static class MultipleParameters extends PathParameter {
+		private static final long serialVersionUID = 1L;
+
 		private String second;
 
 		// No path annotation, so will take from anywhere
@@ -301,6 +305,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 	@HttpParameters
 	public static class QueryParameter implements Serializable {
+		private static final long serialVersionUID = 1L;
+
 		protected String param;
 
 		@HttpQueryParameter("") // default to method property name
@@ -375,6 +381,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 	@HttpParameters
 	public static class FormParameter implements Serializable {
+		private static final long serialVersionUID = 1L;
+
 		protected String param;
 
 		public void setParam(String param) {
@@ -909,6 +917,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 	@HttpSessionStateful
 	public static class SessionObject implements Serializable {
+		private static final long serialVersionUID = 1L;
+
 		private String value = null;
 	}
 

@@ -28,10 +28,14 @@ import net.officefloor.web.accept.AcceptNegotiator;
 public class NoAcceptHandlersException extends Exception {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param message
-	 *            Message.
+	 * @param message Message.
 	 */
 	public NoAcceptHandlersException(String message) {
 		super(message);

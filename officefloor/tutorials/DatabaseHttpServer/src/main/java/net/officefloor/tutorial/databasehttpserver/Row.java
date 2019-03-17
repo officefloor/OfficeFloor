@@ -35,6 +35,7 @@ import net.officefloor.web.HttpParameters;
 @NoArgsConstructor
 @HttpParameters
 public class Row implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	private int id;
 

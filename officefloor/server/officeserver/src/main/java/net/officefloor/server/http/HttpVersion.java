@@ -29,6 +29,11 @@ import net.officefloor.server.stream.StreamBufferPool;
  */
 public class HttpVersion implements Serializable {
 
+	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
 	// HTTP version names
 	private static final String HTTP_1_0_NAME = "HTTP/1.0";
 	private static final String HTTP_1_1_NAME = "HTTP/1.1";
@@ -36,8 +41,7 @@ public class HttpVersion implements Serializable {
 	/**
 	 * Obtains the {@link HttpVersion}.
 	 * 
-	 * @param version
-	 *            {@link HttpVersion}.
+	 * @param version {@link HttpVersion}.
 	 * @return {@link HttpVersion}.
 	 */
 	public static HttpVersion getHttpVersion(String version) {
@@ -74,8 +78,7 @@ public class HttpVersion implements Serializable {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param httpVersionName
-		 *            Name of the {@link HttpVersion}.
+		 * @param httpVersionName Name of the {@link HttpVersion}.
 		 */
 		private HttpVersionEnum(String httpVersionName) {
 			this.httpVersion = new HttpVersion(httpVersionName, this);
@@ -127,8 +130,7 @@ public class HttpVersion implements Serializable {
 	/**
 	 * Instantiate a dynamic {@link HttpVersion}.
 	 * 
-	 * @param name
-	 *            Name of the {@link HttpVersion}.
+	 * @param name Name of the {@link HttpVersion}.
 	 */
 	public HttpVersion(String name) {
 		this(name, HttpVersionEnum.OTHER);
@@ -137,10 +139,8 @@ public class HttpVersion implements Serializable {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name
-	 *            Name of the {@link HttpVersion}.
-	 * @param httpMethodEnum
-	 *            {@link HttpVersionEnum}.
+	 * @param name           Name of the {@link HttpVersion}.
+	 * @param httpMethodEnum {@link HttpVersionEnum}.
 	 */
 	private HttpVersion(String name, HttpVersionEnum httpMethodEnum) {
 		this.name = name;
@@ -157,8 +157,7 @@ public class HttpVersion implements Serializable {
 	/**
 	 * Equals without the type checking.
 	 * 
-	 * @param httpMethod
-	 *            {@link HttpVersion}.
+	 * @param httpMethod {@link HttpVersion}.
 	 * @return <code>true</code> if same {@link HttpVersion}.
 	 */
 	public boolean isEqual(HttpVersion httpMethod) {
@@ -193,13 +192,10 @@ public class HttpVersion implements Serializable {
 	/**
 	 * Writes this {@link HttpStatus} to the {@link StreamBuffer}.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param head
-	 *            Head {@link StreamBuffer} of the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param            <B> Buffer type.
+	 * @param head       Head {@link StreamBuffer} of the linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
 	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
 		StreamBuffer.write(this.byteContent, head, bufferPool);

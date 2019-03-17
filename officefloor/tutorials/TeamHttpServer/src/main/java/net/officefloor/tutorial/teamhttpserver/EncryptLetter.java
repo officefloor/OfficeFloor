@@ -29,6 +29,7 @@ import net.officefloor.web.HttpParameters;
 // START SNIPPET: example
 @HttpParameters
 public class EncryptLetter implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	private char letter;
 

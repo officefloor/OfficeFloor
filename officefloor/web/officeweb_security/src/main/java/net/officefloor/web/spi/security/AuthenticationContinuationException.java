@@ -35,10 +35,14 @@ import net.officefloor.web.security.HttpAuthentication;
 public class AuthenticationContinuationException extends HttpException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param entity
-	 *            Entity.
+	 * @param entity Entity.
 	 */
 	public AuthenticationContinuationException(String entity) {
 		super(HttpStatus.INTERNAL_SERVER_ERROR, null, entity);

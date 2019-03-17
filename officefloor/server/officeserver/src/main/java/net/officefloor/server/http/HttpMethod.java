@@ -28,10 +28,14 @@ import java.util.jar.Attributes.Name;
 public class HttpMethod implements Serializable {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Obtains the {@link HttpMethod}.
 	 * 
-	 * @param methodName
-	 *            Name of the {@link HttpMethod}.
+	 * @param methodName Name of the {@link HttpMethod}.
 	 * @return {@link HttpMethod}.
 	 */
 	public static HttpMethod getHttpMethod(String methodName) {
@@ -78,8 +82,7 @@ public class HttpMethod implements Serializable {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param httpMethodName
-		 *            {@link Name} of the {@link HttpMethod}.
+		 * @param httpMethodName {@link Name} of the {@link HttpMethod}.
 		 */
 		private HttpMethodEnum(String httpMethodName) {
 			this.httpMethod = new HttpMethod(httpMethodName, this);
@@ -87,8 +90,7 @@ public class HttpMethod implements Serializable {
 
 		/**
 		 * <p>
-		 * Obtains the singleton {@link HttpMethod} for this
-		 * {@link HttpMethodEnum}.
+		 * Obtains the singleton {@link HttpMethod} for this {@link HttpMethodEnum}.
 		 * <p>
 		 * Note for {@link HttpMethodEnum#OTHER} this returns <code>null</code>.
 		 * 
@@ -152,8 +154,7 @@ public class HttpMethod implements Serializable {
 	/**
 	 * Instantiate a dynamic {@link HttpMethod}.
 	 * 
-	 * @param name
-	 *            Name of the {@link HttpMethod}.
+	 * @param name Name of the {@link HttpMethod}.
 	 */
 	public HttpMethod(String name) {
 		this(name, HttpMethodEnum.OTHER);
@@ -162,10 +163,8 @@ public class HttpMethod implements Serializable {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name
-	 *            Name of the {@link HttpMethod}.
-	 * @param httpMethodEnum
-	 *            {@link HttpMethodEnum}.
+	 * @param name           Name of the {@link HttpMethod}.
+	 * @param httpMethodEnum {@link HttpMethodEnum}.
 	 */
 	HttpMethod(String name, HttpMethodEnum httpMethodEnum) {
 		this.name = name;
@@ -176,8 +175,7 @@ public class HttpMethod implements Serializable {
 	/**
 	 * Equals without the type checking.
 	 * 
-	 * @param httpMethod
-	 *            {@link HttpMethod}.
+	 * @param httpMethod {@link HttpMethod}.
 	 * @return <code>true</code> if same {@link HttpMethod}.
 	 */
 	public boolean isEqual(HttpMethod httpMethod) {

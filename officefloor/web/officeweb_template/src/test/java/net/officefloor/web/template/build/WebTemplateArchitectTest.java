@@ -1066,6 +1066,8 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 
 	@HttpSessionStateful
 	public static class StatefulLogic implements Serializable {
+		private static final long serialVersionUID = 1L;
+
 		private int count = 0;
 
 		public StatefulLogic getTemplate() {

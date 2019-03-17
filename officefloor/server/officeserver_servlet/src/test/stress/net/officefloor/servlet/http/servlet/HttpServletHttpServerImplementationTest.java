@@ -195,6 +195,11 @@ public class HttpServletHttpServerImplementationTest extends AbstractHttpServerI
 	public static class FixHeadersFilter extends HttpFilter {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Loads the fix {@link org.eclipse.jetty.http.HttpHeader} instances.
 		 * 
 		 * @param response {@link HttpServletResponse}.

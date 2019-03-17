@@ -29,16 +29,14 @@ public interface AdaptedErrorHandler {
 	/**
 	 * Shows the error.
 	 * 
-	 * @param message
-	 *            Error message to show.
+	 * @param message Error message to show.
 	 */
 	void showError(String message);
 
 	/**
 	 * Shows the error.
 	 * 
-	 * @param error
-	 *            {@link Throwable} error to show.
+	 * @param error {@link Throwable} error to show.
 	 */
 	void showError(Throwable error);
 
@@ -52,8 +50,7 @@ public interface AdaptedErrorHandler {
 	 * }
 	 * </pre>
 	 * 
-	 * @param operation
-	 *            {@link UncertainOperation}.
+	 * @param operation {@link UncertainOperation}.
 	 * @return <code>true</code> if {@link UncertainOperation} threw an
 	 *         {@link Exception}. The {@link Exception} will displayed visually to
 	 *         the user.
@@ -68,8 +65,7 @@ public interface AdaptedErrorHandler {
 		/**
 		 * Uncertain logic.
 		 * 
-		 * @throws Throwable
-		 *             Failure in the uncertain logic.
+		 * @throws Throwable Failure in the uncertain logic.
 		 */
 		void run() throws Throwable;
 	}
@@ -80,10 +76,14 @@ public interface AdaptedErrorHandler {
 	public static class MessageOnlyException extends RuntimeException {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Instantiate.
 		 * 
-		 * @param message
-		 *            Message.
+		 * @param message Message.
 		 */
 		public MessageOnlyException(String message) {
 			super(message);

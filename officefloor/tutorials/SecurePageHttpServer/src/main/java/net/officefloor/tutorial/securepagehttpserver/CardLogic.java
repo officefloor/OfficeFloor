@@ -34,6 +34,7 @@ public class CardLogic {
 	@Data
 	@HttpParameters
 	public static class CardDetails implements Serializable {
+		private static final long serialVersionUID = 1L;
 
 		private String number;
 

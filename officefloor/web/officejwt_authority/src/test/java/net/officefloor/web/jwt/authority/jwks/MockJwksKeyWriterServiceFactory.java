@@ -21,6 +21,7 @@ public class MockJwksKeyWriterServiceFactory
 	 * Mock {@link Key}.
 	 */
 	public static class MockKey implements Key {
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public String getAlgorithm() {

@@ -38,6 +38,7 @@ import net.officefloor.web.HttpSessionStateful;
 // START SNIPPET: values
 @HttpSessionStateful
 public class Template implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	private Map<Character, LetterEncryption> cache = new HashMap<Character, LetterEncryption>();
 
