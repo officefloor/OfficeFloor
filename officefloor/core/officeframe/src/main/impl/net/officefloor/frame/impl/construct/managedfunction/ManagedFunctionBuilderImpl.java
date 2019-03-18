@@ -194,6 +194,12 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 		this.governances.add(new ManagedFunctionGovernanceConfigurationImpl(governanceName));
 	}
 
+	@Override
+	public void setTimeout(long timeout) {
+		// TODO implement ManagedFunctionBuilder<O,F>.setTimeout
+		throw new UnsupportedOperationException("TODO implement ManagedFunctionBuilder<O,F>.setTimeout");
+	}
+
 	/*
 	 * ============ TaskConfiguration =====================================
 	 */

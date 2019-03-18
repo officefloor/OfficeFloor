@@ -20,6 +20,7 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.FunctionManager;
@@ -50,54 +51,43 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * expose functionality to be invoked)</li>
 	 * </ol>
 	 * 
-	 * @param annotation
-	 *            Annotation.
+	 * @param annotation Annotation.
 	 */
 	void addAnnotation(Object annotation);
 
 	/**
 	 * Links in the parameter for this {@link ManagedFunction}.
 	 * 
-	 * @param key
-	 *            Key identifying the parameter.
-	 * @param parameterType
-	 *            Type of the parameter.
+	 * @param key           Key identifying the parameter.
+	 * @param parameterType Type of the parameter.
 	 */
 	void linkParameter(O key, Class<?> parameterType);
 
 	/**
 	 * Links in the parameter for this {@link ManagedFunction}.
 	 * 
-	 * @param index
-	 *            Index identifying the parameter.
-	 * @param parameterType
-	 *            Type of the parameter.
+	 * @param index         Index identifying the parameter.
+	 * @param parameterType Type of the parameter.
 	 */
 	void linkParameter(int index, Class<?> parameterType);
 
 	/**
 	 * Links in a {@link ManagedObject} to this {@link ManagedFunction}.
 	 * 
-	 * @param key
-	 *            Key identifying the {@link ManagedObject}.
-	 * @param scopeManagedObjectName
-	 *            Name of the {@link ManagedObject} within the
-	 *            {@link ManagedObjectScope}.
-	 * @param objectType
-	 *            Type required by the {@link ManagedFunction}.
+	 * @param key                    Key identifying the {@link ManagedObject}.
+	 * @param scopeManagedObjectName Name of the {@link ManagedObject} within the
+	 *                               {@link ManagedObjectScope}.
+	 * @param objectType             Type required by the {@link ManagedFunction}.
 	 */
 	void linkManagedObject(O key, String scopeManagedObjectName, Class<?> objectType);
 
 	/**
 	 * Links in a {@link ManagedObject} to this {@link ManagedFunction}.
 	 * 
-	 * @param managedObjectIndex
-	 *            Index of the {@link ManagedObject}.
-	 * @param scopeManagedObjectName
-	 *            Name of the {@link ManagedObject} within the
-	 *            {@link ManagedObjectScope}.
-	 * @param objectType
-	 *            Type required by the {@link ManagedFunction}.
+	 * @param managedObjectIndex     Index of the {@link ManagedObject}.
+	 * @param scopeManagedObjectName Name of the {@link ManagedObject} within the
+	 *                               {@link ManagedObjectScope}.
+	 * @param objectType             Type required by the {@link ManagedFunction}.
 	 */
 	void linkManagedObject(int managedObjectIndex, String scopeManagedObjectName, Class<?> objectType);
 
@@ -105,18 +95,12 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * Adds {@link Administration} to be undertaken before this
 	 * {@link ManagedFunction}.
 	 *
-	 * @param <E>
-	 *            Extension type.
-	 * @param <f>
-	 *            {@link Flow} key type.
-	 * @param <G>
-	 *            {@link Governance} key type.
-	 * @param administrationName
-	 *            Name of the {@link Administration}.
-	 * @param extension
-	 *            Extension type for {@link Administration}.
-	 * @param administrationFactory
-	 *            {@link AdministrationFactory}.
+	 * @param                       <E> Extension type.
+	 * @param                       <f> {@link Flow} key type.
+	 * @param                       <G> {@link Governance} key type.
+	 * @param administrationName    Name of the {@link Administration}.
+	 * @param extension             Extension type for {@link Administration}.
+	 * @param administrationFactory {@link AdministrationFactory}.
 	 * @return {@link AdministrationBuilder} to build the {@link Administration}.
 	 */
 	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> preAdminister(String administrationName,
@@ -126,18 +110,12 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * Adds {@link Administration} to be undertaken after this
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param <E>
-	 *            Extension type.
-	 * @param <f>
-	 *            {@link Flow} key type.
-	 * @param <G>
-	 *            {@link Governance} key type.
-	 * @param administrationName
-	 *            Name of the {@link Administration}.
-	 * @param extension
-	 *            Extension type for {@link Administration}.
-	 * @param administrationFactory
-	 *            {@link AdministrationFactory}.
+	 * @param                       <E> Extension type.
+	 * @param                       <f> {@link Flow} key type.
+	 * @param                       <G> {@link Governance} key type.
+	 * @param administrationName    Name of the {@link Administration}.
+	 * @param extension             Extension type for {@link Administration}.
+	 * @param administrationFactory {@link AdministrationFactory}.
 	 * @return {@link AdministrationBuilder} to build the {@link Administration}.
 	 */
 	<E, f extends Enum<f>, G extends Enum<G>> AdministrationBuilder<f, G> postAdminister(String administrationName,
@@ -164,8 +142,7 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * <li>Manually managed by an {@link Administration}</li>
 	 * </ol>
 	 * 
-	 * @param governanceName
-	 *            Name of the {@link Governance}.
+	 * @param governanceName Name of the {@link Governance}.
 	 */
 	void addGovernance(String governanceName);
 
@@ -180,14 +157,21 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
 	 * </ol>
 	 * 
-	 * @param functionManagedObjectName
-	 *            Name of the {@link ManagedObject} to be referenced locally by this
-	 *            {@link ManagedFunction}.
-	 * @param officeManagedObjectName
-	 *            Name of the {@link ManagedObject} referenced locally within the
-	 *            {@link Office}.
+	 * @param functionManagedObjectName Name of the {@link ManagedObject} to be
+	 *                                  referenced locally by this
+	 *                                  {@link ManagedFunction}.
+	 * @param officeManagedObjectName   Name of the {@link ManagedObject} referenced
+	 *                                  locally within the {@link Office}.
 	 * @return {@link DependencyMappingBuilder}.
 	 */
 	DependencyMappingBuilder addManagedObject(String functionManagedObjectName, String officeManagedObjectName);
+
+	/**
+	 * Specifies the timeout to for {@link AsynchronousFlow} instances for this
+	 * {@link ManagedFunction}.
+	 *
+	 * @param timeout Timeout.
+	 */
+	void setTimeout(long timeout);
 
 }

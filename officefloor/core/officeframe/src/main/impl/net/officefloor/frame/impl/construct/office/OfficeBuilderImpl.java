@@ -204,6 +204,12 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
+	public void setDefaultAsynchronousFlowTimeout(long timeout) {
+		// TODO implement OfficeBuilder.setDefaultAsynchronousFlowTimeout
+		throw new UnsupportedOperationException("TODO implement OfficeBuilder.setDefaultAsynchronousFlowTimeout");
+	}
+
+	@Override
 	public void registerTeam(String officeTeamName, String officeFloorTeamName) {
 		this.teams.add(new LinkedTeamConfigurationImpl(officeTeamName, officeFloorTeamName));
 	}
