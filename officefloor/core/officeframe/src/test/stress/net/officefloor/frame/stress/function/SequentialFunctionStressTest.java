@@ -28,10 +28,10 @@ import net.officefloor.frame.test.ReflectiveFunctionBuilder;
  * 
  * @author Daniel Sagenschneider
  */
-public class SequentialTaskStressTest extends AbstractStressTestCase {
+public class SequentialFunctionStressTest extends AbstractStressTestCase {
 
 	public static TestSuite suite() {
-		return createSuite(SequentialTaskStressTest.class);
+		return createSuite(SequentialFunctionStressTest.class);
 	}
 
 	@Override
