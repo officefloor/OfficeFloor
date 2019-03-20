@@ -17,8 +17,10 @@
  */
 package net.officefloor.frame.api.administration;
 
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FunctionFlowContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Context in which the {@link Administration} executes.
@@ -31,16 +33,14 @@ public interface AdministrationContext<E extends Object, F extends Enum<F>, G ex
 	/**
 	 * Obtains the particular extensions.
 	 * 
-	 * @return Extension for the {@link ManagedObject} instances to be
-	 *         administered.
+	 * @return Extension for the {@link ManagedObject} instances to be administered.
 	 */
 	E[] getExtensions();
 
 	/**
 	 * Obtains the {@link GovernanceManager} for the particular key.
 	 * 
-	 * @param key
-	 *            Key identifying the {@link GovernanceManager}.
+	 * @param key Key identifying the {@link GovernanceManager}.
 	 * @return {@link GovernanceManager}.
 	 */
 	GovernanceManager getGovernance(G key);
@@ -48,10 +48,17 @@ public interface AdministrationContext<E extends Object, F extends Enum<F>, G ex
 	/**
 	 * Obtains the {@link GovernanceManager} for the index.
 	 * 
-	 * @param governanceIndex
-	 *            Index identifying the {@link GovernanceManager}.
+	 * @param governanceIndex Index identifying the {@link GovernanceManager}.
 	 * @return {@link GovernanceManager}.
 	 */
 	GovernanceManager getGovernance(int governanceIndex);
+
+	/**
+	 * Creates an {@link AsynchronousFlow} that must be completed before any further
+	 * {@link Flow} is executed.
+	 * 
+	 * @return {@link AsynchronousFlow} that must be completed.
+	 */
+	AsynchronousFlow createAsynchronousFlow();
 
 }

@@ -153,16 +153,12 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 
 	@Override
 	public long getAsynchronousFlowTimeout() {
-		// TODO implement ManagedFunctionLogicMetaData.getAsynchronousFlowTimeout
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedFunctionLogicMetaData.getAsynchronousFlowTimeout");
+		return this.asynchronousFlowTimeout;
 	}
 
 	@Override
 	public AssetManager getAsynchronousFlowManager() {
-		// TODO implement ManagedFunctionLogicMetaData.getAsynchronousFlowManager
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedFunctionLogicMetaData.getAsynchronousFlowManager");
+		return this.asynchronousFlowAssetManager;
 	}
 
 	@Override

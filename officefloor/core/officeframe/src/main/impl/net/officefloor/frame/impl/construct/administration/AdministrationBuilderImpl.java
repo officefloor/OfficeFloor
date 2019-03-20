@@ -118,6 +118,11 @@ public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>> 
 				new AdministrationGovernanceConfigurationImpl<G>(key, governanceIndex, governanceName));
 	}
 
+	@Override
+	public void setAsynchronousFlowTimeout(long timeout) {
+		this.asynchronousFlowTimeout = timeout;
+	}
+
 	/*
 	 * ============= AdministrationConfiguration =====================
 	 */
