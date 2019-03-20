@@ -138,16 +138,12 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 
 	@Override
 	public long getAsynchronousFlowTimeout() {
-		// TODO implement ManagedFunctionLogicMetaData.getAsynchronousFlowTimeout
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedFunctionLogicMetaData.getAsynchronousFlowTimeout");
+		return this.asynchronousFlowTimeout;
 	}
 
 	@Override
 	public AssetManager getAsynchronousFlowManager() {
-		// TODO implement ManagedFunctionLogicMetaData.getAsynchronousFlowManager
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedFunctionLogicMetaData.getAsynchronousFlowManager");
+		return this.asynchronousFlowAssetManager;
 	}
 
 	@Override
@@ -237,6 +233,11 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 
 					// Undertake the flow
 					context.doFlow(flowMetaData, parameter, callback);
+				}
+
+				@Override
+				public AsynchronousFlow createAsynchronousFlow() {
+					return context.createAsynchronousFlow();
 				}
 			};
 

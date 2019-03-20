@@ -28,16 +28,12 @@ import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 public interface FunctionFlowContext<F extends Enum<F>> {
 
 	/**
-	 * Instigates a {@link Flow} to be run from the
-	 * {@link ManagedFunctionLogic}.
+	 * Instigates a {@link Flow} to be run from the {@link ManagedFunctionLogic}.
 	 * 
-	 * @param key
-	 *            Key identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter for the first {@link ManagedFunction} of the
-	 *            {@link Flow}.
-	 * @param callback
-	 *            Optional {@link FlowCallback}. May be <code>null</code>.
+	 * @param key       Key identifying the {@link Flow} to instigate.
+	 * @param parameter Parameter for the first {@link ManagedFunction} of the
+	 *                  {@link Flow}.
+	 * @param callback  Optional {@link FlowCallback}. May be <code>null</code>.
 	 */
 	void doFlow(F key, Object parameter, FlowCallback callback);
 
@@ -49,14 +45,19 @@ public interface FunctionFlowContext<F extends Enum<F>> {
 	 * In other words, an {@link Enum} is not required to define the possible
 	 * {@link Flow} instances available.
 	 * 
-	 * @param flowIndex
-	 *            Index identifying the {@link Flow} to instigate.
-	 * @param parameter
-	 *            Parameter for the first {@link ManagedFunction} of the
-	 *            {@link Flow}.
-	 * @param callback
-	 *            Optional {@link FlowCallback}. May be <code>null</code>.
+	 * @param flowIndex Index identifying the {@link Flow} to instigate.
+	 * @param parameter Parameter for the first {@link ManagedFunction} of the
+	 *                  {@link Flow}.
+	 * @param callback  Optional {@link FlowCallback}. May be <code>null</code>.
 	 */
 	void doFlow(int flowIndex, Object parameter, FlowCallback callback);
+
+	/**
+	 * Creates an {@link AsynchronousFlow} that must be completed before any further
+	 * {@link Flow} is executed.
+	 * 
+	 * @return {@link AsynchronousFlow} that must be completed.
+	 */
+	AsynchronousFlow createAsynchronousFlow();
 
 }

@@ -86,12 +86,4 @@ public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> ex
 	void doFlow(String functionName, Object parameter, FlowCallback callback)
 			throws UnknownFunctionException, InvalidParameterTypeException;
 
-	/**
-	 * Creates an {@link AsynchronousFlow} that must be completed before any further
-	 * {@link Flow} is executed.
-	 * 
-	 * @return {@link AsynchronousFlow} that must be completed.
-	 */
-	AsynchronousFlow createAsynchronousFlow();
-
 }
