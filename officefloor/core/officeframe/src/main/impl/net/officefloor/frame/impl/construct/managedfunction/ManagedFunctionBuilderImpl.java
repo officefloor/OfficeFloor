@@ -27,6 +27,7 @@ import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
@@ -98,6 +99,11 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 	 * {@link ManagedFunction}.
 	 */
 	private final List<AdministrationConfiguration<?, ?, ?>> postAdministration = new LinkedList<AdministrationConfiguration<?, ?, ?>>();
+
+	/**
+	 * {@link AsynchronousFlow} timeout.
+	 */
+	private long asynchronousFlowTimeout = -1;
 
 	/**
 	 * Initiate.
@@ -195,9 +201,8 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 	}
 
 	@Override
-	public void setTimeout(long timeout) {
-		// TODO implement ManagedFunctionBuilder<O,F>.setTimeout
-		throw new UnsupportedOperationException("TODO implement ManagedFunctionBuilder<O,F>.setTimeout");
+	public void setAsynchronousFlowTimeout(long timeout) {
+		this.asynchronousFlowTimeout = timeout;
 	}
 
 	/*
@@ -247,6 +252,11 @@ public class ManagedFunctionBuilderImpl<O extends Enum<O>, F extends Enum<F>> ex
 	@Override
 	public ManagedObjectConfiguration<?>[] getManagedObjectConfiguration() {
 		return this.functionManagedObjects.toArray(new ManagedObjectConfiguration[0]);
+	}
+
+	@Override
+	public long getAsynchronousFlowTimeout() {
+		return this.asynchronousFlowTimeout;
 	}
 
 }

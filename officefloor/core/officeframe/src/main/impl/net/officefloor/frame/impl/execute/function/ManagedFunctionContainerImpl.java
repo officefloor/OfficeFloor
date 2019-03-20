@@ -17,8 +17,11 @@
  */
 package net.officefloor.frame.impl.execute.function;
 
+import net.officefloor.frame.api.escalate.AsynchronousFlowTimedOutEscalation;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.ProcessCancelledEscalation;
+import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
@@ -27,14 +30,18 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectReadyCheckImpl;
+import net.officefloor.frame.internal.structure.ActiveAsynchronousFlow;
+import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.AssetLatch;
+import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionLogic;
 import net.officefloor.frame.internal.structure.FunctionState;
+import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.GovernanceContainer;
 import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
@@ -57,6 +64,16 @@ import net.officefloor.frame.internal.structure.ThreadState;
  */
 public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData>
 		extends AbstractLinkedListSetEntry<FunctionState, Flow> implements ManagedFunctionContainer {
+
+	/**
+	 * Awaiting {@link AsynchronousFlow} instances.
+	 */
+	private final LinkedListSet<ActiveAsynchronousFlow, ManagedFunctionContainer> awaitingAsynchronousFlowCompletions = new StrictLinkedListSet<ActiveAsynchronousFlow, ManagedFunctionContainer>() {
+		@Override
+		protected ManagedFunctionContainer getOwner() {
+			return ManagedFunctionContainerImpl.this;
+		}
+	};
 
 	/**
 	 * Awaiting {@link FlowCompletion} instances.
@@ -433,6 +450,20 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Undertake execute functions (may be invoked by callback)
 			FunctionState executeFunctions = null;
 
+			// Wait on any new asynchronous flows
+			ActiveAsynchronousFlow asynchronousFlow = this.awaitingAsynchronousFlowCompletions.getHead();
+			while (asynchronousFlow != null) {
+				if (!asynchronousFlow.isWaiting()) {
+					executeFunctions = Promise.then(executeFunctions, asynchronousFlow.waitOnCompletion());
+				}
+				asynchronousFlow = asynchronousFlow.getNext();
+			}
+
+			// Ensure asynchronous flows are complete
+			if (this.awaitingAsynchronousFlowCompletions.getHead() != null) {
+				return executeFunctions;
+			}
+
 			// Spawn any thread states
 			if (this.spawnThreadStateFunction != null) {
 				FunctionState spawn = this.spawnThreadStateFunction;
@@ -725,6 +756,170 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 				// Load the sequential function
 				container.loadSequentialFunction(sequentialFunction);
+			}
+		}
+
+		@Override
+		public AsynchronousFlow createAsynchronousFlow() {
+
+			// Easy access to container
+			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
+
+			// Ensure in appropriate state to invoke flows
+			switch (container.containerState) {
+			case EXECUTE_FUNCTION:
+			case AWAIT_FLOW_COMPLETIONS:
+				break; // correct states to invoke flow
+
+			default:
+				throw new IllegalStateException(
+						"Can not invoke asynchronous flow outside function/callback execution (state: "
+								+ container.containerState + ")");
+			}
+
+			// Create the asynchronous flow
+			AsynchronousFlowImpl flow = new AsynchronousFlowImpl();
+			container.awaitingAsynchronousFlowCompletions.addEntry(flow);
+
+			// Return the asynchronous flow
+			return flow;
+		}
+	}
+
+	/**
+	 * {@link AsynchronousFlow} implementation.
+	 */
+	private class AsynchronousFlowImpl
+			extends AbstractLinkedListSetEntry<ActiveAsynchronousFlow, ManagedFunctionContainer>
+			implements ActiveAsynchronousFlow, AsynchronousFlow, Asset {
+
+		/**
+		 * {@link AssetLatch} for this {@link AsynchronousFlow}.
+		 */
+		private final AssetLatch assetLatch;
+
+		/**
+		 * Time the {@link AsynchronousFlow} was triggered.
+		 */
+		private final long startTime;
+
+		/**
+		 * Indicates if waiting on the {@link AsynchronousFlow}.
+		 */
+		private boolean isWaiting = false;
+
+		/**
+		 * Indicates if the {@link AsynchronousFlow} is complete.
+		 */
+		private boolean isComplete = false;
+
+		/**
+		 * Instantiate.
+		 */
+		private AsynchronousFlowImpl() {
+
+			// Easy access to container
+			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
+
+			// Create the asset latch for asynchronous flow
+			this.assetLatch = container.functionLogicMetaData.getAsynchronousFlowManager().createAssetLatch(this);
+
+			// Capture the start time
+			this.startTime = container.functionLogicMetaData.getOfficeMetaData().getMonitorClock().currentTimeMillis();
+		}
+
+		/*
+		 * ================== LinkedListSetEntry =================
+		 */
+
+		@Override
+		public ManagedFunctionContainer getLinkedListSetOwner() {
+			return ManagedFunctionContainerImpl.this;
+		}
+
+		/*
+		 * ================= ActiveAsynchronousFlow ===============
+		 */
+
+		@Override
+		public boolean isWaiting() {
+			return this.isWaiting;
+		}
+
+		@Override
+		public FunctionState waitOnCompletion() {
+
+			// Flag that will be now waiting
+			this.isWaiting = true;
+
+			// Handle waiting on the asynchronous flow
+			return this.assetLatch.awaitOnAsset(ManagedFunctionContainerImpl.this);
+		}
+
+		/*
+		 * ==================== AsynchronousFlow ==================
+		 */
+
+		@Override
+		public void complete(AsynchronousFlowCompletion completion) {
+
+			// Undertake completion of asynchronous flow
+			this.assetLatch.releaseFunctions(true, new ManagedFunctionOperation() {
+
+				@Override
+				public FunctionState execute(FunctionStateContext context) throws Throwable {
+
+					// Easy access to flow
+					AsynchronousFlowImpl flow = AsynchronousFlowImpl.this;
+
+					// Determine if complete
+					if (flow.isComplete) {
+						return null; // already complete
+					}
+
+					// Remove from listing to allow progression
+					ManagedFunctionContainerImpl.this.awaitingAsynchronousFlowCompletions.removeEntry(flow);
+
+					// Flag now complete
+					flow.isComplete = true;
+
+					// Complete the flow (if available)
+					if (completion != null) {
+						completion.run();
+					}
+					return null; // nothing further
+				}
+			});
+		}
+
+		/*
+		 * ==================== AsynchronousFlow ==================
+		 */
+
+		@Override
+		public ThreadState getOwningThreadState() {
+			return ManagedFunctionContainerImpl.this.getThreadState();
+		}
+
+		@Override
+		public void checkOnAsset(CheckAssetContext context) {
+
+			// Easy access to container
+			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
+
+			// Determine if asynchronous operation has timed out
+			long idleTime = container.functionLogicMetaData.getOfficeMetaData().getMonitorClock().currentTimeMillis()
+					- this.startTime;
+			if (idleTime > container.functionLogicMetaData.getAsynchronousFlowTimeout()) {
+
+				// Remove from listing and consider complete
+				ManagedFunctionContainerImpl.this.awaitingAsynchronousFlowCompletions.removeEntry(this);
+				this.isComplete = true;
+
+				// Timed out, so escalation failure
+				context.failFunctions(
+						new AsynchronousFlowTimedOutEscalation(container.functionLogicMetaData.getFunctionName()),
+						true);
 			}
 		}
 	}

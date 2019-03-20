@@ -43,11 +43,11 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 
 	/**
 	 * <p>
-	 * Scope index of the {@link ManagedObjectIndex} indicating the parameter
-	 * rather than the object of the {@link ManagedObject}.
+	 * Scope index of the {@link ManagedObjectIndex} indicating the parameter rather
+	 * than the object of the {@link ManagedObject}.
 	 * <p>
-	 * As {@link ManagedObjectIndex} are indexes into arrays, the negative value
-	 * is safe to use as a parameter index.
+	 * As {@link ManagedObjectIndex} are indexes into arrays, the negative value is
+	 * safe to use as a parameter index.
 	 */
 	public static final int PARAMETER_INDEX = -1;
 
@@ -70,10 +70,8 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 	/**
 	 * Initiate.
 	 * 
-	 * @param functionMetaData
-	 *            {@link ManagedFunctionMetaData}.
-	 * @param parameter
-	 *            Parameter for the {@link ManagedFunction}.
+	 * @param functionMetaData {@link ManagedFunctionMetaData}.
+	 * @param parameter        Parameter for the {@link ManagedFunction}.
 	 */
 	public ManagedFunctionLogicImpl(ManagedFunctionMetaData<O, F> functionMetaData, Object parameter) {
 		this.parameter = parameter;
@@ -99,9 +97,9 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 	 * <p>
 	 * Token class given to the {@link ManagedFunction}.
 	 * <p>
-	 * As application code will be provided a {@link ManagedFunctionContext}
-	 * this exposes just the necessary functionality and prevents access to
-	 * internals of the framework.
+	 * As application code will be provided a {@link ManagedFunctionContext} this
+	 * exposes just the necessary functionality and prevents access to internals of
+	 * the framework.
 	 */
 	private final class ManagedFunctionContextToken implements ManagedFunctionContext<O, F> {
 
@@ -113,8 +111,7 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 		/**
 		 * Instantiate.
 		 * 
-		 * @param context
-		 *            {@link ManagedFunctionLogicContext}.
+		 * @param context {@link ManagedFunctionLogicContext}.
 		 */
 		public ManagedFunctionContextToken(ManagedFunctionLogicContext context) {
 			this.context = context;
@@ -190,8 +187,7 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 
 		@Override
 		public AsynchronousFlow createAsynchronousFlow() {
-			// TODO implement ManagedFunctionContext<O,F>.createAsynchronousFlow
-			throw new UnsupportedOperationException("TODO implement ManagedFunctionContext<O,F>.createAsynchronousFlow");
+			return this.context.createAsynchronousFlow();
 		}
 	}
 

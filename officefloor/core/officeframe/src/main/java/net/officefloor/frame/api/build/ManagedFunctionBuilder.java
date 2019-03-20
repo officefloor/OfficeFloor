@@ -172,6 +172,6 @@ public interface ManagedFunctionBuilder<O extends Enum<O>, F extends Enum<F>> ex
 	 *
 	 * @param timeout Timeout.
 	 */
-	void setTimeout(long timeout);
+	void setAsynchronousFlowTimeout(long timeout);
 
 }

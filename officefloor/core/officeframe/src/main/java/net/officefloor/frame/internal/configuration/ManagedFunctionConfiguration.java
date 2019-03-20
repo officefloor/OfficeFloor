@@ -18,6 +18,7 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
@@ -38,8 +39,7 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	String getFunctionName();
 
 	/**
-	 * Obtains the {@link ManagedFunctionFactory} for the
-	 * {@link ManagedFunction}.
+	 * Obtains the {@link ManagedFunctionFactory} for the {@link ManagedFunction}.
 	 * 
 	 * @return {@link ManagedFunctionFactory}.
 	 */
@@ -53,8 +53,8 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	Object[] getAnnotations();
 
 	/**
-	 * Obtains the configuration of the dependent {@link Object} instances for
-	 * this {@link ManagedFunction}.
+	 * Obtains the configuration of the dependent {@link Object} instances for this
+	 * {@link ManagedFunction}.
 	 * 
 	 * @return Configuration of the dependent {@link Object} instances for this
 	 *         {@link ManagedFunction}.
@@ -103,5 +103,12 @@ public interface ManagedFunctionConfiguration<O extends Enum<O>, F extends Enum<
 	 * @return Reference to the next {@link ManagedFunction}.
 	 */
 	ManagedFunctionReference getNextFunction();
+
+	/**
+	 * Obtains the timeout for any {@link AsynchronousFlow} instigated.
+	 * 
+	 * @return Timeout for any {@link AsynchronousFlow} instigated.
+	 */
+	long getAsynchronousFlowTimeout();
 
 }

@@ -42,44 +42,55 @@ public interface AssetLatch {
 	 * {@link ThreadState} of the {@link FunctionState}) to wait until the
 	 * {@link Asset} is ready.
 	 * <p>
-	 * This is typically because the {@link Asset} is doing some processing that
-	 * the {@link FunctionState} requires completed before proceeding.
+	 * This is typically because the {@link Asset} is doing some processing that the
+	 * {@link FunctionState} requires completed before proceeding.
 	 * 
-	 * @param function
-	 *            {@link FunctionState} to be released when the {@link Asset} is
-	 *            ready.
+	 * @param function {@link FunctionState} to be released when the {@link Asset}
+	 *                 is ready.
 	 * @return Optional {@link FunctionState} to execute to wait on the
 	 *         {@link Asset}.
 	 */
 	FunctionState awaitOnAsset(FunctionState function);
 
 	/**
-	 * Releases the {@link FunctionState} instances waiting on the
-	 * {@link Asset}.
+	 * Releases the {@link FunctionState} instances waiting on the {@link Asset}.
 	 * 
-	 * @param isPermanent
-	 *            <code>true</code> indicates that all {@link FunctionState}
-	 *            instances added to the {@link AssetLatch} from now on are
-	 *            activated immediately. It is useful to flag an
-	 *            {@link AssetLatch} in this state when the {@link Asset} is no
-	 *            longer being used to stop a {@link FunctionState} from waiting
-	 *            forever.
+	 * @param isPermanent <code>true</code> indicates that all {@link FunctionState}
+	 *                    instances added to the {@link AssetLatch} from now on are
+	 *                    activated immediately. It is useful to flag an
+	 *                    {@link AssetLatch} in this state when the {@link Asset} is
+	 *                    no longer being used to stop a {@link FunctionState} from
+	 *                    waiting forever.
 	 */
 	void releaseFunctions(boolean isPermanent);
 
 	/**
+	 * Releases the {@link FunctionState} instances waiting on the {@link Asset}.
+	 * 
+	 * @param isPermanent   <code>true</code> indicates that all
+	 *                      {@link FunctionState} instances added to the
+	 *                      {@link AssetLatch} from now on are activated
+	 *                      immediately. It is useful to flag an {@link AssetLatch}
+	 *                      in this state when the {@link Asset} is no longer being
+	 *                      used to stop a {@link FunctionState} from waiting
+	 *                      forever.
+	 * @param functionState {@link FunctionState} to be executed first before each
+	 *                      currently waiting {@link FunctionState}.
+	 */
+	void releaseFunctions(boolean isPermanent, FunctionState functionState);
+
+	/**
 	 * Fails the {@link FunctionState} instances waiting on this {@link Asset}.
 	 * 
-	 * @param failure
-	 *            Failure to propagate to the {@link ThreadState} of the
-	 *            {@link FunctionState} instances waiting on the {@link Asset}.
-	 * @param isPermanent
-	 *            <code>true</code> indicates that all {@link FunctionState}
-	 *            instances added to the {@link AssetLatch} from now on are
-	 *            activated immediately with the input failure. It is useful to
-	 *            flag an {@link AssetLatch} in this state when the
-	 *            {@link Asset} is in a failed state that can not be recovered
-	 *            from.
+	 * @param failure     Failure to propagate to the {@link ThreadState} of the
+	 *                    {@link FunctionState} instances waiting on the
+	 *                    {@link Asset}.
+	 * @param isPermanent <code>true</code> indicates that all {@link FunctionState}
+	 *                    instances added to the {@link AssetLatch} from now on are
+	 *                    activated immediately with the input failure. It is useful
+	 *                    to flag an {@link AssetLatch} in this state when the
+	 *                    {@link Asset} is in a failed state that can not be
+	 *                    recovered from.
 	 */
 	void failFunctions(Throwable failure, boolean isPermanent);
 

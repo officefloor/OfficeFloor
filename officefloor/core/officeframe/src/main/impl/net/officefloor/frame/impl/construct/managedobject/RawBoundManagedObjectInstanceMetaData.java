@@ -22,6 +22,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
@@ -341,15 +342,17 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 	 * Loads the {@link ManagedObjectMetaData} for the
 	 * {@link RawBoundManagedObjectMetaData}.
 	 * 
-	 * @param assetType           {@link AssetType} requiring the
-	 *                            {@link ManagedObject}.
-	 * @param assetName           Name of the {@link Asset} requiring the
-	 *                            {@link ManagedObject}.
-	 * @param assetManagerFactory {@link AssetManagerFactory}.
-	 * @param issues              {@link OfficeFloorIssues}.
+	 * @param assetType                      {@link AssetType} requiring the
+	 *                                       {@link ManagedObject}.
+	 * @param assetName                      Name of the {@link Asset} requiring the
+	 *                                       {@link ManagedObject}.
+	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
+	 *                                       timeout.
+	 * @param issues                         {@link OfficeFloorIssues}.
 	 */
 	public void loadManagedObjectMetaData(AssetType assetType, String assetName,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
+			AssetManagerFactory assetManagerFactory, long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Determine if already loaded
 		if (this.managedObjectMetaData != null) {
@@ -380,24 +383,29 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 				assetManagerFactory, issues);
 
 		// Manage by the office
-		this.rawMoMetaData.getRawManagingOfficeMetaData().manageManagedObject(this);
+		this.rawMoMetaData.getRawManagingOfficeMetaData().manageManagedObject(this, assetManagerFactory,
+				defaultAsynchronousFlowTimeout);
 	}
 
 	/**
 	 * Loads the remaining state for the {@link ManagedObjectMetaData}.
 	 * 
-	 * @param officeMetaData            {@link OfficeMetaData}.
-	 * @param recycleFlowMetaData       Recycle {@link FlowMetaData}.
-	 * @param managedObjectAdminFactory {@link ManagedObjectAdministrationMetaDataFactory}.
-	 * @param issues                    {@link OfficeFloorIssues}.
+	 * @param officeMetaData                 {@link OfficeMetaData}.
+	 * @param recycleFlowMetaData            Recycle {@link FlowMetaData}.
+	 * @param managedObjectAdminFactory      {@link ManagedObjectAdministrationMetaDataFactory}.
+	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
+	 *                                       timeout.
+	 * @param issues                         {@link OfficeFloorIssues}.
 	 */
 	public void loadRemainingState(OfficeMetaData officeMetaData, FlowMetaData recycleFlowMetaData,
-			ManagedObjectAdministrationMetaDataFactory managedObjectAdminFactory, OfficeFloorIssues issues) {
+			ManagedObjectAdministrationMetaDataFactory managedObjectAdminFactory,
+			AssetManagerFactory assetManagerFactory, long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Load the pre-load administration
 		ManagedObjectAdministrationMetaData<?, ?, ?>[] preLoadAdmin = managedObjectAdminFactory
 				.createManagedObjectAdministrationMetaData(this.preLoadAdministrationConfiguration,
-						this.rawBoundMetaData, issues);
+						this.rawBoundMetaData, assetManagerFactory, defaultAsynchronousFlowTimeout, issues);
 
 		// Load the remaining state
 		this.managedObjectMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData, preLoadAdmin);

@@ -24,10 +24,12 @@ import java.util.logging.Logger;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaData;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
@@ -87,18 +89,14 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param configuration
-	 *            {@link ManagedFunctionConfiguration}.
-	 * @param functionScopedManagedObjects
-	 *            {@link ManagedFunction} scoped
-	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param requiredManagedObjects
-	 *            Required {@link RawBoundManagedObjectMetaData} for this
-	 *            {@link ManagedFunction}.
-	 * @param functionMetaData
-	 *            {@link ManagedFunctionMetaDataImpl}.
+	 * @param functionName                 Name of the {@link ManagedFunction}.
+	 * @param configuration                {@link ManagedFunctionConfiguration}.
+	 * @param functionScopedManagedObjects {@link ManagedFunction} scoped
+	 *                                     {@link RawBoundManagedObjectMetaData}.
+	 * @param requiredManagedObjects       Required
+	 *                                     {@link RawBoundManagedObjectMetaData} for
+	 *                                     this {@link ManagedFunction}.
+	 * @param functionMetaData             {@link ManagedFunctionMetaDataImpl}.
 	 */
 	public RawManagedFunctionMetaData(String functionName, ManagedFunctionConfiguration<O, F> configuration,
 			Map<String, RawBoundManagedObjectMetaData> functionScopedManagedObjects,
@@ -123,21 +121,20 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	/**
 	 * Loads meta-data regarding the containing {@link Office}.
 	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param flowMetaDataFactory
-	 *            {@link FlowMetaDataFactory}.
-	 * @param escalationFlowFactory
-	 *            {@link EscalationFlowFactory}.
-	 * @param rawAdministrationMetaDataFactory
-	 *            {@link RawAdministrationMetaDataFactory}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param officeMetaData                   {@link OfficeMetaData}.
+	 * @param flowMetaDataFactory              {@link FlowMetaDataFactory}.
+	 * @param escalationFlowFactory            {@link EscalationFlowFactory}.
+	 * @param rawAdministrationMetaDataFactory {@link RawAdministrationMetaDataFactory}.
+	 * @param assetManagerFactory              {@link AssetManagerFactory}.
+	 * @param defaultAsynchronousFlowTimeout   Default {@link AsynchronousFlow}
+	 *                                         timeout.
+	 * @param issues                           {@link OfficeFloorIssues}.
 	 * @return <code>true</code> if successfully loaded the {@link OfficeMetaData}.
 	 */
 	public boolean loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
 			EscalationFlowFactory escalationFlowFactory,
-			RawAdministrationMetaDataFactory rawAdministrationMetaDataFactory, OfficeFloorIssues issues) {
+			RawAdministrationMetaDataFactory rawAdministrationMetaDataFactory, AssetManagerFactory assetManagerFactory,
+			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Obtain the listing of flow meta-data
 		FlowMetaData[] flowMetaDatas = flowMetaDataFactory.createFlowMetaData(this.configuration.getFlowConfiguration(),
@@ -171,10 +168,12 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 		// Create the administrations
 		AdministrationMetaData<?, ?, ?>[] preAdministrations = this
 				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
-						configuration.getPreAdministration(), rawAdministrationMetaDataFactory, issues);
+						configuration.getPreAdministration(), rawAdministrationMetaDataFactory, assetManagerFactory,
+						defaultAsynchronousFlowTimeout, issues);
 		AdministrationMetaData<?, ?, ?>[] postAdministrations = this
 				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
-						configuration.getPostAdministration(), rawAdministrationMetaDataFactory, issues);
+						configuration.getPostAdministration(), rawAdministrationMetaDataFactory, assetManagerFactory,
+						defaultAsynchronousFlowTimeout, issues);
 
 		// Create the required managed object indexes
 		ManagedObjectIndex[] requiredManagedObjectIndexes = RawBoundManagedObjectMetaData
@@ -245,21 +244,23 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * Constructs the {@link AdministrationMetaData} and registers the
 	 * {@link RawBoundManagedObjectMetaData} instances for {@link Administration}.
 	 * 
-	 * @param configuration
-	 *            {@link AdministrationConfiguration} instances.
-	 * @param rawAdminFactory
-	 *            {@link RawAdministrationMetaDataFactory}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param configuration                  {@link AdministrationConfiguration}
+	 *                                       instances.
+	 * @param rawAdminFactory                {@link RawAdministrationMetaDataFactory}.
+	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
+	 *                                       timeout.
+	 * @param issues                         {@link OfficeFloorIssues}.
 	 * @return Constructed {@link AdministrationMetaData} instances.
 	 */
 	private AdministrationMetaData<?, ?, ?>[] constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
 			AdministrationConfiguration<?, ?, ?>[] configuration, RawAdministrationMetaDataFactory rawAdminFactory,
-			OfficeFloorIssues issues) {
+			AssetManagerFactory assetManagerFactory, long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Construct the raw administration meta-data
 		RawAdministrationMetaData[] rawAdministrations = rawAdminFactory.constructRawAdministrationMetaData(
-				configuration, this.functionScopedManagedObjects, AssetType.FUNCTION, functionName, issues);
+				configuration, this.functionScopedManagedObjects, AssetType.FUNCTION, functionName, assetManagerFactory,
+				defaultAsynchronousFlowTimeout, issues);
 
 		// Create array of administration meta-data and register managed objects
 		AdministrationMetaData<?, ?, ?>[] administrations = new AdministrationMetaData[rawAdministrations.length];

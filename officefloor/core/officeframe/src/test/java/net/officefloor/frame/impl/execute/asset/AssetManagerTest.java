@@ -120,6 +120,21 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can providing additional {@link FunctionState} on completion.
+	 */
+	public void testReleaseLatchWithFunctionState() {
+		MockFunctionState waiting = new MockFunctionState();
+		MockFunctionState additional = new MockFunctionState();
+		this.replayMockObjects();
+		this.doOperation(() -> this.latch.awaitOnAsset(waiting));
+		assertFalse("Function should be waiting", waiting.isExecuted);
+		this.latch.releaseFunctions(true, additional);
+		this.verifyMockObjects();
+		assertTrue("Should execute additional", additional.isExecuted);
+		assertTrue("Should execute waiting", waiting.isExecuted);
+	}
+
+	/**
 	 * Ensure permanently release.
 	 */
 	public void testPermanentlyReleaseLatch() throws Throwable {

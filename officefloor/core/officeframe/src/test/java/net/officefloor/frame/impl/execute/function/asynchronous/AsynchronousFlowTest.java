@@ -41,7 +41,7 @@ public class AsynchronousFlowTest extends AbstractOfficeConstructTestCase {
 		this.constructFunction(work, "servicingComplete");
 
 		// Ensure halts execution until flow completes
-		this.invokeFunction("triggerAsynchronousFlow", null);
+		this.triggerFunction("triggerAsynchronousFlow", null, null);
 		assertFalse("Should halt on async flow and not complete servicing", work.isServicingComplete);
 
 		// Complete flow confirming completes flow

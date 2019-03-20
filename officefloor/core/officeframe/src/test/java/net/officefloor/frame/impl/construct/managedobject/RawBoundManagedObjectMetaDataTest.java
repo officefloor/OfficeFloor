@@ -241,8 +241,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can construct {@link RawBoundManagedObjectMetaData} with
-	 * dependency not available.
+	 * Ensure can construct {@link RawBoundManagedObjectMetaData} with dependency
+	 * not available.
 	 */
 	public void testDependencyNotAvailable() {
 
@@ -312,8 +312,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can construct {@link RawBoundManagedObjectMetaData} with
-	 * dependency on another {@link RawBoundManagedObjectMetaData}.
+	 * Ensure can construct {@link RawBoundManagedObjectMetaData} with dependency on
+	 * another {@link RawBoundManagedObjectMetaData}.
 	 */
 	public void testDependencyOnAnotherBound() {
 
@@ -347,8 +347,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures the order of {@link RawBoundManagedObjectMetaData} is order to
-	 * clean up the {@link ManagedObject} instances.
+	 * Ensures the order of {@link RawBoundManagedObjectMetaData} is order to clean
+	 * up the {@link ManagedObject} instances.
 	 */
 	public void testOrderingManagedObjectsByDependenciesForCleanup() {
 
@@ -407,8 +407,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can construct {@link RawBoundManagedObjectMetaData} with
-	 * dependency on a {@link RawBoundManagedObjectMetaData} from scope.
+	 * Ensure can construct {@link RawBoundManagedObjectMetaData} with dependency on
+	 * a {@link RawBoundManagedObjectMetaData} from scope.
 	 */
 	public void testDependencyOnScopeBound() {
 
@@ -468,8 +468,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures reports issue if class between bound and input
-	 * {@link ManagedObject} name.
+	 * Ensures reports issue if class between bound and input {@link ManagedObject}
+	 * name.
 	 */
 	public void testClashBetweenBoundAndInputManagedObject() {
 
@@ -568,8 +568,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if binding Input {@link ManagedObject} instances to same
-	 * name without a default instance specified.
+	 * Ensure issue if binding Input {@link ManagedObject} instances to same name
+	 * without a default instance specified.
 	 */
 	public void testBindInputManagedObjectInstancesWithNoDefault() {
 
@@ -604,8 +604,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if binding Input {@link ManagedObject} instances to same
-	 * name without a default instance of not bound {@link ManagedObjectSource}.
+	 * Ensure issue if binding Input {@link ManagedObject} instances to same name
+	 * without a default instance of not bound {@link ManagedObjectSource}.
 	 */
 	public void testBindInputManagedObjectInstancesWithUnknownBoundManagedObjectSource() {
 
@@ -965,11 +965,11 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
 	 * 
-	 * @param expectedNumberConstructed
-	 *            Expected number of {@link RawBoundManagedObjectMetaData}
-	 *            instances to be constructed.
-	 * @param boundManagedObjectConfiguration
-	 *            {@link ManagedObjectConfiguration} instances.
+	 * @param expectedNumberConstructed       Expected number of
+	 *                                        {@link RawBoundManagedObjectMetaData}
+	 *                                        instances to be constructed.
+	 * @param boundManagedObjectConfiguration {@link ManagedObjectConfiguration}
+	 *                                        instances.
 	 * @return Constructed {@link RawBoundManagedObjectMetaData}.
 	 */
 	private RawBoundManagedObjectMetaData[] constructRawBoundManagedObjectMetaData(int expectedNumberConstructed,
@@ -981,11 +981,10 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
 	 * 
-	 * @param expectedNumberConstructed
-	 *            Expected number of {@link RawBoundManagedObjectMetaData}
-	 *            instances to be constructed.
-	 * @param inputManagedObjects
-	 *            {@link RawManagingOfficeMetaData} instances.
+	 * @param expectedNumberConstructed Expected number of
+	 *                                  {@link RawBoundManagedObjectMetaData}
+	 *                                  instances to be constructed.
+	 * @param inputManagedObjects       {@link RawManagingOfficeMetaData} instances.
 	 * @return Constructed {@link RawBoundManagedObjectMetaData}.
 	 */
 	private RawBoundManagedObjectMetaData[] constructRawBoundManagedObjectMetaData(int expectedNumberConstructed,
@@ -996,13 +995,13 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Constructs the {@link RawBoundManagedObjectMetaData} instances.
 	 * 
-	 * @param expectedNumberConstructed
-	 *            Expected number of {@link RawBoundManagedObjectMetaData}
-	 *            instances to be constructed.
-	 * @param boundManagedObjectConfiguration
-	 *            {@link ManagedObjectConfiguration} instances.
-	 * @param inputManagedObjects
-	 *            {@link RawManagingOfficeMetaData} instances.
+	 * @param expectedNumberConstructed       Expected number of
+	 *                                        {@link RawBoundManagedObjectMetaData}
+	 *                                        instances to be constructed.
+	 * @param boundManagedObjectConfiguration {@link ManagedObjectConfiguration}
+	 *                                        instances.
+	 * @param inputManagedObjects             {@link RawManagingOfficeMetaData}
+	 *                                        instances.
 	 * @return Constructed {@link RawBoundManagedObjectMetaData}.
 	 */
 	private RawBoundManagedObjectMetaData[] constructRawBoundManagedObjectMetaData(int expectedNumberConstructed,
@@ -1020,7 +1019,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		RawBoundManagedObjectMetaData[] metaData = factory.constructBoundManagedObjectMetaData(
 				boundManagedObjectConfiguration, this.managedObjectScope,
 				this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), inputManagedObjects, inputDefaults,
-				AssetType.OFFICE, OFFICE_NAME, this.issues);
+				AssetType.OFFICE, OFFICE_NAME, 1, this.issues);
 
 		// Ensure correct number constructed
 		assertEquals("Incorrect number of bound managed objects", expectedNumberConstructed, metaData.length);
@@ -1036,7 +1035,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		for (RawBoundManagedObjectMetaData bound : metaData) {
 			for (RawBoundManagedObjectInstanceMetaData<?> instance : bound.getRawBoundManagedObjectInstanceMetaData()) {
 				if (instance.getManagedObjectMetaData() != null) {
-					instance.loadRemainingState(officeMetaData, null, moAdminFactory, this.issues);
+					instance.loadRemainingState(officeMetaData, null, moAdminFactory,
+							new AssetManagerFactory(null, null, null), 1, this.issues);
 				}
 			}
 		}

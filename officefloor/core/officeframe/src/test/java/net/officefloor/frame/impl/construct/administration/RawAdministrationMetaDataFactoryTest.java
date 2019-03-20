@@ -29,6 +29,7 @@ import net.officefloor.frame.impl.construct.MockConstruct;
 import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectInstanceMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
@@ -258,7 +259,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		// Load managed object meta data
 		boundManagedObject.getRawBoundManagedObjectMetaData().build();
 		boundManagedObject.build().loadManagedObjectMetaData(AssetType.OFFICE, OFFICE_NAME,
-				MockConstruct.mockAssetManagerFactory(), this.issues);
+				MockConstruct.mockAssetManagerFactory(), 1, this.issues);
 
 		// Construct the administrators
 		RawAdministrationMetaData[] rawAdminMetaDatas = this.constructRawAdministration(true, this.configuration);
@@ -311,8 +312,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if unknown {@link Governance} linked to
-	 * {@link Administration}.
+	 * Ensure issue if unknown {@link Governance} linked to {@link Administration}.
 	 */
 	public void testLinkUnkownGovernance() {
 
@@ -350,8 +350,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue regarding the {@link Administration}.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	 * @param issueDescription Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
 		this.issues.addIssue(AssetType.ADMINISTRATOR, ADMINISTRATION_NAME, issueDescription);
@@ -360,10 +359,9 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * Constructs the {@link AdministrationMetaData}.
 	 * 
-	 * @param isCreate
-	 *            Indicates if create the {@link RawAdministrationMetaData}.
-	 * @param configuration
-	 *            {@link AdministrationConfiguration} instances.
+	 * @param isCreate      Indicates if create the
+	 *                      {@link RawAdministrationMetaData}.
+	 * @param configuration {@link AdministrationConfiguration} instances.
 	 * @return {@link AdministrationMetaData}.
 	 */
 	private RawAdministrationMetaData[] constructRawAdministration(boolean isCreate,
@@ -375,7 +373,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 				new EscalationFlowFactory(this.officeMetaData.build()), this.rawOfficeMetaData.build().getTeams())
 						.constructRawAdministrationMetaData(configuration,
 								this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), AssetType.OFFICE,
-								OFFICE_NAME, this.issues);
+								OFFICE_NAME, new AssetManagerFactory(null, null, null), 1, this.issues);
 
 		// Ensure correct number created
 		if (isCreate) {

@@ -21,6 +21,7 @@ import net.officefloor.frame.api.escalate.AsynchronousFlowTimedOutEscalation;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -65,12 +66,13 @@ public class TimedOutAsynchronousFlowTest extends AbstractOfficeConstructTestCas
 		TestWork work = new TestWork();
 		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "triggerAsynchronousFlow");
 		trigger.buildAsynchronousFlow();
+		trigger.buildObject("MO", ManagedObjectScope.THREAD);
 		trigger.setNextFunction("servicingComplete");
 		this.constructFunction(work, "servicingComplete");
 
 		// Flag time out on function / office
 		if (isManagedFunction) {
-			trigger.getBuilder().setTimeout(10);
+			trigger.getBuilder().setAsynchronousFlowTimeout(10);
 		} else {
 			this.getOfficeBuilder().setDefaultAsynchronousFlowTimeout(10);
 		}
@@ -79,6 +81,7 @@ public class TimedOutAsynchronousFlowTest extends AbstractOfficeConstructTestCas
 		Closure<Throwable> escalation = new Closure<>();
 		Office office = this.triggerFunction("triggerAsynchronousFlow", null, (error) -> escalation.value = error);
 		assertFalse("Should halt on async flow and not complete servicing", work.isServicingComplete);
+		assertNull("Should be no escalation: " + escalation.value, escalation.value);
 
 		// Trigger timeout of asynchronous flow
 		this.adjustCurrentTimeMillis(100);

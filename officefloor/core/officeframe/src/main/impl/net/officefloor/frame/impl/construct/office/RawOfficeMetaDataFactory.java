@@ -144,6 +144,9 @@ public class RawOfficeMetaDataFactory {
 			return null; // can not continue
 		}
 
+		// Obtain the default asynchronous flow timeout
+		long defaultAsynchronousFlowTimeout = configuration.getDefaultAsynchronousFlowTimeout();
+
 		// Enhance the office
 		OfficeEnhancerContextImpl.enhanceOffice(officeName, configuration, issues);
 
@@ -240,8 +243,8 @@ public class RawOfficeMetaDataFactory {
 			GovernanceConfiguration governanceConfiguration = governanceConfigurations[i];
 
 			// Create the raw governance
-			RawGovernanceMetaData<?, ?> rawGovernance = rawGovernanceFactory
-					.createRawGovernanceMetaData(governanceConfiguration, i, issues);
+			RawGovernanceMetaData<?, ?> rawGovernance = rawGovernanceFactory.createRawGovernanceMetaData(
+					governanceConfiguration, i, officeAssetManagerFactory, defaultAsynchronousFlowTimeout, issues);
 			if (rawGovernance == null) {
 				// Not able to create governance
 				issues.addIssue(AssetType.OFFICE, officeName,
@@ -339,7 +342,7 @@ public class RawOfficeMetaDataFactory {
 		final RawBoundManagedObjectMetaData[] processBoundManagedObjects = rawBoundManagedObjectFactory
 				.constructBoundManagedObjectMetaData(processManagedObjectConfiguration, ManagedObjectScope.PROCESS,
 						null, officeManagingManagedObjects, boundInputManagedObjects, AssetType.OFFICE, officeName,
-						issues);
+						defaultAsynchronousFlowTimeout, issues);
 
 		// Create the map of process bound managed objects by name
 		Map<String, RawBoundManagedObjectMetaData> processScopeMo = new HashMap<>();
@@ -356,7 +359,7 @@ public class RawOfficeMetaDataFactory {
 		} else {
 			threadBoundManagedObjects = rawBoundManagedObjectFactory.constructBoundManagedObjectMetaData(
 					threadManagedObjectConfiguration, ManagedObjectScope.THREAD, processScopeMo, null, null,
-					AssetType.OFFICE, officeName, issues);
+					AssetType.OFFICE, officeName, defaultAsynchronousFlowTimeout, issues);
 		}
 
 		// Load the thread bound managed objects to scope managed objects
@@ -382,7 +385,8 @@ public class RawOfficeMetaDataFactory {
 
 			// Construct the managed function
 			RawManagedFunctionMetaData<?, ?> rawFunctionMetaData = rawFunctionFactory
-					.constructRawManagedFunctionMetaData(functionConfiguration, issues);
+					.constructRawManagedFunctionMetaData(functionConfiguration, officeAssetManagerFactory,
+							defaultAsynchronousFlowTimeout, issues);
 			if (rawFunctionMetaData == null) {
 				continue; // issue in constructing function
 			}
@@ -475,12 +479,9 @@ public class RawOfficeMetaDataFactory {
 			officeEscalations[i] = new EscalationFlowImpl(typeOfCause, escalationFunctionMetaData);
 		}
 
-		// Obtain all the asset managers for the office
-		AssetManager[] assetManagers = officeAssetManagerFactory.getAssetManagers();
-
 		// Create the office manager
-		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName, monitorOfficeInterval, assetManagers,
-				monitorClockImpl, functionLoop, timer);
+		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName, monitorOfficeInterval, monitorClockImpl,
+				functionLoop, timer);
 
 		// Obtain the managed execution factory
 		ManagedExecutionFactory managedExecutionFactory = this.rawOfficeFloorMetaData.getManagedExecutionFactory();
@@ -506,13 +507,14 @@ public class RawOfficeMetaDataFactory {
 		// Have the managed objects managed by the office
 		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
 			officeManagingManagedObject.manageByOffice(officeMetaData, processBoundManagedObjects, moAdminFactory,
-					defaultexecutionStrategy, executionStrategies, issues);
+					defaultexecutionStrategy, executionStrategies, officeAssetManagerFactory,
+					defaultAsynchronousFlowTimeout, issues);
 		}
 
 		// Link functions within the meta-data of the office
 		for (RawManagedFunctionMetaData<?, ?> rawFunctionMetaData : rawFunctionMetaDatas) {
 			if (!rawFunctionMetaData.loadOfficeMetaData(officeMetaData, flowMetaDataFactory, escalationFlowFactory,
-					rawAdminFactory, issues)) {
+					rawAdminFactory, officeAssetManagerFactory, defaultAsynchronousFlowTimeout, issues)) {
 				return null;
 			}
 		}
@@ -523,6 +525,10 @@ public class RawOfficeMetaDataFactory {
 				return null;
 			}
 		}
+
+		// Obtain all the asset managers for the office
+		AssetManager[] assetManagers = officeAssetManagerFactory.getAssetManagers();
+		officeManager.loadRemainingState(assetManagers);
 
 		// Return the raw office meta-data
 		rawOfficeMetaData.officeMetaData = officeMetaData;

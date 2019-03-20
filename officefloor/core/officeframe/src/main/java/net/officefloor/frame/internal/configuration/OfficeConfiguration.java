@@ -22,6 +22,7 @@ import net.officefloor.frame.api.build.FlowBuilder;
 import net.officefloor.frame.api.build.FunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -210,5 +211,14 @@ public interface OfficeConfiguration {
 	 * @return {@link ThreadSynchroniserFactory} instances.
 	 */
 	ThreadSynchroniserFactory[] getThreadSynchronisers();
+
+	/**
+	 * Obtains the default {@link AsynchronousFlow} timeout for
+	 * {@link AsynchronousFlow} instances instigated by the {@link Office}.
+	 * 
+	 * @return Default {@link AsynchronousFlow} timeout for {@link AsynchronousFlow}
+	 *         instances instigated by the {@link Office}.
+	 */
+	long getDefaultAsynchronousFlowTimeout();
 
 }

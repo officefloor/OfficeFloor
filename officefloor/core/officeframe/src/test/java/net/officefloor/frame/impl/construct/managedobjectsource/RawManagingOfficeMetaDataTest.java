@@ -37,6 +37,7 @@ import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectI
 import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.ManagedObjectAdministrationMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectInstanceMetaData;
@@ -121,6 +122,11 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 	private final Map<String, ThreadFactory[]> executionStrategies = new HashMap<>();
 
 	/**
+	 * {@link AssetManagerFactory}.
+	 */
+	private final AssetManagerFactory assetManagerFactory = new AssetManagerFactory(null, null, null);
+
+	/**
 	 * {@link OfficeFloorIssues}.
 	 */
 	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
@@ -178,7 +184,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Have managed before managed by office.
 		// This would be the possible case that used by same office.
-		rawOffice.manageManagedObject(instance.build()); // undertake first
+		rawOffice.manageManagedObject(instance.build(), this.assetManagerFactory, 1); // undertake first
 		this.run_manageByOffice(rawOffice, true);
 		FunctionState function = instance.build().getManagedObjectMetaData().recycle(managedObject, cleanup);
 		this.verifyMockObjects();
@@ -204,8 +210,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		final RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> instance = this
 				.createRawBoundManagedObjectInstanceMetaData("MOS", rawOffice);
 
+		// Undertake afterwards
 		this.run_manageByOffice(rawOffice, true);
-		rawOffice.manageManagedObject(instance.build()); // undertake afterwards
+		rawOffice.manageManagedObject(instance.build(), new AssetManagerFactory(null, null, null), 1);
 		FunctionState function = instance.build().getManagedObjectMetaData().recycle(managedObject, cleanup);
 		this.verifyMockObjects();
 
@@ -228,7 +235,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createRawBoundManagedObjectInstanceMetaData("MOS", rawOffice);
 
 		// Ensure not obtain recycle function
-		rawOffice.manageManagedObject(instance.build());
+		rawOffice.manageManagedObject(instance.build(), this.assetManagerFactory, 1);
 		FunctionState function = instance.build().getManagedObjectMetaData().recycle(managedObject, cleanup);
 		this.verifyMockObjects();
 
@@ -581,7 +588,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.addRawBoundManagedObjectInstanceMetaData();
 		rawBoundManagedObjectMetaData.build();
 		instance.build().loadManagedObjectMetaData(AssetType.MANAGED_OBJECT, managedObjectSourceName,
-				MockConstruct.mockAssetManagerFactory(), this.issues);
+				MockConstruct.mockAssetManagerFactory(), 1, this.issues);
 		return instance;
 	}
 
@@ -604,7 +611,8 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
 				new RawAdministrationMetaDataFactory(this.officeMetaData.build(), null, null, null), null, null);
 		rawManagingOffice.manageByOffice(this.officeMetaData.build(), processBoundMetaData, moAdminFactory,
-				this.defaultExecutionStrategy, this.executionStrategies, this.issues);
+				this.defaultExecutionStrategy, this.executionStrategies, new AssetManagerFactory(null, null, null), 1,
+				this.issues);
 
 		// Validate creation of execute context
 		if (isCreateExecuteContext) {

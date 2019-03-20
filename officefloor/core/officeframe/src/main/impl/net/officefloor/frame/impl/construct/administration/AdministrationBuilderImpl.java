@@ -25,6 +25,7 @@ import java.util.Map;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.construct.function.AbstractFunctionBuilder;
@@ -66,14 +67,16 @@ public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>> 
 	private final Map<Integer, AdministrationGovernanceConfiguration<?>> governances = new HashMap<Integer, AdministrationGovernanceConfiguration<?>>();
 
 	/**
+	 * {@link AsynchronousFlow} timeout.
+	 */
+	private long asynchronousFlowTimeout = -1;
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param administrationName
-	 *            Name of the {@link Administration}.
-	 * @param extensionInterface
-	 *            Extension interface.
-	 * @param administrationFactory
-	 *            {@link AdministrationFactory}.
+	 * @param administrationName    Name of the {@link Administration}.
+	 * @param extensionInterface    Extension interface.
+	 * @param administrationFactory {@link AdministrationFactory}.
 	 */
 	public AdministrationBuilderImpl(String administrationName, Class<E> extensionInterface,
 			AdministrationFactory<E, F, G> administrationFactory) {
@@ -104,14 +107,11 @@ public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>> 
 	/**
 	 * Links the {@link Governance}.
 	 * 
-	 * @param key
-	 *            Key to access the {@link Governance} from the
-	 *            {@link AdministrationDuty}.
-	 * @param governanceIndex
-	 *            Index of the {@link Governance} from the
-	 *            {@link AdministrationDuty}.
-	 * @param governanceName
-	 *            Name of the {@link Governance} to link.
+	 * @param key             Key to access the {@link Governance} from the
+	 *                        {@link AdministrationDuty}.
+	 * @param governanceIndex Index of the {@link Governance} from the
+	 *                        {@link AdministrationDuty}.
+	 * @param governanceName  Name of the {@link Governance} to link.
 	 */
 	private void linkGovernance(G key, int governanceIndex, String governanceName) {
 		this.governances.put(Integer.valueOf(governanceIndex),
@@ -164,6 +164,11 @@ public class AdministrationBuilderImpl<E, F extends Enum<F>, G extends Enum<G>> 
 	@Override
 	public String[] getAdministeredManagedObjectNames() {
 		return this.administeredManagedObjectNames.toArray(new String[0]);
+	}
+
+	@Override
+	public long getAsynchronousFlowTimeout() {
+		return this.asynchronousFlowTimeout;
 	}
 
 }

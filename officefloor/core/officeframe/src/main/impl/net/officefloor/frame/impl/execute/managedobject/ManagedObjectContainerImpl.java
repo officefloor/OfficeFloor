@@ -590,7 +590,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		@Override
 		public FunctionState handleEscalation(Throwable escalation, EscalationCompletion escalationCompletion) {
 
-			// TODO provide escalation completion
+			// Ensure not have escalation completion
 			if (escalationCompletion != null) {
 				throw new IllegalStateException("Should not have " + EscalationCompletion.class.getSimpleName()
 						+ " for " + ManagedObjectContainer.class.getSimpleName());
