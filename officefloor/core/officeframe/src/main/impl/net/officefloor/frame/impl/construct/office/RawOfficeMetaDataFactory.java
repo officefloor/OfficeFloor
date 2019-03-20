@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.executive.Executive;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.profile.Profiler;
@@ -146,6 +147,11 @@ public class RawOfficeMetaDataFactory {
 
 		// Obtain the default asynchronous flow timeout
 		long defaultAsynchronousFlowTimeout = configuration.getDefaultAsynchronousFlowTimeout();
+		if (defaultAsynchronousFlowTimeout <= 0) {
+			issues.addIssue(AssetType.OFFICE, officeName, "Office default " + AsynchronousFlow.class.getSimpleName()
+					+ " timeout must be positive (" + defaultAsynchronousFlowTimeout + ")");
+			return null; // can not continue
+		}
 
 		// Enhance the office
 		OfficeEnhancerContextImpl.enhanceOffice(officeName, configuration, issues);

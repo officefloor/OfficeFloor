@@ -56,23 +56,18 @@ public class _timeout_AsynchronousGovernanceEnforceTest extends AbstractOfficeCo
 		TestGovernance govern = new TestGovernance();
 		ReflectiveGovernanceBuilder governance = this.constructGovernance(govern, "GOVERNANCE");
 		governance.enforce("enforce").buildAsynchronousFlow();
+		governance.getBuilder().setAsynchronousFlowTimeout(10);
 
 		// Invoke the function
 		Closure<Throwable> escalation = new Closure<>();
-		Closure<Boolean> isComplete = new Closure<>(false);
-		Office office = this.triggerFunction("task", null, (error) -> {
-			escalation.value = error;
-			isComplete.value = true;
-		});
+		Office office = this.triggerFunction("task", null, (error) -> escalation.value = error);
 		assertNull("Should be no escalation: " + escalation.value, escalation.value);
-		assertFalse("Should not be complete", isComplete.value);
 
 		// Ensure timeout governance
 		this.adjustCurrentTimeMillis(100);
 		office.runAssetChecks();
 
 		// Ensure time out
-		assertTrue("Should be complete", isComplete.value);
 		assertTrue("Should timeout: " + escalation.value,
 				escalation.value instanceof AsynchronousFlowTimedOutEscalation);
 	}

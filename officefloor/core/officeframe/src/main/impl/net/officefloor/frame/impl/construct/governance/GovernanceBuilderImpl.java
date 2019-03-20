@@ -67,6 +67,15 @@ public class GovernanceBuilderImpl<E, F extends Enum<F>> extends AbstractFunctio
 	}
 
 	/*
+	 * =============== GovernanceBuilder ====================
+	 */
+
+	@Override
+	public void setAsynchronousFlowTimeout(long timeout) {
+		this.asynchronousFlowTimeout = timeout;
+	}
+
+	/*
 	 * =============== GovernanceConfiguration ====================
 	 */
 

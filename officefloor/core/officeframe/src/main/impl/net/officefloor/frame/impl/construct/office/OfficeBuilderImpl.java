@@ -169,7 +169,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * Default {@link AsynchronousFlow} timeout.
 	 */
-	private long defaultAsynchronousFlowTimeout = -1;
+	private long defaultAsynchronousFlowTimeout = 10 * 1000;
 
 	/**
 	 * {@link Profiler}.

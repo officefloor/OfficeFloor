@@ -338,8 +338,8 @@ public class RawAdministrationMetaDataFactory {
 		AdministrationMetaDataImpl<E, F, G> adminMetaData = new AdministrationMetaDataImpl<E, F, G>(adminName,
 				adminFactory, extensionType,
 				ConstructUtil.toArray(eiMetaDatas, new ManagedObjectExtensionExtractorMetaData[0]), responsibleTeam,
-				defaultAsynchronousFlowTimeout, asynchronousFlowAssetManager, flows, governanceMapping,
-				escalationProcedure, this.officeMetaData);
+				asynchronousFlowTimeout, asynchronousFlowAssetManager, flows, governanceMapping, escalationProcedure,
+				this.officeMetaData);
 
 		// Create the listing of administered managed objects
 		RawBoundManagedObjectMetaData[] rawBoundAdministeredManagedObjects = administeredManagedObjects
