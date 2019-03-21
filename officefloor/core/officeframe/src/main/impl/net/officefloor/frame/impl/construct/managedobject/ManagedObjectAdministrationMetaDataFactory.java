@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.construct.managedobject;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.AsynchronousFlow;
@@ -29,6 +30,7 @@ import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectAdministrationMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
+import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -79,6 +81,8 @@ public class ManagedObjectAdministrationMetaDataFactory {
 	/**
 	 * Constructs the {@link ManagedObjectAdministrationMetaData} instances.
 	 * 
+	 * @param administeredObjectName         Name of {@link Asset} adding
+	 *                                       {@link Administration}.
 	 * @param administrationConfiguration    {@link AdministrationConfiguration}
 	 *                                       instances.
 	 * @param boundManagedObject             {@link RawBoundManagedObjectMetaData}
@@ -92,7 +96,7 @@ public class ManagedObjectAdministrationMetaDataFactory {
 	 *         {@link OfficeFloorIssues}.
 	 */
 	public ManagedObjectAdministrationMetaData<?, ?, ?>[] createManagedObjectAdministrationMetaData(
-			AdministrationConfiguration<?, ?, ?>[] administrationConfiguration,
+			String administeredObjectName, AdministrationConfiguration<?, ?, ?>[] administrationConfiguration,
 			RawBoundManagedObjectMetaData boundManagedObject, AssetManagerFactory assetManagerFactory,
 			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
@@ -115,7 +119,7 @@ public class ManagedObjectAdministrationMetaDataFactory {
 
 		// Construct the raw administration
 		RawAdministrationMetaData[] rawAdministrations = rawAdminFactory.constructRawAdministrationMetaData(
-				administrationConfiguration, scopeMo, AssetType.MANAGED_OBJECT,
+				administeredObjectName, "load", administrationConfiguration, scopeMo, AssetType.MANAGED_OBJECT,
 				boundManagedObject.getBoundManagedObjectName(), assetManagerFactory, defaultAsynchronousFlowTimeout,
 				issues);
 		if (rawAdministrations == null) {

@@ -99,6 +99,9 @@ public class RawAdministrationMetaDataFactory {
 	/**
 	 * Creates the {@link RawAdministrationMetaData} instances.
 	 * 
+	 * @param administeredAssetName          Name of {@link Asset} adding this
+	 *                                       {@link Administration}.
+	 * @param administrationQualifier        {@link Administration} qualifier.
 	 * @param configuration                  {@link AdministrationConfiguration}
 	 *                                       instances.
 	 * @param scopeMo                        {@link RawBoundManagedObjectMetaData}
@@ -112,10 +115,10 @@ public class RawAdministrationMetaDataFactory {
 	 * @param issues                         {@link OfficeFloorIssues}.
 	 * @return {@link RawAdministrationMetaData} instances.
 	 */
-	public RawAdministrationMetaData[] constructRawAdministrationMetaData(
-			AdministrationConfiguration<?, ?, ?>[] configuration, Map<String, RawBoundManagedObjectMetaData> scopeMo,
-			AssetType assetType, String assetName, AssetManagerFactory assetManagerFactory,
-			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
+	public RawAdministrationMetaData[] constructRawAdministrationMetaData(String administeredAssetName,
+			String administrationQualifier, AdministrationConfiguration<?, ?, ?>[] configuration,
+			Map<String, RawBoundManagedObjectMetaData> scopeMo, AssetType assetType, String assetName,
+			AssetManagerFactory assetManagerFactory, long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Create the administrators
 		RawAdministrationMetaData[] rawAdministrations = new RawAdministrationMetaData[configuration.length];
@@ -123,9 +126,9 @@ public class RawAdministrationMetaDataFactory {
 			AdministrationConfiguration<?, ?, ?> administrationConfiguration = configuration[i];
 
 			// Construct the raw administrator
-			RawAdministrationMetaData rawAdministration = this.constructRawAdministrationMetaData(
-					administrationConfiguration, scopeMo, assetType, assetName, assetManagerFactory,
-					defaultAsynchronousFlowTimeout, issues);
+			RawAdministrationMetaData rawAdministration = this.constructRawAdministrationMetaData(administeredAssetName,
+					administrationQualifier, administrationConfiguration, scopeMo, assetType, assetName,
+					assetManagerFactory, defaultAsynchronousFlowTimeout, issues);
 			if (rawAdministration == null) {
 				return null; // failed to create the administration
 			}
@@ -141,6 +144,9 @@ public class RawAdministrationMetaDataFactory {
 	/**
 	 * Provides typed construction of a {@link AdministrationMetaData}.
 	 * 
+	 * @param administeredAssetName          Name of {@link Asset} adding this
+	 *                                       {@link Administration}.
+	 * @param administrationQualifier        {@link Administration} qualifier.
 	 * @param configuration                  {@link AdministrationConfiguration}
 	 *                                       instances.
 	 * @param scopeMo                        {@link RawBoundManagedObjectMetaData}
@@ -157,6 +163,7 @@ public class RawAdministrationMetaDataFactory {
 	 */
 	@SuppressWarnings("unchecked")
 	private <E, F extends Enum<F>, G extends Enum<G>> RawAdministrationMetaData constructRawAdministrationMetaData(
+			String administeredAssetName, String administrationQualifier,
 			AdministrationConfiguration<E, F, G> configuration, Map<String, RawBoundManagedObjectMetaData> scopeMo,
 			AssetType assetType, String assetName, AssetManagerFactory assetManagerFactory,
 			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
@@ -332,7 +339,8 @@ public class RawAdministrationMetaDataFactory {
 
 		// Create the asynchronous flow asset manager
 		AssetManager asynchronousFlowAssetManager = assetManagerFactory.createAssetManager(AssetType.ADMINISTRATOR,
-				adminName, AsynchronousFlow.class.getSimpleName(), issues);
+				adminName, Administration.class.getSimpleName() + administrationQualifier + "-" + administeredAssetName,
+				issues);
 
 		// Create the administrator meta-data
 		AdministrationMetaDataImpl<E, F, G> adminMetaData = new AdministrationMetaDataImpl<E, F, G>(adminName,

@@ -404,8 +404,9 @@ public class RawBoundManagedObjectInstanceMetaData<O extends Enum<O>> {
 
 		// Load the pre-load administration
 		ManagedObjectAdministrationMetaData<?, ?, ?>[] preLoadAdmin = managedObjectAdminFactory
-				.createManagedObjectAdministrationMetaData(this.preLoadAdministrationConfiguration,
-						this.rawBoundMetaData, assetManagerFactory, defaultAsynchronousFlowTimeout, issues);
+				.createManagedObjectAdministrationMetaData(this.boundManagedObjectName,
+						this.preLoadAdministrationConfiguration, this.rawBoundMetaData, assetManagerFactory,
+						defaultAsynchronousFlowTimeout, issues);
 
 		// Load the remaining state
 		this.managedObjectMetaData.loadRemainingState(officeMetaData, recycleFlowMetaData, preLoadAdmin);

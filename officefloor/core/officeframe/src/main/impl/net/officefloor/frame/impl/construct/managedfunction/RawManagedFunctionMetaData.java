@@ -167,11 +167,11 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 
 		// Create the administrations
 		AdministrationMetaData<?, ?, ?>[] preAdministrations = this
-				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
+				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects("pre",
 						configuration.getPreAdministration(), rawAdministrationMetaDataFactory, assetManagerFactory,
 						defaultAsynchronousFlowTimeout, issues);
 		AdministrationMetaData<?, ?, ?>[] postAdministrations = this
-				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
+				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects("post",
 						configuration.getPostAdministration(), rawAdministrationMetaDataFactory, assetManagerFactory,
 						defaultAsynchronousFlowTimeout, issues);
 
@@ -244,6 +244,7 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * Constructs the {@link AdministrationMetaData} and registers the
 	 * {@link RawBoundManagedObjectMetaData} instances for {@link Administration}.
 	 * 
+	 * @param administrationQualifier        {@link Administration} qualifier.
 	 * @param configuration                  {@link AdministrationConfiguration}
 	 *                                       instances.
 	 * @param rawAdminFactory                {@link RawAdministrationMetaDataFactory}.
@@ -254,13 +255,14 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * @return Constructed {@link AdministrationMetaData} instances.
 	 */
 	private AdministrationMetaData<?, ?, ?>[] constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
-			AdministrationConfiguration<?, ?, ?>[] configuration, RawAdministrationMetaDataFactory rawAdminFactory,
-			AssetManagerFactory assetManagerFactory, long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
+			String administrationQualifier, AdministrationConfiguration<?, ?, ?>[] configuration,
+			RawAdministrationMetaDataFactory rawAdminFactory, AssetManagerFactory assetManagerFactory,
+			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Construct the raw administration meta-data
 		RawAdministrationMetaData[] rawAdministrations = rawAdminFactory.constructRawAdministrationMetaData(
-				configuration, this.functionScopedManagedObjects, AssetType.FUNCTION, functionName, assetManagerFactory,
-				defaultAsynchronousFlowTimeout, issues);
+				this.functionName, administrationQualifier, configuration, this.functionScopedManagedObjects,
+				AssetType.FUNCTION, functionName, assetManagerFactory, defaultAsynchronousFlowTimeout, issues);
 
 		// Create array of administration meta-data and register managed objects
 		AdministrationMetaData<?, ?, ?>[] administrations = new AdministrationMetaData[rawAdministrations.length];
