@@ -33,6 +33,7 @@ public class TemplateLogic {
 	@Data
 	@HttpParameters
 	public static class Parameters implements Serializable {
+		private static final long serialVersionUID = 1L;
 
 		private String a;
 
@@ -46,7 +47,7 @@ public class TemplateLogic {
 	}
 
 	public void add(Parameters parameters) {
-		
+
 		int a = Integer.parseInt(parameters.getA());
 		int b = Integer.parseInt(parameters.getB());
 

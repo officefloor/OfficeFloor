@@ -29,6 +29,11 @@ package net.officefloor.frame.api.source;
 public class UnknownServiceError extends AbstractSourceError {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * {@link ServiceFactory} type that is not configured.
 	 */
 	private final Class<?> unknownServiceFactoryType;
@@ -36,8 +41,8 @@ public class UnknownServiceError extends AbstractSourceError {
 	/**
 	 * Initiate.
 	 * 
-	 * @param unknownServiceFactoryType
-	 *            {@link ServiceFactory} type that is not configured.
+	 * @param unknownServiceFactoryType {@link ServiceFactory} type that is not
+	 *                                  configured.
 	 */
 	public UnknownServiceError(Class<?> unknownServiceFactoryType) {
 		super("No services configured for " + unknownServiceFactoryType.getName());

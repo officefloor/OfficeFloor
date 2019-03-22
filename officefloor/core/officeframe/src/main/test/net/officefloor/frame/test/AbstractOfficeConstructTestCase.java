@@ -361,20 +361,20 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 		synchronized (this.reflectiveFunctionInvokedMethods) {
 
 			// Create expected method calls
-			StringBuilder actualMethods = new StringBuilder();
-			for (String methodName : methodNames) {
-				actualMethods.append(methodName.trim() + " ");
-			}
-
-			// Create the actual method calls
 			StringBuilder expectedMethods = new StringBuilder();
-			for (String methodName : this.reflectiveFunctionInvokedMethods) {
+			for (String methodName : methodNames) {
 				expectedMethods.append(methodName.trim() + " ");
 			}
 
+			// Create the actual method calls
+			StringBuilder actualMethods = new StringBuilder();
+			for (String methodName : this.reflectiveFunctionInvokedMethods) {
+				actualMethods.append(methodName.trim() + " ");
+			}
+
 			// Validate appropriate methods called
-			assertEquals("Incorrect methods invoked [ " + actualMethods.toString() + "]", actualMethods.toString(),
-					expectedMethods.toString());
+			assertEquals("Incorrect methods invoked [" + actualMethods.toString() + "]", expectedMethods.toString(),
+					actualMethods.toString());
 		}
 	}
 

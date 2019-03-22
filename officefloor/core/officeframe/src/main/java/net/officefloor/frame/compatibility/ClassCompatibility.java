@@ -349,6 +349,11 @@ public class ClassCompatibility {
 	public static class CompatibilityInvocationException extends RuntimeException {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param cause {@link Throwable} cause.

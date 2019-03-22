@@ -25,6 +25,7 @@ import net.officefloor.frame.api.build.FunctionBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
@@ -102,6 +103,22 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Record no office name
 		this.configuration = new OfficeBuilderImpl(null);
 		this.issues.addIssue(AssetType.OFFICE_FLOOR, "OfficeFloor", "Office registered without name");
+
+		// Construct the office
+		this.replayMockObjects();
+		this.constructRawOfficeMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if non-positive {@link AsynchronousFlow} timeout.
+	 */
+	public void testNonPositiveAsynchronousFlowTimeout() {
+
+		// Record non-positive asynchronous flow timeout
+		this.configuration.setDefaultAsynchronousFlowTimeout(0);
+		this.issues.addIssue(AssetType.OFFICE, "OFFICE",
+				"Office default AsynchronousFlow timeout must be positive (0)");
 
 		// Construct the office
 		this.replayMockObjects();
@@ -226,8 +243,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to obtain {@link FunctionBuilder} for an
-	 * {@link OfficeEnhancer}.
+	 * Ensure able to obtain {@link FunctionBuilder} for an {@link OfficeEnhancer}.
 	 */
 	public void testGetFlowNodeBuilderForOfficeEnhancing() {
 
@@ -430,8 +446,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to construct a {@link ProcessState} bound
-	 * {@link ManagedObject}.
+	 * Ensure able to construct a {@link ProcessState} bound {@link ManagedObject}.
 	 */
 	public void testConstructProcessBoundManagedObject() {
 
@@ -475,8 +490,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to construct a {@link ThreadState} bound
-	 * {@link ManagedObject}.
+	 * Ensure able to construct a {@link ThreadState} bound {@link ManagedObject}.
 	 */
 	public void testConstructThreadBoundManagedObject() {
 
@@ -498,8 +512,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to construct {@link ThreadState} and {@link ProcessState}
-	 * bound {@link ManagedObject} instances.
+	 * Ensure able to construct {@link ThreadState} and {@link ProcessState} bound
+	 * {@link ManagedObject} instances.
 	 */
 	public void testConstructProcessAndThreadBoundManagedObjects() {
 
@@ -737,8 +751,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no type of cause for {@link Office}
-	 * {@link EscalationFlow}.
+	 * Ensure issue if no type of cause for {@link Office} {@link EscalationFlow}.
 	 */
 	public void testNoTypeOfCauseForOfficeEscalation() {
 
@@ -845,8 +858,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	 * @param issueDescription Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
 		this.issues.addIssue(AssetType.OFFICE, OFFICE_NAME, issueDescription);
@@ -855,10 +867,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of issue.
+	 * @param issueDescription Description of the issue.
+	 * @param cause            Cause of issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
 		this.issues.addIssue(AssetType.OFFICE, OFFICE_NAME, issueDescription, cause);
@@ -867,8 +877,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Creates a {@link RawManagingOfficeMetaData} for this {@link Office}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
 	 * @return {@link RawManagingOfficeMetaDataMockBuilder}.
 	 */
 	private RawManagingOfficeMetaDataMockBuilder<?> mockRawManagingOfficeMetaData(String managedObjectSourceName) {
@@ -881,8 +890,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Constructs the {@link RawOfficeMetaData}.
 	 * 
-	 * @param isExpectConstruct
-	 *            Flag indicating if should be constructed.
+	 * @param isExpectConstruct Flag indicating if should be constructed.
 	 * @return Constructed {@link RawOfficeMetaData}.
 	 */
 	private RawOfficeMetaData constructRawOfficeMetaData(boolean isExpectConstruct) {

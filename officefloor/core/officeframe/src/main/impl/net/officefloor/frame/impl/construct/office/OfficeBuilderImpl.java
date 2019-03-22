@@ -27,6 +27,7 @@ import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
@@ -166,6 +167,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private int maximumFunctionStateChainLength = 1000;
 
 	/**
+	 * Default {@link AsynchronousFlow} timeout.
+	 */
+	private long defaultAsynchronousFlowTimeout = 10 * 1000;
+
+	/**
 	 * {@link Profiler}.
 	 */
 	private Profiler profiler = null;
@@ -201,6 +207,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public void setMaximumFunctionStateChainLength(int maximumFunctionStateChainLength) {
 		this.maximumFunctionStateChainLength = maximumFunctionStateChainLength;
+	}
+
+	@Override
+	public void setDefaultAsynchronousFlowTimeout(long timeout) {
+		this.defaultAsynchronousFlowTimeout = timeout;
 	}
 
 	@Override
@@ -407,6 +418,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public ThreadSynchroniserFactory[] getThreadSynchronisers() {
 		return this.threadSynchronisers.toArray(new ThreadSynchroniserFactory[0]);
+	}
+
+	@Override
+	public long getDefaultAsynchronousFlowTimeout() {
+		return this.defaultAsynchronousFlowTimeout;
 	}
 
 }

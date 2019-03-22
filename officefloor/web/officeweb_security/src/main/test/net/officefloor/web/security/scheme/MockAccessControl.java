@@ -29,6 +29,11 @@ import java.util.Set;
 public class MockAccessControl implements Serializable {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * User identifier.
 	 */
 	private final String userName;
@@ -41,10 +46,8 @@ public class MockAccessControl implements Serializable {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param userName
-	 *            User name.
-	 * @param roles
-	 *            Roles.
+	 * @param userName User name.
+	 * @param roles    Roles.
 	 */
 	public MockAccessControl(String userName, String... roles) {
 		this.userName = userName;
@@ -57,8 +60,7 @@ public class MockAccessControl implements Serializable {
 	/**
 	 * Instantiate from {@link MockCredentials}.
 	 * 
-	 * @param credentials
-	 *            {@link MockCredentials}.
+	 * @param credentials {@link MockCredentials}.
 	 */
 	public MockAccessControl(MockCredentials credentials) {
 		this(credentials.getUserName(), credentials.getRoles());

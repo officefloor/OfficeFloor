@@ -29,6 +29,11 @@ import net.officefloor.compile.issues.CompilerIssues;
 public class LoadTypeError extends Error {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Type being attempted to be loaded.
 	 * 
 	 * @see #getType()
@@ -36,8 +41,7 @@ public class LoadTypeError extends Error {
 	private final Class<?> type;
 
 	/**
-	 * Name of the source class being used to load the type. May also be an
-	 * alias.
+	 * Name of the source class being used to load the type. May also be an alias.
 	 */
 	private final String sourceClassName;
 
@@ -49,14 +53,11 @@ public class LoadTypeError extends Error {
 	/**
 	 * Initiate.
 	 * 
-	 * @param type
-	 *            Type being attempted to be loaded.
-	 * @param sourceClassName
-	 *            Name of the source class being used to load the type. May also
-	 *            be an alias.
-	 * @param causes
-	 *            {@link CompilerIssue} instances indicating cause of not
-	 *            loading type.
+	 * @param type            Type being attempted to be loaded.
+	 * @param sourceClassName Name of the source class being used to load the type.
+	 *                        May also be an alias.
+	 * @param causes          {@link CompilerIssue} instances indicating cause of
+	 *                        not loading type.
 	 */
 	public LoadTypeError(Class<?> type, String sourceClassName, CompilerIssue[] causes) {
 		super("Failure loading " + type.getSimpleName() + " from source " + sourceClassName);
@@ -68,10 +69,8 @@ public class LoadTypeError extends Error {
 	/**
 	 * Convenience method to add this as an issue to the {@link CompilerIssues}.
 	 * 
-	 * @param node
-	 *            {@link Node} handling this.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param node   {@link Node} handling this.
+	 * @param issues {@link CompilerIssues}.
 	 */
 	public void addLoadTypeIssue(Node node, CompilerIssues issues) {
 		issues.addIssue(node, this.getMessage(), this.causes);
@@ -87,22 +86,21 @@ public class LoadTypeError extends Error {
 	}
 
 	/**
-	 * Obtains the name of the source class being used to load the type. May
-	 * also be an alias.
+	 * Obtains the name of the source class being used to load the type. May also be
+	 * an alias.
 	 * 
-	 * @return Name of the source class being used to load the type. May also be
-	 *         an alias.
+	 * @return Name of the source class being used to load the type. May also be an
+	 *         alias.
 	 */
 	public String getSourceClassName() {
 		return this.sourceClassName;
 	}
 
 	/**
-	 * Obtains the {@link CompilerIssue} instances indicating cause of not
-	 * loading type.
+	 * Obtains the {@link CompilerIssue} instances indicating cause of not loading
+	 * type.
 	 * 
-	 * @return {@link CompilerIssue} instances indicating cause of not loading
-	 *         type.
+	 * @return {@link CompilerIssue} instances indicating cause of not loading type.
 	 */
 	public CompilerIssue[] getCauses() {
 		return this.causes;

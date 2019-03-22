@@ -31,10 +31,14 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public class OfficeFloorBuildException extends Exception {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Initiate with reason.
 	 * 
-	 * @param reason
-	 *            Reason.
+	 * @param reason Reason.
 	 */
 	public OfficeFloorBuildException(String reason) {
 		super(reason);
@@ -43,10 +47,8 @@ public class OfficeFloorBuildException extends Exception {
 	/**
 	 * Initiate.
 	 * 
-	 * @param reason
-	 *            Reason.
-	 * @param cause
-	 *            Cause.
+	 * @param reason Reason.
+	 * @param cause  Cause.
 	 */
 	public OfficeFloorBuildException(String reason, Throwable cause) {
 		super(reason, cause);
@@ -61,17 +63,14 @@ public class OfficeFloorBuildException extends Exception {
 	 * This is a convenience method for
 	 * {@link OfficeFloorBuilder#buildOfficeFloor()}.
 	 * 
-	 * @param officeFloorBuilder
-	 *            {@link OfficeFloorBuilder}.
+	 * @param officeFloorBuilder {@link OfficeFloorBuilder}.
 	 * @return {@link OfficeFloor}.
-	 * @throws OfficeFloorBuildException
-	 *             {@link OfficeFloorBuildException} if failure to construct
-	 *             {@link OfficeFloor}.
+	 * @throws OfficeFloorBuildException {@link OfficeFloorBuildException} if
+	 *                                   failure to construct {@link OfficeFloor}.
 	 * 
 	 * @see OfficeFrame
 	 */
-	public static final OfficeFloor buildOfficeFloor(
-			OfficeFloorBuilder officeFloorBuilder)
+	public static final OfficeFloor buildOfficeFloor(OfficeFloorBuilder officeFloorBuilder)
 			throws OfficeFloorBuildException {
 		try {
 			// Attempt to build and return the Office Floor
@@ -89,40 +88,32 @@ public class OfficeFloorBuildException extends Exception {
 	private static class FailOnFirstIssue implements OfficeFloorIssues {
 
 		@Override
-		public void addIssue(AssetType assetType, String assetName,
-				String issueDescription) {
+		public void addIssue(AssetType assetType, String assetName, String issueDescription) {
 			// Indicate construction issue
-			this.indicateIssue(assetType + " " + assetName + ": "
-					+ issueDescription);
+			this.indicateIssue(assetType + " " + assetName + ": " + issueDescription);
 		}
 
 		@Override
-		public void addIssue(AssetType assetType, String assetName,
-				String issueDescription, Throwable cause) {
+		public void addIssue(AssetType assetType, String assetName, String issueDescription, Throwable cause) {
 
 			// Obtain the stack trace of the cause
 			StringWriter stackTrace = new StringWriter();
 			cause.printStackTrace(new PrintWriter(stackTrace));
 
 			// Indicate construction issue
-			this.addIssue(assetType, assetName, issueDescription
-					+ "\n\nCaused by: " + stackTrace);
+			this.addIssue(assetType, assetName, issueDescription + "\n\nCaused by: " + stackTrace);
 		}
 
 		/**
 		 * Indicates issue in construction.
 		 * 
-		 * @param issueDescription
-		 *            Description of the issue.
-		 * @throws ConstructError
-		 *             Propagate to be caught in register office floor.
+		 * @param issueDescription Description of the issue.
+		 * @throws ConstructError Propagate to be caught in register office floor.
 		 */
-		private void indicateIssue(String issueDescription)
-				throws ConstructError {
+		private void indicateIssue(String issueDescription) throws ConstructError {
 
 			// Create the construction exception
-			OfficeFloorBuildException cause = new OfficeFloorBuildException(
-					issueDescription);
+			OfficeFloorBuildException cause = new OfficeFloorBuildException(issueDescription);
 
 			// Propagate to be caught in register office floor
 			throw new ConstructError(cause);
@@ -136,10 +127,14 @@ public class OfficeFloorBuildException extends Exception {
 	private static class ConstructError extends Error {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Initiate.
 		 * 
-		 * @param cause
-		 *            Cause.
+		 * @param cause Cause.
 		 */
 		public ConstructError(Throwable cause) {
 			super(cause);

@@ -34,13 +34,10 @@ public class FailCompilerIssues extends AbstractCompilerIssues {
 	/**
 	 * Compiles with exception of first issue.
 	 * 
-	 * @param compiler
-	 *            {@link OfficeFloorCompiler}.
-	 * @param officeFloorName
-	 *            {@link OfficeFloor} name.
+	 * @param compiler        {@link OfficeFloorCompiler}.
+	 * @param officeFloorName {@link OfficeFloor} name.
 	 * @return {@link OfficeFloor}.
-	 * @throws CompileException
-	 *             If fails to compile.
+	 * @throws CompileException If fails to compile.
 	 */
 	public static OfficeFloor compile(OfficeFloorCompiler compiler, String officeFloorName) throws CompileException {
 
@@ -70,6 +67,11 @@ public class FailCompilerIssues extends AbstractCompilerIssues {
 	private static class CompileError extends Error {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * {@link DefaultCompilerIssue}.
 		 */
 		private final DefaultCompilerIssue issue;
@@ -77,8 +79,7 @@ public class FailCompilerIssues extends AbstractCompilerIssues {
 		/**
 		 * Initiate.
 		 * 
-		 * @param issue
-		 *            {@link DefaultCompilerIssue}.
+		 * @param issue {@link DefaultCompilerIssue}.
 		 */
 		public CompileError(DefaultCompilerIssue issue) {
 			super(issue.getIssueDescription());

@@ -45,6 +45,11 @@ public class AnonymousHttpSecuritySource
 		HttpAuthentication<Void>, HttpAccessControl {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Anonymous {@link Principal}.
 	 */
 	private static final Principal anonymous = new Principal() {

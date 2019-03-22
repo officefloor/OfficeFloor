@@ -26,24 +26,24 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorVersionIncompatibilityException extends
-		RuntimeException {
+public class OfficeFloorVersionIncompatibilityException extends RuntimeException {
 
 	/**
-	 * Constructs and throws the
-	 * {@link OfficeFloorVersionIncompatibilityException}.
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Constructs and throws the {@link OfficeFloorVersionIncompatibilityException}.
 	 * 
-	 * @param implementation
-	 *            Implementation.
-	 * @param methodName
-	 *            Name of the incompatible {@link Method}.
-	 * @param parameterTypes
-	 *            Parameter types for the incompatible {@link Method}.
+	 * @param implementation Implementation.
+	 * @param methodName     Name of the incompatible {@link Method}.
+	 * @param parameterTypes Parameter types for the incompatible {@link Method}.
 	 * @return OfficeFloorVersionIncompatibilityException The
 	 *         {@link OfficeFloorVersionIncompatibilityException} to throw.
 	 */
-	public static OfficeFloorVersionIncompatibilityException newTypeIncompatibilityException(
-			Object implementation, String methodName, Class<?>[] parameterTypes) {
+	public static OfficeFloorVersionIncompatibilityException newTypeIncompatibilityException(Object implementation,
+			String methodName, Class<?>[] parameterTypes) {
 
 		// Build the message
 		StringBuilder msg = new StringBuilder();
@@ -59,8 +59,7 @@ public class OfficeFloorVersionIncompatibilityException extends
 				msg.append(", ");
 			}
 			isFirst = false;
-			msg.append(parameterType == null ? "?" : parameterType
-					.getSimpleName());
+			msg.append(parameterType == null ? "?" : parameterType.getSimpleName());
 		}
 		msg.append(")");
 
@@ -71,8 +70,7 @@ public class OfficeFloorVersionIncompatibilityException extends
 	/**
 	 * Initiate.
 	 * 
-	 * @param message
-	 *            Message.
+	 * @param message Message.
 	 */
 	private OfficeFloorVersionIncompatibilityException(String message) {
 		super(message);

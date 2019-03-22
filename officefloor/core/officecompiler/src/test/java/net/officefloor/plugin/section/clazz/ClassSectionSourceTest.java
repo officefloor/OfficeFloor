@@ -47,7 +47,9 @@ import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.escalate.EscalationHandler;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -697,6 +699,48 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		public void doInput() {
 			// Testing type
+		}
+	}
+
+	/**
+	 * Ensure able to access {@link ManagedFunctionContext}.
+	 */
+	public void testManagedFunctionContext() throws Exception {
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockManagedFunctionContextSection.class,
+				this.configureClassSectionFunction("function"));
+		expected.addSectionInput("function", null);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockManagedFunctionContextSection.class.getName());
+	}
+
+	public static class MockManagedFunctionContextSection {
+		public void function(ManagedFunctionContext<?, ?> context) {
+			// Testing
+		}
+	}
+
+	/**
+	 * Ensure able to access {@link AsynchronousFlow}.
+	 */
+	public void testAsynchronousFlow() throws Exception {
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockAsynchronousFlowSection.class,
+				this.configureClassSectionFunction("function"));
+		expected.addSectionInput("function", null);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockAsynchronousFlowSection.class.getName());
+	}
+
+	public static class MockAsynchronousFlowSection {
+		public void function(AsynchronousFlow flowOne, AsynchronousFlow flowTwo) {
+			// TEsting
 		}
 	}
 

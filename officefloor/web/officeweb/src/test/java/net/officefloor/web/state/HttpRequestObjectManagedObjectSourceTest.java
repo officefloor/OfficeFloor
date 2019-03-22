@@ -69,8 +69,7 @@ public class HttpRequestObjectManagedObjectSourceTest extends OfficeFrameTestCas
 	/**
 	 * Ensure correct type.
 	 * 
-	 * @param isLoadParameters
-	 *            <code>true</code> to load parameters.
+	 * @param isLoadParameters <code>true</code> to load parameters.
 	 */
 	public void doTypeTest(boolean isLoadParameters) {
 
@@ -170,20 +169,15 @@ public class HttpRequestObjectManagedObjectSourceTest extends OfficeFrameTestCas
 	/**
 	 * Undertakes the test to use the {@link HttpRequestState}.
 	 * 
-	 * @param isAlreadyRegistered
-	 *            Indicates if object is already registered with the
-	 *            {@link HttpRequestState}.
-	 * @param boundName
-	 *            Name to bind object within {@link HttpRequestState}.
-	 *            <code>null</code> to use {@link ManagedObject} name.
-	 * @param isLoadParameters
-	 *            Indicates if loading parameters.
-	 * @param requestUri
-	 *            Request URI.
-	 * @param expectedValue
-	 *            Expected value to be loaded.
-	 * @param propertyNameValuePairs
-	 *            Additional property name/value pairs.
+	 * @param isAlreadyRegistered    Indicates if object is already registered with
+	 *                               the {@link HttpRequestState}.
+	 * @param boundName              Name to bind object within
+	 *                               {@link HttpRequestState}. <code>null</code> to
+	 *                               use {@link ManagedObject} name.
+	 * @param isLoadParameters       Indicates if loading parameters.
+	 * @param requestUri             Request URI.
+	 * @param expectedValue          Expected value to be loaded.
+	 * @param propertyNameValuePairs Additional property name/value pairs.
 	 */
 	public void doTest(boolean isAlreadyRegistered, String boundName, boolean isLoadParameters, String requestUri,
 			String expectedValue, String... propertyNameValuePairs) throws Throwable {
@@ -236,8 +230,7 @@ public class HttpRequestObjectManagedObjectSourceTest extends OfficeFrameTestCas
 	/**
 	 * Creates the {@link HttpRequestState}.
 	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
+	 * @param connection {@link ServerHttpConnection}.
 	 * @return {@link HttpRequestState}.
 	 */
 	private HttpRequestState createHttpRequestState(ServerHttpConnection connection) throws Throwable {
@@ -251,6 +244,7 @@ public class HttpRequestObjectManagedObjectSourceTest extends OfficeFrameTestCas
 	 * Mock object.
 	 */
 	public static class MockObject implements Serializable {
+		private static final long serialVersionUID = 1L;
 
 		private String value = null;
 

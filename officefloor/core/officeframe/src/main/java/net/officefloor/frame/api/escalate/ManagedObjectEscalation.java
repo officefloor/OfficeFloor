@@ -31,6 +31,11 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 public abstract class ManagedObjectEscalation extends Escalation {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * {@link Class} of the {@link Object} returned from the failed
 	 * {@link ManagedObject}.
 	 */
@@ -39,9 +44,8 @@ public abstract class ManagedObjectEscalation extends Escalation {
 	/**
 	 * Initiate.
 	 * 
-	 * @param objectType
-	 *            {@link Class} of the {@link Object} returned from the failed
-	 *            {@link ManagedObject}.
+	 * @param objectType {@link Class} of the {@link Object} returned from the
+	 *                   failed {@link ManagedObject}.
 	 */
 	public ManagedObjectEscalation(Class<?> objectType) {
 		this.objectType = objectType;
@@ -50,11 +54,9 @@ public abstract class ManagedObjectEscalation extends Escalation {
 	/**
 	 * Allows for a cause of the {@link Escalation}.
 	 * 
-	 * @param objectType
-	 *            {@link Class} of the {@link Object} returned from the failed
-	 *            {@link ManagedObject}.
-	 * @param cause
-	 *            Cause of the {@link Escalation}.
+	 * @param objectType {@link Class} of the {@link Object} returned from the
+	 *                   failed {@link ManagedObject}.
+	 * @param cause      Cause of the {@link Escalation}.
 	 */
 	public ManagedObjectEscalation(Class<?> objectType, Throwable cause) {
 		super(cause);

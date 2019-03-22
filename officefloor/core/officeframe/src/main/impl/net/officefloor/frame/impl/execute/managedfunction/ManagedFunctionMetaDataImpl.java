@@ -18,12 +18,14 @@
 package net.officefloor.frame.impl.execute.managedfunction;
 
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -87,6 +89,16 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final ManagedObjectMetaData<?>[] functionBoundManagedObjects;
 
 	/**
+	 * {@link AsynchronousFlow} timeout.
+	 */
+	private final long asynchronousFlowTimeout;
+
+	/**
+	 * {@link AssetManager} for the instigated {@link AsynchronousFlow} instances.
+	 */
+	private final AssetManager asynchronousFlowAssetManager;
+
+	/**
 	 * {@link OfficeMetaData}.
 	 */
 	private OfficeMetaData officeMetaData;
@@ -133,32 +145,33 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	/**
 	 * Initiate with details of the meta-data for the {@link ManagedFunction}.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param functionFactory
-	 *            {@link ManagedFunctionFactory} to create the
-	 *            {@link ManagedFunction} of the {@link ManagedFunctionMetaData}.
-	 * @param annotations
-	 *            Differentiators.
-	 * @param parameterType
-	 *            Parameter type of this {@link ManagedFunction}.
-	 * @param responsibleTeam
-	 *            {@link TeamManagement} of the {@link Team} responsible for
-	 *            executing this {@link ManagedFunction}. May be <code>null</code>.
-	 * @param functionIndexedManagedObjects
-	 *            Translates the {@link ManagedFunction} index to the
-	 *            {@link ManagedObjectIndex} to obtain the {@link ManagedObject} for
-	 *            the {@link ManagedFunction}.
-	 * @param functionBoundManagedObjects
-	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}
-	 *            instances bound to the {@link ManagedFunction}.
-	 * @param requiredGovernance
-	 *            Required {@link Governance}.
+	 * @param functionName                  Name of the {@link ManagedFunction}.
+	 * @param functionFactory               {@link ManagedFunctionFactory} to create
+	 *                                      the {@link ManagedFunction} of the
+	 *                                      {@link ManagedFunctionMetaData}.
+	 * @param annotations                   Differentiators.
+	 * @param parameterType                 Parameter type of this
+	 *                                      {@link ManagedFunction}.
+	 * @param responsibleTeam               {@link TeamManagement} of the
+	 *                                      {@link Team} responsible for executing
+	 *                                      this {@link ManagedFunction}. May be
+	 *                                      <code>null</code>.
+	 * @param functionIndexedManagedObjects Translates the {@link ManagedFunction}
+	 *                                      index to the {@link ManagedObjectIndex}
+	 *                                      to obtain the {@link ManagedObject} for
+	 *                                      the {@link ManagedFunction}.
+	 * @param functionBoundManagedObjects   {@link ManagedObjectMetaData} of the
+	 *                                      {@link ManagedObject} instances bound to
+	 *                                      the {@link ManagedFunction}.
+	 * @param requiredGovernance            Required {@link Governance}.
+	 * @param asynchronousFlowTimeout       {@link AsynchronousFlow} timeout.
+	 * @param asynchronousFlowsAssetManager {@link AssetManager} for the invoked
+	 *                                      {@link AsynchronousFlow} instances.
 	 */
 	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory,
 			Object[] annotations, Class<?> parameterType, TeamManagement responsibleTeam,
 			ManagedObjectIndex[] functionIndexedManagedObjects, ManagedObjectMetaData<?>[] functionBoundManagedObjects,
-			boolean[] requiredGovernance) {
+			boolean[] requiredGovernance, long asynchronousFlowTimeout, AssetManager asynchronousFlowsAssetManager) {
 		this.functionName = functionName;
 		this.functionFactory = functionFactory;
 		this.annotations = annotations;
@@ -167,34 +180,33 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 		this.functionIndexedManagedObjects = functionIndexedManagedObjects;
 		this.functionBoundManagedObjects = functionBoundManagedObjects;
 		this.requiredGovernance = requiredGovernance;
+		this.asynchronousFlowTimeout = asynchronousFlowTimeout;
+		this.asynchronousFlowAssetManager = asynchronousFlowsAssetManager;
 	}
 
 	/**
 	 * Loads the remaining state of this {@link ManagedFunctionMetaData}.
 	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param flowMetaData
-	 *            Meta-data of the available {@link Flow} instances from this
-	 *            {@link ManagedFunction}.
-	 * @param nextFunctionMetaData
-	 *            {@link ManagedFunctionMetaData} of the next
-	 *            {@link ManagedFunction}.
-	 * @param escalationProcedure
-	 *            {@link EscalationProcedure} for exceptions of the
-	 *            {@link ManagedFunction} of this {@link ManagedFunctionMetaData}.
-	 * @param preAdministration
-	 *            {@link AdministrationMetaData} specifying the
-	 *            {@link Administration} instances to be completed before executing
-	 *            the {@link ManagedFunction}.
-	 * @param postAdministration
-	 *            {@link AdministrationMetaData} specifying the
-	 *            {@link Administration} instances to be completed after executing
-	 *            the {@link ManagedFunction}.
-	 * @param requiredManagedObjects
-	 *            {@link ManagedObjectIndex} instances identifying the
-	 *            {@link ManagedObject} instances that must be loaded before the
-	 *            {@link ManagedFunction} may be executed.
+	 * @param officeMetaData         {@link OfficeMetaData}.
+	 * @param flowMetaData           Meta-data of the available {@link Flow}
+	 *                               instances from this {@link ManagedFunction}.
+	 * @param nextFunctionMetaData   {@link ManagedFunctionMetaData} of the next
+	 *                               {@link ManagedFunction}.
+	 * @param escalationProcedure    {@link EscalationProcedure} for exceptions of
+	 *                               the {@link ManagedFunction} of this
+	 *                               {@link ManagedFunctionMetaData}.
+	 * @param preAdministration      {@link AdministrationMetaData} specifying the
+	 *                               {@link Administration} instances to be
+	 *                               completed before executing the
+	 *                               {@link ManagedFunction}.
+	 * @param postAdministration     {@link AdministrationMetaData} specifying the
+	 *                               {@link Administration} instances to be
+	 *                               completed after executing the
+	 *                               {@link ManagedFunction}.
+	 * @param requiredManagedObjects {@link ManagedObjectIndex} instances
+	 *                               identifying the {@link ManagedObject} instances
+	 *                               that must be loaded before the
+	 *                               {@link ManagedFunction} may be executed.
 	 */
 	public void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaData[] flowMetaData,
 			ManagedFunctionMetaData<?, ?> nextFunctionMetaData, EscalationProcedure escalationProcedure,
@@ -256,6 +268,16 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	@Override
 	public FlowMetaData getFlow(int flowIndex) {
 		return this.flowMetaData[flowIndex];
+	}
+
+	@Override
+	public long getAsynchronousFlowTimeout() {
+		return this.asynchronousFlowTimeout;
+	}
+
+	@Override
+	public AssetManager getAsynchronousFlowManager() {
+		return this.asynchronousFlowAssetManager;
 	}
 
 	@Override

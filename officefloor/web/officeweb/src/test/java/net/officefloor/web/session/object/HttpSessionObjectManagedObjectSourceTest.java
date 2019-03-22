@@ -104,9 +104,8 @@ public class HttpSessionObjectManagedObjectSourceTest extends OfficeFrameTestCas
 	/**
 	 * Undertakes the test to use the {@link HttpSession}.
 	 * 
-	 * @param boundName
-	 *            Name to bind object within {@link HttpSession}.
-	 *            <code>null</code> to use {@link ManagedObject} name.
+	 * @param boundName Name to bind object within {@link HttpSession}.
+	 *                  <code>null</code> to use {@link ManagedObject} name.
 	 */
 	public void doTest(String boundName) throws Throwable {
 
@@ -164,6 +163,7 @@ public class HttpSessionObjectManagedObjectSourceTest extends OfficeFrameTestCas
 	 * Mock object.
 	 */
 	public static class MockObject implements Serializable {
+		private static final long serialVersionUID = 1L;
 	}
 
 	/**

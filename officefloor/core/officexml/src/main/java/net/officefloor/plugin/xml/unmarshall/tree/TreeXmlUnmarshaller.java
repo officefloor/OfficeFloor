@@ -58,19 +58,14 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 	/**
 	 * Initiate with details to unmarshall the XML.
 	 * 
-	 * @param metaData
-	 *            Meta-data of the mappings.
-	 * @param translatorRegistry
-	 *            Registry of translators.
-	 * @param referenceRegistry
-	 *            Registry of referenced {@link XmlMapping} instances.
-	 * @throws XmlMarshallException
-	 *             If fail to configure.
+	 * @param metaData           Meta-data of the mappings.
+	 * @param translatorRegistry Registry of translators.
+	 * @param referenceRegistry  Registry of referenced {@link XmlMapping}
+	 *                           instances.
+	 * @throws XmlMarshallException If fail to configure.
 	 */
-	public TreeXmlUnmarshaller(XmlMappingMetaData metaData,
-			TranslatorRegistry translatorRegistry,
-			ReferencedXmlMappingRegistry referenceRegistry)
-			throws XmlMarshallException {
+	public TreeXmlUnmarshaller(XmlMappingMetaData metaData, TranslatorRegistry translatorRegistry,
+			ReferencedXmlMappingRegistry referenceRegistry) throws XmlMarshallException {
 
 		// Obtain the target object class
 		String targetObjectClassName = metaData.getLoadObjectClassName();
@@ -78,16 +73,12 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 		try {
 			targetObjectClass = Class.forName(targetObjectClassName);
 		} catch (ClassNotFoundException ex) {
-			throw new XmlMarshallException(
-					"Can not find class of target object '"
-							+ targetObjectClassName + "'", ex);
+			throw new XmlMarshallException("Can not find class of target object '" + targetObjectClassName + "'", ex);
 		}
 
 		// Initiate handler
-		this.handler = new HandlerImpl(new XmlState(new XmlContext(
-				targetObjectClass, metaData.getElementName(),
-				metaData.getLoadObjectConfiguration(), translatorRegistry,
-				referenceRegistry)));
+		this.handler = new HandlerImpl(new XmlState(new XmlContext(targetObjectClass, metaData.getElementName(),
+				metaData.getLoadObjectConfiguration(), translatorRegistry, referenceRegistry)));
 
 		// Create the parser
 		try {
@@ -102,11 +93,10 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * net.officefloor.plugin.xml.XmlUnmarshaller#unmarshall(java.io.InputStream
-	 * , java.lang.Object)
+	 * net.officefloor.plugin.xml.XmlUnmarshaller#unmarshall(java.io.InputStream ,
+	 * java.lang.Object)
 	 */
-	public void unmarshall(InputStream xml, Object target)
-			throws XmlMarshallException {
+	public void unmarshall(InputStream xml, Object target) throws XmlMarshallException {
 		// Set the target object to load it
 		this.handler.setTargetObject(target);
 
@@ -118,8 +108,7 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 			throw ex.getXmlMarshallException();
 		} catch (SAXException ex) {
 			// Propagate failure
-			throw new XmlMarshallException(ex.getMessage(),
-					(ex.getCause() == null ? ex : ex.getCause()));
+			throw new XmlMarshallException(ex.getMessage(), (ex.getCause() == null ? ex : ex.getCause()));
 		} catch (IOException ex) {
 			// Propagate failure
 			throw new XmlMarshallException(ex.getMessage(), ex);
@@ -147,8 +136,7 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 		/**
 		 * Initiate with state of XML unmarshalling.
 		 * 
-		 * @param state
-		 *            State of XML unmarshalling.
+		 * @param state State of XML unmarshalling.
 		 */
 		public HandlerImpl(XmlState state) {
 			// Store state
@@ -158,8 +146,7 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 		/**
 		 * Sets the target object.
 		 * 
-		 * @param targetObject
-		 *            Target object to have values loaded to it.
+		 * @param targetObject Target object to have values loaded to it.
 		 */
 		public void setTargetObject(Object targetObject) {
 			this.state.setTargetObject(targetObject);
@@ -168,12 +155,11 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 		/**
 		 * Handles loading the attribute value on the target value.
 		 */
-		public void startElement(String uri, String localName, String qName,
-				Attributes attributes) throws SAXException {
+		public void startElement(String uri, String localName, String qName, Attributes attributes)
+				throws SAXException {
 			try {
 				// Obtain the element xml mapping for element
-				ElementXmlMapping mapping = this.state.getCurrentContext()
-						.getElementXmlMapping(qName);
+				ElementXmlMapping mapping = this.state.getCurrentContext().getElementXmlMapping(qName);
 				if (mapping != null) {
 
 					// Start the mapping of the element
@@ -183,8 +169,7 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 					}
 
 					// Map the static mappings for element
-					List<XmlMapping> staticMappings = mapping
-							.getStaticXmlMappings();
+					List<XmlMapping> staticMappings = mapping.getStaticXmlMappings();
 					if (staticMappings != null) {
 						for (XmlMapping staticMapping : staticMappings) {
 							// Do the mapping
@@ -194,8 +179,7 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 					}
 
 					// Map the attributes
-					AttributeXmlMappings attributeMappings = mapping
-							.getAttributeXmlMappings();
+					AttributeXmlMappings attributeMappings = mapping.getAttributeXmlMappings();
 					if (attributeMappings != null) {
 
 						// Process the attributes
@@ -206,15 +190,12 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 								String attributeName = attributes.getQName(i);
 
 								// Obtain the xml mapping for attribute
-								XmlMapping attributeMapping = attributeMappings
-										.getXmlMapping(attributeName);
+								XmlMapping attributeMapping = attributeMappings.getXmlMapping(attributeName);
 
 								if (attributeMapping != null) {
 									// Do the mapping
-									attributeMapping.startMapping(this.state,
-											attributeName);
-									attributeMapping.endMapping(this.state,
-											attributes.getValue(i));
+									attributeMapping.startMapping(this.state, attributeName);
+									attributeMapping.endMapping(this.state, attributes.getValue(i));
 								}
 							}
 						}
@@ -229,8 +210,7 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 		/**
 		 * Handles obtain the value for the element.
 		 */
-		public void characters(char[] ch, int start, int length)
-				throws SAXException {
+		public void characters(char[] ch, int start, int length) throws SAXException {
 			// Obtain value
 			this.elementValue = String.valueOf(ch, start, length);
 		}
@@ -238,8 +218,7 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 		/**
 		 * Handles loading the value onto the target value.
 		 */
-		public void endElement(String uri, String localName, String qName)
-				throws SAXException {
+		public void endElement(String uri, String localName, String qName) throws SAXException {
 			try {
 				// Check if to pop context
 				String endElementName = this.state.getEndElementName();
@@ -249,14 +228,12 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 				}
 
 				// End xml mapping for element if exists
-				ElementXmlMapping mapping = this.state.getCurrentContext()
-						.getElementXmlMapping(qName);
+				ElementXmlMapping mapping = this.state.getCurrentContext().getElementXmlMapping(qName);
 				if (mapping != null) {
 					XmlMapping elementMapping = mapping.getElementXmlMapping();
 					if (elementMapping != null) {
 						// End the mapping
-						elementMapping
-								.endMapping(this.state, this.elementValue);
+						elementMapping.endMapping(this.state, this.elementValue);
 					}
 				}
 
@@ -276,6 +253,11 @@ public class TreeXmlUnmarshaller implements XmlUnmarshaller {
 class UnmarshallException extends SAXException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Cause of unmarshalling failure.
 	 */
 	protected XmlMarshallException cause;
@@ -283,8 +265,7 @@ class UnmarshallException extends SAXException {
 	/**
 	 * Initiate with cause.
 	 * 
-	 * @param cause
-	 *            Cause.
+	 * @param cause Cause.
 	 */
 	public UnmarshallException(XmlMarshallException cause) {
 		super(cause);

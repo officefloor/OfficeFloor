@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.team.Team;
 
@@ -46,10 +47,27 @@ public interface ManagedFunctionLogicMetaData {
 	TeamManagement getResponsibleTeam();
 
 	/**
+	 * Obtains the time out for {@link AsynchronousFlow} instigated by the
+	 * {@link ManagedFunction}.
+	 * 
+	 * @return Time out for {@link AsynchronousFlow} instigated by the
+	 *         {@link ManagedFunction}.
+	 */
+	long getAsynchronousFlowTimeout();
+
+	/**
+	 * Obtains the {@link AssetManager} that manages {@link AsynchronousFlow}
+	 * instances instigated by the {@link ManagedFunction}.
+	 * 
+	 * @return {@link AssetManager} that manages {@link AsynchronousFlow} instances
+	 *         instigated by the {@link ManagedFunction}.
+	 */
+	AssetManager getAsynchronousFlowManager();
+
+	/**
 	 * Obtains the {@link FlowMetaData} of the specified {@link Flow}.
 	 * 
-	 * @param flowIndex
-	 *            Index of the {@link Flow}.
+	 * @param flowIndex Index of the {@link Flow}.
 	 * @return {@link FlowMetaData} of the specified {@link Flow}.
 	 */
 	FlowMetaData getFlow(int flowIndex);
@@ -63,8 +81,7 @@ public interface ManagedFunctionLogicMetaData {
 	ManagedFunctionMetaData<?, ?> getNextManagedFunctionMetaData();
 
 	/**
-	 * Obtains the {@link EscalationProcedure} for the
-	 * {@link ManagedFunctionLogic}.
+	 * Obtains the {@link EscalationProcedure} for the {@link ManagedFunctionLogic}.
 	 * 
 	 * @return {@link EscalationProcedure}.
 	 */

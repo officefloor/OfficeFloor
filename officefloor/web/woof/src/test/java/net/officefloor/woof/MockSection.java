@@ -37,6 +37,8 @@ public class MockSection {
 
 	@HttpSessionStateful
 	public static class State implements Serializable {
+		private static final long serialVersionUID = 1L;
+
 		private String previous = "-1";
 	}
 

@@ -19,6 +19,7 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationFactory;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 
@@ -51,8 +52,7 @@ public interface AdministrationConfiguration<E, F extends Enum<F>, G extends Enu
 	Class<E> getExtensionType();
 
 	/**
-	 * Obtains the names of the {@link ManagedObject} instances to be
-	 * administered.
+	 * Obtains the names of the {@link ManagedObject} instances to be administered.
 	 * 
 	 * @return Names of the {@link ManagedObject} instances to be administered.
 	 */
@@ -61,9 +61,16 @@ public interface AdministrationConfiguration<E, F extends Enum<F>, G extends Enu
 	/**
 	 * Obtains the configuration for the linked {@link Governance}.
 	 * 
-	 * @return {@link AdministrationGovernanceConfiguration} specifying the
-	 *         linked {@link Governance}.
+	 * @return {@link AdministrationGovernanceConfiguration} specifying the linked
+	 *         {@link Governance}.
 	 */
 	AdministrationGovernanceConfiguration<?>[] getGovernanceConfiguration();
+
+	/**
+	 * Obtains the timeout for any {@link AsynchronousFlow} instigated.
+	 * 
+	 * @return Timeout for any {@link AsynchronousFlow} instigated.
+	 */
+	long getAsynchronousFlowTimeout();
 
 }

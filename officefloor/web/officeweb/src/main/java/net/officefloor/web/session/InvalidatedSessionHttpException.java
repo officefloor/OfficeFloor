@@ -37,6 +37,11 @@ import net.officefloor.server.http.HttpStatus;
 public class InvalidatedSessionHttpException extends HttpException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Initiate.
 	 */
 	public InvalidatedSessionHttpException() {
@@ -46,8 +51,7 @@ public class InvalidatedSessionHttpException extends HttpException {
 	/**
 	 * Initiate with cause.
 	 *
-	 * @param cause
-	 *            Cause of {@link HttpSession} being invalid.
+	 * @param cause Cause of {@link HttpSession} being invalid.
 	 */
 	public InvalidatedSessionHttpException(Throwable cause) {
 		super(HttpStatus.UNAUTHORIZED, cause);

@@ -29,6 +29,11 @@ package net.officefloor.frame.api.source;
 public class UnknownResourceError extends AbstractSourceError {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Location of the unknown resource.
 	 */
 	private final String unknownResourceLocation;
@@ -36,8 +41,7 @@ public class UnknownResourceError extends AbstractSourceError {
 	/**
 	 * Initiate.
 	 * 
-	 * @param unknownResourceLocation
-	 *            Location of the unknown resource.
+	 * @param unknownResourceLocation Location of the unknown resource.
 	 */
 	public UnknownResourceError(String unknownResourceLocation) {
 		super("Can not obtain resource at location '" + unknownResourceLocation + "'");
@@ -47,11 +51,9 @@ public class UnknownResourceError extends AbstractSourceError {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param error
-	 *            Triggering {@link UnknownResourceError} from
-	 *            {@link ServiceFactory}.
-	 * @param serviceFactory
-	 *            {@link ServiceFactory}.
+	 * @param error          Triggering {@link UnknownResourceError} from
+	 *                       {@link ServiceFactory}.
+	 * @param serviceFactory {@link ServiceFactory}.
 	 */
 	public UnknownResourceError(UnknownResourceError error, ServiceFactory<?> serviceFactory) {
 		super(error, serviceFactory);

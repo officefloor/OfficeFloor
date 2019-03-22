@@ -51,6 +51,11 @@ import net.officefloor.server.stream.impl.ByteSequence;
 public class OfficeFloorHttpServlet extends HttpServlet {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * {@link ExternalServiceInput} to service the {@link HttpServletRequest}
 	 * instances.
 	 */

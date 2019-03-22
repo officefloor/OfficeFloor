@@ -1137,7 +1137,7 @@ public class MockConstruct {
 			this.governanceName = governanceName;
 			this.extensionType = extensionType;
 			this.configuration = new GovernanceBuilderImpl<>(governanceName, extensionType, () -> null);
-			this.metaData = new GovernanceMetaDataImpl<>(governanceName, () -> null, null);
+			this.metaData = new GovernanceMetaDataImpl<>(governanceName, () -> null, null, 1, null);
 		}
 
 		/**
@@ -1462,7 +1462,7 @@ public class MockConstruct {
 		 * {@link EscalationFlow}.
 		 */
 		private EscalationFlow officeFloorEscalation = new EscalationFlowImpl(Throwable.class,
-				new ManagedFunctionMetaDataImpl<>("HANDLER", () -> null, null, null, null, null, null, null));
+				new ManagedFunctionMetaDataImpl<>("HANDLER", () -> null, null, null, null, null, null, null, 1, null));
 
 		/**
 		 * {@link RawOfficeFloorMetaData}.
@@ -1647,7 +1647,7 @@ public class MockConstruct {
 			this.assertNotBuilt();
 			ManagedFunctionMetaDataImpl<?, ?> function = new ManagedFunctionMetaDataImpl<>(functionName,
 					() -> (context) -> null, new Object[0], parameterType, null, new ManagedObjectIndex[0],
-					new ManagedObjectMetaData[0], new boolean[0]);
+					new ManagedObjectMetaData[0], new boolean[0], 1, null);
 			this.functions.add(function);
 			return function;
 		}
@@ -1673,7 +1673,7 @@ public class MockConstruct {
 						}
 					}
 					functions.add(new ManagedFunctionMetaDataImpl<>(functionName, null, null, parameterType, null, null,
-							null, null));
+							null, null, 1, null));
 				}
 
 				// Load the convenience functions

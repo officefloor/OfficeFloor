@@ -21,13 +21,16 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.team.Team;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.governance.GovernanceMetaDataImpl;
 import net.officefloor.frame.internal.configuration.GovernanceConfiguration;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TeamManagement;
 
@@ -51,10 +54,10 @@ public class RawGovernanceMetaDataFactory {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office} having {@link Governance} added.
-	 * @param officeTeams
-	 *            {@link TeamManagement} instances by their {@link Office} name.
+	 * @param officeName  Name of the {@link Office} having {@link Governance}
+	 *                    added.
+	 * @param officeTeams {@link TeamManagement} instances by their {@link Office}
+	 *                    name.
 	 */
 	public RawGovernanceMetaDataFactory(String officeName, Map<String, TeamManagement> officeTeams) {
 		this.officeName = officeName;
@@ -64,21 +67,20 @@ public class RawGovernanceMetaDataFactory {
 	/**
 	 * Creates the {@link RawGovernanceMetaData}.
 	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param configuration
-	 *            {@link GovernanceConfiguration}.
-	 * @param governanceIndex
-	 *            Index of the {@link Governance} within the
-	 *            {@link ProcessState}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param                                <E> Extension interface type.
+	 * @param                                <F> Flow key type.
+	 * @param configuration                  {@link GovernanceConfiguration}.
+	 * @param governanceIndex                Index of the {@link Governance} within
+	 *                                       the {@link ProcessState}.
+	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
+	 *                                       timeout.
+	 * @param issues                         {@link OfficeFloorIssues}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
 	public <E, F extends Enum<F>> RawGovernanceMetaData<E, F> createRawGovernanceMetaData(
-			GovernanceConfiguration<E, F> configuration, int governanceIndex, OfficeFloorIssues issues) {
+			GovernanceConfiguration<E, F> configuration, int governanceIndex, AssetManagerFactory assetManagerFactory,
+			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Obtain the governance name
 		String governanceName = configuration.getGovernanceName();
@@ -115,9 +117,19 @@ public class RawGovernanceMetaDataFactory {
 			}
 		}
 
+		// Obtain the asynchronous flow timeout
+		long asynchronousFlowTimeout = configuration.getAsynchronousFlowTimeout();
+		if (asynchronousFlowTimeout <= 0) {
+			asynchronousFlowTimeout = defaultAsynchronousFlowTimeout;
+		}
+
+		// Create the asynchronous flow asset manager
+		AssetManager asynchronousFlowAssetManager = assetManagerFactory.createAssetManager(AssetType.GOVERNANCE,
+				governanceName, AsynchronousFlow.class.getSimpleName(), issues);
+
 		// Create the Governance Meta-Data
 		GovernanceMetaDataImpl<E, F> governanceMetaData = new GovernanceMetaDataImpl<>(governanceName,
-				governanceFactory, responsibleTeam);
+				governanceFactory, responsibleTeam, asynchronousFlowTimeout, asynchronousFlowAssetManager);
 
 		// Create the raw Governance meta-data
 		RawGovernanceMetaData<E, F> rawGovernanceMetaData = new RawGovernanceMetaData<>(governanceName, governanceIndex,

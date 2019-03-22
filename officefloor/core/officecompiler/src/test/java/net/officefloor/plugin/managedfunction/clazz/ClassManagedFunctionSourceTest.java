@@ -37,6 +37,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBui
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
@@ -366,6 +367,21 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		staticMethod.setReturnType(Object.class);
 
+		// managedFunctionContext
+		ManagedFunctionTypeBuilder managedFunctionContext = namespace.addManagedFunctionType("managedFunctionContext",
+				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
+		managedFunctionContext.setReturnType(ManagedFunctionContext.class);
+
+		// asynchronousFlow
+		ManagedFunctionTypeBuilder asynchronousFlow = namespace.addManagedFunctionType("asynchronousFlow",
+				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
+		asynchronousFlow.setReturnType(AsynchronousFlow.class);
+
+		// asynchronousFlows
+		ManagedFunctionTypeBuilder asynchronousFlows = namespace.addManagedFunctionType("asynchronousFlows",
+				new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
+		asynchronousFlows.setReturnType(AsynchronousFlow[].class);
+
 		// Validate the namespace type
 		ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace, ClassManagedFunctionSource.class,
 				ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, MockClass.class.getName());
@@ -405,12 +421,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		final int ASYNCHRONOUS_FLOW_INDEX = 0;
 
 		// Create the function
-		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
-				ClassManagedFunctionSource.class, ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
-				MockClass.class.getName());
-		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[1];
-		ManagedFunction<?, ?> function = functionType.getManagedFunctionFactory().createManagedFunction();
-		assertEquals("Incorrect function", "functionInstanceMethod", functionType.getFunctionName());
+		ManagedFunction<?, ?> function = createMockClassManagedFunction("functionInstanceMethod");
 
 		// Record invoking method
 		MockClass.expectedParameter = PARAMETER_VALUE;
@@ -440,12 +451,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		final SQLException exception = new SQLException("Method failure");
 
 		// Create the function
-		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
-				ClassManagedFunctionSource.class, ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
-				MockClass.class.getName());
-		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
-		ManagedFunction<?, ?> function = functionType.getManagedFunctionFactory().createManagedFunction();
-		assertEquals("Incorrect function", "functionFailMethod", functionType.getFunctionName());
+		ManagedFunction<?, ?> function = createMockClassManagedFunction("functionFailMethod");
 
 		// Record invoking method
 		MockClass.sqlException = exception;
@@ -469,17 +475,12 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 * Ensure can invoke static {@link Method}.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testStaticException() throws Throwable {
+	public void testStaticMethod() throws Throwable {
 
 		final String RETURN_VALUE = "STATIC RETURN VALUE";
 
 		// Create the function
-		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
-				ClassManagedFunctionSource.class, ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
-				MockClass.class.getName());
-		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[2];
-		ManagedFunction<?, ?> function = functionType.getManagedFunctionFactory().createManagedFunction();
-		assertEquals("Incorrect function", "functionStaticMethod", functionType.getFunctionName());
+		ManagedFunction<?, ?> function = createMockClassManagedFunction("functionStaticMethod");
 
 		// Record invoking method
 		MockClass.returnValue = RETURN_VALUE;
@@ -493,6 +494,102 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Verify mock objects
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to access {@link ManagedFunctionContext}.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testManagedFunctionContext() throws Throwable {
+
+		// Create the function
+		ManagedFunction<?, ?> function = createMockClassManagedFunction("managedFunctionContext");
+
+		// Replay the mock objects
+		this.replayMockObjects();
+
+		// Invoke the function ensuring the correct return value
+		Object returnValue = function.execute(this.functionContext);
+		assertEquals("Incorrect return value", this.functionContext, returnValue);
+
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to access {@link AsynchronousFlow}.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testAsynchronousFlow() throws Throwable {
+
+		// Create the function
+		ManagedFunction<?, ?> function = createMockClassManagedFunction("asynchronousFlow");
+
+		// Record obtain asynchronous flow
+		AsynchronousFlow flow = this.createMock(AsynchronousFlow.class);
+		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flow);
+
+		// Replay the mock objects
+		this.replayMockObjects();
+
+		// Invoke the function ensuring the correct return value
+		Object returnValue = function.execute(this.functionContext);
+		assertEquals("Incorrect return value", flow, returnValue);
+
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure creates new {@link AsynchronousFlow} for each parameter.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testMultipleAsynchronousFlows() throws Throwable {
+
+		// Create the function
+		ManagedFunction<?, ?> function = createMockClassManagedFunction("asynchronousFlows");
+
+		// Record obtain asynchronous flow
+		AsynchronousFlow flowOne = this.createMock(AsynchronousFlow.class);
+		AsynchronousFlow flowTwo = this.createMock(AsynchronousFlow.class);
+		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flowOne);
+		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flowTwo);
+
+		// Replay the mock objects
+		this.replayMockObjects();
+
+		// Invoke the function ensuring the correct return value
+		Object returnValue = function.execute(this.functionContext);
+		assertTrue("Should be array of flows", returnValue instanceof AsynchronousFlow[]);
+		AsynchronousFlow[] flows = (AsynchronousFlow[]) returnValue;
+		assertEquals("Incorrect first flow", flowOne, flows[0]);
+		assertEquals("Incorrect second flow", flowTwo, flows[1]);
+
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Creates the {@link ManagedFunction} from the {@link MockClass}.
+	 * 
+	 * @param methodName Name of {@link Method} on {@link MockClass}.
+	 * @return {@link ManagedFunction} for the {@link Method}.
+	 */
+	private static ManagedFunction<?, ?> createMockClassManagedFunction(String methodName) throws Throwable {
+
+		// Create the function
+		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.loadManagedFunctionType(
+				ClassManagedFunctionSource.class, ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+				MockClass.class.getName());
+		for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
+			if (functionType.getFunctionName().equals(methodName)) {
+				return functionType.getManagedFunctionFactory().createManagedFunction();
+			}
+		}
+
+		// As here, method not exist (invalid test)
+		fail("INVALID TEST: method " + methodName + " not on " + MockClass.class.getName());
+		return null;
 	}
 
 	/**
@@ -557,6 +654,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		 */
 		public void functionFailMethod() throws SQLException {
 			throw sqlException;
+			// Testing
 		}
 
 		/**
@@ -578,6 +676,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		 */
 		@NonFunctionMethod
 		public void nonFunctionMethod() {
+			// Testing
 		}
 
 		/**
@@ -585,6 +684,19 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		 */
 		@NonFunctionMethod
 		public static void nonStaticFunctionMethod() {
+			// Testing
+		}
+
+		public ManagedFunctionContext<?, ?> managedFunctionContext(ManagedFunctionContext<?, ?> context) {
+			return context;
+		}
+
+		public AsynchronousFlow asynchronousFlow(AsynchronousFlow flow) {
+			return flow;
+		}
+
+		public AsynchronousFlow[] asynchronousFlows(AsynchronousFlow flowOne, AsynchronousFlow flowTwo) {
+			return new AsynchronousFlow[] { flowOne, flowTwo };
 		}
 	}
 

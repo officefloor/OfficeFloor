@@ -35,6 +35,7 @@ public class TemplateLogic {
 
 	@HttpSessionStateful
 	public static class Posts implements Serializable {
+		private static final long serialVersionUID = 1L;
 
 		private final List<Post> posts = new ArrayList<Post>();
 
@@ -50,6 +51,7 @@ public class TemplateLogic {
 	@Data
 	@HttpParameters
 	public static class Post implements Serializable {
+		private static final long serialVersionUID = 1L;
 
 		private String text;
 	}
@@ -57,8 +59,7 @@ public class TemplateLogic {
 	/**
 	 * Provides values from the HTTP session.
 	 * 
-	 * @param posts
-	 *            {@link Posts} being the session bound object.
+	 * @param posts {@link Posts} being the session bound object.
 	 * @return {@link Posts} to contain values to render to page.
 	 */
 	public Posts getTemplateData(Posts posts) {
@@ -68,11 +69,9 @@ public class TemplateLogic {
 	/**
 	 * Handles the post form submission.
 	 * 
-	 * @param post
-	 *            {@link Post} that is dependency injected with HTTP parameters
-	 *            loaded onto it.
-	 * @param posts
-	 *            {@link Posts} that is dependency injected from the HTTP session.
+	 * @param post  {@link Post} that is dependency injected with HTTP parameters
+	 *              loaded onto it.
+	 * @param posts {@link Posts} that is dependency injected from the HTTP session.
 	 */
 	public void post(Post post, Posts posts) {
 		posts.addPost(post);

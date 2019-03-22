@@ -30,6 +30,11 @@ import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 public class CleanupException extends Exception {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Print adapter.
 	 */
 	private static interface PrintAdapter<P> {
@@ -37,30 +42,24 @@ public class CleanupException extends Exception {
 		/**
 		 * Prints the text.
 		 * 
-		 * @param text
-		 *            Text.
-		 * @param printer
-		 *            Printer.
+		 * @param text    Text.
+		 * @param printer Printer.
 		 */
 		void print(String text, P printer);
 
 		/**
 		 * Prints the text and a new line.
 		 * 
-		 * @param text
-		 *            Text.
-		 * @param printer
-		 *            Printer.
+		 * @param text    Text.
+		 * @param printer Printer.
 		 */
 		void println(String text, P printer);
 
 		/**
 		 * Prints the {@link Throwable} stack trace.
 		 * 
-		 * @param failure
-		 *            Failure.
-		 * @param printer
-		 *            Printer.
+		 * @param failure Failure.
+		 * @param printer Printer.
 		 */
 		void print(Throwable failure, P printer);
 	}
@@ -115,8 +114,7 @@ public class CleanupException extends Exception {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param cleanupEscalations
-	 *            {@link CleanupEscalation} instances.
+	 * @param cleanupEscalations {@link CleanupEscalation} instances.
 	 */
 	public CleanupException(CleanupEscalation[] cleanupEscalations) {
 		this.cleanupEscalations = cleanupEscalations;
@@ -148,10 +146,8 @@ public class CleanupException extends Exception {
 	/**
 	 * Prints the stack trace.
 	 * 
-	 * @param printer
-	 *            Printer.
-	 * @param adapter
-	 *            {@link PrintAdapter}.
+	 * @param printer Printer.
+	 * @param adapter {@link PrintAdapter}.
 	 */
 	private <P> void printStackTrace(P printer, PrintAdapter<P> adapter) {
 

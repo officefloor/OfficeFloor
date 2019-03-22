@@ -25,10 +25,14 @@ package net.officefloor.eclipse.configurer.internal;
 public class MessageOnlyException extends Exception {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param message
-	 *            Message.
+	 * @param message Message.
 	 */
 	public MessageOnlyException(String message) {
 		super(message);

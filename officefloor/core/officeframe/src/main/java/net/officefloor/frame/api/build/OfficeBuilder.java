@@ -18,6 +18,7 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
@@ -84,6 +85,13 @@ public interface OfficeBuilder {
 	 *                                        length.
 	 */
 	void setMaximumFunctionStateChainLength(int maximumFunctionStateChainLength);
+
+	/**
+	 * Specifies the default timeout for {@link AsynchronousFlow} instances.
+	 *
+	 * @param timeout Default timeout.
+	 */
+	void setDefaultAsynchronousFlowTimeout(long timeout);
 
 	/**
 	 * Registers a {@link Team} which will execute {@link ManagedFunction} instances

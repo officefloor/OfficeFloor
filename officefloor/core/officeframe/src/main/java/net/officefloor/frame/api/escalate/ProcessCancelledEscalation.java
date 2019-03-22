@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.manage;
+package net.officefloor.frame.api.escalate;
 
 import net.officefloor.frame.internal.structure.ProcessState;
 
@@ -24,5 +24,11 @@ import net.officefloor.frame.internal.structure.ProcessState;
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessCancelledException extends Exception {
+public class ProcessCancelledEscalation extends Escalation {
+
+	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
 }

@@ -140,6 +140,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockException extends Exception {
+		private static final long serialVersionUID = 1L;
+
 		public MockException(String message) {
 			super(message);
 		}
@@ -157,6 +159,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	}
 
 	public static class NonAdaptableException extends Exception {
+		private static final long serialVersionUID = 1L;
+
 		public NonAdaptableException() {
 			super("TEST");
 		}
@@ -178,6 +182,8 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockExceptionAsObject extends Exception implements MockInterface {
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public String getValue() {
 			return "TEST";

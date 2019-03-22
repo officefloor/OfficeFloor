@@ -16,6 +16,7 @@
 	<modules>
 		<module>officespring</module>
 		<module>officespring_data</module>
+		<module>officespring_webclient</module>
 	</modules>
 	<dependencies>
 		<dependency>

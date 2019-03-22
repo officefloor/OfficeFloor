@@ -28,12 +28,15 @@ import net.officefloor.web.template.extension.WebTemplateExtension;
 public class WoofTemplateExtensionException extends Exception {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param message
-	 *            Reason.
-	 * @param cause
-	 *            Cause.
+	 * @param message Reason.
+	 * @param cause   Cause.
 	 */
 	public WoofTemplateExtensionException(String message, Throwable cause) {
 		super(message, cause);
@@ -42,8 +45,7 @@ public class WoofTemplateExtensionException extends Exception {
 	/**
 	 * Initiate.
 	 * 
-	 * @param message
-	 *            Reason.
+	 * @param message Reason.
 	 */
 	public WoofTemplateExtensionException(String message) {
 		super(message);
