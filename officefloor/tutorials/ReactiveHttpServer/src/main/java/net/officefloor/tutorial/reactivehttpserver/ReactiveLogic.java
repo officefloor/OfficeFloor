@@ -29,6 +29,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class ReactiveLogic {
 
 	public void reactive(WebClient client, AsynchronousFlow flow, ObjectResponse<ServerResponse> response) {
@@ -36,5 +37,5 @@ public class ReactiveLogic {
 				.bodyToMono(ServerResponse.class)
 				.subscribe(ReactiveWoof.send(flow, response), ReactiveWoof.propagateHttpError(flow));
 	}
-
 }
+// END SNIPPET: tutorial

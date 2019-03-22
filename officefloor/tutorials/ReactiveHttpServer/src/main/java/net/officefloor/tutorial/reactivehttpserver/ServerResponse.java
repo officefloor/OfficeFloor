@@ -26,9 +26,11 @@ import lombok.NoArgsConstructor;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServerResponse {
 	private String message;
 }
+// END SNIPPET: tutorial

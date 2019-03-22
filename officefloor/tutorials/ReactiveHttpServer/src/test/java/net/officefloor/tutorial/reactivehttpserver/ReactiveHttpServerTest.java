@@ -35,6 +35,7 @@ import net.officefloor.test.OfficeFloorRule;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class ReactiveHttpServerTest {
 
 	@Rule
@@ -52,5 +53,5 @@ public class ReactiveHttpServerTest {
 		assertEquals("Incorrect response", mapper.writeValueAsString(new ServerResponse("TEST")),
 				EntityUtils.toString(response.getEntity()));
 	}
-
 }
+// END SNIPPET: tutorial

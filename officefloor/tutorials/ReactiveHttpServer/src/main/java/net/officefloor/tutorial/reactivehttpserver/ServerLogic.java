@@ -24,10 +24,11 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class ServerLogic {
 
 	public void service(ObjectResponse<ServerResponse> response) {
 		response.send(new ServerResponse("TEST"));
 	}
-
 }
+// END SNIPPET: tutorial
