@@ -19,16 +19,20 @@ package net.officefloor.spring.reactive;
 
 import java.util.function.Consumer;
 
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+
 import net.officefloor.frame.api.function.AsynchronousFlow;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.woof.WoOF;
 
 /**
- * Utility methods for {@link OfficeFloor} working with Spring Reactive.
+ * Utility methods for {@link WoOF} working with Spring Reactive.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorReactiveUtil {
+public class ReactiveWoof {
 
 	/**
 	 * Provides handling for on error.
@@ -36,8 +40,29 @@ public class OfficeFloorReactiveUtil {
 	 * @param flow {@link AsynchronousFlow}.
 	 * @return {@link Consumer} for error handling.
 	 */
-	public static Consumer<? super Throwable> onError(AsynchronousFlow flow) {
+	public static Consumer<? super Throwable> flowError(AsynchronousFlow flow) {
 		return (error) -> flow.complete(() -> {
+			throw error;
+		});
+	};
+
+	/**
+	 * Provides handling of an error and propagates
+	 * 
+	 * @param flow {@link AsynchronousFlow}.
+	 * @return {@link Consumer} for error handling.
+	 */
+	public static Consumer<? super Throwable> propagateHttpError(AsynchronousFlow flow) {
+		return (error) -> flow.complete(() -> {
+
+			// Attempt to translate to HTTP exception
+			if (error instanceof WebClientResponseException) {
+				WebClientResponseException responseException = (WebClientResponseException) error;
+				throw new HttpException(HttpStatus.getHttpStatus(responseException.getStatusCode().value()),
+						responseException);
+			}
+
+			// Propagate the raw error
 			throw error;
 		});
 	}

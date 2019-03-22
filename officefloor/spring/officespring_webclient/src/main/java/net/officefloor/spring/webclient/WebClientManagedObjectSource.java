@@ -23,8 +23,8 @@ import org.springframework.web.reactive.function.client.WebClient.Builder;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
@@ -55,16 +55,27 @@ public class WebClientManagedObjectSource extends AbstractManagedObjectSource<No
 
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
 
 		// Configure the meta data
 		context.setObjectClass(WebClient.class);
-	}
 
-	@Override
-	public void start(ManagedObjectExecuteContext<None> context) throws Exception {
+		// Determine if web client builder factory
+		String factoryClassName = mosContext.getProperty(PROPERTY_WEB_CLIENT_BUILDER_FACTORY, null);
+		WebClientBuilderFactory builderFactory;
+		if (factoryClassName == null) {
+
+			// Create default builder factory
+			builderFactory = (sourceContext) -> WebClient.builder();
+
+		} else {
+			// Load custom builder factory
+			Class<?> builderFactoryClass = mosContext.loadClass(factoryClassName);
+			builderFactory = (WebClientBuilderFactory) builderFactoryClass.getConstructor().newInstance();
+		}
 
 		// Create the web client builder
-		this.webClientBuilder = WebClient.builder();
+		this.webClientBuilder = builderFactory.createWebClientBuilder(mosContext);
 	}
 
 	@Override
