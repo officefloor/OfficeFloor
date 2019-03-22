@@ -61,7 +61,6 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeName      Name of the {@link Office} being managed.
 	 * @param monitorInterval Interval in milliseconds between each check of the
 	 *                        {@link Office}. Setting this high reduces overhead of
 	 *                        managing the {@link Office}, however setting lower
@@ -70,8 +69,8 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	 * @param functionLoop    {@link FunctionLoop} for the {@link Office}.
 	 * @param timer           {@link Timer} to monitor the {@link Office}.
 	 */
-	public OfficeManagerImpl(String officeName, long monitorInterval, MonitorClockImpl monitorClock,
-			FunctionLoop functionLoop, Timer timer) {
+	public OfficeManagerImpl(long monitorInterval, MonitorClockImpl monitorClock, FunctionLoop functionLoop,
+			Timer timer) {
 		this.monitorInterval = monitorInterval;
 		this.monitorClock = monitorClock;
 		this.functionLoop = functionLoop;

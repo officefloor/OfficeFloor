@@ -486,8 +486,8 @@ public class RawOfficeMetaDataFactory {
 		}
 
 		// Create the office manager
-		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName, monitorOfficeInterval, monitorClockImpl,
-				functionLoop, timer);
+		OfficeManagerImpl officeManager = new OfficeManagerImpl(monitorOfficeInterval, monitorClockImpl, functionLoop,
+				timer);
 
 		// Obtain the managed execution factory
 		ManagedExecutionFactory managedExecutionFactory = this.rawOfficeFloorMetaData.getManagedExecutionFactory();
