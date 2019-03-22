@@ -37,6 +37,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -71,6 +72,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	public ClassManagedFunctionSource() {
 		// Add the default manufacturers
 		this.manufacturers.add(new ManagedFunctionContextParameterManufacturer());
+		this.manufacturers.add(new AsynchronousFlowParameterManufacturer());
 		this.manufacturers.add(new FlowParameterManufacturer<FlowInterface>(FlowInterface.class));
 
 		// Load any additional manufacturers
@@ -349,10 +351,30 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
 				Sequence flowSequence, SourceContext sourceContext) {
 
-			// Determine if task context
+			// Determine if managed function context
 			if (ManagedFunctionContext.class.equals(parameterType)) {
-				// Parameter is a task context
+				// Parameter is a managed function context
 				return new ManagedFunctionContextParameterFactory();
+			}
+
+			// Not function context
+			return null;
+		}
+	}
+
+	/**
+	 * {@link ParameterManufacturer} for an {@link AsynchronousFlow}.
+	 */
+	protected static class AsynchronousFlowParameterManufacturer implements ParameterManufacturer {
+		@Override
+		public ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
+				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
+				Sequence flowSequence, SourceContext sourceContext) {
+
+			// Determine if asynchronous flow
+			if (AsynchronousFlow.class.equals(parameterType)) {
+				// Parameter is an asynchronous flow
+				return new AsynchronousFlowParameterFactory();
 			}
 
 			// Not function context

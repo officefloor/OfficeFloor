@@ -107,7 +107,7 @@ public class WebClientTest extends OfficeFrameTestCase {
 		String result = client.get()
 				.uri("http://localhost:7878/webclient?url=" + (isCustomWebClient ? "/" : "http://localhost:7878/"))
 				.accept(MediaType.APPLICATION_JSON).retrieve().bodyToMono(String.class).block();
-		assertEquals("Should obtain result", "TEST", result);
+		assertEquals("Should obtain result", "\"TEST\"", result);
 	}
 
 	public static class WebClientLogic {
