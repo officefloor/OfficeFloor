@@ -29,6 +29,11 @@ package net.officefloor.frame.api.source;
 public class UnknownPropertyError extends AbstractSourceError {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Name of the unknown property.
 	 */
 	private final String unknownPropertyName;
@@ -36,8 +41,7 @@ public class UnknownPropertyError extends AbstractSourceError {
 	/**
 	 * Initiate.
 	 * 
-	 * @param unknownPropertyName
-	 *            Name of the unknown property.
+	 * @param unknownPropertyName Name of the unknown property.
 	 */
 	public UnknownPropertyError(String unknownPropertyName) {
 		super("Must specify property '" + unknownPropertyName + "'");
@@ -47,10 +51,8 @@ public class UnknownPropertyError extends AbstractSourceError {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param unknownPropertyError
-	 *            Triggering {@link UnknownPropertyError}.
-	 * @param serviceFactory
-	 *            {@link ServiceFactory} requiring the property.
+	 * @param unknownPropertyError Triggering {@link UnknownPropertyError}.
+	 * @param serviceFactory       {@link ServiceFactory} requiring the property.
 	 */
 	public UnknownPropertyError(UnknownPropertyError unknownPropertyError, ServiceFactory<?> serviceFactory) {
 		super(unknownPropertyError, serviceFactory);

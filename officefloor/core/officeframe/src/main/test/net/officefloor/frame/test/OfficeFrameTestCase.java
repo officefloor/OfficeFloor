@@ -230,6 +230,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	private static class TestFail extends Error {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param cause Cause of failure.

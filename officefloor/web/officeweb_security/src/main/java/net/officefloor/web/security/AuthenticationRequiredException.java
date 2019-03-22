@@ -35,6 +35,11 @@ import net.officefloor.web.spi.security.HttpSecurity;
 public class AuthenticationRequiredException extends RuntimeException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Name of the required {@link HttpSecurity}.
 	 */
 	private final String requiredHttpSecurityName;
@@ -49,10 +54,9 @@ public class AuthenticationRequiredException extends RuntimeException {
 	/**
 	 * Initiate for a specific {@link HttpSecurity}.
 	 * 
-	 * @param requiredHttpSecurityName
-	 *            Name of the specific {@link HttpSecurity} required. May be
-	 *            <code>null</code> to indicate any configured
-	 *            {@link HttpSecurity}.
+	 * @param requiredHttpSecurityName Name of the specific {@link HttpSecurity}
+	 *                                 required. May be <code>null</code> to
+	 *                                 indicate any configured {@link HttpSecurity}.
 	 */
 	public AuthenticationRequiredException(String requiredHttpSecurityName) {
 		this.requiredHttpSecurityName = requiredHttpSecurityName;

@@ -29,6 +29,11 @@ import net.officefloor.web.security.HttpAccessControl;
 public class MockHttpAccessControl implements HttpAccessControl {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * {@link MockAccessControl}.
 	 */
 	private final MockAccessControl accessControl;
@@ -36,8 +41,7 @@ public class MockHttpAccessControl implements HttpAccessControl {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param accessControl
-	 *            {@link MockAccessControl}.
+	 * @param accessControl {@link MockAccessControl}.
 	 */
 	public MockHttpAccessControl(MockAccessControl accessControl) {
 		this.accessControl = accessControl;

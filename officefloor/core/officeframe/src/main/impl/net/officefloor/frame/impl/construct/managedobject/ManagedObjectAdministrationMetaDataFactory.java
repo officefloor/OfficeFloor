@@ -20,13 +20,17 @@ package net.officefloor.frame.impl.construct.managedobject;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaData;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectAdministrationMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
+import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -46,28 +50,25 @@ public class ManagedObjectAdministrationMetaDataFactory {
 	private final RawAdministrationMetaDataFactory rawAdminFactory;
 
 	/**
-	 * {@link ThreadState} scoped {@link RawBoundManagedObjectMetaData}
-	 * instances.
+	 * {@link ThreadState} scoped {@link RawBoundManagedObjectMetaData} instances.
 	 */
 	private final Map<String, RawBoundManagedObjectMetaData> threadScopedManagedObjects;
 
 	/**
-	 * {@link ProcessState} scoped {@link RawBoundManagedObjectMetaData}
-	 * instances.
+	 * {@link ProcessState} scoped {@link RawBoundManagedObjectMetaData} instances.
 	 */
 	private final Map<String, RawBoundManagedObjectMetaData> processScopedManagedObjects;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param rawAdminFactory
-	 *            {@link RawAdministrationMetaDataFactory}.
-	 * @param threadScopedManagedObjects
-	 *            {@link ThreadState} scoped
-	 *            {@link RawBoundManagedObjectMetaData} instances.
-	 * @param processScopedManagedObjects
-	 *            {@link ProcessState} scoped
-	 *            {@link RawBoundManagedObjectMetaData} instances.
+	 * @param rawAdminFactory             {@link RawAdministrationMetaDataFactory}.
+	 * @param threadScopedManagedObjects  {@link ThreadState} scoped
+	 *                                    {@link RawBoundManagedObjectMetaData}
+	 *                                    instances.
+	 * @param processScopedManagedObjects {@link ProcessState} scoped
+	 *                                    {@link RawBoundManagedObjectMetaData}
+	 *                                    instances.
 	 */
 	public ManagedObjectAdministrationMetaDataFactory(RawAdministrationMetaDataFactory rawAdminFactory,
 			Map<String, RawBoundManagedObjectMetaData> threadScopedManagedObjects,
@@ -80,19 +81,24 @@ public class ManagedObjectAdministrationMetaDataFactory {
 	/**
 	 * Constructs the {@link ManagedObjectAdministrationMetaData} instances.
 	 * 
-	 * @param administrationConfiguration
-	 *            {@link AdministrationConfiguration} instances.
-	 * @param boundManagedObject
-	 *            {@link RawBoundManagedObjectMetaData} being administered.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param administeredObjectName         Name of {@link Asset} adding
+	 *                                       {@link Administration}.
+	 * @param administrationConfiguration    {@link AdministrationConfiguration}
+	 *                                       instances.
+	 * @param boundManagedObject             {@link RawBoundManagedObjectMetaData}
+	 *                                       being administered.
+	 * @param assetManagerFactory            {@link AssetManagerFactory}.
+	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
+	 *                                       timeout.
+	 * @param issues                         {@link OfficeFloorIssues}.
 	 * @return {@link ManagedObjectAdministrationMetaData} instances or
 	 *         <code>null</code> if issues with issue reported to the
 	 *         {@link OfficeFloorIssues}.
 	 */
 	public ManagedObjectAdministrationMetaData<?, ?, ?>[] createManagedObjectAdministrationMetaData(
-			AdministrationConfiguration<?, ?, ?>[] administrationConfiguration,
-			RawBoundManagedObjectMetaData boundManagedObject, OfficeFloorIssues issues) {
+			String administeredObjectName, AdministrationConfiguration<?, ?, ?>[] administrationConfiguration,
+			RawBoundManagedObjectMetaData boundManagedObject, AssetManagerFactory assetManagerFactory,
+			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Obtain the appropriate scope managed objects
 		ManagedObjectScope scope = boundManagedObject.getManagedObjectIndex().getManagedObjectScope();
@@ -113,8 +119,9 @@ public class ManagedObjectAdministrationMetaDataFactory {
 
 		// Construct the raw administration
 		RawAdministrationMetaData[] rawAdministrations = rawAdminFactory.constructRawAdministrationMetaData(
-				administrationConfiguration, scopeMo, AssetType.MANAGED_OBJECT,
-				boundManagedObject.getBoundManagedObjectName(), issues);
+				administeredObjectName, "load", administrationConfiguration, scopeMo, AssetType.MANAGED_OBJECT,
+				boundManagedObject.getBoundManagedObjectName(), assetManagerFactory, defaultAsynchronousFlowTimeout,
+				issues);
 		if (rawAdministrations == null) {
 			return null;
 		}

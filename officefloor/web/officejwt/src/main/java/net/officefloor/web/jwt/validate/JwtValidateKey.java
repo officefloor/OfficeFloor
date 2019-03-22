@@ -14,6 +14,11 @@ import net.officefloor.frame.api.clock.Clock;
 public class JwtValidateKey implements Serializable {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Start time.
 	 */
 	private final long startTime;

@@ -302,6 +302,11 @@ public class CompileUtil {
 	 * Indicates failure in loading types.
 	 */
 	private static class LoadTypesException extends RuntimeException {
+
+		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
 	}
 
 	/**

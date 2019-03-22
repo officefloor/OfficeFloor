@@ -36,6 +36,11 @@ import net.officefloor.server.stream.StreamBufferPool;
 public class HttpException extends RuntimeException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * {@link HttpHeader} space.
 	 */
 	private static byte[] SPACE = " ".getBytes(ServerHttpConnection.HTTP_CHARSET);
@@ -78,8 +83,7 @@ public class HttpException extends RuntimeException {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param status
-	 *            {@link HttpStatus}.
+	 * @param status {@link HttpStatus}.
 	 */
 	public HttpException(HttpStatus status) {
 		super(status.getStatusMessage());
@@ -91,10 +95,8 @@ public class HttpException extends RuntimeException {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param status
-	 *            {@link HttpStatus}.
-	 * @param cause
-	 *            {@link Throwable} cause.
+	 * @param status {@link HttpStatus}.
+	 * @param cause  {@link Throwable} cause.
 	 */
 	public HttpException(HttpStatus status, Throwable cause) {
 		super(cause);
@@ -106,12 +108,9 @@ public class HttpException extends RuntimeException {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param status
-	 *            {@link HttpStatus}.
-	 * @param headers
-	 *            {@link HttpHeader} instances. May be <code>null</code>.
-	 * @param entity
-	 *            Entity for the {@link HttpResponse}. May be <code>null</code>.
+	 * @param status  {@link HttpStatus}.
+	 * @param headers {@link HttpHeader} instances. May be <code>null</code>.
+	 * @param entity  Entity for the {@link HttpResponse}. May be <code>null</code>.
 	 */
 	public HttpException(HttpStatus status, WritableHttpHeader[] headers, String entity) {
 		super(status.getStatusMessage());
@@ -124,8 +123,7 @@ public class HttpException extends RuntimeException {
 	 * Enable wrapping {@link Throwable} in a {@link HttpException} for
 	 * {@link HttpStatus#INTERNAL_SERVER_ERROR}.
 	 * 
-	 * @param cause
-	 *            {@link Throwable} cause.
+	 * @param cause {@link Throwable} cause.
 	 */
 	public HttpException(Throwable cause) {
 		this(HttpStatus.INTERNAL_SERVER_ERROR, cause);
@@ -161,17 +159,12 @@ public class HttpException extends RuntimeException {
 	/**
 	 * Writes the HTTP response for this {@link HttpException}.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param version
-	 *            {@link HttpVersion}.
-	 * @param isIncludeStackTrace
-	 *            Whether to include the stack trace.
-	 * @param head
-	 *            Head {@link StreamBuffer} of the linked list of
-	 *            {@link StreamBuffer} instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param                     <B> Buffer type.
+	 * @param version             {@link HttpVersion}.
+	 * @param isIncludeStackTrace Whether to include the stack trace.
+	 * @param head                Head {@link StreamBuffer} of the linked list of
+	 *                            {@link StreamBuffer} instances.
+	 * @param bufferPool          {@link StreamBufferPool}.
 	 */
 	public <B> void writeHttpResponse(HttpVersion version, boolean isIncludeStackTrace, StreamBuffer<B> head,
 			StreamBufferPool<B> bufferPool) {

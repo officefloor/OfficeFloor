@@ -86,12 +86,9 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 	/**
 	 * Initiate.
 	 * 
-	 * @param asset
-	 *            {@link Asset} to be managed.
-	 * @param assetManager
-	 *            {@link AssetManager} for managing this.
-	 * @param clock
-	 *            {@link MonitorClock}.
+	 * @param asset        {@link Asset} to be managed.
+	 * @param assetManager {@link AssetManager} for managing this.
+	 * @param clock        {@link MonitorClock}.
 	 */
 	public AssetLatchImpl(Asset asset, AssetManagerImpl assetManager, MonitorClock clock) {
 		this.asset = asset;
@@ -162,8 +159,13 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 
 	@Override
 	public void releaseFunctions(boolean isPermanent) {
+		this.releaseFunctions(isPermanent, null);
+	}
+
+	@Override
+	public void releaseFunctions(boolean isPermanent, FunctionState functionState) {
 		// Latch released, so proceed with functions
-		ReleaseOperation release = new ReleaseOperation(isPermanent);
+		FunctionState release = Promise.then(functionState, new ReleaseOperation(isPermanent));
 		FunctionLoop loop = this.assetManager.getFunctionLoop();
 		loop.delegateFunction(release);
 	}
@@ -216,8 +218,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		/**
 		 * Instantiate.
 		 * 
-		 * @param function
-		 *            {@link FunctionState} awaiting on this {@link AssetLatch}.
+		 * @param function {@link FunctionState} awaiting on this {@link AssetLatch}.
 		 */
 		public AwaitingEntry(FunctionState function) {
 			this.function = function;
@@ -242,8 +243,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		/**
 		 * Initiate.
 		 * 
-		 * @param entry
-		 *            {@link AwaitingEntry} to be registered.
+		 * @param entry {@link AwaitingEntry} to be registered.
 		 */
 		public AwaitingOperation(AwaitingEntry entry) {
 			this.entry = entry;
@@ -290,8 +290,7 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		/**
 		 * Instantiate.
 		 * 
-		 * @param isPermanent
-		 *            Indicates if proceeding is permanent.
+		 * @param isPermanent Indicates if proceeding is permanent.
 		 */
 		public ReleaseOperation(boolean isPermanent) {
 			this.isPermanent = isPermanent;
@@ -352,10 +351,8 @@ public class AssetLatchImpl extends AbstractLinkedListSetEntry<AssetLatchImpl, A
 		/**
 		 * Instantiate.
 		 * 
-		 * @param failure
-		 *            Failure.
-		 * @param isPermanent
-		 *            Indicates if proceeding is permanent.
+		 * @param failure     Failure.
+		 * @param isPermanent Indicates if proceeding is permanent.
 		 */
 		public FailOperation(Throwable failure, boolean isPermanent) {
 			this.failure = failure;

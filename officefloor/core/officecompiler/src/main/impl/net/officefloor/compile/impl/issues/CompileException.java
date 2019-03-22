@@ -34,10 +34,14 @@ import net.officefloor.compile.issues.CompilerIssue;
 public class CompileException extends Exception {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Obtains the {@link DefaultCompilerIssue} as string.
 	 * 
-	 * @param issue
-	 *            {@link DefaultCompilerIssue}.
+	 * @param issue {@link DefaultCompilerIssue}.
 	 * @return Text details of the {@link DefaultCompilerIssue}.
 	 */
 	public static String toIssueString(DefaultCompilerIssue issue) {
@@ -49,10 +53,8 @@ public class CompileException extends Exception {
 	/**
 	 * Prints the {@link DefaultCompilerIssue} to the {@link PrintStream}.
 	 * 
-	 * @param issue
-	 *            {@link DefaultCompilerIssue}.
-	 * @param out
-	 *            {@link PrintStream}.
+	 * @param issue {@link DefaultCompilerIssue}.
+	 * @param out   {@link PrintStream}.
 	 */
 	public static void printIssue(DefaultCompilerIssue issue, PrintStream out) {
 		printIssue(issue, new PrintStreamOutput(out), 0);
@@ -61,10 +63,8 @@ public class CompileException extends Exception {
 	/**
 	 * Prints the {@link DefaultCompilerIssue} to the {@link PrintWriter}.
 	 * 
-	 * @param issue
-	 *            {@link DefaultCompilerIssue}.
-	 * @param out
-	 *            {@link PrintWriter}.
+	 * @param issue {@link DefaultCompilerIssue}.
+	 * @param out   {@link PrintWriter}.
 	 */
 	public static void printIssue(DefaultCompilerIssue issue, PrintWriter out) {
 		printIssue(issue, new PrintWriterOutput(out), 0);
@@ -78,8 +78,7 @@ public class CompileException extends Exception {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param issue
-	 *            {@link DefaultCompilerIssue}.
+	 * @param issue {@link DefaultCompilerIssue}.
 	 */
 	public CompileException(DefaultCompilerIssue issue) {
 		super(issue.getIssueDescription());
@@ -141,16 +140,14 @@ public class CompileException extends Exception {
 		/**
 		 * Prints the text.
 		 * 
-		 * @param text
-		 *            Text.
+		 * @param text Text.
 		 */
 		void print(String text);
 
 		/**
 		 * Prints the stack trace.
 		 * 
-		 * @param throwable
-		 *            {@link Throwable}.
+		 * @param throwable {@link Throwable}.
 		 */
 		void printStackTrace(Throwable throwable);
 
@@ -173,8 +170,7 @@ public class CompileException extends Exception {
 		/**
 		 * Initiate.
 		 * 
-		 * @param stream
-		 *            {@link PrintStream}.
+		 * @param stream {@link PrintStream}.
 		 */
 		public PrintStreamOutput(PrintStream stream) {
 			this.stream = stream;
@@ -209,8 +205,7 @@ public class CompileException extends Exception {
 		/**
 		 * Initiate.
 		 * 
-		 * @param writer
-		 *            {@link PrintWriter}.
+		 * @param writer {@link PrintWriter}.
 		 */
 		public PrintWriterOutput(PrintWriter writer) {
 			this.writer = writer;
@@ -235,12 +230,9 @@ public class CompileException extends Exception {
 	/**
 	 * Prints the {@link CompilerIssue}.
 	 * 
-	 * @param issue
-	 *            {@link DefaultCompilerIssue}.
-	 * @param out
-	 *            {@link Output}.
-	 * @param depth
-	 *            Depth into the causes.
+	 * @param issue {@link DefaultCompilerIssue}.
+	 * @param out   {@link Output}.
+	 * @param depth Depth into the causes.
 	 */
 	private static void printIssue(DefaultCompilerIssue issue, Output out, int depth) {
 
@@ -260,12 +252,9 @@ public class CompileException extends Exception {
 	/**
 	 * Prints the {@link CompilerIssue} causes.
 	 * 
-	 * @param issue
-	 *            {@link DefaultCompilerIssue}.
-	 * @param out
-	 *            {@link Output}.
-	 * @param depth
-	 *            Depth into the causes.
+	 * @param issue {@link DefaultCompilerIssue}.
+	 * @param out   {@link Output}.
+	 * @param depth Depth into the causes.
 	 */
 	private static void printCauses(DefaultCompilerIssue issue, Output out, int depth) {
 
@@ -293,10 +282,8 @@ public class CompileException extends Exception {
 	 * Prints the separation between the lines, taking into account depth into
 	 * causes.
 	 * 
-	 * @param out
-	 *            {@link Output}.
-	 * @param depth
-	 *            Depth into the causes.
+	 * @param out   {@link Output}.
+	 * @param depth Depth into the causes.
 	 */
 	private static void printLineSeparation(Output out, int depth) {
 
@@ -312,12 +299,9 @@ public class CompileException extends Exception {
 	/**
 	 * Loads the {@link Node} trace.
 	 * 
-	 * @param node
-	 *            {@link Node}.
-	 * @param out
-	 *            {@link Output}.
-	 * @param depth
-	 *            Depth into the causes.
+	 * @param node  {@link Node}.
+	 * @param out   {@link Output}.
+	 * @param depth Depth into the causes.
 	 */
 	private static void printNodeTrace(Node node, Output out, int depth) {
 
@@ -346,10 +330,8 @@ public class CompileException extends Exception {
 	/**
 	 * Fills the {@link Node} trace.
 	 * 
-	 * @param node
-	 *            {@link Node}.
-	 * @param trace
-	 *            Trace to fill.
+	 * @param node  {@link Node}.
+	 * @param trace Trace to fill.
 	 */
 	private static void fillNodeTrace(Node node, List<StackTraceElement> trace) {
 

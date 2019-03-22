@@ -607,6 +607,11 @@ public class DigestHttpSecuritySource extends
 	private static class SecurityState implements Serializable {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Nonce for the authentication.
 		 */
 		public final String nonce;

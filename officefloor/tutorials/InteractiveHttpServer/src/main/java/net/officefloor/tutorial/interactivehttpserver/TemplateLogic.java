@@ -33,6 +33,7 @@ public class TemplateLogic {
 	@Data
 	@HttpParameters
 	public static class Parameters implements Serializable {
+		private static final long serialVersionUID = 1L;
 
 		private String name;
 
@@ -45,6 +46,7 @@ public class TemplateLogic {
 
 	@Data
 	public static class Issue implements Serializable {
+		private static final long serialVersionUID = 1L;
 
 		private final String message;
 	}
@@ -52,10 +54,10 @@ public class TemplateLogic {
 	/**
 	 * Obtains the bean for rendering the template.
 	 * 
-	 * @param submittedParameters
-	 *            Same {@link Parameters} that was constructed for
-	 *            {@link #handleSubmission(Parameters)}. This allows the page to be
-	 *            rendered with the values provided by the client.
+	 * @param submittedParameters Same {@link Parameters} that was constructed for
+	 *                            {@link #handleSubmission(Parameters)}. This allows
+	 *                            the page to be rendered with the values provided
+	 *                            by the client.
 	 * @return {@link Parameters} for rendering to page.
 	 */
 	public Parameters getTemplateData(Parameters submittedParameters) {
@@ -65,10 +67,10 @@ public class TemplateLogic {
 	/**
 	 * Reflectively invoked to handle form submission.
 	 * 
-	 * @param submittedParameters
-	 *            {@link Parameters} which is dependency injected. It is constructed
-	 *            via its default constructor and has the HTTP parameters values
-	 *            loaded by corresponding names.
+	 * @param submittedParameters {@link Parameters} which is dependency injected.
+	 *                            It is constructed via its default constructor and
+	 *                            has the HTTP parameters values loaded by
+	 *                            corresponding names.
 	 */
 	public void handleSubmission(Parameters submittedParameters) {
 

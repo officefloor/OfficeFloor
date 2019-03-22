@@ -30,12 +30,15 @@ import net.officefloor.server.http.WritableHttpHeader;
 public class BadRequestHttpException extends HttpException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param headers
-	 *            {@link WritableHttpHeader} instances.
-	 * @param entity
-	 *            {@link HttpResponse} entity.
+	 * @param headers {@link WritableHttpHeader} instances.
+	 * @param entity  {@link HttpResponse} entity.
 	 */
 	public BadRequestHttpException(WritableHttpHeader[] headers, String entity) {
 		super(HttpStatus.BAD_REQUEST, headers, entity);

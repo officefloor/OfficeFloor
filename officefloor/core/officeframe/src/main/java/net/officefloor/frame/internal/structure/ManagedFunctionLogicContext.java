@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -32,17 +33,15 @@ public interface ManagedFunctionLogicContext {
 	 * Specifies the next {@link FunctionLogic} to be executed before the next
 	 * {@link ManagedFunctionLogic}.
 	 * 
-	 * @param function
-	 *            Next {@link FunctionLogic}.
+	 * @param function Next {@link FunctionLogic}.
 	 */
 	void next(FunctionLogic function);
 
 	/**
 	 * Obtains the {@link Object} from a {@link ManagedObject}.
 	 * 
-	 * @param index
-	 *            {@link ManagedObjectIndex} identifying the
-	 *            {@link ManagedObject}.
+	 * @param index {@link ManagedObjectIndex} identifying the
+	 *              {@link ManagedObject}.
 	 * @return Object from the {@link ManagedObject}.
 	 */
 	Object getObject(ManagedObjectIndex index);
@@ -50,14 +49,18 @@ public interface ManagedFunctionLogicContext {
 	/**
 	 * Invokes a {@link Flow}.
 	 * 
-	 * @param flowMetaData
-	 *            {@link FlowMetaData} for the {@link Flow}.
-	 * @param parameter
-	 *            Parameter for the initial {@link ManagedFunction} of the
-	 *            {@link Flow}.
-	 * @param callback
-	 *            Optional {@link FlowCallback}. May be <code>null</code>.
+	 * @param flowMetaData {@link FlowMetaData} for the {@link Flow}.
+	 * @param parameter    Parameter for the initial {@link ManagedFunction} of the
+	 *                     {@link Flow}.
+	 * @param callback     Optional {@link FlowCallback}. May be <code>null</code>.
 	 */
 	void doFlow(FlowMetaData flowMetaData, Object parameter, FlowCallback callback);
+
+	/**
+	 * Creates an {@link AsynchronousFlow}.
+	 * 
+	 * @return {@link AsynchronousFlow}.
+	 */
+	AsynchronousFlow createAsynchronousFlow();
 
 }

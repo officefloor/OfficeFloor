@@ -29,11 +29,13 @@ import junit.framework.TestCase;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceContext;
 import net.officefloor.frame.api.governance.GovernanceFactory;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -108,20 +110,14 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	/**
 	 * Instantiate.
 	 *
-	 * @param <C>
-	 *            {@link Governance} {@link Class} type.
-	 * @param clazz
-	 *            {@link Class}.
-	 * @param object
-	 *            Object should the method not be <code>static</code>. May be
-	 *            <code>null</code> if <code>static</code> {@link Method} of the
-	 *            {@link Class}.
-	 * @param governanceName
-	 *            Name of the {@link Governance}.
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder}.
-	 * @param testCase
-	 *            {@link AbstractOfficeConstructTestCase}.
+	 * @param                <C> {@link Governance} {@link Class} type.
+	 * @param clazz          {@link Class}.
+	 * @param object         Object should the method not be <code>static</code>.
+	 *                       May be <code>null</code> if <code>static</code>
+	 *                       {@link Method} of the {@link Class}.
+	 * @param governanceName Name of the {@link Governance}.
+	 * @param officeBuilder  {@link OfficeBuilder}.
+	 * @param testCase       {@link AbstractOfficeConstructTestCase}.
 	 */
 	public <C> ReflectiveGovernanceBuilder(Class<C> clazz, C object, String governanceName, OfficeBuilder officeBuilder,
 			AbstractOfficeConstructTestCase testCase) {
@@ -152,8 +148,8 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	/**
 	 * Constructs the register {@link ManagedObject} {@link GovernanceActivity}.
 	 * 
-	 * @param methodName
-	 *            Name of {@link Method} to register the {@link ManagedObject}.
+	 * @param methodName Name of {@link Method} to register the
+	 *                   {@link ManagedObject}.
 	 * @return {@link ReflectiveGovernanceActivityBuilder}.
 	 */
 	public ReflectiveGovernanceActivityBuilder register(String methodName) {
@@ -165,8 +161,8 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	/**
 	 * Constructs the enforce {@link GovernanceActivity}.
 	 * 
-	 * @param methodName
-	 *            Name of {@link Method} for enforcing the {@link Governance}.
+	 * @param methodName Name of {@link Method} for enforcing the
+	 *                   {@link Governance}.
 	 * @return {@link ReflectiveGovernanceActivityBuilder}.
 	 */
 	public ReflectiveGovernanceActivityBuilder enforce(String methodName) {
@@ -177,8 +173,8 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	/**
 	 * Constructs the disregard {@link GovernanceActivity}.
 	 * 
-	 * @param methodName
-	 *            Name of {@link Method} for disregarding the {@link Governance}.
+	 * @param methodName Name of {@link Method} for disregarding the
+	 *                   {@link Governance}.
 	 * @return {@link ReflectiveGovernanceActivityBuilder}.
 	 */
 	public ReflectiveGovernanceActivityBuilder disregard(String methodName) {
@@ -189,17 +185,15 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	/**
 	 * Creates the {@link ReflectiveGovernanceActivityBuilder}.
 	 * 
-	 * @param activityType
-	 *            Type of activity.
-	 * @param methodName
-	 *            Name of {@link Method} for the activity.
-	 * @param existing
-	 *            Existing {@link ReflectiveGovernanceActivityBuilder}. Most likely
-	 *            <code>null</code>.
-	 * @param expectedExtensionInterface
-	 *            Expected extension interface. May be <code>null</code>.
-	 * @param isExtensionAnArray
-	 *            Flags whether extension interface an array paramaeter.
+	 * @param activityType               Type of activity.
+	 * @param methodName                 Name of {@link Method} for the activity.
+	 * @param existing                   Existing
+	 *                                   {@link ReflectiveGovernanceActivityBuilder}.
+	 *                                   Most likely <code>null</code>.
+	 * @param expectedExtensionInterface Expected extension interface. May be
+	 *                                   <code>null</code>.
+	 * @param isExtensionAnArray         Flags whether extension interface an array
+	 *                                   paramaeter.
 	 * @return {@link ReflectiveGovernanceActivityBuilder}.
 	 */
 	private ReflectiveGovernanceActivityBuilder createActivity(String activityType, String methodName,
@@ -314,10 +308,9 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 		/**
 		 * Builder for the particular {@link Governance} action.
 		 * 
-		 * @param clazz
-		 *            {@link Class} containing the {@link Method}.
-		 * @param methodName
-		 *            Name of the {@link Method} for the {@link Governance} action.
+		 * @param clazz      {@link Class} containing the {@link Method}.
+		 * @param methodName Name of the {@link Method} for the {@link Governance}
+		 *                   action.
 		 */
 		private ReflectiveGovernanceActivityBuilder(Class<?> clazz, String methodName) {
 
@@ -341,12 +334,9 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 		/**
 		 * Builds the {@link Flow}.
 		 * 
-		 * @param functionName
-		 *            {@link ManagedFunction} name.
-		 * @param argumentType
-		 *            Type of argument passed to the {@link Flow}.
-		 * @param isSpawnThread
-		 *            Flags whether to spawn a {@link ThreadState}.
+		 * @param functionName  {@link ManagedFunction} name.
+		 * @param argumentType  Type of argument passed to the {@link Flow}.
+		 * @param isSpawnThread Flags whether to spawn a {@link ThreadState}.
 		 */
 		public void buildFlow(String functionName, Class<?> argumentType, boolean isSpawnThread) {
 
@@ -362,14 +352,31 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 		}
 
 		/**
+		 * Builds {@link AsynchronousFlow}.
+		 */
+		public void buildAsynchronousFlow() {
+
+			// Ensure parameter is AsynchronousFlow
+			Class<?> parameterType = this.parameterTypes[this.parameterIndex];
+			TestCase.assertTrue(
+					"Parameter " + this.parameterIndex + " must be " + AsynchronousFlow.class.getSimpleName(),
+					AsynchronousFlow.class.isAssignableFrom(parameterType));
+
+			// Link AsynchronousFlow
+			this.parameterFactories[this.parameterIndex] = new AsynchronousFlowParameterFactory();
+
+			// Set for next parameter
+			this.parameterIndex++;
+		}
+
+		/**
 		 * Extracts the extension interface type from the {@link Method} (first
 		 * parameter).
 		 * 
-		 * @param isArray
-		 *            Indicates if expecting extension interface to be in an array.
-		 * @param expectedExtensionInterface
-		 *            Optional expected extension interface. May be <code>null</code> to
-		 *            be any interface.
+		 * @param isArray                    Indicates if expecting extension interface
+		 *                                   to be in an array.
+		 * @param expectedExtensionInterface Optional expected extension interface. May
+		 *                                   be <code>null</code> to be any interface.
 		 * @return Extension interface.
 		 */
 		private Class<?> extractExtensionInterface(boolean isArray, Class<?> expectedExtensionInterface) {
@@ -402,12 +409,9 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 		/**
 		 * Executes the {@link Method}.
 		 * 
-		 * @param extensions
-		 *            Extensions.
-		 * @param context
-		 *            {@link GovernanceContext}.
-		 * @throws Throwable
-		 *             If fails.
+		 * @param extensions Extensions.
+		 * @param context    {@link GovernanceContext}.
+		 * @throws Throwable If fails.
 		 */
 		private void execute(Object[] extensions, GovernanceContext<Indexed> context) throws Throwable {
 
@@ -473,8 +477,7 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 		/**
 		 * Initiate.
 		 * 
-		 * @param index
-		 *            Index of the {@link FlowMetaData}.
+		 * @param index Index of the {@link FlowMetaData}.
 		 */
 		public ReflectiveFlowParameterFactory(int index) {
 			this.index = index;
@@ -488,6 +491,17 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 					context.doFlow(ReflectiveFlowParameterFactory.this.index, parameter, callback);
 				}
 			};
+		}
+	}
+
+	/**
+	 * {@link ParameterFactory} to obtain the {@link AsynchronousContext}.
+	 */
+	private static class AsynchronousFlowParameterFactory implements ParameterFactory {
+
+		@Override
+		public Object createParamater(Object[] extensions, GovernanceContext<Indexed> context) {
+			return context.createAsynchronousFlow();
 		}
 	}
 

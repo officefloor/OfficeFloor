@@ -26,6 +26,7 @@ import java.io.Serializable;
  */
 // START SNIPPET: example
 public class LetterEncryption implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	private char letter;
 

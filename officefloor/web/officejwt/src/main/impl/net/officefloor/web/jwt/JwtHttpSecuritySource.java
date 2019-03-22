@@ -741,6 +741,11 @@ public class JwtHttpSecuritySource<C> extends
 	private class JwtHttpAccessControlImpl extends HttpAccessControlImpl implements JwtHttpAccessControl<C> {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Claims.
 		 */
 		private final C claims;

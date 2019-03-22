@@ -31,6 +31,11 @@ import net.officefloor.web.state.HttpRequestState;
 public class ChallengeMomento implements Serializable {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Momento for the {@link ServerHttpConnection}.
 	 */
 	private final Serializable connection;
@@ -43,10 +48,8 @@ public class ChallengeMomento implements Serializable {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param connection
-	 *            Momento for the {@link ServerHttpConnection}.
-	 * @param requestState
-	 *            Momento for the {@link HttpRequestState}.
+	 * @param connection   Momento for the {@link ServerHttpConnection}.
+	 * @param requestState Momento for the {@link HttpRequestState}.
 	 */
 	public ChallengeMomento(Serializable connection, Serializable requestState) {
 		this.connection = connection;

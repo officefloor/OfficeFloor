@@ -210,6 +210,11 @@ public class RawBoundManagedObjectMetaData {
 	private static class CyclicDependencyException extends RuntimeException {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param message Initiate with description for {@link OfficeFloorIssues}.

@@ -36,6 +36,11 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 public abstract class Escalation extends Throwable {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Default constructor.
 	 */
 	public Escalation() {
@@ -45,8 +50,7 @@ public abstract class Escalation extends Throwable {
 	/**
 	 * Allows for a cause of the {@link Escalation}.
 	 * 
-	 * @param cause
-	 *            Cause of the {@link Escalation}.
+	 * @param cause Cause of the {@link Escalation}.
 	 */
 	public Escalation(Throwable cause) {
 		super(cause);

@@ -51,7 +51,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.6.2</revision>
+		<revision>3.7.0</revision>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
@@ -291,6 +291,11 @@
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring_data</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
+				<artifactId>officespring_webclient</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Identity -->

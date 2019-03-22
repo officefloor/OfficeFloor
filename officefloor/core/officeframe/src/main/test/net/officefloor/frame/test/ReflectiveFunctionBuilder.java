@@ -26,11 +26,13 @@ import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -91,21 +93,15 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	/**
 	 * Initiate.
 	 *
-	 * @param <C>
-	 *            {@link ManagedFunction} {@link Method} containing {@link Class}
-	 *            type.
-	 * @param clazz
-	 *            {@link Class}.
-	 * @param object
-	 *            Object should the method not be <code>static</code>. May be
-	 *            <code>null</code> if <code>static</code> {@link Method} of the
-	 *            {@link Class}.
-	 * @param methodName
-	 *            Name of the {@link Method} to invoke.
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder}.
-	 * @param testCase
-	 *            {@link AbstractOfficeConstructTestCase}.
+	 * @param               <C> {@link ManagedFunction} {@link Method} containing
+	 *                      {@link Class} type.
+	 * @param clazz         {@link Class}.
+	 * @param object        Object should the method not be <code>static</code>. May
+	 *                      be <code>null</code> if <code>static</code>
+	 *                      {@link Method} of the {@link Class}.
+	 * @param methodName    Name of the {@link Method} to invoke.
+	 * @param officeBuilder {@link OfficeBuilder}.
+	 * @param testCase      {@link AbstractOfficeConstructTestCase}.
 	 */
 	public <C> ReflectiveFunctionBuilder(Class<C> clazz, C object, String methodName, OfficeBuilder officeBuilder,
 			AbstractOfficeConstructTestCase testCase) {
@@ -177,10 +173,26 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	}
 
 	/**
+	 * Builds {@link AsynchronousFlow}.
+	 */
+	public void buildAsynchronousFlow() {
+
+		// Ensure parameter is AsynchronousFlow
+		Class<?> parameterType = this.parameterTypes[this.parameterIndex];
+		TestCase.assertTrue("Parameter " + this.parameterIndex + " must be " + AsynchronousFlow.class.getSimpleName(),
+				AsynchronousFlow.class.isAssignableFrom(parameterType));
+
+		// Link AsynchronousFlow
+		this.parameterFactories[this.parameterIndex] = new AsynchronousFlowParameterFactory();
+
+		// Set for next parameter
+		this.parameterIndex++;
+	}
+
+	/**
 	 * Links the {@link ManagedObject} to the {@link ManagedFunction}.
 	 * 
-	 * @param scopeManagedObjectName
-	 *            Scope name of the {@link ManagedObject}.
+	 * @param scopeManagedObjectName Scope name of the {@link ManagedObject}.
 	 */
 	public void buildObject(String scopeManagedObjectName) {
 
@@ -199,10 +211,10 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	/**
 	 * Builds the {@link ManagedObjectScope} bound {@link ManagedObject}.
 	 * 
-	 * @param officeManagedObjectName
-	 *            {@link Office} name of the {@link ManagedObject}.
-	 * @param managedObjectScope
-	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
+	 * @param officeManagedObjectName {@link Office} name of the
+	 *                                {@link ManagedObject}.
+	 * @param managedObjectScope      {@link ManagedObjectScope} for the
+	 *                                {@link ManagedObject}.
 	 * @return {@link DependencyMappingBuilder}.
 	 */
 	public DependencyMappingBuilder buildObject(String officeManagedObjectName, ManagedObjectScope managedObjectScope) {
@@ -221,12 +233,9 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	/**
 	 * Builds the flow.
 	 * 
-	 * @param functionName
-	 *            {@link ManagedFunction} name.
-	 * @param argumentType
-	 *            Type of argument passed to the {@link Flow}.
-	 * @param isSpawnThreadState
-	 *            <code>true</code> to spawn in {@link ThreadState}.
+	 * @param functionName       {@link ManagedFunction} name.
+	 * @param argumentType       Type of argument passed to the {@link Flow}.
+	 * @param isSpawnThreadState <code>true</code> to spawn in {@link ThreadState}.
 	 */
 	public void buildFlow(String functionName, Class<?> argumentType, boolean isSpawnThreadState) {
 
@@ -243,8 +252,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	 * Specifies the next {@link ManagedFunction} using the return type of the
 	 * {@link Method} as the argument type.
 	 * 
-	 * @param functionName
-	 *            {@link ManagedFunction} name.
+	 * @param functionName {@link ManagedFunction} name.
 	 */
 	public void setNextFunction(String functionName) {
 
@@ -261,8 +269,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	/**
 	 * Creates pre {@link Administration}.
 	 * 
-	 * @param methodName
-	 *            Name of {@link Method} for {@link Administration}.
+	 * @param methodName Name of {@link Method} for {@link Administration}.
 	 * @return {@link ReflectiveAdministrationBuilder}.
 	 */
 	public ReflectiveAdministrationBuilder preAdminister(String methodName) {
@@ -272,8 +279,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	/**
 	 * Creates post {@link Administration}.
 	 * 
-	 * @param methodName
-	 *            Name of {@link Method} for {@link Administration}.
+	 * @param methodName Name of {@link Method} for {@link Administration}.
 	 * @return {@link ReflectiveAdministrationBuilder}.
 	 */
 	public ReflectiveAdministrationBuilder postAdminister(String methodName) {
@@ -283,10 +289,9 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	/**
 	 * Adds {@link Administration}.
 	 * 
-	 * @param methodName
-	 *            Name of the {@link Method}.
-	 * @param isPreNotPost
-	 *            <code>true</code> for pre (otherwise <code>false</code> for post).
+	 * @param methodName   Name of the {@link Method}.
+	 * @param isPreNotPost <code>true</code> for pre (otherwise <code>false</code>
+	 *                     for post).
 	 * @return {@link ReflectiveAdministrationBuilder}.
 	 */
 	private ReflectiveAdministrationBuilder addAdminster(String methodName, boolean isPreNotPost) {
@@ -345,6 +350,17 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	}
 
 	/**
+	 * {@link ParameterFactory} to obtain the {@link AsynchronousContext}.
+	 */
+	private static class AsynchronousFlowParameterFactory implements ParameterFactory {
+
+		@Override
+		public Object createParamater(ManagedFunctionContext<Indexed, Indexed> context) {
+			return context.createAsynchronousFlow();
+		}
+	}
+
+	/**
 	 * {@link ParameterFactory} to obtain a dependency.
 	 */
 	private static class ObjectParameterFactory implements ParameterFactory {
@@ -357,8 +373,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 		/**
 		 * Initiate.
 		 * 
-		 * @param index
-		 *            Index of the object.
+		 * @param index Index of the object.
 		 */
 		public ObjectParameterFactory(int index) {
 			this.index = index;

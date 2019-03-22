@@ -58,8 +58,7 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 	private static final ManagedObjectMetaData<?>[] NO_MANAGED_OBJECT_META_DATA = new ManagedObjectMetaData[0];
 
 	/**
-	 * No required {@link Governance} for
-	 * {@link EscalationHandlerManagedFunction}.
+	 * No required {@link Governance} for {@link EscalationHandlerManagedFunction}.
 	 */
 	private static final boolean[] NO_GOVERNANCE = null;
 
@@ -76,8 +75,7 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 	private static final FlowMetaData[] NO_FLOW_META_DATA = new FlowMetaData[0];
 
 	/**
-	 * No {@link Escalation} handling from
-	 * {@link EscalationHandlerManagedFunction}.
+	 * No {@link Escalation} handling from {@link EscalationHandlerManagedFunction}.
 	 */
 	private static final EscalationProcedure FURTHER_ESCALATION_PROCEDURE = new EscalationProcedureImpl();
 
@@ -104,10 +102,8 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 	/**
 	 * Initiate.
 	 * 
-	 * @param escalationHandler
-	 *            {@link EscalationHandler}.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
+	 * @param escalationHandler {@link EscalationHandler}.
+	 * @param officeMetaData    {@link OfficeMetaData}.
 	 */
 	public EscalationHandlerEscalationFlow(EscalationHandler escalationHandler, OfficeMetaData officeMetaData) {
 
@@ -117,7 +113,7 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 				escalationHandler);
 		ManagedFunctionMetaDataImpl<EscalationKey, None> functionMetaData = new ManagedFunctionMetaDataImpl<EscalationKey, None>(
 				EscalationHandler.class.getSimpleName(), functionFactory, null, Throwable.class, anyTeam,
-				MANGED_OBJECT_DEPENDENCIES, NO_MANAGED_OBJECT_META_DATA, NO_GOVERNANCE);
+				MANGED_OBJECT_DEPENDENCIES, NO_MANAGED_OBJECT_META_DATA, NO_GOVERNANCE, -1, null);
 		functionMetaData.loadOfficeMetaData(officeMetaData, NO_FLOW_META_DATA, null, FURTHER_ESCALATION_PROCEDURE,
 				NO_ADMINISTRATOR_META_DATA, NO_ADMINISTRATOR_META_DATA, NO_MANAGED_OBJECTS);
 		this.functionMetaData = functionMetaData;
@@ -157,8 +153,7 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 		/**
 		 * Initiate.
 		 * 
-		 * @param escalationHandler
-		 *            {@link EscalationHandler}.
+		 * @param escalationHandler {@link EscalationHandler}.
 		 */
 		public EscalationHandlerManagedFunctionFactory(EscalationHandler escalationHandler) {
 			this.escalationHandler = escalationHandler;

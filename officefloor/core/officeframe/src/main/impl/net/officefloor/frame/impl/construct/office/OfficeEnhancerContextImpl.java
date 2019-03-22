@@ -37,13 +37,10 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 	/**
 	 * Enhances the {@link OfficeConfiguration}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
-	 * @param officeConfiguration
-	 *            {@link OfficeConfiguration}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues} to provide issues in enhancing the
-	 *            {@link OfficeConfiguration}.
+	 * @param officeName          Name of the {@link Office}.
+	 * @param officeConfiguration {@link OfficeConfiguration}.
+	 * @param issues              {@link OfficeFloorIssues} to provide issues in
+	 *                            enhancing the {@link OfficeConfiguration}.
 	 */
 	public static void enhanceOffice(String officeName, OfficeConfiguration officeConfiguration,
 			OfficeFloorIssues issues) {
@@ -71,10 +68,8 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 	/**
 	 * Initiate.
 	 * 
-	 * @param officeConfiguration
-	 *            {@link OfficeConfiguration}.
-	 * @param rawOfficeFloorMetaData
-	 *            {@link RawOfficeFloorMetaData}.
+	 * @param officeConfiguration    {@link OfficeConfiguration}.
+	 * @param rawOfficeFloorMetaData {@link RawOfficeFloorMetaData}.
 	 */
 	private OfficeEnhancerContextImpl(OfficeConfiguration officeConfiguration) {
 		this.officeConfiguration = officeConfiguration;
@@ -106,10 +101,14 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 	private static class OfficeEnhancerError extends Error {
 
 		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
 		 * Initiate.
 		 * 
-		 * @param message
-		 *            Message.
+		 * @param message Message.
 		 */
 		public OfficeEnhancerError(String message) {
 			super(message);

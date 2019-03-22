@@ -26,15 +26,18 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class SourceManagedObjectTimedOutEscalation extends
-		ManagedObjectEscalation {
+public class SourceManagedObjectTimedOutEscalation extends ManagedObjectEscalation {
+
+	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param objectType
-	 *            {@link Class} of the {@link Object} returned from the timed
-	 *            out {@link ManagedObject}.
+	 * @param objectType {@link Class} of the {@link Object} returned from the timed
+	 *                   out {@link ManagedObject}.
 	 */
 	public SourceManagedObjectTimedOutEscalation(Class<?> objectType) {
 		super(objectType);

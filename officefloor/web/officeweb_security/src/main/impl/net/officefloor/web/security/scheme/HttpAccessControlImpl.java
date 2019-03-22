@@ -31,6 +31,11 @@ import net.officefloor.web.security.HttpAccessControl;
 public class HttpAccessControlImpl implements HttpAccessControl, Serializable {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Authentication scheme.
 	 */
 	private final String authenticationScheme;
@@ -48,12 +53,9 @@ public class HttpAccessControlImpl implements HttpAccessControl, Serializable {
 	/**
 	 * Initiate.
 	 * 
-	 * @param authenticationScheme
-	 *            Authentication scheme.
-	 * @param principal
-	 *            {@link Principal}.
-	 * @param roles
-	 *            Roles for the user.
+	 * @param authenticationScheme Authentication scheme.
+	 * @param principal            {@link Principal}.
+	 * @param roles                Roles for the user.
 	 */
 	public HttpAccessControlImpl(String authenticationScheme, Principal principal, Set<String> roles) {
 		this.authenticationScheme = authenticationScheme;
@@ -64,12 +66,9 @@ public class HttpAccessControlImpl implements HttpAccessControl, Serializable {
 	/**
 	 * Initiate with simple {@link Principal}.
 	 * 
-	 * @param authenticationScheme
-	 *            Authentication scheme.
-	 * @param principalName
-	 *            {@link Principal} name.
-	 * @param roles
-	 *            Roles for the user.
+	 * @param authenticationScheme Authentication scheme.
+	 * @param principalName        {@link Principal} name.
+	 * @param roles                Roles for the user.
 	 */
 	public HttpAccessControlImpl(String authenticationScheme, final String principalName, Set<String> roles) {
 		this.authenticationScheme = authenticationScheme;

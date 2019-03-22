@@ -30,6 +30,7 @@ import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedFunctionBuilder;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
@@ -100,21 +101,16 @@ public class ReflectiveAdministrationBuilder {
 	/**
 	 * Instantiate.
 	 *
-	 * @param <C>
-	 *            {@link Administration} {@link Class} type.
-	 * @param clazz
-	 *            {@link Class} to determine the {@link Method} instances for the
-	 *            {@link Administration} instances.
-	 * @param object
-	 *            Optional {@link Object} for non-static methods.
-	 * @param methodName
-	 *            Name of the {@link Method} to invoke.
-	 * @param isPreNotPost
-	 *            Indicates if pre-administration (otherwise post-administration).
-	 * @param managedFunctionBuilder
-	 *            {@link ManagedFunctionBuilder}.
-	 * @param testCase
-	 *            {@link AbstractOfficeConstructTestCase}.
+	 * @param                        <C> {@link Administration} {@link Class} type.
+	 * @param clazz                  {@link Class} to determine the {@link Method}
+	 *                               instances for the {@link Administration}
+	 *                               instances.
+	 * @param object                 Optional {@link Object} for non-static methods.
+	 * @param methodName             Name of the {@link Method} to invoke.
+	 * @param isPreNotPost           Indicates if pre-administration (otherwise
+	 *                               post-administration).
+	 * @param managedFunctionBuilder {@link ManagedFunctionBuilder}.
+	 * @param testCase               {@link AbstractOfficeConstructTestCase}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <C> ReflectiveAdministrationBuilder(Class<C> clazz, C object, String methodName, boolean isPreNotPost,
@@ -171,8 +167,7 @@ public class ReflectiveAdministrationBuilder {
 	/**
 	 * Builds the {@link Administration} of the {@link ManagedObject}.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject} to administer.
+	 * @param managedObjectName Name of the {@link ManagedObject} to administer.
 	 */
 	public void administerManagedObject(String managedObjectName) {
 		this.administrationBuilder.administerManagedObject(managedObjectName);
@@ -181,12 +176,9 @@ public class ReflectiveAdministrationBuilder {
 	/**
 	 * Builds the {@link Flow}.
 	 * 
-	 * @param functionName
-	 *            {@link ManagedFunction} name.
-	 * @param argumentType
-	 *            Type of argument passed to the {@link Flow}.
-	 * @param isSpawnThreadState
-	 *            Indicates whether to spawn a {@link ThreadState}.
+	 * @param functionName       {@link ManagedFunction} name.
+	 * @param argumentType       Type of argument passed to the {@link Flow}.
+	 * @param isSpawnThreadState Indicates whether to spawn a {@link ThreadState}.
 	 */
 	public void buildFlow(String functionName, Class<?> argumentType, boolean isSpawnThreadState) {
 
@@ -202,8 +194,7 @@ public class ReflectiveAdministrationBuilder {
 	/**
 	 * Builds the {@link Governance}.
 	 * 
-	 * @param governanceName
-	 *            Name of the {@link Governance}.
+	 * @param governanceName Name of the {@link Governance}.
 	 */
 	public void buildGovernance(String governanceName) {
 
@@ -213,6 +204,23 @@ public class ReflectiveAdministrationBuilder {
 
 		// Set for next governance and parameter
 		this.governanceIndex++;
+		this.parameterIndex++;
+	}
+
+	/**
+	 * Builds {@link AsynchronousFlow}.
+	 */
+	public void buildAsynchronousFlow() {
+
+		// Ensure parameter is AsynchronousFlow
+		Class<?> parameterType = this.parameterTypes[this.parameterIndex];
+		TestCase.assertTrue("Parameter " + this.parameterIndex + " must be " + AsynchronousFlow.class.getSimpleName(),
+				AsynchronousFlow.class.isAssignableFrom(parameterType));
+
+		// Link AsynchronousFlow
+		this.parameterFactories[this.parameterIndex] = new AsynchronousFlowParameterFactory();
+
+		// Set for next parameter
 		this.parameterIndex++;
 	}
 
@@ -290,8 +298,7 @@ public class ReflectiveAdministrationBuilder {
 		/**
 		 * Initiate.
 		 * 
-		 * @param index
-		 *            Index of the {@link FlowMetaData}.
+		 * @param index Index of the {@link FlowMetaData}.
 		 */
 		public ReflectiveFlowParameterFactory(int index) {
 			this.index = index;
@@ -310,9 +317,6 @@ public class ReflectiveAdministrationBuilder {
 
 	/**
 	 * {@link ParameterFactory} to obtain {@link GovernanceManager}.
-	 * 
-	 *
-	 * @author Daniel Sagenschneider
 	 */
 	private class ReflectiveGovernanceParameterFactory implements ParameterFactory {
 
@@ -324,8 +328,7 @@ public class ReflectiveAdministrationBuilder {
 		/**
 		 * Initiate.
 		 * 
-		 * @param index
-		 *            Index of the {@link Governance}.
+		 * @param index Index of the {@link Governance}.
 		 */
 		public ReflectiveGovernanceParameterFactory(int index) {
 			this.index = index;
@@ -334,6 +337,17 @@ public class ReflectiveAdministrationBuilder {
 		@Override
 		public Object createParamater(AdministrationContext<Object, Indexed, Indexed> context) {
 			return context.getGovernance(this.index);
+		}
+	}
+
+	/**
+	 * {@link ParameterFactory} to obtain {@link AsynchronousFlow}.
+	 */
+	private class AsynchronousFlowParameterFactory implements ParameterFactory {
+
+		@Override
+		public Object createParamater(AdministrationContext<Object, Indexed, Indexed> context) {
+			return context.createAsynchronousFlow();
 		}
 	}
 

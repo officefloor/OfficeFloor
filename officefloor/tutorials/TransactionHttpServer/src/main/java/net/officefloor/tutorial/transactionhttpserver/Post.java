@@ -41,6 +41,7 @@ import net.officefloor.web.HttpObject;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Post implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

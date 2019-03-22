@@ -12,6 +12,11 @@ import net.officefloor.web.jwt.validate.JwtValidateKey;
 public class ValidateKeysException extends HttpException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param status {@link HttpStatus}.

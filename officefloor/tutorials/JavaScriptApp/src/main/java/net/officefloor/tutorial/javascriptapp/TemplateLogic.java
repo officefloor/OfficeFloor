@@ -38,6 +38,8 @@ public class TemplateLogic {
 	@Data
 	@HttpParameters
 	public static class AdditionRequest implements Serializable {
+		private static final long serialVersionUID = 1L;
+
 		private String numberOne;
 		private String numberTwo;
 	}
@@ -57,6 +59,8 @@ public class TemplateLogic {
 	@Data
 	@HttpObject
 	public static class SubtractionRequest implements Serializable {
+		private static final long serialVersionUID = 1L;
+
 		private String numberOne;
 		private String numberTwo;
 	}

@@ -28,6 +28,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.construct.MockConstruct;
 import net.officefloor.frame.impl.construct.MockConstruct.OfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
@@ -277,8 +278,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Records an issue for the {@link Governance}.
 	 * 
-	 * @param issueDescription
-	 *            Issue description.
+	 * @param issueDescription Issue description.
 	 */
 	private void record_issue(String issueDescription) {
 		this.issues.addIssue(AssetType.GOVERNANCE, GOVERNANCE_NAME, issueDescription);
@@ -287,9 +287,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Creates the {@link RawGovernanceMetaData}.
 	 * 
-	 * @param isCreated
-	 *            Indicates if expected to create the
-	 *            {@link RawGovernanceMetaData}.
+	 * @param isCreated Indicates if expected to create the
+	 *                  {@link RawGovernanceMetaData}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
 	private RawGovernanceMetaData<?, ?> constructRawGovernanceMetaData(boolean isCreated) {
@@ -297,7 +296,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 		// Create the raw governance meta-data
 		RawGovernanceMetaData<?, ?> rawGovernanceMetaData = new RawGovernanceMetaDataFactory(OFFICE_NAME,
 				this.rawOfficeMetaData.build().getTeams()).createRawGovernanceMetaData(this.configuration,
-						GOVERNANCE_INDEX, this.issues);
+						GOVERNANCE_INDEX, new AssetManagerFactory(null, null, null), 1, this.issues);
 		if (!isCreated) {
 			// Ensure not created
 			assertNull("Should not create the Raw Governance Meta-Data", rawGovernanceMetaData);
@@ -316,9 +315,8 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Fully creates the {@link RawGovernanceMetaData}.
 	 * 
-	 * @param isSuccessful
-	 *            Indicates if expect to be successful in loading
-	 *            {@link OfficeMetaData}.
+	 * @param isSuccessful Indicates if expect to be successful in loading
+	 *                     {@link OfficeMetaData}.
 	 * @return {@link RawGovernanceMetaData}.
 	 */
 	private RawGovernanceMetaData<?, ?> fullyConstructRawGovernanceMetaData(boolean isSuccessful) {

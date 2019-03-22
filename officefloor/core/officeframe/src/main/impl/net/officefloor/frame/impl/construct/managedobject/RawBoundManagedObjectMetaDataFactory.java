@@ -28,6 +28,7 @@ import java.util.Set;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -114,6 +115,8 @@ public class RawBoundManagedObjectMetaDataFactory {
 	 * @param assetName                       Name of the {@link Asset} that
 	 *                                        {@link ManagedObject} instances are
 	 *                                        being bound.
+	 * @param defaultAsynchronousFlowTimeout  Default {@link AsynchronousFlow}
+	 *                                        timeout.
 	 * @param issues                          {@link OfficeFloorIssues}.
 	 * @return {@link RawBoundManagedObjectMetaData} instances for the bound
 	 *         {@link ManagedObject} instances.
@@ -122,7 +125,7 @@ public class RawBoundManagedObjectMetaDataFactory {
 			ManagedObjectConfiguration<?>[] boundManagedObjectConfiguration, ManagedObjectScope scope,
 			Map<String, RawBoundManagedObjectMetaData> scopeManagedObjects,
 			RawManagingOfficeMetaData<?>[] inputManagedObjects, Map<String, String> boundInputManagedObjects,
-			AssetType assetType, String assetName, OfficeFloorIssues issues) {
+			AssetType assetType, String assetName, long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
 
 		// Handle if null scope managed objects
 		if (scopeManagedObjects == null) {
@@ -430,7 +433,8 @@ public class RawBoundManagedObjectMetaDataFactory {
 				instanceMetaData.loadGovernance(rawGovernanceMetaData, issues);
 
 				// Load the meta-data
-				instanceMetaData.loadManagedObjectMetaData(assetType, assetName, assetManagerFactory, issues);
+				instanceMetaData.loadManagedObjectMetaData(assetType, assetName, assetManagerFactory,
+						defaultAsynchronousFlowTimeout, issues);
 			}
 		}
 
@@ -442,6 +446,11 @@ public class RawBoundManagedObjectMetaDataFactory {
 	 * Thrown to indicate a cyclic dependency.
 	 */
 	private static class CyclicDependencyException extends RuntimeException {
+
+		/**
+		 * Serial version UID.
+		 */
+		private static final long serialVersionUID = 1L;
 
 		/**
 		 * Initiate.

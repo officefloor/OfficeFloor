@@ -39,6 +39,7 @@ import net.officefloor.frame.impl.construct.MockConstruct.RawBoundManagedObjectM
 import net.officefloor.frame.impl.construct.MockConstruct.RawManagedObjectMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.MockConstruct.RawOfficeMetaDataMockBuilder;
 import net.officefloor.frame.impl.construct.administration.RawAdministrationMetaDataFactory;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.escalation.EscalationFlowFactory;
 import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
@@ -374,8 +375,8 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue {@link Object} required is incompatible with {@link Object}
-	 * from the {@link ManagedObject}.
+	 * Ensure issue {@link Object} required is incompatible with {@link Object} from
+	 * the {@link ManagedObject}.
 	 */
 	public void testIncompatibleManagedObject() {
 
@@ -393,8 +394,8 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to order {@link ManagedObject} dependencies so that
-	 * dependencies come first (required for coordinating).
+	 * Ensure able to order {@link ManagedObject} dependencies so that dependencies
+	 * come first (required for coordinating).
 	 */
 	public void testManagedObjectDependencyOrdering() {
 
@@ -655,8 +656,8 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Flagged to be manual {@link Governance} however {@link Governance}
-	 * configured for the {@link ManagedFunction}.
+	 * Flagged to be manual {@link Governance} however {@link Governance} configured
+	 * for the {@link ManagedFunction}.
 	 */
 	public void testGovernanceButFlaggedManual() {
 
@@ -776,8 +777,7 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 	 * Records an issue on the {@link OfficeFloorIssues} about the
 	 * {@link ManagedFunction}.
 	 * 
-	 * @param issueDescription
-	 *            Issue description expected.
+	 * @param issueDescription Issue description expected.
 	 */
 	private void record_functionIssue(String issueDescription) {
 		this.issues.addIssue(AssetType.FUNCTION, FUNCTION_NAME, issueDescription);
@@ -786,8 +786,7 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * Constructs the {@link RawManagedFunctionMetaData}.
 	 * 
-	 * @param isExpectConstruct
-	 *            If expected to be constructed.
+	 * @param isExpectConstruct If expected to be constructed.
 	 * @return {@link RawManagedFunctionMetaData}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -798,8 +797,8 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 				MockConstruct.mockAssetManagerFactory(), this.rawOfficeMetaData.build().getManagedObjectMetaData(),
 				this.rawOfficeMetaData.build().getGovernanceMetaData());
 		RawManagedFunctionMetaData<?, ?> metaData = new RawManagedFunctionMetaDataFactory(
-				this.rawOfficeMetaData.build(), rawBoundMoFactory)
-						.constructRawManagedFunctionMetaData(this.configuration, this.issues);
+				this.rawOfficeMetaData.build(), rawBoundMoFactory).constructRawManagedFunctionMetaData(
+						this.configuration, new AssetManagerFactory(null, null, null), 1, this.issues);
 		if (isExpectConstruct) {
 			assertNotNull("Expected to construct meta-data", metaData);
 		} else {
@@ -811,12 +810,11 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Fully constructs the {@link RawManagedFunctionMetaData} by ensuring
-	 * remaining state is loaded. Will always expect to construct the
+	 * Fully constructs the {@link RawManagedFunctionMetaData} by ensuring remaining
+	 * state is loaded. Will always expect to construct the
 	 * {@link RawManagedFunctionMetaData}.
 	 * 
-	 * @param isLoad
-	 *            Indicates if loaded.
+	 * @param isLoad Indicates if loaded.
 	 * @return {@link RawManagedFunctionMetaData}.
 	 */
 	private RawManagedFunctionMetaData<Indexed, Indexed> fullyConstructRawFunctionMetaData(boolean isLoad) {
@@ -835,7 +833,7 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 
 		// Link the functions and load remaining state to function meta-data
 		boolean isLoaded = metaData.loadOfficeMetaData(this.officeMetaData.build(), flowMetaDataFactory,
-				escalationFlowFactory, rawAdminFactory, this.issues);
+				escalationFlowFactory, rawAdminFactory, new AssetManagerFactory(null, null, null), 1, this.issues);
 		assertEquals("Incorrect load", isLoad, isLoaded);
 
 		// Return the fully constructed meta-data

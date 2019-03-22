@@ -28,10 +28,14 @@ import net.officefloor.server.http.HttpStatus;
 public class NotFoundHttpException extends HttpException {
 
 	/**
+	 * Serial version UID.
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param requestUri
-	 *            Request URI.
+	 * @param requestUri Request URI.
 	 */
 	public NotFoundHttpException(String requestUri) {
 		super(HttpStatus.NOT_FOUND, null, "No resource found for " + requestUri);

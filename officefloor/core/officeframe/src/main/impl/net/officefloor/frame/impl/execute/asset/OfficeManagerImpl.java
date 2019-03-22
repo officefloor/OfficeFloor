@@ -39,11 +39,6 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	private final long monitorInterval;
 
 	/**
-	 * {@link AssetManager} instances of the {@link Office}.
-	 */
-	private final AssetManager[] assetManagers;
-
-	/**
 	 * {@link FunctionLoop}.
 	 */
 	private final FunctionLoop functionLoop;
@@ -59,25 +54,36 @@ public class OfficeManagerImpl extends TimerTask implements OfficeManager {
 	private final MonitorClockImpl monitorClock;
 
 	/**
+	 * {@link AssetManager} instances of the {@link Office}.
+	 */
+	private AssetManager[] assetManagers;
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param officeName      Name of the {@link Office} being managed.
 	 * @param monitorInterval Interval in milliseconds between each check of the
 	 *                        {@link Office}. Setting this high reduces overhead of
 	 *                        managing the {@link Office}, however setting lower
 	 *                        increases responsiveness of the {@link Office}.
-	 * @param assetManagers   {@link AssetManager} instances to manage.
 	 * @param monitorClock    {@link MonitorClock} for the {@link Office}.
 	 * @param functionLoop    {@link FunctionLoop} for the {@link Office}.
 	 * @param timer           {@link Timer} to monitor the {@link Office}.
 	 */
-	public OfficeManagerImpl(String officeName, long monitorInterval, AssetManager[] assetManagers,
-			MonitorClockImpl monitorClock, FunctionLoop functionLoop, Timer timer) {
+	public OfficeManagerImpl(long monitorInterval, MonitorClockImpl monitorClock, FunctionLoop functionLoop,
+			Timer timer) {
 		this.monitorInterval = monitorInterval;
-		this.assetManagers = assetManagers;
 		this.monitorClock = monitorClock;
 		this.functionLoop = functionLoop;
 		this.timer = timer;
+	}
+
+	/**
+	 * Loads the remaining {@link AssetManager} instances.
+	 * 
+	 * @param assetManagers {@link AssetManager} instances.
+	 */
+	public void loadRemainingState(AssetManager[] assetManagers) {
+		this.assetManagers = assetManagers;
 	}
 
 	/*

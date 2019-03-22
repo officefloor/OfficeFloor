@@ -23,6 +23,7 @@ import java.util.List;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.GovernanceManager;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.impl.execute.function.Promise;
@@ -62,12 +63,9 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 	/**
 	 * Initiate.
 	 * 
-	 * @param metaData
-	 *            {@link AdministrationMetaData}.
-	 * @param extensions
-	 *            Extensions to administer.
-	 * @param threadState
-	 *            {@link ThreadState}.
+	 * @param metaData    {@link AdministrationMetaData}.
+	 * @param extensions  Extensions to administer.
+	 * @param threadState {@link ThreadState}.
 	 */
 	public AdministrationFunctionLogic(AdministrationMetaData<E, F, G> metaData, E[] extensions,
 			ThreadState threadState) {
@@ -114,8 +112,8 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 	 * Token class given to the {@link AdministrationFunctionLogic}.
 	 * <p>
 	 * As application code will be provided a {@link AdministrationContext} this
-	 * exposes just the necessary functionality and prevents access to internals
-	 * of the framework.
+	 * exposes just the necessary functionality and prevents access to internals of
+	 * the framework.
 	 */
 	private class AdministrationContextToken implements AdministrationContext<E, F, G> {
 
@@ -136,8 +134,7 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 		/**
 		 * Initiate.
 		 * 
-		 * @param context
-		 *            {@link ManagedFunctionLogicContext}.
+		 * @param context {@link ManagedFunctionLogicContext}.
 		 */
 		public AdministrationContextToken(ManagedFunctionLogicContext context) {
 			this.context = context;
@@ -187,6 +184,11 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 			return manager;
 		}
 
+		@Override
+		public AsynchronousFlow createAsynchronousFlow() {
+			return this.context.createAsynchronousFlow();
+		}
+
 		/**
 		 * {@link GovernanceManager} implementation.
 		 */
@@ -200,9 +202,8 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 			/**
 			 * Initiate.
 			 * 
-			 * @param governanceIndex
-			 *            Index of {@link Governance} within the
-			 *            {@link ThreadState}.
+			 * @param governanceIndex Index of {@link Governance} within the
+			 *                        {@link ThreadState}.
 			 */
 			public GovernanceManagerImpl(int governanceIndex) {
 				this.governanceIndex = governanceIndex;
