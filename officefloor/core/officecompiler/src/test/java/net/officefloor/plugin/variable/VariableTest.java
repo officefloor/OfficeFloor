@@ -17,9 +17,11 @@
  */
 package net.officefloor.plugin.variable;
 
+import net.officefloor.compile.integrate.officefloor.AugmentManagedObjectSourceFlowTest.Section;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.managedfunction.clazz.Qualified;
 import net.officefloor.plugin.section.clazz.NextFunction;
 
 /**
@@ -38,15 +40,7 @@ public class VariableTest extends OfficeFrameTestCase {
 	 * Ensure can {@link Out} then {@link In}.
 	 */
 	public void testOutIn() throws Throwable {
-
-		// Compile section
-		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		compiler.office((context) -> context.addSection("SECTION", OutInSection.class));
-		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
-
-		// Trigger the function
-		CompileOfficeFloor.invokeProcess(officeFloor, "stepOne", null);
-		assertTrue("Should complete", isComplete);
+		this.doVariableTest(OutInSection.class);
 	}
 
 	public static class OutInSection {
@@ -60,13 +54,43 @@ public class VariableTest extends OfficeFrameTestCase {
 		public void stepTwo(In<String> text, In<Integer> number) {
 			assertEquals("Incorrect text", "TEXT", text.get());
 			assertEquals("Incorrect number", Integer.valueOf(1), number.get());
+			isComplete = true;
 		}
 	}
 
-	public static class OutValSection {
+	/**
+	 * Ensure can qualified {@link Out} then {@link In}.
+	 */
+	public void testQualifiedOutIn() throws Throwable {
+		this.doVariableTest(QualifiedOutInSection.class);
+	}
+
+	public static class QualifiedOutInSection {
 
 		@NextFunction("stepTwo")
-		public void stepOne(Out<String> text, Out<Integer> number) {
+		public void stepOne(@Qualified("QUALIFIED") Out<String> qualified, Out<String> unqualified) {
+			qualified.set("QUALIFIED");
+			unqualified.set("UNQUALIFIED");
+		}
+
+		public void stepTwo(@Qualified("QUALIFIED") In<String> qualified, In<String> unqualified) {
+			assertEquals("Incorrect text", "QUALIFIED", qualified.get());
+			assertEquals("Incorrect number", "UNQUALIFIED", unqualified.get());
+			isComplete = true;
+		}
+	}
+
+	/**
+	 * Ensure can {@link Var} then {@link Val}.
+	 */
+	public void testVarVal() throws Throwable {
+		this.doVariableTest(VarValSection.class);
+	}
+
+	public static class VarValSection {
+
+		@NextFunction("stepTwo")
+		public void stepOne(Var<String> text, Var<Integer> number) {
 			text.set("TEXT");
 			number.set(1);
 		}
@@ -74,7 +98,48 @@ public class VariableTest extends OfficeFrameTestCase {
 		public void stepTwo(@Val String text, @Val Integer number) {
 			assertEquals("Incorrect text", "TEXT", text);
 			assertEquals("Incorrect number", Integer.valueOf(1), number);
+			isComplete = true;
 		}
+	}
+
+	/**
+	 * Ensure can qualified {@link Var} then {@link Val}.
+	 */
+	public void testQualifiedVarVal() throws Throwable {
+		this.doVariableTest(QualifiedVarValSection.class);
+	}
+
+	public static class QualifiedVarValSection {
+
+		@NextFunction("stepTwo")
+		public void stepOne(@Qualified("QUALIFIED") Var<String> qualified, Var<String> unqualified) {
+			qualified.set("QUALIFIED");
+			unqualified.set("UNQUALIFIED");
+		}
+
+		public void stepTwo(@Qualified("QUALIFIED") @Val String qualified, @Val String unqualified) {
+			assertEquals("Incorrect text", "QUALIFIED", qualified);
+			assertEquals("Incorrect number", "UNQUALIFIED", unqualified);
+			isComplete = true;
+		}
+	}
+
+	/**
+	 * Undertakes the variable testing.
+	 * 
+	 * @param sectionClass {@link Section} {@link Class}.
+	 */
+	private void doVariableTest(Class<?> sectionClass) throws Throwable {
+
+		// Compile section
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> context.addSection("SECTION", sectionClass));
+		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+
+		// Trigger the function
+		isComplete = false;
+		CompileOfficeFloor.invokeProcess(officeFloor, "stepOne", null);
+		assertTrue("Should complete", isComplete);
 	}
 
 }
