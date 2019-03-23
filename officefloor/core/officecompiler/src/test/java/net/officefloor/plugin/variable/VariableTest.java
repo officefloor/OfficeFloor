@@ -30,15 +30,23 @@ import net.officefloor.plugin.section.clazz.NextFunction;
 public class VariableTest extends OfficeFrameTestCase {
 
 	/**
+	 * Indicates if complete.
+	 */
+	private static boolean isComplete = false;
+
+	/**
 	 * Ensure can {@link Out} then {@link In}.
 	 */
-	public void testOutIn() throws Exception {
+	public void testOutIn() throws Throwable {
 
 		// Compile section
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.office((context) -> context.addSection("SECTION", OutInSection.class));
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 
+		// Trigger the function
+		CompileOfficeFloor.invokeProcess(officeFloor, "stepOne", null);
+		assertTrue("Should complete", isComplete);
 	}
 
 	public static class OutInSection {

@@ -43,6 +43,11 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.variable.In;
+import net.officefloor.plugin.variable.Out;
+import net.officefloor.plugin.variable.Val;
+import net.officefloor.plugin.variable.Var;
+import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
  * Test the {@link ClassManagedFunctionSource}.
@@ -330,6 +335,94 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockAnnotateParameterClass {
 		public void function(@MockDynamicQualification("value") MockParameter parameter) {
+		}
+	}
+
+	/**
+	 * Ensure appropriate {@link Var} types.
+	 */
+	public void testVariableTypes() throws Exception {
+		this.doVariableTypesTest(MockVariables.class, "");
+	}
+
+	/**
+	 * Ensure appropriate named/qualified {@link Var} types.
+	 */
+	public void testNamedVariableTypes() throws Exception {
+		this.doVariableTypesTest(MockNamedVariables.class, "MOCK_NAME-");
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void doVariableTypesTest(Class clazz, String qualifier) throws Exception {
+
+		// Obtain the variable name
+		String variableName = qualifier + String.class.getName();
+
+		// Create the namespace type builder
+		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
+
+		// Load the functions (all depend on variable)
+		for (String methodName : new String[] { "var", "out", "in", "val" }) {
+			ManagedFunctionTypeBuilder method = namespace.addManagedFunctionType(methodName,
+					new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
+			ManagedFunctionObjectTypeBuilder var = method.addObject(Var.class);
+			var.setLabel(variableName);
+			var.setTypeQualifier(variableName);
+			var.addAnnotation(new VariableAnnotation(variableName));
+		}
+
+		// Validate the namespace type
+		FunctionNamespaceType namespaceType = ManagedFunctionLoaderUtil.validateManagedFunctionType(namespace,
+				ClassManagedFunctionSource.class, ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, clazz.getName());
+
+		// Validate the annotations
+		for (ManagedFunctionType<?, ?> function : namespaceType.getManagedFunctionTypes()) {
+			ManagedFunctionObjectType<?> parameter = function.getObjectTypes()[0];
+			boolean isVariableAnnotation = false;
+			for (Object annotation : parameter.getAnnotations()) {
+				if (annotation instanceof VariableAnnotation) {
+					isVariableAnnotation = true;
+					VariableAnnotation var = (VariableAnnotation) annotation;
+					assertEquals("Incorrect name", variableName, var.getVariableName());
+				}
+			}
+			assertTrue("Should be variable annotation for " + function.getFunctionName(), isVariableAnnotation);
+		}
+	}
+
+	public static class MockVariables {
+		public void var(Var<String> variable) {
+			// Testing
+		}
+
+		public void out(Out<String> out) {
+			// Testing
+		}
+
+		public void in(In<String> in) {
+			// Testing
+		}
+
+		public void val(@Val String val) {
+			// Testing
+		}
+	}
+
+	public static class MockNamedVariables {
+		public void var(@MockDynamicQualification("NAME") Var<String> variable) {
+			// Testing
+		}
+
+		public void out(@MockDynamicQualification("NAME") Out<String> out) {
+			// Testing
+		}
+
+		public void in(@MockDynamicQualification("NAME") In<String> in) {
+			// Testing
+		}
+
+		public void val(@MockDynamicQualification("NAME") @Val String val) {
+			// Testing
 		}
 	}
 
