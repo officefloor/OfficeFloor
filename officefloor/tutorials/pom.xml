@@ -17,6 +17,7 @@
 		<module>AuthenticationHttpServer</module>
 		<module>CorsHttpServer</module>
 		<module>DatabaseHttpServer</module>
+		<module>DeployHttpServer</module>
 		<module>DiPojoHttpServer</module>
 		<module>DynamicHttpServer</module>
 		<module>ExceptionHttpServer</module>
@@ -42,10 +43,10 @@
 		<module>SpringHttpServer</module>
 		<module>StaticContentHttpServer</module>
 		<module>TeamHttpServer</module>
+		<module>TestHttpServer</module>
 		<module>ThreadAffinityHttpServer</module>
 		<module>TransactionHttpServer</module>
-		<module>TestHttpServer</module>
-		<module>DeployHttpServer</module>
+		<module>VariableHttpServer</module>
 	</modules>
 	<build>
 		<plugins>
