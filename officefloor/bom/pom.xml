@@ -122,6 +122,18 @@
 				<artifactId>officecompiler</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!-- Polyglot -->
+			<dependency>
+				<groupId>net.officefloor.polyglot</groupId>
+				<artifactId>polyglot</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.polyglot</groupId>
+				<artifactId>officepolyglot_scala</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Server -->
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
