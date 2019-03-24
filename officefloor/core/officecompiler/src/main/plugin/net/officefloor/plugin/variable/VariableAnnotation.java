@@ -17,12 +17,34 @@
  */
 package net.officefloor.plugin.variable;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+
 /**
  * Annotation for {@link Var}.
  * 
  * @author Daniel Sagenschneider
  */
 public class VariableAnnotation {
+
+	/**
+	 * Extracts the possible variable name.
+	 * 
+	 * @param objectType {@link ManagedFunctionObjectType}.
+	 * @return Variable name or <code>null</code> if not a variable.
+	 */
+	public static String extractPossibleVariableName(ManagedFunctionObjectType<?> objectType) {
+
+		// Extract variable name
+		for (Object annotation : objectType.getAnnotations()) {
+			if (annotation instanceof VariableAnnotation) {
+				VariableAnnotation variableAnnotation = (VariableAnnotation) annotation;
+				return variableAnnotation.getVariableName();
+			}
+		}
+
+		// As here, not variable
+		return null;
+	}
 
 	/**
 	 * Name for the {@link Var}.

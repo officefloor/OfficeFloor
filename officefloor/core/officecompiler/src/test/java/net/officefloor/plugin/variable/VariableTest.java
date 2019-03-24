@@ -138,7 +138,7 @@ public class VariableTest extends OfficeFrameTestCase {
 
 		// Trigger the function
 		isComplete = false;
-		CompileOfficeFloor.invokeProcess(officeFloor, "stepOne", null);
+		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.stepOne", null);
 		assertTrue("Should complete", isComplete);
 	}
 

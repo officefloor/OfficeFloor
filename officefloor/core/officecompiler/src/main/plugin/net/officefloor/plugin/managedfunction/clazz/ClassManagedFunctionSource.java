@@ -286,6 +286,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 						String labelSuffix;
 						if (isVal) {
 							// Value (from variable)
+							parameterFactory = new ManagedFunctionValueParameterFactory(objectSequence.nextIndex());
 							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
 							typeQualifierSuffix = paramType.getTypeName();
 							isIncludeVariableAnnotation = true;
@@ -293,6 +294,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 
 						} else if (Var.class.equals(paramType)) {
 							// Variable
+							parameterFactory = new ManagedFunctionVariableParameterFactory(objectSequence.nextIndex());
 							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
 							typeQualifierSuffix = extractVariableType(paramGenericType);
 							isIncludeVariableAnnotation = true;
@@ -300,6 +302,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 
 						} else if (Out.class.equals(paramType)) {
 							// Output (from variable)
+							parameterFactory = new ManagedFunctionOutParameterFactory(objectSequence.nextIndex());
 							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
 							typeQualifierSuffix = extractVariableType(paramGenericType);
 							isIncludeVariableAnnotation = true;
@@ -307,6 +310,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 
 						} else if (In.class.equals(paramType)) {
 							// Input (from variable)
+							parameterFactory = new ManagedFunctionInParameterFactory(objectSequence.nextIndex());
 							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
 							typeQualifierSuffix = extractVariableType(paramGenericType);
 							isIncludeVariableAnnotation = true;

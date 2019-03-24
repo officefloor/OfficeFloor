@@ -32,33 +32,62 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 public class VariableManagedObjectSource extends AbstractManagedObjectSource<None, None> {
 
 	/**
-	 * Obtains {@link Out} wrapper on {@link Var}.
+	 * Obtains {@link Var} from dependency object.
 	 * 
-	 * @param variable {@link Var}.
-	 * @return {@link Out} wrapper on {@link Var}.
+	 * @param object Dependency object.
+	 * @return {@link Var} wrapper on dependency object.
+	 * @throws IllegalStateException If fails to convert.
 	 */
-	public static <T> Out<T> out(Var<T> variable) {
+	@SuppressWarnings("unchecked")
+	public static <T> Var<T> var(Object object) throws IllegalStateException {
+		if (!(object instanceof Var)) {
+			throw new IllegalStateException("Object is not a variable");
+		}
+		return (Var<T>) object;
+	}
+
+	/**
+	 * Obtains {@link Out} from dependency object.
+	 * 
+	 * @param object Dependency object.
+	 * @return {@link Out} wrapper on dependency object.
+	 */
+	public static <T> Out<T> out(Object object) {
+		Var<T> variable = var(object);
 		return (value) -> variable.set(value);
 	}
 
 	/**
-	 * Obtains {@link In} wrapper on {@link Var}.
+	 * Obtains {@link In} from dependency object.
 	 * 
-	 * @param variable {@link Var}.
-	 * @return {@link In} wrapper on {@link Var}
+	 * @param object Dependency object.
+	 * @return {@link In} wrapper on dependency object.
 	 */
-	public static <T> In<T> in(Var<T> variable) {
+	public static <T> In<T> in(Object object) {
+		Var<T> variable = var(object);
 		return () -> variable.get();
 	}
 
 	/**
-	 * Obtains the value of the variable.
+	 * Obtains the value from dependency object.
 	 * 
-	 * @param variable {@link Var}.
-	 * @return Value of the {@link Var}.
+	 * @param object Dependency object.
+	 * @return Value extracted from dependency object.
 	 */
-	public static <T> T val(Var<T> variable) {
+	public static <T> T val(Object object) {
+		Var<T> variable = var(object);
 		return variable.get();
+	}
+
+	/**
+	 * Obtains the variable name.
+	 * 
+	 * @param qualifier Qualifier for variable.
+	 * @param type      Variable type.
+	 * @return Name for the variable.
+	 */
+	public static String name(String qualifier, String type) {
+		return (qualifier == null ? "" : qualifier + "-") + type;
 	}
 
 	/*
