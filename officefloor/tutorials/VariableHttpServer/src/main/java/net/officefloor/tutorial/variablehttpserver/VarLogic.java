@@ -26,6 +26,7 @@ import net.officefloor.plugin.variable.Var;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class VarLogic {
 
 	@NextFunction("use")
@@ -34,3 +35,4 @@ public class VarLogic {
 		description.set("Need to watch his code!");
 	}
 }
+// END SNIPPET: tutorial

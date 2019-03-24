@@ -27,8 +27,10 @@ import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 /**
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Qualifier
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface Description {
 }
+// END SNIPPET: tutorial

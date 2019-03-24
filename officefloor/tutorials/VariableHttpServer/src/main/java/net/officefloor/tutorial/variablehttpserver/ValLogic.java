@@ -26,6 +26,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class ValLogic {
 
 	public void useValues(@Val Person person, @Description @Val String description,
@@ -33,3 +34,4 @@ public class ValLogic {
 		response.send(new ServerResponse(person, description));
 	}
 }
+// END SNIPPET: tutorial

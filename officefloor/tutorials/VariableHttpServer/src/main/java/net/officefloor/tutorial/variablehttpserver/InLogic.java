@@ -26,6 +26,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class InLogic {
 
 	public void useValues(In<Person> person, @Description In<String> description,
@@ -33,3 +34,4 @@ public class InLogic {
 		response.send(new ServerResponse(person.get(), description.get()));
 	}
 }
+// END SNIPPET: tutorial

@@ -15,24 +15,49 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorial.variablehttpserver;
+package net.officefloor.model.test.variable;
 
-import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.variable.In;
-import net.officefloor.plugin.variable.Out;
+import net.officefloor.plugin.variable.Var;
 
 /**
- * Using {@link Out} and {@link In} for variables.
+ * Mock {@link Var}.
  * 
  * @author Daniel Sagenschneider
  */
-// START SNIPPET: tutorial
-public class OutLogic {
+public class MockVar<T> implements Var<T> {
 
-	@NextFunction("use")
-	public void setValues(Out<Person> person, @Description Out<String> description) {
-		person.set(new Person("Daniel", "Sagenschneider"));
-		description.set("Need to watch his code!");
+	/**
+	 * Value.
+	 */
+	private T value = null;
+
+	/**
+	 * Default constructor.
+	 */
+	public MockVar() {
 	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param value Initial value.
+	 */
+	public MockVar(T value) {
+		this.value = value;
+	}
+
+	/*
+	 * ================== Var ========================
+	 */
+
+	@Override
+	public void set(T value) {
+		this.value = value;
+	}
+
+	@Override
+	public T get() {
+		return this.value;
+	}
+
 }
-// END SNIPPET: tutorial

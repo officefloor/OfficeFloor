@@ -86,6 +86,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ReactiveHttpServer/index.html}Reactive}}                | Using Reactive for asynchronous concurrency.               | AsynchronousFlow
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./VariableHttpServer/index.html}Variables}}               | Passing state downstream for flows.                        | Out\<T\> , @Val
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./DatabaseHttpServer/index.html}Dependency Injection (Managed Object)}} | Dependency injecting a customised managed object. | ManagedObjectSource
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TeamHttpServer/index.html}Thread Injection}}            | Thread injection to performance tune the application.      | Thread Injection
