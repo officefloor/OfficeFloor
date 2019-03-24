@@ -65,6 +65,7 @@ import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFact
 import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource.SectionManagedFunctionFactory;
+import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
  * <p>
@@ -981,7 +982,7 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			designer.link(objectSection, managedObject);
 
 			// Link remaining objects for function (1 as after section object)
-			for (int i = 1; i < objectTypes.length; i++) {
+			NEXT_OBJECT: for (int i = 1; i < objectTypes.length; i++) {
 				ManagedFunctionObjectType<?> objectType = objectTypes[i];
 
 				// Determine if object is a parameter
@@ -990,7 +991,13 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 					String objectName = objectType.getObjectName();
 					FunctionObject functionObject = function.getFunctionObject(objectName);
 					functionObject.flagAsParameter();
-					continue; // next object
+					continue NEXT_OBJECT;
+				}
+
+				// Variable registered via augmentation
+				String variableName = VariableAnnotation.extractPossibleVariableName(objectType);
+				if (variableName != null) {
+					continue NEXT_OBJECT; // not include variable
 				}
 
 				// Link the function object

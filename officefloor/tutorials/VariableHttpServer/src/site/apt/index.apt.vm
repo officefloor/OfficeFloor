@@ -1,0 +1,77 @@
+                                               -----------------------
+                                                 Variable Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<Variable Tutorial>>
+
+  This tutorial demonstrates passing values downstream with variables.
+  
+  Unlike function/method/procedures calls, variables do not need to be sent directly by the caller.  Variables can be set upstream and dependency injected anywhere downstream.  This allows a lot more flexibility to composing flows together.
+   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/VariableHttpServer/${projectVersion}/VariableHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Out\<T\> / Var\<T\>
+
+  The following method demonstrates setting values for variables.
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/OutLogic.java|ignoreDownloadError=false}
+
+  Variables will be created by reflectively interrogating the parameters.  As many variables may be of the same type, qualifiers can be used to distinguish them (just like naming a variable).
+
+  While the {{{/apidocs/net/officefloor/plugin/managedfunction/clazz/Qualified.html}Qualified}} can be used for text names.  This is discouraged, as does not refactor well.  Using {{{/apidocs/net/officefloor/plugin/managedfunction/clazz/Qualifier.html}Qualifier}} on annotations is the recommended approach to naming variables.
+  
+  The qualifier is as follows.
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/Description.java|ignoreDownloadError=false}
+
+  Typically, the {{{/apidocs/net/officefloor/plugin/variable/Out.html}Out\<T\>}} should always be used to set the variable.  This allows reasoning when compiling flows for out/in combinations to avoid uninitialised variables (i.e. null values).
+  
+  However, there are times when you both need to get and set the variable value.  This can be achieved with the {{{/apidocs/net/officefloor/plugin/variable/Var.html}Var\<T\>}}.  However, please not that this is discouraged, as reduces ability for reasoning of flow composition (i.e. whether out/in combinations line up).
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/VarLogic.java|ignoreDownloadError=false}
+
+
+
+@Val / In\<T\>
+
+  The following method demonstrates obtaining values for variables.
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/ValLogic.java|ignoreDownloadError=false}
+
+  Values for variables can be annotated with {{{/apidocs/net/officefloor/plugin/variable/Val.html}@Val}}.  This will distinguish them from other objects to be dependency injected (such as means to send the response).
+  
+  Typically, for readability and to avoid referencing too many framework classes, the {{{/apidocs/net/officefloor/plugin/variable/Out.html}Out\<T\>}} to {{{/apidocs/net/officefloor/plugin/variable/Val.html}@Val}} combinations are used.
+
+  However, for those that like symmetry there is also the {{{/apidocs/net/officefloor/plugin/variable/In.html}In\<T\>}}.
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/InLogic.java|ignoreDownloadError=false}
+
+
+
+Composing Flows
+
+  The following demonstrates weaving together different combinations of the above.
+
+[./images/VariableHttpServer-configuration.png] VariableHttpServer screen shot.
+
+
+
+Testing
+
+  As always, OfficeFloor encourages ease of testing.  As all dependencies are injected directly into the methods, it is very easy to unit test the methods.
+  
+%{snippet|id=functions|file=${basedir}/src/test/java/net/officefloor/tutorial/variablehttpserver/VariableHttpServerTest.java|ignoreDownloadError=false}
+
+  Once the methods are confirmed to pass unit testing, OfficeFloor also makes it easy to test the composed flows.
+  
+%{snippet|id=mockServer|file=${basedir}/src/test/java/net/officefloor/tutorial/variablehttpserver/VariableHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../DatabaseHttpServer/index.html}next tutorial}} covers injecting customised managed objects.

@@ -1,0 +1,56 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/outIn" secure="false" x="42" y="48">
+      <section name="OutSet" input="setValues"/>
+    </http-continuation>
+    <http-continuation path="/outVal" secure="false" x="35" y="220">
+      <section name="OutToValSet" input="setValues"/>
+    </http-continuation>
+    <http-continuation path="/varVal" secure="false" x="39" y="131">
+      <section name="VarSet" input="setValues"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="OutSet" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.variablehttpserver.OutLogic" x="165" y="28">
+      <input name="setValues" parameter-type=""/>
+      <output name="use" argument-type="">
+        <section name="InUse" input="useValues"/>
+      </output>
+    </section>
+    <section name="InUse" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.variablehttpserver.InLogic" x="403" y="26">
+      <input name="useValues" parameter-type=""/>
+    </section>
+    <section name="OutToValSet" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.variablehttpserver.OutLogic" x="166" y="205">
+      <input name="setValues" parameter-type=""/>
+      <output name="use" argument-type="">
+        <section name="OutToValUse" input="useValues"/>
+      </output>
+    </section>
+    <section name="OutToValUse" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.variablehttpserver.ValLogic" x="401" y="205">
+      <input name="useValues" parameter-type=""/>
+    </section>
+    <section name="VarSet" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.variablehttpserver.VarLogic" x="168" y="112">
+      <input name="setValues" parameter-type=""/>
+      <output name="use" argument-type="">
+        <section name="ValUse" input="useValues"/>
+      </output>
+    </section>
+    <section name="ValUse" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.variablehttpserver.ValLogic" x="403" y="112">
+      <input name="useValues" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

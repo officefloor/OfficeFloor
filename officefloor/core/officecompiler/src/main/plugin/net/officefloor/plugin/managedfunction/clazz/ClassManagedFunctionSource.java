@@ -21,6 +21,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -46,6 +48,11 @@ import net.officefloor.plugin.clazz.ClassFlowBuilder;
 import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
 import net.officefloor.plugin.clazz.ClassFlowRegistry;
 import net.officefloor.plugin.clazz.Sequence;
+import net.officefloor.plugin.variable.In;
+import net.officefloor.plugin.variable.Out;
+import net.officefloor.plugin.variable.Val;
+import net.officefloor.plugin.variable.Var;
+import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
  * {@link ManagedFunctionSource} for a {@link Class} having the {@link Method}
@@ -229,6 +236,9 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 					functionTypeBuilder.addAnnotation(annotation);
 				}
 
+				// Obtain the generic parameters
+				Type[] methodGenericParameters = method.getGenericParameterTypes();
+
 				// Obtain the parameter annotations (for qualifying)
 				Annotation[][] methodParamAnnotations = method.getParameterAnnotations();
 
@@ -237,6 +247,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 
 					// Obtain the parameter type and its annotations
 					Class<?> paramType = paramTypes[i];
+					Type paramGenericType = methodGenericParameters[i];
 					Annotation[] typeAnnotations = paramType.getAnnotations();
 					Annotation[] paramAnnotations = methodParamAnnotations[i];
 
@@ -251,18 +262,68 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 						}
 					}
 
-					// Default to object if no parameter factory
+					// If not context dependency, must be injected dependency
 					if (parameterFactory == null) {
-						// Otherwise must be an dependency object
-						parameterFactory = new ManagedFunctionObjectParameterFactory(objectSequence.nextIndex());
-						ManagedFunctionObjectTypeBuilder<Indexed> objectTypeBuilder = functionTypeBuilder
-								.addObject(paramType);
 
 						// Create the listing of all annotations
 						List<Annotation> allAnnotations = new ArrayList<>(
 								typeAnnotations.length + paramAnnotations.length);
 						allAnnotations.addAll(Arrays.asList(typeAnnotations));
 						allAnnotations.addAll(Arrays.asList(paramAnnotations));
+
+						// Determine if Val
+						boolean isVal = false;
+						for (Annotation annotation : allAnnotations) {
+							if (Val.class.equals(annotation.annotationType())) {
+								isVal = true;
+							}
+						}
+
+						// Determine the dependency
+						ManagedFunctionObjectTypeBuilder<Indexed> objectTypeBuilder;
+						String typeQualifierSuffix;
+						boolean isIncludeVariableAnnotation;
+						String labelSuffix;
+						if (isVal) {
+							// Value (from variable)
+							parameterFactory = new ManagedFunctionValueParameterFactory(objectSequence.nextIndex());
+							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
+							typeQualifierSuffix = paramType.getTypeName();
+							isIncludeVariableAnnotation = true;
+							labelSuffix = typeQualifierSuffix;
+
+						} else if (Var.class.equals(paramType)) {
+							// Variable
+							parameterFactory = new ManagedFunctionVariableParameterFactory(objectSequence.nextIndex());
+							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
+							typeQualifierSuffix = extractVariableType(paramGenericType);
+							isIncludeVariableAnnotation = true;
+							labelSuffix = typeQualifierSuffix;
+
+						} else if (Out.class.equals(paramType)) {
+							// Output (from variable)
+							parameterFactory = new ManagedFunctionOutParameterFactory(objectSequence.nextIndex());
+							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
+							typeQualifierSuffix = extractVariableType(paramGenericType);
+							isIncludeVariableAnnotation = true;
+							labelSuffix = typeQualifierSuffix;
+
+						} else if (In.class.equals(paramType)) {
+							// Input (from variable)
+							parameterFactory = new ManagedFunctionInParameterFactory(objectSequence.nextIndex());
+							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
+							typeQualifierSuffix = extractVariableType(paramGenericType);
+							isIncludeVariableAnnotation = true;
+							labelSuffix = typeQualifierSuffix;
+
+						} else {
+							// Otherwise must be an dependency object
+							parameterFactory = new ManagedFunctionObjectParameterFactory(objectSequence.nextIndex());
+							objectTypeBuilder = functionTypeBuilder.addObject(paramType);
+							typeQualifierSuffix = null;
+							isIncludeVariableAnnotation = false;
+							labelSuffix = paramType.getName();
+						}
 
 						// Determine type qualifier
 						String typeQualifier = null;
@@ -293,13 +354,24 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 
 								// Provide type qualifier
 								typeQualifier = nameFactory.getQualifierName(annotation);
-								objectTypeBuilder.setTypeQualifier(typeQualifier);
+								objectTypeBuilder.setTypeQualifier(
+										typeQualifier + (typeQualifierSuffix != null ? "-" + typeQualifierSuffix : ""));
 							}
 						}
 
 						// Specify the label
-						String label = (typeQualifier != null ? typeQualifier + "-" : "") + paramType.getName();
+						String label = (typeQualifier != null ? typeQualifier + "-" : "") + labelSuffix;
 						objectTypeBuilder.setLabel(label);
+
+						// Determine if include variable annotation
+						if (isIncludeVariableAnnotation) {
+							objectTypeBuilder.addAnnotation(new VariableAnnotation(label));
+
+							// Add qualifier for non-qualified variable
+							if (typeQualifier == null) {
+								objectTypeBuilder.setTypeQualifier(typeQualifierSuffix);
+							}
+						}
 					}
 
 					// Load the parameter factory
@@ -314,6 +386,24 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 
 			// Add methods from the parent class on next iteration
 			clazz = clazz.getSuperclass();
+		}
+	}
+
+	/**
+	 * Extracts the type from the variable.
+	 * 
+	 * @param variableGenericType Variable {@link Type}.
+	 * @return Variable type.
+	 */
+	protected static String extractVariableType(Type variableGenericType) {
+		if (variableGenericType instanceof ParameterizedType) {
+			// Use generics to determine exact type
+			ParameterizedType paramType = (ParameterizedType) variableGenericType;
+			Type[] generics = paramType.getActualTypeArguments();
+			return (generics.length > 0) ? generics[0].getTypeName() : Object.class.getName();
+		} else {
+			// Not parameterized, so raw object
+			return Object.class.getName();
 		}
 	}
 

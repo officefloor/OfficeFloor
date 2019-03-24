@@ -64,6 +64,11 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
+import net.officefloor.plugin.variable.In;
+import net.officefloor.plugin.variable.Out;
+import net.officefloor.plugin.variable.Val;
+import net.officefloor.plugin.variable.Var;
+import net.officefloor.plugin.variable.VariableOfficeExtensionService;
 
 /**
  * Tests the {@link ClassSectionSource}.
@@ -740,7 +745,30 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 	public static class MockAsynchronousFlowSection {
 		public void function(AsynchronousFlow flowOne, AsynchronousFlow flowTwo) {
-			// TEsting
+			// Testing
+		}
+	}
+
+	/**
+	 * Ensure {@link Var} dependencies are not exposed. They are managed via
+	 * {@link VariableOfficeExtensionService}.
+	 */
+	public void testVariablesNotExposed() throws Exception {
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockVariableSection.class,
+				this.configureClassSectionFunction("variables"));
+		expected.addSectionInput("variables", null);
+
+		// Validate section
+		SectionLoaderUtil.validateSectionType(expected, ClassSectionSource.class, MockVariableSection.class.getName());
+	}
+
+	public static class MockVariableSection {
+		public void variables(@Val Long value, In<Integer> in, Var<String> variable, Out<Character> out,
+				@MockQualification @Val Long namedValue, @MockQualification In<Integer> namedIn,
+				@MockQualification Var<String> namedVariable, @MockQualification Out<Character> namedOut) {
+			// Testing
 		}
 	}
 

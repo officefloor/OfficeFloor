@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.7.0" date="In SCM" description="Reactive">
+		<release version="3.8.0" date="In SCM" description="Variables">
+			<action type="add" dev="sagenschneider">Variables</action>
+		</release>
+		<release version="3.7.0" date="2019-03-24" description="Reactive">
 			<action type="add" dev="sagenschneider">Reactive</action>
 		</release>
 		<release version="3.6.2" date="2019-03-11" description="Web Intercepter (CORS)">

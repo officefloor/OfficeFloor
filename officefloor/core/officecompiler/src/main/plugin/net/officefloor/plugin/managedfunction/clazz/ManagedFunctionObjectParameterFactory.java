@@ -29,13 +29,12 @@ public class ManagedFunctionObjectParameterFactory implements ManagedFunctionPar
 	/**
 	 * Index of the {@link Object}.
 	 */
-	private final int objectIndex;
+	protected final int objectIndex;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param objectIndex
-	 *            Index of the {@link Object}.
+	 * @param objectIndex Index of the {@link Object}.
 	 */
 	public ManagedFunctionObjectParameterFactory(int objectIndex) {
 		this.objectIndex = objectIndex;
