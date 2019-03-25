@@ -17,6 +17,10 @@
  */
 package net.officefloor.maven;
 
+import java.io.EOFException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.rmi.UnmarshalException;
+
 import javax.management.JMX;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -45,11 +49,9 @@ public class CloseOfficeFloorMojo extends AbstractMojo {
 	/**
 	 * Obtains the {@link OfficeFloorMBean}.
 	 * 
-	 * @param port
-	 *            Port that JMX is running on for {@link OfficeFloor}.
+	 * @param port Port that JMX is running on for {@link OfficeFloor}.
 	 * @return {@link OfficeFloorMBean}.
-	 * @throws Exception
-	 *             If failure to connect and obtain {@link OfficeFloorMBean}.
+	 * @throws Exception If failure to connect and obtain {@link OfficeFloorMBean}.
 	 */
 	public static OfficeFloorMBean getOfficeFloorBean(int port) throws Exception {
 
@@ -87,9 +89,32 @@ public class CloseOfficeFloorMojo extends AbstractMojo {
 			// Close OfficeFloor
 			mbean.closeOfficeFloor();
 
+		} catch (UndeclaredThrowableException ex) {
+			// Handle possible connection loss (as likely closed quickly)
+			Throwable cause = ex.getCause();
+			if (cause instanceof UnmarshalException) {
+				cause = cause.getCause();
+				if (cause instanceof EOFException) {
+					return; // ignore closing too quickly
+				}
+			}
+
+			// Propagate failure
+			this.propagateException(ex);
+
 		} catch (Exception ex) {
-			throw new MojoExecutionException("Failed to close " + OfficeFloor.class.getSimpleName(), ex);
+			this.propagateException(ex);
 		}
+	}
+
+	/**
+	 * Propagates the {@link Throwable}.
+	 * 
+	 * @param ex Cause.
+	 * @throws MojoExecutionException Propagated {@link MojoExecutionException}.
+	 */
+	private void propagateException(Throwable ex) throws MojoExecutionException {
+		throw new MojoExecutionException("Failed to close " + OfficeFloor.class.getSimpleName(), ex);
 	}
 
 }
