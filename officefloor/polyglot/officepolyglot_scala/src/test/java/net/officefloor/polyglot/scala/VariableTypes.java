@@ -18,19 +18,34 @@
 package net.officefloor.polyglot.scala;
 
 /**
- * Java Object.
+ * Variables.
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaObject {
+public class VariableTypes {
 
-	private String identifier;
+	private final char val;
 
-	public JavaObject(String identifier) {
-		this.identifier = identifier;
+	private final String in;
+
+	private final int var;
+
+	public VariableTypes(char val, String in, int var) {
+		this.val = val;
+		this.in = in;
+		this.var = var;
 	}
 
-	public String getIdentifier() {
-		return this.identifier;
+	public char getVal() {
+		return this.val;
 	}
+
+	public String getIn() {
+		return in;
+	}
+
+	public int getVar() {
+		return var;
+	}
+
 }

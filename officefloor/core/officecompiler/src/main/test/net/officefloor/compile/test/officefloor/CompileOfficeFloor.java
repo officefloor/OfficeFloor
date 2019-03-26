@@ -19,6 +19,7 @@ package net.officefloor.compile.test.officefloor;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -53,6 +54,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.variable.Var;
 
 /**
  * Provides easier compiling of {@link OfficeFloor} for testing.
@@ -399,6 +401,13 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 					public OfficeSection addSection(String sectionName, Class<?> sectionClass) {
 						return officeArchitect.addOfficeSection(sectionName, ClassSectionSource.class.getName(),
 								sectionClass.getName());
+					}
+
+					@Override
+					public <T> OfficeManagedObject addVariable(String qualifier, Class<T> type,
+							Consumer<Var<T>> compileVar) {
+						// TODO implement CompileOfficeContext.addVariable
+						throw new UnsupportedOperationException("TODO implement CompileOfficeContext.addVariable");
 					}
 				});
 			}

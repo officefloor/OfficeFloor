@@ -17,20 +17,48 @@
  */
 package net.officefloor.polyglot.scala;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
- * Java Object.
+ * {@link Collection} types.
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaObject {
+public class CollectionTypes {
 
-	private String identifier;
+	private final List<Integer> list;
 
-	public JavaObject(String identifier) {
-		this.identifier = identifier;
+	private final Set<Character> set;
+
+	private final Map<String, JavaObject> map;
+
+	private final Collection<Float> collection;
+
+	public CollectionTypes(List<Integer> list, Set<Character> set, Map<String, JavaObject> map,
+			Collection<Float> collection) {
+		this.list = list;
+		this.set = set;
+		this.map = map;
+		this.collection = collection;
 	}
 
-	public String getIdentifier() {
-		return this.identifier;
+	public List<Integer> getList() {
+		return list;
 	}
+
+	public Set<Character> getSet() {
+		return set;
+	}
+
+	public Map<String, JavaObject> getMap() {
+		return map;
+	}
+
+	public Collection<Float> getCollection() {
+		return collection;
+	}
+
 }

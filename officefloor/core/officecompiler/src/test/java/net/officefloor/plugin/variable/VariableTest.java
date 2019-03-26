@@ -19,6 +19,7 @@ package net.officefloor.plugin.variable;
 
 import net.officefloor.compile.integrate.officefloor.AugmentManagedObjectSourceFlowTest.Section;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.officefloor.CompileVar;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.Qualified;
@@ -40,7 +41,7 @@ public class VariableTest extends OfficeFrameTestCase {
 	 * Ensure can {@link Out} then {@link In}.
 	 */
 	public void testOutIn() throws Throwable {
-		this.doVariableTest(OutInSection.class);
+		this.doVariableTest(OutInSection.class, null, String.class, "TEXT", null, Integer.class, 1);
 	}
 
 	public static class OutInSection {
@@ -62,7 +63,8 @@ public class VariableTest extends OfficeFrameTestCase {
 	 * Ensure can qualified {@link Out} then {@link In}.
 	 */
 	public void testQualifiedOutIn() throws Throwable {
-		this.doVariableTest(QualifiedOutInSection.class);
+		this.doVariableTest(QualifiedOutInSection.class, "QUALIFIED", String.class, "QUALIFIED", null, String.class,
+				"UNQUALIFIED");
 	}
 
 	public static class QualifiedOutInSection {
@@ -84,7 +86,7 @@ public class VariableTest extends OfficeFrameTestCase {
 	 * Ensure can {@link Var} then {@link Val}.
 	 */
 	public void testVarVal() throws Throwable {
-		this.doVariableTest(VarValSection.class);
+		this.doVariableTest(VarValSection.class, null, String.class, "TEXT", null, Integer.class, 1);
 	}
 
 	public static class VarValSection {
@@ -106,7 +108,8 @@ public class VariableTest extends OfficeFrameTestCase {
 	 * Ensure can qualified {@link Var} then {@link Val}.
 	 */
 	public void testQualifiedVarVal() throws Throwable {
-		this.doVariableTest(QualifiedVarValSection.class);
+		this.doVariableTest(QualifiedVarValSection.class, "QUALIFIED", String.class, "QUALIFIED", null, String.class,
+				"UNQUALIFIED");
 	}
 
 	public static class QualifiedVarValSection {
@@ -127,19 +130,38 @@ public class VariableTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes the variable testing.
 	 * 
-	 * @param sectionClass {@link Section} {@link Class}.
+	 * @param sectionClass    {@link Section} {@link Class}.
+	 * @param varOneQualifier Variable one qualifier.
+	 * @param varOneType      Variable one type.
+	 * @param varOneValue     Variable one value.
+	 * @param varTwoQualifier Variable two qualifier.
+	 * @param varTwoType      Variable two type.
+	 * @param varTwoValue     Variable two value.
 	 */
-	private void doVariableTest(Class<?> sectionClass) throws Throwable {
+	private <A, B> void doVariableTest(Class<?> sectionClass, String varOneQualifier, Class<A> varOneType,
+			A varOneValue, String varTwoQualifier, Class<B> varTwoType, B varTwoValue) throws Throwable {
+
+		// Capture variable values
+		CompileVar<A> varOne = new CompileVar<>();
+		CompileVar<B> varTwo = new CompileVar<>();
 
 		// Compile section
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		compiler.office((context) -> context.addSection("SECTION", sectionClass));
+		compiler.office((context) -> {
+			context.addSection("SECTION", sectionClass);
+			context.addVariable(varOneQualifier, varOneType, varOne);
+			context.addVariable(varTwoQualifier, varTwoType, varTwo);
+		});
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 
 		// Trigger the function
 		isComplete = false;
 		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.stepOne", null);
 		assertTrue("Should complete", isComplete);
+
+		// Ensure correct values
+		assertEquals("Incorrect variable one value", varOneValue, varOne.getValue());
+		assertEquals("Incorrect variable two value", varTwoValue, varTwo.getValue());
 	}
 
 }

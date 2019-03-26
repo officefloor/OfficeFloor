@@ -18,19 +18,63 @@
 package net.officefloor.polyglot.scala;
 
 /**
- * Java Object.
+ * Primitive types.
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaObject {
+public class PrimitiveTypes {
 
-	private String identifier;
+	private final byte _byte;
 
-	public JavaObject(String identifier) {
-		this.identifier = identifier;
+	private final short _short;
+
+	private final char _char;
+
+	private final int _int;
+
+	private final long _long;
+
+	private final float _float;
+
+	private final double _double;
+
+	public PrimitiveTypes(byte _byte, short _short, char _char, int _int, long _long, float _float, double _double) {
+		super();
+		this._byte = _byte;
+		this._short = _short;
+		this._char = _char;
+		this._int = _int;
+		this._long = _long;
+		this._float = _float;
+		this._double = _double;
 	}
 
-	public String getIdentifier() {
-		return this.identifier;
+	public byte getByte() {
+		return _byte;
 	}
+
+	public short getShort() {
+		return _short;
+	}
+
+	public char getChar() {
+		return _char;
+	}
+
+	public int getInt() {
+		return _int;
+	}
+
+	public long getLong() {
+		return _long;
+	}
+
+	public float getFloat() {
+		return _float;
+	}
+
+	public double getDouble() {
+		return _double;
+	}
+
 }

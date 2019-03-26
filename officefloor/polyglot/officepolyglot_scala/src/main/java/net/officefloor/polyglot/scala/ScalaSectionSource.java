@@ -17,20 +17,28 @@
  */
 package net.officefloor.polyglot.scala;
 
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+
 /**
- * Java Object.
+ * Scala {@link SectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaObject {
+public class ScalaSectionSource extends AbstractSectionSource {
 
-	private String identifier;
-
-	public JavaObject(String identifier) {
-		this.identifier = identifier;
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		// TODO implement AbstractSectionSource.loadSpecification
+		throw new UnsupportedOperationException("TODO implement AbstractSectionSource.loadSpecification");
 	}
 
-	public String getIdentifier() {
-		return this.identifier;
+	@Override
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
+		// TODO implement SectionSource.sourceSection
+		throw new UnsupportedOperationException("TODO implement SectionSource.sourceSection");
 	}
+
 }

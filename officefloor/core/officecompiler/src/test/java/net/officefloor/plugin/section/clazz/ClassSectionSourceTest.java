@@ -118,7 +118,6 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testIgnoreNonFunctionMethods() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockIgnoreInputSection.class,
-
 				this.configureClassSectionFunction("includedInput"));
 		expected.addSectionInput("includedInput", null);
 
@@ -1450,7 +1449,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			String functionName, String functionTypeName) {
 		SectionFunction function = namespace.addSectionFunction(functionName, functionTypeName);
 		FunctionObject functionObject = function.getFunctionObject(ClassSectionSource.CLASS_OBJECT_NAME);
-		designer.link(functionObject, objectManagedObject);
+		designer.link(functionObject, this.objectManagedObject);
 		return function;
 	}
 

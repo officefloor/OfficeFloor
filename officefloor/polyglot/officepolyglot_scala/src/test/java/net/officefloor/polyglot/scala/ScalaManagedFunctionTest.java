@@ -26,8 +26,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.section.SectionLoaderUtil;
+import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.test.variable.MockVar;
+import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
  * Tests adapting a Scala function via a {@link ManagedFunction}.
@@ -37,10 +46,10 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class ScalaManagedFunctionTest extends OfficeFrameTestCase {
 
 	/**
-	 * Ensure can use unified types.
+	 * Ensure can use primitive types.
 	 */
-	public void testDirectUnifiedTypes() {
-		UnifiedTypes types = package$.MODULE$.unifiedTypes((byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0);
+	public void testDirectPrimitiveTypes() {
+		PrimitiveTypes types = package$.MODULE$.primitiveTypes((byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0);
 		assertEquals("byte", 1, types.getByte());
 		assertEquals("short", 2, types.getShort());
 		assertEquals("char", '3', types.getChar());
@@ -51,23 +60,45 @@ public class ScalaManagedFunctionTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can use Scala object.
+	 * Ensure correct {@link ManagedFunctionType}.
 	 */
-	public void testDirectScalaObject() {
-		assertEquals("byte", 1, ScalaObject.getByte());
-		assertEquals("short", 2, ScalaObject.getShort());
-		assertEquals("char", '3', ScalaObject.getChar());
-		assertEquals("integer", 4, ScalaObject.getInt());
-		assertEquals("long", 5, ScalaObject.getLong());
-		assertEquals("float", 6.0f, ScalaObject.getFloat());
-		assertEquals("double", 7.0, ScalaObject.getDouble());
+	public void testTypePrimitive() {
+
+		// TODO fix up
+		if (true) {
+			System.err.println("TODO: testTypePrimitive");
+			return;
+		}
+
+		// Create expected type
+		SectionDesigner expected = SectionLoaderUtil.createSectionDesigner();
+		SectionFunctionNamespace namespace = expected.addSectionFunctionNamespace("SCALA",
+				ScalaManagedFunctionSource.class.getName());
+		SectionFunction function = namespace.addSectionFunction("primitiveTypes", "primitiveTypes");
+		function.getFunctionObject("Byte");
+		expected.addSectionInput("primitiveTypes", null);
+
+		// Ensure correct type
+		SectionLoaderUtil.validateOfficeSection(expected, ScalaSectionSource.class, package$.class.getName(),
+				"function", "primitiveTypes");
+	}
+	
+	/**
+	 * Ensure can invoke primitive types.
+	 */
+	public void testInvokePrimitiveTypes() {
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			
+		});
+		
 	}
 
 	/**
 	 * Ensure can pass in a Java object.
 	 */
 	public void testDirectJavaObject() {
-		JavaObject object = new JavaObject();
+		JavaObject object = new JavaObject("test");
 		assertSame("Incorrect object", object, package$.MODULE$.objects(object));
 	}
 
@@ -75,15 +106,38 @@ public class ScalaManagedFunctionTest extends OfficeFrameTestCase {
 	 * Ensure can pass collections.
 	 */
 	public void testDirectCollections() {
-		List<Object> list = new LinkedList<>();
-		Set<Object> set = new HashSet<>();
-		Map<String, Object> map = new HashMap<>();
-		Collection<Object> collection = new ArrayList<>();
+		List<Integer> list = new LinkedList<>();
+		Set<Character> set = new HashSet<>();
+		Map<String, JavaObject> map = new HashMap<>();
+		Collection<Float> collection = new ArrayList<>();
 		CollectionTypes types = package$.MODULE$.collections(list, set, map, collection);
 		assertSame("list", list, types.getList());
 		assertSame("set", set, types.getSet());
 		assertSame("map", map, types.getMap());
 		assertSame("collection", collection, types.getCollection());
+	}
+
+	/**
+	 * Ensure can handle variables.
+	 */
+	public void testDirectVariables() {
+		MockVar<String> in = new MockVar<>("2");
+		MockVar<JavaObject> out = new MockVar<>();
+		MockVar<Integer> var = new MockVar<>(3);
+		VariableTypes types = package$.MODULE$.variables('1', in, out, var);
+		assertEquals("val", '1', types.getVal());
+		assertEquals("in", "2", types.getIn());
+		assertEquals("var", 3, types.getVar());
+		assertEquals("update out", "test", out.get().getIdentifier());
+		assertEquals("update var", Integer.valueOf(4), var.get());
+	}
+
+	/**
+	 * Ensure can provide {@link Parameter}.
+	 */
+	public void testDirectParameter() {
+		String result = package$.MODULE$.parameters("test");
+		assertEquals("parameter", "test", result);
 	}
 
 }
