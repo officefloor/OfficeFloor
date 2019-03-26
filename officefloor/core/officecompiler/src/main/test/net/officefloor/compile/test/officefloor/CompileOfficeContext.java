@@ -73,15 +73,15 @@ public interface CompileOfficeContext {
 	OfficeSection addSection(String sectionName, Class<?> sectionClass);
 
 	/**
-	 * Adds a variable.
+	 * Listens to a variable.
 	 * 
+	 * @param            <T> Variable type.
 	 * @param qualifier  Qualifier for variable. May be <code>null</code>.
 	 * @param type       Type for variable.
 	 * @param compileVar Typical {@link CompileVar} to handle value. May, however,
 	 *                   be any {@link Consumer} for the created {@link Var}.
-	 * @return {@link OfficeManagedObject} for {@link Var}.
 	 */
-	<T> OfficeManagedObject addVariable(String qualifier, Class<T> type, Consumer<Var<T>> compileVar);
+	<T> void variable(String qualifier, Class<T> type, Consumer<Var<T>> compileVar);
 
 	/**
 	 * Obtains the {@link OfficeSection}.

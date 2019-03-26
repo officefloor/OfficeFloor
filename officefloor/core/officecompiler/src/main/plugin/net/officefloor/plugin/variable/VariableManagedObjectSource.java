@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.variable;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
@@ -29,7 +31,7 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel Sagenschneider
  */
-public class VariableManagedObjectSource extends AbstractManagedObjectSource<None, None> {
+public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * Obtains {@link Var} from dependency object.
@@ -90,6 +92,27 @@ public class VariableManagedObjectSource extends AbstractManagedObjectSource<Non
 		return (qualifier == null ? "" : qualifier + "-") + type;
 	}
 
+	/**
+	 * Decorator of new {@link Var}.
+	 */
+	private final Consumer<Var<T>> decorator;
+
+	/**
+	 * Default constructor.
+	 */
+	public VariableManagedObjectSource() {
+		this.decorator = null;
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param decorator Decorator of new {@link Var}.
+	 */
+	public VariableManagedObjectSource(Consumer<Var<T>> decorator) {
+		this.decorator = decorator;
+	}
+
 	/*
 	 * =================== ManagedObjectSource ===================
 	 */
@@ -109,13 +132,23 @@ public class VariableManagedObjectSource extends AbstractManagedObjectSource<Non
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new VariableManagedObject<>();
+
+		// Create the variable
+		VariableManagedObject var = new VariableManagedObject();
+
+		// Enable decoration of the variable
+		if (this.decorator != null) {
+			this.decorator.accept(var);
+		}
+
+		// Return variable
+		return var;
 	}
 
 	/**
 	 * Variable {@link ManagedObject}.
 	 */
-	private class VariableManagedObject<T> implements ProcessAwareManagedObject, Var<T> {
+	private class VariableManagedObject implements ProcessAwareManagedObject, Var<T> {
 
 		/**
 		 * {@link ProcessAwareContext}.

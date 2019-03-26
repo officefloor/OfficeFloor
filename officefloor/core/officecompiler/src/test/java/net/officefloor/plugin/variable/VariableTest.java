@@ -149,8 +149,8 @@ public class VariableTest extends OfficeFrameTestCase {
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		compiler.office((context) -> {
 			context.addSection("SECTION", sectionClass);
-			context.addVariable(varOneQualifier, varOneType, varOne);
-			context.addVariable(varTwoQualifier, varTwoType, varTwo);
+			context.variable(varOneQualifier, varOneType, varOne);
+			context.variable(varTwoQualifier, varTwoType, varTwo);
 		});
 		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
 

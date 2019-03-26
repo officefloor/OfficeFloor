@@ -19,6 +19,7 @@ package net.officefloor.plugin.variable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
@@ -37,6 +38,43 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * @author Daniel Sagenschneider
  */
 public class VariableOfficeExtensionService implements OfficeExtensionService {
+
+	/**
+	 * Context logic.
+	 */
+	@FunctionalInterface
+	public static interface ContextLogic<R, T extends Throwable> {
+
+		/**
+		 * Logic.
+		 * 
+		 * @retrun Result.
+		 * @throws T Possible failure.
+		 */
+		R run() throws T;
+	}
+
+	/**
+	 * {@link ThreadLocal} decorators for variables.
+	 */
+	private static final ThreadLocal<Map<String, Consumer<Var<?>>>> threadLocalDecorators = new ThreadLocal<>();
+
+	/**
+	 * Runs within context.
+	 * 
+	 * @param decorators {@link Map} of decorators by variable name.
+	 * @param logic      {@link ContextLogic}.
+	 * @throws T Possible failure.
+	 */
+	public static <R, T extends Throwable> R runInContext(Map<String, Consumer<Var<?>>> decorators,
+			ContextLogic<R, T> logic) throws T {
+		threadLocalDecorators.set(decorators);
+		try {
+			return logic.run();
+		} finally {
+			threadLocalDecorators.remove();
+		}
+	}
 
 	/*
 	 * ======================== OfficeExtensionService ==========================
@@ -80,6 +118,9 @@ public class VariableOfficeExtensionService implements OfficeExtensionService {
 		@Override
 		public void augmentManagedFunction(ManagedFunctionAugmentorContext context) {
 
+			// Obtain the variable decorators
+			Map<String, Consumer<Var<?>>> decorators = threadLocalDecorators.get();
+
 			// Load any variables
 			ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
 			NEXT_OBJECT: for (ManagedFunctionObjectType<?> objectType : functionType.getObjectTypes()) {
@@ -97,10 +138,16 @@ public class VariableOfficeExtensionService implements OfficeExtensionService {
 				OfficeManagedObject variable = this.variables.get(variableName);
 				if (variable == null) {
 
+					// Obtain the possible decorator
+					Consumer<Var<?>> decorator = (decorators == null) ? null : decorators.get(variableName);
+
+					// Create the variable source
+					@SuppressWarnings({ "unchecked", "rawtypes" })
+					VariableManagedObjectSource<?> mos = new VariableManagedObjectSource(decorator);
+
 					// Create the variable
 					String moVariableName = "VARIABLE_" + variableName;
-					variable = this.office
-							.addOfficeManagedObjectSource(moVariableName, VariableManagedObjectSource.class.getName())
+					variable = this.office.addOfficeManagedObjectSource(moVariableName, mos)
 							.addOfficeManagedObject(variableName, ManagedObjectScope.THREAD);
 
 					// Register the variable (for expected re-use)
