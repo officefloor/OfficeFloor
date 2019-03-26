@@ -15,37 +15,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.scala;
+package net.officefloor.polyglot.test;
 
 /**
- * Variables.
+ * Java Object.
  * 
  * @author Daniel Sagenschneider
  */
-public class VariableTypes {
+public class JavaObject {
 
-	private final char val;
+	private String identifier;
 
-	private final String in;
-
-	private final int var;
-
-	public VariableTypes(char val, String in, int var) {
-		this.val = val;
-		this.in = in;
-		this.var = var;
+	public JavaObject(String identifier) {
+		this.identifier = identifier;
 	}
 
-	public char getVal() {
-		return this.val;
+	public String getIdentifier() {
+		return this.identifier;
 	}
-
-	public String getIn() {
-		return in;
-	}
-
-	public int getVar() {
-		return var;
-	}
-
 }

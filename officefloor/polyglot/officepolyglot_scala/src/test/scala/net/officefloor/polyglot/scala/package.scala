@@ -1,11 +1,12 @@
 package net.officefloor.polyglot
 
+import net.officefloor.polyglot.test.{ PrimitiveTypes, JavaObject, CollectionTypes, VariableTypes }
 import net.officefloor.plugin.variable.{ Val, In, Out, Var }
 import net.officefloor.plugin.section.clazz.{ Parameter, NextFunction }
 
 package object scala {
 
-  def primitiveTypes(_byte: Byte, _short: Short, _char: Char, _int: Int, _long: Long, _float: Float, _double: Double): PrimitiveTypes = {
+  def primitives(_byte: Byte, _short: Short, _char: Char, _int: Int, _long: Long, _float: Float, _double: Double): PrimitiveTypes = {
     new PrimitiveTypes(_byte, _short, _char, _int, _long, _float, _double)
   }
 
@@ -22,7 +23,7 @@ package object scala {
     result
   }
 
-  def parameters(@Parameter parameter: String): String = parameter
+  def parameter(@Parameter parameter: String): String = parameter
 
   @NextFunction("next")
   def nextFunction() = Unit

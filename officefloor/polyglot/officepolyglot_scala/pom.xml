@@ -14,13 +14,14 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<scala-version>2.12.8</scala-version>
+		<scala-maven-version>4.0.1</scala-maven-version>
 	</properties>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<version>4.0.1</version>
+				<version>${scala-maven-version}</version>
 				<configuration>
 					<recompileMode>incremental</recompileMode>
 				</configuration>
@@ -65,6 +66,11 @@
 		<dependency>
 			<groupId>net.officefloor.core</groupId>
 			<artifactId>officecompiler</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.polyglot</groupId>
+			<artifactId>officepolyglot_test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.scala-lang</groupId>
