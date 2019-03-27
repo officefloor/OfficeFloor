@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.construct.source;
 
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -302,7 +303,55 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		@Override
 		public Class<?> loadOptionalClass(String name) {
 			try {
+
+				// Determine if primitive
+				switch (name) {
+				case "byte":
+					return byte.class;
+				case "short":
+					return short.class;
+				case "char":
+					return char.class;
+				case "int":
+					return int.class;
+				case "long":
+					return long.class;
+				case "float":
+					return float.class;
+				case "double":
+					return double.class;
+				case "[B":
+					return byte[].class;
+				case "[S":
+					return short[].class;
+				case "[C":
+					return char[].class;
+				case "[I":
+					return int[].class;
+				case "[J":
+					return long[].class;
+				case "[F":
+					return float[].class;
+				case "[D":
+					return double[].class;
+				}
+
+				// Determine if array
+				final String START = "[L";
+				final String END = ";";
+				if (name.startsWith(START) && name.endsWith(END)) {
+
+					// Array, so obtain component name
+					String componentName = name.substring(START.length(), name.length() - END.length());
+					Class<?> componentType = this.classLoader.loadClass(componentName);
+
+					// Return the array class
+					return Array.newInstance(componentType, 0).getClass();
+				}
+
+				// Load the non-array class
 				return this.classLoader.loadClass(name);
+
 			} catch (ClassNotFoundException ex) {
 				return null;
 			}

@@ -17,40 +17,21 @@
  */
 package net.officefloor.polyglot.test;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
- * {@link Collection} types.
+ * Parameter type.
  * 
  * @author Daniel Sagenschneider
  */
-public class CollectionTypes {
+public class ParameterTypes {
 
-	private final List<Integer> list;
+	private final String parameter;
 
-	private final Set<Character> set;
-
-	private final Map<String, JavaObject> map;
-
-	public CollectionTypes(List<Integer> list, Set<Character> set, Map<String, JavaObject> map) {
-		this.list = list;
-		this.set = set;
-		this.map = map;
+	public ParameterTypes(String parameter) {
+		this.parameter = parameter;
 	}
 
-	public List<Integer> getList() {
-		return list;
-	}
-
-	public Set<Character> getSet() {
-		return set;
-	}
-
-	public Map<String, JavaObject> getMap() {
-		return map;
+	public String getParameter() {
+		return parameter;
 	}
 
 }

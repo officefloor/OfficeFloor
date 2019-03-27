@@ -132,17 +132,7 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-
-		// Create the variable
-		VariableManagedObject var = new VariableManagedObject();
-
-		// Enable decoration of the variable
-		if (this.decorator != null) {
-			this.decorator.accept(var);
-		}
-
-		// Return variable
-		return var;
+		return new VariableManagedObject();
 	}
 
 	/**
@@ -171,6 +161,17 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 
 		@Override
 		public Object getObject() throws Throwable {
+
+			// Easy access to source
+			VariableManagedObjectSource<T> mos = VariableManagedObjectSource.this;
+
+			// Enable decoration of the variable
+			// (after getting process aware context)
+			if (mos.decorator != null) {
+				mos.decorator.accept(this);
+			}
+
+			// Return this var
 			return this;
 		}
 

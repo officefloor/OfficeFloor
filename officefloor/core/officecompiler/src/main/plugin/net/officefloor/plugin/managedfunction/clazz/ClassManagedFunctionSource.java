@@ -251,6 +251,23 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 					Annotation[] typeAnnotations = paramType.getAnnotations();
 					Annotation[] paramAnnotations = methodParamAnnotations[i];
 
+					// Handle primitives
+					if (byte.class.equals(paramType)) {
+						paramType = Byte.class;
+					} else if (short.class.equals(paramType)) {
+						paramType = Short.class;
+					} else if (char.class.equals(paramType)) {
+						paramType = Character.class;
+					} else if (int.class.equals(paramType)) {
+						paramType = Integer.class;
+					} else if (long.class.equals(paramType)) {
+						paramType = Long.class;
+					} else if (float.class.equals(paramType)) {
+						paramType = Float.class;
+					} else if (double.class.equals(paramType)) {
+						paramType = Double.class;
+					}
+
 					// Obtain the parameter factory
 					ManagedFunctionParameterFactory parameterFactory = null;
 					CREATED: for (ParameterManufacturer manufacturer : this.manufacturers) {
@@ -283,13 +300,16 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 						ManagedFunctionObjectTypeBuilder<Indexed> objectTypeBuilder;
 						String typeQualifierSuffix;
 						boolean isIncludeVariableAnnotation;
+						String labelPrefix;
 						String labelSuffix;
+						final String VAR_LABEL_PREFIX = "VAR-";
 						if (isVal) {
 							// Value (from variable)
 							parameterFactory = new ManagedFunctionValueParameterFactory(objectSequence.nextIndex());
 							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
 							typeQualifierSuffix = paramType.getTypeName();
 							isIncludeVariableAnnotation = true;
+							labelPrefix = VAR_LABEL_PREFIX;
 							labelSuffix = typeQualifierSuffix;
 
 						} else if (Var.class.equals(paramType)) {
@@ -298,6 +318,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
 							typeQualifierSuffix = extractVariableType(paramGenericType);
 							isIncludeVariableAnnotation = true;
+							labelPrefix = VAR_LABEL_PREFIX;
 							labelSuffix = typeQualifierSuffix;
 
 						} else if (Out.class.equals(paramType)) {
@@ -306,6 +327,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
 							typeQualifierSuffix = extractVariableType(paramGenericType);
 							isIncludeVariableAnnotation = true;
+							labelPrefix = VAR_LABEL_PREFIX;
 							labelSuffix = typeQualifierSuffix;
 
 						} else if (In.class.equals(paramType)) {
@@ -314,6 +336,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 							objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
 							typeQualifierSuffix = extractVariableType(paramGenericType);
 							isIncludeVariableAnnotation = true;
+							labelPrefix = VAR_LABEL_PREFIX;
 							labelSuffix = typeQualifierSuffix;
 
 						} else {
@@ -322,6 +345,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 							objectTypeBuilder = functionTypeBuilder.addObject(paramType);
 							typeQualifierSuffix = null;
 							isIncludeVariableAnnotation = false;
+							labelPrefix = "";
 							labelSuffix = paramType.getName();
 						}
 
@@ -361,7 +385,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 
 						// Specify the label
 						String label = (typeQualifier != null ? typeQualifier + "-" : "") + labelSuffix;
-						objectTypeBuilder.setLabel(label);
+						objectTypeBuilder.setLabel(labelPrefix + label);
 
 						// Determine if include variable annotation
 						if (isIncludeVariableAnnotation) {

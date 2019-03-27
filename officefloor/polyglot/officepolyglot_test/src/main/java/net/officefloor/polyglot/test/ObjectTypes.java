@@ -17,40 +17,42 @@
  */
 package net.officefloor.polyglot.test;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
- * {@link Collection} types.
+ * Object types.
  * 
  * @author Daniel Sagenschneider
  */
-public class CollectionTypes {
+public class ObjectTypes {
 
-	private final List<Integer> list;
+	private final String string;
 
-	private final Set<Character> set;
+	private final JavaObject object;
 
-	private final Map<String, JavaObject> map;
+	private final int[] primitiveArray;
 
-	public CollectionTypes(List<Integer> list, Set<Character> set, Map<String, JavaObject> map) {
-		this.list = list;
-		this.set = set;
-		this.map = map;
+	private final JavaObject[] objectArray;
+
+	public ObjectTypes(String string, JavaObject object, int[] primitiveArray, JavaObject[] objectArray) {
+		this.string = string;
+		this.object = object;
+		this.primitiveArray = primitiveArray;
+		this.objectArray = objectArray;
 	}
 
-	public List<Integer> getList() {
-		return list;
+	public String getString() {
+		return string;
 	}
 
-	public Set<Character> getSet() {
-		return set;
+	public JavaObject getObject() {
+		return object;
 	}
 
-	public Map<String, JavaObject> getMap() {
-		return map;
+	public int[] getPrimitiveArray() {
+		return primitiveArray;
+	}
+
+	public JavaObject[] getObjectArray() {
+		return objectArray;
 	}
 
 }
