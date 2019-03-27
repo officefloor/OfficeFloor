@@ -31,11 +31,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileVar;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -368,55 +364,6 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 		context.getOfficeArchitect()
 				.addOfficeManagedObjectSource(value.getClass().getName(), new ValueManagedObjectSource(value))
 				.addOfficeManagedObject(value.getClass().getName(), ManagedObjectScope.THREAD);
-	}
-
-	/**
-	 * Value {@link ManagedObjectSource}.
-	 */
-	private static class ValueManagedObjectSource extends AbstractManagedObjectSource<None, None>
-			implements ManagedObject {
-
-		/**
-		 * Value.
-		 */
-		private final Object value;
-
-		/***
-		 * Instantiate.
-		 * 
-		 * @param value Value.
-		 */
-		private ValueManagedObjectSource(Object value) {
-			this.value = value;
-		}
-
-		/*
-		 * ======================= ManagedObjectSource ===================
-		 */
-
-		@Override
-		protected void loadSpecification(SpecificationContext context) {
-			// No specification
-		}
-
-		@Override
-		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
-			context.setObjectClass(this.value.getClass());
-		}
-
-		@Override
-		protected ManagedObject getManagedObject() throws Throwable {
-			return this;
-		}
-
-		/*
-		 * =================== ManagedObject ==============================
-		 */
-
-		@Override
-		public Object getObject() throws Throwable {
-			return this.value;
-		}
 	}
 
 }

@@ -26,7 +26,6 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
-import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -36,11 +35,11 @@ import net.officefloor.plugin.variable.Val;
 import net.officefloor.plugin.variable.Var;
 
 /**
- * Confirms the tests with {@link ClassManagedFunctionSource}.
+ * Confirms the tests with {@link ClassSectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
+public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 
 	@Override
 	protected PrimitiveTypes primitives(byte _byte, short _short, char _char, int _int, long _long, float _float,
