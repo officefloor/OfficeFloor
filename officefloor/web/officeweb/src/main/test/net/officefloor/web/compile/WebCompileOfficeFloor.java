@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.plugin.variable.Var;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.HttpInput;
@@ -160,6 +161,11 @@ public class WebCompileOfficeFloor extends CompileOfficeFloor {
 		@Override
 		public OfficeSection addSection(String sectionName, Class<?> sectionClass) {
 			return this.officeContext.addSection(sectionName, sectionClass);
+		}
+
+		@Override
+		public <T> void variable(String qualifier, Class<T> type, Consumer<Var<T>> compileVar) {
+			this.officeContext.variable(qualifier, type, compileVar);
 		}
 
 		@Override

@@ -17,11 +17,12 @@
  */
 package net.officefloor.polyglot.scala;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.variable.In;
@@ -30,6 +31,8 @@ import net.officefloor.plugin.variable.Var;
 import net.officefloor.polyglot.test.AbstractPolyglotFunctionTest;
 import net.officefloor.polyglot.test.CollectionTypes;
 import net.officefloor.polyglot.test.JavaObject;
+import net.officefloor.polyglot.test.ObjectTypes;
+import net.officefloor.polyglot.test.ParameterTypes;
 import net.officefloor.polyglot.test.PrimitiveTypes;
 import net.officefloor.polyglot.test.VariableTypes;
 
@@ -47,20 +50,31 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected String primitives(CompileOfficeContext context) {
+	protected String primitives(CompileOfficeContext context, OfficeSectionInput handleResult) {
 		// TODO implement AbstractPolyglotFunctionTest.primitives
 		throw new UnsupportedOperationException("TODO implement AbstractPolyglotFunctionTest.primitives");
 	}
 
 	@Override
-	protected JavaObject objects(JavaObject object) {
-		return package$.MODULE$.objects(object);
+	protected ObjectTypes objects(String string, JavaObject object, int[] primitiveArray, JavaObject[] objectArray) {
+		return package$.MODULE$.objects(string, object, primitiveArray, objectArray);
 	}
 
 	@Override
-	protected CollectionTypes collections(List<Integer> list, Set<Character> set, Map<String, JavaObject> map,
-			Collection<Float> collection) {
-		return package$.MODULE$.collections(list, set, map, collection);
+	protected String objects(CompileOfficeContext context, OfficeSectionInput handleResult) {
+		// TODO implement AbstractPolyglotFunctionTest.objects
+		throw new UnsupportedOperationException("TODO implement AbstractPolyglotFunctionTest.objects");
+	}
+
+	@Override
+	protected CollectionTypes collections(List<Integer> list, Set<Character> set, Map<String, JavaObject> map) {
+		return package$.MODULE$.collections(list, set, map);
+	}
+
+	@Override
+	protected String collections(CompileOfficeContext context, OfficeSectionInput handleResult) {
+		// TODO implement AbstractPolyglotFunctionTest.collections
+		throw new UnsupportedOperationException("TODO implement AbstractPolyglotFunctionTest.collections");
 	}
 
 	@Override
@@ -69,8 +83,20 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected String parameter(String parameter) {
+	protected String variables(CompileOfficeContext context, OfficeSectionInput handleResult) {
+		// TODO implement AbstractPolyglotFunctionTest.variables
+		throw new UnsupportedOperationException("TODO implement AbstractPolyglotFunctionTest.variables");
+	}
+
+	@Override
+	protected ParameterTypes parameter(String parameter) {
 		return package$.MODULE$.parameter(parameter);
+	}
+
+	@Override
+	protected void parameter(OfficeSectionOutput pass, CompileOfficeContext context, OfficeSectionInput handleResult) {
+		// TODO implement AbstractPolyglotFunctionTest.parameter
+		throw new UnsupportedOperationException("TODO implement AbstractPolyglotFunctionTest.parameter");
 	}
 
 }
