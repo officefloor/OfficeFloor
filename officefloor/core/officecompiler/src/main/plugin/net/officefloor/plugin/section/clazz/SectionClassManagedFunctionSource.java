@@ -17,23 +17,24 @@
  */
 package net.officefloor.plugin.section.clazz;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.source.PrivateSource;
-import net.officefloor.plugin.clazz.Sequence;
 import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
+import net.officefloor.plugin.managedfunction.clazz.MethodManagedFunctionBuilder;
 
 /**
  * {@link ManagedFunctionSource} implementation to provide the
@@ -49,32 +50,44 @@ public class SectionClassManagedFunctionSource extends ClassManagedFunctionSourc
 	 */
 
 	@Override
-	protected void loadParameterManufacturers(List<ParameterManufacturer> manufacturers) {
-		manufacturers.add(new FlowParameterManufacturer<SectionInterface>(SectionInterface.class));
+	protected MethodManagedFunctionBuilder createMethodManagedFunctionBuilder(FunctionNamespaceBuilder namespaceBuilder,
+			ManagedFunctionSourceContext context) throws Exception {
+		return new SectionMethodManagedFunctionBuilder();
 	}
 
-	@Override
-	protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(Constructor<?> constructor,
-			Method method, ManagedFunctionParameterFactory[] parameters) {
-		boolean isStatic = (constructor == null);
-		return new SectionManagedFunctionFactory(method, isStatic, parameters);
-	}
+	/**
+	 * {@link MethodManagedFunctionBuilder} for the {@link SectionSource}.
+	 */
+	protected class SectionMethodManagedFunctionBuilder extends MethodManagedFunctionBuilder {
 
-	@Override
-	protected ManagedFunctionTypeBuilder<Indexed, Indexed> addManagedFunctionType(Class<?> clazz,
-			FunctionNamespaceBuilder namespaceBuilder, String functionName,
-			ManagedFunctionFactory<Indexed, Indexed> functionFactory, Sequence objectSequence, Sequence flowSequence) {
+		@Override
+		protected void loadParameterManufacturers(List<ParameterManufacturer> manufacturers) {
+			manufacturers.add(new FlowParameterManufacturer<SectionInterface>(SectionInterface.class));
+		}
 
-		// Include method as function in type definition
-		ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = namespaceBuilder
-				.addManagedFunctionType(functionName, functionFactory, Indexed.class, Indexed.class);
+		@Override
+		protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(
+				MethodManagedFunctionFactoryContext context) {
+			boolean isStatic = (context.getMethodObjectInstanceFactory() == null);
+			return new SectionManagedFunctionFactory(context.getMethod(), isStatic, context.getParameters());
+		}
 
-		// Add the section object always as first dependency
-		functionTypeBuilder.addObject(clazz).setLabel("OBJECT");
-		objectSequence.nextIndex(); // index for section object
+		@Override
+		protected ManagedFunctionTypeBuilder<Indexed, Indexed> addManagedFunctionType(
+				MethodManagedFunctionTypeContext context) {
 
-		// Return the function type builder
-		return functionTypeBuilder;
+			// Include method as function in type definition
+			ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = context.getNamespaceBuilder()
+					.addManagedFunctionType(context.getFunctionName(), context.getFunctionFactory(), Indexed.class,
+							Indexed.class);
+
+			// Add the section object always as first dependency
+			functionTypeBuilder.addObject(context.getInstanceClass()).setLabel("OBJECT");
+			context.nextObjectIndex(); // index for section object
+
+			// Return the function type builder
+			return functionTypeBuilder;
+		}
 	}
 
 	/**
@@ -94,21 +107,18 @@ public class SectionClassManagedFunctionSource extends ClassManagedFunctionSourc
 		private final boolean isStatic;
 
 		/**
-		 * {@link ManagedFunctionParameterFactory} instances for the parameters
-		 * of the {@link Method}.
+		 * {@link ManagedFunctionParameterFactory} instances for the parameters of the
+		 * {@link Method}.
 		 */
 		private final ManagedFunctionParameterFactory[] parameters;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param method
-		 *            {@link Method} for the {@link ManagedFunction}.
-		 * @param isStatic
-		 *            Indicates if the {@link Method} is static.
-		 * @param parameters
-		 *            {@link ManagedFunctionParameterFactory} instances for the
-		 *            parameters of the {@link Method}.
+		 * @param method     {@link Method} for the {@link ManagedFunction}.
+		 * @param isStatic   Indicates if the {@link Method} is static.
+		 * @param parameters {@link ManagedFunctionParameterFactory} instances for the
+		 *                   parameters of the {@link Method}.
 		 */
 		public SectionManagedFunctionFactory(Method method, boolean isStatic,
 				ManagedFunctionParameterFactory[] parameters) {

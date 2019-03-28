@@ -13,7 +13,7 @@
 	<description>OfficeFloor plug-in for using Scala</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<scala-version>2.11.11</scala-version>
+		<scala-version>2.12.8</scala-version>
 		<scala-maven-version>4.0.1</scala-maven-version>
 	</properties>
 	<build>

@@ -49,6 +49,7 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedfunction.clazz.ClassFunctionFactory;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.clazz.DefaultConstructorMethodObjectInstanceFactory;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -78,8 +79,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link ManagedFunction} with a responsible
-	 * {@link Team}.
+	 * Tests compiling a {@link ManagedFunction} with a responsible {@link Team}.
 	 */
 	public void testAssignFunctionTeam() {
 
@@ -134,8 +134,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link ManagedFunction} linking a {@link Flow} to
-	 * another {@link ManagedFunction} on the same {@link FunctionNamespace}.
+	 * Tests compiling a {@link ManagedFunction} linking a {@link Flow} to another
+	 * {@link ManagedFunction} on the same {@link FunctionNamespace}.
 	 */
 	public void testLinkFlowToFunctionOnSameFunctionNamespace() {
 
@@ -154,8 +154,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link ManagedFunction} linking a {@link Flow} to
-	 * different {@link FunctionNamespace} in the same {@link OfficeSection}.
+	 * Tests compiling a {@link ManagedFunction} linking a {@link Flow} to different
+	 * {@link FunctionNamespace} in the same {@link OfficeSection}.
 	 */
 	public void testLinkFlowToFunctionOnDifferentFunctionNamespaceInSameSection() {
 
@@ -318,8 +318,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} link the
-	 * {@link FunctionObject} as a parameter.
+	 * Ensure compiling a {@link ManagedFunction} link the {@link FunctionObject} as
+	 * a parameter.
 	 */
 	public void testLinkFunctionObjectAsParameter() {
 
@@ -337,8 +337,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} linking the
-	 * {@link FunctionObject} to a {@link OfficeFloorManagedObject}.
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link FunctionObject}
+	 * to a {@link OfficeFloorManagedObject}.
 	 */
 	public void testLinkFunctionObjectToOfficeFloorManagedObject() {
 
@@ -361,8 +361,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} linking the
-	 * {@link FunctionObject} to an {@link OfficeFloorInputManagedObject}.
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link FunctionObject}
+	 * to an {@link OfficeFloorInputManagedObject}.
 	 */
 	public void testLinkFunctionObjectToOfficeFloorInputManagedObject() {
 
@@ -385,8 +385,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} linking the
-	 * {@link FunctionObject} to an {@link OfficeManagedObject}.
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link FunctionObject}
+	 * to an {@link OfficeManagedObject}.
 	 */
 	public void testLinkFunctionObjectToOfficeManagedObject() {
 
@@ -409,8 +409,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} linking the
-	 * {@link FunctionObject} to a {@link SectionManagedObject}.
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link FunctionObject}
+	 * to a {@link SectionManagedObject}.
 	 */
 	public void testLinkFunctionObjectToParentSectionManagedObject() {
 
@@ -434,8 +434,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensure compiling a {@link ManagedFunction} linking the
-	 * {@link FunctionObject} to a {@link DeskManagedObject}.
+	 * Ensure compiling a {@link ManagedFunction} linking the {@link FunctionObject}
+	 * to a {@link DeskManagedObject}.
 	 */
 	public void testLinkFunctionObjectToSectionManagedObject() {
 
@@ -504,8 +504,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests compiling a {@link ManagedFunction} linking a {@link Escalation} to
-	 * a {@link ManagedFunction} in a different {@link OfficeSection}.
+	 * Tests compiling a {@link ManagedFunction} linking a {@link Escalation} to a
+	 * {@link ManagedFunction} in a different {@link OfficeSection}.
 	 */
 	public void testLinkEscalationToFunctionInDifferentOfficeSection() {
 
@@ -621,8 +621,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * {@link ManagedFunctionSource} to load annotation for
-	 * {@link ManagedFunction}.
+	 * {@link ManagedFunctionSource} to load annotation for {@link ManagedFunction}.
 	 */
 	public static class AnnotatedManagedFunctionSource extends AbstractManagedFunctionSource {
 
@@ -641,7 +640,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = namespaceBuilder.addManagedFunctionType("function",
-					new ClassFunctionFactory(CompileFunctionClass.class.getConstructor(new Class[0]),
+					new ClassFunctionFactory(
+							new DefaultConstructorMethodObjectInstanceFactory(CompileFunctionClass.class),
 							CompileFunctionClass.class.getMethod("simpleFunction"),
 							new ManagedFunctionParameterFactory[0]),
 					Indexed.class, Indexed.class);
