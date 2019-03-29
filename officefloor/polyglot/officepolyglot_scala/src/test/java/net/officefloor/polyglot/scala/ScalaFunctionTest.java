@@ -21,11 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.AssertionFailedError;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
+import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
@@ -49,7 +51,20 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 	 * Ensure issue if try to use non Scala object.
 	 */
 	public void testNonScalaObject() {
-		fail("TODO implement");
+		boolean isSuccessful;
+		try {
+			SectionLoaderUtil.loadSectionType(ScalaFunctionSectionSource.class, NotScalaObject.class.getName(),
+					ScalaFunctionSectionSource.PROPERTY_FUNCTION_NAME, "not_available");
+			isSuccessful = true;
+		} catch (AssertionFailedError ex) {
+
+			// Ensure reasonse
+			assertTrue("Incorrect cause: " + ex.getMessage(), ex.getMessage().startsWith("Class "
+					+ NotScalaObject.class.getName() + " is not Scala Object (expecting MODULE$ static field)"));
+
+			isSuccessful = false;
+		}
+		assertFalse("Should not be successful", isSuccessful);
 	}
 
 	/*

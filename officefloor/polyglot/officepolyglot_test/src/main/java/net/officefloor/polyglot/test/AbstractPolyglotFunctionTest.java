@@ -32,10 +32,10 @@ import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileVar;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.test.variable.MockVar;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.variable.In;
@@ -361,9 +361,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	 * @param value   Value.
 	 */
 	private static void value(CompileOfficeContext context, Object value) {
-		context.getOfficeArchitect()
-				.addOfficeManagedObjectSource(value.getClass().getName(), new ValueManagedObjectSource(value))
-				.addOfficeManagedObject(value.getClass().getName(), ManagedObjectScope.THREAD);
+		Singleton.load(context.getOfficeArchitect(), value);
 	}
 
 }

@@ -20,10 +20,14 @@ package net.officefloor.polyglot.scala;
 import java.lang.reflect.Field;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 
@@ -39,9 +43,29 @@ public class ScalaFunctionSectionSource extends ClassSectionSource {
 	 */
 	public static final String PROPERTY_FUNCTION_NAME = "function.name";
 
+	/**
+	 * Name of {@link ManagedFunction} to include.
+	 */
+	private String functionName;
+
 	/*
 	 * ==================== ClassSectionSource ==========================
 	 */
+
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty(PROPERTY_FUNCTION_NAME, "Function");
+	}
+
+	@Override
+	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
+
+		// Obtain the function name
+		this.functionName = context.getProperty(PROPERTY_FUNCTION_NAME);
+
+		// Source the function
+		super.sourceSection(designer, context);
+	}
 
 	@Override
 	protected Class<?> getSectionClass(String sectionClassName) throws Exception {
@@ -86,6 +110,11 @@ public class ScalaFunctionSectionSource extends ClassSectionSource {
 		functionNamespace.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
 				sectionClass.getName());
 		return functionNamespace;
+	}
+
+	@Override
+	protected boolean isIncludeManagedFunctionType(ManagedFunctionType<?, ?> functionType) {
+		return (this.functionName.equals(functionType.getFunctionName()));
 	}
 
 }
