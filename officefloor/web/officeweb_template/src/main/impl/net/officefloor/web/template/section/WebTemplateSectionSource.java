@@ -72,7 +72,9 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.FlowAnnotation;
 import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.NextFunctionAnnotation;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -850,10 +852,10 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				}
 
 				// Ensure no next function (as must render section next)
-				Method method = beanFunction.method;
-				if (method.isAnnotationPresent(NextFunction.class)) {
-					throw designer.addIssue("Template bean method '" + method.getName() + "' (function "
-							+ beanFunctionKey + ") must not be annotated with @" + NextFunction.class.getSimpleName()
+				if (beanFunction.type.getAnnotation(NextFunctionAnnotation.class) != null) {
+					throw designer.addIssue("Template bean method '" + beanFunction.type.getFunctionName()
+							+ "' (function " + beanFunctionKey + ") must not be annotated with @"
+							+ NextFunction.class.getSimpleName()
 							+ " (next function is always rendering template section)");
 				}
 
@@ -975,8 +977,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 			} else {
 				// Not linked to content function, so use default behaviour
-				super.linkFunctionFlow(flowLink.functionFlow, flowLink.functionType, flowLink.flowInterfaceType,
-						flowLink.flowMethod, flowLink.flowArgumentType);
+				FlowAnnotation flow = new FlowAnnotation(flowName, -1, false, flowLink.flow.getParameterType(), false);
+				super.linkFunctionFlow(flowLink.functionFlow, flowLink.functionType, flow);
 			}
 		}
 
@@ -1037,20 +1039,20 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 
 				// Potentially rendering so obtain the class method
 				TemplateClassFunction methodFunction = this.sectionClassMethodFunctionsByName.get(beanTaskKey);
-				Method method = methodFunction.method;
 
 				// Determine if the redirect values function
-				if ((redirectValuesFunctionName != null) && (redirectValuesFunctionName.equals(method.getName()))) {
+				if ((redirectValuesFunctionName != null)
+						&& (redirectValuesFunctionName.equals(methodFunction.type.getFunctionName()))) {
 					continue; // not render (as redirect)
 				}
 
 				// Determine if not render template after
-				if (method.isAnnotationPresent(NotRenderTemplateAfter.class)) {
+				if (methodFunction.type.getAnnotation(NotRenderTemplateAfter.class) != null) {
 					continue; // not render
 				}
 
 				// Determine if NextFunction, so not render template after
-				if (method.isAnnotationPresent(NextFunction.class)) {
+				if (methodFunction.type.getAnnotation(NextFunctionAnnotation.class) != null) {
 					continue; // not render
 				}
 
@@ -1076,11 +1078,6 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		private final ManagedFunctionType<?, ?> type;
 
 		/**
-		 * {@link Method} for the {@link SectionFunction}.
-		 */
-		private final Method method;
-
-		/**
 		 * Type of parameter for {@link SectionFunction}. <code>null</code> indicates no
 		 * parameter.
 		 */
@@ -1091,15 +1088,12 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		 * 
 		 * @param function  {@link SectionFunction}.
 		 * @param type      {@link ManagedFunctionType}.
-		 * @param method    {@link Method} for the {@link SectionFunction}.
 		 * @param parameter Type of parameter for {@link SectionFunction}.
 		 *                  <code>null</code> indicates no parameter.
 		 */
-		private TemplateClassFunction(SectionFunction function, ManagedFunctionType<?, ?> type, Method method,
-				Class<?> parameter) {
+		private TemplateClassFunction(SectionFunction function, ManagedFunctionType<?, ?> type, Class<?> parameter) {
 			this.function = function;
 			this.type = type;
-			this.method = method;
 			this.parameter = parameter;
 		}
 	}
@@ -1146,38 +1140,23 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 		private final ManagedFunctionType<?, ?> functionType;
 
 		/**
-		 * Flow interface type.
+		 * {@link FlowAnnotation}.
 		 */
-		private final Class<?> flowInterfaceType;
-
-		/**
-		 * Flow interface method.
-		 */
-		private final Method flowMethod;
-
-		/**
-		 * Flow interface method argument type.
-		 */
-		private final Class<?> flowArgumentType;
+		private final FlowAnnotation flow;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param functionFlow      {@link FunctionFlow} to be linked.
-		 * @param functionType      {@link ManagedFunctionType} of the
-		 *                          {@link ManagedFunction} for the
-		 *                          {@link FunctionFlow}.
-		 * @param flowInterfaceType Flow interface type.
-		 * @param flowMethod        Flow interface method.
-		 * @param flowArgumentType  Flow interface method argument type.
+		 * @param functionFlow {@link FunctionFlow} to be linked.
+		 * @param functionType {@link ManagedFunctionType} of the
+		 *                     {@link ManagedFunction} for the {@link FunctionFlow}.
+		 * @param flow         {@link FlowAnnotation}.
 		 */
 		private TemplateFlowLink(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
-				Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
+				FlowAnnotation flow) {
 			this.functionFlow = functionFlow;
 			this.functionType = functionType;
-			this.flowInterfaceType = flowInterfaceType;
-			this.flowMethod = flowMethod;
-			this.flowArgumentType = flowArgumentType;
+			this.flow = flow;
 		}
 	}
 
@@ -1772,7 +1751,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 	}
 
 	@Override
-	protected void enrichFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType, Method method,
+	protected void enrichFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
 			Class<?> parameterType) {
 
 		// Do not include if no logic class
@@ -1780,23 +1759,21 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 			return;
 		}
 
-		// Keep track of the functions to allow linking by case-insensitive
-		// names
+		// Keep track to allow linking by case-insensitive names
 		String functionKey = createFunctionKey(function.getSectionFunctionName());
 		this.sectionClassMethodFunctionsByName.put(functionKey,
-				new TemplateClassFunction(function, functionType, method, parameterType));
+				new TemplateClassFunction(function, functionType, parameterType));
 
 		// Enrich the function
-		super.enrichFunction(function, functionType, method, parameterType);
+		super.enrichFunction(function, functionType, parameterType);
 	}
 
 	@Override
 	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
-			Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
+			FlowAnnotation flow) {
 		// At this stage, the template content functions are not available.
 		// Therefore just keep track of flows for later linking.
-		this.flowLinks
-				.add(new TemplateFlowLink(functionFlow, functionType, flowInterfaceType, flowMethod, flowArgumentType));
+		this.flowLinks.add(new TemplateFlowLink(functionFlow, functionType, flow));
 	}
 
 	/**

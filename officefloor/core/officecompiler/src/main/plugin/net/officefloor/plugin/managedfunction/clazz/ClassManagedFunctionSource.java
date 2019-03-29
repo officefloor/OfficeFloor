@@ -44,6 +44,19 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 	public static final String CLASS_NAME_PROPERTY_NAME = "class.name";
 
 	/**
+	 * Creates the {@link MethodObjectInstanceManufacturer}.
+	 * 
+	 * @param clazz {@link Class}.
+	 * @return {@link MethodObjectInstanceManufacturer}.
+	 * @throws Exception If fails to create
+	 *                   {@link MethodObjectInstanceManufacturer}.
+	 */
+	protected MethodObjectInstanceManufacturer createMethodObjectInstanceManufacturer(Class<?> clazz) throws Exception {
+		MethodObjectInstanceFactory instanceFactory = new DefaultConstructorMethodObjectInstanceFactory(clazz);
+		return () -> instanceFactory;
+	}
+
+	/**
 	 * Creates the {@link MethodManagedFunctionBuilder}.
 	 * 
 	 * @param namespaceBuilder {@link FunctionNamespaceBuilder}.
@@ -87,10 +100,7 @@ public class ClassManagedFunctionSource extends AbstractManagedFunctionSource
 		Class<?> clazz = context.loadClass(className);
 
 		// Create the method object instance manufacturer
-		MethodObjectInstanceFactory instanceFactory = new DefaultConstructorMethodObjectInstanceFactory(clazz);
-		MethodObjectInstanceManufacturer instanceManufacturer = () -> {
-			return instanceFactory;
-		};
+		MethodObjectInstanceManufacturer instanceManufacturer = this.createMethodObjectInstanceManufacturer(clazz);
 
 		// Create the method managed function builder
 		MethodManagedFunctionBuilder methodBuilder = this.createMethodManagedFunctionBuilder(namespaceBuilder, context);

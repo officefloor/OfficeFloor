@@ -88,9 +88,10 @@ public class MethodManagedFunctionBuilder {
 	 * 
 	 * @param context {@link MethodManagedFunctionFactoryContext}.
 	 * @return {@link ManagedFunctionFactory}.
+	 * @throws Exception If fails to create {@link ManagedFunctionFactory}.
 	 */
 	protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(
-			MethodManagedFunctionFactoryContext context) {
+			MethodManagedFunctionFactoryContext context) throws Exception {
 		return new ClassFunctionFactory(context.getMethodObjectInstanceFactory(), context.getMethod(),
 				context.getParameters());
 	}
@@ -100,9 +101,10 @@ public class MethodManagedFunctionBuilder {
 	 * 
 	 * @param context {@link MethodManagedFunctionFactoryContext}.
 	 * @return Added {@link ManagedFunctionTypeBuilder}.
+	 * @throws Exception If fails to create {@link ManagedFunctionTypeBuilder}.
 	 */
 	protected ManagedFunctionTypeBuilder<Indexed, Indexed> addManagedFunctionType(
-			MethodManagedFunctionTypeContext context) {
+			MethodManagedFunctionTypeContext context) throws Exception {
 
 		// Include method as function in type definition
 		ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = context.getNamespaceBuilder()
@@ -111,6 +113,28 @@ public class MethodManagedFunctionBuilder {
 
 		// Return the function type builder
 		return functionTypeBuilder;
+	}
+
+	/**
+	 * Enriches the {@link ManagedFunctionTypeBuilder}.
+	 * 
+	 * @param context {@link EnrichManagedFunctionTypeContext}.
+	 */
+	protected void enrichManagedFunctionType(EnrichManagedFunctionTypeContext context) {
+		// No enrichment
+	}
+
+	/**
+	 * Enriches the {@link ManagedFunctionObjectTypeBuilder}.
+	 * 
+	 * @param objectType         Object type.
+	 * @param genericType        Generic type.
+	 * @param annotations        {@link Annotation} instances.
+	 * @param functionObjectType {@link ManagedFunctionObjectTypeBuilder}.
+	 */
+	protected void enrichManagedFunctionObjectType(Class<?> objectType, Type genericType, Annotation[] annotations,
+			ManagedFunctionObjectTypeBuilder<Indexed> functionObjectType) {
+		// No enrichment
 	}
 
 	/**
@@ -354,6 +378,9 @@ public class MethodManagedFunctionBuilder {
 						objectTypeBuilder.setTypeQualifier(typeQualifierSuffix);
 					}
 				}
+
+				// Enrich the object
+				this.enrichManagedFunctionObjectType(paramType, paramGenericType, paramAnnotations, objectTypeBuilder);
 			}
 
 			// Load the parameter factory
@@ -364,6 +391,10 @@ public class MethodManagedFunctionBuilder {
 		for (Class<?> escalationType : method.getExceptionTypes()) {
 			functionTypeBuilder.addEscalation((Class<Throwable>) escalationType);
 		}
+
+		// Enrich the managed function
+		this.enrichManagedFunctionType(new EnrichManagedFunctionTypeContext(methodName, method, instanceClass,
+				methodObjectInstanceFactory, parameters, functionTypeBuilder));
 
 		// Return the managed function builder
 		return functionTypeBuilder;
@@ -595,6 +626,47 @@ public class MethodManagedFunctionBuilder {
 		 */
 		public int nextFlowIndex() {
 			return flowSequence.nextIndex();
+		}
+	}
+
+	/**
+	 * Context for creating the {@link ManagedFunctionTypeBuilder}.
+	 */
+	public static class EnrichManagedFunctionTypeContext extends MethodManagedFunctionFactoryContext {
+
+		/**
+		 * {@link ManagedFunctionTypeBuilder}.
+		 */
+		private final ManagedFunctionTypeBuilder<Indexed, Indexed> managedFunctionTypeBuilder;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param functionName                Name of {@link ManagedFunction} for the
+		 *                                    {@link Method}.
+		 * @param method                      {@link Method}.
+		 * @param instanceClass               {@link Class} for the instance containing
+		 *                                    the {@link Method}.
+		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
+		 *                                    be <code>null</code> if static.
+		 * @param parameters                  {@link ManagedFunctionParameterFactory}
+		 *                                    instances.
+		 * @param functionType                {@link ManagedFunctionTypeBuilder}.
+		 */
+		public EnrichManagedFunctionTypeContext(String functionName, Method method, Class<?> instanceClass,
+				MethodObjectInstanceFactory methodObjectInstanceFactory, ManagedFunctionParameterFactory[] parameters,
+				ManagedFunctionTypeBuilder<Indexed, Indexed> functionType) {
+			super(functionName, method, instanceClass, methodObjectInstanceFactory, parameters);
+			this.managedFunctionTypeBuilder = functionType;
+		}
+
+		/**
+		 * Obtains the {@link ManagedFunctionTypeBuilder}.
+		 * 
+		 * @return {@link ManagedFunctionTypeBuilder}.
+		 */
+		public ManagedFunctionTypeBuilder<Indexed, Indexed> getManagedFunctionTypeBuilder() {
+			return managedFunctionTypeBuilder;
 		}
 	}
 

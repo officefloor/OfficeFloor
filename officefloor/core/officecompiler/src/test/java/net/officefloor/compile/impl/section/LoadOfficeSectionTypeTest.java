@@ -106,8 +106,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can load a sub {@link SubSectionType}. To ensure recursive loading
-	 * of the {@link SubSectionType} instances.
+	 * Ensure can load a sub {@link SubSectionType}. To ensure recursive loading of
+	 * the {@link SubSectionType} instances.
 	 */
 	public void testLoadSubSubSection() {
 
@@ -162,8 +162,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure no {@link DependentObjectType} if
-	 * {@link ManagedFunctionObjectType} not linked.
+	 * Ensure no {@link DependentObjectType} if {@link ManagedFunctionObjectType}
+	 * not linked.
 	 */
 	public void testFunctionObjectDependencyNotLinked() {
 
@@ -235,8 +235,10 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect input", "ANNOTATION", annotation.getOfficeSectionInputName());
 		assertEquals("Incorrect number of annotations", 1, annotation.getAnnotations().length);
 		assertEquals("Incorrect annotations", "TEST", annotation.getAnnotations()[0]);
+		assertEquals("Incorrect by type annotation", "TEST", annotation.getAnnotation(String.class));
 		OfficeSectionInputType noAnnotation = type.getOfficeSectionInputTypes()[1];
 		assertEquals("Should be no annotations", 0, noAnnotation.getAnnotations().length);
+		assertNull("Should be no by type annotation", noAnnotation.getAnnotation(String.class));
 	}
 
 	/**
@@ -280,8 +282,10 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect input", "ANNOTATION", annotation.getOfficeSectionOutputName());
 		assertEquals("Incorrect number of annotations", 1, annotation.getAnnotations().length);
 		assertEquals("Incorrect annotations", "TEST", annotation.getAnnotations()[0]);
+		assertEquals("Incorrect by type annotation", "TEST", annotation.getAnnotation(String.class));
 		OfficeSectionOutputType noAnnotation = type.getOfficeSectionOutputTypes()[1];
 		assertEquals("Should be no annotations", 0, noAnnotation.getAnnotations().length);
+		assertNull("Should be no by type annotation", noAnnotation.getAnnotation(String.class));
 	}
 
 	/**
@@ -361,8 +365,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure no {@link DependentManagedObject} if
-	 * {@link ManagedObjectDependency} not linked.
+	 * Ensure no {@link DependentManagedObject} if {@link ManagedObjectDependency}
+	 * not linked.
 	 */
 	public void testSectionManagedObjectDependencyNotLinked() {
 
@@ -633,8 +637,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can get {@link FunctionObject} linked to {@link ManagedObject}
-	 * which has a {@link ManagedObjectDependency} linked to another
+	 * Ensure can get {@link FunctionObject} linked to {@link ManagedObject} which
+	 * has a {@link ManagedObjectDependency} linked to another
 	 * {@link ManagedObject}.
 	 */
 	public void testFunctionDependentOnManagedObjectDependentOnAnotherManagedObject() {

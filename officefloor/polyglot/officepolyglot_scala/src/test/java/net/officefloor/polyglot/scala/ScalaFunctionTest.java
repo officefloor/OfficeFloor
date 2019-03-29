@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
@@ -43,6 +45,17 @@ import net.officefloor.polyglot.test.VariableTypes;
  */
 public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 
+	/**
+	 * Ensure issue if try to use non Scala object.
+	 */
+	public void testNonScalaObject() {
+		fail("TODO implement");
+	}
+
+	/*
+	 * ====================== AbstractPolyglotFunctionTest =========================
+	 */
+
 	@Override
 	protected PrimitiveTypes primitives(byte _byte, short _short, char _char, int _int, long _long, float _float,
 			double _double) {
@@ -51,8 +64,12 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 
 	@Override
 	protected String primitives(CompileOfficeContext context, OfficeSectionInput handleResult) {
-		// TODO implement AbstractPolyglotFunctionTest.primitives
-		throw new UnsupportedOperationException("TODO implement AbstractPolyglotFunctionTest.primitives");
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", ScalaFunctionSectionSource.class.getName(),
+				package$.class.getName());
+		function.addProperty(ScalaFunctionSectionSource.PROPERTY_FUNCTION_NAME, "primitives");
+		office.link(function.getOfficeSectionOutput("use"), handleResult);
+		return "section.primitives";
 	}
 
 	@Override
@@ -62,8 +79,12 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 
 	@Override
 	protected String objects(CompileOfficeContext context, OfficeSectionInput handleResult) {
-		// TODO implement AbstractPolyglotFunctionTest.objects
-		throw new UnsupportedOperationException("TODO implement AbstractPolyglotFunctionTest.objects");
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", ScalaFunctionSectionSource.class.getName(),
+				package$.class.getName());
+		function.addProperty(ScalaFunctionSectionSource.PROPERTY_FUNCTION_NAME, "objects");
+		office.link(function.getOfficeSectionOutput("use"), handleResult);
+		return "section.objects";
 	}
 
 	@Override
@@ -73,8 +94,12 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 
 	@Override
 	protected String collections(CompileOfficeContext context, OfficeSectionInput handleResult) {
-		// TODO implement AbstractPolyglotFunctionTest.collections
-		throw new UnsupportedOperationException("TODO implement AbstractPolyglotFunctionTest.collections");
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", ScalaFunctionSectionSource.class.getName(),
+				package$.class.getName());
+		function.addProperty(ScalaFunctionSectionSource.PROPERTY_FUNCTION_NAME, "collections");
+		office.link(function.getOfficeSectionOutput("use"), handleResult);
+		return "section.collections";
 	}
 
 	@Override
@@ -84,8 +109,12 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 
 	@Override
 	protected String variables(CompileOfficeContext context, OfficeSectionInput handleResult) {
-		// TODO implement AbstractPolyglotFunctionTest.variables
-		throw new UnsupportedOperationException("TODO implement AbstractPolyglotFunctionTest.variables");
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", ScalaFunctionSectionSource.class.getName(),
+				package$.class.getName());
+		function.addProperty(ScalaFunctionSectionSource.PROPERTY_FUNCTION_NAME, "variables");
+		office.link(function.getOfficeSectionOutput("use"), handleResult);
+		return "section.variables";
 	}
 
 	@Override
@@ -95,8 +124,12 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 
 	@Override
 	protected void parameter(OfficeSectionOutput pass, CompileOfficeContext context, OfficeSectionInput handleResult) {
-		// TODO implement AbstractPolyglotFunctionTest.parameter
-		throw new UnsupportedOperationException("TODO implement AbstractPolyglotFunctionTest.parameter");
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", ScalaFunctionSectionSource.class.getName(),
+				package$.class.getName());
+		function.addProperty(ScalaFunctionSectionSource.PROPERTY_FUNCTION_NAME, "parameter");
+		office.link(pass, function.getOfficeSectionInput("parameter"));
+		office.link(function.getOfficeSectionOutput("use"), handleResult);
 	}
 
 }

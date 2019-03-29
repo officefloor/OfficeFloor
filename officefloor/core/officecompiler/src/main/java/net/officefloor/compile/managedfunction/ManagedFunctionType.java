@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.managedfunction;
 
+import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -28,7 +29,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionType<M extends Enum<M>, F extends Enum<F>> {
+public interface ManagedFunctionType<M extends Enum<M>, F extends Enum<F>> extends AnnotatedType {
 
 	/**
 	 * Obtains the name of the {@link ManagedFunction}.
@@ -43,13 +44,6 @@ public interface ManagedFunctionType<M extends Enum<M>, F extends Enum<F>> {
 	 * @return {@link ManagedFunctionFactory}.
 	 */
 	ManagedFunctionFactory<M, F> getManagedFunctionFactory();
-
-	/**
-	 * Obtains the annotations for the {@link ManagedFunction}.
-	 * 
-	 * @return Annotations for the {@link ManagedFunction}.
-	 */
-	Object[] getAnnotations();
 
 	/**
 	 * Obtains the type name of {@link Object} returned from the

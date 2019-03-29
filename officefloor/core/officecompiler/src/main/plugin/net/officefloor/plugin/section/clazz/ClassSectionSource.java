@@ -17,15 +17,14 @@
  */
 package net.officefloor.plugin.section.clazz;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -58,13 +57,8 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.plugin.clazz.ClassFlowMethodMetaData;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionFlowParameterFactory;
-import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
-import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource.SectionManagedFunctionFactory;
 import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
@@ -289,9 +283,9 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	}
 
 	/**
-	 * {@link SubSection} instances by the {@link SectionInterface} annotated type.
+	 * {@link SubSection} instances by the section name.
 	 */
-	private final Map<Class<?>, SubSection> _subSectionsByType = new HashMap<Class<?>, SubSection>();
+	private final Map<String, SubSection> _subSectionsByName = new HashMap<>();
 
 	/**
 	 * <p>
@@ -299,46 +293,44 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * <p>
 	 * Should the {@link SubSection} not already be created, it is created.
 	 * 
-	 * @param sectionInterfaceType Type that is annotated with
-	 *                             {@link SectionInterface}.
-	 * @param sectionAnnotation    {@link SectionInterface} annotation.
+	 * @param sectionInterfaceAnnotation {@link SectionInterfaceAnnotation}.
 	 * @return {@link SubSection}.
 	 */
-	public SubSection getOrCreateSubSection(Class<?> sectionInterfaceType, SectionInterface sectionAnnotation) {
+	public SubSection getOrCreateSubSection(SectionInterfaceAnnotation sectionInterfaceAnnotation) {
+
+		// Obtain the section name
+		String subSectionName = sectionInterfaceAnnotation.getSectionName();
 
 		// Determine if sub section already created for type
-		SubSection subSection = this._subSectionsByType.get(sectionInterfaceType);
+		SubSection subSection = this._subSectionsByName.get(subSectionName);
 		if (subSection != null) {
 			return subSection;
 		}
 
 		// Sub section not registered, so create and register
-		String subSectionName = sectionInterfaceType.getSimpleName();
-		String subSectionSourceClassName = sectionAnnotation.source().getName();
-		String subSectionLocation = ("".equals(sectionAnnotation.location()))
-				? sectionAnnotation.locationClass().getName()
-				: sectionAnnotation.location();
+		String subSectionSourceClassName = sectionInterfaceAnnotation.getSource().getName();
+		String subSectionLocation = sectionInterfaceAnnotation.getLocation();
 		subSection = this.getDesigner().addSubSection(subSectionName, subSectionSourceClassName, subSectionLocation);
 		PropertyList subSectionProperties = this.getContext().createPropertyList();
-		for (Property property : sectionAnnotation.properties()) {
-			String name = property.name();
-			String value = ("".equals(property.value())) ? property.valueClass().getName() : property.value();
+		for (PropertyAnnotation property : sectionInterfaceAnnotation.getProperties()) {
+			String name = property.getName();
+			String value = property.getValue();
 			subSection.addProperty(name, value);
 			subSectionProperties.addProperty(name).setValue(value);
 		}
 
 		// Register the sub section
-		this._subSectionsByType.put(sectionInterfaceType, subSection);
+		this._subSectionsByName.put(subSectionName, subSection);
 
 		// Link outputs of sub section
-		for (FlowLink flowLink : sectionAnnotation.outputs()) {
+		for (FlowLinkAnnotation flowLink : sectionInterfaceAnnotation.getOutputs()) {
 
 			// Obtain the sub section output
-			String subSectionOuputName = flowLink.name();
+			String subSectionOuputName = flowLink.getName();
 			SubSectionOutput subSectionOuput = subSection.getSubSectionOutput(subSectionOuputName);
 
 			// Obtain the section function for output
-			String linkFunctionName = flowLink.method();
+			String linkFunctionName = flowLink.getMethod();
 			SectionFunction linkFunction = this.getFunctionByTypeName(linkFunctionName);
 			if (linkFunction != null) {
 				// Link flow internally
@@ -446,15 +438,14 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Enriches the {@link ManagedFunction}.
 	 * 
-	 * @param function       {@link SectionFunction}.
-	 * @param functionType   {@link ManagedFunctionType} for the
-	 *                       {@link SectionFunction}.
-	 * @param functionMethod {@link Method} for the {@link SectionFunction}.
-	 * @param parameterType  Parameter type for the {@link SectionFunction}. May be
-	 *                       <code>null</code> if no parameter.
+	 * @param function      {@link SectionFunction}.
+	 * @param functionType  {@link ManagedFunctionType} for the
+	 *                      {@link SectionFunction}.
+	 * @param parameterType Parameter type for the {@link SectionFunction}. May be
+	 *                      <code>null</code> if no parameter.
 	 */
 	protected void enrichFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
-			Method functionMethod, Class<?> parameterType) {
+			Class<?> parameterType) {
 
 		// Obtain the input name
 		String inputName = this.getFunctionName(functionType);
@@ -472,19 +463,14 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 * 
 	 * @param function               {@link SectionFunction}.
 	 * @param functionType           {@link ManagedFunctionType}.
-	 * @param functionMethod         {@link Method} for the {@link SectionFunction}.
-	 * @param argumentType           Argument type. May be <code>null</code> if no
-	 *                               argument type.
-	 * @param nextFunctionAnnotation {@link NextFunction} annotation on the
-	 *                               {@link Method}.
+	 * @param nextFunctionAnnotation {@link NextFunctionAnnotation}.
 	 */
 	protected void linkNextFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
-			Method functionMethod, Class<?> argumentType, NextFunction nextFunctionAnnotation) {
+			NextFunctionAnnotation nextFunctionAnnotation) {
 
-		// Obtain the next function name
-		String nextFunctionName = nextFunctionAnnotation.value();
-
-		// Obtain the argument type name for the function
+		// Obtain the next function details
+		String nextFunctionName = nextFunctionAnnotation.getNextFunctionName();
+		Class<?> argumentType = nextFunctionAnnotation.getArgumentType();
 		String argumentTypeName = (argumentType == null ? null : argumentType.getName());
 
 		// Attempt to obtain next function internally
@@ -503,41 +489,6 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	/**
 	 * Links the {@link FunctionFlow}.
 	 * 
-	 * @param function          {@link SectionFunction}.
-	 * @param functionType      {@link ManagedFunctionType}.
-	 * @param flowInterfaceType Interface type specifying the flows.
-	 * @param flowMethod        Method on the interface for the flow to be linked.
-	 * @param flowArgumentType  {@link FunctionFlow} argument type. May be
-	 *                          <code>null</code> if no argument.
-	 */
-	protected void linkFunctionFlow(SectionFunction function, ManagedFunctionType<?, ?> functionType,
-			Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
-
-		// Obtain the flow name
-		String flowName = flowMethod.getName();
-
-		// Obtain the function flow
-		FunctionFlow functionFlow = function.getFunctionFlow(flowName);
-
-		// Determine if section interface (or flow interface)
-		SectionInterface sectionAnnotation = flowInterfaceType.getAnnotation(SectionInterface.class);
-		if (sectionAnnotation != null) {
-			// Section interface so obtain the sub section
-			SubSection subSection = this.getOrCreateSubSection(flowInterfaceType, sectionAnnotation);
-
-			// Link flow to sub section input
-			SubSectionInput subSectionInput = subSection.getSubSectionInput(flowName);
-			this.getDesigner().link(functionFlow, subSectionInput, false);
-
-		} else {
-			// Link the function flow
-			this.linkFunctionFlow(functionFlow, functionType, flowInterfaceType, flowMethod, flowArgumentType);
-		}
-	}
-
-	/**
-	 * Links the {@link FunctionFlow}.
-	 * 
 	 * @param functionFlow      {@link FunctionFlow}.
 	 * @param functionType      {@link ManagedFunctionType}.
 	 * @param flowInterfaceType Interface type specifying the flows.
@@ -546,16 +497,17 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 	 *                          <code>null</code> if no argument.
 	 */
 	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
-			Class<?> flowInterfaceType, Method flowMethod, Class<?> flowArgumentType) {
+			FlowAnnotation flowAnnotation) {
 
 		// Obtain the flow name
 		String flowName = functionFlow.getFunctionFlowName();
 
 		// Obtain the flow argument name
+		Class<?> flowArgumentType = flowAnnotation.getParameterType();
 		String flowArgumentTypeName = (flowArgumentType == null ? null : flowArgumentType.getName());
 
 		// Determine if spawn thread state
-		boolean isSpawnThreadState = flowMethod.isAnnotationPresent(Spawn.class);
+		boolean isSpawnThreadState = flowAnnotation.isSpawn();
 
 		// Flow interface so attempt to obtain the function internally
 		SectionFunction linkFunction = this.getFunctionByTypeName(flowName);
@@ -568,6 +520,24 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			SectionOutput sectionOutput = this.getOrCreateOutput(flowName, flowArgumentTypeName, false);
 			this.getDesigner().link(functionFlow, sectionOutput, isSpawnThreadState);
 		}
+	}
+
+	/**
+	 * Links the {@link FunctionFlow}.
+	 * 
+	 * @param functionFlow               {@link FunctionFlow}.
+	 * @param functionType               {@link ManagedFunctionType}.
+	 * @param sectionInterfaceAnnotation {@link SectionInterfaceAnnotation}.
+	 */
+	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
+			SectionInterfaceAnnotation sectionInterfaceAnnotation) {
+
+		// Section interface so obtain the sub section
+		SubSection subSection = this.getOrCreateSubSection(sectionInterfaceAnnotation);
+
+		// Link flow to sub section input
+		SubSectionInput subSectionInput = subSection.getSubSectionInput(functionFlow.getFunctionFlowName());
+		this.getDesigner().link(functionFlow, subSectionInput, false);
 	}
 
 	/**
@@ -634,6 +604,225 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 		}
 	}
 
+	/**
+	 * {@link Object} for {@link Method}.
+	 */
+	protected class ObjectForMethod {
+
+		/**
+		 * {@link Object} for {@link Method}.
+		 */
+		final SectionManagedObject object;
+
+		/**
+		 * Error message for failing to obtain the {@link Object} for the
+		 * {@link Method}.
+		 */
+		final String errorMessage;
+
+		/**
+		 * Successfully obtained {@link SectionManagedObject}.
+		 * 
+		 * @param object {@link SectionManagedObject}.
+		 */
+		protected ObjectForMethod(SectionManagedObject object) {
+			if (object == null) {
+				throw new IllegalArgumentException("Must provide " + SectionManagedObject.class.getSimpleName());
+			}
+			this.object = object;
+			this.errorMessage = null;
+		}
+
+		/**
+		 * Failed to obtain {@link SectionManagedObject}.
+		 * 
+		 * @param errorMessage Error message.
+		 * @param cause        Possible cause for error. May be <code>null</code>.
+		 */
+		protected ObjectForMethod(String errorMessage, Throwable cause) {
+			if (CompileUtil.isBlank(errorMessage)) {
+				throw new IllegalArgumentException("Must provide error message");
+			}
+			this.errorMessage = errorMessage;
+			this.object = null;
+
+			// Detail the error
+			if (cause != null) {
+				ClassSectionSource.this.getDesigner().addIssue(errorMessage, cause);
+			} else {
+				ClassSectionSource.this.getDesigner().addIssue(errorMessage);
+			}
+		}
+	}
+
+	/**
+	 * Loads the {@link SectionManagedObject} for the {@link Object} for the
+	 * {@link Method}.
+	 * 
+	 * @param sectionClass {@link Class} of the {@link Object}.
+	 * @return {@link ObjectForMethod}. May be <code>null</code> for no
+	 *         {@link Object} for {@link Method}.
+	 * @throws Exception If fails to load {@link Object} for the {@link Method}.
+	 */
+	protected ObjectForMethod loadObjectForMethod(Class<?> sectionClass) throws Exception {
+
+		// Add the managed object for the section class
+		SectionManagedObject managedObject = this.createClassManagedObject(CLASS_OBJECT_NAME, sectionClass);
+
+		// Obtain the dependency meta-data
+		DependencyMetaData[] dependencyMetaData = this.extractClassManagedObjectDependencies(CLASS_OBJECT_NAME,
+				sectionClass);
+
+		// Load the managed objects
+		for (DependencyMetaData dependency : dependencyMetaData) {
+
+			// Obtain dependency name and type
+			String dependencyName = dependency.name;
+			String dependencyTypeName = dependency.field.getType().getName();
+
+			// Obtain the managed object dependency
+			SectionManagedObjectDependency moDependency = managedObject
+					.getSectionManagedObjectDependency(dependencyName);
+
+			// Determine if managed object
+			ManagedObject moAnnotation = dependency.field.getAnnotation(ManagedObject.class);
+			if (moAnnotation != null) {
+				// Use name of field to add the managed object
+				String moName = dependency.name;
+
+				// Add the managed object
+				SectionManagedObjectSource mos = this.getDesigner().addSectionManagedObjectSource(moName,
+						moAnnotation.source().getName());
+				for (Property property : moAnnotation.properties()) {
+					String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
+					mos.addProperty(property.name(), value);
+				}
+				SectionManagedObject mo = mos.addSectionManagedObject(moName, ManagedObjectScope.PROCESS);
+
+				// Add the type qualifiers for managed object
+				for (TypeQualifier typeQualifier : moAnnotation.qualifiers()) {
+					Class<?> qualifierClass = typeQualifier.qualifier();
+					if (TypeQualifier.class.equals(qualifierClass)) {
+						// No qualifier (as default value)
+						qualifierClass = null;
+					}
+					String qualifier = (qualifierClass == null ? null : qualifierClass.getName());
+					String type = typeQualifier.type().getName();
+					mo.addTypeQualification(qualifier, type);
+				}
+
+				// Register the managed object
+				this._managedObjectsByTypeName.put(dependencyTypeName, mo);
+
+				// Link dependency to managed object
+				this.getDesigner().link(moDependency, mo);
+
+			} else {
+				// Obtain the type qualifier for external object
+				String dependencyTypeQualifier;
+				try {
+					dependencyTypeQualifier = dependency.getTypeQualifier();
+				} catch (IllegalArgumentException ex) {
+					return new ObjectForMethod("Unable to obtain type qualifier for dependency " + dependencyName, ex);
+				}
+
+				// Link to external object (by qualified type)
+				SectionObject sectionObject = this.getOrCreateObject(dependencyTypeQualifier, dependencyTypeName);
+				this.getDesigner().link(moDependency, sectionObject);
+			}
+		}
+
+		// Link the managed object dependencies
+		NEXT_DEPENDENCY: for (DependencyMetaData dependency : dependencyMetaData) {
+
+			// Obtain the managed object annotation
+			ManagedObject annotation = dependency.field.getAnnotation(ManagedObject.class);
+			if (annotation == null) {
+				continue NEXT_DEPENDENCY; // not managed object dependency
+			}
+
+			// Obtain the managed object
+			String managedObjectName = dependency.field.getType().getName();
+			SectionManagedObject mo = this.getManagedObject(managedObjectName);
+
+			// Load the managed object type
+			PropertyList moProperties = this.getContext().createPropertyList();
+			for (Property property : annotation.properties()) {
+				String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
+				moProperties.addProperty(property.name()).setValue(value);
+			}
+			ManagedObjectType<?> moType = this.getContext().loadManagedObjectType(managedObjectName,
+					annotation.source().getName(), moProperties);
+
+			// Link the dependencies for the managed object
+			for (ManagedObjectDependencyType<?> dependencyType : moType.getDependencyTypes()) {
+
+				// Obtain the dependency type information
+				String dependencyTypeName = dependencyType.getDependencyType().getName();
+				String dependencyTypeQualifier = dependencyType.getTypeQualifier();
+
+				// Obtain the managed object dependency
+				SectionManagedObjectDependency moDependency = mo
+						.getSectionManagedObjectDependency(dependencyType.getDependencyName());
+
+				// First attempt to link internally
+				SectionManagedObject dependencyMo = this.getManagedObject(dependencyTypeName);
+				if (dependencyMo != null) {
+					// Link to managed object
+					this.getDesigner().link(moDependency, dependencyMo);
+
+				} else {
+					// Link to external object (by type)
+					SectionObject sectionObject = this.getOrCreateObject(dependencyTypeQualifier, dependencyTypeName);
+					this.getDesigner().link(moDependency, sectionObject);
+				}
+			}
+		}
+
+		// Return the object
+		return new ObjectForMethod(managedObject);
+	}
+
+	/**
+	 * Loads the {@link FunctionNamespaceType}.
+	 * 
+	 * @param namespace    Namespace.
+	 * @param sectionClass Section {@link Class}.
+	 * @return {@link FunctionNamespaceType}.
+	 */
+	protected FunctionNamespaceType loadFunctionNamespaceType(String namespace, Class<?> sectionClass) {
+		PropertyList workProperties = this.getContext().createPropertyList();
+		workProperties.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
+				.setValue(sectionClass.getName());
+		return this.getContext().loadManagedFunctionType(namespace, SectionClassManagedFunctionSource.class.getName(),
+				workProperties);
+	}
+
+	/**
+	 * Adds the {@link SectionFunctionNamespace}.
+	 * 
+	 * @param namespace    Namespace.
+	 * @param sectionClass Section {@link Class}.
+	 * @return {@link SectionFunctionNamespace}.
+	 */
+	protected SectionFunctionNamespace adddSectionFunctionNamespace(String namespace, Class<?> sectionClass) {
+		SectionFunctionNamespace functionNamespace = this.getDesigner().addSectionFunctionNamespace(namespace,
+				SectionClassManagedFunctionSource.class.getName());
+		functionNamespace.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME,
+				sectionClass.getName());
+		return functionNamespace;
+	}
+
+	/**
+	 * Indicates if include {@link ManagedFunctionType}.
+	 * 
+	 * @param functionType {@link ManagedFunctionType}.
+	 * @return <code>true</code> include the {@link ManagedFunctionType}.
+	 */
+	protected boolean isIncludeManagedFunctionType(ManagedFunctionType<?, ?> functionType) {
+		return true;
+	}
+
 	/*
 	 * ================ SectionSourceService ========================
 	 */
@@ -679,119 +868,21 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 
 		// Obtain the class
 		Class<?> sectionClass = this.getSectionClass(sectionClassName);
-
-		// Add the managed object for the section class
-		SectionManagedObject managedObject = this.createClassManagedObject(CLASS_OBJECT_NAME, sectionClass);
-
-		// Obtain the dependency meta-data
-		DependencyMetaData[] dependencyMetaData = this.extractClassManagedObjectDependencies(CLASS_OBJECT_NAME,
-				sectionClass);
-
-		// Load the managed objects
-		for (DependencyMetaData dependency : dependencyMetaData) {
-
-			// Obtain dependency name and type
-			String dependencyName = dependency.name;
-			String dependencyTypeName = dependency.field.getType().getName();
-
-			// Obtain the managed object dependency
-			SectionManagedObjectDependency moDependency = managedObject
-					.getSectionManagedObjectDependency(dependencyName);
-
-			// Determine if managed object
-			ManagedObject moAnnotation = dependency.field.getAnnotation(ManagedObject.class);
-			if (moAnnotation != null) {
-				// Use name of field to add the managed object
-				String moName = dependency.name;
-
-				// Add the managed object
-				SectionManagedObjectSource mos = designer.addSectionManagedObjectSource(moName,
-						moAnnotation.source().getName());
-				for (Property property : moAnnotation.properties()) {
-					String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
-					mos.addProperty(property.name(), value);
-				}
-				SectionManagedObject mo = mos.addSectionManagedObject(moName, ManagedObjectScope.PROCESS);
-
-				// Add the type qualifiers for managed object
-				for (TypeQualifier typeQualifier : moAnnotation.qualifiers()) {
-					Class<?> qualifierClass = typeQualifier.qualifier();
-					if (TypeQualifier.class.equals(qualifierClass)) {
-						// No qualifier (as default value)
-						qualifierClass = null;
-					}
-					String qualifier = (qualifierClass == null ? null : qualifierClass.getName());
-					String type = typeQualifier.type().getName();
-					mo.addTypeQualification(qualifier, type);
-				}
-
-				// Register the managed object
-				this._managedObjectsByTypeName.put(dependencyTypeName, mo);
-
-				// Link dependency to managed object
-				designer.link(moDependency, mo);
-
-			} else {
-				// Obtain the type qualifier for external object
-				String dependencyTypeQualifier;
-				try {
-					dependencyTypeQualifier = dependency.getTypeQualifier();
-				} catch (IllegalArgumentException ex) {
-					designer.addIssue("Unable to obtain type qualifier for dependency " + dependencyName, ex);
-					return; // invalid section
-				}
-
-				// Link to external object (by qualified type)
-				SectionObject sectionObject = this.getOrCreateObject(dependencyTypeQualifier, dependencyTypeName);
-				designer.link(moDependency, sectionObject);
-			}
+		if (sectionClass == null) {
+			return;
 		}
 
-		// Link the managed object dependencies
-		for (DependencyMetaData dependency : dependencyMetaData) {
-
-			// Obtain the managed object annotation
-			ManagedObject annotation = dependency.field.getAnnotation(ManagedObject.class);
-			if (annotation == null) {
-				continue; // not managed object dependency
+		// Load the object for the methods
+		ObjectForMethod objectForMethod = this.loadObjectForMethod(sectionClass);
+		SectionManagedObject sectionObject;
+		if (objectForMethod != null) {
+			if (objectForMethod.errorMessage != null) {
+				return; // invalid section
 			}
-
-			// Obtain the managed object
-			String managedObjectName = dependency.field.getType().getName();
-			SectionManagedObject mo = this.getManagedObject(managedObjectName);
-
-			// Load the managed object type
-			PropertyList moProperties = context.createPropertyList();
-			for (Property property : annotation.properties()) {
-				String value = ("".equals(property.value()) ? property.valueClass().getName() : property.value());
-				moProperties.addProperty(property.name()).setValue(value);
-			}
-			ManagedObjectType<?> moType = context.loadManagedObjectType(managedObjectName,
-					annotation.source().getName(), moProperties);
-
-			// Link the dependencies for the managed object
-			for (ManagedObjectDependencyType<?> dependencyType : moType.getDependencyTypes()) {
-
-				// Obtain the dependency type information
-				String dependencyTypeName = dependencyType.getDependencyType().getName();
-				String dependencyTypeQualifier = dependencyType.getTypeQualifier();
-
-				// Obtain the managed object dependency
-				SectionManagedObjectDependency moDependency = mo
-						.getSectionManagedObjectDependency(dependencyType.getDependencyName());
-
-				// First attempt to link internally
-				SectionManagedObject dependencyMo = this.getManagedObject(dependencyTypeName);
-				if (dependencyMo != null) {
-					// Link to managed object
-					designer.link(moDependency, dependencyMo);
-
-				} else {
-					// Link to external object (by type)
-					SectionObject sectionObject = this.getOrCreateObject(dependencyTypeQualifier, dependencyTypeName);
-					designer.link(moDependency, sectionObject);
-				}
-			}
+			sectionObject = objectForMethod.object;
+		} else {
+			// No object required
+			sectionObject = null;
 		}
 
 		// Ensure the section class has functions
@@ -807,30 +898,28 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 
 		// Load the namespace type for the class
 		String functionNamespace = "NAMESPACE";
-		PropertyList workProperties = context.createPropertyList();
-		workProperties.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
-				.setValue(sectionClassName);
-		FunctionNamespaceType namespaceType = context.loadManagedFunctionType(functionNamespace,
-				SectionClassManagedFunctionSource.class.getName(), workProperties);
+		FunctionNamespaceType namespaceType = this.loadFunctionNamespaceType(functionNamespace, sectionClass);
 
 		// Add the namespace for the section class
-		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(functionNamespace,
-				SectionClassManagedFunctionSource.class.getName());
-		namespace.addProperty(SectionClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, sectionClassName);
+		SectionFunctionNamespace namespace = this.adddSectionFunctionNamespace(functionNamespace, sectionClass);
 
 		// Load functions
-		Map<String, SectionFunction> functionsByParameterType = new HashMap<String, SectionFunction>();
-		Map<String, Integer> parameterIndexes = new HashMap<String, Integer>();
-		for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
+		Map<String, SectionFunction> functionsByParameterType = new HashMap<>();
+		Map<String, Integer> parameterIndexes = new HashMap<>();
+		Set<String> includedFunctionTypeNames = new HashSet<>();
+		NEXT_FUNCTION: for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
+
+			// Obtain the function type name
+			String functionTypeName = functionType.getFunctionName();
+
+			// Determine if include function
+			if (!this.isIncludeManagedFunctionType(functionType)) {
+				continue NEXT_FUNCTION;
+			}
+			includedFunctionTypeNames.add(functionTypeName);
 
 			// Obtain the function name
-			String functionTypeName = functionType.getFunctionName();
 			String functionName = this.getFunctionName(functionType);
-
-			// Obtain the method for the function
-			SectionManagedFunctionFactory functionFactory = (SectionManagedFunctionFactory) functionType
-					.getManagedFunctionFactory();
-			Method method = functionFactory.getMethod();
 
 			// Add function (both by name and type name for internal linking)
 			SectionFunction function = namespace.addSectionFunction(functionName, functionTypeName);
@@ -839,124 +928,80 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			this.registerFunctionByTypeName(functionTypeName, function);
 
 			// Obtain the parameter for the function
-			int objectIndex = 1; // 1 as Section Object first
+			ParameterAnnotation parameterAnnotation = functionType.getAnnotation(ParameterAnnotation.class);
 			Class<?> parameterType = null;
-			Class<?>[] parameters = method.getParameterTypes();
-			Annotation[][] parametersAnnotations = method.getParameterAnnotations();
-			for (int i = 0; i < parameters.length; i++) {
-				Class<?> parameter = parameters[i];
-				Annotation[] parameterAnnotations = parametersAnnotations[i];
+			if (parameterAnnotation != null) {
+				// Specify the parameter type
+				parameterType = parameterAnnotation.getParameterType();
 
-				// Determine if flow or section interface (not object)
-				if ((parameter.getAnnotation(FlowInterface.class) != null)
-						|| (parameter.getAnnotation(SectionInterface.class) != null)) {
-					continue; // ignore flow and section interfaces
-				}
+				// Register the function by its parameter type (for exception handling)
+				functionsByParameterType.put(parameterType.getName(), function);
 
-				// Determine if the parameter
-				boolean isParameter = false;
-				for (Annotation annotation : parameterAnnotations) {
-					if (Parameter.class.equals(annotation.annotationType())) {
-						isParameter = true;
-					}
-				}
-
-				// Register as parameter
-				if (isParameter) {
-
-					// Ensure only one parameter
-					if (parameterType != null) {
-						throw new IllegalStateException("Method " + functionName
-								+ " may only have one parameter annotated with " + Parameter.class.getSimpleName());
-					}
-
-					// Specify the parameter type
-					parameterType = parameter;
-
-					// Register the function by its parameter type
-					functionsByParameterType.put(parameterType.getName(), function);
-
-					// Register the parameter index for the function
-					parameterIndexes.put(functionTypeName, Integer.valueOf(objectIndex));
-				}
-
-				// Increment object index for parameter
-				objectIndex++;
+				// Register the parameter index for the function
+				parameterIndexes.put(functionTypeName, Integer.valueOf(parameterAnnotation.getParameterIndex()));
 			}
 
 			// Enrich the function
-			this.enrichFunction(function, functionType, method, parameterType);
+			this.enrichFunction(function, functionType, parameterType);
 		}
 
 		// Link functions
-		for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
+		NEXT_FUNCTION: for (ManagedFunctionType<?, ?> functionType : namespaceType.getManagedFunctionTypes()) {
 
-			// Obtain the function name
-			String functionName = functionType.getFunctionName();
+			// Obtain the function type name
+			String functionTypeName = functionType.getFunctionName();
+
+			// Ensure include the function
+			if (!includedFunctionTypeNames.contains(functionTypeName)) {
+				continue NEXT_FUNCTION;
+			}
 
 			// Obtain the function
-			SectionFunction function = this.getFunctionByTypeName(functionName);
+			SectionFunction function = this.getFunctionByTypeName(functionTypeName);
 
-			// Obtain the function method
-			SectionManagedFunctionFactory functionFactory = (SectionManagedFunctionFactory) functionType
-					.getManagedFunctionFactory();
-			Method method = functionFactory.getMethod();
-
-			// Link the next function
-			NextFunction nextFunctionAnnotation = method.getAnnotation(NextFunction.class);
+			// Link the next function (if available)
+			NextFunctionAnnotation nextFunctionAnnotation = functionType.getAnnotation(NextFunctionAnnotation.class);
 			if (nextFunctionAnnotation != null) {
-
-				// Obtain the argument type for the function
-				Class<?> returnType = method.getReturnType();
-				Class<?> argumentType = ((returnType == null) || (void.class.equals(returnType))
-						|| (Void.TYPE.equals(returnType))) ? null : returnType;
-
-				// Link next function
-				this.linkNextFunction(function, functionType, method, argumentType, nextFunctionAnnotation);
+				this.linkNextFunction(function, functionType, nextFunctionAnnotation);
 			}
 
 			// Obtain the flow meta-data for the function
-			List<ClassFlowMethodMetaData> flowMetaDatas = new LinkedList<ClassFlowMethodMetaData>();
-			ManagedFunctionParameterFactory[] parameterFactories = functionFactory.getParameterFactories();
-			for (ManagedFunctionParameterFactory factory : parameterFactories) {
+			FlowAnnotation[] flowAnnotations = functionType.getAnnotation(FlowAnnotation[].class);
+			if (flowAnnotations != null) {
 
-				// Ignore if not flow parameter factory
-				if (!(factory instanceof ManagedFunctionFlowParameterFactory)) {
-					continue; // ignore as not flow parameter factory
+				// Sort the flows by index
+				List<FlowAnnotation> flowList = Arrays.asList(flowAnnotations);
+				Collections.sort(flowList, (a, b) -> a.getFlowIndex() - b.getFlowIndex());
+
+				// Link flows for the function
+				for (FlowAnnotation flow : flowList) {
+
+					// Obtain the function flow
+					FunctionFlow functionFlow = function.getFunctionFlow(flow.getFlowName());
+
+					// Link the function flow
+					this.linkFunctionFlow(functionFlow, functionType, flow);
 				}
-				ManagedFunctionFlowParameterFactory flowParameterFactory = (ManagedFunctionFlowParameterFactory) factory;
-
-				// Add the flow meta-data
-				flowMetaDatas.addAll(Arrays.asList(flowParameterFactory.getFlowMethodMetaData()));
 			}
 
-			// Sort the flows by index
-			Collections.sort(flowMetaDatas, new Comparator<ClassFlowMethodMetaData>() {
-				@Override
-				public int compare(ClassFlowMethodMetaData a, ClassFlowMethodMetaData b) {
-					return a.getFlowIndex() - b.getFlowIndex();
+			// Obtain the flow meta-data for the function
+			SectionInterfaceAnnotation[] sectionAnnotations = functionType
+					.getAnnotation(SectionInterfaceAnnotation[].class);
+			if (sectionAnnotations != null) {
+
+				// Sort the flows by index
+				List<SectionInterfaceAnnotation> flowList = Arrays.asList(sectionAnnotations);
+				Collections.sort(flowList, (a, b) -> a.getFlowIndex() - b.getFlowIndex());
+
+				// Link flows for the function
+				for (SectionInterfaceAnnotation flow : flowList) {
+
+					// Obtain the function flow
+					FunctionFlow functionFlow = function.getFunctionFlow(flow.getFlowName());
+
+					// Link the function flow
+					this.linkFunctionFlow(functionFlow, functionType, flow);
 				}
-			});
-
-			// Link flows for the function
-			for (ClassFlowMethodMetaData flowMetaData : flowMetaDatas) {
-
-				// Obtain the flow interface type
-				Class<?> flowInterfaceType = flowMetaData.getFlowType();
-
-				// Obtain the flow method
-				Method flowMethod = flowMetaData.getMethod();
-
-				// Obtain the argument type for the flow
-				Class<?> flowArgumentType = null;
-				Class<?>[] flowParameters = flowMethod.getParameterTypes();
-				if (flowParameters.length > 0) {
-					// Argument is always the first (and only) parameter
-					flowArgumentType = flowParameters[0];
-				}
-
-				// Link the function flow
-				this.linkFunctionFlow(function, functionType, flowInterfaceType, flowMethod, flowArgumentType);
 			}
 
 			// Link escalations for the function
@@ -971,22 +1016,25 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 			}
 
 			// Obtain the object index for the parameter
-			Integer parameterIndex = parameterIndexes.get(functionName);
+			Integer parameterIndex = parameterIndexes.get(functionTypeName);
 
 			// Obtain the object types
 			ManagedFunctionObjectType<?>[] objectTypes = functionType.getObjectTypes();
 
-			// First object is always the section object
-			ManagedFunctionObjectType<?> sectionObjectType = objectTypes[0];
-			FunctionObject objectSection = function.getFunctionObject(sectionObjectType.getObjectName());
-			designer.link(objectSection, managedObject);
+			// Determine first object is the section object
+			int objectIndex = 0;
+			if (sectionObject != null) {
+				ManagedFunctionObjectType<?> sectionObjectType = objectTypes[objectIndex++];
+				FunctionObject objectSection = function.getFunctionObject(sectionObjectType.getObjectName());
+				designer.link(objectSection, sectionObject);
+			}
 
 			// Link remaining objects for function (1 as after section object)
-			NEXT_OBJECT: for (int i = 1; i < objectTypes.length; i++) {
+			NEXT_OBJECT: for (int i = objectIndex; i < objectTypes.length; i++) {
 				ManagedFunctionObjectType<?> objectType = objectTypes[i];
 
 				// Determine if object is a parameter
-				if ((parameterIndex != null) && (parameterIndex.intValue() == i)) {
+				if ((parameterIndex != null) && ((parameterIndex.intValue() + objectIndex) == i)) {
 					// Parameter so flag as parameter
 					String objectName = objectType.getObjectName();
 					FunctionObject functionObject = function.getFunctionObject(objectName);

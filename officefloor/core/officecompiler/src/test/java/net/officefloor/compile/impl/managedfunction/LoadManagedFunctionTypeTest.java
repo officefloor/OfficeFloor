@@ -215,8 +215,7 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure issue if no {@link ManagedFunctionType} instances as no point of
-	 * {@link FunctionNamespaceType} without at least one
-	 * {@link ManagedFunction}.
+	 * {@link FunctionNamespaceType} without at least one {@link ManagedFunction}.
 	 */
 	public void testNoFunctions() {
 
@@ -313,10 +312,11 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 					functionFactory, None.class, None.class);
 			function.addAnnotation(ANNOTATION);
 		});
+		ManagedFunctionType<?, ?> functionType = namespaceType.getManagedFunctionTypes()[0];
 
 		// Ensure annotation available
-		Object annotation = namespaceType.getManagedFunctionTypes()[0].getAnnotations()[0];
-		assertEquals("Incorrect annotation", ANNOTATION, annotation);
+		assertEquals("Incorrect annotation", ANNOTATION, functionType.getAnnotations()[0]);
+		assertEquals("Incorrect by type annotation", ANNOTATION, functionType.getAnnotation(String.class));
 	}
 
 	/**
@@ -334,15 +334,16 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 					functionFactory, Indexed.class, None.class);
 			function.addObject(String.class).addAnnotation(ANNOTATION);
 		});
+		ManagedFunctionObjectType<?> objectType = namespaceType.getManagedFunctionTypes()[0].getObjectTypes()[0];
 
 		// Ensure annotation available
-		Object annotation = namespaceType.getManagedFunctionTypes()[0].getObjectTypes()[0].getAnnotations()[0];
-		assertEquals("Incorrect annotation", ANNOTATION, annotation);
+		assertEquals("Incorrect annotation", ANNOTATION, objectType.getAnnotations()[0]);
+		assertEquals("Incorrect by type annotation", ANNOTATION, objectType.getAnnotation(String.class));
 	}
 
 	/**
-	 * Ensure issue if using {@link Enum} but no
-	 * {@link ManagedFunctionObjectType} provided for a key.
+	 * Ensure issue if using {@link Enum} but no {@link ManagedFunctionObjectType}
+	 * provided for a key.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testMissingObjectForKey() {
@@ -362,8 +363,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no key for {@link ManagedFunctionObjectType} by provided
-	 * key class.
+	 * Ensure issue if no key for {@link ManagedFunctionObjectType} by provided key
+	 * class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testNoKeyForObject() {
@@ -387,8 +388,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if incorrect key type for {@link ManagedFunctionObjectType}
-	 * by provided key class.
+	 * Ensure issue if incorrect key type for {@link ManagedFunctionObjectType} by
+	 * provided key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testIncorrectKeyTypeForObject() {
@@ -412,8 +413,7 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if more {@link ManagedFunctionObjectType} instances than
-	 * keys.
+	 * Ensure issue if more {@link ManagedFunctionObjectType} instances than keys.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testMoreObjectsThanKeys() {
@@ -439,8 +439,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if key provided for {@link ManagedFunctionObjectType} but no
-	 * key class.
+	 * Ensure issue if key provided for {@link ManagedFunctionObjectType} but no key
+	 * class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testObjectHasKeyButNoKeyClass() {
@@ -609,8 +609,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no key for {@link ManagedFunctionFlowType} but provided
-	 * key class.
+	 * Ensure issue if no key for {@link ManagedFunctionFlowType} but provided key
+	 * class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testNoKeyForFlow() {
@@ -634,8 +634,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if incorrect key type for {@link ManagedFunctionFlowType}
-	 * but provided key class.
+	 * Ensure issue if incorrect key type for {@link ManagedFunctionFlowType} but
+	 * provided key class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testIncorrectKeyTypeForFlow() {
@@ -683,8 +683,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if key provided for {@link ManagedFunctionFlowType} but no
-	 * key class.
+	 * Ensure issue if key provided for {@link ManagedFunctionFlowType} but no key
+	 * class.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testFlowHasKeyButNoKeyClass() {
@@ -891,13 +891,10 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link FunctionNamespaceType} within the input {@link Loader}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the
-	 *            {@link FunctionNamespaceType}.
-	 * @param loader
-	 *            {@link Loader}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link FunctionNamespaceType}.
+	 * @param loader                 {@link Loader}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link FunctionNamespaceType}.
 	 */
 	private FunctionNamespaceType loadManagedFunctionType(boolean isExpectedToLoad, Loader loader,
@@ -944,12 +941,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Implemented to load the {@link FunctionNamespaceType}.
 		 * 
-		 * @param namespace
-		 *            {@link FunctionNamespaceBuilder}.
-		 * @param context
-		 *            {@link ManagedFunctionSourceContext}.
-		 * @throws Exception
-		 *             If fails to source {@link FunctionNamespaceType}.
+		 * @param namespace {@link FunctionNamespaceBuilder}.
+		 * @param context   {@link ManagedFunctionSourceContext}.
+		 * @throws Exception If fails to source {@link FunctionNamespaceType}.
 		 */
 		void sourceManagedFunction(FunctionNamespaceBuilder namespace, ManagedFunctionSourceContext context)
 				throws Exception;

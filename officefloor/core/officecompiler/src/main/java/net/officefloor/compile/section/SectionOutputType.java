@@ -19,7 +19,7 @@ package net.officefloor.compile.section;
 
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
-import net.officefloor.compile.spi.section.SectionOutput;
+import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -27,7 +27,7 @@ import net.officefloor.frame.api.manage.Office;
  * 
  * @author Daniel Sagenschneider
  */
-public interface SectionOutputType {
+public interface SectionOutputType extends AnnotatedType {
 
 	/**
 	 * Obtains the name of this {@link SectionOutputType}.
@@ -38,12 +38,12 @@ public interface SectionOutputType {
 
 	/**
 	 * <p>
-	 * Obtains the fully qualified {@link Class} name of the argument type for
-	 * this {@link SectionOutputType}.
+	 * Obtains the fully qualified {@link Class} name of the argument type for this
+	 * {@link SectionOutputType}.
 	 * <p>
 	 * The name is returned rather than the actual {@link Class} to enable the
-	 * {@link SectionType} to be obtained should the {@link Class} not be
-	 * available to the {@link ClassLoader}.
+	 * {@link SectionType} to be obtained should the {@link Class} not be available
+	 * to the {@link ClassLoader}.
 	 * 
 	 * @return Fully qualified {@link Class} name of the argument type.
 	 */
@@ -55,19 +55,12 @@ public interface SectionOutputType {
 	 * {@link ManagedFunctionEscalationType} instances.
 	 * <p>
 	 * A {@link ManagedFunctionFlowType} must be connected to an
-	 * {@link SectionInputType}, however a {@link ManagedFunctionEscalationType}
-	 * may be generically handled by the {@link Office}.
+	 * {@link SectionInputType}, however a {@link ManagedFunctionEscalationType} may
+	 * be generically handled by the {@link Office}.
 	 * 
 	 * @return <code>true</code> if this {@link SectionOutputType} is
 	 *         {@link ManagedFunctionEscalationType} instances only.
 	 */
 	boolean isEscalationOnly();
-
-	/**
-	 * Obtains the annotations for the {@link SectionOutput}.
-	 * 
-	 * @return Annotations for the {@link SectionOutput}.
-	 */
-	Object[] getAnnotations();
 
 }

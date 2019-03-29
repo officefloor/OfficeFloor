@@ -18,6 +18,7 @@
 package net.officefloor.compile.section;
 
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 
@@ -26,7 +27,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeSectionOutputType {
+public interface OfficeSectionOutputType extends AnnotatedType {
 
 	/**
 	 * Obtains the name of this {@link OfficeSectionOutput}.
@@ -43,19 +44,11 @@ public interface OfficeSectionOutputType {
 	String getArgumentType();
 
 	/**
-	 * Indicates if this {@link OfficeSectionOutput} is escalation only. In
-	 * other words it can be handled by an {@link Office}
-	 * {@link EscalationProcedure}.
+	 * Indicates if this {@link OfficeSectionOutput} is escalation only. In other
+	 * words it can be handled by an {@link Office} {@link EscalationProcedure}.
 	 * 
 	 * @return <code>true</code> if escalation only.
 	 */
 	boolean isEscalationOnly();
-
-	/**
-	 * Obtains the annotations for the {@link OfficeSectionOutput}.
-	 * 
-	 * @return Annotations for the {@link OfficeSectionOutput}.
-	 */
-	Object[] getAnnotations();
 
 }
