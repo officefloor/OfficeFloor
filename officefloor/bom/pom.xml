@@ -64,7 +64,7 @@
 		<eclipse-persistence-jpa-version>2.7.4</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<google-api-version>1.28.0</google-api-version>
-		<google-appengine-version>1.9.71</google-appengine-version>
+		<google-appengine-version>1.9.73</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<h2database-version>1.4.199</h2database-version>
 		<hibernate-version>5.4.2.Final</hibernate-version>
