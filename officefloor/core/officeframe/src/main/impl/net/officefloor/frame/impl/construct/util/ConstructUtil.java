@@ -187,13 +187,37 @@ public class ConstructUtil {
 		Class<?> argumentType = functionReference.getArgumentType();
 		Class<?> parameterType = functionMetaData.getParameterType();
 		if ((argumentType != null) && (parameterType != null)) {
-			// Ensure argument may be passed as a parameter to the task
+
+			// Ensure argument may be passed as a parameter to the function
 			if (!parameterType.isAssignableFrom(argumentType)) {
-				issues.addIssue(assetType, assetName,
-						"Argument is not compatible with function parameter (argument=" + argumentType.getName()
-								+ ", parameter=" + parameterType.getName() + ", function=" + functionName + ") for "
-								+ forItemDescription);
-				return null; // must have compatible argument to parameter
+
+				// Not match, attempt to determine if need boxing
+				Class<?> boxedAgumentType = null;
+				if (argumentType.equals(byte.class)) {
+					boxedAgumentType = Byte.class;
+				} else if (argumentType.equals(short.class)) {
+					boxedAgumentType = Short.class;
+				} else if (argumentType.equals(char.class)) {
+					boxedAgumentType = Character.class;
+				} else if (argumentType.equals(int.class)) {
+					boxedAgumentType = Integer.class;
+				} else if (argumentType.equals(long.class)) {
+					boxedAgumentType = Long.class;
+				} else if (argumentType.equals(float.class)) {
+					boxedAgumentType = Float.class;
+				} else if (argumentType.equals(double.class)) {
+					boxedAgumentType = Double.class;
+				}
+
+				// Ensure boxed argument may be passed
+				if ((boxedAgumentType == null) || (!parameterType.isAssignableFrom(boxedAgumentType))) {
+					// Invalid argument
+					issues.addIssue(assetType, assetName,
+							"Argument is not compatible with function parameter (argument=" + argumentType.getName()
+									+ ", parameter=" + parameterType.getName() + ", function=" + functionName + ") for "
+									+ forItemDescription);
+					return null; // must have compatible argument to parameter
+				}
 			}
 		}
 

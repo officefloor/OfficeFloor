@@ -89,6 +89,64 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 	 * @return Name for the variable.
 	 */
 	public static String name(String qualifier, String type) {
+
+		// Handle arrays
+		switch (type) {
+		case "byte":
+			type = Byte.class.getName();
+			break;
+		case "short":
+			type = Short.class.getName();
+			break;
+		case "char":
+			type = Character.class.getName();
+			break;
+		case "int":
+			type = Integer.class.getName();
+			break;
+		case "long":
+			type = Long.class.getName();
+			break;
+		case "float":
+			type = Float.class.getName();
+			break;
+		case "double":
+			type = Double.class.getName();
+			break;
+		case "[B":
+			type = "byte[]";
+			break;
+		case "[S":
+			type = "short[]";
+			break;
+		case "[C":
+			type = "char[]";
+			break;
+		case "[I":
+			type = "int[]";
+			break;
+		case "[J":
+			type = "long[]";
+			break;
+		case "[F":
+			type = "float[]";
+			break;
+		case "[D":
+			type = "double[]";
+			break;
+		}
+
+		// Determine if array
+		final String START = "[L";
+		final String END = ";";
+		if (type.startsWith(START) && type.endsWith(END)) {
+
+			// Array, so obtain component name
+			String componentName = type.substring(START.length(), type.length() - END.length());
+			type = componentName + "[]";
+		}
+
+		// Return name
 		return (qualifier == null ? "" : qualifier + "-") + type;
 	}
 
