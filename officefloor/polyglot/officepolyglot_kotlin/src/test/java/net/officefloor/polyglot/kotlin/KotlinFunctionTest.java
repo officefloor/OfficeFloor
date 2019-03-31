@@ -50,7 +50,7 @@ public class KotlinFunctionTest extends AbstractPolyglotFunctionTest {
 	/**
 	 * Ensure using top level functions.
 	 */
-	public void _testNonFunctions() {
+	public void testNonFunctions() {
 		boolean isSuccessful;
 		try {
 			SectionLoaderUtil.loadSectionType(KotlinFunctionSectionSource.class, KotlinObject.class.getName(),

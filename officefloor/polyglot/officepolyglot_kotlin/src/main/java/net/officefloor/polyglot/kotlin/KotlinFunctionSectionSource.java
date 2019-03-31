@@ -69,7 +69,8 @@ public class KotlinFunctionSectionSource extends ClassSectionSource {
 
 		// Ensure kotlin functions
 		if (!sectionClassName.endsWith("Kt")) {
-			this.getDesigner().addIssue("Class " + sectionClassName + " is not top level Kotlin functions");
+			this.getDesigner()
+					.addIssue("Class " + sectionClassName + " is not top level Kotlin functions (should end in Kt)");
 			return null;
 		}
 
