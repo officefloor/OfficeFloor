@@ -15,6 +15,7 @@
 	<description>Provides polyglot</description>
 	<modules>
 		<module>officepolyglot_test</module>
+		<module>officepolyglot_kotlin</module>
 		<module>officepolyglot_scala</module>
 	</modules>
 	<dependencies>

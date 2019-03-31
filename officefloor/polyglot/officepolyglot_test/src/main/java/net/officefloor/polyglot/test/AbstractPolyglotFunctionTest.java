@@ -296,7 +296,9 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 		assertEquals("val", '1', types.getVal());
 		assertEquals("in", "2", types.getIn());
 		assertEquals("var", 3, types.getVar());
+		assertNotNull("No out", out);
 		assertEquals("update out", "test", out.getIdentifier());
+		assertNotNull("no var", var);
 		assertEquals("update var", Integer.valueOf(4), var);
 	}
 

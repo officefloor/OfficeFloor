@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.scala;
-
-import java.lang.reflect.Field;
+package net.officefloor.polyglot.kotlin;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
@@ -31,14 +29,14 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 
 /**
- * Scala function {@link SectionSource}.
+ * Kotlin function {@link SectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ScalaFunctionSectionSource extends ClassSectionSource {
+public class KotlinFunctionSectionSource extends ClassSectionSource {
 
 	/**
-	 * {@link Property} name of the Scala function to use.
+	 * {@link Property} name of the Kotlin function to use.
 	 */
 	public static final String PROPERTY_FUNCTION_NAME = "function.name";
 
@@ -69,23 +67,14 @@ public class ScalaFunctionSectionSource extends ClassSectionSource {
 	@Override
 	protected Class<?> getSectionClass(String sectionClassName) throws Exception {
 
-		// Load the class
-		Class<?> objectClass = super.getSectionClass(sectionClassName);
-
-		// Determine if Scala object (to obtain function)
-		final String MODULE$_FIELD_NAME = "MODULE$";
-		for (Field field : objectClass.getFields()) {
-			if (MODULE$_FIELD_NAME.equals(field.getName())) {
-
-				// Found module for functions (so return it's type)
-				return field.getType();
-			}
+		// Ensure kotlin functions
+		if (!sectionClassName.endsWith("Kt")) {
+			this.getDesigner().addIssue("Class " + sectionClassName + " is not top level Kotlin functions");
+			return null;
 		}
 
-		// As here, not Scala object
-		this.getDesigner().addIssue("Class " + sectionClassName + " is not Scala Object (expecting "
-				+ MODULE$_FIELD_NAME + " static field)");
-		return null;
+		// Load the class
+		return super.getSectionClass(sectionClassName);
 	}
 
 	@Override
@@ -96,17 +85,17 @@ public class ScalaFunctionSectionSource extends ClassSectionSource {
 	@Override
 	protected FunctionNamespaceType loadFunctionNamespaceType(String namespace, Class<?> sectionClass) {
 		PropertyList workProperties = this.getContext().createPropertyList();
-		workProperties.addProperty(ScalaManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
+		workProperties.addProperty(KotlinManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(sectionClass.getName());
-		return this.getContext().loadManagedFunctionType(namespace, ScalaManagedFunctionSource.class.getName(),
+		return this.getContext().loadManagedFunctionType(namespace, KotlinManagedFunctionSource.class.getName(),
 				workProperties);
 	}
 
 	@Override
 	protected SectionFunctionNamespace adddSectionFunctionNamespace(String namespace, Class<?> sectionClass) {
 		SectionFunctionNamespace functionNamespace = this.getDesigner().addSectionFunctionNamespace(namespace,
-				ScalaManagedFunctionSource.class.getName());
-		functionNamespace.addProperty(ScalaManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, sectionClass.getName());
+				KotlinManagedFunctionSource.class.getName());
+		functionNamespace.addProperty(KotlinManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, sectionClass.getName());
 		return functionNamespace;
 	}
 

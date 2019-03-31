@@ -8,33 +8,24 @@
 		<artifactId>polyglot</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officepolyglot_scala</artifactId>
-	<name>Scala</name>
-	<description>OfficeFloor plug-in for using Scala</description>
+	<artifactId>officepolyglot_kotlin</artifactId>
+	<name>Kotlin</name>
+	<description>OfficeFloor plug-in for using Kotlin</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<kotlin-maven-version>1.3.21</kotlin-maven-version>
 	</properties>
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>net.alchim31.maven</groupId>
-				<artifactId>scala-maven-plugin</artifactId>
-				<configuration>
-					<recompileMode>incremental</recompileMode>
-				</configuration>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-maven-plugin</artifactId>
+				<version>${kotlin-maven-version}</version>
 				<executions>
 					<execution>
-						<id>scala-compile</id>
-						<phase>process-resources</phase>
+						<id>test-compile</id>
 						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>scala-test-compile</id>
-						<phase>process-test-resources</phase>
-						<goals>
-							<goal>testCompile</goal>
+							<goal>test-compile</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -43,7 +34,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<executions>
-					<!-- Only use Scala compiling -->
+					<!-- Only use Kotlin compiling -->
 					<execution>
 						<id>default-compile</id>
 						<phase>none</phase>
@@ -54,11 +45,17 @@
 					</execution>
 					<execution>
 						<id>java-compile</id>
-						<phase>none</phase>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
 					</execution>
 					<execution>
 						<id>java-test-compile</id>
-						<phase>none</phase>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
@@ -74,7 +71,7 @@
 						</goals>
 						<configuration>
 							<sources>
-								<source>src/test/scala</source>
+								<source>src/test/kotlin</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -88,8 +85,8 @@
 			<artifactId>officecompiler</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-stdlib</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.polyglot</groupId>
