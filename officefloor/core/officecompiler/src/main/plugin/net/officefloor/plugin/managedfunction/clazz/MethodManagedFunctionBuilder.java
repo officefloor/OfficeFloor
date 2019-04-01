@@ -236,7 +236,9 @@ public class MethodManagedFunctionBuilder {
 			Annotation[] paramAnnotations = methodParamAnnotations[i];
 
 			// Handle primitives
-			if (byte.class.equals(paramType)) {
+			if (boolean.class.equals(paramType)) {
+				paramType = Boolean.class;
+			} else if (byte.class.equals(paramType)) {
 				paramType = Byte.class;
 			} else if (short.class.equals(paramType)) {
 				paramType = Short.class;

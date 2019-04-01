@@ -72,9 +72,9 @@ public class KotlinFunctionTest extends AbstractPolyglotFunctionTest {
 	 */
 
 	@Override
-	protected PrimitiveTypes primitives(byte _byte, short _short, char _char, int _int, long _long, float _float,
-			double _double) {
-		return KotlinFunctionsKt.primitives(_byte, _short, _char, _int, _long, _float, _double);
+	protected PrimitiveTypes primitives(boolean _boolean, byte _byte, short _short, char _char, int _int, long _long,
+			float _float, double _double) {
+		return KotlinFunctionsKt.primitives(_boolean, _byte, _short, _char, _int, _long, _float, _double);
 	}
 
 	@Override

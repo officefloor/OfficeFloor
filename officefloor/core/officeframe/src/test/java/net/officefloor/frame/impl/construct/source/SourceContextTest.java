@@ -160,8 +160,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 				new MockClockFactory());
 
 		// Load primitives
-		for (Class<?> primitive : new Class[] { byte.class, short.class, char.class, int.class, long.class, float.class,
-				double.class }) {
+		for (Class<?> primitive : new Class[] { boolean.class, byte.class, short.class, char.class, int.class,
+				long.class, float.class, double.class }) {
 			assertEquals(primitive.getSimpleName(), primitive, context.loadClass(primitive.getName()));
 		}
 	}
@@ -176,8 +176,8 @@ public class SourceContextTest extends OfficeFrameTestCase {
 				new MockClockFactory());
 
 		// Load primitives
-		for (Class<?> primitive : new Class[] { byte[].class, short[].class, char[].class, int[].class, long[].class,
-				float[].class, double[].class }) {
+		for (Class<?> primitive : new Class[] { boolean[].class, byte[].class, short[].class, char[].class, int[].class,
+				long[].class, float[].class, double[].class }) {
 			assertEquals(primitive.getSimpleName(), primitive, context.loadClass(primitive.getName()));
 		}
 	}

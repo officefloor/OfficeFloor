@@ -34,6 +34,11 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
 public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<None, None> {
 
 	/**
+	 * Prefix for variable name.
+	 */
+	public static final String VARIABLE_NAME_PREFIX = "VARIABLE_";
+
+	/**
 	 * Obtains {@link Var} from dependency object.
 	 * 
 	 * @param object Dependency object.

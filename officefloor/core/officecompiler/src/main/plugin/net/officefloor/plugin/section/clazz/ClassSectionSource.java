@@ -887,9 +887,11 @@ public class ClassSectionSource extends AbstractSectionSource implements Section
 
 		// Ensure the section class has functions
 		boolean hasFunctionMethod = false;
-		for (Method method : sectionClass.getMethods()) {
+		HAS_METHOD: for (Method method : sectionClass.getMethods()) {
 			if (!(method.getDeclaringClass().equals(Object.class))) {
-				hasFunctionMethod = true; // declared a class
+				// Has non-object method
+				hasFunctionMethod = true;
+				break HAS_METHOD;
 			}
 		}
 		if (!hasFunctionMethod) {

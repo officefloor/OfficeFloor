@@ -24,6 +24,8 @@ package net.officefloor.polyglot.test;
  */
 public class PrimitiveTypes {
 
+	private final boolean _boolean;
+
 	private final byte _byte;
 
 	private final short _short;
@@ -38,8 +40,9 @@ public class PrimitiveTypes {
 
 	private final double _double;
 
-	public PrimitiveTypes(byte _byte, short _short, char _char, int _int, long _long, float _float, double _double) {
-		super();
+	public PrimitiveTypes(boolean _boolean, byte _byte, short _short, char _char, int _int, long _long, float _float,
+			double _double) {
+		this._boolean = _boolean;
 		this._byte = _byte;
 		this._short = _short;
 		this._char = _char;
@@ -47,6 +50,10 @@ public class PrimitiveTypes {
 		this._long = _long;
 		this._float = _float;
 		this._double = _double;
+	}
+
+	public boolean getBoolean() {
+		return _boolean;
 	}
 
 	public byte getByte() {

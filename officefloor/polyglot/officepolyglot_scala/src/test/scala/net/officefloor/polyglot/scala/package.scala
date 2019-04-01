@@ -7,8 +7,8 @@ import net.officefloor.plugin.section.clazz.{ Parameter, NextFunction }
 package object scala {
 
   @NextFunction("use")
-  def primitives(_byte: Byte, _short: Short, _char: Char, _int: Int, _long: Long, _float: Float, _double: Double): PrimitiveTypes = {
-    new PrimitiveTypes(_byte, _short, _char, _int, _long, _float, _double)
+  def primitives(_boolean: Boolean, _byte: Byte, _short: Short, _char: Char, _int: Int, _long: Long, _float: Float, _double: Double): PrimitiveTypes = {
+    new PrimitiveTypes(_boolean, _byte, _short, _char, _int, _long, _float, _double)
   }
 
   @NextFunction("use")

@@ -136,12 +136,17 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.polyglot</groupId>
-				<artifactId>officepolyglot_scala</artifactId>
+				<artifactId>officepolyglot_javascript</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.polyglot</groupId>
 				<artifactId>officepolyglot_kotlin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.polyglot</groupId>
+				<artifactId>officepolyglot_scala</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Server -->

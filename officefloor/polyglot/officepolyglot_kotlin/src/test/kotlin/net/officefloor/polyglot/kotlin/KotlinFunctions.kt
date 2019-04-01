@@ -15,6 +15,7 @@ import net.officefloor.polyglot.test.VariableTypes
 
 @NextFunction("use")
 fun primitives(
+	_boolean: Boolean,
 	_byte: Byte,
 	_short: Short,
 	_char: Char,
@@ -23,7 +24,7 @@ fun primitives(
 	_float: Float,
 	_double: Double
 ): PrimitiveTypes {
-	return PrimitiveTypes(_byte, _short, _char, _int, _long, _float, _double)
+	return PrimitiveTypes(_boolean, _byte, _short, _char, _int, _long, _float, _double)
 }
 
 @NextFunction("use")

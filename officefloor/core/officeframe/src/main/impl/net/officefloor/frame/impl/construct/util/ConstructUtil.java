@@ -192,25 +192,27 @@ public class ConstructUtil {
 			if (!parameterType.isAssignableFrom(argumentType)) {
 
 				// Not match, attempt to determine if need boxing
-				Class<?> boxedAgumentType = null;
-				if (argumentType.equals(byte.class)) {
-					boxedAgumentType = Byte.class;
+				Class<?> boxedArgumentType = null;
+				if (argumentType.equals(boolean.class)) {
+					boxedArgumentType = Boolean.class;
+				} else if (argumentType.equals(byte.class)) {
+					boxedArgumentType = Byte.class;
 				} else if (argumentType.equals(short.class)) {
-					boxedAgumentType = Short.class;
+					boxedArgumentType = Short.class;
 				} else if (argumentType.equals(char.class)) {
-					boxedAgumentType = Character.class;
+					boxedArgumentType = Character.class;
 				} else if (argumentType.equals(int.class)) {
-					boxedAgumentType = Integer.class;
+					boxedArgumentType = Integer.class;
 				} else if (argumentType.equals(long.class)) {
-					boxedAgumentType = Long.class;
+					boxedArgumentType = Long.class;
 				} else if (argumentType.equals(float.class)) {
-					boxedAgumentType = Float.class;
+					boxedArgumentType = Float.class;
 				} else if (argumentType.equals(double.class)) {
-					boxedAgumentType = Double.class;
+					boxedArgumentType = Double.class;
 				}
 
 				// Ensure boxed argument may be passed
-				if ((boxedAgumentType == null) || (!parameterType.isAssignableFrom(boxedAgumentType))) {
+				if ((boxedArgumentType == null) || (!parameterType.isAssignableFrom(boxedArgumentType))) {
 					// Invalid argument
 					issues.addIssue(assetType, assetName,
 							"Argument is not compatible with function parameter (argument=" + argumentType.getName()

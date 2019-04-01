@@ -1489,14 +1489,14 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Configure flows
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
-		CompileVar<Double> result = new CompileVar<>();
+		CompileVar<Boolean> result = new CompileVar<>();
 		compiler.office((context) -> {
 			context.addSection("SECTION", PrimitiveParametersSection.class);
-			context.variable(null, Double.class, result);
+			context.variable(null, Boolean.class, result);
 		});
 		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", Byte.valueOf((byte) 1));
-			assertEquals("Incorrect object", Double.valueOf(1), result.getValue());
+			assertTrue("Should pass all the way through", result.getValue());
 		}
 	}
 
@@ -1537,7 +1537,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			return param;
 		}
 
-		public void doDouble(@Parameter double param, Out<Double> out) {
+		@NextFunction("doBoolean")
+		public boolean doDouble(@Parameter double param) {
+			return Math.abs(param - 1) < 0.0000001; // avoid rounding issues
+		}
+
+		public void doBoolean(@Parameter boolean param, Out<Boolean> out) {
 			out.set(param);
 		}
 	}

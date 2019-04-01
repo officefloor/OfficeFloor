@@ -64,13 +64,13 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can use primitive types.
 	 */
-	public void testDirectPrimitives() {
-		PrimitiveTypes types = this.primitives((byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0);
+	public void testDirectPrimitives() throws Exception {
+		PrimitiveTypes types = this.primitives(true, (byte) 1, (short) 2, '3', 4, 5L, 6.0f, 7.0);
 		assertPrimitives(types);
 	}
 
-	protected abstract PrimitiveTypes primitives(byte _byte, short _short, char _char, int _int, long _long,
-			float _float, double _double);
+	protected abstract PrimitiveTypes primitives(boolean _boolean, byte _byte, short _short, char _char, int _int,
+			long _long, float _float, double _double) throws Exception;
 
 	/**
 	 * Ensure can invoke primitive types.
@@ -82,6 +82,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 		compiler.office((context) -> {
 
 			// Load inputs
+			value(context, Boolean.valueOf(true));
 			value(context, Byte.valueOf((byte) 1));
 			value(context, Short.valueOf((short) 2));
 			value(context, Character.valueOf('3'));
@@ -111,6 +112,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	protected abstract String primitives(CompileOfficeContext context, OfficeSectionInput handleResult);
 
 	private static void assertPrimitives(PrimitiveTypes types) {
+		assertTrue("boolean", types.getBoolean());
 		assertEquals("byte", 1, types.getByte());
 		assertEquals("short", 2, types.getShort());
 		assertEquals("char", '3', types.getChar());
@@ -123,7 +125,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can pass in a Java object.
 	 */
-	public void testDirectObject() {
+	public void testDirectObject() throws Exception {
 		String string = "TEST";
 		JavaObject object = new JavaObject("test");
 		int[] primitiveArray = new int[] { 1 };
@@ -133,7 +135,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	}
 
 	protected abstract ObjectTypes objects(String string, JavaObject object, int[] primitiveArray,
-			JavaObject[] objectArray);
+			JavaObject[] objectArray) throws Exception;
 
 	/**
 	 * Ensure can invoke object types.
@@ -186,7 +188,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can pass collections.
 	 */
-	public void testDirectCollections() {
+	public void testDirectCollections() throws Exception {
 		List<Integer> list = new LinkedList<>();
 		Set<Character> set = new HashSet<>();
 		Map<String, JavaObject> map = new HashMap<>();
@@ -194,7 +196,8 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 		assertCollections(types, list, set, map);
 	}
 
-	protected abstract CollectionTypes collections(List<Integer> list, Set<Character> set, Map<String, JavaObject> map);
+	protected abstract CollectionTypes collections(List<Integer> list, Set<Character> set, Map<String, JavaObject> map)
+			throws Exception;
 
 	/**
 	 * Ensure can invoke collections.
@@ -243,7 +246,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can handle variables.
 	 */
-	public void testDirectVariables() {
+	public void testDirectVariables() throws Exception {
 		MockVar<String> in = new MockVar<>("2");
 		MockVar<JavaObject> out = new MockVar<>();
 		MockVar<Integer> var = new MockVar<>(3);
@@ -251,7 +254,8 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 		assertVariables(types, out.get(), var.get());
 	}
 
-	protected abstract VariableTypes variables(char val, In<String> in, Out<JavaObject> out, Var<Integer> var);
+	protected abstract VariableTypes variables(char val, In<String> in, Out<JavaObject> out, Var<Integer> var)
+			throws Exception;
 
 	/**
 	 * Ensure can using variables.
@@ -305,12 +309,12 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide {@link Parameter}.
 	 */
-	public void testDirectParameter() {
+	public void testDirectParameter() throws Exception {
 		ParameterTypes types = this.parameter("test");
 		assertParameter(types);
 	}
 
-	protected abstract ParameterTypes parameter(String parameter);
+	protected abstract ParameterTypes parameter(String parameter) throws Exception;
 
 	/**
 	 * Ensure can use parameter.

@@ -42,9 +42,9 @@ import net.officefloor.plugin.variable.Var;
 public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 
 	@Override
-	protected PrimitiveTypes primitives(byte _byte, short _short, char _char, int _int, long _long, float _float,
-			double _double) {
-		return new PrimitivesLogic().primitives(_byte, _short, _char, _int, _long, _float, _double);
+	protected PrimitiveTypes primitives(boolean _boolean, byte _byte, short _short, char _char, int _int, long _long,
+			float _float, double _double) {
+		return new PrimitivesLogic().primitives(_boolean, _byte, _short, _char, _int, _long, _float, _double);
 	}
 
 	@Override
@@ -58,9 +58,9 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 
 	public static class PrimitivesLogic {
 		@NextFunction("use")
-		public PrimitiveTypes primitives(byte _byte, short _short, char _char, int _int, long _long, float _float,
-				double _double) {
-			return new PrimitiveTypes(_byte, _short, _char, _int, _long, _float, _double);
+		public PrimitiveTypes primitives(boolean _boolean, byte _byte, short _short, char _char, int _int, long _long,
+				float _float, double _double) {
+			return new PrimitiveTypes(_boolean, _byte, _short, _char, _int, _long, _float, _double);
 		}
 	}
 

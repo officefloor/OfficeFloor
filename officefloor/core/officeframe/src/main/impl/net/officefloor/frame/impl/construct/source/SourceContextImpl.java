@@ -306,6 +306,8 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 
 				// Determine if primitive
 				switch (name) {
+				case "boolean":
+					return boolean.class;
 				case "byte":
 					return byte.class;
 				case "short":
@@ -320,6 +322,8 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 					return float.class;
 				case "double":
 					return double.class;
+				case "[Z":
+					return boolean[].class;
 				case "[B":
 					return byte[].class;
 				case "[S":

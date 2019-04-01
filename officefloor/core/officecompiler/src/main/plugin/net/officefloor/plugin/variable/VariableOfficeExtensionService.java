@@ -48,7 +48,7 @@ public class VariableOfficeExtensionService implements OfficeExtensionService {
 		/**
 		 * Logic.
 		 * 
-		 * @retrun Result.
+		 * @return Result.
 		 * @throws T Possible failure.
 		 */
 		R run() throws T;
@@ -146,7 +146,7 @@ public class VariableOfficeExtensionService implements OfficeExtensionService {
 					VariableManagedObjectSource<?> mos = new VariableManagedObjectSource(decorator);
 
 					// Create the variable
-					String moVariableName = "VARIABLE_" + variableName;
+					String moVariableName = VariableManagedObjectSource.VARIABLE_NAME_PREFIX + variableName;
 					variable = this.office.addOfficeManagedObjectSource(moVariableName, mos)
 							.addOfficeManagedObject(variableName, ManagedObjectScope.THREAD);
 
