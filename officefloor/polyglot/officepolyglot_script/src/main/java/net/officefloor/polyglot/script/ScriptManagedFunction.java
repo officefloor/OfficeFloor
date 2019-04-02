@@ -18,6 +18,8 @@
 package net.officefloor.polyglot.script;
 
 import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -33,9 +35,29 @@ import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFact
 public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexed> {
 
 	/**
-	 * {@link Invocable}.
+	 * {@link ThreadLocal} for {@link Invocable}.
 	 */
-	private final Invocable invocable;
+	private final ThreadLocal<Invocable> invocable = new ThreadLocal<>();
+
+	/**
+	 * {@link ScriptEngineManager}.
+	 */
+	private final ScriptEngineManager engineManager;
+
+	/**
+	 * {@link ScriptEngine} name.
+	 */
+	private final String engineName;
+
+	/**
+	 * Setup script.
+	 */
+	private final String setupScript;
+
+	/**
+	 * Script.
+	 */
+	private final String script;
 
 	/**
 	 * Name of the function.
@@ -50,13 +72,19 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 	/**
 	 * Instantiate.
 	 * 
-	 * @param invocable          {@link Invocable}.
+	 * @param engineManager      {@link ScriptEngineManager}.
+	 * @param engineName         {@link ScriptEngine} name.
+	 * @param setupScript        Setup script.
+	 * @param script             Script.
 	 * @param functionName       Name of the function.
 	 * @param parameterFactories {@link ManagedFunctionParameterFactory} instances.
 	 */
-	public ScriptManagedFunction(Invocable invocable, String functionName,
-			ManagedFunctionParameterFactory[] parameterFactories) {
-		this.invocable = invocable;
+	public ScriptManagedFunction(ScriptEngineManager engineManager, String engineName, String setupScript,
+			String script, String functionName, ManagedFunctionParameterFactory[] parameterFactories) {
+		this.engineManager = engineManager;
+		this.engineName = engineName;
+		this.setupScript = setupScript;
+		this.script = script;
 		this.functionName = functionName;
 		this.parameterFactories = parameterFactories;
 	}
@@ -68,6 +96,24 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 	@Override
 	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
+		// Obtain the invocable
+		Invocable invocable = this.invocable.get();
+		if (invocable == null) {
+
+			// Create and configure the engine
+			ScriptEngine engine = this.engineManager.getEngineByName(engineName);
+			if (this.setupScript != null) {
+				engine.eval(this.setupScript);
+			}
+			engine.eval(this.script);
+
+			// Obtain the invocable
+			invocable = (Invocable) engine;
+
+			// Load for re-use
+			this.invocable.set(invocable);
+		}
+
 		// Obtain the arguments
 		Object[] arguments = new Object[this.parameterFactories.length];
 		for (int i = 0; i < arguments.length; i++) {
@@ -75,7 +121,7 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 		}
 
 		// Invoke the function
-		return this.invocable.invokeFunction(this.functionName, arguments);
+		return invocable.invokeFunction(this.functionName, arguments);
 	}
 
 }

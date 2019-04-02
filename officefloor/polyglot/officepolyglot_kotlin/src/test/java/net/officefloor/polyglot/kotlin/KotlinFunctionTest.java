@@ -123,13 +123,13 @@ public class KotlinFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected String variables(CompileOfficeContext context, OfficeSectionInput handleResult) {
+	protected void variables(OfficeSectionOutput pass, CompileOfficeContext context, OfficeSectionInput handleResult) {
 		OfficeArchitect office = context.getOfficeArchitect();
 		OfficeSection function = office.addOfficeSection("section", KotlinFunctionSectionSource.class.getName(),
 				KotlinFunctionsKt.class.getName());
 		function.addProperty(KotlinFunctionSectionSource.PROPERTY_FUNCTION_NAME, "variables");
+		office.link(pass, function.getOfficeSectionInput("variables"));
 		office.link(function.getOfficeSectionOutput("use"), handleResult);
-		return "section.variables";
 	}
 
 	@Override

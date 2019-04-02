@@ -17,6 +17,8 @@
  */
 package net.officefloor.polyglot.script;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -94,6 +96,23 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 	 */
 	private static final ObjectMapper mapper = new ObjectMapper();
 
+	/**
+	 * Reads in the content.
+	 * 
+	 * @param content Content.
+	 * @return Content as string.
+	 * @throws IOException If fails to read content.
+	 */
+	private static String readContent(InputStream content) throws IOException {
+		StringWriter buffer = new StringWriter();
+		try (Reader reader = new InputStreamReader(content)) {
+			for (int character = reader.read(); character != -1; character = reader.read()) {
+				buffer.write(character);
+			}
+		}
+		return buffer.toString();
+	}
+
 	/*
 	 * ===================== ManagedFunctionSource ===============================
 	 */
@@ -125,24 +144,22 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		// Load the setup script (if provided)
 		String setupScriptPath = context.getProperty(PROPERTY_SETUP_SCRIPT_PATH, null);
+		String setupScript = null;
 		if (setupScriptPath != null) {
-			engine.eval(new InputStreamReader(context.getResource(setupScriptPath)));
+			setupScript = readContent(context.getResource(setupScriptPath));
+			engine.eval(setupScript);
 		}
 
 		// Load the Script contents
 		String scriptPath = context.getProperty(PROPERTY_SCRIPT_PATH);
-		engine.eval(new InputStreamReader(context.getResource(scriptPath)));
+		String script = readContent(context.getResource(scriptPath));
+		engine.eval(script);
 
 		// Load the meta-data for the function
 		String metaDataScriptPath = context.getProperty(PROPERTY_METADATA_SCRIPT_PATH);
-		StringWriter metaDataExtraction = new StringWriter();
-		try (Reader metaDataReader = new InputStreamReader(context.getResource(metaDataScriptPath))) {
-			for (int character = metaDataReader.read(); character != -1; character = metaDataReader.read()) {
-				metaDataExtraction.write(character);
-			}
-		}
-		String metaDataExtractionScript = metaDataExtraction.toString().replace("_FUNCTION_NAME_", functionName);
-		engine.eval(metaDataExtractionScript);
+		String metaDataScript = readContent(context.getResource(metaDataScriptPath));
+		metaDataScript = metaDataScript.toString().replace("_FUNCTION_NAME_", functionName);
+		engine.eval(metaDataScript);
 		Object metaData = invocable.invokeFunction("OFFICEFLOOR_METADATA_" + functionName);
 
 		// Parse out the meta-data
@@ -192,9 +209,9 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 		List<ScriptParameterMetaData> parameterMetaDatas = functionMetaData.getParameters();
 		ManagedFunctionParameterFactory[] parameterFactories = new ManagedFunctionParameterFactory[parameterMetaDatas
 				.size()];
-		ManagedFunctionTypeBuilder<Indexed, Indexed> function = functionNamespaceTypeBuilder.addManagedFunctionType(
-				functionName, new ScriptManagedFunction(invocable, functionName, parameterFactories), Indexed.class,
-				Indexed.class);
+		ManagedFunctionTypeBuilder<Indexed, Indexed> function = functionNamespaceTypeBuilder
+				.addManagedFunctionType(functionName, new ScriptManagedFunction(engineManager, engineName, setupScript,
+						script, functionName, parameterFactories), Indexed.class, Indexed.class);
 		int objectIndex = 0;
 		for (int i = 0; i < parameterMetaDatas.size(); i++) {
 			ScriptParameterMetaData parameterMetaData = parameterMetaDatas.get(i);

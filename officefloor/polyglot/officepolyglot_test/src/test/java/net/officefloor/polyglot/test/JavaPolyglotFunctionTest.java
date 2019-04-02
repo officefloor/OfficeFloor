@@ -112,12 +112,12 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected String variables(CompileOfficeContext context, OfficeSectionInput handleResult) {
+	protected void variables(OfficeSectionOutput pass, CompileOfficeContext context, OfficeSectionInput handleResult) {
 		OfficeArchitect office = context.getOfficeArchitect();
 		OfficeSection function = office.addOfficeSection("section", ClassSectionSource.class.getName(),
 				VariableLogic.class.getName());
+		office.link(pass, function.getOfficeSectionInput("variable"));
 		office.link(function.getOfficeSectionOutput("use"), handleResult);
-		return "section.variable";
 	}
 
 	public static class VariableLogic {

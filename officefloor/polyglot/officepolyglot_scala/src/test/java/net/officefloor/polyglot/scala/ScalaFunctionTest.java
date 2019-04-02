@@ -123,13 +123,13 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected String variables(CompileOfficeContext context, OfficeSectionInput handleResult) {
+	protected void variables(OfficeSectionOutput pass, CompileOfficeContext context, OfficeSectionInput handleResult) {
 		OfficeArchitect office = context.getOfficeArchitect();
 		OfficeSection function = office.addOfficeSection("section", ScalaFunctionSectionSource.class.getName(),
 				package$.class.getName());
 		function.addProperty(ScalaFunctionSectionSource.PROPERTY_FUNCTION_NAME, "variables");
+		office.link(pass, function.getOfficeSectionInput("variables"));
 		office.link(function.getOfficeSectionOutput("use"), handleResult);
-		return "section.variables";
 	}
 
 	@Override

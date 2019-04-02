@@ -258,52 +258,76 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 			throws Exception;
 
 	/**
-	 * Ensure can using variables.
+	 * Sets up invoking the variables.
 	 */
-	public void testInvokeVariables() throws Throwable {
+	private void setupInvokeVariables(CompileVar<JavaObject> out, CompileVar<Integer> var) throws Throwable {
 		CompileOfficeFloor compiler = new CompileOfficeFloor();
 		CompileVar<Character> val = new CompileVar<Character>('1');
 		CompileVar<String> in = new CompileVar<>("2");
-		CompileVar<JavaObject> out = new CompileVar<>();
-		CompileVar<Integer> var = new CompileVar<>(3);
-		CompileVar<VariableTypes> result = new CompileVar<>();
-		Closure<String> functionName = new Closure<>();
 		compiler.office((context) -> {
 
-			// Capture variables
+			// Capture variables (if provided)
 			context.variable(null, Character.class, val);
 			context.variable(null, String.class, in);
 			context.variable(null, JavaObject.class, out);
 			context.variable(null, Integer.class, var);
 
+			// Pass results
+			OfficeSection pass = context.addSection("PASS", VariablePass.class);
+
 			// Capture result
 			OfficeSection section = context.addSection("RESULT", VariableReturn.class);
-			context.variable(null, VariableTypes.class, result);
 
 			// Load polyglot function
-			functionName.value = this.variables(context, section.getOfficeSectionInput("service"));
+			this.variables(pass.getOfficeSectionOutput("use"), context, section.getOfficeSectionInput("service"));
 		});
 		this.officeFloor = compiler.compileAndOpenOfficeFloor();
-		CompileOfficeFloor.invokeProcess(this.officeFloor, functionName.value, null);
-		assertVariables(result.getValue(), out.getValue(), var.getValue());
 	}
 
-	public static class VariableReturn {
-		public void service(@Parameter VariableTypes result, Out<VariableTypes> out) {
-			out.set(result);
+	/**
+	 * Ensure can using variables.
+	 */
+	public void testInvokeVariables() throws Throwable {
+
+		// Setup invoking variables
+		CompileVar<JavaObject> out = new CompileVar<>();
+		CompileVar<Integer> var = new CompileVar<>(3);
+		this.setupInvokeVariables(out, var);
+
+		// Invoke the function
+		Closure<VariableTypes> capture = new Closure<>();
+		CompileOfficeFloor.invokeProcess(this.officeFloor, "PASS.service", capture);
+		assertVariables(capture.value, out.getValue(), var.getValue());
+	}
+
+	public static class VariablePass {
+		@NextFunction("use")
+		public void service(@Parameter Closure<VariableTypes> capture, Out<Closure<VariableTypes>> out) {
+			out.set(capture);
 		}
 	}
 
-	protected abstract String variables(CompileOfficeContext context, OfficeSectionInput handleResult);
+	public static class VariableReturn {
+		public void service(@Parameter VariableTypes result, In<Closure<VariableTypes>> in) {
+			in.get().value = result;
+		}
+	}
+
+	protected abstract void variables(OfficeSectionOutput pass, CompileOfficeContext context,
+			OfficeSectionInput handleResult);
 
 	private static void assertVariables(VariableTypes types, JavaObject out, Integer var) {
-		assertEquals("val", '1', types.getVal());
-		assertEquals("in", "2", types.getIn());
-		assertEquals("var", 3, types.getVar());
+		assertVariables(types);
 		assertNotNull("No out", out);
 		assertEquals("update out", "test", out.getIdentifier());
 		assertNotNull("no var", var);
 		assertEquals("update var", Integer.valueOf(4), var);
+	}
+
+	private static void assertVariables(VariableTypes types) {
+		assertEquals("val", '1', types.getVal());
+		assertEquals("in", "2", types.getIn());
+		assertEquals("var", 3, types.getVar());
 	}
 
 	/**
@@ -358,6 +382,33 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 
 	private static void assertParameter(ParameterTypes types) {
 		assertEquals("parameter", "test", types.getParameter());
+	}
+
+	/**
+	 * Ensure safe to run directly multi-threaded.
+	 */
+	@StressTest
+	public void testDirectMultiThreaded() throws Exception {
+		this.doMultiThreadedTest(10, 10000, 10, () -> this.testDirectVariables());
+	}
+
+	/**
+	 * Ensure safe to run invoked multi-threaded.
+	 */
+	@StressTest
+	public void testInvokeMultiThreaded() throws Throwable {
+
+		// Setup
+		CompileVar<JavaObject> out = new CompileVar<>();
+		CompileVar<Integer> var = new CompileVar<>(3);
+		this.setupInvokeVariables(out, var);
+
+		// Undertake test
+		this.doMultiThreadedTest(10, 10000, 10, () -> {
+			Closure<VariableTypes> capture = new Closure<>();
+			CompileOfficeFloor.invokeProcess(this.officeFloor, "PASS.service", capture);
+			assertVariables(capture.value);
+		});
 	}
 
 	/**

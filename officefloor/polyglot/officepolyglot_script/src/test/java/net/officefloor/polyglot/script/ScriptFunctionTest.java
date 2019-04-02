@@ -51,34 +51,43 @@ import net.officefloor.polyglot.test.VariableTypes;
  */
 public class ScriptFunctionTest extends AbstractPolyglotFunctionTest {
 
-	private static final Invocable DIRECT;
+	/**
+	 * {@link ScriptEngineManager}.
+	 */
+	private static final ScriptEngineManager engineManager = new ScriptEngineManager();
 
-	static {
-		try {
-			// Obtain the engine
-			final String engineName = "graal.js";
-			ScriptEngineManager engineManager = new ScriptEngineManager();
-			ScriptEngine engine = engineManager.getEngineByName(engineName);
+	/**
+	 * {@link ThreadLocal} instance {@link Invocable}.
+	 */
+	private static final ThreadLocal<Invocable> DIRECT = new ThreadLocal<Invocable>() {
+		@Override
+		protected Invocable initialValue() {
+			try {
+				// Obtain the engine
+				final String engineName = "graal.js";
+				ScriptEngine engine = engineManager.getEngineByName(engineName);
 
-			// Load the setup
-			InputStream setup = ScriptFunctionTest.class.getClassLoader().getResourceAsStream("javascript/Setup.js");
-			engine.eval(new InputStreamReader(setup));
+				// Load the setup
+				InputStream setup = ScriptFunctionTest.class.getClassLoader()
+						.getResourceAsStream("javascript/Setup.js");
+				engine.eval(new InputStreamReader(setup));
 
-			// Load the script
-			InputStream content = ScriptFunctionTest.class.getClassLoader()
-					.getResourceAsStream("javascript/Functions.js");
-			engine.eval(new InputStreamReader(content));
+				// Load the script
+				InputStream content = ScriptFunctionTest.class.getClassLoader()
+						.getResourceAsStream("javascript/Functions.js");
+				engine.eval(new InputStreamReader(content));
 
-			// Invoke the function
-			Invocable invocable = (Invocable) engine;
+				// Invoke the function
+				Invocable invocable = (Invocable) engine;
 
-			// Load for use
-			DIRECT = invocable;
+				// Load for use
+				return invocable;
 
-		} catch (Exception ex) {
-			throw fail(ex);
+			} catch (Exception ex) {
+				throw fail(ex);
+			}
 		}
-	}
+	};
 
 	/**
 	 * Invokes the JavaScript function directly.
@@ -91,7 +100,7 @@ public class ScriptFunctionTest extends AbstractPolyglotFunctionTest {
 	@SuppressWarnings("unchecked")
 	private static <T> T directInvokeFunction(String functionName, Class<T> returnType, Object... arguments)
 			throws Exception {
-		Object result = DIRECT.invokeFunction(functionName, arguments);
+		Object result = DIRECT.get().invokeFunction(functionName, arguments);
 		if (returnType == null) {
 			assertNull("Should not have return", result);
 			return null;
@@ -160,13 +169,13 @@ public class ScriptFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected String variables(CompileOfficeContext context, OfficeSectionInput handleResult) {
+	protected void variables(OfficeSectionOutput pass, CompileOfficeContext context, OfficeSectionInput handleResult) {
 		OfficeArchitect office = context.getOfficeArchitect();
 		OfficeSection function = office.addOfficeSection("section", MockScriptFunctionSectionSource.class.getName(),
 				"javascript/Functions.js");
 		function.addProperty(MockScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "variables");
+		office.link(pass, function.getOfficeSectionInput("variables"));
 		office.link(function.getOfficeSectionOutput("use"), handleResult);
-		return "section.variables";
 	}
 
 	@Override
