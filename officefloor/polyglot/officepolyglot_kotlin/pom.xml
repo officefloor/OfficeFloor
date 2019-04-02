@@ -13,14 +13,12 @@
 	<description>OfficeFloor plug-in for using Kotlin</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<kotlin-maven-version>1.3.21</kotlin-maven-version>
 	</properties>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-maven-plugin</artifactId>
-				<version>${kotlin-maven-version}</version>
 				<executions>
 					<execution>
 						<id>test-compile</id>

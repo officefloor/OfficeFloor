@@ -13,7 +13,6 @@
 	<description>OfficeFloor plug-in for using JavaScript</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<graalvm.version>1.0.0-rc14</graalvm.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -23,12 +22,10 @@
 		<dependency>
 			<groupId>org.graalvm.js</groupId>
 			<artifactId>js</artifactId>
-			<version>${graalvm.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.graalvm.js</groupId>
 			<artifactId>js-scriptengine</artifactId>
-			<version>${graalvm.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -38,10 +35,6 @@
 			<groupId>net.officefloor.polyglot</groupId>
 			<artifactId>officepolyglot_test</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
 		</dependency>
 	</dependencies>
 </project>
