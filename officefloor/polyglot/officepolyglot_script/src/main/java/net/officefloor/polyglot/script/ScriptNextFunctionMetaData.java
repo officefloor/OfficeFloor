@@ -15,27 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.javascript;
+package net.officefloor.polyglot.script;
 
-import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.polyglot.script.AbstractScriptFunctionSectionSource;
+import javax.script.ScriptEngine;
+
+import lombok.Data;
 
 /**
- * JavaScript function {@link SectionSource}.
+ * Meta-data for the {@link ScriptEngine} next function.
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaScriptFunctionSectionSource extends AbstractScriptFunctionSectionSource {
-
-	@Override
-	protected String getScriptEngineName(SourceContext context) throws Exception {
-		return "graal.js";
-	}
-
-	@Override
-	protected String getMetaDataScriptPath(SourceContext context) throws Exception {
-		return this.getClass().getPackage().getName().replace('.', '/') + "/OfficeFloorFunctionMetaData.js";
-	}
-
+@Data
+public class ScriptNextFunctionMetaData {
+	private String name;
+	private String argumentType;
 }

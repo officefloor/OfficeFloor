@@ -15,22 +15,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.javascript;
+package net.officefloor.polyglot.script;
 
-import java.util.List;
-
-import javax.script.ScriptEngine;
-
-import lombok.Data;
+import net.officefloor.frame.api.source.SourceContext;
 
 /**
- * Meta-data for a {@link ScriptEngine} function.
+ * Mock {@link AbstractScriptFunctionSectionSource} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-@Data
-public class ScriptFunctionMetaData {
-	private List<ScriptParameterMetaData> parameters;
-	private ScriptNextFunctionMetaData nextFunction;
-	private String error;
+public class MockScriptFunctionSectionSource extends AbstractScriptFunctionSectionSource {
+
+	@Override
+	protected String getScriptEngineName(SourceContext context) {
+		return "graal.js";
+	}
+
+	@Override
+	protected String getSetupScriptPath(SourceContext context) throws Exception {
+		return "javascript/Setup.js";
+	}
+
+	@Override
+	protected String getMetaDataScriptPath(SourceContext context) {
+		return "javascript/OfficeFloorFunctionMetaData.js";
+	}
+
 }

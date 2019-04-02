@@ -18,6 +18,7 @@
 		<module>officepolyglot_javascript</module>
 		<module>officepolyglot_kotlin</module>
 		<module>officepolyglot_scala</module>
+		<module>officepolyglot_script</module>
 	</modules>
 	<dependencies>
 		<dependency>

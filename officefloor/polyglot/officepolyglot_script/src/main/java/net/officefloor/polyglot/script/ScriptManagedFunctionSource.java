@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.javascript;
+package net.officefloor.polyglot.script;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -56,18 +56,7 @@ import net.officefloor.plugin.variable.VariableManagedObjectSource;
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaScriptManagedFunctionSource extends AbstractManagedFunctionSource {
-
-	/**
-	 * {@link Property} name for the location of the JavaScript file on the class
-	 * path.
-	 */
-	public static final String PROPERTY_JAVASCRIPT_PATH = "javascript.resource.path";
-
-	/**
-	 * {@link Property} name for the JavaScript function name.
-	 */
-	public static final String PROPERTY_FUNCTION_NAME = "function.name";
+public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
 	 * {@link Property} name for the {@link ScriptEngine}.
@@ -75,9 +64,25 @@ public class JavaScriptManagedFunctionSource extends AbstractManagedFunctionSour
 	public static final String PROPERTY_ENGINE_NAME = "javascript.engine.name";
 
 	/**
-	 * {@link Property} name for the default {@link ScriptEngine}.
+	 * {@link Property} name for optional script file to load to setup.
 	 */
-	public static final String DEFAULT_ENGINE_NAME = "graal.js";
+	public static final String PROPERTY_SETUP_SCRIPT_PATH = "script.setup.path";
+
+	/**
+	 * {@link Property} name for the location of the Script file on the class path.
+	 */
+	public static final String PROPERTY_SCRIPT_PATH = "script.path";
+
+	/**
+	 * {@link Property} name for the location of the Script to extra meta-data for
+	 * the function.
+	 */
+	public static final String PROPERTY_METADATA_SCRIPT_PATH = "script.metadata.path";
+
+	/**
+	 * {@link Property} name for the JavaScript function name.
+	 */
+	public static final String PROPERTY_FUNCTION_NAME = "function.name";
 
 	/**
 	 * {@link ScriptEngineManager}.
@@ -95,8 +100,10 @@ public class JavaScriptManagedFunctionSource extends AbstractManagedFunctionSour
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_JAVASCRIPT_PATH, "JavaScript Path");
+		context.addProperty(PROPERTY_ENGINE_NAME, "Engine");
+		context.addProperty(PROPERTY_SCRIPT_PATH, "Script Path");
 		context.addProperty(PROPERTY_FUNCTION_NAME, "Function");
+		context.addProperty(PROPERTY_METADATA_SCRIPT_PATH, "MetaData Script Path");
 	}
 
 	@Override
@@ -107,7 +114,7 @@ public class JavaScriptManagedFunctionSource extends AbstractManagedFunctionSour
 		String functionName = context.getProperty(PROPERTY_FUNCTION_NAME);
 
 		// Obtain the script engine
-		String engineName = context.getProperty(PROPERTY_ENGINE_NAME, DEFAULT_ENGINE_NAME);
+		String engineName = context.getProperty(PROPERTY_ENGINE_NAME);
 		ScriptEngine engine = engineManager.getEngineByName(engineName);
 
 		// Ensure invocable
@@ -116,23 +123,37 @@ public class JavaScriptManagedFunctionSource extends AbstractManagedFunctionSour
 		}
 		Invocable invocable = (Invocable) engine;
 
-		// Load the JavaScript contents
-		String javaScriptPath = context.getProperty(PROPERTY_JAVASCRIPT_PATH);
-		engine.eval(new InputStreamReader(context.getResource(javaScriptPath)));
+		// Load the setup script (if provided)
+		String setupScriptPath = context.getProperty(PROPERTY_SETUP_SCRIPT_PATH, null);
+		if (setupScriptPath != null) {
+			engine.eval(new InputStreamReader(context.getResource(setupScriptPath)));
+		}
+
+		// Load the Script contents
+		String scriptPath = context.getProperty(PROPERTY_SCRIPT_PATH);
+		engine.eval(new InputStreamReader(context.getResource(scriptPath)));
 
 		// Load the meta-data for the function
+		String metaDataScriptPath = context.getProperty(PROPERTY_METADATA_SCRIPT_PATH);
 		StringWriter metaDataExtraction = new StringWriter();
-		try (Reader metaDataReader = new InputStreamReader(
-				context.getResource(JavaScriptManagedFunctionSource.class.getPackage().getName().replace('.', '/')
-						+ "/OfficeFloorFunctionMetaData.js"))) {
+		try (Reader metaDataReader = new InputStreamReader(context.getResource(metaDataScriptPath))) {
 			for (int character = metaDataReader.read(); character != -1; character = metaDataReader.read()) {
 				metaDataExtraction.write(character);
 			}
 		}
 		String metaDataExtractionScript = metaDataExtraction.toString().replace("_FUNCTION_NAME_", functionName);
 		engine.eval(metaDataExtractionScript);
-		String metaData = (String) invocable.invokeFunction("OFFICEFLOOR_METADATA_" + functionName);
-		ScriptFunctionMetaData functionMetaData = mapper.readValue(metaData, ScriptFunctionMetaData.class);
+		Object metaData = invocable.invokeFunction("OFFICEFLOOR_METADATA_" + functionName);
+
+		// Parse out the meta-data
+		if (metaData == null) {
+			throw new Exception("No meta-data provided for function " + functionName);
+		} else if (!(metaData instanceof String)) {
+			throw new Exception("Meta-data provide for function " + functionName + " must be JSON string ("
+					+ metaData.getClass().getName() + ")");
+		}
+		String metaDataJsonString = (String) metaData;
+		ScriptFunctionMetaData functionMetaData = mapper.readValue(metaDataJsonString, ScriptFunctionMetaData.class);
 
 		// Ensure no error
 		String error = functionMetaData.getError();

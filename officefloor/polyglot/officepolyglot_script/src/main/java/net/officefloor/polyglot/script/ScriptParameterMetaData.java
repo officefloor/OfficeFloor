@@ -15,19 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.javascript;
+package net.officefloor.polyglot.script;
 
 import javax.script.ScriptEngine;
 
 import lombok.Data;
 
 /**
- * Meta-data for the {@link ScriptEngine} next function.
+ * Meta-data for a {@link ScriptEngine} function.
  * 
  * @author Daniel Sagenschneider
  */
 @Data
-public class ScriptNextFunctionMetaData {
-	private String name;
-	private String argumentType;
+public class ScriptParameterMetaData {
+	private String qualifier;
+	private String type;
+	private String nature;
 }
