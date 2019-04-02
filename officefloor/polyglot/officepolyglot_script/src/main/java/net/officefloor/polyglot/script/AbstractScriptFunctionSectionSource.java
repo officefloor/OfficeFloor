@@ -25,14 +25,14 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.AbstractFunctionSectionSource;
 
 /**
  * Abstract script function {@link SectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractScriptFunctionSectionSource extends ClassSectionSource {
+public abstract class AbstractScriptFunctionSectionSource extends AbstractFunctionSectionSource {
 
 	/**
 	 * {@link Property} name for the {@link ScriptEngine} name.

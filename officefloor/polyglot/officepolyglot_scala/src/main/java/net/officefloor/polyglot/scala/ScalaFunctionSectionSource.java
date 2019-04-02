@@ -28,14 +28,14 @@ import net.officefloor.compile.spi.section.SectionFunctionNamespace;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.section.clazz.AbstractFunctionSectionSource;
 
 /**
  * Scala function {@link SectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ScalaFunctionSectionSource extends ClassSectionSource {
+public class ScalaFunctionSectionSource extends AbstractFunctionSectionSource {
 
 	/**
 	 * {@link Property} name of the Scala function to use.
