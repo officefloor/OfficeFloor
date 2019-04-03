@@ -17,30 +17,24 @@
  */
 package net.officefloor.polyglot.test;
 
-import lombok.Value;
+import java.io.Serializable;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import net.officefloor.web.HttpParameters;
 
 /**
- * Primitive types.
+ * Mock {@link HttpParameters} object.
  * 
  * @author Daniel Sagenschneider
  */
-@Value
-public class PrimitiveTypes {
+@HttpParameters
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class MockHttpParameters implements Serializable {
+	private static final long serialVersionUID = 1L;
 
-	private boolean primitiveBoolean;
-
-	private byte primitiveByte;
-
-	private short primitiveShort;
-
-	private char primitiveChar;
-
-	private int primitiveInt;
-
-	private long primitiveLong;
-
-	private float primitiveFloat;
-
-	private double primitiveDouble;
-
+	private String mock;
 }

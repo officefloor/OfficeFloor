@@ -17,11 +17,14 @@
  */
 package net.officefloor.polyglot.test;
 
+import lombok.Value;
+
 /**
  * Variables.
  * 
  * @author Daniel Sagenschneider
  */
+@Value
 public class VariableTypes {
 
 	private final char val;
@@ -29,23 +32,5 @@ public class VariableTypes {
 	private final String in;
 
 	private final int var;
-
-	public VariableTypes(char val, String in, int var) {
-		this.val = val;
-		this.in = in;
-		this.var = var;
-	}
-
-	public char getVal() {
-		return this.val;
-	}
-
-	public String getIn() {
-		return in;
-	}
-
-	public int getVar() {
-		return var;
-	}
 
 }

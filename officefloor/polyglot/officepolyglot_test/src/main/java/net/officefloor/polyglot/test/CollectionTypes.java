@@ -22,11 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.Value;
+
 /**
  * {@link Collection} types.
  * 
  * @author Daniel Sagenschneider
  */
+@Value
 public class CollectionTypes {
 
 	private final List<Integer> list;
@@ -34,23 +37,5 @@ public class CollectionTypes {
 	private final Set<Character> set;
 
 	private final Map<String, JavaObject> map;
-
-	public CollectionTypes(List<Integer> list, Set<Character> set, Map<String, JavaObject> map) {
-		this.list = list;
-		this.set = set;
-		this.map = map;
-	}
-
-	public List<Integer> getList() {
-		return list;
-	}
-
-	public Set<Character> getSet() {
-		return set;
-	}
-
-	public Map<String, JavaObject> getMap() {
-		return map;
-	}
 
 }

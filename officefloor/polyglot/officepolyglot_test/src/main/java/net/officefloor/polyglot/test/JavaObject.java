@@ -17,20 +17,20 @@
  */
 package net.officefloor.polyglot.test;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * Java Object.
  * 
  * @author Daniel Sagenschneider
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class JavaObject {
 
 	private String identifier;
 
-	public JavaObject(String identifier) {
-		this.identifier = identifier;
-	}
-
-	public String getIdentifier() {
-		return this.identifier;
-	}
 }

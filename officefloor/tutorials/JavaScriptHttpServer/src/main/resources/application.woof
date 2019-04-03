@@ -1,0 +1,33 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/" secure="false" x="52" y="64">
+      <section name="Validate" input="validate"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="Respond" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.javascripthttpserver.ResponseLogic" x="439" y="45">
+      <input name="send" parameter-type=""/>
+    </section>
+    <section name="Validate" source="net.officefloor.polyglot.javascript.JavaScriptFunctionSectionSource" location="net/officefloor/tutorial/javascripthttpserver/Validate.js" x="164" y="48">
+      <property name="function.name" value="validate"/>
+      <input name="validate" parameter-type=""/>
+      <output name="valid" argument-type="">
+        <section name="Respond" input="send"/>
+      </output>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

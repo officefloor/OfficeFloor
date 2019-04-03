@@ -17,15 +17,20 @@
  */
 package net.officefloor.polyglot.test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
+import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.NextFunction;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -33,6 +38,12 @@ import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
 import net.officefloor.plugin.variable.Var;
+import net.officefloor.web.HttpCookieParameter;
+import net.officefloor.web.HttpHeaderParameter;
+import net.officefloor.web.HttpPathParameter;
+import net.officefloor.web.HttpQueryParameter;
+import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.compile.CompileWebContext;
 
 /**
  * Confirms the tests with {@link ClassSectionSource}.
@@ -148,6 +159,100 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 		@NextFunction("use")
 		public ParameterTypes parameter(@Parameter String parameter) {
 			return new ParameterTypes(parameter);
+		}
+	}
+
+	@Override
+	protected void web(String pathParameter, String queryParameter, String headerParameter, String cookieParameter,
+			MockHttpParameters httpParameters, MockHttpObject httpObject, ObjectResponse<WebTypes> response) {
+		new WebLogic().web(pathParameter, queryParameter, headerParameter, cookieParameter, httpParameters, httpObject,
+				response);
+	}
+
+	@Override
+	protected void web(OfficeFlowSourceNode pass, CompileWebContext context) {
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", ClassSectionSource.class.getName(),
+				WebLogic.class.getName());
+		office.link(pass, function.getOfficeSectionInput("web"));
+	}
+
+	public static class WebLogic {
+		public void web(@HttpPathParameter("param") String pathParameter,
+				@HttpQueryParameter("param") String queryParameter,
+				@HttpHeaderParameter("param") String headerParameter,
+				@HttpCookieParameter("param") String cookieParameter, MockHttpParameters httpParameters,
+				MockHttpObject httpObject, ObjectResponse<WebTypes> response) {
+			response.send(new WebTypes(pathParameter, queryParameter, headerParameter, cookieParameter, httpParameters,
+					httpObject, new JavaObject(pathParameter)));
+		}
+	}
+
+	@Override
+	protected String flow(CompileOfficeContext context, OfficeSectionInput next, OfficeSectionInput flow,
+			OfficeSectionInput flowWithCallback, OfficeSectionInput flowWithParameterAndCallback,
+			OfficeSectionInput flowWithParameter, OfficeSectionInput exception) {
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", ClassSectionSource.class.getName(),
+				FlowLogic.class.getName());
+		office.link(function.getOfficeSectionOutput("nextFunction"), next);
+		office.link(function.getOfficeSectionOutput("flow"), flow);
+		office.link(function.getOfficeSectionOutput("flowWithCallback"), flowWithCallback);
+		office.link(function.getOfficeSectionOutput("flowWithParameterAndCallback"), flowWithParameterAndCallback);
+		office.link(function.getOfficeSectionOutput("flowWithParameter"), flowWithParameter);
+		office.link(function.getOfficeSectionOutput(IOException.class.getName()), exception);
+		return "section.service";
+	}
+
+	@FlowInterface
+	public static interface Flows {
+		void flow();
+
+		void flowWithCallback(FlowCallback callback);
+
+		void flowWithParameterAndCallback(String parameter, FlowCallback callback);
+
+		void flowWithParameter(String parameter);
+	}
+
+	public static class FlowLogic {
+		@NextFunction("nextFunction")
+		public void service(@Parameter String flowType, Flows flows) throws IOException {
+			switch (flowType) {
+			case "nextFunction":
+				return; // do nothing so next function fires
+			case "flow":
+				flows.flow();
+				return;
+			case "callbacks":
+				flows.flowWithCallback((error1) -> {
+					flows.flowWithParameterAndCallback("1", (error2) -> {
+						flows.flowWithParameter("2");
+					});
+				});
+				return;
+			case "exception":
+				throw new IOException();
+			default:
+				fail("Invalid flow type: " + flowType);
+			}
+		}
+	}
+
+	@Override
+	protected void asynchronousFlow(AsynchronousFlow flowOne, AsynchronousFlow flowTwo) {
+		new AsynchronousFlowLogic().service(flowOne, flowTwo);
+	}
+
+	@Override
+	protected String asynchronousFlow(CompileOfficeContext context) {
+		context.addSection("section", AsynchronousFlowLogic.class);
+		return "section.service";
+	}
+
+	public static class AsynchronousFlowLogic {
+		public void service(AsynchronousFlow flowOne, AsynchronousFlow flowTwo) {
+			flowOne.complete(() -> flowTwo.complete(null));
 		}
 	}
 

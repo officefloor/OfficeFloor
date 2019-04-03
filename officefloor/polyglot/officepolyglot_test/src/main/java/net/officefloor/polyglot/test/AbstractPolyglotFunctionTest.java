@@ -24,13 +24,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.test.managedfunction.MockAsynchronousFlow;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileVar;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -41,6 +46,13 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Var;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.build.HttpUrlContinuation;
+import net.officefloor.web.compile.CompileWebContext;
+import net.officefloor.web.compile.WebCompileOfficeFloor;
+import net.officefloor.woof.mock.MockObjectResponse;
 
 /**
  * Abstract tests for a polyglot function via a {@link SectionSource}.
@@ -48,6 +60,11 @@ import net.officefloor.plugin.variable.Var;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
+
+	/**
+	 * {@link ObjectMapper}.
+	 */
+	private static final ObjectMapper mapper = new ObjectMapper();
 
 	/**
 	 * {@link OfficeFloor}.
@@ -112,14 +129,14 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	protected abstract String primitives(CompileOfficeContext context, OfficeSectionInput handleResult);
 
 	private static void assertPrimitives(PrimitiveTypes types) {
-		assertTrue("boolean", types.getBoolean());
-		assertEquals("byte", 1, types.getByte());
-		assertEquals("short", 2, types.getShort());
-		assertEquals("char", '3', types.getChar());
-		assertEquals("integer", 4, types.getInt());
-		assertEquals("long", 5, types.getLong());
-		assertEquals("float", 6.0f, types.getFloat());
-		assertEquals("double", 7.0, types.getDouble());
+		assertTrue("boolean", types.isPrimitiveBoolean());
+		assertEquals("byte", 1, types.getPrimitiveByte());
+		assertEquals("short", 2, types.getPrimitiveShort());
+		assertEquals("char", '3', types.getPrimitiveChar());
+		assertEquals("integer", 4, types.getPrimitiveInt());
+		assertEquals("long", 5, types.getPrimitiveLong());
+		assertEquals("float", 6.0f, types.getPrimitiveFloat());
+		assertEquals("double", 7.0, types.getPrimitiveDouble());
 	}
 
 	/**
@@ -410,6 +427,153 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 			assertVariables(capture.value);
 		});
 	}
+
+	/**
+	 * Ensure can run direct for web.
+	 */
+	public void testDirectWeb() {
+		MockObjectResponse<WebTypes> types = new MockObjectResponse<>();
+		this.web("path", "query", "header", "cookie", new MockHttpParameters("test"), new MockHttpObject(1, "test"),
+				types);
+		assertWeb(types.getObject());
+	}
+
+	protected abstract void web(String pathParameter, String queryParameter, String headerParameter,
+			String cookieParameter, MockHttpParameters httpParameters, MockHttpObject httpObject,
+			ObjectResponse<WebTypes> response);
+
+	/**
+	 * Ensure can invoke for web.
+	 */
+	public void testInvokeWeb() throws Throwable {
+		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+		Closure<MockHttpServer> server = new Closure<>();
+		compiler.mockHttpServer((mockServer) -> server.value = mockServer);
+		compiler.web((context) -> {
+			HttpUrlContinuation input = context.getWebArchitect().getHttpInput(false, "/test/{param}");
+			this.web(input.getInput(), context);
+		});
+		this.officeFloor = compiler.compileAndOpenOfficeFloor();
+		MockHttpResponse response = server.value
+				.send(MockHttpServer.mockRequest("/test/path?param=query").header("param", "header")
+						.cookie("param", "cookie").header("mock", "test").header("content-type", "application/json")
+						.entity(mapper.writeValueAsString(new MockHttpObject(1, "test"))));
+		assertEquals("Incorrect status", 200, response.getStatus().getStatusCode());
+		WebTypes types = mapper.readValue(response.getEntity(), WebTypes.class);
+		assertWeb(types);
+	}
+
+	protected abstract void web(OfficeFlowSourceNode pass, CompileWebContext context);
+
+	private static void assertWeb(WebTypes types) {
+		assertNotNull("Missing types", types);
+		assertEquals("path", types.getPathParameter());
+		assertEquals("query", types.getQueryParameter());
+		assertEquals("header", types.getHeaderParameter());
+		assertEquals("cookie", types.getCookieParameter());
+		assertNotNull("Missing HTTP Parameters", types.getHttpParameters());
+		assertEquals("HTTP Parameters value", "test", types.getHttpParameters().getMock());
+		assertNotNull("Missing HTTP Object", types.getHttpObject());
+		assertEquals("HTTP Object identifier", 1, types.getHttpObject().getIdentifier());
+		assertEquals("HTTP Object message", "test", types.getHttpObject().getMessage());
+		assertNotNull("Missing object", types.getObject());
+		assertEquals("object", "path", types.getObject().getIdentifier());
+	}
+
+	/**
+	 * Ensure can invoke flow.
+	 */
+	public void testFlow() throws Throwable {
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		CompileVar<String> result = new CompileVar<>();
+		Closure<String> functionName = new Closure<>();
+		compiler.office((context) -> {
+			context.variable(null, String.class, result);
+			OfficeSection section = context.addSection("HANDLERS", FlowHandlers.class);
+			functionName.value = this.flow(context, section.getOfficeSectionInput("nextFunction"),
+					section.getOfficeSectionInput("flow"), section.getOfficeSectionInput("flowWithCallback"),
+					section.getOfficeSectionInput("flowWithParameterAndCallback"),
+					section.getOfficeSectionInput("flowWithParameter"), section.getOfficeSectionInput("exception"));
+		});
+		this.officeFloor = compiler.compileAndOpenOfficeFloor();
+
+		// Test next function
+		CompileOfficeFloor.invokeProcess(this.officeFloor, functionName.value, "nextFunction");
+		assertEquals("nextFunction", result.getValue());
+
+		// Test trigger flow
+		CompileOfficeFloor.invokeProcess(this.officeFloor, functionName.value, "flow");
+		assertEquals("flow", result.getValue());
+
+		// Test flow callbacks with parameters
+		CompileOfficeFloor.invokeProcess(this.officeFloor, functionName.value, "callbacks");
+		assertEquals("flowWithCallback-flowWithParameterAndCallback-1-flowWithParameter-2", result.getValue());
+
+		// Test exception
+		CompileOfficeFloor.invokeProcess(this.officeFloor, functionName.value, "exception");
+		assertEquals("exception", result.getValue());
+	}
+
+	public static class FlowHandlers {
+		public void nextFunction(Out<String> result) {
+			result.set("nextFunction");
+		}
+
+		public void flow(Out<String> result) {
+			result.set("flow");
+		}
+
+		public void flowWithCallback(Out<String> result) {
+			result.set("flowWithCallback");
+		}
+
+		public void flowWithParameterAndCallback(@Parameter String param, Var<String> result) {
+			result.set(result.get() + "-flowWithParameterAndCallback-" + param);
+		}
+
+		public void flowWithParameter(@Parameter String param, Var<String> result) {
+			result.set(result.get() + "-flowWithParameter-" + param);
+		}
+
+		public void exception(Out<String> result) {
+			result.set("exception");
+		}
+	}
+
+	protected abstract String flow(CompileOfficeContext context, OfficeSectionInput next, OfficeSectionInput flow,
+			OfficeSectionInput flowWithCallback, OfficeSectionInput flowWithParameterAndCallback,
+			OfficeSectionInput flowWithParameter, OfficeSectionInput exception);
+
+	/**
+	 * Validate direct {@link AsynchronousFlow}.
+	 */
+	public void testDirectAsynchronousFlow() throws Throwable {
+		MockAsynchronousFlow flowOne = new MockAsynchronousFlow();
+		MockAsynchronousFlow flowTwo = new MockAsynchronousFlow();
+		this.asynchronousFlow(flowOne, flowTwo);
+		assertTrue("Flow one should be complete", flowOne.isComplete());
+		assertFalse("Flow two not yet complete", flowTwo.isComplete());
+		flowOne.getCompletion().run();
+		assertTrue("Flow two should now be complete", flowTwo.isComplete());
+		assertNull("Should not have flow two completion", flowTwo.getCompletion());
+	}
+
+	protected abstract void asynchronousFlow(AsynchronousFlow flowOne, AsynchronousFlow flowTwo);
+
+	/**
+	 * Ensure can invoke {@link AsynchronousFlow}.
+	 */
+	public void testInvokeAsynchronousFlow() throws Throwable {
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		Closure<String> functionName = new Closure<>();
+		compiler.office((context) -> {
+			functionName.value = this.asynchronousFlow(context);
+		});
+		this.officeFloor = compiler.compileAndOpenOfficeFloor();
+		CompileOfficeFloor.invokeProcess(this.officeFloor, functionName.value, null);
+	}
+
+	protected abstract String asynchronousFlow(CompileOfficeContext context);
 
 	/**
 	 * Loads a value.

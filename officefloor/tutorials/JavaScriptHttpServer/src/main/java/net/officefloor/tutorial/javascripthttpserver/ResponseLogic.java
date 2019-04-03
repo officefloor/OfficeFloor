@@ -15,32 +15,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.test;
+package net.officefloor.tutorial.javascripthttpserver;
 
-import lombok.Value;
+import net.officefloor.web.ObjectResponse;
 
 /**
- * Primitive types.
+ * Sends the response.
  * 
  * @author Daniel Sagenschneider
  */
-@Value
-public class PrimitiveTypes {
+public class ResponseLogic {
 
-	private boolean primitiveBoolean;
-
-	private byte primitiveByte;
-
-	private short primitiveShort;
-
-	private char primitiveChar;
-
-	private int primitiveInt;
-
-	private long primitiveLong;
-
-	private float primitiveFloat;
-
-	private double primitiveDouble;
-
+	public void send(ObjectResponse<Response> response) {
+		response.send(new Response("successful"));
+	}
 }

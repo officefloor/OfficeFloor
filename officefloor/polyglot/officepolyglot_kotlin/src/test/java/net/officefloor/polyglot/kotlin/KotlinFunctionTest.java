@@ -23,11 +23,13 @@ import java.util.Set;
 
 import junit.framework.AssertionFailedError;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
@@ -35,10 +37,15 @@ import net.officefloor.plugin.variable.Var;
 import net.officefloor.polyglot.test.AbstractPolyglotFunctionTest;
 import net.officefloor.polyglot.test.CollectionTypes;
 import net.officefloor.polyglot.test.JavaObject;
+import net.officefloor.polyglot.test.MockHttpObject;
+import net.officefloor.polyglot.test.MockHttpParameters;
 import net.officefloor.polyglot.test.ObjectTypes;
 import net.officefloor.polyglot.test.ParameterTypes;
 import net.officefloor.polyglot.test.PrimitiveTypes;
 import net.officefloor.polyglot.test.VariableTypes;
+import net.officefloor.polyglot.test.WebTypes;
+import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.compile.CompileWebContext;
 
 /**
  * Tests adapting Kotlin {@link Object} for {@link ManagedFunction}.
@@ -145,6 +152,53 @@ public class KotlinFunctionTest extends AbstractPolyglotFunctionTest {
 		function.addProperty(KotlinFunctionSectionSource.PROPERTY_FUNCTION_NAME, "parameters");
 		office.link(pass, function.getOfficeSectionInput("parameters"));
 		office.link(function.getOfficeSectionOutput("use"), handleResult);
+	}
+
+	@Override
+	protected void web(String pathParameter, String queryParameter, String headerParameter, String cookieParameter,
+			MockHttpParameters httpParameters, MockHttpObject httpObject, ObjectResponse<WebTypes> response) {
+		KotlinFunctionsKt.web(pathParameter, queryParameter, headerParameter, cookieParameter, httpParameters,
+				httpObject, response);
+	}
+
+	@Override
+	protected void web(OfficeFlowSourceNode pass, CompileWebContext context) {
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", KotlinFunctionSectionSource.class.getName(),
+				KotlinFunctionsKt.class.getName());
+		function.addProperty(KotlinFunctionSectionSource.PROPERTY_FUNCTION_NAME, "web");
+		office.link(pass, function.getOfficeSectionInput("web"));
+	}
+
+	@Override
+	protected String flow(CompileOfficeContext context, OfficeSectionInput next, OfficeSectionInput flow,
+			OfficeSectionInput flowWithCallback, OfficeSectionInput flowWithParameterAndCallback,
+			OfficeSectionInput flowWithParameter, OfficeSectionInput exception) {
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", KotlinFunctionSectionSource.class.getName(),
+				KotlinFunctionsKt.class.getName());
+		function.addProperty(KotlinFunctionSectionSource.PROPERTY_FUNCTION_NAME, "serviceFlow");
+		office.link(function.getOfficeSectionOutput("nextFunction"), next);
+		office.link(function.getOfficeSectionOutput("flow"), flow);
+		office.link(function.getOfficeSectionOutput("flowWithCallback"), flowWithCallback);
+		office.link(function.getOfficeSectionOutput("flowWithParameterAndCallback"), flowWithParameterAndCallback);
+		office.link(function.getOfficeSectionOutput("flowWithParameter"), flowWithParameter);
+		office.link(function.getOfficeSectionOutput("exception"), exception);
+		return "section.serviceFlow";
+	}
+
+	@Override
+	protected void asynchronousFlow(AsynchronousFlow flowOne, AsynchronousFlow flowTwo) {
+		KotlinFunctionsKt.asynchronousFlow(flowOne, flowTwo);
+	}
+
+	@Override
+	protected String asynchronousFlow(CompileOfficeContext context) {
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", KotlinFunctionSectionSource.class.getName(),
+				KotlinFunctionsKt.class.getName());
+		function.addProperty(KotlinFunctionSectionSource.PROPERTY_FUNCTION_NAME, "asynchronousFlow");
+		return "section.asynchronousFlow";
 	}
 
 }

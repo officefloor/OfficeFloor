@@ -1,5 +1,6 @@
 package net.officefloor.polyglot.kotlin
 
+import net.officefloor.frame.api.function.AsynchronousFlow
 import net.officefloor.plugin.section.clazz.NextFunction
 import net.officefloor.plugin.section.clazz.Parameter
 import net.officefloor.plugin.variable.In
@@ -8,10 +9,22 @@ import net.officefloor.plugin.variable.Val
 import net.officefloor.plugin.variable.Var
 import net.officefloor.polyglot.test.CollectionTypes
 import net.officefloor.polyglot.test.JavaObject
+import net.officefloor.polyglot.test.MockHttpObject
+import net.officefloor.polyglot.test.MockHttpParameters
 import net.officefloor.polyglot.test.ObjectTypes
 import net.officefloor.polyglot.test.ParameterTypes
 import net.officefloor.polyglot.test.PrimitiveTypes
 import net.officefloor.polyglot.test.VariableTypes
+import net.officefloor.polyglot.test.WebTypes
+import net.officefloor.web.HttpCookieParameter
+import net.officefloor.web.HttpHeaderParameter
+import net.officefloor.web.HttpPathParameter
+import net.officefloor.web.HttpQueryParameter
+import net.officefloor.web.ObjectResponse
+import net.officefloor.frame.api.function.FlowCallback
+import org.junit.Assert
+import java.io.IOException
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface
 
 @NextFunction("use")
 fun primitives(
@@ -53,4 +66,51 @@ fun variables(@Val _val: Char, _in: In<String>, _out: Out<JavaObject>, _var: Var
 @NextFunction("use")
 fun parameters(@Parameter param: String): ParameterTypes {
 	return ParameterTypes(param)
+}
+
+fun web(
+	@HttpPathParameter("param") pathParameter: String,
+	@HttpQueryParameter("param") queryParameter: String,
+	@HttpHeaderParameter("param") headerParameter: String,
+	@HttpCookieParameter("param") cookieParameter: String, httpParameters: MockHttpParameters,
+	httpObject: MockHttpObject, response: ObjectResponse<WebTypes>
+) {
+	response.send(
+		WebTypes(
+			pathParameter, queryParameter, headerParameter, cookieParameter, httpParameters,
+			httpObject, JavaObject(pathParameter)
+		)
+	);
+}
+
+@FlowInterface
+interface Flows {
+	fun flow()
+	fun flowWithCallback(callback: FlowCallback)
+	fun flowWithParameterAndCallback(parameter: String, callback: FlowCallback)
+	fun flowWithParameter(parameter: String)
+	fun exception(ex: IOException)
+}
+
+@NextFunction("nextFunction")
+fun serviceFlow(@Parameter flowType: String, flows: Flows) {
+	when (flowType) {
+		"nextFunction" -> return;
+		"flow" ->
+			flows.flow()
+		"callbacks" ->
+			flows.flowWithCallback(FlowCallback {
+				flows.flowWithParameterAndCallback("1", FlowCallback {
+					flows.flowWithParameter("2")
+				})
+			})
+		"exception" -> flows.exception(IOException());
+		else ->
+			Assert.fail("Invalid flow type: " + flowType);
+	}
+}
+
+
+fun asynchronousFlow(flowOne: AsynchronousFlow, flowTwo: AsynchronousFlow) {
+	flowOne.complete({ flowTwo.complete(null) })
 }

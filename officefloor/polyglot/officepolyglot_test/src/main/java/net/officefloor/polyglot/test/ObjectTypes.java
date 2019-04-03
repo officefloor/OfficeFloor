@@ -17,11 +17,14 @@
  */
 package net.officefloor.polyglot.test;
 
+import lombok.Value;
+
 /**
  * Object types.
  * 
  * @author Daniel Sagenschneider
  */
+@Value
 public class ObjectTypes {
 
 	private final String string;
@@ -31,28 +34,5 @@ public class ObjectTypes {
 	private final int[] primitiveArray;
 
 	private final JavaObject[] objectArray;
-
-	public ObjectTypes(String string, JavaObject object, int[] primitiveArray, JavaObject[] objectArray) {
-		this.string = string;
-		this.object = object;
-		this.primitiveArray = primitiveArray;
-		this.objectArray = objectArray;
-	}
-
-	public String getString() {
-		return string;
-	}
-
-	public JavaObject getObject() {
-		return object;
-	}
-
-	public int[] getPrimitiveArray() {
-		return primitiveArray;
-	}
-
-	public JavaObject[] getObjectArray() {
-		return objectArray;
-	}
 
 }

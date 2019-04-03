@@ -17,30 +17,24 @@
  */
 package net.officefloor.polyglot.test;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import net.officefloor.web.HttpObject;
 
 /**
- * Primitive types.
+ * Mock {@link HttpObject}.
  * 
  * @author Daniel Sagenschneider
  */
-@Value
-public class PrimitiveTypes {
+@HttpObject
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class MockHttpObject {
 
-	private boolean primitiveBoolean;
+	private int identifier;
 
-	private byte primitiveByte;
-
-	private short primitiveShort;
-
-	private char primitiveChar;
-
-	private int primitiveInt;
-
-	private long primitiveLong;
-
-	private float primitiveFloat;
-
-	private double primitiveDouble;
+	private String message;
 
 }

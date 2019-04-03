@@ -15,32 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.test;
+package net.officefloor.tutorial.javascripthttpserver;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * Primitive types.
+ * Response for successfully validated {@link Request}.
  * 
  * @author Daniel Sagenschneider
  */
-@Value
-public class PrimitiveTypes {
-
-	private boolean primitiveBoolean;
-
-	private byte primitiveByte;
-
-	private short primitiveShort;
-
-	private char primitiveChar;
-
-	private int primitiveInt;
-
-	private long primitiveLong;
-
-	private float primitiveFloat;
-
-	private double primitiveDouble;
-
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Response {
+	private String message;
 }
