@@ -88,6 +88,7 @@ public class KotlinFunctionSectionSource extends AbstractFunctionSectionSource {
 		PropertyList workProperties = this.getContext().createPropertyList();
 		workProperties.addProperty(KotlinManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(sectionClass.getName());
+		workProperties.addProperty(KotlinManagedFunctionSource.PROPERTY_FUNCTION_NAME).setValue(this.functionName);
 		return this.getContext().loadManagedFunctionType(namespace, KotlinManagedFunctionSource.class.getName(),
 				workProperties);
 	}
@@ -97,6 +98,7 @@ public class KotlinFunctionSectionSource extends AbstractFunctionSectionSource {
 		SectionFunctionNamespace functionNamespace = this.getDesigner().addSectionFunctionNamespace(namespace,
 				KotlinManagedFunctionSource.class.getName());
 		functionNamespace.addProperty(KotlinManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, sectionClass.getName());
+		functionNamespace.addProperty(KotlinManagedFunctionSource.PROPERTY_FUNCTION_NAME, this.functionName);
 		return functionNamespace;
 	}
 

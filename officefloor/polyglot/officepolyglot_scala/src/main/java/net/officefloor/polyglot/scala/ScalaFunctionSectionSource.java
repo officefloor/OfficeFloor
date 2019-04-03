@@ -98,6 +98,7 @@ public class ScalaFunctionSectionSource extends AbstractFunctionSectionSource {
 		PropertyList workProperties = this.getContext().createPropertyList();
 		workProperties.addProperty(ScalaManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(sectionClass.getName());
+		workProperties.addProperty(ScalaManagedFunctionSource.PROPERTY_FUNCTION_NAME).setValue(this.functionName);
 		return this.getContext().loadManagedFunctionType(namespace, ScalaManagedFunctionSource.class.getName(),
 				workProperties);
 	}
@@ -107,6 +108,7 @@ public class ScalaFunctionSectionSource extends AbstractFunctionSectionSource {
 		SectionFunctionNamespace functionNamespace = this.getDesigner().addSectionFunctionNamespace(namespace,
 				ScalaManagedFunctionSource.class.getName());
 		functionNamespace.addProperty(ScalaManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, sectionClass.getName());
+		functionNamespace.addProperty(ScalaManagedFunctionSource.PROPERTY_FUNCTION_NAME, this.functionName);
 		return functionNamespace;
 	}
 
