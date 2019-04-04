@@ -108,6 +108,27 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	/**
+	 * {@link ScriptExceptionTranslator}.
+	 */
+	private final ScriptExceptionTranslator scriptExceptionTranslator;
+
+	/**
+	 * Default constructor.
+	 */
+	public ScriptManagedFunctionSource() {
+		this(null);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param scriptExceptionTranslator {@link ScriptExceptionTranslator}.
+	 */
+	public ScriptManagedFunctionSource(ScriptExceptionTranslator scriptExceptionTranslator) {
+		this.scriptExceptionTranslator = scriptExceptionTranslator != null ? scriptExceptionTranslator : (ex) -> ex;
+	}
+
+	/**
 	 * Reads in the content.
 	 * 
 	 * @param content Content.
@@ -226,8 +247,10 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 		ManagedFunctionParameterFactory[] parameterFactories = new ManagedFunctionParameterFactory[parameterMetaDatas
 				.size()];
 		ManagedFunctionTypeBuilder<Indexed, Indexed> function = functionNamespaceTypeBuilder
-				.addManagedFunctionType(functionName, new ScriptManagedFunction(engineManager, engineName, setupScript,
-						script, functionName, parameterFactories), Indexed.class, Indexed.class);
+				.addManagedFunctionType(
+						functionName, new ScriptManagedFunction(engineManager, engineName, setupScript, script,
+								functionName, parameterFactories, this.scriptExceptionTranslator),
+						Indexed.class, Indexed.class);
 
 		// Capture the flows
 		List<FlowAnnotation> flowAnnotations = new LinkedList<>();

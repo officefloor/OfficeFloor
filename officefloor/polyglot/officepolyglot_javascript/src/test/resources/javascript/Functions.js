@@ -10,6 +10,7 @@ const MockHttpParameters = Java.type('net.officefloor.polyglot.test.MockHttpPara
 const MockHttpObject = Java.type('net.officefloor.polyglot.test.MockHttpObject')
 const ObjectResponse = Java.type('net.officefloor.web.ObjectResponse')
 const IOException = Java.type('java.io.IOException')
+const HttpException = Java.type('net.officefloor.server.http.HttpException')
 
 
 function primitives(_boolean, _byte, _short, _char, _int, _long, _float, _double) {
@@ -104,6 +105,12 @@ web.officefloor = [
 	{httpObject: MockHttpObject},
 	ObjectResponse
 ]
+
+
+function httpException() {
+	throw new HttpException(422, 'test')
+}
+httpException.officefloor = []
 
 
 function asynchronousFlow(flowOne, flowTwo) {

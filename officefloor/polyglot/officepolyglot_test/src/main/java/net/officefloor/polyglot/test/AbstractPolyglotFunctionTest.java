@@ -46,6 +46,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Var;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.ObjectResponse;
@@ -479,6 +480,43 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 		assertNotNull("Missing object", types.getObject());
 		assertEquals("object", "path", types.getObject().getIdentifier());
 	}
+
+	/**
+	 * Ensure can run direct for {@link HttpException}.
+	 */
+	public void testDirectHttpException() throws Throwable {
+		try {
+			this.httpException();
+			fail("Should not be successful");
+		} catch (HttpException ex) {
+			HttpException expected = new HttpException(422, "test");
+			assertEquals("status", expected.getHttpStatus().getStatusCode(), ex.getHttpStatus().getStatusCode());
+			Class<?> causeClass = ex.getCause() != null ? ex.getCause().getClass() : null;
+			assertEquals("cause class: " + causeClass, expected.getCause().getClass(), causeClass);
+			String causeMessage = ex.getCause() != null ? ex.getCause().getMessage() : null;
+			assertEquals("cause message: " + causeMessage, expected.getCause().getMessage(), causeMessage);
+		}
+	}
+
+	protected abstract void httpException() throws Throwable;
+
+	/**
+	 * Ensure can invoke to handle {@link HttpException}.
+	 */
+	public void testInvokeHttpException() throws Throwable {
+		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+		Closure<MockHttpServer> server = new Closure<>();
+		compiler.mockHttpServer((mockServer) -> server.value = mockServer);
+		compiler.web((context) -> {
+			HttpUrlContinuation input = context.getWebArchitect().getHttpInput(false, "/error");
+			this.httpException(input.getInput(), context);
+		});
+		this.officeFloor = compiler.compileAndOpenOfficeFloor();
+		MockHttpResponse response = server.value.send(MockHttpServer.mockRequest("/error"));
+		response.assertResponse(422, "{\"error\":\"test\"}");
+	}
+
+	protected abstract void httpException(OfficeFlowSourceNode pass, CompileWebContext context);
 
 	/**
 	 * Ensure can invoke flow.

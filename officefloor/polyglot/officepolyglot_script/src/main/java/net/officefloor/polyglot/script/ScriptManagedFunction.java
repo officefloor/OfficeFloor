@@ -20,6 +20,7 @@ package net.officefloor.polyglot.script;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -70,23 +71,32 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 	private final ManagedFunctionParameterFactory[] parameterFactories;
 
 	/**
+	 * {@link ScriptExceptionTranslator}.
+	 */
+	private final ScriptExceptionTranslator scriptExceptionTranslator;
+
+	/**
 	 * Instantiate.
 	 * 
-	 * @param engineManager      {@link ScriptEngineManager}.
-	 * @param engineName         {@link ScriptEngine} name.
-	 * @param setupScript        Setup script.
-	 * @param script             Script.
-	 * @param functionName       Name of the function.
-	 * @param parameterFactories {@link ManagedFunctionParameterFactory} instances.
+	 * @param engineManager             {@link ScriptEngineManager}.
+	 * @param engineName                {@link ScriptEngine} name.
+	 * @param setupScript               Setup script.
+	 * @param script                    Script.
+	 * @param functionName              Name of the function.
+	 * @param parameterFactories        {@link ManagedFunctionParameterFactory}
+	 *                                  instances.
+	 * @param scriptExceptionTranslator {@link ScriptExceptionTranslator}.
 	 */
 	public ScriptManagedFunction(ScriptEngineManager engineManager, String engineName, String setupScript,
-			String script, String functionName, ManagedFunctionParameterFactory[] parameterFactories) {
+			String script, String functionName, ManagedFunctionParameterFactory[] parameterFactories,
+			ScriptExceptionTranslator scriptExceptionTranslator) {
 		this.engineManager = engineManager;
 		this.engineName = engineName;
 		this.setupScript = setupScript;
 		this.script = script;
 		this.functionName = functionName;
 		this.parameterFactories = parameterFactories;
+		this.scriptExceptionTranslator = scriptExceptionTranslator;
 	}
 
 	/*
@@ -120,8 +130,15 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 			arguments[i] = this.parameterFactories[i].createParameter(context);
 		}
 
-		// Invoke the function
-		return invocable.invokeFunction(this.functionName, arguments);
+		try {
+			// Invoke the function
+			return invocable.invokeFunction(this.functionName, arguments);
+
+		} catch (ScriptException ex) {
+			// Translate and throw
+			Throwable translated = this.scriptExceptionTranslator.translate(ex);
+			throw translated != null ? translated : ex;
+		}
 	}
 
 }

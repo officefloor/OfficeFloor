@@ -25,6 +25,7 @@ import net.officefloor.frame.api.function.FlowCallback
 import org.junit.Assert
 import java.io.IOException
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface
+import net.officefloor.server.http.HttpException
 
 @NextFunction("use")
 fun primitives(
@@ -82,6 +83,12 @@ fun web(
 		)
 	);
 }
+
+
+fun httpException() {
+	throw HttpException(422, "test")
+}
+
 
 @FlowInterface
 interface Flows {

@@ -11,6 +11,7 @@ import net.officefloor.frame.api.function.AsynchronousFlow
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface
 import java.io.IOException
 import org.junit.Assert
+import net.officefloor.server.http.HttpException
 
 package object scala {
 
@@ -50,6 +51,10 @@ package object scala {
     httpObject: MockHttpObject, response: ObjectResponse[WebTypes]) {
     response.send(new WebTypes(pathParameter, queryParameter, headerParameter, cookieParameter, httpParameters,
       httpObject, new JavaObject(pathParameter)));
+  }
+  
+  def httpException() {
+    throw new HttpException(422, "test")
   }
 
   @NextFunction("nextFunction")

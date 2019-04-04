@@ -124,6 +124,12 @@ web.officefloor = {
 }
 
 
+function httpException() {
+	throw new HttpException(422, 'test')
+}
+httpException.officefloor = {}
+
+
 function asynchronousFlow(flowOne, flowTwo) {
 	flowOne.complete(() => {
 		flowTwo.complete(null)

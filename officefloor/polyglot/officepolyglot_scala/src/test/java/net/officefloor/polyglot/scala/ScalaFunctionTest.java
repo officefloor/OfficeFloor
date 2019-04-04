@@ -171,6 +171,20 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
+	protected void httpException() throws Exception {
+		package$.MODULE$.httpException();
+	}
+
+	@Override
+	protected void httpException(OfficeFlowSourceNode pass, CompileWebContext context) {
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", ScalaFunctionSectionSource.class.getName(),
+				package$.class.getName());
+		function.addProperty(ScalaFunctionSectionSource.PROPERTY_FUNCTION_NAME, "httpException");
+		office.link(pass, function.getOfficeSectionInput("httpException"));
+	}
+
+	@Override
 	protected String flow(CompileOfficeContext context, OfficeSectionInput next, OfficeSectionInput flow,
 			OfficeSectionInput flowWithCallback, OfficeSectionInput flowWithParameterAndCallback,
 			OfficeSectionInput flowWithParameter, OfficeSectionInput exception) {

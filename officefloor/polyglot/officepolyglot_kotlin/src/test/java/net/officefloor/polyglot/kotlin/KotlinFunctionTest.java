@@ -171,6 +171,20 @@ public class KotlinFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
+	protected void httpException() throws Exception {
+		KotlinFunctionsKt.httpException();
+	}
+
+	@Override
+	protected void httpException(OfficeFlowSourceNode pass, CompileWebContext context) {
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", KotlinFunctionSectionSource.class.getName(),
+				KotlinFunctionsKt.class.getName());
+		function.addProperty(KotlinFunctionSectionSource.PROPERTY_FUNCTION_NAME, "httpException");
+		office.link(pass, function.getOfficeSectionInput("httpException"));
+	}
+
+	@Override
 	protected String flow(CompileOfficeContext context, OfficeSectionInput next, OfficeSectionInput flow,
 			OfficeSectionInput flowWithCallback, OfficeSectionInput flowWithParameterAndCallback,
 			OfficeSectionInput flowWithParameter, OfficeSectionInput exception) {

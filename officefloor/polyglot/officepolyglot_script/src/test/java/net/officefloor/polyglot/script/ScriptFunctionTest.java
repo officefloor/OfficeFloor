@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
@@ -215,6 +216,25 @@ public class ScriptFunctionTest extends AbstractPolyglotFunctionTest {
 				"javascript/Functions.js");
 		function.addProperty(MockScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "web");
 		office.link(pass, function.getOfficeSectionInput("web"));
+	}
+
+	@Override
+	protected void httpException() throws Throwable {
+		try {
+			directInvokeFunction("httpException", null);
+			fail("Should not be successful");
+		} catch (ScriptException ex) {
+			throw new MockScriptFunctionSectionSource().getScriptExceptionTranslator().translate(ex);
+		}
+	}
+
+	@Override
+	protected void httpException(OfficeFlowSourceNode pass, CompileWebContext context) {
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", MockScriptFunctionSectionSource.class.getName(),
+				"javascript/Functions.js");
+		function.addProperty(MockScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "httpException");
+		office.link(pass, function.getOfficeSectionInput("httpException"));
 	}
 
 	@Override

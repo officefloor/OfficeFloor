@@ -17,9 +17,13 @@
  */
 package net.officefloor.polyglot.javascript;
 
+import org.graalvm.polyglot.PolyglotException;
+import org.graalvm.polyglot.Value;
+
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.polyglot.script.AbstractScriptFunctionSectionSource;
+import net.officefloor.polyglot.script.ScriptExceptionTranslator;
 
 /**
  * JavaScript function {@link SectionSource}.
@@ -36,6 +40,26 @@ public class JavaScriptFunctionSectionSource extends AbstractScriptFunctionSecti
 	@Override
 	protected String getMetaDataScriptPath(SourceContext context) throws Exception {
 		return this.getClass().getPackage().getName().replace('.', '/') + "/OfficeFloorFunctionMetaData.js";
+	}
+
+	@Override
+	protected ScriptExceptionTranslator getScriptExceptionTranslator() {
+		return (ex) -> {
+			if (ex.getCause() instanceof PolyglotException) {
+				PolyglotException polyglotEx = (PolyglotException) ex.getCause();
+				if (polyglotEx.isGuestException()) {
+					Object guestObject = polyglotEx.getGuestObject();
+					if (guestObject instanceof Value) {
+						Value value = (Value) guestObject;
+						Object cause = value.asHostObject();
+						if (cause instanceof Throwable) {
+							return (Throwable) cause;
+						}
+					}
+				}
+			}
+			return ex;
+		};
 	}
 
 }

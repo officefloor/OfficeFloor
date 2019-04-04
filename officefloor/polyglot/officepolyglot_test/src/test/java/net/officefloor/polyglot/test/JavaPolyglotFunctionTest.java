@@ -38,6 +38,7 @@ import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
 import net.officefloor.plugin.variable.Var;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.web.HttpCookieParameter;
 import net.officefloor.web.HttpHeaderParameter;
 import net.officefloor.web.HttpPathParameter;
@@ -185,6 +186,25 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 				MockHttpObject httpObject, ObjectResponse<WebTypes> response) {
 			response.send(new WebTypes(pathParameter, queryParameter, headerParameter, cookieParameter, httpParameters,
 					httpObject, new JavaObject(pathParameter)));
+		}
+	}
+
+	@Override
+	protected void httpException() throws Exception {
+		new HttpExceptionLogic().httpException();
+	}
+
+	@Override
+	protected void httpException(OfficeFlowSourceNode pass, CompileWebContext context) {
+		OfficeArchitect office = context.getOfficeArchitect();
+		OfficeSection function = office.addOfficeSection("section", ClassSectionSource.class.getName(),
+				HttpExceptionLogic.class.getName());
+		office.link(pass, function.getOfficeSectionInput("httpException"));
+	}
+
+	public static class HttpExceptionLogic {
+		public void httpException() throws HttpException {
+			throw new HttpException(422, "test");
 		}
 	}
 

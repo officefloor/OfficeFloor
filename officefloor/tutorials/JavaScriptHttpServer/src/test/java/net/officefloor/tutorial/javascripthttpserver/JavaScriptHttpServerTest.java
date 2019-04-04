@@ -41,7 +41,8 @@ public class JavaScriptHttpServerTest {
 	@Test
 	public void invalidIdentifier() throws Exception {
 		MockHttpResponse response = this.server
-				.send(MockHttpServer.mockRequest().entity(mapper.writeValueAsString(new Request(-1, "Daniel"))));
+				.send(MockHttpServer.mockRequest().header("Content-Type", "application/json")
+						.entity(mapper.writeValueAsString(new Request(-1, "Daniel"))));
 		response.assertResponse(400, "Invalid identifier");
 	}
 

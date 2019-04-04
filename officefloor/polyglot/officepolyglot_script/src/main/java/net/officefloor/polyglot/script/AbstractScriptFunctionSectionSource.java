@@ -99,6 +99,15 @@ public abstract class AbstractScriptFunctionSectionSource extends AbstractFuncti
 	 */
 	protected abstract String getMetaDataScriptPath(SourceContext context) throws Exception;
 
+	/**
+	 * Obtains the {@link ScriptExceptionTranslator}.
+	 * 
+	 * @return {@link ScriptExceptionTranslator}.
+	 */
+	protected ScriptExceptionTranslator getScriptExceptionTranslator() {
+		return null; // will be defaulted
+	}
+
 	/*
 	 * ================= ClassSectionSource =====================
 	 */
@@ -144,8 +153,13 @@ public abstract class AbstractScriptFunctionSectionSource extends AbstractFuncti
 
 	@Override
 	protected SectionFunctionNamespace adddSectionFunctionNamespace(String namespace, Class<?> sectionClass) {
+
+		// Obtain the script engine translator
+		ScriptExceptionTranslator translator = this.getScriptExceptionTranslator();
+
+		// Configure the function
 		SectionFunctionNamespace functionNamespace = this.getDesigner().addSectionFunctionNamespace(namespace,
-				ScriptManagedFunctionSource.class.getName());
+				new ScriptManagedFunctionSource(translator));
 		functionNamespace.addProperty(ScriptManagedFunctionSource.PROPERTY_ENGINE_NAME, this.engineName);
 		if (this.setupScriptPath != null) {
 			functionNamespace.addProperty(ScriptManagedFunctionSource.PROPERTY_SETUP_SCRIPT_PATH, this.setupScriptPath);
