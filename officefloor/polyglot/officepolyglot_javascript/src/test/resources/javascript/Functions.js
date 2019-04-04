@@ -1,10 +1,15 @@
 
-var PrimitiveTypes = Java.type('net.officefloor.polyglot.test.PrimitiveTypes')
-var ObjectTypes = Java.type('net.officefloor.polyglot.test.ObjectTypes')
-var CollectionTypes = Java.type('net.officefloor.polyglot.test.CollectionTypes')
-var VariableTypes = Java.type('net.officefloor.polyglot.test.VariableTypes')
-var ParameterTypes = Java.type('net.officefloor.polyglot.test.ParameterTypes')
-var JavaObject = Java.type('net.officefloor.polyglot.test.JavaObject')
+const PrimitiveTypes = Java.type('net.officefloor.polyglot.test.PrimitiveTypes')
+const ObjectTypes = Java.type('net.officefloor.polyglot.test.ObjectTypes')
+const CollectionTypes = Java.type('net.officefloor.polyglot.test.CollectionTypes')
+const VariableTypes = Java.type('net.officefloor.polyglot.test.VariableTypes')
+const ParameterTypes = Java.type('net.officefloor.polyglot.test.ParameterTypes')
+const WebTypes = Java.type('net.officefloor.polyglot.test.WebTypes')
+const JavaObject = Java.type('net.officefloor.polyglot.test.JavaObject')
+const MockHttpParameters = Java.type('net.officefloor.polyglot.test.MockHttpParameters')
+const MockHttpObject = Java.type('net.officefloor.polyglot.test.MockHttpObject')
+const ObjectResponse = Java.type('net.officefloor.web.ObjectResponse')
+const IOException = Java.type('java.io.IOException')
 
 
 function primitives(_boolean, _byte, _short, _char, _int, _long, _float, _double) {
@@ -52,4 +57,61 @@ function parameter(param) {
 parameter.officefloor = [
 	{param: 'java.lang.String'},
 	{next: 'use', argumentType: ParameterTypes}
+]
+
+
+function serviceFlow(flowType, flow, flowWithCallback, flowWithParameterAndCallback, flowWithParameter, exception) {
+	switch (flowType) {
+	case 'nextFunction':
+		return // do nothing so next function fires
+	case 'flow':
+		flow.doFlow(null, null)
+		return
+	case 'callbacks':
+		flowWithCallback.doFlow(null, (error1) => {
+			flowWithParameterAndCallback.doFlow("1", (error2) => {
+				flowWithParameter.doFlow("2", null)
+			})
+		})
+		return
+	case 'exception':
+		exception.doFlow(new IOException(), null)
+		return
+	default:
+		Assert.fail("Invalid flow type: " + flowType);
+	}
+}
+serviceFlow.officefloor = [
+	{param: 'java.lang.String'},
+	{flow: 'flow'},
+	{flow: 'flowWithCallback'},
+	{flow: 'flowWithParameterAndCallback', argumentType: 'java.lang.String'},
+	{flow: 'flowWithParameter', argumentType: 'java.lang.String'},
+	{flow: 'exception', argumentType: IOException},
+	{next: 'nextFunction'}
+]
+
+
+function web(pathParameter, queryParameter, headerParameter, cookieParameter, httpParameters, httpObject, response) {
+	response.send(new WebTypes(pathParameter, queryParameter, headerParameter, cookieParameter, httpParameters, httpObject, new JavaObject(pathParameter)))
+}
+web.officefloor = [
+	{httpPathParameter: 'param'},
+	{httpQueryParameter: 'param'},
+	{httpHeaderParameter: 'param'},
+	{httpCookieParameter: 'param'},
+	{httpParameters: MockHttpParameters},
+	{httpObject: MockHttpObject},
+	ObjectResponse
+]
+
+
+function asynchronousFlow(flowOne, flowTwo) {
+	flowOne.complete(() => {
+		flowTwo.complete(null)
+	})		
+}
+asynchronousFlow.officefloor = [
+	{asynchronousFlow: true},
+	{asynchronousFlow: true}
 ]
