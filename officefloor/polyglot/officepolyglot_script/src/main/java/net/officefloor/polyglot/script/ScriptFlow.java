@@ -17,19 +17,22 @@
  */
 package net.officefloor.polyglot.script;
 
-import javax.script.ScriptEngine;
-
-import lombok.Data;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Meta-data for a {@link ScriptEngine} function.
+ * Provides means for script to invoke {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-@Data
-public class ScriptParameterMetaData {
-	private String name;
-	private String qualifier;
-	private String type;
-	private String nature;
+public interface ScriptFlow {
+
+	/**
+	 * Undertakes the {@link Flow}.
+	 * 
+	 * @param parameter Parameter. May be <code>null</code>.
+	 * @param callback  {@link FlowCallback}.
+	 */
+	void doFlow(Object parameter, FlowCallback callback);
+
 }

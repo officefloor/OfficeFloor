@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2019 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,21 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.script;
+package net.officefloor.plugin.managedfunction.clazz;
 
-import javax.script.ScriptEngine;
-
-import lombok.Data;
+import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
- * Meta-data for a {@link ScriptEngine} function.
+ * {@link ManagedFunctionParameterFactory} for an {@link AsynchronousFlow}.
  * 
  * @author Daniel Sagenschneider
  */
-@Data
-public class ScriptParameterMetaData {
-	private String name;
-	private String qualifier;
-	private String type;
-	private String nature;
+public class ManagedFunctionAsynchronousFlowParameterFactory implements ManagedFunctionParameterFactory {
+
+	/*
+	 * ====================== ParameterFactory =============================
+	 */
+
+	@Override
+	public Object createParameter(ManagedFunctionContext<?, ?> context) {
+		return context.createAsynchronousFlow();
+	}
+
 }

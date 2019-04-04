@@ -431,7 +431,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can run direct for web.
 	 */
-	public void testDirectWeb() {
+	public void testDirectWeb() throws Exception {
 		MockObjectResponse<WebTypes> types = new MockObjectResponse<>();
 		this.web("path", "query", "header", "cookie", new MockHttpParameters("test"), new MockHttpObject(1, "test"),
 				types);
@@ -440,7 +440,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 
 	protected abstract void web(String pathParameter, String queryParameter, String headerParameter,
 			String cookieParameter, MockHttpParameters httpParameters, MockHttpObject httpObject,
-			ObjectResponse<WebTypes> response);
+			ObjectResponse<WebTypes> response) throws Exception;
 
 	/**
 	 * Ensure can invoke for web.
@@ -558,7 +558,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 		assertNull("Should not have flow two completion", flowTwo.getCompletion());
 	}
 
-	protected abstract void asynchronousFlow(AsynchronousFlow flowOne, AsynchronousFlow flowTwo);
+	protected abstract void asynchronousFlow(AsynchronousFlow flowOne, AsynchronousFlow flowTwo) throws Exception;
 
 	/**
 	 * Ensure can invoke {@link AsynchronousFlow}.

@@ -16,8 +16,8 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor.core</groupId>
-			<artifactId>officecompiler</artifactId>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officeweb</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

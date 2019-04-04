@@ -44,9 +44,24 @@ public @interface HttpCookieParameter {
 	 * {@link QualifierNameFactory}.
 	 */
 	public static class HttpCookieParameterNameFactory implements QualifierNameFactory<HttpCookieParameter> {
+
+		/**
+		 * Obtains the qualifier from name.
+		 * 
+		 * @param name Name.
+		 * @return Qualifier.
+		 */
+		public static String getQualifier(String name) {
+			return HttpCookieParameter.class.getSimpleName() + "_" + name;
+		}
+
+		/*
+		 * ================== QualifierNameFactory =======================
+		 */
+
 		@Override
 		public String getQualifierName(HttpCookieParameter annotation) {
-			return HttpCookieParameter.class.getSimpleName() + "_" + annotation.value();
+			return getQualifier(annotation.value());
 		}
 	}
 

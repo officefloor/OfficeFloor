@@ -15,21 +15,45 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.script;
-
-import javax.script.ScriptEngine;
-
-import lombok.Data;
+package net.officefloor.web;
 
 /**
- * Meta-data for a {@link ScriptEngine} function.
+ * {@link HttpObject} annotation.
  * 
  * @author Daniel Sagenschneider
  */
-@Data
-public class ScriptParameterMetaData {
-	private String name;
-	private String qualifier;
-	private String type;
-	private String nature;
+public class HttpObjectAnnotation {
+
+	/**
+	 * Accepted content types.
+	 */
+	private String[] acceptedContentTypes;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param annotation {@link HttpObject}
+	 */
+	public HttpObjectAnnotation(HttpObject annotation) {
+		this.acceptedContentTypes = annotation.acceptedContentTypes();
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param acceptedContentTypes Accepted content types.
+	 */
+	public HttpObjectAnnotation(String... acceptedContentTypes) {
+		this.acceptedContentTypes = acceptedContentTypes;
+	}
+
+	/**
+	 * Obtains the accepted content types.
+	 * 
+	 * @return Accepted content types.
+	 */
+	public String[] getAcceptedContentTypes() {
+		return this.acceptedContentTypes;
+	}
+
 }

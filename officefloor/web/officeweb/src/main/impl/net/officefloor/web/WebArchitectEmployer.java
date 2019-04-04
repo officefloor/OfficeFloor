@@ -584,7 +584,13 @@ public class WebArchitectEmployer implements WebArchitect {
 					}
 
 					// HTTP parameters
+					HttpParametersAnnotation httpParametersAnnotation = null;
 					if (annotation instanceof HttpParameters) {
+						httpParametersAnnotation = new HttpParametersAnnotation((HttpParameters) annotation);
+					} else if (annotation instanceof HttpParametersAnnotation) {
+						httpParametersAnnotation = (HttpParametersAnnotation) annotation;
+					}
+					if (httpParametersAnnotation != null) {
 						// Load as HTTP parameters (only once)
 						if (!httpParameters.contains(objectType)) {
 							this.addHttpRequestObject(objectType, true);
@@ -593,9 +599,15 @@ public class WebArchitectEmployer implements WebArchitect {
 					}
 
 					// HTTP object
+					HttpObjectAnnotation httpObjectAnnotation = null;
 					if (annotation instanceof HttpObject) {
-						HttpObject httpObject = (HttpObject) annotation;
-						String[] acceptedContentTypes = httpObject.acceptedContentTypes();
+						httpObjectAnnotation = new HttpObjectAnnotation((HttpObject) annotation);
+					}
+					if (annotation instanceof HttpObjectAnnotation) {
+						httpObjectAnnotation = (HttpObjectAnnotation) annotation;
+					}
+					if (httpObjectAnnotation != null) {
+						String[] acceptedContentTypes = httpObjectAnnotation.getAcceptedContentTypes();
 						this.addHttpObject(objectType, acceptedContentTypes);
 					}
 
@@ -609,25 +621,20 @@ public class WebArchitectEmployer implements WebArchitect {
 
 					// Load HTTP arguments
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpPathParameter.class,
-							HttpValueLocation.PATH, objectType, context, (parameter) -> parameter.value(),
-							(parameter) -> new HttpPathParameter.HttpPathParameterNameFactory()
-									.getQualifierName(parameter));
+							HttpPathParameterAnnotation.class, HttpValueLocation.PATH, objectType, context,
+							(rawAnnotation) -> new HttpPathParameterAnnotation(rawAnnotation));
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpQueryParameter.class,
-							HttpValueLocation.QUERY, objectType, context, (parameter) -> parameter.value(),
-							(parameter) -> new HttpQueryParameter.HttpQueryParameterNameFactory()
-									.getQualifierName(parameter));
+							HttpQueryParameterAnnotation.class, HttpValueLocation.QUERY, objectType, context,
+							(rawAnnotation) -> new HttpQueryParameterAnnotation(rawAnnotation));
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpHeaderParameter.class,
-							HttpValueLocation.HEADER, objectType, context, (parameter) -> parameter.value(),
-							(parameter) -> new HttpHeaderParameter.HttpHeaderParameterNameFactory()
-									.getQualifierName(parameter));
+							HttpHeaderParameterAnnotation.class, HttpValueLocation.HEADER, objectType, context,
+							(rawAnnotation) -> new HttpHeaderParameterAnnotation(rawAnnotation));
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpCookieParameter.class,
-							HttpValueLocation.COOKIE, objectType, context, (parameter) -> parameter.value(),
-							(parameter) -> new HttpCookieParameter.HttpCookieParameterNameFactory()
-									.getQualifierName(parameter));
+							HttpCookieParameterAnnotation.class, HttpValueLocation.COOKIE, objectType, context,
+							(rawAnnotation) -> new HttpCookieParameterAnnotation(rawAnnotation));
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpContentParameter.class,
-							HttpValueLocation.ENTITY, objectType, context, (parameter) -> parameter.value(),
-							(parameter) -> new HttpContentParameter.HttpContentParameterNameFactory()
-									.getQualifierName(parameter));
+							HttpContentParameterAnnotation.class, HttpValueLocation.ENTITY, objectType, context,
+							(rawAnnotation) -> new HttpContentParameterAnnotation(rawAnnotation));
 				}
 			}
 		});
@@ -659,30 +666,33 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * Loads the in-line HTTP argument.
 	 * 
-	 * @param annotation       {@link Annotation}.
-	 * @param annotationType   Type of {@link Annotation}.
-	 * @param valueLocation    {@link HttpValueLocation}.
-	 * @param objectType       Parameter object type.
-	 * @param context          {@link ManagedFunctionAugmentorContext}.
-	 * @param getParameterName {@link Function} to obtain the parameter name.
-	 * @param getQualifierName {@link Function} to obtain the type qualification
-	 *                         name.
+	 * @param annotation         {@link Annotation}.
+	 * @param annotationType     Type of {@link Annotation}.
+	 * @param annotationWrapType Wrapping type for {@link Annotation}.
+	 * @param valueLocation      {@link HttpValueLocation}.
+	 * @param objectType         Parameter object type.
+	 * @param context            {@link ManagedFunctionAugmentorContext}.
+	 * @param wrapAnnotation     {@link Function} to wrap {@link Annotation} with
+	 *                           wrapper.
 	 */
-	private <P extends Annotation> void loadInlineHttpArgument(Object annotation, Class<P> annotationType,
-			HttpValueLocation valueLocation, Class<?> objectType, ManagedFunctionAugmentorContext context,
-			Function<P, String> getParameterName, Function<P, String> getQualifierName) {
+	@SuppressWarnings("unchecked")
+	private <P extends Annotation, W extends HttpParameterAnnotation> void loadInlineHttpArgument(Object annotation,
+			Class<P> annotationType, Class<W> annotationWrapType, HttpValueLocation valueLocation, Class<?> objectType,
+			ManagedFunctionAugmentorContext context, Function<P, W> wrapAnnotation) {
 
-		// Ensure appropriate annotation
-		if (!(annotation instanceof Annotation)) {
+		// Determine if wrap type
+		W annotationWrapper;
+		if (annotationWrapType.isAssignableFrom(annotation.getClass())) {
+			annotationWrapper = (W) annotation;
+
+		} else if ((annotation instanceof Annotation)
+				&& (annotationType.equals(((Annotation) annotation).annotationType()))) {
+			annotationWrapper = wrapAnnotation.apply((P) annotation);
+
+		} else {
+			// Not particular HTTP parameter
 			return;
 		}
-		if (((Annotation) annotation).annotationType() != annotationType) {
-			return;
-		}
-
-		// Obtain the parameter
-		@SuppressWarnings("unchecked")
-		P parameterAnnotation = (P) annotation;
 
 		// Ensure parameter object is a String
 		if (objectType != String.class) {
@@ -691,8 +701,8 @@ public class WebArchitectEmployer implements WebArchitect {
 		}
 
 		// Add the HTTP argument
-		String parameterName = getParameterName.apply(parameterAnnotation);
-		String typeQualifier = getQualifierName.apply(parameterAnnotation);
+		String parameterName = annotationWrapper.getParameterName();
+		String typeQualifier = annotationWrapper.getQualifier();
 		this.addHttpArgument(parameterName, valueLocation).addTypeQualification(typeQualifier, String.class.getName());
 	}
 

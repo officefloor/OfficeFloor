@@ -742,7 +742,7 @@ public class MethodManagedFunctionBuilder {
 			// Determine if asynchronous flow
 			if (AsynchronousFlow.class.equals(parameterType)) {
 				// Parameter is an asynchronous flow
-				return new AsynchronousFlowParameterFactory();
+				return new ManagedFunctionAsynchronousFlowParameterFactory();
 			}
 
 			// Not function context

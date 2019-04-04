@@ -23,6 +23,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -35,23 +37,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionAsynchronousFlowParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionInParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionObjectParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionOutParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionValueParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionVariableParameterFactory;
+import net.officefloor.plugin.section.clazz.FlowAnnotation;
 import net.officefloor.plugin.section.clazz.NextFunctionAnnotation;
 import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.variable.Var;
 import net.officefloor.plugin.variable.VariableAnnotation;
 import net.officefloor.plugin.variable.VariableManagedObjectSource;
+import net.officefloor.web.HttpCookieParameterAnnotation;
+import net.officefloor.web.HttpHeaderParameterAnnotation;
+import net.officefloor.web.HttpObjectAnnotation;
+import net.officefloor.web.HttpParametersAnnotation;
+import net.officefloor.web.HttpPathParameterAnnotation;
+import net.officefloor.web.HttpQueryParameterAnnotation;
 
 /**
  * {@link ManagedFunctionSource} for JavaScript function.
@@ -205,17 +216,29 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 		// Loads the class
 		Function<String, Class<?>> loadClass = (className) -> context.loadClass(translateClass.apply(className));
 
-		// Add the function
+		// Obtain the parameters (ensuring have list)
 		List<ScriptParameterMetaData> parameterMetaDatas = functionMetaData.getParameters();
+		if (parameterMetaDatas == null) {
+			parameterMetaDatas = Collections.emptyList();
+		}
+
+		// Load the function
 		ManagedFunctionParameterFactory[] parameterFactories = new ManagedFunctionParameterFactory[parameterMetaDatas
 				.size()];
 		ManagedFunctionTypeBuilder<Indexed, Indexed> function = functionNamespaceTypeBuilder
 				.addManagedFunctionType(functionName, new ScriptManagedFunction(engineManager, engineName, setupScript,
 						script, functionName, parameterFactories), Indexed.class, Indexed.class);
+
+		// Capture the flows
+		List<FlowAnnotation> flowAnnotations = new LinkedList<>();
+
+		// Load the parameters
 		int objectIndex = 0;
+		int flowIndex = 0;
 		for (int i = 0; i < parameterMetaDatas.size(); i++) {
 			ScriptParameterMetaData parameterMetaData = parameterMetaDatas.get(i);
 			// Obtain the object details
+			String parameterName = parameterMetaData.getName();
 			String qualifier = parameterMetaData.getQualifier();
 			String typeName = parameterMetaData.getType();
 
@@ -223,7 +246,8 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 			Class<?> type;
 			final String arraySuffix = "[]";
 			if (CompileUtil.isBlank(typeName)) {
-				throw new IllegalStateException("No type configured for parameter " + i);
+				// No type provided
+				type = null;
 
 			} else if (typeName.endsWith(arraySuffix)) {
 				// Load array
@@ -236,6 +260,21 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 				type = loadClass.apply(typeName);
 			}
 
+			// Ease checking for type and name
+			int parameterIndex = i;
+			Runnable ensureHaveType = () -> {
+				if (type == null) {
+					throw new IllegalStateException("Must provide type for parameter " + parameterIndex
+							+ " (with nature " + parameterMetaData.getNature() + ")");
+				}
+			};
+			Runnable ensureHaveName = () -> {
+				if (CompileUtil.isBlank(parameterName)) {
+					throw new IllegalStateException("Must provide name for parameter " + parameterIndex
+							+ " (with nature " + parameterMetaData.getNature() + ")");
+				}
+			};
+
 			// Obtain the nature
 			String nature = parameterMetaData.getNature();
 			if (nature == null) {
@@ -247,10 +286,12 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 			case "parameter":
 				// Add the parameter
+				ensureHaveType.run();
 				function.addAnnotation(new ParameterAnnotation(type, i));
 				// Carry on to load object for parameter
 			case "object":
 				// Add the object
+				ensureHaveType.run();
 				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
 				parameter = function.addObject(type);
 				if (qualifier != null) {
@@ -260,23 +301,106 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 				break;
 
 			case "val":
+				ensureHaveType.run();
 				parameterFactories[i] = new ManagedFunctionValueParameterFactory(objectIndex++);
 				isVariable = true;
 				break;
 
 			case "in":
+				ensureHaveType.run();
 				parameterFactories[i] = new ManagedFunctionInParameterFactory(objectIndex++);
 				isVariable = true;
 				break;
 
 			case "out":
+				ensureHaveType.run();
 				parameterFactories[i] = new ManagedFunctionOutParameterFactory(objectIndex++);
 				isVariable = true;
 				break;
 
 			case "var":
+				ensureHaveType.run();
 				parameterFactories[i] = new ManagedFunctionVariableParameterFactory(objectIndex++);
 				isVariable = true;
+				break;
+
+			case "httpPathParameter":
+				ensureHaveName.run();
+				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameter = function.addObject(String.class);
+				HttpPathParameterAnnotation httpPathParameter = new HttpPathParameterAnnotation(parameterName);
+				parameter.addAnnotation(httpPathParameter);
+				parameter.setTypeQualifier(httpPathParameter.getQualifier());
+				isVariable = false;
+				break;
+
+			case "httpQueryParameter":
+				ensureHaveName.run();
+				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameter = function.addObject(String.class);
+				HttpQueryParameterAnnotation httpQueryParameter = new HttpQueryParameterAnnotation(parameterName);
+				parameter.addAnnotation(httpQueryParameter);
+				parameter.setTypeQualifier(httpQueryParameter.getQualifier());
+				isVariable = false;
+				break;
+
+			case "httpHeaderParameter":
+				ensureHaveName.run();
+				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameter = function.addObject(String.class);
+				HttpHeaderParameterAnnotation httpHeaderParameter = new HttpHeaderParameterAnnotation(parameterName);
+				parameter.addAnnotation(httpHeaderParameter);
+				parameter.setTypeQualifier(httpHeaderParameter.getQualifier());
+				isVariable = false;
+				break;
+
+			case "httpCookieParameter":
+				ensureHaveName.run();
+				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameter = function.addObject(String.class);
+				HttpCookieParameterAnnotation httpCookieParameter = new HttpCookieParameterAnnotation(parameterName);
+				parameter.addAnnotation(httpCookieParameter);
+				parameter.setTypeQualifier(httpCookieParameter.getQualifier());
+				isVariable = false;
+				break;
+
+			case "httpParameters":
+				ensureHaveType.run();
+				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameter = function.addObject(type);
+				parameter.addAnnotation(new HttpParametersAnnotation());
+				if (qualifier != null) {
+					parameter.setTypeQualifier(qualifier);
+				}
+				isVariable = false;
+				break;
+
+			case "httpObject":
+				ensureHaveType.run();
+				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameter = function.addObject(type);
+				parameter.addAnnotation(new HttpObjectAnnotation());
+				if (qualifier != null) {
+					parameter.setTypeQualifier(qualifier);
+				}
+				isVariable = false;
+				break;
+
+			case "flow":
+				ensureHaveName.run();
+				ManagedFunctionFlowTypeBuilder<?> flow = function.addFlow();
+				flow.setLabel(parameterName);
+				if (type != null) {
+					flow.setArgumentType(type);
+				}
+				flowAnnotations.add(new FlowAnnotation(parameterName, flowIndex, false, type, true));
+				parameterFactories[i] = new ScriptFlowParameterFactory(flowIndex++);
+				isVariable = false;
+				break;
+
+			case "asynchronousFlow":
+				parameterFactories[i] = new ManagedFunctionAsynchronousFlowParameterFactory();
+				isVariable = false;
 				break;
 
 			default:
@@ -292,6 +416,11 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 				parameter.setTypeQualifier(variableName);
 				parameter.addAnnotation(new VariableAnnotation(variableName));
 			}
+		}
+
+		// Load possible flows
+		if (flowAnnotations.size() > 0) {
+			function.addAnnotation(flowAnnotations.toArray(new FlowAnnotation[flowAnnotations.size()]));
 		}
 
 		// Load the section annotations for the function

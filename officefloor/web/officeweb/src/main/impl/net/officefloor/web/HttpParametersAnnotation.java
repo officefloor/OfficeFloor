@@ -15,21 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.script;
-
-import javax.script.ScriptEngine;
-
-import lombok.Data;
+package net.officefloor.web;
 
 /**
- * Meta-data for a {@link ScriptEngine} function.
+ * {@link HttpParameters} annotation.
  * 
  * @author Daniel Sagenschneider
  */
-@Data
-public class ScriptParameterMetaData {
-	private String name;
-	private String qualifier;
-	private String type;
-	private String nature;
+public class HttpParametersAnnotation {
+
+	/**
+	 * Default constructor.
+	 */
+	public HttpParametersAnnotation() {
+	}
+
+	/**
+	 * Instantiate for {@link HttpParameters}.
+	 * 
+	 * @param httpParameters {@link HttpParameters}.
+	 */
+	public HttpParametersAnnotation(HttpParameters httpParameters) {
+	}
 }

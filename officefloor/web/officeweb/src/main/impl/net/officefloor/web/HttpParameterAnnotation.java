@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,25 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
-
-import net.officefloor.frame.api.function.AsynchronousFlow;
-import net.officefloor.frame.api.function.ManagedFunctionContext;
+package net.officefloor.web;
 
 /**
- * {@link ManagedFunctionParameterFactory} for an {@link AsynchronousFlow}.
+ * HTTP parameter annotation.
  * 
  * @author Daniel Sagenschneider
  */
-public class AsynchronousFlowParameterFactory implements ManagedFunctionParameterFactory {
+public interface HttpParameterAnnotation {
 
-	/*
-	 * ====================== ParameterFactory =============================
+	/**
+	 * Obtains the name to extract the parameter value.
+	 * 
+	 * @return Name to extract the parameter value.
 	 */
+	String getParameterName();
 
-	@Override
-	public Object createParameter(ManagedFunctionContext<?, ?> context) {
-		return context.createAsynchronousFlow();
-	}
+	/**
+	 * Obtains the qualifier.
+	 * 
+	 * @return Qualifier.
+	 */
+	String getQualifier();
 
 }

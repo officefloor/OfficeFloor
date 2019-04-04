@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -253,12 +254,7 @@ public class NodeUtil {
 		// Create the listing of children
 		final List<Node> childNodes = new ArrayList<>();
 		for (final Map<String, ? extends Node> childMap : children) {
-			childMap.keySet().stream().sorted().forEach((key) -> {
-
-				if (key == null) {
-					System.out.println("FOUND");
-				}
-
+			childMap.keySet().stream().sorted((a, b) -> CompileUtil.sortCompare(a, b)).forEach((key) -> {
 				childNodes.add(childMap.get(key));
 			});
 		}
