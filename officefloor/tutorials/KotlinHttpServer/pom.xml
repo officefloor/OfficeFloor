@@ -4,15 +4,17 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.polyglot</groupId>
-		<artifactId>polyglot</artifactId>
+		<groupId>net.officefloor.tutorial</groupId>
+		<artifactId>tutorials</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officepolyglot_kotlin</artifactId>
-	<name>Kotlin</name>
-	<description>OfficeFloor plug-in for using Kotlin</description>
+	<artifactId>KotlinScriptHttpServer</artifactId>
+	<name>KotlinScript Tutorial</name>
+	<description>Tutorial of implementing logic with Kotlin</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<basedir>${basedir}</basedir>
+		<projectVersion>${project.version}</projectVersion>
 	</properties>
 	<build>
 		<plugins>
@@ -20,6 +22,12 @@
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-maven-plugin</artifactId>
 				<executions>
+					<execution>
+						<id>compile</id>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
 					<execution>
 						<id>test-compile</id>
 						<goals>
@@ -65,6 +73,18 @@
 						<id>add-source</id>
 						<phase>generate-sources</phase>
 						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>src/main/kotlin</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
 							<goal>add-test-source</goal>
 						</goals>
 						<configuration>
@@ -79,21 +99,42 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor.core</groupId>
-			<artifactId>officecompiler</artifactId>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.jetbrains.kotlin</groupId>
-			<artifactId>kotlin-stdlib</artifactId>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officejson_jackson</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-kotlin</artifactId>
-		</dependency>
+		<!-- START SNIPPET: KOTLIN -->
 		<dependency>
 			<groupId>net.officefloor.polyglot</groupId>
-			<artifactId>officepolyglot_test</artifactId>
+			<artifactId>officepolyglot_kotlin</artifactId>
+		</dependency>
+		<!-- END SNIPPET: KOTLIN -->
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<profiles>
+		<profile>
+			<!-- Profile for building -->
+			<id>build-repositories</id>
+			<activation>
+				<file>
+					<exists>${basedir}/pom.xml</exists>
+				</file>
+			</activation>
+			<repositories>
+				<repository>
+					<!-- OfficeFloor repository to obtain artifacts for running the example -->
+					<id>maven2-repository.officefloor.net</id>
+					<name>OfficeFloor Repository for Maven</name>
+					<url>http://www.officefloor.net/maven2/</url>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
 </project>

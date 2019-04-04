@@ -31,6 +31,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Var;
@@ -44,8 +45,11 @@ import net.officefloor.polyglot.test.ParameterTypes;
 import net.officefloor.polyglot.test.PrimitiveTypes;
 import net.officefloor.polyglot.test.VariableTypes;
 import net.officefloor.polyglot.test.WebTypes;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.compile.CompileWebContext;
+import net.officefloor.web.compile.WebCompileOfficeFloor;
 
 /**
  * Tests adapting Kotlin {@link Object} for {@link ManagedFunction}.
@@ -65,13 +69,36 @@ public class KotlinFunctionTest extends AbstractPolyglotFunctionTest {
 			isSuccessful = true;
 		} catch (AssertionFailedError ex) {
 
-			// Ensure reasonse
+			// Ensure correct reason
 			assertTrue("Incorrect cause: " + ex.getMessage(), ex.getMessage().startsWith(
 					"Class " + KotlinObject.class.getName() + " is not top level Kotlin functions (should end in Kt)"));
 
 			isSuccessful = false;
 		}
 		assertFalse("Should not be successful", isSuccessful);
+	}
+
+	/**
+	 * Ensure able to send Kotlin data object.
+	 */
+	public void testWebSendKotlinDataObject() throws Throwable {
+		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+		Closure<MockHttpServer> server = new Closure<>();
+		compiler.mockHttpServer((mockServer) -> server.value = mockServer);
+		compiler.web((context) -> {
+			context.link(false, "/", KotlinRequestService.class);
+		});
+		this.officeFloor = compiler.compileAndOpenOfficeFloor();
+		MockHttpResponse response = server.value
+				.send(MockHttpServer.mockRequest().header("Content-Type", "application/json")
+						.entity(mapper.writeValueAsString(new KotlinRequest(1, "test"))));
+		response.assertResponse(200, mapper.writeValueAsString(new KotlinRequest(2, "")));
+	}
+
+	public static class KotlinRequestService {
+		public void service(KotlinRequest request, ObjectResponse<KotlinRequest> response) {
+			response.send(new KotlinRequest(request.getId() + 1, "Serviced " + request.getMessage()));
+		}
 	}
 
 	/*

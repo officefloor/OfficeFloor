@@ -65,12 +65,12 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ObjectMapper}.
 	 */
-	private static final ObjectMapper mapper = new ObjectMapper();
+	protected static final ObjectMapper mapper = new ObjectMapper();
 
 	/**
 	 * {@link OfficeFloor}.
 	 */
-	private OfficeFloor officeFloor;
+	protected OfficeFloor officeFloor;
 
 	@Override
 	protected void tearDown() throws Exception {

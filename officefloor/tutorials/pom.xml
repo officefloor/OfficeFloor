@@ -31,6 +31,7 @@
 		<module>JwtAuthorityHttpServer</module>
 		<module>JwtHttpServer</module>
 		<module>JwtResourceHttpServer</module>
+		<module>KotlinHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>ObjectifyHttpServer</module>
 		<module>PrototypeHttpServer</module>
