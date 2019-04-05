@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,38 +17,43 @@
  */
 package net.officefloor.web.json;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.frame.api.source.ServiceFactory;
-import net.officefloor.web.build.HttpObjectParserFactory;
-import net.officefloor.web.build.HttpObjectParserServiceFactory;
 
 /**
- * {@link ServiceFactory} for Jackson {@link HttpObjectParserServiceFactory}.
+ * Mock {@link ObjectMapperParserDecorator} for testing decorating the
+ * {@link ObjectMapper}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JacksonHttpObjectParserServiceFactory implements HttpObjectParserServiceFactory {
+public class MockObjectMapperParserDecorator
+		implements ObjectMapperParserDecoratorServiceFactory, ObjectMapperParserDecorator {
+
+	/**
+	 * Indicates whether to decorate the {@link ObjectMapper}.
+	 */
+	public static boolean isDecorate = false;
 
 	/*
-	 * ==================== ServiceFactory ===================
+	 * ===================== ObjectMapperDecoratorServiceFactory ==================
 	 */
 
 	@Override
-	public HttpObjectParserFactory createService(ServiceContext context) throws Throwable {
+	public ObjectMapperParserDecorator createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
-		// Create the Object Mapper
-		ObjectMapper mapper = new ObjectMapper();
+	/*
+	 * ======================= ObjectMapperDecorator ===============================
+	 */
 
-		// Decorate the Object Mapper
-		for (ObjectMapperParserDecorator decorator : context
-				.loadOptionalServices(ObjectMapperParserDecoratorServiceFactory.class)) {
-			decorator.decorateObjectMapper(mapper);
+	@Override
+	public void decorateObjectMapper(ObjectMapper mapper) throws Exception {
+		if (isDecorate) {
+			mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		}
-
-		// Return factory
-		return new JacksonHttpObjectParserFactory(mapper);
 	}
 
 }

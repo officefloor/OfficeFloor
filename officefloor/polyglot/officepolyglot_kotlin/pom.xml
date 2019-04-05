@@ -91,6 +91,10 @@
 			<artifactId>jackson-module-kotlin</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officejson_default</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.polyglot</groupId>
 			<artifactId>officepolyglot_test</artifactId>
 			<scope>test</scope>

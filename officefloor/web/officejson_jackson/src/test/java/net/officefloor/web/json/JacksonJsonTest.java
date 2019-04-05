@@ -89,6 +89,8 @@ public class JacksonJsonTest extends OfficeFrameTestCase {
 
 	@Data
 	@HttpObject
+	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class InputObject {
 		private String input;
 	}
@@ -126,16 +128,23 @@ public class JacksonJsonTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure {@link JacksonHttpObjectParserServiceFactory} registered with other.
 	 */
-	public void testJacksonRegisteredWithOtherParser() {
-		fail("TODO implement");
-	}
+	public void testOtherContentType() throws Exception {
 
-	/**
-	 * Ensure {@link JacksonHttpObjectResponderServiceFactory} registered with
-	 * other.
-	 */
-	public void testJacksonRegisteredWithOtherResponder() {
-		fail("TODO implement");
+		// Configure the server
+		this.compile.web((context) -> {
+			context.link(false, "POST", "/path", MockJacksonJson.class);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send the request (ensure handle JSON)
+//		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
+//				.header("Content-Type", "application/json").entity("{ \"input\": \"INPUT\" }"));
+//		response.assertResponse(200, "{\"output\":\"OUTPUT\"}");
+
+		// Send the request
+		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
+				.header("Content-Type", "test/mock").entity("{ \"input\": \"OVERWRITE\" }"));
+		response.assertResponse(200, "MOCK");
 	}
 
 }

@@ -17,12 +17,22 @@
  */
 package net.officefloor.web.json;
 
-import net.officefloor.frame.api.source.ServiceFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * {@link ServiceFactory} for the {@link ObjectMapperDecorator}.
+ * Decorates the {@link ObjectMapper} for the
+ * {@link JacksonHttpObjectParserFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ObjectMapperDecoratorServiceFactory extends ServiceFactory<ObjectMapperDecorator> {
+public interface ObjectMapperParserDecorator {
+
+	/**
+	 * Decorates the {@link ObjectMapper}.
+	 * 
+	 * @param mapper {@link ObjectMapper}.
+	 * @throws Exception If fails to decorate the {@link ObjectMapper}.
+	 */
+	void decorateObjectMapper(ObjectMapper mapper) throws Exception;
+
 }

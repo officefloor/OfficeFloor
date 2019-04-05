@@ -41,6 +41,8 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.web.WebArchitectEmployer;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.json.JacksonHttpObjectParserServiceFactory;
+import net.officefloor.web.json.JacksonHttpObjectResponderServiceFactory;
 import net.officefloor.web.resource.build.HttpResourceArchitect;
 import net.officefloor.web.resource.build.HttpResourceArchitectEmployer;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
@@ -380,6 +382,10 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(web, officeArchitect, context);
 		HttpResourceArchitect resources = HttpResourceArchitectEmployer.employHttpResourceArchitect(web, security,
 				officeArchitect, context);
+
+		// Load the default object parser / responders
+		web.setDefaultHttpObjectParser(new JacksonHttpObjectParserServiceFactory());
+		web.setDefaultHttpObjectResponder(new JacksonHttpObjectResponderServiceFactory());
 
 		// Create the WoOF context
 		WoofContext woofContext = new WoofContext() {

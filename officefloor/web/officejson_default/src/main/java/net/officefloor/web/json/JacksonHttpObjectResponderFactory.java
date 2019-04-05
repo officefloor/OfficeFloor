@@ -44,13 +44,29 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 	 * Obtains the entity for the {@link Escalation}.
 	 * 
 	 * @param escalation {@link Throwable} {@link Escalation}.
+	 * @param mapper     {@link ObjectMapper} to write entity.
 	 * @return Entity for the {@link Escalation}.
 	 * @throws IOException If fails to write {@link Escalation}.
 	 */
-	public static String getEntity(Throwable escalation) throws IOException {
+	public static String getEntity(Throwable escalation, ObjectMapper mapper) throws IOException {
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		writeError(buffer, escalation);
+		writeError(buffer, escalation, initiateObjectMapper(mapper));
 		return buffer.toString();
+	}
+
+	/**
+	 * Initialises the {@link ObjectMapper}.
+	 * 
+	 * @param mapper {@link ObjectMapper}.
+	 * @return Initialised {@link ObjectMapper}.
+	 */
+	private static ObjectMapper initiateObjectMapper(ObjectMapper mapper) {
+
+		// Always disable close on finish
+		mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+
+		// Return the mapper for use
+		return mapper;
 	}
 
 	/**
@@ -60,7 +76,7 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 	 * @param escalation {@link Throwable} {@link Escalation}.
 	 * @throws IOException If fails to write.
 	 */
-	private static void writeError(OutputStream output, Throwable escalation) throws IOException {
+	private static void writeError(OutputStream output, Throwable escalation, ObjectMapper mapper) throws IOException {
 		output.write(ERROR_MESSAGE_PREFIX);
 
 		// Write the error detail
@@ -76,11 +92,7 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 	/**
 	 * {@link ObjectMapper}.
 	 */
-	private static final ObjectMapper mapper = new ObjectMapper();
-
-	static {
-		mapper.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
-	}
+	private final ObjectMapper mapper;
 
 	/**
 	 * <code>Content-Type</code>.
@@ -98,6 +110,15 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 	 */
 	private static final byte[] ERROR_MESSAGE_SUFFIX = "}".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 
+	/**
+	 * Initiate with the {@link ObjectMapper}.
+	 * 
+	 * @param mapper {@link ObjectMapper}.
+	 */
+	public JacksonHttpObjectResponderFactory(ObjectMapper mapper) {
+		this.mapper = initiateObjectMapper(mapper);
+	}
+
 	/*
 	 * ============== HttpObjectResponderFactory ===============
 	 */
@@ -111,7 +132,7 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 	public <T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType) {
 
 		// Create the type for efficient execution
-		JavaType javaType = mapper.constructType(objectType);
+		JavaType javaType = this.mapper.constructType(objectType);
 
 		// Determine if can deserialise type
 		if (!mapper.canDeserialize(javaType)) {
@@ -135,7 +156,7 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 			public void send(T object, ServerHttpConnection connection) throws IOException {
 				HttpResponse response = connection.getResponse();
 				response.setContentType(contentType, null);
-				mapper.writeValue(response.getEntity(), object);
+				JacksonHttpObjectResponderFactory.this.mapper.writeValue(response.getEntity(), object);
 			}
 		};
 	}
@@ -161,7 +182,7 @@ public class JacksonHttpObjectResponderFactory implements HttpObjectResponderFac
 				HttpResponse response = connection.getResponse();
 				response.setContentType(contentType, null);
 				ServerOutputStream output = response.getEntity();
-				writeError(output, escalation);
+				writeError(output, escalation, JacksonHttpObjectResponderFactory.this.mapper);
 			}
 		};
 	}

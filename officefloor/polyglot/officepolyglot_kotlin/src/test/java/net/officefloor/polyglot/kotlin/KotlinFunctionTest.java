@@ -92,7 +92,7 @@ public class KotlinFunctionTest extends AbstractPolyglotFunctionTest {
 		MockHttpResponse response = server.value
 				.send(MockHttpServer.mockRequest().header("Content-Type", "application/json")
 						.entity(mapper.writeValueAsString(new KotlinRequest(1, "test"))));
-		response.assertResponse(200, mapper.writeValueAsString(new KotlinRequest(2, "")));
+		response.assertResponse(200, mapper.writeValueAsString(new KotlinRequest(2, "Serviced test")));
 	}
 
 	public static class KotlinRequestService {

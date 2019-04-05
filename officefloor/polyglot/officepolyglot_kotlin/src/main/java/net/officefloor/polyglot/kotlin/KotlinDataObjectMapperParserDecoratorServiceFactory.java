@@ -15,44 +15,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.web.json;
+package net.officefloor.polyglot.kotlin;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.web.json.ObjectMapperParserDecorator;
+import net.officefloor.web.json.ObjectMapperParserDecoratorServiceFactory;
 
 /**
- * Mock {@link ObjectMapperDecorator} for testing decorating the
- * {@link ObjectMapper}.
+ * Kotlin Data {@link ObjectMapperParserDecoratorServiceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockObjectMapperDecorator implements ObjectMapperDecoratorServiceFactory, ObjectMapperDecorator {
-
-	/**
-	 * Indicates whether to decorate the {@link ObjectMapper}.
-	 */
-	public static boolean isDecorate = false;
+public class KotlinDataObjectMapperParserDecoratorServiceFactory
+		implements ObjectMapperParserDecoratorServiceFactory, ObjectMapperParserDecorator {
 
 	/*
-	 * ===================== ObjectMapperDecoratorServiceFactory ==================
+	 * ================ ObjectMapperParserDecoratorServiceFactory ================
 	 */
 
 	@Override
-	public ObjectMapperDecorator createService(ServiceContext context) throws Throwable {
+	public ObjectMapperParserDecorator createService(ServiceContext context) throws Throwable {
 		return this;
 	}
 
 	/*
-	 * ======================= ObjectMapperDecorator ===============================
+	 * ======================== ObjectMapperParserDecorator =======================
 	 */
 
 	@Override
 	public void decorateObjectMapper(ObjectMapper mapper) throws Exception {
-		mapper.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES);
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		mapper.registerModule(new KotlinModule());
 	}
 
 }

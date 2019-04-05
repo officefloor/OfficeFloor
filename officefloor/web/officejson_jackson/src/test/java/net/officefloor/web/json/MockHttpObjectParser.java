@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,63 +17,46 @@
  */
 package net.officefloor.web.json;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
+import net.officefloor.web.build.HttpObjectParserServiceFactory;
+import net.officefloor.web.json.JacksonJsonTest.InputObject;
 
 /**
- * Jackson {@link HttpObjectParserFactory}.
+ * Mock {@link HttpObjectParserServiceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JacksonHttpObjectParserFactory implements HttpObjectParserFactory {
+public class MockHttpObjectParser implements HttpObjectParserServiceFactory, HttpObjectParserFactory {
 
-	/**
-	 * {@link ObjectMapper}.
+	/*
+	 * ===================== HttpObjectParserServiceFactory ===================
 	 */
-	private final ObjectMapper mapper;
 
-	/**
-	 * Instantiate.
-	 * 
-	 * @param mapper {@link ObjectMapper}.
-	 */
-	public JacksonHttpObjectParserFactory(ObjectMapper mapper) {
-		this.mapper = mapper;
+	@Override
+	public HttpObjectParserFactory createService(ServiceContext context) throws Throwable {
+		return this;
 	}
 
 	/*
-	 * ================= HttpObjectParserFactory ===============
+	 * ======================== HttpObjectParserFactory =======================
 	 */
 
 	@Override
 	public String getContentType() {
-		return "application/json";
+		return "test/mock";
 	}
 
 	@Override
 	public <T> HttpObjectParser<T> createHttpObjectParser(Class<T> objectClass) throws Exception {
-
-		// Create the type for efficient execution
-		JavaType javaType = this.mapper.constructType(objectClass);
-
-		// Determine if can deserialise type
-		if (!this.mapper.canDeserialize(javaType)) {
-			return null;
-		}
-
-		// Can deserialise, so provide parser
 		return new HttpObjectParser<T>() {
 
 			@Override
 			public String getContentType() {
-				return JacksonHttpObjectParserFactory.this.getContentType();
+				return MockHttpObjectParser.this.getContentType();
 			}
 
 			@Override
@@ -84,12 +67,7 @@ public class JacksonHttpObjectParserFactory implements HttpObjectParserFactory {
 			@Override
 			@SuppressWarnings("unchecked")
 			public T parse(ServerHttpConnection connection) throws HttpException {
-				try {
-					return (T) JacksonHttpObjectParserFactory.this.mapper.readValue(connection.getRequest().getEntity(),
-							javaType);
-				} catch (IOException ex) {
-					throw new HttpException(ex);
-				}
+				return (T) new InputObject("INPUT");
 			}
 		};
 	}

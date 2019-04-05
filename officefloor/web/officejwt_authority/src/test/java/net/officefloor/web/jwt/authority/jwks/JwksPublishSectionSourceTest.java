@@ -172,7 +172,7 @@ public class JwksPublishSectionSourceTest extends OfficeFrameTestCase implements
 				HttpStatus.INTERNAL_SERVER_ERROR, (mockResponse) -> mockResponse);
 		assertEquals("Incorrect response",
 				JacksonHttpObjectResponderFactory
-						.getEntity(new HttpException(new Exception("No JwksKeyWriter for key UNKNOWN"))),
+						.getEntity(new HttpException(new Exception("No JwksKeyWriter for key UNKNOWN")), mapper),
 				response.getEntity(null));
 
 		// Ensure verify

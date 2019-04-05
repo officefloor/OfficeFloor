@@ -95,7 +95,7 @@ public class DefaultJsonTest extends OfficeFrameTestCase {
 	public void testJacksonDecorateRequest() throws Exception {
 
 		// Enable decoration
-		MockObjectMapperDecorator.isDecorate = true;
+		MockObjectMapperParserDecorator.isDecorate = true;
 		try {
 			// Configure the server
 			this.compile.web((context) -> {
@@ -106,10 +106,10 @@ public class DefaultJsonTest extends OfficeFrameTestCase {
 			// Send the request
 			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
 					.header("Content-Type", "application/json").entity("{ \"input\": \"INPUT\", \"ignored\": true }"));
-			response.assertResponse(200, "{\n  \"output\":\"OUTPUT\"\n}");
+			response.assertResponse(200, "{\"output\":\"OUTPUT\"}");
 
 		} finally {
-			MockObjectMapperDecorator.isDecorate = false;
+			MockObjectMapperParserDecorator.isDecorate = false;
 		}
 	}
 
@@ -119,7 +119,7 @@ public class DefaultJsonTest extends OfficeFrameTestCase {
 	public void testJacksonDecorateResponse() throws Exception {
 
 		// Enable decoration
-		MockObjectMapperDecorator.isDecorate = true;
+		MockObjectMapperResponderDecorator.isDecorate = true;
 		try {
 
 			// Configure the server
@@ -131,10 +131,10 @@ public class DefaultJsonTest extends OfficeFrameTestCase {
 			// Send the request
 			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
 					.header("Content-Type", "application/json").entity("{ \"input\": \"INPUT\" }"));
-			response.assertResponse(200, "{\n  \"output\":\"OUTPUT\"\n}");
+			response.assertResponse(200, "{\n  \"output\" : \"OUTPUT\"\n}");
 
 		} finally {
-			MockObjectMapperDecorator.isDecorate = false;
+			MockObjectMapperResponderDecorator.isDecorate = false;
 		}
 	}
 
