@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -50,8 +51,10 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
+import net.officefloor.web.build.HttpObjectParserServiceFactory;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
+import net.officefloor.web.build.HttpObjectResponderServiceFactory;
 import net.officefloor.web.build.HttpPathFactory;
 import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.HttpValueLocation;
@@ -577,6 +580,32 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to register default {@link HttpObjectParserServiceFactory}.
+	 */
+	public void testDefaultHttpObjectParser() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.getWebArchitect().setDefaultHttpObjectParser(new ObjectValueServiceFactory());
+			context.link(false, "POST", "/path", MockObjectValue.class);
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send the request
+		MockHttpResponse response = this.server.send(this.mockRequest("/path").method(HttpMethod.POST)
+				.header("Content-Type", "application/mock").entity("value"));
+		response.assertResponse(200, "Value=value");
+	}
+
+	public static class ObjectValueServiceFactory implements HttpObjectParserServiceFactory {
+
+		@Override
+		public HttpObjectParserFactory createService(ServiceContext context) throws Throwable {
+			return new ObjectValueFactory();
+		}
+	}
+
+	/**
 	 * Code generators are likely to create objects with different
 	 * {@link Annotation} values. Therefore, rather than force the code generators
 	 * to include {@link HttpObject}, another {@link Annotation} can be used to
@@ -790,6 +819,40 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	public static class MockEscalate {
 		public void service() throws Exception {
 			throw new Exception("TEST ESCALATION");
+		}
+	}
+
+	/**
+	 * Ensure can register default {@link MockRegisterObjectResponderService}.
+	 */
+	public void testDefaultObjectResponder() throws Exception {
+
+		// Flag to not register
+		MockHttpObjectResponderServiceFactory.isInclude = false;
+		try {
+
+			// Configure the server
+			this.compile.web((context) -> {
+				context.link(false, "GET", "/path/{param}", MockObjectSection.class);
+				context.getWebArchitect().setDefaultHttpObjectResponder(new MockObjectResponderServiceFactory());
+			});
+			this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+			// Send request
+			MockHttpResponse response = this.server
+					.send(this.mockRequest("/path/value").header("accept", "application/mock"));
+			response.assertResponse(200, "{value=\"OBJECT value\"}", "content-type", "application/mock");
+
+		} finally {
+			MockHttpObjectResponderServiceFactory.isInclude = true;
+		}
+	}
+
+	public static class MockObjectResponderServiceFactory implements HttpObjectResponderServiceFactory {
+
+		@Override
+		public HttpObjectResponderFactory createService(ServiceContext context) throws Throwable {
+			return new MockObjectResponderFactory();
 		}
 	}
 

@@ -108,6 +108,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	}
 
 	@Override
+	public <S, F extends ServiceFactory<S>> S loadService(F serviceFactory) throws LoadServiceError {
+		return this.delegate.loadService(serviceFactory);
+	}
+
+	@Override
 	public <S, F extends ServiceFactory<S>, D extends F> S loadService(Class<F> serviceFactoryType,
 			D defaultServiceFactory) throws UnknownServiceError, LoadServiceError {
 		return this.delegate.loadService(serviceFactoryType, defaultServiceFactory);
@@ -223,6 +228,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		@Override
 		public ClassLoader getClassLoader() {
 			return this.delegate.getClassLoader();
+		}
+
+		@Override
+		public <S, F extends ServiceFactory<S>> S loadService(F serviceFactory) throws LoadServiceError {
+			return this.delegate.loadService(serviceFactory);
 		}
 
 		@Override
@@ -407,6 +417,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 
 			// Return the resource
 			return resource;
+		}
+
+		@Override
+		public <S, F extends ServiceFactory<S>> S loadService(F serviceFactory) throws LoadServiceError {
+			return createService(serviceFactory, this);
 		}
 
 		@Override

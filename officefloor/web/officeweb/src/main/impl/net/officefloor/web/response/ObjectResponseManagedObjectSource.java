@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
@@ -58,6 +59,22 @@ public class ObjectResponseManagedObjectSource
 		implements HttpEscalationHandler {
 
 	/**
+	 * Obtains the default {@link HttpObjectResponderFactory}.
+	 */
+	@FunctionalInterface
+	public static interface DefaultHttpObjectResponder {
+
+		/**
+		 * Obtains the default {@link HttpObjectResponderFactory}.
+		 * 
+		 * @return Default {@link HttpObjectResponderFactory}.
+		 * @throws Exception If fails to obtain the default
+		 *                   {@link HttpObjectResponderFactory}.
+		 */
+		HttpObjectResponderFactory getDefaultHttpObjectResponderFactory() throws Exception;
+	}
+
+	/**
 	 * Dependency keys.
 	 */
 	public static enum ObjectResponseDependencies {
@@ -68,6 +85,11 @@ public class ObjectResponseManagedObjectSource
 	 * {@link List} of {@link HttpObjectResponderFactory} instances.
 	 */
 	private final List<HttpObjectResponderFactory> objectResponderFactoriesList;
+
+	/**
+	 * {@link DefaultHttpObjectResponder}.
+	 */
+	private final DefaultHttpObjectResponder defaultHttpObjectResponder;
 
 	/**
 	 * {@link AcceptNegotiator} for the {@link Object} {@link ContentTypeCache}.
@@ -87,11 +109,15 @@ public class ObjectResponseManagedObjectSource
 	/**
 	 * Instantiate.
 	 * 
-	 * @param objectResponderFactories
-	 *            {@link List} of {@link HttpObjectResponderFactory} instances.
+	 * @param objectResponderFactories   {@link List} of
+	 *                                   {@link HttpObjectResponderFactory}
+	 *                                   instances.
+	 * @param defaultHttpObjectResponder {@link DefaultHttpObjectResponder}.
 	 */
-	public ObjectResponseManagedObjectSource(List<HttpObjectResponderFactory> objectResponderFactories) {
+	public ObjectResponseManagedObjectSource(List<HttpObjectResponderFactory> objectResponderFactories,
+			DefaultHttpObjectResponder defaultHttpObjectResponder) {
 		this.objectResponderFactoriesList = objectResponderFactories;
+		this.defaultHttpObjectResponder = defaultHttpObjectResponder;
 	}
 
 	/*
@@ -117,8 +143,11 @@ public class ObjectResponseManagedObjectSource
 		// Create the negotiators
 		AcceptNegotiatorBuilder<ContentTypeCache> objectBuilder = new AcceptNegotiatorBuilderImpl<>();
 		AcceptNegotiatorBuilder<ContentTypeCache> escalationBuilder = new AcceptNegotiatorBuilderImpl<>();
-		for (HttpObjectResponderFactory factory : this.objectResponderFactoriesList) {
+		NEXT_FACTORY: for (HttpObjectResponderFactory factory : this.objectResponderFactoriesList) {
 			String contentType = factory.getContentType();
+			if (CompileUtil.isBlank(contentType)) {
+				continue NEXT_FACTORY;
+			}
 
 			// Add content-type for negotiator
 			objectBuilder.addHandler(contentType, new ContentTypeCache(factory));
@@ -130,6 +159,25 @@ public class ObjectResponseManagedObjectSource
 			}
 			isFirst = false;
 			accept.append(contentType);
+		}
+		if (isFirst) {
+			// Determine if provide default responder
+			HttpObjectResponderFactory defaultFactory = this.defaultHttpObjectResponder
+					.getDefaultHttpObjectResponderFactory();
+			if (defaultFactory != null) {
+
+				// Provide default
+				String contentType = defaultFactory.getContentType();
+				if (!CompileUtil.isBlank(contentType)) {
+
+					// Add content-type for negotiator
+					objectBuilder.addHandler(contentType, new ContentTypeCache(defaultFactory));
+					escalationBuilder.addHandler(contentType, new ContentTypeCache(defaultFactory));
+
+					// Only the one, so is the accept type
+					accept.append(contentType);
+				}
+			}
 		}
 		try {
 			this.objectNegotiator = objectBuilder.build();
@@ -275,10 +323,8 @@ public class ObjectResponseManagedObjectSource
 		/**
 		 * Creates the {@link HttpObjectResponder}.
 		 * 
-		 * @param objectType
-		 *            Object type.
-		 * @param factory
-		 *            {@link HttpObjectResponderFactory}.
+		 * @param objectType Object type.
+		 * @param factory    {@link HttpObjectResponderFactory}.
 		 * @return {@link HttpObjectResponder}.
 		 */
 		<T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType, HttpObjectResponderFactory factory);
@@ -287,17 +333,12 @@ public class ObjectResponseManagedObjectSource
 	/**
 	 * Handles the object.
 	 * 
-	 * @param object
-	 *            Object for the response.
-	 * @param head
-	 *            Head {@link AcceptType} for the linked list of {@link AcceptType}
-	 *            instances.
-	 * @param cache
-	 *            {@link ContentTypeCache} instances.
-	 * @param responderFactory
-	 *            {@link ResponderFactory}.
-	 * @param connection
-	 *            {@link ServerHttpConnection} connection.
+	 * @param object           Object for the response.
+	 * @param head             Head {@link AcceptType} for the linked list of
+	 *                         {@link AcceptType} instances.
+	 * @param cache            {@link ContentTypeCache} instances.
+	 * @param responderFactory {@link ResponderFactory}.
+	 * @param connection       {@link ServerHttpConnection} connection.
 	 * @return <code>true</code> if object sent.
 	 */
 	@SuppressWarnings("unchecked")
@@ -354,9 +395,8 @@ public class ObjectResponseManagedObjectSource
 		/**
 		 * Instantiate.
 		 * 
-		 * @param factory
-		 *            {@link HttpObjectResponderFactory} for the
-		 *            <code>content-type</code>.
+		 * @param factory {@link HttpObjectResponderFactory} for the
+		 *                <code>content-type</code>.
 		 */
 		private ContentTypeCache(HttpObjectResponderFactory factory) {
 			this.factory = factory;
@@ -381,10 +421,8 @@ public class ObjectResponseManagedObjectSource
 		/**
 		 * Instantiate.
 		 * 
-		 * @param objectType
-		 *            Object type.
-		 * @param objectResponder
-		 *            {@link HttpObjectResponder} for the object type.
+		 * @param objectType      Object type.
+		 * @param objectResponder {@link HttpObjectResponder} for the object type.
 		 */
 		private ObjectResponderCache(Class<T> objectType, HttpObjectResponder<T> objectResponder) {
 			this.objectType = objectType;

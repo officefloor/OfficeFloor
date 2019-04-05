@@ -289,6 +289,10 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		// Create context
 		SourceContext context = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
 				new MockClockFactory());
+		
+		// Ensure able to load provided service
+		Class<SingleServiceFactory> loadedService = context.loadService(new SingleServiceFactory());
+		assertEquals("Should load provided service", SingleServiceFactory.class, loadedService);
 
 		// Ensure able to load optional service
 		Class<SingleServiceFactory> optionalService = context.loadOptionalService(SingleServiceFactory.class);

@@ -123,4 +123,19 @@ public class JacksonJsonTest extends OfficeFrameTestCase {
 		}
 	}
 
+	/**
+	 * Ensure {@link JacksonHttpObjectParserServiceFactory} registered with other.
+	 */
+	public void testJacksonRegisteredWithOtherParser() {
+		fail("TODO implement");
+	}
+
+	/**
+	 * Ensure {@link JacksonHttpObjectResponderServiceFactory} registered with
+	 * other.
+	 */
+	public void testJacksonRegisteredWithOtherResponder() {
+		fail("TODO implement");
+	}
+
 }

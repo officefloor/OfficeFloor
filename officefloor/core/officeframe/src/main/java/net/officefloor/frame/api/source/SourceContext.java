@@ -84,6 +84,17 @@ public interface SourceContext extends SourceProperties {
 	InputStream getResource(String location) throws UnknownResourceError;
 
 	/**
+	 * Loads the specific service.
+	 * 
+	 * @param                <S> Service type
+	 * @param                <F> {@link ServiceFactory} type to create service.
+	 * @param serviceFactory {@link ServiceFactory}.
+	 * @return Service.
+	 * @throws LoadServiceError If fails to load the service.
+	 */
+	<S, F extends ServiceFactory<S>> S loadService(F serviceFactory) throws LoadServiceError;
+
+	/**
 	 * Loads a single service.
 	 * 
 	 * @param                       <S> Service type

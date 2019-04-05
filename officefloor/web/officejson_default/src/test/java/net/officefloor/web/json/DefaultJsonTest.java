@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.json;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -84,6 +86,55 @@ public class DefaultJsonTest extends OfficeFrameTestCase {
 		public void service(InputObject input, ObjectResponse<OutputObject> response) {
 			assertEquals("Incorrect JSON input", "INPUT", input.getInput());
 			response.send(new OutputObject("OUTPUT"));
+		}
+	}
+
+	/**
+	 * Ensure can decorate the {@link ObjectMapper}.
+	 */
+	public void testJacksonDecorateRequest() throws Exception {
+
+		// Enable decoration
+		MockObjectMapperDecorator.isDecorate = true;
+		try {
+			// Configure the server
+			this.compile.web((context) -> {
+				context.link(false, "POST", "/path", MockJacksonJson.class);
+			});
+			this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+			// Send the request
+			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
+					.header("Content-Type", "application/json").entity("{ \"input\": \"INPUT\", \"ignored\": true }"));
+			response.assertResponse(200, "{\n  \"output\":\"OUTPUT\"\n}");
+
+		} finally {
+			MockObjectMapperDecorator.isDecorate = false;
+		}
+	}
+
+	/**
+	 * Ensure can decorate the {@link ObjectMapper}.
+	 */
+	public void testJacksonDecorateResponse() throws Exception {
+
+		// Enable decoration
+		MockObjectMapperDecorator.isDecorate = true;
+		try {
+
+			// Configure the server
+			this.compile.web((context) -> {
+				context.link(false, "POST", "/path", MockJacksonJson.class);
+			});
+			this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+			// Send the request
+			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
+					.header("Content-Type", "application/json").entity("{ \"input\": \"INPUT\" }"));
+			response.assertResponse(200, "{\n  \"output\":\"OUTPUT\"\n}");
+
+		} finally {
+			MockObjectMapperDecorator.isDecorate = false;
 		}
 	}
 
