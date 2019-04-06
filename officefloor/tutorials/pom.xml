@@ -38,6 +38,7 @@
 		<module>RawHttpServer</module>
 		<module>ReactiveHttpServer</module>
 		<module>RestHttpServer</module>
+		<module>ScalaHttpServer</module>
 		<module>SectionHttpServer</module>
 		<module>SecurePageHttpServer</module>
 		<module>SecureLinkHttpServer</module>

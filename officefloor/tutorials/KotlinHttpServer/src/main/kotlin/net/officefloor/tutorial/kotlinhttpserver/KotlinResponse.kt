@@ -3,4 +3,4 @@ package net.officefloor.tutorial.kotlinhttpserver
 /**
  * Kotlin response.
  */
-data class KotlinResponse(var message: String)
+data class KotlinResponse(val message: String)

@@ -90,6 +90,7 @@
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<scala-maven-version>4.0.1</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
+		<scalatest-version>3.0.5</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.26</slf4j-version>
 		<spring-version>2.1.3.RELEASE</spring-version>
@@ -152,6 +153,11 @@
 			<dependency>
 				<groupId>net.officefloor.polyglot</groupId>
 				<artifactId>officepolyglot_scala</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.polyglot</groupId>
+				<artifactId>officepolyglot_scalatest</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -531,6 +537,11 @@
 				<groupId>org.scala-lang</groupId>
 				<artifactId>scala-library</artifactId>
 				<version>${scala-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scalatest</groupId>
+				<artifactId>scalatest_2.12</artifactId>
+				<version>${scalatest-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jetbrains.kotlin</groupId>
