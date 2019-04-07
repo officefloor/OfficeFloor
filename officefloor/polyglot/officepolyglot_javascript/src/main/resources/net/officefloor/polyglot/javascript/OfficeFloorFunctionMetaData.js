@@ -9,7 +9,7 @@ function OFFICEFLOOR_METADATA__FUNCTION_NAME_() {
 	let officefloor = _FUNCTION_NAME_.officefloor;
 	if (!officefloor) {
 		return {
-			error : "No officefloor meta-data on function _FUNCTION_NAME_";
+			error : "No officefloor meta-data on function _FUNCTION_NAME_"
 		}
 	}
 	if (!Array.isArray(officefloor)) {
