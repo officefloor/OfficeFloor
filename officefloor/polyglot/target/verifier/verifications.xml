@@ -1,9 +1,0 @@
-<verifications>
-	<files>
-		<!-- Ensure using latest version -->
-		<file>
-			<location>/home/daniel/OfficeFloor/officefloor/polyglot/../bom/pom.xml</location>
-			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>polyglot</artifactId>[^;]*</dependencyManagement>]]></contains>
-		</file>
-	</files>
-</verifications>
