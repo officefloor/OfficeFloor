@@ -64,7 +64,7 @@
 		<scala-maven-version>4.0.1</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
 		<spring-version>2.1.1.RELEASE</spring-version>
-		<tycho-version>1.3.0</tycho-version>
+		<tycho-version>1.4.0</tycho-version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
