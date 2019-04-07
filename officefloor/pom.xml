@@ -46,7 +46,7 @@
 	</modules>
 	<properties>
 		<asm-version>7.1</asm-version>
-		<compiler-version>3.9.0</compiler-version>
+		<compiler-version>3.8.0</compiler-version>
 		<current.year>2018</current.year>
 		<failsafe-version>2.22.1</failsafe-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
