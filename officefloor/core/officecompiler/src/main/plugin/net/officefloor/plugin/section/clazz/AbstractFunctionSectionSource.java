@@ -607,13 +607,13 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 		/**
 		 * {@link Object} for {@link Method}.
 		 */
-		final SectionManagedObject object;
+		protected final SectionManagedObject object;
 
 		/**
 		 * Error message for failing to obtain the {@link Object} for the
 		 * {@link Method}.
 		 */
-		final String errorMessage;
+		protected final String errorMessage;
 
 		/**
 		 * Successfully obtained {@link SectionManagedObject}.

@@ -146,18 +146,8 @@ public class MethodManagedFunctionBuilder {
 	 */
 	public boolean isCandidateFunctionMethod(Method method) {
 
-		// Ignore non-public methods
-		if (!Modifier.isPublic(method.getModifiers())) {
-			return false;
-		}
-
-		// Ignore methods annotated to not be functions
-		if (method.isAnnotationPresent(NonFunctionMethod.class)) {
-			return false;
-		}
-
-		// As here, candidate method for function
-		return true;
+		// Candidate if public and not flagged not function
+		return Modifier.isPublic(method.getModifiers()) && (!(method.isAnnotationPresent(NonFunctionMethod.class)));
 	}
 
 	/**

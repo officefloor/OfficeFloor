@@ -27,6 +27,9 @@ import java.io.IOException
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface
 import net.officefloor.server.http.HttpException
 
+/**
+ * Primitives.
+ */
 @NextFunction("use")
 fun primitives(
 	_boolean: Boolean,
@@ -41,6 +44,9 @@ fun primitives(
 	return PrimitiveTypes(_boolean, _byte, _short, _char, _int, _long, _float, _double)
 }
 
+/**
+ * Objects.
+ */
 @NextFunction("use")
 fun objects(
 	_string: String,
@@ -51,11 +57,17 @@ fun objects(
 	return ObjectTypes(_string, _object, _primitiveArray, _objectArray)
 }
 
+/**
+ * Collections.
+ */
 @NextFunction("use")
 fun collections(_list: List<Int>, _set: Set<Char>, _map: Map<String, JavaObject>): CollectionTypes {
 	return CollectionTypes(_list, _set, _map)
 }
 
+/**
+ * Variables.
+ */
 @NextFunction("use")
 fun variables(@Val _val: Char, _in: In<String>, _out: Out<JavaObject>, _var: Var<Int>): VariableTypes {
 	_out.set(JavaObject("test"))
@@ -64,11 +76,17 @@ fun variables(@Val _val: Char, _in: In<String>, _out: Out<JavaObject>, _var: Var
 	return VariableTypes(_val, _in.get(), captureVar)
 }
 
+/**
+ * Parameters.
+ */
 @NextFunction("use")
 fun parameters(@Parameter param: String): ParameterTypes {
 	return ParameterTypes(param)
 }
 
+/**
+ * Web.
+ */
 fun web(
 	@HttpPathParameter("param") pathParameter: String,
 	@HttpQueryParameter("param") queryParameter: String,
@@ -84,12 +102,16 @@ fun web(
 	);
 }
 
-
+/**
+ * HttpException.
+ */
 fun httpException() {
 	throw HttpException(422, "test")
 }
 
-
+/**
+ * Flow interface.
+ */
 @FlowInterface
 interface Flows {
 	fun flow()
@@ -99,6 +121,9 @@ interface Flows {
 	fun exception(ex: IOException)
 }
 
+/**
+ * Flows.
+ */
 @NextFunction("nextFunction")
 fun serviceFlow(@Parameter flowType: String, flows: Flows) {
 	when (flowType) {
@@ -117,7 +142,9 @@ fun serviceFlow(@Parameter flowType: String, flows: Flows) {
 	}
 }
 
-
+/**
+ * Asynchronous flows.
+ */
 fun asynchronousFlow(flowOne: AsynchronousFlow, flowTwo: AsynchronousFlow) {
 	flowOne.complete({ flowTwo.complete(null) })
 }

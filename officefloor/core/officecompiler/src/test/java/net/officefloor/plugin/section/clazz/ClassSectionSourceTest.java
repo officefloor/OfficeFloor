@@ -1439,6 +1439,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 				break;
 			default:
 				fail("Unknown input: " + option);
+				break;
 			}
 		}
 

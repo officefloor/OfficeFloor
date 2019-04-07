@@ -127,6 +127,7 @@ public abstract class AbstractScriptFunctionSectionSource extends AbstractFuncti
 	 */
 	protected static class ScriptSection {
 		public void script() {
+			// Required method
 		}
 	}
 

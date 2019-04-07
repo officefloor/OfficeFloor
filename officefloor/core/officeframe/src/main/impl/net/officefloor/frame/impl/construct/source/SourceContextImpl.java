@@ -348,6 +348,9 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 					return float[].class;
 				case "[D":
 					return double[].class;
+				default:
+					// Carry on to load class
+					break;
 				}
 
 				// Determine if array

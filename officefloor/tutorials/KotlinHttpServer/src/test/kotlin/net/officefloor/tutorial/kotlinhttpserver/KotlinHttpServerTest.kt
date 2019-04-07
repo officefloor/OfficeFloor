@@ -17,6 +17,9 @@ class KotlinHttpServerTest {
 	@JvmField
 	public val server = MockWoofServerRule()
 
+	/**
+	 * Tests send request to server.
+	 */
 	@Test
 	fun service() {
 		val response = this.server.send(

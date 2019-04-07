@@ -100,7 +100,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 		compiler.office((context) -> {
 
 			// Load inputs
-			value(context, Boolean.valueOf(true));
+			value(context, Boolean.TRUE);
 			value(context, Byte.valueOf((byte) 1));
 			value(context, Short.valueOf((short) 2));
 			value(context, Character.valueOf('3'));

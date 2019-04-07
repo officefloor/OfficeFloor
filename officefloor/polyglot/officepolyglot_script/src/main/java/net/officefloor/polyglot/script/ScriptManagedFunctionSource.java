@@ -170,7 +170,8 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 		// Ensure invocable
 		if (!(engine instanceof Invocable)) {
-			throw new Exception("Script engine " + engineName + " must be " + Invocable.class.getSimpleName());
+			throw new IllegalStateException(
+					"Script engine " + engineName + " must be " + Invocable.class.getSimpleName());
 		}
 		Invocable invocable = (Invocable) engine;
 
@@ -190,7 +191,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 		// Load the meta-data for the function
 		String metaDataScriptPath = context.getProperty(PROPERTY_METADATA_SCRIPT_PATH);
 		String metaDataScript = readContent(context.getResource(metaDataScriptPath));
-		metaDataScript = metaDataScript.toString().replace("_FUNCTION_NAME_", functionName);
+		metaDataScript = metaDataScript.replace("_FUNCTION_NAME_", functionName);
 		engine.eval(metaDataScript);
 		Object metaData = invocable.invokeFunction("OFFICEFLOOR_METADATA_" + functionName);
 

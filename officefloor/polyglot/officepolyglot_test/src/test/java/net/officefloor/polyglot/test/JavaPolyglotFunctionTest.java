@@ -255,6 +255,7 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 				throw new IOException();
 			default:
 				fail("Invalid flow type: " + flowType);
+				break;
 			}
 		}
 	}

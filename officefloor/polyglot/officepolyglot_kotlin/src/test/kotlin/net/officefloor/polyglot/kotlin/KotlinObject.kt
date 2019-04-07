@@ -4,7 +4,10 @@ import net.officefloor.plugin.managedobject.clazz.Dependency
 import net.officefloor.polyglot.test.JavaObject
 import net.officefloor.polyglot.test.ObjectInterface
 
-class KotlinObject() : ObjectInterface {
+/**
+ * Kotlin object.
+ */
+class KotlinObject : ObjectInterface {
 
 	@Dependency
 	private var dependency: JavaObject? = null

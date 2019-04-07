@@ -1,12 +1,9 @@
 package net.officefloor.polyglot
 
-import net.officefloor.polyglot.test.{ PrimitiveTypes, ObjectTypes, JavaObject, CollectionTypes, VariableTypes, ParameterTypes }
+import net.officefloor.polyglot.test.{ PrimitiveTypes, ObjectTypes, JavaObject, CollectionTypes, VariableTypes, ParameterTypes, MockHttpParameters, MockHttpObject, WebTypes }
 import net.officefloor.plugin.variable.{ Val, In, Out, Var }
 import net.officefloor.plugin.section.clazz.{ Parameter, NextFunction }
-import net.officefloor.web.{ HttpPathParameter, HttpQueryParameter, HttpHeaderParameter, HttpCookieParameter }
-import net.officefloor.polyglot.test.{ MockHttpParameters, MockHttpObject }
-import net.officefloor.web.ObjectResponse
-import net.officefloor.polyglot.test.WebTypes
+import net.officefloor.web.{ HttpPathParameter, HttpQueryParameter, HttpHeaderParameter, HttpCookieParameter, ObjectResponse }
 import net.officefloor.frame.api.function.AsynchronousFlow
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface
 import java.io.IOException
@@ -52,7 +49,7 @@ package object scala {
     response.send(new WebTypes(pathParameter, queryParameter, headerParameter, cookieParameter, httpParameters,
       httpObject, new JavaObject(pathParameter)));
   }
-  
+
   def httpException() {
     throw new HttpException(422, "test")
   }
@@ -60,7 +57,7 @@ package object scala {
   @NextFunction("nextFunction")
   def serviceFlow(@Parameter flowType: String, flows: Flows) {
     flowType match {
-      case "nextFunction" => return
+      case "nextFunction" => Unit
       case "flow" => flows.flow()
       case "callbacks" =>
         flows.flowWithCallback((error1) => {

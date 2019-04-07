@@ -139,6 +139,9 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 		case "[D":
 			type = "double[]";
 			break;
+		default:
+			// Use type as is
+			break;
 		}
 
 		// Determine if array
