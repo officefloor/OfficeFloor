@@ -9,7 +9,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<officefloor-version>${version}</officefloor-version>
-		<compiler-version>3.9.0</compiler-version>
+		<compiler-version>3.8.0</compiler-version>
 		<failsafe-version>2.22.1</failsafe-version>
 		<surefire-version>2.22.1</surefire-version>
 		<java-lowest-version>8</java-lowest-version>
