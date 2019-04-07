@@ -28,6 +28,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.section.clazz.Spawn;
 
 /**
  * Factory to create the {@link FlowInterface} {@link Flow} instances.
@@ -151,9 +152,12 @@ public class ClassFlowBuilder<A extends Annotation> {
 						+ functionName + ").  Must not have return type.");
 			}
 
+			// Determine if spawn
+			boolean isSpawn = flowMethod.isAnnotationPresent(Spawn.class);
+
 			// Create and register the flow method meta-data
-			ClassFlowMethodMetaData flowMethodMetaData = new ClassFlowMethodMetaData(parameterType, flowMethod,
-					flowSequence.nextIndex(), (flowParameterType != null), isFlowCallback);
+			ClassFlowMethodMetaData flowMethodMetaData = new ClassFlowMethodMetaData(parameterType, flowMethod, isSpawn,
+					flowSequence.nextIndex(), flowParameterType, isFlowCallback);
 			flowMethodMetaDatas.put(flowMethodName, flowMethodMetaData);
 
 			// Register the flow

@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.managedfunction.clazz;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.build.Indexed;
@@ -32,10 +31,10 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 public class ClassFunctionFactory implements ManagedFunctionFactory<Indexed, Indexed> {
 
 	/**
-	 * Default {@link Constructor} for the {@link Class} containing the
-	 * {@link Method}. Will be <code>null</code> if static {@link Method}.
+	 * {@link MethodObjectInstanceFactory}. Will be <code>null</code> if static
+	 * {@link Method}.
 	 */
-	private final Constructor<?> constructor;
+	private final MethodObjectInstanceFactory methodObjectInstanceFactory;
 
 	/**
 	 * Method to invoke for this {@link ManagedFunction}.
@@ -50,17 +49,17 @@ public class ClassFunctionFactory implements ManagedFunctionFactory<Indexed, Ind
 	/**
 	 * Initiate.
 	 * 
-	 * @param constructor
-	 *            Default {@link Constructor} for the {@link Class} containing
-	 *            the {@link Method}. Will be <code>null</code> if static
-	 *            {@link Method}.
-	 * @param method
-	 *            {@link Method} to invoke for the {@link ManagedFunction}.
-	 * @param parameters
-	 *            {@link ManagedFunctionParameterFactory} instances.
+	 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
+	 *                                    be <code>null</code> if static
+	 *                                    {@link Method}.
+	 * @param method                      {@link Method} to invoke for the
+	 *                                    {@link ManagedFunction}.
+	 * @param parameters                  {@link ManagedFunctionParameterFactory}
+	 *                                    instances.
 	 */
-	public ClassFunctionFactory(Constructor<?> constructor, Method method, ManagedFunctionParameterFactory[] parameters) {
-		this.constructor = constructor;
+	public ClassFunctionFactory(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
+			ManagedFunctionParameterFactory[] parameters) {
+		this.methodObjectInstanceFactory = methodObjectInstanceFactory;
 		this.method = method;
 		this.parameters = parameters;
 	}
@@ -80,7 +79,7 @@ public class ClassFunctionFactory implements ManagedFunctionFactory<Indexed, Ind
 
 	@Override
 	public ClassFunction createManagedFunction() {
-		return new ClassFunction(this.constructor, this.method, this.parameters);
+		return new ClassFunction(this.methodObjectInstanceFactory, this.method, this.parameters);
 	}
 
 }

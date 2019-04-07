@@ -366,7 +366,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 			ManagedFunctionTypeBuilder method = namespace.addManagedFunctionType(methodName,
 					new ClassFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 			ManagedFunctionObjectTypeBuilder var = method.addObject(Var.class);
-			var.setLabel(variableName);
+			var.setLabel("VAR-" + variableName);
 			var.setTypeQualifier(variableName);
 			var.addAnnotation(new VariableAnnotation(variableName));
 		}

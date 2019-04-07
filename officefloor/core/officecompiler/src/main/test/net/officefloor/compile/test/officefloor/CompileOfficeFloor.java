@@ -17,8 +17,11 @@
  */
 package net.officefloor.compile.test.officefloor;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -53,6 +56,9 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.variable.Var;
+import net.officefloor.plugin.variable.VariableManagedObjectSource;
+import net.officefloor.plugin.variable.VariableOfficeExtensionService;
 
 /**
  * Provides easier compiling of {@link OfficeFloor} for testing.
@@ -147,6 +153,11 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	private final OfficeFloorCompiler compiler;
 
 	/**
+	 * {@link Var} decorators.
+	 */
+	private final Map<String, Consumer<Var<?>>> variableDecorators = new HashMap<>();
+
+	/**
 	 * {@link CompileOfficeFloorExtension} instances.
 	 */
 	private final List<CompileOfficeFloorExtension> officeFloorExtensions = new LinkedList<>();
@@ -216,12 +227,14 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 	 * @throws Exception If fails to compile the {@link OfficeFloor}.
 	 */
 	public OfficeFloor compileOfficeFloor() throws Exception {
+		return VariableOfficeExtensionService.runInContext(this.variableDecorators, () -> {
 
-		// Ensure use this to source OfficeFloor with extensions
-		this.compiler.setOfficeFloorSource(this);
+			// Ensure use this to source OfficeFloor with extensions
+			this.compiler.setOfficeFloorSource(this);
 
-		// Compile and return the OfficeFloor
-		return this.compiler.compile("OfficeFloor");
+			// Compile and return the OfficeFloor
+			return this.compiler.compile("OfficeFloor");
+		});
 	}
 
 	/**
@@ -399,6 +412,17 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 					public OfficeSection addSection(String sectionName, Class<?> sectionClass) {
 						return officeArchitect.addOfficeSection(sectionName, ClassSectionSource.class.getName(),
 								sectionClass.getName());
+					}
+
+					@Override
+					@SuppressWarnings({ "rawtypes", "unchecked" })
+					public <T> void variable(String qualifier, Class<T> type, Consumer<Var<T>> compileVar) {
+
+						// Obtain the variable name
+						String variableName = VariableManagedObjectSource.name(qualifier, type.getName());
+
+						// Capture the variable
+						CompileOfficeFloor.this.variableDecorators.put(variableName, (Consumer) compileVar);
 					}
 				});
 			}

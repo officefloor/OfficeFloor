@@ -21,6 +21,8 @@ import java.io.IOException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -131,6 +133,27 @@ public class WoofServerTest extends OfficeFrameTestCase {
 	public static class ContextualOverloadSection {
 		public void service(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("OVERRIDE");
+		}
+	}
+
+	/**
+	 * Ensure default JSON configured.
+	 */
+	public void testDefaultJsonObject() throws IOException {
+
+		// Open the OfficeFloor (on default ports)
+		this.officeFloor = WoOF.open();
+
+		// Create the client
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+
+			// Ensure can obtain template
+			HttpPost post = new HttpPost("http://localhost:7878/objects");
+			post.addHeader("Content-Type", "application/json");
+			post.setEntity(new StringEntity("{\"message\":\"TEST\"}"));
+			HttpResponse response = client.execute(post);
+			assertEquals("Incorrect template", "{\"message\":\"TEST-mock\"}",
+					HttpClientTestUtil.entityToString(response));
 		}
 	}
 

@@ -112,6 +112,29 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can match on array.
+	 */
+	public void testMatchByArray() {
+		this.replayMockObjects();
+		this.wirer.addAutoWireTarget(this.target, new AutoWire(Object[].class));
+		AutoWireLink<Node, Node>[] links = this.wirer.getAutoWireLinks(this.source, new AutoWire(Object[].class));
+		this.assertLinkMatch(links, new AutoWire(Object[].class), new AutoWire(Object[].class));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can match on array name
+	 */
+	public void testMatchByArrayName() {
+		this.replayMockObjects();
+		this.wirer.addAutoWireTarget(this.target, new AutoWire(Object[].class.getName()));
+		AutoWireLink<Node, Node>[] links = this.wirer.getAutoWireLinks(this.source,
+				new AutoWire(Object[].class.getName()));
+		this.assertLinkMatch(links, new AutoWire(Object[].class.getName()), new AutoWire(Object[].class.getName()));
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure can match on qualified type.
 	 */
 	public void testMatchByQualifiedType() {

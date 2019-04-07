@@ -60,11 +60,12 @@ public class MockSection {
 	/**
 	 * Provides testing of objects.
 	 * 
-	 * @param object   {@link MockObject} injected from configuration.
-	 * @param response Sends the {@link MockObject} as a response.
+	 * @param object     {@link MockObject} injected from configuration.
+	 * @param httpObject {@link MockHttpObject}.
+	 * @param response   Sends the {@link MockObject} as a response.
 	 */
-	public void objects(MockObject object, ObjectResponse<MockObject> response) {
-		response.send(object);
+	public void objects(MockObject object, MockHttpObject httpObject, ObjectResponse<MockHttpObject> response) {
+		response.send(new MockHttpObject(httpObject.getMessage() + "-" + object.getMessage()));
 	}
 
 	/**

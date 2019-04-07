@@ -187,13 +187,39 @@ public class ConstructUtil {
 		Class<?> argumentType = functionReference.getArgumentType();
 		Class<?> parameterType = functionMetaData.getParameterType();
 		if ((argumentType != null) && (parameterType != null)) {
-			// Ensure argument may be passed as a parameter to the task
+
+			// Ensure argument may be passed as a parameter to the function
 			if (!parameterType.isAssignableFrom(argumentType)) {
-				issues.addIssue(assetType, assetName,
-						"Argument is not compatible with function parameter (argument=" + argumentType.getName()
-								+ ", parameter=" + parameterType.getName() + ", function=" + functionName + ") for "
-								+ forItemDescription);
-				return null; // must have compatible argument to parameter
+
+				// Not match, attempt to determine if need boxing
+				Class<?> boxedArgumentType = null;
+				if (argumentType.equals(boolean.class)) {
+					boxedArgumentType = Boolean.class;
+				} else if (argumentType.equals(byte.class)) {
+					boxedArgumentType = Byte.class;
+				} else if (argumentType.equals(short.class)) {
+					boxedArgumentType = Short.class;
+				} else if (argumentType.equals(char.class)) {
+					boxedArgumentType = Character.class;
+				} else if (argumentType.equals(int.class)) {
+					boxedArgumentType = Integer.class;
+				} else if (argumentType.equals(long.class)) {
+					boxedArgumentType = Long.class;
+				} else if (argumentType.equals(float.class)) {
+					boxedArgumentType = Float.class;
+				} else if (argumentType.equals(double.class)) {
+					boxedArgumentType = Double.class;
+				}
+
+				// Ensure boxed argument may be passed
+				if ((boxedArgumentType == null) || (!parameterType.isAssignableFrom(boxedArgumentType))) {
+					// Invalid argument
+					issues.addIssue(assetType, assetName,
+							"Argument is not compatible with function parameter (argument=" + argumentType.getName()
+									+ ", parameter=" + parameterType.getName() + ", function=" + functionName + ") for "
+									+ forItemDescription);
+					return null; // must have compatible argument to parameter
+				}
 			}
 		}
 

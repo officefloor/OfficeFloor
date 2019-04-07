@@ -18,13 +18,14 @@
 package net.officefloor.compile.section;
 
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.type.AnnotatedType;
 
 /**
  * <code>Type definition</code> of the {@link OfficeSectionInput}.
  *
  * @author Daniel Sagenschneider
  */
-public interface OfficeSectionInputType {
+public interface OfficeSectionInputType extends AnnotatedType {
 
 	/**
 	 * Obtains the name of this {@link OfficeSectionInput}.
@@ -39,12 +40,5 @@ public interface OfficeSectionInputType {
 	 * @return Parameter type for this {@link OfficeSectionInput}.
 	 */
 	String getParameterType();
-
-	/**
-	 * Obtains the annotations for the {@link OfficeSectionInput}.
-	 * 
-	 * @return Annotations for the {@link OfficeSectionInput}.
-	 */
-	Object[] getAnnotations();
 
 }

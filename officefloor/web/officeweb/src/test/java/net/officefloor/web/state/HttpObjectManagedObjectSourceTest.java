@@ -19,6 +19,7 @@ package net.officefloor.web.state;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
@@ -45,11 +46,16 @@ public class HttpObjectManagedObjectSourceTest extends OfficeFrameTestCase {
 	private static final String MOCK_CONTENT_TYPE = "application/mock";
 
 	/**
+	 * Default {@link HttpObjectParserFactory}.
+	 */
+	private HttpObjectParserFactory defaultHttpObjectParserFactory = null;
+
+	/**
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		ManagedObjectLoaderUtil
-				.validateSpecification(new HttpObjectManagedObjectSource<>(MockObject.class, null, new ArrayList<>()));
+		ManagedObjectLoaderUtil.validateSpecification(new HttpObjectManagedObjectSource<>(MockObject.class, null,
+				new ArrayList<>(), () -> this.defaultHttpObjectParserFactory));
 	}
 
 	/**
@@ -64,7 +70,7 @@ public class HttpObjectManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Validate the managed object type
 		ManagedObjectLoaderUtil.validateManagedObjectType(type, new HttpObjectManagedObjectSource<>(MockObject.class,
-				null, Arrays.asList(new MockHttpObjectParserFactory())));
+				null, Arrays.asList(new MockHttpObjectParserFactory()), () -> this.defaultHttpObjectParserFactory));
 	}
 
 	/**
@@ -118,20 +124,45 @@ public class HttpObjectManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can default the {@link HttpObjectParser}.
+	 */
+	public void testDefaultObjectParser() throws Throwable {
+		this.defaultHttpObjectParserFactory = new MockHttpObjectParserFactory();
+		this.doLoadObjectTest(MockObject.class, MOCK_CONTENT_TYPE, false,
+				(httpObject) -> assertEquals("Incorrect parsed content", "TEST", httpObject.value));
+	}
+
+	/**
+	 * Undertakes the load HTTP object test.
+	 */
+	private <T> void doLoadObjectTest(Class<T> objectType, String contentType, Consumer<T> validator,
+			String... acceptedContentTypes) throws Throwable {
+		this.doLoadObjectTest(objectType, contentType, true, validator, acceptedContentTypes);
+	}
+
+	/**
 	 * Undertakes the load HTTP object test.
 	 */
 	@SuppressWarnings("unchecked")
-	private <T> void doLoadObjectTest(Class<T> objectType, String contentType, Consumer<T> validator,
-			String... acceptedContentTypes) throws Throwable {
+	private <T> void doLoadObjectTest(Class<T> objectType, String contentType, boolean isAddParserFactory,
+			Consumer<T> validator, String... acceptedContentTypes) throws Throwable {
 
 		// Create the connection
 		MockServerHttpConnection connection = MockHttpServer
 				.mockConnection(MockHttpServer.mockRequest().header("content-type", contentType).entity("TEST"));
 
+		// Create the list of object parsers
+		List<HttpObjectParserFactory> objectParserFactories = new ArrayList<>(1);
+		if (isAddParserFactory) {
+			objectParserFactories.add(new MockHttpObjectParserFactory());
+		} else {
+			objectParserFactories.add(new NoHttpObjectParserFactory());
+		}
+
 		// Source the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		HttpObjectManagedObjectSource<T> mos = loader.loadManagedObjectSource(new HttpObjectManagedObjectSource<>(
-				objectType, acceptedContentTypes, Arrays.asList(new MockHttpObjectParserFactory())));
+				objectType, acceptedContentTypes, objectParserFactories, () -> this.defaultHttpObjectParserFactory));
 
 		// Load the HTTP Object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -142,6 +173,19 @@ public class HttpObjectManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Ensure correctly parsed out object
 		assertEquals("Incorrect object class", objectType, object.getClass());
 		validator.accept((T) object);
+	}
+
+	private static class NoHttpObjectParserFactory implements HttpObjectParserFactory {
+
+		@Override
+		public String getContentType() {
+			return MOCK_CONTENT_TYPE;
+		}
+
+		@Override
+		public <T> HttpObjectParser<T> createHttpObjectParser(Class<T> objectClass) throws Exception {
+			return null;
+		}
 	}
 
 	private static class MockHttpObjectParserFactory implements HttpObjectParserFactory {

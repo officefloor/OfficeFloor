@@ -44,9 +44,24 @@ public @interface HttpHeaderParameter {
 	 * {@link QualifierNameFactory}.
 	 */
 	public static class HttpHeaderParameterNameFactory implements QualifierNameFactory<HttpHeaderParameter> {
+
+		/**
+		 * Obtains the qualifier from name.
+		 * 
+		 * @param name Name.
+		 * @return Qualifier.
+		 */
+		public static String getQualifier(String name) {
+			return HttpHeaderParameter.class.getSimpleName() + "_" + name;
+		}
+
+		/*
+		 * ================== QualifierNameFactory =======================
+		 */
+
 		@Override
 		public String getQualifierName(HttpHeaderParameter annotation) {
-			return HttpHeaderParameter.class.getSimpleName() + "_" + annotation.value();
+			return getQualifier(annotation.value());
 		}
 	}
 

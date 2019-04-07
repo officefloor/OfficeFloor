@@ -67,10 +67,6 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>officejson_jackson</artifactId>
-		</dependency>
 		<!-- START SNIPPET: dependency -->
 		<dependency>
 			<groupId>net.officefloor.server</groupId>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.tutorial</groupId>
+		<artifactId>tutorials</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<artifactId>JavaScriptHttpServer</artifactId>
+	<name>JavaScript Tutorial</name>
+	<description>Tutorial of implementing logic with JavaScript</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<basedir>${basedir}</basedir>
+		<projectVersion>${project.version}</projectVersion>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+		</dependency>
+		<!-- START SNIPPET: JAVASCRIPT -->
+		<dependency>
+			<groupId>net.officefloor.polyglot</groupId>
+			<artifactId>officepolyglot_javascript</artifactId>
+		</dependency>
+		<!-- END SNIPPET: WEBCLIENT -->
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	<profiles>
+		<profile>
+			<!-- Profile for building -->
+			<id>build-repositories</id>
+			<activation>
+				<file>
+					<exists>${basedir}/pom.xml</exists>
+				</file>
+			</activation>
+			<repositories>
+				<repository>
+					<!-- OfficeFloor repository to obtain artifacts for running the example -->
+					<id>maven2-repository.officefloor.net</id>
+					<name>OfficeFloor Repository for Maven</name>
+					<url>http://www.officefloor.net/maven2/</url>
+				</repository>
+			</repositories>
+		</profile>
+	</profiles>
+</project>

@@ -42,6 +42,7 @@ import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
+import net.officefloor.web.response.ObjectResponseManagedObjectSource.DefaultHttpObjectResponder;
 import net.officefloor.web.response.ObjectResponseManagedObjectSource.ObjectResponseDependencies;
 import net.officefloor.web.state.HttpObjectManagedObjectSource.HttpObjectDependencies;
 
@@ -53,11 +54,17 @@ import net.officefloor.web.state.HttpObjectManagedObjectSource.HttpObjectDepende
 public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
+	 * Default {@link HttpObjectResponderFactory}.
+	 */
+	private HttpObjectResponderFactory defaultHttpObjectResponderFactory = null;
+
+	/**
 	 * Validate specification.
 	 */
 	public void testSpecification() {
 		ManagedObjectLoaderUtil.validateSpecification(new ObjectResponseManagedObjectSource(
-				Arrays.asList(new MockHttpObjectResponderFactory("application/json", 0))));
+				Arrays.asList(new MockHttpObjectResponderFactory("application/json", 0)),
+				() -> this.defaultHttpObjectResponderFactory));
 	}
 
 	/**
@@ -70,8 +77,10 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 		type.addDependency(ObjectResponseDependencies.SERVER_HTTP_CONNECTION, ServerHttpConnection.class, null);
 
 		// Validate the managed object type
-		ManagedObjectLoaderUtil.validateManagedObjectType(type, new ObjectResponseManagedObjectSource(
-				Arrays.asList(new MockHttpObjectResponderFactory("application/json", 0))));
+		ManagedObjectLoaderUtil.validateManagedObjectType(type,
+				new ObjectResponseManagedObjectSource(
+						Arrays.asList(new MockHttpObjectResponderFactory("application/json", 0)),
+						() -> this.defaultHttpObjectResponderFactory));
 	}
 
 	/**
@@ -81,7 +90,7 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	public void testNoFactory() {
 		try {
 			new ManagedObjectSourceStandAlone()
-					.initManagedObjectSource(new ObjectResponseManagedObjectSource(Collections.EMPTY_LIST));
+					.initManagedObjectSource(new ObjectResponseManagedObjectSource(Collections.EMPTY_LIST, () -> null));
 			fail("Should not be successful");
 		} catch (Exception ex) {
 			assertEquals("Incorrect cause", "Must have at least one HttpObjectResponderFactory configured",
@@ -90,8 +99,7 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can send based on input <code>content-type</code> as no accept
-	 * type.
+	 * Ensure can send based on input <code>content-type</code> as no accept type.
 	 */
 	public void testMatchContentTypeAsNoAccept() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse(A(), "content/type", new MockObject("TEST"),
@@ -100,8 +108,7 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can send based on input <code>content-type</code> as accept any
-	 * type.
+	 * Ensure can send based on input <code>content-type</code> as accept any type.
 	 */
 	public void testMatchContentTypeAsWildcardAccept() throws Throwable {
 		MockHttpResponse response = this.doObjectResponse(A("*/*"), "content/type", new MockObject("TEST"),
@@ -190,6 +197,15 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure use {@link DefaultHttpObjectResponder}.
+	 */
+	public void testMatchWithDefaultHttpObjectResponderFactory() throws Throwable {
+		this.defaultHttpObjectResponderFactory = new MockHttpObjectResponderFactory("application/default", -1);
+		MockHttpResponse response = this.doObjectResponse("application/default", new MockObject("TEST"));
+		assertResponse(response, "application/default", "{value: 'TEST--1'}");
+	}
+
+	/**
 	 * Ensure can parse out values with spacing.
 	 */
 	public void testParsingWithSpacing() throws Throwable {
@@ -239,8 +255,8 @@ public class ObjectResponseManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Source the managed object source
 		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
-		ObjectResponseManagedObjectSource mos = loader
-				.loadManagedObjectSource(new ObjectResponseManagedObjectSource(factories));
+		ObjectResponseManagedObjectSource mos = loader.loadManagedObjectSource(
+				new ObjectResponseManagedObjectSource(factories, () -> this.defaultHttpObjectResponderFactory));
 
 		// Obtain the object response
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();

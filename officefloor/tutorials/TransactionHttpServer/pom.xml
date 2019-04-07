@@ -29,10 +29,6 @@
 		</dependency>
 		<!-- END SNIPPET: tutorial -->
 		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>officejson_jackson</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 		</dependency>

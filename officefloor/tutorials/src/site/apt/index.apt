@@ -6,7 +6,7 @@
                
 OfficeFloor Tutorials
   
-  Once you have installed the {{{../install.html}OfficeFloor Eclipse plug-ins}} you have the tools ready for the below tutorials.
+  Once you have installed the {{{../install.html}OfficeFloor plug-ins}} you have the tools ready for the below tutorials.
     
   The tutorials refer to <WoOF>, which stands for <Web on OfficeFloor>.  It is a set of prefabricated plug-ins for OfficeFloor that enables OfficeFloor to act as a high performance Web Application Server.  Due to "true" inversion of control, you will see that the prefabricated plug-ins are much more re-usable than simple Dependency Injection framework objects.
   

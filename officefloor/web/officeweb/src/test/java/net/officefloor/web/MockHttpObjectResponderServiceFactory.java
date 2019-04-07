@@ -37,6 +37,11 @@ import net.officefloor.web.build.HttpObjectResponderServiceFactory;
 public class MockHttpObjectResponderServiceFactory
 		implements HttpObjectResponderServiceFactory, HttpObjectResponderFactory {
 
+	/**
+	 * Indicates whether to include;
+	 */
+	public static boolean isInclude = true;
+
 	/*
 	 * =========== HttpObjectResponderServiceFactory ============
 	 */
@@ -52,7 +57,7 @@ public class MockHttpObjectResponderServiceFactory
 
 	@Override
 	public String getContentType() {
-		return "registered/response";
+		return isInclude ? "registered/response" : null;
 	}
 
 	@Override

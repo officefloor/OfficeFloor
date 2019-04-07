@@ -43,6 +43,8 @@ import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.officefloor.CompileVar;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.escalate.Escalation;
@@ -118,7 +120,6 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public void testIgnoreNonFunctionMethods() {
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockIgnoreInputSection.class,
-
 				this.configureClassSectionFunction("includedInput"));
 		expected.addSectionInput("includedInput", null);
 
@@ -267,6 +268,53 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockFlowInterfaceSection {
 		public void doInput(MockFlowInterface flows) {
+			// Testing type
+		}
+	}
+
+	/**
+	 * Ensure can provide parameter types for {@link FlowInterface}.
+	 */
+	public void testFlowInterfaceParameterTypes() {
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockParameterFlowInterfaceSection.class,
+				this.configureClassSectionFunction("doInput"));
+		expected.addSectionInput("doInput", null);
+		expected.addSectionOutput("doArray", Object[].class.getName(), false);
+		expected.addSectionOutput("doBoxedPrimitive", Character.class.getName(), false);
+		expected.addSectionOutput("doBoxedPrimitiveArray", Character[].class.getName(), false);
+		expected.addSectionOutput("doObject", Object.class.getName(), false);
+		expected.addSectionOutput("doPrimitive", char.class.getName(), false);
+		expected.addSectionOutput("doPrimitiveArray", char[].class.getName(), false);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockParameterFlowInterfaceSection.class.getName());
+	}
+
+	/**
+	 * Mock {@link FlowInterface} for the {@link MockFlowInterfaceSection}.
+	 */
+	@FlowInterface
+	public static interface MockParameterFlowInterface {
+		void doObject(Object param);
+
+		void doPrimitive(char param);
+
+		void doBoxedPrimitive(Character param);
+
+		void doArray(Object[] param);
+
+		void doPrimitiveArray(char[] param);
+
+		void doBoxedPrimitiveArray(Character[] param);
+	}
+
+	/**
+	 * Section with a parameter {@link FlowInterface}.
+	 */
+	public static class MockParameterFlowInterfaceSection {
+		public void doInput(MockParameterFlowInterface flows) {
 			// Testing type
 		}
 	}
@@ -1318,6 +1366,189 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can pass parameters via {@link FlowInterface}.
+	 */
+	public void testFlowInterfaceParameter() throws Throwable {
+
+		// Configure flows
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		CompileVar<Object> object = new CompileVar<>();
+		CompileVar<Character> primitive = new CompileVar<>();
+		CompileVar<Character> boxedPrimitive = new CompileVar<>();
+		CompileVar<Object[]> objectArray = new CompileVar<>();
+		CompileVar<char[]> primitiveArray = new CompileVar<>();
+		CompileVar<Character[]> boxedPrimitiveArray = new CompileVar<>();
+		compiler.office((context) -> {
+			context.addSection("SECTION", MockPassParameterFlowInterfaceSection.class);
+			context.variable(null, Object.class, object);
+			context.variable("primitive", Character.class, primitive);
+			context.variable(null, Character.class, boxedPrimitive);
+			context.variable(null, Object[].class, objectArray);
+			context.variable(null, char[].class, primitiveArray);
+			context.variable(null, Character[].class, boxedPrimitiveArray);
+		});
+		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+
+			// Object
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doObject");
+			assertEquals("Incorrect object", "1", object.getValue());
+
+			// Primitive
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doPrimitive");
+			assertEquals("Incorrect primitive", Character.valueOf('2'), primitive.getValue());
+
+			// Boxed primitive
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doBoxedPrimitive");
+			assertEquals("Incorrect primitive", Character.valueOf('3'), boxedPrimitive.getValue());
+
+			// Object array
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doObjectArray");
+			assertEquals("Incorrect object array", "4", objectArray.getValue()[0]);
+
+			// Primitive array
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doPrimitiveArray");
+			assertEquals("Incorrect primitive", '5', primitiveArray.getValue()[0]);
+
+			// Boxed primitive
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", "doBoxedPrimitiveArray");
+			assertEquals("Incorrect primitive", Character.valueOf('6'), boxedPrimitiveArray.getValue()[0]);
+		}
+	}
+
+	public static class MockPassParameterFlowInterfaceSection {
+
+		public void service(@Parameter String option, ParameterFlowInterface flows) {
+			switch (option) {
+			case "doObject":
+				flows.doObject("1");
+				break;
+			case "doPrimitive":
+				flows.doPrimitive('2');
+				break;
+			case "doBoxedPrimitive":
+				flows.doBoxedPrimitive('3');
+				break;
+			case "doObjectArray":
+				flows.doObjectArray(new Object[] { "4" });
+				break;
+			case "doPrimitiveArray":
+				flows.doPrimitiveArray(new char[] { '5' });
+				break;
+			case "doBoxedPrimitiveArray":
+				flows.doBoxedPrimitiveArray(new Character[] { '6' });
+				break;
+			default:
+				fail("Unknown input: " + option);
+				break;
+			}
+		}
+
+		public void doObject(@Parameter Object value, Out<Object> out) {
+			out.set(value);
+		}
+
+		public void doPrimitive(@Parameter char value, @Qualified("primitive") Out<Character> out) {
+			out.set(value);
+		}
+
+		public void doBoxedPrimitive(@Parameter Character value, Out<Character> out) {
+			out.set(value);
+		}
+
+		public void doObjectArray(@Parameter Object[] value, Out<Object[]> out) {
+			out.set(value);
+		}
+
+		public void doPrimitiveArray(@Parameter char[] value, Out<char[]> out) {
+			out.set(value);
+		}
+
+		public void doBoxedPrimitiveArray(@Parameter Character[] value, Out<Character[]> out) {
+			out.set(value);
+		}
+	}
+
+	@FlowInterface
+	public static interface ParameterFlowInterface {
+		void doObject(Object param);
+
+		void doPrimitive(char param);
+
+		void doBoxedPrimitive(Character param);
+
+		void doObjectArray(Object[] param);
+
+		void doPrimitiveArray(char[] param);
+
+		void doBoxedPrimitiveArray(Character[] param);
+	}
+
+	/**
+	 * Ensure can pass primitive parameters.
+	 */
+	public void testPrimtiiveParameters() throws Throwable {
+
+		// Configure flows
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		CompileVar<Boolean> result = new CompileVar<>();
+		compiler.office((context) -> {
+			context.addSection("SECTION", PrimitiveParametersSection.class);
+			context.variable(null, Boolean.class, result);
+		});
+		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.service", Byte.valueOf((byte) 1));
+			assertTrue("Should pass all the way through", result.getValue());
+		}
+	}
+
+	public static class PrimitiveParametersSection {
+
+		@NextFunction("doByte")
+		public byte service(@Parameter byte param) {
+			return param;
+		}
+
+		@NextFunction("doShort")
+		public short doByte(@Parameter byte param) {
+			return param;
+		}
+
+		@NextFunction("doChar")
+		public char doShort(@Parameter short param) {
+			return (char) param;
+		}
+
+		@NextFunction("doInt")
+		public int doChar(@Parameter char param) {
+			return param;
+		}
+
+		@NextFunction("doLong")
+		public long doInt(@Parameter int param) {
+			return param;
+		}
+
+		@NextFunction("doFloat")
+		public float doLong(@Parameter long param) {
+			return param;
+		}
+
+		@NextFunction("doDouble")
+		public double doFloat(@Parameter float param) {
+			return param;
+		}
+
+		@NextFunction("doBoolean")
+		public boolean doDouble(@Parameter double param) {
+			return Math.abs(param - 1) < 0.0000001; // avoid rounding issues
+		}
+
+		public void doBoolean(@Parameter boolean param, Out<Boolean> out) {
+			out.set(param);
+		}
+	}
+
+	/**
 	 * Ensure can configure a {@link SubSection}.
 	 */
 	public void testSubSection() throws Exception {
@@ -1450,7 +1681,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			String functionName, String functionTypeName) {
 		SectionFunction function = namespace.addSectionFunction(functionName, functionTypeName);
 		FunctionObject functionObject = function.getFunctionObject(ClassSectionSource.CLASS_OBJECT_NAME);
-		designer.link(functionObject, objectManagedObject);
+		designer.link(functionObject, this.objectManagedObject);
 		return function;
 	}
 

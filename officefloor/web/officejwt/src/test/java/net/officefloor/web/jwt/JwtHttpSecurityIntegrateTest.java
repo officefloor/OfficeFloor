@@ -86,8 +86,8 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	};
 
 	/**
-	 * {@link JwtValidateKeyCollector} handler to use in provide {@link JwtValidateKey}
-	 * instances.
+	 * {@link JwtValidateKeyCollector} handler to use in provide
+	 * {@link JwtValidateKey} instances.
 	 */
 	private static Consumer<JwtValidateKeyCollector> jwtDecodeCollectorHandler = DEFAULT_JWT_DECODE_COLLECTOR;
 
@@ -146,7 +146,7 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		jwtDecodeCollectorHandler = (collector) -> {
 		};
 		String errorEntity = JacksonHttpObjectResponderFactory
-				.getEntity(new HttpException(new TimeoutException("Server timed out loading JWT keys")));
+				.getEntity(new HttpException(new TimeoutException("Server timed out loading JWT keys")), mapper);
 		this.doJwtTest("Bearer NO.KEYS.AVAILBLE", HttpStatus.SERVICE_UNAVAILABLE, errorEntity,
 				JwtHttpSecuritySource.PROEPRTY_STARTUP_TIMEOUT, "0");
 	}
@@ -241,7 +241,8 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure invalid JWT as {@link JwtValidateKey} is too new but within clock skew.
+	 * Ensure invalid JWT as {@link JwtValidateKey} is too new but within clock
+	 * skew.
 	 */
 	public void testValidDueToNewKeyButWithinClockSkew() throws Exception {
 		this.doValidDecodeKeyTest(2, 20);
@@ -308,7 +309,7 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 		MockHttpRequestBuilder request = MockHttpServer.mockRequest(ROLE_PATH);
 		request.header("Authorization", "Bearer " + otherToken);
 		this.server.send(request).assertResponse(HttpStatus.FORBIDDEN.getStatusCode(),
-				JacksonHttpObjectResponderFactory.getEntity(new HttpException(HttpStatus.FORBIDDEN)));
+				JacksonHttpObjectResponderFactory.getEntity(new HttpException(HttpStatus.FORBIDDEN), mapper));
 
 		// JWT for role
 		String roleToken = Jwts.builder().signWith(keyPair.getPrivate()).claim("role", "allow").compact();
@@ -428,8 +429,8 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 * 
 	 * @param keyStartOffset  {@link JwtValidateKey} start seconds offset to current
 	 *                        time.
-	 * @param keyExpireOffset {@link JwtValidateKey} expire seconds offset to current
-	 *                        time.
+	 * @param keyExpireOffset {@link JwtValidateKey} expire seconds offset to
+	 *                        current time.
 	 */
 	private void doValidDecodeKeyTest(long keyStartOffset, long keyExpireOffset) throws Exception {
 		jwtDecodeCollectorHandler = (collector) -> {
@@ -443,8 +444,8 @@ public class JwtHttpSecurityIntegrateTest extends OfficeFrameTestCase {
 	 * 
 	 * @param keyStartOffset  {@link JwtValidateKey} start seconds offset to current
 	 *                        time.
-	 * @param keyExpireOffset {@link JwtValidateKey} expire seconds offset to current
-	 *                        time.
+	 * @param keyExpireOffset {@link JwtValidateKey} expire seconds offset to
+	 *                        current time.
 	 */
 	private void doInvalidDecodeKeyTest(long keyStartOffset, long keyExpireOffset) throws Exception {
 
