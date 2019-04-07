@@ -5,6 +5,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import net.officefloor.woof.mock.MockWoofServerRule
 import net.officefloor.server.http.mock.MockHttpRequestBuilder
+import net.officefloor.server.http.HttpMethod
 
 /**
  * Traits to assist testing with WoOF.
@@ -41,4 +42,14 @@ trait WoofRules {
    */
   def mockRequest(requestUri: String): MockHttpRequestBuilder = new ScalaMockWoofServerStaticAccess().mockRequest(requestUri)
 
+  /**
+   * Obtains the HttpMethod for the name.
+   */
+  def httpMethod(methodName: String): HttpMethod = new ScalaMockWoofServerStaticAccess().httpMethod(methodName)
+  
+  /**
+   * Translate entity object to JSON.
+   */
+  def jsonEntity(entity: Any): String = new ScalaMockWoofServerStaticAccess().jsonEntity(entity)
+  
 }

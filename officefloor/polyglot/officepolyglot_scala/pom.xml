@@ -92,6 +92,14 @@
 			<artifactId>scala-library</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officejson_default</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-scala_2.12</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.polyglot</groupId>
 			<artifactId>officepolyglot_test</artifactId>
 			<scope>test</scope>

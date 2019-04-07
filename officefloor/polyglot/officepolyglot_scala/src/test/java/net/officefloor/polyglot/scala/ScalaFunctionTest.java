@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.module.scala.DefaultScalaModule;
+
 import junit.framework.AssertionFailedError;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
@@ -31,6 +33,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Var;
@@ -44,8 +47,11 @@ import net.officefloor.polyglot.test.ParameterTypes;
 import net.officefloor.polyglot.test.PrimitiveTypes;
 import net.officefloor.polyglot.test.VariableTypes;
 import net.officefloor.polyglot.test.WebTypes;
+import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.compile.CompileWebContext;
+import net.officefloor.web.compile.WebCompileOfficeFloor;
 
 /**
  * Tests adapting a Scala function via a {@link ManagedFunction}.
@@ -53,6 +59,10 @@ import net.officefloor.web.compile.CompileWebContext;
  * @author Daniel Sagenschneider
  */
 public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
+
+	static {
+		mapper.registerModule(new DefaultScalaModule());
+	}
 
 	/**
 	 * Ensure issue if try to use non Scala object.
@@ -65,13 +75,36 @@ public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
 			isSuccessful = true;
 		} catch (AssertionFailedError ex) {
 
-			// Ensure reasonse
+			// Ensure correct reason
 			assertTrue("Incorrect cause: " + ex.getMessage(), ex.getMessage().startsWith("Class "
 					+ NotScalaObject.class.getName() + " is not Scala Object (expecting MODULE$ static field)"));
 
 			isSuccessful = false;
 		}
 		assertFalse("Should not be successful", isSuccessful);
+	}
+
+	/**
+	 * Ensure able to send Scala class.
+	 */
+	public void testWebSendScalaClass() throws Throwable {
+		WebCompileOfficeFloor compiler = new WebCompileOfficeFloor();
+		Closure<MockHttpServer> server = new Closure<>();
+		compiler.mockHttpServer((mockServer) -> server.value = mockServer);
+		compiler.web((context) -> {
+			context.link(false, "/", ScalaRequestService.class);
+		});
+		this.officeFloor = compiler.compileAndOpenOfficeFloor();
+		MockHttpResponse response = server.value
+				.send(MockHttpServer.mockRequest().header("Content-Type", "application/json")
+						.entity(mapper.writeValueAsString(new ScalaRequest(1, "test"))));
+		response.assertResponse(200, "{\"identifier\":2,\"message\":\"Serviced test\"}");
+	}
+
+	public static class ScalaRequestService {
+		public void service(ScalaRequest request, ObjectResponse<ScalaRequest> response) {
+			response.send(new ScalaRequest(request.identifier() + 1, "Serviced " + request.message()));
+		}
 	}
 
 	/*
