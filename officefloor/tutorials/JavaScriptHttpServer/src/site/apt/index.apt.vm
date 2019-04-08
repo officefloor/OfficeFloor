@@ -20,6 +20,14 @@
 
 
 
+Enable JavaScript
+
+  To enable using JavaScript, add the following:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
 JavaScript
 
   The JavaScript to validate the request is as follows:
