@@ -27,16 +27,6 @@ JavaScript
   
   Different payload types (HTTP parameters and JSON) are used for the respective AJAX requests.  This is to demonstrate in the next sections how WoOF handles each payload type.
 
-
-
-Including JSON object handling
-
-  To include the object parsing/rendering from/to JSON, include the following in your <<<pom.xml>>>:
-
-%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
-  
-  WoOF will auto detect the extension and include it.
-
   
   
 AJAX with HTTP parameters

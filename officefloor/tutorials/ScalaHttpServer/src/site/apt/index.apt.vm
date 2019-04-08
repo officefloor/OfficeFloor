@@ -1,0 +1,57 @@
+                                               -----------------------
+                                               Scala Polyglot Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<Scala Polyglot Tutorial>>
+
+  This tutorial demonstrates using Scala within WoOF.
+  
+  While the tutorial is simple, it is entirely written in Scala.
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ScalaHttpServer/${projectVersion}/ScalaHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Enable Scala
+
+  To enable using Scala, add the following:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+Scala
+
+  The Scala to service the request is:
+  
+%{snippet|file=${basedir}/src/main/scala/net/officefloor/tutorial/scalahttpserver/ScalaService.scala|ignoreDownloadError=false}
+
+  The Scala function is configured via the {{{/apidocs/net/officefloor/polyglot/scala/ScalaFunctionSectionSource.html}ScalaFunctionSectionSource}}.
+
+
+
+Scala Classes
+
+  As part of supporting Scala, the necessary Jackson support is included to enable sending/receiving Scala classes as JSON.
+  
+  The request / response data classes are as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/scalahttpserver/ScalaRequest.scala|ignoreDownloadError=false}
+ 
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/scalahttpserver/ScalaResponse.scala|ignoreDownloadError=false}
+
+
+
+Testing
+
+  WoOF is integrated with ScalaTest via traits.  This allows the following ease of testing:
+  
+%{snippet|file=${basedir}/src/test/scala/net/officefloor/tutorial/scalahttpserver/ScalaHttpServerTest.scala|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../VariableHttpServer/index.html}next tutorial}} covers variables.

@@ -127,7 +127,7 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof</artifactId>
 		</dependency>
-		<!-- START SNIPPET: SCALA -->
+		<!-- START SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.polyglot</groupId>
 			<artifactId>officepolyglot_scala</artifactId>
@@ -137,7 +137,7 @@
 			<artifactId>officepolyglot_scalatest</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- END SNIPPET: SCALA -->
+		<!-- END SNIPPET: tutorial -->
 	</dependencies>
 	<profiles>
 		<profile>

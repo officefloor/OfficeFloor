@@ -21,12 +21,12 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof</artifactId>
 		</dependency>
-		<!-- START SNIPPET: JAVASCRIPT -->
+		<!-- START SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.polyglot</groupId>
 			<artifactId>officepolyglot_javascript</artifactId>
 		</dependency>
-		<!-- END SNIPPET: WEBCLIENT -->
+		<!-- END SNIPPET: tutorial -->
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>

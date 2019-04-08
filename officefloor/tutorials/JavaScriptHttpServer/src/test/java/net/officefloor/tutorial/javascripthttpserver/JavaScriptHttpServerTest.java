@@ -33,6 +33,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class JavaScriptHttpServerTest {
 
+	// START SNIPPET: tutorial
 	@Rule
 	public final MockWoofServerRule server = new MockWoofServerRule();
 
@@ -60,4 +61,5 @@ public class JavaScriptHttpServerTest {
 						.entity(mapper.writeValueAsString(new Request(1, "Daniel"))));
 		response.assertResponse(200, mapper.writeValueAsString(new Response("successful")));
 	}
+	// END SNIPPET: tutorial
 }
