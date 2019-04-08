@@ -88,6 +88,10 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ReactiveHttpServer/index.html}Reactive}}                | Using Reactive for asynchronous concurrency.               | AsynchronousFlow
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./KotlinHttpServer/index.html}Kotlin}}                    | Using Kotlin.                                              | Polyglot Kotlin
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./ScalaHttpServer/index.html}Scala}}                      | Using Scala.                                               | Polyglot Scala
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./VariableHttpServer/index.html}Variables}}               | Passing state downstream for flows.                        | Out\<T\> , @Val
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./DatabaseHttpServer/index.html}Dependency Injection (Managed Object)}} | Dependency injecting a customised managed object. | ManagedObjectSource
