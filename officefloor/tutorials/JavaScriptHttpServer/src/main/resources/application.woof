@@ -9,10 +9,10 @@
   <templates>
   </templates>
   <sections>
-    <section name="Respond" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.javascripthttpserver.ResponseLogic" x="439" y="45">
+    <section name="Respond" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.javascripthttpserver.ResponseLogic" x="378" y="47">
       <input name="send" parameter-type=""/>
     </section>
-    <section name="Validate" source="net.officefloor.polyglot.javascript.JavaScriptFunctionSectionSource" location="net/officefloor/tutorial/javascripthttpserver/Validate.js" x="164" y="48">
+    <section name="Validate" source="net.officefloor.polyglot.javascript.JavaScriptFunctionSectionSource" location="net/officefloor/tutorial/javascripthttpserver/Validate.js" x="145" y="48">
       <property name="function.name" value="validate"/>
       <input name="validate" parameter-type=""/>
       <output name="valid" argument-type="">

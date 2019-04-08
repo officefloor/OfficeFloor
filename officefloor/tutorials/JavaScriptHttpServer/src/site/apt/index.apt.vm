@@ -1,0 +1,68 @@
+                                               -----------------------
+                                             JavaScript Polyglot Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<JavaScript Polyglot Tutorial>>
+
+  This tutorial demonstrates using JavaScript within WoOF.
+
+  It will use the {{{/apidocs/net/officefloor/polyglot/javascript/JavaScriptFunctionSectionSource.html}JavaScriptFunctionSectionSource}} to enable use of JavaScript functions.
+
+  The use of JavaScript in this tutorial will be to validate the request.  This allows JavaScript in a single page application to be re-used on the server.  In other words, validation rules used to confirm correctly entered information can be re-used server side to ensure correct defensive checks regarding the data sent.  This avoids having to recode and maintain two separate sets of validation rules in different languages.
+
+  The configuration of the tutorial is as follows:
+
+[./images/JavaScriptHttpServer-configuration.png] JavaScriptHttpServer screen shot.
+   
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/JavaScriptHttpServer/${projectVersion}/JavaScriptHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+JavaScript
+
+  The JavaScript to validate the request is as follows:
+  
+%{snippet|file=${basedir}/src/main/resources/net/officefloor/tutorial/javascripthttpserver/Validate.js|ignoreDownloadError=false}
+
+  The JavaScript is interpreted by the {{{http://www.graalvm.org}graal.js}} script engine and integrated into WoOF with the {{{/apidocs/net/officefloor/polyglot/javascript/JavaScriptFunctionSectionSource.html}JavaScriptFunctionSectionSource}}.
+  
+  The representation of the JavaScript function is very similar to Java methods.
+  
+  However, due to lack of type information, the meta-data for the JavaScript function must be defined.  The <<<officefloor>>> object configured against the function provides this meta-data.  Please see the JavaScript {{{https://github.com/sagenschneider/OfficeFloor/blob/master/officefloor/polyglot/officepolyglot_javascript/src/test/resources/javascript/Functions.js}polyglot tests}} for the various configurations.
+  
+  Note: once the {{{http://www.graalvm.org}graal.js}} script engine supports decorators, the configuration will be updated to <<<@OfficeFloor>>> decorator to have similar look to Java for consistency.
+
+
+
+Send Response
+
+  Now that the JavaScript has validated the request, the response can be sent:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/javascripthttpserver/ResponseLogic.java|ignoreDownloadError=false}
+
+  This demonstrates providing polyglot solutions with OfficeFloor.
+
+
+
+Note on scripting and threading
+  
+  As the JavaScript script engine requires single threads, an engine is created per thread.
+  
+  This does not cause state sharing problems, as all state is injected into the JavaScript function.  However, if you do decide to cache state within the script, be aware that there may be more than one script engine running.
+  
+  Also, as a script engine is created per thread this can push up memory.  For validation (as per this tutorial), the engines run on the socket listener threads.  Therefore, there is only going to be an engine per CPU (following one socket listener thread per CPU).  However, be aware that using JavaScript later in the application when handled by other {{{/apidocs/net/officefloor/frame/api/team/Team.html}Team}} instances, that number of engines can increase causing additional memory.
+
+
+Testing
+
+  The following shows the JavaScript validation rejecting an invalid request and allowing a valid request:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/javascripthttpserver/JavaScriptHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../JwtResourceHttpServer/index.html}next tutorial}} covers JWT security.
