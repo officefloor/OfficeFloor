@@ -156,7 +156,7 @@
 						<version>${dokka-maven-version}</version>
 						<executions>
 							<execution>
-								<phase>integration-test</phase>
+								<phase>prepare-package</phase>
 								<goals>
 									<goal>javadocJar</goal>
 								</goals>
