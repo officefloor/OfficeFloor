@@ -39,6 +39,13 @@
 							<goal>testCompile</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>attach-javadocs</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>doc-jar</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
