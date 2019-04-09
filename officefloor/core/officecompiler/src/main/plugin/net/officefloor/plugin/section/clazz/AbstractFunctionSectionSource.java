@@ -484,12 +484,9 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 	/**
 	 * Links the {@link FunctionFlow}.
 	 * 
-	 * @param functionFlow      {@link FunctionFlow}.
-	 * @param functionType      {@link ManagedFunctionType}.
-	 * @param flowInterfaceType Interface type specifying the flows.
-	 * @param flowMethod        Method on the interface for the flow to be linked.
-	 * @param flowArgumentType  {@link FunctionFlow} argument type. May be
-	 *                          <code>null</code> if no argument.
+	 * @param functionFlow   {@link FunctionFlow}.
+	 * @param functionType   {@link ManagedFunctionType}.
+	 * @param flowAnnotation {@link FlowAnnotation}.
 	 */
 	protected void linkFunctionFlow(FunctionFlow functionFlow, ManagedFunctionType<?, ?> functionType,
 			FlowAnnotation flowAnnotation) {

@@ -24,7 +24,6 @@ public interface JwksKeyWriter<K extends Key> {
 	 * Writes the {@link Key} as {@link ObjectNode}.
 	 * 
 	 * @param context {@link JwksKeyWriterContext}.
-	 * @return {@link ObjectNode}.
 	 * @throws Exception If fails to write the {@link Key}.
 	 */
 	void writeKey(JwksKeyWriterContext<K> context) throws Exception;

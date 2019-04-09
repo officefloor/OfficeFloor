@@ -788,13 +788,6 @@
 					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
-			<pluginRepositories>
-				<pluginRepository>
-					<id>jcenter</id>
-					<name>JCenter</name>
-					<url>https://jcenter.bintray.com/</url>
-				</pluginRepository>
-			</pluginRepositories>
 			<build>
 				<plugins>
 					<plugin>
@@ -814,25 +807,6 @@
 								</configuration>
 							</execution>
 						</executions>
-					</plugin>
-					<plugin>
-						<!-- Provide Kotlin JavaDoc files -->
-						<groupId>org.jetbrains.dokka</groupId>
-						<artifactId>dokka-maven-plugin</artifactId>
-						<version>${dokka-maven-version}</version>
-						<executions>
-							<execution>
-								<phase>integration-test</phase>
-								<goals>
-									<goal>javadocJar</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<sourceDirectories>
-								<dir>src/main/kotlin</dir>
-							</sourceDirectories>
-						</configuration>
 					</plugin>
 					<plugin>
 						<!-- Generate Javadoc release jar (before signing) -->
@@ -861,7 +835,7 @@
 								</goals>
 								<configuration>
 									<gpgArguments>
-										<arg>--pinentry-mode</arg>
+										<arg>- -pinentry-mode</arg>
 										<arg>loopback</arg>
 									</gpgArguments>
 								</configuration>

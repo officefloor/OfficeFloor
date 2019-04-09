@@ -8,8 +8,8 @@ import net.officefloor.web.jwt.validate.JwtValidateKey;
  * Collects {@link JwtAccessKey} instances for JWT validation.
  * <p>
  * It is expected that the {@link JwtAccessKey} instances (and their
- * corresponding {@link JwtValidateKey} instances) are rotated. This minimises the
- * impact of "leaked" keys (for whatever reason) from creating security
+ * corresponding {@link JwtValidateKey} instances) are rotated. This minimises
+ * the impact of "leaked" keys (for whatever reason) from creating security
  * problems.
  * <p>
  * Furthermore, in a clustered environment, co-ordinating the creation of
@@ -53,9 +53,7 @@ public interface JwtAccessKeyCollector {
 	/**
 	 * Specifies the {@link JwtAccessKey} instances.
 	 * 
-	 * @param timeToNextCheck Time in milliseconds to collect {@link JwtAccessKey}
-	 *                        instances again.
-	 * @param keys            {@link JwtAccessKey} instances.
+	 * @param keys {@link JwtAccessKey} instances.
 	 */
 	void setKeys(JwtAccessKey[] keys);
 
