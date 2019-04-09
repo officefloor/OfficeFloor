@@ -157,5 +157,32 @@
 				</repository>
 			</repositories>
 		</profile>
+		<profile>
+			<id>scala-release-to-maven-central</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>sonatype</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Provide Scala JavaDoc files -->
+						<groupId>net.alchim31.maven</groupId>
+						<artifactId>scala-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<phase>integration-test</phase>
+								<goals>
+									<goal>doc-jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 </project>

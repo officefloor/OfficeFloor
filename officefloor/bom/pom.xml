@@ -60,6 +60,7 @@
 		<commons-text-version>1.6</commons-text-version>
 		<datanucleus-version>5.2.0-release</datanucleus-version>
 		<docker-client-version>8.15.2</docker-client-version>
+		<dokka-maven-version>0.9.18</dokka-maven-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.4</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
@@ -834,7 +835,7 @@
 								</goals>
 								<configuration>
 									<gpgArguments>
-										<arg>--pinentry-mode</arg>
+										<arg>- -pinentry-mode</arg>
 										<arg>loopback</arg>
 									</gpgArguments>
 								</configuration>

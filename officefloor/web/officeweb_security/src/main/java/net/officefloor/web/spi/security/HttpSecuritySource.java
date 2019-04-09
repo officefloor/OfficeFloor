@@ -66,7 +66,7 @@ public interface HttpSecuritySource<A, AC extends Serializable, C, O extends Enu
 	 * 
 	 * @param context {@link HttpSecurityExecuteContext} to use in starting this
 	 *                {@link HttpSecuritySource}.
-	 * @throws Exception Should the {@link HttpSecuritySourceSource} fail to start
+	 * @throws Exception Should the {@link HttpSecuritySource} fail to start
 	 *                   execution.
 	 */
 	void start(HttpSecurityExecuteContext<F> context) throws Exception;

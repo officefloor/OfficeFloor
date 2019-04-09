@@ -99,7 +99,7 @@ public interface OfficeFloorManagedObjectSource extends PropertyConfigurable {
 
 	/**
 	 * Obtains the {@link OfficeFloorManagedObjectFunctionDependency} for the
-	 * {@link ManagedObjectFunctionDependencyType} for the {@link ManagedObjects}.
+	 * {@link ManagedObjectFunctionDependencyType} for the {@link ManagedObject}.
 	 * 
 	 * @param managedObjectFunctionDependencyName Name of the
 	 *                                            {@link ManagedObjectFunctionDependencyType}.

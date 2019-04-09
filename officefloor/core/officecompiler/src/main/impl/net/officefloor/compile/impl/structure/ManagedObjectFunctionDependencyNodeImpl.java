@@ -69,9 +69,9 @@ public class ManagedObjectFunctionDependencyNodeImpl implements ManagedObjectFun
 	/**
 	 * Initiate.
 	 * 
-	 * @param dependencyName Name of this {@link ManagedObjectDependency}.
-	 * @param managedObject  Parent {@link ManagedObjectSourceNode}.
-	 * @param context        {@link NodeContext}.
+	 * @param dependencyName      Name of this {@link ManagedObjectDependency}.
+	 * @param managedObjectSource Parent {@link ManagedObjectSourceNode}.
+	 * @param context             {@link NodeContext}.
 	 */
 	public ManagedObjectFunctionDependencyNodeImpl(String dependencyName, ManagedObjectSourceNode managedObjectSource,
 			NodeContext context) {

@@ -218,7 +218,7 @@ public class JavaFxUtil {
 	 * Creates a {@link CssManager}.
 	 * 
 	 * @param parent Parent {@link Composite}.
-	 * @param scene  {@link Scene} to listen in on for {@link ParseError} instances.
+	 * @param scene  {@link Scene} to listen in on for errors.
 	 * @param style  {@link Property} to specify the style.
 	 * @return {@link CssManager}.
 	 */

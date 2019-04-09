@@ -275,7 +275,7 @@ public class ClassCompatibility {
 		/**
 		 * Creates an {@link ArgumentCompatibility} for this {@link Object}.
 		 * 
-		 * @param parameterTypeName {@link Method} parameter type.
+		 * @param parameterType {@link Method} parameter type.
 		 * @return {@link ArgumentCompatibility}.
 		 */
 		public ArgumentCompatibility arg(Class<?> parameterType) {

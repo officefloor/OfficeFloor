@@ -25,6 +25,7 @@ import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.spi.security.HttpAccessControlFactory;
 import net.officefloor.web.spi.security.HttpAuthenticationFactory;
 import net.officefloor.web.spi.security.HttpSecuritySource;
+import net.officefloor.web.spi.security.HttpSecuritySupportingManagedObject;
 
 /**
  * <code>Type definition</code> of a {@link HttpSecuritySource}.
