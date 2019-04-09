@@ -20,7 +20,6 @@ package net.officefloor.plugin.managedfunction.clazz;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -65,8 +64,6 @@ public abstract class AbstractFunctionManagedFunctionSource extends AbstractMana
 	/**
 	 * Creates the {@link MethodManagedFunctionBuilder}.
 	 * 
-	 * @param isIncludeMethod  {@link Predicate} to determine if include the
-	 *                         {@link Method}.
 	 * @param namespaceBuilder {@link FunctionNamespaceBuilder}.
 	 * @param context          {@link ManagedFunctionSourceContext}.
 	 * @return {@link MethodManagedFunctionBuilder}.

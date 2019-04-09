@@ -132,5 +132,44 @@
 				</repository>
 			</repositories>
 		</profile>
+		<profile>
+			<id>kotlin-release-to-maven-central</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>sonatype</value>
+				</property>
+			</activation>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>jcenter</id>
+					<name>JCenter</name>
+					<url>https://jcenter.bintray.com/</url>
+				</pluginRepository>
+			</pluginRepositories>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Provide Kotlin JavaDoc files -->
+						<groupId>org.jetbrains.dokka</groupId>
+						<artifactId>dokka-maven-plugin</artifactId>
+						<version>${dokka-maven-version}</version>
+						<executions>
+							<execution>
+								<phase>integration-test</phase>
+								<goals>
+									<goal>javadocJar</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<sourceDirectories>
+								<dir>src/main/kotlin</dir>
+							</sourceDirectories>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 </project>

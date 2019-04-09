@@ -42,8 +42,8 @@ public interface ManagingOfficeBuilder<F extends Enum<F>> {
 	 *                               within the {@link ProcessState} of the
 	 *                               {@link Office}.
 	 * @return {@link ThreadDependencyMappingBuilder} to map the dependencies of the
-	 *         {@link ManagedObject} and possible {@link ManagedObjectFunction}
-	 *         instances.
+	 *         {@link ManagedObject} and possible
+	 *         {@link ManagedObjectFunctionDependency} instances.
 	 */
 	ThreadDependencyMappingBuilder setInputManagedObjectName(String inputManagedObjectName);
 
