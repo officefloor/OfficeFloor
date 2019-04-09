@@ -1,0 +1,27 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/" secure="false" x="42" y="64">
+      <section name="Kotlin" input="service"/>
+    </http-continuation>
+  </http-continuations>
+  <http-inputs>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="Kotlin" source="net.officefloor.polyglot.kotlin.KotlinFunctionSectionSource" location="net.officefloor.tutorial.kotlinhttpserver.KotlinLogicKt" x="176" y="46">
+      <property name="function.name" value="service"/>
+      <input name="service" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

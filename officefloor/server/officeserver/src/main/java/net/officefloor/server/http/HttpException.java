@@ -106,6 +106,29 @@ public class HttpException extends RuntimeException {
 	}
 
 	/**
+	 * Convenience constructor for providing error message.
+	 * 
+	 * @param statusCode   Status code.
+	 * @param errorMessage Error message.
+	 */
+	public HttpException(int statusCode, String errorMessage) {
+		this(HttpStatus.getHttpStatus(statusCode), errorMessage);
+	}
+
+	/**
+	 * Convenience constructor for providing error message.
+	 * 
+	 * @param status       {@link HttpStatus}.
+	 * @param errorMessage Error message.
+	 */
+	public HttpException(HttpStatus status, String errorMessage) {
+		super(new ErrorMessageException(errorMessage));
+		this.status = status;
+		this.headers = NO_HEADERS;
+		this.entity = null;
+	}
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param status  {@link HttpStatus}.
@@ -205,6 +228,38 @@ public class HttpException extends RuntimeException {
 
 		// Write the stack trace
 		StreamBuffer.write(stackTraceBytes, head, bufferPool);
+	}
+
+	/**
+	 * Allow error message.
+	 */
+	private static class ErrorMessageException extends Exception {
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Instantiate with error message.
+		 * 
+		 * @param message Error message.
+		 */
+		private ErrorMessageException(String message) {
+			super(message);
+		}
+	}
+
+	/*
+	 * ==================== Exception =====================
+	 */
+
+	@Override
+	public String getMessage() {
+		Throwable cause = this.getCause();
+		if ((cause != null) && (cause instanceof ErrorMessageException)) {
+			// Use just the error message
+			return cause.getMessage();
+		} else {
+			// Provide full message
+			return super.getMessage();
+		}
 	}
 
 }

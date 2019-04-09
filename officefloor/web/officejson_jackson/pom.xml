@@ -17,15 +17,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
-			<artifactId>officeweb</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-afterburner</artifactId>
+			<artifactId>officejson_default</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.server</groupId>

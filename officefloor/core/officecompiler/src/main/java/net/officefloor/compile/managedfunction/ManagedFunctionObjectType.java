@@ -17,6 +17,7 @@
  */
 package net.officefloor.compile.managedfunction;
 
+import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
@@ -25,7 +26,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionObjectType<M extends Enum<M>> {
+public interface ManagedFunctionObjectType<M extends Enum<M>> extends AnnotatedType {
 
 	/**
 	 * Obtains the name for the {@link ManagedFunctionObjectType}.
@@ -70,12 +71,5 @@ public interface ManagedFunctionObjectType<M extends Enum<M>> {
 	 *         <code>null</code> if no {@link Enum} for objects.
 	 */
 	M getKey();
-
-	/**
-	 * Obtains the annotations for the {@link ManagedFunctionObjectType}.
-	 * 
-	 * @return Annotations for the {@link ManagedFunctionObjectType}.
-	 */
-	Object[] getAnnotations();
 
 }

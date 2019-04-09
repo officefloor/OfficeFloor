@@ -27,15 +27,18 @@
 		<module>InheritHttpServer</module>
 		<module>InteractiveHttpServer</module>
 		<module>JavaScriptApp</module>
+		<module>JavaScriptHttpServer</module>
 		<module>JwtAuthorityHttpServer</module>
 		<module>JwtHttpServer</module>
 		<module>JwtResourceHttpServer</module>
+		<module>KotlinHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>ObjectifyHttpServer</module>
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
 		<module>ReactiveHttpServer</module>
 		<module>RestHttpServer</module>
+		<module>ScalaHttpServer</module>
 		<module>SectionHttpServer</module>
 		<module>SecurePageHttpServer</module>
 		<module>SecureLinkHttpServer</module>

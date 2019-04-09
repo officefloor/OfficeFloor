@@ -4,9 +4,9 @@
 		<http-continuation path="/path">
 			<section name="Section" input="service" />
 		</http-continuation>
-		<http-continuation path="/objects">
+		<http-input method="POST" path="/objects">
 			<section name="Section" input="objects" />
-		</http-continuation>
+		</http-input>
 		<http-continuation path="/teams">
 			<section name="Section" input="teams" />
 		</http-continuation>

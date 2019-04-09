@@ -23,10 +23,6 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
-			<artifactId>officejson_jackson</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
 			<scope>test</scope>
 		</dependency>

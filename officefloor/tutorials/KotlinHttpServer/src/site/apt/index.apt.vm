@@ -1,0 +1,59 @@
+                                               -----------------------
+                                               Kotlin Polyglot Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<Kotlin Polyglot Tutorial>>
+
+  This tutorial demonstrates using Kotlin within WoOF.
+  
+  While the tutorial is simple, it is entirely written in Kotlin.
+  
+  As Kotlin compiles to classes, much of the existing features of WoOF can be used as is.  However, as this tutorial also demonstrates, Kotlin functions can be used.
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/KotlinHttpServer/${projectVersion}/KotlinHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Enable Kotlin
+
+  To enable using Kotlin, add the following:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+
+
+Kotlin
+
+  The Kotlin to service the request is:
+  
+%{snippet|file=${basedir}/src/main/kotlin/net/officefloor/tutorial/kotlinhttpserver/KotlinLogic.kt|ignoreDownloadError=false}
+
+  The Kotlin function is configured via the {{{/apidocs/net/officefloor/polyglot/kotlin/KotlinFunctionSectionSource.html}KotlinFunctionSectionSource}}.
+
+
+
+Kotlin Data Objects
+
+  As part of supporting Kotlin, the necessary Jackson support is included to enable sending/receiving Kotlin data classes as JSON.
+  
+  The request / response data classes are as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/kotlin/net/officefloor/tutorial/kotlinhttpserver/KotlinRequest.kt|ignoreDownloadError=false}
+ 
+%{snippet|id=tutorial|file=${basedir}/src/main/kotlin/net/officefloor/tutorial/kotlinhttpserver/KotlinResponse.kt|ignoreDownloadError=false}
+
+
+
+Testing
+
+  As Kotlin is integrated well with Java, the following demonstrates writing tests with Kotlin:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/kotlin/net/officefloor/tutorial/kotlinhttpserver/KotlinHttpServerTest.kt|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../ScalaHttpServer/index.html}next tutorial}} covers Scala.

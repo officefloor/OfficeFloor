@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.construct.source;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -124,6 +125,60 @@ public class SourceContextTest extends OfficeFrameTestCase {
 			fail("Should not be successful");
 		} catch (UnknownClassError ex) {
 			assertEquals("Incorrect error", "UNKNOWN CLASS", ex.getUnknownClassName());
+		}
+	}
+
+	/**
+	 * Ensure appropriately loads {@link Array} {@link Class} and reports on
+	 * unavailable {@link Class}.
+	 */
+	public void testLoadArrayClass() {
+
+		// Create the context
+		SourceContext context = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
+				new MockClockFactory());
+
+		// Ensure able to load array class
+		assertEquals("Should load array class", Object[].class, context.loadClass(Object[].class.getName()));
+
+		// Ensure error if not able to load class
+		try {
+			context.loadClass("[LUNKNOWN CLASS;");
+			fail("Should not be successful");
+		} catch (UnknownClassError ex) {
+			assertEquals("Incorrect error", "[LUNKNOWN CLASS;", ex.getUnknownClassName());
+		}
+	}
+
+	/**
+	 * Ensure can appropriate loads primitives.
+	 */
+	public void testLoadPrimitives() {
+
+		// Create the context
+		SourceContext context = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
+				new MockClockFactory());
+
+		// Load primitives
+		for (Class<?> primitive : new Class[] { boolean.class, byte.class, short.class, char.class, int.class,
+				long.class, float.class, double.class }) {
+			assertEquals(primitive.getSimpleName(), primitive, context.loadClass(primitive.getName()));
+		}
+	}
+
+	/**
+	 * Ensure can appropriate load primitive {@link Array}.
+	 */
+	public void testLoadPrimitiveArrays() {
+
+		// Create the context
+		SourceContext context = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
+				new MockClockFactory());
+
+		// Load primitives
+		for (Class<?> primitive : new Class[] { boolean[].class, byte[].class, short[].class, char[].class, int[].class,
+				long[].class, float[].class, double[].class }) {
+			assertEquals(primitive.getSimpleName(), primitive, context.loadClass(primitive.getName()));
 		}
 	}
 
@@ -234,6 +289,10 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		// Create context
 		SourceContext context = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
 				new MockClockFactory());
+		
+		// Ensure able to load provided service
+		Class<SingleServiceFactory> loadedService = context.loadService(new SingleServiceFactory());
+		assertEquals("Should load provided service", SingleServiceFactory.class, loadedService);
 
 		// Ensure able to load optional service
 		Class<SingleServiceFactory> optionalService = context.loadOptionalService(SingleServiceFactory.class);

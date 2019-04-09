@@ -35,11 +35,9 @@ public class VariableAnnotation {
 	public static String extractPossibleVariableName(ManagedFunctionObjectType<?> objectType) {
 
 		// Extract variable name
-		for (Object annotation : objectType.getAnnotations()) {
-			if (annotation instanceof VariableAnnotation) {
-				VariableAnnotation variableAnnotation = (VariableAnnotation) annotation;
-				return variableAnnotation.getVariableName();
-			}
+		VariableAnnotation annotation = objectType.getAnnotation(VariableAnnotation.class);
+		if (annotation != null) {
+			return annotation.getVariableName();
 		}
 
 		// As here, not variable

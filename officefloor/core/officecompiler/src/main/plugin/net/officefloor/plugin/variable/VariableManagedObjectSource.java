@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.variable;
 
+import java.util.function.Consumer;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessAwareContext;
@@ -29,7 +31,12 @@ import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel Sagenschneider
  */
-public class VariableManagedObjectSource extends AbstractManagedObjectSource<None, None> {
+public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<None, None> {
+
+	/**
+	 * Prefix for variable name.
+	 */
+	public static final String VARIABLE_NAME_PREFIX = "VARIABLE_";
 
 	/**
 	 * Obtains {@link Var} from dependency object.
@@ -87,7 +94,89 @@ public class VariableManagedObjectSource extends AbstractManagedObjectSource<Non
 	 * @return Name for the variable.
 	 */
 	public static String name(String qualifier, String type) {
+
+		// Handle arrays
+		switch (type) {
+		case "byte":
+			type = Byte.class.getName();
+			break;
+		case "short":
+			type = Short.class.getName();
+			break;
+		case "char":
+			type = Character.class.getName();
+			break;
+		case "int":
+			type = Integer.class.getName();
+			break;
+		case "long":
+			type = Long.class.getName();
+			break;
+		case "float":
+			type = Float.class.getName();
+			break;
+		case "double":
+			type = Double.class.getName();
+			break;
+		case "[B":
+			type = "byte[]";
+			break;
+		case "[S":
+			type = "short[]";
+			break;
+		case "[C":
+			type = "char[]";
+			break;
+		case "[I":
+			type = "int[]";
+			break;
+		case "[J":
+			type = "long[]";
+			break;
+		case "[F":
+			type = "float[]";
+			break;
+		case "[D":
+			type = "double[]";
+			break;
+		default:
+			// Use type as is
+			break;
+		}
+
+		// Determine if array
+		final String START = "[L";
+		final String END = ";";
+		if (type.startsWith(START) && type.endsWith(END)) {
+
+			// Array, so obtain component name
+			String componentName = type.substring(START.length(), type.length() - END.length());
+			type = componentName + "[]";
+		}
+
+		// Return name
 		return (qualifier == null ? "" : qualifier + "-") + type;
+	}
+
+	/**
+	 * Decorator of new {@link Var}.
+	 */
+	private final Consumer<Var<T>> decorator;
+
+	/**
+	 * Default constructor.
+	 */
+	public VariableManagedObjectSource() {
+		this.decorator = null;
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param decorator Decorator of new {@link Var}.
+	 */
+	public VariableManagedObjectSource(Consumer<Var<T>> decorator) {
+		this.decorator = decorator;
 	}
 
 	/*
@@ -109,13 +198,13 @@ public class VariableManagedObjectSource extends AbstractManagedObjectSource<Non
 
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		return new VariableManagedObject<>();
+		return new VariableManagedObject();
 	}
 
 	/**
 	 * Variable {@link ManagedObject}.
 	 */
-	private class VariableManagedObject<T> implements ProcessAwareManagedObject, Var<T> {
+	private class VariableManagedObject implements ProcessAwareManagedObject, Var<T> {
 
 		/**
 		 * {@link ProcessAwareContext}.
@@ -138,6 +227,17 @@ public class VariableManagedObjectSource extends AbstractManagedObjectSource<Non
 
 		@Override
 		public Object getObject() throws Throwable {
+
+			// Easy access to source
+			VariableManagedObjectSource<T> mos = VariableManagedObjectSource.this;
+
+			// Enable decoration of the variable
+			// (after getting process aware context)
+			if (mos.decorator != null) {
+				mos.decorator.accept(this);
+			}
+
+			// Return this var
 			return this;
 		}
 

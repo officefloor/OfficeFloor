@@ -420,8 +420,10 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect input", "ANNOTATION", annotation.getSectionInputName());
 		assertEquals("Incorrect number of annotations", 1, annotation.getAnnotations().length);
 		assertEquals("Incorrect annotations", "TEST", annotation.getAnnotations()[0]);
+		assertEquals("Incorrect by type annotation", "TEST", annotation.getAnnotation(String.class));
 		SectionInputType noAnnotation = type.getSectionInputTypes()[1];
 		assertEquals("Should be no annotations", 0, noAnnotation.getAnnotations().length);
+		assertNull("Should be no by type annotation", noAnnotation.getAnnotation(String.class));
 	}
 
 	/**
@@ -487,8 +489,10 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect input", "ANNOTATION", annotation.getSectionOutputName());
 		assertEquals("Incorrect number of annotations", 1, annotation.getAnnotations().length);
 		assertEquals("Incorrect annotations", "TEST", annotation.getAnnotations()[0]);
+		assertEquals("Incorrect by type annotation", "TEST", annotation.getAnnotation(String.class));
 		SectionOutputType noAnnotation = type.getSectionOutputTypes()[1];
 		assertEquals("Should be no annotations", 0, noAnnotation.getAnnotations().length);
+		assertNull("Should be no by type annotation", noAnnotation.getAnnotation(String.class));
 	}
 
 	/**
@@ -570,8 +574,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load {@link SectionType} with multiple inputs, outputs or
-	 * objects.
+	 * Ensure can load {@link SectionType} with multiple inputs, outputs or objects.
 	 */
 	public void testSectionTypeWithMultipleInputsOutputObjects() {
 		// Load section type
@@ -773,12 +776,10 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link SectionType} within the input {@link Loader}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the {@link SectionType}.
-	 * @param loader
-	 *            {@link Loader}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link SectionType}.
+	 * @param loader                 {@link Loader}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link SectionType}.
 	 */
 	private SectionType loadSectionType(boolean isExpectedToLoad, Loader loader, String... propertyNameValuePairs) {
@@ -827,12 +828,9 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Implemented to load the {@link SectionType}.
 		 * 
-		 * @param section
-		 *            {@link SectionDesigner}.
-		 * @param context
-		 *            {@link SectionSourceContext}.
-		 * @throws Exception
-		 *             If fails to source {@link SectionType}.
+		 * @param section {@link SectionDesigner}.
+		 * @param context {@link SectionSourceContext}.
+		 * @throws Exception If fails to source {@link SectionType}.
 		 */
 		void sourceSection(SectionDesigner section, SectionSourceContext context) throws Exception;
 	}

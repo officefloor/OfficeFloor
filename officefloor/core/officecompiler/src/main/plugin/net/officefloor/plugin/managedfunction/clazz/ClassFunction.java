@@ -17,7 +17,6 @@
  */
 package net.officefloor.plugin.managedfunction.clazz;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -36,15 +35,12 @@ public class ClassFunction implements ManagedFunction<Indexed, Indexed> {
 	 * Invokes the {@link Method} as the {@link ManagedFunction} directly on the
 	 * {@link Object}.
 	 * 
-	 * @param instance
-	 *            Instance. May be <code>null</code> if static {@link Method}.
-	 * @param method
-	 *            {@link Method}.
-	 * @param parameters
-	 *            Parameters.
+	 * @param instance   Instance. May be <code>null</code> if static
+	 *                   {@link Method}.
+	 * @param method     {@link Method}.
+	 * @param parameters Parameters.
 	 * @return {@link Method} return value.
-	 * @throws Throwable
-	 *             Failure invoking the {@link Method}.
+	 * @throws Throwable Failure invoking the {@link Method}.
 	 */
 	public static Object invokeMethod(Object instance, Method method, Object[] parameters) throws Throwable {
 
@@ -87,15 +83,10 @@ public class ClassFunction implements ManagedFunction<Indexed, Indexed> {
 	}
 
 	/**
-	 * Arguments for the default {@link Constructor}.
+	 * {@link MethodObjectInstanceFactory}. Will be <code>null</code> if static
+	 * {@link Method}.
 	 */
-	private static final Object[] DEFAULT_CONSTRUCTION_ARGUMENTS = new Object[0];
-
-	/**
-	 * Default {@link Constructor} for the {@link Class} containing the
-	 * {@link Method}. Will be <code>null</code> if static {@link Method}.
-	 */
-	private final Constructor<?> constructor;
+	private final MethodObjectInstanceFactory methodObjectInstanceFactory;
 
 	/**
 	 * Method to invoke for this {@link ManagedFunction}.
@@ -110,19 +101,18 @@ public class ClassFunction implements ManagedFunction<Indexed, Indexed> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param constructor
-	 *            Default {@link Constructor} for the {@link Class} containing
-	 *            the {@link Method}. Will be <code>null</code> if static
-	 *            {@link Method}.
-	 * @param method
-	 *            Method to invoke for this {@link ManagedFunction}.
-	 * @param parameterFactories
-	 *            {@link ManagedFunctionParameterFactory} instances.
+	 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
+	 *                                    be <code>null</code> if static
+	 *                                    {@link Method}.
+	 * @param method                      Method to invoke for this
+	 *                                    {@link ManagedFunction}.
+	 * @param parameterFactories          {@link ManagedFunctionParameterFactory}
+	 *                                    instances.
 	 */
-	public ClassFunction(Constructor<?> constructor, Method method,
+	public ClassFunction(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
 			ManagedFunctionParameterFactory[] parameterFactories) {
 		this.method = method;
-		this.constructor = constructor;
+		this.methodObjectInstanceFactory = methodObjectInstanceFactory;
 		this.parameterFactories = parameterFactories;
 	}
 
@@ -143,8 +133,8 @@ public class ClassFunction implements ManagedFunction<Indexed, Indexed> {
 	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 		// Obtain the instance to invoke the method on (null if static method)
-		Object instance = (this.constructor == null ? null
-				: this.constructor.newInstance(DEFAULT_CONSTRUCTION_ARGUMENTS));
+		Object instance = (this.methodObjectInstanceFactory == null) ? null
+				: this.methodObjectInstanceFactory.createInstance();
 
 		// Create the listing of parameters
 		Object[] params = new Object[this.parameterFactories.length];

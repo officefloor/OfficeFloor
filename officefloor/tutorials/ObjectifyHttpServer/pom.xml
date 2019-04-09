@@ -21,10 +21,6 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>officejson_jackson</artifactId>
-		</dependency>
 		<!-- START SNIPPET: OBJECTIFY -->
 		<dependency>
 			<groupId>net.officefloor.persistence</groupId>

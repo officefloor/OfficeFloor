@@ -63,12 +63,14 @@ import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.build.WebInterceptServiceFactory;
 import net.officefloor.web.response.ObjectResponseManagedObjectSource;
+import net.officefloor.web.response.ObjectResponseManagedObjectSource.DefaultHttpObjectResponder;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationStateManagedObjectSource;
 import net.officefloor.web.state.HttpArgumentManagedObjectSource;
 import net.officefloor.web.state.HttpObjectManagedObjectSource;
+import net.officefloor.web.state.HttpObjectManagedObjectSource.DefaultHttpObjectParser;
 import net.officefloor.web.state.HttpRequestObjectManagedObjectSource;
 import net.officefloor.web.state.HttpRequestStateManagedObjectSource;
 import net.officefloor.web.tokenise.FormHttpArgumentParser;
@@ -157,6 +159,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	private final List<HttpObjectParserFactory> singletonObjectParserList = new LinkedList<>();
 
 	/**
+	 * Default {@link HttpObjectParserServiceFactory}.
+	 */
+	private HttpObjectParserServiceFactory defaultHttpObjectParserServiceFactory = null;
+
+	/**
 	 * Registry of {@link HttpObject} {@link Annotation} alias to accepted
 	 * <code>content-type</code> values. Note: the keys indicate the aliases, as
 	 * accepted <code>content-type</code> values are optional.
@@ -187,6 +194,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * {@link HttpObjectResponderFactory} instances.
 	 */
 	private final List<HttpObjectResponderFactory> objectResponderFactories = new LinkedList<>();
+
+	/**
+	 * Default {@link HttpObjectResponderServiceFactory}.
+	 */
+	private HttpObjectResponderServiceFactory defaultHttpObjectResponderServiceFactory = null;
 
 	/**
 	 * {@link HttpInputImpl} instances.
@@ -369,6 +381,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
+	public void setDefaultHttpObjectParser(HttpObjectParserServiceFactory objectParserServiceFactory) {
+		this.defaultHttpObjectParserServiceFactory = objectParserServiceFactory;
+	}
+
+	@Override
 	public void addHttpObjectAnnotationAlias(Class<?> httpObjectAnnotationAliasClass, String... acceptedContentTypes) {
 		this.httpObjectAliases.put(httpObjectAnnotationAliasClass, acceptedContentTypes);
 	}
@@ -380,10 +397,15 @@ public class WebArchitectEmployer implements WebArchitect {
 		OfficeManagedObject object = this.httpObjects.get(objectClass);
 		if (object == null) {
 
+			// Create the default object parser
+			DefaultHttpObjectParser defaultHttpObjectParser = () -> this.defaultHttpObjectParserServiceFactory != null
+					? this.officeSourceContext.loadService(this.defaultHttpObjectParserServiceFactory)
+					: null;
+
 			// Not registered, so register
 			OfficeManagedObjectSource mos = this.officeArchitect.addOfficeManagedObjectSource(objectClass.getName(),
 					new HttpObjectManagedObjectSource<>(objectClass, acceptedContentTypes,
-							this.singletonObjectParserList));
+							this.singletonObjectParserList, defaultHttpObjectParser));
 			object = mos.addOfficeManagedObject(objectClass.getName(), ManagedObjectScope.PROCESS);
 			this.httpObjects.put(objectClass, object);
 		}
@@ -395,6 +417,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	@Override
 	public void addHttpObjectResponder(HttpObjectResponderFactory objectResponderFactory) {
 		this.objectResponderFactories.add(objectResponderFactory);
+	}
+
+	@Override
+	public void setDefaultHttpObjectResponder(HttpObjectResponderServiceFactory objectResponderServiceFactory) {
+		this.defaultHttpObjectResponderServiceFactory = objectResponderServiceFactory;
 	}
 
 	@Override
@@ -463,9 +490,16 @@ public class WebArchitectEmployer implements WebArchitect {
 				.addOfficeManagedObject("HTTP_REQUEST_STATE", ManagedObjectScope.PROCESS);
 
 		// Configure the object responder (if configured factories)
-		if (this.objectResponderFactories.size() > 0) {
+		if ((this.objectResponderFactories.size() > 0) || (this.defaultHttpObjectResponderServiceFactory != null)) {
+
+			// Create the default object responder
+			DefaultHttpObjectResponder defaultHttpObjectResponder = () -> this.defaultHttpObjectResponderServiceFactory != null
+					? this.officeSourceContext.loadService(this.defaultHttpObjectResponderServiceFactory)
+					: null;
+
+			// Add the object responder
 			ObjectResponseManagedObjectSource objectResponseMos = new ObjectResponseManagedObjectSource(
-					this.objectResponderFactories);
+					this.objectResponderFactories, defaultHttpObjectResponder);
 			this.officeArchitect.addOfficeManagedObjectSource("OBJECT_RESPONSE", objectResponseMos)
 					.addOfficeManagedObject("OBJECT_RESPONSE", ManagedObjectScope.PROCESS);
 			this.routing.setHttpEscalationHandler(objectResponseMos);
@@ -584,7 +618,13 @@ public class WebArchitectEmployer implements WebArchitect {
 					}
 
 					// HTTP parameters
+					HttpParametersAnnotation httpParametersAnnotation = null;
 					if (annotation instanceof HttpParameters) {
+						httpParametersAnnotation = new HttpParametersAnnotation((HttpParameters) annotation);
+					} else if (annotation instanceof HttpParametersAnnotation) {
+						httpParametersAnnotation = (HttpParametersAnnotation) annotation;
+					}
+					if (httpParametersAnnotation != null) {
 						// Load as HTTP parameters (only once)
 						if (!httpParameters.contains(objectType)) {
 							this.addHttpRequestObject(objectType, true);
@@ -593,9 +633,15 @@ public class WebArchitectEmployer implements WebArchitect {
 					}
 
 					// HTTP object
+					HttpObjectAnnotation httpObjectAnnotation = null;
 					if (annotation instanceof HttpObject) {
-						HttpObject httpObject = (HttpObject) annotation;
-						String[] acceptedContentTypes = httpObject.acceptedContentTypes();
+						httpObjectAnnotation = new HttpObjectAnnotation((HttpObject) annotation);
+					}
+					if (annotation instanceof HttpObjectAnnotation) {
+						httpObjectAnnotation = (HttpObjectAnnotation) annotation;
+					}
+					if (httpObjectAnnotation != null) {
+						String[] acceptedContentTypes = httpObjectAnnotation.getAcceptedContentTypes();
 						this.addHttpObject(objectType, acceptedContentTypes);
 					}
 
@@ -609,25 +655,20 @@ public class WebArchitectEmployer implements WebArchitect {
 
 					// Load HTTP arguments
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpPathParameter.class,
-							HttpValueLocation.PATH, objectType, context, (parameter) -> parameter.value(),
-							(parameter) -> new HttpPathParameter.HttpPathParameterNameFactory()
-									.getQualifierName(parameter));
+							HttpPathParameterAnnotation.class, HttpValueLocation.PATH, objectType, context,
+							(rawAnnotation) -> new HttpPathParameterAnnotation(rawAnnotation));
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpQueryParameter.class,
-							HttpValueLocation.QUERY, objectType, context, (parameter) -> parameter.value(),
-							(parameter) -> new HttpQueryParameter.HttpQueryParameterNameFactory()
-									.getQualifierName(parameter));
+							HttpQueryParameterAnnotation.class, HttpValueLocation.QUERY, objectType, context,
+							(rawAnnotation) -> new HttpQueryParameterAnnotation(rawAnnotation));
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpHeaderParameter.class,
-							HttpValueLocation.HEADER, objectType, context, (parameter) -> parameter.value(),
-							(parameter) -> new HttpHeaderParameter.HttpHeaderParameterNameFactory()
-									.getQualifierName(parameter));
+							HttpHeaderParameterAnnotation.class, HttpValueLocation.HEADER, objectType, context,
+							(rawAnnotation) -> new HttpHeaderParameterAnnotation(rawAnnotation));
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpCookieParameter.class,
-							HttpValueLocation.COOKIE, objectType, context, (parameter) -> parameter.value(),
-							(parameter) -> new HttpCookieParameter.HttpCookieParameterNameFactory()
-									.getQualifierName(parameter));
+							HttpCookieParameterAnnotation.class, HttpValueLocation.COOKIE, objectType, context,
+							(rawAnnotation) -> new HttpCookieParameterAnnotation(rawAnnotation));
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpContentParameter.class,
-							HttpValueLocation.ENTITY, objectType, context, (parameter) -> parameter.value(),
-							(parameter) -> new HttpContentParameter.HttpContentParameterNameFactory()
-									.getQualifierName(parameter));
+							HttpContentParameterAnnotation.class, HttpValueLocation.ENTITY, objectType, context,
+							(rawAnnotation) -> new HttpContentParameterAnnotation(rawAnnotation));
 				}
 			}
 		});
@@ -659,30 +700,33 @@ public class WebArchitectEmployer implements WebArchitect {
 	/**
 	 * Loads the in-line HTTP argument.
 	 * 
-	 * @param annotation       {@link Annotation}.
-	 * @param annotationType   Type of {@link Annotation}.
-	 * @param valueLocation    {@link HttpValueLocation}.
-	 * @param objectType       Parameter object type.
-	 * @param context          {@link ManagedFunctionAugmentorContext}.
-	 * @param getParameterName {@link Function} to obtain the parameter name.
-	 * @param getQualifierName {@link Function} to obtain the type qualification
-	 *                         name.
+	 * @param annotation         {@link Annotation}.
+	 * @param annotationType     Type of {@link Annotation}.
+	 * @param annotationWrapType Wrapping type for {@link Annotation}.
+	 * @param valueLocation      {@link HttpValueLocation}.
+	 * @param objectType         Parameter object type.
+	 * @param context            {@link ManagedFunctionAugmentorContext}.
+	 * @param wrapAnnotation     {@link Function} to wrap {@link Annotation} with
+	 *                           wrapper.
 	 */
-	private <P extends Annotation> void loadInlineHttpArgument(Object annotation, Class<P> annotationType,
-			HttpValueLocation valueLocation, Class<?> objectType, ManagedFunctionAugmentorContext context,
-			Function<P, String> getParameterName, Function<P, String> getQualifierName) {
+	@SuppressWarnings("unchecked")
+	private <P extends Annotation, W extends HttpParameterAnnotation> void loadInlineHttpArgument(Object annotation,
+			Class<P> annotationType, Class<W> annotationWrapType, HttpValueLocation valueLocation, Class<?> objectType,
+			ManagedFunctionAugmentorContext context, Function<P, W> wrapAnnotation) {
 
-		// Ensure appropriate annotation
-		if (!(annotation instanceof Annotation)) {
+		// Determine if wrap type
+		W annotationWrapper;
+		if (annotationWrapType.isAssignableFrom(annotation.getClass())) {
+			annotationWrapper = (W) annotation;
+
+		} else if ((annotation instanceof Annotation)
+				&& (annotationType.equals(((Annotation) annotation).annotationType()))) {
+			annotationWrapper = wrapAnnotation.apply((P) annotation);
+
+		} else {
+			// Not particular HTTP parameter
 			return;
 		}
-		if (((Annotation) annotation).annotationType() != annotationType) {
-			return;
-		}
-
-		// Obtain the parameter
-		@SuppressWarnings("unchecked")
-		P parameterAnnotation = (P) annotation;
 
 		// Ensure parameter object is a String
 		if (objectType != String.class) {
@@ -691,8 +735,8 @@ public class WebArchitectEmployer implements WebArchitect {
 		}
 
 		// Add the HTTP argument
-		String parameterName = getParameterName.apply(parameterAnnotation);
-		String typeQualifier = getQualifierName.apply(parameterAnnotation);
+		String parameterName = annotationWrapper.getParameterName();
+		String typeQualifier = annotationWrapper.getQualifier();
 		this.addHttpArgument(parameterName, valueLocation).addTypeQualification(typeQualifier, String.class.getName());
 	}
 

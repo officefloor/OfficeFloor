@@ -1,0 +1,27 @@
+<woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/" method="POST" secure="false" x="-15" y="75">
+      <section name="Scala" input="service"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="Scala" source="net.officefloor.polyglot.scala.ScalaFunctionSectionSource" location="net.officefloor.polyglot.scalatest.ScalaService$" x="141" y="54">
+      <property name="function.name" value="service"/>
+      <input name="service" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

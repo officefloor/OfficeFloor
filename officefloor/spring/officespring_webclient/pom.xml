@@ -47,10 +47,5 @@
 			<artifactId>officejson_jackson</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>woof_test</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

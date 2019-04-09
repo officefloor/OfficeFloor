@@ -1408,6 +1408,115 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Multi-threaded test logic interface.
+	 * 
+	 * @param <T> Possible {@link Throwable}.
+	 */
+	protected static interface MultithreadedTestLogic<T extends Throwable> {
+		void run() throws T;
+	}
+
+	/**
+	 * Undertakes multi-threaded testing of {@link TestLogic}.
+	 * 
+	 * @param threadCount    Number of {@link Thread} instances to run in parallel.
+	 * @param iterationCount Number of iterations of {@link TestLogic} per
+	 *                       {@link Thread}.
+	 * @param test           {@link TestLogic}.
+	 * @throws T Possible failure from failing {@link TestLogic}.
+	 */
+	protected final <T extends Throwable> void doMultiThreadedTest(int threadCount, int iterationCount,
+			MultithreadedTestLogic<T> test) throws T {
+		this.doMultiThreadedTest(threadCount, iterationCount, 3, test);
+	}
+
+	/**
+	 * Undertakes multi-threaded testing of {@link TestLogic}.
+	 * 
+	 * @param threadCount    Number of {@link Thread} instances to run in parallel.
+	 * @param iterationCount Number of iterations of {@link TestLogic} per
+	 *                       {@link Thread}.
+	 * @param timeout        Timeout.
+	 * @param test           {@link TestLogic}.
+	 * @throws T Possible failure from failing {@link TestLogic}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected final <T extends Throwable> void doMultiThreadedTest(int threadCount, int iterationCount, int timeout,
+			MultithreadedTestLogic<T> test) throws T {
+
+		// Create the threads with completion status
+		boolean[] isComplete = new boolean[threadCount];
+		Thread[] threads = new Thread[threadCount];
+		Closure<Throwable> failure = new Closure<>();
+		for (int t = 0; t < threads.length; t++) {
+			isComplete[t] = false;
+			final int threadIndex = t;
+			threads[t] = new Thread(() -> {
+				try {
+					// Undertake all iterations of test
+					for (int i = 0; i < iterationCount; i++) {
+						test.run();
+					}
+
+				} catch (Throwable ex) {
+					// Capture the first error (as likely cause)
+					synchronized (isComplete) {
+						if (failure.value == null) {
+							failure.value = ex;
+						}
+					}
+
+				} finally {
+					// Flag complete
+					synchronized (isComplete) {
+						isComplete[threadIndex] = true;
+						isComplete.notify(); // wake up immediately
+					}
+				}
+			});
+		}
+
+		// Start all threads
+		for (int t = 0; t < threads.length; t++) {
+			threads[t].start();
+		}
+
+		// Wait until threads complete or time out
+		long startTime = System.currentTimeMillis();
+		synchronized (isComplete) {
+			boolean isCompleted = false;
+			while (!isCompleted) {
+
+				// Determine if error
+				if (failure.value != null) {
+					throw (T) failure.value;
+				}
+
+				// Determine if complete
+				isCompleted = true;
+				for (boolean isThreadComplete : isComplete) {
+					if (!isThreadComplete) {
+						isCompleted = false;
+					}
+				}
+				if (isCompleted) {
+					return; // successfully completed
+				}
+
+				// Determine if timed out
+				timeout(startTime, timeout);
+
+				// Try again after some time
+				try {
+					isComplete.wait(1000);
+				} catch (InterruptedException ex) {
+					fail("Sleep interrupted: " + ex.getMessage());
+				}
+			}
+		}
+	}
+
+	/**
 	 * Test capture interface.
 	 * 
 	 * @param <T> Possible {@link Throwable}.

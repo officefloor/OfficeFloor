@@ -17,6 +17,8 @@
  */
 package net.officefloor.compile.test.officefloor;
 
+import java.util.function.Consumer;
+
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -26,6 +28,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.plugin.variable.Var;
 
 /**
  * Context for compiling the {@link Office}.
@@ -51,12 +54,10 @@ public interface CompileOfficeContext {
 	/**
 	 * Adds an {@link OfficeManagedObject} for {@link ClassManagedObjectSource}.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeManagedObject}.
-	 * @param managedObjectClass
-	 *            {@link Class} for the {@link ClassManagedObjectSource}.
-	 * @param scope
-	 *            {@link ManagedObjectScope}.
+	 * @param managedObjectName  Name of the {@link OfficeManagedObject}.
+	 * @param managedObjectClass {@link Class} for the
+	 *                           {@link ClassManagedObjectSource}.
+	 * @param scope              {@link ManagedObjectScope}.
 	 * @return {@link OfficeManagedObject}.
 	 */
 	OfficeManagedObject addManagedObject(String managedObjectName, Class<?> managedObjectClass,
@@ -65,13 +66,22 @@ public interface CompileOfficeContext {
 	/**
 	 * Adds an {@link OfficeSection} for {@link ClassSectionSource}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionClass
-	 *            {@link Class} for the {@link ClassSectionSource}.
+	 * @param sectionName  Name of the {@link OfficeSection}.
+	 * @param sectionClass {@link Class} for the {@link ClassSectionSource}.
 	 * @return {@link OfficeSection}.
 	 */
 	OfficeSection addSection(String sectionName, Class<?> sectionClass);
+
+	/**
+	 * Listens to a variable.
+	 * 
+	 * @param            <T> Variable type.
+	 * @param qualifier  Qualifier for variable. May be <code>null</code>.
+	 * @param type       Type for variable.
+	 * @param compileVar Typical {@link CompileVar} to handle value. May, however,
+	 *                   be any {@link Consumer} for the created {@link Var}.
+	 */
+	<T> void variable(String qualifier, Class<T> type, Consumer<Var<T>> compileVar);
 
 	/**
 	 * Obtains the {@link OfficeSection}.
@@ -83,10 +93,8 @@ public interface CompileOfficeContext {
 	/**
 	 * Overrides the default {@link OfficeSection}.
 	 * 
-	 * @param sectionSourceClass
-	 *            {@link SectionSource} {@link Class}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
+	 * @param sectionSourceClass {@link SectionSource} {@link Class}.
+	 * @param sectionLocation    Location of the {@link OfficeSection}.
 	 * @return Overridden {@link OfficeSection}.
 	 */
 	OfficeSection overrideSection(Class<? extends SectionSource> sectionSourceClass, String sectionLocation);

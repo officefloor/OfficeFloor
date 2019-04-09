@@ -46,6 +46,22 @@ public class HttpObjectManagedObjectSource<T>
 		extends AbstractManagedObjectSource<HttpObjectManagedObjectSource.HttpObjectDependencies, None> {
 
 	/**
+	 * Obtains the default {@link HttpObjectParserFactory}.
+	 */
+	@FunctionalInterface
+	public static interface DefaultHttpObjectParser {
+
+		/**
+		 * Obtains the default {@link HttpObjectParserFactory}.
+		 * 
+		 * @return Default {@link HttpObjectParserFactory}.
+		 * @throws Exception If fails to obtain the default
+		 *                   {@link HttpObjectParserFactory}.
+		 */
+		HttpObjectParserFactory getDefaultHttpObjectParserFactory() throws Exception;
+	}
+
+	/**
 	 * Dependency keys.
 	 */
 	public static enum HttpObjectDependencies {
@@ -69,6 +85,11 @@ public class HttpObjectManagedObjectSource<T>
 	private final List<HttpObjectParserFactory> parserFactories;
 
 	/**
+	 * {@link DefaultHttpObjectParser}.
+	 */
+	private final DefaultHttpObjectParser defaultHttpObjectParser;
+
+	/**
 	 * {@link HttpObjectParser} instances.
 	 */
 	private HttpObjectParser<T>[] parsers;
@@ -76,19 +97,19 @@ public class HttpObjectManagedObjectSource<T>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param objectClass
-	 *            {@link Object} {@link Class}.
-	 * @param acceptedContentTypes
-	 *            Accepted <code>content-type</code> values.
-	 * @param parserFactories
-	 *            {@link List} of {@link HttpObjectParserFactory} instances that are
-	 *            loaded by the {@link WebArchitect}.
+	 * @param objectClass             {@link Object} {@link Class}.
+	 * @param acceptedContentTypes    Accepted <code>content-type</code> values.
+	 * @param parserFactories         {@link List} of
+	 *                                {@link HttpObjectParserFactory} instances that
+	 *                                are loaded by the {@link WebArchitect}.
+	 * @param defaultHttpObjectParser {@link DefaultHttpObjectParser}.
 	 */
 	public HttpObjectManagedObjectSource(Class<T> objectClass, String[] acceptedContentTypes,
-			List<HttpObjectParserFactory> parserFactories) {
+			List<HttpObjectParserFactory> parserFactories, DefaultHttpObjectParser defaultHttpObjectParser) {
 		this.objectClass = objectClass;
 		this.acceptedContentTypes = acceptedContentTypes;
 		this.parserFactories = parserFactories;
+		this.defaultHttpObjectParser = defaultHttpObjectParser;
 	}
 
 	/*
@@ -118,50 +139,72 @@ public class HttpObjectManagedObjectSource<T>
 
 		// Create the list of parsers
 		List<HttpObjectParser<T>> objectParsers = new LinkedList<>();
-		NEXT_PARSER: for (HttpObjectParserFactory parserFactory : this.parserFactories) {
+		for (HttpObjectParserFactory parserFactory : this.parserFactories) {
+			this.loadObjectParser(parserFactory, objectParsers);
+		}
 
-			// Obtain the content type
-			String contentType = parserFactory.getContentType();
-
-			// Determine if accept Content-Type
-			if ((this.acceptedContentTypes != null) && (this.acceptedContentTypes.length > 0)) {
-				// Ensure one of the accepted content types
-				boolean isAcceptableContentType = false;
-				for (String acceptedContentType : this.acceptedContentTypes) {
-					if (acceptedContentType.equals(contentType)) {
-						isAcceptableContentType = true;
-					}
-				}
-				if (!isAcceptableContentType) {
-					// Not acceptable Content-Type
-					continue NEXT_PARSER;
-				}
-			}
-
-			// Create the parser for the object class
-			try {
-				HttpObjectParser<T> parser = parserFactory.createHttpObjectParser(this.objectClass);
-				if (parser == null) {
-					continue NEXT_PARSER; // parser not able to handle object
-				}
-
-				// Include the parser
-				objectParsers.add(parser);
-
-			} catch (Exception ex) {
-				// Propagate failure about creating object parser
-				String errorMessage = ex.getMessage();
-				errorMessage = CompileUtil.isBlank(errorMessage) ? "" : " (cause: " + errorMessage + ")";
-				throw new Exception("Failed to create " + HttpObjectParser.class.getSimpleName() + " for Content-Type "
-						+ contentType + " for object " + this.objectClass.getName() + errorMessage, ex);
+		// Determine if default parser
+		if (objectParsers.size() == 0) {
+			HttpObjectParserFactory parserFactory = this.defaultHttpObjectParser.getDefaultHttpObjectParserFactory();
+			if (parserFactory != null) {
+				this.loadObjectParser(parserFactory, objectParsers);
 			}
 		}
+
+		// Load the parsers
 		this.parsers = objectParsers.toArray(new HttpObjectParser[objectParsers.size()]);
 
 		// Ensure have at least one object parser
 		if (this.parsers.length == 0) {
 			throw new Exception("No " + HttpObjectParser.class.getSimpleName() + " available for object "
 					+ this.objectClass.getName() + acceptContentTypeMessage);
+		}
+	}
+
+	/**
+	 * Loads the {@link HttpObjectParserFactory}.
+	 * 
+	 * @param parserFactory {@link HttpObjectParserFactory}.
+	 * @param objectParsers {@link List} to be loaded with the
+	 *                      {@link HttpObjectParser}.
+	 */
+	private void loadObjectParser(HttpObjectParserFactory parserFactory, List<HttpObjectParser<T>> objectParsers)
+			throws Exception {
+
+		// Obtain the content type
+		String contentType = parserFactory.getContentType();
+
+		// Determine if accept Content-Type
+		if ((this.acceptedContentTypes != null) && (this.acceptedContentTypes.length > 0)) {
+			// Ensure one of the accepted content types
+			boolean isAcceptableContentType = false;
+			for (String acceptedContentType : this.acceptedContentTypes) {
+				if (acceptedContentType.equals(contentType)) {
+					isAcceptableContentType = true;
+				}
+			}
+			if (!isAcceptableContentType) {
+				// Not acceptable Content-Type
+				return;
+			}
+		}
+
+		// Create the parser for the object class
+		try {
+			HttpObjectParser<T> parser = parserFactory.createHttpObjectParser(this.objectClass);
+			if (parser == null) {
+				return; // parser not able to handle object
+			}
+
+			// Include the parser
+			objectParsers.add(parser);
+
+		} catch (Exception ex) {
+			// Propagate failure about creating object parser
+			String errorMessage = ex.getMessage();
+			errorMessage = CompileUtil.isBlank(errorMessage) ? "" : " (cause: " + errorMessage + ")";
+			throw new Exception("Failed to create " + HttpObjectParser.class.getSimpleName() + " for Content-Type "
+					+ contentType + " for object " + this.objectClass.getName() + errorMessage, ex);
 		}
 	}
 

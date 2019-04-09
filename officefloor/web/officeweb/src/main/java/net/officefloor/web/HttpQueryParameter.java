@@ -42,9 +42,24 @@ public @interface HttpQueryParameter {
 	 * {@link QualifierNameFactory}.
 	 */
 	public static class HttpQueryParameterNameFactory implements QualifierNameFactory<HttpQueryParameter> {
+
+		/**
+		 * Obtains the qualifier from name.
+		 * 
+		 * @param name Name.
+		 * @return Qualifier.
+		 */
+		public static String getQualifier(String name) {
+			return HttpQueryParameter.class.getSimpleName() + "_" + name;
+		}
+
+		/*
+		 * ================== QualifierNameFactory =======================
+		 */
+
 		@Override
 		public String getQualifierName(HttpQueryParameter annotation) {
-			return HttpQueryParameter.class.getSimpleName() + "_" + annotation.value();
+			return getQualifier(annotation.value());
 		}
 	}
 
