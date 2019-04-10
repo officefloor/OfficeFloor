@@ -15,6 +15,7 @@
 	<description>Provides modules for Spring integration</description>
 	<modules>
 		<module>officespring</module>
+		<module>officespring_test</module>
 		<module>officespring_data</module>
 		<module>officespring_webclient</module>
 	</modules>

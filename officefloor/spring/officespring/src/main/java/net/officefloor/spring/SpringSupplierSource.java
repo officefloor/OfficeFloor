@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.boot.SpringApplication;
@@ -99,6 +100,39 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 	 * dependencies for Spring.
 	 */
 	private static final ThreadLocal<SpringDependencyFactory> springDependencyFactory = new ThreadLocal<>();
+
+	/**
+	 * <p>
+	 * Allows capturing the {@link ConfigurableApplicationContext}.
+	 * <p>
+	 * Typically this is for testing to enable using Spring beans.
+	 * 
+	 * @param capture {@link Consumer} to receive the
+	 *                {@link ConfigurableApplicationContext}.
+	 * @param loader  {@link SpringLoader}.
+	 * @return Loaded context.
+	 * @throws E Possible failure in loading.
+	 */
+	public static <S, E extends Throwable> S captureApplicationContext(Consumer<ConfigurableApplicationContext> capture,
+			SpringLoader<S, E> loader) throws E {
+
+		// Provide capture
+		applicationContextCapture.set(capture);
+		try {
+
+			// Undertake the load
+			return loader.load();
+
+		} finally {
+			// Ensure clear capture (no longer loading)
+			applicationContextCapture.set(null);
+		}
+	}
+
+	/**
+	 * {@link Consumer} to receive the {@link ConfigurableApplicationContext}.
+	 */
+	private static final ThreadLocal<Consumer<ConfigurableApplicationContext>> applicationContextCapture = new ThreadLocal<>();
 
 	/**
 	 * Provides the loading of Spring.
@@ -317,6 +351,12 @@ public class SpringSupplierSource extends AbstractSupplierSource {
 			return applicationContext;
 
 		}, dependencyFactory);
+
+		// Determine if capture the application context
+		Consumer<ConfigurableApplicationContext> captureApplicationContext = applicationContextCapture.get();
+		if (captureApplicationContext != null) {
+			captureApplicationContext.accept(this.springContext);
+		}
 
 		// Load listing of all the beans (mapped by their type)
 		Map<Class<?>, List<String>> beanNamesByType = new HashMap<>();

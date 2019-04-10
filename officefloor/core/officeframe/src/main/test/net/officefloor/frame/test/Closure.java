@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.test;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -24,7 +25,7 @@ import java.util.function.Function;
  *
  * @author Daniel Sagenschneider
  */
-public class Closure<T> {
+public class Closure<T> implements Consumer<T> {
 
 	/**
 	 * {@link Closure} free variable value.
@@ -41,10 +42,19 @@ public class Closure<T> {
 	/**
 	 * Initialise with initial value.
 	 * 
-	 * @param initialValue
-	 *            Initial value.
+	 * @param initialValue Initial value.
 	 */
 	public Closure(T initialValue) {
 		this.value = initialValue;
 	}
+
+	/*
+	 * ===================== Consumer ========================
+	 */
+
+	@Override
+	public void accept(T value) {
+		this.value = value;
+	}
+
 }

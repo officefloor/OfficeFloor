@@ -33,8 +33,17 @@
 			<artifactId>h2</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.spring</groupId>
+			<artifactId>officespring_test</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

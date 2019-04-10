@@ -17,6 +17,8 @@
 		<projectVersion>${project.version}</projectVersion>
 	</properties>
 	<build>
+		<sourceDirectory>src/main/kotlin</sourceDirectory>
+		<testSourceDirectory>src/test/kotlin</testSourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
@@ -62,36 +64,6 @@
 						<goals>
 							<goal>testCompile</goal>
 						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/main/kotlin</source>
-							</sources>
-						</configuration>
-					</execution>
-					<execution>
-						<id>add-test-source</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/test/kotlin</source>
-							</sources>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -162,11 +134,6 @@
 								</goals>
 							</execution>
 						</executions>
-						<configuration>
-							<sourceDirectories>
-								<dir>src/main/kotlin</dir>
-							</sourceDirectories>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>

@@ -40,6 +40,7 @@ import net.officefloor.compile.test.supplier.SupplierTypeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.managedfunction.clazz.Qualified;
@@ -511,6 +512,43 @@ public class SpringBootTest extends OfficeFrameTestCase {
 			assertNotNull("Should have service thread", serviceThread);
 			assertNotEquals("Should be different thread", serviceThread, Thread.currentThread());
 			threadLocalValue = MockSpringSupplierExtension.threadLocal.get();
+		}
+	}
+
+	/**
+	 * Ensure able to capture the {@link ConfigurableApplicationContext}.
+	 */
+	public void testCaptureApplicationContext() throws Exception {
+
+		// Capture the application context
+		Closure<ConfigurableApplicationContext> applicationContext = new Closure<>();
+		OfficeFloor officeFloor = SpringSupplierSource.captureApplicationContext(applicationContext, () -> {
+
+			// Configure OfficeFloor to auto-wire in Spring beans
+			CompileOfficeFloor compile = new CompileOfficeFloor();
+			compile.office((context) -> {
+				OfficeArchitect office = context.getOfficeArchitect();
+
+				// Add Spring supplier
+				office.addSupplier("SPRING", SpringSupplierSource.class.getName()).addProperty(
+						SpringSupplierSource.CONFIGURATION_CLASS_NAME, MockSpringBootConfiguration.class.getName());
+
+				// Add the OfficeFloor managed object
+				Singleton.load(office, this.createMock(OfficeFloorManagedObject.class));
+			});
+			return compile.compileAndOpenOfficeFloor();
+		});
+		try {
+
+			// Ensure have Spring application context
+			assertNotNull("Should have Spring application context", applicationContext.value);
+
+			// Ensure able to use application context
+			SimpleBean bean = applicationContext.value.getBean(SimpleBean.class);
+			assertNotNull("Should have bean", bean);
+
+		} finally {
+			officeFloor.closeOfficeFloor();
 		}
 	}
 

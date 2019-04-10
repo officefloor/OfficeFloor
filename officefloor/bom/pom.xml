@@ -64,6 +64,7 @@
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.4</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
+		<flyway-version>5.2.4</flyway-version>
 		<google-api-version>1.28.0</google-api-version>
 		<google-appengine-version>1.9.73</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
@@ -340,6 +341,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
+				<artifactId>officespring_test</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.spring</groupId>
 				<artifactId>officespring_data</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -389,6 +395,11 @@
 				<groupId>com.zaxxer</groupId>
 				<artifactId>HikariCP</artifactId>
 				<version>${hikari-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-core</artifactId>
+				<version>${flyway-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.h2database</groupId>
