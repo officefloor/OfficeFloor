@@ -17,16 +17,23 @@
  */
 package net.officefloor.tutorial.transactionhttpserver;
 
+import java.sql.SQLException;
 import java.util.Arrays;
 
+import javax.sql.DataSource;
+
+import org.flywaydb.core.Flyway;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.spring.test.SpringRule;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
@@ -36,12 +43,24 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class TransactionHttpServerTest {
 
+	public final SpringRule spring = new SpringRule();
+
+	public final MockWoofServerRule server = new MockWoofServerRule();
+
 	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	public final RuleChain order = RuleChain.outerRule(this.spring).around(this.server);
 
 	private static final String POST_CONTENT = "Interesting post article";
 
 	private static final ObjectMapper mapper = new ObjectMapper();
+
+	@Before
+	public void resetDatabase() throws SQLException {
+		DataSource dataSource = this.spring.getBean(DataSource.class);
+		Flyway flyway = Flyway.configure().dataSource(dataSource).load();
+		flyway.clean();
+		flyway.migrate();
+	}
 
 	@Test
 	public void createPost() throws Exception {
