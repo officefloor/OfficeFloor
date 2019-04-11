@@ -35,6 +35,7 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AdministrationNode;
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireDirection;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
@@ -674,7 +675,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		if (this.isAutoWireObjects) {
 
 			// Create the OfficeFloor auto wirer
-			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class);
+			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class,
+					AutoWireDirection.SOURCE_REQUIRES_TARGET);
 			final AutoWirer<LinkObjectNode> officeFloorContextAutoWirer = this.officeFloor
 					.loadAutoWireObjectTargets(officeFloorAutoWirer, compileContext);
 
@@ -742,7 +744,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 			// Create the OfficeFloor extension auto wirer
 			final AutoWirer<ManagedObjectExtensionNode> officeFloorAutoWirer = this.context
-					.createAutoWirer(ManagedObjectExtensionNode.class);
+					.createAutoWirer(ManagedObjectExtensionNode.class, AutoWireDirection.SOURCE_REQUIRES_TARGET);
 			final AutoWirer<ManagedObjectExtensionNode> officeFloorContextAutoWirer = this.officeFloor
 					.loadAutoWireExtensionTargets(officeFloorAutoWirer, compileContext);
 
@@ -791,7 +793,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		if (this.isAutoWireTeams) {
 
 			// Create the OfficeFloor team auto wirer
-			final AutoWirer<LinkTeamNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkTeamNode.class);
+			final AutoWirer<LinkTeamNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkTeamNode.class,
+					AutoWireDirection.TARGET_CATEGORISES_SOURCE);
 			this.officeFloor.loadAutoWireTeamTargets(officeFloorAutoWirer, this, compileContext);
 
 			// Create the Office team auto wirer

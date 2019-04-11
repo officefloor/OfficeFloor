@@ -118,11 +118,12 @@ public interface NodeContext {
 	/**
 	 * Creates a new {@link AutoWirer}.
 	 * 
-	 * @param          <N> Type of {@link Node}.
-	 * @param nodeType {@link Class} type of {@link Node}.
+	 * @param           <N> Type of {@link Node}.
+	 * @param nodeType  {@link Class} type of {@link Node}.
+	 * @param direction {@link AutoWireDirection}.
 	 * @return New {@link AutoWirer}.
 	 */
-	<N extends Node> AutoWirer<N> createAutoWirer(Class<N> nodeType);
+	<N extends Node> AutoWirer<N> createAutoWirer(Class<N> nodeType, AutoWireDirection direction);
 
 	/**
 	 * Obtains the {@link OfficeFloorSource} class.

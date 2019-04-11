@@ -90,6 +90,7 @@ import net.officefloor.compile.impl.supplier.SupplierLoaderImpl;
 import net.officefloor.compile.impl.team.TeamLoaderImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AdministrationNode;
+import net.officefloor.compile.internal.structure.AutoWireDirection;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.EscalationNode;
@@ -490,8 +491,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public <N extends Node> AutoWirer<N> createAutoWirer(Class<N> nodeType) {
-		return new AutoWirerImpl<>(this.sourceContext, this.getCompilerIssues());
+	public <N extends Node> AutoWirer<N> createAutoWirer(Class<N> nodeType, AutoWireDirection direction) {
+		return new AutoWirerImpl<>(this.sourceContext, this.getCompilerIssues(), direction);
 	}
 
 	@Override
