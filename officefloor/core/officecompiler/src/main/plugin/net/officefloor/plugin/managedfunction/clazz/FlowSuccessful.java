@@ -15,32 +15,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.function;
+package net.officefloor.plugin.managedfunction.clazz;
 
-import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * <p>
- * Allows {@link ThreadState} safe logic to run on the completion of the
- * {@link AsynchronousFlow}.
- * <p>
- * As the {@link AsynchronousFlow} is very likely to use other {@link Thread}
- * instances (and likely call the completion of {@link AsynchronousFlow} on
- * another {@link Thread}), this allows {@link ThreadState} logic to synchronise
- * the results back into the {@link ManagedFunction} and its dependent
- * {@link ManagedObject} instances.
  * 
  * @author Daniel Sagenschneider
  */
 @FunctionalInterface
-public interface AsynchronousFlowCompletion {
+public interface FlowSuccessful extends FlowCallback {
 
 	/**
-	 * Contains the {@link ThreadState} safe logic.
+	 * Default implementation of {@link FlowCallback} to escalate and then invoke
+	 * successful handling.
+	 */
+	default void run(Throwable escalation) throws Throwable {
+
+		// Ensure propagate flow failure
+		if (escalation != null) {
+			throw escalation;
+		}
+
+		// Successful flow
+		this.run();
+	}
+
+	/**
+	 * Invoked on completion of successful {@link Flow}.
 	 * 
-	 * @throws Throwable Indicate a failure in the {@link AsynchronousFlow}.
+	 * @throws Throwable Possible failure in handling completion.
 	 */
 	void run() throws Throwable;
-
 }

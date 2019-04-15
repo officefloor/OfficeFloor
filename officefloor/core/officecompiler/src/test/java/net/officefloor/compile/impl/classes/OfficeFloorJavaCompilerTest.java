@@ -140,7 +140,7 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 		 * 
 		 * @param sourceContext {@link SourceContext}.
 		 */
-		public MockOfficeFloorJavaCompilerImpl(SourceContext sourceContext) {
+		public MockOfficeFloorJavaCompilerImpl(SourceContext sourceContext) throws ClassNotFoundException {
 			super(sourceContext);
 		}
 	}
@@ -176,6 +176,33 @@ public class OfficeFloorJavaCompilerTest extends OfficeFrameTestCase {
 			// Ensure no Java compiler
 			assertNull("Ensure no compiling", OfficeFloorJavaCompiler.newInstance(getSourceContext()));
 		});
+	}
+
+	/**
+	 * Ensure disable if Java compiler not available.
+	 */
+	@SuppressWarnings("restriction")
+	public void testDisableAsNoJavaCompiler() {
+
+		// Ensure compiler available for test
+		Class<?> javacProcessingEnvironmentClass = com.sun.tools.javac.processing.JavacProcessingEnvironment.class;
+		assertNotNull("Invalid test: should have javac processing environment", javacProcessingEnvironmentClass);
+
+		// Ensure correct java compiler class to check
+		assertEquals("Incorrect check class", javacProcessingEnvironmentClass.getName(),
+				OfficeFloorJavaCompilerImpl.JAVAC_PROCESSING_ENVIRONMENT_CLASS_NAME);
+
+		// Create class loader without compiler
+		SourceContext sourceContext = getSourceContext(new ClassLoader() {
+			@Override
+			public Class<?> loadClass(String name) throws ClassNotFoundException {
+				if (name.equals(javacProcessingEnvironmentClass.getName())) {
+					throw new ClassNotFoundException(name);
+				}
+				return super.loadClass(name);
+			}
+		});
+		assertNull("No Java compiler, so no compiling", OfficeFloorJavaCompiler.newInstance(sourceContext));
 	}
 
 	/**

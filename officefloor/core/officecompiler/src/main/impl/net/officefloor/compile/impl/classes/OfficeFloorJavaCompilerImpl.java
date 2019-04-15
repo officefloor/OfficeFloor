@@ -60,6 +60,12 @@ import net.officefloor.frame.api.source.SourceContext;
 public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 
 	/**
+	 * {@link Class} name for the JavacProcessingEnvironment to confirm on class
+	 * path to ensure can compile.
+	 */
+	static final String JAVAC_PROCESSING_ENVIRONMENT_CLASS_NAME = "com.sun.tools.javac.processing.JavacProcessingEnvironment";
+
+	/**
 	 * Indicates if the {@link Method} has a return value.
 	 * 
 	 * @param method {@link Method}.
@@ -104,10 +110,21 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	 * Instantiate.
 	 * 
 	 * @param sourceContext {@link SourceContext}.
+	 * @throws ClassNotFoundException If missing {@link Class} instances for
+	 *                                compiling.
 	 */
-	public OfficeFloorJavaCompilerImpl(SourceContext sourceContext) {
+	public OfficeFloorJavaCompilerImpl(SourceContext sourceContext) throws ClassNotFoundException {
 		this.sourceContext = sourceContext;
-		this.compiledClassLoader = new CompiledClassLoader(this.sourceContext.getClassLoader());
+
+		// Ensure compiler available
+		ClassLoader classLoader = this.sourceContext.getClassLoader();
+		Class<?> javacProcessingEnvironmentClass = classLoader.loadClass(JAVAC_PROCESSING_ENVIRONMENT_CLASS_NAME);
+		if (javacProcessingEnvironmentClass == null) {
+			throw new ClassNotFoundException(JAVAC_PROCESSING_ENVIRONMENT_CLASS_NAME);
+		}
+
+		// Load state
+		this.compiledClassLoader = new CompiledClassLoader(classLoader);
 
 		// Obtain the Java Compiler
 		this.javaCompiler = ToolProvider.getSystemJavaCompiler();
