@@ -120,6 +120,25 @@ public class OfficeFloorCompilerAdapter extends OfficeFloorCompiler {
 	 */
 
 	@Override
+	public void addSourceAliases() {
+		this.invokeMethod("addSourceAliases", new Object[0]);
+	}
+
+	@Override
+	public void addSystemProperties() {
+		this.invokeMethod("addSystemProperties", new Object[0]);
+	}
+
+	@Override
+	public void addEnvProperties() {
+		this.invokeMethod("addEnvProperties", new Object[0]);
+	}
+
+	/*
+	 * ===================== OfficeFloorCompiler abstract ==================
+	 */
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T run(Class<? extends OfficeFloorCompilerRunnable<T>> runnableClass, Object... parameters)
 			throws Exception {
