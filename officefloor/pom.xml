@@ -51,7 +51,7 @@
 		<failsafe-version>2.22.1</failsafe-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<java-lowest-version>8</java-lowest-version>
-		<jetty-version>9.4.15.v20190215</jetty-version>
+		<jetty-version>9.4.16.v20190411</jetty-version>
 		<maven-version>3.6.1</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
@@ -224,13 +224,10 @@
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-server</artifactId>
+				<artifactId>jetty-bom</artifactId>
 				<version>${jetty-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-servlet</artifactId>
-				<version>${jetty-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>easymock</groupId>
