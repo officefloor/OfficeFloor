@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.script.Bindings;
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -74,6 +76,8 @@ public class ScriptFunctionTest extends AbstractPolyglotFunctionTest {
 				// Obtain the engine
 				final String engineName = "graal.js";
 				ScriptEngine engine = engineManager.getEngineByName(engineName);
+				Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+        			bindings.put("polyglot.js.allowAllAccess", true);
 
 				// Load the setup
 				InputStream setup = ScriptFunctionTest.class.getClassLoader()
