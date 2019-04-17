@@ -19,6 +19,7 @@ package net.officefloor.polyglot.script;
 
 import javax.script.Bindings;
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
