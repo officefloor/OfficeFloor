@@ -63,7 +63,7 @@ public class OfficeFloorJavaCompilerImpl extends OfficeFloorJavaCompiler {
 	 * {@link Class} name for the JavacProcessingEnvironment to confirm on class
 	 * path to ensure can compile.
 	 */
-	static final String JAVAC_PROCESSING_ENVIRONMENT_CLASS_NAME = "com.sun.tools.javac.processing.JavacProcessingEnvironment";
+	public static final String JAVAC_PROCESSING_ENVIRONMENT_CLASS_NAME = "com.sun.tools.javac.processing.JavacProcessingEnvironment";
 
 	/**
 	 * Indicates if the {@link Method} has a return value.
