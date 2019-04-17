@@ -42,6 +42,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
@@ -448,6 +449,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		parallel.setLabel("parallel");
 		parallel.setArgumentType(Integer.class);
 		instanceMethod.addFlow().setLabel("sequential");
+		instanceMethod.addFlow().setLabel("successfulFlow");
 		instanceMethod.addEscalation(IOException.class);
 
 		// functionFailMethod
@@ -509,6 +511,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		final String RETURN_VALUE = "INSTANCE RETURN VALUE";
 
 		// Index order of flows due to sorting by method name
+		final int SUCCESSFUL_FLOW_INDEX = 3;
 		final int SEQUENTIAL_FLOW_INDEX = 2;
 		final int PARALLEL_FLOW_INDEX = 1;
 		final int ASYNCHRONOUS_FLOW_INDEX = 0;
@@ -523,6 +526,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.functionContext.doFlow(SEQUENTIAL_FLOW_INDEX, null, null);
 		this.functionContext.doFlow(PARALLEL_FLOW_INDEX, Integer.valueOf(1), null);
 		this.functionContext.doFlow(ASYNCHRONOUS_FLOW_INDEX, PARAMETER_VALUE, null);
+		this.functionContext.doFlow(SUCCESSFUL_FLOW_INDEX, null, null);
 
 		// Replay the mock objects
 		this.replayMockObjects();
@@ -737,6 +741,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 			flows.sequential();
 			flows.parallel(Integer.valueOf(1));
 			flows.asynchronous(parameter, null);
+			flows.successfulFlow(null);
 
 			// Return the value
 			return returnValue;
@@ -818,6 +823,13 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		 * @param callback  {@link FlowCallback}.
 		 */
 		void asynchronous(String parameter, FlowCallback callback);
+
+		/**
+		 * Handles only successful {@link Flow}.
+		 * 
+		 * @param successful {@link FlowSuccessful}.
+		 */
+		void successfulFlow(FlowSuccessful successful);
 	}
 
 	/**

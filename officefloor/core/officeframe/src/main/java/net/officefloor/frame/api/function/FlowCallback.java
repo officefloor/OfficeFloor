@@ -32,6 +32,7 @@ import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
  *
  * @author Daniel Sagenschneider
  */
+@FunctionalInterface
 public interface FlowCallback {
 
 	/**
@@ -51,12 +52,10 @@ public interface FlowCallback {
 	/**
 	 * Invoked on completion of the {@link Flow}.
 	 * 
-	 * @param escalation
-	 *            Possible {@link Throwable} from the {@link Flow}.
-	 *            <code>null</code> indicates all {@link Escalation} instances
-	 *            handled within {@link Flow}.
-	 * @throws Throwable
-	 *             {@link Escalation} within the callback logic.
+	 * @param escalation Possible {@link Throwable} from the {@link Flow}.
+	 *                   <code>null</code> indicates all {@link Escalation}
+	 *                   instances handled within {@link Flow}.
+	 * @throws Throwable {@link Escalation} within the callback logic.
 	 */
 	void run(Throwable escalation) throws Throwable;
 
