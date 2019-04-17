@@ -17,7 +17,9 @@
  */
 package net.officefloor.polyglot.script;
 
+import javax.script.Bindings;
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -112,6 +114,8 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 
 			// Create and configure the engine
 			ScriptEngine engine = this.engineManager.getEngineByName(engineName);
+			Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+        		bindings.put("polyglot.js.allowAllAccess", true);
 			if (this.setupScript != null) {
 				engine.eval(this.setupScript);
 			}
