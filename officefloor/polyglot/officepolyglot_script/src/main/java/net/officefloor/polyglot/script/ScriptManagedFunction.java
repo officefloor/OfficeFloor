@@ -112,6 +112,8 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 
 			// Create and configure the engine
 			ScriptEngine engine = this.engineManager.getEngineByName(engineName);
+			Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+        		bindings.put("polyglot.js.allowAllAccess", true);
 			if (this.setupScript != null) {
 				engine.eval(this.setupScript);
 			}
