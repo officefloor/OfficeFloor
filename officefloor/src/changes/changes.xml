@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.9.0" date="In SCM" description="Polyglot">
+		<release version="3.9.1" date="In SCM" description="Team auto-wire direction fixes">
+			<action type="add" dev="sagenschneider">Variables</action>
+		</release>
+		<release version="3.9.0" date="2019-04-12" description="Polyglot">
 			<action type="add" dev="sagenschneider">Variables</action>
 		</release>
 		<release version="3.8.0" date="2019-03-27" description="Variables">

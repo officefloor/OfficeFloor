@@ -154,18 +154,16 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	public synchronized static final OfficeFloorCompiler newOfficeFloorCompiler(ClassLoader implClassLoader) {
 
 		// Ensure have implementation class loader
-		if (implClassLoader == null) {
-			implClassLoader = Thread.currentThread().getContextClassLoader();
+		ClassLoader loader = implClassLoader;
+		if (loader == null) {
+			loader = defaultClassLoader();
 		}
-
-		// Obtain the client class loader
-		ClassLoader clientClassLoader = OfficeFloorCompiler.class.getClassLoader();
 
 		// Determine if use factory
 		Object implementation = null;
 		if (FACTORY != null) {
 			// Factory to create the OfficeFloor compiler
-			implementation = FACTORY.createOfficeFloorCompiler(implClassLoader);
+			implementation = FACTORY.createOfficeFloorCompiler(loader);
 
 		} else {
 			// Determine if overriding the implementation
@@ -177,8 +175,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 			// Load implementation
 			try {
-				implementation = implClassLoader.loadClass(implementationClassName).getDeclaredConstructor()
-						.newInstance();
+				implementation = loader.loadClass(implementationClassName).getDeclaredConstructor().newInstance();
 			} catch (Throwable ex) {
 				throw new IllegalArgumentException(
 						"Can not create instance of " + implementationClassName + " from default constructor", ex);
@@ -193,7 +190,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 		} else {
 			// Not compatible so must wrap to enable compatibility
-			compiler = new OfficeFloorCompilerAdapter(implementation, clientClassLoader, implClassLoader);
+			compiler = new OfficeFloorCompilerAdapter(implementation, defaultClassLoader(), loader);
 
 			// Specify class loader on the implementation
 			try {
@@ -215,7 +212,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 				// Specify the class loader
 				classLoaderField.setAccessible(true);
-				classLoaderField.set(implementation, implClassLoader);
+				classLoaderField.set(implementation, loader);
 
 			} catch (Exception ex) {
 				throw new IllegalStateException("Unable to specify class loader on "
@@ -223,8 +220,8 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 			}
 		}
 
-		// Specify the class loader on the compiler
-		compiler.classLoader = clientClassLoader;
+		// Ensure only load provided class loader
+		compiler.classLoader = implClassLoader;
 
 		// Return the OfficeFloor compiler implementation
 		return compiler;
@@ -245,6 +242,16 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 	}
 
 	/**
+	 * Obtains the default {@link ClassLoader}.
+	 * 
+	 * @return Default {@link ClassLoader}.
+	 */
+	private static ClassLoader defaultClassLoader() {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		return (classLoader != null) ? classLoader : OfficeFloorCompiler.class.getClassLoader();
+	}
+
+	/**
 	 * {@link ClassLoader} initialised to be the {@link Thread} instance's
 	 * {@link ClassLoader}.
 	 */
@@ -259,7 +266,7 @@ public abstract class OfficeFloorCompiler implements Node, PropertyConfigurable 
 
 		// Ensure have a class loader
 		if (this.classLoader == null) {
-			this.classLoader = Thread.currentThread().getContextClassLoader();
+			this.classLoader = defaultClassLoader();
 		}
 
 		// Return the class loader

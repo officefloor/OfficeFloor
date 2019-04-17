@@ -109,6 +109,10 @@
 			<artifactId>scalatest_2.12</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.scalacheck</groupId>
+			<artifactId>scalacheck_2.12</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
 		</dependency>
