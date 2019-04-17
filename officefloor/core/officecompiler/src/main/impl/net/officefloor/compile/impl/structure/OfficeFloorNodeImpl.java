@@ -32,6 +32,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireDirection;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.ExecutiveNode;
@@ -768,7 +769,8 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 		if (this.isAutoWireObjects) {
 
 			// Create the auto wirer
-			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class);
+			final AutoWirer<LinkObjectNode> officeFloorAutoWirer = this.context.createAutoWirer(LinkObjectNode.class,
+					AutoWireDirection.SOURCE_REQUIRES_TARGET);
 			final AutoWirer<LinkObjectNode> autoWirer = this.loadAutoWireObjectTargets(officeFloorAutoWirer,
 					compileContext);
 
@@ -809,7 +811,8 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 		if (this.isAutoWireTeams) {
 
 			// Create the auto-wirer
-			final AutoWirer<LinkTeamNode> autoWirer = this.context.createAutoWirer(LinkTeamNode.class);
+			final AutoWirer<LinkTeamNode> autoWirer = this.context.createAutoWirer(LinkTeamNode.class,
+					AutoWireDirection.TARGET_CATEGORISES_SOURCE);
 			this.teams.values().forEach((team) -> {
 
 				// Create the target auto-wires

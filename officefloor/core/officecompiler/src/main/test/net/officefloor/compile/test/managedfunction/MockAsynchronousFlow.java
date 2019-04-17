@@ -19,6 +19,7 @@ package net.officefloor.compile.test.managedfunction;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
@@ -45,7 +46,7 @@ public class MockAsynchronousFlow implements AsynchronousFlow {
 	 * 
 	 * @return <code>true</code> if {@link AsynchronousFlow} is complete.
 	 */
-	public boolean isComplete() {
+	public synchronized boolean isComplete() {
 		return this.isComplete;
 	}
 
@@ -58,9 +59,46 @@ public class MockAsynchronousFlow implements AsynchronousFlow {
 	 * @return {@link AsynchronousFlowCompletion} or <code>null</code> if not
 	 *         provided.
 	 */
-	public AsynchronousFlowCompletion getCompletion() {
+	public synchronized AsynchronousFlowCompletion getCompletion() {
 		assertTrue("Flow not complete", this.isComplete);
 		return this.completion;
+	}
+
+	/**
+	 * Waits for completion.
+	 * 
+	 * @param timeToWait Time in milliseconds to wait.
+	 * @return Provided {@link AsynchronousFlowCompletion}.
+	 */
+	public synchronized AsynchronousFlowCompletion waitOnCompletion(int timeToWait) {
+		long endTime = System.currentTimeMillis() + timeToWait;
+		while (!this.isComplete) {
+
+			// Determine if complete
+			if (endTime < System.currentTimeMillis()) {
+				fail("Timed out after " + timeToWait + " milliseconds waiting on "
+						+ AsynchronousFlow.class.getSimpleName() + " to complete");
+			}
+
+			// Wait some time
+			try {
+				this.wait(100);
+			} catch (InterruptedException ex) {
+				fail("Interrupted wait on completion");
+			}
+		}
+
+		// Return the asynchronous flow completion
+		return this.completion;
+	}
+
+	/**
+	 * Waits a default period of time for completion.
+	 * 
+	 * @return Provided {@link AsynchronousFlowCompletion}.
+	 */
+	public AsynchronousFlowCompletion waitOnCompletion() {
+		return this.waitOnCompletion(3000);
 	}
 
 	/*
@@ -68,10 +106,15 @@ public class MockAsynchronousFlow implements AsynchronousFlow {
 	 */
 
 	@Override
-	public void complete(AsynchronousFlowCompletion completion) {
+	public synchronized void complete(AsynchronousFlowCompletion completion) {
+
+		// Undertake completion
 		assertFalse("Already completed " + AsynchronousFlow.class.getSimpleName(), this.isComplete);
 		this.isComplete = true;
 		this.completion = completion;
+
+		// Notify complete
+		this.notify();
 	}
 
 }

@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireDirection;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.Node;
@@ -50,6 +51,11 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	private final CompilerIssues issues;
 
 	/**
+	 * Direction of the {@link AutoWire}.
+	 */
+	private final AutoWireDirection direction;
+
+	/**
 	 * Target {@link AutoWireLink} instances.
 	 */
 	private final List<AutoWireNodeImpl> targets = new ArrayList<>();
@@ -62,11 +68,12 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param context {@link SourceContext}.
-	 * @param issues  {@link CompilerIssues}.
+	 * @param context   {@link SourceContext}.
+	 * @param issues    {@link CompilerIssues}.
+	 * @param direction {@link AutoWireDirection}.
 	 */
-	public AutoWirerImpl(SourceContext context, CompilerIssues issues) {
-		this(context, issues, null);
+	public AutoWirerImpl(SourceContext context, CompilerIssues issues, AutoWireDirection direction) {
+		this(context, issues, direction, null);
 	}
 
 	/**
@@ -74,11 +81,14 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 	 * 
 	 * @param context    {@link SourceContext}.
 	 * @param issues     {@link CompilerIssues}.
+	 * @param direction  {@link AutoWireDirection}.
 	 * @param outerScope Outer scope {@link AutoWirer}.
 	 */
-	private AutoWirerImpl(SourceContext context, CompilerIssues issues, AutoWirerImpl<N> outerScope) {
+	private AutoWirerImpl(SourceContext context, CompilerIssues issues, AutoWireDirection direction,
+			AutoWirerImpl<N> outerScope) {
 		this.context = context;
 		this.issues = issues;
+		this.direction = direction;
 		this.outerScope = outerScope;
 	}
 
@@ -174,9 +184,22 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 									continue NEXT_AUTO_WIRE;
 								}
 
-								// Match on child type
-								if (!sourceClass.isAssignableFrom(targetClass)) {
-									continue NEXT_AUTO_WIRE;
+								// Match on child type (respecting direction)
+								switch (this.direction) {
+								case SOURCE_REQUIRES_TARGET:
+									if (!sourceClass.isAssignableFrom(targetClass)) {
+										continue NEXT_AUTO_WIRE;
+									}
+									break;
+
+								case TARGET_CATEGORISES_SOURCE:
+									if (!targetClass.isAssignableFrom(sourceClass)) {
+										continue NEXT_AUTO_WIRE;
+									}
+									break;
+
+								default:
+									throw new IllegalStateException("Unknown auto-wire direction: " + this.direction);
 								}
 							}
 
@@ -270,7 +293,7 @@ public class AutoWirerImpl<N extends Node> implements AutoWirer<N> {
 
 	@Override
 	public AutoWirer<N> createScopeAutoWirer() {
-		return new AutoWirerImpl<>(this.context, this.issues, this);
+		return new AutoWirerImpl<>(this.context, this.issues, this.direction, this);
 	}
 
 	/**

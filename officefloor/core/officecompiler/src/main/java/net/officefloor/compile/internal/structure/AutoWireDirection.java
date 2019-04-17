@@ -15,32 +15,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.function;
+package net.officefloor.compile.internal.structure;
 
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.api.team.Team;
 
 /**
- * <p>
- * Allows {@link ThreadState} safe logic to run on the completion of the
- * {@link AsynchronousFlow}.
- * <p>
- * As the {@link AsynchronousFlow} is very likely to use other {@link Thread}
- * instances (and likely call the completion of {@link AsynchronousFlow} on
- * another {@link Thread}), this allows {@link ThreadState} logic to synchronise
- * the results back into the {@link ManagedFunction} and its dependent
- * {@link ManagedObject} instances.
+ * Direction of {@link AutoWire}.
  * 
  * @author Daniel Sagenschneider
  */
-@FunctionalInterface
-public interface AsynchronousFlowCompletion {
+public enum AutoWireDirection {
 
 	/**
-	 * Contains the {@link ThreadState} safe logic.
-	 * 
-	 * @throws Throwable Indicate a failure in the {@link AsynchronousFlow}.
+	 * <p>
+	 * Flags that the source requires to use the target. Hence, target must be child
+	 * of source.
+	 * <p>
+	 * This is typically used in {@link ManagedObject} auto-wirings to provide
+	 * dependent {@link ManagedObject}.
 	 */
-	void run() throws Throwable;
+	SOURCE_REQUIRES_TARGET,
 
+	/**
+	 * <p>
+	 * Flags that the target categories the source. Hence, source must be child of
+	 * target.
+	 * <p>
+	 * This is typically used in {@link Team} auto-wirings to assign
+	 * {@link ManagedFunction} to {@link Team}.
+	 */
+	TARGET_CATEGORISES_SOURCE
 }

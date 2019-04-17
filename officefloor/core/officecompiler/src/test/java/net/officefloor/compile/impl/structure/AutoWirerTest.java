@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.structure;
 import java.util.function.Function;
 
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.AutoWireDirection;
 import net.officefloor.compile.internal.structure.AutoWireLink;
 import net.officefloor.compile.internal.structure.AutoWirer;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -53,7 +54,8 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link AutoWirer} to test.
 	 */
-	private final AutoWirer<Node> wirer = new AutoWirerImpl<>(this.context, this.issues);
+	private AutoWirer<Node> wirer = new AutoWirerImpl<>(this.context, this.issues,
+			AutoWireDirection.SOURCE_REQUIRES_TARGET);
 
 	/**
 	 * {@link OfficeNode}.
@@ -206,6 +208,18 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	 * Child type.
 	 */
 	private static interface ChildType extends ParentType {
+	}
+
+	/**
+	 * Ensure can match on reverse of child type.
+	 */
+	public void testMatchReverseChildType() {
+		this.wirer = new AutoWirerImpl<Node>(this.context, this.issues, AutoWireDirection.TARGET_CATEGORISES_SOURCE);
+		this.replayMockObjects();
+		this.wirer.addAutoWireTarget(this.target, new AutoWire(ParentType.class));
+		AutoWireLink<Node, Node>[] links = this.wirer.getAutoWireLinks(this.source, new AutoWire(ChildType.class));
+		this.assertLinkMatch(links, new AutoWire(ChildType.class), new AutoWire(ParentType.class));
+		this.verifyMockObjects();
 	}
 
 	/**

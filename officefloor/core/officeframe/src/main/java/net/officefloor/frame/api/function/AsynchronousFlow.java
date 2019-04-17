@@ -31,6 +31,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  * 
  * @author Daniel Sagenschneider
  */
+@FunctionalInterface
 public interface AsynchronousFlow {
 
 	/**

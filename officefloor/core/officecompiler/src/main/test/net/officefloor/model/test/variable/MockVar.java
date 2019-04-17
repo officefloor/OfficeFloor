@@ -29,7 +29,7 @@ public class MockVar<T> implements Var<T> {
 	/**
 	 * Value.
 	 */
-	private T value = null;
+	private volatile T value = null;
 
 	/**
 	 * Default constructor.
