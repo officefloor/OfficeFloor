@@ -92,6 +92,7 @@
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<scala-maven-version>4.0.1</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
+		<scalacheck-version>1.14.0</scalacheck-version>
 		<scalatest-maven-version>2.0.0</scalatest-maven-version>
 		<scalatest-version>3.2.0-SNAP10</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
@@ -555,6 +556,11 @@
 				<groupId>org.scalatest</groupId>
 				<artifactId>scalatest_2.12</artifactId>
 				<version>${scalatest-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scalacheck</groupId>
+				<artifactId>scalacheck_2.12</artifactId>
+				<version>${scalacheck-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jetbrains.kotlin</groupId>
