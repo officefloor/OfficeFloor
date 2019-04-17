@@ -253,7 +253,9 @@ Starting release
 	
     post {
    		always {
-    		emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
+            script {
+   				if (currentBuild.result != 'ABORTED') {
+	    			emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
 ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 
 Tests:
@@ -273,6 +275,8 @@ Log (last lines):
 ...
 ${BUILD_LOG}
 '''
+				}
+			}
 		}
 	}
 
