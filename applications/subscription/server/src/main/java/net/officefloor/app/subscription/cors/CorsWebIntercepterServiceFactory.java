@@ -1,7 +1,7 @@
 package net.officefloor.app.subscription.cors;
 
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebInterceptServiceFactory;
 
@@ -13,7 +13,7 @@ import net.officefloor.web.build.WebInterceptServiceFactory;
 public class CorsWebIntercepterServiceFactory implements WebInterceptServiceFactory {
 
 	public static class CorsWebIntercepter {
-		@NextFunction("service")
+		@Next("service")
 		public static void cors(ServerHttpConnection connection) {
 			Cors.options(connection);
 		}

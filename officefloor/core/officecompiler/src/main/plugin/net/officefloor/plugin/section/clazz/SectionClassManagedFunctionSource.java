@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
@@ -146,18 +147,28 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 				objectIndex++;
 			}
 
-			// Obtain the next function
-			NextFunction nextFunction = context.getMethod().getAnnotation(NextFunction.class);
-			if (nextFunction != null) {
+			// Obtain the next
+			Supplier<Class<?>> nextArgumentType = () -> {
 
 				// Obtain the argument type for the function
 				Class<?> returnType = context.getMethod().getReturnType();
 				Class<?> argumentType = ((returnType == null) || (void.class.equals(returnType))
 						|| (Void.TYPE.equals(returnType))) ? null : returnType;
 
-				// Add the next function
+				// Return the argument type
+				return argumentType;
+			};
+			Next next = context.getMethod().getAnnotation(Next.class);
+			if (next != null) {
+				context.getManagedFunctionTypeBuilder().addAnnotation(new NextAnnotation(next, nextArgumentType.get()));
+			}
+
+			// TODO: deprecated, but still handle NextFunction
+			@SuppressWarnings("deprecation")
+			NextFunction nextFunction = context.getMethod().getAnnotation(NextFunction.class);
+			if (nextFunction != null) {
 				context.getManagedFunctionTypeBuilder()
-						.addAnnotation(new NextFunctionAnnotation(nextFunction, argumentType));
+						.addAnnotation(new NextAnnotation(nextFunction, nextArgumentType.get()));
 			}
 
 			// Obtain the flow meta-data for the function

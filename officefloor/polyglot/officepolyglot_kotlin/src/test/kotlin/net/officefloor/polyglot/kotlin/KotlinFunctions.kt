@@ -1,7 +1,9 @@
 package net.officefloor.polyglot.kotlin
 
 import net.officefloor.frame.api.function.AsynchronousFlow
-import net.officefloor.plugin.section.clazz.NextFunction
+import net.officefloor.frame.api.function.FlowCallback
+import net.officefloor.plugin.managedfunction.clazz.FlowInterface
+import net.officefloor.plugin.section.clazz.Next
 import net.officefloor.plugin.section.clazz.Parameter
 import net.officefloor.plugin.variable.In
 import net.officefloor.plugin.variable.Out
@@ -16,21 +18,19 @@ import net.officefloor.polyglot.test.ParameterTypes
 import net.officefloor.polyglot.test.PrimitiveTypes
 import net.officefloor.polyglot.test.VariableTypes
 import net.officefloor.polyglot.test.WebTypes
+import net.officefloor.server.http.HttpException
 import net.officefloor.web.HttpCookieParameter
 import net.officefloor.web.HttpHeaderParameter
 import net.officefloor.web.HttpPathParameter
 import net.officefloor.web.HttpQueryParameter
 import net.officefloor.web.ObjectResponse
-import net.officefloor.frame.api.function.FlowCallback
 import org.junit.Assert
 import java.io.IOException
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface
-import net.officefloor.server.http.HttpException
 
 /**
  * Primitives.
  */
-@NextFunction("use")
+@Next("use")
 fun primitives(
 	_boolean: Boolean,
 	_byte: Byte,
@@ -47,7 +47,7 @@ fun primitives(
 /**
  * Objects.
  */
-@NextFunction("use")
+@Next("use")
 fun objects(
 	_string: String,
 	_object: JavaObject,
@@ -60,7 +60,7 @@ fun objects(
 /**
  * Collections.
  */
-@NextFunction("use")
+@Next("use")
 fun collections(_list: List<Int>, _set: Set<Char>, _map: Map<String, JavaObject>): CollectionTypes {
 	return CollectionTypes(_list, _set, _map)
 }
@@ -68,7 +68,7 @@ fun collections(_list: List<Int>, _set: Set<Char>, _map: Map<String, JavaObject>
 /**
  * Variables.
  */
-@NextFunction("use")
+@Next("use")
 fun variables(@Val _val: Char, _in: In<String>, _out: Out<JavaObject>, _var: Var<Int>): VariableTypes {
 	_out.set(JavaObject("test"))
 	val captureVar = _var.get()
@@ -79,7 +79,7 @@ fun variables(@Val _val: Char, _in: In<String>, _out: Out<JavaObject>, _var: Var
 /**
  * Parameters.
  */
-@NextFunction("use")
+@Next("use")
 fun parameters(@Parameter param: String): ParameterTypes {
 	return ParameterTypes(param)
 }
@@ -124,7 +124,7 @@ interface Flows {
 /**
  * Flows.
  */
-@NextFunction("nextFunction")
+@Next("nextFunction")
 fun serviceFlow(@Parameter flowType: String, flows: Flows) {
 	when (flowType) {
 		"nextFunction" -> return;

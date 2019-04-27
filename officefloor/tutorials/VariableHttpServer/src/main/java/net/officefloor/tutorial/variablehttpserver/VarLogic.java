@@ -17,7 +17,7 @@
  */
 package net.officefloor.tutorial.variablehttpserver;
 
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.variable.Val;
 import net.officefloor.plugin.variable.Var;
 
@@ -29,7 +29,7 @@ import net.officefloor.plugin.variable.Var;
 // START SNIPPET: tutorial
 public class VarLogic {
 
-	@NextFunction("use")
+	@Next("use")
 	public void setValues(Var<Person> person, @Description Var<String> description) {
 		person.set(new Person("Daniel", "Sagenschneider"));
 		description.set("Need to watch his code!");

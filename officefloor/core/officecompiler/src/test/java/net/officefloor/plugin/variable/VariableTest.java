@@ -23,7 +23,7 @@ import net.officefloor.compile.test.officefloor.CompileVar;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.Qualified;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 
 /**
  * Test using the {@link Var}.
@@ -46,7 +46,7 @@ public class VariableTest extends OfficeFrameTestCase {
 
 	public static class OutInSection {
 
-		@NextFunction("stepTwo")
+		@Next("stepTwo")
 		public void stepOne(Out<String> text, Out<Integer> number) {
 			text.set("TEXT");
 			number.set(1);
@@ -69,7 +69,7 @@ public class VariableTest extends OfficeFrameTestCase {
 
 	public static class QualifiedOutInSection {
 
-		@NextFunction("stepTwo")
+		@Next("stepTwo")
 		public void stepOne(@Qualified("QUALIFIED") Out<String> qualified, Out<String> unqualified) {
 			qualified.set("QUALIFIED");
 			unqualified.set("UNQUALIFIED");
@@ -91,7 +91,7 @@ public class VariableTest extends OfficeFrameTestCase {
 
 	public static class VarValSection {
 
-		@NextFunction("stepTwo")
+		@Next("stepTwo")
 		public void stepOne(Var<String> text, Var<Integer> number) {
 			text.set("TEXT");
 			number.set(1);
@@ -114,7 +114,7 @@ public class VariableTest extends OfficeFrameTestCase {
 
 	public static class QualifiedVarValSection {
 
-		@NextFunction("stepTwo")
+		@Next("stepTwo")
 		public void stepOne(@Qualified("QUALIFIED") Var<String> qualified, Var<String> unqualified) {
 			qualified.set("QUALIFIED");
 			unqualified.set("UNQUALIFIED");

@@ -201,6 +201,32 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Section with an output.
 	 */
 	public static class MockOutputSection {
+		@Next("doOutput")
+		public void doInput() {
+			// Testing type
+		}
+	}
+
+	/**
+	 * Ensure deprecated {@link NextFunction} continues to operate.
+	 */
+	public void testDeprecatedNextFunction() {
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockDeprecatedNextFunctionSection.class,
+				this.configureClassSectionFunction("doInput"));
+		expected.addSectionInput("doInput", null);
+		expected.addSectionOutput("doOutput", null, false);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class,
+				MockDeprecatedNextFunctionSection.class.getName());
+	}
+
+	/**
+	 * Section with an output.
+	 */
+	public static class MockDeprecatedNextFunctionSection {
+		@SuppressWarnings("deprecation")
 		@NextFunction("doOutput")
 		public void doInput() {
 			// Testing type
@@ -230,12 +256,12 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Section with an output.
 	 */
 	public static class MockOutputsToSameOutputSection {
-		@NextFunction("doOutput")
+		@Next("doOutput")
 		public void one() {
 			// Testing type
 		}
 
-		@NextFunction("doOutput")
+		@Next("doOutput")
 		public void two() {
 			// Testing type
 		}
@@ -398,7 +424,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Section with parameter and arguments.
 	 */
 	public static class MockParameterArgumentSection {
-		@NextFunction("doOutput")
+		@Next("doOutput")
 		public Integer doInput(@Parameter String parameter) {
 			return null;
 		}
@@ -954,7 +980,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	public static class MockChangeFunctionNameWithLinksSection {
 
 		// even with name change, should still link by method name
-		@NextFunction("oldName")
+		@Next("oldName")
 		public void doInput(MockChangeNameFlows flow, ReturnValue returnValue, @Parameter Boolean isInvokeFlow) {
 
 			// Flag invoked
@@ -967,7 +993,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			}
 		}
 
-		@NextFunction("externalFlow")
+		@Next("externalFlow")
 		public void oldName(ReturnValue returnValue, @Parameter String parameter, Connection connection)
 				throws SQLException {
 			// Indicate invoked
@@ -1173,7 +1199,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockInternalFlowSection {
 
-		@NextFunction("doSecond")
+		@Next("doSecond")
 		public ReturnValue doFirst(@Parameter ReturnValue returnValue) {
 			returnValue.value = "one";
 			return returnValue;
@@ -1503,42 +1529,42 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 	public static class PrimitiveParametersSection {
 
-		@NextFunction("doByte")
+		@Next("doByte")
 		public byte service(@Parameter byte param) {
 			return param;
 		}
 
-		@NextFunction("doShort")
+		@Next("doShort")
 		public short doByte(@Parameter byte param) {
 			return param;
 		}
 
-		@NextFunction("doChar")
+		@Next("doChar")
 		public char doShort(@Parameter short param) {
 			return (char) param;
 		}
 
-		@NextFunction("doInt")
+		@Next("doInt")
 		public int doChar(@Parameter char param) {
 			return param;
 		}
 
-		@NextFunction("doLong")
+		@Next("doLong")
 		public long doInt(@Parameter int param) {
 			return param;
 		}
 
-		@NextFunction("doFloat")
+		@Next("doFloat")
 		public float doLong(@Parameter long param) {
 			return param;
 		}
 
-		@NextFunction("doDouble")
+		@Next("doDouble")
 		public double doFloat(@Parameter float param) {
 			return param;
 		}
 
-		@NextFunction("doBoolean")
+		@Next("doBoolean")
 		public boolean doDouble(@Parameter double param) {
 			return Math.abs(param - 1) < 0.0000001; // avoid rounding issues
 		}
@@ -1587,7 +1613,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 * Section to invoke sub section.
 	 */
 	public static class MockSubSection {
-		@NextFunction("output")
+		@Next("output")
 		public void doSubSectionInput(ReturnValue returnValue) {
 			returnValue.value = "sub";
 		}

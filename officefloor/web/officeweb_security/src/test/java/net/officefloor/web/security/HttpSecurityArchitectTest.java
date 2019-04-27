@@ -53,7 +53,7 @@ import net.officefloor.plugin.managedfunction.clazz.Qualified;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
@@ -708,7 +708,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class HttpSectionSecurerFlowServicer {
-		@NextFunction("decision")
+		@Next("decision")
 		public void service() {
 		}
 
@@ -763,7 +763,7 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class HttpSectionSecurerFlowServicerWithArgument {
-		@NextFunction("decision")
+		@Next("decision")
 		public String service() {
 			return "argument";
 		}

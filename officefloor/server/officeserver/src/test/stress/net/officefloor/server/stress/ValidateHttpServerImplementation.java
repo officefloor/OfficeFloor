@@ -87,7 +87,7 @@ public class ValidateHttpServerImplementation implements HttpServerImplementatio
 			https.addCustomizer(new SecureRequestCustomizer());
 
 			// Use the provided SSL context
-			SslContextFactory sslContextFactory = new SslContextFactory();
+			SslContextFactory sslContextFactory = new SslContextFactory.Server();
 			sslContextFactory.setSslContext(sslContext);
 			sslContextFactory.setExcludeCipherSuites();
 			sslContextFactory.setExcludeProtocols();

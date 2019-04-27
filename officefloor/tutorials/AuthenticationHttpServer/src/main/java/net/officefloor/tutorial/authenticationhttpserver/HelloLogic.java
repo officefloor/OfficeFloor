@@ -18,7 +18,7 @@
 package net.officefloor.tutorial.authenticationhttpserver;
 
 import lombok.Data;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
@@ -44,7 +44,7 @@ public class HelloLogic {
 		return new TemplateData(username);
 	}
 
-	@NextFunction("LoggedOut")
+	@Next("LoggedOut")
 	public void logout(HttpAuthentication<?> authentication) {
 		authentication.logout(null);
 	}

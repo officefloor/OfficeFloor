@@ -46,7 +46,7 @@ Exception handling configuration
 
   As per the configuration above, the <<<handleSqlException>>> method is invoked to handle the <<<SQLException>>>.
   
-  Once the method completes it follows normal WoOF behaviour.  In other words, the <<<@NextFunction>>> annotation is honoured resulting in the static error page being sent to the client.
+  Once the method completes it follows normal WoOF behaviour.  In other words, the <<<@Next>>> annotation is honoured resulting in the static error page being sent to the client.
 
 
 

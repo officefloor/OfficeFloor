@@ -32,7 +32,7 @@ import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
@@ -69,7 +69,7 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	public static class PrimitivesLogic {
-		@NextFunction("use")
+		@Next("use")
 		public PrimitiveTypes primitives(boolean _boolean, byte _byte, short _short, char _char, int _int, long _long,
 				float _float, double _double) {
 			return new PrimitiveTypes(_boolean, _byte, _short, _char, _int, _long, _float, _double);
@@ -91,7 +91,7 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	public static class ObjectLogic {
-		@NextFunction("use")
+		@Next("use")
 		public ObjectTypes object(String string, JavaObject object, int[] primitiveArray, JavaObject[] objectArray) {
 			return new ObjectTypes(string, object, primitiveArray, objectArray);
 		}
@@ -112,7 +112,7 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	public static class CollectionLogic {
-		@NextFunction("use")
+		@Next("use")
 		public CollectionTypes collection(List<Integer> list, Set<Character> set, Map<String, JavaObject> map) {
 			return new CollectionTypes(list, set, map);
 		}
@@ -133,7 +133,7 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	public static class VariableLogic {
-		@NextFunction("use")
+		@Next("use")
 		public VariableTypes variable(@Val char val, In<String> in, Out<JavaObject> out, Var<Integer> var) {
 			out.set(new JavaObject("test"));
 			int varValue = var.get();
@@ -157,7 +157,7 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	public static class ParameterLogic {
-		@NextFunction("use")
+		@Next("use")
 		public ParameterTypes parameter(@Parameter String parameter) {
 			return new ParameterTypes(parameter);
 		}
@@ -236,7 +236,7 @@ public class JavaPolyglotFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	public static class FlowLogic {
-		@NextFunction("nextFunction")
+		@Next("nextFunction")
 		public void service(@Parameter String flowType, Flows flows) throws IOException {
 			switch (flowType) {
 			case "nextFunction":

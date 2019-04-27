@@ -458,13 +458,13 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 	 * 
 	 * @param function               {@link SectionFunction}.
 	 * @param functionType           {@link ManagedFunctionType}.
-	 * @param nextFunctionAnnotation {@link NextFunctionAnnotation}.
+	 * @param nextFunctionAnnotation {@link NextAnnotation}.
 	 */
 	protected void linkNextFunction(SectionFunction function, ManagedFunctionType<?, ?> functionType,
-			NextFunctionAnnotation nextFunctionAnnotation) {
+			NextAnnotation nextFunctionAnnotation) {
 
 		// Obtain the next function details
-		String nextFunctionName = nextFunctionAnnotation.getNextFunctionName();
+		String nextFunctionName = nextFunctionAnnotation.getNextName();
 		Class<?> argumentType = nextFunctionAnnotation.getArgumentType();
 		String argumentTypeName = (argumentType == null ? null : argumentType.getName());
 
@@ -939,8 +939,8 @@ public abstract class AbstractFunctionSectionSource extends AbstractSectionSourc
 			// Obtain the function
 			SectionFunction function = this.getFunctionByTypeName(functionTypeName);
 
-			// Link the next function (if available)
-			NextFunctionAnnotation nextFunctionAnnotation = functionType.getAnnotation(NextFunctionAnnotation.class);
+			// Link the next (if available)
+			NextAnnotation nextFunctionAnnotation = functionType.getAnnotation(NextAnnotation.class);
 			if (nextFunctionAnnotation != null) {
 				this.linkNextFunction(function, functionType, nextFunctionAnnotation);
 			}

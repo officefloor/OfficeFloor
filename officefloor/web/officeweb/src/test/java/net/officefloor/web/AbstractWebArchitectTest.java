@@ -37,7 +37,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.EntityUtil;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
@@ -1070,7 +1070,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockRedirect implements MockPathParameters {
-		@NextFunction("redirect")
+		@Next("redirect")
 		public MockPathParameters service() {
 			return this;
 		}
@@ -1186,7 +1186,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockIntercept {
-		@NextFunction("service")
+		@Next("service")
 		public void intercept(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("intercepted ");
 		}
@@ -1216,12 +1216,12 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockMultipleInputIntercept {
-		@NextFunction("output")
+		@Next("output")
 		public void interceptOne() {
 			// Testing error
 		}
 
-		@NextFunction("output")
+		@Next("output")
 		public void interceptTwo() {
 			// Testing error
 		}
@@ -1335,7 +1335,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class MockPassThroughChainedServicer {
-		@NextFunction("chain")
+		@Next("chain")
 		public void pass(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("pass - ");
 		}

@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpQueryParameter;
@@ -72,7 +72,7 @@ public class MockSection {
 	 * 
 	 * @param flows {@link TeamFlows}.
 	 */
-	@NextFunction("teamsDifferent")
+	@Next("teamsDifferent")
 	public String teams() {
 		return Thread.currentThread().getName();
 	}

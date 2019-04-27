@@ -28,7 +28,7 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
@@ -107,7 +107,7 @@ public class MockLoadSection {
 	 * @throws IOException
 	 *             Escalation.
 	 */
-	@NextFunction("doOutput")
+	@Next("doOutput")
 	public Integer doInput(@Parameter String parameter, Connection connection)
 			throws IOException {
 		return null;

@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.HttpSessionStateful;
 
@@ -69,7 +69,7 @@ public class Template implements Serializable {
 		void retrieveFromDatabase(char letter);
 	}
 
-	@NextFunction("setDisplayCode")
+	@Next("setDisplayCode")
 	public LetterEncryption encrypt(EncryptLetter request, PageFlows flows) {
 
 		// Specify thread name (clearing database thread)
@@ -94,7 +94,7 @@ public class Template implements Serializable {
 	// END SNIPPET: cache
 
 	// START SNIPPET: database
-	@NextFunction("setDisplayCode")
+	@Next("setDisplayCode")
 	public LetterEncryption retrieveFromDatabase(@Parameter char letter, Connection connection) throws SQLException {
 
 		// Specify thread name

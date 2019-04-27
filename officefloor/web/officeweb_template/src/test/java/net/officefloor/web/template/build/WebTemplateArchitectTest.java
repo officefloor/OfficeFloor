@@ -35,7 +35,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
@@ -363,15 +363,14 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if section {@link Method} is annotated with
-	 * {@link NextFunction}.
+	 * Ensure issue if section {@link Method} is annotated with {@link Next}.
 	 */
 	public void testSectionMethodNotAllowedNextFunction() throws Exception {
 		this.templateIssue((issues) -> {
 			issues.recordCaptureIssues(false);
 			issues.recordCaptureIssues(false);
 			issues.recordIssue("/path", SectionNodeImpl.class,
-					"Template bean method 'getTemplate' (function GETTEMPLATE) must not be annotated with @NextFunction (next function is always rendering template section)");
+					"Template bean method 'getTemplate' (function GETTEMPLATE) must not be annotated with @Next (next function is always rendering template section)");
 			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
 		}, (context, templater) -> {
@@ -381,7 +380,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class IllegalNextFunctionLogic {
-		@NextFunction("illegal")
+		@Next("illegal")
 		public IllegalNextFunctionLogic getTemplate() {
 			return this;
 		}
@@ -773,7 +772,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 	}
 
 	public static class DynamicPathSection {
-		@NextFunction("template")
+		@Next("template")
 		public DynamicPathSection service() {
 			return this;
 		}

@@ -18,31 +18,41 @@
 package net.officefloor.plugin.section.clazz;
 
 /**
- * {@link NextFunction} annotation.
+ * {@link Next} annotation.
  * 
  * @author Daniel Sagenschneider
  */
-public class NextFunctionAnnotation {
+public class NextAnnotation {
 
 	/**
-	 * Name of the {@link NextFunction}.
+	 * Name of the {@link Next}.
 	 */
-	private final String nextFunctionName;
+	private final String nextName;
 
 	/**
-	 * Argument type for the {@link NextFunction}.
+	 * Argument type for the {@link Next}.
 	 */
 	private final Class<?> argumentType;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param nextFunctionName Name of the {@link NextFunction}.
-	 * @param argumentType     Argument type for the {@link NextFunction}.
+	 * @param nextName     Name of the {@link Next}.
+	 * @param argumentType Argument type for the {@link Next}.
 	 */
-	public NextFunctionAnnotation(String nextFunctionName, Class<?> argumentType) {
-		this.nextFunctionName = nextFunctionName;
+	public NextAnnotation(String nextName, Class<?> argumentType) {
+		this.nextName = nextName;
 		this.argumentType = argumentType;
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param next         {@link Next}.
+	 * @param argumentType Argument type for the {@link Next}.
+	 */
+	public NextAnnotation(Next next, Class<?> argumentType) {
+		this(next.value(), argumentType);
 	}
 
 	/**
@@ -51,23 +61,24 @@ public class NextFunctionAnnotation {
 	 * @param nextFunction {@link NextFunction}.
 	 * @param argumentType Argument type for the {@link NextFunction}.
 	 */
-	public NextFunctionAnnotation(NextFunction nextFunction, Class<?> argumentType) {
+	@SuppressWarnings("deprecation")
+	public NextAnnotation(NextFunction nextFunction, Class<?> argumentType) {
 		this(nextFunction.value(), argumentType);
 	}
 
 	/**
-	 * Obtains the {@link NextFunction} name.
+	 * Obtains the {@link Next} name.
 	 * 
-	 * @return {@link NextFunction} name.
+	 * @return {@link Next} name.
 	 */
-	public String getNextFunctionName() {
-		return this.nextFunctionName;
+	public String getNextName() {
+		return this.nextName;
 	}
 
 	/**
-	 * Obtains the argument type for the {@link NextFunction}.
+	 * Obtains the argument type for the {@link Next}.
 	 * 
-	 * @return Argument type for the {@link NextFunction}.
+	 * @return Argument type for the {@link Next}.
 	 */
 	public Class<?> getArgumentType() {
 		return this.argumentType;

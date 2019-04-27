@@ -41,7 +41,7 @@ import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.test.variable.MockVar;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
@@ -319,7 +319,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	}
 
 	public static class VariablePass {
-		@NextFunction("use")
+		@Next("use")
 		public void service(@Parameter Closure<VariableTypes> capture, Out<Closure<VariableTypes>> out) {
 			out.set(capture);
 		}
@@ -383,7 +383,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	}
 
 	public static class ParameterPass {
-		@NextFunction("use")
+		@Next("use")
 		public String service() {
 			return "test";
 		}

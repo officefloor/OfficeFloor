@@ -45,7 +45,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.managedfunction.clazz.Qualified;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.spring.extension.SpringSupplierExtension;
 
 /**
@@ -501,7 +501,7 @@ public class SpringBootTest extends OfficeFrameTestCase {
 
 		private static volatile String threadLocalValue = null;
 
-		@NextFunction("next")
+		@Next("next")
 		public void service(SimpleBean bean) {
 			serviceThread = Thread.currentThread();
 			String value = bean.getValue() + "-" + MockSpringSupplierExtension.officeFloorManagedObject.getValue();
