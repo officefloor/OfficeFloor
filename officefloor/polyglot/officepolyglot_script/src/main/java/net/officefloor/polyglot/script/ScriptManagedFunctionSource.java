@@ -54,7 +54,7 @@ import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFact
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionValueParameterFactory;
 import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionVariableParameterFactory;
 import net.officefloor.plugin.section.clazz.FlowAnnotation;
-import net.officefloor.plugin.section.clazz.NextFunctionAnnotation;
+import net.officefloor.plugin.section.clazz.NextAnnotation;
 import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.variable.Var;
 import net.officefloor.plugin.variable.VariableAnnotation;
@@ -170,7 +170,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 		String engineName = context.getProperty(PROPERTY_ENGINE_NAME);
 		ScriptEngine engine = engineManager.getEngineByName(engineName);
 		Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-        	bindings.put("polyglot.js.allowAllAccess", true);
+		bindings.put("polyglot.js.allowAllAccess", true);
 
 		// Ensure invocable
 		if (!(engine instanceof Invocable)) {
@@ -456,7 +456,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 		if (nextFunction != null) {
 			String argumentTypeName = nextFunction.getArgumentType();
 			Class<?> argumentType = (argumentTypeName == null) ? null : context.loadClass(argumentTypeName);
-			function.addAnnotation(new NextFunctionAnnotation(nextFunction.getName(), argumentType));
+			function.addAnnotation(new NextAnnotation(nextFunction.getName(), argumentType));
 		}
 	}
 
