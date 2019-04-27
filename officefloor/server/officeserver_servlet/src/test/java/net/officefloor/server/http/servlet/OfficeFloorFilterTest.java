@@ -32,7 +32,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;
@@ -301,12 +301,12 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 
 		private static volatile Thread teamsThread = null;
 
-		@NextFunction("anotherTeam")
+		@Next("anotherTeam")
 		public void teams() {
 			teamsThread = Thread.currentThread();
 		}
 
-		@NextFunction("service")
+		@Next("service")
 		public void anotherTeam(TeamMarker teamMarker) {
 
 			// Ensure serviced in different thread

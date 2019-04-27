@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 
 import net.officefloor.compile.type.AnnotatedType;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 
 /**
  * Tests the {@link AnnotatedType}.
@@ -71,13 +71,13 @@ public class AnnotatedTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to match actual annotation.
 	 */
-	@NextFunction("TEST")
+	@Next("TEST")
 	public void testMatchActualAnnotation() throws Exception {
 		Method method = this.getClass().getMethod("testMatchActualAnnotation");
-		NextFunction nextFunction = method.getAnnotation(NextFunction.class);
+		Next nextFunction = method.getAnnotation(Next.class);
 		assertNotNull("Invalid test as not found annotation", nextFunction);
 		AnnotatedType type = () -> method.getAnnotations();
-		assertEquals("Incorrect annotation", nextFunction, type.getAnnotation(NextFunction.class));
+		assertEquals("Incorrect annotation", nextFunction, type.getAnnotation(Next.class));
 	}
 
 }

@@ -24,7 +24,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.ThreadSafeClosure;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
@@ -164,7 +164,7 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 
 	public static class AcrossMethodsSection {
 
-		@NextFunction("other")
+		@Next("other")
 		public void service(Objectify objectify) {
 			objectify.save().entities(new MockEntity(null, "one", "first", 1, 2)).now();
 		}
@@ -187,7 +187,7 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 
 	public static class AcrossTeamsSection {
 
-		@NextFunction("otherTeam")
+		@Next("otherTeam")
 		public Thread service(Objectify objectify) {
 			objectify.save().entities(new MockEntity(null, "one", "first", 1, 2)).now();
 			return Thread.currentThread();

@@ -26,7 +26,7 @@ import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ManagedObject;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.Property;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -149,7 +149,7 @@ public class TemplateLogic {
 	 * @return Parameter for the next task.
 	 * @throws IOException Escalation.
 	 */
-	@NextFunction("doExternalFlow")
+	@Next("doExternalFlow")
 	public String nextFunction(ServerHttpConnection connection) throws IOException {
 
 		// Indicate next task
@@ -210,7 +210,7 @@ public class TemplateLogic {
 	 * @return Parameter for external flow.
 	 * @throws IOException Escalation.
 	 */
-	@NextFunction("doExternalFlow")
+	@Next("doExternalFlow")
 	public String doInternalFlow(@Parameter Integer parameter, Connection sqlConnection,
 			ServerHttpConnection httpConnection) throws IOException {
 

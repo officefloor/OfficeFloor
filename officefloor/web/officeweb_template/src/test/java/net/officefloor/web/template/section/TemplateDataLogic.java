@@ -17,7 +17,7 @@
  */
 package net.officefloor.web.template.section;
 
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 
 /**
  * Logic for template with Data suffix on method name.
@@ -65,7 +65,7 @@ public class TemplateDataLogic {
 	/**
 	 * Required to have output flow for integration testing setup.
 	 */
-	@NextFunction("doExternalFlow")
+	@Next("doExternalFlow")
 	public void requiredForIntegration() {
 	}
 

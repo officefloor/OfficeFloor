@@ -26,7 +26,7 @@ application.woof
   
 
 
-@NextFunction
+@Next
 
   The first template provides a link to navigate to the other template.
 
@@ -62,7 +62,7 @@ application.woof
    
   This allows programmatically determining which is the next function.  It is possible to add further methods to the interface to provide alternate navigation paths.  Navigation only occurs if the method is invoked.  Please also be aware that navigation to the page happens after the method has completed.
   
-  Both <<<@NextFunction>>> and <<<@FlowInterface>>> may also be used in combination. <<<@NextFunction>>> will provide the default next function unless overridden by a method of a <<<@FlowInterface>>> being invoked.
+  Both <<<@Next>>> and <<<@FlowInterface>>> may also be used in combination. <<<@Next>>> will provide the default next unless overridden by a method of a <<<@FlowInterface>>> being invoked.
 
   The above configuration has the external flow linked back to the first template.
 

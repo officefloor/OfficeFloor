@@ -81,7 +81,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.impl.HttpServerLocationImpl;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
@@ -861,7 +861,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	 */
 	public static class PressureOverloadServicer {
 
-		@NextFunction("backPressure")
+		@Next("backPressure")
 		public Thread service() {
 			return Thread.currentThread();
 		}
@@ -984,7 +984,7 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 
 		private static final boolean[] isContinue = new boolean[] { false };
 
-		@NextFunction("loopOne")
+		@Next("loopOne")
 		public void service(CancelConnectionManagedObjectSource mos) throws Throwable {
 
 			// Only one request gets serviced, while rest chain behind
@@ -1005,13 +1005,13 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 			}
 		}
 
-		@NextFunction("loopTwo")
+		@Next("loopTwo")
 		public void loopOne(TeamMarker marker) throws Exception {
 			// loops around (on different team to allow socket listener to close connection)
 			Thread.sleep(1);
 		}
 
-		@NextFunction("loopOne")
+		@Next("loopOne")
 		public void loopTwo(TeamTwoMarker marker) {
 			// loop
 		}

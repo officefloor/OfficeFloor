@@ -40,7 +40,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
@@ -215,17 +215,17 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 
 	public static class MockSection {
 
-		@NextFunction("service")
+		@Next("service")
 		public String externalFunctionManager(@Parameter String parameter) {
 			return parameter;
 		}
 
-		@NextFunction("service")
+		@Next("service")
 		public String internalFunctionManager(@Parameter String parameter) {
 			return parameter;
 		}
 
-		@NextFunction("service")
+		@Next("service")
 		public String externalServiceInput() {
 			return "EXTERNAL_SERVICE_INPUT";
 		}
@@ -234,12 +234,12 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 			object.flows.doProcess(parameter);
 		}
 
-		@NextFunction("service")
+		@Next("service")
 		public String managedObjectInternalThread(@Parameter String parameter) {
 			return parameter;
 		}
 
-		@NextFunction("service")
+		@Next("service")
 		public String managedObjectExternalThread(@Parameter String parameter) {
 			return parameter;
 		}

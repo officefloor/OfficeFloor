@@ -30,7 +30,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 
 /**
  * Ensures the {@link SupplierSource} can register an
@@ -66,7 +66,7 @@ public class RunSupplierThreadSynchroniserTest extends AbstractRunTestCase {
 
 		private static volatile Thread threadLocalThread;
 
-		@NextFunction("differentTeam")
+		@Next("differentTeam")
 		public void threadLocal(MockManagedObjectSource mos) {
 			threadLocalThread = Thread.currentThread();
 

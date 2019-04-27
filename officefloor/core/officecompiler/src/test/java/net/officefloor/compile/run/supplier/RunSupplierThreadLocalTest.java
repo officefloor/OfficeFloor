@@ -28,7 +28,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 
 /**
  * Tests the {@link SupplierThreadLocal}.
@@ -75,7 +75,7 @@ public class RunSupplierThreadLocalTest extends AbstractRunTestCase {
 
 		private static MockObject dependency;
 
-		@NextFunction("dependency")
+		@Next("dependency")
 		public void threadLocal(MockManagedObjectSource mos) {
 
 			// Available as supplier source managed object dependency

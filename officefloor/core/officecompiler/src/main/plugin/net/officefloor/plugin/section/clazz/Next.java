@@ -15,21 +15,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.tutorial.navigatehttpserver;
+package net.officefloor.plugin.section.clazz;
 
-import net.officefloor.plugin.section.clazz.Next;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Logic for <code>TemplateOne.ofp</code>.
+ * Annotates a method with the name of the next in the {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-// START SNIPPET: example
-public class TemplateOne {
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Next {
 
-	@Next("external")
-	public void navigate() {
-	}
+	/**
+	 * Obtains the name of the next in the {@link Flow}.
+	 * 
+	 * @return Name of the next in the {@link Flow}.
+	 */
+	String value();
 
 }
-// END SNIPPET: example

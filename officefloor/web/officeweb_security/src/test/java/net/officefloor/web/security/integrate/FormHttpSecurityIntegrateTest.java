@@ -23,7 +23,7 @@ import java.io.Serializable;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.web.build.WebArchitect;
@@ -98,7 +98,7 @@ public class FormHttpSecurityIntegrateTest extends AbstractHttpSecurityIntegrate
 			connection.getResponse().getEntityWriter().write("LOGIN");
 		}
 
-		@NextFunction("authenticate")
+		@Next("authenticate")
 		public HttpCredentials login(LoginForm form) {
 			return new HttpCredentialsImpl(form.username, form.password);
 		}

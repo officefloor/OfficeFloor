@@ -38,7 +38,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 import net.officefloor.plugin.section.clazz.SectionClassManagedObjectSource;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -407,9 +407,8 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure that parent links (no longer in inherited template) are considered
-	 * in all links. This is to allow the link secure information to be
-	 * inherited.
+	 * Ensure that parent links (no longer in inherited template) are considered in
+	 * all links. This is to allow the link secure information to be inherited.
 	 */
 	public void testLinkKnownInParent() {
 
@@ -465,10 +464,8 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Missing section method as section requires a bean.
 	 * 
-	 * @param templateLogicClass
-	 *            Template logic {@link Class}.
-	 * @param issueDescription
-	 *            Expected issue description.
+	 * @param templateLogicClass Template logic {@link Class}.
+	 * @param issueDescription   Expected issue description.
 	 */
 	private void doMissingSectionMethodTest(Class<?> templateLogicClass, String issueDescription) {
 
@@ -502,7 +499,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Section method may not be annotated with {@link NextFunction}.
+	 * Section method may not be annotated with {@link Next}.
 	 */
 	public void testIllegalNextFunctionAnnotationForSectionMethod() {
 
@@ -516,7 +513,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 
 		// Record errors
 		issues.recordIssue("<type>", SectionNodeImpl.class,
-				"Template bean method 'getSection' (function GETSECTION) must not be annotated with @NextFunction (next function is always rendering template section)");
+				"Template bean method 'getSection' (function GETSECTION) must not be annotated with @Next (next function is always rendering template section)");
 
 		// Create loader
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -538,12 +535,11 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 	public static class NextFunctionErrorLogic {
 
 		/**
-		 * Section method with disallowed {@link NextFunction}.
+		 * Section method with disallowed {@link Next}.
 		 * 
-		 * @return Should not be called as invalid to have {@link NextFunction}
-		 *         annotation.
+		 * @return Should not be called as invalid to have {@link Next} annotation.
 		 */
-		@NextFunction("NotAllowed")
+		@Next("NotAllowed")
 		public Object getSection() {
 			return null;
 		}

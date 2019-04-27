@@ -22,7 +22,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{../maven/woof-archetype/index.html}My first WoOF application}} | Walks through the simple steps to create and run an OfficeFloor (WoOF) web application. | {{{http://maven.apache.org}Maven}} and {{{http://eclipse.org}Eclipse}} plug-ins |
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./NavigateHttpServer/index.html}Configuring flows}}       | Controlling execution flow (avoiding need for refactoring). | @NextFunction , @FlowInterface\
+| {{{./NavigateHttpServer/index.html}Configuring flows}}       | Controlling execution flow (avoiding need for refactoring). | @Next , @FlowInterface\
 |                                                              |                                                            | (Continuation Injection)
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ExceptionHttpServer/index.html}Exception handling}}     | Handling exceptions.                                       | @Parameter

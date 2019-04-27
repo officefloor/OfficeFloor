@@ -74,7 +74,7 @@ import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.FlowAnnotation;
 import net.officefloor.plugin.section.clazz.NextFunction;
-import net.officefloor.plugin.section.clazz.NextFunctionAnnotation;
+import net.officefloor.plugin.section.clazz.NextAnnotation;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -852,7 +852,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				}
 
 				// Ensure no next function (as must render section next)
-				if (beanFunction.type.getAnnotation(NextFunctionAnnotation.class) != null) {
+				if (beanFunction.type.getAnnotation(NextAnnotation.class) != null) {
 					throw designer.addIssue("Template bean method '" + beanFunction.type.getFunctionName()
 							+ "' (function " + beanFunctionKey + ") must not be annotated with @"
 							+ NextFunction.class.getSimpleName()
@@ -1052,7 +1052,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				}
 
 				// Determine if NextFunction, so not render template after
-				if (methodFunction.type.getAnnotation(NextFunctionAnnotation.class) != null) {
+				if (methodFunction.type.getAnnotation(NextAnnotation.class) != null) {
 					continue; // not render
 				}
 
