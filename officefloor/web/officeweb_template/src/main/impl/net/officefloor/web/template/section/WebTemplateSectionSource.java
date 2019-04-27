@@ -73,7 +73,7 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.FlowAnnotation;
-import net.officefloor.plugin.section.clazz.NextFunction;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.NextAnnotation;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpMethod;
@@ -855,8 +855,7 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				if (beanFunction.type.getAnnotation(NextAnnotation.class) != null) {
 					throw designer.addIssue("Template bean method '" + beanFunction.type.getFunctionName()
 							+ "' (function " + beanFunctionKey + ") must not be annotated with @"
-							+ NextFunction.class.getSimpleName()
-							+ " (next function is always rendering template section)");
+							+ Next.class.getSimpleName() + " (next function is always rendering template section)");
 				}
 
 				// Obtain the return type for the template
