@@ -41,7 +41,7 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	sh './.travis-install.sh'
-			// Ensure clear benchmark junit tests to avoid old tests failing build
+				// Ensure clear benchmark junit tests to avoid old tests failing build
 	        	dir('benchmarks/test') {
 	        	    sh 'mvn clean'
 	        	}
@@ -62,8 +62,8 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	        }
 		    post {
 			    always {
-				junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
-				junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
+					junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
+					junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
 			    }
 		    }
 	    }
@@ -82,8 +82,8 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	        }
 		    post {
 			    always {
-				junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
-				junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
+					junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
+					junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
 			    }
 		    }
 	    } 
@@ -144,9 +144,13 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 			    always {
 					junit allowEmptyResults: true, testResults: 'benchmarks/test/**/target/surefire-reports/TEST-*.xml'
 
-					emailext to: "${PERFORMANCE_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' RESULTS (${BUILD_NUMBER})', attachmentsPattern: 'benchmarks/results.txt, benchmarks/results.zip', body: '''
+	            	script {
+   						if (currentBuild.result != 'ABORTED') {
+							emailext to: "${PERFORMANCE_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OF ' + "${params.BUILD_TYPE}" + ' RESULTS (${BUILD_NUMBER})', attachmentsPattern: 'benchmarks/results.txt, benchmarks/results.zip', body: '''
 ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 '''
+						}
+					}
     			}
 			}
 		}
@@ -211,7 +215,13 @@ Starting release
 	        	dir('officefloor/bom') {
 					sh 'mvn -Dmaven.test.failure.ignore=true -Dofficefloor-deploy=sonatype clean deploy'
 				}
-			}         
+			}
+			post {
+			    always {
+					junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
+					junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
+			    }
+			}
 	    }
 
 	    stage('Deploy Site') {
