@@ -36,6 +36,8 @@ export class AuthenticationService {
 
                     // Notify logged in
                     this.state.next( user );
+                }, ( error: any ) => {
+                    console.log( 'TODO handle login error: ' + error )
                 } )
 
             } else {

@@ -8,6 +8,7 @@ import { AppComponent } from './app.component';
 import { SocialLoginModule, AuthServiceConfig } from "angularx-social-login";
 import { GoogleLoginProvider, FacebookLoginProvider, LinkedInLoginProvider } from "angularx-social-login";
 import { LoginComponent } from './login/login.component';
+import { CheckoutComponent } from './checkout/checkout.component';
 
 let config = new AuthServiceConfig( [
     {
@@ -23,7 +24,8 @@ export function provideConfig() {
 @NgModule( {
     declarations: [
         AppComponent,
-        LoginComponent
+        LoginComponent,
+        CheckoutComponent
     ],
     imports: [
         BrowserModule,
