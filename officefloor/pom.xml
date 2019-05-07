@@ -46,7 +46,7 @@
 	</modules>
 	<properties>
 		<asm-version>7.1</asm-version>
-		<compiler-version>3.8.0</compiler-version>
+		<compiler-version>3.8.1</compiler-version>
 		<current.year>2018</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
@@ -58,7 +58,7 @@
 		<maven.compiler.target>${java-lowest-version}</maven.compiler.target>
 		<maven-plugin-version>3.6.0</maven-plugin-version>
 		<maven-project-info-reports-version>3.0.0</maven-project-info-reports-version>
-		<maven-surefire-version>2.22.1</maven-surefire-version>
+		<maven-surefire-version>2.22.2</maven-surefire-version>
 		<openjfx-version>11-ea+25</openjfx-version>
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
