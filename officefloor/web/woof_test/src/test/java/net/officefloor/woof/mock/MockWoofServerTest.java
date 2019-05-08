@@ -18,17 +18,31 @@
 package net.officefloor.woof.mock;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.woof.WoofLoaderExtensionService;
+import net.officefloor.woof.mock.MockWoofServer.MockWoofInput;
 
 /**
  * Tests the {@link WoofLoaderExtensionService}.
@@ -137,6 +151,69 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	public static class OverrideSection {
 		public void service(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("TEST");
+		}
+	}
+
+	/**
+	 * Ensure can setup servicing a particular port for testing.
+	 */
+	public void testMockSocketServicing() throws Exception {
+
+		// Start with additional functionality
+		this.server.close();
+		try (OfficeFloor officeFloor = MockWoofServer.open(7171, 7272, MockServicerSection.class)) {
+
+			// Ensure can obtain HTTP response
+			try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+				HttpResponse response = client.execute(new HttpGet("http://localhost:7171"));
+				assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+				assertEquals("Incorrect response", "MOCK", EntityUtils.toString(response.getEntity()));
+			}
+
+			// Ensure can obtain HTTPS response
+			try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient(true)) {
+				HttpPost post = new HttpPost("https://localhost:7272/path");
+				post.setEntity(new StringEntity("1"));
+				HttpResponse response = client.execute(post);
+				assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+				assertEquals("Incorrect response", "MOCK-1", EntityUtils.toString(response.getEntity()));
+			}
+		}
+	}
+
+	/**
+	 * Ensure can setup HTTP only.
+	 */
+	public void testHttpOnly() throws Exception {
+
+		// Start with additional functionality
+		this.server.close();
+		try (OfficeFloor officeFloor = MockWoofServer.open(7171, MockServicerSection.class)) {
+
+			// Ensure can obtain HTTP response
+			try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+				HttpResponse response = client.execute(new HttpGet("http://localhost:7171"));
+				assertEquals("Should be successful", 200, response.getStatusLine().getStatusCode());
+				assertEquals("Incorrect response", "MOCK", EntityUtils.toString(response.getEntity()));
+			}
+		}
+	}
+
+	public static class MockServicerSection {
+
+		@MockWoofInput
+		public void get(ServerHttpConnection connection) throws IOException {
+			connection.getResponse().getEntityWriter().write("MOCK");
+		}
+
+		@MockWoofInput(secure = true, method = "POST", path = "/path")
+		public void post(ServerHttpConnection connection) throws IOException {
+			Reader reader = new InputStreamReader(connection.getRequest().getEntity(), Charset.forName("UTF-8"));
+			StringWriter buffer = new StringWriter();
+			for (int character = reader.read(); character != -1; character = reader.read()) {
+				buffer.write(character);
+			}
+			connection.getResponse().getEntityWriter().write("MOCK-" + buffer.toString());
 		}
 	}
 
