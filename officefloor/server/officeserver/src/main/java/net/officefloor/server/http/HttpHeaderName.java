@@ -41,11 +41,20 @@ public class HttpHeaderName {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name
-	 *            {@link HttpHeaderName}.
+	 * @param name {@link HttpHeaderName}.
 	 */
 	public HttpHeaderName(String name) {
-		this.name = name.toLowerCase(); // case insensitive
+		this(name, false);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param name           {@link HttpHeaderName}.
+	 * @param isMaintainCase Whether to maintain {@link HttpHeaderName} case.
+	 */
+	public HttpHeaderName(String name, boolean isMaintainCase) {
+		this.name = isMaintainCase ? name : name.toLowerCase(); // case insensitive
 		this.encodedName = this.name.getBytes(ServerHttpConnection.HTTP_CHARSET);
 	}
 
@@ -61,13 +70,10 @@ public class HttpHeaderName {
 	/**
 	 * Writes this {@link HttpHeaderName} to the {@link StreamBuffer}.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param head
-	 *            Head {@link StreamBuffer} of linked list of {@link StreamBuffer}
-	 *            instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param <B>        Buffer type.
+	 * @param head       Head {@link StreamBuffer} of linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
 	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
 		StreamBuffer.write(this.encodedName, head, bufferPool);

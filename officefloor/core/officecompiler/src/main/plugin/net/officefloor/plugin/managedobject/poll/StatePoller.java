@@ -45,6 +45,26 @@ import net.officefloor.frame.internal.structure.ProcessState;
 public class StatePoller<S, F extends Enum<F>> {
 
 	/**
+	 * <p>
+	 * Creates an initialised {@link StatePoller} that does not poll.
+	 * <p>
+	 * This is useful if state is loaded without needing polling. This allows the
+	 * {@link ManagedObjectSource} to poll in some cases and load from configuration
+	 * in others. This then allows using {@link StatePoller} for single interface to
+	 * state.
+	 * 
+	 * @param <S>   State type.
+	 * @param <F>   {@link Flow} {@link Enum}.
+	 * @param state State.
+	 * @return {@link StatePoller} initialised with state.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <S, F extends Enum<F>> StatePoller<S, F> state(S state) {
+		return new StatePoller<S, F>((Class<S>) state.getClass(), "",
+				(context, callback) -> context.setFinalState(state), null, null, null, -1);
+	}
+
+	/**
 	 * Creates a {@link Builder} for {@link Flow} key.
 	 * 
 	 * @param stateType            State type.
@@ -494,7 +514,7 @@ public class StatePoller<S, F extends Enum<F>> {
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneId.systemDefault());
 
 		// Create invoke for new process
-		this.pollSchedular = (isManualPoll, nextPollInterval, unit) -> {
+		this.pollSchedular = poller == null ? null : (isManualPoll, nextPollInterval, unit) -> {
 			long delay = this.defaultPollInterval;
 			boolean isDefault = true;
 			try {
@@ -603,7 +623,9 @@ public class StatePoller<S, F extends Enum<F>> {
 	 * Manually trigger poll.
 	 */
 	public void poll() {
-		this.pollSchedular.schedulePoll(true, 0L, null);
+		if (this.pollSchedular != null) {
+			this.pollSchedular.schedulePoll(true, 0L, null);
+		}
 	}
 
 	/**
@@ -647,7 +669,24 @@ public class StatePoller<S, F extends Enum<F>> {
 		}
 
 		@Override
-		public synchronized void setNextState(S nextState, long nextPollInterval, TimeUnit unit) {
+		public void setNextState(S nextState, long nextPollInterval, TimeUnit unit) {
+			this.setState(nextState, () -> StatePoller.this.pollSchedular.schedulePoll(false, nextPollInterval, unit));
+		}
+
+		@Override
+		public void setFinalState(S finalState) {
+			this.setState(finalState, () -> {
+				// No further polling
+			});
+		}
+
+		/**
+		 * Specifies the state and possible triggers next poll.
+		 * 
+		 * @param nextState Next state.
+		 * @param nextPoll  Triggers the next poll.
+		 */
+		private synchronized void setState(S nextState, Runnable nextPoll) {
 
 			// Ensure correct type
 			if ((nextState != null) && (!StatePoller.this.stateType.isAssignableFrom(nextState.getClass()))) {
@@ -682,7 +721,7 @@ public class StatePoller<S, F extends Enum<F>> {
 			} finally {
 				// Poll again (if not manually triggered)
 				if (!this.isManualPoll) {
-					StatePoller.this.pollSchedular.schedulePoll(false, nextPollInterval, unit);
+					nextPoll.run();
 				}
 			}
 		}

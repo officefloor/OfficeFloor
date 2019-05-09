@@ -27,6 +27,13 @@ public interface StatePollContext<S> {
 	void setNextState(S nextState, long nextPollInterval, TimeUnit unit);
 
 	/**
+	 * Sets the state and stops polling.
+	 * 
+	 * @param finalState Final state before stop polling.
+	 */
+	void setFinalState(S finalState);
+
+	/**
 	 * Indicates there was a failure in polling.
 	 * 
 	 * @param cause            Cause of the failure.

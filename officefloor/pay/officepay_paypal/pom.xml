@@ -47,5 +47,10 @@
 			<artifactId>checkout-sdk</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

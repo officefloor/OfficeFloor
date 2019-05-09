@@ -399,6 +399,35 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	}
 
 	/**
+	 * Ensure flag final state.
+	 */
+	public void testFinalState() throws Exception {
+		InvokedProcess process = this.startupProcess();
+		assertNull("Should not have current state", process.managedObject.pollContext.getCurrentState());
+		process.parameter.pollContext.setFinalState("TEST");
+		assertEquals("Incorrect startup state", "TEST", this.poller.getState(10, TimeUnit.MILLISECONDS));
+		assertEquals("Should be no further polling", 0, this.invokedProcesses.size());
+	}
+
+	/**
+	 * Ensure flag final state after polling.
+	 */
+	public void testFinalStateAfterPolling() throws Exception {
+		InvokedProcess process = this.startupProcess();
+		assertNull("Should not have current state", process.managedObject.pollContext.getCurrentState());
+		for (int i = 1; i < 10; i++) {
+			process.parameter.pollContext.setNextState("Process-" + i, 1, TimeUnit.MINUTES);
+			assertEquals("Incorrect state", "Process-" + i, this.poller.getStateNow());
+			process = this.nextInvokedProcess(i, 60 * 1000);
+			assertEquals("Should have current state", "Process-" + i,
+					process.managedObject.pollContext.getCurrentState());
+		}
+		process.parameter.pollContext.setFinalState("FINAL");
+		assertEquals("Incorrect startup state", "FINAL", this.poller.getState(10, TimeUnit.MILLISECONDS));
+		assertEquals("Should be no further polling", 0, this.invokedProcesses.size());
+	}
+
+	/**
 	 * Ensure can clear state.
 	 */
 	public void testClearState() throws Exception {
@@ -423,6 +452,30 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 		process = this.invokedProcesses.remove();
 		process.managedObject.pollContext.setNextState("RELOAD", -1, null);
 		assertEquals("Should have state after poll", "RELOAD", this.poller.getStateNow());
+	}
+
+	/**
+	 * <p>
+	 * Ensure can initialise poller with value and not poll.
+	 * <p>
+	 * This is useful for possible test setup that avoids need to poll external
+	 * system, but just configures state.
+	 */
+	public void testInitialisedState() throws Exception {
+
+		// Build for initialised state
+		this.poller = StatePoller.state("TEST");
+
+		// Ensure can obtain state
+		assertEquals("Incorrect immediate state", "TEST", this.poller.getStateNow());
+		assertEquals("Incorrect state", "TEST", this.poller.getState(1, TimeUnit.SECONDS));
+
+		// Attempt manual poll (should do nothing)
+		this.poller.poll();
+
+		// Ensure can clear
+		this.poller.clear();
+		assertNull("Should clear state", this.poller.getStateNow());
 	}
 
 	/**

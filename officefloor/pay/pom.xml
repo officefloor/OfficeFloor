@@ -22,5 +22,10 @@
 			<artifactId>junit</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>
