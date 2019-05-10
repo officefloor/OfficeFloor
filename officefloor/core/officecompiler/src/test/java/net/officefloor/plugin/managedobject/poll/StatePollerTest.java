@@ -407,6 +407,7 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 		process.parameter.pollContext.setFinalState("TEST");
 		assertEquals("Incorrect startup state", "TEST", this.poller.getState(10, TimeUnit.MILLISECONDS));
 		assertEquals("Should be no further polling", 0, this.invokedProcesses.size());
+		this.assertLogs("Final", "Final state set. No further polling");
 	}
 
 	/**

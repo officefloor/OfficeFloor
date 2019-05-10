@@ -34,6 +34,7 @@
 		<module>KotlinHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>ObjectifyHttpServer</module>
+		<module>PayPalHttpServer</module>
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
 		<module>ReactiveHttpServer</module>
