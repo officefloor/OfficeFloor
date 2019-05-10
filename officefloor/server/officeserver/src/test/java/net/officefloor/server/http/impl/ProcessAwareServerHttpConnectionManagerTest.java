@@ -35,6 +35,7 @@ import net.officefloor.server.http.CleanupException;
 import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
@@ -42,6 +43,7 @@ import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.HttpRequestCookies;
 import net.officefloor.server.http.HttpRequestHeaders;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpResponseHeaders;
 import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpStatus;
@@ -265,7 +267,9 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		// Create with server name
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = this.createServerHttpConnection("TEST",
 				"OfficeFloorServer", () -> new HttpHeaderValue("<date>"));
-		connection.getResponse().getHeaders().addHeader("Custom", "test");
+		HttpResponseHeaders responseHeaders = connection.getResponse().getHeaders();
+		responseHeaders.addHeader("Custom", "test");
+		responseHeaders.addHeader(new HttpHeaderName("MaintainCase", true), "Case Sensitive");
 
 		// Send response
 		connection.getServiceFlowCallback().run(null);
@@ -286,6 +290,11 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 		this.responseHeader = this.responseHeader.next;
 		assertEquals("Incorrect Custom HTTP header", "custom", this.responseHeader.getName());
 		assertEquals("Incorrect Custom value", "test", this.responseHeader.getValue());
+
+		// Ensure can maintain case (clients may not not be case insensitive)
+		this.responseHeader = this.responseHeader.next;
+		assertEquals("Incorrect maintain case HTTP header", "MaintainCase", this.responseHeader.getName());
+		assertEquals("Incorrect maintain case value", "Case Sensitive", this.responseHeader.getValue());
 
 		// Ensure no further headers
 		this.responseHeader = this.responseHeader.next;

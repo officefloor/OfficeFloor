@@ -366,6 +366,18 @@
 				<artifactId>officeidentity_google</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<!-- Pay -->
+			<dependency>
+				<groupId>net.officefloor.pay</groupId>
+				<artifactId>pay</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.pay</groupId>
+				<artifactId>officepay_paypal</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- ================================================ -->
 			<!-- Additional Dependencies -->
 			<!-- ================================================ -->

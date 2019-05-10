@@ -15,9 +15,9 @@
 	</parent>
 	<artifactId>server</artifactId>
 	<packaging>war</packaging>
-	
+
 	<properties>
-		<google.appengine.version>1.9.71</google.appengine.version>
+		<google.appengine.version>2.0.0-rc6</google.appengine.version>
 	</properties>
 
 	<dependencies>
@@ -52,6 +52,11 @@
 		<dependency>
 			<groupId>net.officefloor.server</groupId>
 			<artifactId>officeserver_servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.paypal.sdk</groupId>
+			<artifactId>checkout-sdk</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -89,7 +94,7 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.google.appengine</groupId>
+				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>appengine-maven-plugin</artifactId>
 				<version>${google.appengine.version}</version>
 			</plugin>

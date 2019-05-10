@@ -39,6 +39,7 @@
 		<module>web</module>
 		<module>persistence</module>
 		<module>identity</module>
+		<module>pay</module>
 		<module>spring</module>
 		<module>maven</module>
 		<module>eclipse</module>
