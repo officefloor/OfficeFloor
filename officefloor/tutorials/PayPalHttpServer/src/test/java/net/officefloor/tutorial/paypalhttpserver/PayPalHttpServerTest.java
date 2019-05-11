@@ -25,6 +25,7 @@ import org.junit.rules.RuleChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paypal.orders.Order;
+import com.paypal.orders.OrderRequest;
 
 import net.officefloor.pay.paypal.mock.PayPalRule;
 import net.officefloor.server.http.HttpMethod;
@@ -55,7 +56,10 @@ public class PayPalHttpServerTest {
 	public void createOrder() throws Exception {
 
 		// Record create order
-		this.payPal.addOrdersCreateResponse(new Order().id("MOCK_ORDER_ID").status("CREATED"));
+		this.payPal.addOrdersCreateResponse(new Order().id("MOCK_ORDER_ID").status("CREATED")).validate((request) -> {
+			OrderRequest order = (OrderRequest) request.requestBody();
+			assertEquals("Incorrect intent", "CAPTURE", order.intent());
+		});
 
 		// Create
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/create").method(HttpMethod.POST)
@@ -71,7 +75,10 @@ public class PayPalHttpServerTest {
 	public void captureOrder() throws Exception {
 
 		// Record capture order
-		this.payPal.addOrdersCaptureResponse(new Order().id("MOCK_ORDER_ID").status("COMPLETED"));
+		this.payPal.addOrdersCaptureResponse(new Order().id("MOCK_ORDER_ID").status("COMPLETED"))
+				.validate((request) -> {
+					assertEquals("Incorrect order", "/v2/checkout/orders/MOCK_ORDER_ID/capture?", request.path());
+				});
 
 		// Create
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/capture").method(HttpMethod.POST)

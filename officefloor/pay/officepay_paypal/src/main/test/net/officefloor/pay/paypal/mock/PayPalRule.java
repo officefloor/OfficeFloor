@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -55,14 +56,29 @@ public class PayPalRule implements TestRule {
 	private static final Json JSON = new Json();
 
 	/**
+	 * Validates the {@link HttpRequest}.
+	 */
+	@FunctionalInterface
+	public static interface Validator<R extends HttpRequest<? extends Object>> {
+
+		/**
+		 * Validates the {@link HttpRequest}.
+		 * 
+		 * @param request {@link HttpRequest}.
+		 * @throws Throwable Possible validation failure.
+		 */
+		void validate(R request) throws Throwable;
+	}
+
+	/**
 	 * Interaction.
 	 */
-	private class Interaction {
+	public class Interaction<R extends HttpRequest<? extends Object>> {
 
 		/**
 		 * {@link Predicate} to match {@link HttpRequest}.
 		 */
-		private final Predicate<HttpRequest<?>> matcher;
+		private final Predicate<Object> matcher;
 
 		/**
 		 * {@link HttpResponse}.
@@ -70,13 +86,17 @@ public class PayPalRule implements TestRule {
 		private final HttpResponse<?> response;
 
 		/**
+		 * {@link Validator}.
+		 */
+		private Validator<R> validator = null;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param matcher  {@link Predicate} to match {@link HttpRequest}.
 		 * @param response {@link HttpResponse}.
 		 */
-		private Interaction(Predicate<HttpRequest<?>> matcher, int statusCode, Object result,
-				String[] headerNameValues) {
+		private Interaction(Predicate<Object> matcher, int statusCode, Object result, String[] headerNameValues) {
 			this.matcher = matcher;
 			Headers headers = new Headers();
 			for (int i = 0; i < headerNameValues.length; i += 2) {
@@ -85,12 +105,23 @@ public class PayPalRule implements TestRule {
 			this.response = new MockHttpResponse<>(headers, statusCode, result);
 			PayPalRule.this.customInteractions.add(this);
 		}
+
+		/**
+		 * Registers a {@link Validator}.
+		 * 
+		 * @param validator {@link Validator}.
+		 * @return <code>this</code>.
+		 */
+		public Interaction<R> validate(Validator<R> validator) {
+			this.validator = validator;
+			return this;
+		}
 	}
 
 	/**
 	 * Custom {@link Interaction} instances.
 	 */
-	private final Deque<Interaction> customInteractions = new ConcurrentLinkedDeque<>();
+	private final Deque<Interaction<?>> customInteractions = new ConcurrentLinkedDeque<>();
 
 	/**
 	 * Adds an {@link Interaction}.
@@ -99,10 +130,11 @@ public class PayPalRule implements TestRule {
 	 * @param statusCode       Status code.
 	 * @param result           Result.
 	 * @param headerNameValues {@link Headers} name/value pairs.
+	 * @return {@link Interaction}.
 	 */
-	public void addInteraction(Predicate<HttpRequest<?>> matcher, int statusCode, Object result,
-			String... headerNameValues) {
-		new Interaction(matcher, statusCode, result, headerNameValues);
+	public <R extends HttpRequest<? extends Object>> Interaction<R> addInteraction(Predicate<Object> matcher,
+			int statusCode, Object result, String... headerNameValues) {
+		return new Interaction<>(matcher, statusCode, result, headerNameValues);
 	}
 
 	/**
@@ -110,9 +142,10 @@ public class PayPalRule implements TestRule {
 	 * 
 	 * @param order            {@link Order}.
 	 * @param headerNameValues {@link Headers} name/value pairs.
+	 * @return {@link Interaction}.
 	 */
-	public void addOrdersCreateResponse(Order order, String... headerNameValues) {
-		this.addOrdersCreateResponse((request) -> true, 200, order, headerNameValues);
+	public Interaction<OrdersCreateRequest> addOrdersCreateResponse(Order order, String... headerNameValues) {
+		return this.addOrdersCreateResponse((request) -> true, 200, order, headerNameValues);
 	}
 
 	/**
@@ -123,10 +156,11 @@ public class PayPalRule implements TestRule {
 	 * @param statusCode       Status code.
 	 * @param order            {@link Order}.
 	 * @param headerNameValues {@link Headers} name/value pairs.
+	 * @return {@link Interaction}.
 	 */
-	public void addOrdersCreateResponse(Predicate<OrdersCreateRequest> matcher, int statusCode, Order order,
-			String... headerNameValues) {
-		new Interaction((request) -> {
+	public Interaction<OrdersCreateRequest> addOrdersCreateResponse(Predicate<OrdersCreateRequest> matcher,
+			int statusCode, Order order, String... headerNameValues) {
+		return new Interaction<>((request) -> {
 			return (request instanceof OrdersCreateRequest) ? matcher.test((OrdersCreateRequest) request) : false;
 		}, statusCode, order, headerNameValues);
 	}
@@ -136,9 +170,10 @@ public class PayPalRule implements TestRule {
 	 * 
 	 * @param order            {@link Order}.
 	 * @param headerNameValues {@link Headers} name/value pairs.
+	 * @return {@link Interaction}.
 	 */
-	public void addOrdersCaptureResponse(Order order, String... headerNameValues) {
-		this.addOrdersCaptureResponse((request) -> true, 200, order, headerNameValues);
+	public Interaction<OrdersCaptureRequest> addOrdersCaptureResponse(Order order, String... headerNameValues) {
+		return this.addOrdersCaptureResponse((request) -> true, 200, order, headerNameValues);
 	}
 
 	/**
@@ -149,10 +184,11 @@ public class PayPalRule implements TestRule {
 	 * @param statusCode       Status code.
 	 * @param order            {@link Order}.
 	 * @param headerNameValues {@link Headers} name/value pairs.
+	 * @return {@link Interaction}.
 	 */
-	public void addOrdersCaptureResponse(Predicate<OrdersCaptureRequest> matcher, int statusCode, Order order,
-			String... headerNameValues) {
-		new Interaction((request) -> {
+	public Interaction<OrdersCaptureRequest> addOrdersCaptureResponse(Predicate<OrdersCaptureRequest> matcher,
+			int statusCode, Order order, String... headerNameValues) {
+		return new Interaction<>((request) -> {
 			return (request instanceof OrdersCaptureRequest) ? matcher.test((OrdersCaptureRequest) request) : false;
 		}, statusCode, order, headerNameValues);
 	}
@@ -168,14 +204,28 @@ public class PayPalRule implements TestRule {
 			public void evaluate() throws Throwable {
 
 				// Override the PayPal client with mock
-				PayPalHttpClientManagedObjectSource.runWithPayPalHttpClient(new MockPayPalHttpClient(), () -> {
+				MockPayPalHttpClient client = new MockPayPalHttpClient();
+				PayPalHttpClientManagedObjectSource.runWithPayPalHttpClient(client, () -> {
 
 					// Evaluation the rule
 					base.evaluate();
 				});
 
+				// Ensure no validation error
+				if (client.firstValidationFailure != null) {
+					throw client.firstValidationFailure;
+				}
+
 				// Ensure all interactions have occurred
-				assertEquals("Not all PayPal interactions exercised", 0, PayPalRule.this.customInteractions.size());
+				if (PayPalRule.this.customInteractions.size() > 0) {
+					StringWriter buffer = new StringWriter();
+					buffer.write("Not all PayPal interactions exercised");
+					for (Interaction<?> interaction : PayPalRule.this.customInteractions) {
+						buffer.write("\n\nRESPONSE: ");
+						buffer.write(JSON.serialize(interaction.response.result()));
+					}
+					assertEquals(buffer.toString(), 0, PayPalRule.this.customInteractions.size());
+				}
 			}
 		};
 	}
@@ -184,6 +234,11 @@ public class PayPalRule implements TestRule {
 	 * Mock {@link PayPalHttpClient}.
 	 */
 	private class MockPayPalHttpClient extends PayPalHttpClient {
+
+		/**
+		 * First possible validation failure.
+		 */
+		private volatile Throwable firstValidationFailure = null;
 
 		/**
 		 * Instantiate.
@@ -198,15 +253,28 @@ public class PayPalRule implements TestRule {
 		 */
 
 		@Override
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public <T> HttpResponse<T> execute(HttpRequest<T> request) throws IOException {
 
 			// Determine if handle by configured interaction
-			Iterator<Interaction> iterator = PayPalRule.this.customInteractions.iterator();
+			Iterator<Interaction<?>> iterator = PayPalRule.this.customInteractions.iterator();
 			while (iterator.hasNext()) {
 				Interaction interaction = iterator.next();
 				if (interaction.matcher.test(request)) {
 					iterator.remove();
+
+					// Ensure valid
+					if (interaction.validator != null) {
+						try {
+							interaction.validator.validate(request);
+						} catch (Throwable ex) {
+							if (this.firstValidationFailure == null) {
+								this.firstValidationFailure = ex;
+							}
+						}
+					}
+
+					// Return the response
 					return (HttpResponse<T>) interaction.response;
 				}
 			}
