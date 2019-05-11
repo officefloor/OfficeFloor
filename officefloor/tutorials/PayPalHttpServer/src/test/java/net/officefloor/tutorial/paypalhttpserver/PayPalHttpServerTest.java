@@ -44,6 +44,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class PayPalHttpServerTest {
 
+	// START SNIPPET: tutorial
 	private static final ObjectMapper mapper = new ObjectMapper();
 
 	public final PayPalRule payPal = new PayPalRule();
@@ -85,5 +86,6 @@ public class PayPalHttpServerTest {
 				.entity(mapper.writeValueAsString(new CaptureOrder("MOCK_ORDER_ID"))));
 		response.assertResponse(200, mapper.writeValueAsString(new CapturedOrder("MOCK_ORDER_ID", "COMPLETED")));
 	}
+	// END SNIPPET: tutorial
 
 }

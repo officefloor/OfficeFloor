@@ -26,6 +26,7 @@ import net.officefloor.pay.paypal.PayPalConfigurationRepository;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class InMemoryPayPalConfigurationRepository implements PayPalConfigurationRepository {
 
 	private static volatile PayPalEnvironment environmet = null;
@@ -42,5 +43,5 @@ public class InMemoryPayPalConfigurationRepository implements PayPalConfiguratio
 	public PayPalEnvironment createPayPalEnvironment() {
 		return environmet;
 	}
-
 }
+// END SNIPPET: tutorial

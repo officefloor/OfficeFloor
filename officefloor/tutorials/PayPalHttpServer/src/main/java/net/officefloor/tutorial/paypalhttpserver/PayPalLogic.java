@@ -43,6 +43,7 @@ import net.officefloor.web.ObjectResponse;
  */
 public class PayPalLogic {
 
+	// START SNIPPET: configure
 	@Value
 	@HttpObject
 	public static class Configuration {
@@ -53,7 +54,9 @@ public class PayPalLogic {
 	public void configure(Configuration configuration, InMemoryPayPalConfigurationRepository repository) {
 		repository.loadEnvironment(configuration.clientId, configuration.clientSecret);
 	}
+	// END SNIPPET: configure
 
+	// START SNIPPET: create
 	@Value
 	@HttpObject
 	public static class CreateOrder {
@@ -81,7 +84,9 @@ public class PayPalLogic {
 										.tax(new Money().currencyCode(currency).value("0.50")).quantity("1")))))));
 		response.send(new CreatedOrder(order.result().id(), order.result().status()));
 	}
+	// END SNIPPET: create
 
+	// START SNIPPET: capture
 	@Value
 	@HttpObject
 	public static class CaptureOrder {
@@ -101,4 +106,5 @@ public class PayPalLogic {
 		HttpResponse<Order> order = client.execute(request);
 		response.send(new CapturedOrder(order.result().id(), order.result().status()));
 	}
+	// END SNIPPET: capture
 }
