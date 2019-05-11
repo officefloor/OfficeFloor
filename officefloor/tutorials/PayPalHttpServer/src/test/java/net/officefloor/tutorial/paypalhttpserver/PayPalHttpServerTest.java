@@ -31,6 +31,7 @@ import net.officefloor.pay.paypal.mock.PayPalRule;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.tutorial.paypalhttpserver.PayPalLogic.CaptureOrder;
+import net.officefloor.tutorial.paypalhttpserver.PayPalLogic.CapturedOrder;
 import net.officefloor.tutorial.paypalhttpserver.PayPalLogic.CreateOrder;
 import net.officefloor.tutorial.paypalhttpserver.PayPalLogic.CreatedOrder;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -57,18 +58,16 @@ public class PayPalHttpServerTest {
 
 		// Record create order
 		this.payPal.addOrdersCreateResponse(new Order().id("MOCK_ORDER_ID").status("CREATED")).validate((request) -> {
+			assertEquals("Incorrect order", "/v2/checkout/orders?", request.path());
 			OrderRequest order = (OrderRequest) request.requestBody();
 			assertEquals("Incorrect intent", "CAPTURE", order.intent());
+			assertEquals("Incorrect amount", "5.00", order.purchaseUnits().get(0).amount().value());
 		});
 
 		// Create
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/create").method(HttpMethod.POST)
 				.header("Content-Type", "application/json").entity(mapper.writeValueAsString(new CreateOrder("AUD"))));
-		String entity = response.getEntity(null);
-		assertEquals("Should be successful: " + entity, 200, response.getStatus().getStatusCode());
-		CreatedOrder order = mapper.readValue(entity, CreatedOrder.class);
-		assertEquals("Incorrect order", "MOCK_ORDER_ID", order.getOrderId());
-		assertEquals("Incorrect status", "CREATED", order.getStatus());
+		response.assertResponse(200, mapper.writeValueAsString(new CreatedOrder("MOCK_ORDER_ID", "CREATED")));
 	}
 
 	@Test
@@ -84,11 +83,7 @@ public class PayPalHttpServerTest {
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/capture").method(HttpMethod.POST)
 				.header("Content-Type", "application/json")
 				.entity(mapper.writeValueAsString(new CaptureOrder("MOCK_ORDER_ID"))));
-		String entity = response.getEntity(null);
-		assertEquals("Should be successful: " + entity, 200, response.getStatus().getStatusCode());
-		CreatedOrder order = mapper.readValue(entity, CreatedOrder.class);
-		assertEquals("Incorrect order", "MOCK_ORDER_ID", order.getOrderId());
-		assertEquals("Incorrect status", "COMPLETED", order.getStatus());
+		response.assertResponse(200, mapper.writeValueAsString(new CapturedOrder("MOCK_ORDER_ID", "COMPLETED")));
 	}
 
 }
