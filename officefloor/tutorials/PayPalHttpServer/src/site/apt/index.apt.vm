@@ -1,0 +1,61 @@
+                                               -----------------------
+                                                   PayPal Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+  <<PayPal Tutorial>>
+
+  This tutorial demonstrates the ease of integrating PayPal to take payments.
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/PayPalHttpServer/${projectVersion}/PayPalHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+Server side PayPal
+
+  The latest PayPal can be invoked completely from the client side.  This is very convenient, however still requires verifying the funds were appropriately captured on server side.
+  
+  To take more control and ensure the orders are not manipulated client side, the PayPal interaction can be done server side.  The {{{/apidocs/net/officefloor/pay/paypal/PayPalHttpClientManagedObjectSource.html}PayPalHttpClientManagedObjectSource}} provides the server side PayPal client.
+  
+  The two interactions required are:
+  
+   [[1]] Create the order
+   
+   [[1]] Capture funds for the order
+   
+  These interactions are the following:
+  
+%{snippet|id=create|file=${basedir}/src/main/java/net/officefloor/tutorial/paypalhttpserver/PayPalLogic.java|ignoreDownloadError=false}
+
+%{snippet|id=capture|file=${basedir}/src/main/java/net/officefloor/tutorial/paypalhttpserver/PayPalLogic.java|ignoreDownloadError=false}
+
+  See {{{http://developer.paypal.com}PayPal}} for further details.
+  
+  
+  
+Configure PayPal
+
+  The {{{/apidocs/net/officefloor/pay/paypal/PayPalHttpClientManagedObjectSource.html}PayPalHttpClientManagedObjectSource}} depends on a {{{/apidocs/net/officefloor/pay/paypal/PayPalConfigurationRepository.html}PayPalConfigurationRepository}} to provide the PayPal configuration.  This enables different implementations to pull from configuration, database, etc.
+  
+  For simplicity (and use your own PayPal accounts), this tutorial uses an in memory implementation configured by REST request.  The implementation is as follows:
+
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/paypalhttpserver/InMemoryPayPalConfigurationRepository.java|ignoreDownloadError=false}
+
+  with REST request to configure as follows:
+  
+%{snippet|id=configure|file=${basedir}/src/main/java/net/officefloor/tutorial/paypalhttpserver/PayPalLogic.java|ignoreDownloadError=false}
+  
+
+
+Testing
+
+  The {{{/apidocs/net/officefloor/pay/paypal/mock/PayPalRule.html}PayPalRule}} provides ability to mock PayPal for testing.  This provides the following ease of testing:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/paypalhttpserver/PayPalHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../SpringHttpServer/index.html}next tutorial}} covers integrating Spring beans into OfficeFloor.

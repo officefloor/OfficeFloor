@@ -61,7 +61,8 @@ public class StatePoller<S, F extends Enum<F>> {
 	@SuppressWarnings("unchecked")
 	public static <S, F extends Enum<F>> StatePoller<S, F> state(S state) {
 		return new StatePoller<S, F>((Class<S>) state.getClass(), "",
-				(context, callback) -> context.setFinalState(state), null, null, null, -1);
+				(context, callback) -> ((StatePoller<S, F>.StatePollContextImpl) context).setState(state, () -> {
+				}), null, null, null, -1);
 	}
 
 	/**
@@ -421,6 +422,11 @@ public class StatePoller<S, F extends Enum<F>> {
 	}
 
 	/**
+	 * Successful {@link Level}.
+	 */
+	private final Level successLogLevel;
+
+	/**
 	 * {@link Logger}.
 	 */
 	private final Logger logger;
@@ -499,6 +505,7 @@ public class StatePoller<S, F extends Enum<F>> {
 	 */
 	private StatePoller(Class<S> stateType, String identifierText, Initialiser<S> initialiser, Poller<S> poller,
 			Level successLogLevel, Logger logger, long defaultPollInterval) {
+		this.successLogLevel = successLogLevel;
 		this.logger = logger;
 		this.stateType = stateType;
 		this.identifierText = identifierText;
@@ -675,9 +682,8 @@ public class StatePoller<S, F extends Enum<F>> {
 
 		@Override
 		public void setFinalState(S finalState) {
-			this.setState(finalState, () -> {
-				// No further polling
-			});
+			this.setState(finalState, () -> StatePoller.this.logger.log(StatePoller.this.successLogLevel,
+					"Final state set" + StatePoller.this.identifierText + ". No further polling."));
 		}
 
 		/**

@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 
 import org.junit.runners.model.Statement;
 
+import com.braintreepayments.http.HttpRequest;
 import com.braintreepayments.http.HttpResponse;
 import com.braintreepayments.http.serializer.Json;
 import com.paypal.core.PayPalEnvironment;
@@ -48,6 +49,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.pay.paypal.mock.PayPalRule;
+import net.officefloor.pay.paypal.mock.PayPalRule.Interaction;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpHeaderName;
@@ -63,6 +65,8 @@ import net.officefloor.woof.mock.MockWoofServer.MockWoofInput;
  * @author Daniel Sagenschneider
  */
 public class PayPalHttpClientTest extends OfficeFrameTestCase {
+
+	private static final Json JSON = new Json();
 
 	/**
 	 * {@link OfficeFloor}.
@@ -125,11 +129,11 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 			PayPalHttpClientTest.this.officeFloor = compiler.compileAndOpenOfficeFloor();
 
 			// Trigger the servicing
-			Closure<Order> closure = new Closure<>();
+			Closure<HttpResponse<Order>> closure = new Closure<>();
 			CompileOfficeFloor.invokeProcess(PayPalHttpClientTest.this.officeFloor, "SECTION.service", closure);
 
 			// Ensure have order
-			Order order = closure.value;
+			Order order = closure.value.result();
 			assertNotNull("Should have order", order);
 			assertEquals("Incorrect order id", "ORDER_ID", order.id());
 			assertEquals("Incorrect status", "COMPLETED", order.status());
@@ -137,7 +141,8 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 	}
 
 	public static class ConfigureEnvironmentService {
-		public void service(@Parameter Closure<Order> closure, PayPalHttpClient client) throws IOException {
+		public void service(@Parameter Closure<HttpResponse<Order>> closure, PayPalHttpClient client)
+				throws IOException {
 			closure.value = MockCreateOrderService.createOrder(client);
 		}
 	}
@@ -172,19 +177,21 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 	 * Ensure can mock creating an {@link Order}.
 	 */
 	public void testMockCreateOrder() throws Throwable {
-		Order order = this.doOrder(MockCreateOrderService.class,
-				(rule) -> rule.addOrdersCreateResponse(new Order().id("ORDER_ID").status("CREATED")));
-		assertEquals("Incorrect order Id", "ORDER_ID", order.id());
-		assertEquals("Incorrect status", "CREATED", order.status());
+		HttpResponse<Order> response = this.doOrder(MockCreateOrderService.class,
+				(rule) -> rule.addOrdersCreateResponse(new Order().id("ORDER_ID").status("CREATED"), "TEST", "VALUE"));
+		assertEquals("Incorrect header", "VALUE", response.headers().header("TEST"));
+		assertEquals("Incorrect order Id", "ORDER_ID", response.result().id());
+		assertEquals("Incorrect status", "CREATED", response.result().status());
 	}
 
 	public static class MockCreateOrderService {
-		public static void service(@Parameter Closure<Order> closure, PayPalHttpClient client) throws IOException {
+		public static void service(@Parameter Closure<HttpResponse<Order>> closure, PayPalHttpClient client)
+				throws IOException {
 			closure.value = createOrder(client);
 		}
 
-		public static Order createOrder(PayPalHttpClient client) throws IOException {
-			OrdersCreateRequest request = new OrdersCreateRequest().requestBody(new OrderRequest().intent("CAPTURE")
+		public static OrdersCreateRequest createOrdersRequest() {
+			return new OrdersCreateRequest().requestBody(new OrderRequest().intent("CAPTURE")
 					.applicationContext(new ApplicationContext().brandName("OfficeFloor").landingPage("BILLING"))
 					.purchaseUnits(Arrays
 							.asList(new PurchaseUnitRequest().referenceId("MOCK_ID").description("Test create order")
@@ -194,11 +201,14 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 													.taxTotal(new Money().currencyCode("AUD").value("0.50"))))
 									.items(Arrays.asList(new Item().name("Domain").description("Domain subscription")
 											.unitAmount(new Money().currencyCode("AUD").value("4.50"))
-											.tax(new Money().currencyCode("AUD").value("0.50")).quantity("1")
-											.category("SUBSCRIPTION"))))));
+											.tax(new Money().currencyCode("AUD").value("0.50")).quantity("1"))))));
+		}
+
+		public static HttpResponse<Order> createOrder(PayPalHttpClient client) throws IOException {
+			OrdersCreateRequest request = createOrdersRequest();
 			HttpResponse<Order> orderResponse = client.execute(request);
 			assertEquals("Should be successful", 200, orderResponse.statusCode());
-			return orderResponse.result();
+			return orderResponse;
 		}
 	}
 
@@ -206,19 +216,74 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 	 * Ensure can mock capture {@link Order}.
 	 */
 	public void testMockCaptureOrder() throws Throwable {
-		Order order = this.doOrder(MockCaptureService.class,
+		HttpResponse<Order> response = this.doOrder(MockCaptureService.class,
 				(rule) -> rule.addOrdersCaptureResponse(new Order().id("ORDER_ID").status("COMPLETED")));
-		assertEquals("Incorrect order Id", "ORDER_ID", order.id());
-		assertEquals("Incorrect status", "COMPLETED", order.status());
+		assertEquals("Incorrect order Id", "ORDER_ID", response.result().id());
+		assertEquals("Incorrect status", "COMPLETED", response.result().status());
 	}
 
 	public static class MockCaptureService {
-		public void service(@Parameter Closure<Order> closure, PayPalHttpClient client) throws IOException {
+		public void service(@Parameter Closure<HttpResponse<Order>> closure, PayPalHttpClient client)
+				throws IOException {
 			OrdersCaptureRequest request = new OrdersCaptureRequest("ORDER_ID");
 			request.requestBody(new OrderRequest());
 			HttpResponse<Order> orderResponse = client.execute(request);
 			assertEquals("Should be successful", 200, orderResponse.statusCode());
-			closure.value = orderResponse.result();
+			closure.value = orderResponse;
+		}
+	}
+
+	/**
+	 * Ensure report unexpected {@link Interaction}.
+	 */
+	public void testUnexpectedInteraction() throws Throwable {
+		try {
+			this.doOrder(MockCreateOrderService.class, (rule) -> {
+				// No interaction, so is unexpected
+			});
+			fail("Should not be successful");
+		} catch (AssertionError ex) {
+			assertEquals("Incorrect cause",
+					"No PayPal interaction for OrdersCreateRequest("
+							+ JSON.serialize(MockCreateOrderService.createOrdersRequest().requestBody()) + ")",
+					ex.getMessage());
+		}
+	}
+
+	/**
+	 * Ensure all {@link Interaction} instances occur.
+	 */
+	public void testMissingInteraction() throws Throwable {
+		Order unexpected = new Order().status("MISSING");
+		try {
+			this.doOrder(MockCreateOrderService.class, (rule) -> {
+				rule.addOrdersCreateResponse(new Order().status("USED"));
+
+				// Record missing interaction
+				rule.addOrdersCaptureResponse(unexpected);
+			});
+			fail("Should not be successful");
+		} catch (AssertionError ex) {
+			assertEquals("Incorrect cause", "Not all PayPal interactions exercised\n\nRESPONSE: "
+					+ JSON.serialize(unexpected) + " expected:<0> but was:<1>", ex.getMessage());
+		}
+	}
+
+	/**
+	 * Ensure can validate the {@link HttpRequest}.
+	 */
+	public void testValidateHttpRequest() throws Throwable {
+		final Exception failure = new Exception("TEST");
+		try {
+			this.doOrder(MockCreateOrderService.class,
+					(rule) -> rule.addOrdersCreateResponse(new Order()).validate((request) -> {
+						OrderRequest orderRequest = (OrderRequest) request.requestBody();
+						assertEquals("Incorrect intent", "CAPTURE", orderRequest.intent());
+						throw failure;
+					}));
+			fail("Should not be successful");
+		} catch (Exception ex) {
+			assertSame("Should throw failure", failure, ex);
 		}
 	}
 
@@ -226,12 +291,12 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 	 * Undertakes interacting with {@link Order}.
 	 * 
 	 * @param sectionSourceClass {@link SectionSource} {@link Class}.
-	 * @return {@link Order}.
+	 * @return {@link HttpResponse}.
 	 */
-	private Order doOrder(Class<?> sectionSourceClass, Consumer<PayPalRule> configurer) throws Throwable {
+	private HttpResponse<Order> doOrder(Class<?> sectionSourceClass, Consumer<PayPalRule> configurer) throws Throwable {
 
 		// Ensure mock PayPal
-		Closure<Order> closure = new Closure<>();
+		Closure<HttpResponse<Order>> closure = new Closure<>();
 		PayPalRule rule = new PayPalRule();
 		rule.apply(new Statement() {
 			@Override
@@ -264,7 +329,7 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 		}, null).evaluate();
 
 		// Ensure retrieved mocked order
-		Order order = closure.value;
+		HttpResponse<Order> order = closure.value;
 		assertNotNull("Should have order", order);
 		return order;
 	}

@@ -1,0 +1,34 @@
+<woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/capture" method="POST" secure="false" x="95" y="47">
+      <section name="PayPal" input="captureOrder"/>
+    </http-input>
+    <http-input path="/configure" method="POST" secure="false" x="93" y="144">
+      <section name="PayPal" input="configure"/>
+    </http-input>
+    <http-input path="/create" method="POST" secure="false" x="99" y="94">
+      <section name="PayPal" input="createOrder"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+    <section name="PayPal" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.paypalhttpserver.PayPalLogic" x="296" y="60">
+      <input name="captureOrder" parameter-type=""/>
+      <input name="configure" parameter-type=""/>
+      <input name="createOrder" parameter-type=""/>
+    </section>
+  </sections>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>
