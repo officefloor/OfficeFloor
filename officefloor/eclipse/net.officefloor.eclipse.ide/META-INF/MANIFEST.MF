@@ -2,14 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Eclipse IDE
 Bundle-SymbolicName: net.officefloor.eclipse.ide;singleton:=true
-Bundle-Version: 3.10.0
+Bundle-Version: 3.10.1
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: net.officefloor.core;bundle-version="3.10.0",
- net.officefloor.eclipse.common;bundle-version="3.10.0",
- net.officefloor.eclipse.osgi;bundle-version="3.10.0",
- net.officefloor.eclipse.editor;bundle-version="3.10.0",
- net.officefloor.eclipse.configurer;bundle-version="3.10.0"
+Require-Bundle: net.officefloor.core;bundle-version="3.10.1",
+ net.officefloor.eclipse.common;bundle-version="3.10.1",
+ net.officefloor.eclipse.osgi;bundle-version="3.10.1",
+ net.officefloor.eclipse.editor;bundle-version="3.10.1",
+ net.officefloor.eclipse.configurer;bundle-version="3.10.1"
 Export-Package: net.officefloor.eclipse.ide.editor,
  net.officefloor.eclipse.ide.newwizard
 Bundle-ActivationPolicy: lazy
