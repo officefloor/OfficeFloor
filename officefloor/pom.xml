@@ -48,7 +48,7 @@
 	<properties>
 		<asm-version>7.1</asm-version>
 		<compiler-version>3.8.1</compiler-version>
-		<current.year>2018</current.year>
+		<current.year>2019</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>8</java-lowest-version>
 		<jetty-version>9.4.18.v20190429</jetty-version>
@@ -63,9 +63,6 @@
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<scala-maven-version>4.0.1</scala-maven-version>
-		<scala-version>2.12.8</scala-version>
-		<spring-version>2.1.1.RELEASE</spring-version>
 		<tycho-version>1.4.0</tycho-version>
 	</properties>
 	<dependencyManagement>

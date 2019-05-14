@@ -59,7 +59,7 @@
 		<commons-codec-version>1.12</commons-codec-version>
 		<commons-text-version>1.6</commons-text-version>
 		<datanucleus-version>5.2.1</datanucleus-version>
-		<docker-client-version>8.15.3</docker-client-version>
+		<docker-client-version>8.16.0</docker-client-version>
 		<dokka-maven-version>0.9.18</dokka-maven-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.4</eclipse-persistence-jpa-version>
@@ -89,7 +89,7 @@
 		<objectify-version>6.0.3</objectify-version>
 		<postgresql-version>42.2.5</postgresql-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
-		<scala-maven-version>4.0.1</scala-maven-version>
+		<scala-maven-version>4.0.2</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
 		<scalacheck-version>1.14.0</scalacheck-version>
 		<scalatest-maven-version>2.0.0</scalatest-maven-version>
