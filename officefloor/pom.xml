@@ -63,7 +63,6 @@
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<scala-maven-version>4.0.2</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
 		<spring-version>2.1.1.RELEASE</spring-version>
 		<tycho-version>1.4.0</tycho-version>
