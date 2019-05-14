@@ -12,6 +12,12 @@
 			<contains><![CDATA[version="${project.version}"]]></contains>
 		</file>
 
+		<!-- Ensure Tycho extensions latest -->
+		<file>
+			<location>.mvn/extensions.xml</location>
+			<contains><![CDATA[<version>${tycho-version}</version>]]></contains>
+		</file>
+
 		<!-- Ensure BOM latest -->
 		<file>
 			<location>bom/pom.xml</location>

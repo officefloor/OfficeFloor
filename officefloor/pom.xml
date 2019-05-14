@@ -281,11 +281,6 @@
 						<pomElements>
 							<profiles>remove</profiles>
 						</pomElements>
-						<!-- <pomElements> <parent>expand</parent> <name>keep</name> <description>keep</description> 
-							<url>keep</url> <scm>keep</scm> <issueManagement>keep</issueManagement> <developers>keep</developers> 
-							<contributors>keep</contributors> <properties>keep</properties> <dependencies>keep</dependencies> 
-							<pluginManagement>keep</pluginManagement> <dependencyManagement>keep</dependencyManagement> 
-							</pomElements> -->
 					</configuration>
 					<executions>
 						<execution>
