@@ -17,18 +17,20 @@
  */
 package net.officefloor.web.resource.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.server.filesystem.OfficeFloorFileAttributes;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpResponseBuilder;
@@ -49,6 +51,16 @@ import net.officefloor.web.resource.spi.ResourceTransformer;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestCase {
+
+	/**
+	 * Default {@link FileAttribute} for direction.
+	 */
+	private static final FileAttribute<?>[] DIRECTORY_ATTRIBUTES = OfficeFloorFileAttributes.getDefaultDirectoryAttributes();
+
+	/**
+	 * Default {@link FileAttribute} for file.
+	 */
+	private static final FileAttribute<?>[] FILE_ATTRIBUTES = OfficeFloorFileAttributes.getDefaultFileAttributes();
 
 	/**
 	 * <p>
@@ -254,6 +266,11 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	 * Ensure the {@link FileChannel} is available until complete write.
 	 */
 	public void testFileChannelAvailableUntilCompleteWrite() throws IOException {
+		
+		if (File.separatorChar == '\\') {
+			System.err.println("TODO windows can not delete file before closing stream");
+			return;
+		}
 
 		// Write HTTP file to response
 		String filePath = this.path("/index.html");
@@ -372,20 +389,19 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	};
 
 	private class MockFileCache implements FileCache {
-
+		
 		private final Path tempDirectory;
 
 		public MockFileCache(String name) throws IOException {
-			this.tempDirectory = Files.createTempDirectory(name + "-",
-					PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---")));
+			name = name.replace('/', '_');
+			this.tempDirectory = Files.createTempDirectory(name + "-", DIRECTORY_ATTRIBUTES);
 			AbstractHttpResourceStoreTestCase.this.tempPaths.add(this.tempDirectory);
 		}
 
 		@Override
 		public Path createFile(String name) throws IOException {
 			String suffix = name.replace('/', '_');
-			Path file = Files.createTempFile(this.tempDirectory, null, "-" + suffix,
-					PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-r-----")));
+			Path file = Files.createTempFile(this.tempDirectory, null, "-" + suffix, FILE_ATTRIBUTES);
 			assertTrue("Should have file " + name, Files.isRegularFile(file));
 			AbstractHttpResourceStoreTestCase.this.tempPaths.add(file);
 			return file;
@@ -394,8 +410,7 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 		@Override
 		public Path createDirectory(String name) throws IOException {
 			String prefix = name.replace('/', '_');
-			Path directory = Files.createTempDirectory(this.tempDirectory, prefix + "-",
-					PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---")));
+			Path directory = Files.createTempDirectory(this.tempDirectory, prefix + "-", DIRECTORY_ATTRIBUTES);
 			assertTrue("Should have directory " + name, Files.isDirectory(directory));
 			AbstractHttpResourceStoreTestCase.this.tempPaths.add(directory);
 			return directory;

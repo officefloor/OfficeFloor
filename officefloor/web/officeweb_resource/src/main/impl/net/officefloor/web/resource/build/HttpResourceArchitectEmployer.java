@@ -17,6 +17,7 @@
  */
 package net.officefloor.web.resource.build;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -202,6 +204,17 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 	@Override
 	public HttpResourcesBuilder addHttpResources(String protocolLocation) {
 
+		// Obtain the resource system factory
+		Function<String, ResourceSystemFactory> getResourceSystemFactory = (protocol) -> {
+			for (ResourceSystemFactory factory : this.officeSourceContext.loadServices(ResourceSystemService.class, null)) {
+				if (protocol.equalsIgnoreCase(factory.getProtocolName())) {
+					// Found resource system for protocol
+					return factory;
+				}
+			}
+			return null; // not found
+		};
+		
 		// Obtain the protocol and location
 		int splitIndex = protocolLocation.indexOf(':');
 		if (splitIndex < 0) {
@@ -212,11 +225,16 @@ public class HttpResourceArchitectEmployer implements HttpResourceArchitect {
 		String location = protocolLocation.substring(splitIndex + 1);
 
 		// Obtain the resource system factory
-		for (ResourceSystemFactory factory : this.officeSourceContext.loadServices(ResourceSystemService.class, null)) {
-			if (protocol.equalsIgnoreCase(factory.getProtocolName())) {
-				// Found resource system for protocol
-				return this.addHttpResources(factory, location);
-			}
+		ResourceSystemFactory factory = getResourceSystemFactory.apply(protocol);
+		if (factory != null) {
+			return this.addHttpResources(factory, location);
+		}
+
+		// Determine if file (windows may have C:\dev)
+		File resourceFile = new File(protocolLocation);
+		if (resourceFile.exists()) {
+			// Default file location
+			return this.addHttpResources(new FileResourceSystemService(), protocolLocation);
 		}
 
 		// As here, protocol not available

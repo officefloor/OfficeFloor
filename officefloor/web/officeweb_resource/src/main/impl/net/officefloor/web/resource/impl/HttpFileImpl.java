@@ -20,6 +20,9 @@ package net.officefloor.web.resource.impl;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -53,17 +56,24 @@ public class HttpFileImpl extends AbstractHttpResource implements HttpFile, File
 	 * {@link Charset}.
 	 */
 	private final Charset charset;
+	
+	/**
+	 * Resource {@link Path} to clean up. May be <code>null</code>.
+	 */
+	private final Path cleanupResourcePath;
 
 	/**
 	 * {@link FileChannel}.
 	 */
 	private final FileChannel file;
-
+	
 	/**
 	 * Initiate an existing {@link HttpFile}.
 	 * 
 	 * @param path
 	 *            Path.
+	 * @param cleanupResourcePath
+	 *            Resource {@link Path} to clean up. May be <code>null</code>.
 	 * @param file
 	 *            {@link FileChannel} to the file.
 	 * @param contentEncoding
@@ -73,9 +83,10 @@ public class HttpFileImpl extends AbstractHttpResource implements HttpFile, File
 	 * @param charset
 	 *            {@link Charset}.
 	 */
-	public HttpFileImpl(String path, FileChannel file, HttpHeaderValue contentEncoding, HttpHeaderValue contentType,
+	public HttpFileImpl(String path, Path cleanupResourcePath, FileChannel file, HttpHeaderValue contentEncoding, HttpHeaderValue contentType,
 			Charset charset) {
 		super(path);
+		this.cleanupResourcePath = cleanupResourcePath;
 		this.contentEncoding = contentEncoding;
 		this.contentType = contentType;
 		this.charset = charset;
@@ -147,6 +158,14 @@ public class HttpFileImpl extends AbstractHttpResource implements HttpFile, File
 
 	@Override
 	public void close() throws IOException {
+
+		// Close the file channel
+		this.file.close();
+
+		// Determine if clean up file
+		if (this.cleanupResourcePath != null) {
+			Files.deleteIfExists(this.cleanupResourcePath);
+		}
 	}
 
 }
