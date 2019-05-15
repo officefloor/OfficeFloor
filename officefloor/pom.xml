@@ -46,6 +46,7 @@
 		<module>tutorials</module>
 	</modules>
 	<properties>
+		<ant-optional-version>1.5.3-1</ant-optional-version>
 		<asm-version>7.1</asm-version>
 		<compiler-version>3.8.1</compiler-version>
 		<current.year>2019</current.year>
@@ -733,69 +734,10 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Provide validation xml file with dependency versions -->
+				<!-- Fix site with additional information -->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
-					<execution>
-						<id>Provide validation xml file with dependency versions</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<target>
-								<!-- Obtain the all project class paths (plus ensure a property is 
-									always available for replacefilterfile functionality to not fail) -->
-								<property name="maven_compile_classpath"
-									refid="maven.compile.classpath" />
-								<property name="maven_runtime_classpath"
-									refid="maven.runtime.classpath" />
-								<property name="maven_test_classpath"
-									refid="maven.test.classpath" />
-								<property name="maven_classpath"
-									value="${maven_compile_classpath}${path.separator}${maven_runtime_classpath}${path.separator}${maven_test_classpath}" />
-
-								<echo
-									file="${project.build.directory}/verifier/dependencies.raw"
-									message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
-
-								<!-- Remove the compile and test classes directory from the class 
-									path -->
-								<replace
-									file="${project.build.directory}/verifier/dependencies.raw"
-									token="${project.build.outputDirectory}" value="" />
-								<replace
-									file="${project.build.directory}/verifier/dependencies.raw"
-									token="${project.build.testOutputDirectory}" value="" />
-
-								<!-- Transform into properties file of: ${artifactId}_version=${version} -->
-								<copy
-									file="${project.build.directory}/verifier/dependencies.raw"
-									tofile="${project.build.directory}/verifier/dependencies.properties">
-									<filterchain>
-										<tokenfilter>
-											<!-- Split into tokens for each class path entry -->
-											<stringtokenizer delims="${path.separator}"
-												suppressdelims="true" />
-											<!-- Ignore class path entries without a version (eg system dependencies) -->
-											<containsregex
-												pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)" />
-											<!-- Transform class path entry into property for its version -->
-											<replaceregex
-												pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)"
-												replace="@{\2_version}=\3${line.separator}" />
-										</tokenfilter>
-									</filterchain>
-								</copy>
-
-								<!-- Replace dependency versions in verifications file -->
-								<replace
-									file="${project.build.directory}/verifier/verifications.xml"
-									replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
-							</target>
-						</configuration>
-					</execution>
 					<execution>
 						<id>Setup Authorizor download link and Landing Page</id>
 						<inherited>false</inherited>
@@ -857,31 +799,11 @@
 					<dependency>
 						<groupId>ant</groupId>
 						<artifactId>ant-optional</artifactId>
-						<version>1.5.3-1</version>
+						<version>${ant-optional-version}</version>
 						<scope>runtime</scope>
 					</dependency>
 				</dependencies>
 			</plugin>
-			<plugin>
-				<!-- Verification done during initialise to allow further setup in validation -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-verifier-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>Verify projects to ensure correct linkages</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<verificationFile>${project.build.directory}/verifier/verifications.xml
-							</verificationFile>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- END: project validation -->
-
 			<plugin>
 				<!-- Generate Javadoc for site documentation -->
 				<groupId>org.apache.maven.plugins</groupId>
@@ -1070,6 +992,110 @@
 								<goals>
 									<goal>report</goal>
 								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>officefloor-validate-versions</id>
+			<activation>
+				<os>
+					<family>unix</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Provide validation xml file with dependency versions -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>Provide validation xml file with dependency versions</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<target>
+										<!-- Obtain the all project class paths (plus ensure a property is 
+											always available for replacefilterfile functionality to not fail) -->
+										<property name="maven_compile_classpath"
+											refid="maven.compile.classpath" />
+										<property name="maven_runtime_classpath"
+											refid="maven.runtime.classpath" />
+										<property name="maven_test_classpath"
+											refid="maven.test.classpath" />
+										<property name="maven_classpath"
+											value="${maven_compile_classpath}${path.separator}${maven_runtime_classpath}${path.separator}${maven_test_classpath}" />
+		
+										<echo
+											file="${project.build.directory}/verifier/dependencies.raw"
+											message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
+		
+										<!-- Remove the compile and test classes directory from the class 
+											path -->
+										<replace
+											file="${project.build.directory}/verifier/dependencies.raw"
+											token="${project.build.outputDirectory}" value="" />
+										<replace
+											file="${project.build.directory}/verifier/dependencies.raw"
+											token="${project.build.testOutputDirectory}" value="" />
+		
+										<!-- Transform into properties file of: ${artifactId}_version=${version} -->
+										<copy
+											file="${project.build.directory}/verifier/dependencies.raw"
+											tofile="${project.build.directory}/verifier/dependencies.properties">
+											<filterchain>
+												<tokenfilter>
+													<!-- Split into tokens for each class path entry -->
+													<stringtokenizer delims="${path.separator}"
+														suppressdelims="true" />
+													<!-- Ignore class path entries without a version (eg system dependencies) -->
+													<containsregex
+														pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)" />
+													<!-- Transform class path entry into property for its version -->
+													<replaceregex
+														pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)"
+														replace="@{\2_version}=\3${line.separator}" />
+												</tokenfilter>
+											</filterchain>
+										</copy>
+		
+										<!-- Replace dependency versions in verifications file -->
+										<replace
+											file="${project.build.directory}/verifier/verifications.xml"
+											replacefilterfile="${project.build.directory}/verifier/dependencies.properties" />
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>ant</groupId>
+								<artifactId>ant-optional</artifactId>
+								<version>${ant-optional-version}</version>
+								<scope>runtime</scope>
+							</dependency>
+						</dependencies>
+					</plugin>
+					<plugin>
+						<!-- Verification done during initialise to allow further setup in validation -->
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-verifier-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>Verify projects to ensure correct linkages</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>verify</goal>
+								</goals>
+								<configuration>
+									<verificationFile>${project.build.directory}/verifier/verifications.xml
+									</verificationFile>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
