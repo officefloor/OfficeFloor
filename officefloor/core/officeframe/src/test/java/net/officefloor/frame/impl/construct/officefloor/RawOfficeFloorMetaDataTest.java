@@ -405,9 +405,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			// Ensure written to system error
 			String errorOutput = new String(capture.toByteArray());
 			StringWriter expectedError = new StringWriter();
-			expectedError.write("FAILURE: Office not handling:\n");
+			expectedError.write("FAILURE: Office not handling:" + END_OF_LINE);
 			escalation.printStackTrace(new PrintWriter(expectedError));
-			expectedError.write("\n");
+			expectedError.write(END_OF_LINE);
 			assertEquals("Incorrect error output", expectedError.toString(), errorOutput);
 
 		} finally {

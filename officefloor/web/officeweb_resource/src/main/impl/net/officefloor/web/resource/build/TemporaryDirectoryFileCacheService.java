@@ -21,11 +21,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Set;
 
 import net.officefloor.frame.api.source.ServiceContext;
+import net.officefloor.server.filesystem.OfficeFloorFileAttributes;
 import net.officefloor.web.resource.spi.FileCache;
 import net.officefloor.web.resource.spi.FileCacheFactory;
 import net.officefloor.web.resource.spi.FileCacheService;
@@ -40,14 +38,13 @@ public class TemporaryDirectoryFileCacheService implements FileCacheService, Fil
 	/**
 	 * Directory {@link FileAttribute}.
 	 */
-	private static final FileAttribute<Set<PosixFilePermission>> DIRECTORY_ATTRIBUTE = PosixFilePermissions
-			.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
+	private static final FileAttribute<?>[] DIRECTORY_ATTRIBUTES = OfficeFloorFileAttributes
+			.getDefaultDirectoryAttributes();
 
 	/**
 	 * File {@link FileAttribute}.
 	 */
-	private static final FileAttribute<Set<PosixFilePermission>> FILE_ATTRIBUTE = PosixFilePermissions
-			.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---"));
+	private static final FileAttribute<?>[] FILE_ATTRIBUTES = OfficeFloorFileAttributes.getDefaultFileAttributes();
 
 	/*
 	 * =================== FileCacheService ========================
@@ -86,7 +83,7 @@ public class TemporaryDirectoryFileCacheService implements FileCacheService, Fil
 		 *             If fails to create {@link FileCache}.
 		 */
 		public TemporaryDirectoryFileCache(String name) throws IOException {
-			this.tempDirectory = Files.createTempDirectory(name + "-", DIRECTORY_ATTRIBUTE);
+			this.tempDirectory = Files.createTempDirectory(name + "-", DIRECTORY_ATTRIBUTES);
 		}
 
 		/*
@@ -96,14 +93,14 @@ public class TemporaryDirectoryFileCacheService implements FileCacheService, Fil
 		@Override
 		public Path createFile(String name) throws IOException {
 			String suffix = name.replace('/', '_');
-			Path file = Files.createTempFile(this.tempDirectory, null, "-" + suffix, DIRECTORY_ATTRIBUTE);
+			Path file = Files.createTempFile(this.tempDirectory, null, "-" + suffix, DIRECTORY_ATTRIBUTES);
 			return file;
 		}
 
 		@Override
 		public Path createDirectory(String name) throws IOException {
 			String prefix = name.replace('/', '_');
-			Path directory = Files.createTempDirectory(this.tempDirectory, prefix + "-", FILE_ATTRIBUTE);
+			Path directory = Files.createTempDirectory(this.tempDirectory, prefix + "-", FILE_ATTRIBUTES);
 			return directory;
 		}
 

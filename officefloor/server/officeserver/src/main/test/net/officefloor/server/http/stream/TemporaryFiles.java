@@ -29,8 +29,8 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.PosixFilePermissions;
 
+import net.officefloor.server.filesystem.OfficeFloorFileAttributes;
 import net.officefloor.server.http.ServerHttpConnection;
 
 /**
@@ -58,20 +58,19 @@ public class TemporaryFiles {
 		}
 		return defaultTemporaryFiles;
 	}
+	
+	/**
+	 * Allow files to be read/written by executing user, and allow files to be read
+	 * by group (useful for read-only debugging access).
+	 */
+	private static final FileAttribute<?>[] DIRECTORY_ATTRIBUTES = OfficeFloorFileAttributes
+			.getDefaultDirectoryAttributes();
 
 	/**
 	 * Allow files to be read/written by executing user, and allow files to be read
 	 * by group (useful for read-only debugging access).
 	 */
-	private static final FileAttribute<?>[] DIRECTORY_ATTRIBUTES = new FileAttribute[] {
-			PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxr-x---")) };
-
-	/**
-	 * Allow files to be read/written by executing user, and allow files to be read
-	 * by group (useful for read-only debugging access).
-	 */
-	private static final FileAttribute<?>[] FILE_ATTRIBUTES = new FileAttribute[] {
-			PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-r-----")) };
+	private static final FileAttribute<?>[] FILE_ATTRIBUTES = OfficeFloorFileAttributes.getDefaultFileAttributes();
 
 	/**
 	 * {@link CopyOption} values to create the temporary file.
