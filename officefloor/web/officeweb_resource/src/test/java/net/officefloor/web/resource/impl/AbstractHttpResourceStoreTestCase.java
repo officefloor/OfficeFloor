@@ -17,8 +17,8 @@
  */
 package net.officefloor.web.resource.impl;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -263,14 +263,9 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 	}
 
 	/**
-	 * Ensure the {@link FileChannel} is available until complete write.
+	 * Ensure the {@link FileChannel} is not available after write.
 	 */
-	public void testFileChannelAvailableUntilCompleteWrite() throws IOException {
-		
-		if (File.separatorChar == '\\') {
-			System.err.println("TODO windows can not delete file before closing stream");
-			return;
-		}
+	public void testFileChannelNotAvailableAfterComplete() throws IOException {
 
 		// Write HTTP file to response
 		String filePath = this.path("/index.html");
@@ -281,10 +276,12 @@ public abstract class AbstractHttpResourceStoreTestCase extends OfficeFrameTestC
 
 		// Ensure file channel still available after close
 		MockHttpResponseBuilder mockResponse = MockHttpServer.mockResponse();
-		file.writeTo(mockResponse);
-		MockHttpResponse response = mockResponse.build();
-		assertEquals("Should still have file channel", "<html><body>Hello World</body></html>",
-				response.getEntity(null));
+		try {
+			file.writeTo(mockResponse);
+			fail("Should be closed, so can not write successfully");
+		} catch (ClosedChannelException ex) {
+			// Should be closed
+		}
 	}
 
 	/**

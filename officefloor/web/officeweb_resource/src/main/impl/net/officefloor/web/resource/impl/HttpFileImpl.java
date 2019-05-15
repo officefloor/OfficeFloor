@@ -22,7 +22,6 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -83,8 +82,8 @@ public class HttpFileImpl extends AbstractHttpResource implements HttpFile, File
 	 * @param charset
 	 *            {@link Charset}.
 	 */
-	public HttpFileImpl(String path, Path cleanupResourcePath, FileChannel file, HttpHeaderValue contentEncoding, HttpHeaderValue contentType,
-			Charset charset) {
+	public HttpFileImpl(String path, Path cleanupResourcePath, FileChannel file, HttpHeaderValue contentEncoding,
+			HttpHeaderValue contentType, Charset charset) {
 		super(path);
 		this.cleanupResourcePath = cleanupResourcePath;
 		this.contentEncoding = contentEncoding;
