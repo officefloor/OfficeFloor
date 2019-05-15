@@ -89,6 +89,11 @@ import net.officefloor.frame.impl.execute.officefloor.OfficeFloorImpl;
  */
 public abstract class OfficeFrameTestCase extends TestCase {
 
+	/**
+	 * End line.
+	 */
+	protected static String END_OF_LINE = System.getProperty("line.separator");
+	
 	/*
 	 * ==================== TestCase =========================
 	 */
@@ -357,10 +362,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			URL[] urls = new URL[classPathEntries.length + 1]; // include extra class
 			for (int i = 0; i < classPathEntries.length; i++) {
 				String classPathEntry = classPathEntries[i];
-				classPathEntry = (classPathEntry.startsWith(File.separator) ? "file://" + classPathEntry
-						: classPathEntry);
-				classPathEntry = (classPathEntry.endsWith(".jar") ? classPathEntry : classPathEntry + "/");
-				urls[i] = new URL(classPathEntry);
+				File possibleClassPathFile = new File(classPathEntry);
+				urls[i] = (possibleClassPathFile.exists() ? possibleClassPathFile.toURI().toURL()
+						: new URL(classPathEntry));
 			}
 			urls[classPathEntries.length] = workingDir.toURI().toURL();
 			ClassLoader classLoader = new URLClassLoader(urls, platformClassLoader);
