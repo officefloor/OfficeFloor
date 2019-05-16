@@ -1,4 +1,7 @@
 dist: xenial
+os:
+ - linux
+ - windows
 language: java
 sudo: required
 services: docker
