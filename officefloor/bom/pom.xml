@@ -51,7 +51,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.10.1</revision>
+		<revision>3.10.2</revision>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
@@ -68,7 +68,7 @@
 		<google-api-version>1.28.0</google-api-version>
 		<google-appengine-version>1.9.74</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
-		<graalvm-js-version>1.0.0-rc16</graalvm-js-version>
+		<graalvm-js-version>19.0.0</graalvm-js-version>
 		<h2database-version>1.4.199</h2database-version>
 		<hibernate-version>5.4.2.Final</hibernate-version>
 		<hikari-version>3.3.1</hikari-version>

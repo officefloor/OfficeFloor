@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.10.1" date="In SCM" description="Profile fix for POMs">
+		<release version="3.10.2" date="In SCM" description="Windows compatible">
+			<action type="add" dev="sagenschneider">Windows compatible</action>
+		</release>
+		<release version="3.10.1" date="2019-05-15" description="Profile fix for POMs">
 			<action type="add" dev="sagenschneider">Profile fix for POMs</action>
 		</release>
 		<release version="3.10.0" date="2019-05-13" description="PayPal">
