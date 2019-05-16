@@ -3,16 +3,20 @@ services: docker
 cache:
   directories: $HOME/.m2
 env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco --help; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install jdk11 -params "source=false"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install maven --help; fi
+  - ./.travis-install.sh
+script: ./.travis-script.sh
 after_success: bash <(curl -s https://codecov.io/bash)
 jobs:
   include:
-    - name: Java 8
+    - name: Java 8 (Linux)
       os: linux
       dist: xenial
       language: java
       jdk: openjdk8
-      install: ./.travis-install.sh
-      script: ./.travis-script.sh
       addons:
         apt:
           packages: openjfx
@@ -21,11 +25,6 @@ jobs:
       dist: xenial
       language: java
       jdk: openjdk11
-      install: ./.travis-install.sh
-      script: ./.travis-script.sh
     - name: Java 11 (Windows)
+      os: windows
       language: shell
-      script:
-        - choco install jdk11 -params "source=false"
-        - choco install maven
-        - ./.travis-script.sh
