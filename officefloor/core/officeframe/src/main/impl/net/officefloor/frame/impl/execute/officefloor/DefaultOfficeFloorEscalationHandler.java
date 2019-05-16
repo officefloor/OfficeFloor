@@ -39,12 +39,14 @@ public class DefaultOfficeFloorEscalationHandler implements EscalationHandler {
 	public void handleEscalation(Throwable escalation) throws Throwable {
 
 		// Obtain the stack trace
-		StringWriter stackTrace = new StringWriter();
-		escalation.printStackTrace(new PrintWriter(stackTrace));
+		StringWriter buffer = new StringWriter();
+		PrintWriter writer = new PrintWriter(buffer);
+		writer.println("FAILURE: Office not handling:");
+		escalation.printStackTrace(writer);
+		writer.flush();
 
 		// Prints details of the error
-		System.err.println("FAILURE: Office not handling:\n"
-				+ stackTrace.toString());
+		System.err.println(buffer.toString());
 	}
 
 }

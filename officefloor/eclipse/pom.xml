@@ -92,6 +92,39 @@
 				<artifactId>tycho-maven-plugin</artifactId>
 				<extensions>true</extensions>
 			</plugin>
+			<plugin>
+				<!-- Tycho not generating project name, so putting in fix -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Fix missing name in poms</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<property name="project_name" value="${project.name}" />
+								<property name="flatten_pom"
+									value="${project.basedir}/.flattened-pom.xml" />
+								<echo>Tycho fix: Adding name ${project_name} to ${flatten_pom}</echo>
+								<replaceregexp file="${flatten_pom}"
+									match="&lt;\/packaging&gt;[^;]*&lt;description&gt;" flags="m"
+									replace="&lt;/packaging&gt;&lt;name&gt;${project_name}&lt;/name&gt;&lt;description&gt;" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>ant</groupId>
+						<artifactId>ant-optional</artifactId>
+						<version>1.5.3-1</version>
+						<scope>runtime</scope>
+					</dependency>
+				</dependencies>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>

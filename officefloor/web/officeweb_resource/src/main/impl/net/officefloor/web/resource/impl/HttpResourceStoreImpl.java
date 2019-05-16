@@ -18,6 +18,7 @@
 package net.officefloor.web.resource.impl;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -152,8 +153,8 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 		// Specify the transformers
 		this.transformers = transformers != null ? transformers : new ResourceTransformer[0];
 
-		// Create the file cache
-		String cacheName = location.replace('/', '_');
+		// Create the file cache (handle windows C:\dev)
+		String cacheName = location.replace(':', '_').replace(File.separatorChar, '_');
 		this.fileCache = fileCacheFactory.createFileCache(cacheName);
 
 		// Create the directory default resource names
@@ -523,8 +524,8 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 
 				// Create the HTTP file
 				FileChannel fileChannel = FileChannel.open(context.resource, OPEN_OPTIONS);
-				HttpFileImpl httpFile = new HttpFileImpl(this.resourcePath, fileChannel, context.contentEncoding,
-						context.contentType, context.getCharset());
+				HttpFileImpl httpFile = new HttpFileImpl(this.resourcePath, context.resource, fileChannel,
+						context.contentEncoding, context.contentType, context.getCharset());
 
 				// Flag HTTP resource as resolved
 				this.singletonHttpResource = httpFile;
