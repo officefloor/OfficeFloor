@@ -4,8 +4,6 @@ cache:
   directories: $HOME/.m2
 env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco --help; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install jdk11 -params "source=false"; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install maven; fi
   - ./.travis-install.sh
 script: ./.travis-script.sh
