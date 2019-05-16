@@ -3,6 +3,7 @@ package net.officefloor.nosql.objectify.mock;
 import java.io.IOException;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.rules.TestRule;
@@ -11,6 +12,7 @@ import org.junit.runners.model.Statement;
 
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.testing.LocalDatastoreHelper;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
@@ -160,6 +162,32 @@ public class ObjectifyRule implements TestRule {
 
 		// Return the entities
 		return entities;
+	}
+
+	/**
+	 * Stores the entities.
+	 * 
+	 * @param type         Type of entity.
+	 * @param expectedSize Expected list size.
+	 * @param loader       {@link TypeLoader}.
+	 * @return List of entity.
+	 * @throws TimeoutException If waited too long the list of entities.
+	 */
+	@SuppressWarnings("unchecked")
+	public <E> void store(E... entities) throws TimeoutException {
+
+		// Ensure within rule
+		this.ensureWithinRule("store(...)");
+
+		// Save the entities
+		Map<Key<E>, E> results = this.ofy().save().entities(entities).now();
+
+		// Ensure all entities are available
+		for (Key<E> key : results.keySet()) {
+			E entity = results.get(key);
+
+			this.get(entity.getClass(), (loadType) -> loadType.filterKey(key));
+		}
 	}
 
 	/**
