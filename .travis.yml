@@ -3,8 +3,11 @@ services: docker
 cache:
   directories: $HOME/.m2
 env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
+# Windows JAVA_HOME="C:\Program Files\Java\jdk1.8.0_211\"
 install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install maven; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export JAVA_HOME="C:\Program Files\Java\jdk1.8.0_211\"; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then echo $JAVA_HOME; fi
   - ./.travis-install.sh
 script: ./.travis-script.sh
 after_success: bash <(curl -s https://codecov.io/bash)
@@ -26,4 +29,3 @@ jobs:
     - name: Java 11 (Windows)
       os: windows
       language: shell
-      env: JAVA_HOME="C:\Program Files\Java\jdk1.8.0_211\"
