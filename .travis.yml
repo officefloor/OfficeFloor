@@ -26,5 +26,6 @@ jobs:
       jdk: openjdk11
     - name: Java 11 (Windows)
       language: shell
-      choco install jdk11 -params "source=false"
-      choco install maven
+      script:
+        - choco install jdk11 -params "source=false"
+        - choco install maven
