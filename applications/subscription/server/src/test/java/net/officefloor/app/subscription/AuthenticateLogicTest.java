@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.googlecode.objectify.Ref;
 
 import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateRequest;
 import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateResponse;
@@ -28,6 +29,18 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * @author Daniel Sagenschneider
  */
 public class AuthenticateLogicTest {
+
+	public static void setupUser(ObjectifyRule objectify, String name, String email, String photUrl) {
+		User user = new User(email);
+		user.setName(name);
+		user.setPhotoUrl(photoUrl);
+		objectify.store(user);
+		GoogleSignin login = new GoogleSignin(googleId, email);
+		login.setUser(Ref.create(user));
+		login.setName(name);
+		login.setPhotoUrl(photoUrl);
+		objectify.save().entity(login).now();
+	}
 
 	private GoogleIdTokenRule verifier = new GoogleIdTokenRule();
 
