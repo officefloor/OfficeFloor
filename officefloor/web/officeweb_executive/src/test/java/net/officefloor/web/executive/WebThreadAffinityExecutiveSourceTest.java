@@ -68,6 +68,11 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 	 * Initial {@link Affinity} to reset.
 	 */
 	private BitSet initialAffinity;
+	
+	/**
+	 * Indicates if {@link Affinity} is active.
+	 */
+	private boolean isThreadAffinityActive = false;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -78,6 +83,21 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 
 		// Capture initial affinity (to allow reset on tear down)
 		this.initialAffinity = Affinity.getAffinity();
+		
+		// Determine if affinity available
+		try {
+			BitSet newAffinity = Affinity.getAffinity();
+			newAffinity.clear();
+			newAffinity.set(1);
+			Affinity.setAffinity(newAffinity);
+			BitSet alteredAffinity = Affinity.getAffinity();
+			this.isThreadAffinityActive = newAffinity.equals(alteredAffinity);
+		} finally {
+			Affinity.setAffinity(this.initialAffinity);
+		}
+		if (!this.isThreadAffinityActive) {
+			System.err.println("WARNING: Thread Affinity not available.  Tests not being run");
+		}
 
 		// Provide web thread affinity
 		this.compile.officeFloor((context) -> {
@@ -112,6 +132,12 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 	 * Ensure {@link ExecutionStrategy} provides affinity.
 	 */
 	public void testExecutionStrategyAffinity() throws Exception {
+
+		// Ensure active for valid test
+		if (!this.isThreadAffinityActive) {
+			System.err.println("Not running " + this.getName());
+			return;
+		}
 
 		TestThreadAffinityManagedObjectSource mos = new TestThreadAffinityManagedObjectSource();
 		this.compile.web((context) -> {
@@ -176,6 +202,12 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 	 * Ensure function run with affinity.
 	 */
 	public void testTeamAffinity() throws Exception {
+		
+		// Ensure active for valid test
+		if (!this.isThreadAffinityActive) {
+			System.err.println("Not running " + this.getName());
+			return;
+		}
 
 		this.compile.web((context) -> {
 			OfficeArchitect architect = context.getOfficeArchitect();
