@@ -97,6 +97,7 @@
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.26</slf4j-version>
 		<spring-version>2.1.4.RELEASE</spring-version>
+		<tika-version>1.20</tika-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 	</properties>
 	<dependencyManagement>
@@ -602,6 +603,11 @@
 				<version>${spring-version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tika</groupId>
+				<artifactId>tika-core</artifactId>
+				<version>${tika-version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
