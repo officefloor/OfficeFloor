@@ -23,6 +23,7 @@ import org.junit.rules.RuleChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import net.officefloor.app.subscription.AuthenticateLogicTest;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -67,14 +68,32 @@ public class UserManagedObjectSourceTest {
 	public final RuleChain order = RuleChain.outerRule(this.obectify).around(this.google).around(this.server);
 
 	/**
+	 * Ensure disallow if not authenticated.
+	 */
+	@Test
+	public void notAuthenticated() throws Exception {
+		this.server.send(MockWoofServer.mockRequest("/test")).assertResponse(401, "");
+	}
+
+	/**
+	 * Ensure not authenticated if user not registered in database.
+	 */
+	@Test
+	public void noUser() throws Exception {
+		String token = this.google.getMockIdToken("missing", "email");
+		this.server.send(MockWoofServer.mockRequest("/test").header("authorization", "Bearer " + token))
+				.assertResponse(401, "");
+	}
+
+	/**
 	 * Ensure can create the {@link User}.
 	 */
 	@Test
-	public void testCreateUser() throws Exception {
-		this.google.getMockIdToken("GOOGLE_ID-test", "email");
-		
-		this.server.send(MockWoofServer.mockRequest("/test")).assertResponse(200,
-				mapper.writeValueAsString(new User("test@officefloor.net")));
+	public void authenticated() throws Exception {
+		String googleId = AuthenticateLogicTest.setupUser(this.obectify, "Daniel", "test@officefloor.net", "photoUrl");
+		String token = this.google.getMockIdToken(googleId, "email");
+		this.server.send(MockWoofServer.mockRequest("/test").header("authorization", "Bearer " + token))
+				.assertResponse(200, mapper.writeValueAsString(new User("test@officefloor.net")));
 	}
 
 }
