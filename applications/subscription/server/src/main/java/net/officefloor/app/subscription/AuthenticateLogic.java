@@ -8,10 +8,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Ref;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import net.officefloor.app.subscription.jwt.JwtClaims;
+import lombok.Value;
 import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.server.http.HttpException;
@@ -26,24 +23,20 @@ import net.officefloor.web.jwt.authority.JwtAuthority;
  */
 public class AuthenticateLogic {
 
-	@Data
+	@Value
 	@HttpObject
-	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class AuthenticateRequest {
 		private String idToken;
 	}
 
-	@Data
-	@NoArgsConstructor
-	@AllArgsConstructor
+	@Value
 	public static class AuthenticateResponse {
 		private String refreshToken;
 		private String accessToken;
 	}
 
 	public void authenticate(AuthenticateRequest idTokenInput, GoogleIdTokenVerifier verifier, Objectify objectify,
-			JwtAuthority<JwtClaims> authority, ObjectResponse<AuthenticateResponse> response,
+			JwtAuthority<User> authority, ObjectResponse<AuthenticateResponse> response,
 			ServerHttpConnection connection) throws Exception {
 
 		// Verify token
@@ -120,37 +113,32 @@ public class AuthenticateLogic {
 		});
 
 		// Create the JWT refresh and access token
-		JwtClaims credentials = new JwtClaims(loggedInUser.getId(), loggedInUser.getRoles());
-		String refreshToken = authority.createRefreshToken(credentials);
-		String accessToken = authority.createAccessToken(credentials);
+		String refreshToken = authority.createRefreshToken(loggedInUser);
+		String accessToken = authority.createAccessToken(loggedInUser);
 
 		// Send back the tokens
 		response.send(new AuthenticateResponse(refreshToken, accessToken));
 	}
 
-	@Data
+	@Value
 	@HttpObject
-	@NoArgsConstructor
-	@AllArgsConstructor
 	public static class RefreshRequest {
 		private String refreshToken;
 	}
 
-	@Data
-	@NoArgsConstructor
-	@AllArgsConstructor
+	@Value
 	public static class RefreshResponse {
 		private String accessToken;
 	}
 
-	public void refreshAccessToken(RefreshRequest refreshRequest, JwtAuthority<JwtClaims> authority,
+	public void refreshAccessToken(RefreshRequest refreshRequest, JwtAuthority<User> authority,
 			ObjectResponse<RefreshResponse> response) throws Exception {
 
-		// Obtain the JWT credentials
-		JwtClaims credentials = authority.decodeRefreshToken(refreshRequest.getRefreshToken());
+		// Obtain the user
+		User user = authority.decodeRefreshToken(refreshRequest.getRefreshToken());
 
 		// Create new access token
-		String accessToken = authority.createAccessToken(credentials);
+		String accessToken = authority.createAccessToken(user);
 
 		// Send back the access token
 		response.send(new RefreshResponse(accessToken));

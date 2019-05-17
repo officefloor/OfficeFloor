@@ -42,7 +42,7 @@
   </sections>
   <securities>
     <security name="JWT" source="net.officefloor.web.jwt.JwtHttpSecuritySource" timeout="5000" x="806" y="77">
-      <property name="claims.class" value="net.officefloor.app.subscription.jwt.JwtClaims"/>
+      <property name="claims.class" value="net.officefloor.app.subscription.store.User"/>
       <output name="EXPIRED_JWT" argument-type="java.lang.Void">
         <section name="JwtChallenge" input="EXPIRED_JWT"/>
       </output>

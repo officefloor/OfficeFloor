@@ -2,6 +2,7 @@ package net.officefloor.app.subscription.jwt;
 
 import java.util.Arrays;
 
+import net.officefloor.app.subscription.store.User;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.jwt.role.JwtRoleCollector;
 
@@ -12,7 +13,7 @@ import net.officefloor.web.jwt.role.JwtRoleCollector;
  */
 public class RetrieveRoles {
 
-	public void retrieveRoles(@Parameter JwtRoleCollector<JwtClaims> collector) {
+	public void retrieveRoles(@Parameter JwtRoleCollector<User> collector) {
 		collector.setRoles(Arrays.asList(collector.getClaims().getRoles()));
 	}
 }

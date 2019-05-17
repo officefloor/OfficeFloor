@@ -37,9 +37,10 @@ public class AuthenticateLogicTest {
 	 * @return {@link User}.
 	 */
 	public static User setupUser(ObjectifyRule objectify, String name) {
-		User user = new User(name.replaceAll("\\w", "_") + "@officefloor.org");
+		String noSpaceName = name.replaceAll("\\w", "_");
+		User user = new User(noSpaceName + "@officefloor.org");
 		user.setName(name);
-		user.setPhotoUrl("https://google.com/photo.png");
+		user.setPhotoUrl("https://google.com/" + noSpaceName + ".png");
 		objectify.store(user);
 		return user;
 	}

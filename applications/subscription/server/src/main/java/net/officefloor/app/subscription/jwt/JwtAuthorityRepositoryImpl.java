@@ -6,8 +6,7 @@ import java.util.List;
 
 import com.googlecode.objectify.Objectify;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Value;
 import net.officefloor.app.subscription.store.AccessKey;
 import net.officefloor.app.subscription.store.RefreshKey;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
@@ -106,8 +105,7 @@ public class JwtAuthorityRepositoryImpl implements JwtAuthorityRepository {
 	/**
 	 * {@link JwtAccessKey} implementation.
 	 */
-	@Getter
-	@AllArgsConstructor
+	@Value
 	private static class JwtAccessKeyImpl implements JwtAccessKey {
 		private final long startTime;
 		private final long expireTime;
@@ -118,8 +116,7 @@ public class JwtAuthorityRepositoryImpl implements JwtAuthorityRepository {
 	/**
 	 * {@link JwtRefreshKey} implementation.
 	 */
-	@Getter
-	@AllArgsConstructor
+	@Value
 	private static class JwtRefreshKeyImpl implements JwtRefreshKey {
 		private final long startTime;
 		private final long expireTime;

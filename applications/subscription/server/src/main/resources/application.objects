@@ -5,15 +5,12 @@
 	</managed-object>
 
 	<managed-object source="net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource">
-		<property name="identity.class" value="net.officefloor.app.subscription.jwt.JwtClaims" />
+		<property name="identity.class" value="net.officefloor.app.subscription.store.User" />
 	</managed-object>
 	<managed-object class="net.officefloor.app.subscription.jwt.JwtAuthorityRepositoryImpl" />
 
-	<managed-object source="net.officefloor.app.subscription.user.UserManagedObjectSource" />
-
-<!--
 	<managed-object source="net.officefloor.pay.paypal.PayPalHttpClientManagedObjectSource" />
--->
+	<managed-object class="net.officefloor.app.subscription.paypal.PayPalConfiguration" />
 
 	<supplier source="net.officefloor.nosql.objectify.ObjectifySupplierSource">
 		<property name="objectify.entity.locators" value="net.officefloor.app.subscription.store.ObjectifyEntities" />		
