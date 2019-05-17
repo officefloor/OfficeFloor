@@ -8,6 +8,7 @@ import java.util.function.BiConsumer;
 import org.junit.runners.model.Statement;
 
 import com.googlecode.objectify.Objectify;
+import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.annotation.Entity;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -69,6 +70,37 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 			}
 		}, null).evaluate();
 		assertTrue("Should be valid type", isValid.value);
+	}
+
+	/**
+	 * Ensure {@link ObjectifyRule} can store and get values.
+	 */
+	public void testRuleStoreGet() throws Throwable {
+		Closure<Boolean> isValid = new Closure<>(false);
+		ObjectifyRule rule = new ObjectifyRule();
+		rule.apply(new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+
+				// Register the entity
+				ObjectifyService.register(MockEntity.class);
+
+				// Store entity
+				MockEntity entity = new MockEntity(null, "TEST", "INDEXED", 1, 2);
+				rule.store(entity);
+
+				// Find by no filter
+				MockEntity found = rule.get(MockEntity.class, null);
+				assertEquals("Should find entity ", "TEST", found.getStringValue());
+
+				// Ensure find by filter
+				MockEntity foundByFilter = rule.get(MockEntity.class,
+						(load) -> load.filter("indexedStringValue", "INDEXED"));
+				assertEquals("Should find entity by filter", "TEST", foundByFilter.getStringValue());
+				isValid.value = true;
+			}
+		}, null).evaluate();
+		assertTrue("Should store and get entity", isValid.value);
 	}
 
 	/**

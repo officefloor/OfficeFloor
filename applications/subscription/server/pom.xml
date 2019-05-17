@@ -31,10 +31,6 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
-			<artifactId>officejson_jackson</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
 			<artifactId>officejwt</artifactId>
 		</dependency>
 		<dependency>
@@ -50,13 +46,12 @@
 			<artifactId>officenosql_objectify</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.server</groupId>
-			<artifactId>officeserver_servlet</artifactId>
+			<groupId>net.officefloor.pay</groupId>
+			<artifactId>officepay_paypal</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.paypal.sdk</groupId>
-			<artifactId>checkout-sdk</artifactId>
-			<version>1.0.0</version>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_servlet</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
