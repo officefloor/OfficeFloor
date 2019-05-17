@@ -30,16 +30,16 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class AuthenticateLogicTest {
 
-	public static void setupUser(ObjectifyRule objectify, String name, String email, String photUrl) {
+	public static void setupUser(ObjectifyRule objectify, String name, String email, String photoUrl) {
 		User user = new User(email);
 		user.setName(name);
 		user.setPhotoUrl(photoUrl);
 		objectify.store(user);
-		GoogleSignin login = new GoogleSignin(googleId, email);
+		GoogleSignin login = new GoogleSignin("GOOGLE_ID-" + name, email);
 		login.setUser(Ref.create(user));
 		login.setName(name);
 		login.setPhotoUrl(photoUrl);
-		objectify.save().entity(login).now();
+		objectify.store(login);
 	}
 
 	private GoogleIdTokenRule verifier = new GoogleIdTokenRule();

@@ -9,6 +9,8 @@
 	</managed-object>
 	<managed-object class="net.officefloor.app.subscription.jwt.JwtAuthorityRepositoryImpl" />
 
+	<managed-object source="net.officefloor.app.subscription.user.UserManagedObjectSource" />
+
 <!--
 	<managed-object source="net.officefloor.pay.paypal.PayPalHttpClientManagedObjectSource" />
 -->
