@@ -5,9 +5,7 @@ cache:
 env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
 install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install maven; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then 
-    set JAVA_HOME=C:\Program Files\Java\jdk1.8.0_211\
-    ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_211"; fi
   - ./.travis-install.sh
 script: ./.travis-script.sh
 after_success: bash <(curl -s https://codecov.io/bash)
