@@ -27,6 +27,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.server.http.HttpException;
 
 /**
  * {@link ManagedObjectSource} to provide the logged in {@link User}.
@@ -51,6 +52,7 @@ public class UserManagedObjectSource extends AbstractManagedObjectSource<UserMan
 	@Override
 	protected void loadMetaData(MetaDataContext<DEPENDENCIES, None> context) throws Exception {
 		context.setObjectClass(User.class);
+		context.setManagedObjectClass(UserManagedObject.class);
 		context.addDependency(DEPENDENCIES.JWT_CLAIMS, JwtClaims.class);
 		context.addDependency(DEPENDENCIES.OBJECTIFY, Objectify.class);
 	}
@@ -76,6 +78,9 @@ public class UserManagedObjectSource extends AbstractManagedObjectSource<UserMan
 
 			// Obtain the user
 			this.user = objectify.load().type(User.class).id(claims.getUserId()).now();
+			if (this.user == null) {
+				throw new HttpException(401, "Unknown user. Require login to create user.");
+			}
 		}
 
 		@Override

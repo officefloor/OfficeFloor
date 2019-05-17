@@ -24,14 +24,17 @@ import org.junit.rules.RuleChain;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.app.subscription.AuthenticateLogicTest;
+import net.officefloor.app.subscription.jwt.JwtClaims;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.identity.google.mock.GoogleIdTokenRule;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
+import net.officefloor.web.jwt.mock.MockJwtAccessTokenRule;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
@@ -46,7 +49,7 @@ public class UserManagedObjectSourceTest {
 
 	private final ObjectifyRule obectify = new ObjectifyRule();
 
-	private final GoogleIdTokenRule google = new GoogleIdTokenRule();
+	private final MockJwtAccessTokenRule jwtAccessToken = new MockJwtAccessTokenRule();
 
 	private final MockWoofServerRule server = new MockWoofServerRule((loadContext, compiler) -> {
 		loadContext.extend((context) -> {
@@ -65,7 +68,7 @@ public class UserManagedObjectSourceTest {
 	}
 
 	@Rule
-	public final RuleChain order = RuleChain.outerRule(this.obectify).around(this.google).around(this.server);
+	public final RuleChain order = RuleChain.outerRule(this.obectify).around(this.jwtAccessToken).around(this.server);
 
 	/**
 	 * Ensure disallow if not authenticated.
@@ -80,9 +83,10 @@ public class UserManagedObjectSourceTest {
 	 */
 	@Test
 	public void noUser() throws Exception {
-		String token = this.google.getMockIdToken("missing", "email");
+		String token = this.jwtAccessToken.createAccessToken(new JwtClaims(1, new String[0]));
 		this.server.send(MockWoofServer.mockRequest("/test").header("authorization", "Bearer " + token))
-				.assertResponse(401, "");
+				.assertResponse(401, JacksonHttpObjectResponderFactory
+						.getEntity(new HttpException(401, "Unknown user. Require login to create user."), mapper));
 	}
 
 	/**
@@ -90,10 +94,10 @@ public class UserManagedObjectSourceTest {
 	 */
 	@Test
 	public void authenticated() throws Exception {
-		String googleId = AuthenticateLogicTest.setupUser(this.obectify, "Daniel", "test@officefloor.net", "photoUrl");
-		String token = this.google.getMockIdToken(googleId, "email");
+		User user = AuthenticateLogicTest.setupUser(this.obectify, "Daniel Sagenschneider");
+		String token = this.jwtAccessToken.createAccessToken(new JwtClaims(user.getId(), new String[0]));
 		this.server.send(MockWoofServer.mockRequest("/test").header("authorization", "Bearer " + token))
-				.assertResponse(200, mapper.writeValueAsString(new User("test@officefloor.net")));
+				.assertResponse(200, mapper.writeValueAsString(user));
 	}
 
 }

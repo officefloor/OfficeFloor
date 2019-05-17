@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.objectify.Ref;
 
 import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateRequest;
 import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateResponse;
@@ -35,22 +34,14 @@ public class AuthenticateLogicTest {
 	 * 
 	 * @param objectify {@link ObjectifyRule}.
 	 * @param name      Name of {@link User}.
-	 * @param email     Email for {@link User}.
-	 * @param photoUrl  Photo URL for {@link User}.
-	 * @return Google sign-in ID.
+	 * @return {@link User}.
 	 */
-	public static String setupUser(ObjectifyRule objectify, String name, String email, String photoUrl) {
-		String googleId = "MOCK_GOOGLE_ID_" + name;
-		User user = new User(email);
+	public static User setupUser(ObjectifyRule objectify, String name) {
+		User user = new User(name.replaceAll("\\w", "_") + "@officefloor.org");
 		user.setName(name);
-		user.setPhotoUrl(photoUrl);
+		user.setPhotoUrl("https://google.com/photo.png");
 		objectify.store(user);
-		GoogleSignin login = new GoogleSignin(googleId, email);
-		login.setUser(Ref.create(user));
-		login.setName(name);
-		login.setPhotoUrl(photoUrl);
-		objectify.store(login);
-		return googleId;
+		return user;
 	}
 
 	private GoogleIdTokenRule verifier = new GoogleIdTokenRule();
@@ -81,6 +72,7 @@ public class AuthenticateLogicTest {
 		GoogleSignin login = this.obectify.get(GoogleSignin.class,
 				(load) -> load.filter("email", "daniel@officefloor.net"));
 		assertNotNull("Should have the login", login);
+		assertNotNull("Should have google id", login.getGoogleId());
 		assertEquals("Incorrect name", "Daniel Sagenschneider", login.getName());
 		assertEquals("Incorrect photoUrl", "http://officefloor.net/photo.png", login.getPhotoUrl());
 

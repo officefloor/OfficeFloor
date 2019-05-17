@@ -15,9 +15,14 @@ import com.paypal.orders.Order;
 import com.paypal.orders.OrderRequest;
 import com.paypal.orders.PurchaseUnitRequest;
 
+import net.officefloor.app.subscription.jwt.JwtClaims;
+import net.officefloor.app.subscription.store.User;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.pay.paypal.mock.PayPalRule;
+import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.web.jwt.mock.MockJwtAccessTokenRule;
+import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
@@ -73,7 +78,12 @@ public class DomainOrderTest {
 			assertEquals("http:/officefloor.org", item.url());
 		});
 
-		// 
+		// Send request
+		User user = AuthenticateLogicTest.setupUser(this.obectify, "Daniel");
+		String token = this.jwt.createAccessToken(new JwtClaims(user.getId(), new String[0]));
+		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/createDomainOrder")
+				.method(HttpMethod.POST).header("authorization", "Bearer " + token));
+		response.assertResponse(204, "");
 	}
 
 }

@@ -8,6 +8,9 @@
     <http-input path="/authenticate" method="POST" secure="false" x="153" y="197">
       <section name="Authenticate" input="authenticate"/>
     </http-input>
+    <http-input path="/createDomainOrder" method="POST" secure="false" x="135" y="364">
+      <section name="Domain" input="createOrder"/>
+    </http-input>
     <http-input path="/refreshAccessToken" method="POST" secure="false" x="133" y="254">
       <section name="Authenticate" input="refreshAccessToken"/>
     </http-input>
@@ -21,6 +24,9 @@
     </section>
     <section name="Cors" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.cors.Cors" x="426" y="84">
       <input name="options" parameter-type=""/>
+    </section>
+    <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainLogic" x="424" y="353">
+      <input name="createOrder" parameter-type=""/>
     </section>
     <section name="JwtChallenge" source="net.officefloor.web.jwt.DefaultJwtChallengeSectionSource" location="" x="1035" y="75">
       <input name="EXPIRED_JWT" parameter-type=""/>
