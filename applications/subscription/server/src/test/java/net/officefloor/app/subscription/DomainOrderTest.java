@@ -10,15 +10,20 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.googlecode.objectify.Ref;
 import com.paypal.orders.ApplicationContext;
 import com.paypal.orders.Item;
 import com.paypal.orders.Order;
 import com.paypal.orders.OrderRequest;
 import com.paypal.orders.PurchaseUnitRequest;
 
-import net.officefloor.app.subscription.DomainLogic.CreatedOrder;
-import net.officefloor.app.subscription.DomainLogic.DomainRequest;
+import net.officefloor.app.subscription.DomainLogic.DomainCreatedOrder;
+import net.officefloor.app.subscription.DomainLogic.DomainCaptureRequest;
+import net.officefloor.app.subscription.DomainLogic.DomainCapturedOrder;
+import net.officefloor.app.subscription.DomainLogic.DomainOrderRequest;
 import net.officefloor.app.subscription.store.Domain;
+import net.officefloor.app.subscription.store.Invoice;
+import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.pay.paypal.mock.PayPalRule;
@@ -41,12 +46,12 @@ public class DomainOrderTest {
 
 	private final PayPalRule payPal = new PayPalRule();
 
-	private final ObjectifyRule obectify = new ObjectifyRule();
+	private final ObjectifyRule objectify = new ObjectifyRule();
 
 	private final MockWoofServerRule server = new MockWoofServerRule();
 
 	@Rule
-	public RuleChain chain = RuleChain.outerRule(this.jwt).around(this.payPal).around(this.obectify)
+	public RuleChain chain = RuleChain.outerRule(this.jwt).around(this.payPal).around(this.objectify)
 			.around(this.server);
 
 	@Test
@@ -85,22 +90,27 @@ public class DomainOrderTest {
 		});
 
 		// Send request
-		User user = AuthenticateLogicTest.setupUser(this.obectify, "Daniel");
+		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
 		String token = this.jwt.createAccessToken(user);
 		MockHttpResponse response = this.server
 				.send(MockWoofServer.mockRequest("/createDomainOrder").method(HttpMethod.POST)
 						.header("authorization", "Bearer " + token).header("content-type", "application/json")
-						.entity(mapper.writeValueAsString(new DomainRequest("officefloor.org"))));
+						.entity(mapper.writeValueAsString(new DomainOrderRequest("officefloor.org"))));
+
+		// Ensure correct response
 		String entity = response.getEntity(null);
 		assertEquals("Should be successful: " + entity, 200, response.getStatus().getStatusCode());
-		CreatedOrder order = mapper.readValue(entity, CreatedOrder.class);
+		DomainCreatedOrder order = mapper.readValue(entity, DomainCreatedOrder.class);
 		assertEquals("Incorrect order ID", "MOCK_ORDER_ID", order.getOrderId());
 		assertEquals("Incorrect status", "CREATED", order.getStatus());
 		assertNotNull("Should have invoice", order.getInvoiceId());
-		Domain domain = this.obectify.get(Domain.class, Long.parseLong(order.getInvoiceId()));
-		assertEquals("Incorrect invoiced domain", "officefloor.org", domain.getDomain());
-		assertEquals("Incorrect invoiced user", user.getId(), domain.getUser().get().getId());
-		assertNotNull("Should have invoice timestamp", domain.getTimestamp());
+
+		// Ensure invoice captured in data store
+		Invoice invoice = this.objectify.get(Invoice.class, Long.parseLong(order.getInvoiceId()));
+		assertEquals("Incorrect invoiced user", user.getId(), invoice.getUser().get().getId());
+		assertEquals("Incorrect product type", Invoice.PRODUCT_TYPE_DOMAIN, invoice.getProductType());
+		assertEquals("Incorrect invoiced domain", "officefloor.org", invoice.getProductReference());
+		assertNotNull("Should have invoice timestamp", invoice.getTimestamp());
 	}
 
 	@Test
@@ -109,9 +119,42 @@ public class DomainOrderTest {
 		// Record
 		this.payPal.addOrdersCaptureResponse(new Order().id("MOCK_ORDER_ID").status("COMPLETED"))
 				.validate((request) -> {
-					// TODO be provided the order id
+					assertEquals("MOCK_ORDER_ID", this.payPal.getOrderId(request));
 				});
 
+		// Setup the invoice
+		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		Invoice invoice = new Invoice(Ref.create(user), Invoice.PRODUCT_TYPE_DOMAIN, "officefloor.org");
+		this.objectify.store(invoice);
+
+		// Send request
+		String token = this.jwt.createAccessToken(user);
+		MockHttpResponse response = this.server
+				.send(MockWoofServer.mockRequest("/captureDomainOrder").method(HttpMethod.POST)
+						.header("authorization", "Bearer " + token).header("content-type", "application/json")
+						.entity(mapper.writeValueAsString(new DomainCaptureRequest("MOCK_ORDER_ID"))));
+
+		// Ensure correct response
+		String entity = response.getEntity(null);
+		assertEquals("Should be successful: " + entity, 200, response.getStatus().getStatusCode());
+		DomainCapturedOrder order = mapper.readValue(entity, DomainCapturedOrder.class);
+		assertEquals("Incorrect order ID", "MOCK_ORDER_ID", order.getOrderId());
+		assertEquals("Incorrect status", "COMPLETED", order.getStatus());
+		assertEquals("Incorrect domain", "officefloor.org", order.getDomain());
+
+		// Ensure domain capture in data store
+		Domain domain = this.objectify.get(Domain.class, 1, (loader) -> loader.filter("domain", "officefloor.org"))
+				.get(0);
+		assertEquals("Incorrect domain on domain", "officefloor.org", domain.getDomain());
+		assertEquals("Incorrect user for domain", user.getId(), domain.getUser().get().getId());
+		assertEquals("Incorrect invoice for domain", invoice.getId(), domain.getInvoice().get().getId());
+		assertNotNull("Should have domain timestamp", domain.getTimestamp());
+
+		// Ensure payment captured
+		Payment payment = this.objectify.get(Payment.class, 1, (loader) -> loader.filterKey("invoice", invoice)).get(0);
+		assertEquals("Incorrect user for payment", user.getId(), payment.getUser().get().getId());
+		assertEquals("Incorrect amount", 5_00, payment.getAmount());
+		assertEquals("Incorrect receipt", "CAPTURE_ID", payment.getReceipt());
 	}
 
 }
