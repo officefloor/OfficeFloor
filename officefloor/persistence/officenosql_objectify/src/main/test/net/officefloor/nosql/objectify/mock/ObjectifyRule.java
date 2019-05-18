@@ -1,9 +1,12 @@
 package net.officefloor.nosql.objectify.mock;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.junit.Rule;
 import org.junit.rules.TestRule;
@@ -13,6 +16,7 @@ import org.junit.runners.model.Statement;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.testing.LocalDatastoreHelper;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.LoadResult;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
@@ -85,13 +89,6 @@ public class ObjectifyRule implements TestRule {
 	}
 
 	/**
-	 * Loads the entity.
-	 */
-	public static interface TypeLoader<E> {
-		Query<E> load(LoadType<E> loadType);
-	}
-
-	/**
 	 * Indicates timeout on obtaining entity.
 	 */
 	public static class TimeoutException extends RuntimeException {
@@ -105,17 +102,67 @@ public class ObjectifyRule implements TestRule {
 
 	/**
 	 * <p>
+	 * Obtains the first entity.
+	 * <p>
+	 * Note this obtains arbitrary entity. Typically this is useful in tests when
+	 * only a single instance of the entity exists. However, if more than one entity
+	 * exists, this can cause indeterminate test failures.
+	 * <p>
+	 * Will retry to obtain the entity or timeout.
+	 * 
+	 * @param type Type of entity.
+	 * @return First entity.
+	 * @throws TimeoutException If waited too long for the entity.
+	 */
+	public <E> E get(Class<E> type) throws TimeoutException {
+		return this.get(type, 1, (QueryLoader<E>) null).get(0);
+	}
+
+	/**
+	 * <p>
 	 * Obtains an entity.
 	 * <p>
 	 * Will retry to obtain the entity or timeout.
 	 * 
 	 * @param type   Type of entity.
-	 * @param loader {@link TypeLoader}.
+	 * @param loader {@link QueryLoader}.
 	 * @return Entity.
 	 * @throws TimeoutException If waited too long for the entity.
 	 */
-	public <E> E get(Class<E> type, TypeLoader<E> loader) throws TimeoutException {
-		return this.get(type, 1, loader).get(0);
+	public <E> E get(Class<E> type, long id) throws TimeoutException {
+		return this.get(type, (loader) -> loader.id(id));
+	}
+
+	/**
+	 * Loads the entity.
+	 */
+	public static interface ResultLoader<E> {
+		LoadResult<E> load(LoadType<E> loadType);
+	}
+
+	/**
+	 * <p>
+	 * Obtains an entity.
+	 * <p>
+	 * Will retry to obtain the entity or timeout.
+	 * 
+	 * @param type   Type of entity.
+	 * @param loader {@link QueryLoader}.
+	 * @return Entity.
+	 * @throws TimeoutException If waited too long for the entity.
+	 */
+	public <E> E get(Class<E> type, ResultLoader<E> loader) throws TimeoutException {
+		return this.get(type, 1, () -> {
+			E entity = loader.load(this.ofy().load().type(type)).now();
+			return ((entity == null) ? Collections.emptyList() : Arrays.asList(entity));
+		}).get(0);
+	}
+
+	/**
+	 * Loads the entity.
+	 */
+	public static interface QueryLoader<E> {
+		Query<E> load(LoadType<E> loadType);
 	}
 
 	/**
@@ -123,11 +170,26 @@ public class ObjectifyRule implements TestRule {
 	 * 
 	 * @param type         Type of entity.
 	 * @param expectedSize Expected list size.
-	 * @param loader       {@link TypeLoader}.
+	 * @param loader       {@link QueryLoader}.
 	 * @return List of entity.
 	 * @throws TimeoutException If waited too long the list of entities.
 	 */
-	public <E> List<E> get(Class<E> type, int expectedSize, TypeLoader<E> loader) throws TimeoutException {
+	public <E> List<E> get(Class<E> type, int expectedSize, QueryLoader<E> loader) throws TimeoutException {
+		return this.get(type, expectedSize, () -> {
+			LoadType<E> loadType = this.ofy().load().type(type);
+			return ((loader != null) ? loader.load(loadType) : loadType).list();
+		});
+	}
+
+	/**
+	 * Obtains a list of entities.
+	 * 
+	 * @param expectedSize Expected list size.
+	 * @param loader       Loads the entities.
+	 * @return List of entities.
+	 * @throws TimeoutException If waited too long the list of entities.
+	 */
+	public <E> List<E> get(Class<E> type, int expectedSize, Supplier<List<E>> loader) throws TimeoutException {
 
 		// Ensure within rule
 		this.ensureWithinRule("get(...)");
@@ -155,8 +217,7 @@ public class ObjectifyRule implements TestRule {
 			}
 
 			// Load the entity list
-			LoadType<E> loadType = this.ofy().load().type(type);
-			entities = ((loader != null) ? loader.load(loadType) : loadType).list();
+			entities = loader.get();
 
 		} while (entities.size() < expectedSize);
 
@@ -169,7 +230,7 @@ public class ObjectifyRule implements TestRule {
 	 * 
 	 * @param type         Type of entity.
 	 * @param expectedSize Expected list size.
-	 * @param loader       {@link TypeLoader}.
+	 * @param loader       {@link QueryLoader}.
 	 * @return List of entity.
 	 * @throws TimeoutException If waited too long the list of entities.
 	 */
@@ -186,7 +247,7 @@ public class ObjectifyRule implements TestRule {
 		for (Key<E> key : results.keySet()) {
 			E entity = results.get(key);
 
-			this.get(entity.getClass(), (loadType) -> loadType.filterKey(key));
+			this.get(entity.getClass(), 1, (loadType) -> loadType.filterKey(key));
 		}
 	}
 

@@ -42,7 +42,7 @@ public class ObjectifyHttpServerTest {
 		response.assertResponse(204, "");
 
 		// Ensure post created
-		Post created = this.objectify.get(Post.class, null);
+		Post created = this.objectify.get(Post.class);
 		assertEquals("Incorrect post", "TEST", created.getMessage());
 	}
 	// END SNIPPET: tutorial
@@ -55,7 +55,7 @@ public class ObjectifyHttpServerTest {
 		this.objectify.ofy().save().entities(post).now();
 
 		// Obtain the identifier
-		post = this.objectify.get(Post.class, null);
+		post = this.objectify.get(Post.class);
 
 		// Ensure retrieve the post
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/posts/" + post.getId()));
@@ -70,7 +70,7 @@ public class ObjectifyHttpServerTest {
 		this.objectify.ofy().save().entities(post).now();
 
 		// Obtain the identifier
-		post = this.objectify.get(Post.class, null);
+		post = this.objectify.get(Post.class);
 
 		// Ensure retrieve the post
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/posts/"));

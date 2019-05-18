@@ -61,8 +61,8 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 	/**
 	 * Initiate.
 	 * 
-	 * @param isSpecificSetupFilePerTest
-	 *            Flags if there is a specific setup file per test.
+	 * @param isSpecificSetupFilePerTest Flags if there is a specific setup file per
+	 *                                   test.
 	 */
 	public AbstractChangesTestCase(boolean isSpecificSetupFilePerTest) {
 		this.isSpecificSetupFilePerTest = isSpecificSetupFilePerTest;
@@ -82,19 +82,17 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 	/**
 	 * Retrieves the {@link Model}.
 	 * 
-	 * @param configurationItem
-	 *            {@link ConfigurationItem} containing the {@link Model}.
+	 * @param configurationItem {@link ConfigurationItem} containing the
+	 *                          {@link Model}.
 	 * @return {@link Model}.
-	 * @throws Exception
-	 *             If fails to retrieve the {@link Model}.
+	 * @throws Exception If fails to retrieve the {@link Model}.
 	 */
 	protected abstract M retrieveModel(ConfigurationItem configurationItem) throws Exception;
 
 	/**
 	 * Creates the {@link Model} operations.
 	 * 
-	 * @param model
-	 *            {@link Model} to create operations for.
+	 * @param model {@link Model} to create operations for.
 	 * @return {@link Model} operations.
 	 */
 	protected abstract O createModelOperations(M model);
@@ -107,8 +105,8 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 	protected abstract String getModelFileExtension();
 
 	/**
-	 * Allows particular tests of a {@link TestCase} to override using the
-	 * default setup {@link ConfigurationItem} and use the specific test
+	 * Allows particular tests of a {@link TestCase} to override using the default
+	 * setup {@link ConfigurationItem} and use the specific test
 	 * {@link ConfigurationItem}.
 	 */
 	protected void useTestSetupModel() {
@@ -139,21 +137,19 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 	/**
 	 * Asserts the {@link Change} is correct.
 	 * 
-	 * @param <T>
-	 *            Expected target.
-	 * @param change
-	 *            {@link Change} to verify.
-	 * @param expectedTarget
-	 *            Expected target.
-	 * @param expectedChangeDescription
-	 *            Expected description of the {@link Change}.
-	 * @param expectCanApply
-	 *            Expected if can apply the {@link Change}. Should it be able to
-	 *            be applied, both the {@link Change#apply()} and
-	 *            {@link Change#revert()} will be also tested.
-	 * @param expectedConflictDescriptions
-	 *            Expected descriptions for the {@link Conflict} instances on
-	 *            the {@link Change}.
+	 * @param <T>                          Expected target.
+	 * @param change                       {@link Change} to verify.
+	 * @param expectedTarget               Expected target.
+	 * @param expectedChangeDescription    Expected description of the
+	 *                                     {@link Change}.
+	 * @param expectCanApply               Expected if can apply the {@link Change}.
+	 *                                     Should it be able to be applied, both the
+	 *                                     {@link Change#apply()} and
+	 *                                     {@link Change#revert()} will be also
+	 *                                     tested.
+	 * @param expectedConflictDescriptions Expected descriptions for the
+	 *                                     {@link Conflict} instances on the
+	 *                                     {@link Change}.
 	 */
 	protected <T> void assertChange(Change<T> change, T expectedTarget, String expectedChangeDescription,
 			boolean expectCanApply, String... expectedConflictDescriptions) {
@@ -181,32 +177,43 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 
 		// Validate changes if can apply change
 		if (expectCanApply) {
-			// Should be no change until change is applied
-			this.validateAsSetupModel();
+			String state = "initial";
+			try {
+				// Should be no change until change is applied
+				this.validateAsSetupModel();
+				state = "start";
 
-			// Apply the change and validate results
-			change.apply();
-			this.validateModel();
+				// Apply the change and validate results
+				change.apply();
+				this.validateModel();
+				state = "applied";
 
-			// Revert the change and validate reverted back to setup
-			change.revert();
-			this.validateAsSetupModel();
+				// Revert the change and validate reverted back to setup
+				change.revert();
+				this.validateAsSetupModel();
+				state = "reverted";
 
-			// Apply again for 'redo' functionality
-			change.apply();
-			this.validateModel();
+				// Apply again for 'redo' functionality
+				change.apply();
+				this.validateModel();
+				state = "reapplied";
 
-			// Revert change to have model in setup state for any further
-			// testing
-			change.revert();
+				// Revert change to setup state for any further testing
+				change.revert();
+				state = "reverted";
+
+			} catch (AssertionError ex) {
+				// Provide detail of where failed to aid diagnosis
+				System.err.println(this.getName() + " failed at state " + state + " with " + ex.getMessage());
+				throw ex;
+			}
 		}
 	}
 
 	/**
 	 * Assets all the {@link Change} instances result in a correct change.
 	 * 
-	 * @param changes
-	 *            {@link Change} instances to verify.
+	 * @param changes {@link Change} instances to verify.
 	 */
 	protected void assertChanges(Change<?>... changes) {
 
@@ -224,19 +231,18 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 	}
 
 	/**
-	 * Validates the {@link Model} against the default {@link Model} file for
-	 * the test.
+	 * Validates the {@link Model} against the default {@link Model} file for the
+	 * test.
 	 */
 	protected void validateModel() {
 		this.validateModel(null);
 	}
 
 	/**
-	 * Validates the {@link Model} against the specific {@link Model} file for
-	 * the test.
+	 * Validates the {@link Model} against the specific {@link Model} file for the
+	 * test.
 	 * 
-	 * @param specific
-	 *            Indicates the specific {@link Model} file for the test.
+	 * @param specific Indicates the specific {@link Model} file for the test.
 	 */
 	protected void validateModel(String specific) {
 		this.validateModel(this.getName(), specific);
@@ -256,11 +262,9 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 	/**
 	 * Validates the {@link Model}.
 	 * 
-	 * @param testName
-	 *            Name of the test.
-	 * @param specific
-	 *            Specific name for the test. May be <code>null</code> for the
-	 *            default {@link Model} for the test.
+	 * @param testName Name of the test.
+	 * @param specific Specific name for the test. May be <code>null</code> for the
+	 *                 default {@link Model} for the test.
 	 */
 	private void validateModel(String testName, String specific) {
 
@@ -281,12 +285,9 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 	/**
 	 * Asserts the models are the same.
 	 * 
-	 * @param expected
-	 *            Expected model.
-	 * @param actual
-	 *            Actual model.
-	 * @throws Exception
-	 *             If fails.
+	 * @param expected Expected model.
+	 * @param actual   Actual model.
+	 * @throws Exception If fails.
 	 */
 	protected void assertModels(M expected, M actual) throws Exception {
 
@@ -297,11 +298,9 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 	/**
 	 * Retrieves the {@link Model} for the test.
 	 * 
-	 * @param testName
-	 *            Name of the test.
-	 * @param specific
-	 *            Specific name for the test. May be <code>null</code> for the
-	 *            default {@link Model} for the test.
+	 * @param testName Name of the test.
+	 * @param specific Specific name for the test. May be <code>null</code> for the
+	 *                 default {@link Model} for the test.
 	 * @return {@link Model}.
 	 */
 	private M retrieveModel(String testName, String specific) {

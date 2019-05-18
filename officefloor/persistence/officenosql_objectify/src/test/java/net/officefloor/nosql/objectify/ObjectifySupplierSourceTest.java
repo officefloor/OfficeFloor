@@ -89,14 +89,23 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 				MockEntity entity = new MockEntity(null, "TEST", "INDEXED", 1, 2);
 				rule.store(entity);
 
-				// Find by no filter
-				MockEntity found = rule.get(MockEntity.class, null);
-				assertEquals("Should find entity ", "TEST", found.getStringValue());
-
 				// Ensure find by filter
-				MockEntity foundByFilter = rule.get(MockEntity.class,
-						(load) -> load.filter("indexedStringValue", "INDEXED"));
+				MockEntity foundByFilter = rule
+						.get(MockEntity.class, 1, (load) -> load.filter("indexedStringValue", "INDEXED")).get(0);
 				assertEquals("Should find entity by filter", "TEST", foundByFilter.getStringValue());
+
+				// Ensure find by result
+				MockEntity foundByResult = rule.get(MockEntity.class, (load) -> load.id(entity.getId()));
+				assertEquals("Should find entity by result", "TEST", foundByResult.getStringValue());
+
+				// Ensure find by id
+				MockEntity foundById = rule.get(MockEntity.class, entity.getId());
+				assertEquals("Should find entity by id", "TEST", foundById.getStringValue());
+
+				// Ensure can find as first
+				MockEntity foundByFirst = rule.get(MockEntity.class);
+				assertEquals("Should find entity by first", "TEST", foundByFirst.getStringValue());
+
 				isValid.value = true;
 			}
 		}, null).evaluate();
@@ -119,7 +128,7 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testWriteRead() {
 		this.doObjectifyTest(WriteReadSection.class, (ObjectifyRule rule, MockEntity result) -> {
-			MockEntity entity = rule.get(MockEntity.class, (loader) -> loader);
+			MockEntity entity = rule.get(MockEntity.class);
 			assertNotNull("Should have id", entity.getId());
 			assertEquals("Incorrect id", result.getId(), entity.getId());
 			assertEquals("Incorrect string", "string", entity.getStringValue());
@@ -142,8 +151,8 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testIndexedString() {
 		this.doObjectifyTest(WriteReadSection.class, (ObjectifyRule rule, MockEntity result) -> {
-			MockEntity entity = rule.get(MockEntity.class,
-					(loader) -> loader.filter("indexedStringValue", "indexed string"));
+			MockEntity entity = rule
+					.get(MockEntity.class, 1, (loader) -> loader.filter("indexedStringValue", "indexed string")).get(0);
 			assertEquals("Incorrect entity", result.getId(), entity.getId());
 		});
 	}
@@ -153,7 +162,8 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testIndexedInteger() {
 		this.doObjectifyTest(WriteReadSection.class, (ObjectifyRule rule, MockEntity result) -> {
-			MockEntity entity = rule.get(MockEntity.class, (loader) -> loader.filter("indexedIntegerValue", 2));
+			MockEntity entity = rule.get(MockEntity.class, 1, (loader) -> loader.filter("indexedIntegerValue", 2))
+					.get(0);
 			assertEquals("Incorrect entity", result.getId(), entity.getId());
 		});
 	}
@@ -163,7 +173,7 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testTransaction() {
 		this.doObjectifyTest(TransactionSection.class, (ObjectifyRule rule, MockEntity result) -> {
-			MockEntity entity = rule.get(MockEntity.class, (loader) -> loader);
+			MockEntity entity = rule.get(MockEntity.class);
 			assertNotNull("Should have id", entity.getId());
 			assertEquals("Incorrect id", result.getId(), entity.getId());
 			assertEquals("Incorrect string", "string", entity.getStringValue());
@@ -239,7 +249,7 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	public void testServiceRegisteredEntity() {
 		this.doObjectifyTest(ServiceRegisteredEntitySection.class,
 				(ObjectifyRule rule, ServiceRegisteredEntity entity) -> {
-					ServiceRegisteredEntity retrieved = rule.get(ServiceRegisteredEntity.class, null);
+					ServiceRegisteredEntity retrieved = rule.get(ServiceRegisteredEntity.class);
 					assertEquals("Incorrect retrieved", entity.getId(), retrieved.getId());
 					assertEquals("Incorrect value", "TEST", retrieved.getTest());
 				});
@@ -258,7 +268,7 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testLocatedEntity() {
 		this.doObjectifyTest(LocatedEntitySection.class, (ObjectifyRule rule, LocatedEntity entity) -> {
-			LocatedEntity retrieved = rule.get(LocatedEntity.class, null);
+			LocatedEntity retrieved = rule.get(LocatedEntity.class);
 			assertEquals("Incorrect retrieved", entity.getId(), retrieved.getId());
 			assertEquals("Incorrect value", "TEST", retrieved.getLocation());
 		}, ObjectifySupplierSource.PROPERTY_ENTITY_LOCATORS,
