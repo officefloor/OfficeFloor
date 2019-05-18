@@ -2,14 +2,12 @@ sudo: required
 services: docker
 cache:
   directories: $HOME/.m2
-env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
+env: officefloor_skip_stress_tests=true
 install:
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install docker-desktop; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install maven; fi
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y maven; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_211"; fi
   - ./.travis-install.sh
 script: ./.travis-script.sh
-after_success: bash <(curl -s https://codecov.io/bash)
 jobs:
   include:
 #    - name: Java 8 (Linux)
@@ -25,6 +23,9 @@ jobs:
 #      dist: xenial
 #      language: java
 #      jdk: openjdk11
+#      env: officefloor_code_coverage=true
+#      after_success: bash <(curl -s https://codecov.io/bash)
     - name: Java 8 (Windows)
       os: windows
       language: shell
+      env: officefloor_docker_available=false
