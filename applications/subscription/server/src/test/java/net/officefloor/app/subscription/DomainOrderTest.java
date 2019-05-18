@@ -97,12 +97,21 @@ public class DomainOrderTest {
 		assertEquals("Incorrect order ID", "MOCK_ORDER_ID", order.getOrderId());
 		assertEquals("Incorrect status", "CREATED", order.getStatus());
 		assertNotNull("Should have invoice", order.getInvoiceId());
-		// TODO implement objectify.get(T, Function<LoadType<T>, LoadResult<T>>)
-//		Domain domain = this.obectify.get(Domain.class, (loader) -> loader.id(Long.parseLong(order.getInvoiceId())));
-		Domain domain = this.obectify.get(Domain.class, (loader) -> loader.filter("domain", "officefloor.org"));
+		Domain domain = this.obectify.get(Domain.class, Long.parseLong(order.getInvoiceId()));
 		assertEquals("Incorrect invoiced domain", "officefloor.org", domain.getDomain());
 		assertEquals("Incorrect invoiced user", user.getId(), domain.getUser().get().getId());
 		assertNotNull("Should have invoice timestamp", domain.getTimestamp());
+	}
+
+	@Test
+	public void captureDomainOrder() throws Exception {
+
+		// Record
+		this.payPal.addOrdersCaptureResponse(new Order().id("MOCK_ORDER_ID").status("COMPLETED"))
+				.validate((request) -> {
+					// TODO be provided the order id
+				});
+
 	}
 
 }

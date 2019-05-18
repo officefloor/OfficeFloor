@@ -70,15 +70,15 @@ public class AuthenticateLogicTest {
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure login created in store
-		GoogleSignin login = this.obectify.get(GoogleSignin.class,
-				(load) -> load.filter("email", "daniel@officefloor.net"));
+		GoogleSignin login = this.obectify
+				.get(GoogleSignin.class, 1, (load) -> load.filter("email", "daniel@officefloor.net")).get(0);
 		assertNotNull("Should have the login", login);
 		assertNotNull("Should have google id", login.getGoogleId());
 		assertEquals("Incorrect name", "Daniel Sagenschneider", login.getName());
 		assertEquals("Incorrect photoUrl", "http://officefloor.net/photo.png", login.getPhotoUrl());
 
 		// Ensure user created in store
-		User user = this.obectify.get(User.class, (load) -> load.filter("email", "daniel@officefloor.net"));
+		User user = this.obectify.get(User.class, 1, (load) -> load.filter("email", "daniel@officefloor.net")).get(0);
 		assertEquals("Incorrect user", user.getId(), login.getUser().get().getId());
 		assertEquals("Incorrect name", "Daniel Sagenschneider", user.getName());
 		assertEquals("Incorrect photoUrl", "http://officefloor.net/photo.png", user.getPhotoUrl());
