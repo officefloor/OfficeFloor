@@ -93,7 +93,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * End line.
 	 */
 	protected static String END_OF_LINE = System.getProperty("line.separator");
-	
+
 	/*
 	 * ==================== TestCase =========================
 	 */
@@ -104,6 +104,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	protected static @interface GuiTest {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface UsesDockerTest {
 	}
 
 	/**
@@ -137,9 +141,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		boolean isStressTest = false;
 		try {
 			Method testMethod = this.getClass().getMethod(this.getName());
-			if (testMethod.getAnnotation(StressTest.class) != null) {
-				isStressTest = true; // is stress test
-			}
+			isStressTest = testMethod.isAnnotationPresent(StressTest.class);
 		} catch (Throwable ex) {
 			// Ignore and not consider a stress test
 		}
@@ -148,6 +150,25 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		if (isStressTest) {
 			if (isSkipStressTests()) {
 				System.out.println("NOT RUNNING STRESS TEST " + this.getClass().getSimpleName() + "." + this.getName());
+				return;
+			}
+		}
+
+		// Determine if test uses docker
+		boolean isUsesDocker = false;
+		try {
+			Method testMethod = this.getClass().getMethod(this.getName());
+			isUsesDocker = this.getClass().isAnnotationPresent(UsesDockerTest.class)
+					|| testMethod.isAnnotationPresent(UsesDockerTest.class);
+		} catch (Throwable ex) {
+			// Ignore and not consider using docker
+		}
+
+		// Determine if run test using docker
+		if (isUsesDocker) {
+			if (isSkipTestsUsingDocker()) {
+				System.out.println(
+						"NOT RUNNING TEST USING DOCKER " + this.getClass().getSimpleName() + "." + this.getName());
 				return;
 			}
 		}
@@ -211,6 +232,28 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			value = System.getenv(PROPERTY_NAME.replace('.', '_'));
 		}
 		return value == null ? false : Boolean.parseBoolean(value);
+	}
+
+	/**
+	 * <p>
+	 * Indicates if not to run tests using docker.
+	 * <p>
+	 * Stress tests should normally be run, but in cases of quick unit testing
+	 * running for functionality the stress tests can reduce turn around time and
+	 * subsequently the effectiveness of the tests. This is therefore provided to
+	 * maintain effectiveness of unit tests.
+	 * <p>
+	 * Furthermore, builds time out on Travis so avoid running.
+	 * 
+	 * @return <code>true</code> to ignore doing a stress test.
+	 */
+	public static boolean isSkipTestsUsingDocker() {
+		final String PROPERTY_NAME = "officefloor.docker.available";
+		String value = System.getProperty(PROPERTY_NAME);
+		if (value == null) {
+			value = System.getenv(PROPERTY_NAME.replace('.', '_'));
+		}
+		return value == null ? false : !Boolean.parseBoolean(value);
 	}
 
 	/**
@@ -521,7 +564,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts the failure.
 	 *
-	 * @param                     <F> Failure type.
+	 * @param <F>                 Failure type.
 	 * @param operation           {@link FailOperation} that is expected fail.
 	 * @param expectedFailureType Expect type of failure.
 	 * @return Actual failure for further assertions.
@@ -546,7 +589,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Provides simplified facade to verify {@link Method} will fail.
 	 *
-	 * @param                     <F> Failure type.
+	 * @param <F>                 Failure type.
 	 * @param expectedFailureType Expected failure of method.
 	 * @param object              Object to invoke {@link Method} on.
 	 * @param methodName          Name of the {@link Method}.
@@ -576,7 +619,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Provides simplified facade to verify {@link Method} will fail.
 	 *
-	 * @param                     <F> Failure type.
+	 * @param <F>                 Failure type.
 	 * @param expectedFailureType Expected failure of method.
 	 * @param object              Object to invoke {@link Method} on.
 	 * @param method              {@link Method}.
@@ -681,7 +724,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Assets that the input graph is as expected.
 	 *
-	 * @param              <O> Type.
+	 * @param <O>          Type.
 	 * @param expectedRoot Expected root.
 	 * @param actualRoot   Actual root.
 	 * @throws Exception If fails to compare graphs.
@@ -693,7 +736,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Assets that the input graph is as expected.
 	 *
-	 * @param                   <O> Type.
+	 * @param <O>               Type.
 	 * @param expectedRoot      Expected root.
 	 * @param actualRoot        Actual root.
 	 * @param ignoreMethodNames Listing of methods to be ignored in checking.
@@ -949,7 +992,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that the input list is as expected.
 	 *
-	 * @param               <O> Type.
+	 * @param <O>           Type.
 	 * @param matcher       Matches the items of the list.
 	 * @param list          List to be checked.
 	 * @param expectedItems Items expected to be in the list.
@@ -969,7 +1012,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that the input list equals the expected.
 	 *
-	 * @param               <O> Type.
+	 * @param <O>           Type.
 	 * @param list          List to be checked.
 	 * @param expectedItems Items expected in the list.
 	 */
@@ -985,7 +1028,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that properties on items within list match.
 	 *
-	 * @param               <O> Type.
+	 * @param <O>           Type.
 	 * @param methods       Method names to specify the properties on the items to
 	 *                      match.
 	 * @param list          List to be checked.
@@ -1007,7 +1050,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that properties on items within the array match.
 	 *
-	 * @param               <O> Type.
+	 * @param <O>           Type.
 	 * @param methods       Method names to specify the properties on the items to
 	 *                      match.
 	 * @param array         Array to be checked.
@@ -1021,7 +1064,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that properties on items within list match after the list is sorted.
 	 * 
-	 * @param               <O> Type.
+	 * @param <O>           Type.
 	 * @param sortMethod    Name of method on the items to sort the list by to
 	 *                      ensure match in order.
 	 * @param methods       Method names to specify the properties on the items to
@@ -1055,7 +1098,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Asserts that properties on the input objects match for the specified methods.
 	 * 
-	 * @param          <O> Type.
+	 * @param <O>      Type.
 	 * @param expected Expected item.
 	 * @param actual   Actual item.
 	 * @param methods  Method names to specify the properties on the item to match.
@@ -1107,7 +1150,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Obtains the item within the items whose property by methodName matches the
 	 * input value.
 	 * 
-	 * @param            <T> Item type.
+	 * @param <T>        Item type.
 	 * @param items      Items to search.
 	 * @param methodName Property on the item.
 	 * @param value      Value of property the item should match.
@@ -1211,7 +1254,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Creates a mock object registering the {@link MockControl}of the mock object
 	 * with registry for management.
 	 * 
-	 * @param             <M> Interface type.
+	 * @param <M>         Interface type.
 	 * @param classToMock {@link Class} to be mocked.
 	 * @return Mock object.
 	 */
@@ -1240,7 +1283,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Creates a mock object that synchronises on its {@link MockControl} before
 	 * making any method calls.
 	 * 
-	 * @param                 <M> Interface type.
+	 * @param <M>             Interface type.
 	 * @param interfaceToMock {@link Class} to mock.
 	 * @return Mock object.
 	 */
@@ -1300,7 +1343,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Convenience method to record a method and its return on a mock object.
 	 * 
-	 * @param                <T> Expected result type.
+	 * @param <T>            Expected result type.
 	 * @param mockObject     Mock object.
 	 * @param ignore         Result of operation on the mock object. This is only
 	 *                       provided to obtain correct return type for recording
@@ -1339,7 +1382,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * Convenience method to record a method, an {@link ArgumentsMatcher} and return
 	 * value.
 	 *
-	 * @param                <T> Expected result type.
+	 * @param <T>            Expected result type.
 	 * @param mockObject     Mock object.
 	 * @param ignore         Result of operation on the mock object. This is only
 	 *                       provided to obtain correct return type for recording
@@ -1398,8 +1441,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Undertakes test wrapping with mock object replay and verify.
 	 * 
-	 * @param      <R> Return type of test logic.
-	 * @param      <T> Possible {@link Throwable}.
+	 * @param <R>  Return type of test logic.
+	 * @param <T>  Possible {@link Throwable}.
 	 * @param test Test logic to wrap in replay/verify.
 	 * @return Result of test logic.
 	 * @throws T If logic throws {@link Exception}.
@@ -1532,7 +1575,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Capture <code>std err</code> of test logic.
 	 * 
-	 * @param      <T> Possible {@link Exception} type.
+	 * @param <T>  Possible {@link Exception} type.
 	 * @param test Test logic to capture <code>std err</code>.
 	 * @return <code>std err</code> output.
 	 * @throws T Possible {@link Throwable}.
@@ -1845,7 +1888,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Waits for the check to be <code>true</code>.
 	 * 
-	 * @param       <T> Possible failure type.
+	 * @param <T>   Possible failure type.
 	 * @param check Check.
 	 * @throws T Possible failure.
 	 */
@@ -1856,7 +1899,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Waits for the check to be <code>true</code>.
 	 * 
-	 * @param              <T> Possible failure type.
+	 * @param <T>          Possible failure type.
 	 * @param check        Check.
 	 * @param secondsToRun Seconds to wait before timing out.
 	 * @throws T Possible failure.
