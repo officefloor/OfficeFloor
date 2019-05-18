@@ -411,7 +411,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 				try {
 					this.wait(10);
 				} catch (InterruptedException ex) {
-					throw AbstractSocketManagerTester.fail(ex);
+					throw fail(ex);
 				}
 			}
 
@@ -423,20 +423,20 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 
 		@Override
 		public void run() {
-			// Run
 			try {
+				// Run
 				this.runnable.run();
+
+				// Successful
+				synchronized (this) {
+					this.completion = "COMPLETE";
+					this.notifyAll();
+				}
+
 			} catch (Throwable ex) {
 				synchronized (this) {
 					this.completion = ex;
-				}
-			} finally {
-				// Notify complete
-				synchronized (this) {
-					if (this.completion == null) {
-						this.completion = "COMPLETE";
-					}
-					this.notify();
+					this.notifyAll();
 				}
 			}
 		}

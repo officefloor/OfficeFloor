@@ -216,10 +216,14 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 	 * Ensure can mock capture {@link Order}.
 	 */
 	public void testMockCaptureOrder() throws Throwable {
-		HttpResponse<Order> response = this.doOrder(MockCaptureService.class,
-				(rule) -> rule.addOrdersCaptureResponse(new Order().id("ORDER_ID").status("COMPLETED")));
+		Closure<String> orderId = new Closure<>();
+		HttpResponse<Order> response = this.doOrder(MockCaptureService.class, (rule) -> rule
+				.addOrdersCaptureResponse(new Order().id("ORDER_ID").status("COMPLETED")).validate((request) -> {
+					orderId.value = rule.getOrderId(request);
+				}));
 		assertEquals("Incorrect order Id", "ORDER_ID", response.result().id());
 		assertEquals("Incorrect status", "COMPLETED", response.result().status());
+		assertEquals("Incorrect request order Id", "ORDER_ID", orderId.value);
 	}
 
 	public static class MockCaptureService {

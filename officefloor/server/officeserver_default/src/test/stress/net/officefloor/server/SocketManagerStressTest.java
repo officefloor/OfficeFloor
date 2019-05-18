@@ -147,7 +147,6 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 
 		// Send pipeline requests
 		try (Socket socket = this.tester.getClient()) {
-			socket.setSoTimeout(5 * 1000);
 
 			// Send pipeline of requests
 			OutputStream output = socket.getOutputStream();
