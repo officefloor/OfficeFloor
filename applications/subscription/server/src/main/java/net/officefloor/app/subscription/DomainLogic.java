@@ -92,4 +92,9 @@ public class DomainLogic {
 		private String domain;
 	}
 
+	public static void captureOrder(User user, DomainCaptureRequest request, Objectify objectify,
+			PayPalHttpClient paypal, ObjectResponse<DomainCapturedOrder> resposne) throws IOException {
+
+	}
+
 }

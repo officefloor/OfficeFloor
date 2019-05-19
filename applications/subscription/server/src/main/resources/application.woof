@@ -8,6 +8,9 @@
     <http-input path="/authenticate" method="POST" secure="false" x="153" y="197">
       <section name="Authenticate" input="authenticate"/>
     </http-input>
+    <http-input path="/captureDomainOrder" method="POST" secure="false" x="132" y="424">
+      <section name="Domain" input="captureOrder"/>
+    </http-input>
     <http-input path="/createDomainOrder" method="POST" secure="false" x="135" y="364">
       <section name="Domain" input="createOrder"/>
     </http-input>
@@ -26,6 +29,7 @@
       <input name="options" parameter-type=""/>
     </section>
     <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainLogic" x="424" y="353">
+      <input name="captureOrder" parameter-type=""/>
       <input name="createOrder" parameter-type=""/>
     </section>
     <section name="JwtChallenge" source="net.officefloor.web.jwt.DefaultJwtChallengeSectionSource" location="" x="1035" y="75">
