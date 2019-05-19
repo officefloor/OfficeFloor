@@ -17,30 +17,39 @@
  */
 package net.officefloor.app.subscription.store;
 
+import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 /**
- * PayPal credentials.
+ * Administration.
  * 
  * @author Daniel Sagenschneider
  */
 @Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-public class PayPalCredentials {
+@RequiredArgsConstructor
+public class Administration {
 
 	@Id
 	private Long id;
 
-	private String environment;
+	@NonNull
+	private Ref<User> administrator;
 
-	private String clientId;
+	@NonNull
+	private String paypalEnvironment;
 
-	private String clientSecret;
+	@NonNull
+	private String paypalClientId;
+
+	@NonNull
+	private String paypalClientSecret;
+
 }

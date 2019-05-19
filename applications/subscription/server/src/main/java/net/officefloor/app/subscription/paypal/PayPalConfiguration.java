@@ -20,7 +20,7 @@ package net.officefloor.app.subscription.paypal;
 import com.googlecode.objectify.Objectify;
 import com.paypal.core.PayPalEnvironment;
 
-import net.officefloor.app.subscription.store.PayPalCredentials;
+import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.pay.paypal.PayPalConfigurationRepository;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 
@@ -36,17 +36,17 @@ public class PayPalConfiguration implements PayPalConfigurationRepository {
 
 	@Override
 	public PayPalEnvironment createPayPalEnvironment() {
-		PayPalCredentials credentials = this.objectify.load().type(PayPalCredentials.class).first().now();
-		if (credentials == null) {
+		Administration admin = this.objectify.load().type(Administration.class).first().now();
+		if (admin == null) {
 			return null;
 		}
-		switch (credentials.getEnvironment()) {
+		switch (admin.getPaypalEnvironment()) {
 		case "sandbox":
-			return new PayPalEnvironment.Sandbox(credentials.getClientId(), credentials.getClientSecret());
+			return new PayPalEnvironment.Sandbox(admin.getPaypalClientId(), admin.getPaypalClientSecret());
 		case "live":
-			return new PayPalEnvironment.Live(credentials.getClientId(), credentials.getClientSecret());
+			return new PayPalEnvironment.Live(admin.getPaypalClientId(), admin.getPaypalClientSecret());
 		default:
-			throw new IllegalStateException("Unknown PayPal environment: " + credentials.getEnvironment());
+			throw new IllegalStateException("Unknown PayPal environment: " + admin.getPaypalEnvironment());
 		}
 	}
 
