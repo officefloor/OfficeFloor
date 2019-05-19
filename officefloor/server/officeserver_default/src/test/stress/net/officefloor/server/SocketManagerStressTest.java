@@ -73,7 +73,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 		// Start the clients
 		Future[] clients = new Future[clientCount];
 		for (int i = 0; i < clients.length; i++) {
-			clients[i] = this.thread(() -> this.doPipeline(requestCount));
+			clients[i] = this.thread("client" + i, () -> this.doPipeline(requestCount));
 		}
 
 		// Wait for clients to finish
@@ -106,12 +106,12 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 
 		// Metrics for tests
 		int clientCount = 10;
-		int requestCount = 10000;
+		int requestCount = 1000;
 
 		// Start the clients
 		Future[] clients = new Future[clientCount];
 		for (int i = 0; i < clients.length; i++) {
-			clients[i] = this.thread(() -> this.doPipeline(requestCount));
+			clients[i] = this.thread("client" + i, () -> this.doPipeline(requestCount));
 		}
 
 		// Wait for clients to finish
@@ -131,9 +131,7 @@ public class SocketManagerStressTest extends AbstractSocketManagerTester {
 				(socketServicer) -> (request, responseWriter) -> {
 					Runnable runnable = () -> SocketManagerStressTest.this.writeInteger(request, responseWriter);
 					if (isThreaded) {
-						SocketManagerStressTest.this.thread(() -> {
-							runnable.run();
-						});
+						SocketManagerStressTest.this.thread("ThreadedServicer", () -> runnable.run());
 					} else {
 						runnable.run();
 					}
