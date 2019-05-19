@@ -110,6 +110,7 @@ public class DomainOrderTest {
 		assertEquals("Incorrect invoiced user", user.getId(), invoice.getUser().get().getId());
 		assertEquals("Incorrect product type", Invoice.PRODUCT_TYPE_DOMAIN, invoice.getProductType());
 		assertEquals("Incorrect invoiced domain", "officefloor.org", invoice.getProductReference());
+		assertEquals("Incorrect payment order id", "MOCK_ORDER_ID", invoice.getPaymentOrderId());
 		assertNotNull("Should have invoice timestamp", invoice.getTimestamp());
 	}
 
@@ -125,6 +126,7 @@ public class DomainOrderTest {
 		// Setup the invoice
 		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
 		Invoice invoice = new Invoice(Ref.create(user), Invoice.PRODUCT_TYPE_DOMAIN, "officefloor.org");
+		invoice.setPaymentOrderId("MOCK_ORDER_ID");
 		this.objectify.store(invoice);
 
 		// Send request
@@ -151,9 +153,9 @@ public class DomainOrderTest {
 		assertNotNull("Should have domain timestamp", domain.getTimestamp());
 
 		// Ensure payment captured
-		Payment payment = this.objectify.get(Payment.class, 1, (loader) -> loader.filterKey("invoice", invoice)).get(0);
+		Payment payment = this.objectify.get(Payment.class, 1, (loader) -> loader.filter("invoice", invoice)).get(0);
 		assertEquals("Incorrect user for payment", user.getId(), payment.getUser().get().getId());
-		assertEquals("Incorrect amount", 5_00, payment.getAmount());
+		assertEquals("Incorrect amount", Integer.valueOf(5_00), payment.getAmount());
 		assertEquals("Incorrect receipt", "CAPTURE_ID", payment.getReceipt());
 	}
 

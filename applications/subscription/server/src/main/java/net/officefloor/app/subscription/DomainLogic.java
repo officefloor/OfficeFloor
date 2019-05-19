@@ -14,12 +14,17 @@ import com.paypal.orders.Item;
 import com.paypal.orders.Money;
 import com.paypal.orders.Order;
 import com.paypal.orders.OrderRequest;
+import com.paypal.orders.OrdersCaptureRequest;
 import com.paypal.orders.OrdersCreateRequest;
 import com.paypal.orders.PurchaseUnitRequest;
 
 import lombok.Value;
+import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
+import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
 
@@ -76,6 +81,13 @@ public class DomainLogic {
 										.tax(new Money().value(SUBSCRIPTION_TAX).currencyCode(CURRENCY)).quantity("1")
 										.category("DIGITAL_GOODS").url("http://" + domainName)))))));
 		Order order = orderResponse.result();
+
+		// Update the invoice with the order
+		String paymentOrderId = order.id();
+		invoice.setPaymentOrderId(paymentOrderId);
+		objectify.save().entity(invoice).now();
+
+		// Send the response
 		response.send(new DomainCreatedOrder(order.id(), order.status(), invoiceId));
 	}
 
@@ -93,8 +105,36 @@ public class DomainLogic {
 	}
 
 	public static void captureOrder(User user, DomainCaptureRequest request, Objectify objectify,
-			PayPalHttpClient paypal, ObjectResponse<DomainCapturedOrder> resposne) throws IOException {
+			PayPalHttpClient paypal, ObjectResponse<DomainCapturedOrder> response) throws IOException {
 
+		// Obtain the order id
+		String orderId = request.getOrderId();
+
+		// Obtain the invoice
+		Invoice invoice = objectify.load().type(Invoice.class).filter("paymentOrderId", orderId).first().now();
+		String domainName = invoice.getProductReference();
+
+		// Capture the funds
+		HttpResponse<Order> orderResponse = paypal.execute(new OrdersCaptureRequest(orderId));
+		Order order = orderResponse.result();
+		String captureStatus = order.status();
+		if (!"COMPLETED".equalsIgnoreCase(captureStatus)) {
+			throw new HttpException(HttpStatus.PAYMENT_REQUIRED);
+		}
+
+		// TODO extract amount and receipt from response
+		int amount = 500;
+		String receipt = "CAPTURE_ID";
+
+		// Funds captured, so create entries
+		Ref<User> userRef = Ref.create(user);
+		Ref<Invoice> invoiceRef = Ref.create(invoice);
+		Domain domain = new Domain(domainName, userRef, invoiceRef);
+		Payment payment = new Payment(userRef, invoiceRef, amount, receipt);
+		objectify.save().entities(domain, payment).now();
+
+		// Send the response
+		response.send(new DomainCapturedOrder(orderId, captureStatus, domainName));
 	}
 
 }

@@ -38,5 +38,8 @@ public class Invoice {
 	@NonNull
 	private String productReference;
 
+	@Index
+	private String paymentOrderId;
+
 	private Date timestamp = new Date(System.currentTimeMillis());
 }

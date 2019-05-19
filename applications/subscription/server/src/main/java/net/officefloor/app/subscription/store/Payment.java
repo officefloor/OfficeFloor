@@ -37,8 +37,10 @@ public class Payment {
 	/**
 	 * Amount in cents.
 	 */
-	private int amount;
+	@NonNull
+	private Integer amount;
 
+	@NonNull
 	private String receipt;
 
 	private Date timestamp = new Date(System.currentTimeMillis());
