@@ -36,6 +36,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.management.GarbageCollectorMXBean;
@@ -60,6 +61,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -110,6 +112,10 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	public static @interface UsesDockerTest {
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface UsesGCloudTest {
+	}
+
 	/**
 	 * Indicates if the GUI is available.
 	 * 
@@ -122,55 +128,42 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	@Override
 	public void runBare() throws Throwable {
 
+		// Determines if test annotated with type
+		Function<Class<? extends Annotation>, Boolean> isTestAnnotatedWith = (annotationType) -> {
+			try {
+				Method testMethod = this.getClass().getMethod(this.getName());
+				return testMethod.isAnnotationPresent(annotationType)
+						|| this.getClass().isAnnotationPresent(annotationType);
+			} catch (Throwable ex) {
+				// Ignore and not annotated
+				return false;
+			}
+		};
+
 		// Determine if a graphical test
-		try {
-			Method testMethod = this.getClass().getMethod(this.getName());
-			if (testMethod.getAnnotation(GuiTest.class) != null) {
-				// Determine if headed environment (i.e. can run graphical test)
-				if (!this.isGuiAvailable()) {
-					System.out
-							.println("NOT RUNNING GUI TEST " + this.getClass().getSimpleName() + "." + this.getName());
-					return;
-				}
-			}
-		} catch (Throwable ex) {
-			// Ignore and not consider a graphical test
+		if (isTestAnnotatedWith.apply(GuiTest.class) && (!this.isGuiAvailable())) {
+			System.out.println("NOT RUNNING GUI TEST " + this.getClass().getSimpleName() + "." + this.getName());
+			return;
 		}
 
-		// Determine if a stress test
-		boolean isStressTest = false;
-		try {
-			Method testMethod = this.getClass().getMethod(this.getName());
-			isStressTest = testMethod.isAnnotationPresent(StressTest.class);
-		} catch (Throwable ex) {
-			// Ignore and not consider a stress test
+		// Determine if run stress test
+		if (isTestAnnotatedWith.apply(StressTest.class) && isSkipStressTests()) {
+			System.out.println("NOT RUNNING STRESS TEST " + this.getClass().getSimpleName() + "." + this.getName());
+			return;
 		}
 
-		// Determine if run the stress test
-		if (isStressTest) {
-			if (isSkipStressTests()) {
-				System.out.println("NOT RUNNING STRESS TEST " + this.getClass().getSimpleName() + "." + this.getName());
-				return;
-			}
+		// Determine if run using docker
+		if (isTestAnnotatedWith.apply(UsesDockerTest.class) && isSkipTestsUsingDocker()) {
+			System.out
+					.println("NOT RUNNING TEST USING DOCKER " + this.getClass().getSimpleName() + "." + this.getName());
+			return;
 		}
 
-		// Determine if test uses docker
-		boolean isUsesDocker = false;
-		try {
-			Method testMethod = this.getClass().getMethod(this.getName());
-			isUsesDocker = this.getClass().isAnnotationPresent(UsesDockerTest.class)
-					|| testMethod.isAnnotationPresent(UsesDockerTest.class);
-		} catch (Throwable ex) {
-			// Ignore and not consider using docker
-		}
-
-		// Determine if run test using docker
-		if (isUsesDocker) {
-			if (isSkipTestsUsingDocker()) {
-				System.out.println(
-						"NOT RUNNING TEST USING DOCKER " + this.getClass().getSimpleName() + "." + this.getName());
-				return;
-			}
+		// Determine if run using gcloud
+		if (isTestAnnotatedWith.apply(UsesGCloudTest.class) && isSkipTestsUsingGCloud()) {
+			System.out
+					.println("NOT RUNNING TEST USING GCLOUD " + this.getClass().getSimpleName() + "." + this.getName());
+			return;
 		}
 
 		// Determine if set up GC logging
@@ -238,17 +231,31 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * <p>
 	 * Indicates if not to run tests using docker.
 	 * <p>
-	 * Stress tests should normally be run, but in cases of quick unit testing
-	 * running for functionality the stress tests can reduce turn around time and
-	 * subsequently the effectiveness of the tests. This is therefore provided to
-	 * maintain effectiveness of unit tests.
-	 * <p>
-	 * Furthermore, builds time out on Travis so avoid running.
+	 * Some environments do not support docker, so this enables disabling these
+	 * tests.
 	 * 
 	 * @return <code>true</code> to ignore doing a stress test.
 	 */
 	public static boolean isSkipTestsUsingDocker() {
 		final String PROPERTY_NAME = "officefloor.docker.available";
+		String value = System.getProperty(PROPERTY_NAME);
+		if (value == null) {
+			value = System.getenv(PROPERTY_NAME.replace('.', '_'));
+		}
+		return value == null ? false : !Boolean.parseBoolean(value);
+	}
+
+	/**
+	 * <p>
+	 * Indicates if not to run tests using GCloud (Google Cloud).
+	 * <p>
+	 * Some environments do not have GCloud available, so this enables disabling
+	 * these tests.
+	 * 
+	 * @return <code>true</code> to ignore doing a stress test.
+	 */
+	public static boolean isSkipTestsUsingGCloud() {
+		final String PROPERTY_NAME = "officefloor.gcloud.available";
 		String value = System.getProperty(PROPERTY_NAME);
 		if (value == null) {
 			value = System.getenv(PROPERTY_NAME.replace('.', '_'));

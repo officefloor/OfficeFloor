@@ -23,6 +23,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.ThreadSafeClosure;
+import net.officefloor.frame.test.OfficeFrameTestCase.UsesGCloudTest;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Next;
@@ -33,6 +34,7 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * 
  * @author Daniel Sagenschneider
  */
+@UsesGCloudTest
 public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 
 	/**
