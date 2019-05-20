@@ -5,7 +5,6 @@ cache:
 install:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y maven; fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_211"; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then choco install -y gcloudsdk; fi
   - ./.travis-install.sh
 script: ./.travis-script.sh
 jobs:
@@ -29,4 +28,4 @@ jobs:
     - name: Java 8 (Windows)
       os: windows
       language: shell
-      env: officefloor_skip_stress_tests=true officefloor_docker_available=false
+      env: officefloor_skip_stress_tests=true officefloor_docker_available=false officefloor_gcloud_available=false
