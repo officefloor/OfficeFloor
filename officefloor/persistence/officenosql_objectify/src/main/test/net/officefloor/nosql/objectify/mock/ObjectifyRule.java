@@ -269,30 +269,7 @@ public class ObjectifyRule implements TestRule {
 	@Override
 	public Statement apply(Statement base, Description description) {
 
-		// Ensure start up the local data store
-		boolean isStart = false;
-		boolean[] isStarted = new boolean[] { false };
-		if (dataStore == null) {
-			dataStore = LocalDatastoreHelper.create();
-			isStart = true;
-
-			// Add shutdown hook
-			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-				try {
-					synchronized (isStarted) {
-						if (isStarted[0]) {
-							dataStore.stop();
-						}
-					}
-				} catch (Exception ex) {
-					System.err.println("Failed to shutdown " + LocalDatastoreHelper.class.getSimpleName());
-					ex.printStackTrace();
-				}
-			}));
-		}
-
 		// Return statement to start application
-		boolean finalIsStart = isStart;
 		return new Statement() {
 
 			@Override
@@ -301,13 +278,26 @@ public class ObjectifyRule implements TestRule {
 				// Easy access to rule
 				ObjectifyRule rule = ObjectifyRule.this;
 
-				// Determine if data store failure
-				if (dataStoreFailure != null) {
-					throw dataStoreFailure;
-				}
+				// Ensure start up the local data store
+				if (dataStore == null) {
+					dataStore = LocalDatastoreHelper.create();
 
-				// Start DataStore (if required)
-				if (finalIsStart) {
+					// Add shutdown hook
+					boolean[] isStarted = new boolean[] { false };
+					Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+						try {
+							synchronized (isStarted) {
+								if (isStarted[0]) {
+									dataStore.stop();
+								}
+							}
+						} catch (Exception ex) {
+							System.err.println("Failed to shutdown " + LocalDatastoreHelper.class.getSimpleName());
+							ex.printStackTrace();
+						}
+					}));
+
+					// Start DataStore
 					try {
 						dataStore.start();
 
@@ -325,6 +315,11 @@ public class ObjectifyRule implements TestRule {
 						dataStoreFailure = new IOException(message);
 						throw dataStoreFailure;
 					}
+				}
+
+				// Determine if data store failure
+				if (dataStoreFailure != null) {
+					throw dataStoreFailure;
 				}
 
 				// Reset DataStore for test

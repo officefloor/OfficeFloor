@@ -2,6 +2,7 @@ package net.officefloor.tutorial.objectifyhttpserver;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -24,8 +25,8 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class ObjectifyHttpServerTest {
 
-	@Rule
-	public SkipRule ensureGCloudAvailable = new SkipRule(OfficeFrameTestCase.isSkipTestsUsingGCloud(),
+	@ClassRule
+	public static SkipRule ensureGCloudAvailable = new SkipRule(OfficeFrameTestCase.isSkipTestsUsingGCloud(),
 			"GCloud not available");
 
 	// START SNIPPET: tutorial
