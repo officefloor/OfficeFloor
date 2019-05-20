@@ -11,6 +11,9 @@
     <http-input path="/captureDomainOrder" method="POST" secure="false" x="132" y="424">
       <section name="Domain" input="captureOrder"/>
     </http-input>
+    <http-input path="/configure" method="POST" secure="false" x="187" y="514">
+      <section name="Configure" input="configure"/>
+    </http-input>
     <http-input path="/createDomainOrder" method="POST" secure="false" x="135" y="364">
       <section name="Domain" input="createOrder"/>
     </http-input>
@@ -24,6 +27,9 @@
     <section name="Authenticate" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.AuthenticateLogic" x="422" y="179">
       <input name="authenticate" parameter-type=""/>
       <input name="refreshAccessToken" parameter-type=""/>
+    </section>
+    <section name="Configure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.ConfigureLogic" x="459" y="492">
+      <input name="configure" parameter-type=""/>
     </section>
     <section name="Cors" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.cors.Cors" x="426" y="84">
       <input name="options" parameter-type=""/>

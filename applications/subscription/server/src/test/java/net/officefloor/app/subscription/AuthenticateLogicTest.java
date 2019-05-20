@@ -34,13 +34,15 @@ public class AuthenticateLogicTest {
 	 * 
 	 * @param objectify {@link ObjectifyRule}.
 	 * @param name      Name of {@link User}.
+	 * @param roles     Roles.
 	 * @return {@link User}.
 	 */
-	public static User setupUser(ObjectifyRule objectify, String name) {
+	public static User setupUser(ObjectifyRule objectify, String name, String... roles) {
 		String noSpaceName = name.replaceAll("\\w", "_");
 		User user = new User(noSpaceName + "@officefloor.org");
 		user.setName(name);
 		user.setPhotoUrl("https://google.com/" + noSpaceName + ".png");
+		user.setRoles(roles);
 		objectify.store(user);
 		return user;
 	}
