@@ -29,4 +29,4 @@ jobs:
     - name: Java 8 (Windows)
       os: windows
       language: shell
-      env: officefloor_skip_stress_tests=true officefloor_docker_available=false
+      env: officefloor_skip_stress_tests=true officefloor_docker_available=false officefloor_gcloud_available=false
