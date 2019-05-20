@@ -14,6 +14,7 @@ jobs:
       language: java
       jdk: openjdk8
       env: officefloor_skip_stress_tests=true
+      script: ./.travis-script.sh
       addons:
         apt:
           packages: openjfx
