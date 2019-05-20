@@ -50,6 +50,11 @@ import net.openhft.affinity.Affinity;
 public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 
 	/**
+	 * Indicates if {@link Affinity} is active.
+	 */
+	private static boolean isThreadAffinityActive = WebThreadAffinityExecutiveSource.isThreadAffinityAvailable();
+
+	/**
 	 * {@link WebCompileOfficeFloor}.
 	 */
 	protected final WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
@@ -68,11 +73,6 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 	 * Initial {@link Affinity} to reset.
 	 */
 	private BitSet initialAffinity;
-	
-	/**
-	 * Indicates if {@link Affinity} is active.
-	 */
-	private boolean isThreadAffinityActive = false;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -83,19 +83,9 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 
 		// Capture initial affinity (to allow reset on tear down)
 		this.initialAffinity = Affinity.getAffinity();
-		
+
 		// Determine if affinity available
-		try {
-			BitSet newAffinity = Affinity.getAffinity();
-			newAffinity.clear();
-			newAffinity.set(1);
-			Affinity.setAffinity(newAffinity);
-			BitSet alteredAffinity = Affinity.getAffinity();
-			this.isThreadAffinityActive = newAffinity.equals(alteredAffinity);
-		} finally {
-			Affinity.setAffinity(this.initialAffinity);
-		}
-		if (!this.isThreadAffinityActive) {
+		if (!isThreadAffinityActive) {
 			System.err.println("WARNING: Thread Affinity not available.  Tests not being run");
 		}
 
@@ -134,7 +124,7 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 	public void testExecutionStrategyAffinity() throws Exception {
 
 		// Ensure active for valid test
-		if (!this.isThreadAffinityActive) {
+		if (!isThreadAffinityActive) {
 			System.err.println("Not running " + this.getName());
 			return;
 		}
@@ -202,9 +192,9 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 	 * Ensure function run with affinity.
 	 */
 	public void testTeamAffinity() throws Exception {
-		
+
 		// Ensure active for valid test
-		if (!this.isThreadAffinityActive) {
+		if (!isThreadAffinityActive) {
 			System.err.println("Not running " + this.getName());
 			return;
 		}
