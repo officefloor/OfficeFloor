@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import net.officefloor.server.http.HttpHeader;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.web.jwt.JwtHttpSecuritySource;
 import net.officefloor.web.jwt.validate.JwtValidateKey;
 
@@ -71,6 +73,18 @@ public class MockJwtAccessTokenRule implements TestRule {
 	 */
 	public JwtValidateKey[] getActiveJwtValidateKeys() {
 		return new JwtValidateKey[] { this.validateKey };
+	}
+
+	/**
+	 * Convenience method to add <code>authorization</code> {@link HttpHeader} to
+	 * the {@link MockHttpRequestBuilder}.
+	 * 
+	 * @param claims         Claims for the access token.
+	 * @param requestBuilder {@link MockHttpRequestBuilder}.
+	 * @return {@link MockHttpRequestBuilder} with {@link HttpHeader} configured.
+	 */
+	public MockHttpRequestBuilder authorize(Object claims, MockHttpRequestBuilder requestBuilder) {
+		return requestBuilder.header("authorization", "Bearer " + this.createAccessToken(claims));
 	}
 
 	/*

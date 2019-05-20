@@ -64,13 +64,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>officejson_jackson</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>net.officefloor.server</groupId>
 			<artifactId>officeserver_test</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>officejson_jackson</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
