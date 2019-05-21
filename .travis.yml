@@ -22,8 +22,7 @@ jobs:
       install:
         - choco install -y maven
         - export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_211"
-        - ./.travis-install.sh
-      script: cd officefloor/bom; mvn test -B
+      script: cd officefloor/bom; mvn -B clean install
     - name: Java 11 (Linux)
       os: linux
       dist: xenial
