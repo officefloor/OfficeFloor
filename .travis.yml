@@ -1,22 +1,33 @@
-dist: xenial
-language: java
 sudo: required
 services: docker
 cache:
   directories: $HOME/.m2
-env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
 install: ./.travis-install.sh
-script: ./.travis-script.sh
-after_success: bash <(curl -s https://codecov.io/bash)
-# Support of Java as per https://www.oracle.com/technetwork/java/java-se-support-roadmap.html
-#    (openjdk9, openjdk10 end of life)
-# Note: due to JavaFx, not supporting prior to Java 8
 jobs:
   include:
-    - name: Java 8
+    - name: Java 8 (Linux)
+      os: linux
+      dist: xenial
+      language: java
       jdk: openjdk8
+      env: officefloor_skip_stress_tests=true
+      script: ./.travis-script.sh
       addons:
         apt:
           packages: openjfx
-    - name: Java 11
+    - name: Java 8 (Windows)
+      os: windows
+      language: shell
+      env: officefloor_skip_stress_tests=true officefloor_docker_available=false officefloor_gcloud_available=false
+      install:
+        - choco install -y maven
+        - export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_211"
+        - ./.travis-install.sh
+    - name: Java 11 (Linux)
+      os: linux
+      dist: xenial
+      language: java
       jdk: openjdk11
+      env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
+      script: ./.travis-script.sh
+      after_success: bash <(curl -s https://codecov.io/bash)

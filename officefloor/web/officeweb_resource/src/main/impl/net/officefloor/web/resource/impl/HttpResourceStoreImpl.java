@@ -38,6 +38,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.tika.Tika;
+
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.web.resource.HttpDirectory;
 import net.officefloor.web.resource.HttpFile;
@@ -75,7 +77,12 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 	 * Default <code>Content-Type</code> should it not be determined for the
 	 * resource.
 	 */
-	private static final HttpHeaderValue DEFAULT_CONTENT_TYPE = new HttpHeaderValue("application/octet");
+	private static final String DEFAULT_CONTENT_TYPE = "application/octet";
+
+	/**
+	 * {@link Tika} to determine content type if Java defaults can not.
+	 */
+	private static volatile Tika tikaSingleton = null;
 
 	/**
 	 * {@link Map} of {@link HttpResource} path to the current
@@ -471,19 +478,29 @@ public class HttpResourceStoreImpl implements HttpResourceStore, ResourceSystemC
 				}
 
 				// Determine the content type of resource
-				String contentType = Files.probeContentType(resource);
+				String contentType = null; // Files.probeContentType(resource);
 				HttpHeaderValue contentTypeHeaderValue;
-				if (contentType == null) {
-					// Could not determine, so use default
-					contentTypeHeaderValue = DEFAULT_CONTENT_TYPE;
-				} else {
-					// Obtain the content type
-					contentTypeHeaderValue = store.contentTypes.get(contentType);
-					if (contentTypeHeaderValue == null) {
-						// Not cached, so create and cache
-						contentTypeHeaderValue = new HttpHeaderValue(contentType);
-						store.contentTypes.put(contentType, contentTypeHeaderValue);
+				if ((contentType == null) || DEFAULT_CONTENT_TYPE.equals(contentType)) {
+					// Could not determine, so attempt with Tika
+					Tika tika = tikaSingleton;
+					if (tika == null) {
+						// Ok to create duplicates, as last will be one to reuse
+						tika = new Tika();
+						tikaSingleton = tika;
 					}
+					contentType = tika.detect(resource);
+					if (contentType == null) {
+						// Not able to determine, so use default
+						contentType = DEFAULT_CONTENT_TYPE;
+					}
+				}
+
+				// Obtain the content type
+				contentTypeHeaderValue = store.contentTypes.get(contentType);
+				if (contentTypeHeaderValue == null) {
+					// Not cached, so create and cache
+					contentTypeHeaderValue = new HttpHeaderValue(contentType);
+					store.contentTypes.put(contentType, contentTypeHeaderValue);
 				}
 
 				// Undertake transformation of resource

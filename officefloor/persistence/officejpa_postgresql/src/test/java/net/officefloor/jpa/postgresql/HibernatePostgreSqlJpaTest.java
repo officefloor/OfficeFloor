@@ -27,6 +27,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.frame.test.OfficeFrameTestCase.UsesDockerTest;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.postgresql.PostgreSqlConnectionManagedObjectSource;
 import net.officefloor.jdbc.postgresql.test.PostgreSqlRule;
@@ -41,6 +42,7 @@ import net.officefloor.jpa.test.IMockEntity;
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 public class HibernatePostgreSqlJpaTest extends AbstractJpaTestCase {
 
 	/**
@@ -57,6 +59,9 @@ public class HibernatePostgreSqlJpaTest extends AbstractJpaTestCase {
 		return new TestSetup(new TestSuite(HibernatePostgreSqlJpaTest.class)) {
 
 			protected void setUp() throws Exception {
+				if (isSkipTestsUsingDocker()) {
+					return;
+				}
 				database.startPostgreSql();
 
 				// Ignore hibernate logging
@@ -64,6 +69,9 @@ public class HibernatePostgreSqlJpaTest extends AbstractJpaTestCase {
 			}
 
 			protected void tearDown() throws Exception {
+				if (isSkipTestsUsingDocker()) {
+					return;
+				}
 				database.stopPostgreSql();
 			}
 		};

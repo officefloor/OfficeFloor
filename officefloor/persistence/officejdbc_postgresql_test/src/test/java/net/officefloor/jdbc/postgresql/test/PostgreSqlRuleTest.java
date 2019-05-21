@@ -40,6 +40,7 @@ public class PostgreSqlRuleTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to run PostgreSql.
 	 */
+	@UsesDockerTest
 	public void testConnectivity() throws Throwable {
 
 		// Configure rule
@@ -77,6 +78,7 @@ public class PostgreSqlRuleTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to configure the max connections.
 	 */
+	@UsesDockerTest
 	public void testAdjustMaxConnections() throws Throwable {
 
 		final int MAX_CONNECTIONS = 50;
