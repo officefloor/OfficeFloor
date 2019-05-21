@@ -30,6 +30,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import net.officefloor.compile.properties.PropertyConfigurable;
+import net.officefloor.frame.test.OfficeFrameTestCase.UsesDockerTest;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
@@ -42,6 +43,7 @@ import net.officefloor.jdbc.test.AbstractJdbcTestCase;
  * 
  * @author Daniel Sagenschneider
  */
+@UsesDockerTest
 public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 
 	/**
@@ -73,10 +75,16 @@ public class PostgreSqlJdbcTest extends AbstractJdbcTestCase {
 		return new TestSetup(new TestSuite(PostgreSqlJdbcTest.class)) {
 
 			protected void setUp() throws Exception {
+				if (isSkipTestsUsingDocker()) {
+					return;
+				}
 				server.startPostgreSql();
 			}
 
 			protected void tearDown() throws Exception {
+				if (isSkipTestsUsingDocker()) {
+					return;
+				}
 				server.stopPostgreSql();
 			}
 		};

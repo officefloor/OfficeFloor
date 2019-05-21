@@ -4,10 +4,4 @@
 
 	<managed-object class="net.officefloor.tutorial.paypalhttpserver.InMemoryPayPalConfigurationRepository" />
 
-<!--
-	<managed-object source="net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource" type="javax.persistence.EntityManager">
-		<property-file path="entitymanager.properties" />
-	</managed-object>
--->
-
 </objects>
