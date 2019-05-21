@@ -193,6 +193,19 @@ public class PayPalRule implements TestRule {
 		}, statusCode, order, headerNameValues);
 	}
 
+	/**
+	 * Extracts the {@link Order} id from the {@link OrdersCaptureRequest}.
+	 * 
+	 * @param request {@link OrdersCaptureRequest}.
+	 * @return {@link Order} id.
+	 */
+	public String getOrderId(OrdersCaptureRequest request) {
+		String path = request.path();
+		path = path.substring("/v2/checkout/orders/".length());
+		path = path.substring(0, path.indexOf("/capture"));
+		return path;
+	}
+
 	/*
 	 * ====================== TestRule =============================
 	 */

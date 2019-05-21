@@ -18,6 +18,8 @@
 package net.officefloor.server;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -120,7 +122,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 			SSLContext sslContext = OfficeFloorDefaultSslContextSource.createServerSslContext(null);
 
 			// Create the executor
-			Executor executor = (task) -> new TestThread(() -> task.run()).start();
+			Executor executor = (task) -> new TestThread("SslSocketServicer", () -> task.run()).start();
 
 			// Create the SSL socket servicer
 			SslSocketServicerFactory<R> sslSocketServicerFactory = new SslSocketServicerFactory<>(sslContext,
@@ -226,7 +228,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 			this.threads = new TestThread[runnables.length];
 			for (int i = 0; i < runnables.length; i++) {
 				final int index = i;
-				this.threads[i] = new TestThread(() -> runnables[index].run());
+				this.threads[i] = new TestThread("SocketServicer" + index, () -> runnables[index].run());
 			}
 		}
 
@@ -301,13 +303,15 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 		 * Waits on completion of the {@link TestThread} instances.
 		 */
 		protected void waitForCompletion() throws Exception {
-			long startTime = System.currentTimeMillis();
-			for (int i = 0; i < this.threads.length; i++) {
-				this.threads[i].waitForCompletion(startTime);
+			try {
+				long startTime = System.currentTimeMillis();
+				for (int i = 0; i < this.threads.length; i++) {
+					this.threads[i].waitForCompletion(startTime);
+				}
+			} finally {
+				// As all complete, handle completion
+				AbstractSocketManagerTester.this.handleCompletion(this.bufferPool);
 			}
-
-			// As all complete, handle completion
-			AbstractSocketManagerTester.this.handleCompletion(this.bufferPool);
 		}
 	}
 
@@ -354,7 +358,7 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	 * @param runnable {@link FailableRunnable}.
 	 */
 	protected <T extends Throwable> Future delay(FailableRunnable<T> runnable) {
-		return this.thread(() -> {
+		return this.thread("delay", () -> {
 
 			// Sleep some time to mimic delay
 			try {
@@ -370,11 +374,12 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 	/**
 	 * Runs in another {@link Thread}.
 	 * 
+	 * @param threadName Name to identify the {@link Thread}.
 	 * @return {@link Future}.
 	 * @param runnable {@link FailableRunnable}.
 	 */
-	protected <T extends Throwable> Future thread(FailableRunnable<Throwable> runnable) {
-		TestThread thread = new TestThread(runnable);
+	protected <T extends Throwable> Future thread(String threadName, FailableRunnable<Throwable> runnable) {
+		TestThread thread = new TestThread(threadName, runnable);
 		thread.start();
 		return thread;
 	}
@@ -388,7 +393,8 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 
 		private Object completion = null;
 
-		public TestThread(FailableRunnable<?> runnable) {
+		private TestThread(String threadName, FailableRunnable<?> runnable) {
+			super(threadName);
 			this.runnable = runnable;
 
 			// Register this test thread
@@ -411,32 +417,44 @@ public abstract class AbstractSocketManagerTester extends OfficeFrameTestCase {
 				try {
 					this.wait(10);
 				} catch (InterruptedException ex) {
-					throw AbstractSocketManagerTester.fail(ex);
+					throw fail(ex);
 				}
 			}
 
 			// Determine if failure
 			if (this.completion instanceof Throwable) {
-				throw fail((Throwable) this.completion);
+				Throwable threadFailure = (Throwable) this.completion;
+
+				// Detail the failure (for diagnosing)
+				StringWriter buffer = new StringWriter();
+				buffer.append("Test " + AbstractSocketManagerTester.this.getName() + ": failure in "
+						+ this.getClass().getSimpleName() + " " + this.getName() + ":\n");
+				PrintWriter stackTraceWriter = new PrintWriter(buffer);
+				threadFailure.printStackTrace(stackTraceWriter);
+				stackTraceWriter.flush();
+				System.err.println(buffer.toString());
+
+				// Propagate the failure
+				throw fail(threadFailure);
 			}
 		}
 
 		@Override
 		public void run() {
-			// Run
 			try {
+				// Run
 				this.runnable.run();
+
+				// Successful
+				synchronized (this) {
+					this.completion = "COMPLETE";
+					this.notifyAll();
+				}
+
 			} catch (Throwable ex) {
 				synchronized (this) {
 					this.completion = ex;
-				}
-			} finally {
-				// Notify complete
-				synchronized (this) {
-					if (this.completion == null) {
-						this.completion = "COMPLETE";
-					}
-					this.notify();
+					this.notifyAll();
 				}
 			}
 		}

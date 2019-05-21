@@ -131,7 +131,7 @@ public class DefaultJsonTest extends OfficeFrameTestCase {
 			// Send the request
 			MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/path").method(HttpMethod.POST)
 					.header("Content-Type", "application/json").entity("{ \"input\": \"INPUT\" }"));
-			response.assertResponse(200, "{\n  \"output\" : \"OUTPUT\"\n}");
+			response.assertResponse(200, "{" + END_OF_LINE + "  \"output\" : \"OUTPUT\"" + END_OF_LINE + "}");
 
 		} finally {
 			MockObjectMapperResponderDecorator.isDecorate = false;

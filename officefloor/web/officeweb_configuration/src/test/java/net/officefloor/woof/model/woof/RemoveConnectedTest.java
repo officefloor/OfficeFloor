@@ -86,6 +86,7 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 
 		// Obtain the security to remove
 		WoofSecurityModel security = this.model.getWoofSecurities().get(0);
+		assertEquals("Incorrect security", "SECURITY", security.getHttpSecurityName());
 
 		// Remove the security
 		Change<WoofSecurityModel> change = this.operations.removeSecurity(security);
@@ -106,8 +107,7 @@ public class RemoveConnectedTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
-	 * Ensure able to remove the {@link WoofExceptionModel} linked to a
-	 * template.
+	 * Ensure able to remove the {@link WoofExceptionModel} linked to a template.
 	 */
 	public void testRemoveException() {
 

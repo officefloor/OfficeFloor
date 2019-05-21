@@ -114,12 +114,15 @@ public class MockJwtAuthorityRuleTest extends OfficeFrameTestCase {
 		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/resource").secure(true));
 		response.assertResponse(401, "");
 
-		// Create an access token
-		String accessToken = rule.createAccessToken(new Claims("test"));
-
 		// Ensure can now access resource
+		String accessToken = rule.createAccessToken(new Claims("test"));
 		response = this.server.send(
 				MockHttpServer.mockRequest("/resource").secure(true).header("authorization", "Bearer " + accessToken));
+		response.assertResponse(200, "SECURED RESOURCE");
+
+		// Ensure can use convenience method to access resource
+		response = this.server
+				.send(rule.authorize(new Claims("test"), MockHttpServer.mockRequest("/resource")).secure(true));
 		response.assertResponse(200, "SECURED RESOURCE");
 
 		// Should have mocked JWT validate keys
