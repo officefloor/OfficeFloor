@@ -31,12 +31,14 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import net.officefloor.OfficeFloorMain;
+import net.officefloor.frame.test.SkipRule;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.test.DataSourceRule;
 import net.officefloor.jpa.hibernate.HibernateJpaManagedObjectSource;
 import net.officefloor.jpa.test.EntityManagerRule;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.executive.WebThreadAffinityExecutiveSource;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
@@ -56,6 +58,10 @@ public class ThreadAffinityHttpServerTest {
 			OfficeFloorMain.main(args);
 		}
 	}
+
+	@ClassRule
+	public static SkipRule threadAfinityAvailable = new SkipRule(
+			!WebThreadAffinityExecutiveSource.isThreadAffinityAvailable());
 
 	// START SNIPPET: tutorial
 	@ClassRule

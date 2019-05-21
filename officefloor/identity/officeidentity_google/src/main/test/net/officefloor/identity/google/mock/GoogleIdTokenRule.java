@@ -82,7 +82,7 @@ public class GoogleIdTokenRule implements TestRule {
 
 		// Generate the id token
 		Header header = new JsonWebSignature.Header().setAlgorithm("RS256");
-		Payload payload = new GoogleIdToken.Payload().setSubject(googleId).setEmail(email)
+		Payload payload = new GoogleIdToken.Payload().setSubject(googleId).setEmail(email).setEmailVerified(true)
 				.setIssuedAtTimeSeconds(mockVerifier.getClock().currentTimeMillis()).setExpirationTimeSeconds(10L)
 				.setIssuer(mockVerifier.getIssuer());
 		for (int i = 0; i < nameValuePairs.length; i += 2) {

@@ -50,6 +50,11 @@ import net.openhft.affinity.Affinity;
 public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 
 	/**
+	 * Indicates if {@link Affinity} is active.
+	 */
+	private static boolean isThreadAffinityActive = WebThreadAffinityExecutiveSource.isThreadAffinityAvailable();
+
+	/**
 	 * {@link WebCompileOfficeFloor}.
 	 */
 	protected final WebCompileOfficeFloor compile = new WebCompileOfficeFloor();
@@ -78,6 +83,11 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 
 		// Capture initial affinity (to allow reset on tear down)
 		this.initialAffinity = Affinity.getAffinity();
+
+		// Determine if affinity available
+		if (!isThreadAffinityActive) {
+			System.err.println("WARNING: Thread Affinity not available.  Tests not being run");
+		}
 
 		// Provide web thread affinity
 		this.compile.officeFloor((context) -> {
@@ -112,6 +122,12 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 	 * Ensure {@link ExecutionStrategy} provides affinity.
 	 */
 	public void testExecutionStrategyAffinity() throws Exception {
+
+		// Ensure active for valid test
+		if (!isThreadAffinityActive) {
+			System.err.println("Not running " + this.getName());
+			return;
+		}
 
 		TestThreadAffinityManagedObjectSource mos = new TestThreadAffinityManagedObjectSource();
 		this.compile.web((context) -> {
@@ -176,6 +192,12 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 	 * Ensure function run with affinity.
 	 */
 	public void testTeamAffinity() throws Exception {
+
+		// Ensure active for valid test
+		if (!isThreadAffinityActive) {
+			System.err.println("Not running " + this.getName());
+			return;
+		}
 
 		this.compile.web((context) -> {
 			OfficeArchitect architect = context.getOfficeArchitect();

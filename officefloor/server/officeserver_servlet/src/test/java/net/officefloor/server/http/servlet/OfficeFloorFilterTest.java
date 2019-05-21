@@ -324,7 +324,7 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 		@Override
 		protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			StringWriter buffer = new StringWriter();
-			Reader entity = req.getReader();
+			Reader entity = new InputStreamReader(req.getInputStream());
 			for (int character = entity.read(); character != -1; character = entity.read()) {
 				buffer.write(character);
 			}
