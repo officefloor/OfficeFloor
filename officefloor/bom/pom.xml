@@ -65,7 +65,7 @@
 		<eclipse-persistence-jpa-version>2.7.4</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<flyway-version>5.2.4</flyway-version>
-		<google-api-version>1.28.0</google-api-version>
+		<google-api-version>1.29.0</google-api-version>
 		<google-appengine-version>1.9.74</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>19.0.0</graalvm-js-version>
