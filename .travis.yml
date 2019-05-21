@@ -3,6 +3,7 @@ services: docker
 cache:
   directories: $HOME/.m2
 install: ./.travis-install.sh
+script: ./.travis-script.sh
 jobs:
   include:
     - name: Java 8 (Linux)
@@ -11,7 +12,6 @@ jobs:
       language: java
       jdk: openjdk8
       env: officefloor_skip_stress_tests=true
-      script: ./.travis-script.sh
       addons:
         apt:
           packages: openjfx
@@ -23,11 +23,11 @@ jobs:
         - choco install -y maven
         - export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_211"
         - ./.travis-install.sh
+      script: mvn test
     - name: Java 11 (Linux)
       os: linux
       dist: xenial
       language: java
       jdk: openjdk11
       env: officefloor_skip_stress_tests=true officefloor_code_coverage=true
-      script: ./.travis-script.sh
       after_success: bash <(curl -s https://codecov.io/bash)
