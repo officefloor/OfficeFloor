@@ -33,9 +33,26 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	
 	stages {
 	
+		stage('Check master') {
+	        when {
+	        	allOf {
+	        	    not { branch 'master' }
+	        	}
+	        }
+            steps {
+            	script {
+            		currentBuild.result = 'ABORTED'
+            	}
+            	error "Aborting ${params.BUILD_TYPE} as not on master branch"
+            }
+        }
+	
 		stage('Build') {
 		    when {
-		        expression { params.BUILD_TYPE == 'TEST' }
+		    	allOf {
+			        expression { params.BUILD_TYPE == 'TEST' }
+					branch 'master'
+		    	}
 		    }
 	        steps {
 	        	sh 'mvn -version'
@@ -52,27 +69,7 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 			when {
 				allOf {
 					expression { params.BUILD_TYPE == 'TEST' }
-					not { branch 'master' }
-				}
-			}
-	        steps {
-	        	dir('officefloor/bom') {
-					sh 'mvn -Dofficefloor.skip.stress.tests=true verify'
-	        	}
-	        }
-		    post {
-			    always {
-					junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
-					junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
-			    }
-		    }
-	    }
-	    
-	    stage('Test and Stress') {
-			when {
-				allOf {
-					expression { params.BUILD_TYPE == 'TEST' }
-					branch 'master'
+    				branch 'master'
 				}
 			}
 	        steps {
@@ -92,6 +89,7 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 			when {
 				allOf {
 					expression { params.BUILD_TYPE == 'TEST' }
+					branch 'master'
 				}
 			}
 			tools {
@@ -113,21 +111,6 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 			}
 		}
 	
-	    stage('Check master') {
-	        when {
-	        	allOf {
-					not { expression { params.BUILD_TYPE == 'TEST' } }
-	        	    not { branch 'master' }
-	        	}
-	        }
-            steps {
-            	script {
-            		currentBuild.result = 'ABORTED'
-            	}
-            	error "Attempting to ${params.BUILD_TYPE} when not on master branch"
-            }
-        }
-
 		stage('Performance') {
 			when {
 				allOf {
@@ -159,7 +142,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 	        when {
 	        	allOf {
 					expression { params.BUILD_TYPE == 'STAGE' }
-	        	    branch 'master'
+					branch 'master'
 	        	}
 	        }
 			tools {
@@ -179,7 +162,7 @@ ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 			when {
 				allOf {
 					expression { params.BUILD_TYPE == 'PRE_RELEASE_TEST' || params.BUILD_TYPE == 'RELEASE' }
-				    branch 'master'
+					branch 'master'
 				}
 			}
 			tools {
