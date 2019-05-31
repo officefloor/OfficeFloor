@@ -70,7 +70,7 @@
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>19.0.0</graalvm-js-version>
 		<h2database-version>1.4.199</h2database-version>
-		<hibernate-version>5.4.2.Final</hibernate-version>
+		<hibernate-version>5.4.3.Final</hibernate-version>
 		<hikari-version>3.3.1</hikari-version>
 		<hsqldb-version>2.4.1</hsqldb-version>
 		<httpclient-version>4.5.8</httpclient-version>
