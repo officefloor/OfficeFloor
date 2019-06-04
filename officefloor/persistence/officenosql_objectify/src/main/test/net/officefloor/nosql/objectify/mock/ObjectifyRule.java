@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.junit.Rule;
@@ -223,6 +224,48 @@ public class ObjectifyRule implements TestRule {
 
 		// Return the entities
 		return entities;
+	}
+
+	/**
+	 * Obtains consistent entity.
+	 * 
+	 * @param <E>              Type of entity.
+	 * @param getEntity        Obtains the entity.
+	 * @param checkConsistency Checks the consistency of the entity.
+	 * @return Entity (in consistent state).
+	 * @throws TimeoutException If times out waiting to become consistent.
+	 */
+	public <E> E getConsistent(Supplier<E> getEntity, Function<E, Boolean> checkConsistency) throws TimeoutException {
+
+		// Ensure within rule
+		this.ensureWithinRule("get(...)");
+
+		// Attempt to retrieve entity in consistent state
+		long endTime = System.currentTimeMillis() + this.timeout;
+		for (;;) {
+
+			// Obtain the entity
+			E entity = getEntity.get();
+
+			// Determine if consistent
+			if ((entity != null) && (checkConsistency.apply(entity))) {
+				return entity;
+			}
+
+			// Determine if timed out
+			if (endTime < System.currentTimeMillis()) {
+				throw new TimeoutException("Timed out retrieving "
+						+ (entity != null ? entity.getClass().getSimpleName() : "entity") + " in consistent state");
+			}
+
+			// Wait some time
+			try {
+				Thread.sleep(this.retry);
+			} catch (InterruptedException ex) {
+				throw new TimeoutException("Interrupted retrieving entity");
+			}
+
+		}
 	}
 
 	/**

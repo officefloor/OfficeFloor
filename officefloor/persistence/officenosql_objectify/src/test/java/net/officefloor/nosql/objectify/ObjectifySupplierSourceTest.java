@@ -108,6 +108,15 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 				MockEntity foundByFirst = rule.get(MockEntity.class);
 				assertEquals("Should find entity by first", "TEST", foundByFirst.getStringValue());
 
+				// Update the entity (allowing eventual consistency)
+				entity.setStringValue("CHANGED");
+				rule.ofy().save().entities(entity).now();
+
+				// Ensure can retrieve once consistent
+				MockEntity consistentEntity = rule.getConsistent(() -> rule.get(MockEntity.class, entity.getId()),
+						(checkEntity) -> "CHANGED".equals(checkEntity.getStringValue()));
+				assertEquals("Should have consistent entity", "CHANGED", consistentEntity.getStringValue());
+
 				isValid.value = true;
 			}
 		}, null).evaluate();
