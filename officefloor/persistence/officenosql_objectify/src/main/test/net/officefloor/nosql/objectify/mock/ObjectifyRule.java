@@ -235,7 +235,7 @@ public class ObjectifyRule implements TestRule {
 	 * @return Entity (in consistent state).
 	 * @throws TimeoutException If times out waiting to become consistent.
 	 */
-	public <E> E getConsistent(Supplier<E> getEntity, Function<E, Boolean> checkConsistency) throws TimeoutException {
+	public <E> E consistent(Supplier<E> getEntity, Function<E, Boolean> checkConsistency) throws TimeoutException {
 
 		// Ensure within rule
 		this.ensureWithinRule("get(...)");

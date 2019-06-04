@@ -113,7 +113,7 @@ public class ObjectifySupplierSourceTest extends OfficeFrameTestCase {
 				rule.ofy().save().entities(entity).now();
 
 				// Ensure can retrieve once consistent
-				MockEntity consistentEntity = rule.getConsistent(() -> rule.get(MockEntity.class, entity.getId()),
+				MockEntity consistentEntity = rule.consistent(() -> rule.get(MockEntity.class, entity.getId()),
 						(checkEntity) -> "CHANGED".equals(checkEntity.getStringValue()));
 				assertEquals("Should have consistent entity", "CHANGED", consistentEntity.getStringValue());
 
