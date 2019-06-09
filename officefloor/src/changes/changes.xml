@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.10.2" date="In SCM" description="Windows compatible">
+		<release version="3.10.3" date="In SCM" description="Subscription server">
+			<action type="add" dev="sagenschneider">Subscription server</action>
+		</release>
+		<release version="3.10.2" date="2019-05-19" description="Windows compatible">
 			<action type="add" dev="sagenschneider">Windows compatible</action>
 		</release>
 		<release version="3.10.1" date="2019-05-15" description="Profile fix for POMs">
