@@ -258,6 +258,39 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 	}
 
 	/**
+	 * Create {@link MockHttpRequestBuilder} for JSON payload.
+	 * 
+	 * @param method     {@link HttpMethod}.
+	 * @param jsonObject JSON object.
+	 * @return {@link MockHttpRequestBuilder}.
+	 */
+	public static MockHttpRequestBuilder mockJsonRequest(HttpMethod method, Object jsonObject) {
+		return mockJsonRequest(method, "/", jsonObject);
+	}
+
+	/**
+	 * Create {@link MockHttpRequestBuilder} for JSON payload.
+	 * 
+	 * @param method     {@link HttpMethod}.
+	 * @param requestUri Request URI.
+	 * @param jsonObject JSON object.
+	 * @return {@link MockHttpRequestBuilder}.
+	 */
+	public static MockHttpRequestBuilder mockJsonRequest(HttpMethod method, String requestUri, Object jsonObject) {
+
+		// Create the entity
+		String entity;
+		try {
+			entity = mapper.writeValueAsString(jsonObject);
+		} catch (IOException ex) {
+			throw new AssertionError(ex.getMessage(), ex);
+		}
+
+		// Create request for JSON
+		return mockRequest(requestUri).method(method).header("content-type", "application/json").entity(entity);
+	}
+
+	/**
 	 * {@link OfficeFloor}.
 	 */
 	private OfficeFloor officeFloor;

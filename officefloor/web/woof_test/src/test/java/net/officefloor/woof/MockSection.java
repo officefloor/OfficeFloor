@@ -17,6 +17,8 @@
  */
 package net.officefloor.woof;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -24,6 +26,7 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.HttpSessionStateful;
 import net.officefloor.web.ObjectResponse;
@@ -85,13 +88,30 @@ public class MockSection {
 		response.send(isSameThread ? "SAME THREAD" : "DIFFERENT THREAD");
 	}
 
-	/**
-	 * JSON object to respond.
-	 */
-	public static volatile Object jsonObject = null;
+	@HttpObject
+	public static class MockJsonObject {
 
-	public void json(ObjectResponse<Object> response) {
-		response.send(jsonObject);
+		private String text = "TEST";
+
+		public MockJsonObject() {
+		}
+
+		public MockJsonObject(String text) {
+			this.text = text;
+		}
+
+		public String getText() {
+			return this.text;
+		}
+
+		public void setText(String text) {
+			this.text = text;
+		}
+	}
+
+	public void json(ServerHttpConnection connection, MockJsonObject request, ObjectResponse<Object> response) {
+		assertEquals("application/json", connection.getRequest().getHeaders().getHeader("content-type").getValue());
+		response.send(request);
 	}
 
 	/**

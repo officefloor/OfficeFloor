@@ -38,12 +38,14 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpClientTestUtil;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.woof.MockSection;
+import net.officefloor.woof.MockSection.MockJsonObject;
 import net.officefloor.woof.WoofLoaderExtensionService;
 import net.officefloor.woof.mock.MockWoofServer.MockWoofInput;
 
@@ -106,20 +108,13 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can verify JSON response.
+	 * Ensure can send and verify JSON.
 	 */
-	public void testJsonResponse() throws Exception {
-		MockJsonObject object = new MockJsonObject();
-		MockSection.jsonObject = object;
-		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/json"));
+	public void testJson() throws Exception {
+		MockJsonObject object = new MockJsonObject("MOCK JSON");
+		MockWoofResponse response = this.server.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/json", object));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		response.assertJson(200, object);
-	}
-
-	public static class MockJsonObject {
-		public String getText() {
-			return "TEST";
-		}
 	}
 
 	/**
