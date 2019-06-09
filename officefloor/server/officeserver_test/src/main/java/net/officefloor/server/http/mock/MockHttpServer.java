@@ -140,7 +140,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * @return {@link MockHttpRequestBuilder}.
 	 */
 	public static MockHttpResponseBuilder mockResponse() {
-		return new MockHttpResponseBuilderImpl((MockHttpRequestBuilderImpl) mockRequest("/mock"));
+		return new MockHttpResponseBuilderImpl((MockHttpRequestBuilderImpl) mockRequest("/mock"), new MockHttpServer());
 	}
 
 	/**
@@ -179,12 +179,14 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * Creates the {@link ProcessAwareServerHttpConnectionManagedObject}.
 	 * 
 	 * @param request        {@link MockHttpRequestBuilder}.
+	 * @param server         {@link MockHttpServer}.
 	 * @param serverLocation {@link HttpServerLocation}.
 	 * @param callback       {@link MockHttpRequestCallback}.
 	 * @return {@link ProcessAwareServerHttpConnectionManagedObject}.
 	 */
 	private static ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> createServerHttpConnection(
-			MockHttpRequestBuilder request, HttpServerLocation serverLocation, MockHttpRequestCallback callback) {
+			MockHttpRequestBuilder request, MockHttpServer server, HttpServerLocation serverLocation,
+			MockHttpRequestCallback callback) {
 
 		// Ensure have implementation
 		if (!(request instanceof MockHttpRequestBuilderImpl)) {
@@ -213,7 +215,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		}
 
 		// Handle response
-		HttpResponseWriter<ByteBuffer> responseWriter = new MockHttpResponseWriter(impl, callback, checkBufferPool);
+		HttpResponseWriter<ByteBuffer> responseWriter = new MockHttpResponseWriter(impl, server, callback,
+				checkBufferPool);
 
 		// Create the server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = new ProcessAwareServerHttpConnectionManagedObject<>(
@@ -246,7 +249,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 		// Create the server HTTP connection
 		ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection = createServerHttpConnection(request, this,
-				callback);
+				this, callback);
 
 		// Service the request
 		this.serviceInput.service(connection, connection.getServiceFlowCallback());
@@ -263,6 +266,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		private final MockHttpRequestBuilderImpl request;
 
 		/**
+		 * {@link MockHttpServer}.
+		 */
+		private final MockHttpServer server;
+
+		/**
 		 * {@link MockHttpRequestCallback}.
 		 */
 		private final MockHttpRequestCallback callback;
@@ -276,14 +284,16 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 * Instantiate.
 		 * 
 		 * @param request    {@link MockHttpRequestBuilderImpl}.
+		 * @param server     {@link MockHttpServer}.
 		 * @param callback   {@link MockHttpRequestCallback}.
 		 * @param bufferPool {@link MockStreamBufferPool} to check all
 		 *                   {@link StreamBuffer} instances are released on writing
 		 *                   {@link HttpResponse}. May be <code>null</code>.
 		 */
-		private MockHttpResponseWriter(MockHttpRequestBuilderImpl request, MockHttpRequestCallback callback,
-				MockStreamBufferPool bufferPool) {
+		private MockHttpResponseWriter(MockHttpRequestBuilderImpl request, MockHttpServer server,
+				MockHttpRequestCallback callback, MockStreamBufferPool bufferPool) {
 			this.request = request;
+			this.server = server;
 			this.callback = callback;
 			this.bufferPool = bufferPool;
 		}
@@ -338,7 +348,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 				}
 
 				// Create the response
-				MockHttpResponseImpl response = new MockHttpResponseImpl(this.request, version, status, headers,
+				MockHttpResponse response = this.server.createMockHttpResponse(this.request, version, status, headers,
 						cookies, new ByteArrayInputStream(responseEntity));
 
 				// Response received
@@ -346,7 +356,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 			} catch (Throwable ex) {
 				// Provide failed HTTP response
-				this.callback.response(new MockHttpResponseImpl(this.request, ex));
+				this.callback.response(this.server.createMockHttpResponse(this.request, ex));
 			}
 		}
 	}
@@ -368,6 +378,33 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 
 		// Block waiting for response
 		return callback.waitForResponse(1000);
+	}
+
+	/**
+	 * Creates the {@link MockHttpResponse}.
+	 * 
+	 * @param request           {@link MockHttpRequest}.
+	 * @param version           {@link HttpVersion}.
+	 * @param status            {@link HttpStatus}.
+	 * @param headers           {@link WritableHttpHeader} instances.
+	 * @param cookies           {@link WritableHttpCookie} instances.
+	 * @param entityInputStream Entity.
+	 * @return {@link MockHttpResponse}.
+	 */
+	protected MockHttpResponse createMockHttpResponse(MockHttpRequest request, HttpVersion version, HttpStatus status,
+			List<WritableHttpHeader> headers, List<WritableHttpCookie> cookies, InputStream entityInputStream) {
+		return new MockHttpResponseImpl(request, version, status, headers, cookies, entityInputStream);
+	}
+
+	/**
+	 * Creates the {@link MockHttpResponse}.
+	 * 
+	 * @param request {@link MockHttpRequest}.
+	 * @param failure Failure in servicing.
+	 * @return {@link MockHttpResponse}.
+	 */
+	protected MockHttpResponse createMockHttpResponse(MockHttpRequest request, Throwable failure) {
+		return new MockHttpResponseImpl(request, failure);
 	}
 
 	/*
@@ -424,7 +461,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	/**
 	 * {@link MockHttpRequestBuilder} implementation.
 	 */
-	private static class MockHttpRequestBuilderImpl implements MockHttpRequestBuilder, NonMaterialisedHttpHeaders {
+	private static class MockHttpRequestBuilderImpl
+			implements MockHttpRequestBuilder, NonMaterialisedHttpHeaders, MockHttpRequest {
 
 		/**
 		 * Indicates if secure.
@@ -576,6 +614,15 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		@Override
 		public int length() {
 			return this.headers.size();
+		}
+
+		/*
+		 * ======================= MockHttpRequest ===========================
+		 */
+
+		@Override
+		public String getRequestUri() {
+			return this.requestUri;
 		}
 	}
 
@@ -771,6 +818,11 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		private final MockHttpRequestBuilderImpl request;
 
 		/**
+		 * {@link MockHttpServer}.
+		 */
+		private final MockHttpServer server;
+
+		/**
 		 * Delegate {@link HttpResponse}.
 		 */
 		private final ProcessAwareHttpResponse<ByteBuffer> delegate;
@@ -785,14 +837,16 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 * 
 		 * @param request {@link MockHttpRequestBuilderImpl} for the
 		 *                {@link MockHttpResponse}.
+		 * @param server  {@link MockHttpServer}.
 		 */
-		private MockHttpResponseBuilderImpl(MockHttpRequestBuilderImpl request) {
+		private MockHttpResponseBuilderImpl(MockHttpRequestBuilderImpl request, MockHttpServer server) {
 			this.request = request;
+			this.server = server;
 			MockStreamBufferPool bufferPool = new MockStreamBufferPool();
 			HttpServerLocation serverLocation = new MockHttpServer();
 			ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> serverHttpConnection = new ProcessAwareServerHttpConnectionManagedObject<>(
 					serverLocation, false, () -> HttpMethod.GET, () -> "/", HttpVersion.HTTP_1_1, null, null, null,
-					null, true, new MockHttpResponseWriter(this.request, this, null), bufferPool);
+					null, true, new MockHttpResponseWriter(this.request, this.server, this, null), bufferPool);
 			this.delegate = new ProcessAwareHttpResponse<>(serverHttpConnection, HttpVersion.HTTP_1_1,
 					new MockProcessAwareContext());
 		}
@@ -887,7 +941,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 				// Write the response (to obtain mock HTTP response)
 				this.delegate.flushResponseToHttpResponseWriter(null);
 			} catch (IOException ex) {
-				this.response = new MockHttpResponseImpl(this.request, ex);
+				this.response = this.server.createMockHttpResponse(this.request, ex);
 			}
 
 			// Return the built response
@@ -906,14 +960,27 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	}
 
 	/**
-	 * {@link MockHttpResponse} implementation.
+	 * HTTP request details for the {@link MockHttpResponse}.
 	 */
-	private static class MockHttpResponseImpl implements MockHttpResponse {
+	protected static interface MockHttpRequest {
 
 		/**
-		 * {@link MockHttpRequestBuilderImpl} for this {@link MockHttpResponse}.
+		 * Obtains the request URI.
+		 * 
+		 * @return Request URI.
 		 */
-		private final MockHttpRequestBuilderImpl request;
+		String getRequestUri();
+	}
+
+	/**
+	 * {@link MockHttpResponse} implementation.
+	 */
+	protected static class MockHttpResponseImpl implements MockHttpResponse {
+
+		/**
+		 * {@link MockHttpRequest} for this {@link MockHttpResponse}.
+		 */
+		private final MockHttpRequest request;
 
 		/**
 		 * {@link HttpVersion}.
@@ -948,7 +1015,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Loads the response.
 		 *
-		 * @param request           {@link MockHttpRequestBuilderImpl} for this
+		 * @param request           {@link MockHttpRequest} for this
 		 *                          {@link MockHttpResponse}.
 		 * @param version           {@link HttpVersion}.
 		 * @param status            {@link HttpStatus}.
@@ -957,7 +1024,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 *                          instances.
 		 * @param entityInputStream HTTP entity {@link InputStream}.
 		 */
-		private MockHttpResponseImpl(MockHttpRequestBuilderImpl request, HttpVersion version, HttpStatus status,
+		protected MockHttpResponseImpl(MockHttpRequest request, HttpVersion version, HttpStatus status,
 				List<WritableHttpHeader> headers, List<WritableHttpCookie> cookies, InputStream entityInputStream) {
 			this.request = request;
 			this.version = version;
@@ -971,14 +1038,10 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * Loads with response failure.
 		 * 
-		 * @param request           {@link MockHttpRequestBuilderImpl} for this
-		 *                          {@link MockHttpResponse}.
-		 * @param version           {@link HttpVersion}.
-		 * @param status            {@link HttpStatus}.
-		 * @param headers           {@link List} of {@link HttpHeader} instances.
-		 * @param entityInputStream HTTP entity {@link InputStream}.
+		 * @param request {@link MockHttpRequest} for this {@link MockHttpResponse}.
+		 * @param failure {@link Throwable}.
 		 */
-		private MockHttpResponseImpl(MockHttpRequestBuilderImpl request, Throwable failure) {
+		protected MockHttpResponseImpl(MockHttpRequest request, Throwable failure) {
 			this.request = request;
 			this.failure = failure;
 			this.version = null;
@@ -994,7 +1057,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 * @return Details of the {@link HttpRequest}.
 		 */
 		private String getRequestInfo() {
-			return this.request.requestUri;
+			return this.request.getRequestUri();
 		}
 
 		/**
@@ -1144,7 +1207,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		 * @param request {@link MockHttpRequestBuilder}.
 		 */
 		public MockServerHttpConnectionImpl(MockHttpRequestBuilder request) {
-			this.delegate = createServerHttpConnection(request, new MockHttpServer(), this);
+			MockHttpServer server = new MockHttpServer();
+			this.delegate = createServerHttpConnection(request, server, server, this);
 			this.delegate.setProcessAwareContext(new MockProcessAwareContext());
 		}
 

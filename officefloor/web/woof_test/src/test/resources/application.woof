@@ -10,7 +10,16 @@
 		<http-continuation path="/teams">
 			<section name="Section" input="teams" />
 		</http-continuation>
+		<http-continuation path="/failure">
+			<section name="Section" input="failure" />
+		</http-continuation>
 	</http-continuations>
+	
+	<http-inputs>
+		<http-input method="POST" path="/json">
+			<section name="Section" input="json" />
+		</http-input>
+	</http-inputs>
 
 	<templates>
 		<template path="/template" location="template.ofp" />
@@ -22,6 +31,8 @@
 			<input name="service" />
 			<input name="objects" />
 			<input name="teams" />
+			<input name="json" />
+			<input name="failure" />
 		</section>
 	</sections>
 

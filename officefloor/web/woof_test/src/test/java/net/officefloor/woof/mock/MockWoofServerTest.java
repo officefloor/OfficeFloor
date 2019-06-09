@@ -37,10 +37,15 @@ import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpClientTestUtil;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.web.build.HttpInput;
+import net.officefloor.woof.MockSection;
+import net.officefloor.woof.MockSection.MockJsonObject;
 import net.officefloor.woof.WoofLoaderExtensionService;
 import net.officefloor.woof.mock.MockWoofServer.MockWoofInput;
 
@@ -100,6 +105,38 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 	public void testTeam() throws Exception {
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/teams"));
 		response.assertResponse(200, "\"DIFFERENT THREAD\"");
+	}
+
+	/**
+	 * Ensure can send and verify JSON.
+	 */
+	public void testJson() throws Exception {
+		MockJsonObject object = new MockJsonObject("MOCK JSON");
+		MockWoofResponse response = this.server.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/json", object));
+		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+		response.assertJson(200, object);
+	}
+
+	/**
+	 * Ensure can use convenient JSON {@link HttpException} assertion.
+	 */
+	public void testJsonHttpException() throws Exception {
+		Throwable failure = new HttpException(HttpStatus.FORBIDDEN, "Mock Failure");
+		MockSection.failure = failure;
+		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/failure"));
+		assertEquals("Should be correct status", 403, response.getStatus().getStatusCode());
+		response.assertJsonError(failure);
+	}
+
+	/**
+	 * Ensure can use convenient JSON error assertion.
+	 */
+	public void testJsonError() throws Exception {
+		Throwable failure = new IOException("Mock Failure");
+		MockSection.failure = failure;
+		MockWoofResponse response = this.server.send(MockWoofServer.mockRequest("/failure"));
+		assertEquals("Should be correct status", 500, response.getStatus().getStatusCode());
+		response.assertJsonError(failure);
 	}
 
 	/**
