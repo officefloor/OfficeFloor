@@ -17,6 +17,8 @@
  */
 package net.officefloor.woof.mock;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.mock.MockHttpResponse;
@@ -27,6 +29,25 @@ import net.officefloor.server.http.mock.MockHttpResponse;
  * @author Daniel Sagenschneider
  */
 public interface MockWoofResponse extends MockHttpResponse {
+
+	/**
+	 * Asserts the JSON response.
+	 * 
+	 * @param statusCode           {@link HttpStatus}.
+	 * @param entity               {@link Object} to be written as JSON.
+	 * @param headerNameValuePairs Expected {@link HttpHeader} name/value pairs.
+	 */
+	void assertJson(int statusCode, Object entity, String... headerNameValuePairs);
+
+	/**
+	 * Asserts the JSON response providing custom {@link ObjectMapper}.
+	 * 
+	 * @param statusCode           {@link HttpStatus}.
+	 * @param entity               {@link Object} to be written as JSON.
+	 * @param mapper               Custom {@link ObjectMapper}.
+	 * @param headerNameValuePairs Expected {@link HttpHeader} name/value pairs.
+	 */
+	void assertJson(int statusCode, Object entity, ObjectMapper mapper, String... headerNameValuePairs);
 
 	/**
 	 * Asserts a JSON error.

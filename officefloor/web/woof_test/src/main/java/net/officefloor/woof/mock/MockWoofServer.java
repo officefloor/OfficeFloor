@@ -319,6 +319,26 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 		 */
 
 		@Override
+		public void assertJson(int statusCode, Object entity, String... headerNameValuePairs) {
+			this.assertJson(statusCode, entity, mapper, headerNameValuePairs);
+		}
+
+		@Override
+		public void assertJson(int statusCode, Object entity, ObjectMapper mapper, String... headerNameValuePairs) {
+
+			// Create the expected entity
+			String expectedEntity;
+			try {
+				expectedEntity = mapper.writeValueAsString(entity);
+			} catch (IOException ex) {
+				throw new AssertionError(ex.getMessage(), ex);
+			}
+
+			// Assert the JSON response
+			this.assertResponse(statusCode, expectedEntity, headerNameValuePairs);
+		}
+
+		@Override
 		public void assertJsonError(Throwable failure, String... headerNameValuePairs) {
 
 			// Obtain the failure status code

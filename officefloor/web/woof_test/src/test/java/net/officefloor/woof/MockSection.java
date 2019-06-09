@@ -85,8 +85,23 @@ public class MockSection {
 		response.send(isSameThread ? "SAME THREAD" : "DIFFERENT THREAD");
 	}
 
+	/**
+	 * JSON object to respond.
+	 */
+	public static volatile Object jsonObject = null;
+
+	public void json(ObjectResponse<Object> response) {
+		response.send(jsonObject);
+	}
+
+	/**
+	 * Failure to be thrown for testing.
+	 */
 	public static volatile Throwable failure = null;
 
+	/**
+	 * Services via throwing failure.
+	 */
 	public void failure() throws Throwable {
 		throw failure;
 	}

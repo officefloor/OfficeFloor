@@ -10,6 +10,9 @@
 		<http-continuation path="/teams">
 			<section name="Section" input="teams" />
 		</http-continuation>
+		<http-continuation path="/json">
+			<section name="Section" input="json" />
+		</http-continuation>
 		<http-continuation path="/failure">
 			<section name="Section" input="failure" />
 		</http-continuation>
@@ -25,6 +28,7 @@
 			<input name="service" />
 			<input name="objects" />
 			<input name="teams" />
+			<input name="json" />
 			<input name="failure" />
 		</section>
 	</sections>
