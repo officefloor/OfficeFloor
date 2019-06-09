@@ -85,4 +85,10 @@ public class MockSection {
 		response.send(isSameThread ? "SAME THREAD" : "DIFFERENT THREAD");
 	}
 
+	public static volatile Throwable failure = null;
+
+	public void failure() throws Throwable {
+		throw failure;
+	}
+
 }

@@ -17,11 +17,16 @@
  */
 package net.officefloor.woof.mock;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -30,12 +35,20 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpServerLocation;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.server.http.WritableHttpCookie;
+import net.officefloor.server.http.WritableHttpHeader;
+import net.officefloor.server.http.mock.MockHttpRequestBuilder;
+import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.woof.WoOF;
 import net.officefloor.woof.WoofLoaderExtensionService;
 import net.officefloor.woof.WoofLoaderExtensionService.WoofLoaderRunnableContext;
@@ -49,6 +62,11 @@ import net.officefloor.woof.WoofLoaderExtensionService.WoofLoaderRunnableContext
  * @author Daniel Sagenschneider
  */
 public class MockWoofServer extends MockHttpServer implements AutoCloseable {
+
+	/**
+	 * {@link ObjectMapper}.
+	 */
+	private static final ObjectMapper mapper = new ObjectMapper();
 
 	/**
 	 * Annotates service methods for the {@link ClassSectionSource}.
@@ -254,12 +272,80 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 	}
 
 	/*
+	 * ================== MockHttpServer =======================
+	 */
+
+	@Override
+	protected MockHttpResponse createMockHttpResponse(MockHttpRequest request, HttpVersion version, HttpStatus status,
+			List<WritableHttpHeader> headers, List<WritableHttpCookie> cookies, InputStream entityInputStream) {
+		return new MockWoofResponseImpl(request, version, status, headers, cookies, entityInputStream);
+	}
+
+	@Override
+	protected MockHttpResponse createMockHttpResponse(MockHttpRequest request, Throwable failure) {
+		return new MockWoofResponseImpl(request, failure);
+	}
+
+	@Override
+	public MockWoofResponse send(MockHttpRequestBuilder request) {
+		return (MockWoofResponse) super.send(request);
+	}
+
+	/*
 	 * =================== AutoCloseable =======================
 	 */
 
 	@Override
 	public void close() throws Exception {
 		this.officeFloor.closeOfficeFloor();
+	}
+
+	/**
+	 * {@link MockWoofResponse} implementation.
+	 */
+	protected class MockWoofResponseImpl extends MockHttpResponseImpl implements MockWoofResponse {
+
+		protected MockWoofResponseImpl(MockHttpRequest request, HttpVersion version, HttpStatus status,
+				List<WritableHttpHeader> headers, List<WritableHttpCookie> cookies, InputStream entityInputStream) {
+			super(request, version, status, headers, cookies, entityInputStream);
+		}
+
+		public MockWoofResponseImpl(MockHttpRequest request, Throwable failure) {
+			super(request, failure);
+		}
+
+		/*
+		 * ======================== MockWoofResponse =======================
+		 */
+
+		@Override
+		public void assertJsonError(Throwable failure, String... headerNameValuePairs) {
+
+			// Obtain the failure status code
+			int statusCode = HttpStatus.INTERNAL_SERVER_ERROR.getStatusCode();
+			if (failure instanceof HttpException) {
+				HttpException httpException = (HttpException) failure;
+				statusCode = httpException.getHttpStatus().getStatusCode();
+			}
+
+			// Assert the JSON error
+			this.assertJsonError(statusCode, failure, headerNameValuePairs);
+		}
+
+		@Override
+		public void assertJsonError(int httpStatus, Throwable failure, String... headerNameValuePairs) {
+
+			// Create the expected entity
+			String expectedEntity;
+			try {
+				expectedEntity = JacksonHttpObjectResponderFactory.getEntity(failure, mapper);
+			} catch (IOException ex) {
+				throw new AssertionError(ex.getMessage(), ex);
+			}
+
+			// Assert the response
+			this.assertResponse(httpStatus, expectedEntity, headerNameValuePairs);
+		}
 	}
 
 }
