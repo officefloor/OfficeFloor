@@ -124,7 +124,7 @@ public class MockWoofServerTest extends OfficeFrameTestCase {
 		MockJsonObject object = new MockJsonObject("MOCK JSON");
 		MockWoofResponse response = this.server.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, "/json", object));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		MockJsonObject jsonObject = response.getJson(MockJsonObject.class);
+		MockJsonObject jsonObject = response.getJson(200, MockJsonObject.class);
 		assertEquals("Incorrect JSON text", "MOCK JSON", jsonObject.getText());
 	}
 

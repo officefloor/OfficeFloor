@@ -26,6 +26,8 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.junit.Assert;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -352,14 +354,21 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 		 */
 
 		@Override
-		public <T> T getJson(Class<T> clazz) {
-			return this.getJson(clazz, mapper);
+		public <T> T getJson(int statusCode, Class<T> clazz) {
+			return this.getJson(statusCode, clazz, mapper);
 		}
 
 		@Override
-		public <T> T getJson(Class<T> clazz, ObjectMapper mapper) {
+		public <T> T getJson(int statusCode, Class<T> clazz, ObjectMapper mapper) {
+
+			// Obtain the entity and verify appropriate status
+			String entity = this.getEntity(null);
+			Assert.assertEquals("Incorrect status for " + this.request.getRequestUri() + ": "
+					+ ("".equals(entity) ? "[empty]" : entity), statusCode, this.getStatus().getStatusCode());
+
+			// Return the JSON object from entity
 			try {
-				return mapper.readValue(this.getEntity(null), clazz);
+				return mapper.readValue(entity, clazz);
 			} catch (IOException ex) {
 				throw new AssertionError(ex.getMessage(), ex);
 			}

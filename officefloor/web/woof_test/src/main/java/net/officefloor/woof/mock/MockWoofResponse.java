@@ -33,21 +33,23 @@ public interface MockWoofResponse extends MockHttpResponse {
 	/**
 	 * Obtains the JSON object from HTTP payload.
 	 * 
-	 * @param <T>   Type of object.
-	 * @param clazz {@link Class} for the JSON object.
+	 * @param <T>        Type of object.
+	 * @param statusCode {@link HttpStatus}.
+	 * @param clazz      {@link Class} for the JSON object.
 	 * @return JSON object.
 	 */
-	<T> T getJson(Class<T> clazz);
+	<T> T getJson(int statusCode, Class<T> clazz);
 
 	/**
 	 * Obtains the JSON object from HTTP payload using custom {@link ObjectMapper}.
 	 * 
-	 * @param <T>    Type of object.
-	 * @param clazz  {@link Class} for the JSON object.
-	 * @param mapper Custom {@link ObjectMapper}.
+	 * @param <T>        Type of object.
+	 * @param statusCode {@link HttpStatus}.
+	 * @param clazz      {@link Class} for the JSON object.
+	 * @param mapper     Custom {@link ObjectMapper}.
 	 * @return JSON object.
 	 */
-	<T> T getJson(Class<T> clazz, ObjectMapper mapper);
+	<T> T getJson(int statusCode, Class<T> clazz, ObjectMapper mapper);
 
 	/**
 	 * Asserts the JSON response.
