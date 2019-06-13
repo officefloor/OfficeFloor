@@ -980,37 +980,37 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		/**
 		 * {@link MockHttpRequest} for this {@link MockHttpResponse}.
 		 */
-		private final MockHttpRequest request;
+		protected final MockHttpRequest request;
 
 		/**
 		 * {@link HttpVersion}.
 		 */
-		private final HttpVersion version;
+		protected final HttpVersion version;
 
 		/**
 		 * {@link HttpStatus}.
 		 */
-		private final HttpStatus status;
+		protected final HttpStatus status;
 
 		/**
 		 * {@link HttpHeader} instances.
 		 */
-		private final List<WritableHttpHeader> headers;
+		protected final List<WritableHttpHeader> headers;
 
 		/**
 		 * {@link HttpResponseCookie} instances.
 		 */
-		private final List<WritableHttpCookie> cookies;
+		protected final List<WritableHttpCookie> cookies;
 
 		/**
 		 * HTTP entity {@link InputStream}.
 		 */
-		private final InputStream entityInputStream;
+		protected final InputStream entityInputStream;
 
 		/**
 		 * Possible failure in writing the response.
 		 */
-		private final Throwable failure;
+		protected final Throwable failure;
 
 		/**
 		 * Loads the response.
