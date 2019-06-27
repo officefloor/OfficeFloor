@@ -87,7 +87,7 @@
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.36.Final</netty-version>
 		<objectify-version>6.0.4</objectify-version>
-		<postgresql-version>42.2.5</postgresql-version>
+		<postgresql-version>42.2.6</postgresql-version>
 		<rapidoid-version>5.5.4</rapidoid-version>
 		<scala-maven-version>4.0.2</scala-maven-version>
 		<scala-version>2.12.8</scala-version>

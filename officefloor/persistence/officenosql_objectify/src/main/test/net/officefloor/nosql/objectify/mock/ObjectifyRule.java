@@ -125,8 +125,8 @@ public class ObjectifyRule implements TestRule {
 	 * <p>
 	 * Will retry to obtain the entity or timeout.
 	 * 
-	 * @param type   Type of entity.
-	 * @param loader {@link QueryLoader}.
+	 * @param type Type of entity.
+	 * @param id   Id of entity.
 	 * @return Entity.
 	 * @throws TimeoutException If waited too long for the entity.
 	 */
@@ -271,11 +271,9 @@ public class ObjectifyRule implements TestRule {
 	/**
 	 * Stores the entities.
 	 * 
-	 * @param type         Type of entity.
-	 * @param expectedSize Expected list size.
-	 * @param loader       {@link QueryLoader}.
-	 * @return List of entity.
-	 * @throws TimeoutException If waited too long the list of entities.
+	 * @param entities Entities to store.
+	 * @throws TimeoutException If waited too long to store the entities in
+	 *                          consistent exising state.
 	 */
 	@SuppressWarnings("unchecked")
 	public <E> void store(E... entities) throws TimeoutException {
