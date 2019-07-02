@@ -23,7 +23,7 @@ jobs:
         - choco install -y maven
         - export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_211"
         - export "MAVEN_OPTS=-Xmx2048m"
-      script: cd officefloor/bom; /c/ProgramData/chocolatey/lib/maven/bin/mvn -B -DskipTests clean install
+      script: cd officefloor/bom; /c/ProgramData/chocolatey/bin/mvn -B -DskipTests clean install
     - name: Java 11 (Linux)
       os: linux
       dist: xenial
