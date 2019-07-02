@@ -59,11 +59,6 @@ public class GoogleIdTokenRule implements TestRule {
 	private volatile GoogleIdTokenVerifier mockVerifier = null;
 
 	/**
-	 * Google client id.
-	 */
-	private volatile String googleClientId = null;
-
-	/**
 	 * Generates a mock {@link GoogleIdToken} string.
 	 * 
 	 * @param googleId       Google identifier.
@@ -109,20 +104,6 @@ public class GoogleIdTokenRule implements TestRule {
 
 		// Return the verifier
 		return this.mockVerifier;
-	}
-
-	/**
-	 * Obtains the Google client id.
-	 * 
-	 * @return Google client id.
-	 */
-	public String getGoogleClientId() {
-
-		// Ensure mock verifier available
-		this.ensureInContext("google client id");
-
-		// Return the Google client id
-		return this.googleClientId;
 	}
 
 	/**
@@ -178,15 +159,13 @@ public class GoogleIdTokenRule implements TestRule {
 					rule.mockVerifier = new GoogleIdTokenVerifier.Builder(manager).setClock(clock).build();
 
 					// Undertake the test
-					GoogleIdTokenVerifierManagedObjectSource.runWithFactory((audienceId) -> {
-						rule.googleClientId = audienceId;
+					GoogleIdTokenVerifierManagedObjectSource.runWithFactory(() -> {
 						return rule.getGoogleIdTokenVerifier();
 					}, () -> base.evaluate());
 
 				} finally {
 					// Ensure clear mock verifier
 					rule.mockVerifier = null;
-					rule.googleClientId = null;
 				}
 			}
 		};
