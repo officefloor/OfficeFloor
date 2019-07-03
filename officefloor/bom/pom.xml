@@ -51,7 +51,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.10.3</revision>
+		<revision>3.10.4</revision>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
