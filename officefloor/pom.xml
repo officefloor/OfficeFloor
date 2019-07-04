@@ -52,7 +52,7 @@
 		<current.year>2019</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>8</java-lowest-version>
-		<jetty-version>9.4.18.v20190429</jetty-version>
+		<jetty-version>9.4.19.v20190610</jetty-version>
 		<maven-version>3.6.1</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>

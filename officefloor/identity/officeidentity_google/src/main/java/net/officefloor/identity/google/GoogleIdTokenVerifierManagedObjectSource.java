@@ -1,6 +1,7 @@
 package net.officefloor.identity.google;
 
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.HttpTransport;
@@ -8,35 +9,33 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectFunctionBuilder;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.managedobject.poll.StatePollContext;
+import net.officefloor.plugin.managedobject.poll.StatePoller;
 
 /**
  * {@link ManagedObjectSource} for the {@link GoogleIdTokenVerifier}.
  * 
  * @author Daniel Sagenschneider
  */
-public class GoogleIdTokenVerifierManagedObjectSource extends AbstractManagedObjectSource<None, None>
-		implements ManagedObject {
+public class GoogleIdTokenVerifierManagedObjectSource extends
+		AbstractManagedObjectSource<None, GoogleIdTokenVerifierManagedObjectSource.Flows> implements ManagedObject {
 
-	/**
-	 * Factory {@link FunctionalInterface} to create the
-	 * {@link GoogleIdTokenVerifier}.
-	 */
-	@FunctionalInterface
-	public static interface GoogleIdTokenVerifierFactory {
+	public static enum Flows {
+		CONFIGURE
+	}
 
-		/**
-		 * Creates the {@link GoogleIdTokenVerifier}.
-		 *
-		 * @param audienceId Audience identifier.
-		 * @return {@link GoogleIdTokenVerifier}.
-		 * @throws Exception If fails to create the {@link GoogleIdTokenVerifier}.
-		 */
-		GoogleIdTokenVerifier create(String audienceId) throws Exception;
+	public static enum ConfigureDependencies {
+		POLL_CONTEXT, FACTORY
 	}
 
 	/**
@@ -83,9 +82,9 @@ public class GoogleIdTokenVerifierManagedObjectSource extends AbstractManagedObj
 	private static ThreadLocal<GoogleIdTokenVerifierFactory> threadLocalVerifierFactory = new ThreadLocal<>();
 
 	/**
-	 * {@link GoogleIdTokenVerifier}.
+	 * {@link StatePoller} to load the {@link GoogleIdTokenVerifier}.
 	 */
-	private GoogleIdTokenVerifier verifier;
+	private StatePoller<GoogleIdTokenVerifier, Flows> googleIdTokenVerifier;
 
 	/*
 	 * ==================== ManagedObjectSource ============================
@@ -93,27 +92,72 @@ public class GoogleIdTokenVerifierManagedObjectSource extends AbstractManagedObj
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(PROPERTY_CLIENT_ID, "Client ID");
+		// No required specification
 	}
 
 	@Override
-	protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
+	protected void loadMetaData(MetaDataContext<None, Flows> context) throws Exception {
+		ManagedObjectSourceContext<Flows> sourceContext = context.getManagedObjectSourceContext();
+
+		// Load meta-data
 		context.setObjectClass(GoogleIdTokenVerifier.class);
+		context.addFlow(Flows.CONFIGURE, StatePollContext.class);
 
 		// Obtain the verifier factory
 		GoogleIdTokenVerifierFactory factory = threadLocalVerifierFactory.get();
 		if (factory == null) {
 
-			// Default verifier factory
-			JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-			HttpTransport transport = new NetHttpTransport();
-			factory = (audienceId) -> new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-					.setAudience(Collections.singletonList(audienceId)).build();
+			// Determine if configure via property
+			String audienceId = context.getManagedObjectSourceContext().getProperty(PROPERTY_CLIENT_ID, null);
+			if (!CompileUtil.isBlank(audienceId)) {
+				JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+				HttpTransport transport = new NetHttpTransport();
+				factory = () -> new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+						.setAudience(Collections.singletonList(audienceId)).build();
+			}
 		}
 
-		// Load the verifier
-		String audienceId = context.getManagedObjectSourceContext().getProperty(PROPERTY_CLIENT_ID);
-		this.verifier = factory.create(audienceId);
+		// Load PayPal environment
+		final GoogleIdTokenVerifierFactory finalFactory = factory;
+		ManagedObjectFunctionBuilder<Indexed, None> loadVerifier = sourceContext
+				.addManagedFunction(Flows.CONFIGURE.name(), () -> (functionContext) -> {
+
+					// Obtain the dependencies
+					@SuppressWarnings("unchecked")
+					StatePollContext<GoogleIdTokenVerifier> pollContext = (StatePollContext<GoogleIdTokenVerifier>) functionContext
+							.getObject(0);
+					GoogleIdTokenVerifierFactory verifierFactory = finalFactory;
+					if (verifierFactory == null) {
+						verifierFactory = (GoogleIdTokenVerifierFactory) functionContext.getObject(1);
+					}
+
+					// Create the Google Id Token Verifier
+					GoogleIdTokenVerifier verifier = verifierFactory.create();
+					if (verifier == null) {
+						return null; // no verifier available
+					}
+
+					// Load Verifier
+					pollContext.setFinalState(verifier);
+
+					// Nothing further
+					return null;
+				});
+		loadVerifier.linkParameter(0, StatePollContext.class);
+		if (finalFactory == null) {
+			loadVerifier.linkObject(1, sourceContext.addFunctionDependency(
+					GoogleIdTokenVerifierFactory.class.getSimpleName(), GoogleIdTokenVerifierFactory.class));
+		}
+		sourceContext.getFlow(Flows.CONFIGURE).linkFunction(Flows.CONFIGURE.name());
+	}
+
+	@Override
+	public void start(ManagedObjectExecuteContext<Flows> context) throws Exception {
+
+		// Trigger loading verifier
+		this.googleIdTokenVerifier = StatePoller
+				.builder(GoogleIdTokenVerifier.class, Flows.CONFIGURE, context, (pollContext) -> this)
+				.parameter((pollContext) -> pollContext).defaultPollInterval(5, TimeUnit.SECONDS).build();
 	}
 
 	@Override
@@ -127,7 +171,7 @@ public class GoogleIdTokenVerifierManagedObjectSource extends AbstractManagedObj
 
 	@Override
 	public Object getObject() throws Throwable {
-		return this.verifier;
+		return this.googleIdTokenVerifier.getState(20, TimeUnit.SECONDS);
 	}
 
 }
