@@ -292,6 +292,29 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can mock PayPal error.
+	 */
+	public void testPayPalError() throws Throwable {
+		final IOException failure = new IOException("TEST");
+		Closure<Exception> closure = new Closure<>();
+		this.doOrder(MockErrorService.class, closure, (rule) -> rule.addException(failure));
+		assertSame("Should throw failure", failure, closure.value);
+	}
+
+	public static class MockErrorService {
+		public void service(@Parameter Closure<Exception> closure, PayPalHttpClient client) throws IOException {
+			OrdersCaptureRequest request = new OrdersCaptureRequest("ORDER_ID");
+			request.requestBody(new OrderRequest());
+			try {
+				client.execute(request);
+				fail("Should not be successful");
+			} catch (Exception ex) {
+				closure.value = ex;
+			}
+		}
+	}
+
+	/**
 	 * Undertakes interacting with {@link Order}.
 	 * 
 	 * @param sectionSourceClass {@link SectionSource} {@link Class}.
@@ -301,6 +324,25 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 
 		// Ensure mock PayPal
 		Closure<HttpResponse<Order>> closure = new Closure<>();
+		this.doOrder(sectionSourceClass, closure, configurer);
+
+		// Ensure retrieved mocked order
+		HttpResponse<Order> order = closure.value;
+		assertNotNull("Should have order", order);
+		return order;
+	}
+
+	/**
+	 * Undertakes interacting with {@link Order}.
+	 * 
+	 * @param closure            Closure as parameter.
+	 * @param sectionSourceClass {@link SectionSource} {@link Class}.
+	 * @return {@link HttpResponse}.
+	 */
+	private <R> void doOrder(Class<?> sectionSourceClass, Closure<?> closure, Consumer<PayPalRule> configurer)
+			throws Throwable {
+
+		// Ensure mock PayPal
 		PayPalRule rule = new PayPalRule();
 		rule.apply(new Statement() {
 			@Override
@@ -331,11 +373,6 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 				CompileOfficeFloor.invokeProcess(PayPalHttpClientTest.this.officeFloor, "SECTION.service", closure);
 			}
 		}, null).evaluate();
-
-		// Ensure retrieved mocked order
-		HttpResponse<Order> order = closure.value;
-		assertNotNull("Should have order", order);
-		return order;
 	}
 
 	private static class MockPayPalConfigurationRepository implements PayPalConfigurationRepository {
