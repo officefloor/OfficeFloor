@@ -952,7 +952,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 			FunctionManager function = officeFloor.getOffice("OFFICE").getFunctionManager("test.doInput");
 
 			// Run invoking flow
-			function.invokeProcess(Boolean.valueOf(true), null);
+			function.invokeProcess(true, null);
 			assertEquals("Incorrect value on invoking flow", "doInput -> oldName(Flow) -> finished", returnValue.value);
 
 			// Run using next function
