@@ -252,12 +252,6 @@ public class ObjectifyRule implements TestRule {
 				return entity;
 			}
 
-			// Determine if timed out
-			if (endTime < System.currentTimeMillis()) {
-				throw new TimeoutException("Timed out retrieving "
-						+ (entity != null ? entity.getClass().getSimpleName() : "entity") + " in consistent state");
-			}
-
 			// Wait some time
 			try {
 				Thread.sleep(this.retry);
@@ -265,6 +259,14 @@ public class ObjectifyRule implements TestRule {
 				throw new TimeoutException("Interrupted retrieving entity");
 			}
 
+			// Determine if timed out
+			if (endTime < System.currentTimeMillis()) {
+				throw new TimeoutException("Timed out retrieving "
+						+ (entity != null ? entity.getClass().getSimpleName() : "entity") + " in consistent state");
+			}
+
+			// Clear cache and try again
+			this.ofy().clear();
 		}
 	}
 
