@@ -57,7 +57,7 @@
 		<ant-jsch-version>1.10.5</ant-jsch-version>
 		<affinity-version>3.1.11</affinity-version>
 		<commons-codec-version>1.12</commons-codec-version>
-		<commons-text-version>1.6</commons-text-version>
+		<commons-text-version>1.7</commons-text-version>
 		<datanucleus-version>5.2.1</datanucleus-version>
 		<docker-client-version>8.16.0</docker-client-version>
 		<dokka-maven-version>0.9.18</dokka-maven-version>
