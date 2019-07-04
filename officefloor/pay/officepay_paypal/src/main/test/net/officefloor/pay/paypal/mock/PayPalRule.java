@@ -86,6 +86,11 @@ public class PayPalRule implements TestRule {
 		private final HttpResponse<?> response;
 
 		/**
+		 * {@link IOException}.
+		 */
+		private final IOException exception;
+
+		/**
 		 * {@link Validator}.
 		 */
 		private Validator<R> validator = null;
@@ -103,6 +108,20 @@ public class PayPalRule implements TestRule {
 				headers.header(headerNameValues[i], headerNameValues[i + 1]);
 			}
 			this.response = new MockHttpResponse<>(headers, statusCode, result);
+			this.exception = null;
+			PayPalRule.this.customInteractions.add(this);
+		}
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param matcher   {@link Predicate} to match {@link HttpRequest}.
+		 * @param exception {@link IOException}.
+		 */
+		private Interaction(Predicate<Object> matcher, IOException exception) {
+			this.matcher = matcher;
+			this.response = null;
+			this.exception = exception;
 			PayPalRule.this.customInteractions.add(this);
 		}
 
@@ -194,6 +213,28 @@ public class PayPalRule implements TestRule {
 	}
 
 	/**
+	 * Adds a failure {@link Interaction}.
+	 * 
+	 * @param exception {@link IOException}.
+	 */
+	public void addException(IOException exception) {
+		this.addException((request) -> true, exception);
+	}
+
+	/**
+	 * Adds a failure {@link Interaction}.
+	 * 
+	 * @param matcher   {@link Predicate} to match {@link HttpRequest}.
+	 * @param exception {@link IOException}.
+	 */
+	@SuppressWarnings("unchecked")
+	public void addException(Predicate<HttpRequest<Order>> matcher, IOException exception) {
+		new Interaction<>((request) -> {
+			return (request instanceof HttpRequest) ? matcher.test((HttpRequest<Order>) request) : false;
+		}, exception);
+	}
+
+	/**
 	 * Extracts the {@link Order} id from the {@link OrdersCaptureRequest}.
 	 * 
 	 * @param request {@link OrdersCaptureRequest}.
@@ -275,6 +316,11 @@ public class PayPalRule implements TestRule {
 				Interaction interaction = iterator.next();
 				if (interaction.matcher.test(request)) {
 					iterator.remove();
+
+					// Determine if exception
+					if (interaction.exception != null) {
+						throw interaction.exception;
+					}
 
 					// Ensure valid
 					if (interaction.validator != null) {
