@@ -15,7 +15,7 @@
 
 # OfficeFloor
 
-OfficeFloor - true inversion of control framework
+OfficeFloor - inversion of coupling control
 
 > Inversion of Control = Dependency Injection + Continuation Injection + Thread Injection
 
@@ -25,7 +25,7 @@ More information available at [http://officefloor.net](http://officefloor.net)
 [![Download OfficeFloor](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/officefloor/files/latest/download)
 
 
-# Inversion of Control
+# Inversion of Coupling Control
 
 OfficeFloor completes inversion of control by adding two new paradigms:
 
