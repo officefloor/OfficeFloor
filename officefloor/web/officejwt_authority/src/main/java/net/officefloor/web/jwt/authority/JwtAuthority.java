@@ -19,10 +19,10 @@ public interface JwtAuthority<I> {
 	 * Creates the refresh token for the identity.
 	 * 
 	 * @param identity Identity.
-	 * @return Refresh token.
+	 * @return {@link RefreshToken}.
 	 * @throws RefreshTokenException If fails to create the refresh token.
 	 */
-	String createRefreshToken(I identity) throws RefreshTokenException;
+	RefreshToken createRefreshToken(I identity) throws RefreshTokenException;
 
 	/**
 	 * Decodes the refresh token for the identity.
@@ -49,10 +49,10 @@ public interface JwtAuthority<I> {
 	 * Create the access token for the claims.
 	 * 
 	 * @param claims Claims.
-	 * @return Access token.
+	 * @return {@link AccessToken}.
 	 * @throws AccessTokenException If fails to create the access token.
 	 */
-	String createAccessToken(Object claims) throws AccessTokenException;
+	AccessToken createAccessToken(Object claims) throws AccessTokenException;
 
 	/**
 	 * <p>

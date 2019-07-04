@@ -655,17 +655,18 @@ public class JwtAuthorityManagedObjectSource
 	 * Tokenises the payload with the key.
 	 */
 	@FunctionalInterface
-	private static interface Tokeniser<K extends JwtAuthorityKey> {
+	private static interface Tokeniser<K extends JwtAuthorityKey, J> {
 
 		/**
 		 * Tokenises the payload with the key.
 		 * 
-		 * @param payload Payload.
-		 * @param key     {@link JwtAuthorityKey}.
-		 * @return Tokenised payload.
+		 * @param payload    Payload.
+		 * @param key        {@link JwtAuthorityKey}.
+		 * @param expireTime Expire time.
+		 * @return Token.
 		 * @throws Exception If fails to tokenise the payload.
 		 */
-		String tokenise(String payload, K key) throws Exception;
+		J tokenise(String payload, K key, long expireTime) throws Exception;
 	}
 
 	/**
@@ -680,9 +681,9 @@ public class JwtAuthorityManagedObjectSource
 	 * @return Token.
 	 * @throws T If fails to create the token.
 	 */
-	private <K extends JwtAuthorityKey, T extends Exception> String createToken(Object content,
+	private <J, K extends JwtAuthorityKey, T extends Exception> J createToken(Object content,
 			long tokenExpirationPeriod, StatePoller<K[], ?> poller,
-			BiFunction<HttpStatus, Exception, T> exceptionFactory, Tokeniser<K> tokeniser) throws T {
+			BiFunction<HttpStatus, Exception, T> exceptionFactory, Tokeniser<K, J> tokeniser) throws T {
 
 		// Easy access to source
 		JwtAuthorityManagedObjectSource source = JwtAuthorityManagedObjectSource.this;
@@ -796,7 +797,7 @@ public class JwtAuthorityManagedObjectSource
 
 		// Generate the token
 		try {
-			return tokeniser.tokenise(payload, selectedKey);
+			return tokeniser.tokenise(payload, selectedKey, expireTime);
 		} catch (Exception ex) {
 			throw exceptionFactory.apply(null, ex);
 		}
@@ -1138,7 +1139,7 @@ public class JwtAuthorityManagedObjectSource
 		 */
 
 		@Override
-		public String createRefreshToken(I identity) throws RefreshTokenException {
+		public RefreshToken createRefreshToken(I identity) throws RefreshTokenException {
 
 			// Easy access to source
 			JwtAuthorityManagedObjectSource source = JwtAuthorityManagedObjectSource.this;
@@ -1153,11 +1154,12 @@ public class JwtAuthorityManagedObjectSource
 			// Create the refresh token
 			return source.createToken(identity, source.refreshTokenExpirationPeriod, source.jwtRefreshKeys, (status,
 					ex) -> status != null ? new RefreshTokenException(status, ex) : new RefreshTokenException(ex),
-					(payload, key) -> {
+					(payload, key, expireTime) -> {
 						JwtRefreshKeyImpl impl = (JwtRefreshKeyImpl) key;
-						return JwtAuthorityManagedObjectSource.encrypt(key.getKey(), impl.initVectorBytes,
+						String token = JwtAuthorityManagedObjectSource.encrypt(key.getKey(), impl.initVectorBytes,
 								impl.startSaltBytes, impl.laceBytes, impl.endSaltBytes, payload,
 								source.refreshTokenCipherFactory);
+						return new RefreshToken(token, expireTime);
 					});
 		}
 
@@ -1212,16 +1214,19 @@ public class JwtAuthorityManagedObjectSource
 		}
 
 		@Override
-		public String createAccessToken(Object claims) {
+		public AccessToken createAccessToken(Object claims) {
 
 			// Easy access to source
 			JwtAuthorityManagedObjectSource source = JwtAuthorityManagedObjectSource.this;
 
 			// Create the access token
-			return source.createToken(claims, source.accessTokenExpirationPeriod, source.jwtAccessKeys,
-					(status, ex) -> status != null ? new AccessTokenException(status, ex)
-							: new AccessTokenException(ex),
-					(payload, key) -> Jwts.builder().signWith(key.getPrivateKey()).setPayload(payload).compact());
+			return source.createToken(
+					claims, source.accessTokenExpirationPeriod, source.jwtAccessKeys, (status,
+							ex) -> status != null ? new AccessTokenException(status, ex) : new AccessTokenException(ex),
+					(payload, key, expireTime) -> {
+						String token = Jwts.builder().signWith(key.getPrivateKey()).setPayload(payload).compact();
+						return new AccessToken(token, expireTime);
+					});
 		}
 
 		@Override

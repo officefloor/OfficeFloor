@@ -199,9 +199,9 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	/**
 	 * Creates the access token.
 	 * 
-	 * @return Created access token.
+	 * @return Created {@link AccessToken}.
 	 */
-	protected String createAccessToken() {
+	protected AccessToken createAccessToken() {
 		return this.doAuthorityTest((authority) -> authority.createAccessToken(this.claims));
 	}
 
@@ -222,9 +222,9 @@ public abstract class AbstractJwtAuthorityTokenTest extends OfficeFrameTestCase 
 	/**
 	 * Creates the refresh token.
 	 * 
-	 * @return Created refresh token.
+	 * @return Created {@link RefreshToken}.
 	 */
-	protected String createRefreshToken() {
+	protected RefreshToken createRefreshToken() {
 		return this.doAuthorityTest((authority) -> authority.createRefreshToken(this.identity));
 	}
 
