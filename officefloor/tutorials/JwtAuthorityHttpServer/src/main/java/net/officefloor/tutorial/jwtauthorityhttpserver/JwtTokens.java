@@ -9,7 +9,9 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.jwt.authority.AccessToken;
 import net.officefloor.web.jwt.authority.JwtAuthority;
+import net.officefloor.web.jwt.authority.RefreshToken;
 
 /**
  * Undertakes login.
@@ -50,11 +52,11 @@ public class JwtTokens {
 		Claims claims = createClaims(credentials.username);
 
 		// Create the refresh and access tokens
-		String refreshToken = authority.createRefreshToken(identity);
-		String accessToken = authority.createAccessToken(claims);
+		RefreshToken refreshToken = authority.createRefreshToken(identity);
+		AccessToken accessToken = authority.createAccessToken(claims);
 
 		// Send response
-		response.send(new Tokens(refreshToken, accessToken));
+		response.send(new Tokens(refreshToken.getToken(), accessToken.getToken()));
 	}
 
 	private static Claims createClaims(String username) {
@@ -88,10 +90,10 @@ public class JwtTokens {
 
 		// Create a new access token
 		Claims claims = createClaims(identity.getId());
-		String accessToken = authority.createAccessToken(claims);
+		AccessToken accessToken = authority.createAccessToken(claims);
 
 		// Send refreshed access token
-		response.send(new Token(accessToken));
+		response.send(new Token(accessToken.getToken()));
 	}
 	// END SNIPPET: refresh
 
