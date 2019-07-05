@@ -2,7 +2,7 @@
 <feature
       id="net.officefloor.woof.feature"
       label="Web on OfficeFloor (WoOF) Feature"
-      version="3.10.3"
+      version="3.11.0"
       provider-name="OfficeFloor">
 
    <description url="http://www.officefloor.net/">
@@ -41,8 +41,8 @@
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.equinox.preferences"/>
-      <import feature="net.officefloor.feature" version="3.10.3" match="perfect"/>
-      <import plugin="net.officefloor.woof" version="3.10.3" match="perfect"/>
+      <import feature="net.officefloor.feature" version="3.11.0" match="perfect"/>
+      <import plugin="net.officefloor.woof" version="3.11.0" match="perfect"/>
    </requires>
 
    <plugin
