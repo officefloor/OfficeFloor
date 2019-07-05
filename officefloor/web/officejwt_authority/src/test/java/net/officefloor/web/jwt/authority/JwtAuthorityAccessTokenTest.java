@@ -24,8 +24,11 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 	 * Ensure able to generate access token.
 	 */
 	public void testCreateAccessToken() {
-		String accessToken = this.createAccessToken();
-		this.claims.assertAccessToken(accessToken, keyPair.getPublic(), mockCurrentTime);
+		AccessToken accessToken = this.createAccessToken();
+		assertEquals("Incorrect expire time",
+				mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD,
+				accessToken.getExpireTime());
+		this.claims.assertAccessToken(accessToken.getToken(), keyPair.getPublic(), mockCurrentTime);
 	}
 
 	/**
@@ -74,9 +77,10 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 	public void testDefaultPeriodFromNow() {
 		this.claims.nbf = null;
 		this.claims.exp = null;
-		String accessToken = this.createAccessToken();
+		AccessToken accessToken = this.createAccessToken();
 		this.claims.exp = mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
-		this.claims.assertAccessToken(accessToken, keyPair.getPublic(), mockCurrentTime);
+		assertEquals("Incorrect expire time", this.claims.exp.longValue(), accessToken.getExpireTime());
+		this.claims.assertAccessToken(accessToken.getToken(), keyPair.getPublic(), mockCurrentTime);
 	}
 
 	/**
@@ -124,7 +128,7 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 
 		// Clear keys and start server (should generate keys)
 		this.mockAccessKeys.clear();
-		String accessToken = this.createAccessToken();
+		AccessToken accessToken = this.createAccessToken();
 
 		// Ensure correct request time loaded
 		assertEquals("Incorrect request time for keys",
@@ -145,7 +149,7 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 				firstKey.getExpireTime());
 
 		// Ensure able to use new key
-		this.claims.assertAccessToken(accessToken, firstKey.getPublicKey(), mockCurrentTime);
+		this.claims.assertAccessToken(accessToken.getToken(), firstKey.getPublicKey(), mockCurrentTime);
 
 		// Ensure second key overlaps
 		long secondKeyStart = firstKeyStart + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_KEY_EXPIRATION_PERIOD
@@ -176,8 +180,8 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 	public void testCreateNextAccessKey() {
 
 		// Obtain the access token
-		String accessToken = this.createAccessToken();
-		this.claims.assertAccessToken(accessToken, keyPair.getPublic(), mockCurrentTime);
+		AccessToken accessToken = this.createAccessToken();
+		this.claims.assertAccessToken(accessToken.getToken(), keyPair.getPublic(), mockCurrentTime);
 		assertEquals("Should just be the two setup keys", 2, this.mockAccessKeys.size());
 
 		// Move time forward and refresh (so loads new key)
@@ -209,7 +213,7 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 		this.claims.exp = null;
 		accessToken = this.createAccessToken();
 		this.claims.exp = renewKeyTime + JwtAuthorityManagedObjectSource.DEFAULT_ACCESS_TOKEN_EXPIRATION_PERIOD;
-		this.claims.assertAccessToken(accessToken, secondKey.getPublicKey(), renewKeyTime);
+		this.claims.assertAccessToken(accessToken.getToken(), secondKey.getPublicKey(), renewKeyTime);
 
 		// Ensure valid validate keys
 		JwtValidateKey[] validateKeys = this.doAuthorityTest((authority) -> authority.getActiveJwtValidateKeys());

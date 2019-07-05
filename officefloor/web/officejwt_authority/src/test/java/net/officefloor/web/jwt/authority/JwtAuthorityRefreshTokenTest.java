@@ -54,8 +54,11 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 	 * Ensure able to generate refresh token.
 	 */
 	public void testCreateRefreshToken() {
-		String refreshToken = this.createRefreshToken();
-		this.identity.assertRefreshToken(refreshToken, this.mockRefreshKeys.get(0), mockCipherFactory);
+		RefreshToken refreshToken = this.createRefreshToken();
+		assertEquals("Incorrect expire time",
+				mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD,
+				refreshToken.getExpireTime());
+		this.identity.assertRefreshToken(refreshToken.getToken(), this.mockRefreshKeys.get(0), mockCipherFactory);
 	}
 
 	/**
@@ -126,9 +129,10 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 	public void testDefaultPeriodFromNow() {
 		this.identity.nbf = null;
 		this.identity.exp = null;
-		String refreshToken = this.createRefreshToken();
+		RefreshToken refreshToken = this.createRefreshToken();
 		this.identity.exp = mockCurrentTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD;
-		this.identity.assertRefreshToken(refreshToken, mockJwtRefreshKey, mockCipherFactory);
+		assertEquals("Incorrect expire time", this.identity.exp.longValue(), refreshToken.getExpireTime());
+		this.identity.assertRefreshToken(refreshToken.getToken(), mockJwtRefreshKey, mockCipherFactory);
 	}
 
 	/**
@@ -176,7 +180,7 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 
 		// Clear keys and start server (should generate keys)
 		this.mockRefreshKeys.clear();
-		String refreshToken = this.createRefreshToken();
+		RefreshToken refreshToken = this.createRefreshToken();
 
 		// Ensure correct request time loaded
 		assertEquals("Incorrect request time for keys",
@@ -197,7 +201,7 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 				firstKey.getExpireTime());
 
 		// Ensure able to use new key
-		this.identity.assertRefreshToken(refreshToken, firstKey, mockCipherFactory);
+		this.identity.assertRefreshToken(refreshToken.getToken(), firstKey, mockCipherFactory);
 
 		// Ensure second key overlaps
 		long secondKeyStart = firstKeyStart + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_KEY_EXPIRATION_PERIOD
@@ -215,8 +219,8 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 	public void testCreateNextRefreshKey() {
 
 		// Obtain the refresh token
-		String refreshToken = this.createRefreshToken();
-		this.identity.assertRefreshToken(refreshToken, mockJwtRefreshKey, mockCipherFactory);
+		RefreshToken refreshToken = this.createRefreshToken();
+		this.identity.assertRefreshToken(refreshToken.getToken(), mockJwtRefreshKey, mockCipherFactory);
 		assertEquals("Should just be the two setup keys", 2, this.mockRefreshKeys.size());
 
 		// Move time forward and refresh (so loads new key)
@@ -248,7 +252,7 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 		this.identity.exp = null;
 		refreshToken = this.createRefreshToken();
 		this.identity.exp = renewKeyTime + JwtAuthorityManagedObjectSource.DEFAULT_REFRESH_TOKEN_EXPIRATION_PERIOD;
-		this.identity.assertRefreshToken(refreshToken, secondKey, mockCipherFactory);
+		this.identity.assertRefreshToken(refreshToken.getToken(), secondKey, mockCipherFactory);
 	}
 
 	/**
@@ -265,8 +269,8 @@ public class JwtAuthorityRefreshTokenTest extends AbstractJwtAuthorityTokenTest 
 	 * Ensure can round trip the identity via refresh token.
 	 */
 	public void testRefreshTokenRoundTrip() {
-		String refreshToken = this.createRefreshToken();
-		MockIdentity decoded = this.decodeRefreshToken(refreshToken);
+		RefreshToken refreshToken = this.createRefreshToken();
+		MockIdentity decoded = this.decodeRefreshToken(refreshToken.getToken());
 		this.identity.assertEquals(decoded);
 	}
 

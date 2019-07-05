@@ -2,7 +2,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.10.4" date="In SCM" description="Google Identity Verifier Factory">
+		<release version="3.11.0" date="In SCM" description="Google Identity Verifier Factory">
 			<action type="add" dev="sagenschneider">Google Identity Verifier Factory</action>
 		</release>
 		<release version="3.10.3" date="2019-06-15" description="Subscription server">

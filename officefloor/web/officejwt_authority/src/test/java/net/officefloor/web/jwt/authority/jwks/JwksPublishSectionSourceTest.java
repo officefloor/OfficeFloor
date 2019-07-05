@@ -28,8 +28,10 @@ import net.officefloor.web.build.HttpUrlContinuation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
+import net.officefloor.web.jwt.authority.AccessToken;
 import net.officefloor.web.jwt.authority.AccessTokenException;
 import net.officefloor.web.jwt.authority.JwtAuthority;
+import net.officefloor.web.jwt.authority.RefreshToken;
 import net.officefloor.web.jwt.authority.RefreshTokenException;
 import net.officefloor.web.jwt.authority.ValidateKeysException;
 import net.officefloor.web.jwt.authority.jwks.MockJwksKeyWriterServiceFactory.MockKey;
@@ -320,7 +322,7 @@ public class JwksPublishSectionSourceTest extends OfficeFrameTestCase implements
 	 */
 
 	@Override
-	public String createRefreshToken(Object identity) throws RefreshTokenException {
+	public RefreshToken createRefreshToken(Object identity) throws RefreshTokenException {
 		fail("Should not be required");
 		return null;
 	}
@@ -337,7 +339,7 @@ public class JwksPublishSectionSourceTest extends OfficeFrameTestCase implements
 	}
 
 	@Override
-	public String createAccessToken(Object claims) throws AccessTokenException {
+	public AccessToken createAccessToken(Object claims) throws AccessTokenException {
 		fail("Should not be required");
 		return null;
 	}

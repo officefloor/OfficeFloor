@@ -40,8 +40,10 @@ import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.jwt.DefaultJwtChallengeSectionSource;
 import net.officefloor.web.jwt.JwtHttpSecuritySource;
 import net.officefloor.web.jwt.JwtHttpSecuritySource.Flows;
+import net.officefloor.web.jwt.authority.AccessToken;
 import net.officefloor.web.jwt.authority.JwtAuthority;
 import net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource;
+import net.officefloor.web.jwt.authority.RefreshToken;
 import net.officefloor.web.jwt.authority.combined.CombinedServerRetrieveValidateKeysSectionSource;
 import net.officefloor.web.jwt.authority.jwks.JwksPublishSectionSource;
 import net.officefloor.web.jwt.authority.repository.JwtAccessKey;
@@ -411,16 +413,16 @@ public class JwtServerTest extends OfficeFrameTestCase {
 
 			// Create the refresh token
 			Identity identity = new Identity(name);
-			String refreshToken = authority.createRefreshToken(identity);
+			RefreshToken refreshToken = authority.createRefreshToken(identity);
 
 			// Create the access token
 			Claims claims = createClaims(identity);
-			String accessToken = authority.createAccessToken(claims);
+			AccessToken accessToken = authority.createAccessToken(claims);
 
 			// Provide tokens
 			Tokens tokens = new Tokens();
-			tokens.setRefreshToken(refreshToken);
-			tokens.setAccessToken(accessToken);
+			tokens.setRefreshToken(refreshToken.getToken());
+			tokens.setAccessToken(accessToken.getToken());
 
 			// Send response
 			response.send(tokens);
@@ -449,8 +451,8 @@ public class JwtServerTest extends OfficeFrameTestCase {
 				ObjectResponse<RefreshedAccessToken> response) {
 			Identity identity = authority.decodeRefreshToken(refresh.refreshToken);
 			Claims claims = createClaims(identity);
-			String accessToken = authority.createAccessToken(claims);
-			response.send(new RefreshedAccessToken(accessToken));
+			AccessToken accessToken = authority.createAccessToken(claims);
+			response.send(new RefreshedAccessToken(accessToken.getToken()));
 		}
 	}
 
