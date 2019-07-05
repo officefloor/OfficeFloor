@@ -12,7 +12,6 @@
  [![GitHub](https://img.shields.io/github/license/sagenschneider/OfficeFloor.svg)](http://officefloor.net/pricing.html)
  [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](http://officefloor.net/pricing.html)
 
-
 # OfficeFloor
 
 OfficeFloor - inversion of coupling control
@@ -21,11 +20,9 @@ OfficeFloor - inversion of coupling control
 
 More information available at [http://officefloor.net](http://officefloor.net)
 
-
 [![Download OfficeFloor](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/officefloor/files/latest/download)
 
-
-# Inversion of Coupling Control
+## Inversion of Coupling Control
 
 OfficeFloor completes inversion of control by adding two new paradigms:
 
@@ -52,4 +49,3 @@ In other words, people think/behave synchronously but organise asynchronously.  
 Further to this, graphical configuration is used.  An example configuration is as follows:
 
 ![Graphical Configuration](officefloor/tutorials/TransactionHttpServer/src/site/resources/images/transaction-woof.png "OfficeFloor graphical configuration")
-
