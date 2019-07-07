@@ -21,13 +21,13 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:git:https://github.com/sagenschneider/OfficeFloor.git</connection>
-		<developerConnection>scm:git:git@github.com:sagenschneider/OfficeFloor.git</developerConnection>
-		<url>https://github.com/sagenschneider/OfficeFloor</url>
+		<connection>scm:git:https://github.com/officefloor/OfficeFloor.git</connection>
+		<developerConnection>scm:git:git@github.com:officefloor/OfficeFloor.git</developerConnection>
+		<url>https://github.com/officefloor/OfficeFloor</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/sagenschneider/OfficeFloor/issues</url>
+		<url>https://github.com/officefloor/OfficeFloor/issues</url>
 	</issueManagement>
 	<developers>
 		<developer>

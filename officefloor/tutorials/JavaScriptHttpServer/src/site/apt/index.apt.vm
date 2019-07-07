@@ -38,7 +38,7 @@ JavaScript
   
   The representation of the JavaScript function is very similar to Java methods.
   
-  However, due to lack of type information, the meta-data for the JavaScript function must be defined.  The <<<officefloor>>> object configured against the function provides this meta-data.  Please see the JavaScript {{{https://github.com/sagenschneider/OfficeFloor/blob/master/officefloor/polyglot/officepolyglot_javascript/src/test/resources/javascript/Functions.js}polyglot tests}} for the various configurations.
+  However, due to lack of type information, the meta-data for the JavaScript function must be defined.  The <<<officefloor>>> object configured against the function provides this meta-data.  Please see the JavaScript {{{https://github.com/officefloor/OfficeFloor/blob/master/officefloor/polyglot/officepolyglot_javascript/src/test/resources/javascript/Functions.js}polyglot tests}} for the various configurations.
   
   Note: once the {{{http://www.graalvm.org}graal.js}} script engine supports decorators, the configuration will be updated to <<<@OfficeFloor>>> decorator to have similar look to Java for consistency.
 
