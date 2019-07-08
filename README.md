@@ -4,7 +4,7 @@
  [![Website](https://img.shields.io/website-up-down-green-red/http/officefloor.net.svg?label=http://officefloor.net)](http://officefloor.net)
 
  [![Build Status](https://travis-ci.org/officefloor/OfficeFloor.svg?branch=master)](https://travis-ci.org/officefloor/OfficeFloor)
- [![Codacy Badge](https://api.codacy.com/project/badge/Grade/48a33c29fe5c423fbba190010994925f)](https://www.codacy.com/app/daniel_77/OfficeFloor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sagenschneider/OfficeFloor&amp;utm_campaign=Badge_Grade)
+ [![Codacy Badge](https://api.codacy.com/project/badge/Grade/814039475f634e7183c8cca435446459)](https://www.codacy.com/app/officefloor/OfficeFloor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=officefloor/OfficeFloor&amp;utm_campaign=Badge_Grade)
  [![codecov](https://codecov.io/gh/officefloor/OfficeFloor/branch/master/graph/badge.svg)](https://codecov.io/gh/officefloor/OfficeFloor)
  [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=officefloor/OfficeFloor)](https://dependabot.com)
 
