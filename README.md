@@ -5,7 +5,7 @@
 
  [![Build Status](https://travis-ci.org/sagenschneider/OfficeFloor.svg?branch=master)](https://travis-ci.org/sagenschneider/OfficeFloor)
  [![Codacy Badge](https://api.codacy.com/project/badge/Grade/48a33c29fe5c423fbba190010994925f)](https://www.codacy.com/app/daniel_77/OfficeFloor?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sagenschneider/OfficeFloor&amp;utm_campaign=Badge_Grade)
- [![codecov](https://codecov.io/gh/sagenschneider/OfficeFloor/branch/master/graph/badge.svg)](https://codecov.io/gh/sagenschneider/OfficeFloor)
+ [![codecov](https://codecov.io/gh/officefloor/OfficeFloor/branch/master/graph/badge.svg)](https://codecov.io/gh/officefloor/OfficeFloor)
  [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=sagenschneider/OfficeFloor)](https://dependabot.com)
 
  [![Maven Central](https://img.shields.io/maven-central/v/net.officefloor/officefloor.svg)](https://search.maven.org/search?q=a:officefloor)
