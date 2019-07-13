@@ -26,7 +26,6 @@
 		<module>net.officefloor.eclipse.configurer</module>
 		<module>net.officefloor.eclipse.configurer.tests</module>
 		<module>net.officefloor.eclipse.ide</module>
-		<module>net.officefloor.eclipse.javafx11</module>
 		<module>net.officefloor.eclipse.section</module>
 		<module>net.officefloor.eclipse.section.tests</module>
 		<module>net.officefloor.eclipse.officefloor</module>
