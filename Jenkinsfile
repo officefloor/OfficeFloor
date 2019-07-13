@@ -106,6 +106,8 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 					// Clean build with different Eclipse target
 					// Note: latest Eclipse target is default build
 					sh 'mvn clean'
+					sh 'mvn install -P PHOTON.target'
+					sh 'mvn clean'
 				    sh 'mvn install -P OXYGEN.target'
 				}
 			}
