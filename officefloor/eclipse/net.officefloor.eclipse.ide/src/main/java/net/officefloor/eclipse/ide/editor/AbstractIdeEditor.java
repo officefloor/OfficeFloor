@@ -145,18 +145,15 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	public synchronized static void launchOutsideWorkbench(OutsideWorkbenchLauncher launcher) {
 		isOutsideWorkbench = true;
 		try {
-			launcher.launch();
+			try {
+				launcher.launch();
+			} catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+		} catch (RuntimeException | Error ex) {
+			throw ex;
 		} catch (Throwable ex) {
-			if (ex instanceof InvocationTargetException) {
-				ex = ((InvocationTargetException) ex).getTargetException();
-			}
-			if (ex instanceof RuntimeException) {
-				throw (RuntimeException) ex;
-			} else if (ex instanceof Error) {
-				throw (Error) ex;
-			} else {
-				throw new RuntimeException(ex);
-			}
+			throw new RuntimeException(ex);
 		} finally {
 			isOutsideWorkbench = false;
 		}
