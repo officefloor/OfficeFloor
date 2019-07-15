@@ -1144,26 +1144,6 @@
 			<activation>
 				<jdk>[10,12)</jdk>
 			</activation>
-			<dependencies>
-				<dependency>
-					<groupId>org.openjfx</groupId>
-					<artifactId>javafx-graphics</artifactId>
-					<version>${openjfx-version}</version>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.openjfx</groupId>
-					<artifactId>javafx-controls</artifactId>
-					<version>${openjfx-version}</version>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.openjfx</groupId>
-					<artifactId>javafx-swt</artifactId>
-					<version>${openjfx-swt-version}</version>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>
 			<build>
 				<pluginManagement>
 					<plugins>

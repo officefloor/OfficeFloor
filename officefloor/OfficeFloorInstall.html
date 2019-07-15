@@ -7,13 +7,29 @@ body {
 	background: linear-gradient(to bottom right, #BBE0FF, #FFF);
 }
 
+.step {
+	font-size: large;
+}
+
+.instruction {
+	padding-left: 5em;
+}
+
 .note {
 	font-size: small;
-	padding-left: 5em;
+	padding-left: 8em;
 }
 
 .code {
 	font-family: courier;
+}
+
+.placeholder {
+	color: blue;
+}
+
+ol {
+	padding-left: 7em;
 }
 
 p {
@@ -30,58 +46,68 @@ img {
 	<img src="http://officefloor.net/images/OfficeFloorBannerImage.png">
 	<p>Thank you for taking interest in OfficeFloor.</p>
 
-	<p>Please follow these steps to start using OfficeFloor.</p>
+	<p>Please install OfficeFloor into your IDE to begin using:</p>
 
+	<ul>
+		<li><a href="#eclipse">Eclipse</a></li>
+		<li><a href="#intellij">IntelliJ</a></li>
+	</ul>
 	<p>
-		<strong>Step 1</strong>: ensure your Java installation has JavaFx
-		modules installed. See <a href="https://openjfx.io/">JavaFx</a> for
-		more details.
+		If any issues in installation, see <a
+			href="http://www.officefloor.net/getting-help.html" target="_blank">getting
+			help</a>.
 	</p>
-	<p class="note">From Java 11 many modules (including JavaFx) are no
-		longer bundled with a Java installation.</p>
-	<p class="note">Also a minimum version of Java 8 is required due to
-		JavaFx.</p>
+	<br />
 
-	<p>Follow steps for your IDE</p>
 
-	<h2>Eclipse</h2>
+	<h2>
+		<a name="eclipse">Eclipse</a>
+	</h2>
 
-	<p>
-		<strong>Step 2</strong>: ensure Eclipse version is Oxygen or higher.
-		Ideally <a href="https://www.eclipse.org/downloads/" target="_blank">Eclipse
-			Photon</a>
+	<p class="step">
+		<strong>Step 1</strong>: install latest version of <a
+			href="https://www.eclipse.org/downloads/" target="_blank">Eclipse</a>
 	</p>
+	<p class="note">Note that OfficeFloor do test builds back to
+		Eclipse Oxygen. However, support is lesser for these older versions.</p>
+
+	<p class="step">
+		<strong>Step 2</strong>: ensure JavaFx available on Eclipse class path
+	</p>
+	<p class="instruction">
+		<strong>Java 11 (and above)</strong> where JavaFx no longer part of
+		Java installation:
+	</p>
+	<ol>
+		<li>Download and install/unzip the JavaFX SDK from <a
+			href="https://openjfx.io" target="_blank">Open JavaFx</a></li>
+		<li>Add the following two lines to eclipse.ini file (located in
+			Eclipse installation) with location of JavaFx SDK substituted:
+	</ol>
+	<p class="instruction">
+		<span class="code">-Dosgi.framework.extensions=org.eclipse.fx.osgi</span><br />
+		<span class="code">-Defxclipse.java-modules.dir=<span
+			class="placeholder">&lt;path to JavaFx SDK lib folder&gt;</span></span>
+	</p>
+	<p class="instruction">
+		<strong>Java 9/10</strong> add the following to eclipse.ini file
+		(located in Eclipse installation):
+	</p>
+	<p class="instruction">
+		<span class="code">-Dosgi.framework.extensions=org.eclipse.fx.osgi</span>
+	</p>
+	<p class="instruction">
+		<strong>Java 8</strong> ensure jfxrt.jar is installed in the lib
+		folder (available in Oracle Java 8 installation)
+	</p>
+	<p class="note">Older Java versions on linux may only support GTK2.
+		To resolve add the following environment variable:</p>
 	<p class="note">
-		For older Java versions on linux the following environmental variable
-		may be required to avoid crashes in not supporting the later GTK3: <span
-			class="code">export SWT_GTK3=0</span>
+		<span class="code">export SWT_GTK3=0</span>
 	</p>
-	<p class="note">For newer versions of Eclipse (2018-09 onwards),
-		GTK2 is no longer supported (requires GTK3). Java8, however, only
-		supports GTK2. With many cloud providers not yet supporting Java
-		higher than 8, this typically means Eclipse Photon is latest version
-		of Eclipse to use.</p>
 
-	<p>
+	<p class="step">
 		<strong>Step 3</strong>: drag the <a
-			href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=335225"
-			class="drag"
-			title="Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client"><img
-			typeof="foaf:Image" class="img-responsive"
-			src="https://marketplace.eclipse.org/sites/all/themes/solstice/public/images/marketplace/btn-install.png"
-			alt="Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client" /></a>
-		button to your Eclipse IDE to install <a
-			href="https://www.eclipse.org/efxclipse/index.html" target="_blank">e(fx)clipse</a>
-	</p>
-	<p class="note">
-		Should this not find the <span class="code">E(fx)clipse IDE</span>
-		feature, then please follow steps at <a
-			href="https://www.eclipse.org/efxclipse/install.html" target="_blank">e(fx)clipse
-			tooling</a> to install
-	</p>
-
-	<p>
-		<strong>Step 4</strong>: drag the <a
 			href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=32712"
 			class="drag"
 			title="Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client"><img
@@ -91,35 +117,37 @@ img {
 		button to your Eclipse IDE to install <a
 			href="http://officefloor.net/" target="_blank">OfficeFloor</a>
 	</p>
-	<p class="note">
+	<p class="instruction">
 		Should this not find the <span class="code">OfficeFloor</span>
 		features, please manually install with following steps:
 	</p>
-	<p class="note">Within your Eclipse IDE go to install new software
-		(typically Help -&gt; Install New Software ...)</p>
-	<p class="note">
-		Add the OfficeFloor update site: <span class="code">http://officefloor.net/update</span>
-	</p>
-	<p class="note">
-		Check <span class="code">OfficeFloor</span> and install
-	</p>
+	<ol>
+		<li>Within your Eclipse IDE go to install new software (typically
+			Help -&gt; Install New Software ...)</li>
+		<li>Add the OfficeFloor update site: <span class="code">http://officefloor.net/update</span></li>
+		<li>Check <span class="code">OfficeFloor</span> and install
+		</li>
+	</ol>
 
-	<p>
-		<strong>Step 5</strong>: build your application with OfficeFloor
+	<p class="step">
+		<strong>Step 4</strong>: build your application with OfficeFloor
 	</p>
-	<p class="note">
+	<p class="instruction">
 		More information is available in the <a
 			href="http://officefloor.net/tutorials" target="_blank">tutorials</a>
 		to start developing with <a href="http://officefloor.net/"
 			target="_blank">OfficeFloor</a>
 	</p>
 
-	<h2>IntelliJ</h2>
+
+	<h2>
+		<a name="intellij">IntelliJ</a>
+	</h2>
 
 	<p>
-		<strong>Step 2</strong>: coming soon with <a
-			href="https://github.com/officefloor/OfficeFloor/issues/267">IntelliJ
-			plugin</a>
+		<strong>Step 1</strong>: coming soon with <a
+			href="https://github.com/officefloor/OfficeFloor/issues/267"
+			target="_blank">IntelliJ plugin</a>
 	</p>
 
 </body>

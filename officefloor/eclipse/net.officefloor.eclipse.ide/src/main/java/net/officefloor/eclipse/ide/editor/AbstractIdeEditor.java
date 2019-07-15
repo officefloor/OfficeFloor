@@ -23,6 +23,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -144,13 +145,15 @@ public abstract class AbstractIdeEditor<R extends Model, RE extends Enum<RE>, O>
 	public synchronized static void launchOutsideWorkbench(OutsideWorkbenchLauncher launcher) {
 		isOutsideWorkbench = true;
 		try {
-			launcher.launch();
-		} catch (Throwable ex) {
-			if (ex instanceof RuntimeException) {
-				throw (RuntimeException) ex;
-			} else {
-				throw new RuntimeException(ex);
+			try {
+				launcher.launch();
+			} catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
 			}
+		} catch (RuntimeException | Error ex) {
+			throw ex;
+		} catch (Throwable ex) {
+			throw new RuntimeException(ex);
 		} finally {
 			isOutsideWorkbench = false;
 		}

@@ -129,10 +129,51 @@
 	</build>
 	<profiles>
 		<profile>
-			<id>PHOTON.target</id>
+			<id>2019-06.target</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.eclipse.tycho</groupId>
+						<artifactId>target-platform-configuration</artifactId>
+						<configuration>
+							<target>
+								<artifact>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>net.officefloor.eclipse.target</artifactId>
+									<version>${project.version}</version>
+									<classifier>2019-06</classifier>
+								</artifact>
+							</target>
+							<dependency-resolution>
+								<optionalDependencies>require</optionalDependencies>
+							</dependency-resolution>
+							<environments>
+								<environment>
+									<os>linux</os>
+									<ws>gtk</ws>
+									<arch>x86_64</arch>
+								</environment>
+								<environment>
+									<os>win32</os>
+									<ws>win32</ws>
+									<arch>x86_64</arch>
+								</environment>
+								<environment>
+									<os>macosx</os>
+									<ws>cocoa</ws>
+									<arch>x86_64</arch>
+								</environment>
+							</environments>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>PHOTON.target</id>
 			<build>
 				<plugins>
 					<plugin>

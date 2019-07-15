@@ -94,8 +94,7 @@ public class OfficeFloorOsgiBridge {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param javaProject
-	 *            {@link IJavaProject}.
+	 * @param javaProject {@link IJavaProject}.
 	 */
 	public OfficeFloorOsgiBridge(IJavaProject javaProject) {
 		this.javaProject = javaProject;
@@ -119,8 +118,7 @@ public class OfficeFloorOsgiBridge {
 	 * Typically this is only used for testing. When using for plugins should bridge
 	 * to the {@link IJavaProject} to get latest class path.
 	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param classLoader {@link ClassLoader}.
 	 */
 	public OfficeFloorOsgiBridge(ClassLoader classLoader) {
 		this.javaProject = null;
@@ -144,8 +142,7 @@ public class OfficeFloorOsgiBridge {
 	 * Obtains the {@link ClassLoader} for the {@link IJavaProject}.
 	 * 
 	 * @return {@link ClassLoader} for the {@link IJavaProject}.
-	 * @throws Exception
-	 *             If fails to extract class path from {@link IJavaProject}.
+	 * @throws Exception If fails to extract class path from {@link IJavaProject}.
 	 */
 	public ClassLoader getClassLoader() throws Exception {
 
@@ -178,15 +175,12 @@ public class OfficeFloorOsgiBridge {
 	/**
 	 * Loads the {@link Class}.
 	 * 
-	 * @param <T>
-	 *            {@link Class} type.
-	 * @param className
-	 *            Name of the {@link Class}.
-	 * @param superType
-	 *            Super type of the {@link Class}.
+	 * @param <T>       {@link Class} type.
+	 * @param className Name of the {@link Class}.
+	 * @param superType Super type of the {@link Class}.
 	 * @return {@link Class}.
-	 * @throws Exception
-	 *             If {@link Class} not found or fails to load the {@link Class}.
+	 * @throws Exception If {@link Class} not found or fails to load the
+	 *                   {@link Class}.
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> Class<? extends T> loadClass(String className, Class<T> superType) throws Exception {
@@ -196,11 +190,9 @@ public class OfficeFloorOsgiBridge {
 	/**
 	 * Indicates if the {@link Class} is on the class path.
 	 * 
-	 * @param className
-	 *            Name of the {@link Class}.
+	 * @param className Name of the {@link Class}.
 	 * @return <code>true</code> if the {@link Class} is on the class path.
-	 * @throws Exception
-	 *             If fails to determine if on class path.
+	 * @throws Exception If fails to determine if on class path.
 	 */
 	public boolean isClassOnClassPath(String className) throws Exception {
 
@@ -227,13 +219,10 @@ public class OfficeFloorOsgiBridge {
 	/**
 	 * Checks whether the super type relationship.
 	 * 
-	 * @param className
-	 *            Name of class to extend super type.
-	 * @param superTypeName
-	 *            Name of super type.
+	 * @param className     Name of class to extend super type.
+	 * @param superTypeName Name of super type.
 	 * @return <code>true</code> if class extends super type.
-	 * @throws Exception
-	 *             If fails determining if inheritance relationship.
+	 * @throws Exception If fails determining if inheritance relationship.
 	 */
 	public boolean isSuperType(String className, String superTypeName) throws Exception {
 
@@ -273,19 +262,15 @@ public class OfficeFloorOsgiBridge {
 	/**
 	 * Allows for selecting a {@link Class}.
 	 * 
-	 * @param className
-	 *            Existing class name (or part of). Used to pre-filter the list of
-	 *            {@link Class} names to select from. May be <code>null</code> for
-	 *            no filtering.
-	 * @param parentShell
-	 *            Parent {@link Shell} (for SWT dialogs in selecting the
-	 *            {@link Class}).
-	 * @param superTypeName
-	 *            Optional super type name. May be <code>null</code>.
+	 * @param className     Existing class name (or part of). Used to pre-filter the
+	 *                      list of {@link Class} names to select from. May be
+	 *                      <code>null</code> for no filtering.
+	 * @param parentShell   Parent {@link Shell} (for SWT dialogs in selecting the
+	 *                      {@link Class}).
+	 * @param superTypeName Optional super type name. May be <code>null</code>.
 	 * @return Selected {@link Class} name or <code>null</code> if no {@link Class}
 	 *         selected.
-	 * @throws Exception
-	 *             If fails to select a {@link Class}.
+	 * @throws Exception If fails to select a {@link Class}.
 	 */
 	public String selectClass(String className, Shell parentShell, String superTypeName) throws Exception {
 		return this.selectType(className, IJavaElementSearchConstants.CONSIDER_CLASSES, parentShell, superTypeName);
@@ -294,19 +279,15 @@ public class OfficeFloorOsgiBridge {
 	/**
 	 * Allows for selecting a type.
 	 * 
-	 * @param typeName
-	 *            Existing type name (or part of). Used to pre-filter the list of
-	 *            type names to select from. May be <code>null</code> for no
-	 *            filtering.
-	 * @param consideredTypes
-	 *            {@link IJavaSearchConstants} value.
-	 * @param parentShell
-	 *            Parent {@link Shell} (for SWT dialogs in selecting the type).
-	 * @param superTypeName
-	 *            Optional super type name. May be <code>null</code>.
+	 * @param typeName        Existing type name (or part of). Used to pre-filter
+	 *                        the list of type names to select from. May be
+	 *                        <code>null</code> for no filtering.
+	 * @param consideredTypes {@link IJavaSearchConstants} value.
+	 * @param parentShell     Parent {@link Shell} (for SWT dialogs in selecting the
+	 *                        type).
+	 * @param superTypeName   Optional super type name. May be <code>null</code>.
 	 * @return Selected type name or <code>null</code> if no type selected.
-	 * @throws Exception
-	 *             If fails to select a type.
+	 * @throws Exception If fails to select a type.
 	 */
 	public String selectType(String typeName, int consideredTypes, Shell parentShell, String superTypeName)
 			throws Exception {
@@ -355,11 +336,9 @@ public class OfficeFloorOsgiBridge {
 	/**
 	 * Indicates if the resource is on the class path.
 	 * 
-	 * @param resourcePath
-	 *            Path for the resource.
+	 * @param resourcePath Path for the resource.
 	 * @return <code>true</code> if the resource is on the class path.
-	 * @throws Exception
-	 *             If fails to determine if resource on class path.
+	 * @throws Exception If fails to determine if resource on class path.
 	 */
 	public boolean isResourceOnClassPath(String resourcePath) throws Exception {
 
@@ -372,8 +351,7 @@ public class OfficeFloorOsgiBridge {
 	/**
 	 * Obtains the class path location for the {@link IFile}.
 	 * 
-	 * @param file
-	 *            {@link IFile}.
+	 * @param file {@link IFile}.
 	 * @return Class path location for the {@link IFile}.
 	 */
 	public String getClassPathLocation(IFile file) {
@@ -434,15 +412,13 @@ public class OfficeFloorOsgiBridge {
 	/**
 	 * Selects a resource on the class path.
 	 * 
-	 * @param resourcePath
-	 *            Existing resource path (or part of). Used to pre-filter the list
-	 *            of resources to select from. May be <code>null</code> for no
-	 *            filtering.
-	 * @param parentShell
-	 *            Parent {@link Shell} (for SWT dialogs in selecting the type).
+	 * @param resourcePath Existing resource path (or part of). Used to pre-filter
+	 *                     the list of resources to select from. May be
+	 *                     <code>null</code> for no filtering.
+	 * @param parentShell  Parent {@link Shell} (for SWT dialogs in selecting the
+	 *                     type).
 	 * @return Selected resource path or <code>null</code> if no resource selected.
-	 * @throws Exception
-	 *             If fails to select a resource.
+	 * @throws Exception If fails to select a resource.
 	 */
 	public String selectClassPathResource(String resourcePath, Shell parentShell) throws Exception {
 
@@ -488,8 +464,7 @@ public class OfficeFloorOsgiBridge {
 	 * Obtains the {@link OfficeFloorCompiler}.
 	 * 
 	 * @return {@link OfficeFloorCompiler}.
-	 * @throws Exception
-	 *             If fails to extract class path from {@link IJavaProject}.
+	 * @throws Exception If fails to extract class path from {@link IJavaProject}.
 	 */
 	public OfficeFloorCompiler getOfficeFloorCompiler() throws Exception {
 
