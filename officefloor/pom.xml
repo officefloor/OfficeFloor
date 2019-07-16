@@ -43,6 +43,7 @@
 		<module>spring</module>
 		<module>maven</module>
 		<module>eclipse</module>
+		<module>viewer</module>
 		<module>tutorials</module>
 	</modules>
 	<properties>
