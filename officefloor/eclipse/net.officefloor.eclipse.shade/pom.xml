@@ -17,11 +17,15 @@
 			<plugin>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>tycho-shade-maven-plugin</artifactId>
-				<version>3.12.0</version>
 				<configuration>
-					<excludes>
-						<exclude>net.officefloor.core.*</exclude>
-					</excludes>
+					<excludeResources>
+						<excludeResource>.*\.jar</excludeResource>
+						<excludeResource>.*\.so</excludeResource>
+						<excludeResource>.*\.profile</excludeResource>
+						<excludeResource>META-INF/.*\.SF</excludeResource>
+						<excludeResource>META-INF/.*\.DSA</excludeResource>
+						<excludeResource>META-INF/.*\.RSA</excludeResource>
+					</excludeResources>
 				</configuration>
 				<executions>
 					<execution>

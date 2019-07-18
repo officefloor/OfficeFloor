@@ -20,6 +20,7 @@ package net.officefloor.maven.tycho;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.plugins.shade.ShadeRequest;
 import org.apache.maven.plugins.shade.Shader;
+import org.apache.maven.plugins.shade.filter.Filter;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.tycho.classpath.ClasspathEntry;
 import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
@@ -63,11 +65,17 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 	@Parameter
 	private Set<String> excludes = new HashSet<>();
 
+	/**
+	 * List of resource names to exclude from shading.
+	 */
+	@Parameter
+	private Set<String> excludeResources = new HashSet<>();
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
 		// Log the shading
-		this.getLog().info("Tycho shade classpath:");
+		this.getLog().debug("Tycho shade classpath:");
 
 		// Create the exclude patterns
 		List<Pattern> excludePatterns = new ArrayList<>(this.excludes.size());
@@ -83,7 +91,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 				// Load only jars
 				if (location.isDirectory()) {
 					// Not directory (do not shade)
-					this.getLog().info("  - " + location.getAbsolutePath() + " (not shading directory)");
+					this.getLog().debug("  - " + location.getAbsolutePath() + " (not shading directory)");
 					continue NEXT_LOCACTION;
 				}
 
@@ -92,7 +100,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 					String fileName = location.getName();
 					if (excludePattern.matcher(fileName).matches()) {
 						// Filter out artifact
-						this.getLog().info("  e " + location.getAbsolutePath() + " (not shading by filter "
+						this.getLog().debug("  e " + location.getAbsolutePath() + " (not shading by filter "
 								+ excludePattern.pattern() + ")");
 						continue NEXT_LOCACTION;
 					}
@@ -100,24 +108,66 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 
 				// Shade the jar
 				jars.add(location);
-				this.getLog().info("  + " + location.getAbsolutePath());
+				this.getLog().debug("  + " + location.getAbsolutePath());
 			}
 		}
 
 		// Determine the shade jar name
 		String shadeJarName = this.mavenProject.getBuild().getFinalName() + ".jar";
 
+		// Log the inclusions
+		this.getLog().debug("Tycho shade resources:");
+
 		// Shade the jar
 		ShadeRequest request = new ShadeRequest();
 		request.setJars(jars);
 		request.setUberJar(new File(this.target, shadeJarName));
-		request.setFilters(Collections.emptyList());
+		request.setFilters(Arrays.asList(new ResourceFilter()));
 		request.setResourceTransformers(Collections.emptyList());
 		request.setRelocators(Collections.emptyList());
 		try {
 			this.shader.shade(request);
 		} catch (IOException ex) {
 			throw new MojoFailureException(ex.getMessage(), ex);
+		}
+	}
+
+	private class ResourceFilter implements Filter {
+
+		private final List<Pattern> excludePatterns;
+
+		private ResourceFilter() {
+			this.excludePatterns = new ArrayList<>(TychoShadeMojo.this.excludeResources.size());
+			for (String exclude : TychoShadeMojo.this.excludeResources) {
+				this.excludePatterns.add(Pattern.compile(exclude));
+			}
+		}
+
+		@Override
+		public boolean canFilter(File jar) {
+			return true;
+		}
+
+		@Override
+		public boolean isFiltered(String classFile) {
+
+			// Determine if filter out
+			for (Pattern exclude : this.excludePatterns) {
+				if (exclude.matcher(classFile).matches()) {
+					TychoShadeMojo.this.getLog()
+							.debug("  - " + classFile + " (filtered out by " + exclude.pattern() + ")");
+					return true;
+				}
+			}
+
+			// Include
+			TychoShadeMojo.this.getLog().debug("  + " + classFile);
+			return false;
+		}
+
+		@Override
+		public void finished() {
+			// Nothing to tidy up
 		}
 	}
 
