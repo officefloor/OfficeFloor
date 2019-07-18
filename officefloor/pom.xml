@@ -65,6 +65,7 @@
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<shade-version>3.2.1</shade-version>
 		<tycho-version>1.4.0</tycho-version>
 	</properties>
 	<dependencyManagement>
@@ -187,6 +188,23 @@
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>woof-archetype</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>tycho-shade-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Viewer -->
+			<dependency>
+				<groupId>net.officefloor.viewer</groupId>
+				<artifactId>viewer</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.viewer</groupId>
+				<artifactId>officeviewer</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Additional build dependencies -->
@@ -350,7 +368,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.2.1</version>
+					<version>${shade-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
