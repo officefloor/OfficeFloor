@@ -29,10 +29,10 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
+import net.officefloor.eclipse.ide.editor.AbstractIdeEclipseEditor;
 
 /**
- * {@link IEditorSite} to load {@link AbstractIdeEditor} for preference
+ * {@link IEditorSite} to load {@link AbstractIdeEclipseEditor} for preference
  * configuration.
  * 
  * @author Daniel Sagenschneider
@@ -41,7 +41,7 @@ import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
 public class PreferencesEditorSite implements IEditorSite {
 
 	/**
-	 * Name of the {@link AbstractIdeEditor}.
+	 * Name of the {@link AbstractIdeEclipseEditor}.
 	 */
 	private final String editorName;
 

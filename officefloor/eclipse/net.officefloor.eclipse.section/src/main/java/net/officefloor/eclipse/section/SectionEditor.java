@@ -24,7 +24,7 @@ import javafx.scene.control.Label;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
-import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
+import net.officefloor.eclipse.ide.editor.AbstractIdeEclipseEditor;
 import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -40,7 +40,7 @@ import net.officefloor.model.section.SectionRepository;
  * 
  * @author Daniel Sagenschneider
  */
-public class SectionEditor extends AbstractIdeEditor<SectionModel, SectionEvent, SectionChanges> {
+public class SectionEditor extends AbstractIdeEclipseEditor<SectionModel, SectionEvent, SectionChanges> {
 
 	/**
 	 * Test editor.

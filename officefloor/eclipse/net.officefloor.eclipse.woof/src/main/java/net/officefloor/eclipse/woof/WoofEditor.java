@@ -25,7 +25,7 @@ import org.eclipse.ui.IWorkbench;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
-import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
+import net.officefloor.eclipse.ide.editor.AbstractIdeEclipseEditor;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.woof.model.woof.WoofChanges;
@@ -40,7 +40,7 @@ import net.officefloor.woof.model.woof.WoofRepositoryImpl;
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofEditor extends AbstractIdeEditor<WoofModel, WoofEvent, WoofChanges> {
+public class WoofEditor extends AbstractIdeEclipseEditor<WoofModel, WoofEvent, WoofChanges> {
 
 	/**
 	 * Test editor.

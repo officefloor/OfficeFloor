@@ -21,11 +21,11 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
-import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
+import net.officefloor.eclipse.ide.editor.AbstractIdeEclipseEditor;
 import net.officefloor.model.Model;
 
 /**
- * {@link IEditorInput} to load {@link AbstractIdeEditor} for preference
+ * {@link IEditorInput} to load {@link AbstractIdeEclipseEditor} for preference
  * configuration.
  * 
  * @author Daniel Sagenschneider
@@ -33,12 +33,12 @@ import net.officefloor.model.Model;
 public class PreferencesEditorInput implements IEditorInput {
 
 	/**
-	 * Name of the {@link AbstractIdeEditor}.
+	 * Name of the {@link AbstractIdeEclipseEditor}.
 	 */
 	private final String editorName;
 
 	/**
-	 * Root {@link Model} to configure the {@link AbstractIdeEditor}.
+	 * Root {@link Model} to configure the {@link AbstractIdeEclipseEditor}.
 	 */
 	private final Model rootModel;
 
@@ -46,9 +46,9 @@ public class PreferencesEditorInput implements IEditorInput {
 	 * Instantiate.
 	 * 
 	 * @param editorName
-	 *            Name of the {@link AbstractIdeEditor}.
+	 *            Name of the {@link AbstractIdeEclipseEditor}.
 	 * @param rootModel
-	 *            Root {@link Model} to configure the {@link AbstractIdeEditor}.
+	 *            Root {@link Model} to configure the {@link AbstractIdeEclipseEditor}.
 	 */
 	public PreferencesEditorInput(String editorName, Model rootModel) {
 		this.editorName = editorName;
