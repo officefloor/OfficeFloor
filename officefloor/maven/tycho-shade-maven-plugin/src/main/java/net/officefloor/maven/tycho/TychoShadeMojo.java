@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -38,6 +39,9 @@ import org.apache.maven.plugins.shade.ShadeRequest;
 import org.apache.maven.plugins.shade.Shader;
 import org.apache.maven.plugins.shade.filter.Filter;
 import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.archiver.Archiver;
+import org.codehaus.plexus.archiver.jar.JarArchiver;
+import org.codehaus.plexus.archiver.util.DefaultFileSet;
 import org.eclipse.tycho.classpath.ClasspathEntry;
 import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
 
@@ -51,6 +55,9 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 
 	@Component
 	private Shader shader;
+
+	@Component
+	private Map<String, Archiver> archivers;
 
 	@Parameter(defaultValue = "${project}", readonly = true)
 	private MavenProject mavenProject;
@@ -85,15 +92,10 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 
 		// Load the jars for shading
 		Set<File> jars = new HashSet<>();
+		JarArchiver archiver = (JarArchiver) this.archivers.get("jar");
+		File directoryArchive = null;
 		for (ClasspathEntry entry : this.getClasspath()) {
 			NEXT_LOCACTION: for (File location : entry.getLocations()) {
-
-				// Load only jars
-				if (location.isDirectory()) {
-					// Not directory (do not shade)
-					this.getLog().debug("  - " + location.getAbsolutePath() + " (not shading directory)");
-					continue NEXT_LOCACTION;
-				}
 
 				// Determine if filter
 				for (Pattern excludePattern : excludePatterns) {
@@ -106,14 +108,46 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 					}
 				}
 
+				// Include directory in single archive
+				if (location.isDirectory()) {
+					this.getLog().debug("  d " + location.getAbsolutePath());
+
+					// Lazy configure the archiver
+					if (directoryArchive == null) {
+						File tempArea = new File(this.target, "tycho-shade");
+						if (!tempArea.exists()) {
+							tempArea.mkdirs();
+						}
+						directoryArchive = new File(tempArea, "DirectoriesArchive.jar");
+						archiver.setDestFile(directoryArchive);
+					}
+
+					// Include the directory
+					archiver.addFileSet(new DefaultFileSet(location));
+					continue NEXT_LOCACTION;
+				}
+
 				// Shade the jar
 				jars.add(location);
 				this.getLog().debug("  + " + location.getAbsolutePath());
 			}
 		}
 
+		// Determine if create archive
+		if (directoryArchive != null) {
+			try {
+				archiver.createArchive();
+			} catch (IOException ex) {
+				throw new MojoFailureException("Failed to create directory archive for shading", ex);
+			}
+
+			// Include the directories into shading
+			jars.add(directoryArchive);
+		}
+
 		// Determine the shade jar name
-		String shadeJarName = this.mavenProject.getBuild().getFinalName() + ".jar";
+		File shadeJar = new File(this.target, this.mavenProject.getBuild().getFinalName() + ".jar");
+		this.getLog().info("Shading jar: " + shadeJar.getAbsolutePath());
 
 		// Log the inclusions
 		this.getLog().debug("Tycho shade resources:");
@@ -121,7 +155,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 		// Shade the jar
 		ShadeRequest request = new ShadeRequest();
 		request.setJars(jars);
-		request.setUberJar(new File(this.target, shadeJarName));
+		request.setUberJar(shadeJar);
 		request.setFilters(Arrays.asList(new ResourceFilter()));
 		request.setResourceTransformers(Collections.emptyList());
 		request.setRelocators(Collections.emptyList());
