@@ -38,10 +38,8 @@ import org.apache.maven.plugins.shade.ShadeRequest;
 import org.apache.maven.plugins.shade.Shader;
 import org.apache.maven.plugins.shade.filter.Filter;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.archiver.jar.JarArchiver;
+import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
-import org.codehaus.plexus.context.Context;
-import org.codehaus.plexus.context.ContextException;
 import org.eclipse.tycho.classpath.ClasspathEntry;
 import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
 
@@ -56,8 +54,8 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 	@Component
 	private Shader shader;
 
-	@Component
-	private Context context;
+	@Component(hint = "jar")
+	private Archiver archiver;
 
 	@Parameter(defaultValue = "${project}", readonly = true)
 	private MavenProject mavenProject;
@@ -92,7 +90,6 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 
 		// Load the jars for shading
 		Set<File> jars = new HashSet<>();
-		JarArchiver archiver = null;
 		File directoryArchive = null;
 		for (ClasspathEntry entry : this.getClasspath()) {
 			NEXT_LOCACTION: for (File location : entry.getLocations()) {
@@ -119,21 +116,11 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 							tempArea.mkdirs();
 						}
 						directoryArchive = new File(tempArea, "DirectoriesArchive.jar");
-					}
-
-					// Lazy configure the archiver
-					if (archiver == null) {
-						try {
-							archiver = new JarArchiver();
-							archiver.contextualize(this.context);
-							archiver.setDestFile(directoryArchive);
-						} catch (ContextException ex) {
-							throw new MojoFailureException(ex.getMessage(), ex);
-						}
+						this.archiver.setDestFile(directoryArchive);
 					}
 
 					// Include the directory
-					archiver.addFileSet(new DefaultFileSet(location));
+					this.archiver.addFileSet(new DefaultFileSet(location));
 					continue NEXT_LOCACTION;
 				}
 
@@ -146,7 +133,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 		// Determine if create archive
 		if (directoryArchive != null) {
 			try {
-				archiver.createArchive();
+				this.archiver.createArchive();
 			} catch (IOException ex) {
 				throw new MojoFailureException("Failed to create directory archive for shading", ex);
 			}
