@@ -10,5 +10,6 @@ mvn test -B
 # Ensure backwards compatibility for Eclipse
 cd ../eclipse
 echo "Backwards compability for Eclipse"
-# PHOTON.target already tested by default
+# Latest already tested by default
+mvn clean install -P PHOTON.target
 mvn clean install -P OXYGEN.target
