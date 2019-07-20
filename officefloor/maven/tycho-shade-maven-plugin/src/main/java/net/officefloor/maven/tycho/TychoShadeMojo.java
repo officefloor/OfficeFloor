@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -39,9 +38,10 @@ import org.apache.maven.plugins.shade.ShadeRequest;
 import org.apache.maven.plugins.shade.Shader;
 import org.apache.maven.plugins.shade.filter.Filter;
 import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.jar.JarArchiver;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
+import org.codehaus.plexus.context.Context;
+import org.codehaus.plexus.context.ContextException;
 import org.eclipse.tycho.classpath.ClasspathEntry;
 import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
 
@@ -57,7 +57,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 	private Shader shader;
 
 	@Component
-	private Map<String, Archiver> archivers;
+	private Context context;
 
 	@Parameter(defaultValue = "${project}", readonly = true)
 	private MavenProject mavenProject;
@@ -92,7 +92,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 
 		// Load the jars for shading
 		Set<File> jars = new HashSet<>();
-		JarArchiver archiver = (JarArchiver) this.archivers.get("jar");
+		JarArchiver archiver = null;
 		File directoryArchive = null;
 		for (ClasspathEntry entry : this.getClasspath()) {
 			NEXT_LOCACTION: for (File location : entry.getLocations()) {
@@ -112,14 +112,24 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 				if (location.isDirectory()) {
 					this.getLog().debug("  d " + location.getAbsolutePath());
 
-					// Lazy configure the archiver
+					// Lazy configure the directory archive jar
 					if (directoryArchive == null) {
 						File tempArea = new File(this.target, "tycho-shade");
 						if (!tempArea.exists()) {
 							tempArea.mkdirs();
 						}
 						directoryArchive = new File(tempArea, "DirectoriesArchive.jar");
-						archiver.setDestFile(directoryArchive);
+					}
+
+					// Lazy configure the archiver
+					if (archiver == null) {
+						try {
+							archiver = new JarArchiver();
+							archiver.contextualize(this.context);
+							archiver.setDestFile(directoryArchive);
+						} catch (ContextException ex) {
+							throw new MojoFailureException(ex.getMessage(), ex);
+						}
 					}
 
 					// Include the directory
