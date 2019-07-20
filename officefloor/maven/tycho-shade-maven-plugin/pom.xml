@@ -77,12 +77,9 @@
 			<version>${shade-version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.codehaus.plexus</groupId>
-			<artifactId>plexus-archiver</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.maven.plugin-tools</groupId>
 			<artifactId>maven-plugin-annotations</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>
