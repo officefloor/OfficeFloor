@@ -38,6 +38,7 @@ import org.apache.maven.plugins.shade.ShadeRequest;
 import org.apache.maven.plugins.shade.Shader;
 import org.apache.maven.plugins.shade.filter.Filter;
 import org.codehaus.plexus.archiver.Archiver;
+import org.codehaus.plexus.archiver.jar.JarArchiver;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
 import org.eclipse.tycho.classpath.ClasspathEntry;
 import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
@@ -53,6 +54,9 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 	@Component
 	private Shader shader;
 
+	/**
+	 * {@link JarArchiver}.
+	 */
 	@Component(hint = "jar")
 	private Archiver archiver;
 
