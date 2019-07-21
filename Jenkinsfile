@@ -36,7 +36,7 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 		stage('Set build name') {
 			steps {
 				script {
-				    build.displayName = "#" + build_number + " (" + build.BUILD_TYPE + ")"
+				    currentBuild.displayName = "#${BUILD_NUMBER} (${params.BUILD_TYPE})"
 				}
 			}
 		}
