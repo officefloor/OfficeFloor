@@ -331,7 +331,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Loads the {@link Model} to the parent {@link Model}. This allows for
 	 * constructing a prototype model for editing preferences of the
-	 * {@link AbstractIdeEditor}.
+	 * {@link AbstractIdeEclipseEditor}.
 	 * 
 	 * @param parentModel
 	 *            Parent {@link Model}.

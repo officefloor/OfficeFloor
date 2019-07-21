@@ -43,6 +43,7 @@
 		<module>spring</module>
 		<module>maven</module>
 		<module>eclipse</module>
+		<module>viewer</module>
 		<module>tutorials</module>
 	</modules>
 	<properties>
@@ -64,6 +65,7 @@
 		<openjfx-swt-version>11</openjfx-swt-version>
 		<projectVersion>${revision}</projectVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<shade-version>3.2.1</shade-version>
 		<tycho-version>1.4.0</tycho-version>
 	</properties>
 	<dependencyManagement>
@@ -127,6 +129,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.shade</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.section</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -186,6 +193,23 @@
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>woof-archetype</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>tycho-shade-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Viewer -->
+			<dependency>
+				<groupId>net.officefloor.viewer</groupId>
+				<artifactId>viewer</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.viewer</groupId>
+				<artifactId>officeviewer</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Additional build dependencies -->
@@ -262,6 +286,11 @@
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
 					<artifactId>officefloor-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
+					<artifactId>tycho-shade-maven-plugin</artifactId>
 					<version>${revision}</version>
 				</plugin>
 				<plugin>
@@ -349,7 +378,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
-					<version>3.2.1</version>
+					<version>${shade-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1020,8 +1049,8 @@
 								</goals>
 								<configuration>
 									<target>
-										<!-- Obtain the all project class paths (plus ensure a property is 
-											always available for replacefilterfile functionality to not fail) -->
+										<!-- Obtain the all project class paths (plus ensure a property 
+											is always available for replacefilterfile functionality to not fail) -->
 										<property name="maven_compile_classpath"
 											refid="maven.compile.classpath" />
 										<property name="maven_runtime_classpath"
@@ -1030,11 +1059,11 @@
 											refid="maven.test.classpath" />
 										<property name="maven_classpath"
 											value="${maven_compile_classpath}${path.separator}${maven_runtime_classpath}${path.separator}${maven_test_classpath}" />
-		
+
 										<echo
 											file="${project.build.directory}/verifier/dependencies.raw"
 											message="${maven_classpath}${path.separator}property${file.separator}version-available.jar" />
-		
+
 										<!-- Remove the compile and test classes directory from the class 
 											path -->
 										<replace
@@ -1043,7 +1072,7 @@
 										<replace
 											file="${project.build.directory}/verifier/dependencies.raw"
 											token="${project.build.testOutputDirectory}" value="" />
-		
+
 										<!-- Transform into properties file of: ${artifactId}_version=${version} -->
 										<copy
 											file="${project.build.directory}/verifier/dependencies.raw"
@@ -1053,7 +1082,8 @@
 													<!-- Split into tokens for each class path entry -->
 													<stringtokenizer delims="${path.separator}"
 														suppressdelims="true" />
-													<!-- Ignore class path entries without a version (eg system dependencies) -->
+													<!-- Ignore class path entries without a version (eg system 
+														dependencies) -->
 													<containsregex
 														pattern="(.+)${file.separator}([^${file.separator}]+)-([^-${file.separator}]+)\.([^.]+)" />
 													<!-- Transform class path entry into property for its version -->
@@ -1063,7 +1093,7 @@
 												</tokenfilter>
 											</filterchain>
 										</copy>
-		
+
 										<!-- Replace dependency versions in verifications file -->
 										<replace
 											file="${project.build.directory}/verifier/verifications.xml"
@@ -1082,7 +1112,8 @@
 						</dependencies>
 					</plugin>
 					<plugin>
-						<!-- Verification done during initialise to allow further setup in validation -->
+						<!-- Verification done during initialise to allow further setup in 
+							validation -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-verifier-plugin</artifactId>
 						<executions>

@@ -41,7 +41,7 @@ import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.preview.AdaptedEditorPreview;
-import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
+import net.officefloor.eclipse.ide.editor.AbstractIdeEclipseEditor;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.eclipse.ide.javafx.JavaFxUtil;
 import net.officefloor.eclipse.ide.javafx.JavaFxUtil.CssManager;
@@ -252,14 +252,14 @@ public class ModelPreferenceStyler<M extends Model> {
 			// Provide means to change the styling
 			this.text = new StyledText(container, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 			cssManager.registerText(this.text, initialStyle,
-					(rawStyle) -> AbstractIdeEditor.translateStyle(rawStyle, styler.item));
+					(rawStyle) -> AbstractIdeEclipseEditor.translateStyle(rawStyle, styler.item));
 			SwtUtil.autoHideScrollbars(this.text);
 			GridDataFactory.defaultsFor(this.text).align(SWT.FILL, SWT.FILL).indent(INDENT, INDENT).grab(true, true)
 					.span(2, 1).applyTo(this.text);
 
 			// Load the initial styling of preview
 			cssManager.loadStyle(initialStyle,
-					(rawStyle) -> AbstractIdeEditor.translateStyle(initialStyle, styler.item));
+					(rawStyle) -> AbstractIdeEclipseEditor.translateStyle(initialStyle, styler.item));
 
 			// Return the container
 			return container;

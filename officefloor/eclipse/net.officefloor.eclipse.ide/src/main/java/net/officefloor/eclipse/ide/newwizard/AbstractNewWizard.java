@@ -41,7 +41,7 @@ import org.eclipse.ui.ide.IDE;
 
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
-import net.officefloor.eclipse.ide.editor.AbstractIdeEditor;
+import net.officefloor.eclipse.ide.editor.AbstractIdeEclipseEditor;
 import net.officefloor.model.Model;
 
 /**
@@ -85,9 +85,9 @@ public abstract class AbstractNewWizard<R extends Model> extends Wizard implemen
 	 * Initiate.
 	 * 
 	 * @param editor
-	 *            {@link AbstractIdeEditor}.
+	 *            {@link AbstractIdeEclipseEditor}.
 	 */
-	public AbstractNewWizard(AbstractIdeEditor<R, ?, ?> editor) {
+	public AbstractNewWizard(AbstractIdeEclipseEditor<R, ?, ?> editor) {
 		this.title = editor.getClass().getSimpleName();
 		this.description = "Create the " + this.title;
 		this.initialFileName = editor.fileName();

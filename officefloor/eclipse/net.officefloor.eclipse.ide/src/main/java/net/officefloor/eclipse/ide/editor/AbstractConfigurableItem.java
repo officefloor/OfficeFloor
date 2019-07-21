@@ -535,16 +535,16 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	 * Invoke to run in main method for external testing.
 	 * 
 	 * @param rootModel         Root {@link Model}.
-	 * @param ideEditorClass    {@link AbstractIdeEditor} {@link Class} for this
+	 * @param ideEditorClass    {@link AbstractIdeEclipseEditor} {@link Class} for this
 	 *                          {@link AbstractConfigurableItem}.
 	 * @param decoratePrototype Optional decorator of the prototype {@link Model}
 	 *                          for refactor testing. May be <code>null</code> to
 	 *                          use prototype as is.
 	 */
-	public void main(R rootModel, Class<? extends AbstractIdeEditor<R, RE, O>> ideEditorClass,
+	public void main(R rootModel, Class<? extends AbstractIdeEclipseEditor<R, RE, O>> ideEditorClass,
 			Consumer<M> decoratePrototype) {
-		AbstractIdeEditor.launchOutsideWorkbench(() -> {
-			AbstractIdeEditor<R, RE, O> ideEditor = ideEditorClass.getDeclaredConstructor().newInstance();
+		AbstractIdeEclipseEditor.launchOutsideWorkbench(() -> {
+			AbstractIdeEclipseEditor<R, RE, O> ideEditor = ideEditorClass.getDeclaredConstructor().newInstance();
 			this.init(new MainConfigurableContext(ideEditor.createOperations(rootModel), decoratePrototype));
 			this.run();
 		});

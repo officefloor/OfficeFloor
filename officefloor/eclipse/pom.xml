@@ -28,6 +28,7 @@
 		<module>net.officefloor.eclipse.ide</module>
 		<module>net.officefloor.eclipse.section</module>
 		<module>net.officefloor.eclipse.section.tests</module>
+		<module>net.officefloor.eclipse.shade</module>
 		<module>net.officefloor.eclipse.officefloor</module>
 		<module>net.officefloor.eclipse.launch</module>
 		<module>net.officefloor.woof</module>

@@ -15,14 +15,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.ide.editor;
+package net.officefloor.viewer;
+
+import net.officefloor.eclipse.woof.WoofEditor;
 
 /**
- * Abstract IDE editor.
+ * Viewer for WoOF configuration.
  * 
  * @author Daniel Sagenschneider
  */
-public class AbstractIdeEditor {
+public class WoofViewer extends WoofEditor {
 
-	// TODO provide GEF functionality without coupling to SWT and Eclipse
+	public static void main(String[] args) throws Exception {
+		WoofEditor.main(args);
+	}
 }
