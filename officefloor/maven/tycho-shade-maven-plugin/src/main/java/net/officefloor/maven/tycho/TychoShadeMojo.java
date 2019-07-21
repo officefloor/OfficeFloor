@@ -37,7 +37,6 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.plugins.shade.ShadeRequest;
 import org.apache.maven.plugins.shade.Shader;
 import org.apache.maven.plugins.shade.filter.Filter;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.Archiver;
 import org.codehaus.plexus.archiver.util.DefaultFileSet;
 import org.eclipse.tycho.classpath.ClasspathEntry;
@@ -57,8 +56,8 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 	@Component(hint = "jar")
 	private Archiver archiver;
 
-	@Parameter(defaultValue = "${project}", readonly = true)
-	private MavenProject mavenProject;
+	@Parameter(defaultValue = "${project.build.finalName}", readonly = true)
+	private String finalName;
 
 	@Parameter(defaultValue = "${project.build.directory}", readonly = true)
 	private File target;
@@ -143,7 +142,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 		}
 
 		// Determine the shade jar name
-		File shadeJar = new File(this.target, this.mavenProject.getBuild().getFinalName() + ".jar");
+		File shadeJar = new File(this.target, this.finalName + ".jar");
 		this.getLog().info("Shading jar: " + shadeJar.getAbsolutePath());
 
 		// Log the inclusions
