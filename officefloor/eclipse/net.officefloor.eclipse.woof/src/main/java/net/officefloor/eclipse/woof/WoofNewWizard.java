@@ -19,7 +19,7 @@ package net.officefloor.eclipse.woof;
 
 import org.eclipse.ui.INewWizard;
 
-import net.officefloor.eclipse.ide.newwizard.AbstractNewWizard;
+import net.officefloor.eclipse.ide.newwizard.AbstractNewWizardRefactor;
 import net.officefloor.woof.model.woof.WoofModel;
 
 /**
@@ -27,13 +27,13 @@ import net.officefloor.woof.model.woof.WoofModel;
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofNewWizard extends AbstractNewWizard<WoofModel> {
+public class WoofNewWizard extends AbstractNewWizardRefactor<WoofModel> {
 
 	/**
 	 * Instantiate.
 	 */
 	public WoofNewWizard() {
-		super(new WoofEditor());
+		super(new WoofEditorRefactor());
 	}
 
 }

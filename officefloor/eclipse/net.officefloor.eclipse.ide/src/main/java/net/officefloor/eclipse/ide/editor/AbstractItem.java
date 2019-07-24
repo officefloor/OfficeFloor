@@ -117,6 +117,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		 * 
 		 * @return Parent {@link Shell}.
 		 */
+		@Deprecated // hide shell within SWT adapter implementation
 		Shell getParentShell();
 
 		/**

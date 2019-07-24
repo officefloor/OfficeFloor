@@ -20,21 +20,20 @@ package net.officefloor.eclipse.woof.test;
 import java.io.File;
 
 import net.officefloor.eclipse.woof.WoofEditor;
+import net.officefloor.eclipse.woof.WoofEditorBackup;
 
 /**
  * Allows testing of the {@link WoofEditor}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofEditorMain extends WoofEditor {
+public class WoofEditorMain extends WoofEditorBackup {
 
 	/**
 	 * Runs the {@link WoofEditor} for testing.
 	 * 
-	 * @param args
-	 *            Command line arguments.
-	 * @throws Exception
-	 *             If failure to run.
+	 * @param args Command line arguments.
+	 * @throws Exception If failure to run.
 	 */
 	public static void main(String[] args) throws Exception {
 		WoofEditorMain.launch(new File(ClassLoader
