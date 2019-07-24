@@ -8,11 +8,11 @@
 		<artifactId>officefloor</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<groupId>net.officefloor.eclipse</groupId>
-	<artifactId>eclipse</artifactId>
+	<groupId>net.officefloor.editor</groupId>
+	<artifactId>editor</artifactId>
 	<packaging>pom</packaging>
-	<name>Eclipse</name>
-	<description>Eclipse plugins and features for OfficeFloor</description>
+	<name>Editor</name>
+	<description>Editor for OfficeFloor configuration</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -88,7 +88,7 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!-- Use Tycho to build eclipse components -->
+				<!-- Use Tycho to build (uses GEF from eclipse) -->
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
 				<extensions>true</extensions>
