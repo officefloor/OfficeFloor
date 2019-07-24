@@ -15,12 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor.internal.style;
+package net.officefloor.eclipse.bridge;
+
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
+
+import org.osgi.service.url.AbstractURLStreamHandlerService;
+import org.osgi.service.url.URLStreamHandlerService;
+
+import net.officefloor.eclipse.editor.style.DefaultStyleRegistry;
 
 /**
- * OSGi {@link StyleRegistry}.
+ * OSGi {@link URLStreamHandlerService}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiStyleRegistry extends AbstractStyleRegistry {
+public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+
+	@Override
+	public URLConnection openConnection(URL url) throws IOException {
+		return DefaultStyleRegistry.openConnection(url);
+	}
+
 }

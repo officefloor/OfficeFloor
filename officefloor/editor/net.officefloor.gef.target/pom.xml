@@ -5,11 +5,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.eclipse</groupId>
-		<artifactId>eclipse</artifactId>
+		<groupId>net.officefloor.editor</groupId>
+		<artifactId>editor</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>net.officefloor.eclipse.target</artifactId>
+	<artifactId>net.officefloor.gef.target</artifactId>
 	<name>Eclipse Target Platform</name>
 	<description>Configuration of the Eclipse Target Platform</description>
 	<packaging>pom</packaging>

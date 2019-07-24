@@ -18,25 +18,22 @@
 	</properties>
 	<modules>
 		<module>net.officefloor.core</module>
-		<module>net.officefloor.eclipse.target</module>
-		<module>net.officefloor.eclipse.common</module>
-		<module>net.officefloor.eclipse.osgi</module>
-		<module>net.officefloor.eclipse.editor</module>
-		<module>net.officefloor.eclipse.editor.tests</module>
-		<module>net.officefloor.eclipse.configurer</module>
-		<module>net.officefloor.eclipse.configurer.tests</module>
-		<module>net.officefloor.eclipse.ide</module>
-		<module>net.officefloor.eclipse.section</module>
-		<module>net.officefloor.eclipse.section.tests</module>
-		<module>net.officefloor.eclipse.shade</module>
-		<module>net.officefloor.eclipse.officefloor</module>
-		<module>net.officefloor.eclipse.launch</module>
+		<module>net.officefloor.gef.target</module>
+		<module>net.officefloor.gef.bridge</module>
+		<module>net.officefloor.gef.common</module>
+		<module>net.officefloor.gef.editor</module>
+		<module>net.officefloor.gef.editor.tests</module>
+		<module>net.officefloor.gef.configurer</module>
+		<module>net.officefloor.gef.configurer.tests</module>
+		<module>net.officefloor.gef.ide</module>
+		<module>net.officefloor.gef.section</module>
+		<module>net.officefloor.gef.section.tests</module>
+		<module>net.officefloor.gef.shade</module>
+		<module>net.officefloor.gef.officefloor</module>
 		<module>net.officefloor.woof</module>
-		<module>net.officefloor.eclipse.woof</module>
-		<module>net.officefloor.eclipse.woof.tests</module>
-		<module>net.officefloor.feature</module>
-		<module>net.officefloor.woof.feature</module>
-		<module>update.site</module>
+		<module>net.officefloor.gef.woof</module>
+		<module>net.officefloor.gef.woof.tests</module>
+		<module>eclipse</module>
 	</modules>
 	<build>
 		<plugins>

@@ -15,26 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor.internal.officefloorstyle;
-
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-
-import net.officefloor.eclipse.editor.style.AbstractStyleRegistry;
-import net.officefloor.eclipse.editor.style.SystemStyleRegistry;
+package net.officefloor.eclipse.editor.style;
 
 /**
- * {@link URLStreamHandler} for the {@link SystemStyleRegistry}.
+ * Default {@link StyleRegistry}.
  * 
  * @author Daniel Sagenschneider
  */
-public class Handler extends URLStreamHandler {
-
-	@Override
-	protected URLConnection openConnection(URL url) throws IOException {
-		return AbstractStyleRegistry.openConnection(url);
-	}
-
+public class DefaultStyleRegistry extends AbstractStyleRegistry {
 }

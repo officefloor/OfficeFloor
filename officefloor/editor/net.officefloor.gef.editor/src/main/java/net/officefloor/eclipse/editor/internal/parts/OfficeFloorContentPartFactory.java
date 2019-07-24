@@ -52,7 +52,7 @@ import net.officefloor.eclipse.editor.AdaptedChild;
 import net.officefloor.eclipse.editor.AdaptedConnection;
 import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
 import net.officefloor.eclipse.editor.AdaptedConnector;
-import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
+import net.officefloor.eclipse.editor.AdaptedEditorStyle;
 import net.officefloor.eclipse.editor.AdaptedErrorHandler;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedChildVisualFactory;
@@ -68,7 +68,7 @@ import net.officefloor.eclipse.editor.PaletteStyler;
 import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.editor.internal.models.AbstractAdaptedFactory;
 import net.officefloor.eclipse.editor.internal.models.AdaptedParentFactory;
-import net.officefloor.eclipse.editor.internal.style.StyleRegistry;
+import net.officefloor.eclipse.editor.style.StyleRegistry;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -362,7 +362,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 		this.operations = this.createOperations.apply(this.rootModel);
 
 		// Load the default styling
-		AdaptedEditorPlugin.loadDefaulStylesheet(this.editorPane.getScene());
+		AdaptedEditorStyle.loadDefaulStylesheet(this.editorPane.getScene());
 
 		// Re-apply styles (after so overrides default style)
 		Consumer<Property<String>> reapplyStyle = (style) -> {

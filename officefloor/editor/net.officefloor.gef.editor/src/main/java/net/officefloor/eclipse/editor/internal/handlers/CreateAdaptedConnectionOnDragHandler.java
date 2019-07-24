@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.gef.common.adapt.AdapterKey;
 import org.eclipse.gef.geometry.planar.Dimension;
 import org.eclipse.gef.geometry.planar.Point;
@@ -209,7 +208,7 @@ public class CreateAdaptedConnectionOnDragHandler<R extends Model, O> extends Ab
 		deselected.remove(this.connectionPart);
 		DeselectOperation deselectOperation = new DeselectOperation(getHost().getRoot().getViewer(), deselected);
 		try {
-			getHost().getRoot().getViewer().getDomain().execute(deselectOperation, new NullProgressMonitor());
+			getHost().getRoot().getViewer().getDomain().execute(deselectOperation, null);
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		}

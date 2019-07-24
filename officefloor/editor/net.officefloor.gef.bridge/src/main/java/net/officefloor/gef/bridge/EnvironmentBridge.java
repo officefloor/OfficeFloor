@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,26 +15,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor.internal.officefloorstyle;
-
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-
-import net.officefloor.eclipse.editor.style.AbstractStyleRegistry;
-import net.officefloor.eclipse.editor.style.SystemStyleRegistry;
+package net.officefloor.gef.bridge;
 
 /**
- * {@link URLStreamHandler} for the {@link SystemStyleRegistry}.
+ * Bridges the editor to the environment.
  * 
  * @author Daniel Sagenschneider
  */
-public class Handler extends URLStreamHandler {
+public interface EnvironmentBridge {
 
-	@Override
-	protected URLConnection openConnection(URL url) throws IOException {
-		return AbstractStyleRegistry.openConnection(url);
-	}
-
+	// TODO define bridging
 }

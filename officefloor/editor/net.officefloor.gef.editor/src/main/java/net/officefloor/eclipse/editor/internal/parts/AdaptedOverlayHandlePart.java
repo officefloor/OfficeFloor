@@ -23,7 +23,7 @@ import org.eclipse.gef.mvc.fx.parts.IHandlePart;
 
 import javafx.geometry.Orientation;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.common.javafx.resize.DragResizer;
+import net.officefloor.gef.common.resize.DragResizer;
 import net.officefloor.eclipse.editor.OverlayVisualContext;
 import net.officefloor.eclipse.editor.OverlayVisualFactory;
 
@@ -62,10 +62,8 @@ public class AdaptedOverlayHandlePart extends AbstractHandlePart<Pane> implement
 	/**
 	 * Instantiate.
 	 * 
-	 * @param location
-	 *            Location.
-	 * @param visualFactory
-	 *            {@link OverlayVisualContext}.
+	 * @param location      Location.
+	 * @param visualFactory {@link OverlayVisualContext}.
 	 */
 	public AdaptedOverlayHandlePart(Point location, OverlayVisualFactory visualFactory) {
 		this.location = location;

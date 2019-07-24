@@ -30,13 +30,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.editor.AdaptedChildVisualFactory;
-import net.officefloor.eclipse.editor.AdaptedEditorPlugin;
+import net.officefloor.eclipse.editor.AdaptedEditorStyle;
 import net.officefloor.eclipse.editor.AdaptedModel;
 import net.officefloor.eclipse.editor.AdaptedParent;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedChildPart;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedChildVisualFactoryContextImpl;
 import net.officefloor.eclipse.editor.internal.parts.AdaptedParentPart;
-import net.officefloor.eclipse.editor.internal.style.StyleRegistry;
+import net.officefloor.eclipse.editor.style.StyleRegistry;
 import net.officefloor.model.Model;
 
 /**
@@ -101,12 +101,12 @@ public class AdaptedEditorPreview<M extends Model> {
 		}
 
 		// Load the default styling
-		AdaptedEditorPlugin.loadDefaulStylesheet(this.previewScene);
+		AdaptedEditorStyle.loadDefaulStylesheet(this.previewScene);
 
 		// Load specific styling (if able)
 		if (this.previewVisual instanceof Parent) {
 			Parent previewParent = (Parent) this.previewVisual;
-			StyleRegistry styleRegistry = AdaptedEditorPlugin.createStyleRegistry();
+			StyleRegistry styleRegistry = AdaptedEditorStyle.createStyleRegistry();
 			ReadOnlyProperty<URL> styleUrl = styleRegistry.registerStyle("_preview_", this.styling);
 			styleUrl.addListener((event, oldUrl, newUrl) -> {
 				if (oldUrl != null) {
