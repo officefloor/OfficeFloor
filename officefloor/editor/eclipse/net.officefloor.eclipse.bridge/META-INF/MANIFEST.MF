@@ -7,7 +7,7 @@ Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: net.officefloor.core;bundle-version="3.12.0",
  net.officefloor.gef.bridge;bundle-version="3.12.0",
- net.officefloor.eclipse.editor;bundle-version="3.12.0"
+ net.officefloor.gef.editor;bundle-version="3.12.0"
 Export-Package: net.officefloor.eclipse.bridge
 Import-Package: com.google.common.annotations,
  org.eclipse.core.resources,

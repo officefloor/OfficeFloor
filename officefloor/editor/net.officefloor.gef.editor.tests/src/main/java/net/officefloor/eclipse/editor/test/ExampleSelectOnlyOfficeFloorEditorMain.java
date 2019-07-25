@@ -18,11 +18,11 @@
 package net.officefloor.eclipse.editor.test;
 
 import javafx.application.Application;
-import net.officefloor.eclipse.editor.AdaptedModelStyler;
-import net.officefloor.eclipse.editor.EditorStyler;
-import net.officefloor.eclipse.editor.PaletteIndicatorStyler;
-import net.officefloor.eclipse.editor.PaletteStyler;
-import net.officefloor.eclipse.editor.SelectOnly;
+import net.officefloor.gef.editor.AdaptedModelStyler;
+import net.officefloor.gef.editor.EditorStyler;
+import net.officefloor.gef.editor.PaletteIndicatorStyler;
+import net.officefloor.gef.editor.PaletteStyler;
+import net.officefloor.gef.editor.SelectOnly;
 
 /**
  * Example {@link SelectOnly} {@link ExampleOfficeFloorEditorMain}.
@@ -34,8 +34,7 @@ public class ExampleSelectOnlyOfficeFloorEditorMain extends ExampleOfficeFloorEd
 	/**
 	 * Main to run the editor.
 	 * 
-	 * @param args
-	 *            Command line arguments.
+	 * @param args Command line arguments.
 	 */
 	public static void main(String[] args) {
 		Application.launch(args);

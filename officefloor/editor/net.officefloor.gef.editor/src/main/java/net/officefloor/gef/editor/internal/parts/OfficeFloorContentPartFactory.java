@@ -51,8 +51,9 @@ import net.officefloor.gef.editor.AdaptedBuilderContext;
 import net.officefloor.gef.editor.AdaptedChild;
 import net.officefloor.gef.editor.AdaptedChildVisualFactory;
 import net.officefloor.gef.editor.AdaptedConnection;
+import net.officefloor.gef.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
 import net.officefloor.gef.editor.AdaptedConnector;
-import net.officefloor.gef.editor.AdaptedEditorStyle;
+import net.officefloor.gef.editor.AdaptedEditorPlugin;
 import net.officefloor.gef.editor.AdaptedErrorHandler;
 import net.officefloor.gef.editor.AdaptedModel;
 import net.officefloor.gef.editor.AdaptedParent;
@@ -65,7 +66,6 @@ import net.officefloor.gef.editor.OverlayVisualFactory;
 import net.officefloor.gef.editor.PaletteIndicatorStyler;
 import net.officefloor.gef.editor.PaletteStyler;
 import net.officefloor.gef.editor.SelectOnly;
-import net.officefloor.gef.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
 import net.officefloor.gef.editor.internal.models.AbstractAdaptedFactory;
 import net.officefloor.gef.editor.internal.models.AdaptedParentFactory;
 import net.officefloor.gef.editor.style.StyleRegistry;
@@ -362,7 +362,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 		this.operations = this.createOperations.apply(this.rootModel);
 
 		// Load the default styling
-		AdaptedEditorStyle.loadDefaulStylesheet(this.editorPane.getScene());
+		AdaptedEditorPlugin.loadDefaulStylesheet(this.editorPane.getScene());
 
 		// Re-apply styles (after so overrides default style)
 		Consumer<Property<String>> reapplyStyle = (style) -> {

@@ -30,7 +30,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import net.officefloor.gef.editor.AdaptedChildVisualFactory;
-import net.officefloor.gef.editor.AdaptedEditorStyle;
+import net.officefloor.gef.editor.AdaptedEditorPlugin;
 import net.officefloor.gef.editor.AdaptedModel;
 import net.officefloor.gef.editor.AdaptedParent;
 import net.officefloor.gef.editor.internal.parts.AdaptedChildPart;
@@ -101,12 +101,12 @@ public class AdaptedEditorPreview<M extends Model> {
 		}
 
 		// Load the default styling
-		AdaptedEditorStyle.loadDefaulStylesheet(this.previewScene);
+		AdaptedEditorPlugin.loadDefaulStylesheet(this.previewScene);
 
 		// Load specific styling (if able)
 		if (this.previewVisual instanceof Parent) {
 			Parent previewParent = (Parent) this.previewVisual;
-			StyleRegistry styleRegistry = AdaptedEditorStyle.createStyleRegistry();
+			StyleRegistry styleRegistry = AdaptedEditorPlugin.createStyleRegistry();
 			ReadOnlyProperty<URL> styleUrl = styleRegistry.registerStyle("_preview_", this.styling);
 			styleUrl.addListener((event, oldUrl, newUrl) -> {
 				if (oldUrl != null) {

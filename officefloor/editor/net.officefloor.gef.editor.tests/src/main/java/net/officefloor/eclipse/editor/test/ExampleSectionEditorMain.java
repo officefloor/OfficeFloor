@@ -21,12 +21,12 @@ import javafx.application.Application;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
-import net.officefloor.eclipse.editor.AbstractEditorApplication;
-import net.officefloor.eclipse.editor.AdaptedBuilderContext;
-import net.officefloor.eclipse.editor.AdaptedParentBuilder;
-import net.officefloor.eclipse.editor.AdaptedRootBuilder;
-import net.officefloor.eclipse.editor.DefaultConnectors;
+import net.officefloor.gef.common.structure.StructureLogger;
+import net.officefloor.gef.editor.AbstractEditorApplication;
+import net.officefloor.gef.editor.AdaptedBuilderContext;
+import net.officefloor.gef.editor.AdaptedParentBuilder;
+import net.officefloor.gef.editor.AdaptedRootBuilder;
+import net.officefloor.gef.editor.DefaultConnectors;
 import net.officefloor.model.Model;
 import net.officefloor.model.impl.section.SectionChangesImpl;
 import net.officefloor.model.section.FunctionModel;
@@ -46,8 +46,7 @@ public class ExampleSectionEditorMain extends AbstractEditorApplication {
 	/**
 	 * Main to run the editor.
 	 * 
-	 * @param args
-	 *            Command line arguments.
+	 * @param args Command line arguments.
 	 */
 	public static void main(String[] args) {
 		Application.launch(args);

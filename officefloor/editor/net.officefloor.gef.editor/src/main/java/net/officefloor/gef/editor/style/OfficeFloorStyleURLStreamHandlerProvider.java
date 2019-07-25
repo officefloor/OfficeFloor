@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,27 +15,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor.style;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import java.net.URLStreamHandler;
+import java.net.spi.URLStreamHandlerProvider;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * OfficeFloorStyle {@link URLStreamHandlerProvider}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public class OfficeFloorStyleURLStreamHandlerProvider extends URLStreamHandlerProvider {
 
 	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
+	public URLStreamHandler createURLStreamHandler(String protocol) {
+		return new URLStreamHandler() {
+
+			@Override
+			protected URLConnection openConnection(URL url) throws IOException {
+				return DefaultStyleRegistry.openConnection(url);
+			}
+		};
 	}
 
 }

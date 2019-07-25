@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -23,39 +23,29 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
-import org.eclipse.core.runtime.Plugin;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.url.URLStreamHandlerService;
 
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Scene;
+import net.officefloor.gef.editor.style.AbstractStyleRegistry;
 import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import net.officefloor.gef.editor.style.OsgiURLStreamHandlerService;
 import net.officefloor.gef.editor.style.StyleRegistry;
 import net.officefloor.gef.editor.style.SystemStyleRegistry;
 
 /**
- * {@link Plugin} for the {@link AdaptedEditorModule}.
+ * {@link AbstractUIPlugin} for the Adapted Editor.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedEditorStyle {
-
-	/**
-	 * Indicates if style {@link URL} location is active.
-	 */
-	private static boolean isUrlStyleLocationActive = false;
-
-	/**
-	 * Default stylesheet {@link URL}.
-	 */
-	private static URL DEFAULT_STYLESHEET_URL;
-
-	/**
-	 * Flags {@link URL} location active.
-	 */
-	public static void urlStyleLocationActive() {
-		isUrlStyleLocationActive = true;
-	}
+public class AdaptedEditorPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Creates a new {@link StyleRegistry}.
@@ -64,10 +54,10 @@ public class AdaptedEditorStyle {
 	 */
 	public static StyleRegistry createStyleRegistry() {
 
-		// Determine if able to locate via URL
-		if (isUrlStyleLocationActive) {
+		// Determine if running within OSGi
+		if (INSTANCE == null) {
 
-			// Running without URL locating
+			// Running outside OSGi
 			return new SystemStyleRegistry();
 		}
 
@@ -115,8 +105,8 @@ public class AdaptedEditorStyle {
 	 */
 	public static void loadDefaulStylesheet(Scene scene) {
 
-		// Determine if running with URL locating
-		if (isUrlStyleLocationActive) {
+		// Determine if running within OSGi
+		if (INSTANCE == null) {
 
 			// Running outside OSGi environment (so load from class path)
 			scene.getStylesheets().add(AdaptedEditorModule.class.getName().replace('.', '/') + ".css");
@@ -138,6 +128,63 @@ public class AdaptedEditorStyle {
 
 		// Load the default style sheet
 		scene.getStylesheets().add(DEFAULT_STYLESHEET_URL.toExternalForm());
+	}
+
+	/**
+	 * Obtains the {@link AdaptedEditorPlugin} singleton.
+	 * 
+	 * @return {@link AdaptedEditorPlugin} singleton.
+	 */
+	public AdaptedEditorPlugin getDefault() {
+		return INSTANCE;
+	}
+
+	/**
+	 * Default stylesheet {@link URL}.
+	 */
+	private static URL DEFAULT_STYLESHEET_URL;
+
+	/**
+	 * Singleton.
+	 */
+	private static AdaptedEditorPlugin INSTANCE;
+
+	/**
+	 * {@link ServiceRegistration} for the {@link OsgiURLStreamHandlerService}.
+	 */
+	private ServiceRegistration<?> styleUrlHandler;
+
+	/**
+	 * Instantiate.
+	 */
+	public AdaptedEditorPlugin() {
+		INSTANCE = this;
+	}
+
+	/*
+	 * =============== AbstractUIPlugin =========================
+	 */
+
+	@Override
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+
+		// Register the URL handler for styling
+		Dictionary<String, String> properties = new Hashtable<>();
+		properties.put("url.handler.protocol", AbstractStyleRegistry.PROTOCOL);
+		this.styleUrlHandler = context.registerService(URLStreamHandlerService.class.getName(),
+				new OsgiURLStreamHandlerService(), properties);
+	}
+
+	@Override
+	public void stop(BundleContext context) throws Exception {
+		super.stop(context);
+
+		// Unregister style URL handler
+		if (this.styleUrlHandler != null) {
+			context.ungetService(this.styleUrlHandler.getReference());
+			this.styleUrlHandler = null;
+		}
 	}
 
 }

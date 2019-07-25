@@ -15,21 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.editor.test;
+package net.officefloor.gef.editor.style;
 
-import org.junit.Test;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 
-import net.officefloor.gef.editor.AdaptedEditorModule;
+import org.osgi.service.url.AbstractURLStreamHandlerService;
+import org.osgi.service.url.URLStreamHandlerService;
 
 /**
- * Test the {@link AdaptedEditorModule}.
+ * OSGi {@link URLStreamHandlerService}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AdaptedEditorModelTest {
-	
-	@Test
-	public void required() {
+public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+
+	@Override
+	public URLConnection openConnection(URL url) throws IOException {
+		return DefaultStyleRegistry.openConnection(url);
 	}
 
 }

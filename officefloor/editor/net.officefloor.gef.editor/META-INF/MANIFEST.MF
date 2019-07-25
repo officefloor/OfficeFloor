@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OfficeFloor Editor
-Bundle-SymbolicName: net.officefloor.eclipse.editor;singleton:=true
+Bundle-SymbolicName: net.officefloor.gef.editor;singleton:=true
 Bundle-Version: 3.12.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -33,8 +33,11 @@ Import-Package: com.google.common.collect,
  org.eclipse.gef.mvc.fx.parts,
  org.eclipse.gef.mvc.fx.policies,
  org.eclipse.gef.mvc.fx.providers,
- org.eclipse.gef.mvc.fx.viewer
+ org.eclipse.gef.mvc.fx.viewer,
+ org.eclipse.ui.plugin,
+ org.osgi.service.url
 Export-Package: net.officefloor.gef.editor,
  net.officefloor.gef.editor.preview,
  net.officefloor.gef.editor.style
 Automatic-Module-Name: net.officefloor.gef.editor
+Bundle-Activator: net.officefloor.gef.editor.AdaptedEditorPlugin

@@ -236,7 +236,7 @@ public class AdaptedEditorModule extends MvcFxModule {
 		this.factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
 
 		// Create the style registry for the factory
-		StyleRegistry styleRegistry = AdaptedEditorStyle.createStyleRegistry();
+		StyleRegistry styleRegistry = AdaptedEditorPlugin.createStyleRegistry();
 
 		// Load the viewers and change executor
 		this.viewersComposite = new ViewersComposite(this.content, this.palette, this.selectOnly);
