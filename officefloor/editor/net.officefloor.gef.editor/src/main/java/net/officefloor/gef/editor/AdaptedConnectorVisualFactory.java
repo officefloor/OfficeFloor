@@ -15,27 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
+import org.eclipse.gef.fx.nodes.GeometryNode;
 
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import javafx.scene.layout.Region;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Factory for the creation of the {@link GeometryNode}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public interface AdaptedConnectorVisualFactory<N extends Region> {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
-	}
+	/**
+	 * Creates the {@link GeometryNode}.
+	 * 
+	 * @param context
+	 *            {@link AdaptedConnectorVisualFactoryContext}.
+	 * @return New {@link GeometryNode}.
+	 */
+	N createGeometryNode(AdaptedConnectorVisualFactoryContext context);
 
 }

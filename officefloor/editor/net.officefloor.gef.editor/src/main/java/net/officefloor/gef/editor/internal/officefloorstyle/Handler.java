@@ -15,27 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor.internal.officefloorstyle;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLStreamHandler;
 
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import net.officefloor.gef.editor.style.AbstractStyleRegistry;
+import net.officefloor.gef.editor.style.SystemStyleRegistry;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * {@link URLStreamHandler} for the {@link SystemStyleRegistry}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public class Handler extends URLStreamHandler {
 
 	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
+	protected URLConnection openConnection(URL url) throws IOException {
+		return AbstractStyleRegistry.openConnection(url);
 	}
 
 }

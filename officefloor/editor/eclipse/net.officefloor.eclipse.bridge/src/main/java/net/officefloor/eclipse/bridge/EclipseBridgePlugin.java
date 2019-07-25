@@ -26,8 +26,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.url.URLStreamHandlerService;
 
-import net.officefloor.eclipse.editor.AdaptedEditorStyle;
-import net.officefloor.eclipse.editor.style.AbstractStyleRegistry;
+import net.officefloor.gef.editor.AdaptedEditorStyle;
+import net.officefloor.gef.editor.style.AbstractStyleRegistry;
 
 /**
  * {@link Plugin} for bridging to Eclipse.

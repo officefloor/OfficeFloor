@@ -15,27 +15,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor.internal.parts;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.util.List;
+import java.util.Map;
 
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
+import org.eclipse.gef.mvc.fx.parts.DefaultHoverFeedbackPartFactory;
+import org.eclipse.gef.mvc.fx.parts.IFeedbackPart;
+import org.eclipse.gef.mvc.fx.parts.IFeedbackPartFactory;
+import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import javafx.scene.Node;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * {@link OfficeFloor} {@link IFeedbackPartFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public class OfficeFloorHoverFeedbackPartFactory extends DefaultHoverFeedbackPartFactory {
 
 	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
+	public List<IFeedbackPart<? extends Node>> createFeedbackParts(List<? extends IVisualPart<? extends Node>> targets,
+			Map<Object, Object> contextMap) {
+		return OfficeFloorContentPartFactory.createFeedbackParts(targets,
+				(parts) -> super.createFeedbackParts(parts, contextMap));
 	}
 
 }

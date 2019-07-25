@@ -34,7 +34,7 @@ Import-Package: com.google.common.collect,
  org.eclipse.gef.mvc.fx.policies,
  org.eclipse.gef.mvc.fx.providers,
  org.eclipse.gef.mvc.fx.viewer
-Export-Package: net.officefloor.eclipse.editor,
- net.officefloor.eclipse.editor.preview,
- net.officefloor.eclipse.editor.style
+Export-Package: net.officefloor.gef.editor,
+ net.officefloor.gef.editor.preview,
+ net.officefloor.gef.editor.style
 Automatic-Module-Name: net.officefloor.gef.editor

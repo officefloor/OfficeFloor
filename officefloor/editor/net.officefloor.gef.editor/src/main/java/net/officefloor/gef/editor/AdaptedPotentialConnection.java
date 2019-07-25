@@ -15,27 +15,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.Model;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Potential {@link AdaptedConnection}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public interface AdaptedPotentialConnection {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
-	}
+	/**
+	 * Obtains the source {@link Model} {@link Class}.
+	 * 
+	 * @return Source {@link Model} {@link Class}.
+	 */
+	Class<?> getSourceModelClass();
+
+	/**
+	 * Obtains the target {@link Model} {@link Class}.
+	 * 
+	 * @return Target {@link Model} {@link Class}.
+	 */
+	Class<?> getTargetModelClass();
+
+	/**
+	 * Indicates whether can create the {@link ConnectionModel}.
+	 * 
+	 * @return <code>true</code> if able to create the {@link ConnectionModel}.
+	 */
+	boolean canCreateConnection();
 
 }

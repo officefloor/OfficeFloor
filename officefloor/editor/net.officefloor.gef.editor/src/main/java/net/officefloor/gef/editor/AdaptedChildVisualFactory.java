@@ -15,27 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import javafx.scene.Node;
+import net.officefloor.model.Model;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Creates a visual {@link Node} for the parent {@link Model}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public interface AdaptedChildVisualFactory<M extends Model> {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
-	}
+	/**
+	 * Creates the visual {@link Node}.
+	 * 
+	 * @param model   {@link AdaptedModel}.
+	 * @param context {@link AdaptedChildVisualFactoryContext}.
+	 * @return Visual {@link Node}.
+	 */
+	Node createVisual(M model, AdaptedChildVisualFactoryContext<M> context);
 
 }

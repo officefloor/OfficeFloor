@@ -15,27 +15,42 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor.internal.models;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.util.List;
 
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import net.officefloor.gef.editor.ModelAction;
+import net.officefloor.model.Model;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Adapted {@link ModelAction} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public class AdaptedActions<R extends Model, O, M extends Model> {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
+	/**
+	 * {@link AdaptedAction} instances.
+	 */
+	private final List<AdaptedAction<R, O, M>> actions;
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param actions
+	 *            {@link AdaptedAction} instances.
+	 */
+	public AdaptedActions(List<AdaptedAction<R, O, M>> actions) {
+		this.actions = actions;
+	}
+
+	/**
+	 * Obtains the {@link AdaptedAction} instances.
+	 * 
+	 * @return {@link AdaptedAction} instances.
+	 */
+	public List<AdaptedAction<R, O, M>> getAdaptedActions() {
+		return this.actions;
 	}
 
 }

@@ -15,27 +15,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import javafx.beans.property.Property;
+import javafx.scene.Node;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Styler to the palette indicator.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public interface PaletteIndicatorStyler {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
-	}
+	/**
+	 * <p>
+	 * Obtains the palette indicator.
+	 * <p>
+	 * This allows for interrogating the structure of the palette indicator.
+	 * 
+	 * @return Palette indicator.
+	 */
+	Node getPaletteIndicator();
+
+	/**
+	 * Obtains the {@link Property} to the palette indicator style.
+	 * 
+	 * @return {@link Property} to the palette indicator style.
+	 */
+	Property<String> paletteIndicatorStyle();
 
 }

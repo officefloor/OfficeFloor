@@ -15,27 +15,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import javafx.beans.property.Property;
+import net.officefloor.model.Model;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Styler of the {@link AdaptedModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public interface AdaptedModelStyler {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
-	}
+	/**
+	 * Obtains the {@link Model}.
+	 * 
+	 * @return {@link Model}.
+	 */
+	Model getModel();
+
+	/**
+	 * Obtains the {@link Property} to style the {@link AdaptedModel}.
+	 * 
+	 * @return {@link Property} to style the {@link AdaptedModel}.
+	 */
+	Property<String> style();
 
 }

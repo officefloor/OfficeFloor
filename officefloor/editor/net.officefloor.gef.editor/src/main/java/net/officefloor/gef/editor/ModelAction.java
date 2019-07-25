@@ -15,27 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import net.officefloor.model.Model;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Action on a particular {@link Model}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public interface ModelAction<R extends Model, O, M extends Model> {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
-	}
+	/**
+	 * Executes the action.
+	 * 
+	 * @param context
+	 *            {@link ModelActionContext}.
+	 * @throws Throwable
+	 *             Possible {@link Exception} in executing {@link ModelAction}.
+	 */
+	void execute(ModelActionContext<R, O, M> context) throws Throwable;
 
 }

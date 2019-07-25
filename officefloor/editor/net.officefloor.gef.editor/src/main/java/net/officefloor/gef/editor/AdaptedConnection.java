@@ -15,27 +15,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import net.officefloor.model.ConnectionModel;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Adapted {@link ConnectionModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public interface AdaptedConnection<C extends ConnectionModel> extends AdaptedModel<C> {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
-	}
+	/**
+	 * Obtains the source {@link AdaptedConnectable}.
+	 * 
+	 * @return Source {@link AdaptedConnectable}.
+	 */
+	AdaptedConnectable<?> getSource();
+
+	/**
+	 * Obtains the target {@link AdaptedConnectable}.
+	 * 
+	 * @return Target {@link AdaptedConnectable}.
+	 */
+	AdaptedConnectable<?> getTarget();
+
+	/**
+	 * Indicates whether able to remove the {@link ConnectionModel}.
+	 * 
+	 * @return <code>true</code> if able to remove the {@link ConnectionModel}.
+	 */
+	boolean canRemove();
+
+	/**
+	 * Removes the {@link ConnectionModel}.
+	 */
+	void remove();
 
 }

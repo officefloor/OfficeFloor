@@ -15,27 +15,45 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
-
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import javafx.collections.ObservableList;
+import net.officefloor.gef.editor.internal.models.ChildrenGroupFactory.ChildrenGroupImpl;
+import net.officefloor.model.Model;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Child group.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public interface ChildrenGroup<M extends Model, E extends Enum<E>> {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
-	}
+	/**
+	 * Obtains the {@link ChildrenGroupImpl} name.
+	 * 
+	 * @return {@link ChildrenGroupImpl} name.
+	 */
+	String getChildrenGroupName();
+
+	/**
+	 * Obtains the parent {@link AdaptedChild}.
+	 * 
+	 * @return Parent {@link AdaptedChild}.
+	 */
+	AdaptedChild<M> getParent();
+
+	/**
+	 * Obtains the {@link AdaptedChild} instances.
+	 * 
+	 * @return {@link AdaptedChild} instances.
+	 */
+	ObservableList<AdaptedChild<?>> getChildren();
+
+	/**
+	 * Obtains the events.
+	 * 
+	 * @return Events.
+	 */
+	E[] getEvents();
 
 }

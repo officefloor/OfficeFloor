@@ -15,27 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor.internal.models;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
+import org.eclipse.gef.geometry.planar.Point;
 
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import net.officefloor.gef.editor.AdaptedParent;
+import net.officefloor.model.Model;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Adapted prototype for creating a new {@link AdaptedParent}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public interface AdaptedPrototype<M extends Model> {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
-	}
+	/**
+	 * Triggers creating a new {@link AdaptedParent} at the location.
+	 * 
+	 * @param location
+	 *            Location for the new {@link AdaptedParent}.
+	 */
+	void newAdaptedParent(Point location);
 
 }

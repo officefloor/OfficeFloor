@@ -15,27 +15,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
+import org.eclipse.gef.geometry.planar.Dimension;
 
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import net.officefloor.model.Model;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Builds an {@link AdaptedArea}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public interface AdaptedAreaBuilder<R extends Model, O, M extends Model, E extends Enum<E>>
+		extends AdaptedConnectableBuilder<R, O, M, E> {
 
-	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
-	}
+	/**
+	 * Specifies the minimum {@link Dimension}.
+	 * 
+	 * @param width  Minimum width.
+	 * @param height Minimum height.
+	 */
+	void setMinimumDimension(double width, double height);
+
+	/**
+	 * Configures an {@link ModelAction} for the area {@link Model}.
+	 * 
+	 * @param action        {@link ModelAction}.
+	 * @param visualFactory {@link AdaptedActionVisualFactory}.
+	 */
+	void action(ModelAction<R, O, M> action, AdaptedActionVisualFactory visualFactory);
 
 }

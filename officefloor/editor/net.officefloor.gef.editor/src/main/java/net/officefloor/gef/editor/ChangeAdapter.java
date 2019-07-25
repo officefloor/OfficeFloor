@@ -15,27 +15,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.editor;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
+import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
 
-import org.osgi.service.url.AbstractURLStreamHandlerService;
-import org.osgi.service.url.URLStreamHandlerService;
-
-import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import net.officefloor.model.change.Change;
 
 /**
- * OSGi {@link URLStreamHandlerService}.
+ * Provides default implementation of methods for {@link ChangeListener}.
  * 
  * @author Daniel Sagenschneider
  */
-public class OsgiURLStreamHandlerService extends AbstractURLStreamHandlerService {
+public class ChangeAdapter implements ChangeListener {
 
 	@Override
-	public URLConnection openConnection(URL url) throws IOException {
-		return DefaultStyleRegistry.openConnection(url);
+	public void beforeTransactionOperation(ITransactionalOperation operation) {
+	}
+
+	@Override
+	public void afterTransactionOperation(ITransactionalOperation operation) {
+	}
+
+	@Override
+	public void preApply(Change<?> change) {
+	}
+
+	@Override
+	public void postApply(Change<?> change) {
+	}
+
+	@Override
+	public void preRevert(Change<?> change) {
+	}
+
+	@Override
+	public void postRevert(Change<?> change) {
 	}
 
 }
