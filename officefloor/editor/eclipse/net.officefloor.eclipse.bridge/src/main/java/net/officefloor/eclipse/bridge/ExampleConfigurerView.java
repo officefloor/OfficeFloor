@@ -15,22 +15,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer.test;
+package net.officefloor.eclipse.bridge;
 
 import javax.inject.Inject;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.gef.fx.swt.canvas.FXCanvasEx;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 
-import net.officefloor.eclipse.configurer.ConfigurationBuilder;
-import net.officefloor.eclipse.configurer.Configurer;
-import net.officefloor.eclipse.configurer.ValueLoader;
-import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
+import javafx.embed.swt.FXCanvas;
+import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import net.officefloor.gef.configurer.ConfigurationBuilder;
+import net.officefloor.gef.configurer.Configurer;
+import net.officefloor.gef.configurer.ValueLoader;
 import net.officefloor.model.Model;
 
 /**
@@ -43,8 +49,7 @@ public class ExampleConfigurerView {
 	/**
 	 * Logs the {@link ExampleModel}.
 	 * 
-	 * @param loader
-	 *            {@link ValueLoader}.
+	 * @param loader {@link ValueLoader}.
 	 * @return {@link ValueLoader} with logging.
 	 */
 	private <V> ValueLoader<ExampleModel, V> log(ValueLoader<ExampleModel, V> loader) {
@@ -66,11 +71,8 @@ public class ExampleConfigurerView {
 		}
 		IJavaProject javaProject = JavaCore.create(project);
 
-		// Obtain the shell
-		Shell shell = parent.getShell();
-
 		// Create the configurer
-		Configurer<ExampleModel> configurer = new Configurer<>(new OfficeFloorOsgiBridge(javaProject), shell);
+		Configurer<ExampleModel> configurer = new Configurer<>(new OfficeFloorOsgiBridge(javaProject));
 
 		// Provide configuration
 		ConfigurationBuilder<ExampleModel> builder = configurer;
@@ -101,7 +103,26 @@ public class ExampleConfigurerView {
 			model.write(System.out);
 		});
 
+		// Create the FX Canvas
+		FXCanvas fxCanvas = new FXCanvasEx(parent, SWT.NONE) {
+			public Point computeSize(int wHint, int hHint, boolean changed) {
+				// Always the parent size
+				Rectangle bounds = parent.getClientArea();
+				return new Point(bounds.width - 5, bounds.height - 5);
+			}
+		};
+
+		// Create pane for configuration components
+		Pane pane = new Pane();
+
+		// Load scene into canvas (matching background colour)
+		org.eclipse.swt.graphics.Color background = parent.getBackground();
+		Scene scene = new Scene(pane, Color.rgb(background.getRed(), background.getGreen(), background.getBlue()));
+
+		// Load the scene to the canvas
+		fxCanvas.setScene(scene);
+
 		// Load model to view
-		configurer.loadConfiguration(new ExampleModel(), parent);
+		configurer.loadConfiguration(new ExampleModel(), pane);
 	}
 }

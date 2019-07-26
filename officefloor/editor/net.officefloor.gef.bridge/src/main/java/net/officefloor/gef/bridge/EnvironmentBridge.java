@@ -54,8 +54,9 @@ public interface EnvironmentBridge {
 	 * 
 	 * @param className Name of the {@link Class}.
 	 * @return <code>true</code> if {@link Class} on the {@link Class} path.
+	 * @throws Exception If fails to determine if on {@link Class} path.
 	 */
-	boolean isClassOnClassPath(String className);
+	boolean isClassOnClassPath(String className) throws Exception;
 
 	/**
 	 * Indicates if super type.
@@ -63,8 +64,9 @@ public interface EnvironmentBridge {
 	 * @param className Name of {@link Class}.
 	 * @param superType Super type {@link Class}.
 	 * @return <code>true</code> if super type {@link Class}.
+	 * @throws Exception If fails to determine if super type.
 	 */
-	boolean isSuperType(String className, String superType);
+	boolean isSuperType(String className, String superType) throws Exception;
 
 	/**
 	 * Selects a {@link Class}.
@@ -80,8 +82,9 @@ public interface EnvironmentBridge {
 	 * 
 	 * @param resourcePath Resource path.
 	 * @return <code>true</code> if the resource is on the {@link Class} path.
+	 * @throws Exception If fails to determine if on {@link Class} path.
 	 */
-	boolean isResourceOnClassPath(String resourcePath);
+	boolean isResourceOnClassPath(String resourcePath) throws Exception;
 
 	/**
 	 * Selects a resource from the {@link Class} path.

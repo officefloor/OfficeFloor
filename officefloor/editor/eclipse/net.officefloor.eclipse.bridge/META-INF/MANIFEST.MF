@@ -12,6 +12,7 @@ Require-Bundle: net.officefloor.core;bundle-version="3.12.0",
 Export-Package: net.officefloor.eclipse.bridge
 Import-Package: com.google.common.annotations,
  com.google.common.base,
+ javax.inject,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.gef.fx.swt.canvas,

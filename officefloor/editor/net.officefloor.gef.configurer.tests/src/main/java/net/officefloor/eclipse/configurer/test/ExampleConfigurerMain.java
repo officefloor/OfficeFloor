@@ -17,41 +17,39 @@
  */
 package net.officefloor.eclipse.configurer.test;
 
-import org.eclipse.swt.widgets.Shell;
-
+import javafx.application.Application;
 import javafx.collections.FXCollections;
-import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
-import net.officefloor.eclipse.configurer.ChoiceBuilder;
-import net.officefloor.eclipse.configurer.ConfigurationBuilder;
-import net.officefloor.eclipse.configurer.Configurer;
-import net.officefloor.eclipse.configurer.ListBuilder;
-import net.officefloor.eclipse.configurer.MultipleBuilder;
-import net.officefloor.eclipse.configurer.ValueLoader;
+import javafx.scene.layout.Pane;
 import net.officefloor.eclipse.configurer.test.ExampleModel.ExampleItem;
-import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
+import net.officefloor.gef.bridge.ClassLoaderEnvironmentBridge;
+import net.officefloor.gef.configurer.AbstractConfigurerApplication;
+import net.officefloor.gef.configurer.ChoiceBuilder;
+import net.officefloor.gef.configurer.ConfigurationBuilder;
+import net.officefloor.gef.configurer.Configurer;
+import net.officefloor.gef.configurer.ListBuilder;
+import net.officefloor.gef.configurer.MultipleBuilder;
+import net.officefloor.gef.configurer.ValueLoader;
 
 /**
  * Main for running example configurer.
  * 
  * @author Daniel Sagenschneider
  */
-public class ExampleConfigurerMain extends AbstractConfigurerRunnable {
+public class ExampleConfigurerMain extends AbstractConfigurerApplication {
 
 	/**
 	 * Main to run the configurer.
 	 * 
-	 * @param args
-	 *            Command line arguments.
+	 * @param args Command line arguments.
 	 */
 	public static void main(String[] args) {
-		new ExampleConfigurerMain().run();
+		Application.launch(args);
 	}
 
 	/**
 	 * Logs the {@link ExampleModel}.
 	 * 
-	 * @param loader
-	 *            {@link ValueLoader}.
+	 * @param loader {@link ValueLoader}.
 	 * @return {@link ValueLoader} with logging.
 	 */
 	private <V> ValueLoader<ExampleModel, V> log(ValueLoader<ExampleModel, V> loader) {
@@ -64,8 +62,7 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable {
 	/**
 	 * Logs the {@link ExampleItem}.
 	 * 
-	 * @param loader
-	 *            {@link ValueLoader}.
+	 * @param loader {@link ValueLoader}.
 	 * @return {@link ValueLoader} with logging.
 	 */
 	private <V> ValueLoader<ExampleItem, V> logItem(ValueLoader<ExampleItem, V> loader) {
@@ -76,14 +73,14 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable {
 	}
 
 	/*
-	 * ================ AbstractConfigurerRunnable ================
+	 * ================ AbstractConfigurerApplication ================
 	 */
 
 	@Override
-	protected void loadConfiguration(Shell shell) {
+	protected void loadConfiguration(Pane parent) {
 
 		// Create the configurer
-		Configurer<ExampleModel> configurer = new Configurer<>(OfficeFloorOsgiBridge.getClassLoaderInstance(), shell);
+		Configurer<ExampleModel> configurer = new Configurer<>(new ClassLoaderEnvironmentBridge());
 		ConfigurationBuilder<ExampleModel> builder = configurer;
 
 		// Title
@@ -182,7 +179,7 @@ public class ExampleConfigurerMain extends AbstractConfigurerRunnable {
 		});
 
 		// Load the configuration
-		configurer.loadConfiguration(new ExampleModel(), shell);
+		configurer.loadConfiguration(new ExampleModel(), parent);
 	}
 
 }

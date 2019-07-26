@@ -15,50 +15,47 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.bridge;
+package net.officefloor.gef.configurer;
 
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
 /**
  * Provides means to test editor configurations without loading the Eclipse
  * platform.
- * 
- * @author Daniel Sagenschneider
  */
-public abstract class AbstractConfigurerRunnable implements Runnable {
+public abstract class AbstractConfigurerApplication extends Application {
 
 	/**
 	 * Loads the configuration.
 	 * 
-	 * @param shell {@link Shell}.
+	 * @param pane {@link Pane} to load in the configuration.
 	 */
-	protected abstract void loadConfiguration(Shell shell);
+	protected abstract void loadConfiguration(Pane pane);
 
 	/*
-	 * ==================== Runnable ==========================
+	 * ==================== Application ==========================
 	 */
 
 	@Override
-	public void run() {
+	public void start(Stage stage) throws Exception {
 
-		// Create the SWT display with shell
-		Display display = new Display();
-		Shell shell = new Shell(display);
-		shell.setLayout(new FillLayout());
+		// Setup visuals
+		Pane parent = new Pane();
+		Scene scene = new Scene(parent);
+		stage.setScene(scene);
+		stage.setResizable(true);
+		stage.setWidth(640);
+		stage.setHeight(480);
+		stage.setTitle(this.getClass().getSimpleName());
 
-		// Load configuration to shell
-		this.loadConfiguration(shell);
+		// Load configuration
+		this.loadConfiguration(parent);
 
-		// Run the display
-		shell.open();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
-			}
-		}
-		display.dispose();
+		// Show
+		stage.show();
 	}
 
 }

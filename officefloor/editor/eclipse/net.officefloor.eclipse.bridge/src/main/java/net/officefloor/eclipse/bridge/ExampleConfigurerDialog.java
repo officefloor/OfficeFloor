@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.configurer.test;
+package net.officefloor.eclipse.bridge;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.RowLayout;
@@ -23,10 +23,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
-import net.officefloor.eclipse.configurer.ConfigurationBuilder;
-import net.officefloor.eclipse.configurer.dialog.ConfigurerDialog;
-import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
+
+import net.officefloor.gef.bridge.ClassLoaderEnvironmentBridge;
+import net.officefloor.gef.configurer.ConfigurationBuilder;
 
 /**
  * Runs the example {@link ConfigurerDialog}.
@@ -38,8 +37,7 @@ public class ExampleConfigurerDialog extends AbstractConfigurerRunnable {
 	/**
 	 * Main to run the configurer.
 	 * 
-	 * @param args
-	 *            Command line arguments.
+	 * @param args Command line arguments.
 	 */
 	public static void main(String[] args) {
 		new ExampleConfigurerDialog().run();
@@ -61,8 +59,8 @@ public class ExampleConfigurerDialog extends AbstractConfigurerRunnable {
 			public void handleEvent(Event event) {
 
 				// Create the dialog
-				ConfigurerDialog<ExampleModel> dialog = new ConfigurerDialog<>(
-						OfficeFloorOsgiBridge.getClassLoaderInstance(), shell);
+				ConfigurerDialog<ExampleModel> dialog = new ConfigurerDialog<>(new ClassLoaderEnvironmentBridge(),
+						shell);
 				ConfigurationBuilder<ExampleModel> builder = dialog;
 
 				// Configure the dialog

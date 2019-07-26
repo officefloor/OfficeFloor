@@ -19,7 +19,7 @@ package net.officefloor.eclipse.configurer.test;
 
 import org.junit.Test;
 
-import net.officefloor.eclipse.configurer.Configurer;
+import net.officefloor.gef.configurer.Configurer;
 
 /**
  * Test the {@link Configurer}.

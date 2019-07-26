@@ -48,13 +48,26 @@ import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.gef.bridge.EnvironmentBridge;
 
 /**
  * Bridge for {@link IJavaProject} to {@link OfficeFloorCompiler} functionality.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorOsgiBridge {
+public class OfficeFloorOsgiBridge implements EnvironmentBridge {
+
+	@Override
+	public void selectClass(String searchText, String superType, SelectionHandler handler) {
+		// TODO implement EnvironmentBridge.selectClass
+		throw new UnsupportedOperationException("TODO implement EnvironmentBridge.selectClass");
+	}
+
+	@Override
+	public void selectClassPathResource(String searchText, SelectionHandler handler) {
+		// TODO implement EnvironmentBridge.selectClassPathResource
+		throw new UnsupportedOperationException("TODO implement EnvironmentBridge.selectClassPathResource");
+	}
 
 	/**
 	 * <p>
