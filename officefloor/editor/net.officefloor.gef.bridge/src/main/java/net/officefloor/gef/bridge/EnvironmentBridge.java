@@ -24,5 +24,71 @@ package net.officefloor.gef.bridge;
  */
 public interface EnvironmentBridge {
 
-	// TODO define bridging
+	/**
+	 * Handles selection result.
+	 */
+	interface SelectionHandler {
+
+		/**
+		 * Handles selection.
+		 * 
+		 * @param classPathEntry {@link Class} path entry.
+		 */
+		void selected(String classPathEntry);
+
+		/**
+		 * Indicates selection cancelled.
+		 */
+		void cancelled();
+
+		/**
+		 * Handles error.
+		 * 
+		 * @param error {@link Exception}.
+		 */
+		void error(Exception error);
+	}
+
+	/**
+	 * Indicates if {@link Class} on the {@link Class} path.
+	 * 
+	 * @param className Name of the {@link Class}.
+	 * @return <code>true</code> if {@link Class} on the {@link Class} path.
+	 */
+	boolean isClassOnClassPath(String className);
+
+	/**
+	 * Indicates if super type.
+	 * 
+	 * @param className Name of {@link Class}.
+	 * @param superType Super type {@link Class}.
+	 * @return <code>true</code> if super type {@link Class}.
+	 */
+	boolean isSuperType(String className, String superType);
+
+	/**
+	 * Selects a {@link Class}.
+	 * 
+	 * @param searchText Search text to find the {@link Class}.
+	 * @param superType  Super type of the {@link Class}.
+	 * @param handler    {@link SelectionHandler}.
+	 */
+	void selectClass(String searchText, String superType, SelectionHandler handler);
+
+	/**
+	 * Indicates if the resource is on the {@link Class} path.
+	 * 
+	 * @param resourcePath Resource path.
+	 * @return <code>true</code> if the resource is on the {@link Class} path.
+	 */
+	boolean isResourceOnClassPath(String resourcePath);
+
+	/**
+	 * Selects a resource from the {@link Class} path.
+	 * 
+	 * @param searchText Search text to find the {@link Class} path resource.
+	 * @param handler    {@link SelectionHandler}.
+	 */
+	void selectClassPathResource(String searchText, SelectionHandler handler);
+
 }
