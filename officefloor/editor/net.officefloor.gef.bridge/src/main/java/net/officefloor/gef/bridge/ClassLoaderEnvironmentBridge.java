@@ -17,6 +17,8 @@
  */
 package net.officefloor.gef.bridge;
 
+import java.net.URL;
+
 /**
  * {@link ClassLoader} {@link EnvironmentBridge}.
  * 
@@ -24,38 +26,103 @@ package net.officefloor.gef.bridge;
  */
 public class ClassLoaderEnvironmentBridge implements EnvironmentBridge {
 
+	/**
+	 * {@link ClassLoader}.
+	 */
+	private final ClassLoader classLoader;
+
+	/**
+	 * Instantiate with default {@link ClassLoader}.
+	 */
+	public ClassLoaderEnvironmentBridge() {
+		this.classLoader = this.getClass().getClassLoader();
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param classLoader {@link ClassLoader}.
+	 */
+	public ClassLoaderEnvironmentBridge(ClassLoader classLoader) {
+		this.classLoader = classLoader;
+	}
+
+	/**
+	 * Attempts to load the {@link Class}.
+	 * 
+	 * @param className Name of {@link Class}.
+	 * @return {@link Class} or <code>null</code>.
+	 */
+	private Class<?> loadClass(String className) {
+		try {
+			return this.classLoader.loadClass(className);
+		} catch (ClassNotFoundException ex) {
+			return null;
+		}
+	}
+
+	/**
+	 * Attempts to load the resource.
+	 * 
+	 * @param resourcePath Path to resource.
+	 * @return {@link URL}.
+	 */
+	private URL loadResource(String resourcePath) {
+		return this.classLoader.getResource(resourcePath);
+	}
+
 	/*
 	 * ================= EnvironmentBridge =====================
 	 */
 
 	@Override
 	public boolean isClassOnClassPath(String className) {
-		// TODO implement EnvironmentBridge.isClassOnClassPath
-		throw new UnsupportedOperationException("TODO implement EnvironmentBridge.isClassOnClassPath");
+		return (this.loadClass(className) != null);
 	}
 
 	@Override
 	public boolean isSuperType(String className, String superType) {
-		// TODO implement EnvironmentBridge.isSuperType
-		throw new UnsupportedOperationException("TODO implement EnvironmentBridge.isSuperType");
+
+		// Ensure have class
+		Class<?> superClass = this.loadClass(superType);
+		if (superClass == null) {
+			return false;
+		}
+
+		// Ensure have class
+		Class<?> clazz = this.loadClass(className);
+		if (clazz == null) {
+			return false;
+		}
+
+		// Return whether super type
+		return superClass.isAssignableFrom(clazz);
 	}
 
 	@Override
 	public void selectClass(String searchText, String superType, SelectionHandler handler) {
-		// TODO implement EnvironmentBridge.selectClass
-		throw new UnsupportedOperationException("TODO implement EnvironmentBridge.selectClass");
+
+		// Ensure have class
+		Class<?> superClass = this.loadClass(superType);
+		if (superClass == null) {
+			handler.error(new ClassNotFoundException("Can not find super type " + superType));
+			return;
+		}
+
+		// Not deriving, so just return search text
+		handler.selected(searchText);
 	}
 
 	@Override
 	public boolean isResourceOnClassPath(String resourcePath) {
-		// TODO implement EnvironmentBridge.isResourceOnClassPath
-		throw new UnsupportedOperationException("TODO implement EnvironmentBridge.isResourceOnClassPath");
+		return (this.loadResource(resourcePath) != null);
 	}
 
 	@Override
 	public void selectClassPathResource(String searchText, SelectionHandler handler) {
-		// TODO implement EnvironmentBridge.selectClassPathResource
-		throw new UnsupportedOperationException("TODO implement EnvironmentBridge.selectClassPathResource");
+
+		// Not deriving, so just return search text
+		handler.selected(searchText);
 	}
 
 }

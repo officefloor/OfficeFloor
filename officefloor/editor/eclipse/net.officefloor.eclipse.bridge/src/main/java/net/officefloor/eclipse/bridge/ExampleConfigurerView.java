@@ -29,6 +29,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
 import javafx.embed.swt.FXCanvas;
 import javafx.scene.Scene;
@@ -71,8 +72,11 @@ public class ExampleConfigurerView {
 		}
 		IJavaProject javaProject = JavaCore.create(project);
 
+		// Obtain the shell
+		Shell parentShell = parent.getShell();
+
 		// Create the configurer
-		Configurer<ExampleModel> configurer = new Configurer<>(new OfficeFloorOsgiBridge(javaProject));
+		Configurer<ExampleModel> configurer = new Configurer<>(new EclipseEnvironmentBridge(javaProject, parentShell));
 
 		// Provide configuration
 		ConfigurationBuilder<ExampleModel> builder = configurer;
