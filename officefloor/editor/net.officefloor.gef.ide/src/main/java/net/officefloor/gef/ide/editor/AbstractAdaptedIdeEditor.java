@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.ide.editor;
+package net.officefloor.gef.ide.editor;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +24,6 @@ import java.util.function.Function;
 
 import org.eclipse.gef.mvc.fx.domain.IDomain;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.swt.widgets.Shell;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -35,19 +34,18 @@ import javafx.beans.property.Property;
 import javafx.scene.layout.Pane;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.eclipse.editor.AdaptedBuilder;
-import net.officefloor.eclipse.editor.AdaptedChildBuilder;
-import net.officefloor.eclipse.editor.AdaptedEditorModule;
-import net.officefloor.eclipse.editor.AdaptedParentBuilder;
-import net.officefloor.eclipse.editor.AdaptedRootBuilder;
-import net.officefloor.eclipse.editor.ChangeExecutor;
-import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
-import net.officefloor.eclipse.editor.SelectOnly;
-import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
-import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
-import net.officefloor.eclipse.ide.editor.AbstractItem.PreferenceListener;
-import net.officefloor.eclipse.ide.newwizard.AbstractNewWizard;
-import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
+import net.officefloor.gef.bridge.EnvironmentBridge;
+import net.officefloor.gef.editor.AdaptedBuilder;
+import net.officefloor.gef.editor.AdaptedChildBuilder;
+import net.officefloor.gef.editor.AdaptedEditorModule;
+import net.officefloor.gef.editor.AdaptedParentBuilder;
+import net.officefloor.gef.editor.AdaptedRootBuilder;
+import net.officefloor.gef.editor.ChangeExecutor;
+import net.officefloor.gef.editor.ChildrenGroupBuilder;
+import net.officefloor.gef.editor.SelectOnly;
+import net.officefloor.gef.ide.editor.AbstractItem.ConfigurableContext;
+import net.officefloor.gef.ide.editor.AbstractItem.IdeChildrenGroup;
+import net.officefloor.gef.ide.editor.AbstractItem.PreferenceListener;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -132,9 +130,11 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	 * @param rootModelType    Root {@link Model} type.
 	 * @param createOperations {@link Function} to create the operations from the
 	 *                         root {@link Model}.
+	 * @param envBridge        {@link EnvironmentBridge}.
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public AbstractAdaptedIdeEditor(Class<R> rootModelType, Function<R, O> createOperations) {
+	public AbstractAdaptedIdeEditor(Class<R> rootModelType, Function<R, O> createOperations,
+			EnvironmentBridge envBridge) {
 		this.createOperations = createOperations;
 
 		// Create the adapted builder
@@ -156,15 +156,8 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 				}
 
 				@Override
-				public OfficeFloorOsgiBridge getOsgiBridge() throws Exception {
-//					return AbstractAdaptedIdeEditor.this.getOsgiBridge();
-					return null;
-				}
-
-				@Override
-				public Shell getParentShell() {
-					// TODO REMOVE
-					throw new UnsupportedOperationException("DEPRECATED: getParentShell");
+				public EnvironmentBridge getEnvironmentBridge() throws Exception {
+					return envBridge;
 				}
 
 				@Override
@@ -393,8 +386,6 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	 * Obtains the default file name for the editor.
 	 * 
 	 * @return Default file name for the editor.
-	 * 
-	 * @see AbstractNewWizard
 	 */
 	public abstract String fileName();
 

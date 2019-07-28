@@ -59,17 +59,17 @@ import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 import javafx.embed.swt.FXCanvas;
-import net.officefloor.eclipse.editor.AdaptedModelStyler;
-import net.officefloor.eclipse.editor.AdaptedParent;
-import net.officefloor.eclipse.editor.EditorStyler;
-import net.officefloor.eclipse.editor.PaletteIndicatorStyler;
-import net.officefloor.eclipse.editor.PaletteStyler;
-import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.ide.OfficeFloorIdePlugin;
-import net.officefloor.eclipse.ide.editor.AbstractIdeEclipseEditor;
+import net.officefloor.eclipse.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeLabeller;
+import net.officefloor.gef.editor.AdaptedModelStyler;
+import net.officefloor.gef.editor.AdaptedParent;
+import net.officefloor.gef.editor.EditorStyler;
+import net.officefloor.gef.editor.PaletteIndicatorStyler;
+import net.officefloor.gef.editor.PaletteStyler;
+import net.officefloor.gef.editor.SelectOnly;
 import net.officefloor.model.Model;
 
 /**
@@ -129,7 +129,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 		// Allow configurations for each editor
 		for (EditorWrapper wrapper : this.editors) {
-			AbstractIdeEclipseEditor<?, ?, ?> editor = wrapper.ideEditor;
+			AbstractAdaptedIdeEditor<?, ?, ?> editor = wrapper.ideEditor;
 
 			// Create tab for editor
 			TabItem editorTab = new TabItem(this.editorTabs, SWT.INHERIT_FORCE);
@@ -301,7 +301,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				(overrideStyle != null) && (overrideStyle.trim().length() > 0) ? overrideStyle : defaultStyle);
 		rawStyle.addListener((event, oldValue, newValue) -> {
 			// Translate and update the style
-			String translatedStyle = AbstractIdeEclipseEditor.translateStyle(newValue, item);
+			String translatedStyle = AbstractAdaptedIdeEditor.translateStyle(newValue, item);
 			style.setValue(translatedStyle);
 		});
 		preferences.addPropertyChangeListener((event) -> {
@@ -461,7 +461,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	}
 
 	/**
-	 * Loads the {@link AbstractIdeEclipseEditor} instances.
+	 * Loads the {@link AbstractAdaptedIdeEditor} instances.
 	 */
 	private void loadEditors(IConfigurationElement[] elements, ProgressBar progress, Composite progressContainer,
 			Composite container, Display display) {
@@ -470,15 +470,15 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		new Thread(() -> {
 
 			// Load the editors
-			List<AbstractIdeEclipseEditor<?, ?, ?>> editors = new LinkedList<>();
+			List<AbstractAdaptedIdeEditor<?, ?, ?>> editors = new LinkedList<>();
 			for (int i = 0; i < elements.length; i++) {
 				IConfigurationElement element = elements[i];
 
 				// Obtain the class
 				try {
 					Object extension = element.createExecutableExtension("class");
-					if (extension instanceof AbstractIdeEclipseEditor) {
-						editors.add((AbstractIdeEclipseEditor<?, ?, ?>) extension);
+					if (extension instanceof AbstractAdaptedIdeEditor) {
+						editors.add((AbstractAdaptedIdeEditor<?, ?, ?>) extension);
 					}
 
 				} catch (CoreException ex) {
@@ -501,9 +501,9 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 			}
 
 			// Create the editors
-			final AbstractIdeEclipseEditor<?, ?, ?>[] finalEditors;
+			final AbstractAdaptedIdeEditor<?, ?, ?>[] finalEditors;
 			synchronized (OfficeFloorIdePreferencePage.this) {
-				finalEditors = editors.toArray(new AbstractIdeEclipseEditor[editors.size()]);
+				finalEditors = editors.toArray(new AbstractAdaptedIdeEditor[editors.size()]);
 			}
 
 			// Display the editor preferences
@@ -542,12 +542,12 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	private class EditorWrapper implements Comparable<EditorWrapper> {
 
 		/**
-		 * {@link AbstractIdeEclipseEditor} being wrapped.
+		 * {@link AbstractAdaptedIdeEditor} being wrapped.
 		 */
-		private final AbstractIdeEclipseEditor<?, ?, ?> ideEditor;
+		private final AbstractAdaptedIdeEditor<?, ?, ?> ideEditor;
 
 		/**
-		 * Name of the {@link AbstractIdeEclipseEditor}.
+		 * Name of the {@link AbstractAdaptedIdeEditor}.
 		 */
 		private final String editorName;
 
@@ -558,7 +558,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		private final ObservableMap<String, String> preferencesToChange = FXCollections.observableHashMap();
 
 		/**
-		 * {@link TabItem} for this {@link AbstractIdeEclipseEditor}.
+		 * {@link TabItem} for this {@link AbstractAdaptedIdeEditor}.
 		 */
 		private TabItem editorTab;
 
@@ -581,9 +581,9 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		/**
 		 * Instantiate.
 		 * 
-		 * @param ideEditor {@link AbstractIdeEclipseEditor} being wrapped.
+		 * @param ideEditor {@link AbstractAdaptedIdeEditor} being wrapped.
 		 */
-		private EditorWrapper(AbstractIdeEclipseEditor<?, ?, ?> ideEditor) {
+		private EditorWrapper(AbstractAdaptedIdeEditor<?, ?, ?> ideEditor) {
 			this.ideEditor = ideEditor;
 
 			// Indicate the editor
@@ -623,10 +623,11 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		}
 
 		/**
-		 * Indicates if only defaults configured for the {@link AbstractIdeEclipseEditor}.
+		 * Indicates if only defaults configured for the
+		 * {@link AbstractAdaptedIdeEditor}.
 		 * 
 		 * @return <code>true<code> indicates if only defaults for the
-		 *         {@link AbstractIdeEclipseEditor}.
+		 *         {@link AbstractAdaptedIdeEditor}.
 		 */
 		private void updateDefaultsButton() {
 
@@ -643,10 +644,10 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		}
 
 		/**
-		 * Visits all preferences for the {@link AbstractIdeEclipseEditor}.
+		 * Visits all preferences for the {@link AbstractAdaptedIdeEditor}.
 		 * 
 		 * @param visitor {@link Consumer} to visit each preference identifier for the
-		 *                {@link AbstractIdeEclipseEditor}.
+		 *                {@link AbstractAdaptedIdeEditor}.
 		 */
 		private void visitPreferences(Consumer<String> visitor) {
 			visitor.accept(this.ideEditor.getPaletteIndicatorStyleId());

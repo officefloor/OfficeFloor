@@ -41,7 +41,7 @@ import org.eclipse.ui.ide.IDE;
 
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
-import net.officefloor.eclipse.ide.editor.AbstractIdeEclipseEditor;
+import net.officefloor.eclipse.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.model.Model;
 
 /**
@@ -84,10 +84,9 @@ public abstract class AbstractNewWizard<R extends Model> extends Wizard implemen
 	/**
 	 * Initiate.
 	 * 
-	 * @param editor
-	 *            {@link AbstractIdeEclipseEditor}.
+	 * @param editor {@link AbstractAdaptedIdeEditor}.
 	 */
-	public AbstractNewWizard(AbstractIdeEclipseEditor<R, ?, ?> editor) {
+	public AbstractNewWizard(AbstractAdaptedIdeEditor<R, ?, ?> editor) {
 		this.title = editor.getClass().getSimpleName();
 		this.description = "Create the " + this.title;
 		this.initialFileName = editor.fileName();
@@ -178,12 +177,9 @@ public abstract class AbstractNewWizard<R extends Model> extends Wizard implemen
 	/**
 	 * Creates the item.
 	 * 
-	 * @param resource
-	 *            {@link IResource} of the container to create the item.
-	 * @param itemName
-	 *            Name of the item.
-	 * @param monitor
-	 *            {@link IProgressMonitor}.
+	 * @param resource {@link IResource} of the container to create the item.
+	 * @param itemName Name of the item.
+	 * @param monitor  {@link IProgressMonitor}.
 	 */
 	private void doFinish(IResource resource, String itemName, IProgressMonitor monitor) throws Exception {
 

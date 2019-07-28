@@ -21,7 +21,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
-import net.officefloor.eclipse.ide.editor.AbstractIdeEclipseEditor;
+import net.officefloor.eclipse.bridge.AbstractIdeEclipseEditor;
 import net.officefloor.model.Model;
 
 /**

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.ide.editor;
+package net.officefloor.gef.ide.editor;
 
 import java.io.IOException;
 

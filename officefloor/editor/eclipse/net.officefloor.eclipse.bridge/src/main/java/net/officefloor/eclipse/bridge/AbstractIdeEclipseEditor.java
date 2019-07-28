@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.ide.editor;
+package net.officefloor.eclipse.bridge;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -66,25 +66,23 @@ import javafx.scene.layout.Pane;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
-import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
-import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
-import net.officefloor.eclipse.editor.AdaptedBuilder;
-import net.officefloor.eclipse.editor.AdaptedChildBuilder;
-import net.officefloor.eclipse.editor.AdaptedEditorModule;
-import net.officefloor.eclipse.editor.AdaptedParentBuilder;
-import net.officefloor.eclipse.editor.AdaptedRootBuilder;
-import net.officefloor.eclipse.editor.ChangeAdapter;
-import net.officefloor.eclipse.editor.ChangeExecutor;
-import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
-import net.officefloor.eclipse.editor.SelectOnly;
 import net.officefloor.eclipse.ide.OfficeFloorIdePlugin;
 import net.officefloor.eclipse.ide.editor.AbstractItem.ConfigurableContext;
 import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
 import net.officefloor.eclipse.ide.editor.AbstractItem.PreferenceListener;
 import net.officefloor.eclipse.ide.newwizard.AbstractNewWizard;
 import net.officefloor.eclipse.ide.preferences.PreferencesEditorInput;
-import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
-import net.officefloor.eclipse.osgi.ProjectConfigurationContext;
+import net.officefloor.gef.bridge.EnvironmentBridge;
+import net.officefloor.gef.common.structure.StructureLogger;
+import net.officefloor.gef.editor.AdaptedBuilder;
+import net.officefloor.gef.editor.AdaptedChildBuilder;
+import net.officefloor.gef.editor.AdaptedEditorModule;
+import net.officefloor.gef.editor.AdaptedParentBuilder;
+import net.officefloor.gef.editor.AdaptedRootBuilder;
+import net.officefloor.gef.editor.ChangeAdapter;
+import net.officefloor.gef.editor.ChangeExecutor;
+import net.officefloor.gef.editor.ChildrenGroupBuilder;
+import net.officefloor.gef.editor.SelectOnly;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
@@ -329,11 +327,6 @@ public abstract class AbstractIdeEclipseEditor<R extends Model, RE extends Enum<
 	private WritableConfigurationItem configurationItem;
 
 	/**
-	 * Parent {@link Shell}.
-	 */
-	private Shell parentShell;
-
-	/**
 	 * {@link AdaptedRootBuilder}.
 	 */
 	private AdaptedRootBuilder<R, O> rootBuilder;
@@ -349,9 +342,9 @@ public abstract class AbstractIdeEclipseEditor<R extends Model, RE extends Enum<
 	private O operations;
 
 	/**
-	 * {@link OfficeFloorOsgiBridge}.
+	 * {@link EnvironmentBridge}.
 	 */
-	private OfficeFloorOsgiBridge osgiBridge;
+	private EnvironmentBridge envBridge;
 
 	/**
 	 * {@link AbstractConfigurableItem} instances for this
@@ -436,13 +429,8 @@ public abstract class AbstractIdeEclipseEditor<R extends Model, RE extends Enum<
 				}
 
 				@Override
-				public OfficeFloorOsgiBridge getOsgiBridge() throws Exception {
-					return AbstractIdeEclipseEditor.this.getOsgiBridge();
-				}
-
-				@Override
-				public Shell getParentShell() {
-					return AbstractIdeEclipseEditor.this.parentShell;
+				public EnvironmentBridge getEnvironmentBridge() throws Exception {
+					return AbstractIdeEclipseEditor.this.getEnvironmentBridge();
 				}
 
 				@Override

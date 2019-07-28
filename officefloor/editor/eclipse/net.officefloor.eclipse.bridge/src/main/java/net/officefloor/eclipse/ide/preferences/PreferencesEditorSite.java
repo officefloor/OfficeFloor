@@ -29,7 +29,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import net.officefloor.eclipse.ide.editor.AbstractIdeEclipseEditor;
+import net.officefloor.eclipse.bridge.AbstractIdeEclipseEditor;
 
 /**
  * {@link IEditorSite} to load {@link AbstractIdeEclipseEditor} for preference

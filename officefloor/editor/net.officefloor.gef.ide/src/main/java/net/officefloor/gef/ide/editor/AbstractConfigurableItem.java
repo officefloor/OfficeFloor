@@ -15,36 +15,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.ide.editor;
+package net.officefloor.gef.ide.editor;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 
 import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.configurer.CloseListener;
-import net.officefloor.eclipse.configurer.ConfigurationBuilder;
-import net.officefloor.eclipse.configurer.ConfigurationBuilder.MessageOnlyApplyException;
-import net.officefloor.eclipse.configurer.Configurer;
-import net.officefloor.eclipse.editor.AdaptedErrorHandler.MessageOnlyException;
-import net.officefloor.eclipse.editor.AdaptedParentBuilder;
-import net.officefloor.eclipse.editor.AdaptedRootBuilder;
-import net.officefloor.eclipse.editor.ChangeExecutor;
-import net.officefloor.eclipse.editor.ChangeListener;
-import net.officefloor.eclipse.editor.DefaultImages;
-import net.officefloor.eclipse.ide.ConfigurableItem;
-import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import net.officefloor.gef.bridge.ClassLoaderEnvironmentBridge;
+import net.officefloor.gef.bridge.EnvironmentBridge;
+import net.officefloor.gef.configurer.CloseListener;
+import net.officefloor.gef.configurer.ConfigurationBuilder;
+import net.officefloor.gef.configurer.ConfigurationBuilder.MessageOnlyApplyException;
+import net.officefloor.gef.configurer.Configurer;
+import net.officefloor.gef.editor.AdaptedErrorHandler.MessageOnlyException;
+import net.officefloor.gef.ide.ConfigurableItem;
+import net.officefloor.gef.editor.AdaptedParentBuilder;
+import net.officefloor.gef.editor.AdaptedRootBuilder;
+import net.officefloor.gef.editor.ChangeExecutor;
+import net.officefloor.gef.editor.ChangeListener;
+import net.officefloor.gef.editor.DefaultImages;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
@@ -280,8 +278,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 				parent.create((ctx) -> {
 
 					// Obtain details for dialog
-					OfficeFloorOsgiBridge bridge = this.getConfigurableContext().getOsgiBridge();
-					Shell shell = this.getConfigurableContext().getParentShell();
+					EnvironmentBridge bridge = this.getConfigurableContext().getEnvironmentBridge();
 
 					// Obtain details for executing change
 					O operations = ctx.getOperations();
@@ -297,7 +294,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 						overlay.applyCss();
 
 						// Create the configurer
-						Configurer<I> configurer = new Configurer<>(bridge, shell);
+						Configurer<I> configurer = new Configurer<>(bridge);
 						ConfigurationBuilder<I> builder = configurer;
 
 						// Create the configurable context
@@ -386,8 +383,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 			parent.action((ctx) -> {
 
 				// Obtain details for dialog
-				OfficeFloorOsgiBridge bridge = this.getConfigurableContext().getOsgiBridge();
-				Shell shell = this.getConfigurableContext().getParentShell();
+				EnvironmentBridge bridge = this.getConfigurableContext().getEnvironmentBridge();
 
 				// Obtain details for executing change
 				O operations = ctx.getOperations();
@@ -402,7 +398,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 					overlay.applyCss();
 
 					// Create the configurer
-					Configurer<I> configurer = new Configurer<>(bridge, shell);
+					Configurer<I> configurer = new Configurer<>(bridge);
 					ConfigurationBuilder<I> builder = configurer;
 
 					// Create the configurable context
@@ -528,30 +524,11 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	}
 
 	/*
-	 * =============== AbstractConfigurerRunnable =============
+	 * =============== Application =============
 	 */
-
-	/**
-	 * Invoke to run in main method for external testing.
-	 * 
-	 * @param rootModel         Root {@link Model}.
-	 * @param ideEditorClass    {@link AbstractIdeEclipseEditor} {@link Class} for this
-	 *                          {@link AbstractConfigurableItem}.
-	 * @param decoratePrototype Optional decorator of the prototype {@link Model}
-	 *                          for refactor testing. May be <code>null</code> to
-	 *                          use prototype as is.
-	 */
-	public void main(R rootModel, Class<? extends AbstractIdeEclipseEditor<R, RE, O>> ideEditorClass,
-			Consumer<M> decoratePrototype) {
-		AbstractIdeEclipseEditor.launchOutsideWorkbench(() -> {
-			AbstractIdeEclipseEditor<R, RE, O> ideEditor = ideEditorClass.getDeclaredConstructor().newInstance();
-			this.init(new MainConfigurableContext(ideEditor.createOperations(rootModel), decoratePrototype));
-			this.run();
-		});
-	}
 
 	@Override
-	protected void loadConfiguration(Shell shell) {
+	public void start(Stage stage) throws Exception {
 
 		// Ensure have context
 		ConfigurableContext<R, O> context = this.getConfigurableContext();
@@ -560,28 +537,25 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		}
 		MainConfigurableContext mainContext = (MainConfigurableContext) context;
 
-		// Associate the parent shell
-		mainContext.parentShell = shell;
-
 		// Obtain the IDE configurer
 		IdeConfigurer ideConfigurer = this.configure();
 		if (ideConfigurer == null) {
-			new Label(shell, SWT.NONE).setText("No configuration for " + this.getClass().getSimpleName());
+			stage.setScene(new Scene(new Pane(new Text("No configuration for " + this.getClass().getSimpleName()))));
+			stage.show();
 			return;
 		}
 
 		// Provide separate tabs for add and refactor
-		TabFolder folder = new TabFolder(shell, SWT.NONE);
+		TabPane folder = new TabPane();
 
 		// Load the add configuration
 		if (ideConfigurer.add.size() > 0) {
-			TabItem addTab = new TabItem(folder, SWT.NONE);
-			addTab.setText("Add");
-			Group addGroup = new Group(folder, SWT.NONE);
-			addGroup.setLayout(new FillLayout());
-			addTab.setControl(addGroup);
+			Tab addTab = new Tab("Add");
+			folder.getTabs().add(addTab);
+			Pane addParent = new Pane();
+			addTab.setContent(addParent);
 			I addItem = this.item(null);
-			Configurer<I> addConfigurer = new Configurer<>(OfficeFloorOsgiBridge.getClassLoaderInstance(), shell);
+			Configurer<I> addConfigurer = new Configurer<>(new ClassLoaderEnvironmentBridge());
 			ConfigurationBuilder<I> addBuilder = addConfigurer;
 			ConfigurableModelContext<O, M> addContext = new ConfigurableModelContext<O, M>() {
 
@@ -603,16 +577,15 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 			for (ItemConfigurer<O, M, I> itemConfigurer : ideConfigurer.add) {
 				itemConfigurer.configure(addBuilder, addContext);
 			}
-			addConfigurer.loadConfiguration(addItem, addGroup);
+			addConfigurer.loadConfiguration(addItem, addParent);
 		}
 
 		// Load the add immediately
 		if (ideConfigurer.addImmediately != null) {
-			TabItem addTab = new TabItem(folder, SWT.NONE);
-			addTab.setText("Add");
-			Group addGroup = new Group(folder, SWT.NONE);
-			addGroup.setLayout(new RowLayout());
-			addTab.setControl(addGroup);
+			Tab addTab = new Tab("Add");
+			folder.getTabs().add(addTab);
+			Pane addParent = new Pane();
+			addTab.setContent(addParent);
 			ConfigurableModelContext<O, M> addContext = new ConfigurableModelContext<O, M>() {
 
 				@Override
@@ -630,9 +603,9 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 					mainContext.getChangeExecutor().execute(change);
 				}
 			};
-			Button addButton = new Button(addGroup, SWT.NONE);
-			addButton.setText("Add");
-			addButton.addListener(SWT.Selection, (event) -> {
+			Button addButton = new Button("Add");
+			addParent.getChildren().add(addParent);
+			addButton.setOnAction((event) -> {
 				try {
 					ideConfigurer.addImmediately.action(addContext);
 				} catch (Throwable ex) {
@@ -643,17 +616,16 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 
 		// Load the refactor configuration
 		if (ideConfigurer.refactor.size() > 0) {
-			TabItem refactorTab = new TabItem(folder, SWT.NONE);
-			refactorTab.setText("Refactor");
-			Group refactorGroup = new Group(folder, SWT.NONE);
-			refactorGroup.setLayout(new FillLayout());
-			refactorTab.setControl(refactorGroup);
+			Tab refactorTab = new Tab("Refactor");
+			folder.getTabs().add(refactorTab);
+			Pane refactorParent = new Pane();
+			refactorTab.setContent(refactorParent);
 			M prototype = this.prototype();
 			if (mainContext.decoratePrototype != null) {
 				mainContext.decoratePrototype.accept(prototype);
 			}
 			I refactorItem = this.item(prototype);
-			Configurer<I> refactorConfigurer = new Configurer<>(OfficeFloorOsgiBridge.getClassLoaderInstance(), shell);
+			Configurer<I> refactorConfigurer = new Configurer<>(new ClassLoaderEnvironmentBridge());
 			ConfigurationBuilder<I> refactorBuilder = refactorConfigurer;
 			ConfigurableModelContext<O, M> refactorContext = new ConfigurableModelContext<O, M>() {
 
@@ -675,16 +647,15 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 			for (ItemConfigurer<O, M, I> itemConfigurer : ideConfigurer.refactor) {
 				itemConfigurer.configure(refactorBuilder, refactorContext);
 			}
-			refactorConfigurer.loadConfiguration(refactorItem, refactorGroup);
+			refactorConfigurer.loadConfiguration(refactorItem, refactorParent);
 		}
 
 		// Load the delete configuration
 		if (ideConfigurer.delete != null) {
-			TabItem deleteTab = new TabItem(folder, SWT.NONE);
-			deleteTab.setText("Delete");
-			Group deleteGroup = new Group(folder, SWT.NONE);
-			deleteGroup.setLayout(new RowLayout());
-			deleteTab.setControl(deleteGroup);
+			Tab deleteTab = new Tab("Delete");
+			folder.getTabs().add(deleteTab);
+			Pane deleteParent = new Pane();
+			deleteTab.setContent(deleteParent);
 			M prototype = this.prototype();
 			if (mainContext.decoratePrototype != null) {
 				mainContext.decoratePrototype.accept(prototype);
@@ -706,9 +677,9 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 					mainContext.getChangeExecutor().execute(change);
 				}
 			};
-			Button deleteButton = new Button(deleteGroup, SWT.NONE);
-			deleteButton.setText("Delete");
-			deleteButton.addListener(SWT.Selection, (event) -> {
+			Button deleteButton = new Button("Delete");
+			deleteParent.getChildren().add(deleteButton);
+			deleteButton.setOnAction((event) -> {
 				try {
 					ideConfigurer.delete.action(deleteContext);
 				} catch (Throwable ex) {
@@ -716,11 +687,13 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 				}
 			});
 		}
+
+		// Display
+		stage.show();
 	}
 
 	/**
-	 * Main {@link ConfigurableContext} for testing configuration outside Eclipse
-	 * IDE.
+	 * {@link ConfigurableContext} for testing configuration.
 	 */
 	private class MainConfigurableContext implements ConfigurableContext<R, O>, ChangeExecutor {
 
@@ -733,11 +706,6 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		 * {@link Consumer} to decorate the prototype.
 		 */
 		private final Consumer<M> decoratePrototype;
-
-		/**
-		 * Parent {@link Shell}.
-		 */
-		private Shell parentShell;
 
 		/**
 		 * Instantiate.
@@ -761,13 +729,8 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		}
 
 		@Override
-		public Shell getParentShell() {
-			return this.parentShell;
-		}
-
-		@Override
-		public OfficeFloorOsgiBridge getOsgiBridge() throws Exception {
-			return OfficeFloorOsgiBridge.getClassLoaderInstance();
+		public EnvironmentBridge getEnvironmentBridge() throws Exception {
+			return new ClassLoaderEnvironmentBridge();
 		}
 
 		@Override

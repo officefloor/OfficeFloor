@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin>
 
+	<extension point="org.eclipse.ui.preferencePages">
+		<page 
+			id="new.officefloor.eclipse.ide.preferences"
+	    	class="net.officefloor.eclipse.ide.preferences.OfficeFloorIdePreferencePage"
+            name="OfficeFloor"
+            />
+	</extension>
+	<extension point="org.eclipse.ui.newWizards">
+		<category id="net.officefloor.category" name="OfficeFloor" />
+	</extension>
+
    <extension
          id="net.officefloor.eclipse.configurer.test.fragment"
          point="org.eclipse.e4.workbench.model">

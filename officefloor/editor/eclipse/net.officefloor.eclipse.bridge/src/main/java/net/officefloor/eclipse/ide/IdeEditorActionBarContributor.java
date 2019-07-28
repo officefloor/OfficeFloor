@@ -22,7 +22,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.EditorActionBarContributor;
 
-import net.officefloor.eclipse.editor.AdaptedEditorModule;
+import net.officefloor.gef.editor.AdaptedEditorModule;
 
 /**
  * {@link EditorActionBarContributor} for the {@link AdaptedEditorModule}

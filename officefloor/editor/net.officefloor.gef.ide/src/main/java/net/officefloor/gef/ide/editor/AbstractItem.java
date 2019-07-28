@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.ide.editor;
+package net.officefloor.gef.ide.editor;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,26 +25,23 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 
+import javafx.application.Application;
 import javafx.scene.Node;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.configuration.ConfigurationItem;
-import net.officefloor.eclipse.configurer.AbstractConfigurerRunnable;
-import net.officefloor.eclipse.editor.AdaptedChildBuilder;
-import net.officefloor.eclipse.editor.AdaptedConnectionBuilder;
-import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder;
-import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
-import net.officefloor.eclipse.editor.AdaptedConnectionManagementBuilder.ConnectionRemover;
-import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
-import net.officefloor.eclipse.editor.AdaptedRootBuilder;
-import net.officefloor.eclipse.editor.ChangeExecutor;
-import net.officefloor.eclipse.editor.ChildrenGroup;
-import net.officefloor.eclipse.editor.ChildrenGroupBuilder;
-import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
+import net.officefloor.gef.bridge.EnvironmentBridge;
+import net.officefloor.gef.editor.AdaptedChildBuilder;
+import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
+import net.officefloor.gef.editor.AdaptedConnectionBuilder;
+import net.officefloor.gef.editor.AdaptedConnectionManagementBuilder;
+import net.officefloor.gef.editor.AdaptedConnectionManagementBuilder.ConnectionFactory;
+import net.officefloor.gef.editor.AdaptedConnectionManagementBuilder.ConnectionRemover;
+import net.officefloor.gef.editor.AdaptedRootBuilder;
+import net.officefloor.gef.editor.ChangeExecutor;
+import net.officefloor.gef.editor.ChildrenGroup;
+import net.officefloor.gef.editor.ChildrenGroupBuilder;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
@@ -54,7 +51,7 @@ import net.officefloor.model.Model;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractItem<R extends Model, O, P extends Model, PE extends Enum<PE>, M extends Model, E extends Enum<E>>
-		extends AbstractConfigurerRunnable {
+		extends Application {
 
 	/**
 	 * {@link IdeChildrenGroup} instances for this {@link AbstractItem}.
@@ -84,19 +81,17 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		AdaptedRootBuilder<R, O> getRootBuilder();
 
 		/**
-		 * Obtains the {@link OfficeFloorOsgiBridge}.
+		 * Obtains the {@link EnvironmentBridge}.
 		 * 
-		 * @return {@link OfficeFloorOsgiBridge}.
-		 * @throws Exception
-		 *             If fails to obtain the {@link OfficeFloorOsgiBridge}.
+		 * @return {@link EnvironmentBridge}.
+		 * @throws Exception If fails to obtain the {@link EnvironmentBridge}.
 		 */
-		OfficeFloorOsgiBridge getOsgiBridge() throws Exception;
+		EnvironmentBridge getEnvironmentBridge() throws Exception;
 
 		/**
 		 * Obtains a preference value.
 		 * 
-		 * @param preferenceId
-		 *            Identifier for the preference value.
+		 * @param preferenceId Identifier for the preference value.
 		 * @return Preference value. May be <code>null</code> if no preference
 		 *         configured for identifier.
 		 */
@@ -105,20 +100,11 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Adds a {@link PreferenceListener}.
 		 * 
-		 * @param preferenceId
-		 *            Identifier of the preference value to listen for changes.
-		 * @param preferenceListener
-		 *            {@link PreferenceListener}.
+		 * @param preferenceId       Identifier of the preference value to listen for
+		 *                           changes.
+		 * @param preferenceListener {@link PreferenceListener}.
 		 */
 		void addPreferenceListener(String preferenceId, PreferenceListener preferenceListener);
-
-		/**
-		 * Obtains the parent {@link Shell}.
-		 * 
-		 * @return Parent {@link Shell}.
-		 */
-		@Deprecated // hide shell within SWT adapter implementation
-		Shell getParentShell();
 
 		/**
 		 * Obtains the operations.
@@ -143,8 +129,8 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Notified of preference value change.
 		 * 
-		 * @param newPreferenceValue
-		 *            New value for the preference. May be <code>null</code>.
+		 * @param newPreferenceValue New value for the preference. May be
+		 *                           <code>null</code>.
 		 */
 		void preferenceValueChanged(String newPreferenceValue);
 	}
@@ -152,8 +138,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Initialise with {@link ConfigurableContext}.
 	 * 
-	 * @param context
-	 *            {@link ConfigurableContext}.
+	 * @param context {@link ConfigurableContext}.
 	 */
 	public final void init(ConfigurableContext<R, O> context) {
 		this.context = context;
@@ -172,14 +157,12 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * Convenience method to translate list of property items to a
 	 * {@link PropertyList}.
 	 *
-	 * @param <PI>
-	 *            Property item type.
-	 * @param properties
-	 *            Property items.
-	 * @param getName
-	 *            {@link Function} to extract the name from the property item.
-	 * @param getValue
-	 *            {@link Function} to extract the value from the property item.
+	 * @param <PI>       Property item type.
+	 * @param properties Property items.
+	 * @param getName    {@link Function} to extract the name from the property
+	 *                   item.
+	 * @param getValue   {@link Function} to extract the value from the property
+	 *                   item.
 	 * @return {@link PropertyList}.
 	 */
 	protected final <PI> PropertyList translateToPropertyList(List<PI> properties, Function<PI, String> getName,
@@ -198,12 +181,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Convenience method to translate list of items to a comma separated list.
 	 * 
-	 * @param <CSVI>
-	 *            Comma separated item type.
-	 * @param items
-	 *            Items.
-	 * @param getValue
-	 *            Obtains the value for the comma separate list from the item.
+	 * @param <CSVI>   Comma separated item type.
+	 * @param items    Items.
+	 * @param getValue Obtains the value for the comma separate list from the item.
 	 * @return Comma separate text for the items.
 	 */
 	protected final <CSVI> String translateToCommaSeparateList(List<CSVI> items, Function<CSVI, String> getValue) {
@@ -222,12 +202,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Convenience method to translate comma separated text into a list.
 	 *
-	 * @param <CSVI>
-	 *            Comma separated item type.
-	 * @param text
-	 *            Comma separated text.
-	 * @param getItem
-	 *            Creates the item from the comma separated value.
+	 * @param <CSVI>  Comma separated item type.
+	 * @param text    Comma separated text.
+	 * @param getItem Creates the item from the comma separated value.
 	 * @return List of items.
 	 */
 	protected final <CSVI> List<CSVI> translateFromCommaSeparatedList(String text, Function<String, CSVI> getItem) {
@@ -245,12 +222,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Translate the list of items to name mapping.
 	 * 
-	 * @param <I>
-	 *            Item types.
-	 * @param items
-	 *            Items.
-	 * @param getName
-	 *            {@link Function} to extract the name from the item.
+	 * @param <I>     Item types.
+	 * @param items   Items.
+	 * @param getName {@link Function} to extract the name from the item.
 	 * @return Name mapping.
 	 */
 	protected final <I> Map<String, String> translateToNameMappings(I[] items, Function<I, String> getName) {
@@ -288,11 +262,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Instantiate.
 		 * 
-		 * @param extractor
-		 *            {@link Function} to extract the {@link Model} instances from the
-		 *            parent {@link Model}.
-		 * @param extractChangeEvents
-		 *            Extract change events.
+		 * @param extractor           {@link Function} to extract the {@link Model}
+		 *                            instances from the parent {@link Model}.
+		 * @param extractChangeEvents Extract change events.
 		 */
 		@SafeVarargs
 		public IdeExtractor(Function<P, List<M>> extractor, PE... extractChangeEvents) {
@@ -303,8 +275,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Extracts the {@link Model} instances from the parent {@link Model}.
 		 * 
-		 * @param parentModel
-		 *            Parent {@link Model}.
+		 * @param parentModel Parent {@link Model}.
 		 * @return Extract {@link Model} instances.
 		 */
 		List<M> extract(P parentModel) {
@@ -334,20 +305,16 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * constructing a prototype model for editing preferences of the
 	 * {@link AbstractIdeEclipseEditor}.
 	 * 
-	 * @param parentModel
-	 *            Parent {@link Model}.
-	 * @param itemModel
-	 *            Item {@link Model}.
+	 * @param parentModel Parent {@link Model}.
+	 * @param itemModel   Item {@link Model}.
 	 */
 	public abstract void loadToParent(P parentModel, M itemModel);
 
 	/**
 	 * Creates the visual for the {@link Model}.
 	 * 
-	 * @param model
-	 *            {@link Model}.
-	 * @param context
-	 *            {@link AdaptedChildVisualFactoryContext}.
+	 * @param model   {@link Model}.
+	 * @param context {@link AdaptedChildVisualFactoryContext}.
 	 * @return {@link Node} for the visual.
 	 */
 	public abstract Node visual(M model, AdaptedChildVisualFactoryContext<M> context);
@@ -370,10 +337,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Instantiate.
 		 * 
-		 * @param labeller
-		 *            {@link Function} to extract the label from the {@link Model}.
-		 * @param labelChangeEvents
-		 *            Label change events.
+		 * @param labeller          {@link Function} to extract the label from the
+		 *                          {@link Model}.
+		 * @param labelChangeEvents Label change events.
 		 */
 		@SafeVarargs
 		public IdeLabeller(Function<M, String> labeller, E... labelChangeEvents) {
@@ -384,8 +350,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Obtains the label from the {@link Model}.
 		 * 
-		 * @param model
-		 *            {@link Model}.
+		 * @param model {@link Model}.
 		 * @return Label for the {@link Model}.
 		 */
 		public String getLabel(M model) {
@@ -422,8 +387,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Instantiate with selector.
 		 * 
-		 * @param selector
-		 *            Selector for applying the style.
+		 * @param selector Selector for applying the style.
 		 */
 		public IdeStyle(String selector) {
 			this.style.append(selector + " {" + System.lineSeparator());
@@ -439,10 +403,8 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Adds a rule for this style.
 		 * 
-		 * @param key
-		 *            Key of the rule.
-		 * @param value
-		 *            Value of the rule.
+		 * @param key   Key of the rule.
+		 * @param value Value of the rule.
 		 * @return <code>this</code>.
 		 */
 		public IdeStyle rule(String key, String value) {
@@ -488,8 +450,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Default implementation of {@link #style()} will invoke this to load styles.
 	 * 
-	 * @param styles
-	 *            {@link List} to be loaded with the {@link IdeStyle} instances.
+	 * @param styles {@link List} to be loaded with the {@link IdeStyle} instances.
 	 */
 	protected void loadStyles(List<IdeStyle> styles) {
 	}
@@ -497,8 +458,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Further adapt the {@link AdaptedChildBuilder}.
 	 * 
-	 * @param builder
-	 *            {@link AdaptedChildBuilder}.
+	 * @param builder {@link AdaptedChildBuilder}.
 	 */
 	protected void furtherAdapt(AdaptedChildBuilder<R, O, M, E> builder) {
 		// Default implementation of nothing further
@@ -522,8 +482,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Instantiate for a single {@link AbstractItem}.
 		 * 
-		 * @param child
-		 *            {@link AbstractItem}.
+		 * @param child {@link AbstractItem}.
 		 */
 		@SuppressWarnings("unchecked")
 		public IdeChildrenGroup(AbstractItem<R, O, M, E, ?, ?> child) {
@@ -534,10 +493,8 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Instantiate for multiple {@link AbstractItem} instances.
 		 * 
-		 * @param groupName
-		 *            Name of the group.
-		 * @param children
-		 *            {@link AbstractItem} instances.
+		 * @param groupName Name of the group.
+		 * @param children  {@link AbstractItem} instances.
 		 */
 		@SafeVarargs
 		public IdeChildrenGroup(String groupName, AbstractItem<R, O, M, E, ?, ?>... children) {
@@ -627,8 +584,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Loads the {@link IdeChildrenGroup} instances.
 	 * 
-	 * @param childGroups
-	 *            {@link IdeChildrenGroup} instances.
+	 * @param childGroups {@link IdeChildrenGroup} instances.
 	 */
 	protected void children(List<IdeChildrenGroup> childGroups) {
 		// No children by default
@@ -672,8 +628,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Instantiate.
 		 * 
-		 * @param connectionClass
-		 *            {@link Class} of the {@link ConnectionModel}.
+		 * @param connectionClass {@link Class} of the {@link ConnectionModel}.
 		 */
 		public IdeConnection(Class<C> connectionClass) {
 			this.connectionClass = connectionClass;
@@ -682,13 +637,11 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Connect to many targets.
 		 * 
-		 * @param sourceToMany
-		 *            Obtains the multiple {@link ConnectionModel} instances from the
-		 *            source.
-		 * @param connToSource
-		 *            Obtains the source from a particular {@link ConnectionModel}.
-		 * @param sourceChangeEvents
-		 *            Source change events.
+		 * @param sourceToMany       Obtains the multiple {@link ConnectionModel}
+		 *                           instances from the source.
+		 * @param connToSource       Obtains the source from a particular
+		 *                           {@link ConnectionModel}.
+		 * @param sourceChangeEvents Source change events.
 		 * @return <code>this</code>.
 		 */
 		@SafeVarargs
@@ -703,12 +656,11 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Connect to one target.
 		 * 
-		 * @param sourceToOne
-		 *            Obtains the single {@link ConnectionModel} from the source.
-		 * @param connToSource
-		 *            Obtains the source from the {@link ConnectionModel}.
-		 * @param sourceChangeEvents
-		 *            Source change events.
+		 * @param sourceToOne        Obtains the single {@link ConnectionModel} from the
+		 *                           source.
+		 * @param connToSource       Obtains the source from the
+		 *                           {@link ConnectionModel}.
+		 * @param sourceChangeEvents Source change events.
 		 * @return <code>this</code>.
 		 */
 		@SafeVarargs
@@ -723,12 +675,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Connects the target.
 		 *
-		 * @param <T>
-		 *            Target {@link Model} type.
-		 * @param <TE>
-		 *            Target {@link Model} event type.
-		 * @param targetClass
-		 *            Target {@link Class}.
+		 * @param <T>         Target {@link Model} type.
+		 * @param <TE>        Target {@link Model} event type.
+		 * @param targetClass Target {@link Class}.
 		 * @return {@link IdeConnectionTarget}.
 		 */
 		@SuppressWarnings("unchecked")
@@ -787,10 +736,8 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Instantiate from only the {@link IdeConnection}.
 		 * 
-		 * @param ideConnection
-		 *            {@link IdeConnection}.
-		 * @param targetClass
-		 *            Target {@link Class}.
+		 * @param ideConnection {@link IdeConnection}.
+		 * @param targetClass   Target {@link Class}.
 		 */
 		private IdeConnectionTarget(IdeConnection<C> ideConnection, Class<T> targetClass) {
 			this.targetClass = targetClass;
@@ -800,13 +747,11 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Connect to many sources.
 		 * 
-		 * @param targetToMany
-		 *            Obtains the multiple {@link ConnectionModel} instances from the
-		 *            target.
-		 * @param connToTarget
-		 *            Obtains the target from a particular {@link ConnectionModel}.
-		 * @param targetChangeEvents
-		 *            Target change events.
+		 * @param targetToMany       Obtains the multiple {@link ConnectionModel}
+		 *                           instances from the target.
+		 * @param connToTarget       Obtains the target from a particular
+		 *                           {@link ConnectionModel}.
+		 * @param targetChangeEvents Target change events.
 		 * @return <code>this</code>.
 		 */
 		@SafeVarargs
@@ -822,12 +767,11 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Connect to one target.
 		 * 
-		 * @param targetToOne
-		 *            Obtains the single {@link ConnectionModel} from the target.
-		 * @param connToTarget
-		 *            Obtains the target from the {@link ConnectionModel}.
-		 * @param targetChangeEvents
-		 *            Target change events.
+		 * @param targetToOne        Obtains the single {@link ConnectionModel} from the
+		 *                           target.
+		 * @param connToTarget       Obtains the target from the
+		 *                           {@link ConnectionModel}.
+		 * @param targetChangeEvents Target change events.
 		 * @return <code>this</code>.
 		 */
 		@SafeVarargs
@@ -843,8 +787,8 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Configures creating the {@link ConnectionModel}.
 		 * 
-		 * @param createConnetion
-		 *            {@link ConnectionFactory} to create the {@link ConnectionModel}.
+		 * @param createConnetion {@link ConnectionFactory} to create the
+		 *                        {@link ConnectionModel}.
 		 * @return <code>this</code>.
 		 */
 		public final IdeConnectionTarget<C, T, TE> create(ConnectionFactory<R, O, M, C, T> createConnetion) {
@@ -855,8 +799,8 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Configures deleting the {@link ConnectionModel}.
 		 * 
-		 * @param deleteConnection
-		 *            {@link ConnectionRemover} to delete the {@link ConnectionModel}.
+		 * @param deleteConnection {@link ConnectionRemover} to delete the
+		 *                         {@link ConnectionModel}.
 		 * @return <code>this</code>.
 		 */
 		public final IdeConnectionTarget<C, T, TE> delete(ConnectionRemover<R, O, C> deleteConnection) {
@@ -867,9 +811,8 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 		/**
 		 * Loads the connection to the {@link AdaptedChildBuilder}.
 		 * 
-		 * @param builder
-		 *            {@link AdaptedChildBuilder} to be configured with the
-		 *            {@link ConnectionModel}.
+		 * @param builder {@link AdaptedChildBuilder} to be configured with the
+		 *                {@link ConnectionModel}.
 		 */
 		void loadConnection(AdaptedChildBuilder<R, O, M, E> builder) {
 
@@ -925,8 +868,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 * Loads the {@link IdeConnectionTarget} instances (created from
 	 * {@link IdeConnection} instances).
 	 * 
-	 * @param connections
-	 *            {@link IdeConnection} instances.
+	 * @param connections {@link IdeConnection} instances.
 	 */
 	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
 		// No connections by default
@@ -935,8 +877,7 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	/**
 	 * Creates the {@link AdaptedChildBuilder}.
 	 * 
-	 * @param childrenGroup
-	 *            {@link ChildrenGroupBuilder}.
+	 * @param childrenGroup {@link ChildrenGroupBuilder}.
 	 * @return Child {@link AdaptedChildBuilder}.
 	 */
 	public final AdaptedChildBuilder<R, O, M, E> createChild(ChildrenGroupBuilder<R, O> childrenGroup) {
@@ -975,15 +916,6 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	 */
 	public final String getPreferenceStyleId() {
 		return this.getBuilder().getConfigurationPath() + ".style";
-	}
-
-	/*
-	 * ================= AbstractConfigurerRunnable =====================
-	 */
-
-	@Override
-	protected void loadConfiguration(Shell shell) {
-		new Label(shell, SWT.NONE).setText("Configuring " + this.getClass().getName() + " directly not supported");
 	}
 
 }

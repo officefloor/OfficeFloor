@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Map;
 
+import org.eclipse.gef.fx.swt.canvas.FXCanvasEx;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -34,40 +35,45 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import javafx.beans.property.Property;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import net.officefloor.eclipse.common.javafx.structure.StructureLogger;
+import javafx.embed.swt.FXCanvas;
+import javafx.scene.paint.Color;
+import net.officefloor.eclipse.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
 import net.officefloor.eclipse.ide.javafx.JavaFxUtil;
 import net.officefloor.eclipse.ide.javafx.JavaFxUtil.CssManager;
 import net.officefloor.eclipse.ide.swt.SwtUtil;
+import net.officefloor.gef.common.structure.StructureLogger;
+import net.officefloor.gef.editor.AdaptedModel;
+import net.officefloor.gef.editor.AdaptedParent;
+import net.officefloor.gef.editor.preview.AdaptedEditorPreview;
+import net.officefloor.model.Model;
 
 /**
- * {@link TitleAreaDialog} for styling a particular {@link Node}.
+ * {@link TitleAreaDialog} for styling the {@link AdaptedModel}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NodePreferenceStyler {
+public class ModelPreferenceStyler<M extends Model> {
 
 	/**
-	 * Title.
+	 * Parent {@link Shell}.
 	 */
-	private final String title;
+	private final Shell parentShell;
 
 	/**
-	 * Message.
+	 * {@link AbstractItem}.
 	 */
-	private final String message;
+	private final AbstractItem<?, ?, ?, ?, M, ?> item;
 
 	/**
-	 * {@link Node} to extract the structure.
+	 * Prototype {@link Model} for the item.
 	 */
-	private final Node node;
+	private final M prototype;
 
 	/**
-	 * Identifier within the {@link IPreferenceStore} for the style.
+	 * Label for the item.
 	 */
-	private final String preferenceStyleId;
+	private final String itemLabel;
 
 	/**
 	 * {@link Property} to receive changes to the style. Also, provides the initial
@@ -81,19 +87,14 @@ public class NodePreferenceStyler {
 	private final String defaultStyle;
 
 	/**
+	 * Indicates if {@link AdaptedParent}.
+	 */
+	private final boolean isParent;
+
+	/**
 	 * Preferences to change.
 	 */
 	private final Map<String, String> preferencesToChange;
-
-	/**
-	 * {@link Scene}.
-	 */
-	private final Scene scene;
-
-	/**
-	 * Parent {@link Shell}.
-	 */
-	private final Shell parentShell;
 
 	/**
 	 * Active {@link StyleDialogue} for the {@link AbstractItem}.
@@ -103,38 +104,27 @@ public class NodePreferenceStyler {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param title
-	 *            Title.
-	 * @param message
-	 *            Message.
-	 * @param node
-	 *            {@link Node} to extract the structure.
-	 * @param preferenceStyleId
-	 *            Identifier within the {@link IPreferenceStore} for the style.
-	 * @param style
-	 *            {@link Property} to receive changes to the style. Also, provides
-	 *            the initial style.
-	 * @param defaultStyle
-	 *            Default style.
-	 * @param preferencesToChange
-	 *            Preferences to change.
-	 * @param scene
-	 *            {@link Scene}.
-	 * @param parentShell
-	 *            Parent {@link Shell}.
+	 * @param parentShell         Parent {@link Shell}.
+	 * @param item                {@link AbstractItem}.
+	 * @param prototype           Prototype {@link Model} for the item.
+	 * @param itemLabel           Label for the item.
+	 * @param isParent            Indicates if {@link AdaptedParent}.
+	 * @param style               {@link Property} to receive changes to the style.
+	 *                            Also, provides the initial style.
+	 * @param defaultStyle        Default style.
+	 * @param preferencesToChange {@link Map} to load with the
+	 *                            {@link IPreferenceStore} changes.
 	 */
-	public NodePreferenceStyler(String title, String message, Node node, String preferenceStyleId,
-			Property<String> style, String defaultStyle, Map<String, String> preferencesToChange, Scene scene,
-			Shell parentShell) {
-		this.title = title;
-		this.message = message;
-		this.node = node;
-		this.preferenceStyleId = preferenceStyleId;
+	public ModelPreferenceStyler(Shell parentShell, AbstractItem<?, ?, ?, ?, M, ?> item, M prototype, String itemLabel,
+			boolean isParent, Property<String> style, String defaultStyle, Map<String, String> preferencesToChange) {
+		this.parentShell = parentShell;
+		this.item = item;
+		this.prototype = prototype;
+		this.itemLabel = itemLabel;
+		this.isParent = isParent;
 		this.style = style;
 		this.defaultStyle = defaultStyle == null ? "" : defaultStyle;
 		this.preferencesToChange = preferencesToChange;
-		this.scene = scene;
-		this.parentShell = parentShell;
 	}
 
 	/**
@@ -144,9 +134,7 @@ public class NodePreferenceStyler {
 
 		// Lazy display dialogue for styling
 		if (this.styleDialogue == null) {
-
-			// Create the style dialogue (with cancel to current style)
-			this.styleDialogue = new StyleDialogue(this.style.getValue());
+			this.styleDialogue = new StyleDialogue();
 			this.styleDialogue.open();
 
 			// Handle clearing on close (so can open again)
@@ -158,14 +146,14 @@ public class NodePreferenceStyler {
 	}
 
 	/**
-	 * Provides means to update the styling for the content.
+	 * Provides means to update the styling for an {@link AbstractItem}.
 	 */
 	private class StyleDialogue extends TitleAreaDialog {
 
 		/**
-		 * Style to reset to on canceling.
+		 * {@link FXCanvas} for the preview.
 		 */
-		private final String cancelStyle;
+		private FXCanvas canvas;
 
 		/**
 		 * Displays the style.
@@ -174,13 +162,9 @@ public class NodePreferenceStyler {
 
 		/**
 		 * Instantiate.
-		 * 
-		 * @param cancelStyle
-		 *            Style to reset to on canceling.
 		 */
-		private StyleDialogue(String cancelStyle) {
-			super(NodePreferenceStyler.this.parentShell);
-			this.cancelStyle = cancelStyle;
+		private StyleDialogue() {
+			super(ModelPreferenceStyler.this.parentShell);
 
 			// Initialise dialogue to non-modal
 			this.setShellStyle(SWT.CLOSE | SWT.MODELESS | SWT.BORDER | SWT.TITLE | SWT.RESIZE);
@@ -205,27 +189,39 @@ public class NodePreferenceStyler {
 			// Default sizing
 			int INDENT = 5;
 
+			// Obtain the background color
+			Color backgroundColour = SwtUtil.loadThemeColours(parent, false).get(SwtUtil.BACKGROUND_COLOR);
+
 			// Create the area
 			Composite area = (Composite) super.createDialogArea(parent);
 			GridDataFactory.defaultsFor(area).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(area);
 
 			// Easy access to styler
-			NodePreferenceStyler styler = NodePreferenceStyler.this;
+			ModelPreferenceStyler<M> styler = ModelPreferenceStyler.this;
 
 			// Create container for contents
 			Composite container = new Composite(area, SWT.NONE);
 			GridDataFactory.defaultsFor(container).align(SWT.FILL, SWT.FILL).grab(true, true).applyTo(container);
-			container.setLayout(new GridLayout(1, true));
+			container.setLayout(new GridLayout(2, false));
 
 			// Indicate details
-			this.setTitle(styler.title);
-			this.setMessage(styler.message);
+			this.setTitle(styler.itemLabel);
+			this.setMessage("JavaFx CSS rules for the item");
 
-			// Provide the structure of the node
+			// Provide the preview of the item
+			this.canvas = new FXCanvasEx(container, SWT.NONE);
+			GridDataFactory.defaultsFor(this.canvas).align(SWT.BEGINNING, SWT.BEGINNING).grab(false, false)
+					.indent(INDENT, INDENT).applyTo(canvas);
+			AdaptedEditorPreview<M> preview = new AdaptedEditorPreview<>(styler.prototype, styler.itemLabel,
+					styler.isParent, (model, context) -> styler.item.visual(model, context));
+			this.canvas.setScene(preview.getPreviewScene());
+			this.canvas.getScene().setFill(backgroundColour);
+
+			// Provide the structure of the item
 			Text structureText = new Text(container, SWT.READ_ONLY | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 			try {
 				StringWriter structure = new StringWriter();
-				StructureLogger.log(styler.node, structure);
+				StructureLogger.log(preview.getPreviewVisual(), structure);
 				structureText.setText(structure.toString());
 
 			} catch (Exception ex) {
@@ -239,7 +235,7 @@ public class NodePreferenceStyler {
 					.indent(INDENT, INDENT).applyTo(structureText);
 
 			// Provide CSS errors
-			CssManager cssManager = JavaFxUtil.createCssManager(container, styler.scene, styler.style);
+			CssManager cssManager = JavaFxUtil.createCssManager(container, preview.getPreviewScene(), preview.style());
 			GridDataFactory.defaultsFor(cssManager.getControl()).align(SWT.FILL, SWT.TOP).indent(INDENT, INDENT)
 					.span(2, 1).applyTo(cssManager.getControl());
 
@@ -248,10 +244,15 @@ public class NodePreferenceStyler {
 
 			// Provide means to change the styling
 			this.text = new StyledText(container, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-			cssManager.registerText(this.text, initialStyle, null);
+			cssManager.registerText(this.text, initialStyle,
+					(rawStyle) -> AbstractAdaptedIdeEditor.translateStyle(rawStyle, styler.item));
 			SwtUtil.autoHideScrollbars(this.text);
 			GridDataFactory.defaultsFor(this.text).align(SWT.FILL, SWT.FILL).indent(INDENT, INDENT).grab(true, true)
 					.span(2, 1).applyTo(this.text);
+
+			// Load the initial styling of preview
+			cssManager.loadStyle(initialStyle,
+					(rawStyle) -> AbstractAdaptedIdeEditor.translateStyle(initialStyle, styler.item));
 
 			// Return the container
 			return container;
@@ -263,36 +264,24 @@ public class NodePreferenceStyler {
 			createButton(parent, IDialogConstants.CLIENT_ID + 1, "Restore Default", false).addListener(SWT.Selection,
 					(event) -> {
 						// Reset to default
-						this.text.setText(NodePreferenceStyler.this.defaultStyle);
+						this.text.setText(ModelPreferenceStyler.this.defaultStyle);
 					});
 			createButton(parent, IDialogConstants.OK_ID, "Apply and Close", true);
 		}
 
 		@Override
-		protected void cancelPressed() {
-
-			// Reset to cancel style
-			NodePreferenceStyler.this.style.setValue(this.cancelStyle);
-
-			// Continue cancel
-			super.cancelPressed();
-		}
-
-		@Override
 		protected void okPressed() {
-
-			// Easy access to styler
-			NodePreferenceStyler styler = NodePreferenceStyler.this;
 
 			// Update the style within preference page
 			String style = this.text.getText();
-			styler.style.setValue(style);
+			ModelPreferenceStyler.this.style.setValue(style);
 
 			// Update to preferences (taking into account default style)
-			if (NodePreferenceStyler.this.defaultStyle.equals(style)) {
+			String styleId = ModelPreferenceStyler.this.item.getPreferenceStyleId();
+			if (ModelPreferenceStyler.this.defaultStyle.equals(style)) {
 				style = ""; // reset to default
 			}
-			styler.preferencesToChange.put(styler.preferenceStyleId, style);
+			ModelPreferenceStyler.this.preferencesToChange.put(styleId, style);
 
 			// Close the dialog
 			super.okPressed();
