@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof;
+package net.officefloor.gef.woof;
 
 import java.util.List;
 
@@ -57,18 +57,6 @@ import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofHttpContinuationM
  */
 public class WoofHttpContinuationItem extends
 		AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, WoofHttpContinuationModel, WoofHttpContinuationEvent, WoofHttpContinuationItem> {
-
-	/**
-	 * Test configuration.
-	 * 
-	 * @param args Command line arguments.
-	 */
-	public static void main(String[] args) {
-		WoofEditor.launchConfigurer(new WoofHttpContinuationItem(), (model) -> {
-			model.setApplicationPath("/path");
-			model.setIsSecure(true);
-		});
-	}
 
 	/**
 	 * Application path.
@@ -125,7 +113,7 @@ public class WoofHttpContinuationItem extends
 	}
 
 	@Override
-	protected WoofHttpContinuationItem item(WoofHttpContinuationModel model) {
+	public WoofHttpContinuationItem item(WoofHttpContinuationModel model) {
 		WoofHttpContinuationItem item = new WoofHttpContinuationItem();
 		if (model != null) {
 			item.applicationPath = model.getApplicationPath();

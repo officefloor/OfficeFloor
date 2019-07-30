@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof;
+package net.officefloor.gef.woof;
 
 import java.util.List;
 
@@ -44,17 +44,6 @@ import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel;
  */
 public class WoofResourceItem extends
 		AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, WoofResourceModel, WoofResourceEvent, WoofResourceItem> {
-
-	/**
-	 * Test configuration.
-	 * 
-	 * @param args Command line arguments.
-	 */
-	public static void main(String[] args) {
-		WoofEditor.launchConfigurer(new WoofResourceItem(), (model) -> {
-			model.setResourcePath("/resource");
-		});
-	}
 
 	/**
 	 * Resource path.
@@ -99,7 +88,7 @@ public class WoofResourceItem extends
 	}
 
 	@Override
-	protected WoofResourceItem item(WoofResourceModel model) {
+	public WoofResourceItem item(WoofResourceModel model) {
 		WoofResourceItem item = new WoofResourceItem();
 		if (model != null) {
 			item.resourcePath = model.getResourcePath();

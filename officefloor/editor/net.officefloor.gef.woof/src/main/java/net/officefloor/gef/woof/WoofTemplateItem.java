@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof;
+package net.officefloor.gef.woof;
 
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -31,14 +31,13 @@ import javafx.scene.layout.VBox;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.gef.configurer.ListBuilder;
 import net.officefloor.gef.configurer.ValueValidator;
 import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.gef.editor.DefaultConnectors;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
-import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.web.template.build.WebTemplate;
 import net.officefloor.web.template.build.WebTemplateArchitectEmployer;
 import net.officefloor.web.template.type.WebTemplateLoader;
@@ -60,7 +59,6 @@ import net.officefloor.woof.model.woof.WoofTemplateLinkModel;
 import net.officefloor.woof.model.woof.WoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofTemplateModel;
-import net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel;
 import net.officefloor.woof.model.woof.WoofTemplateToSuperWoofTemplateModel;
 import net.officefloor.woof.template.WoofTemplateExtensionLoaderUtil;
 
@@ -71,46 +69,6 @@ import net.officefloor.woof.template.WoofTemplateExtensionLoaderUtil;
  */
 public class WoofTemplateItem extends
 		AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, WoofTemplateModel, WoofTemplateEvent, WoofTemplateItem> {
-
-	/**
-	 * Mock logic class for testing.
-	 */
-	public static class MockLogic {
-
-		@FlowInterface
-		public static interface Flows {
-			void flow();
-		}
-
-		public MockLogic redirect() {
-			return this;
-		}
-
-		public void getTemplate(Flows flows) {
-		}
-	}
-
-	/**
-	 * Test configuration.
-	 * 
-	 * @param args Command line arguments.
-	 */
-	public static void main(String[] args) {
-		WoofEditor.launchConfigurer(new WoofTemplateItem(), (model) -> {
-			model.setApplicationPath("/path");
-			model.setIsTemplateSecure(true);
-			model.addLink(new WoofTemplateLinkModel("link", false));
-			model.addLink(new WoofTemplateLinkModel("secure", true));
-			model.setTemplateLocation("net/officefloor/eclipse/woof/mock/MockTemplate.html");
-			model.setTemplateClassName(MockLogic.class.getName());
-			model.setRedirectValuesFunction("redirect");
-			model.setTemplateContentType("application/text");
-			model.setTemplateCharset("UTF-8");
-			model.setLinkSeparatorCharacter("+");
-			model.addRenderHttpMethod(new WoofTemplateRenderHttpMethodModel("POST"));
-			model.addRenderHttpMethod(new WoofTemplateRenderHttpMethodModel("PUT"));
-		});
-	}
 
 	/**
 	 * Application path.
@@ -251,7 +209,7 @@ public class WoofTemplateItem extends
 	}
 
 	@Override
-	protected WoofTemplateItem item(WoofTemplateModel model) {
+	public WoofTemplateItem item(WoofTemplateModel model) {
 		WoofTemplateItem item = new WoofTemplateItem();
 		if (model != null) {
 			item.applicationPath = model.getApplicationPath();

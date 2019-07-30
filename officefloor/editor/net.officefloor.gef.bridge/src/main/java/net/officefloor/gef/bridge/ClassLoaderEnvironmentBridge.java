@@ -19,6 +19,8 @@ package net.officefloor.gef.bridge;
 
 import java.net.URL;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+
 /**
  * {@link ClassLoader} {@link EnvironmentBridge}.
  * 
@@ -111,6 +113,22 @@ public class ClassLoaderEnvironmentBridge implements EnvironmentBridge {
 
 		// Not deriving, so just return search text
 		handler.selected(searchText);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S> Class<? extends S> loadClass(String className, Class<S> superType) throws Exception {
+		return (Class<? extends S>) this.classLoader.loadClass(className);
+	}
+
+	@Override
+	public ClassLoader getClassLoader() {
+		return this.classLoader;
+	}
+
+	@Override
+	public OfficeFloorCompiler getOfficeFloorCompiler() {
+		return OfficeFloorCompiler.newOfficeFloorCompiler(this.classLoader);
 	}
 
 	@Override

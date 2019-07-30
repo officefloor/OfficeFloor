@@ -15,29 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof.test;
+package net.officefloor.gef.woof.test;
 
-import java.io.File;
+import org.junit.Test;
 
-import net.officefloor.eclipse.woof.WoofEditor;
-import net.officefloor.eclipse.woof.WoofEditorBackup;
+import net.officefloor.gef.woof.WoofEditor;
 
 /**
- * Allows testing of the {@link WoofEditor}.
+ * Test the {@link WoofEditor}.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofEditorMain extends WoofEditorBackup {
+public class WoofEditorTest {
 
-	/**
-	 * Runs the {@link WoofEditor} for testing.
-	 * 
-	 * @param args Command line arguments.
-	 * @throws Exception If failure to run.
-	 */
-	public static void main(String[] args) throws Exception {
-		WoofEditorMain.launch(new File(ClassLoader
-				.getSystemResource(WoofEditorMain.class.getPackage().getName().replace('.', '/') + "/Test.woof.xml")
-				.toURI()));
+	@Test
+	public void required() {
 	}
+
 }

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof;
+package net.officefloor.gef.woof;
 
 import java.util.List;
 
@@ -27,6 +27,7 @@ import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.gef.configurer.ValueValidator;
 import net.officefloor.gef.editor.AdaptedAreaBuilder;
 import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
@@ -36,9 +37,6 @@ import net.officefloor.gef.editor.DefaultImages;
 import net.officefloor.gef.editor.ParentToAreaConnectionModel;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.gef.ide.editor.AbstractItem;
-import net.officefloor.frame.api.governance.Governance;
-import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
-import net.officefloor.woof.model.woof.PropertyModel;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofGovernanceAreaModel;
 import net.officefloor.woof.model.woof.WoofGovernanceModel;
@@ -53,20 +51,6 @@ import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
  */
 public class WoofGovernanceItem extends
 		AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, WoofGovernanceModel, WoofGovernanceEvent, WoofGovernanceItem> {
-
-	/**
-	 * Test configuration.
-	 * 
-	 * @param args Command line arguments.
-	 */
-	public static void main(String[] args) {
-		WoofEditor.launchConfigurer(new WoofGovernanceItem(), (model) -> {
-			model.setWoofGovernanceName("Governance");
-			model.setGovernanceSourceClassName(ClassGovernanceSource.class.getName());
-			model.addProperty(
-					new PropertyModel(ClassGovernanceSource.CLASS_NAME_PROPERTY_NAME, Object.class.getName()));
-		});
-	}
 
 	/**
 	 * {@link Governance} name.
@@ -125,7 +109,7 @@ public class WoofGovernanceItem extends
 	}
 
 	@Override
-	protected WoofGovernanceItem item(WoofGovernanceModel model) {
+	public WoofGovernanceItem item(WoofGovernanceModel model) {
 		WoofGovernanceItem item = new WoofGovernanceItem();
 		if (model != null) {
 			item.name = model.getWoofGovernanceName();

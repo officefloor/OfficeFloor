@@ -6,7 +6,7 @@ Bundle-Version: 3.12.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-RegisterBuddy: net.officefloor.core
-Export-Package: net.officefloor.eclipse.woof
+Export-Package: net.officefloor.gef.woof
 Require-Bundle: net.officefloor.core;bundle-version="3.12.0",
  net.officefloor.woof;bundle-version="3.12.0",
  net.officefloor.gef.common;bundle-version="3.12.0",

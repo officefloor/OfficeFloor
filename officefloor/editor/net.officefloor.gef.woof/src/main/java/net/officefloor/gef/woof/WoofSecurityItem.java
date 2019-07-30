@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof;
+package net.officefloor.gef.woof;
 
 import java.util.List;
 import java.util.Map;
@@ -29,7 +29,6 @@ import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.gef.editor.DefaultConnectors;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
-import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityLoader;
 import net.officefloor.web.security.type.HttpSecurityType;
@@ -42,7 +41,6 @@ import net.officefloor.woof.model.woof.WoofHttpInputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSecurityModel;
-import net.officefloor.woof.model.woof.WoofSecurityContentTypeModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel.WoofSecurityEvent;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSecurityModel;
@@ -55,21 +53,6 @@ import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSecurityModel;
  */
 public class WoofSecurityItem extends
 		AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, WoofSecurityModel, WoofSecurityEvent, WoofSecurityItem> {
-
-	/**
-	 * Test configuration.
-	 * 
-	 * @param args Command line arguments.
-	 */
-	public static void main(String[] args) {
-		WoofEditor.launchConfigurer(new WoofSecurityItem(), (model) -> {
-			model.setHttpSecurityName("Security");
-			model.setHttpSecuritySourceClassName(BasicHttpSecuritySource.class.getName());
-			model.setTimeout(1000);
-			model.addContentType(new WoofSecurityContentTypeModel("application/json"));
-			model.addContentType(new WoofSecurityContentTypeModel("application/xml"));
-		});
-	}
 
 	/**
 	 * {@link HttpSecurity} name.
@@ -146,7 +129,7 @@ public class WoofSecurityItem extends
 	}
 
 	@Override
-	protected WoofSecurityItem item(WoofSecurityModel model) {
+	public WoofSecurityItem item(WoofSecurityModel model) {
 		WoofSecurityItem item = new WoofSecurityItem();
 		if (model != null) {
 			item.name = model.getHttpSecurityName();

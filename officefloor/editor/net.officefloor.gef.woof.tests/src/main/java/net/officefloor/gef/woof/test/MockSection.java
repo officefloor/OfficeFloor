@@ -15,23 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof.test;
+package net.officefloor.gef.woof.test;
 
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
 /**
- * Example template logic.
+ * Mock section {@link Class} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class Template {
+public class MockSection {
 
 	@FlowInterface
 	public static interface Flows {
-
 		void flow();
 	}
 
-	public void getTemplate(Flows flows) {
+	public void input(Flows flows) {
 	}
+
 }

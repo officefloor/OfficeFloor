@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof;
+package net.officefloor.gef.woof;
 
 import java.util.List;
 
@@ -42,15 +42,6 @@ import net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel;
  */
 public class WoofStartItem extends
 		AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, WoofStartModel, WoofStartEvent, WoofStartItem> {
-
-	/**
-	 * Test configuration.
-	 * 
-	 * @param args Command line arguments.
-	 */
-	public static void main(String[] args) {
-		WoofEditor.launchConfigurer(new WoofStartItem(), null);
-	}
 
 	/*
 	 * ======================= AbstractConfigurableItem =====================
@@ -87,7 +78,7 @@ public class WoofStartItem extends
 	}
 
 	@Override
-	protected WoofStartItem item(WoofStartModel model) {
+	public WoofStartItem item(WoofStartModel model) {
 		return new WoofStartItem();
 	}
 

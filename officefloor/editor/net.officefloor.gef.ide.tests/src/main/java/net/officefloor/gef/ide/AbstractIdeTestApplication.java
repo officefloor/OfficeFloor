@@ -84,6 +84,17 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 	 */
 	protected abstract String getConfigurationFileName();
 
+	/**
+	 * Registers a prototype decorator.
+	 * 
+	 * @param <P>           Prototype type.
+	 * @param prototypeType Prototype {@link Class}.
+	 * @param decorator     Prototype decorator.
+	 */
+	protected <P> void register(Class<P> prototypeType, Consumer<P> decorator) {
+		this.prototypeDecorators.put(prototypeType, decorator);
+	}
+
 	/*
 	 * =============== Application =============================
 	 */
@@ -119,30 +130,37 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 			return this.domain;
 		});
 		editor.setConfigurationItem(configurationItem);
+
+		// Display stage (required by editor)
+		stage.setScene(new Scene(folder));
+		stage.setWidth(1600);
+		stage.setHeight(1200);
+		stage.show();
+
+		// Load editor view (with scene available)
 		editor.loadView((view) -> editorTab.setContent(view));
 		this.domain.activate();
 
+		// Obtain the configurable context (now available from editor)
+		ConfigurableContext<R, O> configurableContext = editor.getConfigurableContext();
+
 		// Load the configuration items
 		for (AbstractConfigurableItem<R, RE, O, ?, ?, ?> parent : editor.getParents()) {
-			this.loadItem(parent, folder);
+			this.loadItem(parent, configurableContext, folder);
 		}
-
-		// Display stage
-		stage.setScene(new Scene(folder));
-		stage.setWidth(800);
-		stage.setHeight(600);
-		stage.show();
 	}
 
 	/**
 	 * Loads the {@link AbstractConfigurableItem}.
 	 * 
-	 * @param <M>  {@link Model} type for item.
-	 * @param <I>  Item type.
-	 * @param item Item.
-	 * @param pane {@link Pane} to configuration item.
+	 * @param <M>                 {@link Model} type for item.
+	 * @param <I>                 Item type.
+	 * @param item                Item.
+	 * @param configurableContext {@link ConfigurableContext}.
+	 * @param pane                {@link Pane} to configuration item.
 	 */
-	private <M extends Model, I> void loadItem(AbstractConfigurableItem<R, RE, O, M, ?, I> item, TabPane pane) {
+	private <M extends Model, I> void loadItem(AbstractConfigurableItem<R, RE, O, M, ?, I> item,
+			ConfigurableContext<R, O> configurableContext, TabPane pane) {
 
 		// Add the tab for item
 		String itemName = item.getClass().getSimpleName();
@@ -171,8 +189,8 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 			prototypeDecorator.accept(prototype);
 		}
 
-		// Obtain the configurable context
-		ConfigurableContext<R, O> configurableContext = item.getConfigurableContext();
+		// Specify the configurable context
+		item.init(configurableContext);
 
 		// Log changes
 		Consumer<Change<?>> logChange = (change) -> {
@@ -247,7 +265,7 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 				}
 			};
 			Button addButton = new Button("Add");
-			addParent.getChildren().add(addParent);
+			addParent.getChildren().add(addButton);
 			addButton.setOnAction((event) -> {
 				try {
 					configuration.addImmediately.action(addContext);

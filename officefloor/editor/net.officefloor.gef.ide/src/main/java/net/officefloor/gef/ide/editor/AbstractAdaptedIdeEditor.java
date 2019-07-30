@@ -221,6 +221,14 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 			}
 		};
 	}
+	
+	/**
+	 * Obtains the {@link ConfigurableContext}
+	 * @return
+	 */
+	public ConfigurableContext<R, O> getConfigurableContext() {
+		return this.configurableContext;
+	}
 
 	/**
 	 * Loads the children and their children recursively.

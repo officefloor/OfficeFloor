@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof;
+package net.officefloor.gef.woof;
 
-import java.io.IOException;
 import java.util.List;
 
 import javafx.scene.layout.HBox;
@@ -55,17 +54,6 @@ import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
  */
 public class WoofExceptionItem extends
 		AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, WoofExceptionModel, WoofExceptionEvent, WoofExceptionItem> {
-
-	/**
-	 * Test configuration.
-	 * 
-	 * @param args Command line arguments.
-	 */
-	public static void main(String[] args) {
-		WoofEditor.launchConfigurer(new WoofExceptionItem(), (model) -> {
-			model.setClassName(IOException.class.getName());
-		});
-	}
 
 	/**
 	 * {@link Exception} {@link Class}.

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof;
+package net.officefloor.gef.woof;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,6 @@ import net.officefloor.gef.configurer.ConfigurationBuilder;
 import net.officefloor.gef.configurer.ValueValidator;
 import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofModel;
@@ -51,33 +50,6 @@ import net.officefloor.woof.model.woof.WoofSectionModel.WoofSectionEvent;
  */
 public class WoofSectionItem extends
 		AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, WoofSectionModel, WoofSectionEvent, WoofSectionItem> {
-
-	/**
-	 * Mock section {@link Class} for testing.
-	 */
-	public static class MockSection {
-
-		@FlowInterface
-		public static interface Flows {
-			void flow();
-		}
-
-		public void input(Flows flows) {
-		}
-	}
-
-	/**
-	 * Test configuration.
-	 * 
-	 * @param args Command line arguments.
-	 */
-	public static void main(String[] args) {
-		WoofEditor.launchConfigurer(new WoofSectionItem(), (model) -> {
-			model.setWoofSectionName("Section");
-			model.setSectionSourceClassName(ClassSectionSource.class.getName());
-			model.setSectionLocation(MockSection.class.getName());
-		});
-	}
 
 	/**
 	 * Loads the {@link SectionType} for the {@link WoofSectionItem}.
@@ -183,7 +155,7 @@ public class WoofSectionItem extends
 	}
 
 	@Override
-	protected WoofSectionItem item(WoofSectionModel model) {
+	public WoofSectionItem item(WoofSectionModel model) {
 		WoofSectionItem item = new WoofSectionItem();
 		if (model != null) {
 			item.name = model.getWoofSectionName();

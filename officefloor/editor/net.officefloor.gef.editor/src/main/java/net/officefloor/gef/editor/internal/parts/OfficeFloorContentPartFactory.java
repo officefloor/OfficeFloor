@@ -248,7 +248,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 				this.editorPane.getStylesheets().remove(oldValue.toExternalForm());
 			}
 			if (newValue != null) {
-				this.editorPane.getScene().getStylesheets().add(newValue.toExternalForm());
+				this.editorPane.getStylesheets().add(newValue.toExternalForm());
 			}
 		});
 		if (this.selectOnly != null) {

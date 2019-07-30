@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof;
+package net.officefloor.gef.woof;
 
 import java.util.List;
 
@@ -54,19 +54,6 @@ import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
  */
 public class WoofHttpInputItem extends
 		AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, WoofHttpInputModel, WoofHttpInputEvent, WoofHttpInputItem> {
-
-	/**
-	 * Test configuration.
-	 * 
-	 * @param args Command line arguments.
-	 */
-	public static void main(String[] args) {
-		WoofEditor.launchConfigurer(new WoofHttpInputItem(), (model) -> {
-			model.setHttpMethod("POST");
-			model.setApplicationPath("/path");
-			model.setIsSecure(true);
-		});
-	}
 
 	/**
 	 * HTTP method.
@@ -123,7 +110,7 @@ public class WoofHttpInputItem extends
 	}
 
 	@Override
-	protected WoofHttpInputItem item(WoofHttpInputModel model) {
+	public WoofHttpInputItem item(WoofHttpInputModel model) {
 		WoofHttpInputItem item = new WoofHttpInputItem();
 		if (model != null) {
 			item.httpMethod = model.getHttpMethod();
