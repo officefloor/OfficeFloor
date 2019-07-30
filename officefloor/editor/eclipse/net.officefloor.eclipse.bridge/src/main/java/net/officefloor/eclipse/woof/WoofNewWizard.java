@@ -33,7 +33,7 @@ public class WoofNewWizard extends AbstractNewWizardRefactor<WoofModel> {
 	 * Instantiate.
 	 */
 	public WoofNewWizard() {
-		super(new WoofEditorRefactor());
+		super(new WoofEditor());
 	}
 
 }

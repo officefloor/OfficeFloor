@@ -30,12 +30,12 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.eclipse.configurer.ChoiceBuilder;
-import net.officefloor.eclipse.configurer.ConfigurationBuilder;
-import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
-import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
-import net.officefloor.eclipse.osgi.OfficeFloorOsgiBridge;
+import net.officefloor.gef.bridge.EnvironmentBridge;
+import net.officefloor.gef.configurer.ChoiceBuilder;
+import net.officefloor.gef.configurer.ConfigurationBuilder;
+import net.officefloor.gef.configurer.ValueValidator;
+import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
+import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.woof.model.woof.WoofChanges;
@@ -69,8 +69,7 @@ public class WoofSectionItem extends
 	/**
 	 * Test configuration.
 	 * 
-	 * @param args
-	 *            Command line arguments.
+	 * @param args Command line arguments.
 	 */
 	public static void main(String[] args) {
 		WoofEditor.launchConfigurer(new WoofSectionItem(), (model) -> {
@@ -83,17 +82,14 @@ public class WoofSectionItem extends
 	/**
 	 * Loads the {@link SectionType} for the {@link WoofSectionItem}.
 	 * 
-	 * @param item
-	 *            {@link WoofSectionItem}.
-	 * @param osgiBridge
-	 *            {@link OfficeFloorOsgiBridge}.
+	 * @param item      {@link WoofSectionItem}.
+	 * @param envBridge {@link EnvironmentBridge}.
 	 * @return {@link SectionType}.
-	 * @throws Exception
-	 *             If fails to load the {@link SectionType}.
+	 * @throws Exception If fails to load the {@link SectionType}.
 	 */
-	public static SectionType loadSectionType(WoofSectionItem item, OfficeFloorOsgiBridge osgiBridge) throws Exception {
-		SectionLoader loader = osgiBridge.getOfficeFloorCompiler().getSectionLoader();
-		Class<? extends SectionSource> sourceClass = osgiBridge.loadClass(item.sourceClassName, SectionSource.class);
+	public static SectionType loadSectionType(WoofSectionItem item, EnvironmentBridge envBridge) throws Exception {
+		SectionLoader loader = envBridge.getOfficeFloorCompiler().getSectionLoader();
+		Class<? extends SectionSource> sourceClass = envBridge.loadClass(item.sourceClassName, SectionSource.class);
 		return loader.loadSectionType(sourceClass, item.location, item.properties);
 	}
 
@@ -181,7 +177,8 @@ public class WoofSectionItem extends
 
 	@Override
 	protected void loadStyles(List<IdeStyle> styles) {
-		styles.add(new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 100.0%, green, mediumseagreen)"));
+		styles.add(
+				new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 100.0%, green, mediumseagreen)"));
 		styles.add(new IdeStyle(".${model} .label").rule("-fx-text-fill", "honeydew"));
 	}
 
@@ -238,13 +235,13 @@ public class WoofSectionItem extends
 
 			// Validate (ensure loads type)
 			builder.validate((ctx) -> {
-				OfficeFloorOsgiBridge osgiBridge = this.getConfigurableContext().getOsgiBridge();
+				EnvironmentBridge envBridge = this.getConfigurableContext().getEnvironmentBridge();
 
 				// Validate the type
 				WoofSectionItem item = ctx.getModel();
 
 				// Attempt to load the type
-				item.sectionType = loadSectionType(item, osgiBridge);
+				item.sectionType = loadSectionType(item, envBridge);
 
 				// Load the mappings
 				item.inputNameMapping = this.translateToNameMappings(item.sectionType.getSectionInputTypes(),

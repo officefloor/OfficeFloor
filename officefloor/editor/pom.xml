@@ -26,6 +26,7 @@
 		<module>net.officefloor.gef.configurer</module>
 		<module>net.officefloor.gef.configurer.tests</module>
 		<module>net.officefloor.gef.ide</module>
+		<module>net.officefloor.gef.ide.tests</module>
 		<module>net.officefloor.gef.section</module>
 		<module>net.officefloor.gef.section.tests</module>
 		<module>net.officefloor.gef.shade</module>

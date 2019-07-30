@@ -26,7 +26,6 @@ import java.util.function.Function;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import javafx.application.Application;
 import javafx.scene.Node;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
@@ -50,8 +49,7 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractItem<R extends Model, O, P extends Model, PE extends Enum<PE>, M extends Model, E extends Enum<E>>
-		extends Application {
+public abstract class AbstractItem<R extends Model, O, P extends Model, PE extends Enum<PE>, M extends Model, E extends Enum<E>> {
 
 	/**
 	 * {@link IdeChildrenGroup} instances for this {@link AbstractItem}.

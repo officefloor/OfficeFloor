@@ -17,6 +17,8 @@
  */
 package net.officefloor.gef.bridge;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+
 /**
  * Bridges the editor to the environment.
  * 
@@ -67,6 +69,31 @@ public interface EnvironmentBridge {
 	 * @throws Exception If fails to determine if super type.
 	 */
 	boolean isSuperType(String className, String superType) throws Exception;
+
+	/**
+	 * Loads the {@link Class}.
+	 * 
+	 * @param <S>       Super type.
+	 * @param className Name of {@link Class}.
+	 * @param superType Super type required of {@link Class}.
+	 * @return {@link Class}.
+	 * @throws Exception If fails to load the {@link Class}.
+	 */
+	<S> Class<? extends S> loadClass(String className, Class<S> superType) throws Exception;
+
+	/**
+	 * Obtains the {@link ClassLoader}.
+	 * 
+	 * @return {@link ClassLoader}.
+	 */
+	ClassLoader getClassLoader();
+
+	/**
+	 * Obtains the {@link OfficeFloorCompiler}.
+	 * 
+	 * @return {@link OfficeFloorCompiler}.
+	 */
+	OfficeFloorCompiler getOfficeFloorCompiler();
 
 	/**
 	 * Selects a {@link Class}.

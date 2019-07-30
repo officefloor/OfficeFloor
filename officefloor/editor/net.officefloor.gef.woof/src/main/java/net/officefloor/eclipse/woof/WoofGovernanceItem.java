@@ -27,15 +27,15 @@ import net.officefloor.compile.governance.GovernanceLoader;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
-import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedAreaBuilder;
-import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
-import net.officefloor.eclipse.editor.AdaptedParentBuilder;
-import net.officefloor.eclipse.editor.DefaultConnectors;
-import net.officefloor.eclipse.editor.DefaultImages;
-import net.officefloor.eclipse.editor.ParentToAreaConnectionModel;
-import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
-import net.officefloor.eclipse.ide.editor.AbstractItem;
+import net.officefloor.gef.configurer.ValueValidator;
+import net.officefloor.gef.editor.AdaptedAreaBuilder;
+import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
+import net.officefloor.gef.editor.AdaptedParentBuilder;
+import net.officefloor.gef.editor.DefaultConnectors;
+import net.officefloor.gef.editor.DefaultImages;
+import net.officefloor.gef.editor.ParentToAreaConnectionModel;
+import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
+import net.officefloor.gef.ide.editor.AbstractItem;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.woof.model.woof.PropertyModel;
@@ -185,11 +185,11 @@ public class WoofGovernanceItem extends
 				WoofGovernanceItem item = ctx.getModel();
 
 				// Obtain the Governance Source
-				Class<? extends GovernanceSource> governanceSourceClass = this.getConfigurableContext().getOsgiBridge()
-						.loadClass(item.sourceClassName, GovernanceSource.class);
+				Class<? extends GovernanceSource> governanceSourceClass = this.getConfigurableContext()
+						.getEnvironmentBridge().loadClass(item.sourceClassName, GovernanceSource.class);
 
 				// Obtain the loader
-				GovernanceLoader loader = this.getConfigurableContext().getOsgiBridge().getOfficeFloorCompiler()
+				GovernanceLoader loader = this.getConfigurableContext().getEnvironmentBridge().getOfficeFloorCompiler()
 						.getGovernanceLoader();
 
 				// Load the type

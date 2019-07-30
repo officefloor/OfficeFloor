@@ -17,44 +17,94 @@
  */
 package net.officefloor.eclipse.woof;
 
-import java.util.function.Consumer;
+import java.util.List;
 
-import org.eclipse.ui.IWorkbench;
-
-import net.officefloor.eclipse.ide.editor.AbstractAdaptedEditorPart;
-import net.officefloor.eclipse.ide.editor.AbstractAdaptedIdeEditor;
-import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
-import net.officefloor.model.Model;
+import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.gef.bridge.EnvironmentBridge;
+import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
+import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofChangesImpl;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import net.officefloor.woof.model.woof.WoofRepository;
+import net.officefloor.woof.model.woof.WoofRepositoryImpl;
 
 /**
  * Web on OfficeFloor (WoOF) Editor.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofEditor extends AbstractAdaptedEditorPart<WoofModel, WoofEvent, WoofChanges> {
+public class WoofEditor extends AbstractAdaptedIdeEditor<WoofModel, WoofEvent, WoofChanges> {
 
 	/**
-	 * Convenience method to launch {@link AbstractConfigurableItem} outside
-	 * {@link IWorkbench}.
-	 *
-	 * @param <M>                {@link Model} type.
-	 * @param <E>                {@link Model} event type.
-	 * @param <I>                Item type.
-	 * @param configurableItem   {@link AbstractConfigurableItem}.
-	 * @param prototypeDecorator Optional prototype decorator.
+	 * {@link WoofRepository}.
 	 */
-	public static <M extends Model, E extends Enum<E>, I> void launchConfigurer(
-			AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, M, E, I> configurableItem,
-			Consumer<M> prototypeDecorator) {
-		configurableItem.main(new WoofModel(), WoofEditorBackup.class, prototypeDecorator);
+	private static final WoofRepository WOOF_REPOSITORY = new WoofRepositoryImpl(new ModelRepositoryImpl());
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param envBridge {@link EnvironmentBridge}.
+	 */
+	public WoofEditor(EnvironmentBridge envBridge) {
+		super(WoofModel.class, (model) -> new WoofChangesImpl(model), envBridge);
+	}
+
+	/*
+	 * ================= AbstractIdeEditor ==================
+	 */
+
+	@Override
+	public String fileName() {
+		return "application.woof";
 	}
 
 	@Override
-	protected AbstractAdaptedIdeEditor<WoofModel, WoofEvent, WoofChanges> createEditor() {
-		return new WoofEditorRefactor();
+	public WoofModel prototype() {
+		return new WoofModel();
+	}
+
+	@Override
+	public String paletteStyle() {
+		return ".palette { -fx-background-color: cornsilk }";
+	}
+
+	@Override
+	public String paletteIndicatorStyle() {
+		return ".palette-indicator { -fx-background-color: bisque }";
+	}
+
+	@Override
+	public String editorStyle() {
+		return ".connection Path { -fx-stroke: royalblue; -fx-opacity: 0.6 }";
+	}
+
+	@Override
+	protected void loadParents(List<AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, ?, ?, ?>> parents) {
+		parents.add(new WoofHttpContinuationItem());
+		parents.add(new WoofHttpInputItem());
+		parents.add(new WoofTemplateItem());
+		parents.add(new WoofSecurityItem());
+		parents.add(new WoofSectionItem());
+		parents.add(new WoofGovernanceItem());
+		parents.add(new WoofResourceItem());
+		parents.add(new WoofExceptionItem());
+		parents.add(new WoofStartItem());
+	}
+
+	@Override
+	protected WoofModel loadRootModel(ConfigurationItem configurationItem) throws Exception {
+		WoofModel woof = new WoofModel();
+		WOOF_REPOSITORY.retrieveWoof(woof, configurationItem);
+		return woof;
+	}
+
+	@Override
+	public void saveRootModel(WoofModel model, WritableConfigurationItem configurationItem) throws Exception {
+		WOOF_REPOSITORY.storeWoof(model, configurationItem);
 	}
 
 }

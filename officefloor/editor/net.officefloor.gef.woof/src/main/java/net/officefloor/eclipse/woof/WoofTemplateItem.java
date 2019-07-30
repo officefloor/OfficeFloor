@@ -31,11 +31,11 @@ import javafx.scene.layout.VBox;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
-import net.officefloor.eclipse.configurer.ListBuilder;
-import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
-import net.officefloor.eclipse.editor.DefaultConnectors;
-import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
+import net.officefloor.gef.configurer.ListBuilder;
+import net.officefloor.gef.configurer.ValueValidator;
+import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
+import net.officefloor.gef.editor.DefaultConnectors;
+import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
@@ -198,7 +198,7 @@ public class WoofTemplateItem extends
 	private WoofTemplateChangeContext getWoofTemplateChangeContext(ConfigurableContext<WoofModel, WoofChanges> context)
 			throws Exception {
 		// Create the template change
-		ClassLoader classLoader = context.getOsgiBridge().getClassLoader();
+		ClassLoader classLoader = context.getEnvironmentBridge().getClassLoader();
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
 		SourceContext sourceContext = compiler.createRootSourceContext();
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(classLoader, null);
@@ -327,8 +327,8 @@ public class WoofTemplateItem extends
 				}
 
 				// Ensure method exists on class
-				Class<?> logicClass = this.getConfigurableContext().getOsgiBridge().loadClass(ctx.getModel().logicClass,
-						Object.class);
+				Class<?> logicClass = this.getConfigurableContext().getEnvironmentBridge()
+						.loadClass(ctx.getModel().logicClass, Object.class);
 				for (Method method : logicClass.getMethods()) {
 					if (redirectMethodName.equals(method.getName())) {
 						return;
@@ -366,7 +366,7 @@ public class WoofTemplateItem extends
 
 				// Obtain the loader
 				WebTemplateLoader loader = WebTemplateArchitectEmployer.employWebTemplateLoader(
-						this.getConfigurableContext().getOsgiBridge().getOfficeFloorCompiler());
+						this.getConfigurableContext().getEnvironmentBridge().getOfficeFloorCompiler());
 
 				// Configure the template
 				WebTemplate template = loader.addTemplate(item.isSecure, item.applicationPath, item.location);

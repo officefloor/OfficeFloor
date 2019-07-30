@@ -19,9 +19,9 @@ package net.officefloor.eclipse.woof;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
-import net.officefloor.eclipse.editor.DefaultConnectors;
-import net.officefloor.eclipse.ide.editor.AbstractItem;
+import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
+import net.officefloor.gef.editor.DefaultConnectors;
+import net.officefloor.gef.ide.editor.AbstractItem;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSectionInputModel;

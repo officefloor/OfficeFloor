@@ -19,30 +19,18 @@ package net.officefloor.gef.ide.editor;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 
-import org.eclipse.gef.mvc.fx.operations.ITransactionalOperation;
-
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
-import net.officefloor.gef.bridge.ClassLoaderEnvironmentBridge;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.configurer.CloseListener;
 import net.officefloor.gef.configurer.ConfigurationBuilder;
 import net.officefloor.gef.configurer.ConfigurationBuilder.MessageOnlyApplyException;
 import net.officefloor.gef.configurer.Configurer;
 import net.officefloor.gef.editor.AdaptedErrorHandler.MessageOnlyException;
-import net.officefloor.gef.ide.ConfigurableItem;
 import net.officefloor.gef.editor.AdaptedParentBuilder;
-import net.officefloor.gef.editor.AdaptedRootBuilder;
 import net.officefloor.gef.editor.ChangeExecutor;
-import net.officefloor.gef.editor.ChangeListener;
 import net.officefloor.gef.editor.DefaultImages;
+import net.officefloor.gef.ide.ConfigurableItem;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
@@ -62,7 +50,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	 *              {@link Model}.
 	 * @return Item.
 	 */
-	protected abstract I item(M model);
+	public abstract I item(M model);
 
 	/**
 	 * IDE configurer.
@@ -166,6 +154,61 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 			this.delete = deletion;
 			return this;
 		}
+	}
+
+	/**
+	 * Configuration for the IdeConfigurer.
+	 */
+	public static class IdeConfiguration<O, M extends Model, I> {
+
+		/**
+		 * Add configuration.
+		 */
+		public final ItemConfigurer<O, M, I>[] add;
+
+		/**
+		 * Refactor configuration.
+		 */
+		public final ItemConfigurer<O, M, I>[] refactor;
+
+		/**
+		 * Add not requiring configuration.
+		 */
+		public final ItemActioner<O, M> addImmediately;
+
+		/**
+		 * Delete.
+		 */
+		public final ItemActioner<O, M> delete;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param configurer {@link IdeConfigurer}.
+		 */
+		@SuppressWarnings("unchecked")
+		public IdeConfiguration(AbstractConfigurableItem<?, ?, O, M, ?, I>.IdeConfigurer configurer) {
+			this.add = configurer.add.toArray(ItemConfigurer[]::new);
+			this.refactor = configurer.refactor.toArray(ItemConfigurer[]::new);
+			this.addImmediately = configurer.addImmediately;
+			this.delete = configurer.delete;
+		}
+	}
+
+	/**
+	 * Extracts the {@link IdeConfigurer} configuration.
+	 * 
+	 * @param <R>        Root {@link Model} type.
+	 * @param <RE>       Root event type.
+	 * @param <O>        Operations type.
+	 * @param <M>        Item {@link Model} type.
+	 * @param <E>        Item event type.
+	 * @param <I>        Item type.
+	 * @param configurer {@link IdeConfigurer}.
+	 */
+	public static <O, M extends Model, I> IdeConfiguration<O, M, I> extractIdeConfiguration(
+			AbstractConfigurableItem<?, ?, O, M, ?, I>.IdeConfigurer configurer) {
+		return new IdeConfiguration<>(configurer);
 	}
 
 	/**
@@ -521,274 +564,6 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 
 		// Apply the change
 		changeExecutor.execute(change);
-	}
-
-	/*
-	 * =============== Application =============
-	 */
-
-	@Override
-	public void start(Stage stage) throws Exception {
-
-		// Ensure have context
-		ConfigurableContext<R, O> context = this.getConfigurableContext();
-		if ((context == null) || (!(context instanceof AbstractConfigurableItem.MainConfigurableContext))) {
-			throw new IllegalStateException("Must start main through instance main method");
-		}
-		MainConfigurableContext mainContext = (MainConfigurableContext) context;
-
-		// Obtain the IDE configurer
-		IdeConfigurer ideConfigurer = this.configure();
-		if (ideConfigurer == null) {
-			stage.setScene(new Scene(new Pane(new Text("No configuration for " + this.getClass().getSimpleName()))));
-			stage.show();
-			return;
-		}
-
-		// Provide separate tabs for add and refactor
-		TabPane folder = new TabPane();
-
-		// Load the add configuration
-		if (ideConfigurer.add.size() > 0) {
-			Tab addTab = new Tab("Add");
-			folder.getTabs().add(addTab);
-			Pane addParent = new Pane();
-			addTab.setContent(addParent);
-			I addItem = this.item(null);
-			Configurer<I> addConfigurer = new Configurer<>(new ClassLoaderEnvironmentBridge());
-			ConfigurationBuilder<I> addBuilder = addConfigurer;
-			ConfigurableModelContext<O, M> addContext = new ConfigurableModelContext<O, M>() {
-
-				@Override
-				public O getOperations() {
-					return mainContext.getOperations();
-				}
-
-				@Override
-				public M getModel() {
-					return null;
-				}
-
-				@Override
-				public void execute(Change<M> change) {
-					mainContext.getChangeExecutor().execute(change);
-				}
-			};
-			for (ItemConfigurer<O, M, I> itemConfigurer : ideConfigurer.add) {
-				itemConfigurer.configure(addBuilder, addContext);
-			}
-			addConfigurer.loadConfiguration(addItem, addParent);
-		}
-
-		// Load the add immediately
-		if (ideConfigurer.addImmediately != null) {
-			Tab addTab = new Tab("Add");
-			folder.getTabs().add(addTab);
-			Pane addParent = new Pane();
-			addTab.setContent(addParent);
-			ConfigurableModelContext<O, M> addContext = new ConfigurableModelContext<O, M>() {
-
-				@Override
-				public O getOperations() {
-					return mainContext.getOperations();
-				}
-
-				@Override
-				public M getModel() {
-					return null; // no modal on add
-				}
-
-				@Override
-				public void execute(Change<M> change) {
-					mainContext.getChangeExecutor().execute(change);
-				}
-			};
-			Button addButton = new Button("Add");
-			addParent.getChildren().add(addParent);
-			addButton.setOnAction((event) -> {
-				try {
-					ideConfigurer.addImmediately.action(addContext);
-				} catch (Throwable ex) {
-					System.out.println("Failed to add " + ex.getMessage());
-				}
-			});
-		}
-
-		// Load the refactor configuration
-		if (ideConfigurer.refactor.size() > 0) {
-			Tab refactorTab = new Tab("Refactor");
-			folder.getTabs().add(refactorTab);
-			Pane refactorParent = new Pane();
-			refactorTab.setContent(refactorParent);
-			M prototype = this.prototype();
-			if (mainContext.decoratePrototype != null) {
-				mainContext.decoratePrototype.accept(prototype);
-			}
-			I refactorItem = this.item(prototype);
-			Configurer<I> refactorConfigurer = new Configurer<>(new ClassLoaderEnvironmentBridge());
-			ConfigurationBuilder<I> refactorBuilder = refactorConfigurer;
-			ConfigurableModelContext<O, M> refactorContext = new ConfigurableModelContext<O, M>() {
-
-				@Override
-				public O getOperations() {
-					return mainContext.getOperations();
-				}
-
-				@Override
-				public M getModel() {
-					return prototype;
-				}
-
-				@Override
-				public void execute(Change<M> change) {
-					mainContext.getChangeExecutor().execute(change);
-				}
-			};
-			for (ItemConfigurer<O, M, I> itemConfigurer : ideConfigurer.refactor) {
-				itemConfigurer.configure(refactorBuilder, refactorContext);
-			}
-			refactorConfigurer.loadConfiguration(refactorItem, refactorParent);
-		}
-
-		// Load the delete configuration
-		if (ideConfigurer.delete != null) {
-			Tab deleteTab = new Tab("Delete");
-			folder.getTabs().add(deleteTab);
-			Pane deleteParent = new Pane();
-			deleteTab.setContent(deleteParent);
-			M prototype = this.prototype();
-			if (mainContext.decoratePrototype != null) {
-				mainContext.decoratePrototype.accept(prototype);
-			}
-			ConfigurableModelContext<O, M> deleteContext = new ConfigurableModelContext<O, M>() {
-
-				@Override
-				public O getOperations() {
-					return mainContext.getOperations();
-				}
-
-				@Override
-				public M getModel() {
-					return prototype;
-				}
-
-				@Override
-				public void execute(Change<M> change) {
-					mainContext.getChangeExecutor().execute(change);
-				}
-			};
-			Button deleteButton = new Button("Delete");
-			deleteParent.getChildren().add(deleteButton);
-			deleteButton.setOnAction((event) -> {
-				try {
-					ideConfigurer.delete.action(deleteContext);
-				} catch (Throwable ex) {
-					System.out.println("Failed to delete " + ex.getMessage());
-				}
-			});
-		}
-
-		// Display
-		stage.show();
-	}
-
-	/**
-	 * {@link ConfigurableContext} for testing configuration.
-	 */
-	private class MainConfigurableContext implements ConfigurableContext<R, O>, ChangeExecutor {
-
-		/**
-		 * Operations.
-		 */
-		private final O operations;
-
-		/**
-		 * {@link Consumer} to decorate the prototype.
-		 */
-		private final Consumer<M> decoratePrototype;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param operations        Operations.
-		 * @param decoratePrototype {@link Consumer} to decorate the prototype.
-		 */
-		private MainConfigurableContext(O operations, Consumer<M> decoratePrototype) {
-			this.operations = operations;
-			this.decoratePrototype = decoratePrototype;
-		}
-
-		/**
-		 * =============== ConfigurableContext ===================
-		 */
-
-		@Override
-		public AdaptedRootBuilder<R, O> getRootBuilder() {
-			throw new IllegalStateException(
-					"Should not require " + AdaptedRootBuilder.class.getSimpleName() + " for testing configuration");
-		}
-
-		@Override
-		public EnvironmentBridge getEnvironmentBridge() throws Exception {
-			return new ClassLoaderEnvironmentBridge();
-		}
-
-		@Override
-		public O getOperations() {
-			return operations;
-		}
-
-		@Override
-		public ChangeExecutor getChangeExecutor() {
-			return this;
-		}
-
-		/*
-		 * ================ ChangeExecutor =======================
-		 */
-
-		@Override
-		public void execute(Change<?> change) {
-			// Log running the change
-			StringBuilder message = new StringBuilder();
-			message.append("Executing change '" + change.getChangeDescription() + "' for target "
-					+ change.getTarget().getClass().getName());
-			if (!change.canApply()) {
-				message.append(" (can not apply)");
-				for (Conflict conflict : change.getConflicts()) {
-					message.append(System.lineSeparator() + "\t" + conflict.getConflictDescription());
-				}
-			}
-			System.out.println(message.toString());
-		}
-
-		@Override
-		public void execute(ITransactionalOperation operation) {
-			throw new UnsupportedOperationException(this.getClass().getSimpleName() + " does not support executing "
-					+ ITransactionalOperation.class.getSimpleName());
-		}
-
-		@Override
-		public void addChangeListener(ChangeListener changeListener) {
-			throw new UnsupportedOperationException(
-					MainConfigurableContext.class.getName() + " does not support " + ChangeListener.class.getName());
-		}
-
-		@Override
-		public void removeChangeListener(ChangeListener changeListener) {
-			throw new UnsupportedOperationException(
-					MainConfigurableContext.class.getName() + " does not support " + ChangeListener.class.getName());
-		}
-
-		@Override
-		public String getPreference(String preferenceId) {
-			return null; // always use defaults
-		}
-
-		@Override
-		public void addPreferenceListener(String preferenceId, PreferenceListener preferenceListener) {
-			// never changes
-		}
 	}
 
 }

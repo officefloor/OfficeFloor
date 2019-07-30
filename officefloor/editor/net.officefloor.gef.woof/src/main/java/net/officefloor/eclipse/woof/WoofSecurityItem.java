@@ -24,10 +24,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.configurer.ValueValidator;
-import net.officefloor.eclipse.editor.AdaptedChildVisualFactoryContext;
-import net.officefloor.eclipse.editor.DefaultConnectors;
-import net.officefloor.eclipse.ide.editor.AbstractConfigurableItem;
+import net.officefloor.gef.configurer.ValueValidator;
+import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
+import net.officefloor.gef.editor.DefaultConnectors;
+import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.web.security.build.HttpSecurityArchitectEmployer;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
@@ -197,11 +197,11 @@ public class WoofSecurityItem extends
 
 				// Obtain the HTTP Security Source
 				Class<? extends HttpSecuritySource> httpSecuritySourceClass = this.getConfigurableContext()
-						.getOsgiBridge().loadClass(item.sourceClassName, HttpSecuritySource.class);
+						.getEnvironmentBridge().loadClass(item.sourceClassName, HttpSecuritySource.class);
 
 				// Obtain the loader
 				HttpSecurityLoader loader = HttpSecurityArchitectEmployer.employHttpSecurityLoader(
-						this.getConfigurableContext().getOsgiBridge().getOfficeFloorCompiler());
+						this.getConfigurableContext().getEnvironmentBridge().getOfficeFloorCompiler());
 
 				// Load the type
 				item.type = loader.loadHttpSecurityType(httpSecuritySourceClass, item.properties);
