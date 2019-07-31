@@ -23,6 +23,25 @@
         name="WoOF Editor"/>
 	</extension>
 
+	<extension point="org.eclipse.ui.newWizards">
+		<wizard 
+			id="net.officefloor.eclipse.section.SectionNewWizard"
+			class="net.officefloor.gef.section.SectionNewWizard"
+			category="net.officefloor.category"
+			name="Section">
+		</wizard>
+	</extension>
+	<extension id="net.officefloor.ui.OfficeFloorEditors" name="OfficeFloor Editors"
+		point="org.eclipse.ui.editors">
+		<editor
+	        id="net.officefloor.editor.section"
+	        class="net.officefloor.gef.section.SectionEditor"
+	        contributorClass="net.officefloor.eclipse.ide.editor.IdeEditorActionBarContributor"
+	        default="true"
+	        extensions="section"
+	        name="Section Editor"/>
+	</extension>
+
 	<extension point="org.eclipse.ui.preferencePages">
 		<page 
 			id="new.officefloor.eclipse.ide.preferences"

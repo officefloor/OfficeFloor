@@ -30,7 +30,6 @@
 		<module>net.officefloor.gef.section</module>
 		<module>net.officefloor.gef.section.tests</module>
 		<module>net.officefloor.gef.shade</module>
-		<module>net.officefloor.gef.officefloor</module>
 		<module>net.officefloor.woof</module>
 		<module>net.officefloor.gef.woof</module>
 		<module>net.officefloor.gef.woof.tests</module>
