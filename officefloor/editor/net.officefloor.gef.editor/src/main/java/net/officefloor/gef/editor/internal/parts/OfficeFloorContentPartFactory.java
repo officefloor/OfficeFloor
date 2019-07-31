@@ -19,12 +19,15 @@ package net.officefloor.gef.editor.internal.parts;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -300,8 +303,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	/**
 	 * Registers the {@link AbstractAdaptedFactory}.
 	 *
-	 * @param         <M> {@link Model} type.
-	 * @param         <E> {@link Model} event type.
+	 * @param <M>     {@link Model} type.
+	 * @param <E>     {@link Model} event type.
 	 * @param builder {@link AbstractAdaptedFactory}.
 	 */
 	public <M extends Model, E extends Enum<E>> void registerModel(AbstractAdaptedFactory<R, O, M, E, ?> builder) {
@@ -445,15 +448,15 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 			// Add the adapted parent (only once)
 			if (!adaptedContentModels.contains(adaptedParent)) {
 				adaptedParents.add(adaptedParent);
-				
+
 				// Listen to adding areas
 				adaptedParent.getModel().addPropertyChangeListener((event) -> {
-					
+
 					// Filter to only area events
 					if (!adaptedParent.isAreaChangeEvent(event.getPropertyName())) {
 						return;
 					}
-					
+
 					// Area changed, so update content
 					this.loadContentModels();
 				});
@@ -487,7 +490,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 						continue;
 					}
 
-					// Add the adapted conenction (only once)
+					// Add the adapted connection (only once)
 					if (!adaptedContentModels.contains(connection)) {
 						adaptedContentModels.add(connection);
 					}
@@ -495,14 +498,24 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 			}
 		}
 
-		// Load the adapted models
-		this.contentViewer.getContents().setAll(adaptedContentModels);
+		// Merge in the adapted models
+		Set<Object> currentContent = new HashSet<>(Arrays.asList(this.contentViewer.getContents().toArray()));
+		for (Object required : adaptedContentModels) {
+			if (!currentContent.contains(required)) {
+				// Not added, so add
+				this.contentViewer.getContents().add(required);
+			}
+			currentContent.remove(required); // remove to determine content to remove
+		}
+		for (Object removed : currentContent) {
+			this.contentViewer.getContents().remove(removed);
+		}
 	}
 
 	/**
 	 * Creates the wrapper for the {@link Model}.
 	 *
-	 * @param                    <M> {@link Model} type.
+	 * @param <M>                {@link Model} type.
 	 * @param model              {@link Model}.
 	 * @param parentAdaptedModel Parent {@link AdaptedModel}.
 	 * @return {@link AbstractAdaptedFactory} for the {@link Model}.
@@ -539,9 +552,9 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	/**
 	 * Adds the {@link ConnectionModel} to the {@link Model} structure.
 	 * 
-	 * @param                  <S> Source {@link Model} type.
-	 * @param                  <T> Target {@link Model} type.
-	 * @param                  <C> {@link ConnectionModel} type.
+	 * @param <S>              Source {@link Model} type.
+	 * @param <T>              Target {@link Model} type.
+	 * @param <C>              {@link ConnectionModel} type.
 	 * @param source           Source {@link Model}.
 	 * @param target           Target {@link Model}.
 	 * @param createConnection {@link ConnectionFactory}.

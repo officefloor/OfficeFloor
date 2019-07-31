@@ -62,10 +62,8 @@ public class ChangeExecutorImpl implements ChangeExecutor {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param contentPartFactory
-	 *            {@link OfficeFloorContentPartFactory}.
-	 * @param domain
-	 *            {@link IDomain}.
+	 * @param contentPartFactory {@link OfficeFloorContentPartFactory}.
+	 * @param domain             {@link IDomain}.
 	 */
 	public ChangeExecutorImpl(OfficeFloorContentPartFactory<?, ?> contentPartFactory, IDomain domain) {
 		this.contentPartFactory = contentPartFactory;
@@ -79,7 +77,7 @@ public class ChangeExecutorImpl implements ChangeExecutor {
 	@Override
 	public void execute(Change<?> change) {
 		this.contentPartFactory.getErrorHandler().isError(() -> {
-			
+
 			// Determine if able to apply
 			if (!change.canApply()) {
 
@@ -107,7 +105,7 @@ public class ChangeExecutorImpl implements ChangeExecutor {
 				}
 				throw new MessageOnlyException(message.toString());
 			}
-			
+
 			// Register executing the change (executes the change)
 			this.domain.execute(new ChangeTransactionalOperation(change), null);
 		});
@@ -157,8 +155,7 @@ public class ChangeExecutorImpl implements ChangeExecutor {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param change
-		 *            {@link Change}.
+		 * @param change {@link Change}.
 		 */
 		private ChangeTransactionalOperation(Change<?> change) {
 			super(change.getChangeDescription());
@@ -168,13 +165,12 @@ public class ChangeExecutorImpl implements ChangeExecutor {
 		/**
 		 * Runs the {@link UncertainOperation}.
 		 * 
-		 * @param operation
-		 *            {@link UncertainOperation}.
+		 * @param operation {@link UncertainOperation}.
 		 * @return Appropriate {@link IStatus} based on {@link UncertainOperation}.
 		 */
 		private IStatus runUncertain(UncertainOperation operation) {
-			ChangeExecutorImpl.this.contentPartFactory.getErrorHandler().isError(operation);
-			return Status.OK_STATUS;
+			boolean isError = ChangeExecutorImpl.this.contentPartFactory.getErrorHandler().isError(operation);
+			return isError ? Status.CANCEL_STATUS : Status.OK_STATUS;
 		}
 
 		/**
