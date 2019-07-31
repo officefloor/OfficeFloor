@@ -22,12 +22,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -498,8 +496,8 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 			}
 		}
 
-		// Merge in the adapted models
-		Set<Object> currentContent = new HashSet<>(Arrays.asList(this.contentViewer.getContents().toArray()));
+		// Merge in the adapted models (attempting to keep order)
+		List<Object> currentContent = new ArrayList<>(Arrays.asList(this.contentViewer.getContents().toArray()));
 		for (Object required : adaptedContentModels) {
 			if (!currentContent.contains(required)) {
 				// Not added, so add

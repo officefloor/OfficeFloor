@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.eclipse.gef.mvc.fx.domain.IDomain;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -221,9 +220,10 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 			}
 		};
 	}
-	
+
 	/**
 	 * Obtains the {@link ConfigurableContext}
+	 * 
 	 * @return
 	 */
 	public ConfigurableContext<R, O> getConfigurableContext() {
@@ -275,8 +275,7 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	/**
 	 * Loads the preferred styling.
 	 * 
-	 * @param preferenceId {@link IPreferenceStore} identifier for the preferred
-	 *                     styling.
+	 * @param preferenceId Preference identifier for the preferred styling.
 	 * @param style        {@link Property} to be loaded with the styling.
 	 * @param defaultStyle Default style. May be <code>null</code>.
 	 * @param translator   Optional translator to translate the raw styling. May be
@@ -309,29 +308,27 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	}
 
 	/**
-	 * Obtains the {@link IPreferenceStore} identifier for the palette indicator
-	 * styling.
+	 * Obtains the preference identifier for the palette indicator styling.
 	 * 
-	 * @return {@link IPreferenceStore} identifier for the palette indicator
-	 *         styling.
+	 * @return Preference identifier for the palette indicator styling.
 	 */
 	public String getPaletteIndicatorStyleId() {
 		return this.prototype().getClass().getSimpleName() + ".palette.indicator.style";
 	}
 
 	/**
-	 * Obtains the {@link IPreferenceStore} identifier for the palette styling.
+	 * Obtains the preference identifier for the palette styling.
 	 * 
-	 * @return {@link IPreferenceStore} identifier for the palette styling.
+	 * @return Preference identifier for the palette styling.
 	 */
 	public String getPaletteStyleId() {
 		return this.prototype().getClass().getSimpleName() + ".palette.style";
 	}
 
 	/**
-	 * Obtains the {@link IPreferenceStore} identifier for the editor styling.
+	 * Obtains the preference identifier for the editor styling.
 	 * 
-	 * @return {@link IPreferenceStore} identifier for the editor styling.
+	 * @return Preference identifier for the editor styling.
 	 */
 	public String getEditorStyleId() {
 		return this.prototype().getClass().getSimpleName() + ".editor.style";

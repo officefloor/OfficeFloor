@@ -13,8 +13,5 @@ Require-Bundle: net.officefloor.core;bundle-version="3.12.0",
 Export-Package: net.officefloor.gef.ide.editor
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.inject,
- org.eclipse.core.commands,
- org.eclipse.gef.common.dispose,
- org.eclipse.gef.mvc.fx.domain,
- org.eclipse.jface.preference
+ org.eclipse.gef.mvc.fx.domain
 Automatic-Module-Name: net.officefloor.gef.ide

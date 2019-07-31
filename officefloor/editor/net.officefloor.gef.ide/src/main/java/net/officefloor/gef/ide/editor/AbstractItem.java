@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import javafx.scene.Node;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
@@ -906,11 +904,9 @@ public abstract class AbstractItem<R extends Model, O, P extends Model, PE exten
 	}
 
 	/**
-	 * Obtains the {@link IPreferenceStore} identifier for styling this
-	 * {@link AbstractItem}.
+	 * Obtains the preference identifier for styling this {@link AbstractItem}.
 	 * 
-	 * @return {@link IPreferenceStore} identifier for styling this
-	 *         {@link AbstractItem}.
+	 * @return Preference identifier for styling this {@link AbstractItem}.
 	 */
 	public final String getPreferenceStyleId() {
 		return this.getBuilder().getConfigurationPath() + ".style";
