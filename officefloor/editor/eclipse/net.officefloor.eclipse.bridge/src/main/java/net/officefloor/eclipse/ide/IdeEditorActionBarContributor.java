@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.ide.editor;
+package net.officefloor.eclipse.ide;
 
 import org.eclipse.gef.mvc.fx.ui.parts.FXEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;

@@ -85,15 +85,17 @@ public interface EnvironmentBridge {
 	 * Obtains the {@link ClassLoader}.
 	 * 
 	 * @return {@link ClassLoader}.
+	 * @throws Exception If fails to obtain {@link ClassLoader}.
 	 */
-	ClassLoader getClassLoader();
+	ClassLoader getClassLoader() throws Exception;
 
 	/**
 	 * Obtains the {@link OfficeFloorCompiler}.
 	 * 
 	 * @return {@link OfficeFloorCompiler}.
+	 * @throws Exception If fails to obtain {@link OfficeFloorCompiler}.
 	 */
-	OfficeFloorCompiler getOfficeFloorCompiler();
+	OfficeFloorCompiler getOfficeFloorCompiler() throws Exception;
 
 	/**
 	 * Selects a {@link Class}.

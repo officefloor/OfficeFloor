@@ -41,7 +41,7 @@ import org.eclipse.ui.ide.IDE;
 
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
-import net.officefloor.eclipse.ide.editor.AbstractAdaptedIdeEditor;
+import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.model.Model;
 
 /**

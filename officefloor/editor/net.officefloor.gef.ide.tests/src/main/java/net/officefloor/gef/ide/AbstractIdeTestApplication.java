@@ -47,6 +47,7 @@ import net.officefloor.gef.ide.editor.AbstractConfigurableItem.ConfigurableModel
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem.IdeConfiguration;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem.ItemConfigurer;
 import net.officefloor.gef.ide.editor.AbstractItem.ConfigurableContext;
+import net.officefloor.gef.ide.preferences.PreferencesEditor;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.change.Conflict;
@@ -143,6 +144,13 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 
 		// Obtain the configurable context (now available from editor)
 		ConfigurableContext<R, O> configurableContext = editor.getConfigurableContext();
+
+		// Load the preferences
+		PreferencesEditor<R> preferences = new PreferencesEditor<>(this.createEditor(envBridge),
+				new VolatileEditorPreferences());
+		Tab preferencesTab = new Tab("Preferences");
+		folder.getTabs().add(preferencesTab);
+		preferences.loadView((view) -> preferencesTab.setContent(view));
 
 		// Load the configuration items
 		for (AbstractConfigurableItem<R, RE, O, ?, ?, ?> parent : editor.getParents()) {

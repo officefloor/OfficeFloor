@@ -37,9 +37,9 @@ import javafx.beans.property.Property;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import net.officefloor.gef.common.structure.StructureLogger;
+import net.officefloor.gef.ide.javafx.JavaFxUtil;
+import net.officefloor.gef.ide.javafx.JavaFxUtil.CssManager;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
-import net.officefloor.eclipse.ide.javafx.JavaFxUtil;
-import net.officefloor.eclipse.ide.javafx.JavaFxUtil.CssManager;
 import net.officefloor.eclipse.ide.swt.SwtUtil;
 
 /**

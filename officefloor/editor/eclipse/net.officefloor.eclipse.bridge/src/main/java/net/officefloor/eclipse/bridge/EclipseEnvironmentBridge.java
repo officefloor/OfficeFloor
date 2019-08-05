@@ -99,77 +99,6 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 		});
 	}
 
-	/**
-	 * Obtains the {@link ClassLoader} for the {@link IJavaProject}.
-	 * 
-	 * @return {@link ClassLoader} for the {@link IJavaProject}.
-	 * @throws Exception If fails to extract class path from {@link IJavaProject}.
-	 */
-	public ClassLoader getClassLoader() throws Exception {
-
-		// Lazy load
-		if (this.classLoader == null) {
-
-			// Obtain the class path for the project
-			String[] classPathEntries = JavaRuntime.computeDefaultRuntimeClassPath(this.javaProject);
-			URL[] urls = new URL[classPathEntries.length];
-			for (int i = 0; i < classPathEntries.length; i++) {
-				String path = classPathEntries[i];
-				File file = new File(path);
-				if (file.exists()) {
-					if (file.isDirectory()) {
-						urls[i] = new URL("file", null, path + "/");
-					} else {
-						urls[i] = new URL("file", null, path);
-					}
-				}
-			}
-
-			// Create the class loader
-			this.classLoader = new URLClassLoader(urls);
-		}
-
-		// Return the class loader
-		return this.classLoader;
-	}
-
-	/**
-	 * Loads the {@link Class}.
-	 * 
-	 * @param <T>       {@link Class} type.
-	 * @param className Name of the {@link Class}.
-	 * @param superType Super type of the {@link Class}.
-	 * @return {@link Class}.
-	 * @throws Exception If {@link Class} not found or fails to load the
-	 *                   {@link Class}.
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> Class<? extends T> loadClass(String className, Class<T> superType) throws Exception {
-		return (Class<? extends T>) this.getClassLoader().loadClass(className);
-	}
-
-	/**
-	 * Obtains the {@link OfficeFloorCompiler}.
-	 * 
-	 * @return {@link OfficeFloorCompiler}.
-	 * @throws Exception If fails to extract class path from {@link IJavaProject}.
-	 */
-	public OfficeFloorCompiler getOfficeFloorCompiler() throws Exception {
-
-		// Lazy load
-		if (this.compiler == null) {
-
-			// Obtain the class loader
-			ClassLoader classLoader = this.getClassLoader();
-
-			// Create the OfficeFloor compiler
-			this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
-		}
-
-		// Return the compiler
-		return this.compiler;
-	}
-
 	/*
 	 * ==================== EnvironmentBridge =====================
 	 */
@@ -250,6 +179,58 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 		} catch (JavaModelException ex) {
 			handler.error(ex);
 		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> Class<? extends T> loadClass(String className, Class<T> superType) throws Exception {
+		return (Class<? extends T>) this.getClassLoader().loadClass(className);
+	}
+
+	@Override
+	public ClassLoader getClassLoader() throws Exception {
+
+		// Lazy load
+		if (this.classLoader == null) {
+
+			// Obtain the class path for the project
+			String[] classPathEntries = JavaRuntime.computeDefaultRuntimeClassPath(this.javaProject);
+			URL[] urls = new URL[classPathEntries.length];
+			for (int i = 0; i < classPathEntries.length; i++) {
+				String path = classPathEntries[i];
+				File file = new File(path);
+				if (file.exists()) {
+					if (file.isDirectory()) {
+						urls[i] = new URL("file", null, path + "/");
+					} else {
+						urls[i] = new URL("file", null, path);
+					}
+				}
+			}
+
+			// Create the class loader
+			this.classLoader = new URLClassLoader(urls);
+		}
+
+		// Return the class loader
+		return this.classLoader;
+	}
+
+	@Override
+	public OfficeFloorCompiler getOfficeFloorCompiler() throws Exception {
+
+		// Lazy load
+		if (this.compiler == null) {
+
+			// Obtain the class loader
+			ClassLoader classLoader = this.getClassLoader();
+
+			// Create the OfficeFloor compiler
+			this.compiler = OfficeFloorCompiler.newOfficeFloorCompiler(classLoader);
+		}
+
+		// Return the compiler
+		return this.compiler;
 	}
 
 	@Override

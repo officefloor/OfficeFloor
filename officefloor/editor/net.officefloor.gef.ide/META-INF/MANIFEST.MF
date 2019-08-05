@@ -10,8 +10,10 @@ Require-Bundle: net.officefloor.core;bundle-version="3.12.0",
  net.officefloor.gef.bridge;bundle-version="3.12.0",
  net.officefloor.gef.editor;bundle-version="3.12.0",
  net.officefloor.gef.configurer;bundle-version="3.12.0"
-Export-Package: net.officefloor.gef.ide.editor
+Export-Package: net.officefloor.gef.ide.editor,
+ net.officefloor.gef.ide.preferences
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.inject,
+ org.eclipse.gef.common.dispose,
  org.eclipse.gef.mvc.fx.domain
 Automatic-Module-Name: net.officefloor.gef.ide

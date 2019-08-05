@@ -17,15 +17,19 @@
  */
 package net.officefloor.eclipse.bridge;
 
+import java.util.function.Consumer;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.gef.mvc.fx.ui.MvcFxUiModule;
 import org.eclipse.gef.mvc.fx.ui.parts.AbstractFXEditor;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 
 import com.google.inject.Injector;
@@ -33,7 +37,9 @@ import com.google.inject.Injector;
 import javafx.scene.Scene;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.ide.preferences.PreferencesEditorInput;
-import net.officefloor.eclipse.osgi.ProjectConfigurationContext;
+import net.officefloor.gef.bridge.ClassLoaderEnvironmentBridge;
+import net.officefloor.gef.bridge.EnvironmentBridge;
+import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.model.Model;
 
 /**
@@ -56,59 +62,78 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 	/**
 	 * Creates the {@link AbstractAdaptedIdeEditor}.
 	 * 
-	 * @param <R>  Root {@link Model}.
-	 * @param <RE> Root event {@link Enum}.
-	 * @param <O>  Operations.
+	 * @param <R>       Root {@link Model}.
+	 * @param <RE>      Root event {@link Enum}.
+	 * @param <O>       Operations.
+	 * @param envBridge {@link EnvironmentBridge}.
 	 * @return {@link AbstractAdaptedIdeEditor}.
 	 */
-	protected abstract AbstractAdaptedIdeEditor<R, RE, O> createEditor();
+	protected abstract AbstractAdaptedIdeEditor<R, RE, O> createEditor(EnvironmentBridge envBridge);
 
 	/*
 	 * ====================== EditorPart ============================
 	 */
 
 	@Override
-	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+	public void createPartControl(Composite parent) {
 
-		// Create the editor
-		this.editor = this.createEditor();
-		this.editor.init(new MvcFxUiModule(), (injector) -> {
-			this.fxToSwt = new FxToSwt(injector);
-			return this.fxToSwt.getDomain();
-		});
-
-		// Initialise
-		this.fxToSwt.init(site, input);
-
-		// Specify the input
-		this.setInput(input);
-		this.setSite(site);
+		// Determine the setup
+		EnvironmentBridge envBridge;
+		Consumer<AbstractAdaptedIdeEditor<R, RE, O>> loadModel;
 
 		// Obtain the input configuration
+		IEditorInput input = this.getEditorInput();
 		if (input instanceof IFileEditorInput) {
 			// Load the configuration item from the file
 			IFileEditorInput fileInput = (IFileEditorInput) input;
 			IFile configurationFile = fileInput.getFile();
 			WritableConfigurationItem configurationItem = ProjectConfigurationContext
 					.getWritableConfigurationItem(configurationFile, null);
-			this.editor.setConfigurationItem(configurationItem);
+			loadModel = (editor) -> this.editor.setConfigurationItem(configurationItem);
+
+			// Obtain the file (and subsequently it's project)
+			IFile file = fileInput.getFile();
+			IProject project = file.getProject();
+
+			// Obtain the java project
+			IJavaProject javaProject = JavaCore.create(project);
+
+			// Obtain the parent shell
+			Shell parentShell = parent.getShell();
+
+			// Create the Eclipse environment
+			envBridge = new EclipseEnvironmentBridge(javaProject, parentShell);
 
 		} else if (input instanceof PreferencesEditorInput) {
 			// Provided the model
 			PreferencesEditorInput preferencesInput = (PreferencesEditorInput) input;
 			R model = (R) preferencesInput.getRootModel();
-			this.editor.setModel(model);
+			loadModel = (editor) -> this.editor.setModel(model);
+
+			// No project, so just use plugin class path
+			envBridge = new ClassLoaderEnvironmentBridge(this.getClass().getClassLoader());
 
 		} else {
 			// Unknown editor input
 			throw new IllegalStateException("Unable to edit input " + input.getClass().getName());
 		}
-	}
 
-	@Override
-	public void createPartControl(Composite parent) {
+		// Create the editor
+		this.editor = this.createEditor(envBridge);
+		this.editor.init(new MvcFxUiModule(), (injector) -> {
+			this.fxToSwt = new FxToSwt(injector);
+			return this.fxToSwt.getDomain();
+		});
+		loadModel.accept(this.editor);
 
-		// Create the part control
+		// Initialise
+		try {
+			this.fxToSwt.init(this.getEditorSite(), input);
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+
+		// Create the view
 		this.fxToSwt.createPartControl(parent);
 	}
 

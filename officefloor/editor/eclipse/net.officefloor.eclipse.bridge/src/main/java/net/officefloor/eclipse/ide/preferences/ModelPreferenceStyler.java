@@ -39,13 +39,13 @@ import javafx.embed.swt.FXCanvas;
 import javafx.scene.paint.Color;
 import net.officefloor.eclipse.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.eclipse.ide.editor.AbstractItem;
-import net.officefloor.eclipse.ide.javafx.JavaFxUtil;
-import net.officefloor.eclipse.ide.javafx.JavaFxUtil.CssManager;
 import net.officefloor.eclipse.ide.swt.SwtUtil;
 import net.officefloor.gef.common.structure.StructureLogger;
 import net.officefloor.gef.editor.AdaptedModel;
 import net.officefloor.gef.editor.AdaptedParent;
 import net.officefloor.gef.editor.preview.AdaptedEditorPreview;
+import net.officefloor.gef.ide.javafx.JavaFxUtil;
+import net.officefloor.gef.ide.javafx.JavaFxUtil.CssManager;
 import net.officefloor.model.Model;
 
 /**
