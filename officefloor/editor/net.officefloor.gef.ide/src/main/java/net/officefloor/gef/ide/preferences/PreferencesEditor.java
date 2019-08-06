@@ -30,7 +30,12 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
+import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import net.officefloor.gef.editor.AdaptedModelStyler;
 import net.officefloor.gef.editor.AdaptedParent;
 import net.officefloor.gef.editor.EditorStyler;
@@ -91,6 +96,12 @@ public class PreferencesEditor<R extends Model> {
 	 */
 	public void loadView(Consumer<Pane> loader) {
 
+		// Provide stack pane to have overlay of style editors
+		StackPane stackView = new StackPane();
+
+		// Determine the background colour
+		Color backgroundColour = Color.LIGHTGREY;
+
 		// Initialise the editor
 		editor.init(null, (injector) -> {
 			injector.injectMembers(this);
@@ -98,32 +109,65 @@ public class PreferencesEditor<R extends Model> {
 		});
 
 		// Provide select only for styling
-		Map<Model, ModelPreferenceStyler> modelStylers = new HashMap<>();
-		Map<Class<? extends Model>, ModelPreferenceStyler> parentStylers = new HashMap<>();
+		Map<Model, ModelPreferenceStyler<?>> modelStylers = new HashMap<>();
+		Map<Class<? extends Model>, ModelPreferenceStyler<?>> parentStylers = new HashMap<>();
 		editor.setSelectOnly(new SelectOnly() {
 
 			@Override
 			public void paletteIndicator(PaletteIndicatorStyler styler) {
 				// TODO implement
-				throw new UnsupportedOperationException();
+				throw new UnsupportedOperationException("TODO STYLE paletteIndicator");
 			}
 
 			@Override
 			public void palette(PaletteStyler styler) {
 				// TODO implement
-				throw new UnsupportedOperationException();
+				throw new UnsupportedOperationException("TODO STYLE palette");
 			}
 
 			@Override
 			public void editor(EditorStyler styler) {
 				// TODO implement
-				throw new UnsupportedOperationException();
+				throw new UnsupportedOperationException("TODO STYLE editor");
 			}
 
 			@Override
 			public void model(AdaptedModelStyler styler) {
-				// TODO implement
-				throw new UnsupportedOperationException();
+				Model model = styler.getModel();
+				this.showStyler("Model " + model.getClass().getSimpleName(), modelStylers.get(model));
+			}
+
+			private void showStyler(String typeDescription, PreferenceStyler styler) {
+
+				// Obtain the visual
+				Pane visual;
+
+				// Create close operation
+				Runnable close = () -> {
+					// Remove all views on top of preference editor
+					while (stackView.getChildren().size() > 1) {
+						stackView.getChildren().remove(1);
+					}
+				};
+
+				// Ensure have styler
+				if (styler == null) {
+					VBox noStyler = new VBox();
+					noStyler.getChildren().add(new Text("No styler availabe for " + typeDescription));
+					Button closeButton = new Button("close");
+					closeButton.setOnAction((event) -> close.run());
+					noStyler.getChildren().add(closeButton);
+					visual = noStyler;
+				} else {
+					// Create the styler
+					visual = styler.createVisual(close);
+				}
+
+				// Ensure any previous editors are closed
+				close.run();
+
+				// Add the styler
+				stackView.getChildren().add(visual);
 			}
 		});
 
@@ -132,7 +176,10 @@ public class PreferencesEditor<R extends Model> {
 		this.editor.setModel(rootModel);
 
 		// Load editor view (with scene available)
-		this.editor.loadView(loader);
+		this.editor.loadView((view) -> {
+			stackView.getChildren().add(view);
+			loader.accept(stackView);
+		});
 
 		// Load the prototype of all models
 		AbstractItem<?, ?, ?, ?, ?, ?>[] parentItems = this.editor.getParents();
@@ -141,7 +188,7 @@ public class PreferencesEditor<R extends Model> {
 
 			// Load the prototype model
 			final int index = i;
-			this.loadPrototypeModel(rootModel, parentItem, true, this.editorPreferences, modelStylers,
+			this.loadPrototypeModel(rootModel, parentItem, true, backgroundColour, this.editorPreferences, modelStylers,
 					(model, styler) -> {
 						// Space out the prototypes
 						model.setX(300);
@@ -163,6 +210,7 @@ public class PreferencesEditor<R extends Model> {
 	 * @param item              {@link AbstractItem} to have its prototype loaded
 	 *                          into the {@link Model}.
 	 * @param isParent          Indicate if {@link AdaptedParent}.
+	 * @param backgroundColour  Background {@link Color}.
 	 * @param editorPreferences {@link EditorPreferences}.
 	 * @param modelStylers      {@link Map} of {@link Model} to
 	 *                          {@link ModelPreferenceStyler} to be populated.
@@ -170,9 +218,9 @@ public class PreferencesEditor<R extends Model> {
 	 * @param decorator         Decorator on the {@link Model}.
 	 * @return Prototype {@link Model} from the {@link AbstractItem}.
 	 */
-	private Model loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent,
-			EditorPreferences editorPreferences, Map<Model, ModelPreferenceStyler> modelStylers,
-			BiConsumer<Model, ModelPreferenceStyler> decorator) {
+	private Model loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent, Color backgroundColour,
+			EditorPreferences editorPreferences, Map<Model, ModelPreferenceStyler<?>> modelStylers,
+			BiConsumer<Model, ModelPreferenceStyler<?>> decorator) {
 
 		// Obtain the prototype for the item
 		Model itemModel = item.prototype();
@@ -215,7 +263,7 @@ public class PreferencesEditor<R extends Model> {
 
 		// Create and register the model styler
 		ModelPreferenceStyler styler = new ModelPreferenceStyler(item, itemModel, itemLabel, isParent, rawStyle,
-				defaultStyle, this.preferencesToChange);
+				defaultStyle, backgroundColour, this.preferencesToChange);
 		modelStylers.put(itemModel, styler);
 
 		// Determine if decorate the model
@@ -229,7 +277,8 @@ public class PreferencesEditor<R extends Model> {
 		// Load child items
 		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
 			for (AbstractItem child : childrenGroup.getChildren()) {
-				this.loadPrototypeModel(itemModel, child, false, editorPreferences, modelStylers, null);
+				this.loadPrototypeModel(itemModel, child, false, backgroundColour, editorPreferences, modelStylers,
+						null);
 			}
 		}
 

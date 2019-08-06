@@ -24,11 +24,12 @@ import org.eclipse.gef.mvc.fx.parts.IVisualPart;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import net.officefloor.gef.editor.AdaptedChildVisualFactory;
 import net.officefloor.gef.editor.AdaptedEditorPlugin;
 import net.officefloor.gef.editor.AdaptedModel;
@@ -47,14 +48,14 @@ import net.officefloor.model.Model;
 public class AdaptedEditorPreview<M extends Model> {
 
 	/**
-	 * Preview {@link Scene}.
-	 */
-	private final Scene previewScene;
-
-	/**
 	 * Preview visual {@link Node}.
 	 */
 	private final Node previewVisual;
+
+	/**
+	 * Preview container.
+	 */
+	private final Pane previewContainer;
 
 	/**
 	 * {@link Property} to obtain specific styling for the {@link IVisualPart}.
@@ -86,22 +87,11 @@ public class AdaptedEditorPreview<M extends Model> {
 					// Never execute action
 				}));
 
-		// Provide transparent padding around visual
-		Pane visualContainer = new Pane(this.previewVisual);
-		visualContainer.setPadding(new Insets(10));
-		visualContainer.setBackground(null);
-
-		// Load into the preview scene
-		this.previewScene = new Scene(visualContainer);
-
 		// Load specific styling
 		AdaptedChildPart.loadStyling(this.previewVisual, model.getClass(), null);
 		if (isParent) {
 			AdaptedParentPart.loadStyling(this.previewVisual);
 		}
-
-		// Load the default styling
-		AdaptedEditorPlugin.loadDefaulStylesheet(this.previewScene);
 
 		// Load specific styling (if able)
 		if (this.previewVisual instanceof Parent) {
@@ -117,15 +107,18 @@ public class AdaptedEditorPreview<M extends Model> {
 				}
 			});
 		}
-	}
 
-	/**
-	 * Obtains the preview {@link Scene}.
-	 * 
-	 * @return Preview {@link Scene}.
-	 */
-	public Scene getPreviewScene() {
-		return this.previewScene;
+		// Center preview visual
+		Pane topMargin = new Pane();
+		VBox.setVgrow(topMargin, Priority.ALWAYS);
+		Pane bottomMargin = new Pane();
+		VBox.setVgrow(bottomMargin, Priority.ALWAYS);
+		Pane leftMargin = new Pane();
+		HBox.setHgrow(leftMargin, Priority.ALWAYS);
+		Pane rightMargin = new Pane();
+		HBox.setHgrow(rightMargin, Priority.ALWAYS);
+		this.previewContainer = new VBox(topMargin, new HBox(leftMargin, this.previewVisual, rightMargin),
+				bottomMargin);
 	}
 
 	/**
@@ -135,6 +128,15 @@ public class AdaptedEditorPreview<M extends Model> {
 	 */
 	public Node getPreviewVisual() {
 		return this.previewVisual;
+	}
+
+	/**
+	 * Obtains the preview container.
+	 * 
+	 * @return Preview container.
+	 */
+	public Pane getPreviewContainer() {
+		return this.previewContainer;
 	}
 
 	/**
