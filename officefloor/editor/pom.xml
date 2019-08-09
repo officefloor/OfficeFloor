@@ -140,7 +140,7 @@
 							<target>
 								<artifact>
 									<groupId>${project.groupId}</groupId>
-									<artifactId>net.officefloor.eclipse.target</artifactId>
+									<artifactId>net.officefloor.gef.target</artifactId>
 									<version>${project.version}</version>
 									<classifier>2019-06</classifier>
 								</artifact>
@@ -181,7 +181,7 @@
 							<target>
 								<artifact>
 									<groupId>${project.groupId}</groupId>
-									<artifactId>net.officefloor.eclipse.target</artifactId>
+									<artifactId>net.officefloor.gef.target</artifactId>
 									<version>${project.version}</version>
 									<classifier>PHOTON</classifier>
 								</artifact>
@@ -232,7 +232,7 @@
 							<target>
 								<artifact>
 									<groupId>${project.groupId}</groupId>
-									<artifactId>net.officefloor.eclipse.target</artifactId>
+									<artifactId>net.officefloor.gef.target</artifactId>
 									<version>${project.version}</version>
 									<classifier>OXYGEN</classifier>
 								</artifact>

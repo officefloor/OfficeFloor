@@ -19,10 +19,14 @@ package net.officefloor.gef.ide.preferences;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Map;
 
 import javafx.beans.property.Property;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -32,10 +36,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.gef.common.structure.StructureLogger;
 import net.officefloor.gef.editor.AdaptedParent;
 import net.officefloor.gef.editor.preview.AdaptedEditorPreview;
+import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.gef.ide.editor.AbstractItem;
+import net.officefloor.gef.ide.editor.AbstractItem.IdeLabeller;
+import net.officefloor.gef.ide.javafx.CssParserJavaFacet;
 import net.officefloor.model.Model;
 
 /**
@@ -51,30 +59,14 @@ public class ModelPreferenceStyler<M extends Model> implements PreferenceStyler 
 	private final AbstractItem<?, ?, ?, ?, M, ?> item;
 
 	/**
-	 * Prototype {@link Model} for the item.
-	 */
-	private final M prototype;
-
-	/**
-	 * Label for the item.
-	 */
-	private final String itemLabel;
-
-	/**
-	 * {@link Property} to receive changes to the style. Also, provides the initial
-	 * style.
-	 */
-	private final Property<String> style;
-
-	/**
-	 * Default style.
-	 */
-	private final String defaultStyle;
-
-	/**
 	 * Indicates if {@link AdaptedParent}.
 	 */
 	private final boolean isParent;
+
+	/**
+	 * Preferences to change.
+	 */
+	private final ObservableMap<String, String> preferencesToChange;
 
 	/**
 	 * Background {@link Color}.
@@ -82,35 +74,20 @@ public class ModelPreferenceStyler<M extends Model> implements PreferenceStyler 
 	private final Color backgroundColour;
 
 	/**
-	 * Preferences to change.
-	 */
-	private final Map<String, String> preferencesToChange;
-
-	/**
 	 * Instantiate.
 	 * 
 	 * @param item                {@link AbstractItem}.
 	 * @param prototype           Prototype {@link Model} for the item.
-	 * @param itemLabel           Label for the item.
 	 * @param isParent            Indicates if {@link AdaptedParent}.
-	 * @param style               {@link Property} to receive changes to the style.
-	 *                            Also, provides the initial style.
-	 * @param defaultStyle        Default style.
+	 * @param preferencesToChange Loaded with the {@link EditorPreferences} changes.
 	 * @param backgroundColour    Background {@link Color}.
-	 * @param preferencesToChange {@link Map} to load with the
-	 *                            {@link EditorPreferences} changes.
 	 */
-	public ModelPreferenceStyler(AbstractItem<?, ?, ?, ?, M, ?> item, M prototype, String itemLabel, boolean isParent,
-			Property<String> style, String defaultStyle, Color backgroundColour,
-			Map<String, String> preferencesToChange) {
+	public ModelPreferenceStyler(AbstractItem<?, ?, ?, ?, M, ?> item, boolean isParent,
+			ObservableMap<String, String> preferencesToChange, Color backgroundColour) {
 		this.item = item;
-		this.prototype = prototype;
-		this.itemLabel = itemLabel;
 		this.isParent = isParent;
-		this.style = style;
-		this.defaultStyle = defaultStyle == null ? "" : defaultStyle;
-		this.backgroundColour = backgroundColour;
 		this.preferencesToChange = preferencesToChange;
+		this.backgroundColour = backgroundColour;
 	}
 
 	/*
@@ -135,8 +112,19 @@ public class ModelPreferenceStyler<M extends Model> implements PreferenceStyler 
 		feedback.setFillHeight(true);
 		center.getChildren().add(feedback);
 
+		// Obtain the prototype
+		M prototype = this.item.prototype();
+
+		// Obtain label for the item
+		IdeLabeller labeller = item.label();
+		String itemName = (labeller == null) ? null : labeller.getLabel(prototype);
+		if ((itemName == null) || (itemName.trim().length() == 0)) {
+			itemName = item.getClass().getSimpleName();
+		}
+		final String itemLabel = itemName;
+
 		// Provide the preview
-		AdaptedEditorPreview<M> preview = new AdaptedEditorPreview<>(this.prototype, this.itemLabel, this.isParent,
+		AdaptedEditorPreview<M> preview = new AdaptedEditorPreview<>(prototype, itemLabel, this.isParent,
 				(model, context) -> this.item.visual(model, context));
 		Pane previewPane = preview.getPreviewContainer();
 		HBox.setHgrow(previewPane, Priority.ALWAYS);
@@ -150,32 +138,78 @@ public class ModelPreferenceStyler<M extends Model> implements PreferenceStyler 
 			StringWriter structure = new StringWriter();
 			StructureLogger.log(preview.getPreviewVisual(), structure);
 			structureNode.setText(structure.toString());
+			structureNode.setStyle("-fx-control-inner-background: gainsboro");
 		} catch (Exception ex) {
 			// Indicate error in obtaining structure
 			StringWriter error = new StringWriter();
 			ex.printStackTrace(new PrintWriter(error));
 			structureNode.setText("Error loading structure\n\n" + error.toString());
+			structureNode.setStyle("-fx-control-inner-background: yellow");
 		}
 		feedback.getChildren().add(structureNode);
 
-		// Obtain the initial styling
-		String initialStyle = this.style.getValue();
+		// Provider CSS errors
+		HBox errorPane = new HBox();
+		errorPane.setBackground(new Background(new BackgroundFill(Color.YELLOW, null, null)));
+		center.getChildren().add(errorPane);
+		Label errorLabel = new Label();
+		errorLabel.setWrapText(true);
+		errorLabel.setPadding(new Insets(10));
+		errorLabel.setTextFill(Color.DARKRED);
 
 		// Provide means to change the styling
-		TextArea styleText = new TextArea(initialStyle);
+		TextArea styleText = new TextArea();
 		VBox.setVgrow(styleText, Priority.ALWAYS);
 		center.getChildren().add(styleText);
 
-		// TODO load styling based on changes to style text
-		// preview.style().setValue(initialStyle);
+		// Provide translation of style
+		Property<String> styler = CssParserJavaFacet.translateProperty(styleText.textProperty(),
+				(rawStyle) -> AbstractAdaptedIdeEditor.translateStyle(rawStyle, this.item));
+
+		// Provide updates to styling
+		Property<String> styleUpdater = preview.style();
+		Property<String> cssErrors = CssParserJavaFacet.cssErrorProperty(styler, styleUpdater);
+
+		// Listing to styling
+		errorLabel.textProperty().bind(cssErrors);
+		cssErrors.addListener((event) -> {
+			ObservableList<Node> children = errorPane.getChildren();
+			if (CompileUtil.isBlank(cssErrors.getValue())) {
+				children.clear(); // no errors
+			} else if (children.size() == 0) {
+				children.add(errorLabel);
+			}
+		});
+
+		// Load the initial styling
+		String initialStyle = this.preferencesToChange.get(this.item.getPreferenceStyleId());
+		if (CompileUtil.isBlank(initialStyle)) {
+			initialStyle = this.item.style();
+		}
+		styleText.textProperty().setValue(initialStyle);
 
 		// Provide buttons
 		BorderPane bottom = new BorderPane();
 		view.setBottom(bottom);
-		HBox buttons = new HBox();
-		bottom.setRight(buttons);
 
 		// Provide button to close
+		HBox buttons = new HBox();
+		buttons.setPadding(new Insets(10));
+		buttons.setSpacing(10);
+		bottom.setRight(buttons);
+
+		// Save changes to preference
+		Button saveButton = new Button("Apply");
+		saveButton.setOnAction((event) -> {
+
+			// TODO save preference change
+
+			// As saved, close
+			close.run();
+		});
+		buttons.getChildren().add(saveButton);
+
+		// No change to preferences
 		Button closeButton = new Button("Cancel");
 		closeButton.setOnAction((event) -> close.run());
 		buttons.getChildren().add(closeButton);

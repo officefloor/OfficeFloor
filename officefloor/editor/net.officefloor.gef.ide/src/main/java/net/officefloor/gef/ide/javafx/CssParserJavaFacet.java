@@ -1,11 +1,9 @@
 package net.officefloor.gef.ide.javafx;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javafx.beans.Observable;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
@@ -24,7 +22,7 @@ public class CssParserJavaFacet implements JavaFacet {
 	/**
 	 * CSS error {@link Property}.
 	 */
-	private static ReadOnlyProperty<String> cssErrorProperty = null;
+	private static Property<String> cssErrorProperty = null;
 
 	/**
 	 * Active error {@link Property}.
@@ -32,15 +30,54 @@ public class CssParserJavaFacet implements JavaFacet {
 	private static SimpleStringProperty activeErrorProperty = null;
 
 	/**
+	 * Translates the {@link Property}.
+	 * 
+	 * @param rawStyle   Raw style.
+	 * @param translator Translator. May be <code>null</code>.
+	 * @return Translated {@link Property}.
+	 */
+	public static Property<String> translateProperty(Property<String> rawStyle, Function<String, String> translator) {
+
+		// Translate the raw style
+		SimpleStringProperty translatedStyle = new SimpleStringProperty();
+		rawStyle.addListener((event) -> {
+
+			// Translate the style
+			String raw = rawStyle.getValue();
+			String translated = translator != null ? translator.apply(raw) : raw;
+
+			// Update the translated style
+			translatedStyle.setValue(translated);
+		});
+
+		// Return the translated
+		return translatedStyle;
+	}
+
+	/**
 	 * Creates a {@link Property} to listen on CSS errors for the style.
 	 * 
-	 * @param style        {@link Property} to specify the style.
-	 * @param translator   Translator. May be <code>null</code>.
+	 * @param style        {@link Property} specifying the style.
 	 * @param styleUpdater Updates the Style.
 	 * @return {@link Property} for CSS errors.
 	 */
-	public static Property<String> cssErrorProperty(Property<String> style, Function<String, String> translator,
-			Consumer<String> styleUpdater) {
+	public static Property<String> cssErrorProperty(Property<String> style, Property<String> styleUpdater) {
+
+		// Listen on style changes, to setup error handling
+		SimpleStringProperty errorProperty = new SimpleStringProperty();
+		style.addListener((event) -> {
+
+			// Specify error as active for style change
+			activeErrorProperty = errorProperty;
+
+			// Clear the error (as no event if no CSS error)
+			errorProperty.setValue("");
+			cssErrorProperty.setValue("");
+
+			// Update the style (may trigger CSS error)
+			String newStyle = style.getValue();
+			styleUpdater.setValue(newStyle);
+		});
 
 		// Ensure have CSS error property registered
 		if (cssErrorProperty == null) {
@@ -53,33 +90,6 @@ public class CssParserJavaFacet implements JavaFacet {
 			});
 		}
 
-		// Translate the raw style
-		SimpleStringProperty translatedStyle = new SimpleStringProperty();
-		style.addListener((event) -> {
-
-			// Translate the style
-			String rawStyle = style.getValue();
-			String translated = translator != null ? translator.apply(rawStyle) : rawStyle;
-
-			// Update the translated style
-			translatedStyle.setValue(translated);
-		});
-
-		// Listen on style changes, to setup error handling
-		SimpleStringProperty errorProperty = new SimpleStringProperty();
-		translatedStyle.addListener((event) -> {
-
-			// Clear the error (as no event if no CSS error)
-			errorProperty.setValue("");
-
-			// Specify error as active for style change
-			activeErrorProperty = errorProperty;
-
-			// Update the style (may trigger CSS error)
-			String newStyle = translatedStyle.get();
-			styleUpdater.accept(newStyle);
-		});
-
 		// Return the error property
 		return errorProperty;
 	}
@@ -90,7 +100,7 @@ public class CssParserJavaFacet implements JavaFacet {
 	 * @param classLoader {@link ClassLoader}.
 	 * @return {@link StringProperty} to the CSS errors.
 	 */
-	private static ReadOnlyProperty<String> errorProperty(ClassLoader classLoader) {
+	private static Property<String> errorProperty(ClassLoader classLoader) {
 
 		// Create the observable list to errors
 		ClassCompatibility css;
@@ -105,11 +115,12 @@ public class CssParserJavaFacet implements JavaFacet {
 
 		// Obtain the observable list for errors
 		ObjectCompatibility list = css.$("errorsProperty");
-		list.get(ObservableList.class).addListener((Observable event) -> {
+		ObservableList<?> observableList = list.get(ObservableList.class);
+		observableList.addListener((Observable event) -> {
 
 			// Extract the message for the last event
-			int size = list.$("size").get(Integer.class);
-			ObjectCompatibility lastEvent = list.$("get", css.arg(size - 1, int.class));
+			int size = observableList.size();
+			ObjectCompatibility lastEvent = ClassCompatibility.object(observableList.get(size - 1));
 			String message = lastEvent.$("getMessage").get(String.class);
 			if (message == null) {
 				message = "";
@@ -117,7 +128,7 @@ public class CssParserJavaFacet implements JavaFacet {
 
 			// Load the error
 			message = message.split(" in stylesheet")[0];
-			property.set(message);
+			property.setValue(message);
 		});
 
 		// Return the property

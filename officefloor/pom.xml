@@ -70,81 +70,71 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<!-- Eclipse -->
+			<!-- Editor -->
 			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>eclipse</artifactId>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>editor</artifactId>
 				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
+				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.core</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.common</artifactId>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.common</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.configurer</artifactId>
+				<artifactId>net.officefloor.gef.bridge</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.configurer</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.configurer.tests</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.editor</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.editor.tests</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.ide</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.configurer.tests</artifactId>
+				<artifactId>net.officefloor.gef.shade</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.editor</artifactId>
+				<artifactId>net.officefloor.gef.section</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.editor.tests</artifactId>
+				<artifactId>net.officefloor.gef.section.tests</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.ide</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.launch</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.officefloor</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.osgi</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.shade</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.section</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.section.tests</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.target</artifactId>
+				<artifactId>net.officefloor.gef.target</artifactId>
 				<version>${revision}</version>
 				<type>pom</type>
 			</dependency>
@@ -155,12 +145,23 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.woof</artifactId>
+				<artifactId>net.officefloor.gef.woof</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.woof.tests</artifactId>
+				<artifactId>net.officefloor.gef.woof.tests</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Eclipse -->
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.launch</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.bridge</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>

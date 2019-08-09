@@ -45,7 +45,6 @@ import net.officefloor.gef.editor.SelectOnly;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.gef.ide.editor.AbstractItem;
 import net.officefloor.gef.ide.editor.AbstractItem.IdeChildrenGroup;
-import net.officefloor.gef.ide.editor.AbstractItem.IdeLabeller;
 import net.officefloor.model.Model;
 
 /**
@@ -109,8 +108,7 @@ public class PreferencesEditor<R extends Model> {
 		});
 
 		// Provide select only for styling
-		Map<Model, ModelPreferenceStyler<?>> modelStylers = new HashMap<>();
-		Map<Class<? extends Model>, ModelPreferenceStyler<?>> parentStylers = new HashMap<>();
+		Map<Class<? extends Model>, ModelPreferenceStyler<?>> modelStylers = new HashMap<>();
 		editor.setSelectOnly(new SelectOnly() {
 
 			@Override
@@ -133,8 +131,8 @@ public class PreferencesEditor<R extends Model> {
 
 			@Override
 			public void model(AdaptedModelStyler styler) {
-				Model model = styler.getModel();
-				this.showStyler("Model " + model.getClass().getSimpleName(), modelStylers.get(model));
+				Class<?> modelType = styler.getModel().getClass();
+				this.showStyler("Model " + modelType.getSimpleName(), modelStylers.get(modelType));
 			}
 
 			private void showStyler(String typeDescription, PreferenceStyler styler) {
@@ -193,9 +191,6 @@ public class PreferencesEditor<R extends Model> {
 						// Space out the prototypes
 						model.setX(300);
 						model.setY(10 + (100 * index));
-
-						// Register parents (prototypes in palette different instance)
-						parentStylers.put(model.getClass(), styler);
 					});
 		}
 
@@ -216,34 +211,20 @@ public class PreferencesEditor<R extends Model> {
 	 *                          {@link ModelPreferenceStyler} to be populated.
 	 * @param editorWrapper     {@link EditorWrapper}.
 	 * @param decorator         Decorator on the {@link Model}.
-	 * @return Prototype {@link Model} from the {@link AbstractItem}.
 	 */
-	private Model loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent, Color backgroundColour,
-			EditorPreferences editorPreferences, Map<Model, ModelPreferenceStyler<?>> modelStylers,
+	private void loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent, Color backgroundColour,
+			EditorPreferences editorPreferences, Map<Class<? extends Model>, ModelPreferenceStyler<?>> modelStylers,
 			BiConsumer<Model, ModelPreferenceStyler<?>> decorator) {
-
-		// Obtain the prototype for the item
-		Model itemModel = item.prototype();
-
-		// Obtain label for the item
-		IdeLabeller labeller = item.label();
-		String itemName = (labeller == null) ? null : labeller.getLabel(itemModel);
-		if ((itemName == null) || (itemName.trim().length() == 0)) {
-			itemName = item.getClass().getSimpleName();
-		}
-		final String itemLabel = itemName;
 
 		// Obtain preference style identifier
 		String preferenceStyleId = item.getPreferenceStyleId();
-
-		// Obtain the style property to change the appearance
-		Property<String> style = item.getBuilder().style();
 
 		// Obtain the styling
 		String defaultStyle = item.style();
 		String overrideStyle = editorPreferences.getPreference(preferenceStyleId);
 
 		// Create the style property
+		Property<String> style = item.getBuilder().style();
 		Property<String> rawStyle = new SimpleStringProperty(
 				(overrideStyle != null) && (overrideStyle.trim().length() > 0) ? overrideStyle : defaultStyle);
 		rawStyle.addListener((event, oldValue, newValue) -> {
@@ -261,10 +242,13 @@ public class PreferencesEditor<R extends Model> {
 			}
 		});
 
+		// Create the item model
+		Model itemModel = item.prototype();
+
 		// Create and register the model styler
-		ModelPreferenceStyler styler = new ModelPreferenceStyler(item, itemModel, itemLabel, isParent, rawStyle,
-				defaultStyle, backgroundColour, this.preferencesToChange);
-		modelStylers.put(itemModel, styler);
+		ModelPreferenceStyler styler = new ModelPreferenceStyler(item, isParent, this.preferencesToChange,
+				backgroundColour);
+		modelStylers.put(itemModel.getClass(), styler);
 
 		// Determine if decorate the model
 		if (decorator != null) {
@@ -281,9 +265,6 @@ public class PreferencesEditor<R extends Model> {
 						null);
 			}
 		}
-
-		// Return the item model
-		return itemModel;
 	}
 
 }
