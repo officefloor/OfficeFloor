@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener.Change;
 import javafx.collections.ObservableMap;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
@@ -36,6 +37,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.gef.editor.AdaptedModelStyler;
 import net.officefloor.gef.editor.AdaptedParent;
 import net.officefloor.gef.editor.EditorStyler;
@@ -68,7 +70,7 @@ public class PreferencesEditor<R extends Model> {
 	 * {@link ObservableMap} of preferences to change within the
 	 * {@link EditorPreferences}.
 	 */
-	private final ObservableMap<String, String> preferencesToChange = FXCollections.observableHashMap();
+	private final ObservableMap<String, PreferenceValue> preferencesToChange = FXCollections.observableHashMap();
 
 	/**
 	 * {@link IDomain}.
@@ -221,12 +223,10 @@ public class PreferencesEditor<R extends Model> {
 
 		// Obtain the styling
 		String defaultStyle = item.style();
-		String overrideStyle = editorPreferences.getPreference(preferenceStyleId);
 
 		// Create the style property
 		Property<String> style = item.getBuilder().style();
-		Property<String> rawStyle = new SimpleStringProperty(
-				(overrideStyle != null) && (overrideStyle.trim().length() > 0) ? overrideStyle : defaultStyle);
+		Property<String> rawStyle = new SimpleStringProperty();
 		rawStyle.addListener((event, oldValue, newValue) -> {
 			// Translate and update the style
 			String translatedStyle = AbstractAdaptedIdeEditor.translateStyle(newValue, item);
@@ -241,13 +241,23 @@ public class PreferencesEditor<R extends Model> {
 				rawStyle.setValue(newRawStyle);
 			}
 		});
+		this.preferencesToChange.addListener((Change<? extends String, ? extends PreferenceValue> event) -> {
+			// Update the style on configuration changes
+			if (preferenceStyleId.contentEquals(event.getKey())) {
+				PreferenceValue preferredStyle = event.getValueAdded();
+				String newRawStyle = (preferredStyle != null) && (!CompileUtil.isBlank(preferredStyle.value))
+						? preferredStyle.value
+						: defaultStyle;
+				rawStyle.setValue(newRawStyle);
+			}
+		});
 
 		// Create the item model
 		Model itemModel = item.prototype();
 
 		// Create and register the model styler
 		ModelPreferenceStyler styler = new ModelPreferenceStyler(item, isParent, this.preferencesToChange,
-				backgroundColour);
+				this.editorPreferences, backgroundColour);
 		modelStylers.put(itemModel.getClass(), styler);
 
 		// Determine if decorate the model
