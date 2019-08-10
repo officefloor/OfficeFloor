@@ -40,6 +40,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.editor.AdaptedModelStyler;
 import net.officefloor.gef.editor.AdaptedParent;
 import net.officefloor.gef.editor.EditorStyler;
@@ -64,9 +65,9 @@ public class PreferencesEditor<R extends Model> {
 	private final AbstractAdaptedIdeEditor<R, ?, ?> editor;
 
 	/**
-	 * {@link EditorPreferences}.
+	 * {@link EnvironmentBridge}.
 	 */
-	private final EditorPreferences editorPreferences;
+	private final EnvironmentBridge envBridge;
 
 	/**
 	 * {@link ObservableMap} of preferences to change within the
@@ -88,13 +89,12 @@ public class PreferencesEditor<R extends Model> {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param editor            {@link AbstractAdaptedIdeEditor} to configure
-	 *                          preferences.
-	 * @param editorPreferences {@link EditorPreferences}.
+	 * @param editor    {@link AbstractAdaptedIdeEditor} to configure preferences.
+	 * @param envBridge {@link EnvironmentBridge}.
 	 */
-	public PreferencesEditor(AbstractAdaptedIdeEditor<R, ?, ?> editor, EditorPreferences editorPreferences) {
+	public PreferencesEditor(AbstractAdaptedIdeEditor<R, ?, ?> editor, EnvironmentBridge envBridge) {
 		this.editor = editor;
-		this.editorPreferences = editorPreferences;
+		this.envBridge = envBridge;
 
 		// Hook in listening to whether dirty
 		this.preferencesToChange.addListener((Change<? extends String, ? extends PreferenceValue> event) -> {
@@ -115,8 +115,7 @@ public class PreferencesEditor<R extends Model> {
 	 * Resets all preferences to their defaults.
 	 */
 	public void resetToDefaults() {
-		this.visitPreferences((preferenceId) -> this.editorPreferences.resetPreference(preferenceId));
-		this.preferencesToChange.clear();
+		this.visitPreferences((preferenceId) -> this.preferencesToChange.put(preferenceId, new PreferenceValue(null)));
 	}
 
 	/**
@@ -126,9 +125,9 @@ public class PreferencesEditor<R extends Model> {
 		for (String preferenceId : this.preferencesToChange.keySet()) {
 			PreferenceValue value = this.preferencesToChange.get(preferenceId);
 			if (value.value == null) {
-				this.editorPreferences.resetPreference(preferenceId);
+				this.envBridge.resetPreference(preferenceId);
 			} else {
-				this.editorPreferences.setPreference(preferenceId, value.value);
+				this.envBridge.setPreference(preferenceId, value.value);
 			}
 		}
 		this.preferencesToChange.clear();
@@ -243,12 +242,11 @@ public class PreferencesEditor<R extends Model> {
 
 			// Load the prototype model
 			final int index = i;
-			this.loadPrototypeModel(rootModel, parentItem, true, backgroundColour, this.editorPreferences, modelStylers,
-					(model, styler) -> {
-						// Space out the prototypes
-						model.setX(300);
-						model.setY(10 + (100 * index));
-					});
+			this.loadPrototypeModel(rootModel, parentItem, true, backgroundColour, modelStylers, (model, styler) -> {
+				// Space out the prototypes
+				model.setX(300);
+				model.setY(10 + (100 * index));
+			});
 		}
 
 		// Activate
@@ -261,19 +259,18 @@ public class PreferencesEditor<R extends Model> {
 	/**
 	 * Recursively loads the prototype {@link Model}.
 	 * 
-	 * @param parentModel       Parent {@link Model}.
-	 * @param item              {@link AbstractItem} to have its prototype loaded
-	 *                          into the {@link Model}.
-	 * @param isParent          Indicate if {@link AdaptedParent}.
-	 * @param backgroundColour  Background {@link Color}.
-	 * @param editorPreferences {@link EditorPreferences}.
-	 * @param modelStylers      {@link Map} of {@link Model} to
-	 *                          {@link ModelPreferenceStyler} to be populated.
-	 * @param editorWrapper     {@link EditorWrapper}.
-	 * @param decorator         Decorator on the {@link Model}.
+	 * @param parentModel      Parent {@link Model}.
+	 * @param item             {@link AbstractItem} to have its prototype loaded
+	 *                         into the {@link Model}.
+	 * @param isParent         Indicate if {@link AdaptedParent}.
+	 * @param backgroundColour Background {@link Color}.
+	 * @param modelStylers     {@link Map} of {@link Model} to
+	 *                         {@link ModelPreferenceStyler} to be populated.
+	 * @param editorWrapper    {@link EditorWrapper}.
+	 * @param decorator        Decorator on the {@link Model}.
 	 */
 	private void loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent, Color backgroundColour,
-			EditorPreferences editorPreferences, Map<Class<? extends Model>, ModelPreferenceStyler<?>> modelStylers,
+			Map<Class<? extends Model>, ModelPreferenceStyler<?>> modelStylers,
 			BiConsumer<Model, ModelPreferenceStyler<?>> decorator) {
 
 		// Obtain preference style identifier
@@ -290,10 +287,10 @@ public class PreferencesEditor<R extends Model> {
 			String translatedStyle = AbstractAdaptedIdeEditor.translateStyle(newValue, item);
 			style.setValue(translatedStyle);
 		});
-		editorPreferences.addPreferenceListener((event) -> {
+		envBridge.addPreferenceListener((event) -> {
 			// Update style on preference changes (typically reseting to defaults)
 			if (preferenceStyleId.equals(event.preferenceId)) {
-				String updatedStyle = editorPreferences.getPreference(preferenceStyleId);
+				String updatedStyle = this.envBridge.getPreference(preferenceStyleId);
 				String newRawStyle = (updatedStyle != null) && (updatedStyle.trim().length() > 0) ? updatedStyle
 						: defaultStyle;
 				rawStyle.setValue(newRawStyle);
@@ -306,7 +303,7 @@ public class PreferencesEditor<R extends Model> {
 				String newRawStyle;
 				if (preferredStyle == null) {
 					// Clearing style, so reset to configuration/default
-					newRawStyle = this.editorPreferences.getPreference(preferenceStyleId);
+					newRawStyle = this.envBridge.getPreference(preferenceStyleId);
 					if (newRawStyle == null) {
 						newRawStyle = defaultStyle;
 					}
@@ -323,7 +320,7 @@ public class PreferencesEditor<R extends Model> {
 
 		// Create and register the model styler
 		ModelPreferenceStyler styler = new ModelPreferenceStyler(item, isParent, this.preferencesToChange,
-				this.editorPreferences, backgroundColour);
+				this.envBridge, backgroundColour);
 		modelStylers.put(itemModel.getClass(), styler);
 
 		// Determine if decorate the model
@@ -337,8 +334,7 @@ public class PreferencesEditor<R extends Model> {
 		// Load child items
 		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
 			for (AbstractItem child : childrenGroup.getChildren()) {
-				this.loadPrototypeModel(itemModel, child, false, backgroundColour, editorPreferences, modelStylers,
-						null);
+				this.loadPrototypeModel(itemModel, child, false, backgroundColour, modelStylers, null);
 			}
 		}
 	}

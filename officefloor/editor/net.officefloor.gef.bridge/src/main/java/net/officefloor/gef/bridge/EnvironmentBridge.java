@@ -123,4 +123,68 @@ public interface EnvironmentBridge {
 	 */
 	void selectClassPathResource(String searchText, SelectionHandler handler);
 
+	/**
+	 * Obtains the preference.
+	 * 
+	 * @param preferenceId Preference identifier.
+	 * @return Preference value or <code>null</code> if no configured.
+	 */
+	String getPreference(String preferenceId);
+
+	/**
+	 * Specifies the preference value.
+	 * 
+	 * @param preferenceId Preference identifier.
+	 * @param value        Value for the preference.
+	 */
+	void setPreference(String preferenceId, String value);
+
+	/**
+	 * Resets the preference to default value.
+	 * 
+	 * @param preferenceId Preference identifier.
+	 */
+	void resetPreference(String preferenceId);
+
+	/**
+	 * Adds a {@link PreferenceListener}.
+	 * 
+	 * @param listener {@link PreferenceListener}.
+	 */
+	void addPreferenceListener(PreferenceListener listener);
+
+	/**
+	 * Preference listener.
+	 */
+	@FunctionalInterface
+	interface PreferenceListener {
+
+		/**
+		 * Handles the {@link PreferenceEvent}.
+		 * 
+		 * @param event {@link PreferenceEvent}.
+		 */
+		void changedPreference(PreferenceEvent event);
+	}
+
+	/**
+	 * Preference event.
+	 */
+	class PreferenceEvent {
+
+		/**
+		 * Preference identifier.
+		 */
+		public final String preferenceId;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param preferenceId Preference identifier.
+		 */
+		public PreferenceEvent(String preferenceId) {
+			this.preferenceId = preferenceId;
+		}
+	}
+
 }

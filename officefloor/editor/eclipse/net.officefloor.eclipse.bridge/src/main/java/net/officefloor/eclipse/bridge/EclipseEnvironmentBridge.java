@@ -57,6 +57,30 @@ import net.officefloor.gef.bridge.EnvironmentBridge;
  */
 public class EclipseEnvironmentBridge implements EnvironmentBridge {
 
+	
+//	IPreferenceStore preferences = AdaptedIdeEditor.this.preferenceStore;
+//	if (preferences != null) {
+//
+//		// Create and register listening to preference change
+//		IPropertyChangeListener changeListener = (event) -> {
+//			if (preferenceId.equals(event.getProperty())) {
+//
+//				// Obtain the value
+//				Object value = event.getNewValue();
+//				if (!(value instanceof String)) {
+//					value = value.toString();
+//				}
+//
+//				// Notify of value change
+//				preferenceListener.preferenceValueChanged((String) value);
+//			}
+//		};
+//		preferences.addPropertyChangeListener(changeListener);
+//
+//		// Register for removing on editor close
+//		AdaptedIdeEditor.this.preferenceChangeListeners.add(changeListener);
+//	}
+
 	/**
 	 * {@link IJavaProject}.
 	 */

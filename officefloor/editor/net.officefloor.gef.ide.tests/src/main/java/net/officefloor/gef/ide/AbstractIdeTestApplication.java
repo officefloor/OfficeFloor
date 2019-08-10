@@ -149,8 +149,7 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 		ConfigurableContext<R, O> configurableContext = editor.getConfigurableContext();
 
 		// Load the preferences
-		PreferencesEditor<R> preferences = new PreferencesEditor<>(this.createEditor(envBridge),
-				new VolatileEditorPreferences());
+		PreferencesEditor<R> preferences = new PreferencesEditor<>(this.createEditor(envBridge), envBridge);
 		Tab preferencesTab = new Tab("Preferences");
 		folder.getTabs().add(preferencesTab);
 		Pane preferencesPane = preferences.loadView((view) -> preferencesTab.setContent(view));

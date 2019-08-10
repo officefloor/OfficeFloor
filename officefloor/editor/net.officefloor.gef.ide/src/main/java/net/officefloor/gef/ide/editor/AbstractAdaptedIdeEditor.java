@@ -171,35 +171,17 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 
 				@Override
 				public String getPreference(String preferenceId) {
-//					IPreferenceStore preferences = AdaptedIdeEditor.this.preferenceStore;
-//					return preferences == null ? null : preferences.getString(preferenceId);
-					return null;
+					return envBridge.getPreference(preferenceId);
 				}
 
 				@Override
 				public void addPreferenceListener(String preferenceId, PreferenceListener preferenceListener) {
-//					IPreferenceStore preferences = AdaptedIdeEditor.this.preferenceStore;
-//					if (preferences != null) {
-//
-//						// Create and register listening to preference change
-//						IPropertyChangeListener changeListener = (event) -> {
-//							if (preferenceId.equals(event.getProperty())) {
-//
-//								// Obtain the value
-//								Object value = event.getNewValue();
-//								if (!(value instanceof String)) {
-//									value = value.toString();
-//								}
-//
-//								// Notify of value change
-//								preferenceListener.preferenceValueChanged((String) value);
-//							}
-//						};
-//						preferences.addPropertyChangeListener(changeListener);
-//
-//						// Register for removing on editor close
-//						AdaptedIdeEditor.this.preferenceChangeListeners.add(changeListener);
-//					}
+					envBridge.addPreferenceListener((event) -> {
+						if (preferenceId.equals(event.preferenceId)) {
+							String preferenceValue = envBridge.getPreference(preferenceId);
+							preferenceListener.preferenceValueChanged(preferenceValue);
+						}
+					});
 				}
 			};
 

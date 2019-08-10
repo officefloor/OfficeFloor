@@ -38,6 +38,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.common.structure.StructureLogger;
 import net.officefloor.gef.editor.AdaptedParent;
 import net.officefloor.gef.editor.preview.AdaptedEditorPreview;
@@ -69,9 +70,9 @@ public class ModelPreferenceStyler<M extends Model> implements PreferenceStyler 
 	private final ObservableMap<String, PreferenceValue> preferencesToChange;
 
 	/**
-	 * {@link EditorPreferences}.
+	 * {@link EnvironmentBridge}.
 	 */
-	private final EditorPreferences editorPreferences;
+	private final EnvironmentBridge envBridge;
 
 	/**
 	 * Background {@link Color}.
@@ -85,16 +86,16 @@ public class ModelPreferenceStyler<M extends Model> implements PreferenceStyler 
 	 * @param prototype           Prototype {@link Model} for the item.
 	 * @param isParent            Indicates if {@link AdaptedParent}.
 	 * @param preferencesToChange Loaded with the {@link EditorPreferences} changes.
-	 * @param editorPreferences   {@link EditorPreferences}.
+	 * @param envBridge           {@link EnvironmentBridge}.
 	 * @param backgroundColour    Background {@link Color}.
 	 */
 	public ModelPreferenceStyler(AbstractItem<?, ?, ?, ?, M, ?> item, boolean isParent,
-			ObservableMap<String, PreferenceValue> preferencesToChange, EditorPreferences editorPreferences,
+			ObservableMap<String, PreferenceValue> preferencesToChange, EnvironmentBridge envBridge,
 			Color backgroundColour) {
 		this.item = item;
 		this.isParent = isParent;
 		this.preferencesToChange = preferencesToChange;
-		this.editorPreferences = editorPreferences;
+		this.envBridge = envBridge;
 		this.backgroundColour = backgroundColour;
 	}
 
@@ -247,7 +248,7 @@ public class ModelPreferenceStyler<M extends Model> implements PreferenceStyler 
 		if ((preference != null) && (!CompileUtil.isBlank(preference.value))) {
 			initialStyle = preference.value; // changes takes priority
 		} else {
-			String configureStyle = this.editorPreferences.getPreference(preferenceId);
+			String configureStyle = this.envBridge.getPreference(preferenceId);
 			if (!CompileUtil.isBlank(configureStyle)) {
 				initialStyle = configureStyle; // current preference is next priority
 			} else {

@@ -19,6 +19,9 @@ package net.officefloor.gef.bridge;
 
 import java.net.URL;
 
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener.Change;
+import javafx.collections.ObservableMap;
 import net.officefloor.compile.OfficeFloorCompiler;
 
 /**
@@ -32,6 +35,11 @@ public class ClassLoaderEnvironmentBridge implements EnvironmentBridge {
 	 * {@link ClassLoader}.
 	 */
 	private final ClassLoader classLoader;
+
+	/**
+	 * Preferences.
+	 */
+	private final ObservableMap<String, String> preferences = FXCollections.observableHashMap();
 
 	/**
 	 * Instantiate with default {@link ClassLoader}.
@@ -141,6 +149,28 @@ public class ClassLoaderEnvironmentBridge implements EnvironmentBridge {
 
 		// Not deriving, so just return search text
 		handler.selected(searchText);
+	}
+
+	@Override
+	public String getPreference(String preferenceId) {
+		return this.preferences.get(preferenceId);
+	}
+
+	@Override
+	public void setPreference(String preferenceId, String value) {
+		this.preferences.put(preferenceId, value);
+	}
+
+	@Override
+	public void resetPreference(String preferenceId) {
+		this.preferences.remove(preferenceId);
+	}
+
+	@Override
+	public void addPreferenceListener(PreferenceListener listener) {
+		this.preferences.addListener((Change<? extends String, ? extends String> event) -> {
+			listener.changedPreference(new PreferenceEvent(event.getKey()));
+		});
 	}
 
 }
