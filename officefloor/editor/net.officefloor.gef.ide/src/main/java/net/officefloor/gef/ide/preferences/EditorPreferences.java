@@ -33,6 +33,21 @@ public interface EditorPreferences {
 	String getPreference(String preferenceId);
 
 	/**
+	 * Specifies the preference value.
+	 * 
+	 * @param preferenceId Preference identifier.
+	 * @param value        Value for the preference.
+	 */
+	void setPreference(String preferenceId, String value);
+
+	/**
+	 * Resets the preference to default value.
+	 * 
+	 * @param preferenceId Preference identifier.
+	 */
+	void resetPreference(String preferenceId);
+
+	/**
 	 * Adds a {@link PreferenceListener}.
 	 * 
 	 * @param listener {@link PreferenceListener}.

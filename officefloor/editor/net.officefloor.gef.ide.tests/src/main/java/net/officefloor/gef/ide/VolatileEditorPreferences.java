@@ -17,6 +17,9 @@
  */
 package net.officefloor.gef.ide;
 
+import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener.Change;
+import javafx.collections.ObservableMap;
 import net.officefloor.gef.ide.preferences.EditorPreferences;
 
 /**
@@ -26,13 +29,31 @@ import net.officefloor.gef.ide.preferences.EditorPreferences;
  */
 public class VolatileEditorPreferences implements EditorPreferences {
 
+	/**
+	 * Preferences.
+	 */
+	private final ObservableMap<String, String> preferences = FXCollections.observableHashMap();
+
 	@Override
 	public String getPreference(String preferenceId) {
-		return null;
+		return this.preferences.get(preferenceId);
+	}
+
+	@Override
+	public void setPreference(String preferenceId, String value) {
+		this.preferences.put(preferenceId, value);
+	}
+
+	@Override
+	public void resetPreference(String preferenceId) {
+		this.preferences.remove(preferenceId);
 	}
 
 	@Override
 	public void addPreferenceListener(PreferenceListener listener) {
+		this.preferences.addListener((Change<? extends String, ? extends String> event) -> {
+			listener.changedPreference(new PreferenceEvent(event.getKey()));
+		});
 	}
 
 }

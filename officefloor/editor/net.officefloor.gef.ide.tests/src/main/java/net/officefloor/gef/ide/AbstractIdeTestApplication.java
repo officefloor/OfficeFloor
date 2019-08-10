@@ -28,10 +28,13 @@ import org.eclipse.gef.mvc.fx.domain.IDomain;
 import com.google.inject.Inject;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -150,11 +153,36 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 				new VolatileEditorPreferences());
 		Tab preferencesTab = new Tab("Preferences");
 		folder.getTabs().add(preferencesTab);
-		preferences.loadView((view) -> preferencesTab.setContent(view));
+		Pane preferencesPane = preferences.loadView((view) -> preferencesTab.setContent(view));
+		BorderPane preferenceButtons = new BorderPane();
+		preferenceButtons.setPadding(new Insets(10));
+		preferencesPane.getChildren().add(preferenceButtons);
+
+		// Reset button for preferences
+		Button resetPreferences = new Button("Reset All");
+		preferenceButtons.setLeft(resetPreferences);
+		resetPreferences.setOnAction((event) -> preferences.resetToDefaults());
+
+		// Apply button for preferences
+		HBox preferenceRightButtons = new HBox();
+		preferenceRightButtons.setSpacing(10);
+		preferenceButtons.setRight(preferenceRightButtons);
+		Button applyPreferences = new Button("Apply");
+		applyPreferences.setOnAction((event) -> preferences.apply());
+		Button cancelPreferences = new Button("Cancel");
+		cancelPreferences.setOnAction((event) -> preferences.cancel());
+		preferenceRightButtons.getChildren().addAll(applyPreferences, cancelPreferences);
+		Runnable preferenceButtonEnabler = () -> {
+			boolean isDisable = !preferences.dirtyProperty().getValue();
+			applyPreferences.setDisable(isDisable);
+			cancelPreferences.setDisable(isDisable);
+		};
+		preferences.dirtyProperty().addListener((event) -> preferenceButtonEnabler.run());
+		preferenceButtonEnabler.run(); // initiate
 
 		// Load the configuration items
 		for (AbstractConfigurableItem<R, RE, O, ?, ?, ?> parent : editor.getParents()) {
-			this.loadItem(parent, configurableContext, folder);
+			this.loadItem(parent, configurableContext, folder, envBridge);
 		}
 	}
 
@@ -166,9 +194,10 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 	 * @param item                Item.
 	 * @param configurableContext {@link ConfigurableContext}.
 	 * @param pane                {@link Pane} to configuration item.
+	 * @param envBridge           {@link EnvironmentBridge}.
 	 */
 	private <M extends Model, I> void loadItem(AbstractConfigurableItem<R, RE, O, M, ?, I> item,
-			ConfigurableContext<R, O> configurableContext, TabPane pane) {
+			ConfigurableContext<R, O> configurableContext, TabPane pane, EnvironmentBridge envBridge) {
 
 		// Add the tab for item
 		String itemName = item.getClass().getSimpleName();
@@ -222,7 +251,7 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 			Pane addParent = new Pane();
 			addTab.setContent(addParent);
 			I addItem = item.item(null);
-			Configurer<I> addConfigurer = new Configurer<>(new ClassLoaderEnvironmentBridge());
+			Configurer<I> addConfigurer = new Configurer<>(envBridge);
 			ConfigurationBuilder<I> addBuilder = addConfigurer;
 			ConfigurableModelContext<O, M> addContext = new ConfigurableModelContext<O, M>() {
 
@@ -290,7 +319,7 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 			Pane refactorParent = new Pane();
 			refactorTab.setContent(refactorParent);
 			I refactorItem = item.item(prototype);
-			Configurer<I> refactorConfigurer = new Configurer<>(new ClassLoaderEnvironmentBridge());
+			Configurer<I> refactorConfigurer = new Configurer<>(envBridge);
 			ConfigurationBuilder<I> refactorBuilder = refactorConfigurer;
 			ConfigurableModelContext<O, M> refactorContext = new ConfigurableModelContext<O, M>() {
 

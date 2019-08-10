@@ -27,17 +27,19 @@ import org.eclipse.gef.mvc.fx.domain.IDomain;
 import com.google.inject.Inject;
 
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener.Change;
 import javafx.collections.ObservableMap;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.gef.editor.AdaptedModelStyler;
 import net.officefloor.gef.editor.AdaptedParent;
 import net.officefloor.gef.editor.EditorStyler;
@@ -73,6 +75,11 @@ public class PreferencesEditor<R extends Model> {
 	private final ObservableMap<String, PreferenceValue> preferencesToChange = FXCollections.observableHashMap();
 
 	/**
+	 * Indicates if dirty (requires save).
+	 */
+	private final SimpleBooleanProperty isDirty = new SimpleBooleanProperty();
+
+	/**
 	 * {@link IDomain}.
 	 */
 	@Inject
@@ -88,14 +95,59 @@ public class PreferencesEditor<R extends Model> {
 	public PreferencesEditor(AbstractAdaptedIdeEditor<R, ?, ?> editor, EditorPreferences editorPreferences) {
 		this.editor = editor;
 		this.editorPreferences = editorPreferences;
+
+		// Hook in listening to whether dirty
+		this.preferencesToChange.addListener((Change<? extends String, ? extends PreferenceValue> event) -> {
+			this.isDirty.setValue(this.preferencesToChange.size() > 0);
+		});
+	}
+
+	/**
+	 * Indicates whether dirty (requires saving).
+	 * 
+	 * @return {@link Property} to track whether requires saving.
+	 */
+	public ReadOnlyProperty<Boolean> dirtyProperty() {
+		return this.isDirty;
+	}
+
+	/**
+	 * Resets all preferences to their defaults.
+	 */
+	public void resetToDefaults() {
+		this.visitPreferences((preferenceId) -> this.editorPreferences.resetPreference(preferenceId));
+		this.preferencesToChange.clear();
+	}
+
+	/**
+	 * Applies the preferences.
+	 */
+	public void apply() {
+		for (String preferenceId : this.preferencesToChange.keySet()) {
+			PreferenceValue value = this.preferencesToChange.get(preferenceId);
+			if (value.value == null) {
+				this.editorPreferences.resetPreference(preferenceId);
+			} else {
+				this.editorPreferences.setPreference(preferenceId, value.value);
+			}
+		}
+		this.preferencesToChange.clear();
+	}
+
+	/**
+	 * Cancels the changes to the preferences.
+	 */
+	public void cancel() {
+		this.preferencesToChange.clear();
 	}
 
 	/**
 	 * Loads the view.
 	 * 
-	 * @param loader Receives the loaded visual.
+	 * @param loader Receives the visual for the entire preview editor.
+	 * @return Editor view enable decorating.
 	 */
-	public void loadView(Consumer<Pane> loader) {
+	public Pane loadView(Consumer<Pane> loader) {
 
 		// Provide stack pane to have overlay of style editors
 		StackPane stackView = new StackPane();
@@ -176,8 +228,11 @@ public class PreferencesEditor<R extends Model> {
 		this.editor.setModel(rootModel);
 
 		// Load editor view (with scene available)
+		VBox editorView = new VBox();
+		VBox.setVgrow(editorView, Priority.ALWAYS);
+		stackView.getChildren().add(editorView);
 		this.editor.loadView((view) -> {
-			stackView.getChildren().add(view);
+			editorView.getChildren().add(view);
 			loader.accept(stackView);
 		});
 
@@ -198,6 +253,9 @@ public class PreferencesEditor<R extends Model> {
 
 		// Activate
 		this.domain.activate();
+
+		// Return the editor view
+		return editorView;
 	}
 
 	/**
@@ -245,9 +303,17 @@ public class PreferencesEditor<R extends Model> {
 			// Update the style on configuration changes
 			if (preferenceStyleId.contentEquals(event.getKey())) {
 				PreferenceValue preferredStyle = event.getValueAdded();
-				String newRawStyle = (preferredStyle != null) && (!CompileUtil.isBlank(preferredStyle.value))
-						? preferredStyle.value
-						: defaultStyle;
+				String newRawStyle;
+				if (preferredStyle == null) {
+					// Clearing style, so reset to configuration/default
+					newRawStyle = this.editorPreferences.getPreference(preferenceStyleId);
+					if (newRawStyle == null) {
+						newRawStyle = defaultStyle;
+					}
+				} else {
+					// Use the new preferred style (or default if resetting)
+					newRawStyle = preferredStyle.value != null ? preferredStyle.value : defaultStyle;
+				}
 				rawStyle.setValue(newRawStyle);
 			}
 		});
@@ -273,6 +339,35 @@ public class PreferencesEditor<R extends Model> {
 			for (AbstractItem child : childrenGroup.getChildren()) {
 				this.loadPrototypeModel(itemModel, child, false, backgroundColour, editorPreferences, modelStylers,
 						null);
+			}
+		}
+	}
+
+	/**
+	 * Visits all preferences.
+	 * 
+	 * @param visitor Visitor for the preferences.
+	 */
+	private void visitPreferences(Consumer<String> visitor) {
+		visitor.accept(this.editor.getPaletteIndicatorStyleId());
+		visitor.accept(this.editor.getPaletteStyleId());
+		visitor.accept(this.editor.getEditorStyleId());
+		for (AbstractItem<?, ?, ?, ?, ?, ?> item : this.editor.getParents()) {
+			this.visitItemPreferences(item, visitor);
+		}
+	}
+
+	/**
+	 * Visits the {@link AbstractItem}.
+	 * 
+	 * @param item    {@link AbstractItem} being visited.
+	 * @param visitor {@link Consumer} visitor.
+	 */
+	private void visitItemPreferences(AbstractItem item, Consumer<String> visitor) {
+		visitor.accept(item.getPreferenceStyleId());
+		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
+			for (AbstractItem<?, ?, ?, ?, ?, ?> child : childrenGroup.getChildren()) {
+				this.visitItemPreferences(child, visitor);
 			}
 		}
 	}
