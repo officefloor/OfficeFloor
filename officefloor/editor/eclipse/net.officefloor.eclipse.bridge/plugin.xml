@@ -4,7 +4,7 @@
 	<extension point="org.eclipse.ui.newWizards">
 		<wizard
         category="net.officefloor.category"
-        class="net.officefloor.eclipse.woof.WoofNewWizard"
+        class="net.officefloor.eclipse.ide.woof.WoofNewWizard"
         icon="icons/OfficeFloor.png"
         id="net.officefloor.eclipse.woof.WoofNewWizard"
         name="WoOF"/>
@@ -14,7 +14,7 @@
 		name="OfficeFloor Editors"
 		>
 		<editor
-        class="net.officefloor.eclipse.woof.WoofEditPart"
+        class="net.officefloor.eclipse.ide.woof.WoofEditPart"
         contributorClass="net.officefloor.eclipse.ide.editor.IdeEditorActionBarContributor"
         default="true"
         extensions="woof"

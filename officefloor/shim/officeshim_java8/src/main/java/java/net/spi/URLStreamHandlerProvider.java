@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,24 +15,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.eclipse.woof;
+package java.net.spi;
 
-import net.officefloor.eclipse.bridge.AbstractAdaptedEditorPart;
-import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
-import net.officefloor.woof.model.woof.WoofChanges;
-import net.officefloor.woof.model.woof.WoofModel;
-import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import java.net.URLStreamHandlerFactory;
 
 /**
- * Web on OfficeFloor (WoOF) Editor.
+ * This class is only available in Java 9 and above. This is only provided to
+ * enable compiling code dependent on this class in Java 8.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofEditPart extends AbstractAdaptedEditorPart<WoofModel, WoofEvent, WoofChanges> {
-
-	@Override
-	protected AbstractAdaptedIdeEditor<WoofModel, WoofEvent, WoofChanges> createEditor() {
-		return new WoofEditor();
-	}
-
+public abstract class URLStreamHandlerProvider implements URLStreamHandlerFactory {
 }

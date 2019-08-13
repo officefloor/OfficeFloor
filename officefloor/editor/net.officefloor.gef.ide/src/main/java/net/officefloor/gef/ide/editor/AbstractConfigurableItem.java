@@ -188,8 +188,8 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		 */
 		@SuppressWarnings("unchecked")
 		public IdeConfiguration(AbstractConfigurableItem<?, ?, O, M, ?, I>.IdeConfigurer configurer) {
-			this.add = configurer.add.toArray(ItemConfigurer[]::new);
-			this.refactor = configurer.refactor.toArray(ItemConfigurer[]::new);
+			this.add = configurer.add.toArray(new ItemConfigurer[configurer.add.size()]);
+			this.refactor = configurer.refactor.toArray(new ItemConfigurer[configurer.refactor.size()]);
 			this.addImmediately = configurer.addImmediately;
 			this.delete = configurer.delete;
 		}

@@ -110,7 +110,7 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 		EnvironmentBridge envBridge = new ClassLoaderEnvironmentBridge(this.getClass().getClassLoader());
 
 		// Obtain the configuration
-		String configurationPath = this.getClass().getPackageName().replace('.', '/') + "/"
+		String configurationPath = this.getClass().getPackage().getName().replace('.', '/') + "/"
 				+ this.getConfigurationFileName();
 		InputStream configurationContent = envBridge.getClassLoader().getResourceAsStream(configurationPath);
 		if (configurationContent == null) {

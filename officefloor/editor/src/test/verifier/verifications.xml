@@ -12,85 +12,70 @@
 			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
 		</file>
 		<file>
-			<location>net.officefloor.eclipse.common/META-INF/MANIFEST.MF
+			<location>net.officefloor.gef.bridge/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.common/META-INF/MANIFEST.MF
 			</location>
 			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
 		</file>
 		<file>
-			<location>net.officefloor.eclipse.configurer/META-INF/MANIFEST.MF
+			<location>net.officefloor.gef.configurer/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.configurer.tests/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.editor/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.editor.tests/META-INF/MANIFEST.MF
 			</location>
 			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
 		</file>
 		<file>
-			<location>net.officefloor.eclipse.configurer.tests/META-INF/MANIFEST.MF
+			<location>net.officefloor.gef.ide/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.ide.tests/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.section/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.section.tests/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.gef.shade/META-INF/MANIFEST.MF
 			</location>
 			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
 		</file>
 		<file>
-			<location>net.officefloor.eclipse.editor/META-INF/MANIFEST.MF
+			<location>net.officefloor.gef.target/META-INF/MANIFEST.MF
 			</location>
 			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
 		</file>
 		<file>
-			<location>net.officefloor.eclipse.editor.tests/META-INF/MANIFEST.MF
+			<location>net.officefloor.gef.woof/META-INF/MANIFEST.MF
 			</location>
 			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
 		</file>
 		<file>
-			<location>net.officefloor.eclipse.ide/META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
-			<location>net.officefloor.eclipse.launch/META-INF/MANIFEST.MF
+			<location>net.officefloor.gef.woof.tests/META-INF/MANIFEST.MF
 			</location>
 			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
-			<location>net.officefloor.eclipse.officefloor/META-INF/MANIFEST.MF
-			</location>
-			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
-			<location>net.officefloor.eclipse.osgi/META-INF/MANIFEST.MF
-			</location>
-			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
-			<location>net.officefloor.eclipse.section/META-INF/MANIFEST.MF
-			</location>
-			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
-			<location>net.officefloor.eclipse.section.tests/META-INF/MANIFEST.MF
-			</location>
-			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
-			<location>net.officefloor.eclipse.target/META-INF/MANIFEST.MF
-			</location>
-			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
-			<location>net.officefloor.eclipse.woof/META-INF/MANIFEST.MF
-			</location>
-			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
-			<location>net.officefloor.eclipse.woof.tests/META-INF/MANIFEST.MF
-			</location>
-			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
-			<location>net.officefloor.feature/feature.xml</location>
-			<contains><![CDATA[version="${project.version}"[^;]*provider-name="OfficeFloor"]]></contains>
 		</file>
 		<file>
 			<location>net.officefloor.woof/META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
-			<location>net.officefloor.woof.feature/feature.xml</location>
-			<contains><![CDATA[version="${project.version}"[^;]*provider-name="OfficeFloor"]]></contains>
 		</file>
 	</files>
 </verifications>

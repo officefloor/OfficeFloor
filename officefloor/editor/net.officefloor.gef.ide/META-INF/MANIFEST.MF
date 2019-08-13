@@ -14,6 +14,8 @@ Export-Package: net.officefloor.gef.ide.editor,
  net.officefloor.gef.ide.preferences
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.inject,
+ com.google.inject.util,
+ org.eclipse.gef.common.activate,
  org.eclipse.gef.common.dispose,
  org.eclipse.gef.mvc.fx.domain
 Automatic-Module-Name: net.officefloor.gef.ide

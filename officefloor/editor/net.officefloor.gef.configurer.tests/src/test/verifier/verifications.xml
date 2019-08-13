@@ -17,7 +17,7 @@
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.eclipse.configurer;bundle-version="${project.version}"]]></contains>
+			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.gef.configurer;bundle-version="${project.version}"]]></contains>
 		</file>
 	</files>
 </verifications>

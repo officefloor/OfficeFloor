@@ -18,21 +18,21 @@
 	</properties>
 	<modules>
 		<module>net.officefloor.core</module>
-		<module>net.officefloor.gef.target</module>
 		<module>net.officefloor.gef.bridge</module>
 		<module>net.officefloor.gef.common</module>
-		<module>net.officefloor.gef.editor</module>
-		<module>net.officefloor.gef.editor.tests</module>
 		<module>net.officefloor.gef.configurer</module>
 		<module>net.officefloor.gef.configurer.tests</module>
+		<module>net.officefloor.gef.editor</module>
+		<module>net.officefloor.gef.editor.tests</module>
 		<module>net.officefloor.gef.ide</module>
 		<module>net.officefloor.gef.ide.tests</module>
 		<module>net.officefloor.gef.section</module>
 		<module>net.officefloor.gef.section.tests</module>
 		<module>net.officefloor.gef.shade</module>
-		<module>net.officefloor.woof</module>
+		<module>net.officefloor.gef.target</module>
 		<module>net.officefloor.gef.woof</module>
 		<module>net.officefloor.gef.woof.tests</module>
+		<module>net.officefloor.woof</module>
 		<module>eclipse</module>
 	</modules>
 	<build>

@@ -17,11 +17,14 @@
  */
 package net.officefloor.eclipse.bridge;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -57,30 +60,6 @@ import net.officefloor.gef.bridge.EnvironmentBridge;
  */
 public class EclipseEnvironmentBridge implements EnvironmentBridge {
 
-	
-//	IPreferenceStore preferences = AdaptedIdeEditor.this.preferenceStore;
-//	if (preferences != null) {
-//
-//		// Create and register listening to preference change
-//		IPropertyChangeListener changeListener = (event) -> {
-//			if (preferenceId.equals(event.getProperty())) {
-//
-//				// Obtain the value
-//				Object value = event.getNewValue();
-//				if (!(value instanceof String)) {
-//					value = value.toString();
-//				}
-//
-//				// Notify of value change
-//				preferenceListener.preferenceValueChanged((String) value);
-//			}
-//		};
-//		preferences.addPropertyChangeListener(changeListener);
-//
-//		// Register for removing on editor close
-//		AdaptedIdeEditor.this.preferenceChangeListeners.add(changeListener);
-//	}
-
 	/**
 	 * {@link IJavaProject}.
 	 */
@@ -90,6 +69,11 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 	 * Parent {@link Shell}.
 	 */
 	private final Shell parentShell;
+
+	/**
+	 * Items to dispose.
+	 */
+	private final List<Closeable> disposeItems = new LinkedList<>();
 
 	/**
 	 * Cached {@link ClassLoader} for the {@link IJavaProject}.
@@ -121,6 +105,17 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 			this.classLoader = null;
 			this.compiler = null;
 		});
+	}
+
+	/**
+	 * Disposes of resources.
+	 * 
+	 * @throws IOException If fails to dispose.
+	 */
+	public void dispose() throws IOException {
+		for (Closeable item : this.disposeItems) {
+			item.close();
+		}
 	}
 
 	/*
@@ -364,6 +359,27 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 
 		// Return the location
 		return location;
+	}
+
+	@Override
+	public String getPreference(String preferenceId) {
+		return AdaptedIdePlugin.getDefault().getPreferenceStore().getString(preferenceId);
+	}
+
+	@Override
+	public void setPreference(String preferenceId, String value) {
+		AdaptedIdePlugin.getDefault().getPreferenceStore().setValue(preferenceId, value);
+	}
+
+	@Override
+	public void resetPreference(String preferenceId) {
+		AdaptedIdePlugin.getDefault().getPreferenceStore().setToDefault(preferenceId);
+	}
+
+	@Override
+	public void addPreferenceListener(PreferenceListener listener) {
+		Closeable cleanup = AdaptedIdePlugin.getDefault().addPreferenceListener(listener);
+		this.disposeItems.add(cleanup);
 	}
 
 }

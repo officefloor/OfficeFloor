@@ -33,6 +33,7 @@
 		</repository>
 	</repositories>
 	<modules>
+		<module>shim</module>
 		<module>core</module>
 		<module>polyglot</module>
 		<module>server</module>
@@ -70,6 +71,18 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<!-- Shim -->
+			<dependency>
+				<groupId>net.officefloor.shim</groupId>
+				<artifactId>shim</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.shim</groupId>
+				<artifactId>officeshim_java8</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Editor -->
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
@@ -115,6 +128,11 @@
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.ide</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.ide.tests</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -1163,6 +1181,12 @@
 										<version>1.8</version>
 										<scope>system</scope>
 										<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
+									</extraClasspathElement>
+									<extraClasspathElement>
+										<groupId>net.officefloor.shim</groupId>
+										<artifactId>officeshim_java8</artifactId>
+										<version>${revision}</version>
+										<scope>compile</scope>
 									</extraClasspathElement>
 								</extraClasspathElements>
 							</configuration>
