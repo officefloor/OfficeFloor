@@ -85,15 +85,17 @@ img {
 			Eclipse installation) with location of JavaFx SDK substituted:
 	</ol>
 	<p class="instruction">
-		<span class="code">-Dosgi.framework.extensions=org.eclipse.fx.osgi</span><br />
 		<span class="code">-Defxclipse.java-modules.dir=<span
-			class="placeholder">&lt;path to JavaFx SDK lib folder&gt;</span></span>
+			class="placeholder">&lt;path to JavaFx SDK lib folder&gt;</span></span><br />
+		<span class="code">--add-modules=javafx.controls,javafx.swt</span><br />
+		<span class="code">-Dosgi.framework.extensions=org.eclipse.fx.osgi</span>
 	</p>
 	<p class="instruction">
 		<strong>Java 9/10</strong> add the following to eclipse.ini file
 		(located in Eclipse installation):
 	</p>
 	<p class="instruction">
+		<span class="code">--add-modules=javafx.controls,javafx.swt</span><br />
 		<span class="code">-Dosgi.framework.extensions=org.eclipse.fx.osgi</span>
 	</p>
 	<p class="instruction">

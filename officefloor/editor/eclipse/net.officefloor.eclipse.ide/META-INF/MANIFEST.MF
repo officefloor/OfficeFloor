@@ -15,7 +15,6 @@ Export-Package: net.officefloor.eclipse.bridge,
  net.officefloor.eclipse.ide.newwizard,
  net.officefloor.eclipse.ide.preferences
 Import-Package: com.google.inject,
- com.ibm.icu.text,
  org.eclipse.core.commands.common,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
