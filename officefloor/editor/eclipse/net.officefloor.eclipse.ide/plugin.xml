@@ -2,28 +2,6 @@
 <plugin>
 
 	<extension point="org.eclipse.ui.newWizards">
-		<wizard
-        category="net.officefloor.category"
-        class="net.officefloor.eclipse.ide.woof.WoofNewWizard"
-        icon="icons/OfficeFloor.png"
-        id="net.officefloor.eclipse.woof.WoofNewWizard"
-        name="WoOF"/>
-	</extension>
-	<extension point="org.eclipse.ui.editors"
-		id="net.officefloor.ui.OfficeFloorEditors" 
-		name="OfficeFloor Editors"
-		>
-		<editor
-        class="net.officefloor.eclipse.ide.woof.WoofEditPart"
-        contributorClass="net.officefloor.eclipse.ide.editor.IdeEditorActionBarContributor"
-        default="true"
-        extensions="woof"
-        icon="icons/OfficeFloor.png"
-        id="net.officefloor.eclipse.woof"
-        name="WoOF Editor"/>
-	</extension>
-
-	<extension point="org.eclipse.ui.newWizards">
 		<wizard 
 			id="net.officefloor.eclipse.section.SectionNewWizard"
 			class="net.officefloor.gef.section.SectionNewWizard"

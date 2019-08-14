@@ -41,10 +41,6 @@
 		</file>
 		<file>
 			<location>META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.eclipse.bridge;bundle-version="${project.version}"]]></contains>
-		</file>
-		<file>
-			<location>META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.eclipse.ide;bundle-version="${project.version}"]]></contains>
 		</file>
 	</files>

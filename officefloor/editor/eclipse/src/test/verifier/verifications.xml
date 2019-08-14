@@ -8,10 +8,6 @@
 
 		<!-- Core eclipse modules are inheriting correct version -->
 		<file>
-			<location>net.officefloor.eclipse.bridge/META-INF/MANIFEST.MF</location>
-			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
-		</file>
-		<file>
 			<location>net.officefloor.eclipse.ide/META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
 		</file>
