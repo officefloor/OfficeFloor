@@ -139,7 +139,7 @@
 						<configuration>
 							<target>
 								<artifact>
-									<groupId>${project.groupId}</groupId>
+									<groupId>net.officefloor.editor</groupId>
 									<artifactId>net.officefloor.gef.target</artifactId>
 									<version>${project.version}</version>
 									<classifier>2019-06</classifier>
@@ -180,7 +180,7 @@
 						<configuration>
 							<target>
 								<artifact>
-									<groupId>${project.groupId}</groupId>
+									<groupId>net.officefloor.editor</groupId>
 									<artifactId>net.officefloor.gef.target</artifactId>
 									<version>${project.version}</version>
 									<classifier>PHOTON</classifier>
@@ -231,7 +231,7 @@
 						<configuration>
 							<target>
 								<artifact>
-									<groupId>${project.groupId}</groupId>
+									<groupId>net.officefloor.editor</groupId>
 									<artifactId>net.officefloor.gef.target</artifactId>
 									<version>${project.version}</version>
 									<classifier>OXYGEN</classifier>

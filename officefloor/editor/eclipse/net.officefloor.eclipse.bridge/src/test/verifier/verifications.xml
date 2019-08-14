@@ -15,5 +15,9 @@
 			<location>META-INF/MANIFEST.MF</location>
 			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.core;bundle-version="${project.version}"]]></contains>
 		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.gef.bridge;bundle-version="${project.version}"]]></contains>
+		</file>
 	</files>
 </verifications>

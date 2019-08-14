@@ -174,12 +174,33 @@
 			<!-- Eclipse -->
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>eclipse</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.bridge</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.ide</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.launch</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.bridge</artifactId>
+				<artifactId>net.officefloor.eclipse.section</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.woof</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -1001,8 +1022,7 @@
 						<excludedPage>apidocs/**</excludedPage>
 					</excludedPages>
 					<excludedLinks>
-						<excludedLink>http://sourceforge.net/projects/officefloor
-						</excludedLink>
+						<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
 						<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
 						<excludedLink>//dl.acm.org/**</excludedLink>
 						<excludedLink>http://dl.acm.org/**</excludedLink>

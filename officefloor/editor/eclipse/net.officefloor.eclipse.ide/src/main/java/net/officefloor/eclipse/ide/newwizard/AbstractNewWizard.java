@@ -41,6 +41,8 @@ import org.eclipse.ui.ide.IDE;
 
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
+import net.officefloor.eclipse.bridge.EclipseEnvironmentBridge;
+import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.model.Model;
 
@@ -86,7 +88,8 @@ public abstract class AbstractNewWizard<R extends Model> extends Wizard implemen
 	 * 
 	 * @param editor {@link AbstractAdaptedIdeEditor}.
 	 */
-	public AbstractNewWizard(AbstractAdaptedIdeEditor<R, ?, ?> editor) {
+	public AbstractNewWizard() {
+		AbstractAdaptedIdeEditor<R, ?, ?> editor = this.createEditor(new EclipseEnvironmentBridge(null, null));
 		this.title = editor.getClass().getSimpleName();
 		this.description = "Create the " + this.title;
 		this.initialFileName = editor.fileName();
@@ -123,6 +126,14 @@ public abstract class AbstractNewWizard<R extends Model> extends Wizard implemen
 			}
 		}
 	}
+
+	/**
+	 * Creates the {@link AbstractAdaptedIdeEditor}.
+	 * 
+	 * @param envBridge {@link EnvironmentBridge}.
+	 * @return {@link AbstractAdaptedIdeEditor}.
+	 */
+	protected abstract AbstractAdaptedIdeEditor<R, ?, ?> createEditor(EnvironmentBridge envBridge);
 
 	/*
 	 * ================== IWorkbenchWizard =======================

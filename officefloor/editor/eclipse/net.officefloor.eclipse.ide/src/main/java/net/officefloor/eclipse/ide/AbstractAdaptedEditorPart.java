@@ -29,15 +29,18 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 
 import com.google.inject.Injector;
 
 import javafx.scene.Scene;
 import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.eclipse.bridge.EclipseEnvironmentBridge;
+import net.officefloor.eclipse.bridge.ProjectConfigurationContext;
 import net.officefloor.eclipse.ide.preferences.PreferencesEditorInput;
-import net.officefloor.gef.bridge.ClassLoaderEnvironmentBridge;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.model.Model;
@@ -75,11 +78,20 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 	 */
 
 	@Override
+	public void init(final IEditorSite site, final IEditorInput input) throws PartInitException {
+		this.setInput(input);
+		this.setSite(site);
+	}
+
+	@Override
 	public void createPartControl(Composite parent) {
 
 		// Determine the setup
 		EnvironmentBridge envBridge;
 		Consumer<AbstractAdaptedIdeEditor<R, RE, O>> loadModel;
+
+		// Obtain the parent shell
+		Shell parentShell = parent.getShell();
 
 		// Obtain the input configuration
 		IEditorInput input = this.getEditorInput();
@@ -98,20 +110,18 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 			// Obtain the java project
 			IJavaProject javaProject = JavaCore.create(project);
 
-			// Obtain the parent shell
-			Shell parentShell = parent.getShell();
-
 			// Create the Eclipse environment
 			envBridge = new EclipseEnvironmentBridge(javaProject, parentShell);
 
 		} else if (input instanceof PreferencesEditorInput) {
 			// Provided the model
 			PreferencesEditorInput preferencesInput = (PreferencesEditorInput) input;
+			@SuppressWarnings("unchecked")
 			R model = (R) preferencesInput.getRootModel();
 			loadModel = (editor) -> this.editor.setModel(model);
 
-			// No project, so just use plugin class path
-			envBridge = new ClassLoaderEnvironmentBridge(this.getClass().getClassLoader());
+			// No project
+			envBridge = new EclipseEnvironmentBridge(null, parentShell);
 
 		} else {
 			// Unknown editor input

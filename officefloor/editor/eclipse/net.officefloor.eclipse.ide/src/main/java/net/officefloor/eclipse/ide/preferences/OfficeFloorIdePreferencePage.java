@@ -17,14 +17,9 @@
  */
 package net.officefloor.eclipse.ide.preferences;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.CoreException;
@@ -45,39 +40,25 @@ import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
-import javafx.embed.swt.FXCanvas;
-import net.officefloor.eclipse.ide.OfficeFloorIdePlugin;
-import net.officefloor.eclipse.ide.editor.AbstractAdaptedIdeEditor;
-import net.officefloor.eclipse.ide.editor.AbstractItem;
-import net.officefloor.eclipse.ide.editor.AbstractItem.IdeChildrenGroup;
-import net.officefloor.eclipse.ide.editor.AbstractItem.IdeLabeller;
-import net.officefloor.gef.editor.AdaptedModelStyler;
-import net.officefloor.gef.editor.AdaptedParent;
-import net.officefloor.gef.editor.EditorStyler;
-import net.officefloor.gef.editor.PaletteIndicatorStyler;
-import net.officefloor.gef.editor.PaletteStyler;
-import net.officefloor.gef.editor.SelectOnly;
-import net.officefloor.model.Model;
+import net.officefloor.eclipse.bridge.AdaptedIdePlugin;
+import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
+import net.officefloor.gef.ide.editor.AbstractItem;
+import net.officefloor.gef.ide.editor.AbstractItem.IdeChildrenGroup;
 
 /**
  * {@link IWorkbenchPreferencePage}.
  * 
  * @author Daniel Sagenschneider
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings("rawtypes")
 public class OfficeFloorIdePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	/**
@@ -136,113 +117,113 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 			editorTab.setText(wrapper.editorName);
 			wrapper.setTabItem(editorTab);
 
-			// Load the editor to configure preferences
-			try {
-
-				// Create the root model
-				Model rootModel = editor.prototype();
-
-				// Initialise the editor
-				IEditorSite editorSite = new PreferencesEditorSite(wrapper.editorName, this.workbench,
-						parent.getShell());
-				IEditorInput editorInput = new PreferencesEditorInput(wrapper.editorName, rootModel);
-				editor.init(editorSite, editorInput);
-
-				// Provide select only for styling
-				Map<Model, ModelPreferenceStyler> modelStylers = new HashMap<>();
-				Map<Class<? extends Model>, ModelPreferenceStyler> parentStylers = new HashMap<>();
-				editor.setSelectOnly(new SelectOnly() {
-
-					private NodePreferenceStyler paletteIndicator = null;
-
-					private NodePreferenceStyler palette = null;
-
-					private NodePreferenceStyler content = null;
-
-					@Override
-					public void paletteIndicator(PaletteIndicatorStyler styler) {
-						if (this.paletteIndicator == null) {
-							this.paletteIndicator = new NodePreferenceStyler("Palette Indicator",
-									"JavaFx CSS rules for the palette indicator", styler.getPaletteIndicator(),
-									editor.getPaletteIndicatorStyleId(), styler.paletteIndicatorStyle(),
-									editor.paletteIndicatorStyle(), wrapper.preferencesToChange,
-									editor.getCanvas().getScene(), parentShell);
-						}
-						this.paletteIndicator.open();
-					}
-
-					@Override
-					public void palette(PaletteStyler styler) {
-						if (this.palette == null) {
-							this.palette = new NodePreferenceStyler("Palette", "JavaFx CSS rules for the palette",
-									styler.getPalette(), editor.getPaletteStyleId(), styler.paletteStyle(),
-									editor.paletteStyle(), wrapper.preferencesToChange, editor.getCanvas().getScene(),
-									parentShell);
-						}
-						this.palette.open();
-					}
-
-					@Override
-					public void editor(EditorStyler styler) {
-						if (this.content == null) {
-							this.content = new NodePreferenceStyler("Editor", "JavaFx CSS rules for the editor",
-									styler.getEditor(), editor.getEditorStyleId(), styler.editorStyle(),
-									editor.editorStyle(), wrapper.preferencesToChange, editor.getCanvas().getScene(),
-									parentShell);
-						}
-						this.content.open();
-					}
-
-					@Override
-					public void model(AdaptedModelStyler styler) {
-						// Open styling for the model
-						Model model = styler.getModel();
-						ModelPreferenceStyler modelStyler = modelStylers.get(model);
-						if (modelStyler == null) {
-							modelStyler = parentStylers.get(model.getClass());
-						}
-						modelStyler.open();
-					}
-				});
-
-				// Display the editor
-				editor.createPartControl(this.editorTabs);
-				editorTab.setControl(editor.getCanvas());
-
-				// Load the prototype of all models
-				AbstractItem<?, ?, ?, ?, ?, ?>[] parentItems = editor.getParents();
-				for (int i = 0; i < parentItems.length; i++) {
-					AbstractItem<?, ?, ?, ?, ?, ?> parentItem = parentItems[i];
-
-					// Load the prototype model
-					final int index = i;
-					this.loadPrototypeModel(rootModel, parentItem, true, modelStylers, wrapper, parent.getShell(),
-							(model, styler) -> {
-								// Space out the prototypes
-								model.setX(300);
-								model.setY(10 + (100 * index));
-
-								// Register parents (prototypes in palette different instance)
-								parentStylers.put(model.getClass(), styler);
-							});
-				}
-
-			} catch (Throwable ex) {
-
-				// Dispose the canvas if created
-				FXCanvas canvas = editor.getCanvas();
-				if (canvas != null) {
-					canvas.dispose();
-				}
-
-				// Indicate failure to load editor
-				Text error = new Text(this.editorTabs, SWT.MULTI);
-				StringWriter stackTrace = new StringWriter();
-				ex.printStackTrace(new PrintWriter(stackTrace));
-				error.setText("Failed to load editor for configuring.\n\n" + stackTrace.toString());
-				error.setEditable(false);
-				editorTab.setControl(error);
-			}
+//			// Load the editor to configure preferences
+//			try {
+//
+//				// Create the root model
+//				Model rootModel = editor.prototype();
+//
+//				// Initialise the editor
+//				IEditorSite editorSite = new PreferencesEditorSite(wrapper.editorName, this.workbench,
+//						parent.getShell());
+//				IEditorInput editorInput = new PreferencesEditorInput(wrapper.editorName, rootModel);
+//				editor.init(editorSite, editorInput);
+//
+//				// Provide select only for styling
+//				Map<Model, ModelPreferenceStyler> modelStylers = new HashMap<>();
+//				Map<Class<? extends Model>, ModelPreferenceStyler> parentStylers = new HashMap<>();
+//				editor.setSelectOnly(new SelectOnly() {
+//
+//					private NodePreferenceStyler paletteIndicator = null;
+//
+//					private NodePreferenceStyler palette = null;
+//
+//					private NodePreferenceStyler content = null;
+//
+//					@Override
+//					public void paletteIndicator(PaletteIndicatorStyler styler) {
+//						if (this.paletteIndicator == null) {
+//							this.paletteIndicator = new NodePreferenceStyler("Palette Indicator",
+//									"JavaFx CSS rules for the palette indicator", styler.getPaletteIndicator(),
+//									editor.getPaletteIndicatorStyleId(), styler.paletteIndicatorStyle(),
+//									editor.paletteIndicatorStyle(), wrapper.preferencesToChange,
+//									editor.getCanvas().getScene(), parentShell);
+//						}
+//						this.paletteIndicator.open();
+//					}
+//
+//					@Override
+//					public void palette(PaletteStyler styler) {
+//						if (this.palette == null) {
+//							this.palette = new NodePreferenceStyler("Palette", "JavaFx CSS rules for the palette",
+//									styler.getPalette(), editor.getPaletteStyleId(), styler.paletteStyle(),
+//									editor.paletteStyle(), wrapper.preferencesToChange, editor.getCanvas().getScene(),
+//									parentShell);
+//						}
+//						this.palette.open();
+//					}
+//
+//					@Override
+//					public void editor(EditorStyler styler) {
+//						if (this.content == null) {
+//							this.content = new NodePreferenceStyler("Editor", "JavaFx CSS rules for the editor",
+//									styler.getEditor(), editor.getEditorStyleId(), styler.editorStyle(),
+//									editor.editorStyle(), wrapper.preferencesToChange, editor.getCanvas().getScene(),
+//									parentShell);
+//						}
+//						this.content.open();
+//					}
+//
+//					@Override
+//					public void model(AdaptedModelStyler styler) {
+//						// Open styling for the model
+//						Model model = styler.getModel();
+//						ModelPreferenceStyler modelStyler = modelStylers.get(model);
+//						if (modelStyler == null) {
+//							modelStyler = parentStylers.get(model.getClass());
+//						}
+//						modelStyler.open();
+//					}
+//				});
+//
+//				// Display the editor
+//				editor.createPartControl(this.editorTabs);
+//				editorTab.setControl(editor.getCanvas());
+//
+//				// Load the prototype of all models
+//				AbstractItem<?, ?, ?, ?, ?, ?>[] parentItems = editor.getParents();
+//				for (int i = 0; i < parentItems.length; i++) {
+//					AbstractItem<?, ?, ?, ?, ?, ?> parentItem = parentItems[i];
+//
+//					// Load the prototype model
+//					final int index = i;
+//					this.loadPrototypeModel(rootModel, parentItem, true, modelStylers, wrapper, parent.getShell(),
+//							(model, styler) -> {
+//								// Space out the prototypes
+//								model.setX(300);
+//								model.setY(10 + (100 * index));
+//
+//								// Register parents (prototypes in palette different instance)
+//								parentStylers.put(model.getClass(), styler);
+//							});
+//				}
+//
+//			} catch (Throwable ex) {
+//
+//				// Dispose the canvas if created
+//				FXCanvas canvas = editor.getCanvas();
+//				if (canvas != null) {
+//					canvas.dispose();
+//				}
+//
+//				// Indicate failure to load editor
+//				Text error = new Text(this.editorTabs, SWT.MULTI);
+//				StringWriter stackTrace = new StringWriter();
+//				ex.printStackTrace(new PrintWriter(stackTrace));
+//				error.setText("Failed to load editor for configuring.\n\n" + stackTrace.toString());
+//				error.setEditable(false);
+//				editorTab.setControl(error);
+//			}
 		}
 
 		// Let the active editor handle being active
@@ -256,88 +237,6 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 		}
 	}
 
-	/**
-	 * Recursively loads the prototype {@link Model}.
-	 * 
-	 * @param parentModel   Parent {@link Model}.
-	 * @param item          {@link AbstractItem} to have its prototype loaded into
-	 *                      the {@link Model}.
-	 * @param isParent      Indicate if {@link AdaptedParent}.
-	 * @param modelStylers  {@link Map} of {@link Model} to
-	 *                      {@link ModelPreferenceStyler} to be populated.
-	 * @param editorWrapper {@link EditorWrapper}.
-	 * @param parentShell   Parent {@link Shell}.
-	 * @param decorator     Decorator on the {@link Model}.
-	 * @return Prototype {@link Model} from the {@link AbstractItem}.
-	 */
-	private Model loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent,
-			Map<Model, ModelPreferenceStyler> modelStylers, EditorWrapper editorWrapper, Shell parentShell,
-			BiConsumer<Model, ModelPreferenceStyler> decorator) {
-
-		// Obtain the prototype for the item
-		Model itemModel = item.prototype();
-
-		// Obtain label for the item
-		IdeLabeller labeller = item.label();
-		String itemName = (labeller == null) ? null : labeller.getLabel(itemModel);
-		if ((itemName == null) || (itemName.trim().length() == 0)) {
-			itemName = item.getClass().getSimpleName();
-		}
-		final String itemLabel = itemName;
-
-		// Obtain preference style identifier
-		String preferenceStyleId = item.getPreferenceStyleId();
-
-		// Obtain the style property to change the appearance
-		Property<String> style = item.getBuilder().style();
-
-		// Obtain the styling
-		IPreferenceStore preferences = this.getPreferenceStore();
-		String defaultStyle = item.style();
-		String overrideStyle = preferences.getString(preferenceStyleId);
-
-		// Create the style property
-		Property<String> rawStyle = new SimpleStringProperty(
-				(overrideStyle != null) && (overrideStyle.trim().length() > 0) ? overrideStyle : defaultStyle);
-		rawStyle.addListener((event, oldValue, newValue) -> {
-			// Translate and update the style
-			String translatedStyle = AbstractAdaptedIdeEditor.translateStyle(newValue, item);
-			style.setValue(translatedStyle);
-		});
-		preferences.addPropertyChangeListener((event) -> {
-			// Update style on preference changes (typically reseting to defaults)
-			if (preferenceStyleId.equals(event.getProperty())) {
-				String updatedStyle = preferences.getString(preferenceStyleId);
-				String newRawStyle = (updatedStyle != null) && (updatedStyle.trim().length() > 0) ? updatedStyle
-						: defaultStyle;
-				rawStyle.setValue(newRawStyle);
-			}
-		});
-
-		// Create and register the model styler
-		ModelPreferenceStyler styler = new ModelPreferenceStyler(parentShell, item, itemModel, itemLabel, isParent,
-				rawStyle, defaultStyle, editorWrapper.preferencesToChange);
-		modelStylers.put(itemModel, styler);
-
-		// Determine if decorate the model
-		if (decorator != null) {
-			decorator.accept(itemModel, styler);
-		}
-
-		// Connect into the model
-		item.loadToParent(parentModel, itemModel);
-
-		// Load child items
-		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {
-			for (AbstractItem child : childrenGroup.getChildren()) {
-				this.loadPrototypeModel(itemModel, child, false, modelStylers, editorWrapper, parentShell, null);
-			}
-		}
-
-		// Return the item model
-		return itemModel;
-	}
-
 	/*
 	 * ================ IWorkbenchPreferencePage =================
 	 */
@@ -349,7 +248,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 	@Override
 	protected IPreferenceStore doGetPreferenceStore() {
-		return OfficeFloorIdePlugin.getDefault().getPreferenceStore();
+		return AdaptedIdePlugin.getDefault().getPreferenceStore();
 	}
 
 	@Override

@@ -29,11 +29,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import net.officefloor.eclipse.bridge.AbstractIdeEclipseEditor;
-
 /**
- * {@link IEditorSite} to load {@link AbstractIdeEclipseEditor} for preference
- * configuration.
+ * {@link IEditorSite} for preference configuration.
  * 
  * @author Daniel Sagenschneider
  */
@@ -41,7 +38,7 @@ import net.officefloor.eclipse.bridge.AbstractIdeEclipseEditor;
 public class PreferencesEditorSite implements IEditorSite {
 
 	/**
-	 * Name of the {@link AbstractIdeEclipseEditor}.
+	 * Name of the editor.
 	 */
 	private final String editorName;
 
@@ -58,12 +55,9 @@ public class PreferencesEditorSite implements IEditorSite {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param editorName
-	 *            Name of the editor.
-	 * @param workbench
-	 *            {@link IWorkbench}.
-	 * @param parentShell
-	 *            Parent {@link Shell}.
+	 * @param editorName  Name of the editor.
+	 * @param workbench   {@link IWorkbench}.
+	 * @param parentShell Parent {@link Shell}.
 	 */
 	public PreferencesEditorSite(String editorName, IWorkbench workbench, Shell parentShell) {
 		this.editorName = editorName;

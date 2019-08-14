@@ -19,7 +19,6 @@ package net.officefloor.eclipse.ide.swt;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.eclipse.e4.ui.css.swt.theme.ITheme;
 import org.eclipse.e4.ui.css.swt.theme.IThemeEngine;
@@ -36,7 +35,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
@@ -48,7 +46,6 @@ import org.w3c.dom.css.CSSStyleDeclaration;
 import org.w3c.dom.css.CSSValue;
 import org.w3c.dom.css.RGBColor;
 
-import javafx.beans.property.Property;
 import javafx.scene.paint.Color;
 
 /**
@@ -104,67 +101,6 @@ public class SwtUtil {
 		};
 		text.addListener(SWT.Resize, scrollBarListener);
 		text.addListener(SWT.Modify, scrollBarListener);
-	}
-
-	/**
-	 * Creates a {@link Label} to display the error {@link Property}.
-	 * 
-	 * @param parent        {@link Composite}.
-	 * @param errorProperty Error {@link Property}.
-	 * @return {@link Label}.
-	 */
-	public static Label label(Composite parent, Property<String> errorProperty) {
-		Label label = new Label(parent, SWT.NONE);
-		label.setText("");
-		errorProperty.addListener((text) -> label.setText(null));
-		return label;
-	}
-	/**
-	 * Registers {@link StyledText} for tracking CSS errors.
-	 * 
-	 * @param text         {@link StyledText} for tracking CSS errors.
-	 * @param initialStyle Initial style.
-	 * @param translator   Optional translator of the CSS. May be <code>null</code>.
-	 */
-	public void registerText(StyledText text, String initialStyle, Function<String, String> translator) {
-		if (initialStyle != null) {
-			text.setText(initialStyle);
-		}
-		text.addListener(SWT.Modify, (event) -> this.loadStyle(text.getText(), translator));
-	}
-
-	/**
-	 * Registers {@link Text} for tracking CSS errors.
-	 * 
-	 * @param text         {@link Text} for tracking CSS errors.
-	 * @param initialStyle Initial style.
-	 * @param translator   Optional translator of the CSS. May be <code>null</code>.
-	 */
-	public void registerText(Text text, String initialStyle, Function<String, String> translator) {
-		if (initialStyle != null) {
-			text.setText(initialStyle);
-		}
-		text.addListener(SWT.Modify, (event) -> this.loadStyle(text.getText(), translator));
-	}
-
-	/**
-	 * Specifies the CSS error.
-	 * 
-	 * @param message CSS error message.
-	 */
-	private void setCssError(String message) {
-
-		// Handle being disposed before CSS error event
-		if (this.cssErrorLabel.isDisposed()) {
-			return;
-		}
-
-		// Display the CSS error
-		this.cssErrorLabel.setText(" " + message);
-		this.cssErrorLabel.setToolTipText(message);
-		this.cssErrorLabel
-				.setForeground(this.cssErrorLabel.getShell().getDisplay().getSystemColor(SWT.COLOR_DARK_YELLOW));
-		this.cssErrorDecoration.show();
 	}
 
 	/**

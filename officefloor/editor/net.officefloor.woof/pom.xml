@@ -8,7 +8,7 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>net.officefloor.woof</artifactId>
-	<name>Eclipse WoOF</name>
+	<name>OfficeFloor WoOF for Editor</name>
 	<description>OfficeFloor WoOF Eclipse plug-in</description>
 	<packaging>eclipse-plugin</packaging>
 	<properties>

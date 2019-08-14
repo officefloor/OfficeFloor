@@ -8,7 +8,7 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>net.officefloor.core</artifactId>
-	<name>Eclipse Core for Editor</name>
+	<name>OfficeFloor Core for Editor</name>
 	<description>OfficeFloor core Editor</description>
 	<packaging>eclipse-plugin</packaging>
 	<properties>

@@ -2,7 +2,7 @@
 	<files>
 		<!-- Ensure using latest version -->
 		<file>
-			<location>${basedir}/../../pom.xml</location>
+			<location>${basedir}/../../../pom.xml</location>
 			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
 		</file>
 

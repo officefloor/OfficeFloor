@@ -55,6 +55,15 @@ public class AdaptedIdePlugin extends AbstractUIPlugin {
 	}
 
 	/**
+	 * Provide means to obtain {@link IPreferenceStore}.
+	 * 
+	 * @return {@link IPreferenceStore}.
+	 */
+	public IPreferenceStore getPreferenceStore() {
+		return super.getPreferenceStore();
+	}
+
+	/**
 	 * Adds a {@link PreferenceListener}.
 	 * 
 	 * @param listener {@link PreferenceListener}.

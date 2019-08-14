@@ -20,6 +20,8 @@ package net.officefloor.eclipse.ide.section;
 import org.eclipse.ui.INewWizard;
 
 import net.officefloor.eclipse.ide.newwizard.AbstractNewWizard;
+import net.officefloor.gef.bridge.EnvironmentBridge;
+import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.gef.section.SectionEditor;
 import net.officefloor.model.section.SectionModel;
 
@@ -30,11 +32,9 @@ import net.officefloor.model.section.SectionModel;
  */
 public class SectionNewWizard extends AbstractNewWizard<SectionModel> {
 
-	/**
-	 * Instantiate.
-	 */
-	public SectionNewWizard() {
-		super(new SectionEditor());
+	@Override
+	protected AbstractAdaptedIdeEditor<SectionModel, ?, ?> createEditor(EnvironmentBridge envBridge) {
+		return new SectionEditor(envBridge);
 	}
 
 }
