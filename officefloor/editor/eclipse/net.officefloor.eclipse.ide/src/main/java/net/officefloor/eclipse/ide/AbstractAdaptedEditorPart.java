@@ -17,6 +17,7 @@
  */
 package net.officefloor.eclipse.ide;
 
+import java.lang.reflect.Proxy;
 import java.util.function.Consumer;
 
 import org.eclipse.core.resources.IFile;
@@ -50,17 +51,33 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum<RE>, O> extends EditorPart {
+public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum<RE>, O> extends AbstractFXEditor {
+
+	/**
+	 * {@link Injector} that does nothing, so can use {@link AbstractFXEditor} as
+	 * super {@link Class} (requirement of constructor).
+	 */
+	private static final Injector doNothingInjector;
+
+	static {
+		try {
+			doNothingInjector = (Injector) Proxy.newProxyInstance(AbstractAdaptedEditorPart.class.getClassLoader(),
+					new Class[] { Injector.class }, (proxy, method, args) -> null);
+		} catch (Exception ex) {
+			// Invalid, as should create proxy
+			throw new IllegalStateException("Unable to create Injector mock for loading class", ex);
+		}
+	}
+
+	/**
+	 * {@link EclipseEnvironmentBridge}.
+	 */
+	private EclipseEnvironmentBridge envBridge;
 
 	/**
 	 * {@link AbstractAdaptedIdeEditor}.
 	 */
 	private AbstractAdaptedIdeEditor<R, RE, O> editor;
-
-	/**
-	 * {@link FxToSwt}.
-	 */
-	private FxToSwt fxToSwt;
 
 	/**
 	 * Creates the {@link AbstractAdaptedIdeEditor}.
@@ -73,28 +90,25 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 	 */
 	protected abstract AbstractAdaptedIdeEditor<R, RE, O> createEditor(EnvironmentBridge envBridge);
 
+	/**
+	 * Instantiate.
+	 */
+	public AbstractAdaptedEditorPart() {
+		super(doNothingInjector);
+	}
+
 	/*
 	 * ====================== EditorPart ============================
 	 */
 
 	@Override
-	public void init(final IEditorSite site, final IEditorInput input) throws PartInitException {
-		this.setInput(input);
-		this.setSite(site);
-	}
-
-	@Override
-	public void createPartControl(Composite parent) {
+	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 
 		// Determine the setup
-		EnvironmentBridge envBridge;
+		EclipseEnvironmentBridge envBridge;
 		Consumer<AbstractAdaptedIdeEditor<R, RE, O>> loadModel;
 
-		// Obtain the parent shell
-		Shell parentShell = parent.getShell();
-
 		// Obtain the input configuration
-		IEditorInput input = this.getEditorInput();
 		if (input instanceof IFileEditorInput) {
 			// Load the configuration item from the file
 			IFileEditorInput fileInput = (IFileEditorInput) input;
@@ -111,7 +125,7 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 			IJavaProject javaProject = JavaCore.create(project);
 
 			// Create the Eclipse environment
-			envBridge = new EclipseEnvironmentBridge(javaProject, parentShell);
+			envBridge = new EclipseEnvironmentBridge(javaProject);
 
 		} else if (input instanceof PreferencesEditorInput) {
 			// Provided the model
@@ -121,93 +135,62 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 			loadModel = (editor) -> this.editor.setModel(model);
 
 			// No project
-			envBridge = new EclipseEnvironmentBridge(null, parentShell);
+			envBridge = new EclipseEnvironmentBridge(null);
 
 		} else {
 			// Unknown editor input
 			throw new IllegalStateException("Unable to edit input " + input.getClass().getName());
 		}
 
-		// Create the editor
+		// Specify initialise details
+		this.envBridge = envBridge;
+
+		// Create and initialise the editor
 		this.editor = this.createEditor(envBridge);
 		this.editor.init(new MvcFxUiModule(), (injector) -> {
-			this.fxToSwt = new FxToSwt(injector);
-			return this.fxToSwt.getDomain();
+			injector.injectMembers(this);
+			return this.getDomain();
 		});
 		loadModel.accept(this.editor);
 
-		// Initialise
-		try {
-			this.fxToSwt.init(this.getEditorSite(), input);
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
-
-		// Create the view
-		this.fxToSwt.createPartControl(parent);
+		// Initialise parent
+		super.init(site, input);
 	}
 
 	@Override
-	public void setFocus() {
-		this.fxToSwt.setFocus();
+	public void createPartControl(Composite parent) {
+
+		// Obtain the parent shell
+		Shell parentShell = parent.getShell();
+		this.envBridge.init(parentShell);
+
+		// Create the visual
+		super.createPartControl(parent);
 	}
 
 	@Override
-	public boolean isDirty() {
-		return this.fxToSwt.isDirty();
+	protected void hookViewers() {
+
+		// Load the view
+		this.editor.loadView((view) -> {
+			this.getCanvas().setScene(new Scene(view));
+		});
 	}
 
 	@Override
 	public boolean isSaveAsAllowed() {
-		return this.fxToSwt.isSaveAsAllowed();
+		return true;
 	}
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		this.fxToSwt.doSave(monitor);
+		AbstractAdaptedEditorPart.this.editor.save();
 	}
 
 	@Override
 	public void doSaveAs() {
-		this.fxToSwt.doSaveAs();
-	}
-
-	/**
-	 * FX to SWT adapting.
-	 */
-	private class FxToSwt extends AbstractFXEditor {
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param injector {@link Injector}.
-		 */
-		public FxToSwt(Injector injector) {
-			super(injector);
-		}
-
-		@Override
-		protected void hookViewers() {
-			AbstractAdaptedEditorPart.this.editor.loadView((view) -> {
-				this.getCanvas().setScene(new Scene(view));
-			});
-		}
-
-		@Override
-		public boolean isSaveAsAllowed() {
-			return true;
-		}
-
-		@Override
-		public void doSaveAs() {
-			// TODO implement EditorPart.doSaveAs
-			throw new UnsupportedOperationException("TODO implement EditorPart.doSaveAs");
-		}
-
-		@Override
-		public void doSave(IProgressMonitor monitor) {
-			AbstractAdaptedEditorPart.this.editor.save();
-		}
+		// TODO implement EditorPart.doSaveAs
+		throw new UnsupportedOperationException("TODO implement EditorPart.doSaveAs");
 	}
 
 }

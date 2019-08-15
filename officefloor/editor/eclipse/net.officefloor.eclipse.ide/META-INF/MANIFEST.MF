@@ -57,3 +57,5 @@ Import-Package: com.google.inject,
  org.osgi.framework,
  org.slf4j
 Automatic-Module-Name: net.officefloor.eclipse.ide
+Bundle-Activator: net.officefloor.eclipse.bridge.AdaptedIdePlugin
+Bundle-ActivationPolicy: lazy

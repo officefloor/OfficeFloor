@@ -33,6 +33,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -66,14 +67,14 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 	private final IJavaProject javaProject;
 
 	/**
-	 * Parent {@link Shell}.
-	 */
-	private final Shell parentShell;
-
-	/**
 	 * Items to dispose.
 	 */
 	private final List<Closeable> disposeItems = new LinkedList<>();
+
+	/**
+	 * Parent {@link Shell}.
+	 */
+	private Shell parentShell;
 
 	/**
 	 * Cached {@link ClassLoader} for the {@link IJavaProject}.
@@ -86,14 +87,12 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 	private OfficeFloorCompiler compiler = null;
 
 	/**
-	 * Instantiate.
+	 * Instantiate for {@link IJavaProject} specific bridging.
 	 * 
 	 * @param javaProject {@link IJavaProject}.
-	 * @param parentShell Parent {@link Shell}.
 	 */
-	public EclipseEnvironmentBridge(IJavaProject javaProject, Shell parentShell) {
+	public EclipseEnvironmentBridge(IJavaProject javaProject) {
 		this.javaProject = javaProject;
-		this.parentShell = parentShell;
 
 		/*
 		 * Listen to java changes to see if class path has become invalid.
@@ -101,10 +100,28 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 		 * Note: rather than determine if particular project is changed, easier to just
 		 * reconstruct class path again on any change.
 		 */
-		JavaCore.addElementChangedListener((event) -> {
+		IElementChangedListener listener = (event) -> {
 			this.classLoader = null;
 			this.compiler = null;
-		});
+		};
+		JavaCore.addElementChangedListener(listener);
+		this.disposeItems.add(() -> JavaCore.removeElementChangedListener(listener));
+	}
+
+	/**
+	 * Initialise for non {@link IJavaProject} specific bridging.
+	 */
+	public EclipseEnvironmentBridge() {
+		this.javaProject = null;
+	}
+
+	/**
+	 * Initialise.
+	 * 
+	 * @param parentShell Parent {@link Shell}.
+	 */
+	public void init(Shell parentShell) {
+		this.parentShell = parentShell;
 	}
 
 	/**
@@ -118,6 +135,19 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 		}
 	}
 
+	/**
+	 * Ensures obtains the {@link IJavaProject}.
+	 * 
+	 * @return {@link IJavaProject}.
+	 */
+	private IJavaProject getJavaProject() {
+		if (this.javaProject == null) {
+			throw new IllegalStateException("Attempting " + IJavaProject.class.getSimpleName()
+					+ " specific bridging outside " + IJavaProject.class.getSimpleName() + " context");
+		}
+		return this.javaProject;
+	}
+
 	/*
 	 * ==================== EnvironmentBridge =====================
 	 */
@@ -126,7 +156,7 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 	public boolean isClassOnClassPath(String className) throws Exception {
 
 		// Use java project to determine if on class path
-		IType type = this.javaProject.findType(className, (IProgressMonitor) null);
+		IType type = this.getJavaProject().findType(className, (IProgressMonitor) null);
 		return (type != null);
 	}
 
@@ -134,13 +164,13 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 	public boolean isSuperType(String className, String superTypeName) throws Exception {
 
 		// Obtain the class type
-		IType type = this.javaProject.findType(className);
+		IType type = this.getJavaProject().findType(className);
 		if (type == null) {
 			throw new ClassNotFoundException("Class " + className + " not on class path");
 		}
 
 		// Obtain the super type from the project
-		IType superType = this.javaProject.findType(superTypeName);
+		IType superType = this.getJavaProject().findType(superTypeName);
 		if (superType == null) {
 			throw new ClassNotFoundException("Please add " + superTypeName + " to the class path");
 		}
@@ -160,15 +190,15 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 			IJavaSearchScope scope = null;
 			if (superTypeName != null) {
 				// Obtain the super type from the project
-				IType superType = this.javaProject.findType(superTypeName);
+				IType superType = this.getJavaProject().findType(superTypeName);
 				if (superType != null) {
 					// Search for sub type class
-					scope = SearchEngine.createStrictHierarchyScope(javaProject, superType, true, true, null);
+					scope = SearchEngine.createStrictHierarchyScope(this.getJavaProject(), superType, true, true, null);
 				}
 			}
 			if (scope == null) {
 				// No hierarchy, so search for any class
-				scope = SearchEngine.createJavaSearchScope(new IJavaProject[] { javaProject }, true);
+				scope = SearchEngine.createJavaSearchScope(new IJavaProject[] { this.getJavaProject() }, true);
 			}
 
 			// Search for any class
@@ -213,7 +243,7 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 		if (this.classLoader == null) {
 
 			// Obtain the class path for the project
-			String[] classPathEntries = JavaRuntime.computeDefaultRuntimeClassPath(this.javaProject);
+			String[] classPathEntries = JavaRuntime.computeDefaultRuntimeClassPath(this.getJavaProject());
 			URL[] urls = new URL[classPathEntries.length];
 			for (int i = 0; i < classPathEntries.length; i++) {
 				String path = classPathEntries[i];
@@ -277,7 +307,7 @@ public class EclipseEnvironmentBridge implements EnvironmentBridge {
 
 		// Obtain the selected file
 		FilteredResourcesSelectionDialog dialog = new FilteredResourcesSelectionDialog(parentShell, false,
-				this.javaProject.getProject(), IResource.FILE);
+				this.getJavaProject().getProject(), IResource.FILE);
 		dialog.setInitialPattern(filter);
 		dialog.setBlockOnOpen(true);
 		dialog.open();

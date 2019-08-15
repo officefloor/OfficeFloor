@@ -89,7 +89,7 @@ public abstract class AbstractNewWizard<R extends Model> extends Wizard implemen
 	 * @param editor {@link AbstractAdaptedIdeEditor}.
 	 */
 	public AbstractNewWizard() {
-		AbstractAdaptedIdeEditor<R, ?, ?> editor = this.createEditor(new EclipseEnvironmentBridge(null, null));
+		AbstractAdaptedIdeEditor<R, ?, ?> editor = this.createEditor(new EclipseEnvironmentBridge());
 		this.title = editor.getClass().getSimpleName();
 		this.description = "Create the " + this.title;
 		this.initialFileName = editor.fileName();
