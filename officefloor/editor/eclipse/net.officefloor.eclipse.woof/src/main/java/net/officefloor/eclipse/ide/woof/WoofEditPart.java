@@ -33,7 +33,7 @@ import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 public class WoofEditPart extends AbstractAdaptedEditorPart<WoofModel, WoofEvent, WoofChanges> {
 
 	@Override
-	protected AbstractAdaptedIdeEditor<WoofModel, WoofEvent, WoofChanges> createEditor(EnvironmentBridge envBridge) {
+	public AbstractAdaptedIdeEditor<WoofModel, WoofEvent, WoofChanges> createEditor(EnvironmentBridge envBridge) {
 		return new WoofEditor(envBridge);
 	}
 

@@ -17,12 +17,14 @@
  */
 package net.officefloor.eclipse.ide;
 
+import java.io.IOException;
 import java.lang.reflect.Proxy;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.gef.mvc.fx.domain.IDomain;
 import org.eclipse.gef.mvc.fx.ui.MvcFxUiModule;
 import org.eclipse.gef.mvc.fx.ui.parts.AbstractFXEditor;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,6 +36,8 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Injector;
 
@@ -41,7 +45,6 @@ import javafx.scene.Scene;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.eclipse.bridge.EclipseEnvironmentBridge;
 import net.officefloor.eclipse.bridge.ProjectConfigurationContext;
-import net.officefloor.eclipse.ide.preferences.PreferencesEditorInput;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.model.Model;
@@ -52,6 +55,21 @@ import net.officefloor.model.Model;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum<RE>, O> extends AbstractFXEditor {
+
+	/**
+	 * {@link Logger}.
+	 */
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAdaptedEditorPart.class);
+
+	/**
+	 * Initialises the {@link AbstractAdaptedIdeEditor}.
+	 * 
+	 * @param editor      {@link AbstractAdaptedIdeEditor} to initialise.
+	 * @param initialiser Initialiser of the {@link AbstractAdaptedIdeEditor}.
+	 */
+	public static void initEditor(AbstractAdaptedIdeEditor<?, ?, ?> editor, Function<Injector, IDomain> initialiser) {
+		editor.init(new MvcFxUiModule(), initialiser);
+	}
 
 	/**
 	 * {@link Injector} that does nothing, so can use {@link AbstractFXEditor} as
@@ -88,7 +106,7 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 	 * @param envBridge {@link EnvironmentBridge}.
 	 * @return {@link AbstractAdaptedIdeEditor}.
 	 */
-	protected abstract AbstractAdaptedIdeEditor<R, RE, O> createEditor(EnvironmentBridge envBridge);
+	public abstract AbstractAdaptedIdeEditor<R, RE, O> createEditor(EnvironmentBridge envBridge);
 
 	/**
 	 * Instantiate.
@@ -104,54 +122,34 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 
-		// Determine the setup
-		EclipseEnvironmentBridge envBridge;
-		Consumer<AbstractAdaptedIdeEditor<R, RE, O>> loadModel;
-
-		// Obtain the input configuration
-		if (input instanceof IFileEditorInput) {
-			// Load the configuration item from the file
-			IFileEditorInput fileInput = (IFileEditorInput) input;
-			IFile configurationFile = fileInput.getFile();
-			WritableConfigurationItem configurationItem = ProjectConfigurationContext
-					.getWritableConfigurationItem(configurationFile, null);
-			loadModel = (editor) -> this.editor.setConfigurationItem(configurationItem);
-
-			// Obtain the file (and subsequently it's project)
-			IFile file = fileInput.getFile();
-			IProject project = file.getProject();
-
-			// Obtain the java project
-			IJavaProject javaProject = JavaCore.create(project);
-
-			// Create the Eclipse environment
-			envBridge = new EclipseEnvironmentBridge(javaProject);
-
-		} else if (input instanceof PreferencesEditorInput) {
-			// Provided the model
-			PreferencesEditorInput preferencesInput = (PreferencesEditorInput) input;
-			@SuppressWarnings("unchecked")
-			R model = (R) preferencesInput.getRootModel();
-			loadModel = (editor) -> this.editor.setModel(model);
-
-			// No project
-			envBridge = new EclipseEnvironmentBridge(null);
-
-		} else {
-			// Unknown editor input
+		// Ensure only file input
+		if (!(input instanceof IFileEditorInput)) {
 			throw new IllegalStateException("Unable to edit input " + input.getClass().getName());
 		}
 
-		// Specify initialise details
-		this.envBridge = envBridge;
+		// Load the configuration item from the file
+		IFileEditorInput fileInput = (IFileEditorInput) input;
+		IFile configurationFile = fileInput.getFile();
+		WritableConfigurationItem configurationItem = ProjectConfigurationContext
+				.getWritableConfigurationItem(configurationFile, null);
+
+		// Obtain the file (and subsequently it's project)
+		IFile file = fileInput.getFile();
+		IProject project = file.getProject();
+
+		// Obtain the java project
+		IJavaProject javaProject = JavaCore.create(project);
+
+		// Create the Eclipse environment
+		this.envBridge = new EclipseEnvironmentBridge(javaProject);
 
 		// Create and initialise the editor
-		this.editor = this.createEditor(envBridge);
-		this.editor.init(new MvcFxUiModule(), (injector) -> {
+		this.editor = this.createEditor(this.envBridge);
+		initEditor(this.editor, (injector) -> {
 			injector.injectMembers(this);
 			return this.getDomain();
 		});
-		loadModel.accept(this.editor);
+		this.editor.setConfigurationItem(configurationItem);
 
 		// Initialise parent
 		super.init(site, input);
@@ -191,6 +189,16 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 	public void doSaveAs() {
 		// TODO implement EditorPart.doSaveAs
 		throw new UnsupportedOperationException("TODO implement EditorPart.doSaveAs");
+	}
+
+	@Override
+	public void dispose() {
+		try {
+			this.envBridge.dispose();
+		} catch (IOException ex) {
+			LOGGER.warn("Failed to dispose of " + EclipseEnvironmentBridge.class.getSimpleName(), ex);
+		}
+		super.dispose();
 	}
 
 }
