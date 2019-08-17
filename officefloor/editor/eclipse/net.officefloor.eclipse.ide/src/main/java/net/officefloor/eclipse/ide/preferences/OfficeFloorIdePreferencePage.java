@@ -67,11 +67,6 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	private static final Logger LOGGER = LoggerFactory.getLogger(OfficeFloorIdePreferencePage.class);
 
 	/**
-	 * {@link IWorkbench}.
-	 */
-	private IWorkbench workbench;
-
-	/**
 	 * {@link EditorInstance} instances.
 	 */
 	private EditorInstance[] editors;
@@ -99,7 +94,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 
 	@Override
 	public void init(IWorkbench workbench) {
-		this.workbench = workbench;
+		// Nothing to initialise
 	}
 
 	@Override
@@ -324,10 +319,10 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 				canvas.setScene(new Scene(view));
 			});
 		}
-		
+
 		// Make buttons visible
-		this.getApplyButton().setVisible(true);
 		this.getDefaultsButton().setVisible(true);
+		this.getApplyButton().setVisible(true);
 	}
 
 	/**
