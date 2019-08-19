@@ -22,27 +22,31 @@
    </url>
 
    <requires>
-      <import plugin="com.google.guava"/>
+      <import plugin="net.officefloor.core" version="3.12.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.woof" version="3.12.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.common" version="3.12.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.editor" version="3.12.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.bridge" version="3.12.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.configurer" version="3.12.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.ide" version="3.12.0" match="greaterOrEqual"/>
       <import plugin="com.google.inject"/>
-      <import plugin="javax.inject"/>
+      <import plugin="org.eclipse.gef.mvc.fx"/>
+      <import plugin="org.eclipse.gef.geometry"/>
+      <import plugin="net.officefloor.gef.woof" version="3.12.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.eclipse.ide" version="3.12.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.commands"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.jobs"/>
-      <import plugin="org.eclipse.gef.common"/>
-      <import plugin="org.eclipse.gef.fx"/>
-      <import plugin="org.eclipse.gef.geometry.convert.fx"/>
-      <import plugin="org.eclipse.gef.geometry"/>
-      <import plugin="org.eclipse.gef.mvc.fx"/>
+      <import plugin="org.eclipse.e4.ui.css.swt.theme"/>
       <import plugin="org.eclipse.gef.mvc.fx.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.eclipse.osgi"/>
-      <import plugin="org.eclipse.equinox.preferences"/>
-      <import feature="net.officefloor.feature" version="3.12.0" match="perfect"/>
-      <import plugin="net.officefloor.woof" version="3.12.0" match="perfect"/>
+      <import plugin="org.slf4j.api"/>
    </requires>
 
    <plugin
@@ -50,6 +54,13 @@
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="net.officefloor.gef.woof"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
          id="net.officefloor.eclipse.woof"
