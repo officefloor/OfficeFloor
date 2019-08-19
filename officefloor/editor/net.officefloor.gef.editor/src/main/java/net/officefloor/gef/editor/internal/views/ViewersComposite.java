@@ -131,12 +131,9 @@ public class ViewersComposite implements AdaptedErrorHandler {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param contentViewer
-	 *            {@link IViewer} for the editor.
-	 * @param paletteViewer
-	 *            {@link IViewer} for the palette.
-	 * @param selectOnly
-	 *            {@link SelectOnly}. May be <code>null</code>.
+	 * @param contentViewer {@link IViewer} for the editor.
+	 * @param paletteViewer {@link IViewer} for the palette.
+	 * @param selectOnly    {@link SelectOnly}. May be <code>null</code>.
 	 */
 	public ViewersComposite(IViewer contentViewer, IViewer paletteViewer, SelectOnly selectOnly) {
 		this.contentViewer = contentViewer;
@@ -147,9 +144,8 @@ public class ViewersComposite implements AdaptedErrorHandler {
 	/**
 	 * Initialises.
 	 * 
-	 * @param isCreateParents
-	 *            Flag indicate whether able to create {@link AdaptedParent}
-	 *            instances.
+	 * @param isCreateParents Flag indicate whether able to create
+	 *                        {@link AdaptedParent} instances.
 	 */
 	public void init(boolean isCreateParents) {
 
@@ -210,9 +206,11 @@ public class ViewersComposite implements AdaptedErrorHandler {
 			this.paletteIndicator.setMinSize(PALETTE_INDICATOR_WIDTH, 0.0);
 			panes.add(this.paletteIndicator);
 
-			// Register listeners to show/hide palette
-			this.paletteIndicator.setOnMouseEntered((event) -> paletteRootNode.setVisible(true));
-			paletteRootNode.setOnMouseExited((event) -> paletteRootNode.setVisible(false));
+			// Register listeners to show/hide palette (if not select only mode)
+			if (this.selectOnly == null) {
+				this.paletteIndicator.setOnMouseEntered((event) -> paletteRootNode.setVisible(true));
+				paletteRootNode.setOnMouseExited((event) -> paletteRootNode.setVisible(false));
+			}
 
 			// Register listeners to update the palette width
 			paletteRootNode.getContentGroup().layoutBoundsProperty().addListener((observable, oldValue, newValue) -> {

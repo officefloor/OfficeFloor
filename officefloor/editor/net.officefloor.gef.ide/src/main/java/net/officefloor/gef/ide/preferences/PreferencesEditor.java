@@ -31,6 +31,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
 import javafx.collections.MapChangeListener.Change;
 import javafx.collections.ObservableMap;
 import javafx.scene.control.Button;
@@ -49,6 +50,7 @@ import net.officefloor.gef.editor.PaletteStyler;
 import net.officefloor.gef.editor.SelectOnly;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.gef.ide.editor.AbstractItem;
+import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor.ViewManager;
 import net.officefloor.gef.ide.editor.AbstractItem.IdeChildrenGroup;
 import net.officefloor.model.Model;
 
@@ -154,32 +156,33 @@ public class PreferencesEditor<R extends Model> {
 		// Determine the background colour
 		Color backgroundColour = Color.LIGHTGREY;
 
-		// Initialise the editor
-		editor.init(null, (injector) -> {
-			injector.injectMembers(this);
-			return this.domain;
-		});
-
 		// Provide select only for styling
+		PreferencesEditor<R> thiz = this;
 		Map<Class<? extends Model>, ModelPreferenceStyler<?>> modelStylers = new HashMap<>();
-		editor.setSelectOnly(new SelectOnly() {
+		this.editor.setSelectOnly(new SelectOnly() {
 
 			@Override
 			public void paletteIndicator(PaletteIndicatorStyler styler) {
-				// TODO implement
-				throw new UnsupportedOperationException("TODO STYLE paletteIndicator");
+				this.showStyler("Palette Indicator",
+						new NodePreferenceStyler(thiz.editor.getPaletteIndicatorStyleId(), styler.getPaletteIndicator(),
+								thiz.editor.paletteIndicatorStyle(), styler.paletteIndicatorStyle(),
+								thiz.preferencesToChange, thiz.envBridge, backgroundColour));
 			}
 
 			@Override
 			public void palette(PaletteStyler styler) {
-				// TODO implement
-				throw new UnsupportedOperationException("TODO STYLE palette");
+				this.showStyler("Palette",
+						new NodePreferenceStyler(thiz.editor.getPaletteStyleId(), styler.getPalette(),
+								thiz.editor.paletteStyle(), styler.paletteStyle(), thiz.preferencesToChange,
+								thiz.envBridge, backgroundColour));
 			}
 
 			@Override
 			public void editor(EditorStyler styler) {
-				// TODO implement
-				throw new UnsupportedOperationException("TODO STYLE editor");
+				this.showStyler("Editor",
+						new NodePreferenceStyler(thiz.editor.getEditorStyleId(), styler.getEditor(),
+								thiz.editor.editorStyle(), styler.editorStyle(), thiz.preferencesToChange,
+								thiz.envBridge, backgroundColour));
 			}
 
 			@Override
@@ -222,6 +225,12 @@ public class PreferencesEditor<R extends Model> {
 			}
 		});
 
+		// Initialise the editor
+		this.editor.init(null, (injector) -> {
+			injector.injectMembers(this);
+			return this.domain;
+		});
+
 		// Load the models to enable configuration
 		R rootModel = this.editor.prototype();
 		this.editor.setModel(rootModel);
@@ -230,10 +239,18 @@ public class PreferencesEditor<R extends Model> {
 		VBox editorView = new VBox();
 		VBox.setVgrow(editorView, Priority.ALWAYS);
 		stackView.getChildren().add(editorView);
-		this.editor.loadView((view) -> {
+		ViewManager viewManager = this.editor.loadView((view) -> {
 			editorView.getChildren().add(view);
 			loader.accept(stackView);
 		});
+
+		// Add preference change listeners
+		this.preferencesToChange.addListener(this.createPreferenceListener(this.editor.getPaletteIndicatorStyleId(),
+				viewManager.paletteIndicatorStyle(), this.editor.paletteIndicatorStyle()));
+		this.preferencesToChange.addListener(this.createPreferenceListener(this.editor.getPaletteStyleId(),
+				viewManager.paletteStyle(), this.editor.paletteStyle()));
+		this.preferencesToChange.addListener(this.createPreferenceListener(this.editor.getEditorStyleId(),
+				viewManager.editorStyle(), this.editor.editorStyle()));
 
 		// Load the prototype of all models
 		AbstractItem<?, ?, ?, ?, ?, ?>[] parentItems = this.editor.getParents();
@@ -269,6 +286,7 @@ public class PreferencesEditor<R extends Model> {
 	 * @param editorWrapper    {@link EditorWrapper}.
 	 * @param decorator        Decorator on the {@link Model}.
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void loadPrototypeModel(Model parentModel, AbstractItem item, boolean isParent, Color backgroundColour,
 			Map<Class<? extends Model>, ModelPreferenceStyler<?>> modelStylers,
 			BiConsumer<Model, ModelPreferenceStyler<?>> decorator) {
@@ -287,7 +305,7 @@ public class PreferencesEditor<R extends Model> {
 			String translatedStyle = AbstractAdaptedIdeEditor.translateStyle(newValue, item);
 			style.setValue(translatedStyle);
 		});
-		envBridge.addPreferenceListener((event) -> {
+		this.envBridge.addPreferenceListener((event) -> {
 			// Update style on preference changes (typically reseting to defaults)
 			if (preferenceStyleId.equals(event.preferenceId)) {
 				String updatedStyle = this.envBridge.getPreference(preferenceStyleId);
@@ -296,30 +314,13 @@ public class PreferencesEditor<R extends Model> {
 				rawStyle.setValue(newRawStyle);
 			}
 		});
-		this.preferencesToChange.addListener((Change<? extends String, ? extends PreferenceValue> event) -> {
-			// Update the style on configuration changes
-			if (preferenceStyleId.contentEquals(event.getKey())) {
-				PreferenceValue preferredStyle = event.getValueAdded();
-				String newRawStyle;
-				if (preferredStyle == null) {
-					// Clearing style, so reset to configuration/default
-					newRawStyle = this.envBridge.getPreference(preferenceStyleId);
-					if (newRawStyle == null) {
-						newRawStyle = defaultStyle;
-					}
-				} else {
-					// Use the new preferred style (or default if resetting)
-					newRawStyle = preferredStyle.value != null ? preferredStyle.value : defaultStyle;
-				}
-				rawStyle.setValue(newRawStyle);
-			}
-		});
+		this.preferencesToChange.addListener(this.createPreferenceListener(preferenceStyleId, rawStyle, defaultStyle));
 
 		// Create the item model
 		Model itemModel = item.prototype();
 
 		// Create and register the model styler
-		ModelPreferenceStyler styler = new ModelPreferenceStyler(item, isParent, this.preferencesToChange,
+		ModelPreferenceStyler<?> styler = new ModelPreferenceStyler<>(item, isParent, this.preferencesToChange,
 				this.envBridge, backgroundColour);
 		modelStylers.put(itemModel.getClass(), styler);
 
@@ -337,6 +338,36 @@ public class PreferencesEditor<R extends Model> {
 				this.loadPrototypeModel(itemModel, child, false, backgroundColour, modelStylers, null);
 			}
 		}
+	}
+
+	/**
+	 * Creates preference change listener.
+	 * 
+	 * @param preferenceStyleId Identifier of preference.
+	 * @param rawStyle          {@link Property} to change raw styling of property.
+	 * @param defaultStyle      Default style.
+	 * @return {@link MapChangeListener} for handling preference changes.
+	 */
+	private MapChangeListener<String, PreferenceValue> createPreferenceListener(String preferenceStyleId,
+			Property<String> rawStyle, String defaultStyle) {
+		return (Change<? extends String, ? extends PreferenceValue> event) -> {
+			// Update the style on configuration changes
+			if (preferenceStyleId.contentEquals(event.getKey())) {
+				PreferenceValue preferredStyle = event.getValueAdded();
+				String newRawStyle;
+				if (preferredStyle == null) {
+					// Clearing style, so reset to configuration/default
+					newRawStyle = this.envBridge.getPreference(preferenceStyleId);
+					if (newRawStyle == null) {
+						newRawStyle = defaultStyle;
+					}
+				} else {
+					// Use the new preferred style (or default if resetting)
+					newRawStyle = preferredStyle.value != null ? preferredStyle.value : defaultStyle;
+				}
+				rawStyle.setValue(newRawStyle);
+			}
+		};
 	}
 
 	/**
@@ -359,6 +390,7 @@ public class PreferencesEditor<R extends Model> {
 	 * @param item    {@link AbstractItem} being visited.
 	 * @param visitor {@link Consumer} visitor.
 	 */
+	@SuppressWarnings("rawtypes")
 	private void visitItemPreferences(AbstractItem item, Consumer<String> visitor) {
 		visitor.accept(item.getPreferenceStyleId());
 		for (IdeChildrenGroup childrenGroup : item.getChildrenGroups()) {

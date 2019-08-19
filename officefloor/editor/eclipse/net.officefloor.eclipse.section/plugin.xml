@@ -10,9 +10,9 @@
 		<wizard 
 		category="net.officefloor.category"
         class="net.officefloor.eclipse.ide.section.SectionNewWizard"
-        icon="icons/OfficeFloor.png"
+        icon="icons/Section.png"
         id="net.officefloor.eclipse.section.SectionNewWizard"
-        name="WoOF"/>
+        name="Section"/>
 	</extension>
 
 	<extension point="org.eclipse.ui.editors"
@@ -22,8 +22,8 @@
         class="net.officefloor.eclipse.ide.section.SectionEditPart"
         contributorClass="net.officefloor.eclipse.ide.IdeEditorActionBarContributor"
         default="true"
-        extensions="woof"
-        icon="icons/OfficeFloor.png"
+        extensions="section"
+        icon="icons/Section.png"
         id="net.officefloor.eclipse.section"
         name="Section Editor"/>
 	</extension>

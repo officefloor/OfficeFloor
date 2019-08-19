@@ -17,48 +17,28 @@
  */
 package net.officefloor.gef.ide.preferences;
 
-import java.util.Map;
-import java.util.function.Consumer;
-
 import javafx.beans.property.Property;
+import javafx.collections.ObservableMap;
 import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import net.officefloor.gef.bridge.EnvironmentBridge;
 
 /**
  * Styles the {@link Node}.
  * 
  * @author Daniel Sagenschneider
  */
-public class NodePreferenceStyler {
+public class NodePreferenceStyler extends AbstractPreferenceStyler {
 
 	/**
-	 * Title.
+	 * Identifier of preference.
 	 */
-	private final String title;
+	private final String preferenceId;
 
 	/**
-	 * Message.
+	 * {@link Node} for visual structure.
 	 */
-	private final String message;
-
-	/**
-	 * {@link Node} to extract the structure.
-	 */
-	private final Node node;
-
-	/**
-	 * Identifier within the {@link EditorPreferences} for the style.
-	 */
-	private final String preferenceStyleId;
-
-	/**
-	 * {@link Property} to receive changes to the style. Also, provides the initial
-	 * style.
-	 */
-	private final Property<String> style;
+	private final Node visual;
 
 	/**
 	 * Default style.
@@ -66,55 +46,39 @@ public class NodePreferenceStyler {
 	private final String defaultStyle;
 
 	/**
-	 * Preferences to change.
+	 * Style updater.
 	 */
-	private final Map<String, String> preferencesToChange;
-
-	/**
-	 * {@link Scene}.
-	 */
-	private final Scene scene;
-
-	/**
-	 * {@link Pane}.
-	 */
-	private final Pane pane;
+	private final Property<String> styleUpdater;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param title               Title.
-	 * @param message             Message.
-	 * @param node                {@link Node} to extract the structure.
-	 * @param preferenceStyleId   Identifier within the {@link EditorPreferences}
-	 *                            for the style.
-	 * @param style               {@link Property} to receive changes to the style.
-	 *                            Also, provides the initial style.
+	 * @param preferenceId        Identifier of preference.
+	 * @param visual              {@link Node} for visual structure.
 	 * @param defaultStyle        Default style.
+	 * @param styleUpdater        Style updater.
 	 * @param preferencesToChange Preferences to change.
-	 * @param scene               {@link Scene}.
+	 * @param envBridge           {@link EnvironmentBridge}.
+	 * @param backgroundColour    Background {@link Color}.
 	 */
-	public NodePreferenceStyler(String title, String message, Node node, String preferenceStyleId,
-			Property<String> style, String defaultStyle, Map<String, String> preferencesToChange, Scene scene,
-			Consumer<Pane> closeHandler) {
-		this.title = title;
-		this.message = message;
-		this.node = node;
-		this.preferenceStyleId = preferenceStyleId;
-		this.style = style;
-		this.defaultStyle = defaultStyle == null ? "" : defaultStyle;
-		this.preferencesToChange = preferencesToChange;
-		this.scene = scene;
+	public NodePreferenceStyler(String preferenceId, Node visual, String defaultStyle, Property<String> styleUpdater,
+			ObservableMap<String, PreferenceValue> preferencesToChange, EnvironmentBridge envBridge,
+			Color backgroundColour) {
+		super(preferencesToChange, envBridge, backgroundColour);
+		this.preferenceId = preferenceId;
+		this.visual = visual;
+		this.defaultStyle = defaultStyle;
+		this.styleUpdater = styleUpdater;
+	}
 
-		// Create title
-		Label titleLabel = new Label(title);
-		Label messageLabel = new Label(message);
+	/*
+	 * ===================== AbstractPreferenceStyler ========================
+	 */
 
-		// Create the container
-		VBox container = new VBox(titleLabel, messageLabel);
-
-		// Specify the pane
-		this.pane = null;
+	@Override
+	protected PreferenceConfiguration init() {
+		return new PreferenceConfiguration(this.preferenceId, this.visual, this.defaultStyle, this.styleUpdater, null,
+				null);
 	}
 
 }

@@ -164,7 +164,7 @@ public class OfficeFloorIdePreferencePage extends PreferencePage implements IWor
 	}
 
 	@Override
-	public synchronized void createControl(Composite parent) {
+	public void createControl(Composite parent) {
 		super.createControl(parent);
 
 		// Initially buttons are not visible

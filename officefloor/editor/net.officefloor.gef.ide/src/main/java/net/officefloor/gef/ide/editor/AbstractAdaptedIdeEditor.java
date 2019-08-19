@@ -454,6 +454,13 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 
 	private IDomain domain;
 
+	/**
+	 * Initialise the {@link AbstractAdaptedIdeEditor}.
+	 * 
+	 * @param overrideModule Optional override {@link Module}.
+	 * @param initialiser    Initialiser with the {@link Injector} to return the
+	 *                       {@link IDomain}.
+	 */
 	public void init(Module overrideModule, Function<Injector, IDomain> initialiser) {
 
 		this.module = new AdaptedEditorModule();
@@ -466,9 +473,12 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	}
 
 	/**
-	 * Activates this {@link AbstractAdaptedIdeEditor}.
+	 * Loads the view.
+	 * 
+	 * @param viewLoader Receives the view.
+	 * @return {@link ViewManager}.
 	 */
-	public void loadView(Consumer<Pane> viewLoader) {
+	public ViewManager loadView(Consumer<Pane> viewLoader) {
 
 		// Provide possible select only
 		if (this.selectOnly != null) {
@@ -500,6 +510,33 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 
 		// Load the module with root model
 		this.module.loadRootModel(this.model);
+
+		// Return the view manager
+		return new ViewManager(this.rootBuilder);
+	}
+
+	/**
+	 * View manager.
+	 */
+	public static class ViewManager {
+
+		private final AdaptedRootBuilder<?, ?> rootBuilder;
+
+		private ViewManager(AdaptedRootBuilder<?, ?> rootBuilder) {
+			this.rootBuilder = rootBuilder;
+		}
+
+		public Property<String> editorStyle() {
+			return this.rootBuilder.editorStyle();
+		}
+
+		public Property<String> paletteIndicatorStyle() {
+			return this.rootBuilder.paletteIndicatorStyle();
+		}
+
+		public Property<String> paletteStyle() {
+			return this.rootBuilder.paletteStyle();
+		}
 	}
 
 	/**
