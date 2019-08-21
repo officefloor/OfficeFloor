@@ -629,6 +629,11 @@
 				</plugin>
 				<plugin>
 					<groupId>net.officefloor.maven</groupId>
+					<artifactId>woof-maven-plugin</artifactId>
+					<version>${revision}</version>
+				</plugin>
+				<plugin>
+					<groupId>net.officefloor.maven</groupId>
 					<artifactId>woof-archetype</artifactId>
 					<version>${revision}</version>
 				</plugin>

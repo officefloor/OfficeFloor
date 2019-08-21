@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.editor</groupId>
+		<artifactId>editor</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<groupId>net.officefloor.eclipse</groupId>
+	<artifactId>eclipse</artifactId>
+	<packaging>pom</packaging>
+	<name>Eclipse</name>
+	<description>Eclipse plugins and features for OfficeFloor</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<modules>
+		<module>net.officefloor.eclipse.ide</module>
+		<module>net.officefloor.eclipse.section</module>
+		<module>net.officefloor.eclipse.woof</module>
+		<module>net.officefloor.eclipse.launch</module>
+		<module>net.officefloor.feature</module>
+		<module>net.officefloor.woof.feature</module>
+		<module>update.site</module>
+	</modules>
+</project>
