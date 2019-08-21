@@ -1,7 +1,7 @@
 **/.settings/
 **/.project
 **/.classpath
-!eclipse/**/.project
-!eclipse/**/.classpath
+!editor/**/.project
+!editor/**/.classpath
 /target/
 **/.flattened-pom.xml

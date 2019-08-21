@@ -93,6 +93,7 @@ public class ClassCompatibility {
 	public ObjectCompatibility $(String methodName, Object... arguments) {
 		return this.invoke(arguments, (parameterTypes) -> this.clazz.getMethod(methodName, parameterTypes),
 				(target, inputArguments) -> {
+					target.setAccessible(true);
 					Object result = target.invoke(null, inputArguments);
 					return ((target.getReturnType() == null) || (void.class.equals(target.getReturnType()))) ? null
 							: new ObjectCompatibility(result);
@@ -203,7 +204,7 @@ public class ClassCompatibility {
 		try {
 			target = locator.locate(parameterTypes);
 		} catch (Exception ex) {
-			throw new IllegalStateException(ERROR_PREFIX + errorFactory.getMessage(null, parameterTypes, ex));
+			throw new IllegalStateException(ERROR_PREFIX + errorFactory.getMessage(null, parameterTypes, ex), ex);
 		}
 
 		// Invoke the target
@@ -213,7 +214,7 @@ public class ClassCompatibility {
 		} catch (InvocationTargetException ex) {
 			throw new CompatibilityInvocationException(ex.getCause());
 		} catch (Exception ex) {
-			throw new IllegalStateException(ERROR_PREFIX + errorFactory.getMessage(target, parameterTypes, ex));
+			throw new IllegalStateException(ERROR_PREFIX + errorFactory.getMessage(target, parameterTypes, ex), ex);
 		}
 
 		// Return the compatibility result

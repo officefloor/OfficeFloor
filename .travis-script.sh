@@ -8,7 +8,7 @@ echo "Standard Travis script stage"
 mvn test -B
 
 # Ensure backwards compatibility for Eclipse
-cd ../eclipse
+cd ../editor
 echo "Backwards compability for Eclipse"
 # Latest already tested by default
 mvn clean install -P PHOTON.target
