@@ -43,8 +43,7 @@
 		<module>pay</module>
 		<module>spring</module>
 		<module>maven</module>
-		<module>eclipse</module>
-		<module>viewer</module>
+		<module>editor</module>
 		<module>tutorials</module>
 	</modules>
 	<properties>
@@ -136,7 +135,7 @@
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
+				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.shade</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -237,19 +236,12 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
+				<artifactId>woof-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
 				<artifactId>tycho-shade-maven-plugin</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<!-- Viewer -->
-			<dependency>
-				<groupId>net.officefloor.viewer</groupId>
-				<artifactId>viewer</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.viewer</groupId>
-				<artifactId>officeviewer</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Additional build dependencies -->
