@@ -36,6 +36,9 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.configuration.ConfigurationItem;
@@ -58,7 +61,7 @@ public class ViewWoofMojo extends AbstractMojo {
 	/**
 	 * Possible configured {@link Artifact} to be resolved.
 	 */
-	@Parameter(required = false, defaultValue = "")
+	@Parameter(property = "artifact", required = false, defaultValue = "")
 	private String artifact;
 
 	@Component
@@ -87,7 +90,24 @@ public class ViewWoofMojo extends AbstractMojo {
 		if (!CompileUtil.isBlank(this.artifact)) {
 
 			// Attempt to resolve the artifact
-			
+			try {
+				ArtifactRequest request = new ArtifactRequest();
+				// TODO add the artifact
+				ArtifactResult result = this.repositorySystem.resolveArtifact(this.repositorySystemSession, request);
+				if (result.isResolved()) {
+					throw new MojoExecutionException("Did not resolve artifact " + this.artifact);
+				}
+
+				// Obtain the artifact
+				File artifactFile = result.getArtifact().getFile();
+
+				// TODO extract configuration from artifact
+				this.getLog().info("TODO extract configuration from artifact " + this.artifact + " for resolved file "
+						+ artifactFile);
+
+			} catch (ArtifactResolutionException ex) {
+				throw new MojoExecutionException("Failed to resolve artifact " + this.artifact, ex);
+			}
 		}
 
 		// Determine if load from current project (no artifact specified)
