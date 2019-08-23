@@ -1,0 +1,23 @@
+<verifications>
+	<files>
+		<!-- Ensure using latest version -->
+		<file>
+			<location>${basedir}/../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>${project.artifactId}</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+
+		<!-- Ensure correct versions in Eclipse plugin -->
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: ${project.version}]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.core;bundle-version="${project.version}"]]></contains>
+		</file>
+		<file>
+			<location>META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Require-Bundle:([^:]*)net.officefloor.gef.editor;bundle-version="${project.version}"]]></contains>
+		</file>
+	</files>
+</verifications>

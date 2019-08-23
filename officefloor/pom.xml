@@ -33,6 +33,7 @@
 		</repository>
 	</repositories>
 	<modules>
+		<module>shim</module>
 		<module>core</module>
 		<module>polyglot</module>
 		<module>server</module>
@@ -42,8 +43,7 @@
 		<module>pay</module>
 		<module>spring</module>
 		<module>maven</module>
-		<module>eclipse</module>
-		<module>viewer</module>
+		<module>editor</module>
 		<module>tutorials</module>
 	</modules>
 	<properties>
@@ -53,7 +53,7 @@
 		<current.year>2019</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>8</java-lowest-version>
-		<jetty-version>9.4.19.v20190610</jetty-version>
+		<jetty-version>9.4.20.v20190813</jetty-version>
 		<maven-version>3.6.1</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
@@ -70,6 +70,106 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<!-- Shim -->
+			<dependency>
+				<groupId>net.officefloor.shim</groupId>
+				<artifactId>shim</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.shim</groupId>
+				<artifactId>officeshim_java8</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<!-- Editor -->
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>editor</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.core</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.common</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.bridge</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.configurer</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.configurer.tests</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.editor</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.editor.tests</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.ide</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.ide.tests</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.gef.shade</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.section</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.section.tests</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.target</artifactId>
+				<version>${revision}</version>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.woof</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.woof</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.woof.tests</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Eclipse -->
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
@@ -79,32 +179,7 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.core</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.common</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.configurer</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.configurer.tests</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.editor</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.editor.tests</artifactId>
+				<artifactId>net.officefloor.eclipse.bridge</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -119,48 +194,12 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.officefloor</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.osgi</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.shade</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.section</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.section.tests</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.target</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.woof</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.woof</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
-				<artifactId>net.officefloor.eclipse.woof.tests</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -197,19 +236,12 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.maven</groupId>
+				<artifactId>woof-maven-plugin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.maven</groupId>
 				<artifactId>tycho-shade-maven-plugin</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<!-- Viewer -->
-			<dependency>
-				<groupId>net.officefloor.viewer</groupId>
-				<artifactId>viewer</artifactId>
-				<version>${revision}</version>
-				<type>pom</type>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.viewer</groupId>
-				<artifactId>officeviewer</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Additional build dependencies -->
@@ -982,8 +1014,7 @@
 						<excludedPage>apidocs/**</excludedPage>
 					</excludedPages>
 					<excludedLinks>
-						<excludedLink>http://sourceforge.net/projects/officefloor
-						</excludedLink>
+						<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
 						<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
 						<excludedLink>//dl.acm.org/**</excludedLink>
 						<excludedLink>http://dl.acm.org/**</excludedLink>
@@ -1162,6 +1193,12 @@
 										<version>1.8</version>
 										<scope>system</scope>
 										<systemPath>${java.home}/lib/jfxswt.jar</systemPath>
+									</extraClasspathElement>
+									<extraClasspathElement>
+										<groupId>net.officefloor.shim</groupId>
+										<artifactId>officeshim_java8</artifactId>
+										<version>${revision}</version>
+										<scope>compile</scope>
 									</extraClasspathElement>
 								</extraClasspathElements>
 							</configuration>

@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Target
-Bundle-SymbolicName: net.officefloor.eclipse.target
-Bundle-Version: 3.12.0
