@@ -18,6 +18,9 @@
 package net.officefloor.maven.woof;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -29,6 +32,7 @@ import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -36,12 +40,13 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.woof.WoofLoaderExtensionService;
 
 /**
@@ -53,10 +58,10 @@ import net.officefloor.woof.WoofLoaderExtensionService;
 public class ViewWoofMojo extends AbstractMojo {
 
 	/**
-	 * {@link MavenProject}.
+	 * {@link PluginDescriptor} for {@link ViewWoofMojo}.
 	 */
-	@Parameter(defaultValue = "${project}", readonly = true)
-	private MavenProject project;
+	@Parameter(defaultValue = "${plugin}", readonly = true)
+	private PluginDescriptor plugin;
 
 	/**
 	 * Possible configured {@link Artifact} to be resolved.
@@ -70,10 +75,19 @@ public class ViewWoofMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${repositorySystemSession}", readonly = true, required = true)
 	private RepositorySystemSession repositorySystemSession;
 
+	@Parameter(defaultValue = "${project.remotePluginRepositories}", readonly = true)
+	private List<RemoteRepository> remoteRepositories;
+
+	/**
+	 * {@link MavenProject}.
+	 */
+	@Parameter(defaultValue = "${project}", readonly = true)
+	private MavenProject project;
+
 	/**
 	 * Path to configuration within the {@link MavenProject} / {@link Artifact}.
 	 */
-	@Parameter(defaultValue = WoofLoaderExtensionService.APPLICATION_WOOF)
+	@Parameter(property = "path", required = false, defaultValue = WoofLoaderExtensionService.APPLICATION_WOOF)
 	private String path = WoofLoaderExtensionService.APPLICATION_WOOF;
 
 	/*
@@ -83,35 +97,54 @@ public class ViewWoofMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 
-		// Obtain the configuration to view
-		ConfigurationItem configuration = null;
+		// Obtain the URLs
+		List<URL> classPathUrls = new ArrayList<>();
 
 		// Determine if specified the artifact
 		if (!CompileUtil.isBlank(this.artifact)) {
 
 			// Attempt to resolve the artifact
+			ArtifactResult result;
 			try {
 				ArtifactRequest request = new ArtifactRequest();
-				// TODO add the artifact
-				ArtifactResult result = this.repositorySystem.resolveArtifact(this.repositorySystemSession, request);
-				if (result.isResolved()) {
-					throw new MojoExecutionException("Did not resolve artifact " + this.artifact);
-				}
-
-				// Obtain the artifact
-				File artifactFile = result.getArtifact().getFile();
-
-				// TODO extract configuration from artifact
-				this.getLog().info("TODO extract configuration from artifact " + this.artifact + " for resolved file "
-						+ artifactFile);
-
+				request.setArtifact(new DefaultArtifact(this.artifact));
+				request.setRepositories(this.remoteRepositories);
+				result = this.repositorySystem.resolveArtifact(this.repositorySystemSession, request);
 			} catch (ArtifactResolutionException ex) {
 				throw new MojoExecutionException("Failed to resolve artifact " + this.artifact, ex);
 			}
+
+			// Determine if error
+			for (Exception ex : result.getExceptions()) {
+				throw new MojoExecutionException("Failed to resolve artifact " + this.artifact, ex);
+			}
+
+			// Ensure have artifact
+			if (result.isMissing()) {
+				throw new MojoExecutionException("Did not find artifact " + this.artifact);
+			}
+
+			// Obtain the artifact
+			File artifactFile = result.getArtifact().getFile();
+
+			// Load the artifact URL
+			URL artifactUrl;
+			try {
+				artifactUrl = artifactFile.toURI().toURL();
+			} catch (MalformedURLException ex) {
+				throw new MojoExecutionException(
+						"Failed to obtain class path from artifact: " + this.artifact + " (" + artifactFile + ")", ex);
+			}
+
+			// TODO REMOVE
+			this.getLog().info("TODO artifact entry: " + artifactUrl.toString());
+
+			// Include the URL
+			classPathUrls.add(artifactUrl);
 		}
 
 		// Determine if load from current project (no artifact specified)
-		if (configuration == null) {
+		if (classPathUrls.size() == 0) {
 
 			// Ensure have current project
 			if (this.project.getFile() == null) {
@@ -119,18 +152,72 @@ public class ViewWoofMojo extends AbstractMojo {
 			}
 
 			// Within project, so find on class path
-			ClassLoader classLoader;
 			try {
-				List<URL> urls = new ArrayList<>();
 				for (String classPathEntry : this.project.getRuntimeClasspathElements()) {
-					urls.add(new File(classPathEntry).toURI().toURL());
+					classPathUrls.add(new File(classPathEntry).toURI().toURL());
 				}
-				classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
 			} catch (DependencyResolutionRequiredException | MalformedURLException ex) {
 				throw new MojoExecutionException("Failed to obtain class path from project", ex);
 			}
+		}
 
-			// TODO load from class path
+		// Load the plugin dependencies
+		for (URL entryUrl : this.plugin.getClassRealm().getURLs()) {
+
+			// TODO REMOVE
+			this.getLog().info("TODO plugin entry: " + entryUrl.toString());
+
+			classPathUrls.add(entryUrl);
+		}
+
+		// Load the JavaFX class path entries
+		try {
+			for (URL entryUrl : JavaFxFacet.getClassPathEntries()) {
+
+				// TODO REMOVE
+				this.getLog().info("TODO javafx entry: " + entryUrl.toString());
+
+				classPathUrls.add(entryUrl);
+			}
+		} catch (Exception ex) {
+			throw new MojoExecutionException("Failed to load JavaFX libraries", ex);
+		}
+
+		// Create the class loader
+		try (URLClassLoader classLoader = new URLClassLoader(classPathUrls.toArray(new URL[classPathUrls.size()]),
+				null)) {
+
+			// Load the viewer
+			Class<?> viewerClass;
+			try {
+				viewerClass = classLoader.loadClass(Viewer.class.getName());
+			} catch (ClassNotFoundException ex) {
+				throw new MojoExecutionException(
+						"Failed to find class " + Viewer.class.getName() + " in constructed class path", ex);
+			}
+
+			// Obtain run method to Viewer
+			final String methodName = "main";
+			Method run;
+			try {
+				run = viewerClass.getMethod(methodName, String[].class);
+			} catch (NoSuchMethodException | SecurityException ex) {
+				throw new MojoExecutionException(
+						"Unable to extract " + methodName + " method from " + Viewer.class.getName(), ex);
+			}
+
+			// Ensure context class path configured for JavaFX application launch
+			Thread.currentThread().setContextClassLoader(classLoader);
+
+			// Run the Viewer
+			try {
+				run.invoke(null, (Object) new String[] { this.path });
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+				throw new MojoExecutionException("Unable to start " + Viewer.class.getName(), ex);
+			}
+
+		} catch (IOException ex) {
+			throw new MojoExecutionException("Failed to close class loader", ex);
 		}
 	}
 

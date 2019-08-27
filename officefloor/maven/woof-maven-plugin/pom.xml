@@ -71,6 +71,11 @@
 			<groupId>net.officefloor.editor</groupId>
 			<artifactId>net.officefloor.gef.shade</artifactId>
 		</dependency>
+		<!-- <dependency> <groupId>org.openjfx</groupId> <artifactId>javafx-graphics</artifactId> 
+			<version>${openjfx-version}</version> </dependency> <dependency> <groupId>org.openjfx</groupId> 
+			<artifactId>javafx-controls</artifactId> <version>${openjfx-version}</version> 
+			</dependency> <dependency> <groupId>org.openjfx</groupId> <artifactId>javafx-swt</artifactId> 
+			<version>${openjfx-swt-version}</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-embedder</artifactId>
@@ -97,4 +102,29 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<profiles>
+		<profile>
+			<!-- Adds JAR artifact to class path for direct running -->
+			<id>TestViewerWithJar</id>
+			<dependencies>
+				<dependency>
+					<groupId>net.officefloor.tutorial</groupId>
+					<artifactId>RestHttpServer</artifactId>
+					<version>${project.version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<!-- Adds WAR artifact to class path for direct running -->
+			<id>TestViewerWithWar</id>
+			<dependencies>
+				<dependency>
+					<groupId>net.officefloor.tutorial</groupId>
+					<artifactId>TransactionHttpServer</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 </project>
