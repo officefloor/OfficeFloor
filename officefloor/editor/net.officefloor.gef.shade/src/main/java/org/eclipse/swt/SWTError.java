@@ -15,23 +15,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.gef.editor.style;
-
-import java.net.URLStreamHandler;
-import java.net.spi.URLStreamHandlerProvider;
-
-import net.officefloor.gef.editor.internal.officefloorstyle.Handler;
+package org.eclipse.swt;
 
 /**
- * OfficeFloorStyle {@link URLStreamHandlerProvider}.
+ * <p>
+ * Avoiding importing SWT, which has O/S specific implementations.
+ * <p>
+ * Providing this only as necessary for GEF.
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorStyleURLStreamHandlerProvider extends URLStreamHandlerProvider {
+public class SWTError extends Error {
 
-	@Override
-	public URLStreamHandler createURLStreamHandler(String protocol) {
-		return new Handler();
-	}
-
+	private static final long serialVersionUID = -9160311124292866538L;
 }
