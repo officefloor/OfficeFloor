@@ -85,6 +85,17 @@ public class ViewWoofMojo extends AbstractMojo {
 	private MavenProject project;
 
 	/**
+	 * <p>
+	 * Directory containing the JavaFX installed jars. This allows specifying a
+	 * different JavaFX version (for a version not included in plugin).
+	 * <p>
+	 * Typically, this is the lib directory of the
+	 * <a href="http://openjfx.org">OpenJFX</a> install.
+	 */
+	@Parameter(property = "javafx.lib")
+	private File javaFxLibDir = null;
+
+	/**
 	 * Path to configuration within the {@link MavenProject} / {@link Artifact}.
 	 */
 	@Parameter(property = "path", required = false, defaultValue = WoofLoaderExtensionService.APPLICATION_WOOF)
@@ -136,9 +147,6 @@ public class ViewWoofMojo extends AbstractMojo {
 						"Failed to obtain class path from artifact: " + this.artifact + " (" + artifactFile + ")", ex);
 			}
 
-			// TODO REMOVE
-			this.getLog().info("TODO artifact entry: " + artifactUrl.toString());
-
 			// Include the URL
 			classPathUrls.add(artifactUrl);
 		}
@@ -162,21 +170,9 @@ public class ViewWoofMojo extends AbstractMojo {
 		}
 
 		// Load the plugin dependencies
-		for (URL entryUrl : this.plugin.getClassRealm().getURLs()) {
-
-			// TODO REMOVE
-			this.getLog().info("TODO plugin entry: " + entryUrl.toString());
-
-			classPathUrls.add(entryUrl);
-		}
-
-		// Load the JavaFX class path entries
 		try {
-			for (URL entryUrl : JavaFxFacet.getClassPathEntries()) {
-
-				// TODO REMOVE
-				this.getLog().info("TODO javafx entry: " + entryUrl.toString());
-
+			for (URL entryUrl : JavaFxFacet.getClassPathEntries(this.plugin.getClassRealm().getURLs(),
+					this.javaFxLibDir)) {
 				classPathUrls.add(entryUrl);
 			}
 		} catch (Exception ex) {
@@ -187,10 +183,13 @@ public class ViewWoofMojo extends AbstractMojo {
 		try (URLClassLoader classLoader = new URLClassLoader(classPathUrls.toArray(new URL[classPathUrls.size()]),
 				null)) {
 
+			// Obtain the viewer class name
+			String viewerClassName = ViewWoofMojo.class.getPackage().getName() + ".Viewer";
+
 			// Load the viewer
 			Class<?> viewerClass;
 			try {
-				viewerClass = classLoader.loadClass(Viewer.class.getName());
+				viewerClass = classLoader.loadClass(viewerClassName);
 			} catch (ClassNotFoundException ex) {
 				throw new MojoExecutionException(
 						"Failed to find class " + Viewer.class.getName() + " in constructed class path", ex);
