@@ -24,8 +24,15 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.ZipFile;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -160,18 +167,27 @@ public class ViewWoofMojo extends AbstractMojo {
 			}
 
 			// Within project, so find on class path
+			List<URL> projectClassPath = new ArrayList<URL>();
 			try {
 				for (String classPathEntry : this.project.getRuntimeClasspathElements()) {
-					classPathUrls.add(new File(classPathEntry).toURI().toURL());
+					projectClassPath.add(new File(classPathEntry).toURI().toURL());
 				}
 			} catch (DependencyResolutionRequiredException | MalformedURLException ex) {
 				throw new MojoExecutionException("Failed to obtain class path from project", ex);
+			}
+
+			// Include non-JavaFX project entries
+			try {
+				classPathUrls.addAll(Arrays.asList(JavaFxFacet
+						.getClassPathEntries(projectClassPath.toArray(new URL[projectClassPath.size()]), false, null)));
+			} catch (Exception ex) {
+				throw new MojoExecutionException("Failed filtering out JavaFX from project class path", ex);
 			}
 		}
 
 		// Load the plugin dependencies
 		try {
-			for (URL entryUrl : JavaFxFacet.getClassPathEntries(this.plugin.getClassRealm().getURLs(),
+			for (URL entryUrl : JavaFxFacet.getClassPathEntries(this.plugin.getClassRealm().getURLs(), true,
 					this.javaFxLibDir)) {
 				classPathUrls.add(entryUrl);
 			}
@@ -180,43 +196,126 @@ public class ViewWoofMojo extends AbstractMojo {
 		}
 
 		// Create the class loader
-		try (URLClassLoader classLoader = new URLClassLoader(classPathUrls.toArray(new URL[classPathUrls.size()]),
-				null)) {
+		try {
+			try (URLClassLoader classLoader = WarAwareUrlClassLoader
+					.create(classPathUrls.toArray(new URL[classPathUrls.size()]))) {
 
-			// Obtain the viewer class name
-			String viewerClassName = ViewWoofMojo.class.getPackage().getName() + ".Viewer";
+				// Obtain the viewer class name
+				String viewerClassName = ViewWoofMojo.class.getPackage().getName() + ".Viewer";
 
-			// Load the viewer
-			Class<?> viewerClass;
-			try {
-				viewerClass = classLoader.loadClass(viewerClassName);
-			} catch (ClassNotFoundException ex) {
-				throw new MojoExecutionException(
-						"Failed to find class " + Viewer.class.getName() + " in constructed class path", ex);
+				// Load the viewer
+				Class<?> viewerClass;
+				try {
+					viewerClass = classLoader.loadClass(viewerClassName);
+				} catch (ClassNotFoundException ex) {
+					throw new MojoExecutionException(
+							"Failed to find class " + Viewer.class.getName() + " in constructed class path", ex);
+				}
+
+				// Obtain run method to Viewer
+				final String methodName = "main";
+				Method run;
+				try {
+					run = viewerClass.getMethod(methodName, String[].class);
+				} catch (NoSuchMethodException | SecurityException ex) {
+					throw new MojoExecutionException(
+							"Unable to extract " + methodName + " method from " + Viewer.class.getName(), ex);
+				}
+
+				// Ensure context class path configured for JavaFX application launch
+				Thread.currentThread().setContextClassLoader(classLoader);
+
+				// Run the Viewer
+				try {
+					run.invoke(null, (Object) new String[] { this.path });
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+					throw new MojoExecutionException("Unable to start " + Viewer.class.getName(), ex);
+				}
+
+			} catch (IOException ex) {
+				throw new MojoExecutionException("Failed to close class loader", ex);
+			}
+		} catch (Exception ex) {
+			throw new MojoExecutionException("Failed class loader", ex);
+		}
+	}
+
+	/**
+	 * {@link URLClassLoader} that is aware of WAR files.
+	 */
+	private static class WarAwareUrlClassLoader extends URLClassLoader {
+
+		/**
+		 * Creates the {@link WarAwareUrlClassLoader}.
+		 * 
+		 * @param urls {@link URL} instances.
+		 * @return {@link WarAwareUrlClassLoader}.
+		 * @throws Exception If fails to create {@link WarAwareUrlClassLoader}.
+		 */
+		public static WarAwareUrlClassLoader create(URL[] urls) throws Exception {
+
+			// Create the listing of URLs
+			List<URL> classPathUrls = new ArrayList<URL>();
+
+			// Load the URLs
+			NEXT_URL: for (URL url : urls) {
+
+				// Determine if WAR file
+				if (!url.getPath().toLowerCase().endsWith(".war")) {
+					classPathUrls.add(url);
+					continue NEXT_URL; // not war file
+				}
+
+				// Create functions to support extracting jars
+				Path tempDirectory = Files.createTempDirectory(url.getPath().replace('.', '_'));
+				registerCleanupPath(tempDirectory);
+				Files.createTempFile(tempDirectory, prefix, suffix, attrs)
+
+				// Decompose the WAR file into parts to enable URL class loader to work
+				ZipFile war = new ZipFile(new File(url.toURI()));
+				war.stream().forEach((entry) -> {
+
+					// TODO REMOVE
+					System.out.println("TODO war entry: " + entry.getName());
+
+				});
 			}
 
-			// Obtain run method to Viewer
-			final String methodName = "main";
-			Method run;
-			try {
-				run = viewerClass.getMethod(methodName, String[].class);
-			} catch (NoSuchMethodException | SecurityException ex) {
-				throw new MojoExecutionException(
-						"Unable to extract " + methodName + " method from " + Viewer.class.getName(), ex);
+			// Return the class loader
+			return new WarAwareUrlClassLoader(classPathUrls.toArray(new URL[classPathUrls.size()]));
+		}
+
+		private static List<Path> pathsToDelete = null;
+
+		private static synchronized void registerCleanupPath(Path path) {
+
+			// Determine if hook to clean up
+			if (pathsToDelete == null) {
+				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+					// Delete files then directories
+					Collections.reverse(pathsToDelete);
+					for (Path deletePath : pathsToDelete) {
+						try {
+							Files.deleteIfExists(deletePath);
+						} catch (IOException ex) {
+							// Best effort to delete
+						}
+					}
+				}));
+				pathsToDelete = new LinkedList<>();
 			}
 
-			// Ensure context class path configured for JavaFX application launch
-			Thread.currentThread().setContextClassLoader(classLoader);
+			// Add path for deletion
+			pathsToDelete.add(path);
+		}
 
-			// Run the Viewer
-			try {
-				run.invoke(null, (Object) new String[] { this.path });
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-				throw new MojoExecutionException("Unable to start " + Viewer.class.getName(), ex);
-			}
-
-		} catch (IOException ex) {
-			throw new MojoExecutionException("Failed to close class loader", ex);
+		/**
+		 * Instantiate.
+		 * 
+		 * @param urls {@link URL} instances.
+		 */
+		private WarAwareUrlClassLoader(URL[] urls) {
+			super(urls, null);
 		}
 	}
 

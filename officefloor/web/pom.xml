@@ -24,6 +24,7 @@
 		<module>officeweb_resource</module>
 		<module>officeweb_security</module>
 		<module>officeweb_template</module>
+		<module>officeweb_war</module>
 		<module>woof</module>
 		<module>woof_test</module>
 	</modules>
