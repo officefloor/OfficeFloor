@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.12.0" date="In SCM" description="Support for Java 11">
+		<release version="3.13.0" date="In SCM" description="Maven viewer plugin">
+			<action type="add" dev="sagenschneider">Maven viewer plugin</action>
+		</release>
+		<release version="3.12.0" date="3019-07-22" description="Support for Java 11">
 			<action type="add" dev="sagenschneider">Support for Java 11</action>
 		</release>
 		<release version="3.11.0" date="2019-07-06" description="Google Identity Verifier Factory">
