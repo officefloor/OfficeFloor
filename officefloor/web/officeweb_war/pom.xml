@@ -21,6 +21,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.tutorial</groupId>
 			<artifactId>TransactionHttpServer</artifactId>
 			<type>war</type>
