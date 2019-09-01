@@ -85,8 +85,6 @@ public abstract class AbstractNewWizard<R extends Model> extends Wizard implemen
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param editor {@link AbstractAdaptedIdeEditor}.
 	 */
 	public AbstractNewWizard() {
 		AbstractAdaptedIdeEditor<R, ?, ?> editor = this.createEditor(new EclipseEnvironmentBridge());

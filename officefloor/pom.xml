@@ -92,46 +92,55 @@
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.core</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.common</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.gef.bridge</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.configurer</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.configurer.tests</artifactId>
+				<type>eclipse-test-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.editor</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.editor.tests</artifactId>
+				<type>eclipse-test-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.ide</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.ide.tests</artifactId>
+				<type>eclipse-test-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -142,11 +151,13 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.gef.section</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.gef.section.tests</artifactId>
+				<type>eclipse-test-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -158,16 +169,19 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.woof</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.gef.woof</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.gef.woof.tests</artifactId>
+				<type>eclipse-test-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Eclipse -->
@@ -180,26 +194,31 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.bridge</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.ide</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.launch</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.section</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.woof</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -879,7 +898,8 @@
 						</goals>
 						<configuration>
 							<!-- Ignore generated code that have no control over -->
-							<excludePackageNames>net.officefloor.web.template.parse</excludePackageNames>
+							<!-- Also, ignore shim packages -->
+							<excludePackageNames>net.officefloor.web.template.parse:java.net.spi</excludePackageNames>
 							<!-- Ensure good quality JavaDoc -->
 							<failOnError>true</failOnError>
 							<failOnWarnings>true</failOnWarnings>

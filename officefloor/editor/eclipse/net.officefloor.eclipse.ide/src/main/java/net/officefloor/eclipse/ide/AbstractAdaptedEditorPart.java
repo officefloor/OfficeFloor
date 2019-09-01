@@ -100,9 +100,6 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 	/**
 	 * Creates the {@link AbstractAdaptedIdeEditor}.
 	 * 
-	 * @param <R>       Root {@link Model}.
-	 * @param <RE>      Root event {@link Enum}.
-	 * @param <O>       Operations.
 	 * @param envBridge {@link EnvironmentBridge}.
 	 * @return {@link AbstractAdaptedIdeEditor}.
 	 */

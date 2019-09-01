@@ -125,7 +125,6 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	 * <p>
 	 * Allows for alternate {@link AdaptedEditorModule} implementation.
 	 * 
-	 * @param module           {@link AdaptedEditorModule}.
 	 * @param rootModelType    Root {@link Model} type.
 	 * @param createOperations {@link Function} to create the operations from the
 	 *                         root {@link Model}.
@@ -344,7 +343,7 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	}
 
 	/**
-	 * Allows overriding to initialise the {@link AbstractIdeEclipseEditor}.
+	 * Allows overriding to initialise the {@link AbstractAdaptedIdeEditor}.
 	 * 
 	 * @param context {@link ConfigurableContext}.
 	 */

@@ -68,7 +68,7 @@ application.woof
     
     [[1]] Graphical configuration allows other less technically inclined to review the functionality of the web application
     
-  To use the graphical configuration of WoOF please ensure you install the Eclipse plug-in.  Details of installing can be found {{{/eclipse/index.html}here}}.
+  To use the graphical configuration of WoOF please ensure you install the Eclipse plug-in.  Details of installing can be found {{{../../install.html}here}}.
   
   Once the Eclipse plug-in is installed you will be able to use the new wizard to create the <<<application.woof>>> file.  On creating and opening there should be a blank editor.  To make configuration changes:
   
