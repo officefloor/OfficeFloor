@@ -177,6 +177,11 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 			throw new MojoFailureException(ex.getMessage(), ex);
 		}
 
+		// Ensure have classes directory
+		if (this.classes == null) {
+			this.classes = new File(this.target, "classes");
+		}
+
 		// Extract to classes directory for packaging into jar
 		Path classesPath = this.classes.toPath();
 		try (JarFile jar = new JarFile(shadeJar)) {
