@@ -73,9 +73,6 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 	/**
 	 * Creates the {@link AbstractAdaptedIdeEditor}.
 	 * 
-	 * @param <R>       Root {@link Model}.
-	 * @param <RE>      Root event {@link Enum}.
-	 * @param <O>       Operations.
 	 * @param envBridge {@link EnvironmentBridge}.
 	 * @return {@link AbstractAdaptedIdeEditor}.
 	 */

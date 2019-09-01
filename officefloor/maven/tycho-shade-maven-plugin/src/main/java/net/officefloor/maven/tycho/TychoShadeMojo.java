@@ -19,12 +19,18 @@ package net.officefloor.maven.tycho;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -48,9 +54,12 @@ import org.eclipse.tycho.compiler.AbstractOsgiCompilerMojo;
  * 
  * @author Daniel Sagenschneider
  */
-@Mojo(name = "shade", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Mojo(name = "shade", defaultPhase = LifecyclePhase.COMPILE, requiresDependencyResolution = ResolutionScope.RUNTIME)
 public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 
+	/**
+	 * {@link Shader}.
+	 */
 	@Component
 	private Shader shader;
 
@@ -65,6 +74,9 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 
 	@Parameter(defaultValue = "${project.build.directory}", readonly = true)
 	private File target;
+
+	@Parameter(defaultValue = "${project.build.outputDirectory}", readonly = true)
+	private File classes;
 
 	/**
 	 * List of artifactId's to exclude from shading. This allows avoiding artifacts
@@ -146,7 +158,7 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 		}
 
 		// Determine the shade jar name
-		File shadeJar = new File(this.target, this.finalName + ".jar");
+		File shadeJar = new File(this.target, this.finalName + "-tychoshade.jar");
 		this.getLog().info("Shading jar: " + shadeJar.getAbsolutePath());
 
 		// Log the inclusions
@@ -161,6 +173,25 @@ public class TychoShadeMojo extends AbstractOsgiCompilerMojo {
 		request.setRelocators(Collections.emptyList());
 		try {
 			this.shader.shade(request);
+		} catch (IOException ex) {
+			throw new MojoFailureException(ex.getMessage(), ex);
+		}
+
+		// Extract to classes directory for packaging into jar
+		Path classesPath = this.classes.toPath();
+		try (JarFile jar = new JarFile(shadeJar)) {
+			Enumeration<JarEntry> entries = jar.entries();
+			while (entries.hasMoreElements()) {
+				JarEntry entry = entries.nextElement();
+				if (!entry.isDirectory()) {
+					Path entryPath = classesPath.resolve(entry.getName());
+					Path parentPath = entryPath.getParent();
+					if (!Files.exists(parentPath)) {
+						Files.createDirectories(parentPath);
+					}
+					Files.copy(jar.getInputStream(entry), entryPath, StandardCopyOption.REPLACE_EXISTING);
+				}
+			}
 		} catch (IOException ex) {
 			throw new MojoFailureException(ex.getMessage(), ex);
 		}
