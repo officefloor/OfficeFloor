@@ -90,7 +90,7 @@ public class ViewWoofMojo extends AbstractMojo {
 	 * different JavaFX version (for a version not included in plugin).
 	 * <p>
 	 * Typically, this is the lib directory of the
-	 * <a href="http://openjfx.org">OpenJFX</a> install.
+	 * <a href="http://openjfx.io">OpenJFX</a> install.
 	 */
 	@Parameter(property = "javafx.lib")
 	private File javaFxLibDir = null;
