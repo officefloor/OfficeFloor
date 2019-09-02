@@ -110,7 +110,7 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 					sh 'mvn clean'
 					sh 'mvn -Dofficefloor.skip.stress.tests=true install'
 	        	}
-				dir('officefloor/editor/eclipse') {
+				dir('officefloor/editor') {
 					// Clean build with different Eclipse target
 					// Note: latest Eclipse target is default build
 					sh 'mvn clean'
