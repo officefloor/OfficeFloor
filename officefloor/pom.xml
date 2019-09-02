@@ -676,6 +676,45 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											net.officefloor.maven
+										</groupId>
+										<artifactId>
+											tycho-shade-maven-plugin
+										</artifactId>
+										<versionRange>
+											[3.13.0,)
+										</versionRange>
+										<goals>
+											<goal>shade</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.jetbrains.kotlin
+										</groupId>
+										<artifactId>
+											kotlin-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.3.41,)
+										</versionRange>
+										<goals>
+											<goal>test-compile</goal>
+											<goal>compile</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
