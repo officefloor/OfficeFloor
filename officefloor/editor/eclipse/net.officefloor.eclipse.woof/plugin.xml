@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+
+	<extension point="org.eclipse.ui.newWizards">
+		<category 
+		id="net.officefloor.category" 
+		name="OfficeFloor" />
+	</extension>
+	<extension point="org.eclipse.ui.newWizards">
+		<wizard 
+		category="net.officefloor.category"
+        class="net.officefloor.eclipse.ide.woof.WoofNewWizard"
+        icon="icons/OfficeFloor.png"
+        id="net.officefloor.eclipse.woof.WoofNewWizard"
+        name="WoOF"/>
+	</extension>
+
+	<extension point="org.eclipse.ui.editors"
+		id="net.officefloor.ui.OfficeFloorEditors" 
+		name="OfficeFloor Editors">
+		<editor
+        class="net.officefloor.eclipse.ide.woof.WoofEditPart"
+        contributorClass="net.officefloor.eclipse.ide.IdeEditorActionBarContributor"
+        default="true"
+        extensions="woof"
+        icon="icons/OfficeFloor.png"
+        id="net.officefloor.eclipse.woof"
+        name="WoOF Editor"/>
+	</extension>
+
+</plugin>
