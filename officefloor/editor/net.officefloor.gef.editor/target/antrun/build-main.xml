@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<project name="maven-antrun-" default="main"  >
-<target name="main">
-  <property name="project_name" value="Editor"/>
-  <property name="flatten_pom" value="/home/daniel/OfficeFloor/officefloor/editor/net.officefloor.gef.editor/.flattened-pom.xml"/>
-  <echo>Tycho fix: Adding name ${project_name} to ${flatten_pom}</echo>
-  <replaceregexp file="${flatten_pom}" match="&lt;\/packaging&gt;[^;]*&lt;description&gt;" flags="m" replace="&lt;/packaging&gt;&lt;name&gt;${project_name}&lt;/name&gt;&lt;description&gt;"/>
-</target>
-</project>
