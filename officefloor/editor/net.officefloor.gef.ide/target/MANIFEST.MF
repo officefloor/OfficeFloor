@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OfficeFloor Eclipse IDE
+Bundle-SymbolicName: net.officefloor.gef.ide;singleton:=true
+Bundle-Version: 3.13.0
+Bundle-Vendor: OfficeFloor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: net.officefloor.core;bundle-version="3.13.0",net.officef
+ loor.gef.common;bundle-version="3.13.0",net.officefloor.gef.bridge;bund
+ le-version="3.13.0",net.officefloor.gef.editor;bundle-version="3.13.0",
+ net.officefloor.gef.configurer;bundle-version="3.13.0"
+Export-Package: net.officefloor.gef.ide.editor,net.officefloor.gef.ide.p
+ references
+Bundle-ActivationPolicy: lazy
+Import-Package: com.google.inject,com.google.inject.util,org.eclipse.gef
+ .common.activate,org.eclipse.gef.common.dispose,org.eclipse.gef.mvc.fx.
+ domain
+Automatic-Module-Name: net.officefloor.gef.ide
+

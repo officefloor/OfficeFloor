@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<units size='1'>
+  <unit id='net.officefloor.gef.section' version='3.13.0' generation='2'>
+    <update id='net.officefloor.gef.section' range='[0.0.0,3.13.0)' severity='0'/>
+    <properties size='5'>
+      <property name='org.eclipse.equinox.p2.name' value='Section Editor'/>
+      <property name='org.eclipse.equinox.p2.provider' value='OfficeFloor'/>
+      <property name='maven-groupId' value='net.officefloor.editor'/>
+      <property name='maven-artifactId' value='net.officefloor.gef.section'/>
+      <property name='maven-version' value='3.13.0'/>
+    </properties>
+    <provides size='5'>
+      <provided namespace='org.eclipse.equinox.p2.iu' name='net.officefloor.gef.section' version='3.13.0'/>
+      <provided namespace='osgi.bundle' name='net.officefloor.gef.section' version='3.13.0'/>
+      <provided namespace='java.package' name='net.officefloor.gef.section' version='0.0.0'/>
+      <provided namespace='osgi.identity' name='net.officefloor.gef.section' version='3.13.0'>
+        <properties size='1'>
+          <property name='type' value='osgi.bundle'/>
+        </properties>
+      </provided>
+      <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='bundle' version='1.0.0'/>
+    </provides>
+    <requires size='11'>
+      <required namespace='osgi.bundle' name='net.officefloor.core' range='3.13.0'/>
+      <required namespace='osgi.bundle' name='net.officefloor.woof' range='3.13.0'/>
+      <required namespace='osgi.bundle' name='net.officefloor.gef.common' range='3.13.0'/>
+      <required namespace='osgi.bundle' name='net.officefloor.gef.editor' range='3.13.0'/>
+      <required namespace='osgi.bundle' name='net.officefloor.gef.bridge' range='3.13.0'/>
+      <required namespace='osgi.bundle' name='net.officefloor.gef.configurer' range='3.13.0'/>
+      <required namespace='osgi.bundle' name='net.officefloor.gef.ide' range='3.13.0'/>
+      <required namespace='java.package' name='com.google.inject' range='0.0.0'/>
+      <required namespace='java.package' name='org.eclipse.gef.mvc.fx.domain' range='0.0.0'/>
+      <required namespace='java.package' name='org.eclipse.gef.geometry.planar' range='0.0.0'/>
+      <requiredProperties namespace='osgi.ee' match='(&amp;(osgi.ee=JavaSE)(version=1.8))'/>
+    </requires>
+    <artifacts size='1'>
+      <artifact classifier='osgi.bundle' id='net.officefloor.gef.section' version='3.13.0'/>
+    </artifacts>
+    <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
+    <touchpointData size='1'>
+      <instructions size='1'>
+        <instruction key='manifest'>
+          Bundle-SymbolicName: net.officefloor.gef.section;singleton:=true&#xA;Bundle-Version: 3.13.0&#xA;
+        </instruction>
+      </instructions>
+    </touchpointData>
+  </unit>
+</units>

@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<artifacts size='1'>
+  <artifact classifier='osgi.bundle' id='net.officefloor.gef.configurer' version='3.13.0'>
+    <properties size='5'>
+      <property name='artifact.size' value='122725'/>
+      <property name='download.size' value='122725'/>
+      <property name='maven-groupId' value='net.officefloor.editor'/>
+      <property name='maven-artifactId' value='net.officefloor.gef.configurer'/>
+      <property name='maven-version' value='3.13.0'/>
+    </properties>
+  </artifact>
+</artifacts>

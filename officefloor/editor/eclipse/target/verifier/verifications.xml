@@ -1,0 +1,35 @@
+<verifications>
+	<files>
+		<!-- Ensure using latest version -->
+		<file>
+			<location>/home/daniel/OfficeFloor/officefloor/editor/eclipse/../../pom.xml</location>
+			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>eclipse</artifactId>[^;]*</dependencyManagement>]]></contains>
+		</file>
+
+		<!-- Core eclipse modules are inheriting correct version -->
+		<file>
+			<location>net.officefloor.eclipse.ide/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: 3.13.0]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.eclipse.launch/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: 3.13.0]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.eclipse.section/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: 3.13.0]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.eclipse.woof/META-INF/MANIFEST.MF</location>
+			<contains><![CDATA[Bundle-Version: 3.13.0]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.feature/feature.xml</location>
+			<contains><![CDATA[<feature[^;]*version="3.13.0"[^;]*provider-name="OfficeFloor"]]></contains>
+		</file>
+		<file>
+			<location>net.officefloor.woof.feature/feature.xml</location>
+			<contains><![CDATA[<feature[^;]*version="3.13.0"[^;]*provider-name="OfficeFloor"]]></contains>
+		</file>
+	</files>
+</verifications>

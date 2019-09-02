@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Section Editor
+Bundle-SymbolicName: net.officefloor.gef.woof;singleton:=true
+Bundle-Version: 3.13.0
+Bundle-Vendor: OfficeFloor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Eclipse-RegisterBuddy: net.officefloor.core
+Export-Package: net.officefloor.gef.woof
+Require-Bundle: net.officefloor.core;bundle-version="3.13.0",net.officef
+ loor.woof;bundle-version="3.13.0",net.officefloor.gef.common;bundle-ver
+ sion="3.13.0",net.officefloor.gef.editor;bundle-version="3.13.0",net.of
+ ficefloor.gef.bridge;bundle-version="3.13.0",net.officefloor.gef.config
+ urer;bundle-version="3.13.0",net.officefloor.gef.ide;bundle-version="3.
+ 13.0"
+Import-Package: com.google.inject,org.eclipse.gef.mvc.fx.domain,org.ecli
+ pse.gef.geometry.planar
+Automatic-Module-Name: net.officefloor.gef.woof
+
