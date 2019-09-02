@@ -1,9 +1,0 @@
-<verifications>
-	<files>
-		<!-- Ensure using latest version -->
-		<file>
-			<location>/home/daniel/OfficeFloor/officefloor/shim/../pom.xml</location>
-			<contains><![CDATA[<dependencyManagement>[^;]*<artifactId>shim</artifactId>[^;]*</dependencyManagement>]]></contains>
-		</file>
-	</files>
-</verifications>
