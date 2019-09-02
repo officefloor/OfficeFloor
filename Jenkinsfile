@@ -108,8 +108,27 @@ H 4 * * * %BUILD_TYPE=PERFORMANCE
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 	        	dir('officefloor/bom') {
 					sh 'mvn clean'
-					sh 'mvn -Dofficefloor.skip.stress.tests=true install'
+					sh 'mvn -Dofficefloor.skip.stress.tests=true -Dmaven.test.failure.ignore=true install'
 	        	}
+			}
+		    post {
+			    always {
+					junit allowEmptyResults: true, testResults: 'officefloor/**/target/surefire-reports/TEST-*.xml'
+					junit allowEmptyResults: true, testResults: 'officefloor/**/target/failsafe-reports/TEST-*.xml'
+			    }
+		    }
+		}
+
+		stage('Eclipse versions compatible') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE == 'TEST' }
+					branch 'master'
+				}
+			}
+			steps {
+	        	sh 'mvn -version'
+	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
 				dir('officefloor/editor') {
 					// Clean build with different Eclipse target
 					// Note: latest Eclipse target is default build
