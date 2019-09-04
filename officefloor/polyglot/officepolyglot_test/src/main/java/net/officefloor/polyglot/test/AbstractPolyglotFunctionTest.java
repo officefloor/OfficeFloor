@@ -407,7 +407,7 @@ public abstract class AbstractPolyglotFunctionTest extends OfficeFrameTestCase {
 	 */
 	@StressTest
 	public void testDirectMultiThreaded() throws Exception {
-		this.doMultiThreadedTest(10, 10000, 10, () -> this.testDirectVariables());
+		this.doMultiThreadedTest(10, 10000, 60, () -> this.testDirectVariables());
 	}
 
 	/**
