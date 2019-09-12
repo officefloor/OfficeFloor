@@ -59,6 +59,11 @@ public class SectionIdeTestApplication extends AbstractIdeTestApplication<Sectio
 	}
 
 	@Override
+	protected String getReplaceConfigurationFileName() {
+		return "Replace.section.xml";
+	}
+
+	@Override
 	public void init() throws Exception {
 		this.register(ExternalFlowModel.class, (flow) -> {
 			flow.setArgumentType(String.class.getName());

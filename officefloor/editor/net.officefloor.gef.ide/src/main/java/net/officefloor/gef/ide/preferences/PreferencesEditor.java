@@ -237,9 +237,9 @@ public class PreferencesEditor<R extends Model> {
 
 		// Load editor view (with scene available)
 		VBox editorView = new VBox();
-		VBox.setVgrow(editorView, Priority.ALWAYS);
 		stackView.getChildren().add(editorView);
-		ViewManager viewManager = this.editor.loadView((view) -> {
+		ViewManager<R> viewManager = this.editor.loadView((view) -> {
+			VBox.setVgrow(view, Priority.ALWAYS);
 			editorView.getChildren().add(view);
 			loader.accept(stackView);
 		});

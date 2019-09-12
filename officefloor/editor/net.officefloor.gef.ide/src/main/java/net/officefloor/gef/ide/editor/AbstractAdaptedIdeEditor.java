@@ -37,6 +37,7 @@ import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.editor.AdaptedBuilder;
 import net.officefloor.gef.editor.AdaptedChildBuilder;
 import net.officefloor.gef.editor.AdaptedEditorModule;
+import net.officefloor.gef.editor.AdaptedErrorHandler.UncertainOperation;
 import net.officefloor.gef.editor.AdaptedParentBuilder;
 import net.officefloor.gef.editor.AdaptedRootBuilder;
 import net.officefloor.gef.editor.ChangeExecutor;
@@ -511,7 +512,7 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 		Property<R> rootModelProperty = this.module.loadRootModel(this.model);
 
 		// Return the view manager
-		return new ViewManager<>(rootModelProperty, this.rootBuilder);
+		return new ViewManager<>(rootModelProperty, this);
 	}
 
 	/**
@@ -521,39 +522,89 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 
 		private final Property<R> rootModel;
 
-		private final AdaptedRootBuilder<?, ?> rootBuilder;
+		private final AbstractAdaptedIdeEditor<R, ?, ?> editor;
 
-		private ViewManager(Property<R> rootModel, AdaptedRootBuilder<?, ?> rootBuilder) {
+		private ViewManager(Property<R> rootModel, AbstractAdaptedIdeEditor<R, ?, ?> editor) {
 			this.rootModel = rootModel;
-			this.rootBuilder = rootBuilder;
+			this.editor = editor;
 		}
 
+		/**
+		 * Obtains {@link Property} to change root {@link Model}.
+		 * 
+		 * @return {@link Property} to change root {@link Model}.
+		 */
 		public Property<R> rootModel() {
 			return this.rootModel;
 		}
 
+		/**
+		 * <p>
+		 * Reloads the root {@link Model} from the {@link WritableConfigurationItem}.
+		 * <p>
+		 * Note: a {@link WritableConfigurationItem} requires to be configured.
+		 */
+		public void reloadFromConfigurationItem() {
+			this.editor.rootBuilder.getErrorHandler().isError(() -> {
+				if (this.editor.configurationItem == null) {
+					throw new IllegalStateException(
+							"No " + WritableConfigurationItem.class.getSimpleName() + " was configured");
+				}
+				R model = this.editor.loadRootModel(this.editor.configurationItem);
+				this.rootModel.setValue(model);
+			});
+		}
+
+		/**
+		 * Obtains {@link Property} to change the Editor styling.
+		 * 
+		 * @return {@link Property} to change the Editor styling.
+		 */
 		public Property<String> editorStyle() {
-			return this.rootBuilder.editorStyle();
+			return this.editor.rootBuilder.editorStyle();
 		}
 
+		/**
+		 * Obtains {@link Property} to change Palette Indicator styling.
+		 * 
+		 * @return {@link Property} to change Palette Indicator styling.
+		 */
 		public Property<String> paletteIndicatorStyle() {
-			return this.rootBuilder.paletteIndicatorStyle();
+			return this.editor.rootBuilder.paletteIndicatorStyle();
 		}
 
+		/**
+		 * Obtains {@link Property} to change Palette styling.
+		 * 
+		 * @return {@link Property} to change Palette styling.
+		 */
 		public Property<String> paletteStyle() {
-			return this.rootBuilder.paletteStyle();
+			return this.editor.rootBuilder.paletteStyle();
 		}
-	}
 
-	/**
-	 * Saves changes.
-	 */
-	public void save() {
-		this.rootBuilder.getErrorHandler().isError(() -> {
+		/**
+		 * <p>
+		 * Runs an {@link UncertainOperation}.
+		 * <p>
+		 * Feedback of {@link Throwable} is presented by the Editor.
+		 * 
+		 * @param operation {@link UncertainOperation}.
+		 * @return <code>true</code> if error.
+		 */
+		public boolean isError(UncertainOperation operation) {
+			return this.editor.rootBuilder.getErrorHandler().isError(operation);
+		}
 
-			// Save the model
-			this.saveRootModel(this.model, this.configurationItem);
-		});
+		/**
+		 * Saves the Editor contents to the {@link WritableConfigurationItem}.
+		 */
+		public void save() {
+			this.editor.rootBuilder.getErrorHandler().isError(() -> {
+
+				// Save the model
+				this.editor.saveRootModel(this.editor.model, this.editor.configurationItem);
+			});
+		}
 	}
 
 }
