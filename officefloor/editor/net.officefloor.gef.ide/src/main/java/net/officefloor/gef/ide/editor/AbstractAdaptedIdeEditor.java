@@ -477,7 +477,7 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	 * @param viewLoader Receives the view.
 	 * @return {@link ViewManager}.
 	 */
-	public ViewManager loadView(Consumer<Pane> viewLoader) {
+	public ViewManager<R> loadView(Consumer<Pane> viewLoader) {
 
 		// Provide possible select only
 		if (this.selectOnly != null) {
@@ -508,21 +508,28 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 		}
 
 		// Load the module with root model
-		this.module.loadRootModel(this.model);
+		Property<R> rootModelProperty = this.module.loadRootModel(this.model);
 
 		// Return the view manager
-		return new ViewManager(this.rootBuilder);
+		return new ViewManager<>(rootModelProperty, this.rootBuilder);
 	}
 
 	/**
 	 * View manager.
 	 */
-	public static class ViewManager {
+	public static class ViewManager<R extends Model> {
+
+		private final Property<R> rootModel;
 
 		private final AdaptedRootBuilder<?, ?> rootBuilder;
 
-		private ViewManager(AdaptedRootBuilder<?, ?> rootBuilder) {
+		private ViewManager(Property<R> rootModel, AdaptedRootBuilder<?, ?> rootBuilder) {
+			this.rootModel = rootModel;
 			this.rootBuilder = rootBuilder;
+		}
+
+		public Property<R> rootModel() {
+			return this.rootModel;
 		}
 
 		public Property<String> editorStyle() {

@@ -24,7 +24,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import net.officefloor.gef.common.structure.StructureLogger;
-import net.officefloor.gef.editor.AbstractEditorApplication;
 import net.officefloor.gef.editor.AdaptedBuilderContext;
 import net.officefloor.gef.editor.AdaptedChildBuilder;
 import net.officefloor.gef.editor.AdaptedErrorHandler;
@@ -33,7 +32,6 @@ import net.officefloor.gef.editor.AdaptedParentBuilder;
 import net.officefloor.gef.editor.AdaptedRootBuilder;
 import net.officefloor.gef.editor.DefaultConnectors;
 import net.officefloor.gef.editor.DefaultImages;
-import net.officefloor.model.Model;
 import net.officefloor.model.impl.officefloor.OfficeFloorChangesImpl;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel.DeployedOfficeInputEvent;
@@ -60,7 +58,7 @@ import net.officefloor.model.officefloor.OfficeFloorTeamModel.OfficeFloorTeamEve
  * 
  * @author Daniel Sagenschneider
  */
-public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
+public class ExampleOfficeFloorEditorMain extends AbstractEditorTestApplication<OfficeFloorModel> {
 
 	/**
 	 * Main to run the editor.
@@ -346,7 +344,7 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 	}
 
 	@Override
-	protected Model createRootModel() {
+	protected OfficeFloorModel createRootModel() {
 
 		// Create the OfficeFloor model
 		OfficeFloorModel root = new OfficeFloorModel();
@@ -390,6 +388,20 @@ public class ExampleOfficeFloorEditorMain extends AbstractEditorApplication {
 		mosFlowToInput.connect();
 
 		// Return the OfficeFloor model
+		return root;
+	}
+
+	@Override
+	protected OfficeFloorModel createRootReplacement() {
+
+		// Create the OfficeFloor model
+		OfficeFloorModel root = new OfficeFloorModel();
+
+		// Provide replacement
+		root.addDeployedOffice(
+				new DeployedOfficeModel("Replacement", "net.example.OfficeSource", "location", 100, 100));
+
+		// Return root model
 		return root;
 	}
 

@@ -22,12 +22,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import net.officefloor.gef.common.structure.StructureLogger;
-import net.officefloor.gef.editor.AbstractEditorApplication;
 import net.officefloor.gef.editor.AdaptedBuilderContext;
 import net.officefloor.gef.editor.AdaptedParentBuilder;
 import net.officefloor.gef.editor.AdaptedRootBuilder;
 import net.officefloor.gef.editor.DefaultConnectors;
-import net.officefloor.model.Model;
 import net.officefloor.model.impl.section.SectionChangesImpl;
 import net.officefloor.model.section.FunctionModel;
 import net.officefloor.model.section.FunctionModel.FunctionEvent;
@@ -41,7 +39,7 @@ import net.officefloor.model.section.SectionModel.SectionEvent;
  * 
  * @author Daniel Sagenschneider
  */
-public class ExampleSectionEditorMain extends AbstractEditorApplication {
+public class ExampleSectionEditorMain extends AbstractEditorTestApplication<SectionModel> {
 
 	/**
 	 * Main to run the editor.
@@ -99,7 +97,7 @@ public class ExampleSectionEditorMain extends AbstractEditorApplication {
 	}
 
 	@Override
-	protected Model createRootModel() {
+	protected SectionModel createRootModel() {
 
 		// Create the Section model
 		SectionModel root = new SectionModel();
@@ -116,6 +114,19 @@ public class ExampleSectionEditorMain extends AbstractEditorApplication {
 		FunctionToNextFunctionModel connection = new FunctionToNextFunctionModel(functionTwo.getFunctionName(),
 				functionOne, functionTwo);
 		connection.connect();
+
+		// Return the Section model
+		return root;
+	}
+
+	@Override
+	protected SectionModel createRootReplacement() {
+
+		// Create the Section model
+		SectionModel root = new SectionModel();
+
+		// Provide replacement
+		root.addFunction(new FunctionModel("Replaced", false, null, null, null, 150, 150));
 
 		// Return the Section model
 		return root;

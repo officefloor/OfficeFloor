@@ -43,6 +43,7 @@ import com.google.inject.Injector;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -154,7 +155,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	/**
 	 * Root {@link Model}.
 	 */
-	private R rootModel;
+	private Property<R> rootModel;
 
 	/**
 	 * Operations.
@@ -348,64 +349,96 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 	 * 
 	 * @param rootModel Root {@link Model}.
 	 */
+	public Property<R> loadRootModel(R rootModel) {
+
+		// Lazy create the root model property
+		if (this.rootModel == null) {
+			this.rootModel = new SimpleObjectProperty<>(rootModel);
+			this.loadRootModel(null, rootModel);
+			this.rootModel
+					.addListener((value, oldRootModel, newRootModel) -> this.loadRootModel(oldRootModel, newRootModel));
+
+		} else {
+			// Already created, so just set as new root model
+			this.rootModel.setValue(rootModel);
+		}
+
+		// Return the root model property
+		return this.rootModel;
+	}
+
+	/**
+	 * Loads the root {@link Model}
+	 * 
+	 * @throws IllegalStateException If invalid root {@link Model}.
+	 */
 	@SuppressWarnings("unchecked")
-	public void loadRootModel(Model rootModel) {
+	private void loadRootModel(R oldRootModel, R newRootModel) throws IllegalStateException {
 
 		// Ensure correct root model
-		if (rootModel == null) {
+		if (newRootModel == null) {
 			throw new IllegalStateException("No root model provided");
 		}
-		if (!this.rootModelClass.equals(rootModel.getClass())) {
+		if (!this.rootModelClass.equals(newRootModel.getClass())) {
 			throw new IllegalStateException("Incorrect root model type " + rootModel.getClass().getName()
 					+ " as configured with " + this.rootModelClass.getName());
 		}
-		this.rootModel = (R) rootModel;
-		this.operations = this.createOperations.apply(this.rootModel);
 
-		// Load the default styling
-		AdaptedEditorPlugin.loadDefaulStylesheet(this.editorPane.getScene());
+		// Determine if require initialising (no operations yet loaded)
+		boolean isRequireInitialise = (this.operations == null);
 
-		// Re-apply styles (after so overrides default style)
-		Consumer<Property<String>> reapplyStyle = (style) -> {
-			String styleRules = style.getValue();
-			if ((styleRules != null) && (styleRules.trim().length() > 0)) {
-				style.setValue(""); // clear rules
-				style.setValue(styleRules); // re-apply
-			}
-		};
-		reapplyStyle.accept(this.editorStyle);
-		reapplyStyle.accept(this.paletteIndicatorStyle);
-		reapplyStyle.accept(this.paletteStyle);
+		// Load the operations
+		this.operations = this.createOperations.apply(newRootModel);
 
-		// Initialise all the models
-		this.models.values().forEach((model) -> model.init(this.injector, this.models));
+		// Iniitalise
+		if (isRequireInitialise) {
 
-		// Validate all the models
-		this.models.values().forEach((model) -> model.validate());
+			// Load the default styling
+			AdaptedEditorPlugin.loadDefaulStylesheet(this.editorPane.getScene());
 
-		// Load with dependencies injected
-		OfficeFloorContentPartFactory<R, O> factory = this.injector.getInstance(OfficeFloorContentPartFactory.class);
+			// Re-apply styles (after so overrides default style)
+			Consumer<Property<String>> reapplyStyle = (style) -> {
+				String styleRules = style.getValue();
+				if ((styleRules != null) && (styleRules.trim().length() > 0)) {
+					style.setValue(""); // clear rules
+					style.setValue(styleRules); // re-apply
+				}
+			};
+			reapplyStyle.accept(this.editorStyle);
+			reapplyStyle.accept(this.paletteIndicatorStyle);
+			reapplyStyle.accept(this.paletteStyle);
 
-		// Load the palette models
-		List<AdaptedModel<?>> paletteModels = new LinkedList<>();
-		for (AbstractAdaptedFactory<R, O, ?, ?, ?> adaptedFactory : this.orderedModels) {
-			if (adaptedFactory instanceof AdaptedParentFactory) {
-				AdaptedParentFactory<R, O, ?, ?> parentFactory = (AdaptedParentFactory<R, O, ?, ?>) adaptedFactory;
+			// Initialise all the models
+			this.models.values().forEach((model) -> model.init(this.injector, this.models));
 
-				// Include if able to create
-				if (parentFactory.isCreate()) {
-					AdaptedModel<?> adaptedPrototype = parentFactory.createPrototype(factory);
-					paletteModels.add(adaptedPrototype);
+			// Validate all the models
+			this.models.values().forEach((model) -> model.validate());
+
+			// Load with dependencies injected
+			OfficeFloorContentPartFactory<R, O> factory = this.injector
+					.getInstance(OfficeFloorContentPartFactory.class);
+
+			// Load the palette models
+			List<AdaptedModel<?>> paletteModels = new LinkedList<>();
+			for (AbstractAdaptedFactory<R, O, ?, ?, ?> adaptedFactory : this.orderedModels) {
+				if (adaptedFactory instanceof AdaptedParentFactory) {
+					AdaptedParentFactory<R, O, ?, ?> parentFactory = (AdaptedParentFactory<R, O, ?, ?>) adaptedFactory;
+
+					// Include if able to create
+					if (parentFactory.isCreate()) {
+						AdaptedModel<?> adaptedPrototype = parentFactory.createPrototype(factory);
+						paletteModels.add(adaptedPrototype);
+					}
 				}
 			}
+			this.paletteViewer.getContents().setAll(paletteModels);
 		}
-		this.paletteViewer.getContents().setAll(paletteModels);
 
-		// Initial load of content models
+		// Load of content models
 		this.loadContentModels();
 
 		// Create property change listener to reload on change
-		this.rootModel.addPropertyChangeListener((event) -> {
+		newRootModel.addPropertyChangeListener((event) -> {
 			this.loadContentModels();
 		});
 	}
@@ -418,7 +451,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 		// Load the content models
 		List<Model> contentModels = new LinkedList<>();
 		for (Function<R, List<? extends Model>> getParents : this.getParentFunctions) {
-			List<? extends Model> parents = getParents.apply(this.rootModel);
+			List<? extends Model> parents = getParents.apply(this.rootModel.getValue());
 			if (parents != null) {
 				contentModels.addAll(parents);
 			}
@@ -538,7 +571,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 		if (builder != null) {
 
 			// Create and register the adapted model
-			adapted = builder.newAdaptedModel(this.rootModel, this.operations, parentAdaptedModel, model);
+			adapted = builder.newAdaptedModel(this.rootModel.getValue(), this.operations, parentAdaptedModel, model);
 			this.modelToAdaption.put(model, adapted);
 			return adapted;
 		}
@@ -564,7 +597,7 @@ public class OfficeFloorContentPartFactory<R extends Model, O> implements IConte
 
 					@Override
 					public R getRootModel() {
-						return OfficeFloorContentPartFactory.this.rootModel;
+						return OfficeFloorContentPartFactory.this.rootModel.getValue();
 					}
 
 					@Override
