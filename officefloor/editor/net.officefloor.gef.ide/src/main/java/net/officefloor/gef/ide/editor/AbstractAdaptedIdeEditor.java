@@ -17,6 +17,9 @@
  */
 package net.officefloor.gef.ide.editor;
 
+import java.io.Reader;
+import java.io.StringWriter;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -33,11 +36,14 @@ import javafx.beans.property.Property;
 import javafx.scene.layout.Pane;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.editor.AdaptedBuilder;
 import net.officefloor.gef.editor.AdaptedChildBuilder;
 import net.officefloor.gef.editor.AdaptedEditorModule;
 import net.officefloor.gef.editor.AdaptedErrorHandler.UncertainOperation;
+import net.officefloor.gef.editor.style.AbstractStyleRegistry;
+import net.officefloor.gef.editor.style.Handler;
 import net.officefloor.gef.editor.AdaptedParentBuilder;
 import net.officefloor.gef.editor.AdaptedRootBuilder;
 import net.officefloor.gef.editor.ChangeExecutor;
@@ -377,6 +383,39 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	public abstract String fileName();
 
 	/**
+	 * Provides root {@link Model} for new file.
+	 * 
+	 * @return Root {@link Model} for new file.
+	 */
+	public abstract R newFileRoot();
+
+	/**
+	 * Obtains the new file content.
+	 * 
+	 * @return New file content.
+	 * @throws Exception If fails to generate new file content.
+	 */
+	public String newFileContent() throws Exception {
+
+		// Obtain the root model
+		R model = this.newFileRoot();
+
+		// Extract the content
+		WritableConfigurationItem configurationItem = MemoryConfigurationContext
+				.createWritableConfigurationItem("NewFile");
+		this.saveRootModel(model, configurationItem);
+		StringWriter buffer = new StringWriter();
+		Reader reader = configurationItem.getReader();
+		for (int character = reader.read(); character != -1; character = reader.read()) {
+			buffer.write(character);
+		}
+		String content = buffer.toString();
+
+		// Return the new file content
+		return content;
+	}
+
+	/**
 	 * Obtains root prototype.
 	 * 
 	 * @return Root prototype.
@@ -450,9 +489,32 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 		return this.createOperations.apply(model);
 	}
 
+	/**
+	 * {@link AdaptedEditorModule}.
+	 */
 	private AdaptedEditorModule module;
 
+	/**
+	 * {@link IDomain}.
+	 */
 	private IDomain domain;
+
+	/**
+	 * Initialises for non OSGi environment.
+	 */
+	public void initNonOsgiEnvironment() {
+		try {
+			// Setup OfficeFloor style URL handling
+			URL.setURLStreamHandlerFactory((protocol) -> {
+				if (!AbstractStyleRegistry.PROTOCOL.equals(protocol)) {
+					return null;
+				}
+				return new Handler();
+			});
+		} catch (Throwable ex) {
+			// Assume factory already initialised
+		}
+	}
 
 	/**
 	 * Initialise the {@link AbstractAdaptedIdeEditor}.

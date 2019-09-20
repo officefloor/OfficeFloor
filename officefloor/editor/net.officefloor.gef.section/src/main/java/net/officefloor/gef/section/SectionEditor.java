@@ -18,7 +18,6 @@
 package net.officefloor.gef.section;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import javafx.scene.control.Label;
 import net.officefloor.configuration.ConfigurationItem;
@@ -27,7 +26,6 @@ import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.gef.ide.editor.AbstractItem.ConfigurableContext;
-import net.officefloor.model.Model;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.section.SectionChangesImpl;
 import net.officefloor.model.impl.section.SectionRepositoryImpl;
@@ -91,6 +89,11 @@ public class SectionEditor extends AbstractAdaptedIdeEditor<SectionModel, Sectio
 	@Override
 	public String fileName() {
 		return "new.section";
+	}
+
+	@Override
+	public SectionModel newFileRoot() {
+		return new SectionModel();
 	}
 
 	@Override
