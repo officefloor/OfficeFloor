@@ -184,7 +184,7 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 		/**
 		 * Instantiate.
 		 * 
-		 * @param configurer {@link IdeConfigurer}.
+		 * @param configurer {@link AbstractConfigurableItem.IdeConfigurer}.
 		 */
 		@SuppressWarnings("unchecked")
 		public IdeConfiguration(AbstractConfigurableItem<?, ?, O, M, ?, I>.IdeConfigurer configurer) {
@@ -196,15 +196,12 @@ public abstract class AbstractConfigurableItem<R extends Model, RE extends Enum<
 	}
 
 	/**
-	 * Extracts the {@link IdeConfigurer} configuration.
+	 * Extracts the {@link IdeConfiguration}.
 	 * 
-	 * @param <R>        Root {@link Model} type.
-	 * @param <RE>       Root event type.
 	 * @param <O>        Operations type.
 	 * @param <M>        Item {@link Model} type.
-	 * @param <E>        Item event type.
 	 * @param <I>        Item type.
-	 * @param configurer {@link IdeConfigurer}.
+	 * @param configurer {@link AbstractConfigurableItem.IdeConfigurer}.
 	 */
 	public static <O, M extends Model, I> IdeConfiguration<O, M, I> extractIdeConfiguration(
 			AbstractConfigurableItem<?, ?, O, M, ?, I>.IdeConfigurer configurer) {

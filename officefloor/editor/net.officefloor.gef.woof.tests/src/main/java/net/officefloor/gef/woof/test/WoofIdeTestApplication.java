@@ -65,6 +65,11 @@ public class WoofIdeTestApplication extends AbstractIdeTestApplication<WoofModel
 	}
 
 	@Override
+	protected String getReplaceConfigurationFileName() {
+		return "Replace.woof.xml";
+	}
+
+	@Override
 	public void init() throws Exception {
 		this.register(WoofExceptionModel.class, (model) -> {
 			model.setClassName(IOException.class.getName());

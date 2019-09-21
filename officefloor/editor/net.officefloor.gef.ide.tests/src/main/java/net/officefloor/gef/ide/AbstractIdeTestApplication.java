@@ -36,6 +36,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import net.officefloor.configuration.WritableConfigurationItem;
@@ -45,6 +47,7 @@ import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.configurer.ConfigurationBuilder;
 import net.officefloor.gef.configurer.Configurer;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
+import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor.ViewManager;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem.ConfigurableModelContext;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem.IdeConfiguration;
@@ -73,9 +76,6 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 	/**
 	 * Creates the {@link AbstractAdaptedIdeEditor}.
 	 * 
-	 * @param <R>       Root {@link Model}.
-	 * @param <RE>      Root event {@link Enum}.
-	 * @param <O>       Operations.
 	 * @param envBridge {@link EnvironmentBridge}.
 	 * @return {@link AbstractAdaptedIdeEditor}.
 	 */
@@ -89,6 +89,15 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 	protected abstract String getConfigurationFileName();
 
 	/**
+	 * Obtains path to the {@link WritableConfigurationItem} to replace root
+	 * {@link Model}.
+	 * 
+	 * @return Path to the {@link WritableConfigurationItem} to replace root
+	 *         {@link Model}.
+	 */
+	protected abstract String getReplaceConfigurationFileName();
+
+	/**
 	 * Registers a prototype decorator.
 	 * 
 	 * @param <P>           Prototype type.
@@ -97,6 +106,14 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 	 */
 	protected <P> void register(Class<P> prototypeType, Consumer<P> decorator) {
 		this.prototypeDecorators.put(prototypeType, decorator);
+	}
+
+	/**
+	 * Loads the {@link WritableConfigurationItem}.
+	 */
+	@FunctionalInterface
+	private static interface LoadConfiguration {
+		InputStream loadConfiguration(String configurationFileName) throws Exception;
 	}
 
 	/*
@@ -109,17 +126,23 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 		// Setup environment
 		EnvironmentBridge envBridge = new ClassLoaderEnvironmentBridge(this.getClass().getClassLoader());
 
+		// Function to load configuration
+		LoadConfiguration loadConfiguration = (configurationFileName) -> {
+			String configurationPath = this.getClass().getPackage().getName().replace('.', '/') + "/"
+					+ configurationFileName;
+			InputStream configurationContent = envBridge.getClassLoader().getResourceAsStream(configurationPath);
+			if (configurationContent == null) {
+				throw new FileNotFoundException("Can not find configuration on class path: " + configurationPath);
+			}
+			return configurationContent;
+		};
+
 		// Obtain the configuration
-		String configurationPath = this.getClass().getPackage().getName().replace('.', '/') + "/"
-				+ this.getConfigurationFileName();
-		InputStream configurationContent = envBridge.getClassLoader().getResourceAsStream(configurationPath);
-		if (configurationContent == null) {
-			throw new FileNotFoundException("Can not find configuration on class path: " + configurationPath);
-		}
+		InputStream configurationContent = loadConfiguration.loadConfiguration(this.getConfigurationFileName());
 
 		// Obtain the configuration item
 		WritableConfigurationItem configurationItem = MemoryConfigurationContext
-				.createWritableConfigurationItem(configurationPath);
+				.createWritableConfigurationItem(this.getConfigurationFileName());
 		configurationItem.setConfiguration(configurationContent);
 
 		// Create tabs for various items being tested
@@ -141,9 +164,31 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 		stage.setHeight(1200);
 		stage.show();
 
+		// Provide reload button
+		VBox editorContainer = new VBox();
+		editorTab.setContent(editorContainer);
+
 		// Load editor view (with scene available)
-		editor.loadView((view) -> editorTab.setContent(view));
+		ViewManager<R> viewManager = editor.loadView((view) -> {
+			VBox.setVgrow(view, Priority.ALWAYS);
+			editorContainer.getChildren().add(view);
+		});
 		this.domain.activate();
+
+		// Handle replace model
+		BorderPane editorButtons = new BorderPane();
+		VBox.setVgrow(editorButtons, Priority.NEVER);
+		editorButtons.setPadding(new Insets(10));
+		editorContainer.getChildren().add(editorButtons);
+		Button replaceEditorRootButton = new Button("Replace Root Model");
+		editorButtons.setRight(replaceEditorRootButton);
+		replaceEditorRootButton.setOnAction((event) -> {
+			viewManager.isError(() -> {
+				InputStream inputStream = loadConfiguration.loadConfiguration(this.getReplaceConfigurationFileName());
+				configurationItem.setConfiguration(inputStream);
+				viewManager.reloadFromConfigurationItem();
+			});
+		});
 
 		// Obtain the configurable context (now available from editor)
 		ConfigurableContext<R, O> configurableContext = editor.getConfigurableContext();
@@ -154,6 +199,7 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 		folder.getTabs().add(preferencesTab);
 		Pane preferencesPane = preferences.loadView((view) -> preferencesTab.setContent(view));
 		BorderPane preferenceButtons = new BorderPane();
+		VBox.setVgrow(preferenceButtons, Priority.NEVER);
 		preferenceButtons.setPadding(new Insets(10));
 		preferencesPane.getChildren().add(preferenceButtons);
 

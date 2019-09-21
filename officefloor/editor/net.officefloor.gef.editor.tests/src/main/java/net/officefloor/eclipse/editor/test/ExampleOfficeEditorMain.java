@@ -25,7 +25,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.gef.common.structure.StructureLogger;
-import net.officefloor.gef.editor.AbstractEditorApplication;
 import net.officefloor.gef.editor.AdaptedAreaBuilder;
 import net.officefloor.gef.editor.AdaptedBuilderContext;
 import net.officefloor.gef.editor.AdaptedParentBuilder;
@@ -33,7 +32,6 @@ import net.officefloor.gef.editor.AdaptedRootBuilder;
 import net.officefloor.gef.editor.DefaultConnectors;
 import net.officefloor.gef.editor.DefaultImages;
 import net.officefloor.gef.editor.ParentToAreaConnectionModel;
-import net.officefloor.model.Model;
 import net.officefloor.model.impl.office.OfficeChangesImpl;
 import net.officefloor.model.office.GovernanceAreaModel;
 import net.officefloor.model.office.GovernanceModel;
@@ -47,7 +45,7 @@ import net.officefloor.model.office.OfficeModel.OfficeEvent;
  * 
  * @author Daniel Sagenschneider
  */
-public class ExampleOfficeEditorMain extends AbstractEditorApplication {
+public class ExampleOfficeEditorMain extends AbstractEditorTestApplication<OfficeModel> {
 
 	/**
 	 * Main to run the editor.
@@ -134,7 +132,7 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 	}
 
 	@Override
-	protected Model createRootModel() {
+	protected OfficeModel createRootModel() {
 
 		// Create the Office model
 		OfficeModel root = new OfficeModel();
@@ -144,8 +142,20 @@ public class ExampleOfficeEditorMain extends AbstractEditorApplication {
 		root.addGovernance(governance);
 
 		// Governance Area
-		GovernanceAreaModel area = new GovernanceAreaModel(100, 400, 100, 100);
-		governance.addGovernanceArea(area);
+		governance.addGovernanceArea(new GovernanceAreaModel(100, 600, 100, 150));
+
+		// Return the Office model
+		return root;
+	}
+
+	@Override
+	protected OfficeModel createRootReplacement() {
+
+		// Create the Office model
+		OfficeModel root = new OfficeModel();
+
+		// Add replacement model
+		root.addGovernance(new GovernanceModel("Replaced", null, false, 100, 100));
 
 		// Return the Office model
 		return root;

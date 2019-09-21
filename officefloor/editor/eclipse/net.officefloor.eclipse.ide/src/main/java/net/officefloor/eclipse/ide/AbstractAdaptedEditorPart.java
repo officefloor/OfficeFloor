@@ -47,6 +47,7 @@ import net.officefloor.eclipse.bridge.EclipseEnvironmentBridge;
 import net.officefloor.eclipse.bridge.ProjectConfigurationContext;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
+import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor.ViewManager;
 import net.officefloor.model.Model;
 
 /**
@@ -98,11 +99,13 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 	private AbstractAdaptedIdeEditor<R, RE, O> editor;
 
 	/**
+	 * {@link ViewManager}.
+	 */
+	private ViewManager<R> viewManager;
+
+	/**
 	 * Creates the {@link AbstractAdaptedIdeEditor}.
 	 * 
-	 * @param <R>       Root {@link Model}.
-	 * @param <RE>      Root event {@link Enum}.
-	 * @param <O>       Operations.
 	 * @param envBridge {@link EnvironmentBridge}.
 	 * @return {@link AbstractAdaptedIdeEditor}.
 	 */
@@ -170,7 +173,7 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 	protected void hookViewers() {
 
 		// Load the view
-		this.editor.loadView((view) -> {
+		this.viewManager = this.editor.loadView((view) -> {
 			this.getCanvas().setScene(new Scene(view));
 		});
 	}
@@ -182,7 +185,8 @@ public abstract class AbstractAdaptedEditorPart<R extends Model, RE extends Enum
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		AbstractAdaptedEditorPart.this.editor.save();
+		this.viewManager.save();
+		this.markNonDirty();
 	}
 
 	@Override

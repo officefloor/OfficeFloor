@@ -15,18 +15,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.viewer;
-
-import net.officefloor.eclipse.woof.WoofEditor;
+package org.eclipse.swt;
 
 /**
- * Viewer for WoOF configuration.
+ * <p>
+ * Avoiding importing SWT, which has O/S specific implementations.
+ * <p>
+ * Providing this only as necessary for GEF.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofViewer extends WoofEditor {
+public class SWTError extends Error {
 
-	public static void main(String[] args) throws Exception {
-		WoofEditor.main(args);
-	}
+	private static final long serialVersionUID = -9160311124292866538L;
 }

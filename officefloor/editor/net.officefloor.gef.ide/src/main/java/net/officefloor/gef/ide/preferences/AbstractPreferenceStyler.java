@@ -67,7 +67,7 @@ public abstract class AbstractPreferenceStyler implements PreferenceStyler {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param preferencesToChange Loaded with the {@link EditorPreferences} changes.
+	 * @param preferencesToChange Loaded with the preferences changes.
 	 * @param envBridge           {@link EnvironmentBridge}.
 	 * @param backgroundColour    Background {@link Color}.
 	 */

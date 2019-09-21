@@ -47,9 +47,8 @@ public class ModelPreferenceStyler<M extends Model> extends AbstractPreferenceSt
 	 * Instantiate.
 	 * 
 	 * @param item                {@link AbstractItem}.
-	 * @param prototype           Prototype {@link Model} for the item.
 	 * @param isParent            Indicates if {@link AdaptedParent}.
-	 * @param preferencesToChange Loaded with the {@link EditorPreferences} changes.
+	 * @param preferencesToChange Loaded with the preference changes.
 	 * @param envBridge           {@link EnvironmentBridge}.
 	 * @param backgroundColour    Background {@link Color}.
 	 */

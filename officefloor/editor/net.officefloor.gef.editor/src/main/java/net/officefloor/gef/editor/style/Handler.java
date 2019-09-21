@@ -15,15 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.gef.editor.internal.officefloorstyle;
+package net.officefloor.gef.editor.style;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
-
-import net.officefloor.gef.editor.style.AbstractStyleRegistry;
-import net.officefloor.gef.editor.style.SystemStyleRegistry;
 
 /**
  * {@link URLStreamHandler} for the {@link SystemStyleRegistry}.

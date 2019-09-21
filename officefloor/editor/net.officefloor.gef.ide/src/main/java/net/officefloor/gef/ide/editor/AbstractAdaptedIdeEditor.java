@@ -17,6 +17,9 @@
  */
 package net.officefloor.gef.ide.editor;
 
+import java.io.Reader;
+import java.io.StringWriter;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -33,10 +36,14 @@ import javafx.beans.property.Property;
 import javafx.scene.layout.Pane;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
+import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.editor.AdaptedBuilder;
 import net.officefloor.gef.editor.AdaptedChildBuilder;
 import net.officefloor.gef.editor.AdaptedEditorModule;
+import net.officefloor.gef.editor.AdaptedErrorHandler.UncertainOperation;
+import net.officefloor.gef.editor.style.AbstractStyleRegistry;
+import net.officefloor.gef.editor.style.Handler;
 import net.officefloor.gef.editor.AdaptedParentBuilder;
 import net.officefloor.gef.editor.AdaptedRootBuilder;
 import net.officefloor.gef.editor.ChangeExecutor;
@@ -125,7 +132,6 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	 * <p>
 	 * Allows for alternate {@link AdaptedEditorModule} implementation.
 	 * 
-	 * @param module           {@link AdaptedEditorModule}.
 	 * @param rootModelType    Root {@link Model} type.
 	 * @param createOperations {@link Function} to create the operations from the
 	 *                         root {@link Model}.
@@ -344,7 +350,7 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	}
 
 	/**
-	 * Allows overriding to initialise the {@link AbstractIdeEclipseEditor}.
+	 * Allows overriding to initialise the {@link AbstractAdaptedIdeEditor}.
 	 * 
 	 * @param context {@link ConfigurableContext}.
 	 */
@@ -375,6 +381,39 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	 * @return Default file name for the editor.
 	 */
 	public abstract String fileName();
+
+	/**
+	 * Provides root {@link Model} for new file.
+	 * 
+	 * @return Root {@link Model} for new file.
+	 */
+	public abstract R newFileRoot();
+
+	/**
+	 * Obtains the new file content.
+	 * 
+	 * @return New file content.
+	 * @throws Exception If fails to generate new file content.
+	 */
+	public String newFileContent() throws Exception {
+
+		// Obtain the root model
+		R model = this.newFileRoot();
+
+		// Extract the content
+		WritableConfigurationItem configurationItem = MemoryConfigurationContext
+				.createWritableConfigurationItem("NewFile");
+		this.saveRootModel(model, configurationItem);
+		StringWriter buffer = new StringWriter();
+		Reader reader = configurationItem.getReader();
+		for (int character = reader.read(); character != -1; character = reader.read()) {
+			buffer.write(character);
+		}
+		String content = buffer.toString();
+
+		// Return the new file content
+		return content;
+	}
 
 	/**
 	 * Obtains root prototype.
@@ -450,9 +489,32 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 		return this.createOperations.apply(model);
 	}
 
+	/**
+	 * {@link AdaptedEditorModule}.
+	 */
 	private AdaptedEditorModule module;
 
+	/**
+	 * {@link IDomain}.
+	 */
 	private IDomain domain;
+
+	/**
+	 * Initialises for non OSGi environment.
+	 */
+	public void initNonOsgiEnvironment() {
+		try {
+			// Setup OfficeFloor style URL handling
+			URL.setURLStreamHandlerFactory((protocol) -> {
+				if (!AbstractStyleRegistry.PROTOCOL.equals(protocol)) {
+					return null;
+				}
+				return new Handler();
+			});
+		} catch (Throwable ex) {
+			// Assume factory already initialised
+		}
+	}
 
 	/**
 	 * Initialise the {@link AbstractAdaptedIdeEditor}.
@@ -478,7 +540,7 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	 * @param viewLoader Receives the view.
 	 * @return {@link ViewManager}.
 	 */
-	public ViewManager loadView(Consumer<Pane> viewLoader) {
+	public ViewManager<R> loadView(Consumer<Pane> viewLoader) {
 
 		// Provide possible select only
 		if (this.selectOnly != null) {
@@ -509,45 +571,102 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 		}
 
 		// Load the module with root model
-		this.module.loadRootModel(this.model);
+		Property<R> rootModelProperty = this.module.loadRootModel(this.model);
 
 		// Return the view manager
-		return new ViewManager(this.rootBuilder);
+		return new ViewManager<>(rootModelProperty, this);
 	}
 
 	/**
 	 * View manager.
 	 */
-	public static class ViewManager {
+	public static class ViewManager<R extends Model> {
 
-		private final AdaptedRootBuilder<?, ?> rootBuilder;
+		private final Property<R> rootModel;
 
-		private ViewManager(AdaptedRootBuilder<?, ?> rootBuilder) {
-			this.rootBuilder = rootBuilder;
+		private final AbstractAdaptedIdeEditor<R, ?, ?> editor;
+
+		private ViewManager(Property<R> rootModel, AbstractAdaptedIdeEditor<R, ?, ?> editor) {
+			this.rootModel = rootModel;
+			this.editor = editor;
 		}
 
+		/**
+		 * Obtains {@link Property} to change root {@link Model}.
+		 * 
+		 * @return {@link Property} to change root {@link Model}.
+		 */
+		public Property<R> rootModel() {
+			return this.rootModel;
+		}
+
+		/**
+		 * <p>
+		 * Reloads the root {@link Model} from the {@link WritableConfigurationItem}.
+		 * <p>
+		 * Note: a {@link WritableConfigurationItem} requires to be configured.
+		 */
+		public void reloadFromConfigurationItem() {
+			this.editor.rootBuilder.getErrorHandler().isError(() -> {
+				if (this.editor.configurationItem == null) {
+					throw new IllegalStateException(
+							"No " + WritableConfigurationItem.class.getSimpleName() + " was configured");
+				}
+				R model = this.editor.loadRootModel(this.editor.configurationItem);
+				this.rootModel.setValue(model);
+			});
+		}
+
+		/**
+		 * Obtains {@link Property} to change the Editor styling.
+		 * 
+		 * @return {@link Property} to change the Editor styling.
+		 */
 		public Property<String> editorStyle() {
-			return this.rootBuilder.editorStyle();
+			return this.editor.rootBuilder.editorStyle();
 		}
 
+		/**
+		 * Obtains {@link Property} to change Palette Indicator styling.
+		 * 
+		 * @return {@link Property} to change Palette Indicator styling.
+		 */
 		public Property<String> paletteIndicatorStyle() {
-			return this.rootBuilder.paletteIndicatorStyle();
+			return this.editor.rootBuilder.paletteIndicatorStyle();
 		}
 
+		/**
+		 * Obtains {@link Property} to change Palette styling.
+		 * 
+		 * @return {@link Property} to change Palette styling.
+		 */
 		public Property<String> paletteStyle() {
-			return this.rootBuilder.paletteStyle();
+			return this.editor.rootBuilder.paletteStyle();
 		}
-	}
 
-	/**
-	 * Saves changes.
-	 */
-	public void save() {
-		this.rootBuilder.getErrorHandler().isError(() -> {
+		/**
+		 * <p>
+		 * Runs an {@link UncertainOperation}.
+		 * <p>
+		 * Feedback of {@link Throwable} is presented by the Editor.
+		 * 
+		 * @param operation {@link UncertainOperation}.
+		 * @return <code>true</code> if error.
+		 */
+		public boolean isError(UncertainOperation operation) {
+			return this.editor.rootBuilder.getErrorHandler().isError(operation);
+		}
 
-			// Save the model
-			this.saveRootModel(this.model, this.configurationItem);
-		});
+		/**
+		 * Saves the Editor contents to the {@link WritableConfigurationItem}.
+		 */
+		public void save() {
+			this.editor.rootBuilder.getErrorHandler().isError(() -> {
+
+				// Save the model
+				this.editor.saveRootModel(this.editor.model, this.editor.configurationItem);
+			});
+		}
 	}
 
 }
