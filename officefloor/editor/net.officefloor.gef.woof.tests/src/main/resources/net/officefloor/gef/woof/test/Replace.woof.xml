@@ -1,0 +1,5 @@
+<woof>
+  <http-continuations>
+    <http-continuation path="/replaced" secure="false" x="300" y="100" />
+  </http-continuations>
+</woof>

@@ -15,19 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.gef.editor;
+package net.officefloor.eclipse.editor.test;
 
 import javafx.application.Application;
+import javafx.beans.property.Property;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import net.officefloor.gef.editor.AdaptedBuilderContext;
+import net.officefloor.gef.editor.AdaptedEditorModule;
+import net.officefloor.gef.editor.AdaptedModel;
+import net.officefloor.gef.editor.SelectOnly;
 import net.officefloor.model.Model;
 
 /**
  * Provides means to test editor configurations without loading the Eclipse
  * platform.
  */
-public abstract class AbstractEditorApplication extends Application {
+public abstract class AbstractEditorTestApplication<R extends Model> extends Application {
 
 	/**
 	 * {@link SelectOnly}.
@@ -37,8 +45,7 @@ public abstract class AbstractEditorApplication extends Application {
 	/**
 	 * Builds the {@link AdaptedModel} instances.
 	 * 
-	 * @param context
-	 *            {@link AdaptedBuilderContext}.
+	 * @param context {@link AdaptedBuilderContext}.
 	 */
 	protected abstract void buildModels(AdaptedBuilderContext context);
 
@@ -47,7 +54,14 @@ public abstract class AbstractEditorApplication extends Application {
 	 * 
 	 * @return Root {@link Model}.
 	 */
-	protected abstract Model createRootModel();
+	protected abstract R createRootModel();
+
+	/**
+	 * Creates the replacement root {@link Model}.
+	 * 
+	 * @return Replacement root {@link Model}.
+	 */
+	protected abstract R createRootReplacement();
 
 	/**
 	 * <p>
@@ -64,8 +78,7 @@ public abstract class AbstractEditorApplication extends Application {
 	/**
 	 * Allows specifying that {@link SelectOnly}.
 	 * 
-	 * @param selectOnly
-	 *            {@link SelectOnly}.
+	 * @param selectOnly {@link SelectOnly}.
 	 */
 	protected void setSelectOnly(SelectOnly selectOnly) {
 		this.selectOnly = selectOnly;
@@ -86,20 +99,33 @@ public abstract class AbstractEditorApplication extends Application {
 			module.setSelectOnly(this.selectOnly);
 		}
 
+		// Provide means to replace model
+		VBox container = new VBox();
+
+		// Provide button to replace root model
+		Button replaceButton = new Button("Change Root Model");
+		VBox.setVgrow(replaceButton, Priority.NEVER);
+		container.getChildren().add(replaceButton);
+
 		// Create the parent
 		Parent parent = module.createParent((context) -> this.buildModels(context));
+		VBox.setVgrow(parent, Priority.ALWAYS);
+		container.getChildren().add(parent);
 
 		// Setup visuals
-		Scene scene = new Scene(parent);
+		Scene scene = new Scene(container);
 		stage.setScene(scene);
 		stage.setResizable(true);
-		stage.setWidth(640);
-		stage.setHeight(480);
+		stage.setWidth(1200);
+		stage.setHeight(800);
 		stage.setTitle(this.getClass().getSimpleName());
 
 		// Activate the domain
-		Model rootModel = this.createRootModel();
-		module.activateDomain(rootModel);
+		R rootModel = this.createRootModel();
+		Property<R> rootModelProperty = module.activateDomain(rootModel);
+
+		// Allow button to replace root model
+		replaceButton.setOnAction((event) -> rootModelProperty.setValue(this.createRootReplacement()));
 
 		// Show
 		stage.show();

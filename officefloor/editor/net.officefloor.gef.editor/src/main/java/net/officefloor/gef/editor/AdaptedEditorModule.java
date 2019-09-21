@@ -74,6 +74,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.multibindings.MapBinder;
 
+import javafx.beans.property.Property;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import net.officefloor.gef.editor.internal.behaviors.PaletteFocusBehavior;
@@ -190,14 +191,18 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 * Activates the {@link IDomain}.
 	 * 
 	 * @param rootModel Root {@link Model}.
+	 * @return {@link Property} to change the root {@link Model}.
 	 */
-	public void activateDomain(Model rootModel) {
+	public <R extends Model> Property<R> activateDomain(R rootModel) {
 
 		// Load the root model
-		this.loadRootModel(rootModel);
+		Property<R> rootModelProperty = this.loadRootModel(rootModel);
 
 		// Activate domain
 		this.domain.activate();
+
+		// Return the root model property
+		return rootModelProperty;
 	}
 
 	/*
@@ -271,8 +276,9 @@ public class AdaptedEditorModule extends MvcFxModule {
 	 * Loads the root {@link Model}.
 	 * 
 	 * @param rootModel Root {@link Model}.
+	 * @return {@link Property} to change the root {@link Model}.
 	 */
-	public void loadRootModel(Model rootModel) {
+	public <R extends Model> Property<R> loadRootModel(R rootModel) {
 
 		// Configured so initialise the factory
 		this.viewersComposite.init(this.factory.isCreateParent());
@@ -281,10 +287,14 @@ public class AdaptedEditorModule extends MvcFxModule {
 		this.viewersComposite.getComposite().applyCss();
 
 		// Load the root model
-		this.factory.loadRootModel(rootModel);
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		Property<R> rootModelProperty = ((OfficeFloorContentPartFactory) this.factory).loadRootModel(rootModel);
 
 		// Completed load
 		this.viewersComposite.loadComplete();
+
+		// Return the root model property
+		return rootModelProperty;
 	}
 
 	/*

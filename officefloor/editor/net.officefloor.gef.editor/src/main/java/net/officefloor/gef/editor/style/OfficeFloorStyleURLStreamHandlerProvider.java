@@ -20,8 +20,6 @@ package net.officefloor.gef.editor.style;
 import java.net.URLStreamHandler;
 import java.net.spi.URLStreamHandlerProvider;
 
-import net.officefloor.gef.editor.internal.officefloorstyle.Handler;
-
 /**
  * OfficeFloorStyle {@link URLStreamHandlerProvider}.
  * 
