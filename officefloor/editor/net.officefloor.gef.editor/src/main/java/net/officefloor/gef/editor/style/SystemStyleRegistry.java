@@ -19,8 +19,6 @@ package net.officefloor.gef.editor.style;
 
 import java.util.Arrays;
 
-import net.officefloor.gef.editor.internal.officefloorstyle.Handler;
-
 /**
  * System based {@link StyleRegistry}.
  * 

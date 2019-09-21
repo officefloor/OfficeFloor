@@ -19,8 +19,6 @@ package net.officefloor.eclipse.ide.newwizard;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IContainer;
@@ -39,8 +37,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.eclipse.bridge.EclipseEnvironmentBridge;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
@@ -104,17 +100,7 @@ public abstract class AbstractNewWizard<R extends Model> extends Wizard implemen
 
 		try {
 			// Generate the initial file contents
-			R model = editor.prototype();
-			WritableConfigurationItem configurationItem = MemoryConfigurationContext
-					.createWritableConfigurationItem("editor");
-			editor.saveRootModel(model, configurationItem);
-			StringWriter buffer = new StringWriter();
-			Reader reader = configurationItem.getReader();
-			for (int character = reader.read(); character != -1; character = reader.read()) {
-				buffer.write(character);
-			}
-			this.itemFileContents = buffer.toString();
-
+			this.itemFileContents = editor.newFileContent();
 		} catch (Exception ex) {
 			// Handle exception
 			if (ex instanceof RuntimeException) {

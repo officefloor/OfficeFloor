@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URL;
 import java.util.function.Consumer;
 
 import org.eclipse.gef.mvc.fx.domain.IDomain;
@@ -39,7 +38,6 @@ import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.gef.bridge.ClassLoaderEnvironmentBridge;
 import net.officefloor.gef.bridge.EnvironmentBridge;
-import net.officefloor.gef.editor.internal.officefloorstyle.Handler;
 import net.officefloor.gef.woof.WoofEditor;
 import net.officefloor.woof.WoofLoaderExtensionService;
 
@@ -120,16 +118,9 @@ public class Viewer extends Application {
 		// Create the environment bridge
 		EnvironmentBridge envBridge = new ClassLoaderEnvironmentBridge(classLoader);
 
-		// Setup OfficeFloor style URL handling
-		URL.setURLStreamHandlerFactory((protocol) -> {
-			if (!"officefloorstyle".equals(protocol)) {
-				return null;
-			}
-			return new Handler();
-		});
-
 		// Create and initialise the editor
 		WoofEditor editor = new WoofEditor(envBridge);
+		editor.initNonOsgiEnvironment();
 		editor.init(null, (injector) -> {
 			injector.injectMembers(this);
 			return this.domain;
