@@ -191,12 +191,12 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 		}
 
 		public static OrdersCreateRequest createOrdersRequest() {
-			return new OrdersCreateRequest().requestBody(new OrderRequest().intent("CAPTURE")
+			return new OrdersCreateRequest().requestBody(new OrderRequest().checkoutPaymentIntent("CAPTURE")
 					.applicationContext(new ApplicationContext().brandName("OfficeFloor").landingPage("BILLING"))
 					.purchaseUnits(Arrays
 							.asList(new PurchaseUnitRequest().referenceId("MOCK_ID").description("Test create order")
-									.amount(new AmountWithBreakdown().currencyCode("AUD").value("5.00")
-											.breakdown(new AmountBreakdown()
+									.amountWithBreakdown(new AmountWithBreakdown().currencyCode("AUD").value("5.00")
+											.amountBreakdown(new AmountBreakdown()
 													.itemTotal(new Money().currencyCode("AUD").value("5.00"))
 													.taxTotal(new Money().currencyCode("AUD").value("0.50"))))
 									.items(Arrays.asList(new Item().name("Domain").description("Domain subscription")
@@ -282,7 +282,7 @@ public class PayPalHttpClientTest extends OfficeFrameTestCase {
 			this.doOrder(MockCreateOrderService.class,
 					(rule) -> rule.addOrdersCreateResponse(new Order()).validate((request) -> {
 						OrderRequest orderRequest = (OrderRequest) request.requestBody();
-						assertEquals("Incorrect intent", "CAPTURE", orderRequest.intent());
+						assertEquals("Incorrect intent", "CAPTURE", orderRequest.checkoutPaymentIntent());
 						throw failure;
 					}));
 			fail("Should not be successful");
