@@ -284,8 +284,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	public void testNoExtensionInterfaceType() {
 
 		// Record no extension interface
-		this.recordReturn(this.metaData, this.metaData.getGovernanceFactory(),
-				this.createMock(GovernanceFactory.class));
+		GovernanceFactory<?, ?> governanceFactory = this.createMock(GovernanceFactory.class);
+		this.recordReturn(this.metaData, this.metaData.getGovernanceFactory(), governanceFactory);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), null);
 		this.issues.recordIssue("No extension interface type provided");
 
@@ -318,8 +318,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link GovernanceFlowMetaData} in
-	 * array.
+	 * Ensure issue if <code>null</code> {@link GovernanceFlowMetaData} in array.
 	 */
 	public void testNullFlowMetaData() {
 
@@ -501,13 +500,10 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link GovernanceType}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the
-	 *            {@link GovernanceType}.
-	 * @param init
-	 *            {@link Init}. May be <code>null</code>.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link GovernanceType}.
+	 * @param init                   {@link Init}. May be <code>null</code>.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link GovernanceType}.
 	 */
 	private GovernanceType<Object, None> loadGovernanceType(boolean isExpectedToLoad, Init<?> init,
@@ -563,12 +559,12 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the {@link GovernanceFactory} and extension interface
-	 * type from the {@link GovernanceSourceMetaData}.
+	 * Records obtaining the {@link GovernanceFactory} and extension interface type
+	 * from the {@link GovernanceSourceMetaData}.
 	 */
 	private void record_factoryAndExtensionInterfaceType() {
-		this.recordReturn(this.metaData, this.metaData.getGovernanceFactory(),
-				this.createMock(GovernanceFactory.class));
+		GovernanceFactory<?, ?> governanceFactory = this.createMock(GovernanceFactory.class);
+		this.recordReturn(this.metaData, this.metaData.getGovernanceFactory(), governanceFactory);
 		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), Connection.class);
 	}
 
@@ -588,8 +584,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining simple meta-data from the
-	 * {@link GovernanceSourceMetaData}.
+	 * Records obtaining simple meta-data from the {@link GovernanceSourceMetaData}.
 	 */
 	private void record_simpleMetaData() {
 		this.record_factoryAndExtensionInterfaceType();
@@ -605,8 +600,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Implemented to init the {@link GovernanceSource}.
 		 * 
-		 * @param context
-		 *            {@link GovernanceSourceContext}.
+		 * @param context {@link GovernanceSourceContext}.
 		 */
 		void init(GovernanceSourceContext context);
 	}
@@ -640,8 +634,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Resets state of {@link MockGovernanceSource} for testing.
 		 * 
-		 * @param metaData
-		 *            {@link GovernanceSourceMetaData}.
+		 * @param metaData {@link GovernanceSourceMetaData}.
 		 */
 		public static void reset(GovernanceSourceMetaData<Object, None> metaData) {
 			instantiateFailure = null;
@@ -653,8 +646,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Instantiate.
 		 * 
-		 * @throws Exception
-		 *             Possible instantiate failure.
+		 * @throws Exception Possible instantiate failure.
 		 */
 		public MockGovernanceSource() throws Exception {
 			if (instantiateFailure != null) {
