@@ -73,10 +73,10 @@ public class PayPalLogic {
 			throws IOException {
 		String currency = createOrder.getCurrency();
 		HttpResponse<Order> order = client
-				.execute(new OrdersCreateRequest().requestBody(new OrderRequest().intent("CAPTURE")
+				.execute(new OrdersCreateRequest().requestBody(new OrderRequest().checkoutPaymentIntent("CAPTURE")
 						.purchaseUnits(Arrays.asList(new PurchaseUnitRequest().description("Test create order")
-								.amount(new AmountWithBreakdown().currencyCode(currency).value("5.00")
-										.breakdown(new AmountBreakdown()
+								.amountWithBreakdown(new AmountWithBreakdown().currencyCode(currency).value("5.00")
+										.amountBreakdown(new AmountBreakdown()
 												.itemTotal(new Money().currencyCode(currency).value("4.50"))
 												.taxTotal(new Money().currencyCode(currency).value("0.50"))))
 								.items(Arrays.asList(new Item().name("Domain").description("Domain subscription")
