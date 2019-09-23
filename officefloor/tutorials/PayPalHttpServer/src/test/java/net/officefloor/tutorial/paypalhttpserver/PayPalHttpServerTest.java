@@ -61,8 +61,8 @@ public class PayPalHttpServerTest {
 		this.payPal.addOrdersCreateResponse(new Order().id("MOCK_ORDER_ID").status("CREATED")).validate((request) -> {
 			assertEquals("Incorrect order", "/v2/checkout/orders?", request.path());
 			OrderRequest order = (OrderRequest) request.requestBody();
-			assertEquals("Incorrect intent", "CAPTURE", order.intent());
-			assertEquals("Incorrect amount", "5.00", order.purchaseUnits().get(0).amount().value());
+			assertEquals("Incorrect intent", "CAPTURE", order.checkoutPaymentIntent());
+			assertEquals("Incorrect amount", "5.00", order.purchaseUnits().get(0).amountWithBreakdown().value());
 		});
 
 		// Create
