@@ -388,8 +388,8 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 		this.configuration = new ExecutiveBuilderImpl<>(ExecutionStrategyExecutiveSource.class);
 		ExecutionStrategy strategyOne = this.createMock(ExecutionStrategy.class);
 		this.recordReturn(strategyOne, strategyOne.getExecutionStrategyName(), STRATEGY_NAME);
-		this.recordReturn(strategyOne, strategyOne.getThreadFactories(),
-				new ThreadFactory[] { this.createMock(ThreadFactory.class) });
+		ThreadFactory threadFactory = this.createMock(ThreadFactory.class);
+		this.recordReturn(strategyOne, strategyOne.getThreadFactories(), new ThreadFactory[] { threadFactory });
 		ExecutionStrategy strategyTwo = this.createMock(ExecutionStrategy.class);
 		this.recordReturn(strategyTwo, strategyTwo.getExecutionStrategyName(), STRATEGY_NAME);
 		this.issues.addIssue(AssetType.EXECUTIVE, EXECUTIVE_NAME,
@@ -575,8 +575,8 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 		ExecutionStrategy strategy = this.createMock(ExecutionStrategy.class);
 		this.recordReturn(executive, executive.getExcutionStrategies(), new ExecutionStrategy[] { strategy });
 		this.recordReturn(strategy, strategy.getExecutionStrategyName(), "strategy");
-		this.recordReturn(strategy, strategy.getThreadFactories(),
-				new ThreadFactory[] { this.createMock(ThreadFactory.class) });
+		ThreadFactory threadFactory = this.createMock(ThreadFactory.class);
+		this.recordReturn(strategy, strategy.getThreadFactories(), new ThreadFactory[] { threadFactory });
 		TeamOversight oversight = this.createMock(TeamOversight.class);
 		this.recordReturn(executive, executive.getTeamOversights(), new TeamOversight[] { oversight });
 		this.recordReturn(oversight, oversight.getTeamOversightName(), "oversight");
@@ -603,8 +603,8 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 		ExecutionStrategy strategy = this.createMock(ExecutionStrategy.class);
 		this.recordReturn(executive, executive.getExcutionStrategies(), new ExecutionStrategy[] { strategy });
 		this.recordReturn(strategy, strategy.getExecutionStrategyName(), "strategy");
-		this.recordReturn(strategy, strategy.getThreadFactories(),
-				new ThreadFactory[] { this.createMock(ThreadFactory.class) });
+		ThreadFactory threadFactory = this.createMock(ThreadFactory.class);
+		this.recordReturn(strategy, strategy.getThreadFactories(), new ThreadFactory[] { threadFactory });
 		TeamOversight oversight = this.createMock(TeamOversight.class);
 		this.recordReturn(executive, executive.getTeamOversights(), new TeamOversight[] { oversight });
 		this.recordReturn(oversight, oversight.getTeamOversightName(), "oversight");
