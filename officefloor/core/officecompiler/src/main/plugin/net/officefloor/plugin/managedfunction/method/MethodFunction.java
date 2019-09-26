@@ -23,7 +23,6 @@ import java.lang.reflect.Method;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
 
 /**
  * {@link ManagedFunction} to invoke a {@link Method}.
@@ -95,9 +94,9 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 	private final Method method;
 
 	/**
-	 * {@link ManagedFunctionParameterFactory} instances.
+	 * {@link MethodParameterFactory} instances.
 	 */
-	private final ManagedFunctionParameterFactory[] parameterFactories;
+	private final MethodParameterFactory[] parameterFactories;
 
 	/**
 	 * Initiate.
@@ -107,11 +106,11 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 	 *                                    {@link Method}.
 	 * @param method                      Method to invoke for this
 	 *                                    {@link ManagedFunction}.
-	 * @param parameterFactories          {@link ManagedFunctionParameterFactory}
+	 * @param parameterFactories          {@link MethodParameterFactory}
 	 *                                    instances.
 	 */
 	public MethodFunction(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
-			ManagedFunctionParameterFactory[] parameterFactories) {
+			MethodParameterFactory[] parameterFactories) {
 		this.method = method;
 		this.methodObjectInstanceFactory = methodObjectInstanceFactory;
 		this.parameterFactories = parameterFactories;

@@ -28,7 +28,6 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.clazz.NonFunctionMethod;
-import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder.MethodObjectInstanceManufacturer;
 
 /**
  * {@link ManagedFunctionSource} for a {@link Class} having the {@link Method}

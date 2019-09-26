@@ -21,13 +21,14 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.ClassFlowMethodMetaData;
 import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 
 /**
- * {@link ManagedFunctionParameterFactory} to obtain the {@link Flow}.
+ * {@link MethodParameterFactory} to obtain the {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionFlowParameterFactory implements ManagedFunctionParameterFactory {
+public class FlowInterfaceParameterFactory implements MethodParameterFactory {
 
 	/**
 	 * {@link ClassFlowParameterFactory}.
@@ -40,7 +41,7 @@ public class ManagedFunctionFlowParameterFactory implements ManagedFunctionParam
 	 * @param flowParameterFactory
 	 *            {@link ClassFlowParameterFactory}.
 	 */
-	public ManagedFunctionFlowParameterFactory(ClassFlowParameterFactory flowParameterFactory) {
+	public FlowInterfaceParameterFactory(ClassFlowParameterFactory flowParameterFactory) {
 		this.flowParameterFactory = flowParameterFactory;
 	}
 

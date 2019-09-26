@@ -17,6 +17,8 @@
  */
 package net.officefloor.plugin.variable;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.build.None;
@@ -37,6 +39,24 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 	 * Prefix for variable name.
 	 */
 	public static final String VARIABLE_NAME_PREFIX = "VARIABLE_";
+
+	/**
+	 * Extracts the type from the variable.
+	 * 
+	 * @param variableGenericType Variable {@link Type}.
+	 * @return Variable type.
+	 */
+	public static String extractVariableType(Type variableGenericType) {
+		if (variableGenericType instanceof ParameterizedType) {
+			// Use generics to determine exact type
+			ParameterizedType paramType = (ParameterizedType) variableGenericType;
+			Type[] generics = paramType.getActualTypeArguments();
+			return (generics.length > 0) ? generics[0].getTypeName() : Object.class.getName();
+		} else {
+			// Not parameterized, so raw object
+			return Object.class.getName();
+		}
+	}
 
 	/**
 	 * Obtains {@link Var} from dependency object.

@@ -299,11 +299,12 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 			ClassFlowRegistry flowRegistry = (label, flowParameterType) -> {
 				// Register the flow
 				context.addFlow(flowParameterType).setLabel(label);
+				return flowSequence.nextIndex();
 			};
 
 			// Build the flow parameter factory
 			ClassFlowParameterFactory flowParameterFactory = new ClassFlowBuilder<A>(this.annotationClass)
-					.buildFlowParameterFactory(functionName, parameterType, flowSequence, flowRegistry,
+					.buildFlowParameterFactory(functionName, parameterType, flowRegistry,
 							context.getAdministrationSourceContext());
 			if (flowParameterFactory == null) {
 				return null; // not flow interface

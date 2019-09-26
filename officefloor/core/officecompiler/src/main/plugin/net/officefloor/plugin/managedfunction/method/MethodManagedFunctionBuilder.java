@@ -20,47 +20,28 @@ package net.officefloor.plugin.managedfunction.method;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionEscalationTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.clazz.ClassFlowBuilder;
-import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
-import net.officefloor.plugin.clazz.ClassFlowRegistry;
-import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.NonFunctionMethod;
 import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.clazz.QualifierNameFactory;
 import net.officefloor.plugin.clazz.Sequence;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionAsynchronousFlowParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionContextParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionFlowParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionInParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionObjectParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionOutParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionValueParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionVariableParameterFactory;
-import net.officefloor.plugin.variable.In;
-import net.officefloor.plugin.variable.Out;
-import net.officefloor.plugin.variable.Val;
-import net.officefloor.plugin.variable.Var;
-import net.officefloor.plugin.variable.VariableAnnotation;
+import net.officefloor.plugin.managedfunction.method.parameter.ObjectParameterFactory;
 
 /**
  * Builder to take {@link Method} to produce a {@link ManagedFunction}.
@@ -68,33 +49,6 @@ import net.officefloor.plugin.variable.VariableAnnotation;
  * @author Daniel Sagenschneider
  */
 public class MethodManagedFunctionBuilder {
-
-	/**
-	 * {@link ParameterManufacturer} instances.
-	 */
-	private final List<ParameterManufacturer> manufacturers = new LinkedList<ParameterManufacturer>();
-
-	/**
-	 * Initiate.
-	 */
-	public MethodManagedFunctionBuilder() {
-		// Add the default manufacturers
-		this.manufacturers.add(new ManagedFunctionContextParameterManufacturer());
-		this.manufacturers.add(new AsynchronousFlowParameterManufacturer());
-		this.manufacturers.add(new FlowParameterManufacturer<FlowInterface>(FlowInterface.class));
-
-		// Load any additional manufacturers
-		this.loadParameterManufacturers(this.manufacturers);
-	}
-
-	/**
-	 * Override to add additional {@link ParameterManufacturer} instances.
-	 * 
-	 * @param manufacturers List of {@link ParameterManufacturer} instances to use.
-	 */
-	protected void loadParameterManufacturers(List<ParameterManufacturer> manufacturers) {
-		// By default adds no further manufacturers
-	}
 
 	/**
 	 * Allows overriding the creation of the {@link ManagedFunctionFactory}.
@@ -185,10 +139,10 @@ public class MethodManagedFunctionBuilder {
 
 		// Obtain details of the method
 		String methodName = method.getName();
-		Class<?>[] paramTypes = method.getParameterTypes();
+		Class<?>[] paramClasses = method.getParameterTypes();
 
 		// Create parameters to method to be populated
-		ManagedFunctionParameterFactory[] parameters = new ManagedFunctionParameterFactory[paramTypes.length];
+		MethodParameterFactory[] parameters = new MethodParameterFactory[paramClasses.length];
 
 		// Create the sequences for indexes to the objects and flows
 		Sequence objectSequence = new Sequence();
@@ -224,44 +178,88 @@ public class MethodManagedFunctionBuilder {
 		}
 
 		// Obtain the generic parameters
-		Type[] methodGenericParameters = method.getGenericParameterTypes();
+		Type[] paramTypes = method.getGenericParameterTypes();
 
 		// Obtain the parameter annotations (for qualifying)
 		Annotation[][] methodParamAnnotations = method.getParameterAnnotations();
 
+		// Obtain the parameter manufacturers
+		List<MethodParameterManufacturer> parameterManufacturers = new ArrayList<>();
+		for (MethodParameterManufacturer parameterManufacturer : context
+				.loadOptionalServices(MethodParameterManufacturerServiceFactory.class)) {
+			parameterManufacturers.add(parameterManufacturer);
+		}
+
 		// Define the listing of objects and flows
-		for (int i = 0; i < paramTypes.length; i++) {
+		for (int i = 0; i < paramClasses.length; i++) {
 
 			// Obtain the parameter type and its annotations
-			Class<?> paramType = paramTypes[i];
-			Type paramGenericType = methodGenericParameters[i];
-			Annotation[] typeAnnotations = paramType.getAnnotations();
+			Class<?> paramClass = paramClasses[i];
+			Type paramType = paramTypes[i];
+			Annotation[] typeAnnotations = paramClass.getAnnotations();
 			Annotation[] paramAnnotations = methodParamAnnotations[i];
 
 			// Handle primitives
-			if (boolean.class.equals(paramType)) {
-				paramType = Boolean.class;
-			} else if (byte.class.equals(paramType)) {
-				paramType = Byte.class;
-			} else if (short.class.equals(paramType)) {
-				paramType = Short.class;
-			} else if (char.class.equals(paramType)) {
-				paramType = Character.class;
-			} else if (int.class.equals(paramType)) {
-				paramType = Integer.class;
-			} else if (long.class.equals(paramType)) {
-				paramType = Long.class;
-			} else if (float.class.equals(paramType)) {
-				paramType = Float.class;
-			} else if (double.class.equals(paramType)) {
-				paramType = Double.class;
+			if (boolean.class.equals(paramClass)) {
+				paramClass = Boolean.class;
+			} else if (byte.class.equals(paramClass)) {
+				paramClass = Byte.class;
+			} else if (short.class.equals(paramClass)) {
+				paramClass = Short.class;
+			} else if (char.class.equals(paramClass)) {
+				paramClass = Character.class;
+			} else if (int.class.equals(paramClass)) {
+				paramClass = Integer.class;
+			} else if (long.class.equals(paramClass)) {
+				paramClass = Long.class;
+			} else if (float.class.equals(paramClass)) {
+				paramClass = Float.class;
+			} else if (double.class.equals(paramClass)) {
+				paramClass = Double.class;
 			}
 
+			// Create the listing of all annotations
+			List<Annotation> allAnnotations = new ArrayList<>(typeAnnotations.length + paramAnnotations.length);
+			allAnnotations.addAll(Arrays.asList(typeAnnotations));
+			allAnnotations.addAll(Arrays.asList(paramAnnotations));
+
+			// Determine parameter qualifier
+			String parameterQualifier = null;
+			for (Annotation annotation : allAnnotations) {
+
+				// Obtain the annotation type
+				Class<?> annotationType = annotation.annotationType();
+
+				// Determine if qualifier annotation
+				Qualifier qualifierAnnotation = annotationType.getAnnotation(Qualifier.class);
+				if (qualifierAnnotation != null) {
+
+					// Allow only one qualifier
+					if (parameterQualifier != null) {
+						throw new IllegalArgumentException("Method " + methodName + " parameter " + i
+								+ " has more than one " + Qualifier.class.getSimpleName());
+					}
+
+					// Obtain the qualifier name factory
+					@SuppressWarnings("rawtypes")
+					Class<? extends QualifierNameFactory> nameFactoryClass = qualifierAnnotation.nameFactory();
+					QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.getDeclaredConstructor()
+							.newInstance();
+
+					// Provide type qualifier
+					parameterQualifier = nameFactory.getQualifierName(annotation);
+				}
+			}
+
+			// Create the context
+			MethodParameterManufacturerContext manufacturerContext = new MethodParameterManufacturerContextImpl(
+					paramClass, paramType, allAnnotations.toArray(new Annotation[allAnnotations.size()]),
+					parameterQualifier, objectSequence, flowSequence, functionTypeBuilder, methodName, context);
+
 			// Obtain the parameter factory
-			ManagedFunctionParameterFactory parameterFactory = null;
-			CREATED: for (ParameterManufacturer manufacturer : this.manufacturers) {
-				parameterFactory = manufacturer.createParameterFactory(methodName, paramType, functionTypeBuilder,
-						objectSequence, flowSequence, context);
+			MethodParameterFactory parameterFactory = null;
+			CREATED: for (MethodParameterManufacturer manufacturer : parameterManufacturers) {
+				parameterFactory = manufacturer.createParameterFactory(manufacturerContext);
 				if (parameterFactory != null) {
 					// Created parameter factory, so use
 					break CREATED;
@@ -271,121 +269,22 @@ public class MethodManagedFunctionBuilder {
 			// If not context dependency, must be injected dependency
 			if (parameterFactory == null) {
 
-				// Create the listing of all annotations
-				List<Annotation> allAnnotations = new ArrayList<>(typeAnnotations.length + paramAnnotations.length);
-				allAnnotations.addAll(Arrays.asList(typeAnnotations));
-				allAnnotations.addAll(Arrays.asList(paramAnnotations));
-
-				// Determine if Val
-				boolean isVal = false;
-				for (Annotation annotation : allAnnotations) {
-					if (Val.class.equals(annotation.annotationType())) {
-						isVal = true;
-					}
+				// Add injected dependency
+				parameterFactory = new ObjectParameterFactory(objectSequence.nextIndex());
+				ManagedFunctionObjectTypeBuilder<Indexed> objectTypeBuilder = functionTypeBuilder.addObject(paramClass);
+				if (parameterQualifier != null) {
+					objectTypeBuilder.setTypeQualifier(parameterQualifier);
 				}
-
-				// Determine the dependency
-				ManagedFunctionObjectTypeBuilder<Indexed> objectTypeBuilder;
-				String typeQualifierSuffix;
-				boolean isIncludeVariableAnnotation;
-				String labelPrefix;
-				String labelSuffix;
-				final String VAR_LABEL_PREFIX = "VAR-";
-				if (isVal) {
-					// Value (from variable)
-					parameterFactory = new ManagedFunctionValueParameterFactory(objectSequence.nextIndex());
-					objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
-					typeQualifierSuffix = paramType.getTypeName();
-					isIncludeVariableAnnotation = true;
-					labelPrefix = VAR_LABEL_PREFIX;
-					labelSuffix = typeQualifierSuffix;
-
-				} else if (Var.class.equals(paramType)) {
-					// Variable
-					parameterFactory = new ManagedFunctionVariableParameterFactory(objectSequence.nextIndex());
-					objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
-					typeQualifierSuffix = extractVariableType(paramGenericType);
-					isIncludeVariableAnnotation = true;
-					labelPrefix = VAR_LABEL_PREFIX;
-					labelSuffix = typeQualifierSuffix;
-
-				} else if (Out.class.equals(paramType)) {
-					// Output (from variable)
-					parameterFactory = new ManagedFunctionOutParameterFactory(objectSequence.nextIndex());
-					objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
-					typeQualifierSuffix = extractVariableType(paramGenericType);
-					isIncludeVariableAnnotation = true;
-					labelPrefix = VAR_LABEL_PREFIX;
-					labelSuffix = typeQualifierSuffix;
-
-				} else if (In.class.equals(paramType)) {
-					// Input (from variable)
-					parameterFactory = new ManagedFunctionInParameterFactory(objectSequence.nextIndex());
-					objectTypeBuilder = functionTypeBuilder.addObject(Var.class);
-					typeQualifierSuffix = extractVariableType(paramGenericType);
-					isIncludeVariableAnnotation = true;
-					labelPrefix = VAR_LABEL_PREFIX;
-					labelSuffix = typeQualifierSuffix;
-
-				} else {
-					// Otherwise must be an dependency object
-					parameterFactory = new ManagedFunctionObjectParameterFactory(objectSequence.nextIndex());
-					objectTypeBuilder = functionTypeBuilder.addObject(paramType);
-					typeQualifierSuffix = null;
-					isIncludeVariableAnnotation = false;
-					labelPrefix = "";
-					labelSuffix = paramType.getName();
-				}
-
-				// Determine type qualifier
-				String typeQualifier = null;
 				for (Annotation annotation : allAnnotations) {
-
-					// Add the annotation for the object
 					objectTypeBuilder.addAnnotation(annotation);
-
-					// Obtain the annotation type
-					Class<?> annotationType = annotation.annotationType();
-
-					// Determine if qualifier annotation
-					Qualifier qualifierAnnotation = annotationType.getAnnotation(Qualifier.class);
-					if (qualifierAnnotation != null) {
-
-						// Allow only one qualifier
-						if (typeQualifier != null) {
-							throw new IllegalArgumentException("Method " + methodName + " parameter " + i
-									+ " has more than one " + Qualifier.class.getSimpleName());
-						}
-
-						// Obtain the qualifier name factory
-						@SuppressWarnings("rawtypes")
-						Class<? extends QualifierNameFactory> nameFactoryClass = qualifierAnnotation.nameFactory();
-						QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.getDeclaredConstructor()
-								.newInstance();
-
-						// Provide type qualifier
-						typeQualifier = nameFactory.getQualifierName(annotation);
-						objectTypeBuilder.setTypeQualifier(
-								typeQualifier + (typeQualifierSuffix != null ? "-" + typeQualifierSuffix : ""));
-					}
 				}
 
 				// Specify the label
-				String label = (typeQualifier != null ? typeQualifier + "-" : "") + labelSuffix;
-				objectTypeBuilder.setLabel(labelPrefix + label);
-
-				// Determine if include variable annotation
-				if (isIncludeVariableAnnotation) {
-					objectTypeBuilder.addAnnotation(new VariableAnnotation(label));
-
-					// Add qualifier for non-qualified variable
-					if (typeQualifier == null) {
-						objectTypeBuilder.setTypeQualifier(typeQualifierSuffix);
-					}
-				}
+				String label = (parameterQualifier != null ? parameterQualifier + "-" : "") + paramClass.getName();
+				objectTypeBuilder.setLabel(label);
 
 				// Enrich the object
-				this.enrichManagedFunctionObjectType(paramType, paramGenericType, paramAnnotations, objectTypeBuilder);
+				this.enrichManagedFunctionObjectType(paramClass, paramType, paramAnnotations, objectTypeBuilder);
 			}
 
 			// Load the parameter factory
@@ -403,24 +302,6 @@ public class MethodManagedFunctionBuilder {
 
 		// Return the managed function builder
 		return functionTypeBuilder;
-	}
-
-	/**
-	 * Extracts the type from the variable.
-	 * 
-	 * @param variableGenericType Variable {@link Type}.
-	 * @return Variable type.
-	 */
-	protected static String extractVariableType(Type variableGenericType) {
-		if (variableGenericType instanceof ParameterizedType) {
-			// Use generics to determine exact type
-			ParameterizedType paramType = (ParameterizedType) variableGenericType;
-			Type[] generics = paramType.getActualTypeArguments();
-			return (generics.length > 0) ? generics[0].getTypeName() : Object.class.getName();
-		} else {
-			// Not parameterized, so raw object
-			return Object.class.getName();
-		}
 	}
 
 	/**
@@ -511,9 +392,9 @@ public class MethodManagedFunctionBuilder {
 	public static class MethodManagedFunctionFactoryContext extends MethodContext {
 
 		/**
-		 * {@link ManagedFunctionParameterFactory} instances.
+		 * {@link MethodParameterFactory} instances.
 		 */
-		private final ManagedFunctionParameterFactory[] parameters;
+		private final MethodParameterFactory[] parameters;
 
 		/**
 		 * Instantiate.
@@ -525,21 +406,20 @@ public class MethodManagedFunctionBuilder {
 		 *                                    the {@link Method}.
 		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
 		 *                                    be <code>null</code> if static.
-		 * @param parameters                  {@link ManagedFunctionParameterFactory}
-		 *                                    instances.
+		 * @param parameters                  {@link MethodParameterFactory} instances.
 		 */
 		protected MethodManagedFunctionFactoryContext(String functionName, Method method, Class<?> instanceClass,
-				MethodObjectInstanceFactory methodObjectInstanceFactory, ManagedFunctionParameterFactory[] parameters) {
+				MethodObjectInstanceFactory methodObjectInstanceFactory, MethodParameterFactory[] parameters) {
 			super(functionName, method, instanceClass, methodObjectInstanceFactory);
 			this.parameters = parameters;
 		}
 
 		/**
-		 * Obtains the {@link ManagedFunctionParameterFactory} instances.
+		 * Obtains the {@link MethodParameterFactory} instances.
 		 * 
-		 * @return {@link ManagedFunctionParameterFactory} instances.
+		 * @return {@link MethodParameterFactory} instances.
 		 */
-		public ManagedFunctionParameterFactory[] getParameters() {
+		public MethodParameterFactory[] getParameters() {
 			return this.parameters;
 		}
 	}
@@ -654,12 +534,11 @@ public class MethodManagedFunctionBuilder {
 		 *                                    the {@link Method}.
 		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
 		 *                                    be <code>null</code> if static.
-		 * @param parameters                  {@link ManagedFunctionParameterFactory}
-		 *                                    instances.
+		 * @param parameters                  {@link MethodParameterFactory} instances.
 		 * @param functionType                {@link ManagedFunctionTypeBuilder}.
 		 */
 		public EnrichManagedFunctionTypeContext(String functionName, Method method, Class<?> instanceClass,
-				MethodObjectInstanceFactory methodObjectInstanceFactory, ManagedFunctionParameterFactory[] parameters,
+				MethodObjectInstanceFactory methodObjectInstanceFactory, MethodParameterFactory[] parameters,
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionType) {
 			super(functionName, method, instanceClass, methodObjectInstanceFactory, parameters);
 			this.managedFunctionTypeBuilder = functionType;
@@ -676,130 +555,146 @@ public class MethodManagedFunctionBuilder {
 	}
 
 	/**
-	 * Manufactures the {@link MethodObjectInstanceFactory}.
+	 * {@link MethodParameterManufacturerContext} implementation.
 	 */
-	public static interface MethodObjectInstanceManufacturer {
+	private class MethodParameterManufacturerContextImpl implements MethodParameterManufacturerContext {
 
 		/**
-		 * Creates the {@link MethodObjectInstanceFactory}.
-		 * 
-		 * @return {@link MethodObjectInstanceFactory}.
+		 * Parameter {@link Class}.
 		 */
-		MethodObjectInstanceFactory createMethodObjectInstanceFactory();
-	}
-
-	/**
-	 * Manufactures the {@link ManagedFunctionParameterFactory}.
-	 */
-	public static interface ParameterManufacturer {
+		private final Class<?> parameterClass;
 
 		/**
-		 * Creates the {@link ManagedFunctionParameterFactory}.
-		 * 
-		 * @param functionName        Name of the {@link ManagedFunction}.
-		 * @param parameterType       Parameter type.
-		 * @param functionTypeBuilder {@link ManagedFunctionTypeBuilder}.
-		 * @param objectSequence      Object {@link Sequence}.
-		 * @param flowSequence        Flow {@link Sequence}.
-		 * @param sourceContext       {@link SourceContext}.
-		 * @return {@link ManagedFunctionParameterFactory} or <code>null</code> if not
-		 *         appropriate for this to manufacture a
-		 *         {@link ManagedFunctionParameterFactory}.
-		 * @throws Exception If fails to create the
-		 *                   {@link ManagedFunctionParameterFactory}.
+		 * Parameter {@link Type}.
 		 */
-		ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
-				Sequence flowSequence, SourceContext sourceContext) throws Exception;
-	}
-
-	/**
-	 * {@link ParameterManufacturer} for the {@link ManagedFunctionContext}.
-	 */
-	public static class ManagedFunctionContextParameterManufacturer implements ParameterManufacturer {
-		@Override
-		public ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
-				Sequence flowSequence, SourceContext sourceContext) {
-
-			// Determine if managed function context
-			if (ManagedFunctionContext.class.equals(parameterType)) {
-				// Parameter is a managed function context
-				return new ManagedFunctionContextParameterFactory();
-			}
-
-			// Not function context
-			return null;
-		}
-	}
-
-	/**
-	 * {@link ParameterManufacturer} for an {@link AsynchronousFlow}.
-	 */
-	public static class AsynchronousFlowParameterManufacturer implements ParameterManufacturer {
-		@Override
-		public ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
-				Sequence flowSequence, SourceContext sourceContext) {
-
-			// Determine if asynchronous flow
-			if (AsynchronousFlow.class.equals(parameterType)) {
-				// Parameter is an asynchronous flow
-				return new ManagedFunctionAsynchronousFlowParameterFactory();
-			}
-
-			// Not function context
-			return null;
-		}
-	}
-
-	/**
-	 * {@link ParameterManufacturer} for the {@link FlowInterface}.
-	 */
-	public static class FlowParameterManufacturer<A extends Annotation> implements ParameterManufacturer {
+		private final Type parameterType;
 
 		/**
-		 * {@link Class} of the {@link Annotation}.
+		 * Parameter {@link Annotation} instances.
 		 */
-		private final Class<A> annotationClass;
+		private final Annotation[] parameterAnnotations;
+
+		/**
+		 * Parameter qualifier.
+		 */
+		private final String parameterQualifier;
+
+		/**
+		 * {@link Sequence} for object indexes.
+		 */
+		private final Sequence objectSequence;
+
+		/**
+		 * {@link Sequence} for {@link Flow} indexes.
+		 */
+		private final Sequence flowSequence;
+
+		/**
+		 * {@link ManagedFunctionTypeBuilder}.
+		 */
+		private final ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder;
+
+		/**
+		 * {@link ManagedFunction} name.
+		 */
+		private final String functionName;
+
+		/**
+		 * {@link SourceContext}.
+		 */
+		private final SourceContext sourceContext;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param annotationClass {@link Class} of the {@link Annotation}.
+		 * @param parameterClass       Parameter {@link Type}.
+		 * @param parameterType        Parameter {@link Type}.
+		 * @param parameterAnnotations Parameter {@link Annotation} instances.
+		 * @param parameterQualifier   Parameter qualifier.
+		 * @param objectSequence       {@link Sequence} for object indexes.
+		 * @param flowSequence         {@link Sequence} for {@link Flow} indexes.
+		 * @param functionTypeBuilder  {@link ManagedFunctionTypeBuilder}.
+		 * @param functionName         {@link ManagedFunction} name.
+		 * @param sourceContext        {@link SourceContext}.
 		 */
-		public FlowParameterManufacturer(Class<A> annotationClass) {
-			this.annotationClass = annotationClass;
+		private MethodParameterManufacturerContextImpl(Class<?> parameterClass, Type parameterType,
+				Annotation[] parameterAnnotations, String parameterQualifier, Sequence objectSequence,
+				Sequence flowSequence, ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder,
+				String functionName, SourceContext sourceContext) {
+			this.parameterClass = parameterClass;
+			this.parameterType = parameterType;
+			this.parameterAnnotations = parameterAnnotations;
+			this.parameterQualifier = parameterQualifier;
+			this.objectSequence = objectSequence;
+			this.flowSequence = flowSequence;
+			this.functionTypeBuilder = functionTypeBuilder;
+			this.functionName = functionName;
+			this.sourceContext = sourceContext;
 		}
 
 		/*
-		 * =================== ParameterManufacturer ===================
+		 * ================ MethodParameterManufacturerContext =====================
 		 */
 
 		@Override
-		public ManagedFunctionParameterFactory createParameterFactory(String functionName, Class<?> parameterType,
-				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder, Sequence objectSequence,
-				Sequence flowSequence, SourceContext sourceContext) throws Exception {
+		public Class<?> getParameterClass() {
+			return this.parameterClass;
+		}
 
-			// Create the flow registry
-			ClassFlowRegistry flowRegistry = (label, flowParameterType) -> {
-				// Register the flow
-				ManagedFunctionFlowTypeBuilder<Indexed> flowTypeBuilder = functionTypeBuilder.addFlow();
-				flowTypeBuilder.setLabel(label);
-				if (flowParameterType != null) {
-					flowTypeBuilder.setArgumentType(flowParameterType);
-				}
-			};
+		@Override
+		public Type getParameterType() {
+			return this.parameterType;
+		}
 
-			// Attempt to build flow parameter factory
-			ClassFlowParameterFactory flowParameterFactory = new ClassFlowBuilder<A>(this.annotationClass)
-					.buildFlowParameterFactory(functionName, parameterType, flowSequence, flowRegistry, sourceContext);
-			if (flowParameterFactory == null) {
-				return null; // not flow interface
+		@Override
+		public Annotation[] getParameterAnnotations() {
+			return this.parameterAnnotations;
+		}
+
+		@Override
+		public String getParameterQualifier() {
+			return this.parameterQualifier;
+		}
+
+		@Override
+		public int addObject(Class<?> objectType, Consumer<ManagedFunctionObjectTypeBuilder<Indexed>> builder) {
+			int objectIndex = this.objectSequence.nextIndex();
+			ManagedFunctionObjectTypeBuilder<Indexed> object = this.functionTypeBuilder.addObject(objectType);
+			if (builder != null) {
+				builder.accept(object);
 			}
 
-			// Return wrapping managed function flow parameter factory
-			return new ManagedFunctionFlowParameterFactory(flowParameterFactory);
+			// Enrich the object
+			MethodManagedFunctionBuilder.this.enrichManagedFunctionObjectType(this.parameterClass, this.parameterType,
+					this.parameterAnnotations, object);
+
+			return objectIndex;
+		}
+
+		@Override
+		public int addFlow(Consumer<ManagedFunctionFlowTypeBuilder<Indexed>> builder) {
+			int flowIndex = this.flowSequence.nextIndex();
+			ManagedFunctionFlowTypeBuilder<Indexed> flow = this.functionTypeBuilder.addFlow();
+			if (builder != null) {
+				builder.accept(flow);
+			}
+			return flowIndex;
+		}
+
+		@Override
+		public String getFunctionName() {
+			return this.functionName;
+		}
+
+		@Override
+		public <E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(Class<E> escalationType) {
+			// TODO implement MethodParameterManufacturerContext.addEscalation
+			throw new UnsupportedOperationException("TODO implement MethodParameterManufacturerContext.addEscalation");
+		}
+
+		@Override
+		public SourceContext getSourceContext() {
+			return this.sourceContext;
 		}
 	}
 

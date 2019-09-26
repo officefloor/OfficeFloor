@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2019 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -18,23 +18,27 @@
 package net.officefloor.plugin.managedfunction.method.parameter;
 
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.managedfunction.method.MethodFunction;
-import net.officefloor.plugin.variable.VariableManagedObjectSource;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 
 /**
- * Creates the value for the {@link MethodFunction}.
+ * {@link MethodParameterFactory} for an {@link Object}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionValueParameterFactory extends ManagedFunctionObjectParameterFactory {
+public class ObjectParameterFactory implements MethodParameterFactory {
 
 	/**
-	 * Instantiate.
-	 * 
-	 * @param objectIndex Object index.
+	 * Index of the {@link Object}.
 	 */
-	public ManagedFunctionValueParameterFactory(int objectIndex) {
-		super(objectIndex);
+	protected final int objectIndex;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param objectIndex Index of the {@link Object}.
+	 */
+	public ObjectParameterFactory(int objectIndex) {
+		this.objectIndex = objectIndex;
 	}
 
 	/*
@@ -43,7 +47,7 @@ public class ManagedFunctionValueParameterFactory extends ManagedFunctionObjectP
 
 	@Override
 	public Object createParameter(ManagedFunctionContext<?, ?> context) {
-		return VariableManagedObjectSource.val(context.getObject(this.objectIndex));
+		return context.getObject(this.objectIndex);
 	}
 
 }

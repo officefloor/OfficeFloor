@@ -40,10 +40,10 @@ import net.officefloor.plugin.clazz.ClassFlowMethodMetaData;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.method.AbstractFunctionManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 import net.officefloor.plugin.managedfunction.method.MethodFunction;
 import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionFlowParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.FlowInterfaceParameterFactory;
 
 /**
  * {@link ManagedFunctionSource} implementation to provide the
@@ -72,11 +72,6 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 		/*
 		 * ===================== MethodManagedFunctionBuilder ======================
 		 */
-
-		@Override
-		protected void loadParameterManufacturers(List<ParameterManufacturer> manufacturers) {
-			manufacturers.add(new FlowParameterManufacturer<SectionInterface>(SectionInterface.class));
-		}
 
 		@Override
 		protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(
@@ -174,14 +169,14 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 			// Obtain the flow meta-data for the function
 			List<FlowAnnotation> flowAnnotations = new LinkedList<>();
 			List<SectionInterfaceAnnotation> sectionAnnotations = new LinkedList<>();
-			ManagedFunctionParameterFactory[] parameterFactories = context.getParameters();
-			for (ManagedFunctionParameterFactory factory : parameterFactories) {
+			MethodParameterFactory[] parameterFactories = context.getParameters();
+			for (MethodParameterFactory factory : parameterFactories) {
 
 				// Ignore if not flow parameter factory
-				if (!(factory instanceof ManagedFunctionFlowParameterFactory)) {
+				if (!(factory instanceof FlowInterfaceParameterFactory)) {
 					continue; // ignore as not flow parameter factory
 				}
-				ManagedFunctionFlowParameterFactory flowParameterFactory = (ManagedFunctionFlowParameterFactory) factory;
+				FlowInterfaceParameterFactory flowParameterFactory = (FlowInterfaceParameterFactory) factory;
 
 				// Add the flow meta-data
 				for (ClassFlowMethodMetaData metaData : flowParameterFactory.getFlowMethodMetaData()) {
@@ -240,21 +235,20 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 		private final boolean isStatic;
 
 		/**
-		 * {@link ManagedFunctionParameterFactory} instances for the parameters of the
+		 * {@link MethodParameterFactory} instances for the parameters of the
 		 * {@link Method}.
 		 */
-		private final ManagedFunctionParameterFactory[] parameters;
+		private final MethodParameterFactory[] parameters;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param method     {@link Method} for the {@link ManagedFunction}.
 		 * @param isStatic   Indicates if the {@link Method} is static.
-		 * @param parameters {@link ManagedFunctionParameterFactory} instances for the
-		 *                   parameters of the {@link Method}.
+		 * @param parameters {@link MethodParameterFactory} instances for the parameters
+		 *                   of the {@link Method}.
 		 */
-		public SectionManagedFunctionFactory(Method method, boolean isStatic,
-				ManagedFunctionParameterFactory[] parameters) {
+		public SectionManagedFunctionFactory(Method method, boolean isStatic, MethodParameterFactory[] parameters) {
 			this.method = method;
 			this.isStatic = isStatic;
 			this.parameters = parameters;
@@ -270,11 +264,11 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 		}
 
 		/**
-		 * Obtains the {@link ManagedFunctionParameterFactory} instances.
+		 * Obtains the {@link MethodParameterFactory} instances.
 		 * 
-		 * @return {@link ManagedFunctionParameterFactory} instances.
+		 * @return {@link MethodParameterFactory} instances.
 		 */
-		public ManagedFunctionParameterFactory[] getParameterFactories() {
+		public MethodParameterFactory[] getParameterFactories() {
 			return this.parameters;
 		}
 

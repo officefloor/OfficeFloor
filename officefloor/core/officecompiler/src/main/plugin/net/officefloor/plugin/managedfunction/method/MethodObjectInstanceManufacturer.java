@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,25 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.clazz;
-
-import net.officefloor.frame.internal.structure.Flow;
+package net.officefloor.plugin.managedfunction.method;
 
 /**
- * Registry of {@link Flow}.
+ * Manufactures the {@link MethodObjectInstanceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ClassFlowRegistry {
+public interface MethodObjectInstanceManufacturer {
 
 	/**
-	 * Registers the {@link Flow}.
+	 * Creates the {@link MethodObjectInstanceFactory}.
 	 * 
-	 * @param label             Label for the {@link Flow}.
-	 * @param flowParameterType {@link Class} for the parameter to the {@link Flow}.
-	 *                          May be <code>null</code>.
-	 * @return Index of the {@link Flow}.
+	 * @return {@link MethodObjectInstanceFactory}.
 	 */
-	int registerFlow(String label, Class<?> flowParameterType);
-
+	MethodObjectInstanceFactory createMethodObjectInstanceFactory();
 }

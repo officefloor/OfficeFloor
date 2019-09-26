@@ -28,7 +28,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 
 /**
  * Script {@link ManagedFunction}.
@@ -68,9 +68,9 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 	private final String functionName;
 
 	/**
-	 * {@link ManagedFunctionParameterFactory} instances.
+	 * {@link MethodParameterFactory} instances.
 	 */
-	private final ManagedFunctionParameterFactory[] parameterFactories;
+	private final MethodParameterFactory[] parameterFactories;
 
 	/**
 	 * {@link ScriptExceptionTranslator}.
@@ -85,12 +85,12 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 	 * @param setupScript               Setup script.
 	 * @param script                    Script.
 	 * @param functionName              Name of the function.
-	 * @param parameterFactories        {@link ManagedFunctionParameterFactory}
+	 * @param parameterFactories        {@link MethodParameterFactory}
 	 *                                  instances.
 	 * @param scriptExceptionTranslator {@link ScriptExceptionTranslator}.
 	 */
 	public ScriptManagedFunction(ScriptEngineManager engineManager, String engineName, String setupScript,
-			String script, String functionName, ManagedFunctionParameterFactory[] parameterFactories,
+			String script, String functionName, MethodParameterFactory[] parameterFactories,
 			ScriptExceptionTranslator scriptExceptionTranslator) {
 		this.engineManager = engineManager;
 		this.engineName = engineName;

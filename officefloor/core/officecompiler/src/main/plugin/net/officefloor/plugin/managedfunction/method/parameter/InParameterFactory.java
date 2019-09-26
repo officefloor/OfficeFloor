@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,23 +17,34 @@
  */
 package net.officefloor.plugin.managedfunction.method.parameter;
 
-import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.plugin.managedfunction.method.MethodFunction;
+import net.officefloor.plugin.variable.In;
+import net.officefloor.plugin.variable.VariableManagedObjectSource;
 
 /**
- * {@link ManagedFunctionParameterFactory} for an {@link AsynchronousFlow}.
+ * Creates the {@link In} for the {@link MethodFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionAsynchronousFlowParameterFactory implements ManagedFunctionParameterFactory {
+public class InParameterFactory extends ObjectParameterFactory {
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param objectIndex Object index.
+	 */
+	public InParameterFactory(int objectIndex) {
+		super(objectIndex);
+	}
 
 	/*
-	 * ====================== ParameterFactory =============================
+	 * ================== ParameterFactory ====================================
 	 */
 
 	@Override
 	public Object createParameter(ManagedFunctionContext<?, ?> context) {
-		return context.createAsynchronousFlow();
+		return VariableManagedObjectSource.in(context.getObject(this.objectIndex));
 	}
 
 }

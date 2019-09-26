@@ -31,8 +31,8 @@ import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.method.MethodFunction;
 import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder.MethodObjectInstanceManufacturer;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
+import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceManufacturer;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 
 /**
@@ -89,19 +89,19 @@ public class KotlinManagedFunctionSource extends SectionClassManagedFunctionSour
 		private final Method method;
 
 		/**
-		 * {@link ManagedFunctionParameterFactory} instances for the parameters of the
+		 * {@link MethodParameterFactory} instances for the parameters of the
 		 * {@link Method}.
 		 */
-		private final ManagedFunctionParameterFactory[] parameters;
+		private final MethodParameterFactory[] parameters;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param method     {@link Method} for the {@link ManagedFunction}.
-		 * @param parameters {@link ManagedFunctionParameterFactory} instances for the
+		 * @param parameters {@link MethodParameterFactory} instances for the
 		 *                   parameters of the {@link Method}.
 		 */
-		public KotlinManagedFunctionFactory(Method method, ManagedFunctionParameterFactory[] parameters) {
+		public KotlinManagedFunctionFactory(Method method, MethodParameterFactory[] parameters) {
 			this.method = method;
 			this.parameters = parameters;
 		}
@@ -116,11 +116,11 @@ public class KotlinManagedFunctionSource extends SectionClassManagedFunctionSour
 		}
 
 		/**
-		 * Obtains the {@link ManagedFunctionParameterFactory} instances.
+		 * Obtains the {@link MethodParameterFactory} instances.
 		 * 
-		 * @return {@link ManagedFunctionParameterFactory} instances.
+		 * @return {@link MethodParameterFactory} instances.
 		 */
-		public ManagedFunctionParameterFactory[] getParameterFactories() {
+		public MethodParameterFactory[] getParameterFactories() {
 			return this.parameters;
 		}
 

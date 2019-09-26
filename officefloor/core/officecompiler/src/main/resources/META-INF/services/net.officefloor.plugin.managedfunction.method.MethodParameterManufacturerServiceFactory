@@ -1,0 +1,12 @@
+
+# Method
+net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionContextParameterManufacturer
+net.officefloor.plugin.managedfunction.method.parameter.AsynchronousFlowParameterManufacturer
+net.officefloor.plugin.managedfunction.method.parameter.FlowInterfaceParameterManufacturer
+net.officefloor.plugin.managedfunction.method.parameter.ValueParameterManufacturer
+net.officefloor.plugin.managedfunction.method.parameter.VariableParameterManufacturer
+net.officefloor.plugin.managedfunction.method.parameter.OutParameterManufacturer
+net.officefloor.plugin.managedfunction.method.parameter.InParameterManufacturer
+
+# Section
+net.officefloor.plugin.managedfunction.method.parameter.SectionInterfaceParameterManufacturer

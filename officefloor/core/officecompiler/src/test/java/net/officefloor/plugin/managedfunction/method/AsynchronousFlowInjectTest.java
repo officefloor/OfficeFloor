@@ -15,22 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.managedfunction.method;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+package net.officefloor.plugin.managedfunction.method;
 
 import net.officefloor.compile.test.managedfunction.MockAsynchronousFlow;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil.MethodResult;
 import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests injecting {@link AsynchronousFlow}.
  * 
  * @author Daniel Sagenschneider
  */
-public class AsynchronousFlowInjectTest {
+public class AsynchronousFlowInjectTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can inject {@link AsynchronousFlow}.

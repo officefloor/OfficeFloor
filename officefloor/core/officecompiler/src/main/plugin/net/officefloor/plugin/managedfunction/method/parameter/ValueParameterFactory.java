@@ -19,22 +19,21 @@ package net.officefloor.plugin.managedfunction.method.parameter;
 
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.plugin.managedfunction.method.MethodFunction;
-import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.VariableManagedObjectSource;
 
 /**
- * Creates the {@link Out} for the {@link MethodFunction}.
+ * Creates the value for the {@link MethodFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionOutParameterFactory extends ManagedFunctionObjectParameterFactory {
+public class ValueParameterFactory extends ObjectParameterFactory {
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param objectIndex Object index.
 	 */
-	public ManagedFunctionOutParameterFactory(int objectIndex) {
+	public ValueParameterFactory(int objectIndex) {
 		super(objectIndex);
 	}
 
@@ -44,7 +43,7 @@ public class ManagedFunctionOutParameterFactory extends ManagedFunctionObjectPar
 
 	@Override
 	public Object createParameter(ManagedFunctionContext<?, ?> context) {
-		return VariableManagedObjectSource.out(context.getObject(this.objectIndex));
+		return VariableManagedObjectSource.val(context.getObject(this.objectIndex));
 	}
 
 }

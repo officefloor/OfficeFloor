@@ -46,13 +46,13 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceC
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionAsynchronousFlowParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionInParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionObjectParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionOutParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionValueParameterFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionVariableParameterFactory;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.AsynchronousFlowParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.InParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ObjectParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.OutParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ValueParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.VariableParameterFactory;
 import net.officefloor.plugin.section.clazz.FlowAnnotation;
 import net.officefloor.plugin.section.clazz.NextAnnotation;
 import net.officefloor.plugin.section.clazz.ParameterAnnotation;
@@ -249,7 +249,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 		}
 
 		// Load the function
-		ManagedFunctionParameterFactory[] parameterFactories = new ManagedFunctionParameterFactory[parameterMetaDatas
+		MethodParameterFactory[] parameterFactories = new MethodParameterFactory[parameterMetaDatas
 				.size()];
 		ManagedFunctionTypeBuilder<Indexed, Indexed> function = functionNamespaceTypeBuilder
 				.addManagedFunctionType(
@@ -320,7 +320,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 			case "object":
 				// Add the object
 				ensureHaveType.run();
-				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
 				parameter = function.addObject(type);
 				if (qualifier != null) {
 					parameter.setTypeQualifier(qualifier);
@@ -330,31 +330,31 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 			case "val":
 				ensureHaveType.run();
-				parameterFactories[i] = new ManagedFunctionValueParameterFactory(objectIndex++);
+				parameterFactories[i] = new ValueParameterFactory(objectIndex++);
 				isVariable = true;
 				break;
 
 			case "in":
 				ensureHaveType.run();
-				parameterFactories[i] = new ManagedFunctionInParameterFactory(objectIndex++);
+				parameterFactories[i] = new InParameterFactory(objectIndex++);
 				isVariable = true;
 				break;
 
 			case "out":
 				ensureHaveType.run();
-				parameterFactories[i] = new ManagedFunctionOutParameterFactory(objectIndex++);
+				parameterFactories[i] = new OutParameterFactory(objectIndex++);
 				isVariable = true;
 				break;
 
 			case "var":
 				ensureHaveType.run();
-				parameterFactories[i] = new ManagedFunctionVariableParameterFactory(objectIndex++);
+				parameterFactories[i] = new VariableParameterFactory(objectIndex++);
 				isVariable = true;
 				break;
 
 			case "httpPathParameter":
 				ensureHaveName.run();
-				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
 				parameter = function.addObject(String.class);
 				HttpPathParameterAnnotation httpPathParameter = new HttpPathParameterAnnotation(parameterName);
 				parameter.addAnnotation(httpPathParameter);
@@ -364,7 +364,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 			case "httpQueryParameter":
 				ensureHaveName.run();
-				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
 				parameter = function.addObject(String.class);
 				HttpQueryParameterAnnotation httpQueryParameter = new HttpQueryParameterAnnotation(parameterName);
 				parameter.addAnnotation(httpQueryParameter);
@@ -374,7 +374,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 			case "httpHeaderParameter":
 				ensureHaveName.run();
-				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
 				parameter = function.addObject(String.class);
 				HttpHeaderParameterAnnotation httpHeaderParameter = new HttpHeaderParameterAnnotation(parameterName);
 				parameter.addAnnotation(httpHeaderParameter);
@@ -384,7 +384,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 			case "httpCookieParameter":
 				ensureHaveName.run();
-				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
 				parameter = function.addObject(String.class);
 				HttpCookieParameterAnnotation httpCookieParameter = new HttpCookieParameterAnnotation(parameterName);
 				parameter.addAnnotation(httpCookieParameter);
@@ -394,7 +394,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 			case "httpParameters":
 				ensureHaveType.run();
-				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
 				parameter = function.addObject(type);
 				parameter.addAnnotation(new HttpParametersAnnotation());
 				if (qualifier != null) {
@@ -405,7 +405,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 
 			case "httpObject":
 				ensureHaveType.run();
-				parameterFactories[i] = new ManagedFunctionObjectParameterFactory(objectIndex++);
+				parameterFactories[i] = new ObjectParameterFactory(objectIndex++);
 				parameter = function.addObject(type);
 				parameter.addAnnotation(new HttpObjectAnnotation());
 				if (qualifier != null) {
@@ -427,7 +427,7 @@ public class ScriptManagedFunctionSource extends AbstractManagedFunctionSource {
 				break;
 
 			case "asynchronousFlow":
-				parameterFactories[i] = new ManagedFunctionAsynchronousFlowParameterFactory();
+				parameterFactories[i] = new AsynchronousFlowParameterFactory();
 				isVariable = false;
 				break;
 

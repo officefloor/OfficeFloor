@@ -50,8 +50,8 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.method.DefaultConstructorMethodObjectInstanceFactory;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 import net.officefloor.plugin.managedfunction.method.MethodFunctionFactory;
-import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -643,7 +643,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 					new MethodFunctionFactory(
 							new DefaultConstructorMethodObjectInstanceFactory(CompileFunctionClass.class),
 							CompileFunctionClass.class.getMethod("simpleFunction"),
-							new ManagedFunctionParameterFactory[0]),
+							new MethodParameterFactory[0]),
 					Indexed.class, Indexed.class);
 			function.addAnnotation(ANNOTATION);
 		}

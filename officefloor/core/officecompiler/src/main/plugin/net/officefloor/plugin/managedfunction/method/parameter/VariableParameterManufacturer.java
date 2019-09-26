@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,25 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.clazz;
+package net.officefloor.plugin.managedfunction.method.parameter;
 
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
+import net.officefloor.plugin.managedfunction.method.MethodParameterManufacturer;
+import net.officefloor.plugin.variable.Var;
 
 /**
- * Registry of {@link Flow}.
+ * {@link MethodParameterManufacturer} for a {@link Var}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ClassFlowRegistry {
+public class VariableParameterManufacturer extends AbstractVariableParameterManufacturer {
 
-	/**
-	 * Registers the {@link Flow}.
-	 * 
-	 * @param label             Label for the {@link Flow}.
-	 * @param flowParameterType {@link Class} for the parameter to the {@link Flow}.
-	 *                          May be <code>null</code>.
-	 * @return Index of the {@link Flow}.
-	 */
-	int registerFlow(String label, Class<?> flowParameterType);
+	@Override
+	protected Class<?> getParameterClass() {
+		return Var.class;
+	}
+
+	@Override
+	protected MethodParameterFactory createMethodParameterFactory(int objectIndex) {
+		return new VariableParameterFactory(objectIndex);
+	}
 
 }

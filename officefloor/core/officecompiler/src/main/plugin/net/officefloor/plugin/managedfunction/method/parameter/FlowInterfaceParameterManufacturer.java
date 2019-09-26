@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,25 +17,19 @@
  */
 package net.officefloor.plugin.managedfunction.method.parameter;
 
-import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.managedfunction.method.MethodFunction;
+import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.managedfunction.method.MethodParameterManufacturer;
 
 /**
- * Creates the parameter for the {@link MethodFunction}.
+ * {@link MethodParameterManufacturer} for {@link FlowInterface}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionParameterFactory {
+public class FlowInterfaceParameterManufacturer extends AbstractFlowParameterManufacturer<FlowInterface> {
 
-	/**
-	 * Creates the parameter from the {@link ManagedFunctionContext}.
-	 * 
-	 * @param context
-	 *            {@link ManagedFunctionContext}.
-	 * @return Parameter.
-	 * @throws Exception
-	 *             If fails to create the parameter.
-	 */
-	Object createParameter(ManagedFunctionContext<?, ?> context) throws Exception;
+	@Override
+	protected Class<FlowInterface> getFlowAnnotation() {
+		return FlowInterface.class;
+	}
 
 }

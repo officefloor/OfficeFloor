@@ -15,38 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.method.parameter;
+package net.officefloor.plugin.managedfunction.method;
 
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
- * {@link ManagedFunctionParameterFactory} for an {@link Object}.
+ * Creates the parameter for the {@link MethodFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionObjectParameterFactory implements ManagedFunctionParameterFactory {
+public interface MethodParameterFactory {
 
 	/**
-	 * Index of the {@link Object}.
-	 */
-	protected final int objectIndex;
-
-	/**
-	 * Initiate.
+	 * Creates the parameter from the {@link ManagedFunctionContext}.
 	 * 
-	 * @param objectIndex Index of the {@link Object}.
+	 * @param context
+	 *            {@link ManagedFunctionContext}.
+	 * @return Parameter.
+	 * @throws Exception
+	 *             If fails to create the parameter.
 	 */
-	public ManagedFunctionObjectParameterFactory(int objectIndex) {
-		this.objectIndex = objectIndex;
-	}
-
-	/*
-	 * ================== ParameterFactory ====================================
-	 */
-
-	@Override
-	public Object createParameter(ManagedFunctionContext<?, ?> context) {
-		return context.getObject(this.objectIndex);
-	}
+	Object createParameter(ManagedFunctionContext<?, ?> context) throws Exception;
 
 }

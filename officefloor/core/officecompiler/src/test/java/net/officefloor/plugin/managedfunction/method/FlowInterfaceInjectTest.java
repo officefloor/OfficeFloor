@@ -15,12 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.managedfunction.method;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+package net.officefloor.plugin.managedfunction.method;
 
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil;
@@ -28,12 +23,15 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
+ * Ensure can inject {@link FlowInterface} interfaces.
+ * 
  * @author Daniel Sagenschneider
  */
-public class FlowInterfaceInjectTest {
+public class FlowInterfaceInjectTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure {@link FlowInterface} with single {@link Flow}.

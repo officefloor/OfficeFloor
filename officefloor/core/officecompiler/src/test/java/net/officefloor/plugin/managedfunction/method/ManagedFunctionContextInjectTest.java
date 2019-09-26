@@ -15,20 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.compile.impl.managedfunction.method;
-
-import static org.junit.Assert.assertSame;
+package net.officefloor.plugin.managedfunction.method;
 
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.Closure;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Ensure can inject {@link ManagedFunctionContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionContextInjectTest {
+public class ManagedFunctionContextInjectTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to inject {@link ManagedFunctionContext}.
