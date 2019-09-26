@@ -28,11 +28,11 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
-import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
-import net.officefloor.plugin.managedfunction.clazz.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.managedfunction.clazz.MethodManagedFunctionBuilder.MethodObjectInstanceManufacturer;
+import net.officefloor.plugin.managedfunction.method.MethodFunction;
+import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceManufacturer;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 
 /**
@@ -58,7 +58,7 @@ public class ScalaManagedFunctionSource extends SectionClassManagedFunctionSourc
 
 	@Override
 	protected MethodManagedFunctionBuilder createMethodManagedFunctionBuilder(FunctionNamespaceBuilder namespaceBuilder,
-			ManagedFunctionSourceContext context) throws Exception {
+																			  ManagedFunctionSourceContext context) throws Exception {
 		return new ScalaMethodManagedFunctionBuilder();
 	}
 
@@ -104,20 +104,20 @@ public class ScalaManagedFunctionSource extends SectionClassManagedFunctionSourc
 		private final Method method;
 
 		/**
-		 * {@link ManagedFunctionParameterFactory} instances for the parameters of the
+		 * {@link MethodParameterFactory} instances for the parameters of the
 		 * {@link Method}.
 		 */
-		private final ManagedFunctionParameterFactory[] parameters;
+		private final MethodParameterFactory[] parameters;
 
 		/**
 		 * Initiate.
 		 * 
 		 * @param module     Scala module.
 		 * @param method     {@link Method} for the {@link ManagedFunction}.
-		 * @param parameters {@link ManagedFunctionParameterFactory} instances for the
+		 * @param parameters {@link MethodParameterFactory} instances for the
 		 *                   parameters of the {@link Method}.
 		 */
-		public ScalaManagedFunctionFactory(Object module, Method method, ManagedFunctionParameterFactory[] parameters) {
+		public ScalaManagedFunctionFactory(Object module, Method method, MethodParameterFactory[] parameters) {
 			this.module = module;
 			this.method = method;
 			this.parameters = parameters;
@@ -133,11 +133,11 @@ public class ScalaManagedFunctionSource extends SectionClassManagedFunctionSourc
 		}
 
 		/**
-		 * Obtains the {@link ManagedFunctionParameterFactory} instances.
+		 * Obtains the {@link MethodParameterFactory} instances.
 		 * 
-		 * @return {@link ManagedFunctionParameterFactory} instances.
+		 * @return {@link MethodParameterFactory} instances.
 		 */
-		public ManagedFunctionParameterFactory[] getParameterFactories() {
+		public MethodParameterFactory[] getParameterFactories() {
 			return this.parameters;
 		}
 
@@ -155,7 +155,7 @@ public class ScalaManagedFunctionSource extends SectionClassManagedFunctionSourc
 			}
 
 			// Invoke the method as the task
-			return ClassFunction.invokeMethod(this.module, this.method, params);
+			return MethodFunction.invokeMethod(this.module, this.method, params);
 		}
 	}
 

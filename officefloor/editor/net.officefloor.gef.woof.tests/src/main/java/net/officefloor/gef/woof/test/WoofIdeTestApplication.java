@@ -24,7 +24,7 @@ import net.officefloor.gef.ide.AbstractIdeTestApplication;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.gef.woof.WoofEditor;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.woof.model.woof.PropertyModel;

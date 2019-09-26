@@ -1,8 +1,9 @@
 package net.officefloor.polyglot.scala
 
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface
 import net.officefloor.frame.api.function.FlowCallback
+import net.officefloor.plugin.clazz.FlowInterface
 import java.io.IOException
+
 
 @FlowInterface
 trait Flows {

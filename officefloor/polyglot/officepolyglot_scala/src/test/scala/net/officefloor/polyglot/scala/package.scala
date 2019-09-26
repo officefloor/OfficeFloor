@@ -5,7 +5,7 @@ import net.officefloor.plugin.variable.{ Val, In, Out, Var }
 import net.officefloor.plugin.section.clazz.{ Parameter, Next }
 import net.officefloor.web.{ HttpPathParameter, HttpQueryParameter, HttpHeaderParameter, HttpCookieParameter, ObjectResponse }
 import net.officefloor.frame.api.function.AsynchronousFlow
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface
+import net.officefloor.plugin.clazz.FlowInterface
 import java.io.IOException
 import org.junit.Assert
 import net.officefloor.server.http.HttpException

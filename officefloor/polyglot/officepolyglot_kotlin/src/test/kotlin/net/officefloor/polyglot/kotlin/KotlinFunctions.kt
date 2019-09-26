@@ -2,7 +2,6 @@ package net.officefloor.polyglot.kotlin
 
 import net.officefloor.frame.api.function.AsynchronousFlow
 import net.officefloor.frame.api.function.FlowCallback
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface
 import net.officefloor.plugin.section.clazz.Next
 import net.officefloor.plugin.section.clazz.Parameter
 import net.officefloor.plugin.variable.In
@@ -26,6 +25,7 @@ import net.officefloor.web.HttpQueryParameter
 import net.officefloor.web.ObjectResponse
 import org.junit.Assert
 import java.io.IOException
+import net.officefloor.plugin.clazz.FlowInterface
 
 /**
  * Primitives.
