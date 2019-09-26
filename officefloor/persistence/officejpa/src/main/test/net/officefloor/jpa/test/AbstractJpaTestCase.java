@@ -59,7 +59,7 @@ import net.officefloor.jdbc.test.DataSourceRule;
 import net.officefloor.jdbc.test.ValidateConnectionDecoratorFactory;
 import net.officefloor.jpa.JpaManagedObjectSource;
 import net.officefloor.jpa.JpaManagedObjectSource.DependencyType;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**

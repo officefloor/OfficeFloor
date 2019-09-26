@@ -26,7 +26,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.clazz.Qualifier;
+import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpStatus;

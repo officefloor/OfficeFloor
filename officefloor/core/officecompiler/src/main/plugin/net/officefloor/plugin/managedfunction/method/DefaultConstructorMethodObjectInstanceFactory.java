@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.reflect.Constructor;
 

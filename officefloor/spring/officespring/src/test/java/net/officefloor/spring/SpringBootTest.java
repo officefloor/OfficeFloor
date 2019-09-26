@@ -43,7 +43,7 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.plugin.managedfunction.clazz.Qualified;
+import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.spring.extension.SpringSupplierExtension;

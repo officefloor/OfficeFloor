@@ -28,11 +28,11 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
-import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
-import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
-import net.officefloor.plugin.managedfunction.clazz.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.managedfunction.clazz.MethodManagedFunctionBuilder.MethodObjectInstanceManufacturer;
+import net.officefloor.plugin.managedfunction.method.MethodFunction;
+import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder.MethodObjectInstanceManufacturer;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
 import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 
 /**
@@ -138,7 +138,7 @@ public class KotlinManagedFunctionSource extends SectionClassManagedFunctionSour
 			}
 
 			// Invoke the method as the task
-			return ClassFunction.invokeMethod(null, this.method, params);
+			return MethodFunction.invokeMethod(null, this.method, params);
 		}
 	}
 

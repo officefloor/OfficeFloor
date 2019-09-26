@@ -39,8 +39,8 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.ClassFlowBuilder;
 import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
 import net.officefloor.plugin.clazz.ClassFlowRegistry;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.Sequence;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 
 /**
  * {@link AdministrationSource} that delegates to {@link Object}.

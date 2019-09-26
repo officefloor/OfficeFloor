@@ -66,7 +66,7 @@ import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.managedobject.singleton.Singleton;

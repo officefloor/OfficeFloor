@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -27,7 +27,8 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.plugin.managedfunction.clazz.MethodManagedFunctionBuilder.MethodObjectInstanceManufacturer;
+import net.officefloor.plugin.clazz.NonFunctionMethod;
+import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder.MethodObjectInstanceManufacturer;
 
 /**
  * {@link ManagedFunctionSource} for a {@link Class} having the {@link Method}

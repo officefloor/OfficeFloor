@@ -22,7 +22,7 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.section.clazz.ManagedObject;

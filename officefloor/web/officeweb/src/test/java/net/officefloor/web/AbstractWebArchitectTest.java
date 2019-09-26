@@ -36,7 +36,7 @@ import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.EntityUtil;
 import net.officefloor.server.http.HttpException;

@@ -27,7 +27,6 @@ import java.util.Map;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Spawn;
 
 /**

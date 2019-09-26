@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,25 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method;
 
-import net.officefloor.frame.api.function.AsynchronousFlow;
-import net.officefloor.frame.api.function.ManagedFunctionContext;
+import java.lang.reflect.Method;
 
 /**
- * {@link ManagedFunctionParameterFactory} for an {@link AsynchronousFlow}.
+ * Factory to create the {@link Object} instance to invoke the {@link Method}
+ * on.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionAsynchronousFlowParameterFactory implements ManagedFunctionParameterFactory {
+public interface MethodObjectInstanceFactory {
 
-	/*
-	 * ====================== ParameterFactory =============================
+	/**
+	 * Creates the {@link Object} instance to invoke the {@link Method} on.
+	 * 
+	 * @return {@link Object} instance to invoke the {@link Method} on.
+	 * @throws Exception If fails to create the instance.
 	 */
-
-	@Override
-	public Object createParameter(ManagedFunctionContext<?, ?> context) {
-		return context.createAsynchronousFlow();
-	}
+	Object createInstance() throws Exception;
 
 }

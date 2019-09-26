@@ -15,35 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.clazz;
 
-import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.variable.In;
-import net.officefloor.plugin.variable.VariableManagedObjectSource;
+import net.officefloor.frame.api.function.FlowCallback;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Creates the {@link In} for the {@link ClassFunction}.
+ * {@link FlowCallback} that propagates failures and only handles success.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionInParameterFactory extends ManagedFunctionObjectParameterFactory {
+@FunctionalInterface
+public interface FlowSuccessful extends FlowCallback {
 
 	/**
-	 * Instantiate.
+	 * Default implementation of {@link FlowCallback} to escalate and then invoke
+	 * successful handling.
+	 */
+	default void run(Throwable escalation) throws Throwable {
+
+		// Ensure propagate flow failure
+		if (escalation != null) {
+			throw escalation;
+		}
+
+		// Successful flow
+		this.run();
+	}
+
+	/**
+	 * Invoked on completion of successful {@link Flow}.
 	 * 
-	 * @param objectIndex Object index.
+	 * @throws Throwable Possible failure in handling completion.
 	 */
-	public ManagedFunctionInParameterFactory(int objectIndex) {
-		super(objectIndex);
-	}
-
-	/*
-	 * ================== ParameterFactory ====================================
-	 */
-
-	@Override
-	public Object createParameter(ManagedFunctionContext<?, ?> context) {
-		return VariableManagedObjectSource.in(context.getObject(this.objectIndex));
-	}
-
+	void run() throws Throwable;
 }

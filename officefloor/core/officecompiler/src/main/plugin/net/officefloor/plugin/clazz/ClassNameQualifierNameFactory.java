@@ -15,25 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.clazz;
 
 import java.lang.annotation.Annotation;
 
 /**
- * Determines the {@link Qualifier} name from the {@link Qualifier} attributes.
+ * {@link QualifierNameFactory} providing the fully qualified {@link Class}
+ * name.
  * 
  * @author Daniel Sagenschneider
  */
-public interface QualifierNameFactory<A extends Annotation> {
+public class ClassNameQualifierNameFactory implements QualifierNameFactory<Annotation> {
 
-	/**
-	 * Obtains the {@link Qualifier} name from the {@link Annotation}.
-	 * 
-	 * @param annotation
-	 *            {@link Annotation} containing attributes to aid determining
-	 *            the name.
-	 * @return Qualified name.
+	/*
+	 * ================ QualifierNameFactory ====================
 	 */
-	String getQualifierName(A annotation);
 
+	@Override
+	public String getQualifierName(Annotation annotation) {
+		return annotation.annotationType().getName();
+	}
 }

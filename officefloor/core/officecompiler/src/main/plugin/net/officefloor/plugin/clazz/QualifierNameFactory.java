@@ -15,25 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.clazz;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.internal.structure.Flow;
+import java.lang.annotation.Annotation;
 
 /**
- * Annotates an interface to have each of its methods be a {@link Flow} that may
- * be invoked by the {@link ManagedFunction} class method.
+ * Determines the {@link Qualifier} name from the {@link Qualifier} attributes.
  * 
  * @author Daniel Sagenschneider
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface FlowInterface {
+public interface QualifierNameFactory<A extends Annotation> {
+
+	/**
+	 * Obtains the {@link Qualifier} name from the {@link Annotation}.
+	 * 
+	 * @param annotation
+	 *            {@link Annotation} containing attributes to aid determining
+	 *            the name.
+	 * @return Qualified name.
+	 */
+	String getQualifierName(A annotation);
+
 }

@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
  * Annotates a {@link Method} of the {@link FlowInterface} to indicate to spawn

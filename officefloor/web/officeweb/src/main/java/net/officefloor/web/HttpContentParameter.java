@@ -24,8 +24,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.officefloor.plugin.managedfunction.clazz.Qualifier;
-import net.officefloor.plugin.managedfunction.clazz.QualifierNameFactory;
+import net.officefloor.plugin.clazz.Qualifier;
+import net.officefloor.plugin.clazz.QualifierNameFactory;
 import net.officefloor.server.http.HttpRequest;
 
 /**

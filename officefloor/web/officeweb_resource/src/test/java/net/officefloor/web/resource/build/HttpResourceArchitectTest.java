@@ -30,7 +30,7 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.clazz.Qualified;
+import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpStatus;

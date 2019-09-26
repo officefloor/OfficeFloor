@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,13 +23,14 @@ import java.lang.reflect.Method;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
 
 /**
  * {@link ManagedFunction} to invoke a {@link Method}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassFunction implements ManagedFunction<Indexed, Indexed> {
+public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 
 	/**
 	 * Invokes the {@link Method} as the {@link ManagedFunction} directly on the
@@ -109,7 +110,7 @@ public class ClassFunction implements ManagedFunction<Indexed, Indexed> {
 	 * @param parameterFactories          {@link ManagedFunctionParameterFactory}
 	 *                                    instances.
 	 */
-	public ClassFunction(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
+	public MethodFunction(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
 			ManagedFunctionParameterFactory[] parameterFactories) {
 		this.method = method;
 		this.methodObjectInstanceFactory = methodObjectInstanceFactory;

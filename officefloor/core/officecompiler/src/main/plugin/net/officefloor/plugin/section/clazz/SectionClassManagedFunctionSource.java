@@ -37,13 +37,13 @@ import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.plugin.clazz.ClassFlowMethodMetaData;
-import net.officefloor.plugin.managedfunction.clazz.AbstractFunctionManagedFunctionSource;
-import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionFlowParameterFactory;
-import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
-import net.officefloor.plugin.managedfunction.clazz.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.managedfunction.method.AbstractFunctionManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.method.MethodFunction;
+import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionFlowParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
 
 /**
  * {@link ManagedFunctionSource} implementation to provide the
@@ -298,7 +298,7 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 			}
 
 			// Invoke the method as the task
-			return ClassFunction.invokeMethod(instance, this.method, params);
+			return MethodFunction.invokeMethod(instance, this.method, params);
 		}
 	}
 

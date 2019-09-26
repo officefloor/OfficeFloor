@@ -15,24 +15,26 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method.parameter;
 
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.plugin.managedfunction.method.MethodFunction;
+import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.VariableManagedObjectSource;
 
 /**
- * Creates the value for the {@link ClassFunction}.
+ * Creates the {@link In} for the {@link MethodFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionValueParameterFactory extends ManagedFunctionObjectParameterFactory {
+public class ManagedFunctionInParameterFactory extends ManagedFunctionObjectParameterFactory {
 
 	/**
 	 * Instantiate.
 	 * 
 	 * @param objectIndex Object index.
 	 */
-	public ManagedFunctionValueParameterFactory(int objectIndex) {
+	public ManagedFunctionInParameterFactory(int objectIndex) {
 		super(objectIndex);
 	}
 
@@ -42,7 +44,7 @@ public class ManagedFunctionValueParameterFactory extends ManagedFunctionObjectP
 
 	@Override
 	public Object createParameter(ManagedFunctionContext<?, ?> context) {
-		return VariableManagedObjectSource.val(context.getObject(this.objectIndex));
+		return VariableManagedObjectSource.in(context.getObject(this.objectIndex));
 	}
 
 }

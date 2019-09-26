@@ -34,7 +34,7 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;

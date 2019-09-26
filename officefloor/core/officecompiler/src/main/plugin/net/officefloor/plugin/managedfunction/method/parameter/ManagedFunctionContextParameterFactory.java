@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2019 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,35 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method.parameter;
 
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.variable.Var;
-import net.officefloor.plugin.variable.VariableManagedObjectSource;
 
 /**
- * Creates the {@link Var} for the {@link ClassFunction}.
+ * {@link ManagedFunctionParameterFactory} for the {@link ManagedFunctionContext}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionVariableParameterFactory extends ManagedFunctionObjectParameterFactory {
-
-	/**
-	 * Instantiate.
-	 * 
-	 * @param objectIndex Object index.
-	 */
-	public ManagedFunctionVariableParameterFactory(int objectIndex) {
-		super(objectIndex);
-	}
+public class ManagedFunctionContextParameterFactory implements ManagedFunctionParameterFactory {
 
 	/*
-	 * ================== ParameterFactory ====================================
+	 * ====================== ParameterFactory =============================
 	 */
 
 	@Override
 	public Object createParameter(ManagedFunctionContext<?, ?> context) {
-		return VariableManagedObjectSource.var(context.getObject(this.objectIndex));
+		return context;
 	}
 
 }

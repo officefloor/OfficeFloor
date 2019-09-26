@@ -15,20 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
 
 /**
- * {@link ManagedFunctionFactory} for the {@link ClassFunction}.
+ * {@link ManagedFunctionFactory} for the {@link MethodFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassFunctionFactory implements ManagedFunctionFactory<Indexed, Indexed> {
+public class MethodFunctionFactory implements ManagedFunctionFactory<Indexed, Indexed> {
 
 	/**
 	 * {@link MethodObjectInstanceFactory}. Will be <code>null</code> if static
@@ -57,7 +58,7 @@ public class ClassFunctionFactory implements ManagedFunctionFactory<Indexed, Ind
 	 * @param parameters                  {@link ManagedFunctionParameterFactory}
 	 *                                    instances.
 	 */
-	public ClassFunctionFactory(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
+	public MethodFunctionFactory(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
 			ManagedFunctionParameterFactory[] parameters) {
 		this.methodObjectInstanceFactory = methodObjectInstanceFactory;
 		this.method = method;
@@ -78,8 +79,8 @@ public class ClassFunctionFactory implements ManagedFunctionFactory<Indexed, Ind
 	 */
 
 	@Override
-	public ClassFunction createManagedFunction() {
-		return new ClassFunction(this.methodObjectInstanceFactory, this.method, this.parameters);
+	public MethodFunction createManagedFunction() {
+		return new MethodFunction(this.methodObjectInstanceFactory, this.method, this.parameters);
 	}
 
 }

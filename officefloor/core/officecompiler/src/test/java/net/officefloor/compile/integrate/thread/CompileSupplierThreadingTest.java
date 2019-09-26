@@ -41,7 +41,7 @@ import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.thread.OptionalThreadLocal;
 import net.officefloor.frame.api.thread.ThreadSynchroniser;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**

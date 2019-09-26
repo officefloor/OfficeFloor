@@ -24,7 +24,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import junit.framework.TestCase;
-import net.officefloor.plugin.managedfunction.clazz.NonFunctionMethod;
+import net.officefloor.plugin.clazz.NonFunctionMethod;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpResponse;

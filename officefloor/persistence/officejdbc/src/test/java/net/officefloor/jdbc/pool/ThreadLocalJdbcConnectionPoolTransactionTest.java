@@ -32,7 +32,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.jdbc.AbstractConnectionTestCase;
 import net.officefloor.jdbc.ConnectionManagedObjectSource;
 import net.officefloor.jdbc.ConnectionWrapper;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**

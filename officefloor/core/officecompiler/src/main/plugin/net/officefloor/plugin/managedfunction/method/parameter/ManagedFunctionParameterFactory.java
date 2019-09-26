@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2019 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,35 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method.parameter;
 
 import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.plugin.variable.Out;
-import net.officefloor.plugin.variable.VariableManagedObjectSource;
+import net.officefloor.plugin.managedfunction.method.MethodFunction;
 
 /**
- * Creates the {@link Out} for the {@link ClassFunction}.
+ * Creates the parameter for the {@link MethodFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ManagedFunctionOutParameterFactory extends ManagedFunctionObjectParameterFactory {
+public interface ManagedFunctionParameterFactory {
 
 	/**
-	 * Instantiate.
+	 * Creates the parameter from the {@link ManagedFunctionContext}.
 	 * 
-	 * @param objectIndex Object index.
+	 * @param context
+	 *            {@link ManagedFunctionContext}.
+	 * @return Parameter.
+	 * @throws Exception
+	 *             If fails to create the parameter.
 	 */
-	public ManagedFunctionOutParameterFactory(int objectIndex) {
-		super(objectIndex);
-	}
-
-	/*
-	 * ================== ParameterFactory ====================================
-	 */
-
-	@Override
-	public Object createParameter(ManagedFunctionContext<?, ?> context) {
-		return VariableManagedObjectSource.out(context.getObject(this.objectIndex));
-	}
+	Object createParameter(ManagedFunctionContext<?, ?> context) throws Exception;
 
 }

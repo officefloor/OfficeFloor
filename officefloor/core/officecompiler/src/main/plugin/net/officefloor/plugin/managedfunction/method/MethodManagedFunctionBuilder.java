@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -42,7 +42,20 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.ClassFlowBuilder;
 import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
 import net.officefloor.plugin.clazz.ClassFlowRegistry;
+import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.NonFunctionMethod;
+import net.officefloor.plugin.clazz.Qualifier;
+import net.officefloor.plugin.clazz.QualifierNameFactory;
 import net.officefloor.plugin.clazz.Sequence;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionAsynchronousFlowParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionContextParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionFlowParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionInParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionObjectParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionOutParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionValueParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionVariableParameterFactory;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
@@ -92,7 +105,7 @@ public class MethodManagedFunctionBuilder {
 	 */
 	protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(
 			MethodManagedFunctionFactoryContext context) throws Exception {
-		return new ClassFunctionFactory(context.getMethodObjectInstanceFactory(), context.getMethod(),
+		return new MethodFunctionFactory(context.getMethodObjectInstanceFactory(), context.getMethod(),
 				context.getParameters());
 	}
 

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2019 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,24 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.clazz;
 
-import java.lang.reflect.Method;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
- * Factory to create the {@link Object} instance to invoke the {@link Method}
- * on.
+ * Enables flagging a <code>public</code> method of a {@link Class} to not be
+ * {@link ManagedFunction} for the {@link ClassManagedFunctionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MethodObjectInstanceFactory {
-
-	/**
-	 * Creates the {@link Object} instance to invoke the {@link Method} on.
-	 * 
-	 * @return {@link Object} instance to invoke the {@link Method} on.
-	 * @throws Exception If fails to create the instance.
-	 */
-	Object createInstance() throws Exception;
-
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface NonFunctionMethod {
 }

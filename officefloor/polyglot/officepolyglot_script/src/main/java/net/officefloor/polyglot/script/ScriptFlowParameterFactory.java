@@ -20,7 +20,7 @@ package net.officefloor.polyglot.script;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
+import net.officefloor.plugin.managedfunction.method.parameter.ManagedFunctionParameterFactory;
 
 /**
  * {@link ScriptFlow} {@link ManagedFunctionParameterFactory}.

@@ -15,24 +15,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method.parameter;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
- * Enables flagging a <code>public</code> method of a {@link Class} to not be
- * {@link ManagedFunction} for the {@link ClassManagedFunctionSource}.
+ * {@link ManagedFunctionParameterFactory} for an {@link Object}.
  * 
  * @author Daniel Sagenschneider
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface NonFunctionMethod {
+public class ManagedFunctionObjectParameterFactory implements ManagedFunctionParameterFactory {
+
+	/**
+	 * Index of the {@link Object}.
+	 */
+	protected final int objectIndex;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param objectIndex Index of the {@link Object}.
+	 */
+	public ManagedFunctionObjectParameterFactory(int objectIndex) {
+		this.objectIndex = objectIndex;
+	}
+
+	/*
+	 * ================== ParameterFactory ====================================
+	 */
+
+	@Override
+	public Object createParameter(ManagedFunctionContext<?, ?> context) {
+		return context.getObject(this.objectIndex);
+	}
+
 }

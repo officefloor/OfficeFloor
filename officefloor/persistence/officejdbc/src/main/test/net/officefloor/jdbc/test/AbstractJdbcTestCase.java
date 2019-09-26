@@ -61,7 +61,7 @@ import net.officefloor.jdbc.ConnectionWrapper;
 import net.officefloor.jdbc.DataSourceManagedObjectSource;
 import net.officefloor.jdbc.ReadOnlyConnectionManagedObjectSource;
 import net.officefloor.jdbc.pool.ThreadLocalJdbcConnectionPoolSource;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.Spawn;
 

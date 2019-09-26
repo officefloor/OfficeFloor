@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2019 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,37 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.plugin.managedfunction.clazz;
+package net.officefloor.plugin.managedfunction.method.parameter;
 
-import net.officefloor.frame.api.function.FlowCallback;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
+ * {@link ManagedFunctionParameterFactory} for an {@link AsynchronousFlow}.
  * 
  * @author Daniel Sagenschneider
  */
-@FunctionalInterface
-public interface FlowSuccessful extends FlowCallback {
+public class ManagedFunctionAsynchronousFlowParameterFactory implements ManagedFunctionParameterFactory {
 
-	/**
-	 * Default implementation of {@link FlowCallback} to escalate and then invoke
-	 * successful handling.
+	/*
+	 * ====================== ParameterFactory =============================
 	 */
-	default void run(Throwable escalation) throws Throwable {
 
-		// Ensure propagate flow failure
-		if (escalation != null) {
-			throw escalation;
-		}
-
-		// Successful flow
-		this.run();
+	@Override
+	public Object createParameter(ManagedFunctionContext<?, ?> context) {
+		return context.createAsynchronousFlow();
 	}
 
-	/**
-	 * Invoked on completion of successful {@link Flow}.
-	 * 
-	 * @throws Throwable Possible failure in handling completion.
-	 */
-	void run() throws Throwable;
 }

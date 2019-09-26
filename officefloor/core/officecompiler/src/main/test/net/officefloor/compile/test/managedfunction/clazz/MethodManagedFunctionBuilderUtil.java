@@ -47,8 +47,8 @@ import net.officefloor.frame.api.manage.InvalidParameterTypeException;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.clazz.MethodManagedFunctionBuilder;
-import net.officefloor.plugin.managedfunction.clazz.MethodObjectInstanceFactory;
+import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
 
 /**
  * <p>
@@ -311,6 +311,8 @@ public class MethodManagedFunctionBuilderUtil {
 		try {
 			result = function.execute(context);
 			failure = null;
+		} catch (AssertionError ex) {
+			throw ex; // propagate assertion failures
 		} catch (Throwable ex) {
 			result = null;
 			failure = ex;
