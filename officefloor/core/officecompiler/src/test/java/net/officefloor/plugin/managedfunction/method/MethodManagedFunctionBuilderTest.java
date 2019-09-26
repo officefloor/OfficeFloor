@@ -19,10 +19,12 @@ package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil.MethodResult;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.clazz.Qualified;
 
 /**
  * Tests the {@link MethodManagedFunctionBuilder}.
@@ -108,6 +110,31 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 		public String object = null;
 
 		public void method(String dependency) {
+			this.object = dependency;
+		}
+	}
+
+	/**
+	 * Ensure inject qualified dependency.
+	 */
+	public void testQualifiedDependency() {
+		QualifiedDependencyFunction dependency = new QualifiedDependencyFunction();
+		final String object = "DEPENDENCY";
+		MethodManagedFunctionBuilderUtil.runMethod(dependency, "method", (type) -> {
+			ManagedFunctionObjectTypeBuilder<Indexed> objectType = type.addObject(String.class);
+			objectType.setLabel("qualified-" + String.class.getName());
+			objectType.setTypeQualifier("qualified");
+		}, (context) -> {
+			context.setObject(0, object);
+		});
+		assertEquals("Incorrect dependency", object, dependency.object);
+	}
+
+	public static class QualifiedDependencyFunction {
+
+		public String object = null;
+
+		public void method(@Qualified("qualified") String dependency) {
 			this.object = dependency;
 		}
 	}

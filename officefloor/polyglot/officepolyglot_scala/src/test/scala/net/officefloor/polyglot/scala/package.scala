@@ -60,8 +60,8 @@ package object scala {
       case "nextFunction" => Unit
       case "flow" => flows.flow()
       case "callbacks" =>
-        flows.flowWithCallback((error1) => {
-          flows.flowWithParameterAndCallback("1", (error2) => {
+        flows.flowWithCallback(_ => {
+          flows.flowWithParameterAndCallback("1", _ => {
             flows.flowWithParameter("2")
           })
         })
