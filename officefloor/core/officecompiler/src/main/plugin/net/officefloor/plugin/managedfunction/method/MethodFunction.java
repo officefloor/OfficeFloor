@@ -99,6 +99,11 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 	private final MethodParameterFactory[] parameterFactories;
 
 	/**
+	 * {@link MethodReturnTranslator} or <code>null</code>.
+	 */
+	private final MethodReturnTranslator<Object, Object> returnTranslator;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
@@ -106,14 +111,16 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 	 *                                    {@link Method}.
 	 * @param method                      Method to invoke for this
 	 *                                    {@link ManagedFunction}.
-	 * @param parameterFactories          {@link MethodParameterFactory}
-	 *                                    instances.
+	 * @param parameterFactories          {@link MethodParameterFactory} instances.
+	 * @param returnTranslator            {@link MethodReturnTranslator} or
+	 *                                    <code>null</code>.
 	 */
 	public MethodFunction(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
-			MethodParameterFactory[] parameterFactories) {
+			MethodParameterFactory[] parameterFactories, MethodReturnTranslator<Object, Object> returnTranslator) {
 		this.method = method;
 		this.methodObjectInstanceFactory = methodObjectInstanceFactory;
 		this.parameterFactories = parameterFactories;
+		this.returnTranslator = returnTranslator;
 	}
 
 	/**
@@ -134,7 +141,7 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 
 		// Obtain the instance to invoke the method on (null if static method)
 		Object instance = (this.methodObjectInstanceFactory == null) ? null
-				: this.methodObjectInstanceFactory.createInstance();
+				: this.methodObjectInstanceFactory.createInstance(context);
 
 		// Create the listing of parameters
 		Object[] params = new Object[this.parameterFactories.length];
@@ -143,7 +150,10 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 		}
 
 		// Invoke the method as the function
-		return invokeMethod(instance, this.method, params);
+		Object returnValue = invokeMethod(instance, this.method, params);
+
+		// Return the possibly translated return value
+		return (this.returnTranslator != null) ? this.returnTranslator.translate(returnValue) : returnValue;
 	}
 
 }

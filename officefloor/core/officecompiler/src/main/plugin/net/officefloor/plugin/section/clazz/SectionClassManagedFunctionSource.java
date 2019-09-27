@@ -18,31 +18,24 @@
 package net.officefloor.plugin.section.clazz;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
-import net.officefloor.frame.api.function.ManagedFunctionContext;
-import net.officefloor.frame.api.function.ManagedFunctionFactory;
-import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.plugin.clazz.ClassFlowMethodMetaData;
 import net.officefloor.plugin.clazz.FlowInterface;
-import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.method.AbstractFunctionManagedFunctionSource;
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
-import net.officefloor.plugin.managedfunction.method.MethodFunction;
 import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceManufacturer;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 import net.officefloor.plugin.managedfunction.method.parameter.FlowInterfaceParameterFactory;
 
 /**
@@ -59,6 +52,11 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 	 */
 
 	@Override
+	protected MethodObjectInstanceManufacturer createMethodObjectInstanceManufacturer(Class<?> clazz) throws Exception {
+		return () -> (context) -> context.getObject(0); // obtain the section object
+	}
+
+	@Override
 	protected MethodManagedFunctionBuilder createMethodManagedFunctionBuilder(FunctionNamespaceBuilder namespaceBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
 		return new SectionMethodManagedFunctionBuilder();
@@ -72,13 +70,6 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 		/*
 		 * ===================== MethodManagedFunctionBuilder ======================
 		 */
-
-		@Override
-		protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(
-				MethodManagedFunctionFactoryContext context) throws Exception {
-			boolean isStatic = (context.getMethodObjectInstanceFactory() == null);
-			return new SectionManagedFunctionFactory(context.getMethod(), isStatic, context.getParameters());
-		}
 
 		@Override
 		protected ManagedFunctionTypeBuilder<Indexed, Indexed> addManagedFunctionType(
@@ -208,91 +199,6 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 				context.getManagedFunctionTypeBuilder().addAnnotation(
 						sectionAnnotations.toArray(new SectionInterfaceAnnotation[sectionAnnotations.size()]));
 			}
-		}
-
-		@Override
-		protected void enrichManagedFunctionObjectType(Class<?> objectType, Type genericType, Annotation[] annotations,
-				ManagedFunctionObjectTypeBuilder<Indexed> functionObjectType) {
-			// Nothing to enrich
-		}
-
-	}
-
-	/**
-	 * {@link ManagedFunctionFactory} for overriding
-	 * {@link ClassManagedFunctionSource} behaviour.
-	 */
-	public static class SectionManagedFunctionFactory extends StaticManagedFunction<Indexed, Indexed> {
-
-		/**
-		 * {@link Method} for the {@link ManagedFunction}.
-		 */
-		private final Method method;
-
-		/**
-		 * Indicates if the {@link Method} is static.
-		 */
-		private final boolean isStatic;
-
-		/**
-		 * {@link MethodParameterFactory} instances for the parameters of the
-		 * {@link Method}.
-		 */
-		private final MethodParameterFactory[] parameters;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param method     {@link Method} for the {@link ManagedFunction}.
-		 * @param isStatic   Indicates if the {@link Method} is static.
-		 * @param parameters {@link MethodParameterFactory} instances for the parameters
-		 *                   of the {@link Method}.
-		 */
-		public SectionManagedFunctionFactory(Method method, boolean isStatic, MethodParameterFactory[] parameters) {
-			this.method = method;
-			this.isStatic = isStatic;
-			this.parameters = parameters;
-		}
-
-		/**
-		 * Obtains the {@link Method}.
-		 * 
-		 * @return {@link Method}.
-		 */
-		public Method getMethod() {
-			return this.method;
-		}
-
-		/**
-		 * Obtains the {@link MethodParameterFactory} instances.
-		 * 
-		 * @return {@link MethodParameterFactory} instances.
-		 */
-		public MethodParameterFactory[] getParameterFactories() {
-			return this.parameters;
-		}
-
-		/*
-		 * ===================== ManagedFunction ===========================
-		 */
-
-		@Override
-		public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
-
-			// Obtain the section object
-			Object sectionObject = context.getObject(0);
-
-			// Obtain the instance to invoke the method on
-			Object instance = (this.isStatic ? null : sectionObject);
-
-			// Create the listing of parameters
-			Object[] params = new Object[this.parameters.length];
-			for (int i = 0; i < params.length; i++) {
-				params[i] = this.parameters[i].createParameter(context);
-			}
-
-			// Invoke the method as the task
-			return MethodFunction.invokeMethod(instance, this.method, params);
 		}
 	}
 

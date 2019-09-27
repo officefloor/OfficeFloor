@@ -19,6 +19,9 @@ package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.reflect.Constructor;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+
 /**
  * {@link MethodObjectInstanceFactory} using the default {@link Constructor}.
  * 
@@ -51,7 +54,7 @@ public class DefaultConstructorMethodObjectInstanceFactory implements MethodObje
 	 */
 
 	@Override
-	public Object createInstance() throws Exception {
+	public Object createInstance(ManagedFunctionContext<Indexed, Indexed> context) throws Exception {
 		return this.constructor.newInstance(DEFAULT_CONSTRUCTION_ARGUMENTS);
 	}
 

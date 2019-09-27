@@ -23,7 +23,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -60,7 +62,7 @@ public class MethodManagedFunctionBuilder {
 	protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(
 			MethodManagedFunctionFactoryContext context) throws Exception {
 		return new MethodFunctionFactory(context.getMethodObjectInstanceFactory(), context.getMethod(),
-				context.getParameters());
+				context.getParameters(), context.getReturnTranslator());
 	}
 
 	/**
@@ -132,7 +134,7 @@ public class MethodManagedFunctionBuilder {
 	 * @throws Exception If fails to create the {@link ManagedFunction} from the
 	 *                   {@link Method}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ManagedFunctionTypeBuilder<Indexed, Indexed> buildMethod(Method method, Class<?> instanceClass,
 			MethodObjectInstanceManufacturer methodObjectInstanceManufacturer,
 			FunctionNamespaceBuilder namespaceBuilder, ManagedFunctionSourceContext context) throws Exception {
@@ -155,18 +157,39 @@ public class MethodManagedFunctionBuilder {
 			methodObjectInstanceFactory = methodObjectInstanceManufacturer.createMethodObjectInstanceFactory();
 		}
 
+		// Define the return type
+		Class<?> returnType = method.getReturnType();
+
+		// Determine if translate return type
+		// Note: even if void, allows successful after method execution
+		MethodReturnTranslator returnTranslator = null;
+		MethodReturnManufacturerContextImpl<?> returnContext = new MethodReturnManufacturerContextImpl<>();
+		FOUND_TRANSLATOR: for (MethodReturnManufacturer manufacturer : context
+				.loadOptionalServices(MethodReturnManufacturerServiceFactory.class)) {
+			returnTranslator = manufacturer.createReturnTranslator(returnContext);
+			if (returnTranslator != null) {
+
+				// Determine if translate return
+				if (returnContext.translatedReturnClass != null) {
+					returnType = returnContext.translatedReturnClass;
+				}
+
+				// Found translator
+				break FOUND_TRANSLATOR;
+			}
+		}
+
 		// Create the function factory
 		ManagedFunctionFactory<Indexed, Indexed> functionFactory = this
 				.createManagedFunctionFactory(new MethodManagedFunctionFactoryContext(methodName, method, instanceClass,
-						methodObjectInstanceFactory, parameters));
+						methodObjectInstanceFactory, parameters, returnTranslator));
 
 		// Include method as function in type definition
 		ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = this
 				.addManagedFunctionType(new MethodManagedFunctionTypeContext(methodName, method, instanceClass,
 						methodObjectInstanceFactory, functionFactory, namespaceBuilder, objectSequence, flowSequence));
 
-		// Define the return type (it not void)
-		Class<?> returnType = method.getReturnType();
+		// Load return type if not void
 		if ((returnType != null) && (!Void.TYPE.equals(returnType))) {
 			functionTypeBuilder.setReturnType(returnType);
 		}
@@ -189,6 +212,9 @@ public class MethodManagedFunctionBuilder {
 				.loadOptionalServices(MethodParameterManufacturerServiceFactory.class)) {
 			parameterManufacturers.add(parameterManufacturer);
 		}
+
+		// Escalation types
+		Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes = new HashMap<>();
 
 		// Define the listing of objects and flows
 		for (int i = 0; i < paramClasses.length; i++) {
@@ -241,7 +267,6 @@ public class MethodManagedFunctionBuilder {
 					}
 
 					// Obtain the qualifier name factory
-					@SuppressWarnings("rawtypes")
 					Class<? extends QualifierNameFactory> nameFactoryClass = qualifierAnnotation.nameFactory();
 					QualifierNameFactory<Annotation> nameFactory = nameFactoryClass.getDeclaredConstructor()
 							.newInstance();
@@ -254,7 +279,8 @@ public class MethodManagedFunctionBuilder {
 			// Create the context
 			MethodParameterManufacturerContext manufacturerContext = new MethodParameterManufacturerContextImpl(
 					paramClass, paramType, allAnnotations.toArray(new Annotation[allAnnotations.size()]),
-					parameterQualifier, objectSequence, flowSequence, functionTypeBuilder, methodName, context);
+					parameterQualifier, objectSequence, flowSequence, functionTypeBuilder, escalationTypes, methodName,
+					context);
 
 			// Obtain the parameter factory
 			MethodParameterFactory parameterFactory = null;
@@ -291,14 +317,16 @@ public class MethodManagedFunctionBuilder {
 			parameters[i] = parameterFactory;
 		}
 
-		// Define the escalation listing
+		// Define the escalation listing (avoiding duplicates)
 		for (Class<?> escalationType : method.getExceptionTypes()) {
-			functionTypeBuilder.addEscalation((Class<Throwable>) escalationType);
+			if (!escalationTypes.containsKey(escalationType)) {
+				functionTypeBuilder.addEscalation((Class<Throwable>) escalationType);
+			}
 		}
 
 		// Enrich the managed function
 		this.enrichManagedFunctionType(new EnrichManagedFunctionTypeContext(methodName, method, instanceClass,
-				methodObjectInstanceFactory, parameters, functionTypeBuilder));
+				methodObjectInstanceFactory, parameters, returnTranslator, functionTypeBuilder));
 
 		// Return the managed function builder
 		return functionTypeBuilder;
@@ -397,6 +425,11 @@ public class MethodManagedFunctionBuilder {
 		private final MethodParameterFactory[] parameters;
 
 		/**
+		 * {@link MethodReturnTranslator}.
+		 */
+		private final MethodReturnTranslator<Object, Object> returnTranslator;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param functionName                Name of {@link ManagedFunction} for the
@@ -407,11 +440,14 @@ public class MethodManagedFunctionBuilder {
 		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
 		 *                                    be <code>null</code> if static.
 		 * @param parameters                  {@link MethodParameterFactory} instances.
+		 * @param returnTranslator            {@link MethodReturnTranslator}.
 		 */
 		protected MethodManagedFunctionFactoryContext(String functionName, Method method, Class<?> instanceClass,
-				MethodObjectInstanceFactory methodObjectInstanceFactory, MethodParameterFactory[] parameters) {
+				MethodObjectInstanceFactory methodObjectInstanceFactory, MethodParameterFactory[] parameters,
+				MethodReturnTranslator<Object, Object> returnTranslator) {
 			super(functionName, method, instanceClass, methodObjectInstanceFactory);
 			this.parameters = parameters;
+			this.returnTranslator = returnTranslator;
 		}
 
 		/**
@@ -421,6 +457,15 @@ public class MethodManagedFunctionBuilder {
 		 */
 		public MethodParameterFactory[] getParameters() {
 			return this.parameters;
+		}
+
+		/**
+		 * Obtains the possible {@link MethodReturnTranslator}.
+		 * 
+		 * @return {@link MethodReturnTranslator} or <code>null</code>.
+		 */
+		public MethodReturnTranslator<Object, Object> getReturnTranslator() {
+			return this.returnTranslator;
 		}
 	}
 
@@ -535,12 +580,14 @@ public class MethodManagedFunctionBuilder {
 		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
 		 *                                    be <code>null</code> if static.
 		 * @param parameters                  {@link MethodParameterFactory} instances.
+		 * @param returnTranslator            {@link MethodReturnTranslator}.
 		 * @param functionType                {@link ManagedFunctionTypeBuilder}.
 		 */
 		public EnrichManagedFunctionTypeContext(String functionName, Method method, Class<?> instanceClass,
 				MethodObjectInstanceFactory methodObjectInstanceFactory, MethodParameterFactory[] parameters,
+				MethodReturnTranslator<Object, Object> returnTranslator,
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionType) {
-			super(functionName, method, instanceClass, methodObjectInstanceFactory, parameters);
+			super(functionName, method, instanceClass, methodObjectInstanceFactory, parameters, returnTranslator);
 			this.managedFunctionTypeBuilder = functionType;
 		}
 
@@ -551,6 +598,55 @@ public class MethodManagedFunctionBuilder {
 		 */
 		public ManagedFunctionTypeBuilder<Indexed, Indexed> getManagedFunctionTypeBuilder() {
 			return managedFunctionTypeBuilder;
+		}
+	}
+
+	/**
+	 * {@link MethodReturnManufacturerContext} implementation.
+	 * 
+	 * @author Daniel Sagenschneider
+	 */
+	private class MethodReturnManufacturerContextImpl<T> implements MethodReturnManufacturerContext<T> {
+
+		/**
+		 * Translated return {@link Class}.
+		 */
+		private Class<? super T> translatedReturnClass = null;
+
+		/*
+		 * =================== MethodReturnManufacturerContext =================
+		 */
+
+		@Override
+		public Class<?> getReturnClass() {
+			// TODO implement MethodReturnManufacturerContext<T>.getReturnClass
+			throw new UnsupportedOperationException("TODO implement MethodReturnManufacturerContext<T>.getReturnClass");
+		}
+
+		@Override
+		public void setTranslatedReturnClass(Class<? super T> translatedReturnClass) {
+			this.translatedReturnClass = translatedReturnClass;
+		}
+
+		@Override
+		public Annotation[] getMethodAnnotations() {
+			// TODO implement MethodReturnManufacturerContext<T>.getMethodAnnotations
+			throw new UnsupportedOperationException(
+					"TODO implement MethodReturnManufacturerContext<T>.getMethodAnnotations");
+		}
+
+		@Override
+		public String getFunctionName() {
+			// TODO implement MethodReturnManufacturerContext<T>.getFunctionName
+			throw new UnsupportedOperationException(
+					"TODO implement MethodReturnManufacturerContext<T>.getFunctionName");
+		}
+
+		@Override
+		public SourceContext getSourceContext() {
+			// TODO implement MethodReturnManufacturerContext<T>.getSourceContext
+			throw new UnsupportedOperationException(
+					"TODO implement MethodReturnManufacturerContext<T>.getSourceContext");
 		}
 	}
 
@@ -595,6 +691,12 @@ public class MethodManagedFunctionBuilder {
 		private final ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder;
 
 		/**
+		 * {@link Map} of {@link Throwable} type to
+		 * {@link ManagedFunctionEscalationTypeBuilder}.
+		 */
+		private final Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes;
+
+		/**
 		 * {@link ManagedFunction} name.
 		 */
 		private final String functionName;
@@ -614,12 +716,15 @@ public class MethodManagedFunctionBuilder {
 		 * @param objectSequence       {@link Sequence} for object indexes.
 		 * @param flowSequence         {@link Sequence} for {@link Flow} indexes.
 		 * @param functionTypeBuilder  {@link ManagedFunctionTypeBuilder}.
+		 * @param escalationTypes      {@link Map} of {@link Throwable} type to
+		 *                             {@link ManagedFunctionEscalationTypeBuilder}.
 		 * @param functionName         {@link ManagedFunction} name.
 		 * @param sourceContext        {@link SourceContext}.
 		 */
 		private MethodParameterManufacturerContextImpl(Class<?> parameterClass, Type parameterType,
 				Annotation[] parameterAnnotations, String parameterQualifier, Sequence objectSequence,
 				Sequence flowSequence, ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder,
+				Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes,
 				String functionName, SourceContext sourceContext) {
 			this.parameterClass = parameterClass;
 			this.parameterType = parameterType;
@@ -628,6 +733,7 @@ public class MethodManagedFunctionBuilder {
 			this.objectSequence = objectSequence;
 			this.flowSequence = flowSequence;
 			this.functionTypeBuilder = functionTypeBuilder;
+			this.escalationTypes = escalationTypes;
 			this.functionName = functionName;
 			this.sourceContext = sourceContext;
 		}
@@ -688,8 +794,14 @@ public class MethodManagedFunctionBuilder {
 
 		@Override
 		public <E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(Class<E> escalationType) {
-			// TODO implement MethodParameterManufacturerContext.addEscalation
-			throw new UnsupportedOperationException("TODO implement MethodParameterManufacturerContext.addEscalation");
+
+			// Single builder per escalation type
+			ManagedFunctionEscalationTypeBuilder builder = this.escalationTypes.get(escalationType);
+			if (builder == null) {
+				builder = this.functionTypeBuilder.addEscalation(escalationType);
+				this.escalationTypes.put(escalationType, builder);
+			}
+			return builder;
 		}
 
 		@Override

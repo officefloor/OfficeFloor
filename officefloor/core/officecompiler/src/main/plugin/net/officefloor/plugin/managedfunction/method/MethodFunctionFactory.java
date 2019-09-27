@@ -47,6 +47,11 @@ public class MethodFunctionFactory implements ManagedFunctionFactory<Indexed, In
 	private final MethodParameterFactory[] parameters;
 
 	/**
+	 * {@link MethodReturnTranslator} or <code>null</code>.
+	 */
+	private final MethodReturnTranslator<Object, Object> returnTranslator;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
@@ -54,14 +59,15 @@ public class MethodFunctionFactory implements ManagedFunctionFactory<Indexed, In
 	 *                                    {@link Method}.
 	 * @param method                      {@link Method} to invoke for the
 	 *                                    {@link ManagedFunction}.
-	 * @param parameters                  {@link MethodParameterFactory}
-	 *                                    instances.
+	 * @param parameters                  {@link MethodParameterFactory} instances.
+	 * @param returnTranslator            {@link MethodReturnTranslator}.
 	 */
 	public MethodFunctionFactory(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
-			MethodParameterFactory[] parameters) {
+			MethodParameterFactory[] parameters, MethodReturnTranslator<Object, Object> returnTranslator) {
 		this.methodObjectInstanceFactory = methodObjectInstanceFactory;
 		this.method = method;
 		this.parameters = parameters;
+		this.returnTranslator = returnTranslator;
 	}
 
 	/**
@@ -79,7 +85,8 @@ public class MethodFunctionFactory implements ManagedFunctionFactory<Indexed, In
 
 	@Override
 	public MethodFunction createManagedFunction() {
-		return new MethodFunction(this.methodObjectInstanceFactory, this.method, this.parameters);
+		return new MethodFunction(this.methodObjectInstanceFactory, this.method, this.parameters,
+				this.returnTranslator);
 	}
 
 }

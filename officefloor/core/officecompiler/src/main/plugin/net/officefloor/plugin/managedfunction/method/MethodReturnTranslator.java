@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2019 Daniel Sagenschneider
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,26 +17,25 @@
  */
 package net.officefloor.plugin.managedfunction.method;
 
-import java.lang.reflect.Method;
-
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
- * Factory to create the {@link Object} instance to invoke the {@link Method}
- * on.
+ * Translate the return value of the {@link MethodFunction}.
+ * 
+ * @param <R> {@link MethodFunction} return type.
+ * @param <T> Translated type.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MethodObjectInstanceFactory {
+public interface MethodReturnTranslator<R, T> {
 
 	/**
-	 * Creates the {@link Object} instance to invoke the {@link Method} on.
+	 * Creates the parameter from the {@link ManagedFunctionContext}.
 	 * 
-	 * @param context {@link ManagedFunctionContext}.
-	 * @return {@link Object} instance to invoke the {@link Method} on.
-	 * @throws Exception If fails to create the instance.
+	 * @param returnValue Return value of {@link MethodFunction}.
+	 * @return Translated return value.
+	 * @throws Exception If fails to translate.
 	 */
-	Object createInstance(ManagedFunctionContext<Indexed, Indexed> context) throws Exception;
+	T translate(R returnValue) throws Exception;
 
 }

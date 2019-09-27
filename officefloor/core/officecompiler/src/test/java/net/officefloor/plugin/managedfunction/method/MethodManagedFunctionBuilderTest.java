@@ -23,6 +23,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectT
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil.MethodResult;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.Qualified;
 
@@ -136,6 +137,96 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 
 		public void method(@Qualified("qualified") String dependency) {
 			this.object = dependency;
+		}
+	}
+
+	/**
+	 * Ensure can register exception.
+	 */
+	public void testRegisterException() throws Exception {
+		RuntimeException failure = new RuntimeException("TEST");
+		MethodResult result = MockParameterManufacturer.run((context) -> {
+			context.addEscalation(RuntimeException.class);
+			return (mc) -> failure;
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new RegisterExceptionFunction(), "method",
+				(context) -> context.addEscalation(RuntimeException.class), null));
+		assertSame("Should throw exception", failure, result.getFailure());
+	}
+
+	public static class RegisterExceptionFunction {
+
+		public void method(RuntimeException exception) {
+			throw exception;
+		}
+	}
+
+	/**
+	 * Ensure not register duplicate {@link Exception} types.
+	 */
+	public void testDuplicateException() throws Exception {
+		Exception failure = new Exception("TEST");
+		MethodResult result = MockParameterManufacturer.run((context) -> {
+			context.addEscalation(Exception.class);
+			return (mc) -> failure;
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new DuplicateExceptionFunction(), "method",
+				(type) -> type.addEscalation(Exception.class), null));
+		assertSame("Should throw exception", failure, result.getFailure());
+	}
+
+	public static class DuplicateExceptionFunction {
+
+		public void method(Exception exception) throws Exception {
+			throw exception;
+		}
+	}
+
+	/**
+	 * Ensure can translate dependency.
+	 */
+	public void testTranslateObject() throws Exception {
+		Closure<String> closure = new Closure<>("TEST");
+		MethodResult result = MockParameterManufacturer.run((context) -> {
+			int objectIndex = context.addObject(Closure.class, null);
+			return (mc) -> {
+				@SuppressWarnings("unchecked")
+				Closure<String> object = (Closure<String>) mc.getObject(objectIndex);
+				return object.value;
+			};
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateObjectFunction(), "method", (type) -> {
+			type.addObject(Closure.class);
+			type.setReturnType(String.class);
+		}, (context) -> {
+			context.setObject(0, closure);
+		}));
+		assertEquals("Incorrect translated argument", closure.value, result.getReturnValue());
+	}
+
+	public static class TranslateObjectFunction {
+
+		public String method(String value) {
+			return value;
+		}
+	}
+
+	/**
+	 * Ensure can translate return value.
+	 */
+	public void testTranslateReturn() throws Exception {
+		MethodResult result = MockReturnManufacturer.run(Closure.class, String.class, (context) -> {
+			context.setTranslatedReturnClass(String.class);
+			return (returnValue) -> (String) returnValue.value;
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFunction(), "method", (type) -> {
+			type.setReturnType(String.class);
+		}, null));
+		assertEquals("Incorrect translated return value", TranslateReturnFunction.VALUE, result.getReturnValue());
+	}
+
+	public static class TranslateReturnFunction {
+
+		public static final String VALUE = "VALUE";
+
+		public Closure<String> method() {
+			return new Closure<>(VALUE);
 		}
 	}
 

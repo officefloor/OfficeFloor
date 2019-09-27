@@ -123,7 +123,7 @@ public class MethodManagedFunctionBuilderUtil {
 	 * @return {@link MethodObjectInstanceFactory}.
 	 */
 	public static MethodObjectInstanceFactory instance(Object object) {
-		return () -> object;
+		return (context) -> object;
 	}
 
 	/**
@@ -152,7 +152,7 @@ public class MethodManagedFunctionBuilderUtil {
 	 */
 	public static ManagedFunctionType<Indexed, Indexed> buildStaticMethod(Class<?> clazz, String methodName,
 			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> epectedTypeBuilder) throws Exception {
-		return buildMethod(clazz, method(methodName), () -> null,
+		return buildMethod(clazz, method(methodName), (context) -> null,
 				createManagedFunctionTypeBuilder(methodName, epectedTypeBuilder));
 	}
 
