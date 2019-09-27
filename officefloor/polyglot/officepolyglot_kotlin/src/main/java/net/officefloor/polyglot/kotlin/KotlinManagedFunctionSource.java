@@ -48,7 +48,7 @@ public class KotlinManagedFunctionSource extends SectionClassManagedFunctionSour
 
 	@Override
 	protected MethodObjectInstanceManufacturer createMethodObjectInstanceManufacturer(Class<?> clazz) throws Exception {
-		return () -> () -> null; // always static
+		return () -> null; // always static
 	}
 
 	@Override
@@ -63,82 +63,12 @@ public class KotlinManagedFunctionSource extends SectionClassManagedFunctionSour
 	 */
 	protected class KotlinMethodManagedFunctionBuilder extends SectionMethodManagedFunctionBuilder {
 
-		@Override
-		protected ManagedFunctionFactory<Indexed, Indexed> createManagedFunctionFactory(
-				MethodManagedFunctionFactoryContext context) throws Exception {
-			return new KotlinManagedFunctionFactory(context.getMethod(), context.getParameters());
-		}
 
 		@Override
 		protected ManagedFunctionTypeBuilder<Indexed, Indexed> addManagedFunctionType(
 				MethodManagedFunctionTypeContext context) {
 			return context.getNamespaceBuilder().addManagedFunctionType(context.getFunctionName(),
 					context.getFunctionFactory(), Indexed.class, Indexed.class);
-		}
-	}
-
-	/**
-	 * {@link ManagedFunctionFactory} for overriding
-	 * {@link ClassManagedFunctionSource} behaviour.
-	 */
-	public static class KotlinManagedFunctionFactory extends StaticManagedFunction<Indexed, Indexed> {
-
-		/**
-		 * {@link Method} for the {@link ManagedFunction}.
-		 */
-		private final Method method;
-
-		/**
-		 * {@link MethodParameterFactory} instances for the parameters of the
-		 * {@link Method}.
-		 */
-		private final MethodParameterFactory[] parameters;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param method     {@link Method} for the {@link ManagedFunction}.
-		 * @param parameters {@link MethodParameterFactory} instances for the
-		 *                   parameters of the {@link Method}.
-		 */
-		public KotlinManagedFunctionFactory(Method method, MethodParameterFactory[] parameters) {
-			this.method = method;
-			this.parameters = parameters;
-		}
-
-		/**
-		 * Obtains the {@link Method}.
-		 * 
-		 * @return {@link Method}.
-		 */
-		public Method getMethod() {
-			return this.method;
-		}
-
-		/**
-		 * Obtains the {@link MethodParameterFactory} instances.
-		 * 
-		 * @return {@link MethodParameterFactory} instances.
-		 */
-		public MethodParameterFactory[] getParameterFactories() {
-			return this.parameters;
-		}
-
-		/*
-		 * ===================== ManagedFunction ===========================
-		 */
-
-		@Override
-		public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
-
-			// Create the listing of parameters
-			Object[] params = new Object[this.parameters.length];
-			for (int i = 0; i < params.length; i++) {
-				params[i] = this.parameters[i].createParameter(context);
-			}
-
-			// Invoke the method as the task
-			return MethodFunction.invokeMethod(null, this.method, params);
 		}
 	}
 
