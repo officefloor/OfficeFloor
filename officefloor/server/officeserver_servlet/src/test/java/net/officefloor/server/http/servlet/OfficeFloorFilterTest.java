@@ -29,7 +29,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Next;

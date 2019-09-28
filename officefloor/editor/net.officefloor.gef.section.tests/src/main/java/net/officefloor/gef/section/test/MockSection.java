@@ -18,7 +18,7 @@
 package net.officefloor.gef.section.test;
 
 import net.officefloor.gef.section.SectionEditor;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
  * Mock section {@link Class} for testing the {@link SectionEditor}.

@@ -27,7 +27,6 @@ import java.util.Map;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Spawn;
 
 /**
@@ -58,7 +57,6 @@ public class ClassFlowBuilder<A extends Annotation> {
 	 * @param functionName  Name of {@link Method} containing the
 	 *                      {@link FlowInterface} parameter.
 	 * @param parameterType Interface {@link Class} for the {@link FlowInterface}.
-	 * @param flowSequence  {@link Sequence} for the {@link Flow} instances.
 	 * @param flowRegistry  {@link ClassFlowRegistry}.
 	 * @param sourceContext {@link SourceContext}.
 	 * @return {@link ClassFlowParameterFactory} or <code>null</code> if parameter
@@ -66,7 +64,7 @@ public class ClassFlowBuilder<A extends Annotation> {
 	 * @throws Exception If fails to build the {@link ClassFlowParameterFactory}.
 	 */
 	public ClassFlowParameterFactory buildFlowParameterFactory(String functionName, Class<?> parameterType,
-			Sequence flowSequence, ClassFlowRegistry flowRegistry, SourceContext sourceContext) throws Exception {
+			ClassFlowRegistry flowRegistry, SourceContext sourceContext) throws Exception {
 
 		// Determine if flow interface
 		if (!parameterType.isAnnotationPresent(this.annotationClass)) {
@@ -155,13 +153,13 @@ public class ClassFlowBuilder<A extends Annotation> {
 			// Determine if spawn
 			boolean isSpawn = flowMethod.isAnnotationPresent(Spawn.class);
 
+			// Register the flow
+			int flowIndex = flowRegistry.registerFlow(flowMethodName, flowParameterType);
+
 			// Create and register the flow method meta-data
 			ClassFlowMethodMetaData flowMethodMetaData = new ClassFlowMethodMetaData(parameterType, flowMethod, isSpawn,
-					flowSequence.nextIndex(), flowParameterType, isFlowCallback);
+					flowIndex, flowParameterType, isFlowCallback);
 			flowMethodMetaDatas.put(flowMethodName, flowMethodMetaData);
-
-			// Register the flow
-			flowRegistry.registerFlow(flowMethodName, flowParameterType);
 		}
 
 		// Create and return the flow interface parameter factory

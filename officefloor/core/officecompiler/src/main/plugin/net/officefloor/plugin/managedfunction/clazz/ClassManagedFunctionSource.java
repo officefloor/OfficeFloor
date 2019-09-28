@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import net.officefloor.compile.ManagedFunctionSourceService;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.plugin.managedfunction.method.AbstractFunctionManagedFunctionSource;
 
 /**
  * {@link ManagedFunctionSource} for a {@link Class} having the {@link Method}

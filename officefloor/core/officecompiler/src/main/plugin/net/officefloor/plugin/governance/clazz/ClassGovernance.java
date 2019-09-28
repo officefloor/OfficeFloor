@@ -23,7 +23,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceContext;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.plugin.managedfunction.clazz.ClassFunction;
+import net.officefloor.plugin.managedfunction.method.MethodFunction;
 
 /**
  * {@link Class} {@link Governance}.
@@ -81,14 +81,14 @@ public class ClassGovernance implements Governance<Object, Indexed> {
 	@Override
 	public void governManagedObject(Object extensionInterface,
 			GovernanceContext<Indexed> context) throws Throwable {
-		ClassFunction.invokeMethod(this.instance, this.governMethod,
+		MethodFunction.invokeMethod(this.instance, this.governMethod,
 				new Object[] { extensionInterface });
 	}
 
 	@Override
 	public void enforceGovernance(GovernanceContext<Indexed> context)
 			throws Throwable {
-		ClassFunction
+		MethodFunction
 				.invokeMethod(this.instance, this.enforceMethod, new Object[0]);
 	}
 
@@ -97,7 +97,7 @@ public class ClassGovernance implements Governance<Object, Indexed> {
 			throws Throwable {
 		// Disregard if method to do so
 		if (this.disregardMethod != null) {
-			ClassFunction.invokeMethod(this.instance, this.disregardMethod,
+			MethodFunction.invokeMethod(this.instance, this.disregardMethod,
 					new Object[0]);
 		}
 	}

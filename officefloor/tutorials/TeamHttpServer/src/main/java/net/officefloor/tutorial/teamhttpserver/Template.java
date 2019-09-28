@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.HttpSessionStateful;

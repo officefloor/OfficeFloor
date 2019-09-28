@@ -22,7 +22,7 @@ import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 
 /**

@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import net.officefloor.gef.section.SectionEditor;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
  * Functions for testing {@link SectionEditor}.

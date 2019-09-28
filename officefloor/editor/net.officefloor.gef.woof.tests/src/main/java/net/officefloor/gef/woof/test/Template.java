@@ -17,7 +17,7 @@
  */
 package net.officefloor.gef.woof.test;
 
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
  * Example template logic.

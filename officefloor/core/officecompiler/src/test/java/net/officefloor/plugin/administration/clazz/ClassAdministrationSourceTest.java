@@ -32,7 +32,7 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
  * Tests the {@link ClassAdministrationSource}.

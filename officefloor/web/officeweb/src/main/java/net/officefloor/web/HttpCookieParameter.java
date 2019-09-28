@@ -25,8 +25,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.HttpCookie;
 
-import net.officefloor.plugin.managedfunction.clazz.Qualifier;
-import net.officefloor.plugin.managedfunction.clazz.QualifierNameFactory;
+import net.officefloor.plugin.clazz.Qualifier;
+import net.officefloor.plugin.clazz.QualifierNameFactory;
 
 /**
  * {@link Annotation} to indicate the value is loaded from a {@link HttpCookie}

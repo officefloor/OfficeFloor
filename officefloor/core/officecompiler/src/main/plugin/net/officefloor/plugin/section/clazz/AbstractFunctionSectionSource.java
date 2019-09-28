@@ -56,7 +56,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.plugin.managedfunction.clazz.Qualifier;
+import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.clazz.DependencyMetaData;
 import net.officefloor.plugin.variable.VariableAnnotation;
 

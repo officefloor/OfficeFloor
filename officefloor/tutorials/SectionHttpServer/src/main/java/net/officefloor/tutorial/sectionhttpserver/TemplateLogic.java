@@ -18,7 +18,7 @@
 package net.officefloor.tutorial.sectionhttpserver;
 
 import lombok.Data;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
  * Example logic for the template.

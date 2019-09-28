@@ -31,11 +31,10 @@ import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.FunctionFlowContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 
 /**
- * {@link ManagedFunctionParameterFactory} to obtain the {@link Flow}.
+ * {@link MethodParameterFactory} to obtain the {@link Flow}.
  * 
  * @author Daniel Sagenschneider
  */

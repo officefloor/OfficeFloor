@@ -24,7 +24,7 @@ import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Parameter;
 

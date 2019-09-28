@@ -22,7 +22,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileVar;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.clazz.Qualified;
+import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.section.clazz.Next;
 
 /**

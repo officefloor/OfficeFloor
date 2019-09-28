@@ -41,7 +41,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
  * {@link ManagedObjectSource} that manages an {@link Object} via reflection.

@@ -30,7 +30,7 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;

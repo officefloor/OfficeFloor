@@ -47,11 +47,11 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.managedfunction.clazz.ClassFunctionFactory;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
-import net.officefloor.plugin.managedfunction.clazz.DefaultConstructorMethodObjectInstanceFactory;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
+import net.officefloor.plugin.managedfunction.method.DefaultConstructorMethodObjectInstanceFactory;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
+import net.officefloor.plugin.managedfunction.method.MethodFunctionFactory;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -640,10 +640,10 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		public void sourceManagedFunctions(FunctionNamespaceBuilder namespaceBuilder,
 				ManagedFunctionSourceContext context) throws Exception {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = namespaceBuilder.addManagedFunctionType("function",
-					new ClassFunctionFactory(
+					new MethodFunctionFactory(
 							new DefaultConstructorMethodObjectInstanceFactory(CompileFunctionClass.class),
-							CompileFunctionClass.class.getMethod("simpleFunction"),
-							new ManagedFunctionParameterFactory[0]),
+							CompileFunctionClass.class.getMethod("simpleFunction"), new MethodParameterFactory[0],
+							null),
 					Indexed.class, Indexed.class);
 			function.addAnnotation(ANNOTATION);
 		}

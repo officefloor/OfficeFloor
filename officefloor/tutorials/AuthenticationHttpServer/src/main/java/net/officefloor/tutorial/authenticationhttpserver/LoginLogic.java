@@ -20,7 +20,7 @@ package net.officefloor.tutorial.authenticationhttpserver;
 import java.io.Serializable;
 
 import lombok.Data;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.web.HttpParameters;
 import net.officefloor.web.security.HttpCredentials;
 import net.officefloor.web.security.scheme.HttpCredentialsImpl;

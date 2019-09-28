@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebArchitect;

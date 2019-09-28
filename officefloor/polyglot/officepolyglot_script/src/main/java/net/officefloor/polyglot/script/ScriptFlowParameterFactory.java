@@ -20,14 +20,14 @@ package net.officefloor.polyglot.script;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.plugin.managedfunction.clazz.ManagedFunctionParameterFactory;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 
 /**
- * {@link ScriptFlow} {@link ManagedFunctionParameterFactory}.
+ * {@link ScriptFlow} {@link MethodParameterFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ScriptFlowParameterFactory implements ManagedFunctionParameterFactory {
+public class ScriptFlowParameterFactory implements MethodParameterFactory {
 
 	/**
 	 * Index of the {@link Flow}.

@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.template.extension.WebTemplateExtension;
 import net.officefloor.web.template.extension.WebTemplateExtensionContext;

@@ -37,9 +37,9 @@ import net.officefloor.extension.CompileOffice;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.Qualifier;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
-import net.officefloor.plugin.managedfunction.clazz.FlowInterface;
-import net.officefloor.plugin.managedfunction.clazz.Qualifier;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 
 /**
