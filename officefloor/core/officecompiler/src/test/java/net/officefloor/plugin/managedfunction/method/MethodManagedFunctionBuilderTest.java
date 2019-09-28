@@ -23,9 +23,11 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectT
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil.MethodResult;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.Qualified;
+import net.officefloor.plugin.section.clazz.Next;
 
 /**
  * Tests the {@link MethodManagedFunctionBuilder}.
@@ -141,6 +143,24 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can get {@link ManagedFunction} name.
+	 */
+	public void testFunctionNameParameter() throws Exception {
+		MethodResult result = MockParameterManufacturer.run((context) -> {
+			return (mc) -> context.getFunctionName();
+		}, () -> MethodManagedFunctionBuilderUtil.runStaticMethod(FunctionNameParameterFunction.class, "method",
+				(type) -> type.setReturnType(String.class), null));
+		assertEquals("Incorrect function name", "method", result.getReturnValue());
+	}
+
+	public static class FunctionNameParameterFunction {
+
+		public static String method(String name) {
+			return name;
+		}
+	}
+
+	/**
 	 * Ensure can register exception.
 	 */
 	public void testRegisterException() throws Exception {
@@ -212,12 +232,15 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	 * Ensure can translate return value.
 	 */
 	public void testTranslateReturn() throws Exception {
+		Closure<Class<?>> closure = new Closure<>();
 		MethodResult result = MockReturnManufacturer.run(Closure.class, String.class, (context) -> {
+			closure.value = context.getReturnClass();
 			context.setTranslatedReturnClass(String.class);
 			return (returnValue) -> (String) returnValue.value;
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFunction(), "method", (type) -> {
 			type.setReturnType(String.class);
 		}, null));
+		assertEquals("Incorrect return class", Closure.class, closure.value);
 		assertEquals("Incorrect translated return value", TranslateReturnFunction.VALUE, result.getReturnValue());
 	}
 
@@ -227,6 +250,46 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 
 		public Closure<String> method() {
 			return new Closure<>(VALUE);
+		}
+	}
+
+	/**
+	 * Translate function on return.
+	 */
+	public void testFunctionNameReturn() throws Exception {
+		MethodResult result = MockReturnManufacturer.run(Void.class, String.class, (context) -> {
+			return (none) -> context.getFunctionName();
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new FunctionNameReturnFunction(), "method", (type) -> {
+			type.setReturnType(String.class);
+		}, null));
+		assertEquals("Incorrect returned function name", "method", result.getReturnValue());
+	}
+
+	public static class FunctionNameReturnFunction {
+		public void method() {
+			// No return, but will translate in a value
+		}
+	}
+
+	/**
+	 * Translate function to return annotation value.
+	 */
+	public void testReturnAnnotation() throws Exception {
+		Next annotation = ReturnAnnotationFunction.class.getMethod("method").getAnnotation(Next.class);
+		MethodResult result = MockReturnManufacturer.run(Void.class, Next.class, (context) -> {
+			return (none) -> (Next) context.getMethodAnnotations()[0];
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new ReturnAnnotationFunction(), "method", (type) -> {
+			type.addAnnotation(annotation);
+			type.setReturnType(Next.class);
+		}, null));
+		assertSame("Incorrect annotation", annotation, result.getReturnValue());
+	}
+
+	public static class ReturnAnnotationFunction {
+
+		@Next("TEST")
+		public void method() {
+			// No return, but will translate in a value
 		}
 	}
 

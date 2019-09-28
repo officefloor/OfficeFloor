@@ -46,7 +46,7 @@ import net.officefloor.plugin.clazz.Sequence;
 import net.officefloor.plugin.managedfunction.method.parameter.ObjectParameterFactory;
 
 /**
- * Builder to take {@link Method} to produce a {@link ManagedFunction}.
+ * Builder to wrap execution of a {@link Method} with a {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -157,13 +157,17 @@ public class MethodManagedFunctionBuilder {
 			methodObjectInstanceFactory = methodObjectInstanceManufacturer.createMethodObjectInstanceFactory();
 		}
 
+		// Obtain the method annotations
+		Annotation[] methodAnnotations = method.getAnnotations();
+
 		// Define the return type
 		Class<?> returnType = method.getReturnType();
 
 		// Determine if translate return type
 		// Note: even if void, allows successful after method execution
 		MethodReturnTranslator returnTranslator = null;
-		MethodReturnManufacturerContextImpl<?> returnContext = new MethodReturnManufacturerContextImpl<>();
+		MethodReturnManufacturerContextImpl<?> returnContext = new MethodReturnManufacturerContextImpl<>(returnType,
+				methodAnnotations, methodName, context);
 		FOUND_TRANSLATOR: for (MethodReturnManufacturer manufacturer : context
 				.loadOptionalServices(MethodReturnManufacturerServiceFactory.class)) {
 			returnTranslator = manufacturer.createReturnTranslator(returnContext);
@@ -195,7 +199,6 @@ public class MethodManagedFunctionBuilder {
 		}
 
 		// Load the function annotations
-		Annotation[] methodAnnotations = method.getAnnotations();
 		for (Annotation annotation : methodAnnotations) {
 			functionTypeBuilder.addAnnotation(annotation);
 		}
@@ -609,9 +612,45 @@ public class MethodManagedFunctionBuilder {
 	private class MethodReturnManufacturerContextImpl<T> implements MethodReturnManufacturerContext<T> {
 
 		/**
+		 * {@link Method} return type.
+		 */
+		private final Class<?> returnClass;
+
+		/**
+		 * {@link Method} {@link Annotation} instances.
+		 */
+		private final Annotation[] methodAnnotations;
+
+		/**
+		 * Name of {@link ManagedFunction}.
+		 */
+		private final String functionName;
+
+		/**
+		 * {@link SourceContext}.
+		 */
+		private final SourceContext sourceContext;
+
+		/**
 		 * Translated return {@link Class}.
 		 */
 		private Class<? super T> translatedReturnClass = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param returnClass       {@link Method} return type.
+		 * @param methodAnnotations {@link Method} {@link Annotation} instances.
+		 * @param functionName      Name of {@link ManagedFunction}.
+		 * @param sourceContext     {@link SourceContext}.
+		 */
+		public MethodReturnManufacturerContextImpl(Class<?> returnClass, Annotation[] methodAnnotations,
+				String functionName, SourceContext sourceContext) {
+			this.returnClass = returnClass;
+			this.methodAnnotations = methodAnnotations;
+			this.functionName = functionName;
+			this.sourceContext = sourceContext;
+		}
 
 		/*
 		 * =================== MethodReturnManufacturerContext =================
@@ -619,8 +658,7 @@ public class MethodManagedFunctionBuilder {
 
 		@Override
 		public Class<?> getReturnClass() {
-			// TODO implement MethodReturnManufacturerContext<T>.getReturnClass
-			throw new UnsupportedOperationException("TODO implement MethodReturnManufacturerContext<T>.getReturnClass");
+			return this.returnClass;
 		}
 
 		@Override
@@ -630,23 +668,17 @@ public class MethodManagedFunctionBuilder {
 
 		@Override
 		public Annotation[] getMethodAnnotations() {
-			// TODO implement MethodReturnManufacturerContext<T>.getMethodAnnotations
-			throw new UnsupportedOperationException(
-					"TODO implement MethodReturnManufacturerContext<T>.getMethodAnnotations");
+			return this.methodAnnotations;
 		}
 
 		@Override
 		public String getFunctionName() {
-			// TODO implement MethodReturnManufacturerContext<T>.getFunctionName
-			throw new UnsupportedOperationException(
-					"TODO implement MethodReturnManufacturerContext<T>.getFunctionName");
+			return this.functionName;
 		}
 
 		@Override
 		public SourceContext getSourceContext() {
-			// TODO implement MethodReturnManufacturerContext<T>.getSourceContext
-			throw new UnsupportedOperationException(
-					"TODO implement MethodReturnManufacturerContext<T>.getSourceContext");
+			return this.sourceContext;
 		}
 	}
 
