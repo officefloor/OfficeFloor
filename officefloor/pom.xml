@@ -35,6 +35,7 @@
 	<modules>
 		<module>shim</module>
 		<module>core</module>
+		<module>activity</module>
 		<module>polyglot</module>
 		<module>server</module>
 		<module>web</module>
