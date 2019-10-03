@@ -21,11 +21,19 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import net.officefloor.activity.procedure.build.ProcedureArchitectEmployer;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.compile.test.issues.FailTestCompilerIssues;
+import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * Utility to test the {@link ProcedureLoader}.
@@ -41,19 +49,8 @@ public class ProcedureLoaderUtil {
 	 * @return {@link Procedure} instances for {@link Class}.
 	 * @throws Exception If fails to load {@link Procedure} instances.
 	 */
-	public static Procedure[] listProcedures(Class<?> clazz) throws Exception {
-		return listProcedures(clazz.getName());
-	}
-
-	/**
-	 * List {@link Procedure} instances for {@link Class}.
-	 * 
-	 * @param className Name of {@link Class}.
-	 * @return {@link Procedure} instances for {@link Class}.
-	 * @throws Exception If fails to load {@link Procedure} instances.
-	 */
-	public static Procedure[] listProcedures(String className) throws Exception {
-		return newProcedureLoader().listProcedures(className);
+	public static Procedure[] listProcedures(Class<?> clazz) {
+		return newProcedureLoader().listProcedures(clazz);
 	}
 
 	/**
@@ -65,7 +62,7 @@ public class ProcedureLoaderUtil {
 	 */
 	public static Procedure procedure(String procedureName,
 			Class<? extends ProcedureServiceFactory> serviceFactoryClass) {
-		return procedure(procedureName, serviceFactoryClass, OfficeFloorCompiler.newOfficeFloorCompiler(null));
+		return procedure(procedureName, serviceFactoryClass, officeFloorCompiler(null));
 	}
 
 	/**
@@ -79,15 +76,8 @@ public class ProcedureLoaderUtil {
 	public static Procedure procedure(String procedureName,
 			Class<? extends ProcedureServiceFactory> serviceFactoryClass, OfficeFloorCompiler compiler) {
 
-		// Load the source context
-		Object instance;
-		try {
-			instance = serviceFactoryClass.getDeclaredConstructor().newInstance();
-		} catch (Exception ex) {
-			throw OfficeFrameTestCase.fail(ex);
-		}
-		ProcedureServiceFactory serviceFactory = (ProcedureServiceFactory) instance;
-		ProcedureService service = compiler.createRootSourceContext().loadService(serviceFactory);
+		// Load the service
+		ProcedureService service = loadProcedureService(serviceFactoryClass, officeFloorCompiler(compiler));
 
 		// Return the procedure
 		return new Procedure() {
@@ -111,26 +101,10 @@ public class ProcedureLoaderUtil {
 	 * @param expectedProcedures Expected {@link Procedure} instances.
 	 * @throws Exception If fails to validate.
 	 */
-	public static void validateProcedures(Class<?> clazz, Procedure... expectedProcedures) throws Exception {
+	public static void validateProcedures(Class<?> clazz, Procedure... expectedProcedures) {
 
 		// Obtain the listing of procedures
 		Procedure[] actual = listProcedures(clazz);
-
-		// Validate the procedures
-		validateProcedures(actual, expectedProcedures);
-	}
-
-	/**
-	 * Validates the {@link Procedure} instances.
-	 * 
-	 * @param className          Name of {@link Class}.
-	 * @param expectedProcedures Expected {@link Procedure} instances.
-	 * @throws Exception If fails to validate.
-	 */
-	public static void validateProcedures(String className, Procedure... expectedProcedures) throws Exception {
-
-		// Obtain the listing of procedures
-		Procedure[] actual = listProcedures(className);
 
 		// Validate the procedures
 		validateProcedures(actual, expectedProcedures);
@@ -175,12 +149,97 @@ public class ProcedureLoaderUtil {
 	}
 
 	/**
+	 * Loads the {@link ManagedFunctionType} for the {@link Procedure}.
+	 * 
+	 * @param clazz               {@link Class}.
+	 * @param procedureName       Name of {@link Procedure}.
+	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
+	 * @return {@link ManagedFunctionType}.
+	 */
+	public static ManagedFunctionType<Indexed, Indexed> loadProcedureType(Class<?> clazz, String procedureName,
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass) {
+		return loadProcedureType(clazz, procedureName, serviceFactoryClass, officeFloorCompiler(null));
+	}
+
+	/**
+	 * Loads the {@link ManagedFunctionType} for the {@link Procedure}.
+	 * 
+	 * @param clazz               {@link Class}.
+	 * @param procedureName       Name of {@link Procedure}.
+	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
+	 * @param compiler            {@link OfficeFloorCompiler}.
+	 * @return {@link ManagedFunctionType}.
+	 */
+	public static ManagedFunctionType<Indexed, Indexed> loadProcedureType(Class<?> clazz, String procedureName,
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass, OfficeFloorCompiler compiler) {
+
+		// Create the procedure loader
+		ProcedureLoader loader = newProcedureLoader(compiler);
+
+		// Load the service name
+		ProcedureService service = loadProcedureService(serviceFactoryClass, compiler);
+
+		// Load the managed function type
+		return loader.loadProcedureType(clazz, procedureName, service.getServiceName());
+	}
+
+	/**
+	 * Validates the {@link Procedure} type, with convenience of function name
+	 * matching {@link Procedure} name.
+	 * 
+	 * @param clazz               {@link Class}.
+	 * @param procedureName       Name of {@link Procedure}.
+	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
+	 * @param typeBuilder         Builds the expected
+	 *                            {@link ManagedFunctionTypeBuilder}.
+	 * @return {@link ManagedFunctionType}.
+	 */
+	public static ManagedFunctionType<Indexed, Indexed> validateProcedureType(Class<?> clazz, String procedureName,
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass,
+			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> typeBuilder) {
+		return validateProcedureType(clazz, procedureName, serviceFactoryClass, procedureName, typeBuilder);
+	}
+
+	/**
+	 * Validates the {@link Procedure} type.
+	 * 
+	 * @param clazz               {@link Class}.
+	 * @param procedureName       Name of {@link Procedure}.
+	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
+	 * @param functionName        Name of {@link ManagedFunction}.
+	 * @param typeBuilder         Builds the expected
+	 *                            {@link ManagedFunctionTypeBuilder}.
+	 * @return {@link ManagedFunctionType}.
+	 */
+	public static ManagedFunctionType<Indexed, Indexed> validateProcedureType(Class<?> clazz, String procedureName,
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String functionName,
+			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> typeBuilder) {
+
+		// Load the procedure type
+		ManagedFunctionType<Indexed, Indexed> type = loadProcedureType(clazz, procedureName, serviceFactoryClass);
+
+		// Create expected type
+		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
+		ManagedFunctionTypeBuilder<Indexed, Indexed> procedureBuilder = namespace.addManagedFunctionType(functionName,
+				type.getManagedFunctionFactory(), Indexed.class, Indexed.class);
+		if (typeBuilder != null) {
+			typeBuilder.accept(procedureBuilder);
+		}
+
+		// Validate the managed function type
+		ManagedFunctionLoaderUtil.validateManagedFunctionType(procedureBuilder, type);
+
+		// Return the type
+		return type;
+	}
+
+	/**
 	 * Creates the {@link ProcedureLoader} for current {@link ClassLoader}.
 	 * 
 	 * @return {@link ProcedureLoader}.
 	 */
-	private static ProcedureLoader newProcedureLoader() {
-		return newProcedureLoader(OfficeFloorCompiler.newOfficeFloorCompiler(null));
+	public static ProcedureLoader newProcedureLoader() {
+		return newProcedureLoader(officeFloorCompiler(null));
 	}
 
 	/**
@@ -189,12 +248,52 @@ public class ProcedureLoaderUtil {
 	 * @param compiler {@link OfficeFloorCompiler}.
 	 * @return {@link ProcedureLoader}.
 	 */
-	private static ProcedureLoader newProcedureLoader(OfficeFloorCompiler compiler) {
+	public static ProcedureLoader newProcedureLoader(OfficeFloorCompiler compiler) {
 		try {
-			return ProcedureLoader.newProcedureLoader(compiler);
+			return ProcedureArchitectEmployer.employProcedureLoader(officeFloorCompiler(compiler));
 		} catch (Exception ex) {
-			throw OfficeFrameTestCase.fail(ex);
+			throw new IllegalStateException("Failed to create " + ProcedureLoader.class.getSimpleName(), ex);
 		}
+	}
+
+	/**
+	 * Loads the {@link ProcedureService} from {@link ProcedureServiceFactory}
+	 * {@link Class}.
+	 * 
+	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
+	 * @param compiler            {@link OfficeFloorCompiler}.
+	 * @return Loaded {@link ProcedureService}.
+	 */
+	private static ProcedureService loadProcedureService(Class<? extends ProcedureServiceFactory> serviceFactoryClass,
+			OfficeFloorCompiler compiler) {
+
+		// Load the service factory
+		Object instance;
+		try {
+			instance = serviceFactoryClass.getDeclaredConstructor().newInstance();
+		} catch (Exception ex) {
+			throw new IllegalStateException(
+					"Failed to instantiate " + serviceFactoryClass.getName() + " via default constructor", ex);
+		}
+		ProcedureServiceFactory serviceFactory = (ProcedureServiceFactory) instance;
+
+		// Create and return the service
+		return officeFloorCompiler(compiler).createRootSourceContext().loadService(serviceFactory);
+	}
+
+	/**
+	 * Ensure have {@link OfficeFloorCompiler}.
+	 * 
+	 * @param compiler Possible {@link OfficeFloorCompiler}. May be
+	 *                 <code>null</code>.
+	 * @return {@link OfficeFloorCompiler}.
+	 */
+	private static OfficeFloorCompiler officeFloorCompiler(OfficeFloorCompiler compiler) {
+		if (compiler == null) {
+			compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+			compiler.setCompilerIssues(new FailTestCompilerIssues());
+		}
+		return compiler;
 	}
 
 	/**

@@ -11,6 +11,17 @@
 	<artifactId>officeprocedure</artifactId>
 	<name>Procedure</name>
 	<description>First-Class Procedure for OfficeFloor</description>
+	<dependencies>
+		<dependency>
+			<groupId>net.officefloor.core</groupId>
+			<artifactId>officecompiler</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>

@@ -17,9 +17,7 @@
  */
 package net.officefloor.activity.procedure;
 
-import net.officefloor.activity.impl.procedure.ProcedureLoaderCompilerRunnable;
-import net.officefloor.activity.procedure.ProcedureManagedFunctionSource;
-import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.frame.api.build.Indexed;
 
@@ -31,36 +29,24 @@ import net.officefloor.frame.api.build.Indexed;
 public interface ProcedureLoader {
 
 	/**
-	 * Creates the {@link ProcedureLoader}.
-	 * 
-	 * @param compiler {@link OfficeFloorCompiler}.
-	 * @return {@link ProcedureLoader}.
-	 * @throws Exception If fails to create {@link ProcedureLoader}.
-	 */
-	static ProcedureLoader newProcedureLoader(OfficeFloorCompiler compiler) throws Exception {
-		return compiler.run(ProcedureLoaderCompilerRunnable.class);
-	}
-
-	/**
 	 * Lists the available {@link Procedure} instances from the {@link Class}.
 	 * 
 	 * @param clazz {@link Class}.
-	 * @return Listing of available {@link Procedure} instances.
-	 * @throws Exception If fails to load listing.
+	 * @return Listing of available {@link Procedure} instances or <code>null</code>
+	 *         with issues reported to {@link CompilerIssues}.
 	 */
-	Procedure[] listProcedures(Class<?> clazz) throws Exception;
+	Procedure[] listProcedures(Class<?> clazz);
 
 	/**
 	 * Loads the {@link ManagedFunctionType} for the {@link Procedure} of the
 	 * {@link Class}.
 	 * 
 	 * @param clazz         {@link Class}.
-	 * @param serviceName   {@link ProcedureService} name.
 	 * @param procedureName {@link Procedure} name.
-	 * @return {@link ManagedFunctionType} for the {@link Procedure}.
-	 * @throws Exception
+	 * @param serviceName   {@link ProcedureService} name.
+	 * @return {@link ManagedFunctionType} for the {@link Procedure} or
+	 *         <code>null</code> with issues reported to {@link CompilerIssues}.
 	 */
-	ManagedFunctionType<Indexed, Indexed> loadProcedureType(Class<?> clazz, String serviceName, String procedureName)
-			throws Exception;
+	ManagedFunctionType<Indexed, Indexed> loadProcedureType(Class<?> clazz, String procedureName, String serviceName);
 
 }

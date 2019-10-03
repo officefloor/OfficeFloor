@@ -17,9 +17,12 @@
  */
 package net.officefloor.activity.procedure.java;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 import net.officefloor.activity.procedure.ProcedureService;
+import net.officefloor.activity.procedure.ProcedureServiceContext;
 import net.officefloor.activity.procedure.ProcedureServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
 
@@ -36,27 +39,13 @@ public class ClassProcedureServiceFactory implements ProcedureServiceFactory {
 
 	@Override
 	public ProcedureService createService(ServiceContext context) throws Throwable {
-		return new ClassProcedureService(context);
+		return new ClassProcedureService();
 	}
 
 	/**
 	 * {@link Class} {@link ProcedureService}.
 	 */
 	private static class ClassProcedureService implements ProcedureService {
-
-		/**
-		 * {@link ServiceContext}.
-		 */
-		private final ServiceContext context;
-
-		/**
-		 * Instantiate.
-		 * 
-		 * @param context {@link ServiceContext}.
-		 */
-		private ClassProcedureService(ServiceContext context) {
-			this.context = context;
-		}
 
 		/*
 		 * ======================== ProcedureService ===========================
@@ -68,15 +57,36 @@ public class ClassProcedureServiceFactory implements ProcedureServiceFactory {
 		}
 
 		@Override
-		public String[] listProcedures(String className) {
-
-			// Load the class
-			Class<?> clazz = context.loadClass(className);
+		public String[] listProcedures(Class<?> clazz) {
 
 			// Provide all public (non-object methods)
 			return Arrays.stream(clazz.getMethods())
 					.filter((method) -> !Object.class.equals(method.getDeclaringClass()))
 					.map((method) -> method.getName()).toArray(String[]::new);
+		}
+
+		@Override
+		public Method loadMethod(ProcedureServiceContext context) throws Exception {
+
+			// Find the method
+			String methodName = context.getProcedureName();
+			for (Method method : context.getInstanceClass().getMethods()) {
+				if (method.getName().equals(methodName)) {
+
+					// Found the method
+
+					// Determine if static
+					if (Modifier.isStatic(method.getModifiers())) {
+						context.setMethodObjectInstanceFactory(null); // static
+					}
+
+					// Return the method
+					return method;
+				}
+			}
+
+			// Unable to find the method
+			return null;
 		}
 	}
 }

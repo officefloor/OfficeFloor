@@ -15,26 +15,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.impl.procedure;
+package net.officefloor.activity.procedure.build;
 
+import net.officefloor.activity.impl.procedure.ProcedureLoaderCompilerRunnable;
 import net.officefloor.activity.procedure.ProcedureLoader;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.OfficeFloorCompilerRunnable;
 
 /**
- * {@link OfficeFloorCompilerRunnable} to create {@link ProcedureLoader}.
+ * Employs {@link ProcedureArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcedureLoaderCompilerRunnable implements OfficeFloorCompilerRunnable<ProcedureLoader> {
+public class ProcedureArchitectEmployer {
 
-	/*
-	 * ===================== OfficeFloorCompilerRunnable ====================
+	/**
+	 * Creates the {@link ProcedureLoader}.
+	 * 
+	 * @param compiler {@link OfficeFloorCompiler}.
+	 * @return {@link ProcedureLoader}.
+	 * @throws Exception If fails to create {@link ProcedureLoader}.
 	 */
-
-	@Override
-	public ProcedureLoader run(OfficeFloorCompiler compiler, Object[] parameters) throws Exception {
-		return new ProcedureLoaderImpl(compiler);
+	public static ProcedureLoader employProcedureLoader(OfficeFloorCompiler compiler) throws Exception {
+		return compiler.run(ProcedureLoaderCompilerRunnable.class);
 	}
 
 }

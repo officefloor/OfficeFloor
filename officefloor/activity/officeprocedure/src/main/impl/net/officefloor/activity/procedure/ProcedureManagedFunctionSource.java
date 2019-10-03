@@ -17,11 +17,16 @@
  */
 package net.officefloor.activity.procedure;
 
+import java.lang.reflect.Method;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.plugin.managedfunction.method.DefaultConstructorMethodObjectInstanceFactory;
+import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
+import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
 
 /**
  * {@link ManagedFunctionSource} for first-class procedure.
@@ -58,8 +63,107 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 	@Override
 	public void sourceManagedFunctions(FunctionNamespaceBuilder functionNamespaceTypeBuilder,
 			ManagedFunctionSourceContext context) throws Exception {
-		// TODO implement ManagedFunctionSource.sourceManagedFunctions
-		throw new UnsupportedOperationException("TODO implement ManagedFunctionSource.sourceManagedFunctions");
+
+		// Obtain the procedure details
+		String className = context.getProperty(CLASS_NAME_PROPERTY_NAME);
+		String serviceName = context.getProperty(SERVICE_NAME_PROPERTY_NAME);
+		String procedureName = context.getProperty(PROCEDURE_PROPERTY_NAME);
+
+		// Find the service
+		ProcedureService procedureService = null;
+		FOUND_SERVICE: for (ProcedureService service : context.loadOptionalServices(ProcedureServiceFactory.class)) {
+			if (serviceName.equals(service.getServiceName())) {
+				procedureService = service;
+				break FOUND_SERVICE;
+			}
+		}
+		if (procedureService == null) {
+			// Can not find procedure service
+			throw new Exception("Can not find " + ProcedureService.class.getSimpleName() + " " + serviceName);
+		}
+
+		// Load the class
+		Class<?> clazz = context.loadClass(className);
+
+		// Load the method for the procedure service
+		ProcedureServiceContextImpl procedureContext = new ProcedureServiceContextImpl(clazz, procedureName);
+		Method method = procedureService.loadMethod(procedureContext);
+
+		// Ensure have method
+		if (method == null) {
+			throw new Exception("No " + Method.class.getSimpleName() + " provided by service " + serviceName
+					+ " for procedure " + procedureName + " from class " + clazz.getName());
+		}
+
+		// Obtain the object instance factory
+		MethodObjectInstanceFactory factory = procedureContext.methodObjectInstanceFactory;
+		if ((factory == null) && (!procedureContext.isStatic)) {
+			factory = new DefaultConstructorMethodObjectInstanceFactory(clazz);
+		}
+		MethodObjectInstanceFactory finalFactory = factory;
+
+		// Load the managed function
+		MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder();
+		builder.buildMethod(method, clazz, () -> finalFactory, functionNamespaceTypeBuilder, context);
+	}
+
+	/**
+	 * {@link ProcedureServiceContext} implementation.
+	 */
+	private static class ProcedureServiceContextImpl implements ProcedureServiceContext {
+
+		/**
+		 * {@link Class}.
+		 */
+		private final Class<?> clazz;
+
+		/**
+		 * {@link Procedure} name.
+		 */
+		private final String procedureName;
+
+		/**
+		 * Indicates if static. In other words, no {@link MethodObjectInstanceFactory}.
+		 */
+		private boolean isStatic = false;
+
+		/**
+		 * {@link MethodObjectInstanceFactory}.
+		 */
+		private MethodObjectInstanceFactory methodObjectInstanceFactory = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param clazz         Configured {@link Class}.
+		 * @param procedureName {@link Procedure} name.
+		 * @throws Exception If fails to create default
+		 *                   {@link MethodObjectInstanceFactory}.
+		 */
+		private ProcedureServiceContextImpl(Class<?> clazz, String procedureName) throws Exception {
+			this.clazz = clazz;
+			this.procedureName = procedureName;
+		}
+
+		/*
+		 * =================== ProcedureServiceContext =====================
+		 */
+
+		@Override
+		public Class<?> getInstanceClass() {
+			return this.clazz;
+		}
+
+		@Override
+		public String getProcedureName() {
+			return this.procedureName;
+		}
+
+		@Override
+		public void setMethodObjectInstanceFactory(MethodObjectInstanceFactory factory) {
+			this.methodObjectInstanceFactory = factory;
+			this.isStatic = (factory == null);
+		}
 	}
 
 }

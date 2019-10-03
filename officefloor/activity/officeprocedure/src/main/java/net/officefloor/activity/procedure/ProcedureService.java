@@ -17,6 +17,8 @@
  */
 package net.officefloor.activity.procedure;
 
+import java.lang.reflect.Method;
+
 /**
  * Service providing {@link Procedure} adaptation.
  * 
@@ -46,9 +48,19 @@ public interface ProcedureService {
 	/**
 	 * Provides the available {@link Procedure} names for the {@link Class} name.
 	 * 
-	 * @param className Name of {@link Class}.
+	 * @param clazz {@link Class}.
 	 * @return Available {@link Procedure} names.
+	 * @throws Exception If fails to list {@link Procedure} instances.
 	 */
-	String[] listProcedures(String className);
+	String[] listProcedures(Class<?> clazz) throws Exception;
+
+	/**
+	 * Loads the {@link Method} for the {@link Procedure}.
+	 * 
+	 * @param context {@link ProcedureServiceContext}.
+	 * @return {@link Method} for the {@link ProcedureService}.
+	 * @throws Exception If fails to load the method.
+	 */
+	Method loadMethod(ProcedureServiceContext context) throws Exception;
 
 }
