@@ -19,6 +19,9 @@ package net.officefloor.activity.procedure;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureServiceContext;
+import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
 
 /**

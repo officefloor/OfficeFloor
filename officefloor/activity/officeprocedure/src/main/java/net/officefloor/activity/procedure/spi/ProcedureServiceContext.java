@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure;
+package net.officefloor.activity.procedure.spi;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
 
 /**

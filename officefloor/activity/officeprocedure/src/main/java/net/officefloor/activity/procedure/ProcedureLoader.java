@@ -17,6 +17,7 @@
  */
 package net.officefloor.activity.procedure;
 
+import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.frame.api.build.Indexed;

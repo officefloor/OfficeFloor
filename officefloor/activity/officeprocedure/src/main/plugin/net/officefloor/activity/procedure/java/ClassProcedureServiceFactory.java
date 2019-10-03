@@ -21,9 +21,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
-import net.officefloor.activity.procedure.ProcedureService;
-import net.officefloor.activity.procedure.ProcedureServiceContext;
-import net.officefloor.activity.procedure.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureServiceContext;
+import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
 
 /**

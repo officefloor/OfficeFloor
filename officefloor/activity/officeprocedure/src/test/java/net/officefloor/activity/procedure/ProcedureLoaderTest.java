@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import net.officefloor.activity.procedure.java.ClassProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.test.issues.MockCompilerIssues;

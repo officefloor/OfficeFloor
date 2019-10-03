@@ -17,6 +17,8 @@
  */
 package net.officefloor.activity.procedure;
 
+import net.officefloor.activity.procedure.spi.ProcedureService;
+
 /**
  * Procedure.
  * 

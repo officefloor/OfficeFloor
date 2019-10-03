@@ -26,6 +26,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import net.officefloor.activity.procedure.build.ProcedureArchitectEmployer;
+import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
