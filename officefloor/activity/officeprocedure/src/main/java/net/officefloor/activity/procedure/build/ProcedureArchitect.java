@@ -18,6 +18,12 @@
 package net.officefloor.activity.procedure.build;
 
 import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionOutput;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Builds the {@link Procedure} instances.
@@ -25,5 +31,32 @@ import net.officefloor.activity.procedure.Procedure;
  * @author Daniel Sagenschneider
  */
 public interface ProcedureArchitect {
+
+	/**
+	 * {@link SectionInput} name to invoke the {@link Procedure}.
+	 */
+	public static final String INPUT_NAME = "procedure";
+
+	/**
+	 * {@link SectionOutput} name for next {@link Flow}.
+	 */
+	public static final String NEXT_OUTPUT_NAME = "NEXT";
+
+	/**
+	 * Adds a {@link Procedure}.
+	 * 
+	 * @param className     Name of {@link Class}.
+	 * @param serviceName   {@link ProcedureService} name.
+	 * @param procedureName Name of {@link Procedure}.
+	 * @param isNext        Indicates if next {@link Flow} configured.
+	 * @return {@link OfficeSection} for the {@link Procedure}.
+	 */
+	OfficeSection addProcedure(String className, String serviceName, String procedureName, boolean isNext);
+
+	/**
+	 * Informs the {@link OfficeArchitect} of the {@link Procedure} instances. This
+	 * is invoked once all {@link Procedure} instances are added.
+	 */
+	void informOfficeArchitect();
 
 }

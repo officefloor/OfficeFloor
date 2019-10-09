@@ -17,26 +17,32 @@
  */
 package net.officefloor.activity.procedure.build;
 
-import net.officefloor.activity.impl.procedure.ProcedureLoaderCompilerRunnable;
-import net.officefloor.activity.procedure.ProcedureLoader;
-import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
 
 /**
- * Employs {@link ProcedureArchitect}.
+ * Builds the {@link Procedure} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcedureArchitectEmployer {
+public interface ProcedureDesigner {
 
 	/**
-	 * Creates the {@link ProcedureLoader}.
+	 * Adds a {@link Procedure}.
 	 * 
-	 * @param compiler {@link OfficeFloorCompiler}.
-	 * @return {@link ProcedureLoader}.
-	 * @throws Exception If fails to create {@link ProcedureLoader}.
+	 * @param className     Name of {@link Class}.
+	 * @param serviceName   {@link ProcedureService} name.
+	 * @param procedureName Name of {@link Procedure}.
+	 * @return {@link SectionFunction} for the {@link Procedure}.
 	 */
-	public static ProcedureLoader employProcedureLoader(OfficeFloorCompiler compiler) throws Exception {
-		return compiler.run(ProcedureLoaderCompilerRunnable.class);
-	}
+	SectionFunction addProcedure(String className, String serviceName, String procedureName);
+
+	/**
+	 * Informs the {@link SectionDesigner} of the {@link Procedure} instances. This
+	 * is invoked once all {@link Procedure} instances are added.
+	 */
+	void informSectionDesigner();
 
 }

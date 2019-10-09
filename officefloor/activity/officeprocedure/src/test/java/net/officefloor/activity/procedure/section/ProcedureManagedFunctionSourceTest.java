@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure.source;
+package net.officefloor.activity.procedure.section;
 
-import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -29,7 +28,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class ProcedureManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 	/**
-	 * Ensure specification correct.
+	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
 		ManagedFunctionLoaderUtil.validateSpecification(ProcedureManagedFunctionSource.class,
@@ -38,8 +37,4 @@ public class ProcedureManagedFunctionSourceTest extends OfficeFrameTestCase {
 				ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, "Procedure");
 	}
 
-	// TODO test loading type
-	
-	// TODO test execution
-	
 }

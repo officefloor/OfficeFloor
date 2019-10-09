@@ -22,7 +22,7 @@ import java.util.List;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoader;
-import net.officefloor.activity.procedure.ProcedureManagedFunctionSource;
+import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -30,9 +30,10 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
-import net.officefloor.compile.managedfunction.ManagedFunctionLoader;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.api.build.Indexed;
 
 /**
@@ -61,8 +62,9 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			}
 
 			@Override
-			public ManagedFunctionLoader getManagedFunctionLoader() {
-				return compiler.getManagedFunctionLoader();
+			public FunctionNamespaceType loadManagedFunctionType(PropertyList properties) {
+				return compiler.getManagedFunctionLoader().loadManagedFunctionType(ProcedureManagedFunctionSource.class,
+						properties);
 			}
 
 			@Override
@@ -73,6 +75,38 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			@Override
 			public CompileError addIssue(String issueDescription, Throwable cause) {
 				return compiler.getCompilerIssues().addIssue(compiler, issueDescription, cause);
+			}
+		};
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param designer {@link SectionDesigner}.
+	 * @param context  {@link SectionSourceContext}.
+	 */
+	public ProcedureLoaderImpl(SectionDesigner designer, SectionSourceContext context) {
+		this.loader = new Loader() {
+
+			@Override
+			public Iterable<ProcedureService> loadServices() {
+				return context.loadOptionalServices(ProcedureServiceFactory.class);
+			}
+
+			@Override
+			public FunctionNamespaceType loadManagedFunctionType(PropertyList properties) {
+				return context.loadManagedFunctionType("procedure", ProcedureManagedFunctionSource.class.getName(),
+						properties);
+			}
+
+			@Override
+			public PropertyList createPropertyList() {
+				return context.createPropertyList();
+			}
+
+			@Override
+			public CompileError addIssue(String issueDescription, Throwable cause) {
+				return designer.addIssue(issueDescription, cause);
 			}
 		};
 	}
@@ -120,16 +154,12 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 	public ManagedFunctionType<Indexed, Indexed> loadProcedureType(Class<?> clazz, String procedureName,
 			String serviceName) {
 
-		// Obtain the managed function loader
-		ManagedFunctionLoader loader = this.loader.getManagedFunctionLoader();
-
 		// Load the managed function type
 		PropertyList properties = this.loader.createPropertyList();
 		properties.addProperty(ProcedureManagedFunctionSource.CLASS_NAME_PROPERTY_NAME).setValue(clazz.getName());
 		properties.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME).setValue(serviceName);
 		properties.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME).setValue(procedureName);
-		FunctionNamespaceType namespace = loader.loadManagedFunctionType(ProcedureManagedFunctionSource.class,
-				properties);
+		FunctionNamespaceType namespace = this.loader.loadManagedFunctionType(properties);
 
 		// Ensure have namespace
 		if (namespace == null) {
@@ -194,11 +224,12 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		Iterable<ProcedureService> loadServices();
 
 		/**
-		 * Obtains the {@link ManagedFunctionLoader}.
+		 * Loads the {@link FunctionNamespaceType}.
 		 * 
-		 * @return {@link ManagedFunctionLoader}.
+		 * @param properties {@link PropertyList} for the {@link ManagedFunctionType}.
+		 * @return {@link FunctionNamespaceType}.
 		 */
-		ManagedFunctionLoader getManagedFunctionLoader();
+		FunctionNamespaceType loadManagedFunctionType(PropertyList properties);
 
 		/**
 		 * Creates a {@link PropertyList}.

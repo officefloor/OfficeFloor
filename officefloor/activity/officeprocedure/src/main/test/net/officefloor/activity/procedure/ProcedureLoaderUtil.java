@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import net.officefloor.activity.procedure.build.ProcedureArchitectEmployer;
+import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -252,7 +252,7 @@ public class ProcedureLoaderUtil {
 	 */
 	public static ProcedureLoader newProcedureLoader(OfficeFloorCompiler compiler) {
 		try {
-			return ProcedureArchitectEmployer.employProcedureLoader(officeFloorCompiler(compiler));
+			return ProcedureEmployer.employProcedureLoader(officeFloorCompiler(compiler));
 		} catch (Exception ex) {
 			throw new IllegalStateException("Failed to create " + ProcedureLoader.class.getSimpleName(), ex);
 		}
@@ -263,10 +263,21 @@ public class ProcedureLoaderUtil {
 	 * {@link Class}.
 	 * 
 	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
+	 * @return Loaded {@link ProcedureService}.
+	 */
+	public static ProcedureService loadProcedureService(Class<? extends ProcedureServiceFactory> serviceFactoryClass) {
+		return loadProcedureService(serviceFactoryClass, officeFloorCompiler(null));
+	}
+
+	/**
+	 * Loads the {@link ProcedureService} from {@link ProcedureServiceFactory}
+	 * {@link Class}.
+	 * 
+	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
 	 * @param compiler            {@link OfficeFloorCompiler}.
 	 * @return Loaded {@link ProcedureService}.
 	 */
-	private static ProcedureService loadProcedureService(Class<? extends ProcedureServiceFactory> serviceFactoryClass,
+	public static ProcedureService loadProcedureService(Class<? extends ProcedureServiceFactory> serviceFactoryClass,
 			OfficeFloorCompiler compiler) {
 
 		// Load the service factory

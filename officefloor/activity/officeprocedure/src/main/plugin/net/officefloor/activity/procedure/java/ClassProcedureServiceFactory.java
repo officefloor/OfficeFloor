@@ -33,6 +33,11 @@ import net.officefloor.frame.api.source.ServiceContext;
  */
 public class ClassProcedureServiceFactory implements ProcedureServiceFactory {
 
+	/**
+	 * Service name.
+	 */
+	public static final String SERVICE_NAME = "Class";
+
 	/*
 	 * ====================== ProcedureServiceFactory =====================
 	 */
@@ -53,7 +58,7 @@ public class ClassProcedureServiceFactory implements ProcedureServiceFactory {
 
 		@Override
 		public String getServiceName() {
-			return "Class";
+			return SERVICE_NAME;
 		}
 
 		@Override

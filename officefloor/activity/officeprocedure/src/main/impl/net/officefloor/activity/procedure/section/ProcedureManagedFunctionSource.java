@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure;
+package net.officefloor.activity.procedure.section;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceContext;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
@@ -59,8 +60,9 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// TODO implement AbstractManagedFunctionSource.loadSpecification
-		throw new UnsupportedOperationException("TODO implement AbstractManagedFunctionSource.loadSpecification");
+		context.addProperty(CLASS_NAME_PROPERTY_NAME, "Class");
+		context.addProperty(SERVICE_NAME_PROPERTY_NAME, "Service");
+		context.addProperty(PROCEDURE_PROPERTY_NAME, "Procedure");
 	}
 
 	@Override

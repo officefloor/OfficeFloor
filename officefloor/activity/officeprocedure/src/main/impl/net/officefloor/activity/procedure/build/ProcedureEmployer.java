@@ -1,0 +1,124 @@
+/*
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package net.officefloor.activity.procedure.build;
+
+import net.officefloor.activity.impl.procedure.ProcedureLoaderCompilerRunnable;
+import net.officefloor.activity.impl.procedure.ProcedureLoaderImpl;
+import net.officefloor.activity.procedure.ProcedureLoader;
+import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
+import net.officefloor.activity.procedure.section.ProcedureSectionSource;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionFunction;
+import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
+
+/**
+ * Employs {@link ProcedureArchitect}.
+ * 
+ * @author Daniel Sagenschneider
+ */
+public class ProcedureEmployer {
+
+	/**
+	 * Creates the {@link ProcedureLoader}.
+	 * 
+	 * @param compiler {@link OfficeFloorCompiler}.
+	 * @return {@link ProcedureLoader}.
+	 * @throws Exception If fails to create {@link ProcedureLoader}.
+	 */
+	public static ProcedureLoader employProcedureLoader(OfficeFloorCompiler compiler) throws Exception {
+		return compiler.run(ProcedureLoaderCompilerRunnable.class);
+	}
+
+	/**
+	 * Creates the {@link ProcedureLoader}.
+	 * 
+	 * @param designer {@link SectionDesigner}.
+	 * @param context  {@link SectionSourceContext}.
+	 * @return {@link ProcedureLoader}.
+	 * @throws Exception If fails to create {@link ProcedureLoader}.
+	 */
+	public static ProcedureLoader employProcedureLoader(SectionDesigner designer, SectionSourceContext context)
+			throws Exception {
+		return new ProcedureLoaderImpl(designer, context);
+	}
+
+	/**
+	 * Employs the {@link ProcedureArchitect}.
+	 * 
+	 * @param officeArchitect     {@link OfficeArchitect}.
+	 * @param officeSourceContext {@link OfficeSourceContext}.
+	 * @return {@link ProcedureArchitect}.
+	 */
+	public static ProcedureArchitect employProcedureArchitect(OfficeArchitect officeArchitect,
+			OfficeSourceContext officeSourceContext) {
+		return new ProcedureArchitect() {
+
+			@Override
+			public OfficeSection addProcedure(String className, String serviceName, String procedureName,
+					boolean isNext) {
+				OfficeSection procedure = officeArchitect.addOfficeSection(procedureName,
+						ProcedureSectionSource.class.getName(), procedureName);
+				procedure.addProperty(ProcedureManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, className);
+				procedure.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
+				if (isNext) {
+					procedure.addProperty(ProcedureSectionSource.IS_NEXT_PROPERTY_NAME, Boolean.TRUE.toString());
+				}
+				return procedure;
+			}
+
+			@Override
+			public void informOfficeArchitect() {
+				// Nothing to inform, however available for future functionality
+			}
+		};
+	}
+
+	/**
+	 * Employs the {@link ProcedureDesigner}.
+	 * 
+	 * @param sectionDesigner      {@link SectionDesigner}.
+	 * @param sectionSourceContext {@link SectionSourceContext}.
+	 * @return {@link ProcedureDesigner}.
+	 */
+	public static ProcedureDesigner employProcedureDesigner(SectionDesigner sectionDesigner,
+			SectionSourceContext sectionSourceContext) {
+		return new ProcedureDesigner() {
+
+			@Override
+			public SectionFunction addProcedure(String className, String serviceName, String procedureName) {
+				SectionFunctionNamespace namespace = sectionDesigner.addSectionFunctionNamespace(procedureName,
+						ProcedureManagedFunctionSource.class.getName());
+				namespace.addProperty(ProcedureManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, className);
+				namespace.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
+				namespace.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, procedureName);
+				return namespace.addSectionFunction(procedureName, procedureName);
+			}
+
+			@Override
+			public void informSectionDesigner() {
+				// Nothing to inform, however available for future functionality
+			}
+		};
+	}
+
+}
