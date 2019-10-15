@@ -31,6 +31,7 @@ import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFu
 import net.officefloor.plugin.managedfunction.method.DefaultConstructorMethodObjectInstanceFactory;
 import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
 import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
+import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 
 /**
  * {@link ManagedFunctionSource} for first-class procedure.
@@ -108,7 +109,13 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		MethodObjectInstanceFactory finalFactory = factory;
 
 		// Load the managed function
-		MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder();
+		MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder() {
+			@Override
+			protected void enrichManagedFunctionType(EnrichManagedFunctionTypeContext context) {
+				SectionClassManagedFunctionSource.enrichWithParameterAnnotation(context);
+				SectionClassManagedFunctionSource.enrichWithFlowAnnotations(context);
+			}
+		};
 		builder.buildMethod(method, clazz, () -> finalFactory, functionNamespaceTypeBuilder, context);
 	}
 

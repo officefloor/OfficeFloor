@@ -21,6 +21,7 @@ import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoader;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -33,6 +34,8 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.plugin.section.clazz.FlowAnnotation;
+import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 
 /**
  * {@link SectionSource} for {@link Procedure}.
@@ -80,15 +83,27 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 				serviceName);
 
 		// Link objects
-		for (ManagedFunctionObjectType<Indexed> objectType : type.getObjectTypes()) {
+		ParameterAnnotation parameterAnnotation = type.getAnnotation(ParameterAnnotation.class);
+		int parameterIndex = (parameterAnnotation != null) ? parameterAnnotation.getParameterIndex() : -1;
+		String parameterType = null;
+		ManagedFunctionObjectType<Indexed>[] objectTypes = type.getObjectTypes();
+		NEXT_OBJECT: for (int i = 0; i < objectTypes.length; i++) {
+			ManagedFunctionObjectType<Indexed> objectType = objectTypes[i];
 			String objectName = objectType.getObjectName();
-			SectionObject sectionObject = designer.addSectionObject(objectName, objectType.getObjectType().getName());
+			String objectTypeName = objectType.getObjectType().getName();
+
+			// Determine if parameter
+			if (i == parameterIndex) {
+				procedure.getFunctionObject(objectName).flagAsParameter();
+				parameterType = objectTypeName;
+				continue NEXT_OBJECT; // parameter
+			}
+
+			// Link as section object
+			SectionObject sectionObject = designer.addSectionObject(objectName, objectTypeName);
 			sectionObject.setTypeQualifier(objectType.getTypeQualifier());
 			designer.link(procedure.getFunctionObject(objectName), sectionObject);
 		}
-
-		// TODO determine parameter type
-		String parameterType = null;
 
 		// Provide input to invoke procedure
 		SectionInput sectionInput = designer.addSectionInput(ProcedureArchitect.INPUT_NAME, parameterType);
@@ -100,6 +115,27 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 			String returnTypeName = (returnType != null) ? returnType.getName() : null;
 			SectionOutput next = designer.addSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME, returnTypeName, false);
 			designer.link(procedure, next);
+		}
+
+		// Link the flows
+		FlowAnnotation[] flows = type.getAnnotation(FlowAnnotation[].class);
+		if (flows != null) {
+			for (FlowAnnotation flow : flows) {
+				String flowName = flow.getFlowName();
+				Class<?> argumentType = flow.getParameterType();
+				String argumentTypeName = (argumentType != null) ? argumentType.getName() : null;
+				boolean isSpawn = flow.isSpawn();
+				SectionOutput sectionOutput = designer.addSectionOutput(flowName, argumentTypeName, false);
+				designer.link(procedure.getFunctionFlow(flowName), sectionOutput, isSpawn);
+			}
+		}
+
+		// Link the escalations
+		for (ManagedFunctionEscalationType escalationType : type.getEscalationTypes()) {
+			String escalationTypeName = escalationType.getEscalationType().getName();
+			SectionOutput sectionOutput = designer.addSectionOutput(escalationTypeName,
+					escalationType.getEscalationType().getName(), true);
+			designer.link(procedure.getFunctionEscalation(escalationTypeName), sectionOutput, false);
 		}
 	}
 
