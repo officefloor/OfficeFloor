@@ -17,32 +17,14 @@
  */
 package net.officefloor.activity.procedure.build;
 
-import net.officefloor.activity.procedure.Procedure;
-import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.compile.spi.section.SectionDesigner;
-import net.officefloor.compile.spi.section.SectionFunction;
-
 /**
- * Builds the {@link Procedure} instances.
+ * Tests the {@link ProcedureDesigner}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ProcedureDesigner {
+public class ProcedureArchitectSectionTest extends AbstractProcedureTestCase {
 
-	/**
-	 * Adds a {@link Procedure}.
-	 * 
-	 * @param className     Name of {@link Class}.
-	 * @param serviceName   {@link ProcedureService} name.
-	 * @param procedureName Name of {@link Procedure}.
-	 * @return {@link SectionFunction} for the {@link Procedure}.
-	 */
-	SectionFunction addProcedure(String className, String serviceName, String procedureName);
-
-	/**
-	 * Informs the {@link SectionDesigner} of the {@link Procedure} instances. This
-	 * is invoked once all {@link Procedure} instances are added.
-	 */
-	void informSectionDesigner();
-
+	public ProcedureArchitectSectionTest() {
+		super(false); // section
+	}
 }

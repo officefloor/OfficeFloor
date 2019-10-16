@@ -20,8 +20,6 @@ package net.officefloor.activity.procedure;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.frame.api.build.Indexed;
 
 /**
  * Loader for {@link ProcedureManagedFunctionSource}.
@@ -40,15 +38,14 @@ public interface ProcedureLoader {
 	Procedure[] listProcedures(Class<?> clazz);
 
 	/**
-	 * Loads the {@link ManagedFunctionType} for the {@link Procedure} of the
-	 * {@link Class}.
+	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
 	 * @param clazz         {@link Class}.
-	 * @param procedureName {@link Procedure} name.
 	 * @param serviceName   {@link ProcedureService} name.
-	 * @return {@link ManagedFunctionType} for the {@link Procedure} or
-	 *         <code>null</code> with issues reported to {@link CompilerIssues}.
+	 * @param procedureName {@link Procedure} name.
+	 * @return {@link ProcedureType} for the {@link Procedure} or <code>null</code>
+	 *         with issues reported to {@link CompilerIssues}.
 	 */
-	ManagedFunctionType<Indexed, Indexed> loadProcedureType(Class<?> clazz, String procedureName, String serviceName);
+	ProcedureType loadProcedureType(Class<?> clazz, String serviceName, String procedureName);
 
 }

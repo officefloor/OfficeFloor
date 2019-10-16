@@ -21,21 +21,21 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.function.Consumer;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.junit.Assert;
 
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
-import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
-import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
-import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.compile.test.util.LoaderUtil;
+import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
  * Utility to test the {@link ProcedureLoader}.
@@ -151,29 +151,30 @@ public class ProcedureLoaderUtil {
 	}
 
 	/**
-	 * Loads the {@link ManagedFunctionType} for the {@link Procedure}.
+	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
 	 * @param clazz               {@link Class}.
-	 * @param procedureName       Name of {@link Procedure}.
 	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
-	 * @return {@link ManagedFunctionType}.
+	 * @param procedureName       Name of {@link Procedure}.
+	 * @return {@link ProcedureType}.
 	 */
-	public static ManagedFunctionType<Indexed, Indexed> loadProcedureType(Class<?> clazz, String procedureName,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass) {
-		return loadProcedureType(clazz, procedureName, serviceFactoryClass, officeFloorCompiler(null));
+	public static ProcedureType loadProcedureType(Class<?> clazz,
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName) {
+		return loadProcedureType(clazz, serviceFactoryClass, procedureName, officeFloorCompiler(null));
 	}
 
 	/**
-	 * Loads the {@link ManagedFunctionType} for the {@link Procedure}.
+	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
 	 * @param clazz               {@link Class}.
-	 * @param procedureName       Name of {@link Procedure}.
 	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
+	 * @param procedureName       Name of {@link Procedure}.
 	 * @param compiler            {@link OfficeFloorCompiler}.
-	 * @return {@link ManagedFunctionType}.
+	 * @return {@link ProcedureType}.
 	 */
-	public static ManagedFunctionType<Indexed, Indexed> loadProcedureType(Class<?> clazz, String procedureName,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass, OfficeFloorCompiler compiler) {
+	public static ProcedureType loadProcedureType(Class<?> clazz,
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName,
+			OfficeFloorCompiler compiler) {
 
 		// Create the procedure loader
 		ProcedureLoader loader = newProcedureLoader(compiler);
@@ -182,57 +183,93 @@ public class ProcedureLoaderUtil {
 		ProcedureService service = loadProcedureService(serviceFactoryClass, compiler);
 
 		// Load the managed function type
-		return loader.loadProcedureType(clazz, procedureName, service.getServiceName());
+		return loader.loadProcedureType(clazz, service.getServiceName(), procedureName);
 	}
 
 	/**
-	 * Validates the {@link Procedure} type, with convenience of function name
-	 * matching {@link Procedure} name.
+	 * Creates the {@link ProcedureTypeBuilder}.
 	 * 
-	 * @param clazz               {@link Class}.
-	 * @param procedureName       Name of {@link Procedure}.
-	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
-	 * @param typeBuilder         Builds the expected
-	 *                            {@link ManagedFunctionTypeBuilder}.
-	 * @return {@link ManagedFunctionType}.
+	 * @param procedureName Name of the {@link ProcedureType}.
+	 * @param parameterType {@link Parameter} type for the {@link ProcedureType}.
+	 *                      May be <code>null</code> if no {@link Parameter}.
+	 * @return {@link ProcedureTypeBuilder}.
 	 */
-	public static ManagedFunctionType<Indexed, Indexed> validateProcedureType(Class<?> clazz, String procedureName,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass,
-			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> typeBuilder) {
-		return validateProcedureType(clazz, procedureName, serviceFactoryClass, procedureName, typeBuilder);
+	public static ProcedureTypeBuilder createProcedureTypeBuilder(String procedureName, Class<?> parameterType) {
+		return new ProcedureTypeBuilderImpl(procedureName, parameterType);
 	}
 
 	/**
-	 * Validates the {@link Procedure} type.
+	 * Validates the {@link ProcedureType}.
 	 * 
-	 * @param clazz               {@link Class}.
-	 * @param procedureName       Name of {@link Procedure}.
-	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
-	 * @param functionName        Name of {@link ManagedFunction}.
-	 * @param typeBuilder         Builds the expected
-	 *                            {@link ManagedFunctionTypeBuilder}.
+	 * @param expectedProcedureType Expected {@link ProcedureType} via
+	 *                              {@link ProcedureTypeBuilder}.
+	 * @param clazz                 {@link Class}.
+	 * @param serviceFactoryClass   {@link ProcedureServiceFactory} {@link Class}.
+	 * @param procedureName         Name of {@link Procedure}.
 	 * @return {@link ManagedFunctionType}.
 	 */
-	public static ManagedFunctionType<Indexed, Indexed> validateProcedureType(Class<?> clazz, String procedureName,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String functionName,
-			Consumer<ManagedFunctionTypeBuilder<Indexed, Indexed>> typeBuilder) {
+	public static ProcedureType validateProcedureType(ProcedureTypeBuilder expectedProcedureType, Class<?> clazz,
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName) {
+
+		// Obtain the expected type
+		if (!(expectedProcedureType instanceof ProcedureType)) {
+			Assert.fail("expectedProcedureType must be created from createProcedureTypeBuilder");
+		}
+		ProcedureType eType = (ProcedureType) expectedProcedureType;
 
 		// Load the procedure type
-		ManagedFunctionType<Indexed, Indexed> type = loadProcedureType(clazz, procedureName, serviceFactoryClass);
+		ProcedureType aType = loadProcedureType(clazz, serviceFactoryClass, procedureName);
 
-		// Create expected type
-		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
-		ManagedFunctionTypeBuilder<Indexed, Indexed> procedureBuilder = namespace.addManagedFunctionType(functionName,
-				type.getManagedFunctionFactory(), Indexed.class, Indexed.class);
-		if (typeBuilder != null) {
-			typeBuilder.accept(procedureBuilder);
+		// Verify actual is as expected
+		assertEquals("Incorrect procedure name", eType.getProcedureName(), aType.getProcedureName());
+		assertEquals("Incorrect parameter type", eType.getParameterType(), aType.getParameterType());
+
+		// Verify object types
+		ProcedureObjectType[] eObjects = eType.getObjectTypes();
+		ProcedureObjectType[] aObjects = aType.getObjectTypes();
+		LoaderUtil.assertLength("Incorrect number of object types", eObjects, aObjects,
+				(object) -> object.getObjectName());
+		for (int i = 0; i < eObjects.length; i++) {
+			ProcedureObjectType eObject = eObjects[i];
+			ProcedureObjectType aObject = aObjects[i];
+			assertEquals("Incorrect object name (index " + i + ")", eObject.getObjectName(), aObject.getObjectName());
+			assertEquals("Incorrect object type (object " + eObject.getObjectName() + ")", eObject.getObjectType(),
+					aObject.getObjectType());
+			assertEquals("Incorrect object qualifier (object " + eObject.getObjectName() + ")",
+					eObject.getTypeQualifier(), aObject.getTypeQualifier());
 		}
 
-		// Validate the managed function type
-		ManagedFunctionLoaderUtil.validateManagedFunctionType(procedureBuilder, type);
+		// Verify the flow types
+		ProcedureFlowType[] eFlows = eType.getFlowTypes();
+		ProcedureFlowType[] aFlows = aType.getFlowTypes();
+		LoaderUtil.assertLength("Incorrect number of flow tyeps", eFlows, aFlows, (flow) -> flow.getFlowName());
+		for (int i = 0; i < eFlows.length; i++) {
+			ProcedureFlowType eFlow = eFlows[i];
+			ProcedureFlowType aFlow = aFlows[i];
+			assertEquals("Incorrect flow name (index " + i + ")", eFlow.getFlowName(), aFlow.getFlowName());
+			assertEquals("Incorrect flow argument type (flow " + eFlow.getFlowName() + ")", eFlow.getArgumentType(),
+					aFlow.getArgumentType());
+		}
+
+		// Verify the escalation types
+		ProcedureEscalationType[] eEscalations = eType.getEscalationTypes();
+		ProcedureEscalationType[] aEscalations = aType.getEscalationTypes();
+		LoaderUtil.assertLength("Incorrect number of escalations", eEscalations, aEscalations,
+				(escalation) -> escalation.getEscalationName());
+		for (int i = 0; i < eEscalations.length; i++) {
+			ProcedureEscalationType eEscalation = eEscalations[i];
+			ProcedureEscalationType aEscalation = aEscalations[i];
+			assertEquals("Incorrect escalation name (index " + i + ")", eEscalation.getEscalationName(),
+					aEscalation.getEscalationName());
+			assertEquals("Incorrect escalation type (escalation " + eEscalation.getEscalationName() + ")",
+					eEscalation.getEscalationType(), aEscalation.getEscalationType());
+		}
+
+		// Verify the next argument type
+		assertEquals("Incorrect next argument type", eType.getNextArgumentType(), aType.getNextArgumentType());
 
 		// Return the type
-		return type;
+		return aType;
 	}
 
 	/**
@@ -313,6 +350,116 @@ public class ProcedureLoaderUtil {
 	 * All access via static methods.
 	 */
 	private ProcedureLoaderUtil() {
+	}
+
+	/**
+	 * {@link ProcedureTypeBuilder} to build the expected {@link ProcedureType}.
+	 */
+	private static class ProcedureTypeBuilderImpl implements ProcedureTypeBuilder, ProcedureType {
+
+		/**
+		 * Name of {@link Procedure}.
+		 */
+		private final String procedureName;
+
+		/**
+		 * {@link Parameter} type for {@link Procedure}.
+		 */
+		private final Class<?> parameterType;
+
+		/**
+		 * {@link ProcedureObjectType} instances.
+		 */
+		private final List<ProcedureObjectType> objectTypes = new LinkedList<>();
+
+		/**
+		 * {@link ProcedureFlowType} instances.
+		 */
+		private final List<ProcedureFlowType> flowTypes = new LinkedList<>();
+
+		/**
+		 * {@link ProcedureEscalationType} instances.
+		 */
+		private final List<ProcedureEscalationType> escalationTypes = new LinkedList<>();
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param procedureName Name of {@link Procedure}.
+		 * @param parameterType {@link Parameter} type for {@link Procedure}.
+		 */
+		private ProcedureTypeBuilderImpl(String procedureName, Class<?> parameterType) {
+			this.procedureName = procedureName;
+			this.parameterType = parameterType;
+		}
+
+		/*
+		 * ================= ProcedureTypeBuilder =================
+		 */
+
+		@Override
+		public void addObjectType(String objectName, Class<?> objectType, String typeQualifier) {
+			// TODO implement ProcedureTypeBuilder.addObjectType
+			throw new UnsupportedOperationException("TODO implement ProcedureTypeBuilder.addObjectType");
+		}
+
+		@Override
+		public void addFlowType(String flowName, Class<?> argumentType) {
+			// TODO implement ProcedureTypeBuilder.addFlowType
+			throw new UnsupportedOperationException("TODO implement ProcedureTypeBuilder.addFlowType");
+		}
+
+		@Override
+		public void addEscalationType(String escalationName, Class<? extends Throwable> escalationType) {
+			// TODO implement ProcedureTypeBuilder.addEscalationType
+			throw new UnsupportedOperationException("TODO implement ProcedureTypeBuilder.addEscalationType");
+		}
+
+		@Override
+		public void setNextArgumentType(Class<?> nextArgumentType) {
+			// TODO implement ProcedureTypeBuilder.setNextArgumentType
+			throw new UnsupportedOperationException("TODO implement ProcedureTypeBuilder.setNextArgumentType");
+		}
+
+		/*
+		 * ===================== ProcedureType ===========================
+		 */
+
+		@Override
+		public String getProcedureName() {
+			// TODO implement ProcedureType.getProcedureName
+			throw new UnsupportedOperationException("TODO implement ProcedureType.getProcedureName");
+		}
+
+		@Override
+		public Class<?> getParameterType() {
+			// TODO implement ProcedureType.getParameterType
+			throw new UnsupportedOperationException("TODO implement ProcedureType.getParameterType");
+		}
+
+		@Override
+		public ProcedureObjectType[] getObjectTypes() {
+			// TODO implement ProcedureType.getObjectTypes
+			throw new UnsupportedOperationException("TODO implement ProcedureType.getObjectTypes");
+		}
+
+		@Override
+		public ProcedureFlowType[] getFlowTypes() {
+			// TODO implement ProcedureType.getFlowTypes
+			throw new UnsupportedOperationException("TODO implement ProcedureType.getFlowTypes");
+		}
+
+		@Override
+		public ProcedureEscalationType[] getEscalationTypes() {
+			// TODO implement ProcedureType.getEscalationTypes
+			throw new UnsupportedOperationException("TODO implement ProcedureType.getEscalationTypes");
+		}
+
+		@Override
+		public Class<?> getNextArgumentType() {
+			// TODO implement ProcedureType.getNextArgumentType
+			throw new UnsupportedOperationException("TODO implement ProcedureType.getNextArgumentType");
+		}
 	}
 
 }

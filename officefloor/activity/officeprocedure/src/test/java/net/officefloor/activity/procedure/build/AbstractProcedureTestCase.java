@@ -26,12 +26,11 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.spi.section.FunctionFlow;
-import net.officefloor.compile.spi.section.SectionFunction;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
@@ -87,7 +86,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	 */
 	public void testRunProcedure() throws Throwable {
 		RunProcedure.isRun = false;
-		this.recordPossibleSection();
+		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			setup.addProcedure(RunProcedure.class.getName(), ClassProcedureServiceFactory.SERVICE_NAME, "procedure",
 					false);
@@ -112,8 +111,8 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	public void testNextProcedure() {
 		NextProcedure.isInitiaited = false;
 		NextProcedure.isNextRun = false;
-		this.recordPossibleSection();
-		this.recordPossibleSection();
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			setup.linkNext(
 					setup.addProcedure(NextProcedure.class.getName(), ClassProcedureServiceFactory.SERVICE_NAME,
@@ -150,7 +149,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	public void testObjectProcedure() {
 		ObjectProcedure.procedureObject = null;
 		ProcedureObject object = new ProcedureObject();
-		this.recordPossibleSection();
+		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			setup.linkObject(setup.addProcedure(ObjectProcedure.class.getName(),
 					ClassProcedureServiceFactory.SERVICE_NAME, "procedure", false), ProcedureObject.class.getName(),
@@ -179,10 +178,10 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	public void testParameter() {
 		ParameterProcedure.parameter = null;
 		final String PARAM = "TEST";
-		this.recordPossibleSection();
+		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
-			setup.flagParameter(setup.addProcedure(ParameterProcedure.class.getName(),
-					ClassProcedureServiceFactory.SERVICE_NAME, "procedure", false), String.class.getName());
+			setup.addProcedure(ParameterProcedure.class.getName(), ClassProcedureServiceFactory.SERVICE_NAME,
+					"procedure", false);
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("procedure"), PARAM);
 		});
@@ -204,15 +203,14 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	public void testFlow() {
 		final String PARAM = "TEST";
 		FlowProcedure.parameter = null;
-		this.recordPossibleSection();
-		this.recordPossibleSection();
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			setup.linkFlow(
-					setup.flagParameter(setup.addProcedure(FlowProcedure.class.getName(),
-							ClassProcedureServiceFactory.SERVICE_NAME, "initial", false), String.class.getName()),
-					"doFlow", setup.flagParameter(setup.addProcedure(FlowProcedure.class.getName(),
-							ClassProcedureServiceFactory.SERVICE_NAME, "flow", false), String.class.getName()),
-					false);
+					setup.addProcedure(FlowProcedure.class.getName(), ClassProcedureServiceFactory.SERVICE_NAME,
+							"initial", false),
+					"doFlow", setup.addProcedure(FlowProcedure.class.getName(),
+							ClassProcedureServiceFactory.SERVICE_NAME, "flow", false));
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("initial"), PARAM);
 		});
@@ -243,8 +241,8 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	public void testSpawnFlow() {
 		SpawnFlowProcedure.initialObject = null;
 		SpawnFlowProcedure.flowObject = null;
-		this.recordPossibleSection();
-		this.recordPossibleSection();
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			Object dependency = setup.addDependency(SpawnFlowObject.class);
 			setup.linkFlow(
@@ -256,8 +254,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 					setup.linkDependency(
 							setup.addProcedure(SpawnFlowProcedure.class.getName(),
 									ClassProcedureServiceFactory.SERVICE_NAME, "flow", false),
-							SpawnFlowObject.class.getName(), dependency),
-					true);
+							SpawnFlowObject.class.getName(), dependency));
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("initial"), null);
 		});
@@ -297,8 +294,8 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	 * Ensure validate the parameter type.
 	 */
 	public void testInvalidParameterType() {
-		this.recordPossibleSection();
-		this.recordPossibleSection();
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
 		this.issues.recordIssue("OfficeFloor", OfficeFloorNodeImpl.class,
 				"Argument is not compatible with function parameter (argument=java.lang.String, parameter=java.lang.Integer, function="
 						+ this.getInvokeName("next") + ") for next function");
@@ -306,10 +303,8 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 			setup.linkNext(
 					setup.addProcedure(InvalidNextParameterProcedure.class.getName(),
 							ClassProcedureServiceFactory.SERVICE_NAME, "initial", true),
-					setup.flagParameter(
-							setup.addProcedure(InvalidNextParameterProcedure.class.getName(),
-									ClassProcedureServiceFactory.SERVICE_NAME, "next", false),
-							Integer.class.getName()));
+					setup.addProcedure(InvalidNextParameterProcedure.class.getName(),
+							ClassProcedureServiceFactory.SERVICE_NAME, "next", false));
 		}, null);
 	}
 
@@ -329,18 +324,17 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	 */
 	public void testHandleEscalation() {
 		this.issues.recordCaptureIssues(false);
-		this.recordPossibleSection();
+		this.issues.recordCaptureIssues(false);
 		HandleEscalationProcedure.escalation = new Exception("TEST");
 		this.officeExtraSetup = (office) -> {
 			// Configure handling of escalation
 			OfficeArchitect architect = office.getOfficeArchitect();
-			ProcedureArchitect procedureArchitect = ProcedureEmployer.employProcedureArchitect(architect,
+			ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer.employProcedureArchitect(architect,
 					office.getOfficeSourceContext());
 			OfficeSection handler = procedureArchitect.addProcedure(HandleEscalationProcedure.class.getName(),
 					ClassProcedureServiceFactory.SERVICE_NAME, "handleEscalation", false);
 			OfficeEscalation escalation = architect.addOfficeEscalation(Exception.class.getName());
 			architect.link(escalation, handler.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
-			procedureArchitect.informOfficeArchitect();
 		};
 		this.doTest((setup) -> {
 			setup.linkEscalation(setup.addProcedure(HandleEscalationProcedure.class.getName(),
@@ -368,15 +362,6 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records setup for possible {@link SectionSource}.
-	 */
-	private void recordPossibleSection() {
-		if (this.isOfficeNotSection) {
-			this.issues.recordCaptureIssues(false);
-		}
-	}
-
-	/**
 	 * Setup logic.
 	 */
 	@FunctionalInterface
@@ -399,39 +384,38 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 
 		P linkDependency(P source, String objectName, D dependency);
 
-		P flagParameter(P source, String objectName);
-
-		void linkFlow(P source, String flowName, P target, boolean isSpawn);
+		void linkFlow(P source, String flowName, P target);
 
 		void linkEscalation(P source, Class<? extends Throwable> escalationType);
 	}
 
-	protected static class SectionDesignerSetupContext implements SetupContext<SectionFunction, SectionManagedObject> {
+	protected static class SectionDesignerSetupContext implements SetupContext<SubSection, SectionManagedObject> {
 
 		public final CompileSectionContext context;
 
-		private final ProcedureDesigner procedureDesigner;
+		private final ProcedureArchitect<SubSection> procedureArchitect;
 
-		private SectionDesignerSetupContext(CompileSectionContext context, ProcedureDesigner procedureDesigner) {
+		private SectionDesignerSetupContext(CompileSectionContext context,
+				ProcedureArchitect<SubSection> procedureDesigner) {
 			this.context = context;
-			this.procedureDesigner = procedureDesigner;
+			this.procedureArchitect = procedureDesigner;
 		}
 
 		@Override
-		public SectionFunction addProcedure(String className, String serviceName, String procedureName,
-				boolean isNext) {
-			return this.procedureDesigner.addProcedure(className, serviceName, procedureName);
+		public SubSection addProcedure(String className, String serviceName, String procedureName, boolean isNext) {
+			return this.procedureArchitect.addProcedure(className, serviceName, procedureName, isNext);
 		}
 
 		@Override
-		public void linkNext(SectionFunction source, SectionFunction target) {
-			this.context.getSectionDesigner().link(source, target);
+		public void linkNext(SubSection source, SubSection target) {
+			this.context.getSectionDesigner().link(source.getSubSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME),
+					target.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
 		}
 
 		@Override
-		public void linkObject(SectionFunction source, String objectName, Object target) {
+		public void linkObject(SubSection source, String objectName, Object target) {
 			SectionManagedObject mo = Singleton.load(this.context.getSectionDesigner(), target);
-			this.context.getSectionDesigner().link(source.getFunctionObject(objectName), mo);
+			this.context.getSectionDesigner().link(source.getSubSectionObject(objectName), mo);
 		}
 
 		@Override
@@ -443,30 +427,23 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public SectionFunction linkDependency(SectionFunction source, String objectName,
-				SectionManagedObject dependency) {
-			this.context.getSectionDesigner().link(source.getFunctionObject(objectName), dependency);
+		public SubSection linkDependency(SubSection source, String objectName, SectionManagedObject dependency) {
+			this.context.getSectionDesigner().link(source.getSubSectionObject(objectName), dependency);
 			return source;
 		}
 
 		@Override
-		public SectionFunction flagParameter(SectionFunction source, String objectName) {
-			source.getFunctionObject(objectName).flagAsParameter();
-			return source;
+		public void linkFlow(SubSection source, String flowName, SubSection target) {
+			SubSectionOutput flow = source.getSubSectionOutput(flowName);
+			this.context.getSectionDesigner().link(flow, target.getSubSectionInput(ProcedureArchitect.INPUT_NAME));
 		}
 
 		@Override
-		public void linkFlow(SectionFunction source, String flowName, SectionFunction target, boolean isSpawn) {
-			FunctionFlow flow = source.getFunctionFlow(flowName);
-			this.context.getSectionDesigner().link(flow, target, isSpawn);
-		}
-
-		@Override
-		public void linkEscalation(SectionFunction source, Class<? extends Throwable> escalationType) {
-			FunctionFlow escalation = source.getFunctionEscalation(escalationType.getName());
+		public void linkEscalation(SubSection source, Class<? extends Throwable> escalationType) {
+			SubSectionOutput escalation = source.getSubSectionOutput(escalationType.getName());
 			SectionOutput output = this.context.getSectionDesigner().addSectionOutput(escalationType.getName(),
 					escalationType.getName(), true);
-			this.context.getSectionDesigner().link(escalation, output, false);
+			this.context.getSectionDesigner().link(escalation, output);
 		}
 	}
 
@@ -474,9 +451,10 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 
 		public final CompileOfficeContext context;
 
-		public final ProcedureArchitect procedureArchitect;
+		public final ProcedureArchitect<OfficeSection> procedureArchitect;
 
-		private OfficeArchitectSetupContext(CompileOfficeContext context, ProcedureArchitect procedureArchitect) {
+		private OfficeArchitectSetupContext(CompileOfficeContext context,
+				ProcedureArchitect<OfficeSection> procedureArchitect) {
 			this.context = context;
 			this.procedureArchitect = procedureArchitect;
 		}
@@ -513,13 +491,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public OfficeSection flagParameter(OfficeSection source, String objectName) {
-			// Should be managed by section
-			return source;
-		}
-
-		@Override
-		public void linkFlow(OfficeSection source, String flowName, OfficeSection target, boolean isSpawn) {
+		public void linkFlow(OfficeSection source, String flowName, OfficeSection target) {
 			OfficeSectionOutput output = source.getOfficeSectionOutput(flowName);
 			this.context.getOfficeArchitect().link(output, target.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 		}
@@ -552,10 +524,9 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		compile.getOfficeFloorCompiler().setCompilerIssues(this.issues);
 		compile.office((office) -> {
 			if (this.isOfficeNotSection) {
-				ProcedureArchitect procedureArchitect = ProcedureEmployer
+				ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer
 						.employProcedureArchitect(office.getOfficeArchitect(), office.getOfficeSourceContext());
 				setup.setup((SetupContext<P, D>) new OfficeArchitectSetupContext(office, procedureArchitect));
-				procedureArchitect.informOfficeArchitect();
 			}
 		});
 		if (this.officeExtraSetup != null) {
@@ -563,10 +534,9 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		}
 		compile.section((section) -> {
 			if (!this.isOfficeNotSection) {
-				ProcedureDesigner procedureDesigner = ProcedureEmployer
+				ProcedureArchitect<SubSection> procedureDesigner = ProcedureEmployer
 						.employProcedureDesigner(section.getSectionDesigner(), section.getSectionSourceContext());
 				setup.setup((SetupContext<P, D>) new SectionDesignerSetupContext(section, procedureDesigner));
-				procedureDesigner.informSectionDesigner();
 			}
 		});
 
@@ -593,7 +563,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	 * @return {@link Procedure} {@link ManagedFunction} name.
 	 */
 	protected String getInvokeName(String procedureName) {
-		return this.isOfficeNotSection ? procedureName + ".procedure" : "SECTION." + procedureName;
+		return this.isOfficeNotSection ? procedureName + ".procedure" : "SECTION." + procedureName + ".procedure";
 	}
 
 }

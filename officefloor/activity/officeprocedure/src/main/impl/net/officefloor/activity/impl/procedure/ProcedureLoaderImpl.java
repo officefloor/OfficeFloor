@@ -22,6 +22,7 @@ import java.util.List;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoader;
+import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
@@ -34,7 +35,6 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.frame.api.build.Indexed;
 
 /**
  * {@link ProcedureLoader} implementation.
@@ -150,9 +150,7 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public ManagedFunctionType<Indexed, Indexed> loadProcedureType(Class<?> clazz, String procedureName,
-			String serviceName) {
+	public ProcedureType loadProcedureType(Class<?> clazz, String serviceName, String procedureName) {
 
 		// Load the managed function type
 		PropertyList properties = this.loader.createPropertyList();
@@ -166,8 +164,11 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			return null; // failed to load
 		}
 
-		// Return the managed function type (should always be just one)
-		return (ManagedFunctionType<Indexed, Indexed>) namespace.getManagedFunctionTypes()[0];
+		// Obtain the managed function type (should always be just one)
+		ManagedFunctionType<?, ?> managedFunctionType = namespace.getManagedFunctionTypes()[0];
+
+		// Return the type
+		return null;
 	}
 
 	/**

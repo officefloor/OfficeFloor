@@ -15,16 +15,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure.build;
+package net.officefloor.activity.procedure;
+
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
- * Tests the {@link ProcedureArchitect}.
+ * <code>Type definition</code> of a possible {@link EscalationFlow} by the
+ * {@link Procedure}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcedureArchitectTest extends AbstractProcedureTestCase {
+public interface ProcedureEscalationType {
 
-	public ProcedureArchitectTest() {
-		super(true); // office
-	}
+	/**
+	 * Obtains the name for the {@link ProcedureEscalationType}.
+	 * 
+	 * @return Name for the {@link ProcedureEscalationType}.
+	 */
+	String getEscalationName();
+
+	/**
+	 * Obtains the type of {@link EscalationFlow} by the {@link Procedure}.
+	 * 
+	 * @param <E> {@link Escalation} type.
+	 * @return Type of {@link EscalationFlow} by the {@link Procedure}.
+	 */
+	<E extends Throwable> Class<E> getEscalationType();
+
 }

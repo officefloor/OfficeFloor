@@ -27,8 +27,7 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.section.SectionDesigner;
-import net.officefloor.compile.spi.section.SectionFunction;
-import net.officefloor.compile.spi.section.SectionFunctionNamespace;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 
 /**
@@ -69,9 +68,9 @@ public class ProcedureEmployer {
 	 * @param officeSourceContext {@link OfficeSourceContext}.
 	 * @return {@link ProcedureArchitect}.
 	 */
-	public static ProcedureArchitect employProcedureArchitect(OfficeArchitect officeArchitect,
+	public static ProcedureArchitect<OfficeSection> employProcedureArchitect(OfficeArchitect officeArchitect,
 			OfficeSourceContext officeSourceContext) {
-		return new ProcedureArchitect() {
+		return new ProcedureArchitect<OfficeSection>() {
 
 			@Override
 			public OfficeSection addProcedure(String className, String serviceName, String procedureName,
@@ -85,38 +84,30 @@ public class ProcedureEmployer {
 				}
 				return procedure;
 			}
-
-			@Override
-			public void informOfficeArchitect() {
-				// Nothing to inform, however available for future functionality
-			}
 		};
 	}
 
 	/**
-	 * Employs the {@link ProcedureDesigner}.
+	 * Employs the {@link ProcedureArchitect}.
 	 * 
 	 * @param sectionDesigner      {@link SectionDesigner}.
 	 * @param sectionSourceContext {@link SectionSourceContext}.
-	 * @return {@link ProcedureDesigner}.
+	 * @return {@link ProcedureArchitect}.
 	 */
-	public static ProcedureDesigner employProcedureDesigner(SectionDesigner sectionDesigner,
+	public static ProcedureArchitect<SubSection> employProcedureDesigner(SectionDesigner sectionDesigner,
 			SectionSourceContext sectionSourceContext) {
-		return new ProcedureDesigner() {
+		return new ProcedureArchitect<SubSection>() {
 
 			@Override
-			public SectionFunction addProcedure(String className, String serviceName, String procedureName) {
-				SectionFunctionNamespace namespace = sectionDesigner.addSectionFunctionNamespace(procedureName,
-						ProcedureManagedFunctionSource.class.getName());
-				namespace.addProperty(ProcedureManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, className);
-				namespace.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
-				namespace.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, procedureName);
-				return namespace.addSectionFunction(procedureName, procedureName);
-			}
-
-			@Override
-			public void informSectionDesigner() {
-				// Nothing to inform, however available for future functionality
+			public SubSection addProcedure(String className, String serviceName, String procedureName, boolean isNext) {
+				SubSection procedure = sectionDesigner.addSubSection(procedureName,
+						ProcedureSectionSource.class.getName(), procedureName);
+				procedure.addProperty(ProcedureManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, className);
+				procedure.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
+				if (isNext) {
+					procedure.addProperty(ProcedureSectionSource.IS_NEXT_PROPERTY_NAME, Boolean.TRUE.toString());
+				}
+				return procedure;
 			}
 		};
 	}

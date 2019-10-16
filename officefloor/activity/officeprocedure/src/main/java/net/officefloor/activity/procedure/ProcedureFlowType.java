@@ -15,16 +15,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure.build;
+package net.officefloor.activity.procedure;
+
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Tests the {@link ProcedureDesigner}.
+ * <code>Type definition</code> of a {@link Flow} possibly instigated by a
+ * {@link Procedure}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcedureDesignerTest extends AbstractProcedureTestCase {
+public interface ProcedureFlowType {
 
-	public ProcedureDesignerTest() {
-		super(false); // section
-	}
+	/**
+	 * Obtains the name for the {@link ProcedureFlowType}.
+	 * 
+	 * @return Name for the {@link ProcedureFlowType}.
+	 */
+	String getFlowName();
+
+	/**
+	 * Obtains the type of the argument passed by the {@link Procedure} to the
+	 * {@link Flow}.
+	 * 
+	 * @return Type of argument passed to {@link Flow}. May be <code>null</code> to
+	 *         indicate no argument.
+	 */
+	Class<?> getArgumentType();
+
 }

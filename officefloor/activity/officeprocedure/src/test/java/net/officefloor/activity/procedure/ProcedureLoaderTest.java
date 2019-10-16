@@ -19,15 +19,17 @@ package net.officefloor.activity.procedure;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 
 import net.officefloor.activity.procedure.java.ClassProcedureServiceFactory;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.Qualified;
+import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
  * Tests the {@link ProcedureLoader}.
@@ -160,8 +162,9 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 * Ensure can load type.
 	 */
 	public void testLoadSimpleType() {
-		ProcedureLoaderUtil.validateProcedureType(LoadSimpleTypeProcedure.class, "simple",
-				ClassProcedureServiceFactory.class, null);
+		ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder("simple", null);
+		ProcedureLoaderUtil.validateProcedureType(type, LoadSimpleTypeProcedure.class,
+				ClassProcedureServiceFactory.class, "simple");
 	}
 
 	public static class LoadSimpleTypeProcedure {
@@ -175,17 +178,30 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 * Ensure can load complex type.
 	 */
 	public void testLoadComplexType() {
-		ProcedureLoaderUtil.validateProcedureType(LoadComplexTypeProcedure.class, "complex",
-				ClassProcedureServiceFactory.class, (type) -> {
-					type.setReturnType(Integer.class);
-					type.addObject(String.class).setLabel(String.class.getName());
-					type.addEscalation(IOException.class);
-				});
+		ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder("complex", String.class);
+		type.addObjectType(Long.class.getName(), Long.class, null);
+		type.addObjectType(Character.class.getName(), Character.class, "qualified");
+		type.addFlowType("flowOne", null);
+		type.addFlowType("flowTwo", Byte.class);
+		type.addEscalationType(IOException.class.getSimpleName(), IOException.class);
+		type.addEscalationType(SQLException.class.getSimpleName(), SQLException.class);
+		type.setNextArgumentType(Integer.class);
+		ProcedureLoaderUtil.validateProcedureType(type, LoadComplexTypeProcedure.class,
+				ClassProcedureServiceFactory.class, "complex");
+	}
+
+	@FlowInterface
+	public static interface LoadComplexFlows {
+		void flowOne();
+
+		void flowTwo(Byte parameter);
 	}
 
 	public static class LoadComplexTypeProcedure {
 
-		public Integer complex(String parameter) throws IOException {
+		public Integer complex(@Parameter String parameter, Long dependency,
+				@Qualified("qualified") Character qualifiedDependency, LoadComplexFlows flows)
+				throws IOException, SQLException {
 			return 0;
 		}
 	}
@@ -207,14 +223,21 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ManagedFunctionType<Indexed, Indexed> type = MockProcedureService.run(null, (context) -> {
+		ProcedureType type = MockProcedureService.run((clazz) -> new String[] { "error" }, (context) -> {
 			throw failure;
 		}, () -> {
-			return ProcedureLoaderUtil.loadProcedureType(LoadSimpleTypeProcedure.class, "error",
-					MockProcedureService.class, compiler);
+			return ProcedureLoaderUtil.loadProcedureType(ErrorInLoadProcedure.class, MockProcedureService.class,
+					"error", compiler);
 		});
 		this.verifyMockObjects();
 		assertNull("Should not load type", type);
+	}
+
+	public static class ErrorInLoadProcedure {
+
+		public void error() {
+			// Test method
+		}
 	}
 
 }

@@ -15,29 +15,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure;
-
-import net.officefloor.activity.procedure.spi.ProcedureService;
+package net.officefloor.activity.procedure.build;
 
 /**
- * Procedure.
+ * Tests the {@link ProcedureArchitect}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Procedure {
+public class ProcedureArchitectOfficeTest extends AbstractProcedureTestCase {
 
-	/**
-	 * Obtains the name of the {@link ProcedureService}.
-	 * 
-	 * @return Name of the {@link ProcedureService}.
-	 */
-	String getServiceName();
-
-	/**
-	 * Obtains the name of the {@link Procedure}.
-	 * 
-	 * @return Name of the {@link Procedure}.
-	 */
-	String getProcedureName();
-
+	public ProcedureArchitectOfficeTest() {
+		super(true); // office
+	}
 }
