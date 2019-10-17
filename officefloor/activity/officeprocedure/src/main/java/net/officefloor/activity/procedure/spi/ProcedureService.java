@@ -40,7 +40,7 @@ public interface ProcedureService {
 	 * <ul>
 	 * <li>Class names can be quite long</li>
 	 * <li>Class names are not easily readable</li>
-	 * <li>Enables swapping plugins for same logical server name</li>
+	 * <li>Enables swapping plugins for same logical service name</li>
 	 * </ul>
 	 * 
 	 * @return Name of this service.

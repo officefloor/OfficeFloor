@@ -28,6 +28,9 @@ import java.util.stream.Collectors;
 
 import org.junit.Assert;
 
+import net.officefloor.activity.impl.procedure.ProcedureEscalationTypeImpl;
+import net.officefloor.activity.impl.procedure.ProcedureFlowTypeImpl;
+import net.officefloor.activity.impl.procedure.ProcedureObjectTypeImpl;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
@@ -383,6 +386,11 @@ public class ProcedureLoaderUtil {
 		private final List<ProcedureEscalationType> escalationTypes = new LinkedList<>();
 
 		/**
+		 * Next argument type.
+		 */
+		private Class<?> nextArgumentType = null;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param procedureName Name of {@link Procedure}.
@@ -399,26 +407,22 @@ public class ProcedureLoaderUtil {
 
 		@Override
 		public void addObjectType(String objectName, Class<?> objectType, String typeQualifier) {
-			// TODO implement ProcedureTypeBuilder.addObjectType
-			throw new UnsupportedOperationException("TODO implement ProcedureTypeBuilder.addObjectType");
+			this.objectTypes.add(new ProcedureObjectTypeImpl(objectName, objectType, typeQualifier));
 		}
 
 		@Override
 		public void addFlowType(String flowName, Class<?> argumentType) {
-			// TODO implement ProcedureTypeBuilder.addFlowType
-			throw new UnsupportedOperationException("TODO implement ProcedureTypeBuilder.addFlowType");
+			this.flowTypes.add(new ProcedureFlowTypeImpl(flowName, argumentType));
 		}
 
 		@Override
 		public void addEscalationType(String escalationName, Class<? extends Throwable> escalationType) {
-			// TODO implement ProcedureTypeBuilder.addEscalationType
-			throw new UnsupportedOperationException("TODO implement ProcedureTypeBuilder.addEscalationType");
+			this.escalationTypes.add(new ProcedureEscalationTypeImpl(escalationName, escalationType));
 		}
 
 		@Override
 		public void setNextArgumentType(Class<?> nextArgumentType) {
-			// TODO implement ProcedureTypeBuilder.setNextArgumentType
-			throw new UnsupportedOperationException("TODO implement ProcedureTypeBuilder.setNextArgumentType");
+			this.nextArgumentType = nextArgumentType;
 		}
 
 		/*
@@ -427,38 +431,32 @@ public class ProcedureLoaderUtil {
 
 		@Override
 		public String getProcedureName() {
-			// TODO implement ProcedureType.getProcedureName
-			throw new UnsupportedOperationException("TODO implement ProcedureType.getProcedureName");
+			return this.procedureName;
 		}
 
 		@Override
 		public Class<?> getParameterType() {
-			// TODO implement ProcedureType.getParameterType
-			throw new UnsupportedOperationException("TODO implement ProcedureType.getParameterType");
+			return this.parameterType;
 		}
 
 		@Override
 		public ProcedureObjectType[] getObjectTypes() {
-			// TODO implement ProcedureType.getObjectTypes
-			throw new UnsupportedOperationException("TODO implement ProcedureType.getObjectTypes");
+			return this.objectTypes.toArray(new ProcedureObjectType[this.objectTypes.size()]);
 		}
 
 		@Override
 		public ProcedureFlowType[] getFlowTypes() {
-			// TODO implement ProcedureType.getFlowTypes
-			throw new UnsupportedOperationException("TODO implement ProcedureType.getFlowTypes");
+			return this.flowTypes.toArray(new ProcedureFlowType[this.flowTypes.size()]);
 		}
 
 		@Override
 		public ProcedureEscalationType[] getEscalationTypes() {
-			// TODO implement ProcedureType.getEscalationTypes
-			throw new UnsupportedOperationException("TODO implement ProcedureType.getEscalationTypes");
+			return this.escalationTypes.toArray(new ProcedureEscalationType[this.escalationTypes.size()]);
 		}
 
 		@Override
 		public Class<?> getNextArgumentType() {
-			// TODO implement ProcedureType.getNextArgumentType
-			throw new UnsupportedOperationException("TODO implement ProcedureType.getNextArgumentType");
+			return this.nextArgumentType;
 		}
 	}
 

@@ -17,7 +17,6 @@
  */
 package net.officefloor.activity.procedure;
 
-import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
@@ -38,9 +37,8 @@ public interface ProcedureEscalationType {
 	/**
 	 * Obtains the type of {@link EscalationFlow} by the {@link Procedure}.
 	 * 
-	 * @param <E> {@link Escalation} type.
 	 * @return Type of {@link EscalationFlow} by the {@link Procedure}.
 	 */
-	<E extends Throwable> Class<E> getEscalationType();
+	Class<? extends Throwable> getEscalationType();
 
 }

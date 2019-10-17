@@ -21,7 +21,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.ProcedureEscalationType;
+import net.officefloor.activity.procedure.ProcedureFlowType;
 import net.officefloor.activity.procedure.ProcedureLoader;
+import net.officefloor.activity.procedure.ProcedureObjectType;
 import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureService;
@@ -31,10 +34,14 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 
 /**
  * {@link ProcedureLoader} implementation.
@@ -167,8 +174,49 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		// Obtain the managed function type (should always be just one)
 		ManagedFunctionType<?, ?> managedFunctionType = namespace.getManagedFunctionTypes()[0];
 
-		// Return the type
-		return null;
+		// Obtain parameter and object types
+		Class<?> parameterType = null;
+		List<ProcedureObjectType> objectTypes = new LinkedList<>();
+		ParameterAnnotation parameterAnnotation = managedFunctionType.getAnnotation(ParameterAnnotation.class);
+		int parameterIndex = (parameterAnnotation != null) ? parameterAnnotation.getParameterIndex() : -1;
+		ManagedFunctionObjectType<?>[] functionObjectTypes = managedFunctionType.getObjectTypes();
+		NEXT_OBJECT: for (int i = 0; i < functionObjectTypes.length; i++) {
+			ManagedFunctionObjectType<?> functionObjectType = functionObjectTypes[i];
+			String objectName = functionObjectType.getObjectName();
+			Class<?> objectType = functionObjectType.getObjectType();
+
+			// Determine if parameter
+			if (i == parameterIndex) {
+				parameterType = objectType;
+				continue NEXT_OBJECT; // parameter
+			}
+
+			// Add object type
+			objectTypes.add(new ProcedureObjectTypeImpl(objectName, objectType, functionObjectType.getTypeQualifier()));
+		}
+
+		// Load the flows
+		List<ProcedureFlowType> flowTypes = new LinkedList<>();
+		for (ManagedFunctionFlowType<?> functionFlowType : managedFunctionType.getFlowTypes()) {
+			flowTypes
+					.add(new ProcedureFlowTypeImpl(functionFlowType.getFlowName(), functionFlowType.getArgumentType()));
+		}
+
+		// Load the escalations
+		List<ProcedureEscalationType> escalationTypes = new LinkedList<>();
+		for (ManagedFunctionEscalationType functionEscalationType : managedFunctionType.getEscalationTypes()) {
+			escalationTypes.add(new ProcedureEscalationTypeImpl(functionEscalationType.getEscalationName(),
+					functionEscalationType.getEscalationType()));
+		}
+
+		// Obtain the next argument type
+		Class<?> nextArgumentType = managedFunctionType.getReturnType();
+
+		// Return the procedure type
+		return new ProcedureTypeImpl(procedureName, parameterType,
+				objectTypes.toArray(new ProcedureObjectType[objectTypes.size()]),
+				flowTypes.toArray(new ProcedureFlowType[flowTypes.size()]),
+				escalationTypes.toArray(new ProcedureEscalationType[escalationTypes.size()]), nextArgumentType);
 	}
 
 	/**

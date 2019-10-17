@@ -55,13 +55,11 @@ public class ProcedureEscalationTypeImpl implements ProcedureEscalationType {
 
 	@Override
 	public String getEscalationName() {
-		// TODO implement ProcedureEscalationType.getEscalationName
-		throw new UnsupportedOperationException("TODO implement ProcedureEscalationType.getEscalationName");
+		return this.escalationName;
 	}
 
 	@Override
-	public <E extends Throwable> Class<E> getEscalationType() {
-		// TODO implement ProcedureEscalationType.getEscalationType
-		throw new UnsupportedOperationException("TODO implement ProcedureEscalationType.getEscalationType");
+	public Class<? extends Throwable> getEscalationType() {
+		return this.escalationType;
 	}
 }

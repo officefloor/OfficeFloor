@@ -180,7 +180,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	public void testLoadComplexType() {
 		ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder("complex", String.class);
 		type.addObjectType(Long.class.getName(), Long.class, null);
-		type.addObjectType(Character.class.getName(), Character.class, "qualified");
+		type.addObjectType("qualified-" + Character.class.getName(), Character.class, "qualified");
 		type.addFlowType("flowOne", null);
 		type.addFlowType("flowTwo", Byte.class);
 		type.addEscalationType(IOException.class.getSimpleName(), IOException.class);

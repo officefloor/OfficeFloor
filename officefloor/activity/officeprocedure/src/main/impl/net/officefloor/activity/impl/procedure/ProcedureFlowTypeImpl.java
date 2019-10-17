@@ -54,14 +54,12 @@ public class ProcedureFlowTypeImpl implements ProcedureFlowType {
 
 	@Override
 	public String getFlowName() {
-		// TODO implement ProcedureFlowType.getFlowName
-		throw new UnsupportedOperationException("TODO implement ProcedureFlowType.getFlowName");
+		return this.flowName;
 	}
 
 	@Override
 	public Class<?> getArgumentType() {
-		// TODO implement ProcedureFlowType.getArgumentType
-		throw new UnsupportedOperationException("TODO implement ProcedureFlowType.getArgumentType");
+		return this.argumentType;
 	}
 
 }

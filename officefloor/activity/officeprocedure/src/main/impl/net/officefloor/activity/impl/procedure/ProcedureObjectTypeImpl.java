@@ -60,20 +60,17 @@ public class ProcedureObjectTypeImpl implements ProcedureObjectType {
 
 	@Override
 	public String getObjectName() {
-		// TODO implement ProcedureObjectType.getObjectName
-		throw new UnsupportedOperationException("TODO implement ProcedureObjectType.getObjectName");
+		return this.objectName;
 	}
 
 	@Override
 	public Class<?> getObjectType() {
-		// TODO implement ProcedureObjectType.getObjectType
-		throw new UnsupportedOperationException("TODO implement ProcedureObjectType.getObjectType");
+		return this.objectType;
 	}
 
 	@Override
 	public String getTypeQualifier() {
-		// TODO implement ProcedureObjectType.getTypeQualifier
-		throw new UnsupportedOperationException("TODO implement ProcedureObjectType.getTypeQualifier");
+		return this.typeQualifier;
 	}
 
 }
