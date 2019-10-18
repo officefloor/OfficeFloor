@@ -1,33 +1,32 @@
 <woof>
 
 	<http-continuations>
-		<http-continuation path="/pathA" secure="true" x="100"
-			y="101">
+		<http-continuation path="/pathA" secure="true" x="100" y="101">
 			<section name="SECTION_A" input="INPUT_A" />
 			<template path="/templateB" />
 			<security name="SECURITY_A" />
 			<resource path="/resourceA.html" />
 			<redirect path="/pathB" />
+			<procedure name="PROCEDURE_A" />
 		</http-continuation>
 		<http-continuation path="/pathB" x="110" y="111" />
 	</http-continuations>
 
 	<http-inputs>
-		<http-input path="/pathC" method="POST" secure="true" x="200"
-			y="201">
+		<http-input path="/pathC" method="POST" secure="true" x="200" y="201">
 			<section name="SECTION_B" input="INPUT_0" />
 			<template path="/templateA" />
 			<security name="SECURITY_B" />
 			<resource path="/resourceB.png" />
 			<redirect path="/pathA" />
+			<procedure name="PROCEDURE_A" />
 		</http-input>
 		<http-input path="/pathD" method="PUT" x="210" y="211" />
 	</http-inputs>
 
 	<templates>
-		<template path="/templateA" secure="true" location="example/TemplateA.ofp"
-			class="net.example.ExampleClassA" content-type="text/plain; charset=UTF-16"
-			charset="UTF-16" redirect-values-function="redirect"
+		<template path="/templateA" secure="true" location="example/TemplateA.ofp" class="net.example.ExampleClassA"
+			content-type="text/plain; charset=UTF-16" charset="UTF-16" redirect-values-function="redirect"
 			link-separator-character="_" x="300" y="301">
 			<extends template="/templateB" />
 			<output name="OUTPUT_0" argument-type="java.lang.Integer">
@@ -45,7 +44,10 @@
 			<output name="OUTPUT_4">
 				<redirect path="/pathA" />
 			</output>
-			<output name="OUTPUT_5" />
+			<output name="OUTPUT_5">
+				<procedure name="PROCEDURE_A" />
+			</output>
+			<output name="OUTPUT_6" />
 			<link name="LINK_0" secure="true" />
 			<link name="LINK_1" secure="false" />
 			<render method="POST" />
@@ -56,13 +58,71 @@
 			</extension>
 			<extension class="net.example.Extension" />
 		</template>
-		<template path="/templateB" location="example/TemplateB.ofp"
-			x="302" y="303" />
+		<template path="/templateB" location="example/TemplateB.ofp" x="302" y="303" />
 	</templates>
 
-	<sections>
-		<section name="SECTION_A" source="SECTION" location="SECTION_LOCATION"
+	<procedures>
+		<procedure name="PROCEDURE_A" class="net.example.ExampleProcedure" service="Class" procedure="procedure"
 			x="400" y="401">
+			<next argument-type="java.lang.Byte">
+				<section name="SECTION_A" input="INPUT_A" />
+			</next>
+			<output name="OUTPUT_A" argument-type="java.lang.String">
+				<section name="SECTION_B" input="INPUT_0" />
+			</output>
+			<output name="OUTPUT_B">
+				<template path="/templateA" />
+			</output>
+			<output name="OUTPUT_C">
+				<resource path="/resourceB.png" />
+			</output>
+			<output name="OUTPUT_D">
+				<security name="SECURITY_A" />
+			</output>
+			<output name="OUTPUT_E">
+				<redirect path="/pathB" />
+			</output>
+			<output name="OUTPUT_F">
+				<procedure name="PROCEDURE_B" />
+			</output>
+			<output name="OUTPUT_G" />
+		</procedure>
+		<procedure name="PROCEDURE_B" class="net.example.KotlinProcedure" service="Kotlin" procedure="method"
+			x="402" y="403">
+			<next>
+				<template path="/templateA" />
+			</next>
+		</procedure>
+		<procedure name="PROCEDURE_C" class="net.example.ScalaProcedure" service="Scala" procedure="function"
+			x="404" y="405">
+			<next>
+				<resource path="/resourceB.png" />
+			</next>
+		</procedure>
+		<procedure name="PROCEDURE_D" class="net.example.JavaScriptProcedure" service="JavaScript"
+			procedure="function" x="406" y="407">
+			<next>
+				<security name="SECURITY_A" />
+			</next>
+		</procedure>
+		<procedure name="PROCEDURE_E" class="net.example.GroovyProcedure" service="Groovy" procedure="method"
+			x="408" y="409">
+			<next>
+				<redirect path="/pathB" />
+			</next>
+		</procedure>
+		<procedure name="PROCEDURE_E" class="net.example.PythonProcedure" service="Python" procedure="func" x="408"
+			y="409">
+			<next>
+				<procedure name="PROCEDURE_B" />
+			</next>
+		</procedure>
+		<procedure name="PROCEDURE_F" class="net.example.CustomProcedure" service="Custom" procedure="procedure"
+			x="410" y="411" />
+	</procedures>
+
+	<sections>
+		<section name="SECTION_A" source="SECTION" location="SECTION_LOCATION" x="500" y="501">
 			<property name="name.one" value="value.one" />
 			<property name="name.two" value="value.two" />
 			<input name="INPUT_A" parameter-type="java.lang.Integer" />
@@ -82,17 +142,19 @@
 			<output name="OUTPUT_E">
 				<redirect path="/pathB" />
 			</output>
-			<output name="OUTPUT_F" />
+			<output name="OUTPUT_F">
+				<procedure name="PROCEDURE_A" />
+			</output>
+			<output name="OUTPUT_G" />
 		</section>
-		<section name="SECTION_B" source="net.example.ExampleSectionSource"
-			location="EXAMPLE_LOCATION" x="402" y="403">
+		<section name="SECTION_B" source="net.example.ExampleSectionSource" location="EXAMPLE_LOCATION" x="502"
+			y="503">
 			<input name="INPUT_0" />
 		</section>
 	</sections>
 
 	<securities>
-		<security name="SECURITY_A" source="net.example.HttpSecuritySource"
-			timeout="2000" x="500" y="501">
+		<security name="SECURITY_A" source="net.example.HttpSecuritySource" timeout="2000" x="600" y="601">
 			<property name="name.first" value="value.first" />
 			<property name="name.second" value="value.second" />
 			<content type="application/json" />
@@ -112,53 +174,59 @@
 			<output name="OUTPUT_FOUR">
 				<redirect path="/pathA" />
 			</output>
-			<output name="OUTPUT_FIVE" />
+			<output name="OUTPUT_FIVE">
+				<procedure name="PROCEDURE_A" />
+			</output>
+			<output name="OUTPUT_SIX" />
 		</security>
-		<security name="SECURITY_B" source="net.example.AnotherHttpSecuritySource"
-			x="510" y="511" />
+		<security name="SECURITY_B" source="net.example.AnotherHttpSecuritySource" x="610" y="611" />
 	</securities>
 
 	<governances>
-		<governance name="GOVERNANCE_A" source="net.example.ExampleGovernanceSource"
-			x="600" y="601">
+		<governance name="GOVERNANCE_A" source="net.example.ExampleGovernanceSource" x="700" y="701">
 			<property name="name.a" value="value.a" />
 			<property name="name.b" value="value.b" />
-			<governance-area x="620" y="621" width="640" height="641" />
-			<governance-area x="630" y="631" width="650" height="651" />
+			<governance-area x="720" y="721" width="740" height="641" />
+			<governance-area x="730" y="731" width="750" height="751" />
 		</governance>
-		<governance name="GOVERNANCE_B" source="net.example.AnotherGovernanceSource"
-			x="610" y="611" />
+		<governance name="GOVERNANCE_B" source="net.example.AnotherGovernanceSource" x="710" y="711" />
 	</governances>
 
 	<resources>
-		<resource path="/resourceA.html" x="700" y="701" />
-		<resource path="/resourceB.png" x="710" y="711" />
+		<resource path="/resourceA.html" x="800" y="801" />
+		<resource path="/resourceB.png" x="810" y="811" />
 	</resources>
 
 	<exceptions>
-		<exception class="java.lang.Exception" x="800" y="801">
+		<exception class="java.lang.Exception" x="900" y="901">
 			<section name="SECTION_A" input="INPUT_A" />
 		</exception>
-		<exception class="java.lang.RuntimeException" x="802" y="803">
+		<exception class="java.lang.RuntimeException" x="902" y="903">
 			<template path="/templateA" />
 		</exception>
-		<exception class="java.sql.SQLException" x="804" y="805">
+		<exception class="java.sql.SQLException" x="904" y="905">
 			<resource path="/resourceB.png" />
 		</exception>
-		<exception class="net.example.AuthException" x="806" y="807">
+		<exception class="net.example.AuthException" x="906" y="907">
 			<security name="SECURITY_B" />
 		</exception>
-		<exception class="java.lang.NullPointerException" x="808" y="809">
+		<exception class="java.lang.NullPointerException" x="908" y="909">
 			<redirect path="/pathB" />
 		</exception>
-		<exception class="java.io.IOException" x="810" y="811" />
+		<exception class="java.io.IOException" x="910" y="911">
+			<procedure name="PROCEDURE_A" />
+		</exception>
+		<exception class="java.lang.Throwable" x="912" y="913" />
 	</exceptions>
 
 	<starts>
-		<start x="900" y="901">
+		<start x="1000" y="1001">
 			<section name="SECTION_A" input="INPUT_A" />
 		</start>
-		<start x="910" y="911" />
+		<start x="1002" y="1003">
+			<procedure name="PROCEDURE_A" />
+		</start>
+		<start x="1004" y="1005" />
 	</starts>
 
 </woof>

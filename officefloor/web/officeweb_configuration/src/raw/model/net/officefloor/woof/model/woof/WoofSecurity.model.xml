@@ -7,6 +7,8 @@
 	<list type="WoofSecurityContentTypeModel" name="content type" />
 	<list type="WoofSecurityOutputModel" name="output" />
 	<list type="WoofSectionOutputToWoofSecurityModel" name="woof section output" />
+	<list type="WoofProcedureOutputToWoofSecurityModel" name="woof procedure output" />
+	<list type="WoofProcedureNextToWoofSecurityModel" name="woof procedure next" />
 	<list type="WoofTemplateOutputToWoofSecurityModel" name="woof template output" />
 	<list type="WoofSecurityOutputToWoofSecurityModel" name="woof security output" />
 	<list type="WoofHttpContinuationToWoofSecurityModel" name="woof http continuation" />

@@ -3,6 +3,8 @@
 	<field type="String" name="resource path" />
 	<list type="WoofTemplateOutputToWoofResourceModel" name="woof template output" />
 	<list type="WoofSectionOutputToWoofResourceModel" name="woof section output" />
+	<list type="WoofProcedureOutputToWoofResourceModel" name="woof procedure output" />
+	<list type="WoofProcedureNextToWoofResourceModel" name="woof procedure next" />
 	<list type="WoofSecurityOutputToWoofResourceModel" name="woof security output" />
 	<list type="WoofExceptionToWoofResourceModel" name="woof exception" />
 	<list type="WoofHttpContinuationToWoofResourceModel" name="woof http continuation" />

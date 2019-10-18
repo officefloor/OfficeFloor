@@ -17,6 +17,8 @@
  */
 package net.officefloor.woof.model.woof;
 
+import java.util.List;
+
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.configuration.FileSystemConfigurationContext;
@@ -73,6 +75,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				"getResourcePath");
 		assertProperties(new WoofHttpContinuationToWoofHttpContinuationModel("/pathB"), continuation.getWoofRedirect(),
 				"getApplicationPath");
+		assertProperties(new WoofHttpContinuationToWoofProcedureModel("PROCEDURE_A"), continuation.getWoofProcedure(),
+				"getProcedureName");
 
 		// ----------------------------------------
 		// Validate the HTTP inputs
@@ -91,6 +95,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				"getResourcePath");
 		assertProperties(new WoofHttpInputToWoofHttpContinuationModel("/pathA"), httpInput.getWoofHttpContinuation(),
 				"getApplicationPath");
+		assertProperties(new WoofHttpInputToWoofProcedureModel("PROCEDURE_A"), httpInput.getWoofProcedure(),
+				"getProcedureName");
 
 		// ----------------------------------------
 		// Validate the templates
@@ -111,7 +117,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				new WoofTemplateOutputModel("OUTPUT_0", "java.lang.Integer"),
 				new WoofTemplateOutputModel("OUTPUT_1", null), new WoofTemplateOutputModel("OUTPUT_2", null),
 				new WoofTemplateOutputModel("OUTPUT_3", null), new WoofTemplateOutputModel("OUTPUT_4", null),
-				new WoofTemplateOutputModel("OUTPUT_5", null));
+				new WoofTemplateOutputModel("OUTPUT_5", null), new WoofTemplateOutputModel("OUTPUT_6", null));
 		WoofTemplateOutputModel templateOutputSectionInput = template.getOutputs().get(0);
 		assertProperties(new WoofTemplateOutputToWoofSectionInputModel("SECTION_A", "INPUT_A"),
 				templateOutputSectionInput.getWoofSectionInput(), "getSectionName", "getInputName");
@@ -127,6 +133,9 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofTemplateOutputModel templateOutputApplicationPath = template.getOutputs().get(4);
 		assertProperties(new WoofTemplateOutputToWoofHttpContinuationModel("/pathA"),
 				templateOutputApplicationPath.getWoofHttpContinuation(), "getApplicationPath");
+		WoofTemplateOutputModel templateOutputProcedure = template.getOutputs().get(5);
+		assertProperties(new WoofTemplateOutputToWoofProcedureModel("PROCEDURE_A"),
+				templateOutputProcedure.getWoofProcedure(), "getProcedureName");
 
 		// Validate links
 		assertList(new String[] { "getWoofTemplateLinkName", "getIsLinkSecure" }, template.getLinks(),
@@ -144,15 +153,78 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				new PropertyModel("NAME.0", "VALUE.0"), new PropertyModel("NAME.1", "VALUE.1"));
 
 		// ----------------------------------------
+		// Validate the procedures
+		// ----------------------------------------
+		assertList(
+				new String[] { "getWoofProcedureName", "getClassName", "getServiceName", "getProcedureName", "getX",
+						"getY" },
+				woof.getWoofProcedures(),
+				new WoofProcedureModel("PROCEDURE_A", "net.example.ExampleProcedure", "Class", "procedure", 400, 401),
+				new WoofProcedureModel("PROCEDURE_B", "net.example.KotlinProcedure", "Kotlin", "method", 402, 403),
+				new WoofProcedureModel("PROCEDURE_C", "net.example.ScalaProcedure", "Scala", "function", 404, 405),
+				new WoofProcedureModel("PROCEDURE_D", "net.example.JavaScriptProcedure", "JavaScript", "function", 406,
+						407),
+				new WoofProcedureModel("PROCEDURE_E", "net.example.GroovyProcedure", "Groovy", "method", 408, 409),
+				new WoofProcedureModel("PROCEDURE_F", "net.example.PythonProcedure", "Python", "func", 410, 411),
+				new WoofProcedureModel("PROCEDURE_G", "net.example.CustomProcedure", "Custom", "procedure", 412, 413));
+		List<WoofProcedureModel> procedures = woof.getWoofProcedures();
+		WoofProcedureModel procedure = procedures.get(0);
+
+		// Verify next
+		assertProperties(new WoofProcedureNextModel(Byte.class.getName()), procedure.getNext(), "getArgumentType");
+		assertProperties(new WoofProcedureNextModel(null), procedures.get(1).getNext(), "getArgumentType");
+		WoofProcedureNextModel procedureNextSectionInput = procedures.get(0).getNext();
+		assertProperties(new WoofProcedureNextToWoofSectionInputModel("SECTION_A", "INPUT_A"),
+				procedureNextSectionInput.getWoofSectionInput(), "getSectionName", "getInputName");
+		WoofProcedureNextModel procedureNextTemplate = procedures.get(1).getNext();
+		assertProperties(new WoofProcedureNextToWoofTemplateModel("/templateA"),
+				procedureNextTemplate.getWoofTemplate(), "getApplicationPath");
+		WoofProcedureNextModel procedureNextResource = procedures.get(2).getNext();
+		assertProperties(new WoofProcedureNextToWoofResourceModel("/resourceB.png"),
+				procedureNextResource.getWoofResource(), "getResourcePath");
+		WoofProcedureNextModel procedureNextSecurity = procedures.get(3).getNext();
+		assertProperties(new WoofProcedureNextToWoofSecurityModel("SECURITY_A"),
+				procedureNextSecurity.getWoofSecurity(), "getHttpSecurityName");
+		WoofProcedureNextModel procedureNextApplicationPath = procedures.get(4).getNext();
+		assertProperties(new WoofProcedureNextToWoofHttpContinuationModel("/pathB"),
+				procedureNextApplicationPath.getWoofHttpContinuation(), "getApplicationPath");
+		WoofProcedureNextModel procedureNextProcedure = procedures.get(5).getNext();
+		assertProperties(new WoofProcedureNextToWoofProcedureModel("PROCEDURE_B"),
+				procedureNextProcedure.getWoofProcedure(), "getProcedureName");
+
+		// Verify outputs
+		assertList(new String[] { "getWoofProcedureOutputName", "getArgumentType" }, procedure.getOutputs(),
+				new WoofProcedureOutputModel("OUTPUT_A", String.class.getName()),
+				new WoofProcedureOutputModel("OUTPUT_B", null), new WoofProcedureOutputModel("OUTPUT_C", null),
+				new WoofProcedureOutputModel("OUTPUT_D", null), new WoofProcedureOutputModel("OUTPUT_E", null),
+				new WoofProcedureOutputModel("OUTPUT_F", null), new WoofProcedureOutputModel("OUTPUT_G", null));
+		WoofProcedureOutputModel procedureOutputSectionInput = procedure.getOutputs().get(0);
+		assertProperties(new WoofProcedureOutputToWoofSectionInputModel("SECTION_B", "INPUT_0"),
+				procedureOutputSectionInput.getWoofSectionInput(), "getSectionName", "getInputName");
+		WoofProcedureOutputModel procedureOutputTemplate = procedure.getOutputs().get(1);
+		assertProperties(new WoofProcedureOutputToWoofTemplateModel("/templateA"),
+				procedureOutputTemplate.getWoofTemplate(), "getApplicationPath");
+		WoofProcedureOutputModel procedureOutputResource = procedure.getOutputs().get(2);
+		assertProperties(new WoofProcedureOutputToWoofResourceModel("/resourceB.png"),
+				procedureOutputResource.getWoofResource(), "getResourcePath");
+		WoofProcedureOutputModel procedureOutputSecurity = procedure.getOutputs().get(3);
+		assertProperties(new WoofProcedureOutputToWoofSecurityModel("SECURITY_A"),
+				procedureOutputSecurity.getWoofSecurity(), "getHttpSecurityName");
+		WoofProcedureOutputModel procedureOutputApplicationPath = procedure.getOutputs().get(4);
+		assertProperties(new WoofProcedureOutputToWoofHttpContinuationModel("/pathB"),
+				procedureOutputApplicationPath.getWoofHttpContinuation(), "getApplicationPath");
+		WoofProcedureOutputModel procedureOutputProcedure = procedure.getOutputs().get(5);
+		assertProperties(new WoofProcedureOutputToWoofProcedureModel("PROCEDURE_B"),
+				procedureOutputProcedure.getWoofProcedure(), "getProcedureName");
+
+		// ----------------------------------------
 		// Validate the sections
 		// ----------------------------------------
 		assertList(
 				new String[] { "getWoofSectionName", "getSectionSourceClassName", "getSectionLocation", "getX",
 						"getY" },
-				woof.getWoofSections(),
-				new WoofSectionModel("SECTION_A", "SECTION", "SECTION_LOCATION", null, null, null, 400, 401),
-				new WoofSectionModel("SECTION_B", "net.example.ExampleSectionSource", "EXAMPLE_LOCATION", null, null,
-						null, 402, 403));
+				woof.getWoofSections(), new WoofSectionModel("SECTION_A", "SECTION", "SECTION_LOCATION", 400, 401),
+				new WoofSectionModel("SECTION_B", "net.example.ExampleSectionSource", "EXAMPLE_LOCATION", 402, 403));
 		WoofSectionModel section = woof.getWoofSections().get(0);
 		assertList(new String[] { "getName", "getValue" }, section.getProperties(),
 				new PropertyModel("name.one", "value.one"), new PropertyModel("name.two", "value.two"));
@@ -162,7 +234,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				new WoofSectionOutputModel("OUTPUT_A", "java.lang.String"),
 				new WoofSectionOutputModel("OUTPUT_B", null), new WoofSectionOutputModel("OUTPUT_C", null),
 				new WoofSectionOutputModel("OUTPUT_D", null), new WoofSectionOutputModel("OUTPUT_E", null),
-				new WoofSectionOutputModel("OUTPUT_F", null));
+				new WoofSectionOutputModel("OUTPUT_F", null), new WoofSectionOutputModel("OUTPUT_G", null));
 		WoofSectionOutputModel sectionOutputSectionInput = section.getOutputs().get(0);
 		assertProperties(new WoofSectionOutputToWoofSectionInputModel("SECTION_B", "INPUT_0"),
 				sectionOutputSectionInput.getWoofSectionInput(), "getSectionName", "getInputName");
@@ -178,6 +250,9 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofSectionOutputModel sectionOutputApplicationPath = section.getOutputs().get(4);
 		assertProperties(new WoofSectionOutputToWoofHttpContinuationModel("/pathB"),
 				sectionOutputApplicationPath.getWoofHttpContinuation(), "getApplicationPath");
+		WoofSectionOutputModel sectionOutputProcedure = section.getOutputs().get(5);
+		assertProperties(new WoofSectionOutputToWoofProcedureModel("PROCEDURE_A"),
+				sectionOutputProcedure.getWoofProcedure(), "getProcedureName");
 
 		// ----------------------------------------
 		// Validate the security
@@ -185,10 +260,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(
 				new String[] { "getHttpSecurityName", "getHttpSecuritySourceClassName", "getTimeout", "getX", "getY" },
 				woof.getWoofSecurities(),
-				new WoofSecurityModel("SECURITY_A", "net.example.HttpSecuritySource", 2000, null, null, null, null,
-						null, null, null, null, null, 500, 501),
-				new WoofSecurityModel("SECURITY_B", "net.example.AnotherHttpSecuritySource", 0, null, null, null, null,
-						null, null, null, null, null, 510, 511));
+				new WoofSecurityModel("SECURITY_A", "net.example.HttpSecuritySource", 2000, 500, 501),
+				new WoofSecurityModel("SECURITY_B", "net.example.AnotherHttpSecuritySource", 0, 510, 511));
 		WoofSecurityModel security = woof.getWoofSecurities().get(0);
 		assertList(new String[] { "getName", "getValue" }, security.getProperties(),
 				new PropertyModel("name.first", "value.first"), new PropertyModel("name.second", "value.second"));
@@ -199,7 +272,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				new WoofSecurityOutputModel("OUTPUT_ZERO", "java.lang.String"),
 				new WoofSecurityOutputModel("OUTPUT_ONE", null), new WoofSecurityOutputModel("OUTPUT_TWO", null),
 				new WoofSecurityOutputModel("OUTPUT_THREE", null), new WoofSecurityOutputModel("OUTPUT_FOUR", null),
-				new WoofSecurityOutputModel("OUTPUT_FIVE", null));
+				new WoofSecurityOutputModel("OUTPUT_FIVE", null), new WoofSecurityOutputModel("OUTPUT_SIX", null));
 		WoofSecurityOutputModel securityOutputSectionInput = security.getOutputs().get(0);
 		assertProperties(new WoofSecurityOutputToWoofSectionInputModel("SECTION_B", "INPUT_1"),
 				securityOutputSectionInput.getWoofSectionInput(), "getSectionName", "getInputName");
@@ -215,16 +288,17 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofSecurityOutputModel securityOutputApplicationPath = security.getOutputs().get(4);
 		assertProperties(new WoofSecurityOutputToWoofHttpContinuationModel("/pathA"),
 				securityOutputApplicationPath.getWoofHttpContinuation(), "getApplicationPath");
+		WoofSecurityOutputModel securityOutputProcedure = security.getOutputs().get(5);
+		assertProperties(new WoofSecurityOutputToWoofProcedureModel("PROCEDURE_A"),
+				securityOutputProcedure.getWoofProcedure(), "getProcedureName");
 
 		// ----------------------------------------
 		// Validate the governances
 		// ----------------------------------------
 		assertList(new String[] { "getWoofGovernanceName", "getGovernanceSourceClassName", "getX", "getY" },
 				woof.getWoofGovernances(),
-				new WoofGovernanceModel("GOVERNANCE_A", "net.example.ExampleGovernanceSource", null, null, null, 600,
-						601),
-				new WoofGovernanceModel("GOVERNANCE_B", "net.example.AnotherGovernanceSource", null, null, null, 610,
-						611));
+				new WoofGovernanceModel("GOVERNANCE_A", "net.example.ExampleGovernanceSource", 600, 601),
+				new WoofGovernanceModel("GOVERNANCE_B", "net.example.AnotherGovernanceSource", 610, 611));
 		WoofGovernanceModel governance = woof.getWoofGovernances().get(0);
 		assertList(new String[] { "getName", "getValue" }, governance.getProperties(),
 				new PropertyModel("name.a", "value.a"), new PropertyModel("name.b", "value.b"));
@@ -236,19 +310,19 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the resources
 		// ----------------------------------------
 		assertList(new String[] { "getResourcePath", "getX", "getY" }, woof.getWoofResources(),
-				new WoofResourceModel("/resourceA.html", null, null, null, null, null, null, 700, 701),
-				new WoofResourceModel("/resourceB.png", null, null, null, null, null, null, 710, 711));
+				new WoofResourceModel("/resourceA.html", 700, 701), new WoofResourceModel("/resourceB.png", 710, 711));
 
 		// ----------------------------------------
 		// Validate the exceptions
 		// ----------------------------------------
 		assertList(new String[] { "getClassName", "getX", "getY" }, woof.getWoofExceptions(),
-				new WoofExceptionModel("java.lang.Exception", null, null, null, null, null, 800, 801),
-				new WoofExceptionModel("java.lang.RuntimeException", null, null, null, null, null, 802, 803),
-				new WoofExceptionModel("java.sql.SQLException", null, null, null, null, null, 804, 805),
-				new WoofExceptionModel("net.example.AuthException", null, null, null, null, null, 806, 807),
-				new WoofExceptionModel("java.lang.NullPointerException", null, null, null, null, null, 808, 809),
-				new WoofExceptionModel("java.io.IOException", null, null, null, null, null, 810, 811));
+				new WoofExceptionModel("java.lang.Exception", 800, 801),
+				new WoofExceptionModel("java.lang.RuntimeException", 802, 803),
+				new WoofExceptionModel("java.sql.SQLException", 804, 805),
+				new WoofExceptionModel("net.example.AuthException", 806, 807),
+				new WoofExceptionModel("java.lang.NullPointerException", 808, 809),
+				new WoofExceptionModel("java.io.IOException", 810, 811),
+				new WoofExceptionModel("java.lang.Throwable", 812, 813));
 		WoofExceptionModel exceptionSectionInput = woof.getWoofExceptions().get(0);
 		assertProperties(new WoofExceptionToWoofSectionInputModel("SECTION_A", "INPUT_A"),
 				exceptionSectionInput.getWoofSectionInput(), "getSectionName", "getInputName");
@@ -264,15 +338,21 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		WoofExceptionModel exceptionApplicationPath = woof.getWoofExceptions().get(4);
 		assertProperties(new WoofExceptionToWoofHttpContinuationModel("/pathB"),
 				exceptionApplicationPath.getWoofHttpContinuation(), "getApplicationPath");
+		WoofExceptionModel exceptionProcedure = woof.getWoofExceptions().get(5);
+		assertProperties(new WoofExceptionToWoofProcedureModel("PROCEDURE_A"), exceptionProcedure.getWoofProcedure(),
+				"getProcedureName");
 
 		// ----------------------------------------
 		// Validate the starts
 		// ----------------------------------------
-		assertList(new String[] { "getX", "getY" }, woof.getWoofStarts(), new WoofStartModel(null, 900, 901),
-				new WoofStartModel(null, 910, 911));
-		WoofStartModel start = woof.getWoofStarts().get(0);
-		assertProperties(new WoofStartToWoofSectionInputModel("SECTION_A", "INPUT_A"), start.getWoofSectionInput(),
-				"getSectionName", "getInputName");
+		assertList(new String[] { "getX", "getY" }, woof.getWoofStarts(), new WoofStartModel(null, null, 900, 901),
+				new WoofStartModel(null, null, 910, 911), new WoofStartModel(null, null, 912, 913));
+		WoofStartModel startSection = woof.getWoofStarts().get(0);
+		assertProperties(new WoofStartToWoofSectionInputModel("SECTION_A", "INPUT_A"),
+				startSection.getWoofSectionInput(), "getSectionName", "getInputName");
+		WoofStartModel startProcedure = woof.getWoofStarts().get(1);
+		assertProperties(new WoofStartToWoofProcedureModel("PROCEDURE_A"), startProcedure.getWoofProcedure(),
+				"getProcedureName");
 	}
 
 	/**

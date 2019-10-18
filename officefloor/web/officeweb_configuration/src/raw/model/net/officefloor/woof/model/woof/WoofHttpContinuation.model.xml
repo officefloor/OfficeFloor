@@ -3,15 +3,17 @@
 	<field type="boolean" name="is secure" />
 	<field type="String" name="application path" />
 	<field type="WoofHttpContinuationToWoofSectionInputModel" name="woof section input" />
+	<field type="WoofHttpContinuationToWoofProcedureModel" name="woof procedure" />
 	<field type="WoofHttpContinuationToWoofTemplateModel" name="woof template" />
 	<field type="WoofHttpContinuationToWoofResourceModel" name="woof resource" />
 	<field type="WoofHttpContinuationToWoofSecurityModel" name="woof security" />
-	<field type="WoofHttpContinuationToWoofHttpContinuationModel"
-		name="woof redirect" />
+	<field type="WoofHttpContinuationToWoofHttpContinuationModel" name="woof redirect" />
 	<list type="WoofTemplateOutputToWoofHttpContinuationModel" name="woof template output" />
 	<list type="WoofSectionOutputToWoofHttpContinuationModel" name="woof section output" />
 	<list type="WoofExceptionToWoofHttpContinuationModel" name="woof exception" />
 	<list type="WoofSecurityOutputToWoofHttpContinuationModel" name="woof security output" />
+	<list type="WoofProcedureOutputToWoofHttpContinuationModel" name="woof procedure output" />
+	<list type="WoofProcedureNextToWoofHttpContinuationModel" name="woof procedure next" />
 	<list type="WoofHttpContinuationToWoofHttpContinuationModel" name="woof http continuation" />
 	<list type="WoofHttpInputToWoofHttpContinuationModel" name="woof http input" />
 </model>

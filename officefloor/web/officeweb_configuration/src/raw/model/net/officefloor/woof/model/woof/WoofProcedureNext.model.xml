@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="argument type" />
+	<field type="WoofProcedureNextToWoofSectionInputModel" name="woof section input" />
+	<field type="WoofProcedureNextToWoofTemplateModel" name="woof template" />
+	<field type="WoofProcedureNextToWoofSecurityModel" name="woof security" />
+	<field type="WoofProcedureNextToWoofResourceModel" name="woof resource" />
+	<field type="WoofProcedureNextToWoofHttpContinuationModel" name="woof http continuation" />
+	<field type="WoofProcedureNextToWoofProcedureModel" name="woof procedure" />
+</model>

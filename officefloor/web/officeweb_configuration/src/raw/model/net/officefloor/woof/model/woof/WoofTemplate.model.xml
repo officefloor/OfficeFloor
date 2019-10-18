@@ -14,6 +14,8 @@
 	<list type="WoofTemplateRenderHttpMethodModel" name="render http method" />
 	<list type="WoofTemplateExtensionModel" name="extension" />
 	<list type="WoofSectionOutputToWoofTemplateModel" name="woof section output" />
+	<list type="WoofProcedureOutputToWoofTemplateModel" name="woof procedure output" />
+	<list type="WoofProcedureNextToWoofTemplateModel" name="woof procedure next" />
 	<list type="WoofTemplateOutputToWoofTemplateModel" name="woof template output" />
 	<list type="WoofSecurityOutputToWoofTemplateModel" name="woof security output" />
 	<list type="WoofHttpContinuationToWoofTemplateModel" name="woof http continuation" />
