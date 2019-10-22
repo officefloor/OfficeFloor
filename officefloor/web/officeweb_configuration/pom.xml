@@ -117,6 +117,10 @@
 			<artifactId>officeweb_resource</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.activity</groupId>
+			<artifactId>officeprocedure</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>provided</scope>

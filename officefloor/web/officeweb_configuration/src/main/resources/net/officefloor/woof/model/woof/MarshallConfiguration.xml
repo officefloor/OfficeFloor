@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<marshall type="net.officefloor.woof.model.woof.WoofModel"
-	element="woof">
+<marshall type="net.officefloor.woof.model.woof.WoofModel" element="woof">
 
 	<!-- HTTP CONTINUATIONS -->
 	<collection method="getWoofHttpContinuations" element="http-continuations">
-		<item type="net.officefloor.woof.model.woof.WoofHttpContinuationModel"
-			element="http-continuation">
+		<item type="net.officefloor.woof.model.woof.WoofHttpContinuationModel" element="http-continuation">
 			<attributes>
 				<attribute method="getApplicationPath" attribute="path" />
 				<attribute method="getIsSecure" attribute="secure" />
@@ -38,13 +36,17 @@
 					<attribute method="getApplicationPath" attribute="path" />
 				</attributes>
 			</object>
+			<object method="getWoofProcedure" element="procedure">
+				<attributes>
+					<attribute method="getProcedureName" attribute="name" />
+				</attributes>
+			</object>
 		</item>
 	</collection>
 
 	<!-- HTTP INPUTS -->
 	<collection method="getWoofHttpInputs" element="http-inputs">
-		<item type="net.officefloor.woof.model.woof.WoofHttpInputModel"
-			element="http-input">
+		<item type="net.officefloor.woof.model.woof.WoofHttpInputModel" element="http-input">
 			<attributes>
 				<attribute method="getApplicationPath" attribute="path" />
 				<attribute method="getHttpMethod" attribute="method" />
@@ -78,13 +80,17 @@
 					<attribute method="getApplicationPath" attribute="path" />
 				</attributes>
 			</object>
+			<object method="getWoofProcedure" element="procedure">
+				<attributes>
+					<attribute method="getProcedureName" attribute="name" />
+				</attributes>
+			</object>
 		</item>
 	</collection>
 
 	<!-- TEMPLATES -->
 	<collection method="getWoofTemplates" element="templates">
-		<item type="net.officefloor.woof.model.woof.WoofTemplateModel"
-			element="template">
+		<item type="net.officefloor.woof.model.woof.WoofTemplateModel" element="template">
 			<attributes>
 				<attribute method="getApplicationPath" attribute="path" />
 				<attribute method="getTemplateLocation" attribute="location" />
@@ -98,8 +104,7 @@
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getLinks">
-				<item type="net.officefloor.woof.model.woof.WoofTemplateLinkModel"
-					element="link">
+				<item type="net.officefloor.woof.model.woof.WoofTemplateLinkModel" element="link">
 					<attributes>
 						<attribute method="getWoofTemplateLinkName" attribute="name" />
 						<attribute method="getIsLinkSecure" attribute="secure" />
@@ -107,24 +112,19 @@
 				</item>
 			</collection>
 			<collection method="getRenderHttpMethods">
-				<item
-					type="net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel"
-					element="render">
+				<item type="net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel" element="render">
 					<attributes>
-						<attribute method="getWoofTemplateRenderHttpMethodName"
-							attribute="method" />
+						<attribute method="getWoofTemplateRenderHttpMethodName" attribute="method" />
 					</attributes>
 				</item>
 			</collection>
 			<object method="getSuperWoofTemplate" element="extends">
 				<attributes>
-					<attribute method="getSuperWoofTemplateApplicationPath"
-						attribute="template" />
+					<attribute method="getSuperWoofTemplateApplicationPath" attribute="template" />
 				</attributes>
 			</object>
 			<collection method="getOutputs">
-				<item type="net.officefloor.woof.model.woof.WoofTemplateOutputModel"
-					element="output">
+				<item type="net.officefloor.woof.model.woof.WoofTemplateOutputModel" element="output">
 					<attributes>
 						<attribute method="getWoofTemplateOutputName" attribute="name" />
 						<attribute method="getArgumentType" attribute="argument-type" />
@@ -155,17 +155,20 @@
 							<attribute method="getApplicationPath" attribute="path" />
 						</attributes>
 					</object>
+					<object method="getWoofProcedure" element="procedure">
+						<attributes>
+							<attribute method="getProcedureName" attribute="name" />
+						</attributes>
+					</object>
 				</item>
 			</collection>
 			<collection method="getExtensions">
-				<item type="net.officefloor.woof.model.woof.WoofTemplateExtensionModel"
-					element="extension">
+				<item type="net.officefloor.woof.model.woof.WoofTemplateExtensionModel" element="extension">
 					<attributes>
 						<attribute method="getExtensionClassName" attribute="class" />
 					</attributes>
 					<collection method="getProperties">
-						<item type="net.officefloor.woof.model.woof.PropertyModel"
-							element="property">
+						<item type="net.officefloor.woof.model.woof.PropertyModel" element="property">
 							<attributes>
 								<attribute method="getName" attribute="name" />
 								<attribute method="getValue" attribute="value" />
@@ -179,8 +182,7 @@
 
 	<!-- SECTIONS -->
 	<collection method="getWoofSections" element="sections">
-		<item type="net.officefloor.woof.model.woof.WoofSectionModel"
-			element="section">
+		<item type="net.officefloor.woof.model.woof.WoofSectionModel" element="section">
 			<attributes>
 				<attribute method="getWoofSectionName" attribute="name" />
 				<attribute method="getSectionSourceClassName" attribute="source" />
@@ -189,8 +191,7 @@
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getProperties">
-				<item type="net.officefloor.woof.model.woof.PropertyModel"
-					element="property">
+				<item type="net.officefloor.woof.model.woof.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
@@ -198,8 +199,7 @@
 				</item>
 			</collection>
 			<collection method="getInputs">
-				<item type="net.officefloor.woof.model.woof.WoofSectionInputModel"
-					element="input">
+				<item type="net.officefloor.woof.model.woof.WoofSectionInputModel" element="input">
 					<attributes>
 						<attribute method="getWoofSectionInputName" attribute="name" />
 						<attribute method="getParameterType" attribute="parameter-type" />
@@ -207,8 +207,7 @@
 				</item>
 			</collection>
 			<collection method="getOutputs">
-				<item type="net.officefloor.woof.model.woof.WoofSectionOutputModel"
-					element="output">
+				<item type="net.officefloor.woof.model.woof.WoofSectionOutputModel" element="output">
 					<attributes>
 						<attribute method="getWoofSectionOutputName" attribute="name" />
 						<attribute method="getArgumentType" attribute="argument-type" />
@@ -239,6 +238,100 @@
 							<attribute method="getApplicationPath" attribute="path" />
 						</attributes>
 					</object>
+					<object method="getWoofProcedure" element="procedure">
+						<attributes>
+							<attribute method="getProcedureName" attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- PROCEDURES -->
+	<collection method="getWoofProcedures" element="procedures">
+		<item type="net.officefloor.woof.model.woof.WoofProcedureModel" element="procedure">
+			<attributes>
+				<attribute method="getWoofProcedureName" attribute="name" />
+				<attribute method="getClassName" attribute="class" />
+				<attribute method="getServiceName" attribute="service" />
+				<attribute method="getProcedureName" attribute="procedure" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<object method="getNext" element="next">
+				<attributes>
+					<attribute method="getArgumentType" attribute="argument-type" />
+				</attributes>
+				<object method="getWoofSectionInput" element="section">
+					<attributes>
+						<attribute method="getSectionName" attribute="name" />
+						<attribute method="getInputName" attribute="input" />
+					</attributes>
+				</object>
+				<object method="getWoofTemplate" element="template">
+					<attributes>
+						<attribute method="getApplicationPath" attribute="path" />
+					</attributes>
+				</object>
+				<object method="getWoofResource" element="resource">
+					<attributes>
+						<attribute method="getResourcePath" attribute="path" />
+					</attributes>
+				</object>
+				<object method="getWoofSecurity" element="security">
+					<attributes>
+						<attribute method="getHttpSecurityName" attribute="name" />
+					</attributes>
+				</object>
+				<object method="getWoofHttpContinuation" element="redirect">
+					<attributes>
+						<attribute method="getApplicationPath" attribute="path" />
+					</attributes>
+				</object>
+				<object method="getWoofProcedure" element="procedure">
+					<attributes>
+						<attribute method="getProcedureName" attribute="name" />
+					</attributes>
+				</object>
+			</object>
+			<collection method="getOutputs">
+				<item type="net.officefloor.woof.model.woof.WoofProcedureOutputModel" element="output">
+					<attributes>
+						<attribute method="getWoofProcedureOutputName" attribute="name" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+					</attributes>
+					<object method="getWoofSectionInput" element="section">
+						<attributes>
+							<attribute method="getSectionName" attribute="name" />
+							<attribute method="getInputName" attribute="input" />
+						</attributes>
+					</object>
+					<object method="getWoofTemplate" element="template">
+						<attributes>
+							<attribute method="getApplicationPath" attribute="path" />
+						</attributes>
+					</object>
+					<object method="getWoofResource" element="resource">
+						<attributes>
+							<attribute method="getResourcePath" attribute="path" />
+						</attributes>
+					</object>
+					<object method="getWoofSecurity" element="security">
+						<attributes>
+							<attribute method="getHttpSecurityName" attribute="name" />
+						</attributes>
+					</object>
+					<object method="getWoofHttpContinuation" element="redirect">
+						<attributes>
+							<attribute method="getApplicationPath" attribute="path" />
+						</attributes>
+					</object>
+					<object method="getWoofProcedure" element="procedure">
+						<attributes>
+							<attribute method="getProcedureName" attribute="name" />
+						</attributes>
+					</object>
 				</item>
 			</collection>
 		</item>
@@ -246,19 +339,16 @@
 
 	<!-- SECURITY -->
 	<collection method="getWoofSecurities" element="securities">
-		<item type="net.officefloor.woof.model.woof.WoofSecurityModel"
-			element="security">
+		<item type="net.officefloor.woof.model.woof.WoofSecurityModel" element="security">
 			<attributes>
 				<attribute method="getHttpSecurityName" attribute="name" />
-				<attribute method="getHttpSecuritySourceClassName"
-					attribute="source" />
+				<attribute method="getHttpSecuritySourceClassName" attribute="source" />
 				<attribute method="getTimeout" attribute="timeout" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getProperties">
-				<item type="net.officefloor.woof.model.woof.PropertyModel"
-					element="property">
+				<item type="net.officefloor.woof.model.woof.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
@@ -266,16 +356,14 @@
 				</item>
 			</collection>
 			<collection method="getContentTypes">
-				<item type="net.officefloor.woof.model.woof.WoofSecurityContentTypeModel"
-					element="content">
+				<item type="net.officefloor.woof.model.woof.WoofSecurityContentTypeModel" element="content">
 					<attributes>
 						<attribute method="getContentType" attribute="type" />
 					</attributes>
 				</item>
 			</collection>
 			<collection method="getOutputs">
-				<item type="net.officefloor.woof.model.woof.WoofSecurityOutputModel"
-					element="output">
+				<item type="net.officefloor.woof.model.woof.WoofSecurityOutputModel" element="output">
 					<attributes>
 						<attribute method="getWoofSecurityOutputName" attribute="name" />
 						<attribute method="getArgumentType" attribute="argument-type" />
@@ -306,6 +394,11 @@
 							<attribute method="getApplicationPath" attribute="path" />
 						</attributes>
 					</object>
+					<object method="getWoofProcedure" element="procedure">
+						<attributes>
+							<attribute method="getProcedureName" attribute="name" />
+						</attributes>
+					</object>
 				</item>
 			</collection>
 		</item>
@@ -313,18 +406,15 @@
 
 	<!-- GOVERNANCES -->
 	<collection method="getWoofGovernances" element="governances">
-		<item type="net.officefloor.woof.model.woof.WoofGovernanceModel"
-			element="governance">
+		<item type="net.officefloor.woof.model.woof.WoofGovernanceModel" element="governance">
 			<attributes>
 				<attribute method="getWoofGovernanceName" attribute="name" />
-				<attribute method="getGovernanceSourceClassName"
-					attribute="source" />
+				<attribute method="getGovernanceSourceClassName" attribute="source" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getProperties">
-				<item type="net.officefloor.woof.model.woof.PropertyModel"
-					element="property">
+				<item type="net.officefloor.woof.model.woof.PropertyModel" element="property">
 					<attributes>
 						<attribute method="getName" attribute="name" />
 						<attribute method="getValue" attribute="value" />
@@ -332,8 +422,7 @@
 				</item>
 			</collection>
 			<collection method="getGovernanceAreas">
-				<item type="net.officefloor.woof.model.woof.WoofGovernanceAreaModel"
-					element="governance-area">
+				<item type="net.officefloor.woof.model.woof.WoofGovernanceAreaModel" element="governance-area">
 					<attributes>
 						<attribute method="getX" attribute="x" />
 						<attribute method="getY" attribute="y" />
@@ -347,8 +436,7 @@
 
 	<!-- RESOURCES -->
 	<collection method="getWoofResources" element="resources">
-		<item type="net.officefloor.woof.model.woof.WoofResourceModel"
-			element="resource">
+		<item type="net.officefloor.woof.model.woof.WoofResourceModel" element="resource">
 			<attributes>
 				<attribute method="getResourcePath" attribute="path" />
 				<attribute method="getX" attribute="x" />
@@ -359,8 +447,7 @@
 
 	<!-- EXCEPTIONS -->
 	<collection method="getWoofExceptions" element="exceptions">
-		<item type="net.officefloor.woof.model.woof.WoofExceptionModel"
-			element="exception">
+		<item type="net.officefloor.woof.model.woof.WoofExceptionModel" element="exception">
 			<attributes>
 				<attribute method="getClassName" attribute="class" />
 				<attribute method="getX" attribute="x" />
@@ -392,13 +479,17 @@
 					<attribute method="getApplicationPath" attribute="path" />
 				</attributes>
 			</object>
+			<object method="getWoofProcedure" element="procedure">
+				<attributes>
+					<attribute method="getProcedureName" attribute="name" />
+				</attributes>
+			</object>
 		</item>
 	</collection>
 
 	<!-- STARTS -->
 	<collection method="getWoofStarts" element="starting">
-		<item type="net.officefloor.woof.model.woof.WoofStartModel"
-			element="start">
+		<item type="net.officefloor.woof.model.woof.WoofStartModel" element="start">
 			<attributes>
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
@@ -407,6 +498,11 @@
 				<attributes>
 					<attribute method="getSectionName" attribute="name" />
 					<attribute method="getInputName" attribute="input" />
+				</attributes>
+			</object>
+			<object method="getWoofProcedure" element="procedure">
+				<attributes>
+					<attribute method="getProcedureName" attribute="name" />
 				</attributes>
 			</object>
 		</item>

@@ -111,14 +111,14 @@
 				<redirect path="/pathB" />
 			</next>
 		</procedure>
-		<procedure name="PROCEDURE_E" class="net.example.PythonProcedure" service="Python" procedure="func" x="408"
-			y="409">
+		<procedure name="PROCEDURE_F" class="net.example.PythonProcedure" service="Python" procedure="func" x="410"
+			y="411">
 			<next>
 				<procedure name="PROCEDURE_B" />
 			</next>
 		</procedure>
-		<procedure name="PROCEDURE_F" class="net.example.CustomProcedure" service="Custom" procedure="procedure"
-			x="410" y="411" />
+		<procedure name="PROCEDURE_G" class="net.example.CustomProcedure" service="Custom" procedure="procedure"
+			x="412" y="413" />
 	</procedures>
 
 	<sections>
@@ -186,7 +186,7 @@
 		<governance name="GOVERNANCE_A" source="net.example.ExampleGovernanceSource" x="700" y="701">
 			<property name="name.a" value="value.a" />
 			<property name="name.b" value="value.b" />
-			<governance-area x="720" y="721" width="740" height="641" />
+			<governance-area x="720" y="721" width="740" height="741" />
 			<governance-area x="730" y="731" width="750" height="751" />
 		</governance>
 		<governance name="GOVERNANCE_B" source="net.example.AnotherGovernanceSource" x="710" y="711" />

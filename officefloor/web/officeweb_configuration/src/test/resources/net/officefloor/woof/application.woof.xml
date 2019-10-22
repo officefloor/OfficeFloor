@@ -16,6 +16,9 @@
 		<http-continuation path="/pathE">
 			<redirect path="/pathA" />
 		</http-continuation>
+		<http-continuation path="/pathF">
+			<procedure name="PROCEDURE_A" />
+		</http-continuation>
 	</http-continuations>
 
 	<http-inputs>
@@ -34,13 +37,15 @@
 		<http-input path="/inputE" method="OTHER">
 			<redirect path="/pathA" />
 		</http-input>
+		<http-input path="/inputF" method="GET">
+			<parameter name="PROCEDURE_A" />
+		</http-input>
 	</http-inputs>
 
 
 	<templates>
-		<template path="/template/{param}" location="WOOF/TemplateA.ofp"
-			class="net.example.Template" redirect-values-function="redirect"
-			content-type="text/html; charset=UTF-16" charset="UTF-16"
+		<template path="/template/{param}" location="WOOF/TemplateA.ofp" class="net.example.Template"
+			redirect-values-function="redirect" content-type="text/html; charset=UTF-16" charset="UTF-16"
 			link-separator-character="_" secure="true" x="20" y="20">
 			<output name="OUTPUT_1" argument-type="java.lang.Integer">
 				<section name="SECTION_A" input="INPUT_A" />
@@ -57,6 +62,9 @@
 			<output name="OUTPUT_5" argument-type="java.lang.String">
 				<redirect path="/pathA" />
 			</output>
+			<output name="OUTPUT_6" argument-type="java.lang.Integer">
+				<parameter name="PROCEDURE_A" />
+			</output>
 			<link name="LINK_1" secure="true" />
 			<link name="LINK_2" secure="false" />
 			<render method="POST" />
@@ -66,8 +74,7 @@
 	</templates>
 
 	<sections>
-		<section name="SECTION_A"
-			source="net.officefloor.plugin.section.clazz.ClassSectionSource"
+		<section name="SECTION_A" source="net.officefloor.plugin.section.clazz.ClassSectionSource"
 			location="net.example.Section" x="80" y="80">
 			<property name="name.one" value="value.one" />
 			<property name="name.two" value="value.two" />
@@ -88,15 +95,48 @@
 			<output name="OUTPUT_E" argument-type="java.lang.Long">
 				<redirect path="/pathC" />
 			</output>
+			<output name="OUTPUT_F" argument-type="java.lang.Integer">
+				<procedure name="PROCEDURE_A" />
+			</output>
 		</section>
 		<section name="SECTION_B" source="CLASS" location="net.another.Section">
 			<input name="INPUT_0" />
 		</section>
 	</sections>
 
+	<procedures>
+		<procedure name="PROCEDURE_A" class="net.example.ExampleProcedure" service="Class" procedure="procedure">
+			<next argument-type="java.lang.String">
+				<section name="SECTION_B" input="INPUT_0" />
+				<template path="/template/another" />
+				<security name="SECURITY_TWO" />
+				<resource path="/resource.html" />
+				<redirect path="/pathD" />
+				<procedure name="PROCEDURE_A" />
+			</next>
+			<output name="OUTPUT_ONE" argument-type="java.lang.Number">
+				<section name="SECTION_B" input="INPUT_0" />
+			</output>
+			<output name="OUTPUT_TWO" argument-type="java.lang.Object">
+				<template path="/template/another" />
+			</output>
+			<output name="OUTPUT_THREE">
+				<security name="SECURITY_TWO" />
+			</output>
+			<output name="OUTPUT_FOUR">
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_FIVE" argument-type="java.util.Map">
+				<redirect path="/pathD" />
+			</output>
+			<output name="OUTPUT_SIX" argument-type="java.lang.Integer">
+				<procedure name="PROCEDURE_A" />
+			</output>
+		</procedure>
+	</procedures>
+
 	<securities>
-		<security name="SECURITY_ONE" source="net.example.HttpSecuritySource"
-			timeout="2000">
+		<security name="SECURITY_ONE" source="net.example.HttpSecuritySource" timeout="2000">
 			<property name="name.first" value="value.first" />
 			<property name="name.second" value="value.second" />
 			<content type="application/json" />
@@ -116,6 +156,9 @@
 			<output name="OUTPUT_FIVE" argument-type="java.util.Map">
 				<redirect path="/pathD" />
 			</output>
+			<output name="OUTPUT_SIX" argument-type="java.lang.Integer">
+				<procedure name="PROCEDURE_A" />
+			</output>
 		</security>
 		<security name="SECURITY_TWO" source="net.another.HttpSecuritySource" />
 	</securities>
@@ -126,8 +169,7 @@
 	</resources>
 
 	<governances>
-		<governance name="GOVERNANCE_A"
-			source="net.officefloor.plugin.governance.clazz.ClassGovernanceSource">
+		<governance name="GOVERNANCE_A" source="net.officefloor.plugin.governance.clazz.ClassGovernanceSource">
 			<property name="name.a" value="value.a" />
 			<property name="name.b" value="value.b" />
 			<governance-area x="10" y="10" width="30" height="30" />
@@ -152,6 +194,9 @@
 		<exception class="java.lang.NullPointerException">
 			<redirect path="/pathE" />
 		</exception>
+		<exception class="java.lang.IllegalArgumentException">
+			<procedure name="PROCEDURE_A" />
+		</exception>
 		<exception class="java.io.IOException" />
 	</exceptions>
 
@@ -160,7 +205,7 @@
 			<section name="SECTION_A" input="INPUT_A" />
 		</start>
 		<start>
-			<section name="SECTION_B" input="INPUT_0" />
+			<procedure name="PROCEDURE_A" />
 		</start>
 	</starts>
 
