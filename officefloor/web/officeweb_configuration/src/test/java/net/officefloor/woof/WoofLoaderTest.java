@@ -150,6 +150,10 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		final OfficeSection procedureA = this.createMock(OfficeSection.class);
 		this.recordReturn(this.procedure,
 				this.procedure.addProcedure("net.example.ExampleProcedure", "Class", "procedure", true), procedureA);
+		final OfficeSection procedureB = this.createMock(OfficeSection.class);
+		this.recordReturn(this.procedure,
+				this.procedure.addProcedure("net.example.SecondProcedure", "JavaScript", "function", false),
+				procedureB);
 
 		// Record loading securities
 		final HttpSecurityBuilder securityOne = this.createMock(HttpSecurityBuilder.class);
@@ -210,19 +214,19 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Record linking procedure next
 		this.office.link(this.recordGetNext(procedureA), this.recordGetInput(sectionB, "INPUT_0"));
-		this.office.link(this.recordGetNext(procedureA), templateA.recordGetRender(Short.class));
-		this.office.link(this.recordGetNext(procedureA), this.recordGetInput(securityOne));
-		this.office.link(this.recordGetNext(procedureA), resourcePng);
-		this.office.link(this.recordGetNext(procedureA), this.recordRedirect(pathC, Long.class));
-		this.office.link(this.recordGetNext(procedureA), this.recordGetProcedure(procedureA));
+		this.office.link(this.recordGetNext(procedureA), templateB.recordGetRender(String.class));
+		this.office.link(this.recordGetNext(procedureA), this.recordGetInput(securityTwo));
+		this.office.link(this.recordGetNext(procedureA), resourceHtml);
+		this.office.link(this.recordGetNext(procedureA), this.recordRedirect(pathD, String.class));
+		this.office.link(this.recordGetNext(procedureA), this.recordGetProcedure(procedureB));
 
 		// Record linking procedure outputs
-		this.office.link(this.recordGetOutput(procedureA, "OUTPUT_a"), this.recordGetInput(sectionB, "INPUT_0"));
-		this.office.link(this.recordGetOutput(procedureA, "OUTPUT_b"), templateA.recordGetRender(Short.class));
+		this.office.link(this.recordGetOutput(procedureA, "OUTPUT_a"), this.recordGetInput(sectionA, "INPUT_A"));
+		this.office.link(this.recordGetOutput(procedureA, "OUTPUT_b"), templateA.recordGetRender(Object.class));
 		this.office.link(this.recordGetOutput(procedureA, "OUTPUT_c"), this.recordGetInput(securityOne));
 		this.office.link(this.recordGetOutput(procedureA, "OUTPUT_d"), resourcePng);
-		this.office.link(this.recordGetOutput(procedureA, "OUTPUT_e"), this.recordRedirect(pathC, Long.class));
-		this.office.link(this.recordGetOutput(procedureA, "OUTPUT_f"), this.recordGetProcedure(procedureA));
+		this.office.link(this.recordGetOutput(procedureA, "OUTPUT_e"), this.recordRedirect(pathC, Map.class));
+		this.office.link(this.recordGetOutput(procedureA, "OUTPUT_f"), this.recordGetProcedure(procedureB));
 
 		// Record link security outputs
 		this.office.link(this.recordGetOutput(securityOne, "OUTPUT_ONE"), this.recordGetInput(sectionB, "INPUT_0"));
@@ -441,6 +445,11 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 			@Override
 			public HttpResourceArchitect getHttpResourceArchitect() {
 				return WoofLoaderTest.this.resources;
+			}
+
+			@Override
+			public ProcedureArchitect<OfficeSection> getProcedureArchitect() {
+				return WoofLoaderTest.this.procedure;
 			}
 		});
 	}

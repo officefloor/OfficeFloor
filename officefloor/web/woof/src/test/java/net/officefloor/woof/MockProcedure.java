@@ -32,7 +32,7 @@ public class MockProcedure {
 	 * 
 	 * @param response Sends the response.
 	 */
-	public void objects(ObjectResponse<String> response) {
+	public void procedure(ObjectResponse<String> response) {
 		response.send("PROCEDURE");
 	}
 

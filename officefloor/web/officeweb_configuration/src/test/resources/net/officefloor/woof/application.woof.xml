@@ -38,7 +38,7 @@
 			<redirect path="/pathA" />
 		</http-input>
 		<http-input path="/inputF" method="GET">
-			<parameter name="PROCEDURE_A" />
+			<procedure name="PROCEDURE_A" />
 		</http-input>
 	</http-inputs>
 
@@ -63,7 +63,7 @@
 				<redirect path="/pathA" />
 			</output>
 			<output name="OUTPUT_6" argument-type="java.lang.Integer">
-				<parameter name="PROCEDURE_A" />
+				<procedure name="PROCEDURE_A" />
 			</output>
 			<link name="LINK_1" secure="true" />
 			<link name="LINK_2" secure="false" />
@@ -112,27 +112,28 @@
 				<security name="SECURITY_TWO" />
 				<resource path="/resource.html" />
 				<redirect path="/pathD" />
-				<procedure name="PROCEDURE_A" />
+				<procedure name="PROCEDURE_B" />
 			</next>
-			<output name="OUTPUT_ONE" argument-type="java.lang.Number">
-				<section name="SECTION_B" input="INPUT_0" />
+			<output name="OUTPUT_a" argument-type="java.lang.Number">
+				<section name="SECTION_A" input="INPUT_A" />
 			</output>
-			<output name="OUTPUT_TWO" argument-type="java.lang.Object">
-				<template path="/template/another" />
+			<output name="OUTPUT_b" argument-type="java.lang.Object">
+				<template path="/template/{param}" />
 			</output>
-			<output name="OUTPUT_THREE">
-				<security name="SECURITY_TWO" />
+			<output name="OUTPUT_c">
+				<security name="SECURITY_ONE" />
 			</output>
-			<output name="OUTPUT_FOUR">
-				<resource path="/resource.html" />
+			<output name="OUTPUT_d">
+				<resource path="/resource.png" />
 			</output>
-			<output name="OUTPUT_FIVE" argument-type="java.util.Map">
-				<redirect path="/pathD" />
+			<output name="OUTPUT_e" argument-type="java.util.Map">
+				<redirect path="/pathC" />
 			</output>
-			<output name="OUTPUT_SIX" argument-type="java.lang.Integer">
-				<procedure name="PROCEDURE_A" />
+			<output name="OUTPUT_f" argument-type="java.lang.Integer">
+				<procedure name="PROCEDURE_B" />
 			</output>
 		</procedure>
+		<procedure name="PROCEDURE_B" class="net.example.SecondProcedure" service="JavaScript" procedure="function" />
 	</procedures>
 
 	<securities>
