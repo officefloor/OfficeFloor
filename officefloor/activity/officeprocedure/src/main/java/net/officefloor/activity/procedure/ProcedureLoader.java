@@ -31,21 +31,21 @@ public interface ProcedureLoader {
 	/**
 	 * Lists the available {@link Procedure} instances from the {@link Class}.
 	 * 
-	 * @param clazz {@link Class}.
+	 * @param resource Resource.
 	 * @return Listing of available {@link Procedure} instances or <code>null</code>
 	 *         with issues reported to {@link CompilerIssues}.
 	 */
-	Procedure[] listProcedures(Class<?> clazz);
+	Procedure[] listProcedures(String resource);
 
 	/**
 	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
-	 * @param clazz         {@link Class}.
+	 * @param resource      Resource.
 	 * @param serviceName   {@link ProcedureService} name.
 	 * @param procedureName {@link Procedure} name.
 	 * @return {@link ProcedureType} for the {@link Procedure} or <code>null</code>
 	 *         with issues reported to {@link CompilerIssues}.
 	 */
-	ProcedureType loadProcedureType(Class<?> clazz, String serviceName, String procedureName);
+	ProcedureType loadProcedureType(String resource, String serviceName, String procedureName);
 
 }

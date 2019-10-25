@@ -30,6 +30,10 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.variable.In;
+import net.officefloor.plugin.variable.Out;
+import net.officefloor.plugin.variable.Val;
+import net.officefloor.plugin.variable.Var;
 
 /**
  * Tests the {@link ProcedureLoader}.
@@ -149,7 +153,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 			throw failure;
 		}, null, () -> {
 			ProcedureLoader loader = ProcedureLoaderUtil.newProcedureLoader(compiler);
-			return loader.listProcedures(ListSingleProcedure.class);
+			return loader.listProcedures(ListSingleProcedure.class.getName());
 		});
 		this.verifyMockObjects();
 
@@ -163,7 +167,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadSimpleType() {
 		ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder("simple", null);
-		ProcedureLoaderUtil.validateProcedureType(type, LoadSimpleTypeProcedure.class,
+		ProcedureLoaderUtil.validateProcedureType(type, LoadSimpleTypeProcedure.class.getName(),
 				ClassProcedureServiceFactory.class, "simple");
 	}
 
@@ -181,12 +185,16 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder("complex", String.class);
 		type.addObjectType(Long.class.getName(), Long.class, null);
 		type.addObjectType("qualified-" + Character.class.getName(), Character.class, "qualified");
+		type.addVariableType(String.class.getName());
+		type.addVariableType("qualified-" + Integer.class.getName(), Integer.class.getName());
+		type.addVariableType(Long.class.getName());
+		type.addVariableType(Character.class.getName());
 		type.addFlowType("flowOne", null);
 		type.addFlowType("flowTwo", Byte.class);
 		type.addEscalationType(IOException.class.getSimpleName(), IOException.class);
 		type.addEscalationType(SQLException.class.getSimpleName(), SQLException.class);
 		type.setNextArgumentType(Integer.class);
-		ProcedureLoaderUtil.validateProcedureType(type, LoadComplexTypeProcedure.class,
+		ProcedureLoaderUtil.validateProcedureType(type, LoadComplexTypeProcedure.class.getName(),
 				ClassProcedureServiceFactory.class, "complex");
 	}
 
@@ -200,8 +208,9 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	public static class LoadComplexTypeProcedure {
 
 		public Integer complex(@Parameter String parameter, Long dependency,
-				@Qualified("qualified") Character qualifiedDependency, LoadComplexFlows flows)
-				throws IOException, SQLException {
+				@Qualified("qualified") Character qualifiedDependency, @Val String valVariable,
+				@Qualified("qualified") In<Integer> inVariable, Out<Long> outVariable, Var<Character> varVariable,
+				LoadComplexFlows flows) throws IOException, SQLException {
 			return 0;
 		}
 	}
@@ -226,8 +235,8 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		ProcedureType type = MockProcedureService.run((clazz) -> new String[] { "error" }, (context) -> {
 			throw failure;
 		}, () -> {
-			return ProcedureLoaderUtil.loadProcedureType(ErrorInLoadProcedure.class, MockProcedureService.class,
-					"error", compiler);
+			return ProcedureLoaderUtil.loadProcedureType(ErrorInLoadProcedure.class.getName(),
+					MockProcedureService.class, "error", compiler);
 		});
 		this.verifyMockObjects();
 		assertNull("Should not load type", type);

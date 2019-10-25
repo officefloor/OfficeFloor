@@ -20,6 +20,7 @@ package net.officefloor.activity.procedure;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.plugin.variable.Var;
 
 /**
  * Builder of expected {@link ProcedureType}.
@@ -36,6 +37,22 @@ public interface ProcedureTypeBuilder {
 	 * @param typeQualifier Type qualifier. May be <code>null</code>.
 	 */
 	void addObjectType(String objectName, Class<?> objectType, String typeQualifier);
+
+	/**
+	 * Convenience method to add a {@link ProcedureVariableType} defaulting the
+	 * name.
+	 * 
+	 * @param variableType Type of {@link Var}.
+	 */
+	void addVariableType(String variableType);
+
+	/**
+	 * Adds a {@link ProcedureVariableType}.
+	 * 
+	 * @param variableName Name of {@link Var}.
+	 * @param variableType Type of {@link Var}.
+	 */
+	void addVariableType(String variableName, String variableType);
 
 	/**
 	 * Adds a {@link ProcedureFlowType}.

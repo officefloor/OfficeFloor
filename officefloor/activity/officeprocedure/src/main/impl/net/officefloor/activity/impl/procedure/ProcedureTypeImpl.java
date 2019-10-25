@@ -22,6 +22,7 @@ import net.officefloor.activity.procedure.ProcedureEscalationType;
 import net.officefloor.activity.procedure.ProcedureFlowType;
 import net.officefloor.activity.procedure.ProcedureObjectType;
 import net.officefloor.activity.procedure.ProcedureType;
+import net.officefloor.activity.procedure.ProcedureVariableType;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
@@ -47,6 +48,11 @@ public class ProcedureTypeImpl implements ProcedureType {
 	private final ProcedureObjectType[] objectTypes;
 
 	/**
+	 * {@link ProcedureVariableType} instances.
+	 */
+	private final ProcedureVariableType[] variableTypes;
+
+	/**
 	 * {@link ProcedureFlowType} instances.
 	 */
 	private final ProcedureFlowType[] flowTypes;
@@ -67,15 +73,18 @@ public class ProcedureTypeImpl implements ProcedureType {
 	 * @param procedureName    Name of {@link Procedure}.
 	 * @param parameterType    {@link Parameter} type for {@link Procedure}.
 	 * @param objectTypes      {@link ProcedureObjectType} instances.
+	 * @param variableTypes    {@link ProcedureVariableType} instances.
 	 * @param flowTypes        {@link ProcedureFlowType} instances.
 	 * @param escalationTypes  {@link ProcedureEscalationType} instances.
 	 * @param nextArgumentType Next argument type.
 	 */
 	public ProcedureTypeImpl(String procedureName, Class<?> parameterType, ProcedureObjectType[] objectTypes,
-			ProcedureFlowType[] flowTypes, ProcedureEscalationType[] escalationTypes, Class<?> nextArgumentType) {
+			ProcedureVariableType[] variableTypes, ProcedureFlowType[] flowTypes,
+			ProcedureEscalationType[] escalationTypes, Class<?> nextArgumentType) {
 		this.procedureName = procedureName;
 		this.parameterType = parameterType;
 		this.objectTypes = objectTypes;
+		this.variableTypes = variableTypes;
 		this.flowTypes = flowTypes;
 		this.escalationTypes = escalationTypes;
 		this.nextArgumentType = nextArgumentType;
@@ -98,6 +107,11 @@ public class ProcedureTypeImpl implements ProcedureType {
 	@Override
 	public ProcedureObjectType[] getObjectTypes() {
 		return this.objectTypes;
+	}
+
+	@Override
+	public ProcedureVariableType[] getVariableTypes() {
+		return this.variableTypes;
 	}
 
 	@Override

@@ -34,6 +34,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.plugin.section.clazz.FlowAnnotation;
 import net.officefloor.plugin.section.clazz.ParameterAnnotation;
+import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
  * {@link SectionSource} for {@link Procedure}.
@@ -53,7 +54,7 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(ProcedureManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, "Class");
+		context.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, "Class");
 		context.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, "Service");
 	}
 
@@ -61,14 +62,14 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 	public void sourceSection(SectionDesigner designer, SectionSourceContext context) throws Exception {
 
 		// Obtain procedure details
-		String className = context.getProperty(ProcedureManagedFunctionSource.CLASS_NAME_PROPERTY_NAME);
+		String className = context.getProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME);
 		String serviceName = context.getProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME);
 		String procedureName = context.getSectionLocation();
 		boolean isNext = Boolean.parseBoolean(context.getProperty(IS_NEXT_PROPERTY_NAME, Boolean.FALSE.toString()));
 
 		// Load managed function type for the procedure
 		PropertyList typeProperties = context.createPropertyList();
-		typeProperties.addProperty(ProcedureManagedFunctionSource.CLASS_NAME_PROPERTY_NAME).setValue(className);
+		typeProperties.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME).setValue(className);
 		typeProperties.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME).setValue(serviceName);
 		typeProperties.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME).setValue(procedureName);
 		ManagedFunctionType<?, ?> type = context
@@ -78,7 +79,7 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 		// Load the procedure
 		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(procedureName,
 				ProcedureManagedFunctionSource.class.getName());
-		namespace.addProperty(ProcedureManagedFunctionSource.CLASS_NAME_PROPERTY_NAME, className);
+		namespace.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, className);
 		namespace.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
 		namespace.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, procedureName);
 		SectionFunction procedure = namespace.addSectionFunction("procedure", procedureName);
@@ -98,6 +99,12 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 				procedure.getFunctionObject(objectName).flagAsParameter();
 				parameterType = objectTypeName;
 				continue NEXT_OBJECT; // parameter
+			}
+
+			// Variable registered via augmentation
+			String variableName = VariableAnnotation.extractPossibleVariableName(objectType);
+			if (variableName != null) {
+				continue NEXT_OBJECT; // not include variable
 			}
 
 			// Link as section object

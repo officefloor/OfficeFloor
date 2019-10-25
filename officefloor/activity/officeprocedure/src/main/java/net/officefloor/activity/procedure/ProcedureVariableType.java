@@ -15,26 +15,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure.section;
+package net.officefloor.activity.procedure;
 
-import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.variable.Var;
 
 /**
- * Tests the {@link ProcedureManagedFunctionSource}.
+ * <code>Type definition</code> of {@link Var} required by the
+ * {@link Procedure}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcedureManagedFunctionSourceTest extends OfficeFrameTestCase {
+public interface ProcedureVariableType {
 
 	/**
-	 * Ensure correct specification.
+	 * Obtains the name for the {@link Var}.
+	 * 
+	 * @return Name for the {@link Var}.
 	 */
-	public void testSpecification() {
-		ManagedFunctionLoaderUtil.validateSpecification(ProcedureManagedFunctionSource.class,
-				ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, "Class",
-				ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, "Service",
-				ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, "Procedure");
-	}
+	String getVariableName();
+
+	/**
+	 * Obtains the type of the {@link Var}.
+	 * 
+	 * @return Type of the {@link Var}.
+	 */
+	String getVariableType();
 
 }

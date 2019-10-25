@@ -133,7 +133,7 @@ public abstract class AbstractFunctionManagedFunctionSource extends AbstractMana
 				includedMethodNames.add(methodName);
 
 				// Build the managed function for the method
-				methodBuilder.buildMethod(method, clazz, instanceManufacturer, namespaceBuilder, context);
+				methodBuilder.buildMethod(method, instanceManufacturer, namespaceBuilder, context);
 			}
 
 			// Add methods from the parent class on next iteration

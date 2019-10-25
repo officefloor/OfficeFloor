@@ -37,7 +37,7 @@ import net.officefloor.frame.test.Closure;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Var;
-import net.officefloor.polyglot.test.AbstractPolyglotFunctionTest;
+import net.officefloor.polyglot.test.AbstractPolyglotProcedureTest;
 import net.officefloor.polyglot.test.CollectionTypes;
 import net.officefloor.polyglot.test.JavaObject;
 import net.officefloor.polyglot.test.MockHttpObject;
@@ -58,7 +58,7 @@ import net.officefloor.web.compile.WebCompileOfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class ScalaFunctionTest extends AbstractPolyglotFunctionTest {
+public class ScalaFunctionTest extends AbstractPolyglotProcedureTest {
 
 	static {
 		mapper.registerModule(new DefaultScalaModule());

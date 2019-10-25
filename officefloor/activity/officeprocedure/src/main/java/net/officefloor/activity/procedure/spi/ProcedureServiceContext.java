@@ -30,11 +30,11 @@ import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory
 public interface ProcedureServiceContext {
 
 	/**
-	 * Obtains the {@link Class} configured to provide the {@link Procedure}.
+	 * Obtains the resource configured to provide the {@link Procedure}.
 	 * 
-	 * @return {@link Class} configured to provide the {@link Procedure}.
+	 * @return Resource configured to provide the {@link Procedure}.
 	 */
-	Class<?> getInstanceClass();
+	String getResource();
 
 	/**
 	 * Name of the {@link Procedure}.

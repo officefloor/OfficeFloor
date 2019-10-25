@@ -31,6 +31,7 @@ import org.junit.Assert;
 import net.officefloor.activity.impl.procedure.ProcedureEscalationTypeImpl;
 import net.officefloor.activity.impl.procedure.ProcedureFlowTypeImpl;
 import net.officefloor.activity.impl.procedure.ProcedureObjectTypeImpl;
+import net.officefloor.activity.impl.procedure.ProcedureVariableTypeImpl;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
@@ -48,14 +49,25 @@ import net.officefloor.plugin.section.clazz.Parameter;
 public class ProcedureLoaderUtil {
 
 	/**
-	 * List {@link Procedure} instances for {@link Class}.
+	 * List {@link Procedure} instances for a {@link Class}.
 	 * 
 	 * @param clazz {@link Class}.
 	 * @return {@link Procedure} instances for {@link Class}.
 	 * @throws Exception If fails to load {@link Procedure} instances.
 	 */
 	public static Procedure[] listProcedures(Class<?> clazz) {
-		return newProcedureLoader().listProcedures(clazz);
+		return listProcedures(clazz.getName());
+	}
+
+	/**
+	 * List {@link Procedure} instances for a resource.
+	 * 
+	 * @param resource Resource.
+	 * @return {@link Procedure} instances for {@link Class}.
+	 * @throws Exception If fails to load {@link Procedure} instances.
+	 */
+	public static Procedure[] listProcedures(String resource) {
+		return newProcedureLoader().listProcedures(resource);
 	}
 
 	/**
@@ -107,9 +119,20 @@ public class ProcedureLoaderUtil {
 	 * @throws Exception If fails to validate.
 	 */
 	public static void validateProcedures(Class<?> clazz, Procedure... expectedProcedures) {
+		validateProcedures(clazz.getName(), expectedProcedures);
+	}
+
+	/**
+	 * Validates the {@link Procedure} instances.
+	 * 
+	 * @param resource           Resource.
+	 * @param expectedProcedures Expected {@link Procedure} instances.
+	 * @throws Exception If fails to validate.
+	 */
+	public static void validateProcedures(String resource, Procedure... expectedProcedures) {
 
 		// Obtain the listing of procedures
-		Procedure[] actual = listProcedures(clazz);
+		Procedure[] actual = listProcedures(resource);
 
 		// Validate the procedures
 		validateProcedures(actual, expectedProcedures);
@@ -156,26 +179,26 @@ public class ProcedureLoaderUtil {
 	/**
 	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
-	 * @param clazz               {@link Class}.
+	 * @param resource            Resource.
 	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
 	 * @param procedureName       Name of {@link Procedure}.
 	 * @return {@link ProcedureType}.
 	 */
-	public static ProcedureType loadProcedureType(Class<?> clazz,
+	public static ProcedureType loadProcedureType(String resource,
 			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName) {
-		return loadProcedureType(clazz, serviceFactoryClass, procedureName, officeFloorCompiler(null));
+		return loadProcedureType(resource, serviceFactoryClass, procedureName, officeFloorCompiler(null));
 	}
 
 	/**
 	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
-	 * @param clazz               {@link Class}.
+	 * @param resource            Resource.
 	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
 	 * @param procedureName       Name of {@link Procedure}.
 	 * @param compiler            {@link OfficeFloorCompiler}.
 	 * @return {@link ProcedureType}.
 	 */
-	public static ProcedureType loadProcedureType(Class<?> clazz,
+	public static ProcedureType loadProcedureType(String resource,
 			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName,
 			OfficeFloorCompiler compiler) {
 
@@ -186,7 +209,7 @@ public class ProcedureLoaderUtil {
 		ProcedureService service = loadProcedureService(serviceFactoryClass, compiler);
 
 		// Load the managed function type
-		return loader.loadProcedureType(clazz, service.getServiceName(), procedureName);
+		return loader.loadProcedureType(resource, service.getServiceName(), procedureName);
 	}
 
 	/**
@@ -206,12 +229,12 @@ public class ProcedureLoaderUtil {
 	 * 
 	 * @param expectedProcedureType Expected {@link ProcedureType} via
 	 *                              {@link ProcedureTypeBuilder}.
-	 * @param clazz                 {@link Class}.
+	 * @param resource              Resource.
 	 * @param serviceFactoryClass   {@link ProcedureServiceFactory} {@link Class}.
 	 * @param procedureName         Name of {@link Procedure}.
 	 * @return {@link ManagedFunctionType}.
 	 */
-	public static ProcedureType validateProcedureType(ProcedureTypeBuilder expectedProcedureType, Class<?> clazz,
+	public static ProcedureType validateProcedureType(ProcedureTypeBuilder expectedProcedureType, String resource,
 			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName) {
 
 		// Obtain the expected type
@@ -221,7 +244,7 @@ public class ProcedureLoaderUtil {
 		ProcedureType eType = (ProcedureType) expectedProcedureType;
 
 		// Load the procedure type
-		ProcedureType aType = loadProcedureType(clazz, serviceFactoryClass, procedureName);
+		ProcedureType aType = loadProcedureType(resource, serviceFactoryClass, procedureName);
 
 		// Verify actual is as expected
 		assertEquals("Incorrect procedure name", eType.getProcedureName(), aType.getProcedureName());
@@ -240,6 +263,20 @@ public class ProcedureLoaderUtil {
 					aObject.getObjectType());
 			assertEquals("Incorrect object qualifier (object " + eObject.getObjectName() + ")",
 					eObject.getTypeQualifier(), aObject.getTypeQualifier());
+		}
+
+		// Verify variable types
+		ProcedureVariableType[] eVariables = eType.getVariableTypes();
+		ProcedureVariableType[] aVariables = aType.getVariableTypes();
+		LoaderUtil.assertLength("Incorrect number of variable types", eVariables, aVariables,
+				(variable) -> variable.getVariableType());
+		for (int i = 0; i < eVariables.length; i++) {
+			ProcedureVariableType eVariable = eVariables[i];
+			ProcedureVariableType aVariable = aVariables[i];
+			assertEquals("Incorrect variable name (index " + i + ")", eVariable.getVariableName(),
+					aVariable.getVariableName());
+			assertEquals("Incorrect variable type (variable " + eVariable.getVariableName() + ")",
+					eVariable.getVariableType(), aVariable.getVariableType());
 		}
 
 		// Verify the flow types
@@ -376,6 +413,11 @@ public class ProcedureLoaderUtil {
 		private final List<ProcedureObjectType> objectTypes = new LinkedList<>();
 
 		/**
+		 * {@link ProcedureVariableType} instances.
+		 */
+		private final List<ProcedureVariableType> variableTypes = new LinkedList<>();
+
+		/**
 		 * {@link ProcedureFlowType} instances.
 		 */
 		private final List<ProcedureFlowType> flowTypes = new LinkedList<>();
@@ -411,6 +453,16 @@ public class ProcedureLoaderUtil {
 		}
 
 		@Override
+		public void addVariableType(String variableType) {
+			this.addVariableType(variableType, variableType);
+		}
+
+		@Override
+		public void addVariableType(String variableName, String variableType) {
+			this.variableTypes.add(new ProcedureVariableTypeImpl(variableName, variableType));
+		}
+
+		@Override
 		public void addFlowType(String flowName, Class<?> argumentType) {
 			this.flowTypes.add(new ProcedureFlowTypeImpl(flowName, argumentType));
 		}
@@ -442,6 +494,11 @@ public class ProcedureLoaderUtil {
 		@Override
 		public ProcedureObjectType[] getObjectTypes() {
 			return this.objectTypes.toArray(new ProcedureObjectType[this.objectTypes.size()]);
+		}
+
+		@Override
+		public ProcedureVariableType[] getVariableTypes() {
+			return this.variableTypes.toArray(new ProcedureVariableType[this.variableTypes.size()]);
 		}
 
 		@Override

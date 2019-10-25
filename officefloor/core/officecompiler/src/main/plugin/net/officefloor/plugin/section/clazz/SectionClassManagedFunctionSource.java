@@ -187,7 +187,8 @@ public class SectionClassManagedFunctionSource extends AbstractFunctionManagedFu
 							Indexed.class);
 
 			// Add the section object always as first dependency
-			functionTypeBuilder.addObject(context.getInstanceClass()).setLabel("OBJECT");
+			Class<?> objectClass = context.getMethod().getDeclaringClass();
+			functionTypeBuilder.addObject(objectClass).setLabel("OBJECT");
 			context.nextObjectIndex(); // index for section object
 
 			// Return the function type builder

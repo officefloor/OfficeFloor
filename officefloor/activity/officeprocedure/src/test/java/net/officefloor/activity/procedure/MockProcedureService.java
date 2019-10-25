@@ -40,11 +40,11 @@ public class MockProcedureService implements ProcedureService, ProcedureServiceF
 		/**
 		 * Lists the {@link Procedure} instances.
 		 * 
-		 * @param clazz {@link Class}.
+		 * @param resource Resource.
 		 * @return {@link Procedure} listing.
 		 * @throws Exception Possible failure.
 		 */
-		String[] listProcedures(Class<?> clazz) throws Exception;
+		String[] listProcedures(String resource) throws Exception;
 	}
 
 	/**
@@ -135,11 +135,11 @@ public class MockProcedureService implements ProcedureService, ProcedureServiceF
 	}
 
 	@Override
-	public String[] listProcedures(Class<?> clazz) throws Exception {
+	public String[] listProcedures(String resource) throws Exception {
 
 		// Determine if mocking
 		if (listProcedures != null) {
-			return listProcedures.listProcedures(clazz);
+			return listProcedures.listProcedures(resource);
 		}
 
 		// As here, no mocking

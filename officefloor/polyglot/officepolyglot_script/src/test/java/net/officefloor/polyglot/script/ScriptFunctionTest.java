@@ -41,7 +41,7 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Var;
-import net.officefloor.polyglot.test.AbstractPolyglotFunctionTest;
+import net.officefloor.polyglot.test.AbstractPolyglotProcedureTest;
 import net.officefloor.polyglot.test.CollectionTypes;
 import net.officefloor.polyglot.test.JavaObject;
 import net.officefloor.polyglot.test.MockHttpObject;
@@ -59,7 +59,7 @@ import net.officefloor.web.compile.CompileWebContext;
  * 
  * @author Daniel Sagenschneider
  */
-public class ScriptFunctionTest extends AbstractPolyglotFunctionTest {
+public class ScriptFunctionTest extends AbstractPolyglotProcedureTest {
 
 	/**
 	 * {@link ScriptEngineManager}.

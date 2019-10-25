@@ -45,12 +45,12 @@ public interface ProcedureArchitect<S> {
 	/**
 	 * Adds a {@link Procedure}.
 	 * 
-	 * @param className     Name of {@link Class}.
+	 * @param resource      Resource.
 	 * @param serviceName   {@link ProcedureService} name.
 	 * @param procedureName Name of {@link Procedure}.
 	 * @param isNext        Indicates if next {@link Flow} configured.
 	 * @return {@link OfficeSection}/{@link SubSection} for the {@link Procedure}.
 	 */
-	S addProcedure(String className, String serviceName, String procedureName, boolean isNext);
+	S addProcedure(String resource, String serviceName, String procedureName, boolean isNext);
 
 }

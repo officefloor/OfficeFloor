@@ -44,13 +44,27 @@ public class ClassProcedureServiceFactory implements ProcedureServiceFactory {
 
 	@Override
 	public ProcedureService createService(ServiceContext context) throws Throwable {
-		return new ClassProcedureService();
+		return new ClassProcedureService(context);
 	}
 
 	/**
 	 * {@link Class} {@link ProcedureService}.
 	 */
 	private static class ClassProcedureService implements ProcedureService {
+
+		/**
+		 * {@link ServiceContext}.
+		 */
+		private final ServiceContext context;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param context {@link ServiceContext}.
+		 */
+		private ClassProcedureService(ServiceContext context) {
+			this.context = context;
+		}
 
 		/*
 		 * ======================== ProcedureService ===========================
@@ -62,7 +76,13 @@ public class ClassProcedureServiceFactory implements ProcedureServiceFactory {
 		}
 
 		@Override
-		public String[] listProcedures(Class<?> clazz) {
+		public String[] listProcedures(String resource) {
+
+			// Load the class
+			Class<?> clazz = this.context.loadOptionalClass(resource);
+			if (clazz == null) {
+				return null; // no procedures
+			}
 
 			// Provide all public (non-object methods)
 			return Arrays.stream(clazz.getMethods())
@@ -73,9 +93,12 @@ public class ClassProcedureServiceFactory implements ProcedureServiceFactory {
 		@Override
 		public Method loadMethod(ProcedureServiceContext context) throws Exception {
 
+			// Obtain the class
+			Class<?> clazz = this.context.loadClass(context.getResource());
+
 			// Find the method
 			String methodName = context.getProcedureName();
-			for (Method method : context.getInstanceClass().getMethods()) {
+			for (Method method : clazz.getMethods()) {
 				if (method.getName().equals(methodName)) {
 
 					// Found the method

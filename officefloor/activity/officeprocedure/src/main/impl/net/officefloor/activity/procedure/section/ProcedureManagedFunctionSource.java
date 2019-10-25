@@ -43,7 +43,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 	/**
 	 * {@link Property} name providing the {@link Class} name.
 	 */
-	public static final String CLASS_NAME_PROPERTY_NAME = "class.name";
+	public static final String RESOURCE_NAME_PROPERTY_NAME = "class.name";
 
 	/**
 	 * {@link Property} name providing the service to create the procedure.
@@ -61,7 +61,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(CLASS_NAME_PROPERTY_NAME, "Class");
+		context.addProperty(RESOURCE_NAME_PROPERTY_NAME, "Class");
 		context.addProperty(SERVICE_NAME_PROPERTY_NAME, "Service");
 		context.addProperty(PROCEDURE_PROPERTY_NAME, "Procedure");
 	}
@@ -71,7 +71,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the procedure details
-		String className = context.getProperty(CLASS_NAME_PROPERTY_NAME);
+		String resource = context.getProperty(RESOURCE_NAME_PROPERTY_NAME);
 		String serviceName = context.getProperty(SERVICE_NAME_PROPERTY_NAME);
 		String procedureName = context.getProperty(PROCEDURE_PROPERTY_NAME);
 
@@ -88,23 +88,21 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 			throw new Exception("Can not find " + ProcedureService.class.getSimpleName() + " " + serviceName);
 		}
 
-		// Load the class
-		Class<?> clazz = context.loadClass(className);
-
 		// Load the method for the procedure service
-		ProcedureServiceContextImpl procedureContext = new ProcedureServiceContextImpl(clazz, procedureName);
+		ProcedureServiceContextImpl procedureContext = new ProcedureServiceContextImpl(resource, procedureName);
 		Method method = procedureService.loadMethod(procedureContext);
 
 		// Ensure have method
 		if (method == null) {
 			throw new Exception("No " + Method.class.getSimpleName() + " provided by service " + serviceName
-					+ " for procedure " + procedureName + " from class " + clazz.getName());
+					+ " for procedure " + procedureName + " from resource " + resource);
 		}
 
 		// Obtain the object instance factory
 		MethodObjectInstanceFactory factory = procedureContext.methodObjectInstanceFactory;
 		if ((factory == null) && (!procedureContext.isStatic)) {
-			factory = new DefaultConstructorMethodObjectInstanceFactory(clazz);
+			Class<?> resourceClass = context.loadClass(resource);
+			factory = new DefaultConstructorMethodObjectInstanceFactory(resourceClass);
 		}
 		MethodObjectInstanceFactory finalFactory = factory;
 
@@ -116,7 +114,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 				SectionClassManagedFunctionSource.enrichWithFlowAnnotations(context);
 			}
 		};
-		builder.buildMethod(method, clazz, () -> finalFactory, functionNamespaceTypeBuilder, context);
+		builder.buildMethod(method, () -> finalFactory, functionNamespaceTypeBuilder, context);
 	}
 
 	/**
@@ -125,9 +123,9 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 	private static class ProcedureServiceContextImpl implements ProcedureServiceContext {
 
 		/**
-		 * {@link Class}.
+		 * Resource.
 		 */
-		private final Class<?> clazz;
+		private final String resource;
 
 		/**
 		 * {@link Procedure} name.
@@ -147,13 +145,13 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		/**
 		 * Instantiate.
 		 * 
-		 * @param clazz         Configured {@link Class}.
+		 * @param resource      Resource.
 		 * @param procedureName {@link Procedure} name.
 		 * @throws Exception If fails to create default
 		 *                   {@link MethodObjectInstanceFactory}.
 		 */
-		private ProcedureServiceContextImpl(Class<?> clazz, String procedureName) throws Exception {
-			this.clazz = clazz;
+		private ProcedureServiceContextImpl(String resource, String procedureName) throws Exception {
+			this.resource = resource;
 			this.procedureName = procedureName;
 		}
 
@@ -162,8 +160,8 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		 */
 
 		@Override
-		public Class<?> getInstanceClass() {
-			return this.clazz;
+		public String getResource() {
+			return this.resource;
 		}
 
 		@Override

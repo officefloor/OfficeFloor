@@ -22,6 +22,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.variable.Var;
 
 /**
  * <code>Type definition</code> of a {@link Procedure}.
@@ -53,6 +54,15 @@ public interface ProcedureType {
 	 *         {@link Object} instances required by the {@link Procedure}.
 	 */
 	ProcedureObjectType[] getObjectTypes();
+
+	/**
+	 * Obtains the {@link ProcedureVariableType} definitions for the {@link Var}
+	 * instances required by the {@link Procedure}.
+	 * 
+	 * @return {@link ProcedureVariableType} definitions for the {@link Var}
+	 *         instances required by the {@link Procedure}.
+	 */
+	ProcedureVariableType[] getVariableTypes();
 
 	/**
 	 * Obtains the {@link ProcedureFlowType} definitions for the possible

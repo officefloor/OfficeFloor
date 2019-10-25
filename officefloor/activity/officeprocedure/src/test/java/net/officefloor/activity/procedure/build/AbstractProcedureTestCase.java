@@ -48,6 +48,11 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.plugin.section.clazz.Spawn;
+import net.officefloor.plugin.variable.In;
+import net.officefloor.plugin.variable.Out;
+import net.officefloor.plugin.variable.Val;
+import net.officefloor.plugin.variable.Var;
+import net.officefloor.plugin.variable.VariableManagedObjectSource;
 
 /**
  * Tests the {@link ProcedureDesigner}.
@@ -194,6 +199,44 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 
 		public void procedure(@Parameter String param) {
 			parameter = param;
+		}
+	}
+
+	/**
+	 * Ensure can use {@link VariableManagedObjectSource}.
+	 */
+	public void testVariable() {
+		VariableProcedure.textValue = null;
+		VariableProcedure.numberValue = null;
+		this.issues.recordCaptureIssues(false);
+		this.issues.recordCaptureIssues(false);
+		this.doTest((setup) -> {
+			setup.linkNext(
+					setup.addProcedure(VariableProcedure.class.getName(), ClassProcedureServiceFactory.SERVICE_NAME,
+							"outProcedure", true),
+					setup.addProcedure(VariableProcedure.class.getName(), ClassProcedureServiceFactory.SERVICE_NAME,
+							"inProcedure", false));
+		}, (officeFloor) -> {
+			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("outProcedure"), null);
+		});
+		assertEquals("Incorrect text", "TEXT", VariableProcedure.textValue);
+		assertEquals("Incorrect number", Integer.valueOf(1), VariableProcedure.numberValue);
+	}
+
+	public static class VariableProcedure {
+
+		private static String textValue = null;
+
+		private static Integer numberValue = null;
+
+		public void outProcedure(Out<String> text, Var<Integer> number) {
+			text.set("TEXT");
+			number.set(1);
+		}
+
+		public void inProcedure(In<String> text, @Val Integer number) {
+			textValue = text.get();
+			numberValue = number;
 		}
 	}
 

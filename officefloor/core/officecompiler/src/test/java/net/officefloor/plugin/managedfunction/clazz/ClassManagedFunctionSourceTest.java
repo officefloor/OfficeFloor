@@ -375,7 +375,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 			ManagedFunctionObjectTypeBuilder var = method.addObject(Var.class);
 			var.setLabel("VAR-" + variableName);
 			var.setTypeQualifier(variableName);
-			var.addAnnotation(new VariableAnnotation(variableName));
+			var.addAnnotation(new VariableAnnotation(variableName, String.class.getName()));
 		}
 
 		// Validate the namespace type

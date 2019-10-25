@@ -124,8 +124,6 @@ public class MethodManagedFunctionBuilder {
 	 * 
 	 * @param method                           {@link Method} for the
 	 *                                         {@link ManagedFunction}.
-	 * @param instanceClass                    {@link Class} instance containing the
-	 *                                         {@link Method}.
 	 * @param methodObjectInstanceManufacturer {@link MethodObjectInstanceManufacturer}.
 	 * @param namespaceBuilder                 {@link FunctionNamespaceBuilder}.
 	 * @param context                          {@link ManagedFunctionSourceContext}.
@@ -135,7 +133,7 @@ public class MethodManagedFunctionBuilder {
 	 *                   {@link Method}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ManagedFunctionTypeBuilder<Indexed, Indexed> buildMethod(Method method, Class<?> instanceClass,
+	public ManagedFunctionTypeBuilder<Indexed, Indexed> buildMethod(Method method,
 			MethodObjectInstanceManufacturer methodObjectInstanceManufacturer,
 			FunctionNamespaceBuilder namespaceBuilder, ManagedFunctionSourceContext context) throws Exception {
 
@@ -185,12 +183,12 @@ public class MethodManagedFunctionBuilder {
 
 		// Create the function factory
 		ManagedFunctionFactory<Indexed, Indexed> functionFactory = this
-				.createManagedFunctionFactory(new MethodManagedFunctionFactoryContext(methodName, method, instanceClass,
+				.createManagedFunctionFactory(new MethodManagedFunctionFactoryContext(methodName, method,
 						methodObjectInstanceFactory, parameters, returnTranslator));
 
 		// Include method as function in type definition
 		ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder = this
-				.addManagedFunctionType(new MethodManagedFunctionTypeContext(methodName, method, instanceClass,
+				.addManagedFunctionType(new MethodManagedFunctionTypeContext(methodName, method,
 						methodObjectInstanceFactory, functionFactory, namespaceBuilder, objectSequence, flowSequence));
 
 		// Load return type if not void
@@ -328,7 +326,7 @@ public class MethodManagedFunctionBuilder {
 		}
 
 		// Enrich the managed function
-		this.enrichManagedFunctionType(new EnrichManagedFunctionTypeContext(methodName, method, instanceClass,
+		this.enrichManagedFunctionType(new EnrichManagedFunctionTypeContext(methodName, method,
 				methodObjectInstanceFactory, parameters, returnTranslator, functionTypeBuilder));
 
 		// Return the managed function builder
@@ -351,11 +349,6 @@ public class MethodManagedFunctionBuilder {
 		private final Method method;
 
 		/**
-		 * {@link Class} for the instance containing the {@link Method}.
-		 */
-		private final Class<?> instanceClass;
-
-		/**
 		 * {@link MethodObjectInstanceFactory}. Will be <code>null</code> if static.
 		 */
 		private final MethodObjectInstanceFactory methodObjectInstanceFactory;
@@ -366,16 +359,13 @@ public class MethodManagedFunctionBuilder {
 		 * @param functionName                Name of {@link ManagedFunction} for the
 		 *                                    {@link Method}.
 		 * @param method                      {@link Method}.
-		 * @param instanceClass               {@link Class} for the instance containing
-		 *                                    the {@link Method}.
 		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
 		 *                                    be <code>null</code> if static.
 		 */
-		protected MethodContext(String functionName, Method method, Class<?> instanceClass,
+		protected MethodContext(String functionName, Method method,
 				MethodObjectInstanceFactory methodObjectInstanceFactory) {
 			this.functionName = functionName;
 			this.method = method;
-			this.instanceClass = instanceClass;
 			this.methodObjectInstanceFactory = methodObjectInstanceFactory;
 		}
 
@@ -395,15 +385,6 @@ public class MethodManagedFunctionBuilder {
 		 */
 		public Method getMethod() {
 			return this.method;
-		}
-
-		/**
-		 * Obtains the {@link Class} for the instance containing the {@link Method}.
-		 * 
-		 * @return {@link Class} for the instance containing the {@link Method}.
-		 */
-		public Class<?> getInstanceClass() {
-			return this.instanceClass;
 		}
 
 		/**
@@ -438,17 +419,15 @@ public class MethodManagedFunctionBuilder {
 		 * @param functionName                Name of {@link ManagedFunction} for the
 		 *                                    {@link Method}.
 		 * @param method                      {@link Method}.
-		 * @param instanceClass               {@link Class} for the instance containing
-		 *                                    the {@link Method}.
 		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
 		 *                                    be <code>null</code> if static.
 		 * @param parameters                  {@link MethodParameterFactory} instances.
 		 * @param returnTranslator            {@link MethodReturnTranslator}.
 		 */
-		protected MethodManagedFunctionFactoryContext(String functionName, Method method, Class<?> instanceClass,
+		protected MethodManagedFunctionFactoryContext(String functionName, Method method,
 				MethodObjectInstanceFactory methodObjectInstanceFactory, MethodParameterFactory[] parameters,
 				MethodReturnTranslator<Object, Object> returnTranslator) {
-			super(functionName, method, instanceClass, methodObjectInstanceFactory);
+			super(functionName, method, methodObjectInstanceFactory);
 			this.parameters = parameters;
 			this.returnTranslator = returnTranslator;
 		}
@@ -503,8 +482,6 @@ public class MethodManagedFunctionBuilder {
 		 * @param functionName                Name of {@link ManagedFunction} for the
 		 *                                    {@link Method}.
 		 * @param method                      {@link Method}.
-		 * @param instanceClass               {@link Class} for the instance containing
-		 *                                    the {@link Method}.
 		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
 		 *                                    be <code>null</code> if static.
 		 * @param functionFactory             {@link ManagedFunctionFactory}.
@@ -514,11 +491,11 @@ public class MethodManagedFunctionBuilder {
 		 * @param flowSequence                {@link Sequence} for the {@link Flow}
 		 *                                    indexes.
 		 */
-		public MethodManagedFunctionTypeContext(String functionName, Method method, Class<?> instanceClass,
+		public MethodManagedFunctionTypeContext(String functionName, Method method,
 				MethodObjectInstanceFactory methodObjectInstanceFactory,
 				ManagedFunctionFactory<Indexed, Indexed> functionFactory, FunctionNamespaceBuilder namespaceBuilder,
 				Sequence objectSequence, Sequence flowSequence) {
-			super(functionName, method, instanceClass, methodObjectInstanceFactory);
+			super(functionName, method, methodObjectInstanceFactory);
 			this.functionFactory = functionFactory;
 			this.namespaceBuilder = namespaceBuilder;
 			this.objectSequence = objectSequence;
@@ -578,19 +555,17 @@ public class MethodManagedFunctionBuilder {
 		 * @param functionName                Name of {@link ManagedFunction} for the
 		 *                                    {@link Method}.
 		 * @param method                      {@link Method}.
-		 * @param instanceClass               {@link Class} for the instance containing
-		 *                                    the {@link Method}.
 		 * @param methodObjectInstanceFactory {@link MethodObjectInstanceFactory}. Will
 		 *                                    be <code>null</code> if static.
 		 * @param parameters                  {@link MethodParameterFactory} instances.
 		 * @param returnTranslator            {@link MethodReturnTranslator}.
 		 * @param functionType                {@link ManagedFunctionTypeBuilder}.
 		 */
-		public EnrichManagedFunctionTypeContext(String functionName, Method method, Class<?> instanceClass,
+		public EnrichManagedFunctionTypeContext(String functionName, Method method,
 				MethodObjectInstanceFactory methodObjectInstanceFactory, MethodParameterFactory[] parameters,
 				MethodReturnTranslator<Object, Object> returnTranslator,
 				ManagedFunctionTypeBuilder<Indexed, Indexed> functionType) {
-			super(functionName, method, instanceClass, methodObjectInstanceFactory, parameters, returnTranslator);
+			super(functionName, method, methodObjectInstanceFactory, parameters, returnTranslator);
 			this.managedFunctionTypeBuilder = functionType;
 		}
 

@@ -77,7 +77,7 @@ public class ValueParameterManufacturer
 			for (Annotation annotation : annotations) {
 				builder.addAnnotation(annotation);
 			}
-			builder.addAnnotation(new VariableAnnotation(qualifiedName));
+			builder.addAnnotation(new VariableAnnotation(qualifiedName, type));
 		});
 
 		// Return value

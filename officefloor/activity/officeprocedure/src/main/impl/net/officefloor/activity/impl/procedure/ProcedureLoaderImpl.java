@@ -26,6 +26,7 @@ import net.officefloor.activity.procedure.ProcedureFlowType;
 import net.officefloor.activity.procedure.ProcedureLoader;
 import net.officefloor.activity.procedure.ProcedureObjectType;
 import net.officefloor.activity.procedure.ProcedureType;
+import net.officefloor.activity.procedure.ProcedureVariableType;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
@@ -42,6 +43,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.plugin.section.clazz.ParameterAnnotation;
+import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
  * {@link ProcedureLoader} implementation.
@@ -123,7 +125,7 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 	 */
 
 	@Override
-	public Procedure[] listProcedures(Class<?> clazz) {
+	public Procedure[] listProcedures(String resource) {
 
 		// Collect the listing of procedures
 		List<Procedure> procedures = new LinkedList<Procedure>();
@@ -135,7 +137,7 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			// Attempt to list the procedures
 			String[] procedureNames;
 			try {
-				procedureNames = service.listProcedures(clazz);
+				procedureNames = service.listProcedures(resource);
 			} catch (Exception ex) {
 				this.loader.addIssue("Failed to list procedures from service " + serviceName + " ["
 						+ service.getClass().getName() + "]", ex);
@@ -157,11 +159,11 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 	}
 
 	@Override
-	public ProcedureType loadProcedureType(Class<?> clazz, String serviceName, String procedureName) {
+	public ProcedureType loadProcedureType(String resource, String serviceName, String procedureName) {
 
 		// Load the managed function type
 		PropertyList properties = this.loader.createPropertyList();
-		properties.addProperty(ProcedureManagedFunctionSource.CLASS_NAME_PROPERTY_NAME).setValue(clazz.getName());
+		properties.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME).setValue(resource);
 		properties.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME).setValue(serviceName);
 		properties.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME).setValue(procedureName);
 		FunctionNamespaceType namespace = this.loader.loadManagedFunctionType(properties);
@@ -174,9 +176,10 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		// Obtain the managed function type (should always be just one)
 		ManagedFunctionType<?, ?> managedFunctionType = namespace.getManagedFunctionTypes()[0];
 
-		// Obtain parameter and object types
+		// Obtain parameter, variable and object types
 		Class<?> parameterType = null;
 		List<ProcedureObjectType> objectTypes = new LinkedList<>();
+		List<ProcedureVariableType> variableTypes = new LinkedList<>();
 		ParameterAnnotation parameterAnnotation = managedFunctionType.getAnnotation(ParameterAnnotation.class);
 		int parameterIndex = (parameterAnnotation != null) ? parameterAnnotation.getParameterIndex() : -1;
 		ManagedFunctionObjectType<?>[] functionObjectTypes = managedFunctionType.getObjectTypes();
@@ -184,6 +187,7 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			ManagedFunctionObjectType<?> functionObjectType = functionObjectTypes[i];
 			String objectName = functionObjectType.getObjectName();
 			Class<?> objectType = functionObjectType.getObjectType();
+			String typeQualifier = functionObjectType.getTypeQualifier();
 
 			// Determine if parameter
 			if (i == parameterIndex) {
@@ -191,8 +195,16 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 				continue NEXT_OBJECT; // parameter
 			}
 
+			// Determine if variable
+			VariableAnnotation variableAnnotation = functionObjectType.getAnnotation(VariableAnnotation.class);
+			if (variableAnnotation != null) {
+				variableTypes.add(new ProcedureVariableTypeImpl(variableAnnotation.getVariableName(),
+						variableAnnotation.getVariableType()));
+				continue NEXT_OBJECT; // not include variable as object
+			}
+
 			// Add object type
-			objectTypes.add(new ProcedureObjectTypeImpl(objectName, objectType, functionObjectType.getTypeQualifier()));
+			objectTypes.add(new ProcedureObjectTypeImpl(objectName, objectType, typeQualifier));
 		}
 
 		// Load the flows
@@ -215,6 +227,7 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		// Return the procedure type
 		return new ProcedureTypeImpl(procedureName, parameterType,
 				objectTypes.toArray(new ProcedureObjectType[objectTypes.size()]),
+				variableTypes.toArray(new ProcedureVariableType[variableTypes.size()]),
 				flowTypes.toArray(new ProcedureFlowType[flowTypes.size()]),
 				escalationTypes.toArray(new ProcedureEscalationType[escalationTypes.size()]), nextArgumentType);
 	}
