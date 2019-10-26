@@ -24,7 +24,10 @@ import java.util.Set;
 import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 
 import junit.framework.AssertionFailedError;
+import net.officefloor.activity.impl.procedure.ClassProcedureService;
 import net.officefloor.activity.procedure.ProcedureLoaderUtil;
+import net.officefloor.activity.procedure.build.ProcedureArchitect;
+import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
@@ -77,7 +80,17 @@ public class ScalaProcedureTest extends AbstractPolyglotProcedureTest {
      * Ensure list {@link net.officefloor.activity.procedure.Procedure} instances.
      */
     public void testListProcedures() {
-        ProcedureLoaderUtil.validateProcedures(package$.class, ProcedureLoaderUtil.procedure("test", ScalaProcedureServiceFactory.class));
+        ProcedureLoaderUtil.validateProcedures(package$.class
+                , ProcedureLoaderUtil.procedure("asynchronousFlow", ScalaProcedureServiceFactory.class)
+                , ProcedureLoaderUtil.procedure("collections", ScalaProcedureServiceFactory.class)
+                , ProcedureLoaderUtil.procedure("httpException", ScalaProcedureServiceFactory.class)
+                , ProcedureLoaderUtil.procedure("objects", ScalaProcedureServiceFactory.class)
+                , ProcedureLoaderUtil.procedure("parameter", ScalaProcedureServiceFactory.class)
+                , ProcedureLoaderUtil.procedure("primitives", ScalaProcedureServiceFactory.class)
+                , ProcedureLoaderUtil.procedure("serviceFlow", ScalaProcedureServiceFactory.class)
+                , ProcedureLoaderUtil.procedure("variables", ScalaProcedureServiceFactory.class)
+                , ProcedureLoaderUtil.procedure("web", ScalaProcedureServiceFactory.class)
+        );
     }
 
     /**
@@ -88,7 +101,10 @@ public class ScalaProcedureTest extends AbstractPolyglotProcedureTest {
         Closure<MockHttpServer> server = new Closure<>();
         compiler.mockHttpServer((mockServer) -> server.value = mockServer);
         compiler.web((context) -> {
-            context.link(false, "/", ScalaRequestService.class);
+            OfficeArchitect officeArchitect = context.getOfficeArchitect();
+            ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer.employProcedureArchitect(officeArchitect, context.getOfficeSourceContext());
+            OfficeSection procedure = procedureArchitect.addProcedure(ScalaRequestService.class.getName(), ClassProcedureService.SERVICE_NAME, "service", false);
+            officeArchitect.link(context.getWebArchitect().getHttpInput(false, "/").getInput(), procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
         });
         this.officeFloor = compiler.compileAndOpenOfficeFloor();
         MockHttpResponse response = server.value

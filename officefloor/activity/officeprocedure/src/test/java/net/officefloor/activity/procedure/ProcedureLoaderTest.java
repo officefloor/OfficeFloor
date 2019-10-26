@@ -130,7 +130,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure multiple configured {@link ProcedureService} instances can contribute.
 	 */
-	public void testMultipleConfiguredProcedureServices() {
+	public void testMultipleConfiguredProcedureServices() throws Throwable {
 		AnotherMockProcedureService.run(() -> {
 			return MockProcedureService.run((clazz) -> new String[] { "MOCK" }, null, () -> {
 				ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class,
