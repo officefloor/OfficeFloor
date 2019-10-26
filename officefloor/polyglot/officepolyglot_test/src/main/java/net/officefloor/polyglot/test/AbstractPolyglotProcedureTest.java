@@ -108,6 +108,15 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
     protected abstract Class<? extends ProcedureServiceFactory> getProcedureServiceFactoryClass();
 
     /**
+     * Some languages do not provide exceptions.
+     *
+     * @return <code>true</code> if support {@link Exception}.
+     */
+    protected boolean isSupportExceptions() {
+        return true; // support by default
+    }
+
+    /**
      * Builds the {@link net.officefloor.activity.procedure.Procedure}.
      */
     protected interface ProcedureBuilder {
@@ -531,10 +540,10 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
         ProcedureBuildImpl builder = new ProcedureBuildImpl();
         this.variables(builder);
         ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder(builder.getProcedureName(), null);
-        type.addObjectType("VAR-" + Character.class.getName(), Var.class, Character.class.getName());
-        type.addObjectType("VAR-" + String.class.getName(), Var.class, String.class.getName());
-        type.addObjectType("VAR-" + JavaObject.class.getName(), Var.class, JavaObject.class.getName());
-        type.addObjectType("VAR-" + Integer.class.getName(), Var.class, Integer.class.getName());
+        type.addVariableType(Character.class.getName(), char.class.getName());
+        type.addVariableType(String.class.getName());
+        type.addVariableType(JavaObject.class.getName());
+        type.addVariableType("qualified-" + Integer.class.getName(), Integer.class.getName());
         type.setNextArgumentType(VariableTypes.class);
         ProcedureLoaderUtil.validateProcedureType(type, builder.getResource(), builder.getProcedureServiceFactory(), builder.getProcedureName());
     }
@@ -552,7 +561,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
             context.variable(null, Character.class, val);
             context.variable(null, String.class, in);
             context.variable(null, JavaObject.class, out);
-            context.variable(null, Integer.class, var);
+            context.variable("qualified", Integer.class, var);
 
             // Pass results
             OfficeSection pass = context.addSection("PASS", VariablePass.class);
@@ -629,6 +638,17 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
     }
 
     protected abstract ParameterTypes parameter(String parameter) throws Exception;
+
+    /**
+     * Ensure correct {@link net.officefloor.activity.procedure.ProcedureType}.
+     */
+    public void testParameterType() {
+        ProcedureBuildImpl builder = new ProcedureBuildImpl();
+        this.parameter(builder);
+        ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder(builder.getProcedureName(), String.class);
+        type.setNextArgumentType(ParameterTypes.class);
+        ProcedureLoaderUtil.validateProcedureType(type, builder.getResource(), builder.getProcedureServiceFactory(), builder.getProcedureName());
+    }
 
     /**
      * Ensure can use parameter.
@@ -788,6 +808,19 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
     protected abstract void httpException() throws Throwable;
 
     /**
+     * Ensure correct {@link net.officefloor.activity.procedure.ProcedureType}.
+     */
+    public void testHttpExceptionType() {
+        ProcedureBuildImpl builder = new ProcedureBuildImpl();
+        this.httpException(builder);
+        ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder(builder.getProcedureName(), null);
+        if (this.isSupportExceptions()) {
+            type.addEscalationType(HttpException.class.getSimpleName(), HttpException.class);
+        }
+        ProcedureLoaderUtil.validateProcedureType(type, builder.getResource(), builder.getProcedureServiceFactory(), builder.getProcedureName());
+    }
+
+    /**
      * Ensure can invoke to handle {@link HttpException}.
      */
     public void testInvokeHttpException() throws Throwable {
@@ -811,6 +844,23 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
     }
 
     protected abstract void httpException(ProcedureBuilder builder);
+
+    /**
+     * Ensure correct {@link net.officefloor.activity.procedure.ProcedureType}.
+     */
+    public void testFlowType() {
+        ProcedureBuildImpl builder = new ProcedureBuildImpl();
+        this.flow(builder);
+        ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder(builder.getProcedureName(), String.class);
+        type.addFlowType("flow", null);
+        type.addFlowType("flowWithCallback", null);
+        type.addFlowType("flowWithParameter", String.class);
+        type.addFlowType("flowWithParameterAndCallback", String.class);
+        if (this.isSupportExceptions()) {
+            type.addEscalationType(IOException.class.getSimpleName(), IOException.class);
+        }
+        ProcedureLoaderUtil.validateProcedureType(type, builder.getResource(), builder.getProcedureServiceFactory(), builder.getProcedureName());
+    }
 
     /**
      * Ensure can invoke flow.
@@ -884,7 +934,12 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
         office.link(procedure.getOfficeSectionOutput("flowWithCallback"), flowWithCallback);
         office.link(procedure.getOfficeSectionOutput("flowWithParameterAndCallback"), flowWithParameterAndCallback);
         office.link(procedure.getOfficeSectionOutput("flowWithParameter"), flowWithParameter);
-        office.link(procedure.getOfficeSectionOutput(IOException.class.getName()), exception);
+        if (this.isSupportExceptions()) {
+            office.link(procedure.getOfficeSectionOutput(IOException.class.getName()), exception);
+        } else {
+            OfficeEscalation escalation = office.addOfficeEscalation(IOException.class.getName());
+            office.link(escalation, exception);
+        }
         return builder.getManagedFunctionName();
     }
 
@@ -907,6 +962,16 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
     protected abstract void asynchronousFlow(AsynchronousFlow flowOne, AsynchronousFlow flowTwo) throws Exception;
 
     /**
+     * Ensure correct {@link net.officefloor.activity.procedure.ProcedureType}.
+     */
+    public void testAsynchronousFlowType() {
+        ProcedureBuildImpl builder = new ProcedureBuildImpl();
+        this.asynchronousFlow(builder);
+        ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder(builder.getProcedureName(), null);
+        ProcedureLoaderUtil.validateProcedureType(type, builder.getResource(), builder.getProcedureServiceFactory(), builder.getProcedureName());
+    }
+
+    /**
      * Ensure can invoke {@link AsynchronousFlow}.
      */
     public void testInvokeAsynchronousFlow() throws Throwable {
@@ -923,7 +988,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
         ProcedureBuildImpl builder = new ProcedureBuildImpl();
         this.asynchronousFlow(builder);
         this.addProcedure(builder.getResource(), builder.getProcedureServiceFactory(), builder.getProcedureName(), false, context);
-        return "service.procedure";
+        return builder.getManagedFunctionName();
     }
 
     protected abstract void asynchronousFlow(ProcedureBuilder builder);

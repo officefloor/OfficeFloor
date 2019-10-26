@@ -35,6 +35,7 @@ import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -123,7 +124,7 @@ public class JavaPolyglotProcedureTest extends AbstractPolyglotProcedureTest {
     }
 
     public static class VariableLogic {
-        public VariableTypes variable(@Val char val, In<String> in, Out<JavaObject> out, Var<Integer> var) {
+        public VariableTypes variable(@Val char val, In<String> in, Out<JavaObject> out, @Qualified("qualified") Var<Integer> var) {
             out.set(new JavaObject("test"));
             int varValue = var.get();
             var.set(varValue + 1);

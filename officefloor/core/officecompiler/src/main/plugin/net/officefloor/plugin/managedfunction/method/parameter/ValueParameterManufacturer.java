@@ -67,7 +67,7 @@ public class ValueParameterManufacturer
 
 		// Obtain the variable details
 		String qualifier = context.getParameterQualifier();
-		String type = context.getParameterType().getTypeName();
+		String type = VariableManagedObjectSource.type(context.getParameterType().getTypeName());
 		String qualifiedName = VariableManagedObjectSource.name(qualifier, type);
 
 		// Add the variable
