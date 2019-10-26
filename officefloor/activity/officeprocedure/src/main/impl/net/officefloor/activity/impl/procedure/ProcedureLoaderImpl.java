@@ -17,8 +17,10 @@
  */
 package net.officefloor.activity.impl.procedure;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureEscalationType;
@@ -66,8 +68,13 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		this.loader = new Loader() {
 
 			@Override
-			public Iterable<ProcedureService> loadServices() {
+			public Iterable<ProcedureService> loadProcedureServices() {
 				return compiler.createRootSourceContext().loadOptionalServices(ProcedureServiceFactory.class);
+			}
+
+			@Override
+			public ProcedureService loadDefaultProcedureService() {
+				return new ClassProcedureService(compiler.createRootSourceContext());
 			}
 
 			@Override
@@ -98,8 +105,13 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		this.loader = new Loader() {
 
 			@Override
-			public Iterable<ProcedureService> loadServices() {
+			public Iterable<ProcedureService> loadProcedureServices() {
 				return context.loadOptionalServices(ProcedureServiceFactory.class);
+			}
+
+			@Override
+			public ProcedureService loadDefaultProcedureService() {
+				return new ClassProcedureService(context);
 			}
 
 			@Override
@@ -127,9 +139,9 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 	@Override
 	public Procedure[] listProcedures(String resource) {
 
-		// Collect the listing of procedures
+		// Load procedures
 		List<Procedure> procedures = new LinkedList<Procedure>();
-		for (ProcedureService service : this.loader.loadServices()) {
+		Consumer<ProcedureService> loadProcedures = (service) -> {
 
 			// Obtain the service name
 			String serviceName = service.getServiceName();
@@ -152,7 +164,28 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 					}
 				}
 			}
+		};
+
+		// Collect the listing of procedures
+		for (ProcedureService service : this.loader.loadProcedureServices()) {
+			loadProcedures.accept(service);
 		}
+
+		// Determine if fall back to class
+		if (procedures.size() == 0) {
+			ProcedureService defaultService = this.loader.loadDefaultProcedureService();
+			loadProcedures.accept(defaultService);
+		}
+
+		// Sort the procedures
+		Collections.sort(procedures, (a, b) -> {
+			int comparison = String.CASE_INSENSITIVE_ORDER.compare(a.getProcedureName(), b.getProcedureName());
+			if (comparison == 0) {
+				// Same procedure name, so order by service name
+				comparison = String.CASE_INSENSITIVE_ORDER.compare(a.getServiceName(), b.getServiceName());
+			}
+			return comparison;
+		});
 
 		// Return the procedures
 		return procedures.toArray(new Procedure[procedures.size()]);
@@ -283,7 +316,14 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		 * 
 		 * @return {@link ProcedureService} instances.
 		 */
-		Iterable<ProcedureService> loadServices();
+		Iterable<ProcedureService> loadProcedureServices();
+
+		/**
+		 * Loads the default {@link ProcedureService}.
+		 * 
+		 * @return Default {@link ProcedureService}.
+		 */
+		ProcedureService loadDefaultProcedureService();
 
 		/**
 		 * Loads the {@link FunctionNamespaceType}.

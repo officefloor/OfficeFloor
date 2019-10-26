@@ -540,7 +540,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
         ProcedureBuildImpl builder = new ProcedureBuildImpl();
         this.variables(builder);
         ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder(builder.getProcedureName(), null);
-        type.addVariableType(Character.class.getName(), char.class.getName());
+        type.addVariableType(Character.class.getName(), Character.class.getName());
         type.addVariableType(String.class.getName());
         type.addVariableType(JavaObject.class.getName());
         type.addVariableType("qualified-" + Integer.class.getName(), Integer.class.getName());

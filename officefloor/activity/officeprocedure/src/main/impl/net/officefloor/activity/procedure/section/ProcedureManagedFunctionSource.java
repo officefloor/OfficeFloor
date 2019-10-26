@@ -19,6 +19,7 @@ package net.officefloor.activity.procedure.section;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.activity.impl.procedure.ClassProcedureService;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceContext;
@@ -77,10 +78,18 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 
 		// Find the service
 		ProcedureService procedureService = null;
-		FOUND_SERVICE: for (ProcedureService service : context.loadOptionalServices(ProcedureServiceFactory.class)) {
-			if (serviceName.equals(service.getServiceName())) {
-				procedureService = service;
-				break FOUND_SERVICE;
+		if (ClassProcedureService.SERVICE_NAME.equals(serviceName)) {
+			// Use default service
+			procedureService = new ClassProcedureService(context);
+
+		} else {
+			// Search for service
+			FOUND_SERVICE: for (ProcedureService service : context
+					.loadOptionalServices(ProcedureServiceFactory.class)) {
+				if (serviceName.equals(service.getServiceName())) {
+					procedureService = service;
+					break FOUND_SERVICE;
+				}
 			}
 		}
 		if (procedureService == null) {

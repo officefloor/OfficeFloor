@@ -1,1 +1,2 @@
 net.officefloor.activity.procedure.MockProcedureService
+net.officefloor.activity.procedure.AnotherMockProcedureService

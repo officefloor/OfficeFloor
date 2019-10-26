@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 
-import net.officefloor.activity.procedure.java.ClassProcedureServiceFactory;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -46,8 +45,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 * Ensure can list just one {@link Procedure}.
 	 */
 	public void testListSingleProcedure() {
-		ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class,
-				ProcedureLoaderUtil.procedure("single", ClassProcedureServiceFactory.class));
+		ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class, ProcedureLoaderUtil.procedure("single"));
 	}
 
 	public static class ListSingleProcedure {
@@ -61,10 +59,8 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 * Ensure can list multiple {@link Procedure} instances.
 	 */
 	public void testListMultipleProcedures() {
-		ProcedureLoaderUtil.validateProcedures(ListMultipleProcedures.class,
-				ProcedureLoaderUtil.procedure("one", ClassProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("two", ClassProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("three", ClassProcedureServiceFactory.class));
+		ProcedureLoaderUtil.validateProcedures(ListMultipleProcedures.class, ProcedureLoaderUtil.procedure("one"),
+				ProcedureLoaderUtil.procedure("three"), ProcedureLoaderUtil.procedure("two"));
 	}
 
 	public static class ListMultipleProcedures {
@@ -86,8 +82,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 * Ensure can list static {@link Procedure}.
 	 */
 	public void testListStaticProcedure() {
-		ProcedureLoaderUtil.validateProcedures(StaticProcedure.class,
-				ProcedureLoaderUtil.procedure("staticMethod", ClassProcedureServiceFactory.class));
+		ProcedureLoaderUtil.validateProcedures(StaticProcedure.class, ProcedureLoaderUtil.procedure("staticMethod"));
 	}
 
 	public static class StaticProcedure {
@@ -121,14 +116,28 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can listing from multiple {@link ProcedureService} instances.
+	 * Ensure can configure {@link ProcedureService} overrides default
+	 * {@link ProcedureService}.
 	 */
-	public void testAdditionalServices() {
+	public void testConfiguredProcedureServiceOverridesDefault() {
 		MockProcedureService.run((clazz) -> new String[] { "MOCK" }, null, () -> {
 			ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class,
-					ProcedureLoaderUtil.procedure("single", ClassProcedureServiceFactory.class),
 					ProcedureLoaderUtil.procedure("MOCK", MockProcedureService.class));
 			return null;
+		});
+	}
+
+	/**
+	 * Ensure multiple configured {@link ProcedureService} instances can contribute.
+	 */
+	public void testMultipleConfiguredProcedureServices() {
+		AnotherMockProcedureService.run(() -> {
+			return MockProcedureService.run((clazz) -> new String[] { "MOCK" }, null, () -> {
+				ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class,
+						ProcedureLoaderUtil.procedure("MOCK", AnotherMockProcedureService.class),
+						ProcedureLoaderUtil.procedure("MOCK", MockProcedureService.class));
+				return null;
+			});
 		});
 	}
 
@@ -158,8 +167,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Should only load successful services
-		ProcedureLoaderUtil.validateProcedures(procedures,
-				ProcedureLoaderUtil.procedure("single", ClassProcedureServiceFactory.class));
+		ProcedureLoaderUtil.validateProcedures(procedures, ProcedureLoaderUtil.procedure("single"));
 	}
 
 	/**
@@ -167,8 +175,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadSimpleType() {
 		ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder("simple", null);
-		ProcedureLoaderUtil.validateProcedureType(type, LoadSimpleTypeProcedure.class.getName(),
-				ClassProcedureServiceFactory.class, "simple");
+		ProcedureLoaderUtil.validateProcedureType(type, LoadSimpleTypeProcedure.class.getName(), "simple");
 	}
 
 	public static class LoadSimpleTypeProcedure {
@@ -194,8 +201,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		type.addEscalationType(IOException.class.getSimpleName(), IOException.class);
 		type.addEscalationType(SQLException.class.getSimpleName(), SQLException.class);
 		type.setNextArgumentType(Integer.class);
-		ProcedureLoaderUtil.validateProcedureType(type, LoadComplexTypeProcedure.class.getName(),
-				ClassProcedureServiceFactory.class, "complex");
+		ProcedureLoaderUtil.validateProcedureType(type, LoadComplexTypeProcedure.class.getName(), "complex");
 	}
 
 	@FlowInterface

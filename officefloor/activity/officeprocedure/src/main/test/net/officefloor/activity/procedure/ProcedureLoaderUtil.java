@@ -20,7 +20,6 @@ package net.officefloor.activity.procedure;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -28,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Assert;
 
+import net.officefloor.activity.impl.procedure.ClassProcedureService;
 import net.officefloor.activity.impl.procedure.ProcedureEscalationTypeImpl;
 import net.officefloor.activity.impl.procedure.ProcedureFlowTypeImpl;
 import net.officefloor.activity.impl.procedure.ProcedureObjectTypeImpl;
@@ -36,7 +36,6 @@ import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.util.LoaderUtil;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -97,6 +96,29 @@ public class ProcedureLoaderUtil {
 		ProcedureService service = loadProcedureService(serviceFactoryClass, officeFloorCompiler(compiler));
 
 		// Return the procedure
+		return procedure(procedureName, service.getServiceName());
+	}
+
+	/**
+	 * Convenience creation of default {@link Procedure} for testing.
+	 * 
+	 * @param procedureName Name of the {@link Procedure}.
+	 * @return {@link Procedure}.
+	 */
+	public static Procedure procedure(String procedureName) {
+		return procedure(procedureName, ClassProcedureService.SERVICE_NAME);
+	}
+
+	/**
+	 * Convenience creation of {@link Procedure} for testing.
+	 * 
+	 * @param procedureName Name of the {@link Procedure}.
+	 * @param serviceName   Service name.
+	 * @return {@link Procedure}.
+	 */
+	public static Procedure procedure(String procedureName, String serviceName) {
+
+		// Return the procedure
 		return new Procedure() {
 
 			@Override
@@ -106,7 +128,7 @@ public class ProcedureLoaderUtil {
 
 			@Override
 			public String getServiceName() {
-				return service.getServiceName();
+				return serviceName;
 			}
 		};
 	}
@@ -146,33 +168,26 @@ public class ProcedureLoaderUtil {
 	 */
 	public static void validateProcedures(Procedure[] actualProcedures, Procedure... expectedProcedures) {
 
-		// Create sorted lists for comparison
-		Comparator<Procedure> comparator = (a, b) -> (a.getProcedureName() + "-" + a.getServiceName())
-				.compareTo(b.getProcedureName() + "-" + b.getServiceName());
-		Procedure[] actual = Arrays.copyOf(actualProcedures, actualProcedures.length);
-		Arrays.sort(actual, comparator);
-		Procedure[] expected = Arrays.copyOf(expectedProcedures, expectedProcedures.length);
-		Arrays.sort(expected, comparator);
-
 		// Generate difference message
 		Function<Procedure[], String> toString = (procedures) -> String.join(",",
 				Arrays.stream(procedures)
 						.map((procedure) -> procedure.getProcedureName() + " [" + procedure.getServiceName() + "]")
 						.collect(Collectors.toList()));
-		String differenceSuffix = "\n\n - Expected : " + toString.apply(expected) + "\n - Actual  : "
-				+ toString.apply(actual) + "\n\n";
+		String differenceSuffix = "\n\n - Expected : " + toString.apply(expectedProcedures) + "\n - Actual  : "
+				+ toString.apply(actualProcedures) + "\n\n";
 
 		// Ensure correct number of procedures
-		assertEquals("Incorrect number of procedures" + differenceSuffix, expected.length, actual.length);
+		assertEquals("Incorrect number of procedures" + differenceSuffix, expectedProcedures.length,
+				actualProcedures.length);
 
-		// Ensure procedures align
-		for (int i = 0; i < expected.length; i++) {
-			Procedure eProc = expected[i];
-			Procedure aProc = actual[i];
-			assertEquals("Incorrect procedure name for procedure " + i + differenceSuffix, eProc.getProcedureName(),
-					aProc.getProcedureName());
-			assertEquals("Incorrect service name for procedure " + i + differenceSuffix, eProc.getServiceName(),
-					aProc.getServiceName());
+		// Ensure procedures align (in order)
+		for (int i = 0; i < expectedProcedures.length; i++) {
+			Procedure eProcedure = expectedProcedures[i];
+			Procedure aProcedure = actualProcedures[i];
+			assertEquals("Incorrect procedure name for procedure " + i + differenceSuffix,
+					eProcedure.getProcedureName(), aProcedure.getProcedureName());
+			assertEquals("Incorrect service name for procedure " + i + differenceSuffix, eProcedure.getServiceName(),
+					aProcedure.getServiceName());
 		}
 	}
 
@@ -208,8 +223,25 @@ public class ProcedureLoaderUtil {
 		// Load the service name
 		ProcedureService service = loadProcedureService(serviceFactoryClass, compiler);
 
-		// Load the managed function type
+		// Load the procedure type
 		return loader.loadProcedureType(resource, service.getServiceName(), procedureName);
+	}
+
+	/**
+	 * Loads the {@link ProcedureType} for the {@link Procedure} using default
+	 * {@link ProcedureService}.
+	 * 
+	 * @param resource      Resource.
+	 * @param procedureName Name of {@link Procedure}.
+	 * @return {@link ProcedureType}.
+	 */
+	public static ProcedureType loadProcedureType(String resource, String procedureName) {
+
+		// Create the procedure loader
+		ProcedureLoader loader = newProcedureLoader(officeFloorCompiler(null));
+
+		// Load the procedure type
+		return loader.loadProcedureType(resource, ClassProcedureService.SERVICE_NAME, procedureName);
 	}
 
 	/**
@@ -232,27 +264,61 @@ public class ProcedureLoaderUtil {
 	 * @param resource              Resource.
 	 * @param serviceFactoryClass   {@link ProcedureServiceFactory} {@link Class}.
 	 * @param procedureName         Name of {@link Procedure}.
-	 * @return {@link ManagedFunctionType}.
+	 * @return {@link ProcedureType}.
 	 */
 	public static ProcedureType validateProcedureType(ProcedureTypeBuilder expectedProcedureType, String resource,
 			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName) {
+
+		// Load the procedure type
+		ProcedureType actualType = loadProcedureType(resource, serviceFactoryClass, procedureName);
+
+		// Validate and return
+		return validateProcedureType(expectedProcedureType, actualType);
+	}
+
+	/**
+	 * Validates the {@link ProcedureType} via default {@link ProcedureService}.
+	 * 
+	 * @param expectedProcedureType Expected {@link ProcedureType} via
+	 *                              {@link ProcedureTypeBuilder}.
+	 * @param resource              Resource.
+	 * @param procedureName         Name of {@link Procedure}.
+	 * @return {@link ProcedureType}.
+	 */
+	public static ProcedureType validateProcedureType(ProcedureTypeBuilder expectedProcedureType, String resource,
+			String procedureName) {
+
+		// Load the procedure type
+		ProcedureType actualType = loadProcedureType(resource, procedureName);
+
+		// Validate and return
+		return validateProcedureType(expectedProcedureType, actualType);
+	}
+
+	/**
+	 * Validates the {@link ProcedureType}.
+	 * 
+	 * @param expectedProcedureType Expected {@link ProcedureType} via
+	 *                              {@link ProcedureTypeBuilder}.
+	 * @param actualType            Actual {@link ProcedureType}.
+	 * @return {@link ProcedureType}.
+	 */
+	public static ProcedureType validateProcedureType(ProcedureTypeBuilder expectedProcedureType,
+			ProcedureType actualType) {
 
 		// Obtain the expected type
 		if (!(expectedProcedureType instanceof ProcedureType)) {
 			Assert.fail("expectedProcedureType must be created from createProcedureTypeBuilder");
 		}
-		ProcedureType eType = (ProcedureType) expectedProcedureType;
-
-		// Load the procedure type
-		ProcedureType aType = loadProcedureType(resource, serviceFactoryClass, procedureName);
+		ProcedureType expectedType = (ProcedureType) expectedProcedureType;
 
 		// Verify actual is as expected
-		assertEquals("Incorrect procedure name", eType.getProcedureName(), aType.getProcedureName());
-		assertEquals("Incorrect parameter type", eType.getParameterType(), aType.getParameterType());
+		assertEquals("Incorrect procedure name", expectedType.getProcedureName(), actualType.getProcedureName());
+		assertEquals("Incorrect parameter type", expectedType.getParameterType(), actualType.getParameterType());
 
 		// Verify object types
-		ProcedureObjectType[] eObjects = eType.getObjectTypes();
-		ProcedureObjectType[] aObjects = aType.getObjectTypes();
+		ProcedureObjectType[] eObjects = expectedType.getObjectTypes();
+		ProcedureObjectType[] aObjects = actualType.getObjectTypes();
 		LoaderUtil.assertLength("Incorrect number of object types", eObjects, aObjects,
 				(object) -> object.getObjectName());
 		for (int i = 0; i < eObjects.length; i++) {
@@ -266,8 +332,8 @@ public class ProcedureLoaderUtil {
 		}
 
 		// Verify variable types
-		ProcedureVariableType[] eVariables = eType.getVariableTypes();
-		ProcedureVariableType[] aVariables = aType.getVariableTypes();
+		ProcedureVariableType[] eVariables = expectedType.getVariableTypes();
+		ProcedureVariableType[] aVariables = actualType.getVariableTypes();
 		LoaderUtil.assertLength("Incorrect number of variable types", eVariables, aVariables,
 				(variable) -> variable.getVariableType());
 		for (int i = 0; i < eVariables.length; i++) {
@@ -280,8 +346,8 @@ public class ProcedureLoaderUtil {
 		}
 
 		// Verify the flow types
-		ProcedureFlowType[] eFlows = eType.getFlowTypes();
-		ProcedureFlowType[] aFlows = aType.getFlowTypes();
+		ProcedureFlowType[] eFlows = expectedType.getFlowTypes();
+		ProcedureFlowType[] aFlows = actualType.getFlowTypes();
 		LoaderUtil.assertLength("Incorrect number of flow tyeps", eFlows, aFlows, (flow) -> flow.getFlowName());
 		for (int i = 0; i < eFlows.length; i++) {
 			ProcedureFlowType eFlow = eFlows[i];
@@ -292,8 +358,8 @@ public class ProcedureLoaderUtil {
 		}
 
 		// Verify the escalation types
-		ProcedureEscalationType[] eEscalations = eType.getEscalationTypes();
-		ProcedureEscalationType[] aEscalations = aType.getEscalationTypes();
+		ProcedureEscalationType[] eEscalations = expectedType.getEscalationTypes();
+		ProcedureEscalationType[] aEscalations = actualType.getEscalationTypes();
 		LoaderUtil.assertLength("Incorrect number of escalations", eEscalations, aEscalations,
 				(escalation) -> escalation.getEscalationName());
 		for (int i = 0; i < eEscalations.length; i++) {
@@ -306,10 +372,11 @@ public class ProcedureLoaderUtil {
 		}
 
 		// Verify the next argument type
-		assertEquals("Incorrect next argument type", eType.getNextArgumentType(), aType.getNextArgumentType());
+		assertEquals("Incorrect next argument type", expectedType.getNextArgumentType(),
+				actualType.getNextArgumentType());
 
 		// Return the type
-		return aType;
+		return actualType;
 	}
 
 	/**

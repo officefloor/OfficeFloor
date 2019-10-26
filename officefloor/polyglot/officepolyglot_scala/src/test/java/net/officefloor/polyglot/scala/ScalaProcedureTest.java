@@ -24,6 +24,7 @@ import java.util.Set;
 import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 
 import junit.framework.AssertionFailedError;
+import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
@@ -66,23 +67,17 @@ public class ScalaProcedureTest extends AbstractPolyglotProcedureTest {
     }
 
     /**
-     * Ensure issue if try to use non Scala object.
+     * Ensure no procedures when using non Scala object.
      */
     public void testNonScalaObject() {
-        boolean isSuccessful;
-        try {
-            SectionLoaderUtil.loadSectionType(ScalaFunctionSectionSource.class, NotScalaObject.class.getName(),
-                    ScalaFunctionSectionSource.PROPERTY_FUNCTION_NAME, "not_available");
-            isSuccessful = true;
-        } catch (AssertionFailedError ex) {
+        ProcedureLoaderUtil.validateProcedures(NotScalaObject.class);
+    }
 
-            // Ensure correct reason
-            assertTrue("Incorrect cause: " + ex.getMessage(), ex.getMessage().startsWith("Class "
-                    + NotScalaObject.class.getName() + " is not Scala Object (expecting MODULE$ static field)"));
-
-            isSuccessful = false;
-        }
-        assertFalse("Should not be successful", isSuccessful);
+    /**
+     * Ensure list {@link net.officefloor.activity.procedure.Procedure} instances.
+     */
+    public void testListProcedures() {
+        ProcedureLoaderUtil.validateProcedures(package$.class, ProcedureLoaderUtil.procedure("test", ScalaProcedureServiceFactory.class));
     }
 
     /**
