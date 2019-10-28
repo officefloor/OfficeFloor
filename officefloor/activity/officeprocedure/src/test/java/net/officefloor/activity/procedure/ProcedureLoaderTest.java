@@ -25,15 +25,23 @@ import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureSpecification;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.plugin.section.clazz.Parameter;
+import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Val;
 import net.officefloor.plugin.variable.Var;
+import net.officefloor.plugin.variable.VariableAnnotation;
 
 /**
  * Tests the {@link ProcedureLoader}.
@@ -272,6 +280,68 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		public void error() {
 			// Test method
 		}
+	}
+
+	/**
+	 * Ensure can load simple {@link ManagedFunction}.
+	 */
+	public void testLoadSimpleManagedFunction() {
+		String resource = "RESOURCE";
+		String procedureName = "PROCEDURE";
+		String propertyName = "NAME";
+		String propertyValue = "VALUE";
+		ProcedureTypeBuilder expected = ProcedureLoaderUtil.createProcedureTypeBuilder(procedureName, null);
+		ProcedureType type = MockManagedFunctionProcedureService.run((context) -> {
+			assertEquals("Incorrect resource", resource, context.getResource());
+			assertEquals("Incorrect procedure name", procedureName, context.getProcedureName());
+			assertEquals("Incorrect property", propertyValue, context.getSourceContext().getProperty(propertyName));
+			context.setManagedFunction(() -> null, None.class, None.class);
+		}, () -> {
+			return ProcedureLoaderUtil.validateProcedureType(expected, resource,
+					MockManagedFunctionProcedureService.class, procedureName, propertyName, propertyValue);
+		});
+		assertNotNull("Should load procedure type", type);
+	}
+
+	/**
+	 * Ensure can load complex {@link ManagedFunction}.
+	 */
+	public void testLoadComplexManagedFunction() {
+		ProcedureTypeBuilder expected = ProcedureLoaderUtil.createProcedureTypeBuilder("procedure", Double.class);
+		expected.addObjectType(Long.class.getName(), Long.class, null);
+		expected.addObjectType("qualified-" + Character.class.getName(), Character.class, "qualified");
+		expected.addVariableType(String.class.getName());
+		expected.addVariableType("qualified-" + Integer.class.getName(), Integer.class.getName());
+		expected.addFlowType("flowOne", null);
+		expected.addFlowType("flowTwo", Byte.class);
+		expected.addEscalationType(IOException.class.getSimpleName(), IOException.class);
+		expected.addEscalationType(SQLException.class.getSimpleName(), SQLException.class);
+		expected.setNextArgumentType(Integer.class);
+		ProcedureType type = MockManagedFunctionProcedureService.run((context) -> {
+			ManagedFunctionTypeBuilder<Indexed, Indexed> function = context.setManagedFunction(() -> null,
+					Indexed.class, Indexed.class);
+			function.addAnnotation(new ParameterAnnotation(Double.class, 0));
+			function.addObject(Double.class);
+			function.addObject(Long.class).setLabel(Long.class.getName());
+			ManagedFunctionObjectTypeBuilder<Indexed> character = function.addObject(Character.class);
+			character.setTypeQualifier("qualified");
+			character.setLabel("qualified-" + Character.class.getName());
+			function.addObject(Var.class)
+					.addAnnotation(new VariableAnnotation(String.class.getName(), String.class.getName()));
+			function.addObject(Var.class).addAnnotation(
+					new VariableAnnotation("qualified-" + Integer.class.getName(), Integer.class.getName()));
+			function.addFlow().setLabel("flowOne");
+			ManagedFunctionFlowTypeBuilder<Indexed> flowTwo = function.addFlow();
+			flowTwo.setLabel("flowTwo");
+			flowTwo.setArgumentType(Byte.class);
+			function.addEscalation(IOException.class);
+			function.addEscalation(SQLException.class);
+			function.setReturnType(Integer.class);
+		}, () -> {
+			return ProcedureLoaderUtil.validateProcedureType(expected, "resource",
+					MockManagedFunctionProcedureService.class, "procedure");
+		});
+		assertNotNull("Should load procedure type", type);
 	}
 
 }

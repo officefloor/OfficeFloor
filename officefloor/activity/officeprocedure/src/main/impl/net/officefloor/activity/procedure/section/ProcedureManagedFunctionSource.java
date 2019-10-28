@@ -107,7 +107,8 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 			ManagedFunctionProcedureService managedFunctionProcedureService = (ManagedFunctionProcedureService) procedureService;
 
 			// Load the managed function
-			ProcedureManagedFunctionContextImpl procedureContext = new ProcedureManagedFunctionContextImpl();
+			ProcedureManagedFunctionContextImpl procedureContext = new ProcedureManagedFunctionContextImpl(resource,
+					procedureName, functionNamespaceTypeBuilder, context);
 			managedFunctionProcedureService.loadManagedFunction(procedureContext);
 
 		} else {
@@ -147,34 +148,68 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 	 */
 	private static class ProcedureManagedFunctionContextImpl implements ProcedureManagedFunctionContext {
 
+		/**
+		 * Resource.
+		 */
+		private final String resource;
+
+		/**
+		 * {@link Procedure} name.
+		 */
+		private final String procedureName;
+
+		/**
+		 * {@link FunctionNamespaceBuilder}.
+		 */
+		private final FunctionNamespaceBuilder functionNamespaceBuilder;
+
+		/**
+		 * {@link SourceContext}.
+		 */
+		private final SourceContext sourceContext;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param resource                 Resource.
+		 * @param procedureName            {@link Procedure} name.
+		 * @param functionNamespaceBuilder {@link FunctionNamespaceBuilder}.
+		 * @param sourceContext            {@link SourceContext}.
+		 */
+		private ProcedureManagedFunctionContextImpl(String resource, String procedureName,
+				FunctionNamespaceBuilder functionNamespaceBuilder, SourceContext sourceContext) {
+			this.resource = resource;
+			this.procedureName = procedureName;
+			this.functionNamespaceBuilder = functionNamespaceBuilder;
+			this.sourceContext = sourceContext;
+		}
+
 		/*
 		 * =================== ProcedureManagedFunctionContext ======================
 		 */
 
 		@Override
 		public String getResource() {
-			// TODO implement ProcedureManagedFunctionContext.getResource
-			throw new UnsupportedOperationException("TODO implement ProcedureManagedFunctionContext.getResource");
+			return this.resource;
 		}
 
 		@Override
 		public String getProcedureName() {
-			// TODO implement ProcedureManagedFunctionContext.getProcedureName
-			throw new UnsupportedOperationException("TODO implement ProcedureManagedFunctionContext.getProcedureName");
+			return this.procedureName;
 		}
 
 		@Override
 		public SourceContext getSourceContext() {
-			// TODO implement ProcedureManagedFunctionContext.getSourceContext
-			throw new UnsupportedOperationException("TODO implement ProcedureManagedFunctionContext.getSourceContext");
+			return this.sourceContext;
 		}
 
 		@Override
 		public <M extends Enum<M>, F extends Enum<F>> ManagedFunctionTypeBuilder<M, F> setManagedFunction(
 				ManagedFunctionFactory<M, F> functionFactory, Class<M> objectKeysClass, Class<F> flowKeysClass) {
-			// TODO implement ProcedureManagedFunctionContext.setManagedFunction
-			throw new UnsupportedOperationException(
-					"TODO implement ProcedureManagedFunctionContext.setManagedFunction");
+
+			// Add and return the procedure
+			return this.functionNamespaceBuilder.addManagedFunctionType("procedure", functionFactory, objectKeysClass,
+					flowKeysClass);
 		}
 	}
 
@@ -214,11 +249,8 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		 * @param resource      Resource.
 		 * @param procedureName {@link Procedure} name.
 		 * @param sourceContext {@link SourceContext}.
-		 * @throws Exception If fails to create default
-		 *                   {@link MethodObjectInstanceFactory}.
 		 */
-		private ProcedureMethodContextImpl(String resource, String procedureName, SourceContext sourceContext)
-				throws Exception {
+		private ProcedureMethodContextImpl(String resource, String procedureName, SourceContext sourceContext) {
 			this.resource = resource;
 			this.procedureName = procedureName;
 			this.sourceContext = sourceContext;

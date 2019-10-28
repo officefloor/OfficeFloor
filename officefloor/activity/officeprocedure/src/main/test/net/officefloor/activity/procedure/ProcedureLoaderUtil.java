@@ -38,6 +38,8 @@ import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailTestCompilerIssues;
 import net.officefloor.compile.test.util.LoaderUtil;
 import net.officefloor.plugin.section.clazz.Parameter;
@@ -209,28 +211,32 @@ public class ProcedureLoaderUtil {
 	/**
 	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
-	 * @param resource            Resource.
-	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
-	 * @param procedureName       Name of {@link Procedure}.
+	 * @param resource               Resource.
+	 * @param serviceFactoryClass    {@link ProcedureServiceFactory} {@link Class}.
+	 * @param procedureName          Name of {@link Procedure}.
+	 * @param propertyNameValuePairs Name/value pairs for {@link PropertyList}.
 	 * @return {@link ProcedureType}.
 	 */
 	public static ProcedureType loadProcedureType(String resource,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName) {
-		return loadProcedureType(resource, serviceFactoryClass, procedureName, officeFloorCompiler(null));
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName,
+			String... propertyNameValuePairs) {
+		return loadProcedureType(resource, serviceFactoryClass, procedureName, officeFloorCompiler(null),
+				propertyNameValuePairs);
 	}
 
 	/**
 	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
-	 * @param resource            Resource.
-	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
-	 * @param procedureName       Name of {@link Procedure}.
-	 * @param compiler            {@link OfficeFloorCompiler}.
+	 * @param resource               Resource.
+	 * @param serviceFactoryClass    {@link ProcedureServiceFactory} {@link Class}.
+	 * @param procedureName          Name of {@link Procedure}.
+	 * @param compiler               {@link OfficeFloorCompiler}.
+	 * @param propertyNameValuePairs Name/value pairs for {@link PropertyList}.
 	 * @return {@link ProcedureType}.
 	 */
 	public static ProcedureType loadProcedureType(String resource,
 			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName,
-			OfficeFloorCompiler compiler) {
+			OfficeFloorCompiler compiler, String... propertyNameValuePairs) {
 
 		// Create the procedure loader
 		ProcedureLoader loader = newProcedureLoader(compiler);
@@ -239,7 +245,8 @@ public class ProcedureLoaderUtil {
 		ProcedureService service = loadProcedureService(serviceFactoryClass, compiler);
 
 		// Load the procedure type
-		return loader.loadProcedureType(resource, service.getServiceName(), procedureName);
+		return loader.loadProcedureType(resource, service.getServiceName(), procedureName,
+				new PropertyListImpl(propertyNameValuePairs));
 	}
 
 	/**
@@ -256,7 +263,8 @@ public class ProcedureLoaderUtil {
 		ProcedureLoader loader = newProcedureLoader(officeFloorCompiler(null));
 
 		// Load the procedure type
-		return loader.loadProcedureType(resource, ClassProcedureService.SERVICE_NAME, procedureName);
+		return loader.loadProcedureType(resource, ClassProcedureService.SERVICE_NAME, procedureName,
+				new PropertyListImpl());
 	}
 
 	/**
@@ -274,18 +282,21 @@ public class ProcedureLoaderUtil {
 	/**
 	 * Validates the {@link ProcedureType}.
 	 * 
-	 * @param expectedProcedureType Expected {@link ProcedureType} via
-	 *                              {@link ProcedureTypeBuilder}.
-	 * @param resource              Resource.
-	 * @param serviceFactoryClass   {@link ProcedureServiceFactory} {@link Class}.
-	 * @param procedureName         Name of {@link Procedure}.
+	 * @param expectedProcedureType  Expected {@link ProcedureType} via
+	 *                               {@link ProcedureTypeBuilder}.
+	 * @param resource               Resource.
+	 * @param serviceFactoryClass    {@link ProcedureServiceFactory} {@link Class}.
+	 * @param procedureName          Name of {@link Procedure}.
+	 * @param propertyNameValuePairs Name/value pairs for {@link PropertyList}.
 	 * @return {@link ProcedureType}.
 	 */
 	public static ProcedureType validateProcedureType(ProcedureTypeBuilder expectedProcedureType, String resource,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName) {
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName,
+			String... propertyNameValuePairs) {
 
 		// Load the procedure type
-		ProcedureType actualType = loadProcedureType(resource, serviceFactoryClass, procedureName);
+		ProcedureType actualType = loadProcedureType(resource, serviceFactoryClass, procedureName,
+				propertyNameValuePairs);
 
 		// Validate and return
 		return validateProcedureType(expectedProcedureType, actualType);
@@ -294,14 +305,15 @@ public class ProcedureLoaderUtil {
 	/**
 	 * Validates the {@link ProcedureType} via default {@link ProcedureService}.
 	 * 
-	 * @param expectedProcedureType Expected {@link ProcedureType} via
-	 *                              {@link ProcedureTypeBuilder}.
-	 * @param resource              Resource.
-	 * @param procedureName         Name of {@link Procedure}.
+	 * @param expectedProcedureType  Expected {@link ProcedureType} via
+	 *                               {@link ProcedureTypeBuilder}.
+	 * @param resource               Resource.
+	 * @param procedureName          Name of {@link Procedure}.
+	 * @param propertyNameValuePairs Name/value pairs for {@link PropertyList}.
 	 * @return {@link ProcedureType}.
 	 */
 	public static ProcedureType validateProcedureType(ProcedureTypeBuilder expectedProcedureType, String resource,
-			String procedureName) {
+			String procedureName, String... propertyNameValuePairs) {
 
 		// Load the procedure type
 		ProcedureType actualType = loadProcedureType(resource, procedureName);

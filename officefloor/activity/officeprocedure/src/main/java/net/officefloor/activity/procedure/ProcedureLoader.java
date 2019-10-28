@@ -20,6 +20,7 @@ package net.officefloor.activity.procedure;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.properties.PropertyList;
 
 /**
  * Loader for {@link ProcedureManagedFunctionSource}.
@@ -43,9 +44,10 @@ public interface ProcedureLoader {
 	 * @param resource      Resource.
 	 * @param serviceName   {@link ProcedureService} name.
 	 * @param procedureName {@link Procedure} name.
+	 * @param properties    {@link PropertyList}.
 	 * @return {@link ProcedureType} for the {@link Procedure} or <code>null</code>
 	 *         with issues reported to {@link CompilerIssues}.
 	 */
-	ProcedureType loadProcedureType(String resource, String serviceName, String procedureName);
+	ProcedureType loadProcedureType(String resource, String serviceName, String procedureName, PropertyList properties);
 
 }

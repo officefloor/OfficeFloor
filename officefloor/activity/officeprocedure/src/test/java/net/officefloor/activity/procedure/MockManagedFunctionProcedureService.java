@@ -17,8 +17,6 @@
  */
 package net.officefloor.activity.procedure;
 
-import static org.junit.Assert.fail;
-
 import java.lang.reflect.Method;
 
 import net.officefloor.activity.procedure.spi.ManagedFunctionProcedureService;
@@ -116,7 +114,7 @@ public class MockManagedFunctionProcedureService implements ManagedFunctionProce
 
 	@Override
 	public void listProcedures(ProcedureListContext context) throws Exception {
-		fail("Should not list procedures");
+		// no procedures
 	}
 
 	@Override

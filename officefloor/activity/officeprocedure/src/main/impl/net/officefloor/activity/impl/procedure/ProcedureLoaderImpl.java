@@ -44,6 +44,7 @@ import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
@@ -199,14 +200,18 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 	}
 
 	@Override
-	public ProcedureType loadProcedureType(String resource, String serviceName, String procedureName) {
+	public ProcedureType loadProcedureType(String resource, String serviceName, String procedureName,
+			PropertyList properties) {
 
 		// Load the managed function type
-		PropertyList properties = this.loader.createPropertyList();
-		properties.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME).setValue(resource);
-		properties.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME).setValue(serviceName);
-		properties.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME).setValue(procedureName);
-		FunctionNamespaceType namespace = this.loader.loadManagedFunctionType(properties);
+		PropertyList loadProperties = this.loader.createPropertyList();
+		for (Property property : properties) {
+			loadProperties.addProperty(property.getName()).setValue(property.getValue());
+		}
+		loadProperties.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME).setValue(resource);
+		loadProperties.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME).setValue(serviceName);
+		loadProperties.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME).setValue(procedureName);
+		FunctionNamespaceType namespace = this.loader.loadManagedFunctionType(loadProperties);
 
 		// Ensure have namespace
 		if (namespace == null) {
