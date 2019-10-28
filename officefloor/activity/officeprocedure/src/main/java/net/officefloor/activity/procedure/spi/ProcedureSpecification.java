@@ -17,40 +17,36 @@
  */
 package net.officefloor.activity.procedure.spi;
 
-import java.lang.reflect.Method;
-
 import net.officefloor.activity.procedure.Procedure;
-import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
+import net.officefloor.activity.procedure.ProcedureProperty;
 
 /**
- * Context for the {@link ProcedureService}.
+ * Builds the specification for the {@link Procedure}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ProcedureServiceContext {
+public interface ProcedureSpecification {
 
 	/**
-	 * Obtains the resource configured to provide the {@link Procedure}.
+	 * Adds a property.
 	 * 
-	 * @return Resource configured to provide the {@link Procedure}.
+	 * @param name Name of property that is also used as the label.
 	 */
-	String getResource();
+	void addProperty(String name);
 
 	/**
-	 * Name of the {@link Procedure}.
+	 * Adds a property.
 	 * 
-	 * @return Name of the {@link Procedure}.
+	 * @param name  Name of property.
+	 * @param label Label for the property.
 	 */
-	String getProcedureName();
+	void addProperty(String name, String label);
 
 	/**
-	 * <p>
-	 * Overrides the default {@link MethodObjectInstanceFactory}.
-	 * <p>
-	 * Specifying <code>null</code> indicates a static {@link Method}.
+	 * Adds a property.
 	 * 
-	 * @param factory {@link MethodObjectInstanceFactory}.
+	 * @param property {@link ProcedureProperty}.
 	 */
-	void setMethodObjectInstanceFactory(MethodObjectInstanceFactory factory);
+	void addProperty(ProcedureProperty property);
 
 }

@@ -17,34 +17,26 @@
  */
 package net.officefloor.activity.procedure;
 
-import net.officefloor.activity.procedure.spi.ProcedureService;
-
 /**
- * Procedure.
+ * Individual property of the {@link Procedure}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Procedure {
+public interface ProcedureProperty {
 
 	/**
-	 * Obtains the name of the {@link ProcedureService}.
+	 * Obtains name of property.
 	 * 
-	 * @return Name of the {@link ProcedureService}.
+	 * @return Name of property.
 	 */
-	String getServiceName();
+	String getName();
 
 	/**
-	 * Obtains the name of the {@link Procedure}.
+	 * Obtains the display name of the property. If this returns <code>null</code>
+	 * then the return value of {@link #getName()} is used.
 	 * 
-	 * @return Name of the {@link Procedure}.
+	 * @return Display name of property.
 	 */
-	String getProcedureName();
-
-	/**
-	 * Obtains the specification of properties for the {@link Procedure}.
-	 * 
-	 * @return Property specification.
-	 */
-	ProcedureProperty[] getProperties();
+	String getLabel();
 
 }

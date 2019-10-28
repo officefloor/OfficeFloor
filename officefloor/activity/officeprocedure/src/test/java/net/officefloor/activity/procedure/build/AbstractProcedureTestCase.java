@@ -93,8 +93,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		RunProcedure.isRun = false;
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
-			setup.addProcedure(RunProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "procedure",
-					false);
+			setup.addProcedure(RunProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "procedure", false);
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("procedure"), null);
 		});
@@ -120,8 +119,8 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			setup.linkNext(
-					setup.addProcedure(NextProcedure.class.getName(), ClassProcedureService.SERVICE_NAME,
-							"initial", true),
+					setup.addProcedure(NextProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "initial",
+							true),
 					setup.addProcedure(NextProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "next",
 							false));
 		}, (officeFloor) -> {
@@ -156,9 +155,8 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		ProcedureObject object = new ProcedureObject();
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
-			setup.linkObject(setup.addProcedure(ObjectProcedure.class.getName(),
-					ClassProcedureService.SERVICE_NAME, "procedure", false), ProcedureObject.class.getName(),
-					object);
+			setup.linkObject(setup.addProcedure(ObjectProcedure.class.getName(), ClassProcedureService.SERVICE_NAME,
+					"procedure", false), ProcedureObject.class.getName(), object);
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("procedure"), null);
 		});
@@ -185,8 +183,8 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		final String PARAM = "TEST";
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
-			setup.addProcedure(ParameterProcedure.class.getName(), ClassProcedureService.SERVICE_NAME,
-					"procedure", false);
+			setup.addProcedure(ParameterProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "procedure",
+					false);
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("procedure"), PARAM);
 		});
@@ -250,10 +248,10 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			setup.linkFlow(
-					setup.addProcedure(FlowProcedure.class.getName(), ClassProcedureService.SERVICE_NAME,
-							"initial", false),
-					"doFlow", setup.addProcedure(FlowProcedure.class.getName(),
-							ClassProcedureService.SERVICE_NAME, "flow", false));
+					setup.addProcedure(FlowProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "initial",
+							false),
+					"doFlow", setup.addProcedure(FlowProcedure.class.getName(), ClassProcedureService.SERVICE_NAME,
+							"flow", false));
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("initial"), PARAM);
 		});
@@ -288,16 +286,12 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			Object dependency = setup.addDependency(SpawnFlowObject.class);
-			setup.linkFlow(
-					setup.linkDependency(
-							setup.addProcedure(SpawnFlowProcedure.class.getName(),
-									ClassProcedureService.SERVICE_NAME, "initial", false),
-							SpawnFlowObject.class.getName(), dependency),
+			setup.linkFlow(setup.linkDependency(setup.addProcedure(SpawnFlowProcedure.class.getName(),
+					ClassProcedureService.SERVICE_NAME, "initial", false), SpawnFlowObject.class.getName(), dependency),
 					"doFlow",
-					setup.linkDependency(
-							setup.addProcedure(SpawnFlowProcedure.class.getName(),
-									ClassProcedureService.SERVICE_NAME, "flow", false),
-							SpawnFlowObject.class.getName(), dependency));
+					setup.linkDependency(setup.addProcedure(SpawnFlowProcedure.class.getName(),
+							ClassProcedureService.SERVICE_NAME, "flow", false), SpawnFlowObject.class.getName(),
+							dependency));
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("initial"), null);
 		});

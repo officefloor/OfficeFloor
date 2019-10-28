@@ -48,21 +48,20 @@ public interface ProcedureService {
 	String getServiceName();
 
 	/**
-	 * Provides the available {@link Procedure} names for the resource.
+	 * Provides the available {@link Procedure} instances for the resource.
 	 * 
-	 * @param resource Resource.
-	 * @return Available {@link Procedure} names.
+	 * @param context {@link ProcedureListContext}.
 	 * @throws Exception If fails to list {@link Procedure} instances.
 	 */
-	String[] listProcedures(String resource) throws Exception;
+	void listProcedures(ProcedureListContext context) throws Exception;
 
 	/**
 	 * Loads the {@link Method} for the {@link Procedure}.
 	 * 
-	 * @param context {@link ProcedureServiceContext}.
+	 * @param context {@link ProcedureMethodContext}.
 	 * @return {@link Method} for the {@link ProcedureService}.
 	 * @throws Exception If fails to load the method.
 	 */
-	Method loadMethod(ProcedureServiceContext context) throws Exception;
+	Method loadMethod(ProcedureMethodContext context) throws Exception;
 
 }

@@ -21,6 +21,8 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import net.officefloor.activity.procedure.Procedure;
@@ -86,7 +88,9 @@ public class ProcedureEmployerTest extends OfficeFrameTestCase {
 			String... expectedProcedureNames) {
 
 		// Obtain the procedure names
-		String[] procedureNames = ProcedureEmployer.listProcedureNames(clazz, exclude);
+		List<String> methodNames = new LinkedList<>();
+		ProcedureEmployer.listMethods(clazz, exclude, (method) -> methodNames.add(method.getName()));
+		String[] procedureNames = methodNames.toArray(new String[methodNames.size()]);
 
 		// Ensure correct procedures
 		Arrays.sort(expectedProcedureNames);

@@ -38,8 +38,4 @@ public class ProcedureManagedFunctionSourceTest extends OfficeFrameTestCase {
 				ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, "Procedure");
 	}
 
-	// TODO test loading type
-	
-	// TODO test execution
-	
 }

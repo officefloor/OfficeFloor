@@ -15,36 +15,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure;
+package net.officefloor.polyglot.script;
 
-import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 
 /**
- * Procedure.
+ * Mock {@link ProcedureServiceFactory} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public interface Procedure {
-
-	/**
-	 * Obtains the name of the {@link ProcedureService}.
-	 * 
-	 * @return Name of the {@link ProcedureService}.
-	 */
-	String getServiceName();
-
-	/**
-	 * Obtains the name of the {@link Procedure}.
-	 * 
-	 * @return Name of the {@link Procedure}.
-	 */
-	String getProcedureName();
-
-	/**
-	 * Obtains the specification of properties for the {@link Procedure}.
-	 * 
-	 * @return Property specification.
-	 */
-	ProcedureProperty[] getProperties();
+public class MockProcedureServiceFactory extends AbstractScriptProcedureServiceFactory {
 
 }

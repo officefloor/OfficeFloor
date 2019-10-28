@@ -19,11 +19,11 @@ package net.officefloor.activity.impl.procedure;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 
+import net.officefloor.activity.procedure.build.ProcedureEmployer;
+import net.officefloor.activity.procedure.spi.ProcedureListContext;
+import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
 import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceContext;
-import net.officefloor.frame.api.source.SourceContext;
 
 /**
  * {@link ProcedureService} for {@link Class}.
@@ -37,20 +37,6 @@ public class ClassProcedureService implements ProcedureService {
 	 */
 	public static final String SERVICE_NAME = "Class";
 
-	/**
-	 * {@link SourceContext}.
-	 */
-	private final SourceContext context;
-
-	/**
-	 * Instantiate.
-	 * 
-	 * @param context {@link SourceContext}.
-	 */
-	public ClassProcedureService(SourceContext context) {
-		this.context = context;
-	}
-
 	/*
 	 * ======================== ProcedureService ===========================
 	 */
@@ -61,24 +47,23 @@ public class ClassProcedureService implements ProcedureService {
 	}
 
 	@Override
-	public String[] listProcedures(String resource) {
+	public void listProcedures(ProcedureListContext context) {
 
 		// Load the class
-		Class<?> clazz = this.context.loadOptionalClass(resource);
+		Class<?> clazz = context.getSourceContext().loadOptionalClass(context.getResource());
 		if (clazz == null) {
-			return null; // no procedures
+			return; // no procedures
 		}
 
-		// Provide all public (non-object methods)
-		return Arrays.stream(clazz.getMethods()).filter((method) -> !Object.class.equals(method.getDeclaringClass()))
-				.map((method) -> method.getName()).toArray(String[]::new);
+		// Provide all public methods
+		ProcedureEmployer.listMethods(clazz, null, (method) -> context.addProcedure(method.getName()));
 	}
 
 	@Override
-	public Method loadMethod(ProcedureServiceContext context) throws Exception {
+	public Method loadMethod(ProcedureMethodContext context) throws Exception {
 
 		// Obtain the class
-		Class<?> clazz = this.context.loadClass(context.getResource());
+		Class<?> clazz = context.getSourceContext().loadClass(context.getResource());
 
 		// Find the method
 		String methodName = context.getProcedureName();

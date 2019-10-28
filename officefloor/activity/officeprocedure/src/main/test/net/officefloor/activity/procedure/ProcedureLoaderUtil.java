@@ -30,7 +30,9 @@ import org.junit.Assert;
 import net.officefloor.activity.impl.procedure.ClassProcedureService;
 import net.officefloor.activity.impl.procedure.ProcedureEscalationTypeImpl;
 import net.officefloor.activity.impl.procedure.ProcedureFlowTypeImpl;
+import net.officefloor.activity.impl.procedure.ProcedureImpl;
 import net.officefloor.activity.impl.procedure.ProcedureObjectTypeImpl;
+import net.officefloor.activity.impl.procedure.ProcedurePropertyImpl;
 import net.officefloor.activity.impl.procedure.ProcedureVariableTypeImpl;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureService;
@@ -74,11 +76,12 @@ public class ProcedureLoaderUtil {
 	 * 
 	 * @param procedureName       Name of {@link Procedure}.
 	 * @param serviceFactoryClass {@link ProcedureServiceFactory}.
+	 * @param properties          {@link ProcedureProperty} instances.
 	 * @return {@link Procedure}.
 	 */
 	public static Procedure procedure(String procedureName,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass) {
-		return procedure(procedureName, serviceFactoryClass, officeFloorCompiler(null));
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass, ProcedureProperty... properties) {
+		return procedure(procedureName, serviceFactoryClass, officeFloorCompiler(null), properties);
 	}
 
 	/**
@@ -87,26 +90,29 @@ public class ProcedureLoaderUtil {
 	 * @param procedureName       Name of the {@link Procedure}.
 	 * @param serviceFactoryClass {@link Class} of {@link ProcedureServiceFactory}.
 	 * @param compiler            {@link OfficeFloorCompiler}.
+	 * @param properties          {@link ProcedureProperty} instances.
 	 * @return {@link Procedure}.
 	 */
 	public static Procedure procedure(String procedureName,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass, OfficeFloorCompiler compiler) {
+			Class<? extends ProcedureServiceFactory> serviceFactoryClass, OfficeFloorCompiler compiler,
+			ProcedureProperty... properties) {
 
 		// Load the service
 		ProcedureService service = loadProcedureService(serviceFactoryClass, officeFloorCompiler(compiler));
 
 		// Return the procedure
-		return procedure(procedureName, service.getServiceName());
+		return procedure(procedureName, service.getServiceName(), properties);
 	}
 
 	/**
 	 * Convenience creation of default {@link Procedure} for testing.
 	 * 
 	 * @param procedureName Name of the {@link Procedure}.
+	 * @param properties    {@link ProcedureProperty} instances.
 	 * @return {@link Procedure}.
 	 */
-	public static Procedure procedure(String procedureName) {
-		return procedure(procedureName, ClassProcedureService.SERVICE_NAME);
+	public static Procedure procedure(String procedureName, ProcedureProperty... properties) {
+		return procedure(procedureName, ClassProcedureService.SERVICE_NAME, properties);
 	}
 
 	/**
@@ -114,23 +120,32 @@ public class ProcedureLoaderUtil {
 	 * 
 	 * @param procedureName Name of the {@link Procedure}.
 	 * @param serviceName   Service name.
+	 * @param properties    {@link ProcedureProperty} instances.
 	 * @return {@link Procedure}.
 	 */
-	public static Procedure procedure(String procedureName, String serviceName) {
+	public static Procedure procedure(String procedureName, String serviceName, ProcedureProperty... properties) {
+		return new ProcedureImpl(procedureName, serviceName, properties);
+	}
 
-		// Return the procedure
-		return new Procedure() {
+	/**
+	 * Convenience creation of {@link ProcedureProperty}.
+	 * 
+	 * @param name Property name.
+	 * @return {@link ProcedureProperty}.
+	 */
+	public static ProcedureProperty property(String name) {
+		return new ProcedurePropertyImpl(name, name);
+	}
 
-			@Override
-			public String getProcedureName() {
-				return procedureName;
-			}
-
-			@Override
-			public String getServiceName() {
-				return serviceName;
-			}
-		};
+	/**
+	 * Convenience creation of {@link ProcedureProperty}.
+	 * 
+	 * @param name  Property name.
+	 * @param label Label for the property.
+	 * @return {@link ProcedureProperty}.
+	 */
+	public static ProcedureProperty property(String name, String label) {
+		return new ProcedurePropertyImpl(name, label);
 	}
 
 	/**

@@ -23,6 +23,7 @@ import java.sql.SQLException;
 
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureSpecification;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -120,7 +121,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 * {@link ProcedureService}.
 	 */
 	public void testConfiguredProcedureServiceOverridesDefault() {
-		MockProcedureService.run((clazz) -> new String[] { "MOCK" }, null, () -> {
+		MockProcedureService.run((context) -> context.addProcedure("MOCK"), null, () -> {
 			ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class,
 					ProcedureLoaderUtil.procedure("MOCK", MockProcedureService.class));
 			return null;
@@ -132,12 +133,30 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testMultipleConfiguredProcedureServices() throws Throwable {
 		AnotherMockProcedureService.run(() -> {
-			return MockProcedureService.run((clazz) -> new String[] { "MOCK" }, null, () -> {
+			return MockProcedureService.run((context) -> context.addProcedure("MOCK"), null, () -> {
 				ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class,
 						ProcedureLoaderUtil.procedure("MOCK", AnotherMockProcedureService.class),
 						ProcedureLoaderUtil.procedure("MOCK", MockProcedureService.class));
 				return null;
 			});
+		});
+	}
+
+	/**
+	 * Ensure can specify {@link ProcedureProperty} instances.
+	 */
+	public void testProcedureProperties() throws Throwable {
+		ProcedureProperty property = ProcedureLoaderUtil.property("three", "raw");
+		MockProcedureService.run((context) -> {
+			ProcedureSpecification procedure = context.addProcedure("MOCK");
+			procedure.addProperty("one");
+			procedure.addProperty("two", "TWO");
+			procedure.addProperty(property);
+		}, null, () -> {
+			ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class,
+					ProcedureLoaderUtil.procedure("MOCK", MockProcedureService.class,
+							ProcedureLoaderUtil.property("one"), ProcedureLoaderUtil.property("two", "TWO"), property));
+			return null;
 		});
 	}
 
@@ -238,7 +257,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ProcedureType type = MockProcedureService.run((clazz) -> new String[] { "error" }, (context) -> {
+		ProcedureType type = MockProcedureService.run((context) -> context.addProcedure("error"), (context) -> {
 			throw failure;
 		}, () -> {
 			return ProcedureLoaderUtil.loadProcedureType(ErrorInLoadProcedure.class.getName(),

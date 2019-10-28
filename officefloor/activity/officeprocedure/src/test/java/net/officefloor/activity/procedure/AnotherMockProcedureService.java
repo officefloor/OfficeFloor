@@ -20,7 +20,8 @@ package net.officefloor.activity.procedure;
 import java.lang.reflect.Method;
 
 import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceContext;
+import net.officefloor.activity.procedure.spi.ProcedureListContext;
+import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
 
 /**
  * Another mock {@link ProcedureService} for testing.
@@ -67,12 +68,14 @@ public class AnotherMockProcedureService extends MockProcedureService {
 	}
 
 	@Override
-	public String[] listProcedures(String resource) throws Exception {
-		return isRun ? super.listProcedures(resource) : null;
+	public void listProcedures(ProcedureListContext context) throws Exception {
+		if (isRun) {
+			super.listProcedures(context);
+		}
 	}
 
 	@Override
-	public Method loadMethod(ProcedureServiceContext context) throws Exception {
+	public Method loadMethod(ProcedureMethodContext context) throws Exception {
 		return isRun ? super.loadMethod(context) : null;
 	}
 

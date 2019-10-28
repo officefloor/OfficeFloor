@@ -27,11 +27,14 @@ import net.officefloor.activity.procedure.ProcedureEscalationType;
 import net.officefloor.activity.procedure.ProcedureFlowType;
 import net.officefloor.activity.procedure.ProcedureLoader;
 import net.officefloor.activity.procedure.ProcedureObjectType;
+import net.officefloor.activity.procedure.ProcedureProperty;
 import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.activity.procedure.ProcedureVariableType;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
+import net.officefloor.activity.procedure.spi.ProcedureListContext;
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSpecification;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompileError;
@@ -44,6 +47,7 @@ import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.variable.VariableAnnotation;
 
@@ -68,13 +72,13 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		this.loader = new Loader() {
 
 			@Override
-			public Iterable<ProcedureService> loadProcedureServices() {
-				return compiler.createRootSourceContext().loadOptionalServices(ProcedureServiceFactory.class);
+			public SourceContext getSourceContext() {
+				return compiler.createRootSourceContext();
 			}
 
 			@Override
 			public ProcedureService loadDefaultProcedureService() {
-				return new ClassProcedureService(compiler.createRootSourceContext());
+				return new ClassProcedureService();
 			}
 
 			@Override
@@ -105,13 +109,13 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		this.loader = new Loader() {
 
 			@Override
-			public Iterable<ProcedureService> loadProcedureServices() {
-				return context.loadOptionalServices(ProcedureServiceFactory.class);
+			public SourceContext getSourceContext() {
+				return context;
 			}
 
 			@Override
 			public ProcedureService loadDefaultProcedureService() {
-				return new ClassProcedureService(context);
+				return new ClassProcedureService();
 			}
 
 			@Override
@@ -139,6 +143,9 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 	@Override
 	public Procedure[] listProcedures(String resource) {
 
+		// Obtain the source context
+		SourceContext sourceContext = this.loader.getSourceContext();
+
 		// Load procedures
 		List<Procedure> procedures = new LinkedList<Procedure>();
 		Consumer<ProcedureService> loadProcedures = (service) -> {
@@ -147,27 +154,27 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			String serviceName = service.getServiceName();
 
 			// Attempt to list the procedures
-			String[] procedureNames;
+			ProcedureListContextImpl listContext = new ProcedureListContextImpl(resource, sourceContext);
 			try {
-				procedureNames = service.listProcedures(resource);
+				service.listProcedures(listContext);
 			} catch (Exception ex) {
 				this.loader.addIssue("Failed to list procedures from service " + serviceName + " ["
 						+ service.getClass().getName() + "]", ex);
-				procedureNames = null; // No procedures
+				listContext.procedures.clear(); // don't load procedures
 			}
 
-			// Obtain the procedure names
-			if (procedureNames != null) {
-				for (String procedureName : procedureNames) {
-					if (!CompileUtil.isBlank(procedureName)) {
-						procedures.add(new ProcedureImpl(procedureName.trim(), serviceName));
-					}
+			// Load the procedures
+			for (ProcedureSpecificationImpl specification : listContext.procedures) {
+				if (!CompileUtil.isBlank(specification.procedureName)) {
+					ProcedureProperty[] properties = specification.properties
+							.toArray(new ProcedureProperty[specification.properties.size()]);
+					procedures.add(new ProcedureImpl(specification.procedureName.trim(), serviceName, properties));
 				}
 			}
 		};
 
 		// Collect the listing of procedures
-		for (ProcedureService service : this.loader.loadProcedureServices()) {
+		for (ProcedureService service : sourceContext.loadOptionalServices(ProcedureServiceFactory.class)) {
 			loadProcedures.accept(service);
 		}
 
@@ -266,43 +273,99 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 	}
 
 	/**
-	 * {@link Procedure} implementation.
+	 * {@link ProcedureListContext} implementation.
 	 */
-	private static class ProcedureImpl implements Procedure {
+	private static class ProcedureListContextImpl implements ProcedureListContext {
 
 		/**
-		 * Procedure name.
+		 * Resource.
 		 */
-		private final String procedureName;
+		private final String resource;
 
 		/**
-		 * {@link ProcedureService} name.
+		 * {@link SourceContext}.
 		 */
-		private final String serviceName;
+		private final SourceContext context;
+
+		/**
+		 * {@link ProcedureSpecificationImpl} instances.
+		 */
+		private final List<ProcedureSpecificationImpl> procedures = new LinkedList<>();
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param procedureName Procedure name.
-		 * @param serviceName   {@link ProcedureService} name.
+		 * @param resource Resource.
+		 * @param context  {@link SourceContext}.
 		 */
-		public ProcedureImpl(String procedureName, String serviceName) {
-			this.procedureName = procedureName;
-			this.serviceName = serviceName;
+		private ProcedureListContextImpl(String resource, SourceContext context) {
+			this.resource = resource;
+			this.context = context;
 		}
 
 		/*
-		 * =================== Procedure ======================
+		 * ====================== ProcedureListContext ========================
 		 */
 
 		@Override
-		public String getProcedureName() {
-			return this.procedureName;
+		public String getResource() {
+			return this.resource;
 		}
 
 		@Override
-		public String getServiceName() {
-			return this.serviceName;
+		public ProcedureSpecification addProcedure(String procedureName) {
+			ProcedureSpecificationImpl procedure = new ProcedureSpecificationImpl(procedureName);
+			this.procedures.add(procedure);
+			return procedure;
+		}
+
+		@Override
+		public SourceContext getSourceContext() {
+			return this.context;
+		}
+	}
+
+	/**
+	 * {@link ProcedureSpecification} implementation.
+	 */
+	private static class ProcedureSpecificationImpl implements ProcedureSpecification {
+
+		/**
+		 * Name of the {@link Procedure}.
+		 */
+		private final String procedureName;
+
+		/**
+		 * {@link ProcedureProperty} instances.
+		 */
+		private final List<ProcedureProperty> properties = new LinkedList<>();
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param procedureName Name of the {@link Procedure}.
+		 */
+		private ProcedureSpecificationImpl(String procedureName) {
+			this.procedureName = procedureName;
+		}
+
+		/*
+		 * ==================== ProcedureSpecification ========================
+		 */
+
+		@Override
+		public void addProperty(String name) {
+			this.addProperty(name, name);
+		}
+
+		@Override
+		public void addProperty(String name, String label) {
+			this.addProperty(new ProcedurePropertyImpl(name, label));
+		}
+
+		@Override
+		public void addProperty(ProcedureProperty property) {
+			this.properties.add(property);
 		}
 	}
 
@@ -312,11 +375,11 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 	private static interface Loader {
 
 		/**
-		 * Loads the {@link ProcedureService} instances.
+		 * Obtains the {@link SourceContext} instances.
 		 * 
-		 * @return {@link ProcedureService} instances.
+		 * @return {@link SourceContext} instances.
 		 */
-		Iterable<ProcedureService> loadProcedureServices();
+		SourceContext getSourceContext();
 
 		/**
 		 * Loads the default {@link ProcedureService}.

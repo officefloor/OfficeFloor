@@ -21,14 +21,19 @@ import java.lang.reflect.Method;
 
 import net.officefloor.activity.impl.procedure.ClassProcedureService;
 import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.spi.ManagedFunctionProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureManagedFunctionContext;
+import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
 import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceContext;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.frame.api.function.ManagedFunctionFactory;
+import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.managedfunction.method.DefaultConstructorMethodObjectInstanceFactory;
 import net.officefloor.plugin.managedfunction.method.MethodManagedFunctionBuilder;
 import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
@@ -80,7 +85,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		ProcedureService procedureService = null;
 		if (ClassProcedureService.SERVICE_NAME.equals(serviceName)) {
 			// Use default service
-			procedureService = new ClassProcedureService(context);
+			procedureService = new ClassProcedureService();
 
 		} else {
 			// Search for service
@@ -97,39 +102,86 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 			throw new Exception("Can not find " + ProcedureService.class.getSimpleName() + " " + serviceName);
 		}
 
-		// Load the method for the procedure service
-		ProcedureServiceContextImpl procedureContext = new ProcedureServiceContextImpl(resource, procedureName);
-		Method method = procedureService.loadMethod(procedureContext);
+		// Determine if non-method managed function
+		if (procedureService instanceof ManagedFunctionProcedureService) {
+			ManagedFunctionProcedureService managedFunctionProcedureService = (ManagedFunctionProcedureService) procedureService;
 
-		// Ensure have method
-		if (method == null) {
-			throw new Exception("No " + Method.class.getSimpleName() + " provided by service " + serviceName
-					+ " for procedure " + procedureName + " from resource " + resource);
-		}
+			// Load the managed function
+			ProcedureManagedFunctionContextImpl procedureContext = new ProcedureManagedFunctionContextImpl();
+			managedFunctionProcedureService.loadManagedFunction(procedureContext);
 
-		// Obtain the object instance factory
-		MethodObjectInstanceFactory factory = procedureContext.methodObjectInstanceFactory;
-		if ((factory == null) && (!procedureContext.isStatic)) {
-			Class<?> resourceClass = context.loadClass(resource);
-			factory = new DefaultConstructorMethodObjectInstanceFactory(resourceClass);
-		}
-		MethodObjectInstanceFactory finalFactory = factory;
+		} else {
+			// Load the method for the procedure service
+			ProcedureMethodContextImpl procedureContext = new ProcedureMethodContextImpl(resource, procedureName,
+					context);
+			Method method = procedureService.loadMethod(procedureContext);
 
-		// Load the managed function
-		MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder() {
-			@Override
-			protected void enrichManagedFunctionType(EnrichManagedFunctionTypeContext context) {
-				SectionClassManagedFunctionSource.enrichWithParameterAnnotation(context);
-				SectionClassManagedFunctionSource.enrichWithFlowAnnotations(context);
+			// Ensure have method
+			if (method == null) {
+				throw new Exception("No " + Method.class.getSimpleName() + " provided by service " + serviceName
+						+ " for procedure " + procedureName + " from resource " + resource);
 			}
-		};
-		builder.buildMethod(method, () -> finalFactory, functionNamespaceTypeBuilder, context);
+
+			// Obtain the object instance factory
+			MethodObjectInstanceFactory factory = procedureContext.methodObjectInstanceFactory;
+			if ((factory == null) && (!procedureContext.isStatic)) {
+				Class<?> resourceClass = context.loadClass(resource);
+				factory = new DefaultConstructorMethodObjectInstanceFactory(resourceClass);
+			}
+			MethodObjectInstanceFactory finalFactory = factory;
+
+			// Load the managed function
+			MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder() {
+				@Override
+				protected void enrichManagedFunctionType(EnrichManagedFunctionTypeContext context) {
+					SectionClassManagedFunctionSource.enrichWithParameterAnnotation(context);
+					SectionClassManagedFunctionSource.enrichWithFlowAnnotations(context);
+				}
+			};
+			builder.buildMethod(method, () -> finalFactory, functionNamespaceTypeBuilder, context);
+		}
 	}
 
 	/**
-	 * {@link ProcedureServiceContext} implementation.
+	 * {@link ProcedureManagedFunctionContext} implementation.
 	 */
-	private static class ProcedureServiceContextImpl implements ProcedureServiceContext {
+	private static class ProcedureManagedFunctionContextImpl implements ProcedureManagedFunctionContext {
+
+		/*
+		 * =================== ProcedureManagedFunctionContext ======================
+		 */
+
+		@Override
+		public String getResource() {
+			// TODO implement ProcedureManagedFunctionContext.getResource
+			throw new UnsupportedOperationException("TODO implement ProcedureManagedFunctionContext.getResource");
+		}
+
+		@Override
+		public String getProcedureName() {
+			// TODO implement ProcedureManagedFunctionContext.getProcedureName
+			throw new UnsupportedOperationException("TODO implement ProcedureManagedFunctionContext.getProcedureName");
+		}
+
+		@Override
+		public SourceContext getSourceContext() {
+			// TODO implement ProcedureManagedFunctionContext.getSourceContext
+			throw new UnsupportedOperationException("TODO implement ProcedureManagedFunctionContext.getSourceContext");
+		}
+
+		@Override
+		public <M extends Enum<M>, F extends Enum<F>> ManagedFunctionTypeBuilder<M, F> setManagedFunction(
+				ManagedFunctionFactory<M, F> functionFactory, Class<M> objectKeysClass, Class<F> flowKeysClass) {
+			// TODO implement ProcedureManagedFunctionContext.setManagedFunction
+			throw new UnsupportedOperationException(
+					"TODO implement ProcedureManagedFunctionContext.setManagedFunction");
+		}
+	}
+
+	/**
+	 * {@link ProcedureMethodContext} implementation.
+	 */
+	private static class ProcedureMethodContextImpl implements ProcedureMethodContext {
 
 		/**
 		 * Resource.
@@ -140,6 +192,11 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		 * {@link Procedure} name.
 		 */
 		private final String procedureName;
+
+		/**
+		 * {@link SourceContext}.
+		 */
+		private final SourceContext sourceContext;
 
 		/**
 		 * Indicates if static. In other words, no {@link MethodObjectInstanceFactory}.
@@ -156,12 +213,15 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		 * 
 		 * @param resource      Resource.
 		 * @param procedureName {@link Procedure} name.
+		 * @param sourceContext {@link SourceContext}.
 		 * @throws Exception If fails to create default
 		 *                   {@link MethodObjectInstanceFactory}.
 		 */
-		private ProcedureServiceContextImpl(String resource, String procedureName) throws Exception {
+		private ProcedureMethodContextImpl(String resource, String procedureName, SourceContext sourceContext)
+				throws Exception {
 			this.resource = resource;
 			this.procedureName = procedureName;
+			this.sourceContext = sourceContext;
 		}
 
 		/*
@@ -182,6 +242,11 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		public void setMethodObjectInstanceFactory(MethodObjectInstanceFactory factory) {
 			this.methodObjectInstanceFactory = factory;
 			this.isStatic = (factory == null);
+		}
+
+		@Override
+		public SourceContext getSourceContext() {
+			return this.sourceContext;
 		}
 	}
 

@@ -19,9 +19,8 @@ package net.officefloor.activity.procedure.build;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import net.officefloor.activity.impl.procedure.ProcedureLoaderCompilerRunnable;
@@ -61,20 +60,18 @@ public class ProcedureEmployer {
 
 	/**
 	 * <p>
-	 * Convenience method to list {@link Procedure} names from a {@link Class}.
+	 * Convenience method to list {@link Method} instances from a {@link Class}.
 	 * <p>
 	 * This handles not including {@link Object} methods.
 	 * 
 	 * @param clazz   {@link Class} to extract {@link Procedure} names.
-	 * @param exclude {@link Predicate} to filter out {@link Method} instances for
-	 *                {@link Procedure} instances. May be <code>null</code> to
-	 *                include all.
+	 * @param exclude {@link Predicate} to filter out {@link Method} instances. May
+	 *                be <code>null</code> to include all.
 	 * @return {@link Procedure} names.
 	 */
-	public static String[] listProcedureNames(Class<?> clazz, Predicate<Method> exclude) {
+	public static void listMethods(Class<?> clazz, Predicate<Method> exclude, Consumer<Method> handler) {
 
 		// Load the procedure names
-		List<String> procedureNames = new LinkedList<>();
 		NEXT_METHOD: for (Method method : clazz.getMethods()) {
 			String methodName = method.getName();
 
@@ -88,12 +85,9 @@ public class ProcedureEmployer {
 				continue NEXT_METHOD;
 			}
 
-			// Add the procedure
-			procedureNames.add(methodName);
+			// Add the method
+			handler.accept(method);
 		}
-
-		// Return the procedure names
-		return procedureNames.toArray(new String[procedureNames.size()]);
 	}
 
 	/**
