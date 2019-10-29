@@ -25,6 +25,7 @@ import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource
 import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureSpecification;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
@@ -342,6 +343,65 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 					MockManagedFunctionProcedureService.class, "procedure");
 		});
 		assertNotNull("Should load procedure type", type);
+	}
+
+	/**
+	 * Ensure {@link CompilerIssue} if no {@link ManagedFunction} configured for
+	 * {@link Procedure}.
+	 */
+	public void testIssueIfNoManagedFunction() {
+
+		// Create compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		MockCompilerIssues issues = new MockCompilerIssues(this);
+		compiler.setCompilerIssues(issues);
+
+		// Record failure
+		IllegalStateException failure = new IllegalStateException("Must provide ManagedFunction for Procedure");
+		issues.recordIssue("Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
+				+ ProcedureManagedFunctionSource.class.getName(), failure);
+
+		// Test
+		this.replayMockObjects();
+		ProcedureType type = MockManagedFunctionProcedureService.run((context) -> {
+			// Don't specify managed function
+		}, () -> {
+			return ProcedureLoaderUtil.loadProcedureType("resource", MockManagedFunctionProcedureService.class, "error",
+					compiler);
+		});
+		this.verifyMockObjects();
+		assertNull("Should not load type", type);
+	}
+
+	/**
+	 * Ensure {@link CompilerIssue} if multiple {@link ManagedFunction} instances
+	 * configured for {@link Procedure}.
+	 */
+	public void testIssueIfMultipleManagedFunctions() {
+
+		// Create compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
+		MockCompilerIssues issues = new MockCompilerIssues(this);
+		compiler.setCompilerIssues(issues);
+
+		// Record failure
+		IllegalStateException failure = new IllegalStateException(
+				"Only one ManagedFunction may be specified for a Procedure");
+		issues.recordIssue("Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
+				+ ProcedureManagedFunctionSource.class.getName(), failure);
+
+		// Test
+		this.replayMockObjects();
+		ProcedureType type = MockManagedFunctionProcedureService.run((context) -> {
+			// Incorrectly specify two managed functions
+			context.setManagedFunction(() -> null, None.class, None.class);
+			context.setManagedFunction(() -> null, None.class, None.class);
+		}, () -> {
+			return ProcedureLoaderUtil.loadProcedureType("resource", MockManagedFunctionProcedureService.class, "error",
+					compiler);
+		});
+		this.verifyMockObjects();
+		assertNull("Should not load type", type);
 	}
 
 }

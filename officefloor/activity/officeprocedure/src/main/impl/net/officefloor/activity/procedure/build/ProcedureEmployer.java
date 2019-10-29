@@ -30,6 +30,7 @@ import net.officefloor.activity.procedure.ProcedureLoader;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.section.ProcedureSectionSource;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
@@ -127,9 +128,10 @@ public class ProcedureEmployer {
 
 			@Override
 			public OfficeSection addProcedure(String className, String serviceName, String procedureName,
-					boolean isNext) {
+					boolean isNext, PropertyList properties) {
 				OfficeSection procedure = officeArchitect.addOfficeSection(procedureName,
 						ProcedureSectionSource.class.getName(), procedureName);
+				properties.configureProperties(procedure);
 				procedure.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, className);
 				procedure.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
 				if (isNext) {
@@ -152,9 +154,11 @@ public class ProcedureEmployer {
 		return new ProcedureArchitect<SubSection>() {
 
 			@Override
-			public SubSection addProcedure(String className, String serviceName, String procedureName, boolean isNext) {
+			public SubSection addProcedure(String className, String serviceName, String procedureName, boolean isNext,
+					PropertyList properties) {
 				SubSection procedure = sectionDesigner.addSubSection(procedureName,
 						ProcedureSectionSource.class.getName(), procedureName);
+				properties.configureProperties(procedure);
 				procedure.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, className);
 				procedure.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
 				if (isNext) {

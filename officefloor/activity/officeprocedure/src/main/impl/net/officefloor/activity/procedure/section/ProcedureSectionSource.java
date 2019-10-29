@@ -67,22 +67,31 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 		String procedureName = context.getSectionLocation();
 		boolean isNext = Boolean.parseBoolean(context.getProperty(IS_NEXT_PROPERTY_NAME, Boolean.FALSE.toString()));
 
+		// Name of the managed function
+		final String FUNCTION_NAME = "procedure";
+
 		// Load managed function type for the procedure
 		PropertyList typeProperties = context.createPropertyList();
+		for (String propertyName : context.getPropertyNames()) {
+			typeProperties.addProperty(propertyName).setValue(context.getProperty(propertyName));
+		}
 		typeProperties.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME).setValue(className);
 		typeProperties.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME).setValue(serviceName);
 		typeProperties.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME).setValue(procedureName);
 		ManagedFunctionType<?, ?> type = context
-				.loadManagedFunctionType("procedure", ProcedureManagedFunctionSource.class.getName(), typeProperties)
+				.loadManagedFunctionType(FUNCTION_NAME, ProcedureManagedFunctionSource.class.getName(), typeProperties)
 				.getManagedFunctionTypes()[0];
 
 		// Load the procedure
 		SectionFunctionNamespace namespace = designer.addSectionFunctionNamespace(procedureName,
 				ProcedureManagedFunctionSource.class.getName());
+		for (String propertyName : context.getPropertyNames()) {
+			namespace.addProperty(propertyName, context.getProperty(propertyName));
+		}
 		namespace.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, className);
 		namespace.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
 		namespace.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, procedureName);
-		SectionFunction procedure = namespace.addSectionFunction("procedure", procedureName);
+		SectionFunction procedure = namespace.addSectionFunction(FUNCTION_NAME, procedureName);
 
 		// Link objects
 		ParameterAnnotation parameterAnnotation = type.getAnnotation(ParameterAnnotation.class);

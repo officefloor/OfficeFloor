@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.managedfunction.method.DefaultConstructorMethodObjectInstanceFactory;
@@ -110,6 +111,10 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 			ProcedureManagedFunctionContextImpl procedureContext = new ProcedureManagedFunctionContextImpl(resource,
 					procedureName, functionNamespaceTypeBuilder, context);
 			managedFunctionProcedureService.loadManagedFunction(procedureContext);
+			if (!procedureContext.isManagedFunctionSpecified) {
+				throw new IllegalStateException("Must provide " + ManagedFunction.class.getSimpleName() + " for "
+						+ Procedure.class.getSimpleName());
+			}
 
 		} else {
 			// Load the method for the procedure service
@@ -169,6 +174,12 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		private final SourceContext sourceContext;
 
 		/**
+		 * Indicates if the {@link ManagedFunction} for the {@link Procedure} has been
+		 * specified.
+		 */
+		private boolean isManagedFunctionSpecified = false;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param resource                 Resource.
@@ -207,9 +218,16 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		public <M extends Enum<M>, F extends Enum<F>> ManagedFunctionTypeBuilder<M, F> setManagedFunction(
 				ManagedFunctionFactory<M, F> functionFactory, Class<M> objectKeysClass, Class<F> flowKeysClass) {
 
+			// Ensure only one managed function configured
+			if (this.isManagedFunctionSpecified) {
+				throw new IllegalStateException("Only one " + ManagedFunction.class.getSimpleName()
+						+ " may be specified for a " + Procedure.class.getSimpleName());
+			}
+
 			// Add and return the procedure
-			return this.functionNamespaceBuilder.addManagedFunctionType("procedure", functionFactory, objectKeysClass,
-					flowKeysClass);
+			this.isManagedFunctionSpecified = true;
+			return this.functionNamespaceBuilder.addManagedFunctionType(this.procedureName, functionFactory,
+					objectKeysClass, flowKeysClass);
 		}
 	}
 

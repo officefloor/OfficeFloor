@@ -35,6 +35,11 @@ import net.officefloor.frame.api.source.ServiceContext;
 public class MockManagedFunctionProcedureService implements ManagedFunctionProcedureService, ProcedureServiceFactory {
 
 	/**
+	 * Service name.
+	 */
+	public static final String SERVICE_NAME = "MockManagedFunction";
+
+	/**
 	 * Allow plug in to load {@link ManagedFunction}.
 	 */
 	@FunctionalInterface
@@ -109,7 +114,7 @@ public class MockManagedFunctionProcedureService implements ManagedFunctionProce
 
 	@Override
 	public String getServiceName() {
-		return "MockManagedFunction";
+		return SERVICE_NAME;
 	}
 
 	@Override

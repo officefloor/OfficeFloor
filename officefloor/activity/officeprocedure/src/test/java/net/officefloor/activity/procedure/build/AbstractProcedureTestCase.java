@@ -18,7 +18,9 @@
 package net.officefloor.activity.procedure.build;
 
 import net.officefloor.activity.impl.procedure.ClassProcedureService;
+import net.officefloor.activity.procedure.MockManagedFunctionProcedureService;
 import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
@@ -36,12 +38,14 @@ import net.officefloor.compile.test.officefloor.CompileOfficeContext;
 import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
 import net.officefloor.compile.test.officefloor.CompileSectionContext;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -369,7 +373,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 			ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer.employProcedureArchitect(architect,
 					office.getOfficeSourceContext());
 			OfficeSection handler = procedureArchitect.addProcedure(HandleEscalationProcedure.class.getName(),
-					ClassProcedureService.SERVICE_NAME, "handleEscalation", false);
+					ClassProcedureService.SERVICE_NAME, "handleEscalation", false, new PropertyListImpl());
 			OfficeEscalation escalation = architect.addOfficeEscalation(Exception.class.getName());
 			architect.link(escalation, handler.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 		};
@@ -399,6 +403,36 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can load via {@link ManagedFunction}.
+	 */
+	public void testLoadManagedFunction() {
+		this.issues.recordCaptureIssues(false);
+		String resource = "RESOURCE";
+		String procedureName = "managedFunction";
+		String propertyName = "name";
+		String propertyValue = "value";
+		Closure<Boolean> isRun = new Closure<Boolean>(false);
+		MockManagedFunctionProcedureService.run((context) -> {
+			assertEquals("Incorrect resource name", resource, context.getResource());
+			assertEquals("Incorrect procedure name", procedureName, context.getProcedureName());
+			assertEquals("Incorrect property", propertyValue, context.getSourceContext().getProperty(propertyName));
+			context.setManagedFunction(() -> (managedFunctionContext) -> {
+				isRun.value = true; // flag run
+				return null;
+			}, None.class, None.class);
+		}, () -> {
+			this.doTest((setup) -> {
+				setup.addProcedure(resource, MockManagedFunctionProcedureService.SERVICE_NAME, procedureName, false,
+						propertyName, propertyValue);
+			}, (officeFloor) -> {
+				CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName(procedureName), null);
+			});
+			return null;
+		});
+		assertTrue("Should run managed function", isRun.value);
+	}
+
+	/**
 	 * Setup logic.
 	 */
 	@FunctionalInterface
@@ -411,7 +445,8 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 	 */
 	protected static interface SetupContext<P, D> {
 
-		P addProcedure(String className, String serviceName, String procedureName, boolean isNext);
+		P addProcedure(String resource, String serviceName, String procedureName, boolean isNext,
+				String... propertyNameValuePairs);
 
 		void linkNext(P source, P target);
 
@@ -439,8 +474,10 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public SubSection addProcedure(String className, String serviceName, String procedureName, boolean isNext) {
-			return this.procedureArchitect.addProcedure(className, serviceName, procedureName, isNext);
+		public SubSection addProcedure(String resource, String serviceName, String procedureName, boolean isNext,
+				String... propertyNameValuePairs) {
+			return this.procedureArchitect.addProcedure(resource, serviceName, procedureName, isNext,
+					new PropertyListImpl(propertyNameValuePairs));
 		}
 
 		@Override
@@ -497,8 +534,10 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public OfficeSection addProcedure(String className, String serviceName, String procedureName, boolean isNext) {
-			return this.procedureArchitect.addProcedure(className, serviceName, procedureName, isNext);
+		public OfficeSection addProcedure(String resource, String serviceName, String procedureName, boolean isNext,
+				String... propertyNameValuePairs) {
+			return this.procedureArchitect.addProcedure(resource, serviceName, procedureName, isNext,
+					new PropertyListImpl(propertyNameValuePairs));
 		}
 
 		@Override

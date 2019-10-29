@@ -15,26 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure.section;
+package net.officefloor.activity.procedure.source;
 
-import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
+import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
+import net.officefloor.activity.procedure.section.ProcedureSectionSource;
+import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link ProcedureManagedFunctionSource}.
+ * Tests the {@link ProcedureSectionSource}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcedureManagedFunctionSourceTest extends OfficeFrameTestCase {
+public class ProcedureSectionSourceTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure correct specification.
 	 */
 	public void testSpecification() {
-		ManagedFunctionLoaderUtil.validateSpecification(ProcedureManagedFunctionSource.class,
+		SectionLoaderUtil.validateSpecification(ProcedureSectionSource.class,
 				ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, "Class",
-				ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, "Service",
-				ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, "Procedure");
+				ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, "Service");
 	}
 
 }

@@ -789,9 +789,12 @@ public class WoofLoaderImpl implements WoofLoader {
 				// Determine if next
 				boolean isNext = procedureModel.getNext() != null;
 
+				// TODO provide properties
+				PropertyList properties = null;
+
 				// Configure the procedure
-				OfficeSection procedure = procedureArchitect.addProcedure(className, serviceName, procedureName,
-						isNext);
+				OfficeSection procedure = procedureArchitect.addProcedure(className, serviceName, procedureName, isNext,
+						properties);
 
 				// Maintain reference to procedure by name
 				String woofProcedureName = procedureModel.getWoofProcedureName();
