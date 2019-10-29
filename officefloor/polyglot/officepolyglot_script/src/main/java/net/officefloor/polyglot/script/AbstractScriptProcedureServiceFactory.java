@@ -60,6 +60,7 @@ import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.variable.Var;
 import net.officefloor.plugin.variable.VariableAnnotation;
 import net.officefloor.plugin.variable.VariableManagedObjectSource;
+import net.officefloor.polyglot.script.ScriptManagedFunction.ScriptEngineDecorator;
 import net.officefloor.web.HttpCookieParameterAnnotation;
 import net.officefloor.web.HttpHeaderParameterAnnotation;
 import net.officefloor.web.HttpObjectAnnotation;
@@ -73,11 +74,6 @@ import net.officefloor.web.HttpQueryParameterAnnotation;
  * @author Daniel Sagenschneider
  */
 public abstract class AbstractScriptProcedureServiceFactory implements ProcedureServiceFactory {
-
-	/**
-	 * {@link ScriptEngineManager}.
-	 */
-	private static final ScriptEngineManager engineManager = new ScriptEngineManager();
 
 	/**
 	 * Obtains the service name for this {@link ProcedureService}.
@@ -157,6 +153,7 @@ public abstract class AbstractScriptProcedureServiceFactory implements Procedure
 
 		// Obtain the script engine
 		SourceContext sourceContext = context.getSourceContext();
+		ScriptEngineManager engineManager = new ScriptEngineManager(sourceContext.getClassLoader());
 		String engineName = this.getScriptEngineName(sourceContext);
 		ScriptEngine engine = engineManager.getEngineByName(engineName);
 		this.decorateScriptEngine(engine, sourceContext);
@@ -248,10 +245,14 @@ public abstract class AbstractScriptProcedureServiceFactory implements Procedure
 		}
 
 		// Load the function
+		ScriptEngineDecorator scriptEngineDecorator = (engineToDecorate) -> this.decorateScriptEngine(engineToDecorate,
+				sourceContext);
 		MethodParameterFactory[] parameterFactories = new MethodParameterFactory[parameterMetaDatas.size()];
 		ManagedFunctionTypeBuilder<Indexed, Indexed> function = context
-				.setManagedFunction(new ScriptManagedFunction(engineManager, engineName, setupScript, script,
-						procedureName, parameterFactories, scriptExceptionTranslator), Indexed.class, Indexed.class);
+				.setManagedFunction(
+						new ScriptManagedFunction(engineManager, engineName, scriptEngineDecorator, setupScript, script,
+								procedureName, parameterFactories, scriptExceptionTranslator),
+						Indexed.class, Indexed.class);
 
 		// Capture the flows
 		List<FlowAnnotation> flowAnnotations = new LinkedList<>();

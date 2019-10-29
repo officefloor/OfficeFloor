@@ -68,28 +68,30 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 		@Override
 		protected Invocable initialValue() {
 			try {
-				// Obtain the engine
-				final String engineName = "graal.js";
-				ScriptEngine engine = engineManager.getEngineByName(engineName);
-				Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-				bindings.put("polyglot.js.allowAllAccess", true);
+				synchronized (engineManager) {
 
-				// Load the setup
-				InputStream setup = ScriptProcedureTest.class.getClassLoader()
-						.getResourceAsStream("javascript/Setup.js");
-				engine.eval(new InputStreamReader(setup));
+					// Obtain the engine
+					final String engineName = "graal.js";
+					ScriptEngine engine = engineManager.getEngineByName(engineName);
+					Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+					bindings.put("polyglot.js.allowAllAccess", true);
 
-				// Load the script
-				InputStream content = ScriptProcedureTest.class.getClassLoader()
-						.getResourceAsStream("javascript/Functions.js");
-				engine.eval(new InputStreamReader(content));
+					// Load the setup
+					InputStream setup = ScriptProcedureTest.class.getClassLoader()
+							.getResourceAsStream("javascript/Setup.js");
+					engine.eval(new InputStreamReader(setup));
 
-				// Invoke the function
-				Invocable invocable = (Invocable) engine;
+					// Load the script
+					InputStream content = ScriptProcedureTest.class.getClassLoader()
+							.getResourceAsStream("javascript/Functions.js");
+					engine.eval(new InputStreamReader(content));
 
-				// Load for use
-				return invocable;
+					// Invoke the function
+					Invocable invocable = (Invocable) engine;
 
+					// Load for use
+					return invocable;
+				}
 			} catch (Exception ex) {
 				throw fail(ex);
 			}
