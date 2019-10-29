@@ -17,14 +17,15 @@
  */
 package net.officefloor.polyglot.kotlin;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
+import net.officefloor.activity.procedure.spi.ProcedureListContext;
+import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
 import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceContext;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * Kotlin {@link ProcedureServiceFactory}.
@@ -94,33 +95,33 @@ public class KotlinProcedureServiceFactory implements ProcedureServiceFactory {
 		}
 
 		@Override
-		public String[] listProcedures(String resource) throws Exception {
+		public void listProcedures(ProcedureListContext procedureListContext) throws Exception {
 
 			// Obtain the Kotlin functions
-			Class<?> functionsClass = getKotlinFunctions(resource, this.serviceContext);
+			Class<?> functionsClass = getKotlinFunctions(procedureListContext.getResource(), this.serviceContext);
 			if (functionsClass == null) {
-				return null; // not Kotlin functions
+				return; // not Kotlin functions
 			}
 
-			// Return the procedures (Kotlin static methods)
-			return ProcedureEmployer.listProcedureNames(functionsClass,
-					(method) -> !Modifier.isStatic(method.getModifiers()));
+			// Load the procedures (Kotlin static methods)
+			ProcedureEmployer.listMethods(functionsClass, (method) -> !Modifier.isStatic(method.getModifiers()),
+					(method) -> procedureListContext.addProcedure(method.getName()));
 		}
 
 		@Override
-		public Method loadMethod(ProcedureServiceContext procedureServiceContext) throws Exception {
+		public Method loadMethod(ProcedureMethodContext procedureMethodContext) throws Exception {
 
 			// Obtain the Kotlin functions
-			Class<?> functionClass = getKotlinFunctions(procedureServiceContext.getResource(), this.serviceContext);
+			Class<?> functionClass = getKotlinFunctions(procedureMethodContext.getResource(), this.serviceContext);
 			if (functionClass == null) {
 				return null; // no Kotlin functions
 			}
 
 			// Should always be static
-			procedureServiceContext.setMethodObjectInstanceFactory(null);
+			procedureMethodContext.setMethodObjectInstanceFactory(null);
 
 			// Obtain the function
-			String procedureName = procedureServiceContext.getProcedureName();
+			String procedureName = procedureMethodContext.getProcedureName();
 			for (Method method : functionClass.getMethods()) {
 				if (procedureName.equals(method.getName())) {
 					return method; // found function

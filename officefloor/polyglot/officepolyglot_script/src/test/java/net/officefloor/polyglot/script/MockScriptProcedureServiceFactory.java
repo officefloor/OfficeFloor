@@ -17,21 +17,41 @@
  */
 package net.officefloor.polyglot.script;
 
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
 
+import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.frame.api.source.SourceContext;
 
 /**
- * Mock {@link AbstractScriptFunctionSectionSource} for testing.
+ * Mock {@link ProcedureServiceFactory} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockScriptFunctionSectionSource extends AbstractScriptFunctionSectionSource {
+public class MockScriptProcedureServiceFactory extends AbstractScriptProcedureServiceFactory {
+
+	/*
+	 * ============= AbstractScriptProcedureServiceFactory =============
+	 */
 
 	@Override
-	protected String getScriptEngineName(SourceContext context) {
+	protected String getServiceName() {
+		return "MockScript";
+	}
+
+	@Override
+	protected String getScriptEngineName(SourceContext context) throws Exception {
 		return "graal.js";
+	}
+
+	@Override
+	protected void decorateScriptEngine(ScriptEngine engine, SourceContext context) throws Exception {
+		Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+		bindings.put("polyglot.js.allowAllAccess", true);
 	}
 
 	@Override
@@ -40,7 +60,7 @@ public class MockScriptFunctionSectionSource extends AbstractScriptFunctionSecti
 	}
 
 	@Override
-	protected String getMetaDataScriptPath(SourceContext context) {
+	protected String getMetaDataScriptPath(SourceContext context) throws Exception {
 		return "javascript/OfficeFloorFunctionMetaData.js";
 	}
 

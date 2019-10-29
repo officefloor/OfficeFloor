@@ -31,6 +31,6 @@ import lombok.Data;
 @Data
 public class ScriptFunctionMetaData {
 	private List<ScriptParameterMetaData> parameters;
-	private ScriptNextFunctionMetaData nextFunction;
+	private String nextArgumentType;
 	private String error;
 }

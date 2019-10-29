@@ -27,6 +27,7 @@ import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -100,7 +101,7 @@ public class KotlinProcedureTest extends AbstractPolyglotProcedureTest {
 			ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer
 					.employProcedureArchitect(officeArchitect, context.getOfficeSourceContext());
 			OfficeSection procedure = procedureArchitect.addProcedure(KotlinRequestService.class.getName(),
-					ClassProcedureService.SERVICE_NAME, "service", false);
+					ClassProcedureService.SERVICE_NAME, "service", false, new PropertyListImpl());
 			officeArchitect.link(context.getWebArchitect().getHttpInput(false, "/").getInput(),
 					procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 		});

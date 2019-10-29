@@ -129,15 +129,15 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 	 */
 	public void testListProcedures() {
 		ProcedureLoaderUtil.validateProcedures("javascript/Functions.js",
-				ProcedureLoaderUtil.procedure("asynchronousFlow", MockProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("collections", MockProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("httpException", MockProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("objects", MockProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("parameter", MockProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("primitives", MockProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("serviceFlow", MockProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("variables", MockProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("web", MockProcedureServiceFactory.class));
+				ProcedureLoaderUtil.procedure("asynchronousFlow", MockScriptProcedureServiceFactory.class),
+				ProcedureLoaderUtil.procedure("collections", MockScriptProcedureServiceFactory.class),
+				ProcedureLoaderUtil.procedure("httpException", MockScriptProcedureServiceFactory.class),
+				ProcedureLoaderUtil.procedure("objects", MockScriptProcedureServiceFactory.class),
+				ProcedureLoaderUtil.procedure("parameter", MockScriptProcedureServiceFactory.class),
+				ProcedureLoaderUtil.procedure("primitives", MockScriptProcedureServiceFactory.class),
+				ProcedureLoaderUtil.procedure("serviceFlow", MockScriptProcedureServiceFactory.class),
+				ProcedureLoaderUtil.procedure("variables", MockScriptProcedureServiceFactory.class),
+				ProcedureLoaderUtil.procedure("web", MockScriptProcedureServiceFactory.class));
 	}
 
 	/*
@@ -146,7 +146,12 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 
 	@Override
 	protected Class<? extends ProcedureServiceFactory> getProcedureServiceFactoryClass() {
-		return MockProcedureServiceFactory.class;
+		return MockScriptProcedureServiceFactory.class;
+	}
+
+	@Override
+	protected boolean isSupportExceptions() {
+		return false;
 	}
 
 	@Override
@@ -222,7 +227,7 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 			directInvokeFunction("httpException", null);
 			fail("Should not be successful");
 		} catch (ScriptException ex) {
-			throw new MockScriptFunctionSectionSource().getScriptExceptionTranslator().translate(ex);
+			throw new MockScriptProcedureServiceFactory().getScriptExceptionTranslator().translate(ex);
 		}
 	}
 

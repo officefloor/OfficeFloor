@@ -17,14 +17,15 @@
  */
 package net.officefloor.polyglot.scala;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
+import net.officefloor.activity.procedure.spi.ProcedureListContext;
+import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
 import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceContext;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * Scala {@link ProcedureServiceFactory}.
@@ -99,38 +100,38 @@ public class ScalaProcedureServiceFactory implements ProcedureServiceFactory {
 		 */
 
 		@Override
-		public String[] listProcedures(String resource) throws Exception {
-
-			// Obtain the module
-			Object module = getModule(resource, this.context);
-			if (module == null) {
-				return null; // not Scala module
-			}
-
-			// Load procedures from module (exclude Scala helper methods)
-			return ProcedureEmployer.listProcedureNames(module.getClass(),
-					(method) -> method.getName().startsWith("$"));
-		}
-
-		@Override
 		public String getServiceName() {
 			return SERVICE_NAME;
 		}
 
 		@Override
-		public Method loadMethod(ProcedureServiceContext procedureServiceContext) throws Exception {
+		public void listProcedures(ProcedureListContext procedureListContext) throws Exception {
 
 			// Obtain the module
-			Object module = getModule(procedureServiceContext.getResource(), this.context);
+			Object module = getModule(procedureListContext.getResource(), this.context);
+			if (module == null) {
+				return; // not Scala module
+			}
+
+			// Load procedures from module (exclude Scala helper methods)
+			ProcedureEmployer.listMethods(module.getClass(), (method) -> method.getName().startsWith("$"),
+					(method) -> procedureListContext.addProcedure(method.getName()));
+		}
+
+		@Override
+		public Method loadMethod(ProcedureMethodContext procedureMethodContext) throws Exception {
+
+			// Obtain the module
+			Object module = getModule(procedureMethodContext.getResource(), this.context);
 			if (module == null) {
 				return null; // not module
 			}
 
 			// Should invoke from module
-			procedureServiceContext.setMethodObjectInstanceFactory((context) -> module);
+			procedureMethodContext.setMethodObjectInstanceFactory((context) -> module);
 
 			// Obtain the function
-			String procedureName = procedureServiceContext.getProcedureName();
+			String procedureName = procedureMethodContext.getProcedureName();
 			for (Method method : module.getClass().getMethods()) {
 				if (procedureName.equals(method.getName())) {
 					return method; // found function

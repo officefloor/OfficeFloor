@@ -57,7 +57,7 @@ variables.officefloor = {
 		{type: "char", nature: "val"},
 		{type: "java.lang.String", nature: "in"},
 		{type: JavaObject.class.getName(), nature: "out"},
-		{type: "java.lang.Integer", nature: "var"}
+		{type: "java.lang.Integer", qualifier: "qualified", nature: "var"}
 	],
 	nextArgumentType: VariableTypes.class.getName()
 }
@@ -74,7 +74,7 @@ parameter.officefloor = {
 }
 
 
-function serviceFlow(flowType, flow, flowWithCallback, flowWithParameterAndCallback, flowWithParameter, exception) {
+function serviceFlow(flowType, flow, flowWithCallback, flowWithParameter, flowWithParameterAndCallback) {
 	switch (flowType) {
 	case "nextFunction":
 		return; // do nothing so next function fires
@@ -99,9 +99,8 @@ serviceFlow.officefloor = {
 		{type: "java.lang.String", nature: "parameter"},
 		{name: "flow", nature: "flow"},		
 		{name: "flowWithCallback", nature: "flow"},
-		{name: "flowWithParameterAndCallback", type: "java.lang.String", nature: "flow"},
 		{name: "flowWithParameter", type: "java.lang.String", nature: "flow"},
-		{name: "exception", nature: "flow"}
+		{name: "flowWithParameterAndCallback", type: "java.lang.String", nature: "flow"},
 	]
 }
 
