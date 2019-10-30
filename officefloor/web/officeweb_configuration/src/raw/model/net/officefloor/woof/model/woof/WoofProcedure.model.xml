@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
 	<field type="String" name="woof procedure name" />
-	<field type="String" name="class name" />
-	<field type="String" name="service name" />
+	<field type="String" name="resource" />
+	<field type="String" name="source name" />
 	<field type="String" name="procedure name" />
 	<field type="WoofProcedureNextModel" name="next" />
+	<list type="PropertyModel" name="property" plural="properties" />
 	<list type="WoofProcedureOutputModel" name="output" />
 	<list type="WoofTemplateOutputToWoofProcedureModel" name="woof template output" />
 	<list type="WoofSecurityOutputToWoofProcedureModel" name="woof security output" />

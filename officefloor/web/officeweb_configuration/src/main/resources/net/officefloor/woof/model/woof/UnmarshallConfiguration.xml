@@ -181,11 +181,15 @@
 	<!-- PROCEDURES -->
 	<object method="addWoofProcedure" node="procedure" class="net.officefloor.woof.model.woof.WoofProcedureModel">
 		<value method="setWoofProcedureName" node="procedure@name" />
-		<value method="setClassName" node="procedure@class" />
-		<value method="setServiceName" node="procedure@service" />
+		<value method="setResource" node="procedure@resource" />
+		<value method="setSourceName" node="procedure@source" />
 		<value method="setProcedureName" node="procedure@procedure" />
 		<value method="setX" node="procedure@x" />
 		<value method="setY" node="procedure@y" />
+		<object method="addProperty" node="property" class="net.officefloor.woof.model.woof.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
 		<object method="setNext" node="next" class="net.officefloor.woof.model.woof.WoofProcedureNextModel">
 			<value method="setArgumentType" node="next@argument-type" />
 			<object method="setWoofSectionInput" node="section"

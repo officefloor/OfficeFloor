@@ -156,7 +156,7 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the procedures
 		// ----------------------------------------
 		assertList(
-				new String[] { "getWoofProcedureName", "getClassName", "getServiceName", "getProcedureName", "getX",
+				new String[] { "getWoofProcedureName", "getResource", "getSourceName", "getProcedureName", "getX",
 						"getY" },
 				woof.getWoofProcedures(),
 				new WoofProcedureModel("PROCEDURE_A", "net.example.ExampleProcedure", "Class", "procedure", 400, 401),
@@ -169,6 +169,8 @@ public class WoofModelRepositoryTest extends OfficeFrameTestCase {
 				new WoofProcedureModel("PROCEDURE_G", "net.example.CustomProcedure", "Custom", "procedure", 412, 413));
 		List<WoofProcedureModel> procedures = woof.getWoofProcedures();
 		WoofProcedureModel procedure = procedures.get(0);
+		assertList(new String[] { "getName", "getValue" }, procedure.getProperties(),
+				new PropertyModel("name.ONE", "value.ONE"), new PropertyModel("name.TWO", "value.TWO"));
 
 		// Verify next
 		assertProperties(new WoofProcedureNextModel(Byte.class.getName()), procedure.getNext(), "getArgumentType");

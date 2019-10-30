@@ -129,7 +129,8 @@ public class WoofLoaderImpl implements WoofLoader {
 		SectionConnector sections = new SectionConnector(woof, officeArchitect);
 
 		// Configure the Procedures
-		ProcedureConnector procedures = new ProcedureConnector(woof, officeArchitect, procedureArchitect);
+		ProcedureConnector procedures = new ProcedureConnector(woof, officeArchitect, procedureArchitect,
+				extensionContext);
 
 		// Configure the Security
 		SecurityConnector securities = new SecurityConnector(woof, officeArchitect, securityArchitect);
@@ -763,6 +764,11 @@ public class WoofLoaderImpl implements WoofLoader {
 		private final OfficeArchitect officeArchitect;
 
 		/**
+		 * {@link OfficeExtensionContext}.
+		 */
+		private final OfficeExtensionContext extensionContext;
+
+		/**
 		 * {@link Procedure} instances by name.
 		 */
 		private final Map<String, OfficeSection> procedures = new HashMap<>();
@@ -773,27 +779,32 @@ public class WoofLoaderImpl implements WoofLoader {
 		 * @param woof               {@link WoofModel}.
 		 * @param officeArchitect    {@link OfficeArchitect}.
 		 * @param procedureArchitect {@link ProcedureArchitect}.
+		 * @param extensionContext   {@link OfficeExtensionContext}.
 		 */
 		private ProcedureConnector(WoofModel woof, OfficeArchitect officeArchitect,
-				ProcedureArchitect<OfficeSection> procedureArchitect) {
+				ProcedureArchitect<OfficeSection> procedureArchitect, OfficeExtensionContext extensionContext) {
 			this.officeArchitect = officeArchitect;
+			this.extensionContext = extensionContext;
 
 			// Configure the procedures
 			for (WoofProcedureModel procedureModel : woof.getWoofProcedures()) {
 
 				// Obtain the procedure details
-				String className = procedureModel.getClassName();
-				String serviceName = procedureModel.getServiceName();
+				String resource = procedureModel.getResource();
+				String sourceName = procedureModel.getSourceName();
 				String procedureName = procedureModel.getProcedureName();
 
 				// Determine if next
 				boolean isNext = procedureModel.getNext() != null;
 
-				// TODO provide properties
-				PropertyList properties = null;
+				// Load the properties
+				PropertyList properties = this.extensionContext.createPropertyList();
+				for (PropertyModel propertyModel : procedureModel.getProperties()) {
+					properties.addProperty(propertyModel.getName()).setValue(propertyModel.getValue());
+				}
 
 				// Configure the procedure
-				OfficeSection procedure = procedureArchitect.addProcedure(className, serviceName, procedureName, isNext,
+				OfficeSection procedure = procedureArchitect.addProcedure(resource, sourceName, procedureName, isNext,
 						properties);
 
 				// Maintain reference to procedure by name

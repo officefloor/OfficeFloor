@@ -253,12 +253,20 @@
 		<item type="net.officefloor.woof.model.woof.WoofProcedureModel" element="procedure">
 			<attributes>
 				<attribute method="getWoofProcedureName" attribute="name" />
-				<attribute method="getClassName" attribute="class" />
-				<attribute method="getServiceName" attribute="service" />
+				<attribute method="getResource" attribute="resource" />
+				<attribute method="getSourceName" attribute="source" />
 				<attribute method="getProcedureName" attribute="procedure" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
+			<collection method="getProperties">
+				<item type="net.officefloor.woof.model.woof.PropertyModel" element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
 			<object method="getNext" element="next">
 				<attributes>
 					<attribute method="getArgumentType" attribute="argument-type" />

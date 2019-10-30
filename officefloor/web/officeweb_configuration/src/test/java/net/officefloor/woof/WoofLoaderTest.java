@@ -147,13 +147,22 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 				sectionB);
 
 		// Record loading procedures
+		final PropertyList procedurePropertiesA = this.createMock(PropertyList.class);
+		this.recordReturn(this.extensionContext, this.extensionContext.createPropertyList(), procedurePropertiesA);
+		final Property procedurePropertyOne = this.createMock(Property.class);
+		this.recordReturn(procedurePropertiesA, procedurePropertiesA.addProperty("name.ONE"), procedurePropertyOne);
+		procedurePropertyOne.setValue("value.ONE");
+		final Property procedurePropertyTwo = this.createMock(Property.class);
+		this.recordReturn(procedurePropertiesA, procedurePropertiesA.addProperty("name.TWO"), procedurePropertyTwo);
+		procedurePropertyTwo.setValue("value.TWO");
 		final OfficeSection procedureA = this.createMock(OfficeSection.class);
-		this.recordReturn(this.procedure,
-				this.procedure.addProcedure("net.example.ExampleProcedure", "Class", "procedure", true), procedureA);
+		this.recordReturn(this.procedure, this.procedure.addProcedure("net.example.ExampleProcedure", "Class",
+				"procedure", true, procedurePropertiesA), procedureA);
+		final PropertyList procedurePropertiesB = this.createMock(PropertyList.class);
+		this.recordReturn(this.extensionContext, this.extensionContext.createPropertyList(), procedurePropertiesB);
 		final OfficeSection procedureB = this.createMock(OfficeSection.class);
-		this.recordReturn(this.procedure,
-				this.procedure.addProcedure("net.example.SecondProcedure", "JavaScript", "function", false),
-				procedureB);
+		this.recordReturn(this.procedure, this.procedure.addProcedure("net.example.SecondProcedure", "JavaScript",
+				"function", false, procedurePropertiesB), procedureB);
 
 		// Record loading securities
 		final HttpSecurityBuilder securityOne = this.createMock(HttpSecurityBuilder.class);

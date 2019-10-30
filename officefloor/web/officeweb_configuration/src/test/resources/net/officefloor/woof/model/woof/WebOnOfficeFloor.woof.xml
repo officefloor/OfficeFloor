@@ -62,8 +62,10 @@
 	</templates>
 
 	<procedures>
-		<procedure name="PROCEDURE_A" class="net.example.ExampleProcedure" service="Class" procedure="procedure"
+		<procedure name="PROCEDURE_A" resource="net.example.ExampleProcedure" source="Class" procedure="procedure"
 			x="400" y="401">
+			<property name="name.ONE" value="value.ONE" />
+			<property name="name.TWO" value="value.TWO" />
 			<next argument-type="java.lang.Byte">
 				<section name="SECTION_A" input="INPUT_A" />
 			</next>
@@ -87,37 +89,37 @@
 			</output>
 			<output name="OUTPUT_G" />
 		</procedure>
-		<procedure name="PROCEDURE_B" class="net.example.KotlinProcedure" service="Kotlin" procedure="method"
+		<procedure name="PROCEDURE_B" resource="net.example.KotlinProcedure" source="Kotlin" procedure="method"
 			x="402" y="403">
 			<next>
 				<template path="/templateA" />
 			</next>
 		</procedure>
-		<procedure name="PROCEDURE_C" class="net.example.ScalaProcedure" service="Scala" procedure="function"
+		<procedure name="PROCEDURE_C" resource="net.example.ScalaProcedure" source="Scala" procedure="function"
 			x="404" y="405">
 			<next>
 				<resource path="/resourceB.png" />
 			</next>
 		</procedure>
-		<procedure name="PROCEDURE_D" class="net.example.JavaScriptProcedure" service="JavaScript"
+		<procedure name="PROCEDURE_D" resource="net.example.JavaScriptProcedure" source="JavaScript"
 			procedure="function" x="406" y="407">
 			<next>
 				<security name="SECURITY_A" />
 			</next>
 		</procedure>
-		<procedure name="PROCEDURE_E" class="net.example.GroovyProcedure" service="Groovy" procedure="method"
+		<procedure name="PROCEDURE_E" resource="net.example.GroovyProcedure" source="Groovy" procedure="method"
 			x="408" y="409">
 			<next>
 				<redirect path="/pathB" />
 			</next>
 		</procedure>
-		<procedure name="PROCEDURE_F" class="net.example.PythonProcedure" service="Python" procedure="func" x="410"
-			y="411">
+		<procedure name="PROCEDURE_F" resource="net.example.PythonProcedure" source="Python" procedure="func"
+			x="410" y="411">
 			<next>
 				<procedure name="PROCEDURE_B" />
 			</next>
 		</procedure>
-		<procedure name="PROCEDURE_G" class="net.example.CustomProcedure" service="Custom" procedure="procedure"
+		<procedure name="PROCEDURE_G" resource="net.example.CustomProcedure" source="Custom" procedure="procedure"
 			x="412" y="413" />
 	</procedures>
 
