@@ -36,7 +36,6 @@ import net.officefloor.activity.procedure.spi.ProcedureService;
 import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.activity.procedure.spi.ProcedureSpecification;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
@@ -166,11 +165,10 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 
 			// Load the procedures
 			for (ProcedureSpecificationImpl specification : listContext.procedures) {
-				if (!CompileUtil.isBlank(specification.procedureName)) {
-					ProcedureProperty[] properties = specification.properties
-							.toArray(new ProcedureProperty[specification.properties.size()]);
-					procedures.add(new ProcedureImpl(specification.procedureName.trim(), serviceName, properties));
-				}
+				String procedureName = specification.procedureName != null ? specification.procedureName.trim() : null;
+				ProcedureProperty[] properties = specification.properties
+						.toArray(new ProcedureProperty[specification.properties.size()]);
+				procedures.add(new ProcedureImpl(procedureName, serviceName, properties));
 			}
 		};
 

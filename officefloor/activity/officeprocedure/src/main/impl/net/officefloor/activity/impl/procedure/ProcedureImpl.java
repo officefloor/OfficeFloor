@@ -72,8 +72,7 @@ public class ProcedureImpl implements Procedure {
 
 	@Override
 	public ProcedureProperty[] getProperties() {
-		// TODO implement Procedure.getProperties
-		throw new UnsupportedOperationException("TODO implement Procedure.getProperties");
+		return this.properties;
 	}
 
 }

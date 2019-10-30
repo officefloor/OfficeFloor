@@ -38,7 +38,8 @@ public interface ProcedureListContext {
 	/**
 	 * Adds an available {@link Procedure}.
 	 * 
-	 * @param procedureName Name of the {@link Procedure}.
+	 * @param procedureName Name of the {@link Procedure}. May be <code>null</code>
+	 *                      to indicate for manual selection of {@link Procedure}.
 	 * @return {@link ProcedureSpecification} to detail requirements for the
 	 *         {@link Procedure}.
 	 */

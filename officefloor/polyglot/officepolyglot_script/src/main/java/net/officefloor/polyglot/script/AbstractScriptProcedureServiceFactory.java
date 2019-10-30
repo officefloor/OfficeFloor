@@ -83,6 +83,15 @@ public abstract class AbstractScriptProcedureServiceFactory implements Procedure
 	protected abstract String getServiceName();
 
 	/**
+	 * Obtains the extensions for the script resource.
+	 * 
+	 * @param context {@link SourceContext}.
+	 * @return Extensions for the script resource.
+	 * @throws Exception If fails to obtain the file extensions.
+	 */
+	protected abstract String[] getScriptFileExtensions(SourceContext context) throws Exception;
+
+	/**
 	 * Obtains the name of the {@link ScriptEngine}.
 	 * 
 	 * @param context {@link SourceContext}.
@@ -90,6 +99,17 @@ public abstract class AbstractScriptProcedureServiceFactory implements Procedure
 	 * @throws Exception If fails to obtain the name of the {@link ScriptEngine}.
 	 */
 	protected abstract String getScriptEngineName(SourceContext context) throws Exception;
+
+	/**
+	 * Enables overriding to decorate the {@link ScriptEngine}.
+	 * 
+	 * @param engine  {@link ScriptEngine}.
+	 * @param context {@link SourceContext}.
+	 * @throws Exception If fails to decorate the {@link ScriptEngine}.
+	 */
+	protected void decorateScriptEngine(ScriptEngine engine, SourceContext context) throws Exception {
+		// No decoration by default
+	}
 
 	/**
 	 * Obtains the path to the setup script.
@@ -113,17 +133,6 @@ public abstract class AbstractScriptProcedureServiceFactory implements Procedure
 	protected abstract String getMetaDataScriptPath(SourceContext context) throws Exception;
 
 	/**
-	 * Enables overriding to decorate the {@link ScriptEngine}.
-	 * 
-	 * @param engine  {@link ScriptEngine}.
-	 * @param context {@link SourceContext}.
-	 * @throws Exception If fails to decorate the {@link ScriptEngine}.
-	 */
-	protected void decorateScriptEngine(ScriptEngine engine, SourceContext context) throws Exception {
-		// No decoration by default
-	}
-
-	/**
 	 * Obtains the {@link ScriptExceptionTranslator}.
 	 * 
 	 * @return {@link ScriptExceptionTranslator}.
@@ -133,28 +142,49 @@ public abstract class AbstractScriptProcedureServiceFactory implements Procedure
 	}
 
 	/**
-	 * Lists the {@link Procedure} instances.
+	 * Loads the setup script.
 	 * 
-	 * @param context {@link ProcedureListContext}.
-	 * @throws Exception If fails to list the {@link Procedure} instances.
+	 * @param sourceContext {@link SourceContext}.
+	 * @return Setup script or <code>null</code> if no setup.
+	 * @throws Exception If fails to load setup script.
 	 */
-	protected void listProcedures(ProcedureListContext context) throws Exception {
-		// TODO implement ProcedureService.listProcedures
-		throw new UnsupportedOperationException("TODO implement ProcedureService.listProcedures");
+	protected String loadSetupScript(SourceContext sourceContext) throws Exception {
+		String setupScriptPath = this.getSetupScriptPath(sourceContext);
+		String setupScript = null;
+		if (setupScriptPath != null) {
+			setupScript = readContent(sourceContext.getResource(setupScriptPath));
+		}
+		return setupScript;
 	}
 
 	/**
-	 * Loads the {@link ManagedFunction} for the {@link Procedure}.
+	 * Loads the source script.
 	 * 
-	 * @param context {@link ProcedureManagedFunctionContext}.
-	 * @throws Exception If fails to load the {@link ManagedFunction}.
+	 * @param resource      Resource.
+	 * @param sourceContext {@link SourceContext}.
+	 * @return Resource script.
+	 * @throws Exception If fails to load resource script.
 	 */
-	protected void loadManagedFunction(ProcedureManagedFunctionContext context) throws Exception {
+	protected String loadResourceScript(String resource, SourceContext sourceContext) throws Exception {
+		return readContent(sourceContext.getResource(resource));
+	}
+
+	/**
+	 * Loads the {@link ScriptEngine}.
+	 * 
+	 * @param engineManager  {@link ScriptEngineManager}.
+	 * @param engineName     Name of the {@link ScriptEngine}.
+	 * @param setupScript    Setup script. May be <code>null</code> for no setup.
+	 * @param script         Script containing the function(s).
+	 * @param metaDataScript Script to extract meta-data.
+	 * @param sourceContext  {@link SourceContext}.
+	 * @return {@link Invocable} for the {@link ScriptEngine}.
+	 * @throws Exception IF fails to load the {@link ScriptEngine}.
+	 */
+	protected Invocable loadScriptEngine(ScriptEngineManager engineManager, String engineName, String setupScript,
+			String script, String metaDataScript, SourceContext sourceContext) throws Exception {
 
 		// Obtain the script engine
-		SourceContext sourceContext = context.getSourceContext();
-		ScriptEngineManager engineManager = new ScriptEngineManager(sourceContext.getClassLoader());
-		String engineName = this.getScriptEngineName(sourceContext);
 		ScriptEngine engine = engineManager.getEngineByName(engineName);
 		this.decorateScriptEngine(engine, sourceContext);
 
@@ -166,24 +196,86 @@ public abstract class AbstractScriptProcedureServiceFactory implements Procedure
 		Invocable invocable = (Invocable) engine;
 
 		// Load the setup script (if provided)
-		String setupScriptPath = this.getSetupScriptPath(sourceContext);
-		String setupScript = null;
-		if (setupScriptPath != null) {
-			setupScript = readContent(sourceContext.getResource(setupScriptPath));
+		if (setupScript != null) {
 			engine.eval(setupScript);
 		}
 
 		// Load the Script contents
-		String scriptPath = context.getResource();
-		String script = readContent(sourceContext.getResource(scriptPath));
 		engine.eval(script);
 
-		// Load the meta-data for the function
+		// Load the meta-data for the function (if provided)
+		if (metaDataScript != null) {
+			engine.eval(metaDataScript);
+		}
+
+		// Return the invocable script engine
+		return invocable;
+	}
+
+	/**
+	 * Lists the {@link Procedure} instances.
+	 * 
+	 * @param context {@link ProcedureListContext}.
+	 * @throws Exception If fails to list the {@link Procedure} instances.
+	 */
+	protected void listProcedures(ProcedureListContext context) throws Exception {
+
+		// Obtain the resource
+		String resource = context.getResource();
+
+		// Determine if extension expected for script
+		boolean isScriptResource = false;
+		String[] extensions = this.getScriptFileExtensions(context.getSourceContext());
+		if (extensions != null) {
+			for (String extension : extensions) {
+				if (!CompileUtil.isBlank(extension)) {
+					String compareExtension = extension.startsWith(".") ? extension : "." + extension;
+					if (resource.toLowerCase().endsWith(compareExtension.toLowerCase())) {
+						isScriptResource = true;
+					}
+				}
+			}
+		}
+
+		// As able to load script, able to attempt function
+		if (isScriptResource) {
+			context.addProcedure(null);
+		}
+	}
+
+	/**
+	 * Loads the {@link ManagedFunction} for the {@link Procedure}.
+	 * 
+	 * @param context {@link ProcedureManagedFunctionContext}.
+	 * @throws Exception If fails to load the {@link ManagedFunction}.
+	 */
+	protected void loadManagedFunction(ProcedureManagedFunctionContext context) throws Exception {
+
+		// Obtain details to load script function
+		String resource = context.getResource();
 		String procedureName = context.getProcedureName();
+		SourceContext sourceContext = context.getSourceContext();
+
+		// Create engine manager specific to script
+		ScriptEngineManager engineManager = new ScriptEngineManager(sourceContext.getClassLoader());
+
+		// Obtain the engine name
+		String engineName = this.getScriptEngineName(sourceContext);
+
+		// Load scripts
+		String setupScript = this.loadSetupScript(sourceContext);
+		String script = this.loadResourceScript(resource, sourceContext);
+
+		// Load the meta-data script for the function
 		String metaDataScriptPath = this.getMetaDataScriptPath(sourceContext);
 		String metaDataScript = readContent(sourceContext.getResource(metaDataScriptPath));
 		metaDataScript = metaDataScript.replace("_FUNCTION_NAME_", procedureName);
-		engine.eval(metaDataScript);
+
+		// Obtain the script engine
+		Invocable invocable = this.loadScriptEngine(engineManager, engineName, setupScript, script, metaDataScript,
+				sourceContext);
+
+		// Obtain the function meta-data
 		Object metaData = invocable.invokeFunction("OFFICEFLOOR_METADATA_" + procedureName);
 
 		// Parse out the meta-data

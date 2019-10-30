@@ -19,11 +19,8 @@ package net.officefloor.activity.procedure;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.junit.Assert;
 
@@ -185,26 +182,32 @@ public class ProcedureLoaderUtil {
 	 */
 	public static void validateProcedures(Procedure[] actualProcedures, Procedure... expectedProcedures) {
 
-		// Generate difference message
-		Function<Procedure[], String> toString = (procedures) -> String.join(",",
-				Arrays.stream(procedures)
-						.map((procedure) -> procedure.getProcedureName() + " [" + procedure.getServiceName() + "]")
-						.collect(Collectors.toList()));
-		String differenceSuffix = "\n\n - Expected : " + toString.apply(expectedProcedures) + "\n - Actual  : "
-				+ toString.apply(actualProcedures) + "\n\n";
-
 		// Ensure correct number of procedures
-		assertEquals("Incorrect number of procedures" + differenceSuffix, expectedProcedures.length,
-				actualProcedures.length);
+		LoaderUtil.assertLength("Incorrect number of procedures", expectedProcedures, actualProcedures,
+				(procedure) -> procedure.getProcedureName() + " [" + procedure.getServiceName() + "]");
 
 		// Ensure procedures align (in order)
 		for (int i = 0; i < expectedProcedures.length; i++) {
 			Procedure eProcedure = expectedProcedures[i];
 			Procedure aProcedure = actualProcedures[i];
-			assertEquals("Incorrect procedure name for procedure " + i + differenceSuffix,
-					eProcedure.getProcedureName(), aProcedure.getProcedureName());
-			assertEquals("Incorrect service name for procedure " + i + differenceSuffix, eProcedure.getServiceName(),
-					aProcedure.getServiceName());
+			assertEquals("Incorrect procedure name for procedure " + i, eProcedure.getProcedureName(),
+					aProcedure.getProcedureName());
+			String suffix = "for procedure " + eProcedure.getProcedureName() + " (index " + i + ")";
+			assertEquals("Incorrect service name " + suffix, eProcedure.getServiceName(), aProcedure.getServiceName());
+
+			// Ensure correct properties
+			ProcedureProperty[] eProperties = eProcedure.getProperties();
+			ProcedureProperty[] aProperties = aProcedure.getProperties();
+			LoaderUtil.assertLength("Incorrect number of properties " + suffix, eProperties, aProperties,
+					(property) -> property.getName());
+			for (int p = 0; p < eProperties.length; p++) {
+				ProcedureProperty eProperty = eProperties[p];
+				ProcedureProperty aProperty = aProperties[p];
+				assertEquals("Incorrect name for property " + p + " " + suffix, eProperty.getName(),
+						aProperty.getName());
+				assertEquals("Incorrect label for property " + eProperty.getName() + " " + suffix, eProperty.getLabel(),
+						aProperty.getLabel());
+			}
 		}
 	}
 

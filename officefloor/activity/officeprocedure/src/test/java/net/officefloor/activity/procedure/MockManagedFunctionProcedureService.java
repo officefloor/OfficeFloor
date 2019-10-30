@@ -40,6 +40,26 @@ public class MockManagedFunctionProcedureService implements ManagedFunctionProce
 	public static final String SERVICE_NAME = "MockManagedFunction";
 
 	/**
+	 * Allow plug in means to list {@link Procedure} instances.
+	 */
+	@FunctionalInterface
+	public static interface ListProcedures {
+
+		/**
+		 * Lists the {@link Procedure} instances.
+		 * 
+		 * @param context {@link ProcedureListContext}.
+		 * @throws Exception Possible failure.
+		 */
+		void listProcedures(ProcedureListContext context) throws Exception;
+	}
+
+	/**
+	 * Allow listing mock {@link Procedure} instances.
+	 */
+	private static ListProcedures listProcedures = null;
+
+	/**
 	 * Allow plug in to load {@link ManagedFunction}.
 	 */
 	@FunctionalInterface
@@ -79,15 +99,17 @@ public class MockManagedFunctionProcedureService implements ManagedFunctionProce
 	 * 
 	 * @param <R>                   Result type.
 	 * @param <T>                   Possible failure type.
+	 * @param procedureListing      Mocks listing the {@link Procedure} instances.
 	 * @param managedFunctionLoader Loads the {@link Method}.
 	 * @param logic                 {@link Logic}.
 	 * @return Result.
 	 * @throws T Possible failure.
 	 */
-	public static <R, T extends Throwable> R run(LoadManagedFunction managedFunctionLoader, Logic<R, T> logic)
-			throws T {
+	public static <R, T extends Throwable> R run(ListProcedures procedureListing,
+			LoadManagedFunction managedFunctionLoader, Logic<R, T> logic) throws T {
 		try {
 			// Setup to run
+			listProcedures = procedureListing;
 			loadManagedFunction = managedFunctionLoader;
 
 			// Run the test logic
@@ -95,6 +117,7 @@ public class MockManagedFunctionProcedureService implements ManagedFunctionProce
 
 		} finally {
 			// Reset
+			listProcedures = null;
 			loadManagedFunction = null;
 		}
 	}
@@ -119,7 +142,11 @@ public class MockManagedFunctionProcedureService implements ManagedFunctionProce
 
 	@Override
 	public void listProcedures(ProcedureListContext context) throws Exception {
-		// no procedures
+		
+		// Determine if mocking
+		if (listProcedures != null) {
+			listProcedures.listProcedures(context);
+		}
 	}
 
 	@Override

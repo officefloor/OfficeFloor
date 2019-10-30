@@ -170,6 +170,24 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * <p>
+	 * Ensure can allow manually specifying the {@link Procedure}.
+	 * <p>
+	 * There are cases where the resource can not be introspected for
+	 * {@link Procedure} instances. Therefore, need to allow manually specifying the
+	 * {@link Procedure}.
+	 */
+	public void testManuallySpecifyProcedure() throws Throwable {
+		MockManagedFunctionProcedureService.run((context) -> {
+			context.addProcedure(null);
+		}, null, () -> {
+			ProcedureLoaderUtil.validateProcedures("mock",
+					ProcedureLoaderUtil.procedure(null, MockManagedFunctionProcedureService.class));
+			return null;
+		});
+	}
+
+	/**
 	 * Ensure handle failure in listing {@link Procedure} instances.
 	 */
 	public void testFailLoadProcedures() {
@@ -186,7 +204,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 
 		// Run test
 		this.replayMockObjects();
-		Procedure[] procedures = MockProcedureService.run((clazz) -> {
+		Procedure[] procedures = MockProcedureService.run((context) -> {
 			throw failure;
 		}, null, () -> {
 			ProcedureLoader loader = ProcedureLoaderUtil.newProcedureLoader(compiler);
@@ -292,7 +310,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		String propertyName = "NAME";
 		String propertyValue = "VALUE";
 		ProcedureTypeBuilder expected = ProcedureLoaderUtil.createProcedureTypeBuilder(procedureName, null);
-		ProcedureType type = MockManagedFunctionProcedureService.run((context) -> {
+		ProcedureType type = MockManagedFunctionProcedureService.run(null, (context) -> {
 			assertEquals("Incorrect resource", resource, context.getResource());
 			assertEquals("Incorrect procedure name", procedureName, context.getProcedureName());
 			assertEquals("Incorrect property", propertyValue, context.getSourceContext().getProperty(propertyName));
@@ -318,7 +336,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		expected.addEscalationType(IOException.class.getSimpleName(), IOException.class);
 		expected.addEscalationType(SQLException.class.getSimpleName(), SQLException.class);
 		expected.setNextArgumentType(Integer.class);
-		ProcedureType type = MockManagedFunctionProcedureService.run((context) -> {
+		ProcedureType type = MockManagedFunctionProcedureService.run(null, (context) -> {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = context.setManagedFunction(() -> null,
 					Indexed.class, Indexed.class);
 			function.addAnnotation(new ParameterAnnotation(Double.class, 0));
@@ -363,7 +381,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ProcedureType type = MockManagedFunctionProcedureService.run((context) -> {
+		ProcedureType type = MockManagedFunctionProcedureService.run(null, (context) -> {
 			// Don't specify managed function
 		}, () -> {
 			return ProcedureLoaderUtil.loadProcedureType("resource", MockManagedFunctionProcedureService.class, "error",
@@ -392,7 +410,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ProcedureType type = MockManagedFunctionProcedureService.run((context) -> {
+		ProcedureType type = MockManagedFunctionProcedureService.run(null, (context) -> {
 			// Incorrectly specify two managed functions
 			context.setManagedFunction(() -> null, None.class, None.class);
 			context.setManagedFunction(() -> null, None.class, None.class);

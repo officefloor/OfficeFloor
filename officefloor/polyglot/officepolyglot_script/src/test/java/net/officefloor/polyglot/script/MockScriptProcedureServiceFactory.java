@@ -44,6 +44,11 @@ public class MockScriptProcedureServiceFactory extends AbstractScriptProcedureSe
 	}
 
 	@Override
+	protected String[] getScriptFileExtensions(SourceContext context) {
+		return new String[] { "js" };
+	}
+
+	@Override
 	protected String getScriptEngineName(SourceContext context) throws Exception {
 		return "graal.js";
 	}

@@ -53,14 +53,12 @@ public class ProcedurePropertyImpl implements ProcedureProperty {
 
 	@Override
 	public String getName() {
-		// TODO implement ProcedureProperty.getName
-		throw new UnsupportedOperationException("TODO implement ProcedureProperty.getName");
+		return this.name;
 	}
 
 	@Override
 	public String getLabel() {
-		// TODO implement ProcedureProperty.getLabel
-		throw new UnsupportedOperationException("TODO implement ProcedureProperty.getLabel");
+		return this.label;
 	}
 
 }

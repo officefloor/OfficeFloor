@@ -17,24 +17,44 @@
  */
 package net.officefloor.polyglot.javascript;
 
+import javax.script.Bindings;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
 
-import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.polyglot.script.AbstractScriptFunctionSectionSource;
+import net.officefloor.polyglot.script.AbstractScriptProcedureServiceFactory;
 import net.officefloor.polyglot.script.ScriptExceptionTranslator;
 
 /**
- * JavaScript function {@link SectionSource}.
+ * JavaScript function {@link ProcedureServiceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaScriptFunctionSectionSource extends AbstractScriptFunctionSectionSource {
+public class JavaScriptProcedureServiceFactory extends AbstractScriptProcedureServiceFactory {
+
+	@Override
+	protected String getServiceName() {
+		return "JavaScript";
+	}
+
+	@Override
+	protected String[] getScriptFileExtensions(SourceContext context) throws Exception {
+		return new String[] { "js" };
+	}
 
 	@Override
 	protected String getScriptEngineName(SourceContext context) throws Exception {
 		return "graal.js";
+	}
+
+	@Override
+	protected void decorateScriptEngine(ScriptEngine engine, SourceContext context) throws Exception {
+		Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+		bindings.put("polyglot.js.allowAllAccess", true);
 	}
 
 	@Override

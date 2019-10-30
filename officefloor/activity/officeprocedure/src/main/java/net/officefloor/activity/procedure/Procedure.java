@@ -36,7 +36,8 @@ public interface Procedure {
 	/**
 	 * Obtains the name of the {@link Procedure}.
 	 * 
-	 * @return Name of the {@link Procedure}.
+	 * @return Name of the {@link Procedure}. May be <code>null</code> to indicate
+	 *         manually selected.
 	 */
 	String getProcedureName();
 

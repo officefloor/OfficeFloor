@@ -120,26 +120,18 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 	}
 
 	/**
-	 * Ensure no procedures when using non-functions.
+	 * Ensure manually specify {@link Procedure}.
 	 */
-	public void testNonFunctions() {
-		ProcedureLoaderUtil.validateProcedures("javascript/OfficeFloorFunctionMetaData.js");
+	public void testManualSpecifyProcedure() {
+		ProcedureLoaderUtil.validateProcedures("javascript/Functions.js",
+				ProcedureLoaderUtil.procedure(null, MockScriptProcedureServiceFactory.class));
 	}
 
 	/**
-	 * Ensure list {@link net.officefloor.activity.procedure.Procedure} instances.
+	 * Ensure no manually specify for {@link Class} resource.
 	 */
-	public void testListProcedures() {
-		ProcedureLoaderUtil.validateProcedures("javascript/Functions.js",
-				ProcedureLoaderUtil.procedure("asynchronousFlow", MockScriptProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("collections", MockScriptProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("httpException", MockScriptProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("objects", MockScriptProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("parameter", MockScriptProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("primitives", MockScriptProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("serviceFlow", MockScriptProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("variables", MockScriptProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("web", MockScriptProcedureServiceFactory.class));
+	public void testClassResource() {
+		ProcedureLoaderUtil.validateProcedures(Object.class.getName());
 	}
 
 	/*

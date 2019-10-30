@@ -412,7 +412,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		String propertyName = "name";
 		String propertyValue = "value";
 		Closure<Boolean> isRun = new Closure<Boolean>(false);
-		MockManagedFunctionProcedureService.run((context) -> {
+		MockManagedFunctionProcedureService.run(null, (context) -> {
 			assertEquals("Incorrect resource name", resource, context.getResource());
 			assertEquals("Incorrect procedure name", procedureName, context.getProcedureName());
 			assertEquals("Incorrect property", propertyValue, context.getSourceContext().getProperty(propertyName));
