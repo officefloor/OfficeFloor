@@ -20,22 +20,22 @@ package net.officefloor.polyglot.scala;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureListContext;
 import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
-import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
- * Scala {@link ProcedureServiceFactory}.
+ * Scala {@link ProcedureSourceServiceFactory}.
  */
-public class ScalaProcedureServiceFactory implements ProcedureServiceFactory {
+public class ScalaProcedureSourceServiceFactory implements ProcedureSourceServiceFactory {
 
 	/**
-	 * Scala service name.
+	 * Scala source name.
 	 */
-	public static final String SERVICE_NAME = "Scala";
+	public static final String SOURCE_NAME = "Scala";
 
 	/**
 	 * Obtains the <code>MODULE</code> from object {@link Class}.
@@ -68,18 +68,18 @@ public class ScalaProcedureServiceFactory implements ProcedureServiceFactory {
 	}
 
 	/*
-	 * =================== ProcedureServiceFactory ================
+	 * =================== ProcedureSourceServiceFactory ================
 	 */
 
 	@Override
-	public ProcedureService createService(ServiceContext serviceContext) throws Throwable {
-		return new ScalaProcedureService(serviceContext);
+	public ProcedureSource createService(ServiceContext serviceContext) throws Throwable {
+		return new ScalaProcedureSource(serviceContext);
 	}
 
 	/**
-	 * Scala {@link ProcedureService}.
+	 * Scala {@link ProcedureSource}.
 	 */
-	private static class ScalaProcedureService implements ProcedureService {
+	private static class ScalaProcedureSource implements ProcedureSource {
 
 		/**
 		 * {@link ServiceContext}.
@@ -91,17 +91,17 @@ public class ScalaProcedureServiceFactory implements ProcedureServiceFactory {
 		 *
 		 * @param context {@link ServiceContext}.
 		 */
-		private ScalaProcedureService(ServiceContext context) {
+		private ScalaProcedureSource(ServiceContext context) {
 			this.context = context;
 		}
 
 		/*
-		 * ================ ProcedureService =======================
+		 * ================ ProcedureSource =======================
 		 */
 
 		@Override
-		public String getServiceName() {
-			return SERVICE_NAME;
+		public String getSourceName() {
+			return SOURCE_NAME;
 		}
 
 		@Override

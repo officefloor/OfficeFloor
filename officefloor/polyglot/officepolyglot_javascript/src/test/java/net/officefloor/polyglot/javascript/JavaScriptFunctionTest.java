@@ -31,7 +31,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.variable.In;
@@ -120,8 +120,8 @@ public class JavaScriptFunctionTest extends AbstractPolyglotProcedureTest {
 	 */
 
 	@Override
-	protected Class<? extends ProcedureServiceFactory> getProcedureServiceFactoryClass() {
-		return JavaScriptProcedureServiceFactory.class;
+	protected Class<? extends ProcedureSourceServiceFactory> getProcedureSourceServiceFactoryClass() {
+		return JavaScriptProcedureSourceServiceFactory.class;
 	}
 
 	@Override
@@ -201,7 +201,7 @@ public class JavaScriptFunctionTest extends AbstractPolyglotProcedureTest {
 		try {
 			directInvokeFunction("httpException", null);
 		} catch (ScriptException ex) {
-			throw new JavaScriptProcedureServiceFactory().getScriptExceptionTranslator().translate(ex);
+			throw new JavaScriptProcedureSourceServiceFactory().getScriptExceptionTranslator().translate(ex);
 		}
 	}
 

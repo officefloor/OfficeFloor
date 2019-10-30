@@ -32,7 +32,7 @@ import javax.script.ScriptException;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoaderUtil;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
@@ -124,7 +124,7 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 	 */
 	public void testManualSpecifyProcedure() {
 		ProcedureLoaderUtil.validateProcedures("javascript/Functions.js",
-				ProcedureLoaderUtil.procedure(null, MockScriptProcedureServiceFactory.class));
+				ProcedureLoaderUtil.procedure(null, MockScriptProcedureSourceServiceFactory.class));
 	}
 
 	/**
@@ -139,8 +139,8 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 	 */
 
 	@Override
-	protected Class<? extends ProcedureServiceFactory> getProcedureServiceFactoryClass() {
-		return MockScriptProcedureServiceFactory.class;
+	protected Class<? extends ProcedureSourceServiceFactory> getProcedureSourceServiceFactoryClass() {
+		return MockScriptProcedureSourceServiceFactory.class;
 	}
 
 	@Override
@@ -221,7 +221,7 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 			directInvokeFunction("httpException", null);
 			fail("Should not be successful");
 		} catch (ScriptException ex) {
-			throw new MockScriptProcedureServiceFactory().getScriptExceptionTranslator().translate(ex);
+			throw new MockScriptProcedureSourceServiceFactory().getScriptExceptionTranslator().translate(ex);
 		}
 	}
 

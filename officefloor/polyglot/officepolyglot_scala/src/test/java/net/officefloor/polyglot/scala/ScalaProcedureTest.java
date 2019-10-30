@@ -24,11 +24,11 @@ import java.util.Set;
 import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 
 import junit.framework.AssertionFailedError;
-import net.officefloor.activity.impl.procedure.ClassProcedureService;
+import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
@@ -83,15 +83,15 @@ public class ScalaProcedureTest extends AbstractPolyglotProcedureTest {
 	 */
 	public void testListProcedures() {
 		ProcedureLoaderUtil.validateProcedures(package$.class,
-				ProcedureLoaderUtil.procedure("asynchronousFlow", ScalaProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("collections", ScalaProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("httpException", ScalaProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("objects", ScalaProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("parameter", ScalaProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("primitives", ScalaProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("serviceFlow", ScalaProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("variables", ScalaProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("web", ScalaProcedureServiceFactory.class));
+				ProcedureLoaderUtil.procedure("asynchronousFlow", ScalaProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("collections", ScalaProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("httpException", ScalaProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("objects", ScalaProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("parameter", ScalaProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("primitives", ScalaProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("serviceFlow", ScalaProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("variables", ScalaProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("web", ScalaProcedureSourceServiceFactory.class));
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class ScalaProcedureTest extends AbstractPolyglotProcedureTest {
 			ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer
 					.employProcedureArchitect(officeArchitect, context.getOfficeSourceContext());
 			OfficeSection procedure = procedureArchitect.addProcedure(ScalaRequestService.class.getName(),
-					ClassProcedureService.SERVICE_NAME, "service", false, new PropertyListImpl());
+					ClassProcedureSource.SOURCE_NAME, "service", false, new PropertyListImpl());
 			officeArchitect.link(context.getWebArchitect().getHttpInput(false, "/").getInput(),
 					procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 		});
@@ -128,8 +128,8 @@ public class ScalaProcedureTest extends AbstractPolyglotProcedureTest {
 	 */
 
 	@Override
-	protected Class<? extends ProcedureServiceFactory> getProcedureServiceFactoryClass() {
-		return ScalaProcedureServiceFactory.class;
+	protected Class<? extends ProcedureSourceServiceFactory> getProcedureSourceServiceFactoryClass() {
+		return ScalaProcedureSourceServiceFactory.class;
 	}
 
 	@Override

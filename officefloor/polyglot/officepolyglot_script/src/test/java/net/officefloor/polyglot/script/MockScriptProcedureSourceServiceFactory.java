@@ -24,22 +24,22 @@ import javax.script.ScriptEngine;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
 
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.source.SourceContext;
 
 /**
- * Mock {@link ProcedureServiceFactory} for testing.
+ * Mock {@link ProcedureSourceServiceFactory} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockScriptProcedureServiceFactory extends AbstractScriptProcedureServiceFactory {
+public class MockScriptProcedureSourceServiceFactory extends AbstractScriptProcedureSourceServiceFactory {
 
 	/*
-	 * ============= AbstractScriptProcedureServiceFactory =============
+	 * ============= AbstractScriptProcedureSourceServiceFactory =============
 	 */
 
 	@Override
-	protected String getServiceName() {
+	protected String getSourceName() {
 		return "MockScript";
 	}
 

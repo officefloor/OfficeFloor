@@ -19,13 +19,13 @@ package net.officefloor.activity.procedure.section;
 
 import java.lang.reflect.Method;
 
-import net.officefloor.activity.impl.procedure.ClassProcedureService;
+import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.activity.procedure.Procedure;
-import net.officefloor.activity.procedure.spi.ManagedFunctionProcedureService;
+import net.officefloor.activity.procedure.spi.ManagedFunctionProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureManagedFunctionContext;
 import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
-import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
@@ -83,16 +83,16 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		String procedureName = context.getProperty(PROCEDURE_PROPERTY_NAME);
 
 		// Find the service
-		ProcedureService procedureService = null;
-		if (ClassProcedureService.SERVICE_NAME.equals(serviceName)) {
+		ProcedureSource procedureService = null;
+		if (ClassProcedureSource.SOURCE_NAME.equals(serviceName)) {
 			// Use default service
-			procedureService = new ClassProcedureService();
+			procedureService = new ClassProcedureSource();
 
 		} else {
 			// Search for service
-			FOUND_SERVICE: for (ProcedureService service : context
-					.loadOptionalServices(ProcedureServiceFactory.class)) {
-				if (serviceName.equals(service.getServiceName())) {
+			FOUND_SERVICE: for (ProcedureSource service : context
+					.loadOptionalServices(ProcedureSourceServiceFactory.class)) {
+				if (serviceName.equals(service.getSourceName())) {
 					procedureService = service;
 					break FOUND_SERVICE;
 				}
@@ -100,17 +100,17 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		}
 		if (procedureService == null) {
 			// Can not find procedure service
-			throw new Exception("Can not find " + ProcedureService.class.getSimpleName() + " " + serviceName);
+			throw new Exception("Can not find " + ProcedureSource.class.getSimpleName() + " " + serviceName);
 		}
 
 		// Determine if non-method managed function
-		if (procedureService instanceof ManagedFunctionProcedureService) {
-			ManagedFunctionProcedureService managedFunctionProcedureService = (ManagedFunctionProcedureService) procedureService;
+		if (procedureService instanceof ManagedFunctionProcedureSource) {
+			ManagedFunctionProcedureSource managedFunctionProcedureSource = (ManagedFunctionProcedureSource) procedureService;
 
 			// Load the managed function
 			ProcedureManagedFunctionContextImpl procedureContext = new ProcedureManagedFunctionContextImpl(resource,
 					procedureName, functionNamespaceTypeBuilder, context);
-			managedFunctionProcedureService.loadManagedFunction(procedureContext);
+			managedFunctionProcedureSource.loadManagedFunction(procedureContext);
 			if (!procedureContext.isManagedFunctionSpecified) {
 				throw new IllegalStateException("Must provide " + ManagedFunction.class.getSimpleName() + " for "
 						+ Procedure.class.getSimpleName());
@@ -275,7 +275,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 		}
 
 		/*
-		 * =================== ProcedureServiceContext =====================
+		 * =================== ProcedureMethodContext =====================
 		 */
 
 		@Override

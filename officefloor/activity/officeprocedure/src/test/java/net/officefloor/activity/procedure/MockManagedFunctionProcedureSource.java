@@ -19,18 +19,26 @@ package net.officefloor.activity.procedure;
 
 import java.lang.reflect.Method;
 
-import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ManagedFunctionProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureListContext;
-import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureManagedFunctionContext;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
+import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.ServiceContext;
 
 /**
- * Mock {@link ProcedureService} for testing.
+ * Mock {@link ManagedFunctionProcedureSource} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockProcedureService implements ProcedureService, ProcedureServiceFactory {
+public class MockManagedFunctionProcedureSource
+		implements ManagedFunctionProcedureSource, ProcedureSourceServiceFactory {
+
+	/**
+	 * Service name.
+	 */
+	public static final String SERVICE_NAME = "MockManagedFunction";
 
 	/**
 	 * Allow plug in means to list {@link Procedure} instances.
@@ -53,25 +61,24 @@ public class MockProcedureService implements ProcedureService, ProcedureServiceF
 	private static ListProcedures listProcedures = null;
 
 	/**
-	 * Allow plug in to load {@link Method}.
+	 * Allow plug in to load {@link ManagedFunction}.
 	 */
 	@FunctionalInterface
-	public static interface LoadMethod {
+	public static interface LoadManagedFunction {
 
 		/**
 		 * Loads the {@link Method}.
 		 * 
-		 * @param context {@link ProcedureMethodContext}.
-		 * @return {@link Method}.
+		 * @param context {@link ProcedureManagedFunctionContext}.
 		 * @throws Exception Possible failure.
 		 */
-		Method loadMethod(ProcedureMethodContext context) throws Exception;
+		void loadManagedFunction(ProcedureManagedFunctionContext context) throws Exception;
 	}
 
 	/**
-	 * Allow loading {@link Method}.
+	 * Allow loading {@link ManagedFunction}.
 	 */
-	private static LoadMethod loadMethod = null;
+	private static LoadManagedFunction loadManagedFunction = null;
 
 	/**
 	 * Logic.
@@ -91,20 +98,20 @@ public class MockProcedureService implements ProcedureService, ProcedureServiceF
 	/**
 	 * Runs the mock {@link Logic}.
 	 * 
-	 * @param <R>              Result type.
-	 * @param <T>              Possible failure type.
-	 * @param procedureListing Mocks listing the {@link Procedure} instances.
-	 * @param methodLoader     Loads the {@link Method}.
-	 * @param logic            {@link Logic}.
+	 * @param <R>                   Result type.
+	 * @param <T>                   Possible failure type.
+	 * @param procedureListing      Mocks listing the {@link Procedure} instances.
+	 * @param managedFunctionLoader Loads the {@link Method}.
+	 * @param logic                 {@link Logic}.
 	 * @return Result.
 	 * @throws T Possible failure.
 	 */
-	public static <R, T extends Throwable> R run(ListProcedures procedureListing, LoadMethod methodLoader,
-			Logic<R, T> logic) throws T {
+	public static <R, T extends Throwable> R run(ListProcedures procedureListing,
+			LoadManagedFunction managedFunctionLoader, Logic<R, T> logic) throws T {
 		try {
 			// Setup to run
 			listProcedures = procedureListing;
-			loadMethod = methodLoader;
+			loadManagedFunction = managedFunctionLoader;
 
 			// Run the test logic
 			return logic.run();
@@ -112,26 +119,26 @@ public class MockProcedureService implements ProcedureService, ProcedureServiceF
 		} finally {
 			// Reset
 			listProcedures = null;
-			loadMethod = null;
+			loadManagedFunction = null;
 		}
 	}
 
 	/*
-	 * ===================== ProcedureServiceFactory ====================
+	 * ================== ProcedureSourceServiceFactory =================
 	 */
 
 	@Override
-	public ProcedureService createService(ServiceContext context) throws Throwable {
+	public ProcedureSource createService(ServiceContext context) throws Throwable {
 		return this;
 	}
 
 	/*
-	 * ========================== ProcedureService ======================
+	 * ========================== ProcedureSource ======================
 	 */
 
 	@Override
-	public String getServiceName() {
-		return "Mock";
+	public String getSourceName() {
+		return SERVICE_NAME;
 	}
 
 	@Override
@@ -144,15 +151,12 @@ public class MockProcedureService implements ProcedureService, ProcedureServiceF
 	}
 
 	@Override
-	public Method loadMethod(ProcedureMethodContext context) throws Exception {
+	public void loadManagedFunction(ProcedureManagedFunctionContext context) throws Exception {
 
 		// Determine if mocking
-		if (loadMethod != null) {
-			return loadMethod.loadMethod(context);
+		if (loadManagedFunction != null) {
+			loadManagedFunction.loadManagedFunction(context);
 		}
-
-		// As here, no mocking
-		return null;
 	}
 
 }

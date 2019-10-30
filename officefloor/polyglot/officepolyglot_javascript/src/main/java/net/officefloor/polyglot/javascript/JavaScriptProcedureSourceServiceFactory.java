@@ -24,20 +24,20 @@ import javax.script.ScriptEngine;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
 
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.polyglot.script.AbstractScriptProcedureServiceFactory;
+import net.officefloor.polyglot.script.AbstractScriptProcedureSourceServiceFactory;
 import net.officefloor.polyglot.script.ScriptExceptionTranslator;
 
 /**
- * JavaScript function {@link ProcedureServiceFactory}.
+ * JavaScript function {@link ProcedureSourceServiceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaScriptProcedureServiceFactory extends AbstractScriptProcedureServiceFactory {
+public class JavaScriptProcedureSourceServiceFactory extends AbstractScriptProcedureSourceServiceFactory {
 
 	@Override
-	protected String getServiceName() {
+	protected String getSourceName() {
 		return "JavaScript";
 	}
 

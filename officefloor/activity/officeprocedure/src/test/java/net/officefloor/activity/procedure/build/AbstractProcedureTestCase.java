@@ -17,8 +17,8 @@
  */
 package net.officefloor.activity.procedure.build;
 
-import net.officefloor.activity.impl.procedure.ClassProcedureService;
-import net.officefloor.activity.procedure.MockManagedFunctionProcedureService;
+import net.officefloor.activity.impl.procedure.ClassProcedureSource;
+import net.officefloor.activity.procedure.MockManagedFunctionProcedureSource;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
@@ -97,7 +97,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		RunProcedure.isRun = false;
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
-			setup.addProcedure(RunProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "procedure", false);
+			setup.addProcedure(RunProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME, "procedure", false);
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("procedure"), null);
 		});
@@ -123,9 +123,9 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			setup.linkNext(
-					setup.addProcedure(NextProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "initial",
+					setup.addProcedure(NextProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME, "initial",
 							true),
-					setup.addProcedure(NextProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "next",
+					setup.addProcedure(NextProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME, "next",
 							false));
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("initial"), null);
@@ -159,7 +159,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		ProcedureObject object = new ProcedureObject();
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
-			setup.linkObject(setup.addProcedure(ObjectProcedure.class.getName(), ClassProcedureService.SERVICE_NAME,
+			setup.linkObject(setup.addProcedure(ObjectProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME,
 					"procedure", false), ProcedureObject.class.getName(), object);
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("procedure"), null);
@@ -187,7 +187,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		final String PARAM = "TEST";
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
-			setup.addProcedure(ParameterProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "procedure",
+			setup.addProcedure(ParameterProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME, "procedure",
 					false);
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("procedure"), PARAM);
@@ -214,9 +214,9 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			setup.linkNext(
-					setup.addProcedure(VariableProcedure.class.getName(), ClassProcedureService.SERVICE_NAME,
+					setup.addProcedure(VariableProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME,
 							"outProcedure", true),
-					setup.addProcedure(VariableProcedure.class.getName(), ClassProcedureService.SERVICE_NAME,
+					setup.addProcedure(VariableProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME,
 							"inProcedure", false));
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("outProcedure"), null);
@@ -252,9 +252,9 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		this.issues.recordCaptureIssues(false);
 		this.doTest((setup) -> {
 			setup.linkFlow(
-					setup.addProcedure(FlowProcedure.class.getName(), ClassProcedureService.SERVICE_NAME, "initial",
+					setup.addProcedure(FlowProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME, "initial",
 							false),
-					"doFlow", setup.addProcedure(FlowProcedure.class.getName(), ClassProcedureService.SERVICE_NAME,
+					"doFlow", setup.addProcedure(FlowProcedure.class.getName(), ClassProcedureSource.SOURCE_NAME,
 							"flow", false));
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("initial"), PARAM);
@@ -291,10 +291,10 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		this.doTest((setup) -> {
 			Object dependency = setup.addDependency(SpawnFlowObject.class);
 			setup.linkFlow(setup.linkDependency(setup.addProcedure(SpawnFlowProcedure.class.getName(),
-					ClassProcedureService.SERVICE_NAME, "initial", false), SpawnFlowObject.class.getName(), dependency),
+					ClassProcedureSource.SOURCE_NAME, "initial", false), SpawnFlowObject.class.getName(), dependency),
 					"doFlow",
 					setup.linkDependency(setup.addProcedure(SpawnFlowProcedure.class.getName(),
-							ClassProcedureService.SERVICE_NAME, "flow", false), SpawnFlowObject.class.getName(),
+							ClassProcedureSource.SOURCE_NAME, "flow", false), SpawnFlowObject.class.getName(),
 							dependency));
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("initial"), null);
@@ -343,9 +343,9 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		this.doTest((setup) -> {
 			setup.linkNext(
 					setup.addProcedure(InvalidNextParameterProcedure.class.getName(),
-							ClassProcedureService.SERVICE_NAME, "initial", true),
+							ClassProcedureSource.SOURCE_NAME, "initial", true),
 					setup.addProcedure(InvalidNextParameterProcedure.class.getName(),
-							ClassProcedureService.SERVICE_NAME, "next", false));
+							ClassProcedureSource.SOURCE_NAME, "next", false));
 		}, null);
 	}
 
@@ -373,13 +373,13 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 			ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer.employProcedureArchitect(architect,
 					office.getOfficeSourceContext());
 			OfficeSection handler = procedureArchitect.addProcedure(HandleEscalationProcedure.class.getName(),
-					ClassProcedureService.SERVICE_NAME, "handleEscalation", false, new PropertyListImpl());
+					ClassProcedureSource.SOURCE_NAME, "handleEscalation", false, new PropertyListImpl());
 			OfficeEscalation escalation = architect.addOfficeEscalation(Exception.class.getName());
 			architect.link(escalation, handler.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 		};
 		this.doTest((setup) -> {
 			setup.linkEscalation(setup.addProcedure(HandleEscalationProcedure.class.getName(),
-					ClassProcedureService.SERVICE_NAME, "throwEscalation", false), Exception.class);
+					ClassProcedureSource.SOURCE_NAME, "throwEscalation", false), Exception.class);
 		}, (officeFloor) -> {
 			CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName("throwEscalation"), null);
 		});
@@ -412,7 +412,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 		String propertyName = "name";
 		String propertyValue = "value";
 		Closure<Boolean> isRun = new Closure<Boolean>(false);
-		MockManagedFunctionProcedureService.run(null, (context) -> {
+		MockManagedFunctionProcedureSource.run(null, (context) -> {
 			assertEquals("Incorrect resource name", resource, context.getResource());
 			assertEquals("Incorrect procedure name", procedureName, context.getProcedureName());
 			assertEquals("Incorrect property", propertyValue, context.getSourceContext().getProperty(propertyName));
@@ -422,7 +422,7 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 			}, None.class, None.class);
 		}, () -> {
 			this.doTest((setup) -> {
-				setup.addProcedure(resource, MockManagedFunctionProcedureService.SERVICE_NAME, procedureName, false,
+				setup.addProcedure(resource, MockManagedFunctionProcedureSource.SERVICE_NAME, procedureName, false,
 						propertyName, propertyValue);
 			}, (officeFloor) -> {
 				CompileOfficeFloor.invokeProcess(officeFloor, this.getInvokeName(procedureName), null);

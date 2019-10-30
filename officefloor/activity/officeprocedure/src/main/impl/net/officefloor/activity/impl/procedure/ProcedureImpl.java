@@ -19,7 +19,7 @@ package net.officefloor.activity.impl.procedure;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureProperty;
-import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
 
 /**
  * {@link Procedure} implementation.
@@ -34,7 +34,7 @@ public class ProcedureImpl implements Procedure {
 	private final String procedureName;
 
 	/**
-	 * {@link ProcedureService} name.
+	 * {@link ProcedureSource} name.
 	 */
 	private final String serviceName;
 
@@ -47,7 +47,7 @@ public class ProcedureImpl implements Procedure {
 	 * Instantiate.
 	 * 
 	 * @param procedureName Procedure name.
-	 * @param serviceName   {@link ProcedureService} name.
+	 * @param serviceName   {@link ProcedureSource} name.
 	 * @param properties    {@link ProcedureProperty} instances.
 	 */
 	public ProcedureImpl(String procedureName, String serviceName, ProcedureProperty[] properties) {

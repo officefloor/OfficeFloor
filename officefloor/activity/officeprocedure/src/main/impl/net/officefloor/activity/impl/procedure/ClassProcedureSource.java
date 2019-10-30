@@ -23,27 +23,27 @@ import java.lang.reflect.Modifier;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureListContext;
 import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
-import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
 
 /**
- * {@link ProcedureService} for {@link Class}.
+ * {@link ProcedureSource} for {@link Class}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ClassProcedureService implements ProcedureService {
+public class ClassProcedureSource implements ProcedureSource {
 
 	/**
-	 * Service name.
+	 * Source name.
 	 */
-	public static final String SERVICE_NAME = "Class";
+	public static final String SOURCE_NAME = "Class";
 
 	/*
-	 * ======================== ProcedureService ===========================
+	 * ======================== ProcedureSource ===========================
 	 */
 
 	@Override
-	public String getServiceName() {
-		return SERVICE_NAME;
+	public String getSourceName() {
+		return SOURCE_NAME;
 	}
 
 	@Override

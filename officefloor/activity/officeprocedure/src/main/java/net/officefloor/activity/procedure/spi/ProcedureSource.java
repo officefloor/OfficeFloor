@@ -22,18 +22,18 @@ import java.lang.reflect.Method;
 import net.officefloor.activity.procedure.Procedure;
 
 /**
- * Service providing {@link Procedure} adaptation.
+ * Source providing a {@link Procedure}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ProcedureService {
+public interface ProcedureSource {
 
 	/**
 	 * <p>
-	 * Name of this service.
+	 * Name of this source.
 	 * <p>
 	 * Note that this is the name used in configuration to identify this
-	 * {@link ProcedureService}. Therefore, it can not change without causing
+	 * {@link ProcedureSource}. Therefore, it can not change without causing
 	 * configurations to be updated.
 	 * <p>
 	 * The reasons for using this logical name over {@link Class} names is:
@@ -43,9 +43,9 @@ public interface ProcedureService {
 	 * <li>Enables swapping plugins for same logical service name</li>
 	 * </ul>
 	 * 
-	 * @return Name of this service.
+	 * @return Name of this source.
 	 */
-	String getServiceName();
+	String getSourceName();
 
 	/**
 	 * Provides the available {@link Procedure} instances for the resource.
@@ -59,7 +59,7 @@ public interface ProcedureService {
 	 * Loads the {@link Method} for the {@link Procedure}.
 	 * 
 	 * @param context {@link ProcedureMethodContext}.
-	 * @return {@link Method} for the {@link ProcedureService}.
+	 * @return {@link Method} for the {@link ProcedureSource}.
 	 * @throws Exception If fails to load the method.
 	 */
 	Method loadMethod(ProcedureMethodContext context) throws Exception;

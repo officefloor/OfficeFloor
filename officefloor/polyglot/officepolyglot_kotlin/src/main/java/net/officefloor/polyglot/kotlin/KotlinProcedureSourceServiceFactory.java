@@ -20,24 +20,24 @@ package net.officefloor.polyglot.kotlin;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.activity.procedure.spi.ProcedureListContext;
 import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
-import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.source.ServiceContext;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * Kotlin {@link ProcedureServiceFactory}.
+ * Kotlin {@link ProcedureSourceServiceFactory}.
  *
  * @author Daniel Sagenschneider
  */
-public class KotlinProcedureServiceFactory implements ProcedureServiceFactory {
+public class KotlinProcedureSourceServiceFactory implements ProcedureSourceServiceFactory {
 
 	/**
-	 * Service name.
+	 * Source name.
 	 */
-	public static final String SERVICE_NAME = "Kotlin";
+	public static final String SOURCE_NAME = "Kotlin";
 
 	/**
 	 * Obtains the Kotlin functions {@link Class}.
@@ -58,18 +58,18 @@ public class KotlinProcedureServiceFactory implements ProcedureServiceFactory {
 	}
 
 	/*
-	 * ====================== ProcedureServiceFactory ======================
+	 * ====================== ProcedureSourceServiceFactory ======================
 	 */
 
 	@Override
-	public ProcedureService createService(ServiceContext serviceContext) throws Throwable {
-		return new KotlinProcedureService(serviceContext);
+	public ProcedureSource createService(ServiceContext serviceContext) throws Throwable {
+		return new KotlinProcedureSource(serviceContext);
 	}
 
 	/**
-	 * Kotlin {@link ProcedureService}.
+	 * Kotlin {@link ProcedureSource}.
 	 */
-	private static class KotlinProcedureService implements ProcedureService {
+	private static class KotlinProcedureSource implements ProcedureSource {
 
 		/**
 		 * {@link ServiceContext}.
@@ -81,17 +81,17 @@ public class KotlinProcedureServiceFactory implements ProcedureServiceFactory {
 		 *
 		 * @param serviceContext {@link ServiceContext}.
 		 */
-		private KotlinProcedureService(ServiceContext serviceContext) {
+		private KotlinProcedureSource(ServiceContext serviceContext) {
 			this.serviceContext = serviceContext;
 		}
 
 		/*
-		 * ==================== ProcedureService ============================
+		 * ==================== ProcedureSource ============================
 		 */
 
 		@Override
-		public String getServiceName() {
-			return SERVICE_NAME;
+		public String getSourceName() {
+			return SOURCE_NAME;
 		}
 
 		@Override

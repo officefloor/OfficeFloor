@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
-import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureSpecification;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssue;
@@ -126,26 +126,26 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can configure {@link ProcedureService} overrides default
-	 * {@link ProcedureService}.
+	 * Ensure can configure {@link ProcedureSource} overrides default
+	 * {@link ProcedureSource}.
 	 */
-	public void testConfiguredProcedureServiceOverridesDefault() {
-		MockProcedureService.run((context) -> context.addProcedure("MOCK"), null, () -> {
+	public void testConfiguredProcedureSourceOverridesDefault() {
+		MockProcedureSource.run((context) -> context.addProcedure("MOCK"), null, () -> {
 			ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class,
-					ProcedureLoaderUtil.procedure("MOCK", MockProcedureService.class));
+					ProcedureLoaderUtil.procedure("MOCK", MockProcedureSource.class));
 			return null;
 		});
 	}
 
 	/**
-	 * Ensure multiple configured {@link ProcedureService} instances can contribute.
+	 * Ensure multiple configured {@link ProcedureSource} instances can contribute.
 	 */
-	public void testMultipleConfiguredProcedureServices() throws Throwable {
-		AnotherMockProcedureService.run(() -> {
-			return MockProcedureService.run((context) -> context.addProcedure("MOCK"), null, () -> {
+	public void testMultipleConfiguredProcedureSources() throws Throwable {
+		AnotherMockProcedureSource.run(() -> {
+			return MockProcedureSource.run((context) -> context.addProcedure("MOCK"), null, () -> {
 				ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class,
-						ProcedureLoaderUtil.procedure("MOCK", AnotherMockProcedureService.class),
-						ProcedureLoaderUtil.procedure("MOCK", MockProcedureService.class));
+						ProcedureLoaderUtil.procedure("MOCK", AnotherMockProcedureSource.class),
+						ProcedureLoaderUtil.procedure("MOCK", MockProcedureSource.class));
 				return null;
 			});
 		});
@@ -156,14 +156,14 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testProcedureProperties() throws Throwable {
 		ProcedureProperty property = ProcedureLoaderUtil.property("three", "raw");
-		MockProcedureService.run((context) -> {
+		MockProcedureSource.run((context) -> {
 			ProcedureSpecification procedure = context.addProcedure("MOCK");
 			procedure.addProperty("one");
 			procedure.addProperty("two", "TWO");
 			procedure.addProperty(property);
 		}, null, () -> {
 			ProcedureLoaderUtil.validateProcedures(ListSingleProcedure.class,
-					ProcedureLoaderUtil.procedure("MOCK", MockProcedureService.class,
+					ProcedureLoaderUtil.procedure("MOCK", MockProcedureSource.class,
 							ProcedureLoaderUtil.property("one"), ProcedureLoaderUtil.property("two", "TWO"), property));
 			return null;
 		});
@@ -178,11 +178,11 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 	 * {@link Procedure}.
 	 */
 	public void testManuallySpecifyProcedure() throws Throwable {
-		MockManagedFunctionProcedureService.run((context) -> {
+		MockManagedFunctionProcedureSource.run((context) -> {
 			context.addProcedure(null);
 		}, null, () -> {
 			ProcedureLoaderUtil.validateProcedures("mock",
-					ProcedureLoaderUtil.procedure(null, MockManagedFunctionProcedureService.class));
+					ProcedureLoaderUtil.procedure(null, MockManagedFunctionProcedureSource.class));
 			return null;
 		});
 	}
@@ -199,12 +199,12 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 
 		// Record failure
 		Exception failure = new Exception("TEST");
-		issues.recordIssue("Failed to list procedures from service Mock [" + MockProcedureService.class.getName() + "]",
+		issues.recordIssue("Failed to list procedures from service Mock [" + MockProcedureSource.class.getName() + "]",
 				failure);
 
 		// Run test
 		this.replayMockObjects();
-		Procedure[] procedures = MockProcedureService.run((context) -> {
+		Procedure[] procedures = MockProcedureSource.run((context) -> {
 			throw failure;
 		}, null, () -> {
 			ProcedureLoader loader = ProcedureLoaderUtil.newProcedureLoader(compiler);
@@ -284,11 +284,11 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ProcedureType type = MockProcedureService.run((context) -> context.addProcedure("error"), (context) -> {
+		ProcedureType type = MockProcedureSource.run((context) -> context.addProcedure("error"), (context) -> {
 			throw failure;
 		}, () -> {
 			return ProcedureLoaderUtil.loadProcedureType(ErrorInLoadProcedure.class.getName(),
-					MockProcedureService.class, "error", compiler);
+					MockProcedureSource.class, "error", compiler);
 		});
 		this.verifyMockObjects();
 		assertNull("Should not load type", type);
@@ -310,14 +310,14 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		String propertyName = "NAME";
 		String propertyValue = "VALUE";
 		ProcedureTypeBuilder expected = ProcedureLoaderUtil.createProcedureTypeBuilder(procedureName, null);
-		ProcedureType type = MockManagedFunctionProcedureService.run(null, (context) -> {
+		ProcedureType type = MockManagedFunctionProcedureSource.run(null, (context) -> {
 			assertEquals("Incorrect resource", resource, context.getResource());
 			assertEquals("Incorrect procedure name", procedureName, context.getProcedureName());
 			assertEquals("Incorrect property", propertyValue, context.getSourceContext().getProperty(propertyName));
 			context.setManagedFunction(() -> null, None.class, None.class);
 		}, () -> {
 			return ProcedureLoaderUtil.validateProcedureType(expected, resource,
-					MockManagedFunctionProcedureService.class, procedureName, propertyName, propertyValue);
+					MockManagedFunctionProcedureSource.class, procedureName, propertyName, propertyValue);
 		});
 		assertNotNull("Should load procedure type", type);
 	}
@@ -336,7 +336,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		expected.addEscalationType(IOException.class.getSimpleName(), IOException.class);
 		expected.addEscalationType(SQLException.class.getSimpleName(), SQLException.class);
 		expected.setNextArgumentType(Integer.class);
-		ProcedureType type = MockManagedFunctionProcedureService.run(null, (context) -> {
+		ProcedureType type = MockManagedFunctionProcedureSource.run(null, (context) -> {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = context.setManagedFunction(() -> null,
 					Indexed.class, Indexed.class);
 			function.addAnnotation(new ParameterAnnotation(Double.class, 0));
@@ -358,7 +358,7 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 			function.setReturnType(Integer.class);
 		}, () -> {
 			return ProcedureLoaderUtil.validateProcedureType(expected, "resource",
-					MockManagedFunctionProcedureService.class, "procedure");
+					MockManagedFunctionProcedureSource.class, "procedure");
 		});
 		assertNotNull("Should load procedure type", type);
 	}
@@ -381,10 +381,10 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ProcedureType type = MockManagedFunctionProcedureService.run(null, (context) -> {
+		ProcedureType type = MockManagedFunctionProcedureSource.run(null, (context) -> {
 			// Don't specify managed function
 		}, () -> {
-			return ProcedureLoaderUtil.loadProcedureType("resource", MockManagedFunctionProcedureService.class, "error",
+			return ProcedureLoaderUtil.loadProcedureType("resource", MockManagedFunctionProcedureSource.class, "error",
 					compiler);
 		});
 		this.verifyMockObjects();
@@ -410,12 +410,12 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 
 		// Test
 		this.replayMockObjects();
-		ProcedureType type = MockManagedFunctionProcedureService.run(null, (context) -> {
+		ProcedureType type = MockManagedFunctionProcedureSource.run(null, (context) -> {
 			// Incorrectly specify two managed functions
 			context.setManagedFunction(() -> null, None.class, None.class);
 			context.setManagedFunction(() -> null, None.class, None.class);
 		}, () -> {
-			return ProcedureLoaderUtil.loadProcedureType("resource", MockManagedFunctionProcedureService.class, "error",
+			return ProcedureLoaderUtil.loadProcedureType("resource", MockManagedFunctionProcedureSource.class, "error",
 					compiler);
 		});
 		this.verifyMockObjects();

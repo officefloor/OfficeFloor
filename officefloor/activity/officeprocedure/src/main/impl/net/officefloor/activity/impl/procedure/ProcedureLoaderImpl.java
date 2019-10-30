@@ -32,8 +32,8 @@ import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.activity.procedure.ProcedureVariableType;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureListContext;
-import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.activity.procedure.spi.ProcedureSpecification;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompileError;
@@ -77,8 +77,8 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			}
 
 			@Override
-			public ProcedureService loadDefaultProcedureService() {
-				return new ClassProcedureService();
+			public ProcedureSource loadDefaultProcedureSource() {
+				return new ClassProcedureSource();
 			}
 
 			@Override
@@ -114,8 +114,8 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			}
 
 			@Override
-			public ProcedureService loadDefaultProcedureService() {
-				return new ClassProcedureService();
+			public ProcedureSource loadDefaultProcedureSource() {
+				return new ClassProcedureSource();
 			}
 
 			@Override
@@ -148,10 +148,10 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 
 		// Load procedures
 		List<Procedure> procedures = new LinkedList<Procedure>();
-		Consumer<ProcedureService> loadProcedures = (service) -> {
+		Consumer<ProcedureSource> loadProcedures = (service) -> {
 
 			// Obtain the service name
-			String serviceName = service.getServiceName();
+			String serviceName = service.getSourceName();
 
 			// Attempt to list the procedures
 			ProcedureListContextImpl listContext = new ProcedureListContextImpl(resource, sourceContext);
@@ -173,13 +173,13 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		};
 
 		// Collect the listing of procedures
-		for (ProcedureService service : sourceContext.loadOptionalServices(ProcedureServiceFactory.class)) {
+		for (ProcedureSource service : sourceContext.loadOptionalServices(ProcedureSourceServiceFactory.class)) {
 			loadProcedures.accept(service);
 		}
 
 		// Determine if fall back to class
 		if (procedures.size() == 0) {
-			ProcedureService defaultService = this.loader.loadDefaultProcedureService();
+			ProcedureSource defaultService = this.loader.loadDefaultProcedureSource();
 			loadProcedures.accept(defaultService);
 		}
 
@@ -385,11 +385,11 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		SourceContext getSourceContext();
 
 		/**
-		 * Loads the default {@link ProcedureService}.
+		 * Loads the default {@link ProcedureSource}.
 		 * 
-		 * @return Default {@link ProcedureService}.
+		 * @return Default {@link ProcedureSource}.
 		 */
-		ProcedureService loadDefaultProcedureService();
+		ProcedureSource loadDefaultProcedureSource();
 
 		/**
 		 * Loads the {@link FunctionNamespaceType}.

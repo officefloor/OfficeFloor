@@ -26,7 +26,7 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Context for the {@link ManagedFunctionProcedureService}.
+ * Context for the {@link ManagedFunctionProcedureSource}.
  * 
  * @author Daniel Sagenschneider
  */

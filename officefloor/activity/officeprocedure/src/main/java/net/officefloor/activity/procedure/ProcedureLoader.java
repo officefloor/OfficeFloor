@@ -18,7 +18,7 @@
 package net.officefloor.activity.procedure;
 
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
-import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
 
@@ -42,7 +42,7 @@ public interface ProcedureLoader {
 	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
 	 * @param resource      Resource.
-	 * @param serviceName   {@link ProcedureService} name.
+	 * @param serviceName   {@link ProcedureSource} name.
 	 * @param procedureName {@link Procedure} name.
 	 * @param properties    {@link PropertyList}.
 	 * @return {@link ProcedureType} for the {@link Procedure} or <code>null</code>

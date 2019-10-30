@@ -17,7 +17,7 @@
  */
 package net.officefloor.activity.procedure;
 
-import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
 
 /**
  * Procedure.
@@ -27,9 +27,9 @@ import net.officefloor.activity.procedure.spi.ProcedureService;
 public interface Procedure {
 
 	/**
-	 * Obtains the name of the {@link ProcedureService}.
+	 * Obtains the name of the {@link ProcedureSource}.
 	 * 
-	 * @return Name of the {@link ProcedureService}.
+	 * @return Name of the {@link ProcedureSource}.
 	 */
 	String getServiceName();
 

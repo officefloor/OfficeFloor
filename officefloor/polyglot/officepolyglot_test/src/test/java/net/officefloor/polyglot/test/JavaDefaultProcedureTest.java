@@ -17,8 +17,8 @@
  */
 package net.officefloor.polyglot.test;
 
-import net.officefloor.activity.impl.procedure.ClassProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.impl.procedure.ClassProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.plugin.clazz.FlowInterface;
@@ -45,13 +45,13 @@ import java.util.Set;
 public class JavaDefaultProcedureTest extends AbstractPolyglotProcedureTest {
 
 	@Override
-	protected Class<? extends ProcedureServiceFactory> getProcedureServiceFactoryClass() {
+	protected Class<? extends ProcedureSourceServiceFactory> getProcedureSourceServiceFactoryClass() {
 		return null;
 	}
 
 	@Override
-	protected String getServiceName(Class<? extends ProcedureServiceFactory> serviceFactory) {
-		return ClassProcedureService.SERVICE_NAME; // default service name
+	protected String getSourceName(Class<? extends ProcedureSourceServiceFactory> serviceFactory) {
+		return ClassProcedureSource.SOURCE_NAME; // default service name
 	}
 
 	@Override

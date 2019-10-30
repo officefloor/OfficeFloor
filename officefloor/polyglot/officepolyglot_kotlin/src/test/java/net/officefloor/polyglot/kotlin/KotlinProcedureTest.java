@@ -22,11 +22,11 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.AssertionFailedError;
-import net.officefloor.activity.impl.procedure.ClassProcedureService;
+import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
@@ -78,15 +78,15 @@ public class KotlinProcedureTest extends AbstractPolyglotProcedureTest {
 	 */
 	public void testListProcedures() {
 		ProcedureLoaderUtil.validateProcedures(KotlinFunctionsKt.class,
-				ProcedureLoaderUtil.procedure("asynchronousFlow", KotlinProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("collections", KotlinProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("httpException", KotlinProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("objects", KotlinProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("parameter", KotlinProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("primitives", KotlinProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("serviceFlow", KotlinProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("variables", KotlinProcedureServiceFactory.class),
-				ProcedureLoaderUtil.procedure("web", KotlinProcedureServiceFactory.class));
+				ProcedureLoaderUtil.procedure("asynchronousFlow", KotlinProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("collections", KotlinProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("httpException", KotlinProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("objects", KotlinProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("parameter", KotlinProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("primitives", KotlinProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("serviceFlow", KotlinProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("variables", KotlinProcedureSourceServiceFactory.class),
+				ProcedureLoaderUtil.procedure("web", KotlinProcedureSourceServiceFactory.class));
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class KotlinProcedureTest extends AbstractPolyglotProcedureTest {
 			ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer
 					.employProcedureArchitect(officeArchitect, context.getOfficeSourceContext());
 			OfficeSection procedure = procedureArchitect.addProcedure(KotlinRequestService.class.getName(),
-					ClassProcedureService.SERVICE_NAME, "service", false, new PropertyListImpl());
+					ClassProcedureSource.SOURCE_NAME, "service", false, new PropertyListImpl());
 			officeArchitect.link(context.getWebArchitect().getHttpInput(false, "/").getInput(),
 					procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 		});
@@ -123,8 +123,8 @@ public class KotlinProcedureTest extends AbstractPolyglotProcedureTest {
 	 */
 
 	@Override
-	protected Class<? extends ProcedureServiceFactory> getProcedureServiceFactoryClass() {
-		return KotlinProcedureServiceFactory.class;
+	protected Class<? extends ProcedureSourceServiceFactory> getProcedureSourceServiceFactoryClass() {
+		return KotlinProcedureSourceServiceFactory.class;
 	}
 
 	@Override

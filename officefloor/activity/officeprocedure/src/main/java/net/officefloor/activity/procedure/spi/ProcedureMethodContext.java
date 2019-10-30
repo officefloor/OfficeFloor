@@ -24,7 +24,7 @@ import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.plugin.managedfunction.method.MethodObjectInstanceFactory;
 
 /**
- * Context for the {@link ProcedureService}.
+ * Context for the {@link ProcedureSource}.
  * 
  * @author Daniel Sagenschneider
  */

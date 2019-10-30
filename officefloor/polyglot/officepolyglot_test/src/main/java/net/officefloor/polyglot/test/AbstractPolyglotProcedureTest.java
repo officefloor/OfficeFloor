@@ -33,8 +33,8 @@ import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.activity.procedure.ProcedureTypeBuilder;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
-import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.PropertyConfigurable;
 import net.officefloor.compile.properties.PropertyList;
@@ -99,43 +99,44 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 	 * Convenience method to add a {@link Procedure}.
 	 *
 	 * @param resourceName   Name of resource.
-	 * @param serviceFactory {@link ProcedureServiceFactory}.
+	 * @param serviceFactory {@link ProcedureSourceServiceFactory}.
 	 * @param procedureName  Name of {@link Procedure}.
 	 * @param isNext         Indicates if next {@link Flow}.
 	 * @param properties     {@link PropertyList}.
 	 * @param context        {@link CompileOfficeContext}.
 	 * @return {@link OfficeSection} for the {@link Procedure}.
 	 */
-	protected OfficeSection addProcedure(String resourceName, Class<? extends ProcedureServiceFactory> serviceFactory,
-			String procedureName, boolean isNext, PropertyList properties, CompileOfficeContext context) {
+	protected OfficeSection addProcedure(String resourceName,
+			Class<? extends ProcedureSourceServiceFactory> serviceFactory, String procedureName, boolean isNext,
+			PropertyList properties, CompileOfficeContext context) {
 
-		// Load the service
-		String serviceName = this.getServiceName(serviceFactory);
+		// Load the source
+		String sourceName = this.getSourceName(serviceFactory);
 
 		// Obtain the procedure architect
 		ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer
 				.employProcedureArchitect(context.getOfficeArchitect(), context.getOfficeSourceContext());
 
 		// Create and return procedure
-		return procedureArchitect.addProcedure(resourceName, serviceName, procedureName, isNext, properties);
+		return procedureArchitect.addProcedure(resourceName, sourceName, procedureName, isNext, properties);
 	}
 
 	/**
-	 * Obtains the {@link ProcedureServiceFactory} {@link Class}.
+	 * Obtains the {@link ProcedureSourceServiceFactory} {@link Class}.
 	 *
-	 * @return {@link ProcedureServiceFactory} {@link Class}.
+	 * @return {@link ProcedureSourceServiceFactory} {@link Class}.
 	 */
-	protected abstract Class<? extends ProcedureServiceFactory> getProcedureServiceFactoryClass();
+	protected abstract Class<? extends ProcedureSourceServiceFactory> getProcedureSourceServiceFactoryClass();
 
 	/**
-	 * Obtains the service name for the {@link ProcedureServiceFactory}.
+	 * Obtains the source name for the {@link ProcedureSourceServiceFactory}.
 	 *
-	 * @param serviceFactory {@link ProcedureServiceFactory} {@link Class}.
-	 * @return Service name.
+	 * @param serviceFactory {@link ProcedureSourceServiceFactory} {@link Class}.
+	 * @return Source name.
 	 */
-	protected String getServiceName(Class<? extends ProcedureServiceFactory> serviceFactory) {
-		ProcedureService service = ProcedureLoaderUtil.loadProcedureService(serviceFactory);
-		return service.getServiceName();
+	protected String getSourceName(Class<? extends ProcedureSourceServiceFactory> serviceFactory) {
+		ProcedureSource source = ProcedureLoaderUtil.loadProcedureSource(serviceFactory);
+		return source.getSourceName();
 	}
 
 	/**
@@ -176,12 +177,12 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		void setResource(String resource);
 
 		/**
-		 * Specifies an override {@link ProcedureServiceFactory} {@link Class}.
+		 * Specifies an override {@link ProcedureSourceServiceFactory} {@link Class}.
 		 *
-		 * @param serviceFactoryClass Override {@link ProcedureServiceFactory}
+		 * @param serviceFactoryClass Override {@link ProcedureSourceServiceFactory}
 		 *                            {@link Class}.
 		 */
-		void setProcedureServiceFactoryClass(Class<? extends ProcedureServiceFactory> serviceFactoryClass);
+		void setProcedureSourceServiceFactoryClass(Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass);
 
 		/**
 		 * Specifies the name of the {@link Procedure}.
@@ -215,9 +216,9 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		private String resource = null;
 
 		/**
-		 * {@link ProcedureServiceFactory} {@link Class}.
+		 * {@link ProcedureSourceServiceFactory} {@link Class}.
 		 */
-		private Class<? extends ProcedureServiceFactory> serviceFactoryClass = null;
+		private Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass = null;
 
 		/**
 		 * Name of the {@link Procedure}.
@@ -240,13 +241,13 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		}
 
 		/**
-		 * Obtains the {@link ProcedureServiceFactory} {@link Class}.
+		 * Obtains the {@link ProcedureSourceServiceFactory} {@link Class}.
 		 *
-		 * @return {@link ProcedureServiceFactory} {@link Class}.
+		 * @return {@link ProcedureSourceServiceFactory} {@link Class}.
 		 */
-		private Class<? extends ProcedureServiceFactory> getProcedureServiceFactory() {
+		private Class<? extends ProcedureSourceServiceFactory> getProcedureSourceServiceFactory() {
 			return this.serviceFactoryClass != null ? this.serviceFactoryClass
-					: AbstractPolyglotProcedureTest.this.getProcedureServiceFactoryClass();
+					: AbstractPolyglotProcedureTest.this.getProcedureSourceServiceFactoryClass();
 		}
 
 		/**
@@ -298,7 +299,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		}
 
 		@Override
-		public void setProcedureServiceFactoryClass(Class<? extends ProcedureServiceFactory> serviceFactoryClass) {
+		public void setProcedureSourceServiceFactoryClass(
+				Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass) {
 			this.serviceFactoryClass = serviceFactoryClass;
 		}
 
@@ -326,7 +328,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 	 */
 	private static void validateProcedureType(ProcedureTypeBuilder expected, ProcedureBuildImpl actual) {
 		String resource = actual.getResource();
-		Class<? extends ProcedureServiceFactory> serviceFactoryClass = actual.getProcedureServiceFactory();
+		Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass = actual.getProcedureSourceServiceFactory();
 		String procedureName = actual.getProcedureName();
 		if (serviceFactoryClass == null) {
 			// Default procedures
@@ -411,7 +413,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 	protected String primitives(CompileOfficeContext context, OfficeSectionInput handleResult) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.primitives(builder);
-		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureServiceFactory(),
+		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureSourceServiceFactory(),
 				builder.getProcedureName(), true, builder.getProperties(), context);
 		context.getOfficeArchitect().link(procedure.getOfficeSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME),
 				handleResult);
@@ -502,7 +504,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 	protected String objects(CompileOfficeContext context, OfficeSectionInput handleResult) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.objects(builder);
-		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureServiceFactory(),
+		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureSourceServiceFactory(),
 				builder.getProcedureName(), true, builder.getProperties(), context);
 		context.getOfficeArchitect().link(procedure.getOfficeSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME),
 				handleResult);
@@ -585,7 +587,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 	protected String collections(CompileOfficeContext context, OfficeSectionInput handleResult) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.collections(builder);
-		OfficeSection procedure = this.addProcedure(builder.getResource(), this.getProcedureServiceFactoryClass(),
+		OfficeSection procedure = this.addProcedure(builder.getResource(), this.getProcedureSourceServiceFactoryClass(),
 				builder.getProcedureName(), true, builder.getProperties(), context);
 		context.getOfficeArchitect().link(procedure.getOfficeSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME),
 				handleResult);
@@ -690,7 +692,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.variables(builder);
 		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureServiceFactory(),
+		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureSourceServiceFactory(),
 				builder.getProcedureName(), true, builder.getProperties(), context);
 		office.link(pass, procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 		office.link(procedure.getOfficeSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME), handleResult);
@@ -775,7 +777,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.parameter(builder);
 		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureServiceFactory(),
+		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureSourceServiceFactory(),
 				builder.getProcedureName(), true, builder.getProperties(), context);
 		office.link(pass, procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 		office.link(procedure.getOfficeSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME), handleResult);
@@ -852,7 +854,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 	protected void web(OfficeFlowSourceNode pass, CompileWebContext context) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.web(builder);
-		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureServiceFactory(),
+		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureSourceServiceFactory(),
 				builder.getProcedureName(), false, builder.getProperties(), context);
 		context.getOfficeArchitect().link(pass, procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 	}
@@ -925,7 +927,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 	protected void httpException(OfficeFlowSourceNode pass, CompileWebContext context) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.httpException(builder);
-		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureServiceFactory(),
+		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureSourceServiceFactory(),
 				builder.getProcedureName(), false, builder.getProperties(), context);
 		context.getOfficeArchitect().link(pass, procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 	}
@@ -1016,7 +1018,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.flow(builder);
 		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureServiceFactory(),
+		OfficeSection procedure = this.addProcedure(builder.getResource(), builder.getProcedureSourceServiceFactory(),
 				builder.getProcedureName(), true, builder.getProperties(), context);
 		office.link(procedure.getOfficeSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME), next);
 		office.link(procedure.getOfficeSectionOutput("flow"), flow);
@@ -1076,7 +1078,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 	protected String asynchronousFlow(CompileOfficeContext context) {
 		ProcedureBuildImpl builder = new ProcedureBuildImpl();
 		this.asynchronousFlow(builder);
-		this.addProcedure(builder.getResource(), builder.getProcedureServiceFactory(), builder.getProcedureName(),
+		this.addProcedure(builder.getResource(), builder.getProcedureSourceServiceFactory(), builder.getProcedureName(),
 				false, builder.getProperties(), context);
 		return builder.getManagedFunctionName();
 	}

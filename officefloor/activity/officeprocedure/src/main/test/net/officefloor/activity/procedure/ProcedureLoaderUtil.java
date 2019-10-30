@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.junit.Assert;
 
-import net.officefloor.activity.impl.procedure.ClassProcedureService;
+import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.activity.impl.procedure.ProcedureEscalationTypeImpl;
 import net.officefloor.activity.impl.procedure.ProcedureFlowTypeImpl;
 import net.officefloor.activity.impl.procedure.ProcedureImpl;
@@ -32,8 +32,8 @@ import net.officefloor.activity.impl.procedure.ProcedureObjectTypeImpl;
 import net.officefloor.activity.impl.procedure.ProcedurePropertyImpl;
 import net.officefloor.activity.impl.procedure.ProcedureVariableTypeImpl;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
-import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.properties.PropertyList;
@@ -74,12 +74,12 @@ public class ProcedureLoaderUtil {
 	 * Convenience creation of {@link Procedure} for testing.
 	 * 
 	 * @param procedureName       Name of {@link Procedure}.
-	 * @param serviceFactoryClass {@link ProcedureServiceFactory}.
+	 * @param serviceFactoryClass {@link ProcedureSourceServiceFactory}.
 	 * @param properties          {@link ProcedureProperty} instances.
 	 * @return {@link Procedure}.
 	 */
 	public static Procedure procedure(String procedureName,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass, ProcedureProperty... properties) {
+			Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass, ProcedureProperty... properties) {
 		return procedure(procedureName, serviceFactoryClass, officeFloorCompiler(null), properties);
 	}
 
@@ -87,20 +87,21 @@ public class ProcedureLoaderUtil {
 	 * Convenience creation of {@link Procedure} for testing.
 	 * 
 	 * @param procedureName       Name of the {@link Procedure}.
-	 * @param serviceFactoryClass {@link Class} of {@link ProcedureServiceFactory}.
+	 * @param serviceFactoryClass {@link Class} of
+	 *                            {@link ProcedureSourceServiceFactory}.
 	 * @param compiler            {@link OfficeFloorCompiler}.
 	 * @param properties          {@link ProcedureProperty} instances.
 	 * @return {@link Procedure}.
 	 */
 	public static Procedure procedure(String procedureName,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass, OfficeFloorCompiler compiler,
+			Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass, OfficeFloorCompiler compiler,
 			ProcedureProperty... properties) {
 
 		// Load the service
-		ProcedureService service = loadProcedureService(serviceFactoryClass, officeFloorCompiler(compiler));
+		ProcedureSource service = loadProcedureSource(serviceFactoryClass, officeFloorCompiler(compiler));
 
 		// Return the procedure
-		return procedure(procedureName, service.getServiceName(), properties);
+		return procedure(procedureName, service.getSourceName(), properties);
 	}
 
 	/**
@@ -111,7 +112,7 @@ public class ProcedureLoaderUtil {
 	 * @return {@link Procedure}.
 	 */
 	public static Procedure procedure(String procedureName, ProcedureProperty... properties) {
-		return procedure(procedureName, ClassProcedureService.SERVICE_NAME, properties);
+		return procedure(procedureName, ClassProcedureSource.SOURCE_NAME, properties);
 	}
 
 	/**
@@ -215,13 +216,14 @@ public class ProcedureLoaderUtil {
 	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
 	 * @param resource               Resource.
-	 * @param serviceFactoryClass    {@link ProcedureServiceFactory} {@link Class}.
+	 * @param serviceFactoryClass    {@link ProcedureSourceServiceFactory}
+	 *                               {@link Class}.
 	 * @param procedureName          Name of {@link Procedure}.
 	 * @param propertyNameValuePairs Name/value pairs for {@link PropertyList}.
 	 * @return {@link ProcedureType}.
 	 */
 	public static ProcedureType loadProcedureType(String resource,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName,
+			Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass, String procedureName,
 			String... propertyNameValuePairs) {
 		return loadProcedureType(resource, serviceFactoryClass, procedureName, officeFloorCompiler(null),
 				propertyNameValuePairs);
@@ -231,30 +233,31 @@ public class ProcedureLoaderUtil {
 	 * Loads the {@link ProcedureType} for the {@link Procedure}.
 	 * 
 	 * @param resource               Resource.
-	 * @param serviceFactoryClass    {@link ProcedureServiceFactory} {@link Class}.
+	 * @param serviceFactoryClass    {@link ProcedureSourceServiceFactory}
+	 *                               {@link Class}.
 	 * @param procedureName          Name of {@link Procedure}.
 	 * @param compiler               {@link OfficeFloorCompiler}.
 	 * @param propertyNameValuePairs Name/value pairs for {@link PropertyList}.
 	 * @return {@link ProcedureType}.
 	 */
 	public static ProcedureType loadProcedureType(String resource,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName,
+			Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass, String procedureName,
 			OfficeFloorCompiler compiler, String... propertyNameValuePairs) {
 
 		// Create the procedure loader
 		ProcedureLoader loader = newProcedureLoader(compiler);
 
 		// Load the service name
-		ProcedureService service = loadProcedureService(serviceFactoryClass, compiler);
+		ProcedureSource service = loadProcedureSource(serviceFactoryClass, compiler);
 
 		// Load the procedure type
-		return loader.loadProcedureType(resource, service.getServiceName(), procedureName,
+		return loader.loadProcedureType(resource, service.getSourceName(), procedureName,
 				new PropertyListImpl(propertyNameValuePairs));
 	}
 
 	/**
 	 * Loads the {@link ProcedureType} for the {@link Procedure} using default
-	 * {@link ProcedureService}.
+	 * {@link ProcedureSource}.
 	 * 
 	 * @param resource      Resource.
 	 * @param procedureName Name of {@link Procedure}.
@@ -266,7 +269,7 @@ public class ProcedureLoaderUtil {
 		ProcedureLoader loader = newProcedureLoader(officeFloorCompiler(null));
 
 		// Load the procedure type
-		return loader.loadProcedureType(resource, ClassProcedureService.SERVICE_NAME, procedureName,
+		return loader.loadProcedureType(resource, ClassProcedureSource.SOURCE_NAME, procedureName,
 				new PropertyListImpl());
 	}
 
@@ -288,13 +291,14 @@ public class ProcedureLoaderUtil {
 	 * @param expectedProcedureType  Expected {@link ProcedureType} via
 	 *                               {@link ProcedureTypeBuilder}.
 	 * @param resource               Resource.
-	 * @param serviceFactoryClass    {@link ProcedureServiceFactory} {@link Class}.
+	 * @param serviceFactoryClass    {@link ProcedureSourceServiceFactory}
+	 *                               {@link Class}.
 	 * @param procedureName          Name of {@link Procedure}.
 	 * @param propertyNameValuePairs Name/value pairs for {@link PropertyList}.
 	 * @return {@link ProcedureType}.
 	 */
 	public static ProcedureType validateProcedureType(ProcedureTypeBuilder expectedProcedureType, String resource,
-			Class<? extends ProcedureServiceFactory> serviceFactoryClass, String procedureName,
+			Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass, String procedureName,
 			String... propertyNameValuePairs) {
 
 		// Load the procedure type
@@ -306,7 +310,7 @@ public class ProcedureLoaderUtil {
 	}
 
 	/**
-	 * Validates the {@link ProcedureType} via default {@link ProcedureService}.
+	 * Validates the {@link ProcedureType} via default {@link ProcedureSource}.
 	 * 
 	 * @param expectedProcedureType  Expected {@link ProcedureType} via
 	 *                               {@link ProcedureTypeBuilder}.
@@ -433,26 +437,29 @@ public class ProcedureLoaderUtil {
 	}
 
 	/**
-	 * Loads the {@link ProcedureService} from {@link ProcedureServiceFactory}
+	 * Loads the {@link ProcedureSource} from {@link ProcedureSourceServiceFactory}
 	 * {@link Class}.
 	 * 
-	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
-	 * @return Loaded {@link ProcedureService}.
+	 * @param serviceFactoryClass {@link ProcedureSourceServiceFactory}
+	 *                            {@link Class}.
+	 * @return Loaded {@link ProcedureSource}.
 	 */
-	public static ProcedureService loadProcedureService(Class<? extends ProcedureServiceFactory> serviceFactoryClass) {
-		return loadProcedureService(serviceFactoryClass, officeFloorCompiler(null));
+	public static ProcedureSource loadProcedureSource(
+			Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass) {
+		return loadProcedureSource(serviceFactoryClass, officeFloorCompiler(null));
 	}
 
 	/**
-	 * Loads the {@link ProcedureService} from {@link ProcedureServiceFactory}
+	 * Loads the {@link ProcedureSource} from {@link ProcedureSourceServiceFactory}
 	 * {@link Class}.
 	 * 
-	 * @param serviceFactoryClass {@link ProcedureServiceFactory} {@link Class}.
+	 * @param serviceFactoryClass {@link ProcedureSourceServiceFactory}
+	 *                            {@link Class}.
 	 * @param compiler            {@link OfficeFloorCompiler}.
-	 * @return Loaded {@link ProcedureService}.
+	 * @return Loaded {@link ProcedureSource}.
 	 */
-	public static ProcedureService loadProcedureService(Class<? extends ProcedureServiceFactory> serviceFactoryClass,
-			OfficeFloorCompiler compiler) {
+	public static ProcedureSource loadProcedureSource(
+			Class<? extends ProcedureSourceServiceFactory> serviceFactoryClass, OfficeFloorCompiler compiler) {
 
 		// Load the service factory
 		Object instance;
@@ -462,7 +469,7 @@ public class ProcedureLoaderUtil {
 			throw new IllegalStateException(
 					"Failed to instantiate " + serviceFactoryClass.getName() + " via default constructor", ex);
 		}
-		ProcedureServiceFactory serviceFactory = (ProcedureServiceFactory) instance;
+		ProcedureSourceServiceFactory serviceFactory = (ProcedureSourceServiceFactory) instance;
 
 		// Create and return the service
 		return officeFloorCompiler(compiler).createRootSourceContext().loadService(serviceFactory);

@@ -19,16 +19,16 @@ package net.officefloor.activity.procedure;
 
 import java.lang.reflect.Method;
 
-import net.officefloor.activity.procedure.spi.ProcedureService;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureListContext;
 import net.officefloor.activity.procedure.spi.ProcedureMethodContext;
 
 /**
- * Another mock {@link ProcedureService} for testing.
+ * Another mock {@link ProcedureSource} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class AnotherMockProcedureService extends MockProcedureService {
+public class AnotherMockProcedureSource extends MockProcedureSource {
 
 	/**
 	 * Indicates whether to run.
@@ -59,11 +59,11 @@ public class AnotherMockProcedureService extends MockProcedureService {
 	}
 
 	/*
-	 * ========================== ProcedureService ======================
+	 * ========================== ProcedureSource ======================
 	 */
 
 	@Override
-	public String getServiceName() {
+	public String getSourceName() {
 		return "AnotherMock";
 	}
 

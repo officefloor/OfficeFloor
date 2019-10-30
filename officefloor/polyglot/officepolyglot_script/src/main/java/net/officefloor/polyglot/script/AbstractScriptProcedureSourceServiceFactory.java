@@ -35,11 +35,11 @@ import javax.script.ScriptEngineManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.activity.procedure.Procedure;
-import net.officefloor.activity.procedure.spi.ManagedFunctionProcedureService;
+import net.officefloor.activity.procedure.spi.ManagedFunctionProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureListContext;
 import net.officefloor.activity.procedure.spi.ProcedureManagedFunctionContext;
-import net.officefloor.activity.procedure.spi.ProcedureService;
-import net.officefloor.activity.procedure.spi.ProcedureServiceFactory;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
@@ -69,18 +69,18 @@ import net.officefloor.web.HttpPathParameterAnnotation;
 import net.officefloor.web.HttpQueryParameterAnnotation;
 
 /**
- * {@link ProcedureServiceFactory} providing abstract support for Scripts.
+ * {@link ProcedureSourceServiceFactory} providing abstract support for Scripts.
  * 
  * @author Daniel Sagenschneider
  */
-public abstract class AbstractScriptProcedureServiceFactory implements ProcedureServiceFactory {
+public abstract class AbstractScriptProcedureSourceServiceFactory implements ProcedureSourceServiceFactory {
 
 	/**
-	 * Obtains the service name for this {@link ProcedureService}.
+	 * Obtains the source name for this {@link ProcedureSource}.
 	 * 
-	 * @return Service name for this {@link ProcedureService}.
+	 * @return Source name for this {@link ProcedureSource}.
 	 */
-	protected abstract String getServiceName();
+	protected abstract String getSourceName();
 
 	/**
 	 * Obtains the extensions for the script resource.
@@ -572,36 +572,36 @@ public abstract class AbstractScriptProcedureServiceFactory implements Procedure
 	}
 
 	/*
-	 * ==================== ProcedureServiceFactory ===================
+	 * ==================== ProcedureSourceServiceFactory ===================
 	 */
 
 	@Override
-	public ProcedureService createService(ServiceContext context) throws Throwable {
-		return new ScriptProcedureService();
+	public ProcedureSource createService(ServiceContext context) throws Throwable {
+		return new ScriptProcedureSource();
 	}
 
 	/**
-	 * {@link ProcedureService} providing abstract support for Scripts.
+	 * {@link ProcedureSource} providing abstract support for Scripts.
 	 */
-	private class ScriptProcedureService implements ManagedFunctionProcedureService {
+	private class ScriptProcedureSource implements ManagedFunctionProcedureSource {
 
 		/*
-		 * ==================== ManagedFunctionProcedureService ====================
+		 * ==================== ManagedFunctionProcedureSource ====================
 		 */
 
 		@Override
-		public String getServiceName() {
-			return AbstractScriptProcedureServiceFactory.this.getServiceName();
+		public String getSourceName() {
+			return AbstractScriptProcedureSourceServiceFactory.this.getSourceName();
 		}
 
 		@Override
 		public void listProcedures(ProcedureListContext context) throws Exception {
-			AbstractScriptProcedureServiceFactory.this.listProcedures(context);
+			AbstractScriptProcedureSourceServiceFactory.this.listProcedures(context);
 		}
 
 		@Override
 		public void loadManagedFunction(ProcedureManagedFunctionContext context) throws Exception {
-			AbstractScriptProcedureServiceFactory.this.loadManagedFunction(context);
+			AbstractScriptProcedureSourceServiceFactory.this.loadManagedFunction(context);
 		}
 	}
 
