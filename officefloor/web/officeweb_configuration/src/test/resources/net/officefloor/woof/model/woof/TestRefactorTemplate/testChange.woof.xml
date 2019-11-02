@@ -13,9 +13,9 @@
 	</http-inputs>
 
 	<templates>
-		<template path="/change" secure="false" location="example/Change.html"
-			class="net.example.ChangeClass" content-type="text/changed" charset="UTF-CHANGE"
-			redirect-values-function="change-redirect" link-separator-character="c">
+		<template path="/change" secure="false" location="example/Change.html" class="net.example.ChangeClass"
+			content-type="text/changed" charset="UTF-CHANGE" redirect-values-function="change-redirect"
+			link-separator-character="c">
 			<extends template="/parent" />
 			<link name="LINK_2" secure="true" />
 			<link name="LINK_3" secure="false" />
@@ -33,14 +33,15 @@
 				<redirect path="/path" />
 			</output>
 			<output name="OUTPUT_E">
+				<procedure name="PROCEDURE" />
+			</output>
+			<output name="OUTPUT_F">
 				<section name="SECTION" input="INPUT" />
 			</output>
-			<extension
-				class="net.officefloor.woof.model.woof.MockChangeWoofTemplateExtensionSource">
+			<extension class="net.officefloor.woof.model.woof.MockChangeWoofTemplateExtensionSource">
 				<property name="newName" value="newValue" />
 			</extension>
-			<extension
-				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource">
+			<extension class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource">
 				<property name="change" value="first" />
 			</extension>
 		</template>
@@ -55,9 +56,19 @@
 		</template>
 	</templates>
 
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<template path="/change" />
+			</next>
+			<output name="OUTPUT">
+				<template path="/change" />
+			</output>
+		</procedure>
+	</procedures>
+
 	<sections>
-		<section name="SECTION" source="net.example.ExampleSectionSource"
-			location="SECTION_LOCATION">
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
 			<input name="INPUT" />
 			<output name="OUTPUT">
 				<template path="/change" />

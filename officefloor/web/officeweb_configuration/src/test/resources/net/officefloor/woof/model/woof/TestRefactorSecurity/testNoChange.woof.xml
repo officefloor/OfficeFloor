@@ -13,17 +13,26 @@
 	</http-inputs>
 
 	<templates>
-		<template path="/template" location="example/Template.ofp"
-			class="net.example.LogicClass">
+		<template path="/template" location="example/Template.ofp" class="net.example.LogicClass">
 			<output name="OUTPUT">
 				<security name="SECURITY" />
 			</output>
 		</template>
 	</templates>
 
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<security name="SECURITY" />
+			</next>
+			<output name="OUTPUT">
+				<security name="SECURITY" />
+			</output>
+		</procedure>
+	</procedures>
+
 	<sections>
-		<section name="SECTION" source="net.example.ExampleSectionSource"
-			location="SECTION_LOCATION">
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
 			<input name="INPUT" />
 			<output name="OUTPUT">
 				<security name="SECURITY" />
@@ -32,8 +41,7 @@
 	</sections>
 
 	<securities>
-		<security name="SECURITY" source="net.example.HttpSecuritySource"
-			timeout="4000">
+		<security name="SECURITY" source="net.example.HttpSecuritySource" timeout="4000">
 			<property name="name.one" value="value.one" />
 			<property name="name.two" value="value.two" />
 			<content type="application/json" />
@@ -52,6 +60,9 @@
 			</output>
 			<output name="OUTPUT_E">
 				<redirect path="/path" />
+			</output>
+			<output name="OUTPUT_E">
+				<procedure path="PROCEDURE" />
 			</output>
 		</security>
 		<security name="SECURITY_LINK" source="net.example.HttpSecuritySource">

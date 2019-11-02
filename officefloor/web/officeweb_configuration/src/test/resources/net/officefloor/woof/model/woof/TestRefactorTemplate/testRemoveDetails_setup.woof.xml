@@ -16,9 +16,8 @@
 		<template path="/parent" location="example/Parent.ofp">
 			<output name="OUTPUT_INHERIT" />
 		</template>
-		<template path="/template" secure="true" location="example/Remove.ofp"
-			class="net.example.AddClass" content-type="text/html; charset=UTF-8"
-			charset="UTF-8" redirect-values-function="redirect"
+		<template path="/template" secure="true" location="example/Remove.ofp" class="net.example.AddClass"
+			content-type="text/html; charset=UTF-8" charset="UTF-8" redirect-values-function="redirect"
 			link-separator-character="_">
 			<extends template="/parent" />
 			<output name="OUTPUT_A" argument-type="java.lang.Integer">
@@ -36,14 +35,14 @@
 			<output name="OUTPUT_E">
 				<redirect path="/path" />
 			</output>
-			<extension
-				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource">
+			<output name="OUTPUT_F">
+				<procedure name="PROCEDURE" />
+			</output>
+			<extension class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource">
 				<property name="name" value="value" />
 			</extension>
-			<extension
-				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource" />
-			<extension
-				class="net.officefloor.woof.model.woof.MockChangeWoofTemplateExtensionSource">
+			<extension class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource" />
+			<extension class="net.officefloor.woof.model.woof.MockChangeWoofTemplateExtensionSource">
 				<property name="ONE" value="A" />
 				<property name="TWO" value="B" />
 			</extension>
@@ -55,9 +54,19 @@
 		</template>
 	</templates>
 
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<template path="/template" />
+			</next>
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
+		</procedure>
+	</procedures>
+
 	<sections>
-		<section name="SECTION" source="net.example.ExampleSectionSource"
-			location="SECTION_LOCATION">
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
 			<input name="INPUT" />
 			<output name="OUTPUT">
 				<template path="/template" />
