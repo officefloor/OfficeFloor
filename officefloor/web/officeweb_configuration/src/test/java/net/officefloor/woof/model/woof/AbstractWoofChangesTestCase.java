@@ -21,6 +21,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
+import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.ProcedureEscalationType;
+import net.officefloor.activity.procedure.ProcedureFlowType;
+import net.officefloor.activity.procedure.ProcedureObjectType;
+import net.officefloor.activity.procedure.ProcedureType;
+import net.officefloor.activity.procedure.ProcedureVariableType;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
@@ -31,8 +37,11 @@ import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
 import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
+import net.officefloor.plugin.variable.Var;
 import net.officefloor.web.security.HttpAccessControl;
 import net.officefloor.web.security.HttpAuthentication;
 import net.officefloor.web.security.type.HttpSecurityDependencyType;
@@ -161,7 +170,9 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 
 		// Construct and return the office section
 		SectionTypeContextImpl context = new SectionTypeContextImpl();
-		constructor.construct(context);
+		if (constructor != null) {
+			constructor.construct(context);
+		}
 		return context;
 	}
 
@@ -183,6 +194,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	/**
 	 * Constructor of an {@link SectionType}.
 	 */
+	@FunctionalInterface
 	protected interface SectionTypeConstructor {
 
 		/**
@@ -316,7 +328,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		 * @param name Name.
 		 * @param type Type.
 		 */
-		public SectionTypeItem(String name, String type) {
+		private SectionTypeItem(String name, String type) {
 			this(name, type, false);
 		}
 
@@ -327,7 +339,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		 * @param type         Type.
 		 * @param isEscalation Flag indicating if escalation only.
 		 */
-		public SectionTypeItem(String name, String type, boolean isEscalation) {
+		private SectionTypeItem(String name, String type, boolean isEscalation) {
 			this.name = name;
 			this.type = type;
 			this.typeQualifier = null;
@@ -341,7 +353,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		 * @param type          Type.
 		 * @param typeQualifier Type qualifier.
 		 */
-		public SectionTypeItem(String name, String type, String typeQualifier) {
+		private SectionTypeItem(String name, String type, String typeQualifier) {
 			this.name = name;
 			this.type = type;
 			this.typeQualifier = typeQualifier;
@@ -419,13 +431,16 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 
 		// Construct and return the office section
 		HttpSecurityTypeContextImpl<C, ?, ?> context = new HttpSecurityTypeContextImpl(credentialsType);
-		constructor.construct(context);
+		if (constructor != null) {
+			constructor.construct(context);
+		}
 		return context;
 	}
 
 	/**
 	 * Constructor of an {@link HttpSecurityType}.
 	 */
+	@FunctionalInterface
 	protected interface HttpSecurityTypeConstructor {
 
 		/**
@@ -487,7 +502,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		 * 
 		 * @param credentialsType Type of credentials.
 		 */
-		public HttpSecurityTypeContextImpl(Class<C> credentialsType) {
+		private HttpSecurityTypeContextImpl(Class<C> credentialsType) {
 			this.credentialsType = credentialsType;
 		}
 
@@ -598,7 +613,7 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 		 * @param key           Key.
 		 * @param index         Index.
 		 */
-		public HttpSecurityTypeItem(String itemName, Class<?> itemType, String typeQualifier, E key, int index) {
+		private HttpSecurityTypeItem(String itemName, Class<?> itemType, String typeQualifier, E key, int index) {
 			this.itemName = itemName;
 			this.itemType = itemType;
 			this.typeQualifier = typeQualifier;
@@ -650,6 +665,304 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 
 		@Override
 		public Class<?> getArgumentType() {
+			return this.itemType;
+		}
+	}
+
+	/**
+	 * Constructs the {@link ProcedureType} for testing.
+	 * 
+	 * @param procedureName {@link Procedure} name.
+	 * @param parameterType Parameter type.
+	 * @param constructor   {@link ProcedureTypeConstructor}.
+	 * @return {@link HttpSecurityType}.
+	 */
+	protected ProcedureType constructProcedureType(String procedureName, Class<?> parameterType,
+			ProcedureTypeConstructor constructor) {
+
+		// Construct and return the procedure
+		ProcedureTypeContextImpl context = new ProcedureTypeContextImpl(procedureName, parameterType);
+		constructor.construct(context);
+		return context;
+	}
+
+	/**
+	 * Constructor of an {@link ProcedureType}.
+	 */
+	@FunctionalInterface
+	protected interface ProcedureTypeConstructor {
+
+		/**
+		 * Constructs the {@link ProcedureType}.
+		 * 
+		 * @param context {@link ProcedureTypeContext}.
+		 */
+		void construct(ProcedureTypeContext context);
+	}
+
+	/**
+	 * Context to construct the {@link ProcedureType}.
+	 */
+	protected interface ProcedureTypeContext {
+
+		/**
+		 * Adds a {@link ProcedureObjectType}.
+		 * 
+		 * @param objectName    {@link Object} name.
+		 * @param objectType    {@link Class} of {@link Object}.
+		 * @param typeQualifier Type qualifier.
+		 */
+		void addObject(String objectName, Class<?> objectType, String typeQualifier);
+
+		/**
+		 * Adds a {@link ProcedureVariableType}.
+		 * 
+		 * @param variableName Name of {@link Var}.
+		 * @param variableType {@link Class} of {@link Var}.
+		 */
+		void addVariable(String variableName, Class<?> variableType);
+
+		/**
+		 * Adds a {@link ProcedureFlowType}.
+		 * 
+		 * @param flowName     Name of {@link Flow}.
+		 * @param argumentType Argument {@link Class} for {@link Flow}.
+		 */
+		void addFlow(String flowName, Class<?> argumentType);
+
+		/**
+		 * Adds a {@link ProcedureEscalationType}.
+		 * 
+		 * @param escalationType {@link Class} of {@link Escalation}.
+		 */
+		void addEscalation(Class<? extends Throwable> escalationType);
+
+		/**
+		 * Specifies the next argument {@link Class}.
+		 * 
+		 * @param nextArgumentType Next argument {@link Class}.
+		 */
+		void setNextArgumentType(Class<?> nextArgumentType);
+	}
+
+	/**
+	 * {@link ProcedureTypeContext} implementation.
+	 */
+	private class ProcedureTypeContextImpl implements ProcedureTypeContext, ProcedureType {
+
+		/**
+		 * {@link Procedure} name.
+		 */
+		private final String procedureName;
+
+		/**
+		 * Parameter {@link Class}.
+		 */
+		private final Class<?> parameterType;
+
+		/**
+		 * {@link ProcedureObjectType} instances.
+		 */
+		private final List<ProcedureObjectType> objects = new LinkedList<>();
+
+		/**
+		 * {@link ProcedureVariableType} instances.
+		 */
+		private final List<ProcedureVariableType> variables = new LinkedList<>();
+
+		/**
+		 * {@link ProcedureFlowType} instances.
+		 */
+		private final List<ProcedureFlowType> flows = new LinkedList<>();
+
+		/**
+		 * {@link ProcedureEscalationType} instances.
+		 */
+		private final List<ProcedureEscalationType> escalations = new LinkedList<>();
+
+		/**
+		 * Next argument {@link Class}.
+		 */
+		private Class<?> nextArgumentType = null;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param procedureName {@link Procedure} name.
+		 * @param parameterType Parameter {@link Class}.
+		 */
+		private ProcedureTypeContextImpl(String procedureName, Class<?> parameterType) {
+			this.procedureName = procedureName;
+			this.parameterType = parameterType;
+		}
+
+		/*
+		 * ================= ProcedureTypeContext =======================
+		 */
+
+		@Override
+		public void addObject(String objectName, Class<?> objectType, String typeQualifier) {
+			this.objects.add(new ProcedureTypeItem(objectName, objectType, typeQualifier));
+		}
+
+		@Override
+		public void addVariable(String variableName, Class<?> variableType) {
+			this.variables.add(new ProcedureTypeItem(variableName, variableType, null));
+		}
+
+		@Override
+		public void addFlow(String flowName, Class<?> argumentType) {
+			this.flows.add(new ProcedureTypeItem(flowName, argumentType, null));
+		}
+
+		@Override
+		public void addEscalation(Class<? extends Throwable> escalationType) {
+			this.escalations.add(new ProcedureTypeItem(escalationType.getSimpleName(), escalationType, null));
+		}
+
+		@Override
+		public void setNextArgumentType(Class<?> nextArgumentType) {
+			this.nextArgumentType = nextArgumentType;
+		}
+
+		/*
+		 * ====================== ProcedureType ==========================
+		 */
+
+		@Override
+		public String getProcedureName() {
+			return this.procedureName;
+		}
+
+		@Override
+		public Class<?> getParameterType() {
+			return this.parameterType;
+		}
+
+		@Override
+		public ProcedureObjectType[] getObjectTypes() {
+			return this.objects.toArray(new ProcedureObjectType[this.objects.size()]);
+		}
+
+		@Override
+		public ProcedureVariableType[] getVariableTypes() {
+			return this.variables.toArray(new ProcedureVariableType[this.variables.size()]);
+		}
+
+		@Override
+		public ProcedureFlowType[] getFlowTypes() {
+			return this.flows.toArray(new ProcedureFlowType[this.flows.size()]);
+		}
+
+		@Override
+		public ProcedureEscalationType[] getEscalationTypes() {
+			return this.escalations.toArray(new ProcedureEscalationType[this.escalations.size()]);
+		}
+
+		@Override
+		public Class<?> getNextArgumentType() {
+			return this.nextArgumentType;
+		}
+	}
+
+	/**
+	 * Item for {@link ProcedureObjectType}, {@link ProcedureVariableType},
+	 * {@link ProcedureFlowType} and {@link ProcedureEscalationType}.
+	 */
+	private class ProcedureTypeItem
+			implements ProcedureObjectType, ProcedureVariableType, ProcedureFlowType, ProcedureEscalationType {
+
+		/**
+		 * Name of item.
+		 */
+		private final String itemName;
+
+		/**
+		 * Type for item.
+		 */
+		private final Class<?> itemType;
+
+		/**
+		 * Qualifier for item type.
+		 */
+		private final String typeQualifier;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param itemName      Name of item.
+		 * @param itemType      Type for item.
+		 * @param typeQualifier Qualifier for item type.
+		 */
+		private ProcedureTypeItem(String itemName, Class<?> itemType, String typeQualifier) {
+			this.itemName = itemName;
+			this.itemType = itemType;
+			this.typeQualifier = typeQualifier;
+		}
+
+		/*
+		 * ================== Item common methods ====================
+		 */
+
+		@Override
+		public String getTypeQualifier() {
+			return this.typeQualifier;
+		}
+
+		/*
+		 * ================== ProcedureEscalationType ====================
+		 */
+
+		@Override
+		public String getEscalationName() {
+			return this.itemName;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Class<? extends Throwable> getEscalationType() {
+			return (Class<? extends Throwable>) this.itemType;
+		}
+
+		/*
+		 * ================== ProcedureFlowType ====================
+		 */
+
+		@Override
+		public String getFlowName() {
+			return this.itemName;
+		}
+
+		@Override
+		public Class<?> getArgumentType() {
+			return this.itemType;
+		}
+
+		/*
+		 * ================== ProcedureVariableType ====================
+		 */
+
+		@Override
+		public String getVariableName() {
+			return this.itemName;
+		}
+
+		@Override
+		public String getVariableType() {
+			return this.itemType.getName();
+		}
+
+		/*
+		 * ================== ProcedureObjectType ====================
+		 */
+
+		@Override
+		public String getObjectName() {
+			return this.itemName;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
 			return this.itemType;
 		}
 	}

@@ -10,6 +10,11 @@
 		<template path="/templateLink" />
 	</templates>
 
+	<procedures>
+		<procedure name="PROCEDURE" />
+		<procedure name="PROCEDURE_LINK" />
+	</procedures>
+
 	<sections>
 		<section name="SECTION">
 			<input name="INPUT" />
@@ -35,6 +40,7 @@
 		</exception>
 		<exception class="B">
 			<template path="/template" />
+			<procedure name="PROCEDURE" />
 			<section name="SECTION" input="INPUT" />
 			<security name="SECURITY" />
 			<resource path="/resource" />

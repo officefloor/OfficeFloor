@@ -1,4 +1,9 @@
 <woof>
+	
+	<procedures>
+		<procedure name="PROCEDURE" />
+		<procedure name="PROCEDURE_LINK" />
+	</procedures>
 
 	<sections>
 		<section name="SECTION">
@@ -13,6 +18,7 @@
 		<start />
 		<start>
 			<section name="SECTION" input="INPUT" />
+			<procedure name="PROCEDURE" />
 		</start>
 	</starts>
 
