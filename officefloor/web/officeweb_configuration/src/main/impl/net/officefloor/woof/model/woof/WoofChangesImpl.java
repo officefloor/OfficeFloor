@@ -3688,7 +3688,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 */
 
 	@Override
-	public Change<WoofProcedureNextToWoofTemplateModel> linkProcedureOutputToTemplate(
+	public Change<WoofProcedureOutputToWoofTemplateModel> linkProcedureOutputToTemplate(
 			WoofProcedureOutputModel procedureOutput, WoofTemplateModel template) {
 		// TODO implement WoofChanges.linkProcedureNextToTemplate
 		throw new UnsupportedOperationException("TODO implement WoofChanges.linkProcedureNextToTemplate");
