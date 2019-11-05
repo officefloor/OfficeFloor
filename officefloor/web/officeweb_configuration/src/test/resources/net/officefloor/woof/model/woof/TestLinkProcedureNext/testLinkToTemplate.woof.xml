@@ -12,10 +12,13 @@
 
 	<procedures>
 		<procedure name="A">
-			<next />
+			<next>
+				<template path="/templateLink" />
+			</next>
 		</procedure>
 		<procedure name="B">
 			<next>
+				<template path="/template" />
 				<procedure name="A" />
 				<section name="SECTION" input="INPUT" />
 				<security name="SECURITY" />

@@ -89,6 +89,7 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 		this.securityOutputNameMapping.put("OUTPUT_C", "OUTPUT_C");
 		this.securityOutputNameMapping.put("OUTPUT_D", "OUTPUT_D");
 		this.securityOutputNameMapping.put("OUTPUT_E", "OUTPUT_E");
+		this.securityOutputNameMapping.put("OUTPUT_F", "OUTPUT_F");
 
 		// Refactor the access with same details
 		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "SECURITY",

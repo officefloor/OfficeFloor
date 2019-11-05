@@ -19,21 +19,20 @@
 			</output>
 		</template>
 	</templates>
-	
+
 	<procedures>
 		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
 			<next>
-				<section name="SECTION" input="INPUT_CHANGE" />
+				<section name="CHANGE" input="INPUT_CHANGE" />
 			</next>
 			<output name="OUTPUT">
-				<section name="SECTION" input="INPUT_CHANGE" />
+				<section name="CHANGE" input="INPUT_CHANGE" />
 			</output>
 		</procedure>
 	</procedures>
 
 	<sections>
-		<section name="CHANGE" source="net.example.ChangeSectionSource"
-			location="CHANGE_LOCATION">
+		<section name="CHANGE" source="net.example.ChangeSectionSource" location="CHANGE_LOCATION">
 			<property name="name.1" value="value.one" />
 			<property name="name.two" value="value.2" />
 			<input name="INPUT_CHANGE" parameter-type="java.lang.Double" />
@@ -56,8 +55,7 @@
 				<redirect path="/path" />
 			</output>
 		</section>
-		<section name="SECTION_LINK" source="net.example.LinkSectionSource"
-			location="LINK_LOCATION">
+		<section name="SECTION_LINK" source="net.example.LinkSectionSource" location="LINK_LOCATION">
 			<input name="INPUT" />
 			<output name="OUTPUT">
 				<section name="CHANGE" input="INPUT_CHANGE" />

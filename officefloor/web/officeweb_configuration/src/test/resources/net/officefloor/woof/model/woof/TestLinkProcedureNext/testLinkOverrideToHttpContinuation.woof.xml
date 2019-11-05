@@ -12,18 +12,11 @@
 
 	<procedures>
 		<procedure name="A">
-			<next>
-				<redirect path="/pathLink" />
-			</next>
+			<next />
 		</procedure>
 		<procedure name="B">
 			<next>
-				<template path="/template" />
-				<procedure name="A" />
-				<section name="SECTION" input="INPUT" />
-				<security name="SECURITY" />
-				<resource path="/resource.html" />
-				<redirect path="/path" />
+				<redirect path="/pathLink" />
 			</next>
 		</procedure>
 	</procedures>

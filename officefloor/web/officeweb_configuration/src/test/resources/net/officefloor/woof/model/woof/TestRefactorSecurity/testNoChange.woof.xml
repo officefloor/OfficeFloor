@@ -61,7 +61,7 @@
 			<output name="OUTPUT_E">
 				<redirect path="/path" />
 			</output>
-			<output name="OUTPUT_E">
+			<output name="OUTPUT_F">
 				<procedure path="PROCEDURE" />
 			</output>
 		</security>

@@ -196,7 +196,7 @@ public class LinkProcedureNextTest extends AbstractWoofChangesTestCase {
 	 * Ensure link overrides other links for
 	 * {@link WoofProcedureNextToWoofSectionInputModel}.
 	 */
-	public void testLinkOverrideToProcedureInput() {
+	public void testLinkOverrideToSectionInput() {
 		this.doLinkToSectionInput(B);
 	}
 
