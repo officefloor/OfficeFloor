@@ -9,7 +9,7 @@
 		<template path="/template" />
 		<template path="/templateLink" />
 	</templates>
-	
+
 	<procedures>
 		<procedure name="PROCEDURE" />
 		<procedure name="PROCEDURE_LINK" />
@@ -19,7 +19,7 @@
 		<section name="A">
 			<input name="INPUT" />
 			<output name="OUTPUT">
-				<procedure name="PROCEDURE" />
+				<procedure name="PROCEDURE_LINK" />
 			</output>
 		</section>
 		<section name="B">

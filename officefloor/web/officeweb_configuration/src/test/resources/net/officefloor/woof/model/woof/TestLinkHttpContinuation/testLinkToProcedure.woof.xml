@@ -2,7 +2,7 @@
 
 	<http-continuations>
 		<http-continuation path="/pathA">
-			<procedure PROCEDURE_LINK " />
+			<procedure name="PROCEDURE_LINK" />
 		</http-continuation>
 		<http-continuation path="/pathB">
 			<template path="/template" />

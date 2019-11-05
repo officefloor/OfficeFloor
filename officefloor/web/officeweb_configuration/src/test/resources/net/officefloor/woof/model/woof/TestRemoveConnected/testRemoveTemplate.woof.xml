@@ -36,8 +36,8 @@
 				<section name="SECTION" input="INPUT" />
 				<security name="SECURITY" />
 				<resource path="/resource.html" />
-				<redirect path="/applicationPathLink" />
-				<procedure name="PROCEDURE" />
+				<redirect path="/applicationPath" />
+				<procedure name="PROCEDURE_LINK" />
 			</next>
 			<output name="OUTPUT_1">
 				<section name="SECTION" input="INPUT" />

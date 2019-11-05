@@ -59,13 +59,14 @@
 				<section name="SECTION" input="INPUT" />
 				<template path="/template" />
 				<resource path="/resource.html" />
-				<redirect path="/applicationPathLink" />
+				<redirect path="/applicationPath" />
+				<procedure name="PROCEDURE_LINK" />
 			</next>
 			<output name="OUTPUT_1">
 				<section name="SECTION" input="INPUT" />
 			</output>
 			<output name="OUTPUT_2">
-				<template path="/templateLink" />
+				<template path="/template" />
 			</output>
 			<output name="OUTPUT_3" />
 			<output name="OUTPUT_4">

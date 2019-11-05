@@ -312,12 +312,12 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		change.getTarget().setY(101);
 
 		// Validate change
-		this.assertChange(change, null, "Add Section", true);
+		this.assertChange(change, null, "Add Procedure", true);
 
-		// Ensure appropriately added section
+		// Ensure appropriately added procedure
 		change.apply();
-		WoofSectionModel woofSection = this.model.getWoofSections().get(0);
-		assertSame("Incorrect section", woofSection, change.getTarget());
+		WoofProcedureModel woofProcedure = this.model.getWoofProcedures().get(0);
+		assertSame("Incorrect section", woofProcedure, change.getTarget());
 	}
 
 	/**

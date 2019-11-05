@@ -58,7 +58,7 @@
 				<section name="SECTION" input="INPUT" />
 			</output>
 			<output name="OUTPUT_2">
-				<template path="/templateLink" />
+				<template path="/template" />
 			</output>
 			<output name="OUTPUT_3">
 				<security name="SECURITY" />

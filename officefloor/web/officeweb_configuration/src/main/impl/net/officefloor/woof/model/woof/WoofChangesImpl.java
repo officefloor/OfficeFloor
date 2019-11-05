@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import net.officefloor.activity.procedure.ProcedureFlowType;
 import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -111,6 +112,16 @@ public class WoofChangesImpl implements WoofChanges {
 
 		// Sort the render HTTP methods
 		sortModelList(template.getRenderHttpMethods(), (model) -> model.getWoofTemplateRenderHttpMethodName());
+	}
+
+	/**
+	 * Sorts the {@link WoofProcedureOutputModel} instances of the
+	 * {@link WoofProcedureModel}.
+	 * 
+	 * @param procedure {@link WoofProcedureModel}.
+	 */
+	private static void sortProcedureOutputs(WoofProcedureModel procedure) {
+		sortModelList(procedure.getOutputs(), (model) -> model.getWoofProcedureOutputName());
 	}
 
 	/**
@@ -435,6 +446,13 @@ public class WoofChangesImpl implements WoofChanges {
 	 */
 	private void sortTemplates() {
 		sortModelList(this.model.getWoofTemplates(), (model) -> model.getApplicationPath());
+	}
+
+	/**
+	 * Sorts the {@link WoofProcedureModel} instances.
+	 */
+	private void sortProcedures() {
+		sortModelList(this.model.getWoofProcedures(), (model) -> model.getProcedureName());
 	}
 
 	/**
@@ -809,11 +827,14 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(httpContinuation.getWoofExceptions(), list);
 				removeConnections(httpContinuation.getWoofHttpContinuations(), list);
 				removeConnections(httpContinuation.getWoofHttpInputs(), list);
+				removeConnections(httpContinuation.getWoofProcedureNexts(), list);
+				removeConnections(httpContinuation.getWoofProcedureOutputs(), list);
 				removeConnection(httpContinuation.getWoofSectionInput(), list);
 				removeConnection(httpContinuation.getWoofTemplate(), list);
 				removeConnection(httpContinuation.getWoofSecurity(), list);
 				removeConnection(httpContinuation.getWoofResource(), list);
 				removeConnection(httpContinuation.getWoofRedirect(), list);
+				removeConnection(httpContinuation.getWoofProcedure(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the HTTP continuation
@@ -958,6 +979,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnection(httpInput.getWoofSecurity(), list);
 				removeConnection(httpInput.getWoofResource(), list);
 				removeConnection(httpInput.getWoofHttpContinuation(), list);
+				removeConnection(httpInput.getWoofProcedure(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the HTTP input
@@ -1188,7 +1210,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateToSuperWoofTemplateModel> removeTemplateToSuperTemplate(
 			WoofTemplateToSuperWoofTemplateModel link) {
-		return new RemoveLinkChange<WoofTemplateToSuperWoofTemplateModel>(link, "Remove Template to Super Template");
+		return new RemoveLinkChange<>(link, "Remove Template to Super Template");
 	}
 
 	@Override
@@ -1565,12 +1587,15 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(template.getWoofExceptions(), list);
 				removeConnections(template.getWoofHttpContinuations(), list);
 				removeConnections(template.getWoofHttpInputs(), list);
+				removeConnections(template.getWoofProcedureNexts(), list);
+				removeConnections(template.getWoofProcedureOutputs(), list);
 				for (WoofTemplateOutputModel output : template.getOutputs()) {
 					removeConnection(output.getWoofTemplate(), list);
 					removeConnection(output.getWoofSectionInput(), list);
 					removeConnection(output.getWoofSecurity(), list);
 					removeConnection(output.getWoofResource(), list);
 					removeConnection(output.getWoofHttpContinuation(), list);
+					removeConnection(output.getWoofProcedure(), list);
 				}
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
@@ -2036,6 +2061,8 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnections(input.getWoofHttpContinuations(), list);
 					removeConnections(input.getWoofHttpInputs(), list);
 					removeConnections(input.getWoofStarts(), list);
+					removeConnections(input.getWoofProcedureNexts(), list);
+					removeConnections(input.getWoofProcedureOutputs(), list);
 				}
 				for (WoofSectionOutputModel output : section.getOutputs()) {
 					removeConnection(output.getWoofTemplate(), list);
@@ -2043,6 +2070,7 @@ public class WoofChangesImpl implements WoofChanges {
 					removeConnection(output.getWoofSecurity(), list);
 					removeConnection(output.getWoofResource(), list);
 					removeConnection(output.getWoofHttpContinuation(), list);
+					removeConnection(output.getWoofProcedure(), list);
 				}
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
@@ -2063,8 +2091,52 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofProcedureModel> addProcedure(String procedureName, String resource, String sourceName,
 			String procedure, PropertyList properties, ProcedureType procedureType) {
-		// TODO implement WoofChanges.addProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.addProcedure");
+
+		// Obtain the unique procedure name
+		procedureName = getUniqueName(procedureName, null, this.model.getWoofProcedures(),
+				(model) -> model.getWoofProcedureName());
+
+		// Create the procedure
+		final WoofProcedureModel woofProcedure = new WoofProcedureModel(procedureName, resource, sourceName, procedure);
+
+		// Add the properties (if available)
+		if (properties != null) {
+			for (Property property : properties) {
+				woofProcedure.addProperty(new PropertyModel(property.getName(), property.getValue()));
+			}
+		}
+
+		// Add the flows
+		for (ProcedureFlowType flow : procedureType.getFlowTypes()) {
+
+			// Add the flow
+			String flowName = flow.getFlowName();
+			Class<?> argumentType = flow.getArgumentType();
+			String argumentTypeName = argumentType == null ? null : argumentType.getName();
+			woofProcedure.addOutput(new WoofProcedureOutputModel(flowName, argumentTypeName));
+		}
+
+		// Add next details
+		Class<?> nextArgumentType = procedureType.getNextArgumentType();
+		String nextArgumentTypeName = nextArgumentType == null ? null : nextArgumentType.getName();
+		woofProcedure.setNext(new WoofProcedureNextModel(nextArgumentTypeName));
+
+		// Sort the outputs
+		sortProcedureOutputs(woofProcedure);
+
+		// Return the change to add procedure
+		return new AbstractChange<WoofProcedureModel>(woofProcedure, "Add Procedure") {
+			@Override
+			public void apply() {
+				WoofChangesImpl.this.model.addWoofProcedure(woofProcedure);
+				WoofChangesImpl.this.sortProcedures();
+			}
+
+			@Override
+			public void revert() {
+				WoofChangesImpl.this.model.removeWoofProcedure(woofProcedure);
+			}
+		};
 	}
 
 	@Override
@@ -2076,9 +2148,75 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
-	public Change<WoofProcedureModel> removeProcedure(WoofProcedureModel procedureModel) {
-		// TODO implement WoofChanges.removeProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.removeProcedure");
+	public Change<WoofProcedureModel> removeProcedure(WoofProcedureModel procedure) {
+
+		// Ensure procedure available to remove
+		boolean isInModel = false;
+		for (WoofProcedureModel model : this.model.getWoofProcedures()) {
+			if (model == procedure) {
+				isInModel = true;
+			}
+		}
+		if (!isInModel) {
+			// Procedure model not in model
+			return new NoChange<WoofProcedureModel>(procedure, "Remove procedure " + procedure.getWoofProcedureName(),
+					"Procedure " + procedure.getWoofProcedureName() + " is not in WoOF model");
+		}
+
+		// Return change to remove section
+		return new AbstractChange<WoofProcedureModel>(procedure,
+				"Remove procedure " + procedure.getWoofProcedureName()) {
+
+			/**
+			 * {@link ConnectionModel} instances.
+			 */
+			private ConnectionModel[] connections;
+
+			@Override
+			public void apply() {
+
+				// Remove the connections
+				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
+				removeConnections(procedure.getWoofTemplateOutputs(), list);
+				removeConnections(procedure.getWoofSectionOutputs(), list);
+				removeConnections(procedure.getWoofSecurityOutputs(), list);
+				removeConnections(procedure.getWoofExceptions(), list);
+				removeConnections(procedure.getWoofHttpContinuations(), list);
+				removeConnections(procedure.getWoofHttpInputs(), list);
+				removeConnections(procedure.getWoofStarts(), list);
+				removeConnections(procedure.getWoofProcedureNexts(), list);
+				removeConnections(procedure.getWoofProcedureOutputs(), list);
+				WoofProcedureNextModel next = procedure.getNext();
+				if (next != null) {
+					removeConnection(next.getWoofTemplate(), list);
+					removeConnection(next.getWoofSectionInput(), list);
+					removeConnection(next.getWoofSecurity(), list);
+					removeConnection(next.getWoofResource(), list);
+					removeConnection(next.getWoofHttpContinuation(), list);
+					removeConnection(next.getWoofProcedure(), list);
+				}
+				for (WoofProcedureOutputModel output : procedure.getOutputs()) {
+					removeConnection(output.getWoofTemplate(), list);
+					removeConnection(output.getWoofSectionInput(), list);
+					removeConnection(output.getWoofSecurity(), list);
+					removeConnection(output.getWoofResource(), list);
+					removeConnection(output.getWoofHttpContinuation(), list);
+					removeConnection(output.getWoofProcedure(), list);
+				}
+				this.connections = list.toArray(new ConnectionModel[list.size()]);
+
+				// Remove the procedure
+				WoofChangesImpl.this.model.removeWoofProcedure(procedure);
+			}
+
+			@Override
+			public void revert() {
+				// Add back the procedure
+				WoofChangesImpl.this.model.addWoofProcedure(procedure);
+				reconnectConnections(this.connections);
+				WoofChangesImpl.this.sortProcedures();
+			}
+		};
 	}
 
 	@Override
@@ -2429,12 +2567,15 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(security.getWoofExceptions(), list);
 				removeConnections(security.getWoofHttpContinuations(), list);
 				removeConnections(security.getWoofHttpInputs(), list);
+				removeConnections(security.getWoofProcedureNexts(), list);
+				removeConnections(security.getWoofProcedureOutputs(), list);
 				for (WoofSecurityOutputModel output : security.getOutputs()) {
 					removeConnection(output.getWoofSectionInput(), list);
 					removeConnection(output.getWoofTemplate(), list);
 					removeConnection(output.getWoofSecurity(), list);
 					removeConnection(output.getWoofResource(), list);
 					removeConnection(output.getWoofHttpContinuation(), list);
+					removeConnection(output.getWoofProcedure(), list);
 				}
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
@@ -2783,6 +2924,8 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnections(resource.getWoofExceptions(), list);
 				removeConnections(resource.getWoofHttpContinuations(), list);
 				removeConnections(resource.getWoofHttpInputs(), list);
+				removeConnections(resource.getWoofProcedureNexts(), list);
+				removeConnections(resource.getWoofProcedureOutputs(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the resource
@@ -2891,6 +3034,7 @@ public class WoofChangesImpl implements WoofChanges {
 				removeConnection(exception.getWoofSecurity(), list);
 				removeConnection(exception.getWoofResource(), list);
 				removeConnection(exception.getWoofHttpContinuation(), list);
+				removeConnection(exception.getWoofProcedure(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the exception
@@ -2944,6 +3088,7 @@ public class WoofChangesImpl implements WoofChanges {
 				// Remove the connections
 				List<ConnectionModel> list = new LinkedList<ConnectionModel>();
 				removeConnection(start.getWoofSectionInput(), list);
+				removeConnection(start.getWoofProcedure(), list);
 				this.connections = list.toArray(new ConnectionModel[list.size()]);
 
 				// Remove the start
@@ -2981,6 +3126,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofRedirect());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3009,6 +3155,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofRedirect());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3045,6 +3192,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofRedirect());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3073,6 +3221,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofRedirect());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3101,6 +3250,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofRedirect());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3114,15 +3264,30 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofHttpContinuationToWoofProcedureModel> linkHttpContinuationToProcedure(
 			WoofHttpContinuationModel httpContinuation, WoofProcedureModel procedure) {
-		// TODO implement WoofChanges.linkHttpContinuationToProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.linkHttpContinuationToProcedure");
+
+		// Create the connection
+		final WoofHttpContinuationToWoofProcedureModel connection = new WoofHttpContinuationToWoofProcedureModel(
+				procedure.getWoofProcedureName(), httpContinuation, procedure);
+
+		// Return change to link
+		return new AddLinkChange<WoofHttpContinuationToWoofProcedureModel, WoofHttpContinuationModel>(connection,
+				httpContinuation, "Link HTTP Continuation to Procedure") {
+			@Override
+			protected void addExistingConnections(WoofHttpContinuationModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofRedirect());
+				list.add(source.getWoofProcedure());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofHttpContinuationToWoofProcedureModel> removeHttpContinuationToProcedure(
 			WoofHttpContinuationToWoofProcedureModel link) {
-		// TODO implement WoofChanges.removeHttpContinuationToProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.removeHttpContinuationToProcedure");
+		return new RemoveLinkChange<>(link, "Remove HTTP Continuation to Procedure");
 	}
 
 	/*
@@ -3317,7 +3482,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateOutputToWoofTemplateModel> removeTemplateOutputToTemplate(
 			final WoofTemplateOutputToWoofTemplateModel link) {
-		return new RemoveLinkChange<WoofTemplateOutputToWoofTemplateModel>(link, "Remove Template Output to Template");
+		return new RemoveLinkChange<>(link, "Remove Template Output to Template");
 	}
 
 	@Override
@@ -3353,8 +3518,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateOutputToWoofSectionInputModel> removeTemplateOutputToSectionInput(
 			WoofTemplateOutputToWoofSectionInputModel link) {
-		return new RemoveLinkChange<WoofTemplateOutputToWoofSectionInputModel>(link,
-				"Remove Template Output to Section Input");
+		return new RemoveLinkChange<>(link, "Remove Template Output to Section Input");
 	}
 
 	@Override
@@ -3382,7 +3546,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateOutputToWoofSecurityModel> removeTemplateOutputToSecurity(
 			WoofTemplateOutputToWoofSecurityModel link) {
-		return new RemoveLinkChange<WoofTemplateOutputToWoofSecurityModel>(link, "Remove Template Output to Security");
+		return new RemoveLinkChange<>(link, "Remove Template Output to Security");
 	}
 
 	@Override
@@ -3410,7 +3574,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofTemplateOutputToWoofResourceModel> removeTemplateOutputToResource(
 			WoofTemplateOutputToWoofResourceModel link) {
-		return new RemoveLinkChange<WoofTemplateOutputToWoofResourceModel>(link, "Remove Template Output to Resource");
+		return new RemoveLinkChange<>(link, "Remove Template Output to Resource");
 	}
 
 	@Override
@@ -3449,6 +3613,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3456,7 +3621,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSectionOutputToWoofTemplateModel> removeSectionOutputToTemplate(
 			WoofSectionOutputToWoofTemplateModel link) {
-		return new RemoveLinkChange<WoofSectionOutputToWoofTemplateModel>(link, "Remove Section Output to Template");
+		return new RemoveLinkChange<>(link, "Remove Section Output to Template");
 	}
 
 	@Override
@@ -3485,6 +3650,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3492,8 +3658,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSectionOutputToWoofSectionInputModel> removeSectionOutputToSectionInput(
 			WoofSectionOutputToWoofSectionInputModel link) {
-		return new RemoveLinkChange<WoofSectionOutputToWoofSectionInputModel>(link,
-				"Remove Section Output to Section Input");
+		return new RemoveLinkChange<>(link, "Remove Section Output to Section Input");
 	}
 
 	@Override
@@ -3514,6 +3679,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3521,7 +3687,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSectionOutputToWoofSecurityModel> removeSectionOutputToSecurity(
 			WoofSectionOutputToWoofSecurityModel link) {
-		return new RemoveLinkChange<WoofSectionOutputToWoofSecurityModel>(link, "Remove Section Output to Security");
+		return new RemoveLinkChange<>(link, "Remove Section Output to Security");
 	}
 
 	@Override
@@ -3542,6 +3708,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3549,7 +3716,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSectionOutputToWoofResourceModel> removeSectionOutputToResource(
 			WoofSectionOutputToWoofResourceModel link) {
-		return new RemoveLinkChange<WoofSectionOutputToWoofResourceModel>(link, "Remove Section Output to Resource");
+		return new RemoveLinkChange<>(link, "Remove Section Output to Resource");
 	}
 
 	@Override
@@ -3570,6 +3737,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3577,22 +3745,36 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSectionOutputToWoofHttpContinuationModel> removeSectionOutputToHttpContinuation(
 			WoofSectionOutputToWoofHttpContinuationModel link) {
-		return new RemoveLinkChange<WoofSectionOutputToWoofHttpContinuationModel>(link,
-				"Remove Section Output to HTTP Continuation");
+		return new RemoveLinkChange<>(link, "Remove Section Output to HTTP Continuation");
 	}
 
 	@Override
 	public Change<WoofSectionOutputToWoofProcedureModel> linkSectionOutputToProcedure(
 			WoofSectionOutputModel sectionOutput, WoofProcedureModel procedure) {
-		// TODO implement WoofChanges.linkSectionOutputToProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.linkSectionOutputToProcedure");
+
+		// Create the connection
+		final WoofSectionOutputToWoofProcedureModel connection = new WoofSectionOutputToWoofProcedureModel(
+				procedure.getWoofProcedureName(), sectionOutput, procedure);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofSectionOutputToWoofProcedureModel, WoofSectionOutputModel>(connection,
+				sectionOutput, "Link Section Output to Procedure") {
+			@Override
+			protected void addExistingConnections(WoofSectionOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofSectionOutputToWoofProcedureModel> removeSectionOutputToProcedure(
 			WoofSectionOutputToWoofProcedureModel link) {
-		// TODO implement WoofChanges.removeSectionOutputToProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.removeSectionOutputToProcedure");
+		return new RemoveLinkChange<>(link, "Remove Section Output to Procedure");
 	}
 
 	/*
@@ -3793,6 +3975,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3800,7 +3983,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSecurityOutputToWoofTemplateModel> removeSecurityOutputToTemplate(
 			WoofSecurityOutputToWoofTemplateModel link) {
-		return new RemoveLinkChange<WoofSecurityOutputToWoofTemplateModel>(link, "Remove Security Output to Template");
+		return new RemoveLinkChange<>(link, "Remove Security Output to Template");
 	}
 
 	@Override
@@ -3829,6 +4012,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3836,8 +4020,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSecurityOutputToWoofSectionInputModel> removeSecurityOutputToSectionInput(
 			WoofSecurityOutputToWoofSectionInputModel link) {
-		return new RemoveLinkChange<WoofSecurityOutputToWoofSectionInputModel>(link,
-				"Remove Security Output to Section Input");
+		return new RemoveLinkChange<>(link, "Remove Security Output to Section Input");
 	}
 
 	@Override
@@ -3858,6 +4041,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3865,7 +4049,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSecurityOutputToWoofSecurityModel> removeSecurityOutputToSecurity(
 			WoofSecurityOutputToWoofSecurityModel link) {
-		return new RemoveLinkChange<WoofSecurityOutputToWoofSecurityModel>(link, "Remove Security Output to Security");
+		return new RemoveLinkChange<>(link, "Remove Security Output to Security");
 	}
 
 	@Override
@@ -3886,6 +4070,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3893,7 +4078,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSecurityOutputToWoofResourceModel> removeSecurityOutputToResource(
 			WoofSecurityOutputToWoofResourceModel link) {
-		return new RemoveLinkChange<WoofSecurityOutputToWoofResourceModel>(link, "Remove Security Output to Resource");
+		return new RemoveLinkChange<>(link, "Remove Security Output to Resource");
 	}
 
 	@Override
@@ -3914,6 +4099,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofResource());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3921,22 +4107,36 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofSecurityOutputToWoofHttpContinuationModel> removeSecurityOutputToHttpContinuation(
 			WoofSecurityOutputToWoofHttpContinuationModel link) {
-		return new RemoveLinkChange<WoofSecurityOutputToWoofHttpContinuationModel>(link,
-				"Remove Security Output to HTTP Continuation");
+		return new RemoveLinkChange<>(link, "Remove Security Output to HTTP Continuation");
 	}
 
 	@Override
 	public Change<WoofSecurityOutputToWoofProcedureModel> linkSecurityOutputToProcedure(
 			WoofSecurityOutputModel securityOutput, WoofProcedureModel procedure) {
-		// TODO implement WoofChanges.linkSecurityOutputToProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.linkSecurityOutputToProcedure");
+
+		// Create the connection
+		final WoofSecurityOutputToWoofProcedureModel connection = new WoofSecurityOutputToWoofProcedureModel(
+				procedure.getWoofProcedureName(), securityOutput, procedure);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofSecurityOutputToWoofProcedureModel, WoofSecurityOutputModel>(connection,
+				securityOutput, "Link Security Output to Procedure") {
+			@Override
+			protected void addExistingConnections(WoofSecurityOutputModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofSecurityOutputToWoofProcedureModel> removeSecurityOutputToProcedure(
 			WoofSecurityOutputToWoofProcedureModel link) {
-		// TODO implement WoofChanges.removeSecurityOutputToProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.removeSecurityOutputToProcedure");
+		return new RemoveLinkChange<>(link, "Remove Security Output to Procedure");
 	}
 
 	/*
@@ -3961,6 +4161,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofResource());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -3968,8 +4169,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofExceptionToWoofHttpContinuationModel> removeExceptionToHttpContinuation(
 			WoofExceptionToWoofHttpContinuationModel link) {
-		return new RemoveLinkChange<WoofExceptionToWoofHttpContinuationModel>(link,
-				"Remove Exception to HTTP Continuation");
+		return new RemoveLinkChange<>(link, "Remove Exception to HTTP Continuation");
 	}
 
 	@Override
@@ -3990,13 +4190,14 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofResource());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
 
 	@Override
 	public Change<WoofExceptionToWoofTemplateModel> removeExceptionToTemplate(WoofExceptionToWoofTemplateModel link) {
-		return new RemoveLinkChange<WoofExceptionToWoofTemplateModel>(link, "Remove Exception to Template");
+		return new RemoveLinkChange<>(link, "Remove Exception to Template");
 	}
 
 	@Override
@@ -4025,6 +4226,7 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofResource());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
@@ -4032,7 +4234,7 @@ public class WoofChangesImpl implements WoofChanges {
 	@Override
 	public Change<WoofExceptionToWoofSectionInputModel> removeExceptionToSectionInput(
 			WoofExceptionToWoofSectionInputModel link) {
-		return new RemoveLinkChange<WoofExceptionToWoofSectionInputModel>(link, "Remove Exception to Section Input");
+		return new RemoveLinkChange<>(link, "Remove Exception to Section Input");
 	}
 
 	@Override
@@ -4053,13 +4255,14 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofResource());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
 
 	@Override
 	public Change<WoofExceptionToWoofSecurityModel> removeExceptionToSecurity(WoofExceptionToWoofSecurityModel link) {
-		return new RemoveLinkChange<WoofExceptionToWoofSecurityModel>(link, "Remove Exception to Security");
+		return new RemoveLinkChange<>(link, "Remove Exception to Security");
 	}
 
 	@Override
@@ -4080,27 +4283,43 @@ public class WoofChangesImpl implements WoofChanges {
 				list.add(source.getWoofResource());
 				list.add(source.getWoofSecurity());
 				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
 
 	@Override
 	public Change<WoofExceptionToWoofResourceModel> removeExceptionToResource(WoofExceptionToWoofResourceModel link) {
-		return new RemoveLinkChange<WoofExceptionToWoofResourceModel>(link, "Remove Exception to Resource");
+		return new RemoveLinkChange<>(link, "Remove Exception to Resource");
 	}
 
 	@Override
 	public Change<WoofExceptionToWoofProcedureModel> linkExceptionToProcedure(WoofExceptionModel exception,
 			WoofProcedureModel procedure) {
-		// TODO implement WoofChanges.linkExceptionToProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.linkExceptionToProcedure");
+
+		// Create the connection
+		final WoofExceptionToWoofProcedureModel connection = new WoofExceptionToWoofProcedureModel(
+				procedure.getWoofProcedureName(), exception, procedure);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofExceptionToWoofProcedureModel, WoofExceptionModel>(connection, exception,
+				"Link Exception to Procedure") {
+			@Override
+			protected void addExistingConnections(WoofExceptionModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofTemplate());
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofResource());
+				list.add(source.getWoofSecurity());
+				list.add(source.getWoofHttpContinuation());
+				list.add(source.getWoofProcedure());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofExceptionToWoofProcedureModel> removeExceptionToProcedure(
 			WoofExceptionToWoofProcedureModel link) {
-		// TODO implement WoofChanges.removeExceptionToProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.removeExceptionToProcedure");
+		return new RemoveLinkChange<>(link, "Remove Exception to Procedure");
 	}
 
 	/*
@@ -4129,26 +4348,38 @@ public class WoofChangesImpl implements WoofChanges {
 			@Override
 			protected void addExistingConnections(WoofStartModel source, List<ConnectionModel> list) {
 				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofProcedure());
 			}
 		};
 	}
 
 	@Override
 	public Change<WoofStartToWoofSectionInputModel> removeStartToSectionInput(WoofStartToWoofSectionInputModel link) {
-		return new RemoveLinkChange<WoofStartToWoofSectionInputModel>(link, "Remove Start to Section Input");
+		return new RemoveLinkChange<>(link, "Remove Start to Section Input");
 	}
 
 	@Override
 	public Change<WoofStartToWoofProcedureModel> linkStartToProcedure(WoofStartModel start,
 			WoofProcedureModel procedure) {
-		// TODO implement WoofChanges.linkStartToProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.linkStartToProcedure");
+
+		// Create the connection
+		final WoofStartToWoofProcedureModel connection = new WoofStartToWoofProcedureModel(
+				procedure.getWoofProcedureName(), start, procedure);
+
+		// Return change to add connection
+		return new AddLinkChange<WoofStartToWoofProcedureModel, WoofStartModel>(connection, start,
+				"Link Start to Procedure") {
+			@Override
+			protected void addExistingConnections(WoofStartModel source, List<ConnectionModel> list) {
+				list.add(source.getWoofSectionInput());
+				list.add(source.getWoofProcedure());
+			}
+		};
 	}
 
 	@Override
 	public Change<WoofStartToWoofProcedureModel> removeStartToProcedure(WoofStartToWoofProcedureModel link) {
-		// TODO implement WoofChanges.removeStartToProcedure
-		throw new UnsupportedOperationException("TODO implement WoofChanges.removeStartToProcedure");
+		return new RemoveLinkChange<>(link, "Remove Start to Procedure");
 	}
 
 	/**

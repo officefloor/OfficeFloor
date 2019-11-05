@@ -682,7 +682,9 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 
 		// Construct and return the procedure
 		ProcedureTypeContextImpl context = new ProcedureTypeContextImpl(procedureName, parameterType);
-		constructor.construct(context);
+		if (constructor != null) {
+			constructor.construct(context);
+		}
 		return context;
 	}
 

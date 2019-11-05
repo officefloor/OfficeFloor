@@ -78,7 +78,7 @@
 			<output name="OUTPUT_E">
 				<redirect path="/applicationPath" />
 			</output>
-			<output name="OUTPUT_E" />
+			<output name="OUTPUT_F" />
 		</section>
 		<section name="SECTION_LINK" source="net.example.LinkSectionSource" location="LINK_LOCATION">
 			<input name="INPUT" />
