@@ -7,7 +7,6 @@
 			<security name="SECURITY" />
 			<resource path="/resource.html" />
 			<redirect path="/applicationPathLink" />
-			<procedure name="PROCEDURE" />
 		</http-continuation>
 		<http-continuation path="/applicationPathLink">
 			<redirect path="/applicationPath" />
@@ -21,7 +20,6 @@
 			<security name="SECURITY" />
 			<resource path="/resource.html" />
 			<redirect path="/applicationPath" />
-			<procedure name="PROCEDURE" />
 		</http-input>
 	</http-inputs>
 
@@ -43,9 +41,7 @@
 			<output name="OUTPUT_5">
 				<redirect path="/applicationPath" />
 			</output>
-			<output name="OUTPUT_6">
-				<procedure name="PROCEDURE" />
-			</output>
+			<output name="OUTPUT_6" />
 		</template>
 		<template path="/templateChild" location="example/Child.ofp">
 			<extends template="/template" />
@@ -58,41 +54,9 @@
 	</templates>
 
 	<procedures>
-		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
-			<next>
-				<section name="SECTION" input="INPUT" />
-				<template path="/template" />
-				<security name="SECURITY" />
-				<resource path="/resource.html" />
-				<redirect path="/applicationPathLink" />
-				<procedure name="PROCEDURE" />
-			</next>
-			<output name="OUTPUT_1">
-				<section name="SECTION" input="INPUT" />
-			</output>
-			<output name="OUTPUT_2">
-				<template path="/templateLink" />
-			</output>
-			<output name="OUTPUT_3">
-				<security name="SECURITY" />
-			</output>
-			<output name="OUTPUT_4">
-				<resource path="/resource.html" />
-			</output>
-			<output name="OUTPUT_5">
-				<redirect path="/applicationPath" />
-			</output>
-			<output name="OUTPUT_6">
-				<procedure name="PROCEDURE_LINK" />
-			</output>
-		</procedure>
 		<procedure name="PROCEDURE_LINK" resource="resource2" source="JavaScript" procedure="function">
-			<next>
-				<procedure name="PROCEDURE" />
-			</next>
-			<output name="OUTPUT">
-				<procedure name="PROCEDURE" />
-			</output>
+			<next />
+			<output name="OUTPUT" />
 		</procedure>
 	</procedures>
 
@@ -114,9 +78,7 @@
 			<output name="OUTPUT_E">
 				<redirect path="/applicationPath" />
 			</output>
-			<output name="OUTPUT_F">
-				<procedure name="PROCEDURE" />
-			</output>
+			<output name="OUTPUT_E" />
 		</section>
 		<section name="SECTION_LINK" source="net.example.LinkSectionSource" location="LINK_LOCATION">
 			<input name="INPUT" />
@@ -143,9 +105,7 @@
 			<output name="OUTPUT_e">
 				<redirect path="/applicationPath" />
 			</output>
-			<output name="OUTPUT_f">
-				<procedure name="PROCEDURE" />
-			</output>
+			<output name="OUTPUT_f" />
 		</security>
 		<security name="SECURITY_LINK" source="net.another.HttpSecuritySource">
 			<output name="OUTPUT">
@@ -165,10 +125,13 @@
 			<security name="SECURITY" />
 			<resource path="/resource.html" />
 			<redirect path="/applicationPath" />
-			<procedure name="PROCEDURE" />
 		</exception>
 	</exceptions>
 
-	<starts />
+	<starts>
+		<start>
+			<section name="SECTION" input="INPUT" />
+		</start>
+	</starts>
 
 </woof>

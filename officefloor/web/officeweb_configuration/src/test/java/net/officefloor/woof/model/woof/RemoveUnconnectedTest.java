@@ -91,6 +91,19 @@ public class RemoveUnconnectedTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
+	 * Ensure able to remove the {@link WoofProcedureModel}.
+	 */
+	public void testRemoveProcedure() {
+
+		// Obtain the procedure to remove
+		WoofProcedureModel procedure = this.model.getWoofProcedures().get(0);
+
+		// Remove the procedure
+		Change<WoofProcedureModel> change = this.operations.removeProcedure(procedure);
+		this.assertChange(change, procedure, "Remove procedure PROCEDURE", true);
+	}
+
+	/**
 	 * Ensure able to remove the {@link WoofSectionModel}.
 	 */
 	public void testRemoveSection() {

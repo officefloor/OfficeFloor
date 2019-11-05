@@ -1,0 +1,7 @@
+<woof>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method" />
+	</procedures>
+
+</woof>

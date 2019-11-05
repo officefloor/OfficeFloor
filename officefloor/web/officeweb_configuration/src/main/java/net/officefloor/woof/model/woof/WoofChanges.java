@@ -989,8 +989,8 @@ public interface WoofChanges {
 	 * @param template        {@link WoofTemplateModel}.
 	 * @return {@link Change} to make the link.
 	 */
-	Change<WoofProcedureNextToWoofTemplateModel> linkProcedureOutputToTemplate(WoofProcedureOutputModel procedureOutput,
-			WoofTemplateModel template);
+	Change<WoofProcedureOutputToWoofTemplateModel> linkProcedureOutputToTemplate(
+			WoofProcedureOutputModel procedureOutput, WoofTemplateModel template);
 
 	/**
 	 * Removes the {@link WoofProcedureOutputToWoofTemplateModel}.
