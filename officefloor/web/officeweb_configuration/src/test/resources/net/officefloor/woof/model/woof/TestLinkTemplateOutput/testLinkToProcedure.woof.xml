@@ -8,7 +8,7 @@
 	<templates>
 		<template path="/template">
 			<output name="OUTPUT">
-				<procedure name="PROCEDURE" />
+				<procedure name="PROCEDURE_LINK" />
 			</output>
 		</template>
 		<template path="/templateLink">
