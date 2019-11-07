@@ -107,7 +107,7 @@ public class WoofTemplateOutputItem extends
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToSectionInput(s, t));
 				}).delete((ctx) -> {
 					ctx.getChangeExecutor()
-							.execute(ctx.getOperations().removeTemplateOuputToSectionInput(ctx.getModel()));
+							.execute(ctx.getOperations().removeTemplateOutputToSectionInput(ctx.getModel()));
 				}));
 
 		// Template
@@ -120,7 +120,7 @@ public class WoofTemplateOutputItem extends
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToTemplate(s, t));
 				}).delete((ctx) -> {
-					ctx.getChangeExecutor().execute(ctx.getOperations().removeTemplateOuputToTemplate(ctx.getModel()));
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeTemplateOutputToTemplate(ctx.getModel()));
 				}));
 
 		// Resource
@@ -133,7 +133,7 @@ public class WoofTemplateOutputItem extends
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToResource(s, t));
 				}).delete((ctx) -> {
-					ctx.getChangeExecutor().execute(ctx.getOperations().removeTemplateOuputToResource(ctx.getModel()));
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeTemplateOutputToResource(ctx.getModel()));
 				}));
 
 		// Security
@@ -146,7 +146,7 @@ public class WoofTemplateOutputItem extends
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToSecurity(s, t));
 				}).delete((ctx) -> {
-					ctx.getChangeExecutor().execute(ctx.getOperations().removeTemplateOuputToSecurity(ctx.getModel()));
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeTemplateOutputToSecurity(ctx.getModel()));
 				}));
 
 		// HTTP Continuation

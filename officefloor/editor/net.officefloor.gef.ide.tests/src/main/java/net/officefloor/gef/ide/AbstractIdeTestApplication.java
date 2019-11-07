@@ -152,6 +152,7 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 		Tab editorTab = new Tab("Editor");
 		folder.getTabs().add(editorTab);
 		AbstractAdaptedIdeEditor<R, RE, O> editor = this.createEditor(envBridge);
+		editor.initNonOsgiEnvironment();
 		editor.init(null, (injector) -> {
 			injector.injectMembers(this);
 			return this.domain;

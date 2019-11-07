@@ -107,7 +107,7 @@ public class WoofSecurityOutputItem extends
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkSecurityOutputToSectionInput(s, t));
 				}).delete((ctx) -> {
 					ctx.getChangeExecutor()
-							.execute(ctx.getOperations().removeSecurityOuputToSectionInput(ctx.getModel()));
+							.execute(ctx.getOperations().removeSecurityOutputToSectionInput(ctx.getModel()));
 				}));
 
 		// Template
@@ -120,7 +120,7 @@ public class WoofSecurityOutputItem extends
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkSecurityOutputToTemplate(s, t));
 				}).delete((ctx) -> {
-					ctx.getChangeExecutor().execute(ctx.getOperations().removeSecurityOuputToTemplate(ctx.getModel()));
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSecurityOutputToTemplate(ctx.getModel()));
 				}));
 
 		// Resource
@@ -133,7 +133,7 @@ public class WoofSecurityOutputItem extends
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkSecurityOutputToResource(s, t));
 				}).delete((ctx) -> {
-					ctx.getChangeExecutor().execute(ctx.getOperations().removeSecurityOuputToResource(ctx.getModel()));
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSecurityOutputToResource(ctx.getModel()));
 				}));
 
 		// Security
@@ -146,7 +146,7 @@ public class WoofSecurityOutputItem extends
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkSecurityOutputToSecurity(s, t));
 				}).delete((ctx) -> {
-					ctx.getChangeExecutor().execute(ctx.getOperations().removeSecurityOuputToSecurity(ctx.getModel()));
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSecurityOutputToSecurity(ctx.getModel()));
 				}));
 
 		// HTTP Continuation
@@ -162,8 +162,8 @@ public class WoofSecurityOutputItem extends
 							ctx.getChangeExecutor()
 									.execute(ctx.getOperations().linkSecurityOutputToHttpContinuation(s, t));
 						}).delete((ctx) -> {
-							ctx.getChangeExecutor()
-									.execute(ctx.getOperations().removeSecurityOuputToHttpContinuation(ctx.getModel()));
+							ctx.getChangeExecutor().execute(
+									ctx.getOperations().removeSecurityOutputToHttpContinuation(ctx.getModel()));
 						}));
 	}
 

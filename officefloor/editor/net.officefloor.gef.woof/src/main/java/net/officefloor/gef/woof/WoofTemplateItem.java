@@ -83,7 +83,7 @@ public class WoofTemplateItem extends
 	/**
 	 * Logic {@link Class}.
 	 */
-	private String logicClass;
+	public String logicClass;
 
 	/**
 	 * {@link WebTemplateType} for the {@link WebTemplate}.

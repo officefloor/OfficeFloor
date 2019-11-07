@@ -19,6 +19,7 @@ package net.officefloor.gef.woof.test;
 
 import java.io.IOException;
 
+import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.ide.AbstractIdeTestApplication;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
@@ -35,6 +36,7 @@ import net.officefloor.woof.model.woof.WoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpInputModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import net.officefloor.woof.model.woof.WoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofResourceModel;
 import net.officefloor.woof.model.woof.WoofSectionModel;
 import net.officefloor.woof.model.woof.WoofSecurityContentTypeModel;
@@ -91,6 +93,12 @@ public class WoofIdeTestApplication extends AbstractIdeTestApplication<WoofModel
 		});
 		this.register(WoofResourceModel.class, (model) -> {
 			model.setResourcePath("/resource");
+		});
+		this.register(WoofProcedureModel.class, (model) -> {
+			model.setWoofProcedureName("Procedure");
+			model.setResource(MockProcedure.class.getName());
+			model.setSourceName(ClassProcedureSource.SOURCE_NAME);
+			model.setProcedureName("procedure");
 		});
 		this.register(WoofSectionModel.class, (model) -> {
 			model.setWoofSectionName("Section");

@@ -96,6 +96,17 @@ public class ExampleModel {
 	public List<ExampleItem> multiple = Arrays.asList(new ExampleItem("ONE", true), new ExampleItem("TWO", false));
 
 	/**
+	 * Items for selection.
+	 */
+	public List<ExampleItem> selections = Arrays.asList(new ExampleItem("Selection One", false),
+			new ExampleItem("Selection Two", false));
+
+	/**
+	 * Selected item.
+	 */
+	public ExampleItem selectedItem = this.selections.get(0);
+
+	/**
 	 * Instantiate.
 	 */
 	public ExampleModel() {
@@ -120,10 +131,8 @@ public class ExampleModel {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param text
-		 *            Text.
-		 * @param flag
-		 *            Flag.
+		 * @param text Text.
+		 * @param flag Flag.
 		 */
 		public ExampleItem(String text, boolean flag) {
 			this.text = text;

@@ -50,7 +50,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 	/**
 	 * {@link Property} name providing the {@link Class} name.
 	 */
-	public static final String RESOURCE_NAME_PROPERTY_NAME = "class.name";
+	public static final String RESOURCE_NAME_PROPERTY_NAME = "resource";
 
 	/**
 	 * {@link Property} name providing the service to create the procedure.

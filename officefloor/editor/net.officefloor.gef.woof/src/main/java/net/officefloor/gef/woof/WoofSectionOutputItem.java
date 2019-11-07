@@ -103,7 +103,7 @@ public class WoofSectionOutputItem extends
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkSectionOutputToSectionInput(s, t));
 				}).delete((ctx) -> {
 					ctx.getChangeExecutor()
-							.execute(ctx.getOperations().removeSectionOuputToSectionInput(ctx.getModel()));
+							.execute(ctx.getOperations().removeSectionOutputToSectionInput(ctx.getModel()));
 				}));
 
 		// Template
@@ -116,7 +116,7 @@ public class WoofSectionOutputItem extends
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkSectionOutputToTemplate(s, t));
 				}).delete((ctx) -> {
-					ctx.getChangeExecutor().execute(ctx.getOperations().removeSectionOuputToTemplate(ctx.getModel()));
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSectionOutputToTemplate(ctx.getModel()));
 				}));
 
 		// Resource
@@ -129,7 +129,7 @@ public class WoofSectionOutputItem extends
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkSectionOutputToResource(s, t));
 				}).delete((ctx) -> {
-					ctx.getChangeExecutor().execute(ctx.getOperations().removeSectionOuputToResource(ctx.getModel()));
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSectionOutputToResource(ctx.getModel()));
 				}));
 
 		// Security
@@ -142,7 +142,7 @@ public class WoofSectionOutputItem extends
 				.create((s, t, ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkSectionOutputToSecurity(s, t));
 				}).delete((ctx) -> {
-					ctx.getChangeExecutor().execute(ctx.getOperations().removeSectionOuputToSecurity(ctx.getModel()));
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSectionOutputToSecurity(ctx.getModel()));
 				}));
 
 		// HTTP Continuation
@@ -159,7 +159,7 @@ public class WoofSectionOutputItem extends
 									.execute(ctx.getOperations().linkSectionOutputToHttpContinuation(s, t));
 						}).delete((ctx) -> {
 							ctx.getChangeExecutor()
-									.execute(ctx.getOperations().removeSectionOuputToHttpContinuation(ctx.getModel()));
+									.execute(ctx.getOperations().removeSectionOutputToHttpContinuation(ctx.getModel()));
 						}));
 	}
 

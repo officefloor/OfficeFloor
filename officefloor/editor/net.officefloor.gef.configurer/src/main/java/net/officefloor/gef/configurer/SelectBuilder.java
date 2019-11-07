@@ -1,6 +1,6 @@
 /*
-Procedure * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,23 +15,26 @@ Procedure * OfficeFloor - http://www.officefloor.net
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.gef.woof.test;
+package net.officefloor.gef.configurer;
 
-import net.officefloor.plugin.clazz.FlowInterface;
+import java.util.function.Function;
 
 /**
- * Mock section {@link Class} for testing.
+ * Builder for selecting from a list.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockSection {
+public interface SelectBuilder<M, I> extends Builder<M, I, SelectBuilder<M, I>> {
 
-	@FlowInterface
-	public static interface Flows {
-		void flow();
-	}
-
-	public void input(Flows flows) {
-	}
+	/**
+	 * <p>
+	 * Configure obtaining label from item.
+	 * <p>
+	 * If not configured, will use {@link Object#toString()} of the item.
+	 * 
+	 * @param getLabel Function to obtain label from item.
+	 * @return <code>this</code>.
+	 */
+	SelectBuilder<M, I> itemLabel(Function<I, String> getLabel);
 
 }

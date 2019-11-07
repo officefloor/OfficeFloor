@@ -1,6 +1,6 @@
 /*
- * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2019 Daniel Sagenschneider
+Procedure * OfficeFloor - http://www.officefloor.net
+ * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,13 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.gef.woof;
+package net.officefloor.gef.woof.test;
+
+import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
- * Tests the {@link WoofEditor}.
+ * Mock section {@link Class} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class WoofIdeTestApplication {
+public class MockProcedure {
+
+	@FlowInterface
+	public static interface Flows {
+		void flow();
+	}
+
+	public void procedure(Flows flows) {
+	}
 
 }

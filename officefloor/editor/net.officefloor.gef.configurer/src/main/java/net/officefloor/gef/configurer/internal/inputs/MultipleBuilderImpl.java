@@ -37,6 +37,7 @@ import net.officefloor.gef.configurer.MappingBuilder;
 import net.officefloor.gef.configurer.MultipleBuilder;
 import net.officefloor.gef.configurer.PropertiesBuilder;
 import net.officefloor.gef.configurer.ResourceBuilder;
+import net.officefloor.gef.configurer.SelectBuilder;
 import net.officefloor.gef.configurer.TextBuilder;
 import net.officefloor.gef.configurer.internal.AbstractBuilder;
 import net.officefloor.gef.configurer.internal.AbstractConfigurationBuilder;
@@ -157,6 +158,11 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 	@Override
 	public <I> ListBuilder<V, I> list(String label, Class<I> itemType) {
 		return this.delegate.list(label, itemType);
+	}
+
+	@Override
+	public <I> SelectBuilder<V, I> select(String label, Function<V, ObservableList<I>> getItems) {
+		return this.delegate.select(label, getItems);
 	}
 
 	@Override

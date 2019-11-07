@@ -99,6 +99,11 @@ public class ExampleConfigurerMain extends AbstractConfigurerApplication {
 			}
 		}).setValue(this.log((model, value) -> model.text = value));
 
+		// Configure select
+		builder.select("Select", (model) -> FXCollections.observableArrayList(model.selections))
+				.itemLabel((item) -> item.text).init((model) -> model.selectedItem)
+				.setValue((model, value) -> model.selectedItem = value);
+
 		// Configure class
 		builder.clazz("Class").init((model) -> model.className)
 				.setValue(this.log((model, value) -> model.className = value));

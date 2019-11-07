@@ -19,7 +19,6 @@ package net.officefloor.gef.ide.editor;
 
 import java.io.Reader;
 import java.io.StringWriter;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -41,9 +40,8 @@ import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.editor.AdaptedBuilder;
 import net.officefloor.gef.editor.AdaptedChildBuilder;
 import net.officefloor.gef.editor.AdaptedEditorModule;
+import net.officefloor.gef.editor.AdaptedEditorPlugin;
 import net.officefloor.gef.editor.AdaptedErrorHandler.UncertainOperation;
-import net.officefloor.gef.editor.style.AbstractStyleRegistry;
-import net.officefloor.gef.editor.style.Handler;
 import net.officefloor.gef.editor.AdaptedParentBuilder;
 import net.officefloor.gef.editor.AdaptedRootBuilder;
 import net.officefloor.gef.editor.ChangeExecutor;
@@ -503,17 +501,7 @@ public abstract class AbstractAdaptedIdeEditor<R extends Model, RE extends Enum<
 	 * Initialises for non OSGi environment.
 	 */
 	public void initNonOsgiEnvironment() {
-		try {
-			// Setup OfficeFloor style URL handling
-			URL.setURLStreamHandlerFactory((protocol) -> {
-				if (!AbstractStyleRegistry.PROTOCOL.equals(protocol)) {
-					return null;
-				}
-				return new Handler();
-			});
-		} catch (Throwable ex) {
-			// Assume factory already initialised
-		}
+		AdaptedEditorPlugin.initNonOsgiEnvironment();
 	}
 
 	/**

@@ -21,6 +21,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import net.officefloor.gef.editor.AdaptedEditorPlugin;
 
 /**
  * Provides means to test editor configurations without loading the Eclipse
@@ -50,6 +51,9 @@ public abstract class AbstractConfigurerApplication extends Application {
 		stage.setWidth(640);
 		stage.setHeight(480);
 		stage.setTitle(this.getClass().getSimpleName());
+		
+		// Initialise for Non-Osgi
+		AdaptedEditorPlugin.initNonOsgiEnvironment();
 
 		// Load configuration
 		this.loadConfiguration(parent);

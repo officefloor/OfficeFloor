@@ -67,6 +67,7 @@ import net.officefloor.gef.configurer.MappingBuilder;
 import net.officefloor.gef.configurer.MultipleBuilder;
 import net.officefloor.gef.configurer.PropertiesBuilder;
 import net.officefloor.gef.configurer.ResourceBuilder;
+import net.officefloor.gef.configurer.SelectBuilder;
 import net.officefloor.gef.configurer.TextBuilder;
 import net.officefloor.gef.configurer.ValueValidator;
 import net.officefloor.gef.configurer.ValueValidator.ValueValidatorContext;
@@ -78,6 +79,7 @@ import net.officefloor.gef.configurer.internal.inputs.MappingBuilderImpl;
 import net.officefloor.gef.configurer.internal.inputs.MultipleBuilderImpl;
 import net.officefloor.gef.configurer.internal.inputs.PropertiesBuilderImpl;
 import net.officefloor.gef.configurer.internal.inputs.ResourceBuilderImpl;
+import net.officefloor.gef.configurer.internal.inputs.SelectBuilderImpl;
 import net.officefloor.gef.configurer.internal.inputs.TextBuilderImpl;
 
 /**
@@ -337,6 +339,11 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	@Override
 	public <I> ListBuilder<M, I> list(String label, Class<I> itemType) {
 		return this.registerBuilder(new ListBuilderImpl<>(label));
+	}
+
+	@Override
+	public <I> SelectBuilder<M, I> select(String label, Function<M, ObservableList<I>> getItems) {
+		return this.registerBuilder(new SelectBuilderImpl<>(label, getItems));
 	}
 
 	@Override

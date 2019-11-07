@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 
+import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
 import net.officefloor.activity.procedure.spi.ProcedureSource;
 import net.officefloor.activity.procedure.spi.ProcedureSpecification;
@@ -50,6 +51,38 @@ import net.officefloor.plugin.variable.VariableAnnotation;
  * @author Daniel Sagenschneider
  */
 public class ProcedureLoaderTest extends OfficeFrameTestCase {
+
+	/**
+	 * Validate {@link Procedure}.
+	 */
+	public void testDefaultIsProcedure() {
+		final String PROCEDURE_NAME = "procedure";
+		ProcedureSource mockSource = ProcedureLoaderUtil.loadProcedureSource(MockProcedureSource.class);
+
+		// Matches
+		assertTrue("Class match", ProcedureLoaderUtil.procedure(PROCEDURE_NAME)
+				.isProcedure(ClassProcedureSource.SOURCE_NAME, PROCEDURE_NAME));
+		assertTrue("Source match", ProcedureLoaderUtil.procedure(PROCEDURE_NAME, MockProcedureSource.class)
+				.isProcedure(mockSource.getSourceName(), PROCEDURE_NAME));
+		assertTrue("Manual select match",
+				ProcedureLoaderUtil.procedure(null).isProcedure(ClassProcedureSource.SOURCE_NAME, null));
+
+		// Property should not be considered
+		assertTrue("Property not considered",
+				ProcedureLoaderUtil.procedure(PROCEDURE_NAME, ProcedureLoaderUtil.property("NAME"))
+						.isProcedure(ClassProcedureSource.SOURCE_NAME, PROCEDURE_NAME));
+
+		// Not match
+		assertFalse("No source", ProcedureLoaderUtil.procedure(PROCEDURE_NAME).isProcedure(null, PROCEDURE_NAME));
+		assertFalse("Different source",
+				ProcedureLoaderUtil.procedure(PROCEDURE_NAME).isProcedure(mockSource.getSourceName(), PROCEDURE_NAME));
+		assertFalse("Different procedure", ProcedureLoaderUtil.procedure("not match")
+				.isProcedure(ClassProcedureSource.SOURCE_NAME, PROCEDURE_NAME));
+		assertFalse("Not match to manual select",
+				ProcedureLoaderUtil.procedure(null).isProcedure(ClassProcedureSource.SOURCE_NAME, PROCEDURE_NAME));
+		assertFalse("Manual select not match",
+				ProcedureLoaderUtil.procedure(PROCEDURE_NAME).isProcedure(ClassProcedureSource.SOURCE_NAME, null));
+	}
 
 	/**
 	 * Ensure can list just one {@link Procedure}.

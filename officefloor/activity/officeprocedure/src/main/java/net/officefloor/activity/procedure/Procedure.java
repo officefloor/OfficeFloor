@@ -48,4 +48,18 @@ public interface Procedure {
 	 */
 	ProcedureProperty[] getProperties();
 
+	/**
+	 * Determines if the {@link Procedure}.
+	 * 
+	 * @param serviceName   Service name.
+	 * @param procedureName Name of {@link Procedure}. May be <code>null</code> for
+	 *                      manually selected.
+	 * @return <code>true</code> if this {@link Procedure} matches.
+	 */
+	default boolean isProcedure(String serviceName, String procedureName) {
+		boolean isServiceNameMatch = serviceName == null ? false : serviceName.equals(this.getServiceName());
+		boolean isProcedureNameMatch = procedureName == null ? (this.getProcedureName() == null)
+				: procedureName.equals(this.getProcedureName());
+		return isServiceNameMatch && isProcedureNameMatch;
+	}
 }
