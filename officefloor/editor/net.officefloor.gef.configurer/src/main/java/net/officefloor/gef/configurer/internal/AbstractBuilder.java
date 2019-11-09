@@ -23,9 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
-import javax.swing.event.ChangeEvent;
-
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
