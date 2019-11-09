@@ -123,8 +123,14 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 	@Override
 	public void start(Stage stage) throws Exception {
 
+		// Obtain the class loader
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		if (classLoader == null) {
+			classLoader = this.getClass().getClassLoader();
+		}
+
 		// Setup environment
-		EnvironmentBridge envBridge = new ClassLoaderEnvironmentBridge(this.getClass().getClassLoader());
+		EnvironmentBridge envBridge = new ClassLoaderEnvironmentBridge(classLoader);
 
 		// Function to load configuration
 		LoadConfiguration loadConfiguration = (configurationFileName) -> {

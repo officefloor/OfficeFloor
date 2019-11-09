@@ -393,7 +393,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		};
 
 		// Handle change in rows
-		itemsProperty.addListener((event) -> loadRows.run());
+		itemsProperty.addListener((observable, oldValue, newValue) -> loadRows.run());
 
 		// Load initial rows
 		loadRows.run();
@@ -498,7 +498,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 				this.cells[i] = ListBuilderImpl.this.renderers.get(i).createCellRenderer(this);
 
 				// Trigger updating
-				this.cells[i].getValue().addListener((event) -> this.updater.run());
+				this.cells[i].getValue().addListener((observable, oldValue, newValue) -> this.updater.run());
 			}
 
 			// Provide the delete (except for add row - null item)

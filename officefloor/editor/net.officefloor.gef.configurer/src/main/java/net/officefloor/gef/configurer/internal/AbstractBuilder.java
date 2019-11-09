@@ -23,10 +23,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
+import javax.swing.event.ChangeEvent;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -113,7 +116,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		Tooltip errorTooltip = new Tooltip();
 		errorTooltip.getStyleClass().add("error-tooltip");
 		Tooltip.install(error, errorTooltip);
-		InvalidationListener listener = (observableError) -> {
+		ChangeListener<Throwable> listener = (observable, oldValue, newValue) -> {
 			Throwable cause = errorProperty.getValue();
 			if (cause != null) {
 				// Display the error
@@ -125,7 +128,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			}
 		};
 		errorProperty.addListener(listener);
-		listener.invalidated(errorProperty); // Initialise
+		listener.changed(errorProperty, null, errorProperty.getValue()); // Initialise
 		return error;
 	}
 
@@ -249,22 +252,22 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			this.loadValue();
 
 			// Refresh on error or value change
-			this.error.addListener((event) -> this.context.refreshError());
-			this.value.addListener((event) -> this.context.refreshError());
+			this.error.addListener((observable, oldValue, newValue) -> this.context.refreshError());
+			this.value.addListener((observable, oldValue, newValue) -> this.context.refreshError());
 
 			// Load value to model (so model consistent before validation)
 			if (AbstractBuilder.this.valueLoader != null) {
-				this.value.addListener(
-						(event) -> AbstractBuilder.this.valueLoader.loadValue(model, this.value.getValue()));
+				this.value.addListener((observable, oldValue, newValue) -> AbstractBuilder.this.valueLoader
+						.loadValue(model, this.value.getValue()));
 			}
 
 			// Undertake validation (after loading value to model)
 			this.validators.addAll(AbstractBuilder.this.validators);
-			this.value.addListener((event) -> this.validate());
+			this.value.addListener((observable, oldValue, newValue) -> this.validate());
 			this.validate(); // validate initial value
 
 			// Track model becoming dirty
-			this.value.addListener((event) -> context.dirtyProperty().setValue(true));
+			this.value.addListener((observable, oldValue, newValue) -> context.dirtyProperty().setValue(true));
 		}
 
 		/**
@@ -478,8 +481,8 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 
 			// Always load value to model
 			if (AbstractBuilder.this.valueLoader != null) {
-				this.value.addListener((event) -> AbstractBuilder.this.valueLoader.loadValue(this.context.getModel(),
-						this.value.getValue()));
+				this.value.addListener((observable, oldValue, newValue) -> AbstractBuilder.this.valueLoader
+						.loadValue(this.context.getModel(), this.value.getValue()));
 			}
 		}
 

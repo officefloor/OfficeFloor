@@ -107,7 +107,7 @@ public class ChoiceBuilderImpl<M> extends AbstractBuilder<M, Integer, ChoiceValu
 			// Handle selecting the choice
 			int choiceIndex = i;
 			boolean[] isActive = new boolean[] { false };
-			selection.selectedProperty().addListener((event) -> {
+			selection.selectedProperty().addListener((observable, oldValue, newValue) -> {
 
 				// Only update listing if change to active
 				if (selection.isSelected() && !isActive[0]) {

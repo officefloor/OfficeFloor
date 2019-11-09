@@ -30,12 +30,17 @@ import net.officefloor.activity.procedure.ProcedureLoader;
 import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.configurer.Builder;
 import net.officefloor.gef.configurer.ChoiceBuilder;
+import net.officefloor.gef.configurer.ClassBuilder;
 import net.officefloor.gef.configurer.ConfigurationBuilder;
+import net.officefloor.gef.configurer.OptionalBuilder;
+import net.officefloor.gef.configurer.ResourceBuilder;
 import net.officefloor.gef.configurer.SelectBuilder;
+import net.officefloor.gef.configurer.TextBuilder;
 import net.officefloor.gef.configurer.ValueValidator;
 import net.officefloor.gef.configurer.ValueValidator.ValueValidatorContext;
 import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
@@ -196,8 +201,6 @@ public class WoofProcedureItem extends
 	public IdeConfigurer configure() {
 		return new IdeConfigurer().addAndRefactor((builder, context) -> {
 			builder.title("Procedure");
-			builder.text("Name").init((item) -> item.name).validate(ValueValidator.notEmptyString("Must provide name"))
-					.setValue((item, value) -> item.name = value);
 
 			final int CLASS_INDEX = 0;
 			final int RESOURCE_INDEX = 1;
@@ -212,19 +215,34 @@ public class WoofProcedureItem extends
 				return CLASS_INDEX; // assume class
 			}).validate(ValueValidator.notNull("Must select"));
 
-			// Configure choices
+			// Choice: class
 			ConfigurationBuilder<WoofProcedureItem> classBuilder = choices.choice("Class");
+			ClassBuilder<WoofProcedureItem> resourceClassBuilder = classBuilder.clazz("Class")
+					.init((item) -> item.resource).validate(ValueValidator.notEmptyString("Must specify class"))
+					.setValue((item, value) -> item.resource = value);
+
+			// Choice: resource
 			ConfigurationBuilder<WoofProcedureItem> sourceBuilder = choices.choice("Resource");
+			ResourceBuilder<WoofProcedureItem> resourceResourceBuilder = sourceBuilder.resource("Resource")
+					.init((item) -> item.resource).validate(ValueValidator.notEmptyString("Must specify resource"))
+					.setValue((item, value) -> item.resource = value);
 
 			// Select procedure
-			SelectBuilder<WoofProcedureItem, Procedure> selectProcedures = builder
+			SelectBuilder<WoofProcedureItem, Procedure> selectProceduresBuilder = builder
 					.select("Procedure", (item) -> item.procedures).itemLabel((procedure) -> {
 						String procedureName = procedure.getProcedureName();
 						return ((procedureName == null) ? "<enter>" : procedureName) + " [" + procedure.getServiceName()
 								+ "]";
 					}).init((item) -> {
+						// Check for provided procedure
 						for (Procedure procedure : item.procedures) {
 							if (procedure.isProcedure(item.sourceName, item.procedure)) {
+								return procedure;
+							}
+						}
+						// Check for manual specified procedure
+						for (Procedure procedure : item.procedures) {
+							if (procedure.isProcedure(item.sourceName, null)) {
 								return procedure;
 							}
 						}
@@ -233,23 +251,39 @@ public class WoofProcedureItem extends
 						if (procedure != null) {
 							item.sourceName = procedure.getServiceName();
 							item.procedure = procedure.getProcedureName();
+
+							// Default name (if not specified)
+							if (CompileUtil.isBlank(item.name)) {
+								item.name = item.procedure;
+							}
+
 						} else {
 							item.sourceName = null;
 							item.procedure = null;
 						}
 					});
 
-			// Choice: class
-			classBuilder.clazz("Class").init((item) -> item.resource).validate((validateContext) -> {
-				ValueValidator.notEmptyString("Must specify class").validate(validateContext);
-				loadProcedures(validateContext, selectProcedures, this.getConfigurableContext().getEnvironmentBridge());
-			}).setValue((item, value) -> item.resource = value);
+			// Reload procedures on resource change
+			resourceClassBuilder.validate((validateContext) -> loadProcedures(validateContext, selectProceduresBuilder,
+					this.getConfigurableContext().getEnvironmentBridge()));
+			resourceResourceBuilder.validate((validateContext) -> loadProcedures(validateContext,
+					selectProceduresBuilder, this.getConfigurableContext().getEnvironmentBridge()));
 
-			// Choice: resource
-			sourceBuilder.resource("Resource").init((item) -> item.resource).validate((validateContext) -> {
-				ValueValidator.notEmptyString("Must specify resource");
-				loadProcedures(validateContext, selectProcedures, this.getConfigurableContext().getEnvironmentBridge());
-			}).setValue((item, value) -> item.resource = value);
+			// Determine if manual enter procedure
+			OptionalBuilder<WoofProcedureItem> optionalProcedureBuilder = builder
+					.optional((model) -> model.sourceName != null && model.procedure == null);
+			optionalProcedureBuilder.text("Procedure").init((item) -> item.procedure)
+					.validate(ValueValidator.notEmptyString("Must specify procedure"))
+					.setValue((item, value) -> item.procedure = value);
+
+			// Reload optional procedure on procedure selection
+			selectProceduresBuilder.validate((validateContext) -> validateContext.reload(optionalProcedureBuilder));
+
+			// Name for procedure
+			TextBuilder<WoofProcedureItem> nameBuilder = builder.text("Name").init((item) -> item.name)
+					.validate(ValueValidator.notEmptyString("Must provide name"))
+					.setValue((item, value) -> item.name = value);
+			selectProceduresBuilder.validate((validateContext) -> validateContext.reload(nameBuilder));
 
 			// Optional properties
 			builder.properties("Properties").init((item) -> item.properties)

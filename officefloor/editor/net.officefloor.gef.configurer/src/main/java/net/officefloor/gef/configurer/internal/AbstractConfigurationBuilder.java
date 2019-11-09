@@ -33,6 +33,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
@@ -280,7 +281,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 
 		// Responsive view
 		final double RESPONSIVE_WIDTH = 800;
-		InvalidationListener listener = (event) -> {
+		ChangeListener<Number> listener = (observable, oldValue, newValue) -> {
 			if (grid.getWidth() < RESPONSIVE_WIDTH) {
 				// Avoid events if already narrow
 				if (lister.isWideNotNarrow) {
@@ -294,7 +295,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 			}
 		};
 		grid.widthProperty().addListener(listener);
-		listener.invalidated(null); // organise initial view
+		listener.changed(null, null, null); // organise initial view
 
 		// Ensure display potential error
 		lister.refreshError();
@@ -655,7 +656,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 						};
 
 						// Listen for changes in choice
-						choiceRenderer.getChoiceIndex().addListener((event) -> {
+						choiceRenderer.getChoiceIndex().addListener((observable, oldValue, newValue) -> {
 
 							// Clear next listing (as change in choice)
 							if (this.nextLister != null) {

@@ -20,6 +20,8 @@ package net.officefloor.gef.woof.test;
 import java.io.IOException;
 
 import net.officefloor.activity.impl.procedure.ClassProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSource;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.ide.AbstractIdeTestApplication;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
@@ -58,6 +60,20 @@ public class WoofIdeTestApplication extends AbstractIdeTestApplication<WoofModel
 
 	@Override
 	protected AbstractAdaptedIdeEditor<WoofModel, WoofEvent, WoofChanges> createEditor(EnvironmentBridge envBridge) {
+
+		// Indicate available procedure sources
+		try {
+			System.out.println(ProcedureSource.class.getSimpleName() + " instances:");
+			for (ProcedureSource procedureSource : envBridge.getOfficeFloorCompiler().createRootSourceContext()
+					.loadOptionalServices(ProcedureSourceServiceFactory.class)) {
+				System.out.println(" - " + procedureSource.getSourceName());
+			}
+		} catch (Exception ex) {
+			System.err.println("Failed to obtain available " + ProcedureSource.class.getSimpleName() + " instances");
+			ex.printStackTrace();
+		}
+
+		// Return the editor
 		return new WoofEditor(envBridge);
 	}
 

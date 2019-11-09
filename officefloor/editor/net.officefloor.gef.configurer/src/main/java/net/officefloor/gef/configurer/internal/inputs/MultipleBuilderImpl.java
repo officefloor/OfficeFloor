@@ -143,7 +143,7 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 				loadTabs.run();
 
 				// Update the tabs on change
-				context.getInputValue().addListener((event) -> loadTabs.run());
+				context.getInputValue().addListener((observable, oldValue, newValue) -> loadTabs.run());
 			}
 		};
 	}
