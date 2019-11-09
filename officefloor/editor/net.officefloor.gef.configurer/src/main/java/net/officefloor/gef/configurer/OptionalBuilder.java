@@ -15,27 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure.source;
-
-import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
-import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+package net.officefloor.gef.configurer;
 
 /**
- * Tests the {@link ProcedureManagedFunctionSource}.
+ * Builder of optional configuration.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcedureManagedFunctionSourceTest extends OfficeFrameTestCase {
-
-	/**
-	 * Ensure specification correct.
-	 */
-	public void testSpecification() {
-		ManagedFunctionLoaderUtil.validateSpecification(ProcedureManagedFunctionSource.class,
-				ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, "Class",
-				ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, "Source",
-				ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, "Procedure");
-	}
-
+public interface OptionalBuilder<M> extends InputBuilder<M>, Builder<M, M, OptionalBuilder<M>> {
 }

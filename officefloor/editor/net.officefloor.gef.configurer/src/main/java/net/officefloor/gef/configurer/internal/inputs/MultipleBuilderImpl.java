@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -35,6 +36,7 @@ import net.officefloor.gef.configurer.FlagBuilder;
 import net.officefloor.gef.configurer.ListBuilder;
 import net.officefloor.gef.configurer.MappingBuilder;
 import net.officefloor.gef.configurer.MultipleBuilder;
+import net.officefloor.gef.configurer.OptionalBuilder;
 import net.officefloor.gef.configurer.PropertiesBuilder;
 import net.officefloor.gef.configurer.ResourceBuilder;
 import net.officefloor.gef.configurer.SelectBuilder;
@@ -163,6 +165,11 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 	@Override
 	public <I> SelectBuilder<V, I> select(String label, Function<V, ObservableList<I>> getItems) {
 		return this.delegate.select(label, getItems);
+	}
+
+	@Override
+	public OptionalBuilder<V> optional(Predicate<V> isShow) {
+		return this.delegate.optional(isShow);
 	}
 
 	@Override

@@ -53,9 +53,9 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 	public static final String RESOURCE_NAME_PROPERTY_NAME = "resource";
 
 	/**
-	 * {@link Property} name providing the service to create the procedure.
+	 * {@link Property} name providing the source to create the procedure.
 	 */
-	public static final String SERVICE_NAME_PROPERTY_NAME = "service.name";
+	public static final String SOURCE_NAME_PROPERTY_NAME = "source.name";
 
 	/**
 	 * {@link Property} name identifying the procedure name.
@@ -69,7 +69,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(RESOURCE_NAME_PROPERTY_NAME, "Class");
-		context.addProperty(SERVICE_NAME_PROPERTY_NAME, "Service");
+		context.addProperty(SOURCE_NAME_PROPERTY_NAME, "Source");
 		context.addProperty(PROCEDURE_PROPERTY_NAME, "Procedure");
 	}
 
@@ -79,7 +79,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 
 		// Obtain the procedure details
 		String resource = context.getProperty(RESOURCE_NAME_PROPERTY_NAME);
-		String serviceName = context.getProperty(SERVICE_NAME_PROPERTY_NAME);
+		String serviceName = context.getProperty(SOURCE_NAME_PROPERTY_NAME);
 		String procedureName = context.getProperty(PROCEDURE_PROPERTY_NAME);
 
 		// Find the service

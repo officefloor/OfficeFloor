@@ -76,8 +76,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Instantiate.
 	 * 
-	 * @param label
-	 *            Label.
+	 * @param label Label.
 	 */
 	public AbstractBuilder(String label) {
 		this.label = label;
@@ -86,8 +85,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Creates the input {@link ValueInput} for the {@link ObservableValue}.
 	 * 
-	 * @param context
-	 *            {@link ValueInputContext}.
+	 * @param context {@link ValueInputContext}.
 	 * @return {@link ValueInput} to configure the {@link ObservableValue}.
 	 */
 	protected abstract I createInput(ValueInputContext<M, V> context);
@@ -95,10 +93,8 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Creates the label {@link Node}.
 	 * 
-	 * @param labelText
-	 *            Label text.
-	 * @param valueInput
-	 *            {@link ValueInput}.
+	 * @param labelText  Label text.
+	 * @param valueInput {@link ValueInput}.
 	 * @return Label {@link Node}.
 	 */
 	protected Node createLabel(String labelText, I valueInput) {
@@ -108,10 +104,8 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Creates the error feedback {@link Node}.
 	 * 
-	 * @param valueInput
-	 *            {@link ValueInput}.
-	 * @param errorProperty
-	 *            Error {@link Property}.
+	 * @param valueInput    {@link ValueInput}.
+	 * @param errorProperty Error {@link Property}.
 	 * @return Error feedback {@link Node}.
 	 */
 	protected Node createErrorFeedback(I valueInput, Property<Throwable> errorProperty) {
@@ -138,10 +132,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Obtains the error.
 	 * 
-	 * @param valueInput
-	 *            {@link ValueInput}.
-	 * @param error
-	 *            {@link Throwable} error. May be <code>null</code> if no error.
+	 * @param valueInput {@link ValueInput}.
+	 * @param error      {@link Throwable} error. May be <code>null</code> if no
+	 *                   error.
 	 * @return {@link Throwable} error or <code>null</code> if no error.
 	 */
 	protected Throwable getError(I valueInput, ReadOnlyProperty<Throwable> error) {
@@ -160,14 +153,10 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Allow overriding to configure the {@link TableColumn}.
 	 *
-	 * @param <R>
-	 *            Row object type.
-	 * @param table
-	 *            {@link TableView} that will contain the {@link TableColumn}.
-	 * @param column
-	 *            {@link TableColumn}.
-	 * @param callback
-	 *            {@link Callback}.
+	 * @param <R>      Row object type.
+	 * @param table    {@link TableView} that will contain the {@link TableColumn}.
+	 * @param column   {@link TableColumn}.
+	 * @param callback {@link Callback}.
 	 */
 	protected <R> void configureTableColumn(TableView<R> table, TableColumn<R, V> column,
 			Callback<Integer, ObservableValue<V>> callback) {
@@ -424,11 +413,13 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		}
 
 		@Override
-		public void reloadIf(Builder<?, ?, ?> builder) {
-			if (AbstractBuilder.this == builder) {
+		public boolean reloadIf(Builder<?, ?, ?> builder) {
+			boolean isBuilder = AbstractBuilder.this == builder;
+			if (isBuilder) {
 				// Require reloading this value
 				this.loadValue();
 			}
+			return isBuilder;
 		}
 	}
 
@@ -471,8 +462,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		/**
 		 * Instantiate.
 		 * 
-		 * @param context
-		 *            {@link ValueRendererContext}.
+		 * @param context {@link ValueRendererContext}.
 		 */
 		private CellRendererImpl(ValueRendererContext<M> context) {
 			this.context = context;

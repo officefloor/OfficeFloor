@@ -28,6 +28,9 @@ import net.officefloor.gef.configurer.ConfigurationBuilder;
 import net.officefloor.gef.configurer.Configurer;
 import net.officefloor.gef.configurer.ListBuilder;
 import net.officefloor.gef.configurer.MultipleBuilder;
+import net.officefloor.gef.configurer.OptionalBuilder;
+import net.officefloor.gef.configurer.SelectBuilder;
+import net.officefloor.gef.configurer.TextBuilder;
 import net.officefloor.gef.configurer.ValueLoader;
 
 /**
@@ -90,7 +93,7 @@ public class ExampleConfigurerMain extends AbstractConfigurerApplication {
 		builder.text("Label").init((model) -> model.text);
 
 		// Configure text (editable)
-		builder.text("Text").init((model) -> model.text).validate((context) -> {
+		TextBuilder<ExampleModel> textBuilder = builder.text("Text").init((model) -> model.text).validate((context) -> {
 			switch (context.getValue().getValue().length()) {
 			case 0:
 				throw new Exception("Test failure");
@@ -99,10 +102,26 @@ public class ExampleConfigurerMain extends AbstractConfigurerApplication {
 			}
 		}).setValue(this.log((model, value) -> model.text = value));
 
+		// Optional based on text
+		OptionalBuilder<ExampleModel> textOptionalBuilder = builder.optional((model) -> !"hide".equals(model.text));
+		textOptionalBuilder.text("Optional Text").init((model) -> model.text)
+				.setValue(this.log((model, value) -> model.text = value));
+
+		// Reload of optional based on value
+		textBuilder.validate((context) -> context.reload(textOptionalBuilder));
+
 		// Configure select
-		builder.select("Select", (model) -> FXCollections.observableArrayList(model.selections))
+		SelectBuilder<ExampleModel, ExampleItem> selectBuilder = builder
+				.select("Select", (model) -> FXCollections.observableArrayList(model.selections))
 				.itemLabel((item) -> item.text).init((model) -> model.selectedItem)
-				.setValue((model, value) -> model.selectedItem = value);
+				.setValue(this.log((model, value) -> model.selectedItem = value));
+
+		// Optional based on select
+		OptionalBuilder<ExampleModel> selectOptionalBuilder = builder.optional((model) -> model.selectedItem.flag);
+		selectOptionalBuilder.text("Optional Selection").init((model) -> model.selectedItem.text);
+
+		// Reload optional based on selection
+		selectBuilder.validate((context) -> context.reload(selectOptionalBuilder));
 
 		// Configure class
 		builder.clazz("Class").init((model) -> model.className)

@@ -229,9 +229,14 @@ public class WoofProcedureItem extends
 							}
 						}
 						return null; // no match
-					}).setValue((item, procedure) -> {
-						item.sourceName = procedure.getServiceName();
-						item.procedure = procedure.getProcedureName();
+					}).validate(ValueValidator.notNull("Must select procedure")).setValue((item, procedure) -> {
+						if (procedure != null) {
+							item.sourceName = procedure.getServiceName();
+							item.procedure = procedure.getProcedureName();
+						} else {
+							item.sourceName = null;
+							item.procedure = null;
+						}
 					});
 
 			// Choice: class

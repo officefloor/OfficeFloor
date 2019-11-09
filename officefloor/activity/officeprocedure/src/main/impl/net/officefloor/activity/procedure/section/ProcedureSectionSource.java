@@ -55,7 +55,7 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, "Class");
-		context.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, "Service");
+		context.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, "Source");
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 
 		// Obtain procedure details
 		String className = context.getProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME);
-		String serviceName = context.getProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME);
+		String serviceName = context.getProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME);
 		String procedureName = context.getSectionLocation();
 		boolean isNext = Boolean.parseBoolean(context.getProperty(IS_NEXT_PROPERTY_NAME, Boolean.FALSE.toString()));
 
@@ -76,7 +76,7 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 			typeProperties.addProperty(propertyName).setValue(context.getProperty(propertyName));
 		}
 		typeProperties.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME).setValue(className);
-		typeProperties.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME).setValue(serviceName);
+		typeProperties.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME).setValue(serviceName);
 		typeProperties.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME).setValue(procedureName);
 		ManagedFunctionType<?, ?> type = context
 				.loadManagedFunctionType(FUNCTION_NAME, ProcedureManagedFunctionSource.class.getName(), typeProperties)
@@ -89,7 +89,7 @@ public class ProcedureSectionSource extends AbstractSectionSource {
 			namespace.addProperty(propertyName, context.getProperty(propertyName));
 		}
 		namespace.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, className);
-		namespace.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
+		namespace.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, serviceName);
 		namespace.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, procedureName);
 		SectionFunction procedure = namespace.addSectionFunction(FUNCTION_NAME, procedureName);
 

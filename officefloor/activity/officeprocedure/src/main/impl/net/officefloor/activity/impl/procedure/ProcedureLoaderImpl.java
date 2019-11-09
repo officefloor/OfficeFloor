@@ -207,7 +207,7 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 			loadProperties.addProperty(property.getName()).setValue(property.getValue());
 		}
 		loadProperties.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME).setValue(resource);
-		loadProperties.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME).setValue(serviceName);
+		loadProperties.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME).setValue(serviceName);
 		loadProperties.addProperty(ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME).setValue(procedureName);
 		FunctionNamespaceType namespace = this.loader.loadManagedFunctionType(loadProperties);
 

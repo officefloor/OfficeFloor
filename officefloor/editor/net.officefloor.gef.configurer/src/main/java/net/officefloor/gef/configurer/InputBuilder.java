@@ -19,6 +19,7 @@ package net.officefloor.gef.configurer;
 
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import net.officefloor.compile.properties.PropertyList;
@@ -57,6 +58,15 @@ public interface InputBuilder<M> extends ItemBuilder<M> {
 	 * @return {@link SelectBuilder}.
 	 */
 	<I> SelectBuilder<M, I> select(String label, Function<M, ObservableList<I>> getItems);
+
+	/**
+	 * Configures optional configuration.
+	 * 
+	 * @param isShow {@link Predicate} on whether to show the optional
+	 *               configuration.
+	 * @return {@link OptionalBuilder}.
+	 */
+	OptionalBuilder<M> optional(Predicate<M> isShow);
 
 	/**
 	 * Configures multiple items.

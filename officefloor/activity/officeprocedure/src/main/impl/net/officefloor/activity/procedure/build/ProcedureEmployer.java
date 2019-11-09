@@ -133,7 +133,7 @@ public class ProcedureEmployer {
 						ProcedureSectionSource.class.getName(), procedureName);
 				properties.configureProperties(procedure);
 				procedure.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, className);
-				procedure.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
+				procedure.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, serviceName);
 				if (isNext) {
 					procedure.addProperty(ProcedureSectionSource.IS_NEXT_PROPERTY_NAME, Boolean.TRUE.toString());
 				}
@@ -160,7 +160,7 @@ public class ProcedureEmployer {
 						ProcedureSectionSource.class.getName(), procedureName);
 				properties.configureProperties(procedure);
 				procedure.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, className);
-				procedure.addProperty(ProcedureManagedFunctionSource.SERVICE_NAME_PROPERTY_NAME, serviceName);
+				procedure.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, serviceName);
 				if (isNext) {
 					procedure.addProperty(ProcedureSectionSource.IS_NEXT_PROPERTY_NAME, Boolean.TRUE.toString());
 				}

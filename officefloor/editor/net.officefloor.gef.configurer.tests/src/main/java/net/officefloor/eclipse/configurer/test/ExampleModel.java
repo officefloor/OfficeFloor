@@ -99,7 +99,7 @@ public class ExampleModel {
 	 * Items for selection.
 	 */
 	public List<ExampleItem> selections = Arrays.asList(new ExampleItem("Selection One", false),
-			new ExampleItem("Selection Two", false));
+			new ExampleItem("Selection Two", true));
 
 	/**
 	 * Selected item.

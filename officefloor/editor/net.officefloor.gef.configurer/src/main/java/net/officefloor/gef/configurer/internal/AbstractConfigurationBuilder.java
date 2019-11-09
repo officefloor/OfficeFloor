@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -65,6 +67,7 @@ import net.officefloor.gef.configurer.FlagBuilder;
 import net.officefloor.gef.configurer.ListBuilder;
 import net.officefloor.gef.configurer.MappingBuilder;
 import net.officefloor.gef.configurer.MultipleBuilder;
+import net.officefloor.gef.configurer.OptionalBuilder;
 import net.officefloor.gef.configurer.PropertiesBuilder;
 import net.officefloor.gef.configurer.ResourceBuilder;
 import net.officefloor.gef.configurer.SelectBuilder;
@@ -77,6 +80,7 @@ import net.officefloor.gef.configurer.internal.inputs.FlagBuilderImpl;
 import net.officefloor.gef.configurer.internal.inputs.ListBuilderImpl;
 import net.officefloor.gef.configurer.internal.inputs.MappingBuilderImpl;
 import net.officefloor.gef.configurer.internal.inputs.MultipleBuilderImpl;
+import net.officefloor.gef.configurer.internal.inputs.OptionalBuilderImpl;
 import net.officefloor.gef.configurer.internal.inputs.PropertiesBuilderImpl;
 import net.officefloor.gef.configurer.internal.inputs.ResourceBuilderImpl;
 import net.officefloor.gef.configurer.internal.inputs.SelectBuilderImpl;
@@ -273,7 +277,6 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		// Load the value render list
 		ValueLister<M> lister = new ValueLister<>(model, this.validator, configurationNode, grid, this.title,
 				dirtyProperty, validProperty, errorListener, actioner, this.getValueRendererFactories(), null);
-		lister.organiseWide(1); // ensure initially organised
 
 		// Responsive view
 		final double RESPONSIVE_WIDTH = 800;
@@ -344,6 +347,11 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	@Override
 	public <I> SelectBuilder<M, I> select(String label, Function<M, ObservableList<I>> getItems) {
 		return this.registerBuilder(new SelectBuilderImpl<>(label, getItems));
+	}
+
+	@Override
+	public OptionalBuilder<M> optional(Predicate<M> isShow) {
+		return this.registerBuilder(new OptionalBuilderImpl<>(isShow, this.envBridge));
 	}
 
 	@Override
@@ -459,7 +467,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		/**
 		 * Row index for organising this list.
 		 */
-		private int rowIndex;
+		private int rowIndex = 1;
 
 		/**
 		 * Previous {@link ValueLister}.
@@ -484,8 +492,6 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		 * @param validProperty     Valid {@link Property}.
 		 * @param errorListener     {@link ErrorListener}.
 		 * @param actioner          {@link Actioner}.
-		 * @param rowIndex          Row index within wide view {@link GridPane} to
-		 *                          continue rendering inputs.
 		 * @param rendererFactories {@link ValueRendererFactory} instances.
 		 * @param prevLister        Previous {@link ValueLister}.
 		 */
@@ -520,6 +526,57 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 					// Obtain the value input
 					ValueInput valueInput = renderer.createInput();
 					inputsToActivate.add(valueInput);
+
+					// Determine if optional render
+					if (valueInput instanceof OptionalValueInput) {
+						OptionalValueInput<M> optionalRenderer = (OptionalValueInput<M>) valueInput;
+
+						// Register the optional input (no content but hook in listen to changes)
+						Input<M, ? extends ValueInput> input = new Input<>(valueInput, renderer);
+						this.inputs.add(input);
+
+						// Create consumer to load optional
+						ValueRendererFactory<M, ? extends ValueInput>[] splitRenderers = Arrays
+								.copyOfRange(rendererFactories, i + 1, rendererFactories.length);
+						Consumer<ValueRendererFactory<M, ? extends ValueInput>[]> loader = (
+								optionalRendererFactories) -> {
+
+							// Clear next listing (as change to optional)
+							if (this.nextLister != null) {
+								this.nextLister.removeControls();
+								this.nextLister = null;
+							}
+
+							// Create concat list of remaining
+							ValueRendererFactory<M, ? extends ValueInput>[] remainingRenderers = new ValueRendererFactory[optionalRendererFactories.length
+									+ splitRenderers.length];
+							for (int o = 0; o < optionalRendererFactories.length; o++) {
+								remainingRenderers[o] = optionalRendererFactories[o];
+							}
+							for (int s = 0; s < splitRenderers.length; s++) {
+								remainingRenderers[optionalRendererFactories.length + s] = splitRenderers[s];
+							}
+							this.nextLister = new ValueLister<>(this.model, this.modelValidator, configurationNode,
+									grid, this.title, this.dirtyProperty, this.validProperty, this.errorListener,
+									this.actioner, remainingRenderers, this);
+
+							// Organise optional changes
+							if (this.isWideNotNarrow) {
+								this.organiseWide(this.rowIndex);
+							} else {
+								this.organiseNarrow(this.rowIndex);
+							}
+
+							// Refresh error (now different optional)
+							this.refreshError();
+						};
+
+						// Register (will load remaining values)
+						optionalRenderer.setOptionalLoader(loader);
+
+						// Stop loading renderers (as next listing will render)
+						return;
+					}
 
 					// Add the input
 					Node valueInputNode = valueInput.getNode();
@@ -632,10 +689,18 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		 * @param rowIndex Row index to start organising inputs.
 		 */
 		private void organiseWide(int rowIndex) {
-			this.rowIndex = rowIndex;
+			this.rowIndex = rowIndex; // for next renderer change
+			this.isWideNotNarrow = true;
 
 			// Organise the inputs
-			for (Input<M, ? extends ValueInput> input : this.inputs) {
+			NEXT_INPUT: for (Input<M, ? extends ValueInput> input : this.inputs) {
+
+				// Only layout if has row
+				if (!input.hasRow) {
+					continue NEXT_INPUT;
+				}
+
+				// Layout the input
 				if (input.label != null) {
 					GridPane.setConstraints(input.label, 1, rowIndex, 1, 1, HPos.LEFT, VPos.CENTER, Priority.SOMETIMES,
 							Priority.ALWAYS);
@@ -663,7 +728,6 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 			// Indicate now wide view
 			this.grid.getStyleClass().remove(CSS_CLASS_NARROW);
 			this.grid.getStyleClass().add(CSS_CLASS_WIDE);
-			this.isWideNotNarrow = true;
 		}
 
 		/**
@@ -672,10 +736,18 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		 * @param rowIndex Row index to start organising inputs.
 		 */
 		private void organiseNarrow(int rowIndex) {
-			this.rowIndex = rowIndex;
+			this.rowIndex = rowIndex; // for next renderer change
+			this.isWideNotNarrow = false;
 
 			// Organise the inputs
-			for (Input<M, ? extends ValueInput> input : this.inputs) {
+			NEXT_INPUT: for (Input<M, ? extends ValueInput> input : this.inputs) {
+
+				// Only layout if has row
+				if (!input.hasRow) {
+					continue NEXT_INPUT;
+				}
+
+				// Layout the input
 				if (input.label != null) {
 					GridPane.setConstraints(input.label, 1, rowIndex, 1, 1, HPos.LEFT, VPos.TOP, Priority.ALWAYS,
 							Priority.ALWAYS);
@@ -708,13 +780,14 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 			// Indicate now narrow view
 			this.grid.getStyleClass().remove(CSS_CLASS_WIDE);
 			this.grid.getStyleClass().add(CSS_CLASS_NARROW);
-			this.isWideNotNarrow = false;
 		}
 
 		/**
 		 * Removes the controls from view.
 		 */
 		private void removeControls() {
+
+			// Remove controls for this
 			for (Input<M, ? extends ValueInput> input : this.inputs) {
 				if (input.label != null) {
 					this.grid.getChildren().remove(input.label);
@@ -726,6 +799,11 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 					this.grid.getChildren().remove(input.input);
 				}
 				this.grid.getChildren().remove(input.spacing);
+			}
+
+			// Remove controls for possible subsequent
+			if (this.nextLister != null) {
+				this.nextLister.removeControls();
 			}
 		}
 
@@ -761,7 +839,7 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 			ValueLister<M> lister = firstValueLister;
 			while (lister != null) {
 				for (Input<M, ?> input : lister.inputs) {
-					input.renderer.reloadIf(builder);
+					input.reloadIf(builder);
 				}
 				lister = lister.nextLister;
 			}
@@ -1001,6 +1079,11 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 	private static class Input<M, I extends ValueInput> {
 
 		/**
+		 * Indicates if has row.
+		 */
+		private final boolean hasRow;
+
+		/**
 		 * Label text for the input.
 		 */
 		private final String labelText;
@@ -1048,12 +1131,42 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 		 */
 		private Input(String labelText, Node label, Node errorFeedback, Node input, I valueInput,
 				ValueRenderer<M, I> renderer) {
+			this.hasRow = true;
 			this.labelText = labelText;
 			this.label = label;
 			this.errorFeedback = errorFeedback;
 			this.input = input;
 			this.valueInput = valueInput;
 			this.renderer = renderer;
+		}
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param valueInput {@link ValueInput}.
+		 * @param renderer   {@link ValueRenderer}.
+		 */
+		private Input(I valueInput, ValueRenderer<M, I> renderer) {
+			this.hasRow = false;
+			this.labelText = null;
+			this.label = null;
+			this.errorFeedback = null;
+			this.input = null;
+			this.valueInput = valueInput;
+			this.renderer = renderer;
+		}
+
+		/**
+		 * Reloads if the {@link Builder}.
+		 * 
+		 * @param builder {@link Builder}.
+		 */
+		public void reloadIf(Builder<?, ?, ?> builder) {
+			if (this.renderer.reloadIf(builder)) {
+
+				// Also reload the value input
+				this.valueInput.reload();
+			}
 		}
 	}
 

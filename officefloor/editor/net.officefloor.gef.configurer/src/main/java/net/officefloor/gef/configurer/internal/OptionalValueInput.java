@@ -15,27 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.activity.procedure.source;
+package net.officefloor.gef.configurer.internal;
 
-import net.officefloor.activity.procedure.section.ProcedureManagedFunctionSource;
-import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import java.util.function.Consumer;
 
 /**
- * Tests the {@link ProcedureManagedFunctionSource}.
+ * {@link ValueInput} allowing for optionally rendering following
+ * {@link ValueInput} instances.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcedureManagedFunctionSourceTest extends OfficeFrameTestCase {
+public interface OptionalValueInput<M> extends ValueInput {
 
 	/**
-	 * Ensure specification correct.
+	 * Specifies the optional loader.
+	 * 
+	 * @param loader Loads the optional content.
 	 */
-	public void testSpecification() {
-		ManagedFunctionLoaderUtil.validateSpecification(ProcedureManagedFunctionSource.class,
-				ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, "Class",
-				ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, "Source",
-				ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, "Procedure");
-	}
+	void setOptionalLoader(Consumer<ValueRendererFactory<M, ? extends ValueInput>[]> loader);
 
 }
