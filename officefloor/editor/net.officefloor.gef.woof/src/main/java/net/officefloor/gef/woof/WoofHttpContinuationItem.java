@@ -31,12 +31,15 @@ import net.officefloor.woof.model.woof.WoofExceptionToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel.WoofHttpContinuationEvent;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
 import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
@@ -96,7 +99,7 @@ public class WoofHttpContinuationItem extends
 		context.addNode(container,
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofSectionInputModel.class,
 						WoofHttpContinuationToWoofTemplateModel.class, WoofHttpContinuationToWoofResourceModel.class,
-						WoofHttpContinuationToWoofSecurityModel.class)
+						WoofHttpContinuationToWoofSecurityModel.class, WoofHttpContinuationToWoofProcedureModel.class)
 						.source(WoofHttpContinuationToWoofHttpContinuationModel.class).getNode());
 		return container;
 	}
@@ -202,6 +205,20 @@ public class WoofHttpContinuationItem extends
 				}).delete((ctx) -> {
 					ctx.getChangeExecutor()
 							.execute(ctx.getOperations().removeHttpContinuationToHttpContinuation(ctx.getModel()));
+				}));
+
+		// Procedure
+		connections.add(new IdeConnection<>(WoofHttpContinuationToWoofProcedureModel.class)
+				.connectOne(s -> s.getWoofProcedure(), c -> c.getWoofHttpContinuation(),
+						WoofHttpContinuationEvent.CHANGE_WOOF_PROCEDURE)
+				.to(WoofProcedureModel.class)
+				.many(t -> t.getWoofHttpContinuations(), c -> c.getWoofProcedure(),
+						WoofProcedureEvent.ADD_WOOF_HTTP_CONTINUATION, WoofProcedureEvent.REMOVE_WOOF_HTTP_CONTINUATION)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkHttpContinuationToProcedure(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor()
+							.execute(ctx.getOperations().removeHttpContinuationToProcedure(ctx.getModel()));
 				}));
 	}
 

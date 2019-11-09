@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import net.officefloor.activity.procedure.Procedure;
@@ -44,8 +45,10 @@ import net.officefloor.gef.configurer.TextBuilder;
 import net.officefloor.gef.configurer.ValueValidator;
 import net.officefloor.gef.configurer.ValueValidator.ValueValidatorContext;
 import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
+import net.officefloor.gef.editor.DefaultConnectors;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofProcedureModel;
@@ -159,7 +162,15 @@ public class WoofProcedureItem extends
 	@Override
 	public Pane visual(WoofProcedureModel model, AdaptedChildVisualFactoryContext<WoofProcedureModel> context) {
 		VBox container = new VBox();
-		context.label(container);
+		HBox procedure = context.addNode(container, new HBox());
+		context.addNode(procedure,
+				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofProcedureModel.class).getNode());
+
+//		WoofHttpInputToWoofProcedureModel.class, WoofTemplateOutputToWoofProcedureModel.class,
+//		WoofSecurityOutputToWoofProcedureModel.class, WoofSectionOutputToWoofProcedureModel.class,
+//		WoofExceptionToWoofProcedureModel.class, WoofStartToWoofProcedureModel.class
+
+		context.label(procedure);
 //		HBox children = context.addNode(container, new HBox());
 //		VBox outputs = context.addNode(children, new VBox());
 //		context.childGroup(WoofSectionOutputItem.class.getSimpleName(), outputs);
