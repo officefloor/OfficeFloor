@@ -27,6 +27,7 @@ import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofProcedureNextToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
 import net.officefloor.woof.model.woof.WoofSectionModel;
@@ -67,7 +68,8 @@ public class WoofSectionInputItem extends
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofSectionInputModel.class,
 						WoofHttpInputToWoofSectionInputModel.class, WoofTemplateOutputToWoofSectionInputModel.class,
 						WoofSecurityOutputToWoofSectionInputModel.class, WoofSectionOutputToWoofSectionInputModel.class,
-						WoofExceptionToWoofSectionInputModel.class, WoofStartToWoofSectionInputModel.class).getNode());
+						WoofExceptionToWoofSectionInputModel.class, WoofStartToWoofSectionInputModel.class,
+						WoofProcedureNextToWoofSectionInputModel.class).getNode());
 		context.label(container);
 		return container;
 	}

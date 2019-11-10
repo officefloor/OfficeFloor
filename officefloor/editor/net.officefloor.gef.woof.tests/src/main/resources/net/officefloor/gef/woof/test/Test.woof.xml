@@ -111,6 +111,7 @@
   <procedures>
     <procedure name="procedure" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="558" y="229">
       <next argument-type="">
+        <section name="Section" input="input"/>
       </next>
       <output name="flow" argument-type="">
       </output>

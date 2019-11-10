@@ -54,11 +54,11 @@ import net.officefloor.woof.model.woof.WoofHttpInputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 import net.officefloor.woof.model.woof.WoofSectionOutputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofStartToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofProcedureModel;
-import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 
 /**
  * Configuration for the {@link WoofProcedureModel}.
@@ -176,9 +176,10 @@ public class WoofProcedureItem extends
 						WoofSecurityOutputToWoofProcedureModel.class, WoofTemplateOutputToWoofProcedureModel.class)
 						.getNode());
 		context.label(procedure);
-//		HBox children = context.addNode(container, new HBox());
+		VBox next = context.addNode(procedure, new VBox());
+		context.childGroup(WoofProcedureNextItem.class.getSimpleName(), next);
 //		VBox outputs = context.addNode(children, new VBox());
-//		context.childGroup(WoofSectionOutputItem.class.getSimpleName(), outputs);
+//		context.childGroup(WoofProcedureOutputItem.class.getSimpleName(), outputs);
 		return container;
 	}
 
@@ -210,6 +211,7 @@ public class WoofProcedureItem extends
 
 	@Override
 	protected void children(List<IdeChildrenGroup> childGroups) {
+		childGroups.add(new IdeChildrenGroup(new WoofProcedureNextItem()));
 //		childGroups.add(new IdeChildrenGroup(new WoofProcedureOutputItem()));
 	}
 
