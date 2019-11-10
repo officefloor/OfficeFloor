@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -132,6 +133,11 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 	private int activeEditCount = 0;
 
 	/**
+	 * Index of change.
+	 */
+	private int changeIndex = 0;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param label Label.
@@ -157,11 +163,59 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 	 * @param editLogic Logic to edit the table.
 	 */
 	private void doEdit(Runnable editLogic) {
+
+		// Undertaking change, so update index
+		this.changeIndex++;
+
+		// Undertake edit
 		try {
 			this.activeEditCount++;
 			editLogic.run();
 		} finally {
 			this.activeEditCount--;
+		}
+	}
+
+	/**
+	 * {@link ObjectProperty} updates only fire if different
+	 * {@link Object#equals(Object)}. Can not trust objects to properly indicate
+	 * different. Therefore, enable update fire on every update.
+	 */
+	private static class ChangeArrayList<E> extends ArrayList<E> {
+
+		/**
+		 * Default serialise version.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Index of change to identify if change.
+		 */
+		private final int changeIndex;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param size        Size of {@link ArrayList}.
+		 * @param changeIndex Index of change.
+		 */
+		private ChangeArrayList(int size, int changeIndex) {
+			super(size);
+			this.changeIndex = changeIndex;
+		}
+
+		/*
+		 * =========== Object ===================
+		 */
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public boolean equals(Object obj) {
+			if (!(obj instanceof ChangeArrayList)) {
+				return false; // never match other array type
+			}
+			ChangeArrayList<?> that = (ChangeArrayList<E>) obj;
+			return this.changeIndex == that.changeIndex;
 		}
 	}
 
@@ -181,7 +235,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 
 		// Update the items
 		Runnable loadRowsToItems = () -> {
-			List<I> updatedItems = new ArrayList<>(rows.size());
+			List<I> updatedItems = new ChangeArrayList<>(rows.size(), this.changeIndex);
 			for (Row row : rows) {
 				if (row.item != null) {
 					updatedItems.add(row.item);
@@ -220,16 +274,14 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 			});
 			if (columnRenderer.isEditable()) {
 				// Column editable
-				column.setOnEditCommit((event) -> this.doEdit(() -> {
+				column.setOnEditCommit((event) -> {
 
 					// Load the value into the cell
+					// Note: cell change fires list change event
 					Row row = table.getItems().get(event.getTablePosition().getRow());
 					Property cellValue = row.cells[columnIndex].getValue();
 					cellValue.setValue(event.getNewValue());
-
-					// Update the items
-					loadRowsToItems.run();
-				}));
+				});
 				column.getStyleClass().add("configurer-column-editable");
 
 			} else {
@@ -508,8 +560,9 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 			for (int i = 0; i < this.cells.length; i++) {
 				this.cells[i] = ListBuilderImpl.this.renderers.get(i).createCellRenderer(this);
 
-				// Trigger updating
-				this.cells[i].getValue().addListener((observable, oldValue, newValue) -> this.updater.run());
+				// Trigger updating (consider edit to fire change event)
+				this.cells[i].getValue().addListener(
+						(observable, oldValue, newValue) -> ListBuilderImpl.this.doEdit(() -> this.updater.run()));
 			}
 
 			// Provide the delete (except for add row - null item)

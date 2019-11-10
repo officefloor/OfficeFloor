@@ -147,7 +147,7 @@
         <redirect path="/continuation/section"/>
       </output>
     </security>
-    <security name="Security to Procedure" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1320" y="395">
+    <security name="Security to Procedure" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1320" y="396">
       <property name="realm" value="OfficeFloor"/>
       <output name="form" argument-type="java.lang.Void">
         <procedure name="procedure"/>
