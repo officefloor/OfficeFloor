@@ -196,8 +196,10 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 				// (work around for GEF drag/drop aborting on focus change)
 			}
 		};
-		scroll.prefWidthProperty().bind(configurationNode.widthProperty());
-		scroll.prefHeightProperty().bind(configurationNode.heightProperty());
+		scroll.minWidthProperty().bind(configurationNode.widthProperty());
+		scroll.maxWidthProperty().bind(configurationNode.widthProperty());
+		scroll.minHeightProperty().bind(configurationNode.heightProperty().subtract(100));
+		scroll.maxHeightProperty().bind(configurationNode.heightProperty().subtract(100));
 		scroll.setFitToWidth(true);
 		scroll.getStyleClass().add("configurer-container");
 
@@ -294,7 +296,8 @@ public abstract class AbstractConfigurationBuilder<M> implements ConfigurationBu
 			}
 		};
 		grid.widthProperty().addListener(listener);
-		listener.changed(null, null, null); // organise initial view
+		lister.organiseWide(1); // ensure initially laid out
+		listener.changed(null, null, null); // now make responsive to size
 
 		// Ensure display potential error
 		lister.refreshError();
