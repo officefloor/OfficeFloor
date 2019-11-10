@@ -29,6 +29,8 @@ import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel.WoofHttpContinuationEvent;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
 import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
@@ -40,6 +42,7 @@ import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
 import net.officefloor.woof.model.woof.WoofTemplateOutputModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputModel.WoofTemplateOutputEvent;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofSecurityModel;
@@ -81,7 +84,8 @@ public class WoofTemplateOutputItem extends
 		context.addNode(container, context.connector(DefaultConnectors.FLOW)
 				.target(WoofTemplateOutputToWoofSectionInputModel.class, WoofTemplateOutputToWoofTemplateModel.class,
 						WoofTemplateOutputToWoofResourceModel.class, WoofTemplateOutputToWoofSecurityModel.class,
-						WoofTemplateOutputToWoofHttpContinuationModel.class)
+						WoofTemplateOutputToWoofHttpContinuationModel.class,
+						WoofTemplateOutputToWoofProcedureModel.class)
 				.getNode());
 		return container;
 	}
@@ -150,31 +154,27 @@ public class WoofTemplateOutputItem extends
 				}));
 
 		// HTTP Continuation
-		connections
-				.add(new IdeConnection<>(WoofTemplateOutputToWoofHttpContinuationModel.class)
-						.connectOne(s -> s.getWoofHttpContinuation(), c -> c.getWoofTemplateOutput(),
-								WoofTemplateOutputEvent.CHANGE_WOOF_HTTP_CONTINUATION)
-						.to(WoofHttpContinuationModel.class)
-						.many(t -> t.getWoofTemplateOutputs(), c -> c.getWoofHttpContinuation(),
-								WoofHttpContinuationEvent.ADD_WOOF_TEMPLATE_OUTPUT,
-								WoofHttpContinuationEvent.REMOVE_WOOF_TEMPLATE_OUTPUT)
-						.create((s, t, ctx) -> {
+		connections.add(new IdeConnection<>(WoofTemplateOutputToWoofHttpContinuationModel.class)
+				.connectOne(s -> s.getWoofHttpContinuation(), c -> c.getWoofTemplateOutput(),
+						WoofTemplateOutputEvent.CHANGE_WOOF_HTTP_CONTINUATION)
+				.to(WoofHttpContinuationModel.class).many(t -> t.getWoofTemplateOutputs(),
+						c -> c.getWoofHttpContinuation(), WoofHttpContinuationEvent.ADD_WOOF_TEMPLATE_OUTPUT,
+						WoofHttpContinuationEvent.REMOVE_WOOF_TEMPLATE_OUTPUT));
+		// TODO implement Template Output to HTTP Continuation
 
-							// TODO REMOVE
-							throw new UnsupportedOperationException(
-									"TODO implement connect TemplateOutput to HTTP Continuation");
-
-							// ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToHttpContinuation(s,
-							// t));
-						}).delete((ctx) -> {
-
-							// TODO REMOVE
-							throw new UnsupportedOperationException(
-									"TODO implement remove TemplateOutput to HTTP Continuation");
-
-							// ctx.getChangeExecutor().execute(
-							// ctx.getOperations().removeTemplateOutputToHttpContinuation(ctx.getModel()));
-						}));
+		// Procedure
+		connections.add(new IdeConnection<>(WoofTemplateOutputToWoofProcedureModel.class)
+				.connectOne(s -> s.getWoofProcedure(), c -> c.getWoofTemplateOutput(),
+						WoofTemplateOutputEvent.CHANGE_WOOF_PROCEDURE)
+				.to(WoofProcedureModel.class)
+				.many(t -> t.getWoofTemplateOutputs(), c -> c.getWoofProcedure(),
+						WoofProcedureEvent.ADD_WOOF_TEMPLATE_OUTPUT, WoofProcedureEvent.REMOVE_WOOF_TEMPLATE_OUTPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkTemplateOutputToProcedure(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor()
+							.execute(ctx.getOperations().removeTemplateOutputToProcedure(ctx.getModel()));
+				}));
 	}
 
 }

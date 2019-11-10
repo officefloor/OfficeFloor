@@ -40,12 +40,17 @@
     </http-input>
   </http-inputs>
   <templates>
-    <template path="/template/resource" location="net/officefloor/gef/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1253" y="619">
+    <template path="/template/procedure" location="net/officefloor/gef/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1242" y="692">
+      <output name="link" argument-type="">
+        <procedure name="procedure"/>
+      </output>
+    </template>
+    <template path="/template/resource" location="net/officefloor/gef/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1242" y="568">
       <output name="link" argument-type="">
         <resource path="/resource"/>
       </output>
     </template>
-    <template path="/template/sectionAndTemplate" location="net/officefloor/gef/woof/test/Template.html" class="net.officefloor.gef.woof.test.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1258" y="520">
+    <template path="/template/sectionAndTemplate" location="net/officefloor/gef/woof/test/Template.html" class="net.officefloor.gef.woof.test.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1245" y="482">
       <output name="flow" argument-type="">
         <section name="Section" input="input"/>
       </output>
@@ -53,7 +58,7 @@
         <template path="/template/resource"/>
       </output>
     </template>
-    <template path="/template/security" location="net/officefloor/gef/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1255" y="699">
+    <template path="/template/security" location="net/officefloor/gef/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1240" y="631">
       <extends template="/template/sectionAndTemplate"/>
       <output name="link" argument-type="">
         <security name="Form Security"/>

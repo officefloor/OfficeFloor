@@ -57,6 +57,7 @@ import net.officefloor.woof.model.woof.WoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofSectionOutputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofStartToWoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofTemplateOutputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 
 /**
@@ -172,12 +173,8 @@ public class WoofProcedureItem extends
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofProcedureModel.class,
 						WoofHttpInputToWoofProcedureModel.class, WoofExceptionToWoofProcedureModel.class,
 						WoofStartToWoofProcedureModel.class, WoofSectionOutputToWoofProcedureModel.class,
-						WoofSecurityOutputToWoofProcedureModel.class).getNode());
-
-//		WoofHttpInputToWoofProcedureModel.class, WoofTemplateOutputToWoofProcedureModel.class,
-//		WoofSecurityOutputToWoofProcedureModel.class, WoofSectionOutputToWoofProcedureModel.class,
-//		WoofExceptionToWoofProcedureModel.class, WoofStartToWoofProcedureModel.class
-
+						WoofSecurityOutputToWoofProcedureModel.class, WoofTemplateOutputToWoofProcedureModel.class)
+						.getNode());
 		context.label(procedure);
 //		HBox children = context.addNode(container, new HBox());
 //		VBox outputs = context.addNode(children, new VBox());
