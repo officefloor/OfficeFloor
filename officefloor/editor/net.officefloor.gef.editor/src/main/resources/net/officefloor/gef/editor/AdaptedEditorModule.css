@@ -23,6 +23,11 @@
 	-fx-font-weight: bold;
 }
 
+.parent > HBox > .label {
+	-fx-cursor: move;
+	-fx-font-weight: bold;
+}
+
 .parent HBox {
 	-fx-spacing: 0.5em;
 	-fx-padding: 0.0 0.0 0.0 1.0em;

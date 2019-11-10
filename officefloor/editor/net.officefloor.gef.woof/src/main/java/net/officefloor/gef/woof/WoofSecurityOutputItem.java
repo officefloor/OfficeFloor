@@ -29,6 +29,8 @@ import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel.WoofHttpContinuationEvent;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
 import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
@@ -38,6 +40,7 @@ import net.officefloor.woof.model.woof.WoofSecurityModel.WoofSecurityEvent;
 import net.officefloor.woof.model.woof.WoofSecurityOutputModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputModel.WoofSecurityOutputEvent;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofSecurityModel;
@@ -81,7 +84,8 @@ public class WoofSecurityOutputItem extends
 		context.addNode(container, context.connector(DefaultConnectors.FLOW)
 				.target(WoofSecurityOutputToWoofSectionInputModel.class, WoofSecurityOutputToWoofTemplateModel.class,
 						WoofSecurityOutputToWoofResourceModel.class, WoofSecurityOutputToWoofSecurityModel.class,
-						WoofSecurityOutputToWoofHttpContinuationModel.class)
+						WoofSecurityOutputToWoofHttpContinuationModel.class,
+						WoofSecurityOutputToWoofProcedureModel.class)
 				.getNode());
 		return container;
 	}
@@ -165,6 +169,20 @@ public class WoofSecurityOutputItem extends
 							ctx.getChangeExecutor().execute(
 									ctx.getOperations().removeSecurityOutputToHttpContinuation(ctx.getModel()));
 						}));
+
+		// Procedure
+		connections.add(new IdeConnection<>(WoofSecurityOutputToWoofProcedureModel.class)
+				.connectOne(s -> s.getWoofProcedure(), c -> c.getWoofSecurityOutput(),
+						WoofSecurityOutputEvent.CHANGE_WOOF_PROCEDURE)
+				.to(WoofProcedureModel.class)
+				.many(t -> t.getWoofSecurityOutputs(), c -> c.getWoofProcedure(),
+						WoofProcedureEvent.ADD_WOOF_SECURITY_OUTPUT, WoofProcedureEvent.REMOVE_WOOF_SECURITY_OUTPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkSecurityOutputToProcedure(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor()
+							.execute(ctx.getOperations().removeSecurityOutputToProcedure(ctx.getModel()));
+				}));
 	}
 
 }

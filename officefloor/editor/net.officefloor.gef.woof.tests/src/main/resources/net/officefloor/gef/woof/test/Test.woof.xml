@@ -1,5 +1,8 @@
 <woof>
   <http-continuations>
+    <http-continuation path="/continuation/procedure" secure="false" x="213" y="239">
+      <procedure name="procedure"/>
+    </http-continuation>
     <http-continuation path="/continuation/redirect" secure="false" x="212" y="195">
       <redirect path="/continuation/section"/>
     </http-continuation>
@@ -17,19 +20,22 @@
     </http-continuation>
   </http-continuations>
   <http-inputs>
-    <http-input path="/input/security" method="DELETE" secure="false" x="206" y="485">
+    <http-input path="/input/security" method="DELETE" secure="false" x="208" y="459">
       <security name="Form Security"/>
     </http-input>
-    <http-input path="/input/continuation" method="POST" secure="false" x="204" y="530">
+    <http-input path="/input/continuation" method="POST" secure="false" x="206" y="504">
       <redirect path="/continuation/section"/>
     </http-input>
-    <http-input path="/input/section" method="POST" secure="false" x="215" y="359">
+    <http-input path="/input/procedure" method="POST" secure="false" x="209" y="546">
+      <procedure name="procedure"/>
+    </http-input>
+    <http-input path="/input/section" method="POST" secure="false" x="217" y="333">
       <section name="Section" input="input"/>
     </http-input>
-    <http-input path="/input/template" method="POST" secure="false" x="210" y="401">
+    <http-input path="/input/template" method="POST" secure="false" x="212" y="375">
       <template path="/template/sectionAndTemplate"/>
     </http-input>
-    <http-input path="/input/resource" method="PUT" secure="false" x="208" y="442">
+    <http-input path="/input/resource" method="PUT" secure="false" x="210" y="416">
       <resource path="/resource"/>
     </http-input>
   </http-inputs>
@@ -58,6 +64,12 @@
     <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="960" y="173">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
+      </output>
+    </section>
+    <section name="Section to Procedure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="968" y="594">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+        <procedure name="procedure"/>
       </output>
     </section>
     <section name="Section to Resource" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="964" y="390">
@@ -92,41 +104,53 @@
     </section>
   </sections>
   <procedures>
+    <procedure name="procedure" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="558" y="229">
+      <next argument-type="">
+      </next>
+      <output name="flow" argument-type="">
+      </output>
+    </procedure>
   </procedures>
   <securities>
     <security name="Basic Security" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="1317" y="31">
       <property name="realm" value="OfficeFloor"/>
       <content type="application/json"/>
     </security>
-    <security name="Form Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1314" y="79">
+    <security name="Form Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1317" y="73">
       <property name="realm" value="OfficeFloor"/>
       <content type="text/html"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
         <section name="Section" input="input"/>
       </output>
     </security>
-    <security name="Security to Template" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1316" y="151">
+    <security name="Security to Template" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1318" y="137">
       <property name="realm" value="OfficeFloor"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
         <template path="/template/sectionAndTemplate"/>
       </output>
     </security>
-    <security name="Security to Resource" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1316" y="226">
+    <security name="Security to Resource" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1315" y="201">
       <property name="realm" value="OfficeFloor"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
         <resource path="/resource"/>
       </output>
     </security>
-    <security name="Security To Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1318" y="310">
+    <security name="Security To Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1318" y="266">
       <property name="realm" value="OfficeFloor"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
         <security name="Form Security"/>
       </output>
     </security>
-    <security name="Security to Continuation" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1329" y="383">
+    <security name="Security to Continuation" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1319" y="331">
       <property name="realm" value="OfficeFloor"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
         <redirect path="/continuation/section"/>
+      </output>
+    </security>
+    <security name="Security to Procedure" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1320" y="395">
+      <property name="realm" value="OfficeFloor"/>
+      <output name="form" argument-type="java.lang.Void">
+        <procedure name="procedure"/>
       </output>
     </security>
   </securities>
@@ -140,25 +164,31 @@
     <resource path="/resource" x="1373" y="816"/>
   </resources>
   <exceptions>
-    <exception class="java.io.IOException" x="215" y="684">
+    <exception class="java.io.IOException" x="206" y="641">
       <section name="Section" input="input"/>
     </exception>
-    <exception class="java.lang.Exception" x="212" y="863">
+    <exception class="java.lang.Exception" x="203" y="820">
       <redirect path="/continuation/section"/>
     </exception>
-    <exception class="java.lang.IllegalStateException" x="214" y="819">
+    <exception class="java.lang.IllegalArgumentException" x="200" y="863">
+      <procedure name="procedure"/>
+    </exception>
+    <exception class="java.lang.IllegalStateException" x="205" y="776">
       <security name="Security to Template"/>
     </exception>
-    <exception class="java.lang.NullPointerException" x="212" y="729">
+    <exception class="java.lang.NullPointerException" x="203" y="686">
       <template path="/template/sectionAndTemplate"/>
     </exception>
-    <exception class="java.lang.NumberFormatException" x="215" y="775">
+    <exception class="java.lang.NumberFormatException" x="206" y="732">
       <resource path="/resource"/>
     </exception>
   </exceptions>
   <starting>
     <start x="719" y="8">
       <section name="Section" input="input"/>
+    </start>
+    <start x="722" y="55">
+      <procedure name="procedure"/>
     </start>
   </starting>
 </woof>

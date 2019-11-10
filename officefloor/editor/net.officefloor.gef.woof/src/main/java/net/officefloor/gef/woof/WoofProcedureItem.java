@@ -48,10 +48,15 @@ import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.gef.editor.DefaultConnectors;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.woof.model.woof.WoofChanges;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofHttpInputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofSectionOutputToWoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofStartToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 
 /**
@@ -164,7 +169,10 @@ public class WoofProcedureItem extends
 		VBox container = new VBox();
 		HBox procedure = context.addNode(container, new HBox());
 		context.addNode(procedure,
-				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofProcedureModel.class).getNode());
+				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofProcedureModel.class,
+						WoofHttpInputToWoofProcedureModel.class, WoofExceptionToWoofProcedureModel.class,
+						WoofStartToWoofProcedureModel.class, WoofSectionOutputToWoofProcedureModel.class,
+						WoofSecurityOutputToWoofProcedureModel.class).getNode());
 
 //		WoofHttpInputToWoofProcedureModel.class, WoofTemplateOutputToWoofProcedureModel.class,
 //		WoofSecurityOutputToWoofProcedureModel.class, WoofSectionOutputToWoofProcedureModel.class,

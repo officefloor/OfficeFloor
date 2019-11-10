@@ -127,6 +127,11 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 	private boolean isDelete = false;
 
 	/**
+	 * Indicates if active edit is underway.
+	 */
+	private int activeEditCount = 0;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param label Label.
@@ -144,6 +149,20 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 	private <V, B extends ColumnRenderer<I, V>> B registerBuilder(B builder) {
 		this.renderers.add(builder);
 		return builder;
+	}
+
+	/**
+	 * Undertakes an edit of the table.
+	 * 
+	 * @param editLogic Logic to edit the table.
+	 */
+	private void doEdit(Runnable editLogic) {
+		try {
+			this.activeEditCount++;
+			editLogic.run();
+		} finally {
+			this.activeEditCount--;
+		}
 	}
 
 	/*
@@ -201,7 +220,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 			});
 			if (columnRenderer.isEditable()) {
 				// Column editable
-				column.setOnEditCommit((event) -> {
+				column.setOnEditCommit((event) -> this.doEdit(() -> {
 
 					// Load the value into the cell
 					Row row = table.getItems().get(event.getTablePosition().getRow());
@@ -210,7 +229,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 
 					// Update the items
 					loadRowsToItems.run();
-				});
+				}));
 				column.getStyleClass().add("configurer-column-editable");
 
 			} else {
@@ -244,7 +263,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 						if ((!this.isEmpty()) && (item != null)) {
 
 							// Click anywhere on cell to delete
-							this.setOnMouseClicked((event) -> item.deleteRow());
+							this.setOnMouseClicked((event) -> ListBuilderImpl.this.doEdit(() -> item.deleteRow()));
 
 							// Delete row icon
 							this.setGraphic(
@@ -266,7 +285,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		table.getColumns().setAll(columns);
 
 		// Hook in typing to start edit
-		table.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
+		table.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> this.doEdit(() -> {
 
 			// Obtain the selected row
 			if (table.getSelectionModel().getSelectedCells().size() == 0) {
@@ -356,43 +375,35 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 					return;
 				}
 			}
-		});
+		}));
 
 		// Load the rows
-		boolean isUpdatingRows[] = new boolean[] { false };
 		Runnable loadRows = () -> {
 
-			// Ensure only update once
-			if (isUpdatingRows[0]) {
+			// Do not load if editing (avoid cyclic table change)
+			if (this.activeEditCount > 0) {
 				return;
 			}
 
 			// Load the rows
-			isUpdatingRows[0] = true;
-			try {
-				// Load the rows
-				List<I> items = itemsProperty.getValue();
-				List<Row> updatedRows = new ArrayList<>();
-				if (items != null) {
-					for (I item : items) {
-						updatedRows.add(new Row(table, loadRowsToItems, item, context));
-					}
+			List<I> items = itemsProperty.getValue();
+			List<Row> updatedRows = new ArrayList<>();
+			if (items != null) {
+				for (I item : items) {
+					updatedRows.add(new Row(table, loadRowsToItems, item, context));
 				}
-
-				// Determine if able to add rows
-				if (this.itemFactory != null) {
-					updatedRows.add(new AddRow(table, loadRowsToItems, context));
-				}
-
-				// Load rows to the table
-				rows.setAll(updatedRows);
-
-			} finally {
-				isUpdatingRows[0] = false;
 			}
+
+			// Determine if able to add rows
+			if (this.itemFactory != null) {
+				updatedRows.add(new AddRow(table, loadRowsToItems, context));
+			}
+
+			// Load rows to the table
+			rows.setAll(updatedRows);
 		};
 
-		// Handle change in rows
+		// Handle external change in rows
 		itemsProperty.addListener((observable, oldValue, newValue) -> loadRows.run());
 
 		// Load initial rows
@@ -573,14 +584,16 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		 * @param table {@link TableView}.
 		 */
 		private void addRow() {
+			ListBuilderImpl.this.doEdit(() -> {
 
-			// Create the new row
-			I newItem = ListBuilderImpl.this.itemFactory.get();
-			Row newRow = new Row(this.table, this.updater, newItem, this.context);
+				// Create the new row
+				I newItem = ListBuilderImpl.this.itemFactory.get();
+				Row newRow = new Row(this.table, this.updater, newItem, this.context);
 
-			// Add the row (before the add row)
-			ObservableList<Row> items = this.table.getItems();
-			items.add(items.size() - 1, newRow);
+				// Add the row (before the add row)
+				ObservableList<Row> items = this.table.getItems();
+				items.add(items.size() - 1, newRow);
+			});
 		}
 	}
 
@@ -614,7 +627,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		 * Deletes the {@link Row}.
 		 */
 		public void deleteRow() {
-			this.table.getItems().remove(this.row);
+			ListBuilderImpl.this.doEdit(() -> this.table.getItems().remove(this.row));
 		}
 	}
 
