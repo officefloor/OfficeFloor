@@ -114,7 +114,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		errorTooltip.getStyleClass().add("error-tooltip");
 		Tooltip.install(error, errorTooltip);
 		ChangeListener<Throwable> listener = (observable, oldValue, newValue) -> {
-			Throwable cause = errorProperty.getValue();
+			Throwable cause = newValue;
 			if (cause != null) {
 				// Display the error
 				errorTooltip.setText(cause.getMessage());
@@ -245,26 +245,32 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			// Obtain the model
 			M model = this.context.getModel();
 
+			// Load all the validators
+			this.validators.addAll(AbstractBuilder.this.validators);
+
 			// Initialise to model
 			this.loadValue();
 
-			// Refresh on error or value change
-			this.error.addListener((observable, oldValue, newValue) -> this.context.refreshError());
-			this.value.addListener((observable, oldValue, newValue) -> this.context.refreshError());
-
-			// Load value to model (so model consistent before validation)
-			if (AbstractBuilder.this.valueLoader != null) {
-				this.value.addListener((observable, oldValue, newValue) -> AbstractBuilder.this.valueLoader
-						.loadValue(model, this.value.getValue()));
-			}
-
-			// Undertake validation (after loading value to model)
-			this.validators.addAll(AbstractBuilder.this.validators);
-			this.value.addListener((observable, oldValue, newValue) -> this.validate());
+			// Validate initial value
 			this.validate(); // validate initial value
 
-			// Track model becoming dirty
-			this.value.addListener((observable, oldValue, newValue) -> context.dirtyProperty().setValue(true));
+			// Refresh on error
+			this.error.addListener((observable, oldValue, newValue) -> this.context.refreshError());
+
+			// Listen to changes of value
+			this.value.addListener((observable, oldValue, newValue) -> {
+
+				// Load value to model (so model consistent before validation)
+				if (AbstractBuilder.this.valueLoader != null) {
+					AbstractBuilder.this.valueLoader.loadValue(model, newValue);
+				}
+
+				// Track model becoming dirty
+				context.dirtyProperty().setValue(true);
+
+				// Undertake validation (after loading value to model)
+				this.validate();
+			});
 		}
 
 		/**
@@ -306,6 +312,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			if (!this.isError) {
 				// No error in validate, so clear error
 				this.setError(null);
+				
+				// Refresh all error
+				this.context.refreshError();
 			}
 		}
 
