@@ -1,33 +1,25 @@
 				       ------------------
-				    My First WoOF Application
+				    My First OfficeFloor Application
 				       ------------------
 				      Daniel Sagenschneider
 				       ------------------
 
-  <<My first WoOF application>>
+My first OfficeFloor application
   
   This tutorial walks you through creating and running your first Web on OfficeFloor (WoOF) application.
-  
-%{toc}
-
-Setup
-
-  The following are the pre-requisite setup before working through the tutorial:
-
-   [[1]] Install {{{http://maven.apache.org/download.html}Maven}}
-  
-   [[1]] Install {{{http://www.eclipse.org/downloads/}Eclipse}}
-   
-   [[1]] Install the {{{http://marketplace.eclipse.org/content/officefloor}OfficeFloor plug-in}} into Eclipse
 
 
 
-Creating the WoOF project
+*Quick project setup
 
-  To create a WoOF project use the Maven WoOF archetype.  Run the following within an empty directory:
+  To create a Web on OfficeFloor (WoOF) project use the {{{http://maven.apache.org/download.html}Maven}} WoOF archetype.  Run the following within an empty directory:
 
 +-----------------------------------------+
+
+
     mvn archetype:generate -DarchetypeGroupId=${projectGroupId} -DarchetypeArtifactId=${projectArtifactId}
+
+
 +-----------------------------------------+
 
   Select <<<${projectGroupId}:${projectArtifactId}>>> (if not already selected) and provide the Maven configuration parameters.  The tutorial uses the following parameters:
@@ -39,53 +31,19 @@ Creating the WoOF project
   Change into the created directory and run the following to build the project:
   
 +-----------------------------------------+
+
+
     mvn install
+
+
 +-----------------------------------------+
 
 
 
-Running the WoOF project from Maven
+*Application code
 
-  Once the project is built, run the following within the project directory to start the application:
-
-+-----------------------------------------+
-    mvn net.officefloor.maven:officefloor-maven-plugin:${projectVersion}:open
-+-----------------------------------------+
-
-  Or add the following to maven <settings.xml>:
+  Web on OfficeFloor (WoOF) is configured through the <<<application.woof>>> file.  Opening this file will provide the following graphical configuration for the application. See {{{../../install.html}install}} for adding the OfficeFloor plugin to your favourite IDE.
   
-+-----------------------------------------+
-  <pluginGroups>
-    <pluginGroup>net.officefloor.maven</pluginGroup>
-  </pluginGroups>
-+-----------------------------------------+
-
-  to run the simpler command:
-
-+-----------------------------------------+
-    mvn officefloor:open
-+-----------------------------------------+
-  
-  To stop the application, run:
-
-+-----------------------------------------+
-    mvn officefloor:close
-+-----------------------------------------+
-
-
-
-
-Running the WoOF project from within Eclipse
-
-  To run the WoOF project from within Eclipse, right click on the <<<application.woof>>> file and <<<Run as... OfficeFloor>>>.
-
-
-
-
-WoOF graphical configuration
-
-  WoOF is configured through the <<<application.woof>>> file.  Opening this file with the OfficeFloor Eclipse Plug-in (i.e. WoOF Editor) will provide the following graphical configuration for the application.
-
 [./images/woof-archetype-configuration.png] WoOF archetype project configuration.
 
   The very simple configuration shows servicing a REST call.
@@ -94,23 +52,66 @@ WoOF graphical configuration
   
 %{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/main/java/net/officefloor/test/HelloLogic.java|ignoreDownloadError=false}
 
-  There are various other configuration items that can be added by dragging from the palette (hover over the bar on the left).
-  
   Please see the {{{../../tutorials/index.html}other tutorials}} for explanation of the code and the further features available.
 
 
 
-Unit testing the WoOF application
+*Unit testing the application
 
   The following unit test shows the ease in which to start and stop the application for unit testing.
   
 %{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/test/java/net/officefloor/test/RunApplicationTest.java|ignoreDownloadError=false}
+
+  As there are no socket overheads, the server is fast enough to be started and stopped for unit testing.
+
+
+*Running the application
+
+  Once the project is built, run the following within the project directory to start the application:
+
++-----------------------------------------+
+
+
+    mvn net.officefloor.maven:officefloor-maven-plugin:${projectVersion}:open
+
+
++-----------------------------------------+
+
+  The application will be available at: {{http://localhost:7878/hi/World}}
+
+  To make the commands easier, add the following to your maven <<<~/.m2/settings.xml>>> file:
+  
++-----------------------------------------+
+  <pluginGroups>
+    <pluginGroup>net.officefloor.maven</pluginGroup>
+  </pluginGroups>
++-----------------------------------------+
+
+  This will allow running the simpler command to start the application:
+
++-----------------------------------------+
+
+
+    mvn officefloor:open
+
+
++-----------------------------------------+
+  
+  And the following to stop the application:
+
++-----------------------------------------+
+
+
+    mvn officefloor:close
+
+
++-----------------------------------------+
   
   
 
 Congratulations
 
-  Congratulations you have just created and run your first WoOF web application.
+  Congratulations you have just created and run your first application.
   
-  The {{{../../tutorials/NavigateHttpServer/index.html}next tutorial}} covers configuring flows of the WoOF application.
+  The {{{../../tutorials/NavigateHttpServer/index.html}next tutorial}} covers configuring flows.
 

@@ -20,7 +20,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{../maven/woof-archetype/index.html}My first WoOF application}} | Walks through the simple steps to create and run an OfficeFloor (WoOF) web application. | {{{http://maven.apache.org}Maven}} and {{{http://eclipse.org}Eclipse}} plug-ins |
+| {{{../maven/woof-archetype/index.html}My first application}} | Walks through the simple steps to create and run an OfficeFloor web application. |  |
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./NavigateHttpServer/index.html}Configuring flows}}       | Controlling execution flow (avoiding need for refactoring). | @Next , @FlowInterface\
 |                                                              |                                                            | (Continuation Injection)
