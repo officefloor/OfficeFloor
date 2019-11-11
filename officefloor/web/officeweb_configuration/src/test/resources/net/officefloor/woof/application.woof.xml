@@ -136,6 +136,10 @@
 			</output>
 		</procedure>
 		<procedure name="PROCEDURE_B" resource="net.example.SecondProcedure" source="JavaScript"
+			procedure="function">
+			<next />
+		</procedure>
+		<procedure name="PROCEDURE_C" resource="net.example.ThirdProcedure" source="JavaScript"
 			procedure="function" />
 	</procedures>
 

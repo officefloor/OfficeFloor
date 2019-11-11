@@ -795,7 +795,11 @@ public class WoofLoaderImpl implements WoofLoader {
 				String procedureName = procedureModel.getProcedureName();
 
 				// Determine if next
-				boolean isNext = procedureModel.getNext() != null;
+				WoofProcedureNextModel nextModel = procedureModel.getNext();
+				boolean isNext = (nextModel != null)
+						&& ((nextModel.getWoofHttpContinuation() != null) || (nextModel.getWoofProcedure() != null)
+								|| (nextModel.getWoofResource() != null) || (nextModel.getWoofSectionInput() != null)
+								|| (nextModel.getWoofSecurity() != null) || (nextModel.getWoofTemplate() != null));
 
 				// Load the properties
 				PropertyList properties = this.extensionContext.createPropertyList();

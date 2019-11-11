@@ -29,7 +29,9 @@
 	</sections>
 	
 	<procedures>
-		<procedure name="Procedure" resource="net.officefloor.woof.MockProcedure" source="Class" procedure="procedure" />
+		<procedure name="Procedure" resource="net.officefloor.woof.MockProcedure" source="Class" procedure="procedure">
+			<next />
+		</procedure>
 	</procedures>
 
 </woof>

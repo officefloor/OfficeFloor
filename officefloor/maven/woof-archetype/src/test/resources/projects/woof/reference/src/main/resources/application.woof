@@ -1,7 +1,7 @@
 <woof>
   <http-continuations>
     <http-continuation path="/hi/{name}" secure="false" x="46" y="55">
-      <section name="HelloSection" input="hello"/>
+      <procedure name="hello"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
@@ -9,10 +9,13 @@
   <templates>
   </templates>
   <sections>
-    <section name="HelloSection" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.test.HelloLogic" x="252" y="39">
-      <input name="hello" parameter-type=""/>
-    </section>
   </sections>
+  <procedures>
+    <procedure name="hello" resource="net.officefloor.test.HelloLogic" source="Class" procedure="hello" x="242" y="53">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
   <securities>
   </securities>
   <governances>
