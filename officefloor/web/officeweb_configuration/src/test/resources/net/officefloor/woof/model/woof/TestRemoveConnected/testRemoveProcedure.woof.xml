@@ -1,0 +1,137 @@
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/applicationPath">
+			<section name="SECTION" input="INPUT" />
+			<template path="/template" />
+			<security name="SECURITY" />
+			<resource path="/resource.html" />
+			<redirect path="/applicationPathLink" />
+		</http-continuation>
+		<http-continuation path="/applicationPathLink">
+			<redirect path="/applicationPath" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input method="POST" path="/inputPath">
+			<section name="SECTION" input="INPUT" />
+			<template path="/template" />
+			<security name="SECURITY" />
+			<resource path="/resource.html" />
+			<redirect path="/applicationPath" />
+		</http-input>
+	</http-inputs>
+
+	<templates>
+		<template path="/template" location="example/Template.ofp" class="net.example.LogicClass">
+			<extends template="/templateLink" />
+			<output name="OUTPUT_1">
+				<section name="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_2">
+				<template path="/templateLink" />
+			</output>
+			<output name="OUTPUT_3">
+				<security name="SECURITY" />
+			</output>
+			<output name="OUTPUT_4">
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_5">
+				<redirect path="/applicationPath" />
+			</output>
+			<output name="OUTPUT_6" />
+		</template>
+		<template path="/templateChild" location="example/Child.ofp">
+			<extends template="/template" />
+		</template>
+		<template path="/templateLink" location="example/Link.ofp">
+			<output name="OUTPUT">
+				<template path="/template" />
+			</output>
+		</template>
+	</templates>
+
+	<procedures>
+		<procedure name="PROCEDURE_LINK" resource="resource2" source="JavaScript" procedure="function">
+			<next />
+			<output name="OUTPUT" />
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT_A">
+				<section name="SECTION_LINK" input="INPUT" />
+			</output>
+			<output name="OUTPUT_B">
+				<template path="/template" />
+			</output>
+			<output name="OUTPUT_C">
+				<security name="SECURITY" />
+			</output>
+			<output name="OUTPUT_D">
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_E">
+				<redirect path="/applicationPath" />
+			</output>
+			<output name="OUTPUT_F" />
+		</section>
+		<section name="SECTION_LINK" source="net.example.LinkSectionSource" location="LINK_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<section name="SECTION" input="INPUT" />
+			</output>
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT_a">
+				<section name="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_b">
+				<template path="/template" />
+			</output>
+			<output name="OUTPUT_c">
+				<security name="SECURITY_LINK" />
+			</output>
+			<output name="OUTPUT_d">
+				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_e">
+				<redirect path="/applicationPath" />
+			</output>
+			<output name="OUTPUT_f" />
+		</security>
+		<security name="SECURITY_LINK" source="net.another.HttpSecuritySource">
+			<output name="OUTPUT">
+				<security name="SECURITY" />
+			</output>
+		</security>
+	</securities>
+
+	<resources>
+		<resource path="/resource.html" />
+	</resources>
+
+	<exceptions>
+		<exception class="java.lang.Exception">
+			<section name="SECTION" input="INPUT" />
+			<template path="/template" />
+			<security name="SECURITY" />
+			<resource path="/resource.html" />
+			<redirect path="/applicationPath" />
+		</exception>
+	</exceptions>
+
+	<starts>
+		<start>
+			<section name="SECTION" input="INPUT" />
+		</start>
+	</starts>
+
+</woof>

@@ -9,6 +9,11 @@
 		<template path="/template" />
 		<template path="/templateLink" />
 	</templates>
+	
+	<procedures>
+		<procedure name="PROCEDURE" />
+		<procedure name="PROCEDURE_LINK" />
+	</procedures>
 
 	<sections>
 		<section name="A">
@@ -19,6 +24,7 @@
 			<input name="INPUT" />
 			<output name="OUTPUT">
 				<template path="/template" />
+				<procedure name="PROCEDURE" />
 				<section name="A" input="INPUT" />
 				<security name="SECURITY" />
 				<redirect path="/path" />

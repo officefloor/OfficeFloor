@@ -1,45 +1,56 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/continuation/redirect" secure="false" x="219" y="241">
+    <http-continuation path="/continuation/procedure" secure="false" x="213" y="239">
+      <procedure name="procedureToSection"/>
+    </http-continuation>
+    <http-continuation path="/continuation/redirect" secure="false" x="212" y="195">
       <redirect path="/continuation/section"/>
     </http-continuation>
-    <http-continuation path="/continuation/resource" secure="false" x="218" y="125">
+    <http-continuation path="/continuation/resource" secure="false" x="214" y="107">
       <resource path="/resource"/>
     </http-continuation>
     <http-continuation path="/continuation/section" secure="true" x="216" y="24">
       <section name="Section" input="input"/>
     </http-continuation>
-    <http-continuation path="/continuation/security" secure="false" x="219" y="186">
+    <http-continuation path="/continuation/security" secure="false" x="214" y="151">
       <security name="Basic Security"/>
     </http-continuation>
-    <http-continuation path="/continuation/template" secure="false" x="216" y="71">
+    <http-continuation path="/continuation/template" secure="false" x="215" y="65">
       <template path="/template/sectionAndTemplate"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
-    <http-input path="/input/security" method="DELETE" secure="false" x="207" y="522">
+    <http-input path="/input/security" method="DELETE" secure="false" x="208" y="459">
       <security name="Form Security"/>
     </http-input>
-    <http-input path="/input/continuation" method="POST" secure="false" x="210" y="574">
-      <redirect path="/continuation/redirect"/>
+    <http-input path="/input/continuation" method="POST" secure="false" x="206" y="504">
+      <redirect path="/continuation/section"/>
     </http-input>
-    <http-input path="/input/section" method="POST" secure="false" x="215" y="359">
+    <http-input path="/input/procedure" method="POST" secure="false" x="209" y="546">
+      <procedure name="procedureToSection"/>
+    </http-input>
+    <http-input path="/input/section" method="POST" secure="false" x="217" y="333">
       <section name="Section" input="input"/>
     </http-input>
-    <http-input path="/input/template" method="POST" secure="false" x="210" y="411">
+    <http-input path="/input/template" method="POST" secure="false" x="212" y="375">
       <template path="/template/sectionAndTemplate"/>
     </http-input>
-    <http-input path="/input/resource" method="PUT" secure="false" x="212" y="470">
+    <http-input path="/input/resource" method="PUT" secure="false" x="210" y="416">
       <resource path="/resource"/>
     </http-input>
   </http-inputs>
   <templates>
-    <template path="/template/resource" location="net/officefloor/eclipse/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="634" y="142">
+    <template path="/template/procedure" location="net/officefloor/gef/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1242" y="692">
+      <output name="link" argument-type="">
+        <procedure name="procedureToSection"/>
+      </output>
+    </template>
+    <template path="/template/resource" location="net/officefloor/gef/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1242" y="568">
       <output name="link" argument-type="">
         <resource path="/resource"/>
       </output>
     </template>
-    <template path="/template/sectionAndTemplate" location="net/officefloor/eclipse/woof/test/Template.html" class="net.officefloor.eclipse.woof.test.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="510" y="24">
+    <template path="/template/sectionAndTemplate" location="net/officefloor/gef/woof/test/Template.html" class="net.officefloor.gef.woof.test.Template" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1245" y="482">
       <output name="flow" argument-type="">
         <section name="Section" input="input"/>
       </output>
@@ -47,7 +58,7 @@
         <template path="/template/resource"/>
       </output>
     </template>
-    <template path="/template/security" location="net/officefloor/eclipse/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="477" y="215">
+    <template path="/template/security" location="net/officefloor/gef/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1240" y="631">
       <extends template="/template/sectionAndTemplate"/>
       <output name="link" argument-type="">
         <security name="Form Security"/>
@@ -55,108 +66,176 @@
     </template>
   </templates>
   <sections>
-    <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="490" y="348">
+    <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="960" y="173">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
       </output>
     </section>
-    <section name="Section to Resource" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="494" y="565">
+    <section name="Section to Procedure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="968" y="594">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+        <procedure name="procedureToSection"/>
+      </output>
+    </section>
+    <section name="Section to Resource" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="964" y="390">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
         <resource path="/resource"/>
       </output>
     </section>
-    <section name="Section To Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="495" y="426">
+    <section name="Section To Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="965" y="251">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
         <section name="Section" input="input"/>
       </output>
     </section>
-    <section name="Section to Security" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="496" y="631">
+    <section name="Section to Security" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="966" y="456">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
         <security name="Form Security"/>
       </output>
     </section>
-    <section name="Section to Template" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="497" y="492">
+    <section name="Section to Template" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="967" y="317">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
         <template path="/template/sectionAndTemplate"/>
       </output>
     </section>
-    <section name="Security to Continuation" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.eclipse.woof.test.MockSection" x="498" y="700">
+    <section name="Security to Continuation" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="968" y="525">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
         <redirect path="/continuation/section"/>
       </output>
     </section>
   </sections>
+  <procedures>
+    <procedure name="procedureToSection" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="558" y="229">
+      <next argument-type="">
+        <section name="Section" input="input"/>
+      </next>
+      <output name="flow" argument-type="">
+        <section name="Section" input="input"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToTemplate" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="559" y="296">
+      <next argument-type="">
+        <template path="/template/sectionAndTemplate"/>
+      </next>
+      <output name="flow" argument-type="">
+        <template path="/template/sectionAndTemplate"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToResource" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="559" y="364">
+      <next argument-type="">
+        <resource path="/resource"/>
+      </next>
+      <output name="flow" argument-type="">
+        <resource path="/resource"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToSecurity" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="560" y="430">
+      <next argument-type="">
+        <security name="Basic Security"/>
+      </next>
+      <output name="flow" argument-type="">
+        <security name="Basic Security"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToContinuation" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="560" y="501">
+      <next argument-type="">
+        <redirect path="/continuation/section"/>
+      </next>
+      <output name="flow" argument-type="">
+        <redirect path="/continuation/section"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToProcedure" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="563" y="575">
+      <next argument-type="">
+        <procedure name="procedureToSection"/>
+      </next>
+      <output name="flow" argument-type="">
+        <procedure name="procedureToSection"/>
+      </output>
+    </procedure>
+  </procedures>
   <securities>
-    <security name="Basic Security" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="931" y="71">
+    <security name="Basic Security" source="net.officefloor.web.security.scheme.BasicHttpSecuritySource" timeout="5000" x="1317" y="31">
       <property name="realm" value="OfficeFloor"/>
       <content type="application/json"/>
     </security>
-    <security name="Form Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="928" y="119">
+    <security name="Form Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1317" y="73">
       <property name="realm" value="OfficeFloor"/>
       <content type="text/html"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
         <section name="Section" input="input"/>
       </output>
     </security>
-    <security name="Security to Template" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="930" y="191">
+    <security name="Security to Template" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1318" y="137">
       <property name="realm" value="OfficeFloor"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
         <template path="/template/sectionAndTemplate"/>
       </output>
     </security>
-    <security name="Security to Resource" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="930" y="266">
+    <security name="Security to Resource" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1315" y="201">
       <property name="realm" value="OfficeFloor"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
         <resource path="/resource"/>
       </output>
     </security>
-    <security name="Security To Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="932" y="350">
+    <security name="Security To Security" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1318" y="266">
       <property name="realm" value="OfficeFloor"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
         <security name="Form Security"/>
       </output>
     </security>
-    <security name="Security to Continuation" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="943" y="423">
+    <security name="Security to Continuation" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1319" y="331">
       <property name="realm" value="OfficeFloor"/>
       <output name="FORM_LOGIN_PAGE" argument-type="java.lang.Void">
         <redirect path="/continuation/section"/>
       </output>
     </security>
+    <security name="Security to Procedure" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1320" y="396">
+      <property name="realm" value="OfficeFloor"/>
+      <output name="form" argument-type="java.lang.Void">
+        <procedure name="procedureToSection"/>
+      </output>
+    </security>
   </securities>
   <governances>
-    <governance name="Governance" source="net.officefloor.plugin.governance.clazz.ClassGovernanceSource" x="732" y="431">
-      <property name="class.name" value="net.officefloor.eclipse.woof.test.MockGovernance"/>
-      <governance-area x="740" y="489" width="100" height="80"/>
+    <governance name="Governance" source="net.officefloor.plugin.governance.clazz.ClassGovernanceSource" x="698" y="776">
+      <property name="class.name" value="net.officefloor.gef.woof.test.MockGovernance"/>
+      <governance-area x="703" y="831" width="100" height="80"/>
     </governance>
   </governances>
   <resources>
-    <resource path="/resource" x="997" y="581"/>
+    <resource path="/resource" x="1373" y="816"/>
   </resources>
   <exceptions>
-    <exception class="java.io.IOException" x="214" y="658">
+    <exception class="java.io.IOException" x="206" y="641">
       <section name="Section" input="input"/>
     </exception>
-    <exception class="java.lang.Exception" x="211" y="837">
+    <exception class="java.lang.Exception" x="203" y="820">
       <redirect path="/continuation/section"/>
     </exception>
-    <exception class="java.lang.IllegalStateException" x="213" y="793">
+    <exception class="java.lang.IllegalArgumentException" x="200" y="863">
+      <procedure name="procedureToSection"/>
+    </exception>
+    <exception class="java.lang.IllegalStateException" x="205" y="776">
       <security name="Security to Template"/>
     </exception>
-    <exception class="java.lang.NullPointerException" x="211" y="703">
-      <template path="/template/security"/>
+    <exception class="java.lang.NullPointerException" x="203" y="686">
+      <template path="/template/sectionAndTemplate"/>
     </exception>
-    <exception class="java.lang.NumberFormatException" x="214" y="749">
+    <exception class="java.lang.NumberFormatException" x="206" y="732">
       <resource path="/resource"/>
     </exception>
   </exceptions>
   <starting>
-    <start x="863" y="674">
-      <section name="Section to Security" input="input"/>
+    <start x="719" y="8">
+      <section name="Section" input="input"/>
+    </start>
+    <start x="722" y="55">
+      <procedure name="procedureToSection"/>
     </start>
   </starting>
 </woof>

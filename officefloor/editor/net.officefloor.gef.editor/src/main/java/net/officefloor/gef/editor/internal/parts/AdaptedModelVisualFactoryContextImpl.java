@@ -24,6 +24,7 @@ import java.util.function.Function;
 import org.eclipse.gef.fx.nodes.GeometryNode;
 
 import javafx.scene.Node;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import net.officefloor.gef.editor.AdaptedActionVisualFactory;
@@ -117,6 +118,13 @@ public class AdaptedModelVisualFactoryContextImpl<M extends Model>
 	public <N extends Node> N addNode(Pane parent, N node) {
 		parent.getChildren().add(node);
 		return node;
+	}
+
+	@Override
+	public Pane addIndent(HBox parent) {
+		Pane indent = new Pane();
+		indent.getStyleClass().add("indent");
+		return this.addNode(parent, indent);
 	}
 
 	@Override

@@ -36,6 +36,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Scene;
 import net.officefloor.gef.editor.style.AbstractStyleRegistry;
 import net.officefloor.gef.editor.style.DefaultStyleRegistry;
+import net.officefloor.gef.editor.style.Handler;
 import net.officefloor.gef.editor.style.OsgiURLStreamHandlerService;
 import net.officefloor.gef.editor.style.StyleRegistry;
 import net.officefloor.gef.editor.style.SystemStyleRegistry;
@@ -46,6 +47,23 @@ import net.officefloor.gef.editor.style.SystemStyleRegistry;
  * @author Daniel Sagenschneider
  */
 public class AdaptedEditorPlugin extends AbstractUIPlugin {
+
+	/**
+	 * Initialises for non OSGi environment.
+	 */
+	public static void initNonOsgiEnvironment() {
+		try {
+			// Setup OfficeFloor style URL handling
+			URL.setURLStreamHandlerFactory((protocol) -> {
+				if (!AbstractStyleRegistry.PROTOCOL.equals(protocol)) {
+					return null;
+				}
+				return new Handler();
+			});
+		} catch (Throwable ex) {
+			// Assume factory already initialised
+		}
+	}
 
 	/**
 	 * Creates a new {@link StyleRegistry}.

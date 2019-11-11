@@ -10,6 +10,11 @@
 		<template path="/templateLink" />
 	</templates>
 
+	<procedures>
+		<procedure name="PROCEDURE" />
+		<procedure name="PROCEDURE_LINK" />
+	</procedures>
+
 	<sections>
 		<section name="SECTION">
 			<input name="INPUT" />

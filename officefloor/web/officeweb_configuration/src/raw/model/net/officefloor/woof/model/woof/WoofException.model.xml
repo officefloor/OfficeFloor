@@ -2,6 +2,7 @@
 <model>
 	<field type="String" name="class name" />
 	<field type="WoofExceptionToWoofSectionInputModel" name="woof section input" />
+	<field type="WoofExceptionToWoofProcedureModel" name="woof procedure" />
 	<field type="WoofExceptionToWoofTemplateModel" name="woof template" />
 	<field type="WoofExceptionToWoofResourceModel" name="woof resource" />
 	<field type="WoofExceptionToWoofSecurityModel" name="woof security" />

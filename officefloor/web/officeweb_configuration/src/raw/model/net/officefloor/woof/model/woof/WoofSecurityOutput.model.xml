@@ -3,6 +3,7 @@
 	<field type="String" name="woof security output name" />
 	<field type="String" name="argument type" />
 	<field type="WoofSecurityOutputToWoofSectionInputModel" name="woof section input" />
+	<field type="WoofSecurityOutputToWoofProcedureModel" name="woof procedure" />
 	<field type="WoofSecurityOutputToWoofTemplateModel" name="woof template" />
 	<field type="WoofSecurityOutputToWoofSecurityModel" name="woof security" />
 	<field type="WoofSecurityOutputToWoofResourceModel" name="woof resource" />

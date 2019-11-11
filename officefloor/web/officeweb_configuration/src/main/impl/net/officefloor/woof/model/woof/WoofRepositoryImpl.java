@@ -43,8 +43,7 @@ public class WoofRepositoryImpl implements WoofRepository {
 	/**
 	 * Initiate.
 	 * 
-	 * @param modelRepository
-	 *            {@link ModelRepository}.
+	 * @param modelRepository {@link ModelRepository}.
 	 */
 	public WoofRepositoryImpl(ModelRepository modelRepository) {
 		this.modelRepository = modelRepository;
@@ -72,6 +71,12 @@ public class WoofRepositoryImpl implements WoofRepository {
 			for (WoofSectionInputModel input : section.getInputs()) {
 				sectionInputs.put(section.getWoofSectionName(), input.getWoofSectionInputName(), input);
 			}
+		}
+
+		// Create the set of Procedures
+		Map<String, WoofProcedureModel> procedures = new HashMap<>();
+		for (WoofProcedureModel procedure : woof.getWoofProcedures()) {
+			procedures.put(procedure.getWoofProcedureName(), procedure);
 		}
 
 		// Create the set of Templates
@@ -130,6 +135,13 @@ public class WoofRepositoryImpl implements WoofRepository {
 						conn.setWoofHttpContinuation(source);
 						conn.setWoofRedirect(target);
 					});
+
+			// Procedures
+			connector.connect(httpContinuation.getWoofProcedure(), (conn) -> procedures.get(conn.getProcedureName()),
+					(conn, source, target) -> {
+						conn.setWoofHttpContinuation(source);
+						conn.setWoofProcedure(target);
+					});
 		}
 
 		// Connect HTTP Inputs
@@ -169,6 +181,13 @@ public class WoofRepositoryImpl implements WoofRepository {
 					(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
 						conn.setWoofHttpInput(source);
 						conn.setWoofHttpContinuation(target);
+					});
+
+			// Procedures
+			connector.connect(httpInput.getWoofProcedure(), (conn) -> procedures.get(conn.getProcedureName()),
+					(conn, source, target) -> {
+						conn.setWoofHttpInput(source);
+						conn.setWoofProcedure(target);
 					});
 		}
 
@@ -222,6 +241,13 @@ public class WoofRepositoryImpl implements WoofRepository {
 							conn.setWoofTemplateOutput(source);
 							conn.setWoofHttpContinuation(target);
 						});
+
+				// Procedures
+				outputConnector.connect(templateOutput.getWoofProcedure(),
+						(conn) -> procedures.get(conn.getProcedureName()), (conn, source, target) -> {
+							conn.setWoofTemplateOutput(source);
+							conn.setWoofProcedure(target);
+						});
 			}
 		}
 
@@ -264,6 +290,114 @@ public class WoofRepositoryImpl implements WoofRepository {
 						(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
 							conn.setWoofSectionOutput(source);
 							conn.setWoofHttpContinuation(target);
+						});
+
+				// Procedures
+				connector.connect(sectionOutput.getWoofProcedure(), (conn) -> procedures.get(conn.getProcedureName()),
+						(conn, source, target) -> {
+							conn.setWoofSectionOutput(source);
+							conn.setWoofProcedure(target);
+						});
+			}
+		}
+
+		// Connect Procedure Next
+		for (WoofProcedureModel procedure : woof.getWoofProcedures()) {
+
+			// Link next
+			WoofProcedureNextModel procedureNext = procedure.getNext();
+			if (procedureNext != null) {
+				Connector<WoofProcedureNextModel> connector = new Connector<>(procedureNext);
+
+				// Section Inputs
+				connector.connect(procedureNext.getWoofSectionInput(),
+						(conn) -> sectionInputs.get(conn.getSectionName(), conn.getInputName()),
+						(conn, source, target) -> {
+							conn.setWoofProcedureNext(source);
+							conn.setWoofSectionInput(target);
+						});
+
+				// Templates
+				connector.connect(procedureNext.getWoofTemplate(), (conn) -> templates.get(conn.getApplicationPath()),
+						(conn, source, target) -> {
+							conn.setWoofProcedureNext(source);
+							conn.setWoofTemplate(target);
+						});
+
+				// Resources
+				connector.connect(procedureNext.getWoofResource(), (conn) -> resources.get(conn.getResourcePath()),
+						(conn, source, target) -> {
+							conn.setWoofProcedureNext(source);
+							conn.setWoofResource(target);
+						});
+
+				// Securities
+				connector.connect(procedureNext.getWoofSecurity(), (conn) -> securities.get(conn.getHttpSecurityName()),
+						(conn, source, target) -> {
+							conn.setWoofProcedureNext(source);
+							conn.setWoofSecurity(target);
+						});
+
+				// Redirects
+				connector.connect(procedureNext.getWoofHttpContinuation(),
+						(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
+							conn.setWoofProcedureNext(source);
+							conn.setWoofHttpContinuation(target);
+						});
+
+				// Procedures
+				connector.connect(procedureNext.getWoofProcedure(), (conn) -> procedures.get(conn.getProcedureName()),
+						(conn, source, target) -> {
+							conn.setWoofProcedureNext(source);
+							conn.setWoofProcedure(target);
+						});
+			}
+
+			// Link outputs
+			for (WoofProcedureOutputModel procedureOutput : procedure.getOutputs()) {
+				Connector<WoofProcedureOutputModel> connector = new Connector<>(procedureOutput);
+
+				// Section Inputs
+				connector.connect(procedureOutput.getWoofSectionInput(),
+						(conn) -> sectionInputs.get(conn.getSectionName(), conn.getInputName()),
+						(conn, source, target) -> {
+							conn.setWoofProcedureOutput(source);
+							conn.setWoofSectionInput(target);
+						});
+
+				// Templates
+				connector.connect(procedureOutput.getWoofTemplate(), (conn) -> templates.get(conn.getApplicationPath()),
+						(conn, source, target) -> {
+							conn.setWoofProcedureOutput(source);
+							conn.setWoofTemplate(target);
+						});
+
+				// Resources
+				connector.connect(procedureOutput.getWoofResource(), (conn) -> resources.get(conn.getResourcePath()),
+						(conn, source, target) -> {
+							conn.setWoofProcedureOutput(source);
+							conn.setWoofResource(target);
+						});
+
+				// Securities
+				connector.connect(procedureOutput.getWoofSecurity(),
+						(conn) -> securities.get(conn.getHttpSecurityName()), (conn, source, target) -> {
+							conn.setWoofProcedureOutput(source);
+							conn.setWoofSecurity(target);
+						});
+
+				// Redirects
+				connector.connect(procedureOutput.getWoofHttpContinuation(),
+						(conn) -> httpContinuations.get(conn.getApplicationPath()), (conn, source, target) -> {
+							conn.setWoofProcedureOutput(source);
+							conn.setWoofHttpContinuation(target);
+						});
+
+				// Procedures
+				connector.connect(procedureOutput.getWoofProcedure(), (conn) -> procedures.get(conn.getProcedureName()),
+						(conn, source, target) -> {
+							conn.setWoofProcedureOutput(source);
+							conn.setWoofProcedure(target);
 						});
 			}
 		}
@@ -308,6 +442,13 @@ public class WoofRepositoryImpl implements WoofRepository {
 							conn.setWoofSecurityOutput(source);
 							conn.setWoofHttpContinuation(target);
 						});
+
+				// Procedures
+				connector.connect(securityOutput.getWoofProcedure(), (conn) -> procedures.get(conn.getProcedureName()),
+						(conn, source, target) -> {
+							conn.setWoofSecurityOutput(source);
+							conn.setWoofProcedure(target);
+						});
 			}
 		}
 
@@ -349,6 +490,13 @@ public class WoofRepositoryImpl implements WoofRepository {
 						conn.setWoofException(source);
 						conn.setWoofHttpContinuation(target);
 					});
+
+			// Procedures
+			connector.connect(exception.getWoofProcedure(), (conn) -> procedures.get(conn.getProcedureName()),
+					(conn, source, target) -> {
+						conn.setWoofException(source);
+						conn.setWoofProcedure(target);
+					});
 		}
 
 		// Connect Starts
@@ -360,6 +508,13 @@ public class WoofRepositoryImpl implements WoofRepository {
 					(conn) -> sectionInputs.get(conn.getSectionName(), conn.getInputName()), (conn, source, target) -> {
 						conn.setWoofStart(source);
 						conn.setWoofSectionInput(target);
+					});
+
+			// Procedures
+			connector.connect(start.getWoofProcedure(), (conn) -> procedures.get(conn.getProcedureName()),
+					(conn, source, target) -> {
+						conn.setWoofStart(source);
+						conn.setWoofProcedure(target);
 					});
 		}
 	}
@@ -383,8 +538,7 @@ public class WoofRepositoryImpl implements WoofRepository {
 		}
 
 		/**
-		 * {@link Function} interface to connect source and target with
-		 * connection.
+		 * {@link Function} interface to connect source and target with connection.
 		 */
 		private static interface Connect<C, S, T> {
 			void connect(C connction, S source, T target);
@@ -393,8 +547,7 @@ public class WoofRepositoryImpl implements WoofRepository {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param source
-		 *            Source {@link Model}.
+		 * @param source Source {@link Model}.
 		 */
 		private Connector(S source) {
 			this.source = source;
@@ -403,14 +556,11 @@ public class WoofRepositoryImpl implements WoofRepository {
 		/**
 		 * Undertakes linking connection.
 		 * 
-		 * @param connection
-		 *            {@link ConnectionModel}. May be <code>null</code> if no
-		 *            link.
-		 * @param targetFactory
-		 *            {@link TargetFactory}. Only invoked if
-		 *            {@link ConnectionModel}. May return <code>null</code>.
-		 * @param connector
-		 *            {@link Connect} to connect source and target.
+		 * @param connection    {@link ConnectionModel}. May be <code>null</code> if no
+		 *                      link.
+		 * @param targetFactory {@link TargetFactory}. Only invoked if
+		 *                      {@link ConnectionModel}. May return <code>null</code>.
+		 * @param connector     {@link Connect} to connect source and target.
 		 */
 		private <C extends ConnectionModel, T extends Model> void connect(C connection,
 				TargetFactory<C, T> targetFactory, Connect<C, S, T> connector) {
@@ -433,6 +583,16 @@ public class WoofRepositoryImpl implements WoofRepository {
 
 			// Specify section outputs
 			for (WoofSectionOutputToWoofHttpContinuationModel conn : httpContinuation.getWoofSectionOutputs()) {
+				conn.setApplicationPath(httpContinuation.getApplicationPath());
+			}
+
+			// Specify procedure next
+			for (WoofProcedureNextToWoofHttpContinuationModel conn : httpContinuation.getWoofProcedureNexts()) {
+				conn.setApplicationPath(httpContinuation.getApplicationPath());
+			}
+
+			// Specify procedure output
+			for (WoofProcedureOutputToWoofHttpContinuationModel conn : httpContinuation.getWoofProcedureOutputs()) {
 				conn.setApplicationPath(httpContinuation.getApplicationPath());
 			}
 
@@ -484,6 +644,18 @@ public class WoofRepositoryImpl implements WoofRepository {
 					conn.setInputName(input.getWoofSectionInputName());
 				}
 
+				// Specify procedure next
+				for (WoofProcedureNextToWoofSectionInputModel conn : input.getWoofProcedureNexts()) {
+					conn.setSectionName(section.getWoofSectionName());
+					conn.setInputName(input.getWoofSectionInputName());
+				}
+
+				// Specify procedure output
+				for (WoofProcedureOutputToWoofSectionInputModel conn : input.getWoofProcedureOutputs()) {
+					conn.setSectionName(section.getWoofSectionName());
+					conn.setInputName(input.getWoofSectionInputName());
+				}
+
 				// Specify exceptions
 				for (WoofExceptionToWoofSectionInputModel conn : input.getWoofExceptions()) {
 					conn.setSectionName(section.getWoofSectionName());
@@ -510,6 +682,55 @@ public class WoofRepositoryImpl implements WoofRepository {
 			}
 		}
 
+		// Specify procedure
+		for (WoofProcedureModel procedure : woof.getWoofProcedures()) {
+
+			// Specify HTTP continuation
+			for (WoofHttpContinuationToWoofProcedureModel conn : procedure.getWoofHttpContinuations()) {
+				conn.setProcedureName(procedure.getWoofProcedureName());
+			}
+
+			// Specify HTTP input
+			for (WoofHttpInputToWoofProcedureModel conn : procedure.getWoofHttpInputs()) {
+				conn.setProcedureName(procedure.getWoofProcedureName());
+			}
+
+			// Specify template outputs
+			for (WoofTemplateOutputToWoofProcedureModel conn : procedure.getWoofTemplateOutputs()) {
+				conn.setProcedureName(procedure.getWoofProcedureName());
+			}
+
+			// Specify section outputs
+			for (WoofSectionOutputToWoofProcedureModel conn : procedure.getWoofSectionOutputs()) {
+				conn.setProcedureName(procedure.getWoofProcedureName());
+			}
+
+			// Specify procedure next
+			for (WoofProcedureNextToWoofProcedureModel conn : procedure.getWoofProcedureNexts()) {
+				conn.setProcedureName(procedure.getWoofProcedureName());
+			}
+
+			// Specify procedure output
+			for (WoofProcedureOutputToWoofProcedureModel conn : procedure.getWoofProcedureOutputs()) {
+				conn.setProcedureName(procedure.getWoofProcedureName());
+			}
+
+			// Specify security outputs
+			for (WoofSecurityOutputToWoofProcedureModel conn : procedure.getWoofSecurityOutputs()) {
+				conn.setProcedureName(procedure.getWoofProcedureName());
+			}
+
+			// Specify exceptions
+			for (WoofExceptionToWoofProcedureModel conn : procedure.getWoofExceptions()) {
+				conn.setProcedureName(procedure.getWoofProcedureName());
+			}
+			
+			// Specify starts
+			for (WoofStartToWoofProcedureModel conn : procedure.getWoofStarts()) {
+				conn.setProcedureName(procedure.getWoofProcedureName());
+			}
+		}
+
 		// Specify templates
 		for (WoofTemplateModel template : woof.getWoofTemplates()) {
 
@@ -520,6 +741,16 @@ public class WoofRepositoryImpl implements WoofRepository {
 
 			// Specify section outputs
 			for (WoofSectionOutputToWoofTemplateModel conn : template.getWoofSectionOutputs()) {
+				conn.setApplicationPath(template.getApplicationPath());
+			}
+
+			// Specify procedure next
+			for (WoofProcedureNextToWoofTemplateModel conn : template.getWoofProcedureNexts()) {
+				conn.setApplicationPath(template.getApplicationPath());
+			}
+
+			// Specify procedure output
+			for (WoofProcedureOutputToWoofTemplateModel conn : template.getWoofProcedureOutputs()) {
 				conn.setApplicationPath(template.getApplicationPath());
 			}
 
@@ -554,6 +785,16 @@ public class WoofRepositoryImpl implements WoofRepository {
 
 			// Specify section outputs
 			for (WoofSectionOutputToWoofSecurityModel conn : security.getWoofSectionOutputs()) {
+				conn.setHttpSecurityName(security.getHttpSecurityName());
+			}
+
+			// Specify procedure next
+			for (WoofProcedureNextToWoofSecurityModel conn : security.getWoofProcedureNexts()) {
+				conn.setHttpSecurityName(security.getHttpSecurityName());
+			}
+
+			// Specify procedure output
+			for (WoofProcedureOutputToWoofSecurityModel conn : security.getWoofProcedureOutputs()) {
 				conn.setHttpSecurityName(security.getHttpSecurityName());
 			}
 
@@ -598,6 +839,16 @@ public class WoofRepositoryImpl implements WoofRepository {
 
 			// Specify security outputs
 			for (WoofSecurityOutputToWoofResourceModel conn : resource.getWoofSecurityOutputs()) {
+				conn.setResourcePath(resource.getResourcePath());
+			}
+
+			// Specify procedure next
+			for (WoofProcedureNextToWoofResourceModel conn : resource.getWoofProcedureNexts()) {
+				conn.setResourcePath(resource.getResourcePath());
+			}
+
+			// Specify procedure output
+			for (WoofProcedureOutputToWoofResourceModel conn : resource.getWoofProcedureOutputs()) {
 				conn.setResourcePath(resource.getResourcePath());
 			}
 

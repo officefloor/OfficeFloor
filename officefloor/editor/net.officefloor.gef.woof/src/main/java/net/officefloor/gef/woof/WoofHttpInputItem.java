@@ -32,12 +32,15 @@ import net.officefloor.woof.model.woof.WoofHttpContinuationModel.WoofHttpContinu
 import net.officefloor.woof.model.woof.WoofHttpInputModel;
 import net.officefloor.woof.model.woof.WoofHttpInputModel.WoofHttpInputEvent;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofHttpInputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
 import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
@@ -93,7 +96,7 @@ public class WoofHttpInputItem extends
 				context.connector(DefaultConnectors.FLOW)
 						.target(WoofHttpInputToWoofSectionInputModel.class, WoofHttpInputToWoofTemplateModel.class,
 								WoofHttpInputToWoofResourceModel.class, WoofHttpInputToWoofSecurityModel.class,
-								WoofHttpInputToWoofHttpContinuationModel.class)
+								WoofHttpInputToWoofHttpContinuationModel.class, WoofHttpInputToWoofProcedureModel.class)
 						.getNode());
 		return container;
 	}
@@ -191,6 +194,18 @@ public class WoofHttpInputItem extends
 				}).delete((ctx) -> {
 					ctx.getChangeExecutor()
 							.execute(ctx.getOperations().removeHttpInputToHttpContinuation(ctx.getModel()));
+				}));
+
+		// Procedure
+		connections.add(new IdeConnection<>(WoofHttpInputToWoofProcedureModel.class)
+				.connectOne(s -> s.getWoofProcedure(), c -> c.getWoofHttpInput(),
+						WoofHttpInputEvent.CHANGE_WOOF_PROCEDURE)
+				.to(WoofProcedureModel.class).many(t -> t.getWoofHttpInputs(), c -> c.getWoofProcedure(),
+						WoofProcedureEvent.ADD_WOOF_HTTP_INPUT, WoofProcedureEvent.REMOVE_WOOF_HTTP_INPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkHttpInputToProcedure(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeHttpInputToProcedure(ctx.getModel()));
 				}));
 	}
 

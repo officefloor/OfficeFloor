@@ -63,8 +63,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofTemplateModel}.
 	 * 
-	 * @param templateIndex
-	 *            {@link WoofTemplateModel} index.
+	 * @param templateIndex {@link WoofTemplateModel} index.
 	 */
 	private void doLinkToTemplate(int templateIndex) {
 
@@ -90,10 +89,60 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 				.getWoofTemplate();
 
 		// Remove the link
-		Change<WoofTemplateOutputToWoofTemplateModel> change = this.operations.removeTemplateOuputToTemplate(link);
+		Change<WoofTemplateOutputToWoofTemplateModel> change = this.operations.removeTemplateOutputToTemplate(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Template Output to Template", true);
+	}
+
+	/**
+	 * Ensure can link to {@link WoofProcedureModel}.
+	 */
+	public void testLinkToProcedure() {
+		this.doLinkToProcedure(A);
+	}
+
+	/**
+	 * Ensure link overrides other links for
+	 * {@link WoofTemplateOutputToWoofProcedureModel}.
+	 */
+	public void testLinkOverrideToProcedure() {
+		this.doLinkToProcedure(B);
+	}
+
+	/**
+	 * Undertakes linking to a {@link WoofProcedureModel}.
+	 * 
+	 * @param templateIndex {@link WoofTemplateModel} index.
+	 */
+	private void doLinkToProcedure(int templateIndex) {
+
+		// Obtain the items to link
+		WoofTemplateOutputModel templateOutput = this.model.getWoofTemplates().get(templateIndex).getOutputs().get(0);
+		WoofProcedureModel procedure = this.model.getWoofProcedures().get(1);
+
+		// Link the template output to procedure
+		Change<WoofTemplateOutputToWoofProcedureModel> change = this.operations
+				.linkTemplateOutputToProcedure(templateOutput, procedure);
+
+		// Validate change
+		this.assertChange(change, null, "Link Template Output to Procedure", true);
+	}
+
+	/**
+	 * Ensure can remove the {@link WoofTemplateOutputToWoofProcedureModel}.
+	 */
+	public void testRemoveToProcedure() {
+
+		// Obtain the link to remove
+		WoofTemplateOutputToWoofProcedureModel link = this.model.getWoofTemplates().get(B).getOutputs().get(0)
+				.getWoofProcedure();
+
+		// Remove the link
+		Change<WoofTemplateOutputToWoofProcedureModel> change = this.operations.removeTemplateOutputToProcedure(link);
+
+		// Validate change
+		this.assertChange(change, null, "Remove Template Output to Procedure", true);
 	}
 
 	/**
@@ -114,8 +163,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofSectionInputModel}.
 	 * 
-	 * @param templateIndex
-	 *            {@link WoofTemplateModel} index.
+	 * @param templateIndex {@link WoofTemplateModel} index.
 	 */
 	private void doLinkToSectionInput(int templateIndex) {
 
@@ -142,7 +190,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 
 		// Remove the link
 		Change<WoofTemplateOutputToWoofSectionInputModel> change = this.operations
-				.removeTemplateOuputToSectionInput(link);
+				.removeTemplateOutputToSectionInput(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Template Output to Section Input", true);
@@ -166,8 +214,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofSecurityModel}.
 	 * 
-	 * @param templateIndex
-	 *            {@link WoofTemplateModel} index.
+	 * @param templateIndex {@link WoofTemplateModel} index.
 	 */
 	private void doLinkToSecurity(int templateIndex) {
 
@@ -193,7 +240,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 				.getWoofSecurity();
 
 		// Remove the link
-		Change<WoofTemplateOutputToWoofSecurityModel> change = this.operations.removeTemplateOuputToSecurity(link);
+		Change<WoofTemplateOutputToWoofSecurityModel> change = this.operations.removeTemplateOutputToSecurity(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Template Output to Security", true);
@@ -217,8 +264,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofResourceModel}.
 	 * 
-	 * @param templateIndex
-	 *            {@link WoofTemplateModel} index.
+	 * @param templateIndex {@link WoofTemplateModel} index.
 	 */
 	private void doLinkToResource(int templateIndex) {
 
@@ -244,7 +290,7 @@ public class LinkTemplateOutputTest extends AbstractWoofChangesTestCase {
 				.getWoofResource();
 
 		// Remove the link
-		Change<WoofTemplateOutputToWoofResourceModel> change = this.operations.removeTemplateOuputToResource(link);
+		Change<WoofTemplateOutputToWoofResourceModel> change = this.operations.removeTemplateOutputToResource(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Template Output to Resource", true);

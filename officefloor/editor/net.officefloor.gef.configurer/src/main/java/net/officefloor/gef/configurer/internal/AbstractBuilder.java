@@ -23,10 +23,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -76,8 +76,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Instantiate.
 	 * 
-	 * @param label
-	 *            Label.
+	 * @param label Label.
 	 */
 	public AbstractBuilder(String label) {
 		this.label = label;
@@ -86,8 +85,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Creates the input {@link ValueInput} for the {@link ObservableValue}.
 	 * 
-	 * @param context
-	 *            {@link ValueInputContext}.
+	 * @param context {@link ValueInputContext}.
 	 * @return {@link ValueInput} to configure the {@link ObservableValue}.
 	 */
 	protected abstract I createInput(ValueInputContext<M, V> context);
@@ -95,10 +93,8 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Creates the label {@link Node}.
 	 * 
-	 * @param labelText
-	 *            Label text.
-	 * @param valueInput
-	 *            {@link ValueInput}.
+	 * @param labelText  Label text.
+	 * @param valueInput {@link ValueInput}.
 	 * @return Label {@link Node}.
 	 */
 	protected Node createLabel(String labelText, I valueInput) {
@@ -108,10 +104,8 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Creates the error feedback {@link Node}.
 	 * 
-	 * @param valueInput
-	 *            {@link ValueInput}.
-	 * @param errorProperty
-	 *            Error {@link Property}.
+	 * @param valueInput    {@link ValueInput}.
+	 * @param errorProperty Error {@link Property}.
 	 * @return Error feedback {@link Node}.
 	 */
 	protected Node createErrorFeedback(I valueInput, Property<Throwable> errorProperty) {
@@ -119,8 +113,8 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		Tooltip errorTooltip = new Tooltip();
 		errorTooltip.getStyleClass().add("error-tooltip");
 		Tooltip.install(error, errorTooltip);
-		InvalidationListener listener = (observableError) -> {
-			Throwable cause = errorProperty.getValue();
+		ChangeListener<Throwable> listener = (observable, oldValue, newValue) -> {
+			Throwable cause = newValue;
 			if (cause != null) {
 				// Display the error
 				errorTooltip.setText(cause.getMessage());
@@ -131,17 +125,16 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			}
 		};
 		errorProperty.addListener(listener);
-		listener.invalidated(errorProperty); // Initialise
+		listener.changed(errorProperty, null, errorProperty.getValue()); // Initialise
 		return error;
 	}
 
 	/**
 	 * Obtains the error.
 	 * 
-	 * @param valueInput
-	 *            {@link ValueInput}.
-	 * @param error
-	 *            {@link Throwable} error. May be <code>null</code> if no error.
+	 * @param valueInput {@link ValueInput}.
+	 * @param error      {@link Throwable} error. May be <code>null</code> if no
+	 *                   error.
 	 * @return {@link Throwable} error or <code>null</code> if no error.
 	 */
 	protected Throwable getError(I valueInput, ReadOnlyProperty<Throwable> error) {
@@ -160,14 +153,10 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 	/**
 	 * Allow overriding to configure the {@link TableColumn}.
 	 *
-	 * @param <R>
-	 *            Row object type.
-	 * @param table
-	 *            {@link TableView} that will contain the {@link TableColumn}.
-	 * @param column
-	 *            {@link TableColumn}.
-	 * @param callback
-	 *            {@link Callback}.
+	 * @param <R>      Row object type.
+	 * @param table    {@link TableView} that will contain the {@link TableColumn}.
+	 * @param column   {@link TableColumn}.
+	 * @param callback {@link Callback}.
 	 */
 	protected <R> void configureTableColumn(TableView<R> table, TableColumn<R, V> column,
 			Callback<Integer, ObservableValue<V>> callback) {
@@ -256,26 +245,32 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			// Obtain the model
 			M model = this.context.getModel();
 
+			// Load all the validators
+			this.validators.addAll(AbstractBuilder.this.validators);
+
 			// Initialise to model
 			this.loadValue();
 
-			// Refresh on error or value change
-			this.error.addListener((event) -> this.context.refreshError());
-			this.value.addListener((event) -> this.context.refreshError());
-
-			// Load value to model (so model consistent before validation)
-			if (AbstractBuilder.this.valueLoader != null) {
-				this.value.addListener(
-						(event) -> AbstractBuilder.this.valueLoader.loadValue(model, this.value.getValue()));
-			}
-
-			// Undertake validation (after loading value to model)
-			this.validators.addAll(AbstractBuilder.this.validators);
-			this.value.addListener((event) -> this.validate());
+			// Validate initial value
 			this.validate(); // validate initial value
 
-			// Track model becoming dirty
-			this.value.addListener((event) -> context.dirtyProperty().setValue(true));
+			// Refresh on error
+			this.error.addListener((observable, oldValue, newValue) -> this.context.refreshError());
+
+			// Listen to changes of value
+			this.value.addListener((observable, oldValue, newValue) -> {
+
+				// Load value to model (so model consistent before validation)
+				if (AbstractBuilder.this.valueLoader != null) {
+					AbstractBuilder.this.valueLoader.loadValue(model, newValue);
+				}
+
+				// Track model becoming dirty
+				context.dirtyProperty().setValue(true);
+
+				// Undertake validation (after loading value to model)
+				this.validate();
+			});
 		}
 
 		/**
@@ -317,6 +312,9 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 			if (!this.isError) {
 				// No error in validate, so clear error
 				this.setError(null);
+				
+				// Refresh all error
+				this.context.refreshError();
 			}
 		}
 
@@ -424,11 +422,13 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		}
 
 		@Override
-		public void reloadIf(Builder<?, ?, ?> builder) {
-			if (AbstractBuilder.this == builder) {
+		public boolean reloadIf(Builder<?, ?, ?> builder) {
+			boolean isBuilder = AbstractBuilder.this == builder;
+			if (isBuilder) {
 				// Require reloading this value
 				this.loadValue();
 			}
+			return isBuilder;
 		}
 	}
 
@@ -471,8 +471,7 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 		/**
 		 * Instantiate.
 		 * 
-		 * @param context
-		 *            {@link ValueRendererContext}.
+		 * @param context {@link ValueRendererContext}.
 		 */
 		private CellRendererImpl(ValueRendererContext<M> context) {
 			this.context = context;
@@ -488,8 +487,8 @@ public abstract class AbstractBuilder<M, V, I extends ValueInput, B extends Buil
 
 			// Always load value to model
 			if (AbstractBuilder.this.valueLoader != null) {
-				this.value.addListener((event) -> AbstractBuilder.this.valueLoader.loadValue(this.context.getModel(),
-						this.value.getValue()));
+				this.value.addListener((observable, oldValue, newValue) -> AbstractBuilder.this.valueLoader
+						.loadValue(this.context.getModel(), this.value.getValue()));
 			}
 		}
 

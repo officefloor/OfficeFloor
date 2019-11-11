@@ -21,9 +21,19 @@
 		</template>
 	</templates>
 
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<redirect path="/change" />
+			</next>
+			<output name="OUTPUT">
+				<redirect path="/change" />
+			</output>
+		</procedure>
+	</procedures>
+
 	<sections>
-		<section name="SECTION" source="net.example.ExampleSectionSource"
-			location="SECTION_LOCATION">
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
 			<input name="INPUT" />
 			<output name="OUTPUT">
 				<redirect path="/change" />

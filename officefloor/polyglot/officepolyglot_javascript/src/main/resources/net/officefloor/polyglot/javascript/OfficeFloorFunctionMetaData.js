@@ -47,12 +47,9 @@ function OFFICEFLOOR_METADATA__FUNCTION_NAME_() {
 		let config = officefloor[index];
 
 		// Determine type of configuration
-		if (config.next) {
+		if (config.nextArgumentType) {
 			// Handle next
-			metaData.nextFunction = {
-				name: config.next,
-				argumentType: extractType(config.argumentType)
-			};
+			metaData.nextArgumentType = extractType(config.nextArgumentType)
 			
 		} else if (config.param) {
 			// Handle parameter
@@ -60,19 +57,19 @@ function OFFICEFLOOR_METADATA__FUNCTION_NAME_() {
 			
 		} else if (config.val) {
 			// Handle value from variable
-			metaData.parameters.push({type: extractType(config.val), nature: "val"});
+			metaData.parameters.push({type: extractType(config.val), qualifier: config.qualifier, nature: "val"});
 
 		} else if (config.in) {
 			// Handle in from variable
-			metaData.parameters.push({type: extractType(config.in), nature: "in"});
+			metaData.parameters.push({type: extractType(config.in), qualifier: config.qualifier, nature: "in"});
 
 		} else if (config.out) {
 			// Handle out from variable
-			metaData.parameters.push({type: extractType(config.out), nature: "out"});
+			metaData.parameters.push({type: extractType(config.out), qualifier: config.qualifier, nature: "out"});
 
 		} else if (config.var) {
 			// Handle var from variable
-			metaData.parameters.push({type: extractType(config.var), nature: "var"});
+			metaData.parameters.push({type: extractType(config.var), qualifier: config.qualifier, nature: "var"});
 			
 		} else if (config.httpPathParameter) {
 			// Handle HTTP path parameter

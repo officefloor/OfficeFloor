@@ -92,12 +92,13 @@ public class WoofEditor extends AbstractAdaptedIdeEditor<WoofModel, WoofEvent, W
 	protected void loadParents(List<AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, ?, ?, ?>> parents) {
 		parents.add(new WoofHttpContinuationItem());
 		parents.add(new WoofHttpInputItem());
-		parents.add(new WoofTemplateItem());
-		parents.add(new WoofSecurityItem());
+		parents.add(new WoofProcedureItem());
 		parents.add(new WoofSectionItem());
-		parents.add(new WoofGovernanceItem());
 		parents.add(new WoofResourceItem());
 		parents.add(new WoofExceptionItem());
+		parents.add(new WoofGovernanceItem());
+		parents.add(new WoofTemplateItem());
+		parents.add(new WoofSecurityItem());
 		parents.add(new WoofStartItem());
 	}
 

@@ -1,0 +1,3 @@
+net.officefloor.activity.procedure.MockProcedureSource
+net.officefloor.activity.procedure.AnotherMockProcedureSource
+net.officefloor.activity.procedure.MockManagedFunctionProcedureSource

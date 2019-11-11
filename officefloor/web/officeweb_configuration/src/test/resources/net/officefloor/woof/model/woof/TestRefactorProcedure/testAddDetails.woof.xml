@@ -1,0 +1,14 @@
+<woof>
+
+	<procedures>
+		<procedure name="ADD" resource="resource" source="Class" procedure="method">
+			<property name="name.one" value="value.one" />
+			<property name="name.two" value="value.two" />
+			<next argument-type="java.lang.Long" />
+			<output name="OUTPUT_A" argument-type="java.lang.Integer" />
+			<output name="OUTPUT_B" argument-type="java.lang.String" />
+			<output name="OUTPUT_C" />
+		</procedure>
+	</procedures>
+
+</woof>
