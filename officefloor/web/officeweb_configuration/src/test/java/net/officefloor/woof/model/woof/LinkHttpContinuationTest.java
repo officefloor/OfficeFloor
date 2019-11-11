@@ -54,8 +54,7 @@ public class LinkHttpContinuationTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofTemplateModel}.
 	 * 
-	 * @param index
-	 *            {@link WoofHttpContinuationModel} index.
+	 * @param index {@link WoofHttpContinuationModel} index.
 	 */
 	private void doLinkToHttpContinuation(int index) {
 
@@ -107,8 +106,7 @@ public class LinkHttpContinuationTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofTemplateModel}.
 	 * 
-	 * @param index
-	 *            {@link WoofHttpContinuationModel} index.
+	 * @param index {@link WoofHttpContinuationModel} index.
 	 */
 	private void doLinkToTemplate(int index) {
 
@@ -157,8 +155,7 @@ public class LinkHttpContinuationTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofSectionInputModel}.
 	 * 
-	 * @param index
-	 *            {@link WoofHttpContinuationModel} index.
+	 * @param index {@link WoofHttpContinuationModel} index.
 	 */
 	private void doLinkToSectionInput(int index) {
 
@@ -175,8 +172,7 @@ public class LinkHttpContinuationTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
-	 * Ensure can remove the
-	 * {@link WoofHttpContinuationToWoofSectionInputModel}.
+	 * Ensure can remove the {@link WoofHttpContinuationToWoofSectionInputModel}.
 	 */
 	public void testRemoveToSectionInput() {
 
@@ -190,6 +186,56 @@ public class LinkHttpContinuationTest extends AbstractWoofChangesTestCase {
 
 		// Validate change
 		this.assertChange(change, null, "Remove HTTP Continuation to Section Input", true);
+	}
+
+	/**
+	 * Ensure can link to {@link WoofProcedureModel}.
+	 */
+	public void testLinkToProcedure() {
+		this.doLinkToProcedure(A);
+	}
+
+	/**
+	 * Ensure link overrides other links for
+	 * {@link WoofHttpContinuationToWoofProcedureModel}.
+	 */
+	public void testLinkOverrideToProcedure() {
+		this.doLinkToProcedure(B);
+	}
+
+	/**
+	 * Undertakes linking to a {@link WoofProcedureModel}.
+	 * 
+	 * @param index {@link WoofHttpContinuationModel} index.
+	 */
+	private void doLinkToProcedure(int index) {
+
+		// Obtain the items to link
+		WoofHttpContinuationModel httpContinuation = this.model.getWoofHttpContinuations().get(index);
+		WoofProcedureModel procedure = this.model.getWoofProcedures().get(1);
+
+		// Link to procedure
+		Change<WoofHttpContinuationToWoofProcedureModel> change = this.operations
+				.linkHttpContinuationToProcedure(httpContinuation, procedure);
+
+		// Validate change
+		this.assertChange(change, null, "Link HTTP Continuation to Procedure", true);
+	}
+
+	/**
+	 * Ensure can remove the {@link WoofHttpInputToWoofProcedureModel}.
+	 */
+	public void testRemoveToProcedure() {
+
+		// Obtain the link to remove
+		WoofHttpContinuationToWoofProcedureModel link = this.model.getWoofHttpContinuations().get(B).getWoofProcedure();
+
+		// Remove the link
+		Change<WoofHttpContinuationToWoofProcedureModel> change = this.operations
+				.removeHttpContinuationToProcedure(link);
+
+		// Validate change
+		this.assertChange(change, null, "Remove HTTP Continuation to Procedure", true);
 	}
 
 	/**
@@ -210,8 +256,7 @@ public class LinkHttpContinuationTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofSecurityModel}.
 	 * 
-	 * @param index
-	 *            {@link WoofHttpContinuationModel} index.
+	 * @param index {@link WoofHttpContinuationModel} index.
 	 */
 	private void doLinkToSecurity(int index) {
 
@@ -260,8 +305,7 @@ public class LinkHttpContinuationTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofResourceModel}.
 	 * 
-	 * @param index
-	 *            {@link WoofHttpContinuationModel} index.
+	 * @param index {@link WoofHttpContinuationModel} index.
 	 */
 	private void doLinkToResource(int index) {
 

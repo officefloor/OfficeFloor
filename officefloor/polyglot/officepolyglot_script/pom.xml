@@ -16,6 +16,10 @@
 	</properties>
 	<dependencies>
 		<dependency>
+			<groupId>net.officefloor.activity</groupId>
+			<artifactId>officeprocedure</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>officeweb</artifactId>
 		</dependency>

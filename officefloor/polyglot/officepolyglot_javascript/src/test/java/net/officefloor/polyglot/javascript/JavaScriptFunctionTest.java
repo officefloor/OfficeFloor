@@ -31,18 +31,13 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeFlowSourceNode;
-import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionOutput;
-import net.officefloor.compile.test.officefloor.CompileOfficeContext;
+import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Var;
-import net.officefloor.polyglot.test.AbstractPolyglotFunctionTest;
+import net.officefloor.polyglot.test.AbstractPolyglotProcedureTest;
 import net.officefloor.polyglot.test.CollectionTypes;
 import net.officefloor.polyglot.test.JavaObject;
 import net.officefloor.polyglot.test.MockHttpObject;
@@ -53,14 +48,13 @@ import net.officefloor.polyglot.test.PrimitiveTypes;
 import net.officefloor.polyglot.test.VariableTypes;
 import net.officefloor.polyglot.test.WebTypes;
 import net.officefloor.web.ObjectResponse;
-import net.officefloor.web.compile.CompileWebContext;
 
 /**
  * Tests adapting JavaScript function for {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
+public class JavaScriptFunctionTest extends AbstractPolyglotProcedureTest {
 
 	/**
 	 * {@link ScriptEngineManager}.
@@ -74,24 +68,26 @@ public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
 		@Override
 		protected Invocable initialValue() {
 			try {
-				// Obtain the engine
-				final String engineName = "graal.js";
-				ScriptEngine engine = engineManager.getEngineByName(engineName);
-				Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-        			bindings.put("polyglot.js.allowAllAccess", true);
+				synchronized (engineManager) {
 
-				// Load the script
-				InputStream content = JavaScriptFunctionTest.class.getClassLoader()
-						.getResourceAsStream("javascript/Functions.js");
-				Reader reader = new InputStreamReader(content);
-				engine.eval(reader);
+					// Obtain the engine
+					final String engineName = "graal.js";
+					ScriptEngine engine = engineManager.getEngineByName(engineName);
+					Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+					bindings.put("polyglot.js.allowAllAccess", true);
 
-				// Invoke the function
-				Invocable invocable = (Invocable) engine;
+					// Load the script
+					InputStream content = JavaScriptFunctionTest.class.getClassLoader()
+							.getResourceAsStream("javascript/Functions.js");
+					Reader reader = new InputStreamReader(content);
+					engine.eval(reader);
 
-				// Return for use
-				return invocable;
+					// Invoke the function
+					Invocable invocable = (Invocable) engine;
 
+					// Return for use
+					return invocable;
+				}
 			} catch (Exception ex) {
 				throw fail(ex);
 			}
@@ -124,6 +120,16 @@ public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
 	 */
 
 	@Override
+	protected Class<? extends ProcedureSourceServiceFactory> getProcedureSourceServiceFactoryClass() {
+		return JavaScriptProcedureSourceServiceFactory.class;
+	}
+
+	@Override
+	protected boolean isSupportExceptions() {
+		return false;
+	}
+
+	@Override
 	protected PrimitiveTypes primitives(boolean _boolean, byte _byte, short _short, char _char, int _int, long _long,
 			float _float, double _double) throws Exception {
 		return directInvokeFunction("primitives", PrimitiveTypes.class, _boolean, _byte, _short, _char, _int, _long,
@@ -131,13 +137,8 @@ public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected String primitives(CompileOfficeContext context, OfficeSectionInput handleResult) {
-		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection function = office.addOfficeSection("section", JavaScriptFunctionSectionSource.class.getName(),
-				"javascript/Functions.js");
-		function.addProperty(JavaScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "primitives");
-		office.link(function.getOfficeSectionOutput("use"), handleResult);
-		return "section.primitives";
+	protected void primitives(ProcedureBuilder builder) {
+		builder.setProcedure("javascript/Functions.js", "primitives");
 	}
 
 	@Override
@@ -147,13 +148,8 @@ public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected String objects(CompileOfficeContext context, OfficeSectionInput handleResult) {
-		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection function = office.addOfficeSection("section", JavaScriptFunctionSectionSource.class.getName(),
-				"javascript/Functions.js");
-		function.addProperty(JavaScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "objects");
-		office.link(function.getOfficeSectionOutput("use"), handleResult);
-		return "section.objects";
+	protected void objects(ProcedureBuilder builder) {
+		builder.setProcedure("javascript/Functions.js", "objects");
 	}
 
 	@Override
@@ -163,13 +159,8 @@ public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected String collections(CompileOfficeContext context, OfficeSectionInput handleResult) {
-		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection function = office.addOfficeSection("section", JavaScriptFunctionSectionSource.class.getName(),
-				"javascript/Functions.js");
-		function.addProperty(JavaScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "collections");
-		office.link(function.getOfficeSectionOutput("use"), handleResult);
-		return "section.collections";
+	protected void collections(ProcedureBuilder builder) {
+		builder.setProcedure("javascript/Functions.js", "collections");
 	}
 
 	@Override
@@ -178,13 +169,8 @@ public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected void variables(OfficeSectionOutput pass, CompileOfficeContext context, OfficeSectionInput handleResult) {
-		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection function = office.addOfficeSection("section", JavaScriptFunctionSectionSource.class.getName(),
-				"javascript/Functions.js");
-		function.addProperty(JavaScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "variables");
-		office.link(pass, function.getOfficeSectionInput("variables"));
-		office.link(function.getOfficeSectionOutput("use"), handleResult);
+	protected void variables(ProcedureBuilder builder) {
+		builder.setProcedure("javascript/Functions.js", "variables");
 	}
 
 	@Override
@@ -193,13 +179,8 @@ public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected void parameter(OfficeSectionOutput pass, CompileOfficeContext context, OfficeSectionInput handleResult) {
-		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection function = office.addOfficeSection("section", JavaScriptFunctionSectionSource.class.getName(),
-				"javascript/Functions.js");
-		function.addProperty(JavaScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "parameter");
-		office.link(pass, function.getOfficeSectionInput("parameter"));
-		office.link(function.getOfficeSectionOutput("use"), handleResult);
+	protected void parameter(ProcedureBuilder builder) {
+		builder.setProcedure("javascript/Functions.js", "parameter");
 	}
 
 	@Override
@@ -211,12 +192,8 @@ public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected void web(OfficeFlowSourceNode pass, CompileWebContext context) {
-		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection function = office.addOfficeSection("section", JavaScriptFunctionSectionSource.class.getName(),
-				"javascript/Functions.js");
-		function.addProperty(JavaScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "web");
-		office.link(pass, function.getOfficeSectionInput("web"));
+	protected void web(ProcedureBuilder builder) {
+		builder.setProcedure("javascript/Functions.js", "web");
 	}
 
 	@Override
@@ -224,34 +201,18 @@ public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
 		try {
 			directInvokeFunction("httpException", null);
 		} catch (ScriptException ex) {
-			throw new JavaScriptFunctionSectionSource().getScriptExceptionTranslator().translate(ex);
+			throw new JavaScriptProcedureSourceServiceFactory().getScriptExceptionTranslator().translate(ex);
 		}
 	}
 
 	@Override
-	protected void httpException(OfficeFlowSourceNode pass, CompileWebContext context) {
-		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection function = office.addOfficeSection("section", JavaScriptFunctionSectionSource.class.getName(),
-				"javascript/Functions.js");
-		function.addProperty(JavaScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "httpException");
-		office.link(pass, function.getOfficeSectionInput("httpException"));
+	protected void httpException(ProcedureBuilder builder) {
+		builder.setProcedure("javascript/Functions.js", "httpException");
 	}
 
 	@Override
-	protected String flow(CompileOfficeContext context, OfficeSectionInput next, OfficeSectionInput flow,
-			OfficeSectionInput flowWithCallback, OfficeSectionInput flowWithParameterAndCallback,
-			OfficeSectionInput flowWithParameter, OfficeSectionInput exception) {
-		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection function = office.addOfficeSection("section", JavaScriptFunctionSectionSource.class.getName(),
-				"javascript/Functions.js");
-		function.addProperty(JavaScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "serviceFlow");
-		office.link(function.getOfficeSectionOutput("nextFunction"), next);
-		office.link(function.getOfficeSectionOutput("flow"), flow);
-		office.link(function.getOfficeSectionOutput("flowWithCallback"), flowWithCallback);
-		office.link(function.getOfficeSectionOutput("flowWithParameterAndCallback"), flowWithParameterAndCallback);
-		office.link(function.getOfficeSectionOutput("flowWithParameter"), flowWithParameter);
-		office.link(function.getOfficeSectionOutput("exception"), exception);
-		return "section.serviceFlow";
+	protected void flow(ProcedureBuilder builder) {
+		builder.setProcedure("javascript/Functions.js", "serviceFlow");
 	}
 
 	@Override
@@ -260,12 +221,8 @@ public class JavaScriptFunctionTest extends AbstractPolyglotFunctionTest {
 	}
 
 	@Override
-	protected String asynchronousFlow(CompileOfficeContext context) {
-		OfficeArchitect office = context.getOfficeArchitect();
-		OfficeSection function = office.addOfficeSection("section", JavaScriptFunctionSectionSource.class.getName(),
-				"javascript/Functions.js");
-		function.addProperty(JavaScriptFunctionSectionSource.PROPERTY_FUNCTION_NAME, "asynchronousFlow");
-		return "section.asynchronousFlow";
+	protected void asynchronousFlow(ProcedureBuilder builder) {
+		builder.setProcedure("javascript/Functions.js", "asynchronousFlow");
 	}
 
 }

@@ -22,6 +22,7 @@ import org.eclipse.gef.fx.nodes.GeometryNode;
 
 import javafx.scene.Node;
 import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import net.officefloor.model.ConnectionModel;
@@ -40,12 +41,20 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> extends Adapt
 	 * <p>
 	 * This allows for convenient adding new {@link Node} instances to {@link Pane}.
 	 *
-	 * @param        <N> {@link Node} type.
+	 * @param <N>    {@link Node} type.
 	 * @param parent Parent {@link Pane}.
 	 * @param node   {@link Node}.
 	 * @return Input {@link Node}
 	 */
 	<N extends Node> N addNode(Pane parent, N node);
+
+	/**
+	 * Adds an indent {@link Pane}.
+	 * 
+	 * @param parent Parent {@link HBox}.
+	 * @return {@link Pane} for the indent.
+	 */
+	Pane addIndent(HBox parent);
 
 	/**
 	 * Connector.
@@ -88,7 +97,7 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> extends Adapt
 	 * Specifies the {@link GeometryNode} as {@link AdaptedConnector}
 	 * {@link IAnchor}.
 	 *
-	 * @param                        <N> {@link Node} type.
+	 * @param <N>                    {@link Node} type.
 	 * @param visualFactory          {@link AdaptedConnectorVisualFactory}.
 	 * @param connectionModelClasses {@link ConnectionModel} {@link Class} instances
 	 *                               that this connector satisfies.
@@ -120,8 +129,8 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> extends Adapt
 	 * <p>
 	 * This allows custom visuals (e.g. button) tor trigger an action.
 	 *
-	 * @param        <R> Root {@link Model} type.
-	 * @param        <O> Operations type.
+	 * @param <R>    Root {@link Model} type.
+	 * @param <O>    Operations type.
 	 * @param action {@link ModelAction} to be actioned.
 	 */
 	<R extends Model, O> void action(ModelAction<R, O, M> action);
@@ -130,8 +139,8 @@ public interface AdaptedModelVisualFactoryContext<M extends Model> extends Adapt
 	 * Convenience method to add a {@link ModelAction} to be actioned via
 	 * {@link AdaptedActionVisualFactory}.
 	 *
-	 * @param               <R> Root {@link Model} type.
-	 * @param               <O> Operations type.
+	 * @param <R>           Root {@link Model} type.
+	 * @param <O>           Operations type.
 	 * @param action        {@link ModelAction} to be actioned.
 	 * @param visualFactory {@link AdaptedActionVisualFactory}.
 	 * @return {@link Node} to trigger the {@link ModelAction}.

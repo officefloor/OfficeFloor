@@ -19,6 +19,17 @@
 			</output>
 		</template>
 	</templates>
+	
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<section name="SECTION" input="INPUT" />
+			</next>
+			<output name="OUTPUT">
+				<section name="SECTION" input="INPUT" />
+			</output>
+		</procedure>
+	</procedures>
 
 	<sections>
 		<section name="SECTION" source="net.example.ExampleSectionSource"
@@ -40,6 +51,9 @@
 			</output>
 			<output name="OUTPUT_E">
 				<redirect path="/path" />
+			</output>
+			<output name="OUTPUT_F">
+				<procedure name="PROCEDURE" />
 			</output>
 		</section>
 		<section name="SECTION_LINK" source="net.example.LinkSectionSource"

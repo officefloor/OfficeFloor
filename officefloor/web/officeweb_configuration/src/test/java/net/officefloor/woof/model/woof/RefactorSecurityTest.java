@@ -74,6 +74,7 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 					context.addFlow("OUTPUT_C", null, null);
 					context.addFlow("OUTPUT_D", null, null);
 					context.addFlow("OUTPUT_E", null, null);
+					context.addFlow("OUTPUT_F", null, null);
 					context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
 				});
 
@@ -88,6 +89,7 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 		this.securityOutputNameMapping.put("OUTPUT_C", "OUTPUT_C");
 		this.securityOutputNameMapping.put("OUTPUT_D", "OUTPUT_D");
 		this.securityOutputNameMapping.put("OUTPUT_E", "OUTPUT_E");
+		this.securityOutputNameMapping.put("OUTPUT_F", "OUTPUT_F");
 
 		// Refactor the access with same details
 		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "SECURITY",
@@ -110,6 +112,7 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 			context.addFlow("OUTPUT_C", null, null);
 			context.addFlow("OUTPUT_D", null, null);
 			context.addFlow("OUTPUT_E", null, null);
+			context.addFlow("OUTPUT_F", null, null);
 			context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
 		});
 
@@ -123,7 +126,8 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 		this.securityOutputNameMapping.put("OUTPUT_C", "OUTPUT_B");
 		this.securityOutputNameMapping.put("OUTPUT_D", "OUTPUT_C");
 		this.securityOutputNameMapping.put("OUTPUT_E", "OUTPUT_D");
-		this.securityOutputNameMapping.put("OUTPUT_A", "OUTPUT_E");
+		this.securityOutputNameMapping.put("OUTPUT_F", "OUTPUT_E");
+		this.securityOutputNameMapping.put("OUTPUT_A", "OUTPUT_F");
 
 		// Refactor the section with same details
 		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "CHANGE",
@@ -142,10 +146,7 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 	public void testRemoveDetails() {
 
 		// Create the security type
-		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.constructHttpSecurityType(HttpCredentials.class,
-				(context) -> {
-					// No flows
-				});
+		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.constructHttpSecurityType(HttpCredentials.class, null);
 
 		// Refactor the access removing details
 		Change<WoofSecurityModel> change = this.operations.refactorSecurity(this.security, "SECURITY",

@@ -29,11 +29,14 @@
 			class="net.officefloor.woof.model.woof.WoofHttpContinuationToWoofHttpContinuationModel">
 			<value method="setApplicationPath" node="redirect@path" />
 		</object>
+		<object method="setWoofProcedure" node="procedure"
+			class="net.officefloor.woof.model.woof.WoofHttpContinuationToWoofProcedureModel">
+			<value method="setProcedureName" node="procedure@name" />
+		</object>
 	</object>
 
 	<!-- HTTP INPUT -->
-	<object method="addWoofHttpInput" node="http-input"
-		class="net.officefloor.woof.model.woof.WoofHttpInputModel">
+	<object method="addWoofHttpInput" node="http-input" class="net.officefloor.woof.model.woof.WoofHttpInputModel">
 		<value method="setIsSecure" node="http-input@secure" />
 		<value method="setHttpMethod" node="http-input@method" />
 		<value method="setApplicationPath" node="http-input@path" />
@@ -60,11 +63,14 @@
 			class="net.officefloor.woof.model.woof.WoofHttpInputToWoofHttpContinuationModel">
 			<value method="setApplicationPath" node="redirect@path" />
 		</object>
+		<object method="setWoofProcedure" node="procedure"
+			class="net.officefloor.woof.model.woof.WoofHttpInputToWoofProcedureModel">
+			<value method="setProcedureName" node="procedure@name" />
+		</object>
 	</object>
 
 	<!-- TEMPLATE -->
-	<object method="addWoofTemplate" node="template"
-		class="net.officefloor.woof.model.woof.WoofTemplateModel">
+	<object method="addWoofTemplate" node="template" class="net.officefloor.woof.model.woof.WoofTemplateModel">
 		<value method="setApplicationPath" node="template@path" />
 		<value method="setTemplateLocation" node="template@location" />
 		<value method="setTemplateClassName" node="template@class" />
@@ -79,8 +85,7 @@
 			class="net.officefloor.woof.model.woof.WoofTemplateRenderHttpMethodModel">
 			<value method="setWoofTemplateRenderHttpMethodName" node="render@method" />
 		</object>
-		<object method="addLink" node="link"
-			class="net.officefloor.woof.model.woof.WoofTemplateLinkModel">
+		<object method="addLink" node="link" class="net.officefloor.woof.model.woof.WoofTemplateLinkModel">
 			<value method="setWoofTemplateLinkName" node="link@name" />
 			<value method="setIsLinkSecure" node="link@secure" />
 		</object>
@@ -88,8 +93,7 @@
 			class="net.officefloor.woof.model.woof.WoofTemplateToSuperWoofTemplateModel">
 			<value method="setSuperWoofTemplateApplicationPath" node="extends@template" />
 		</object>
-		<object method="addOutput" node="output"
-			class="net.officefloor.woof.model.woof.WoofTemplateOutputModel">
+		<object method="addOutput" node="output" class="net.officefloor.woof.model.woof.WoofTemplateOutputModel">
 			<value method="setWoofTemplateOutputName" node="output@name" />
 			<value method="setArgumentType" node="output@argument-type" />
 			<object method="setWoofSectionInput" node="section"
@@ -113,12 +117,15 @@
 				class="net.officefloor.woof.model.woof.WoofTemplateOutputToWoofHttpContinuationModel">
 				<value method="setApplicationPath" node="redirect@path" />
 			</object>
+			<object method="setWoofProcedure" node="procedure"
+				class="net.officefloor.woof.model.woof.WoofTemplateOutputToWoofProcedureModel">
+				<value method="setProcedureName" node="procedure@name" />
+			</object>
 		</object>
 		<object method="addExtension" node="extension"
 			class="net.officefloor.woof.model.woof.WoofTemplateExtensionModel">
 			<value method="setExtensionClassName" node="extension@class" />
-			<object method="addProperty" node="property"
-				class="net.officefloor.woof.model.woof.PropertyModel">
+			<object method="addProperty" node="property" class="net.officefloor.woof.model.woof.PropertyModel">
 				<value method="setName" node="property@name" />
 				<value method="setValue" node="property@value" />
 			</object>
@@ -126,25 +133,21 @@
 	</object>
 
 	<!-- SECTIONS -->
-	<object method="addWoofSection" node="section"
-		class="net.officefloor.woof.model.woof.WoofSectionModel">
+	<object method="addWoofSection" node="section" class="net.officefloor.woof.model.woof.WoofSectionModel">
 		<value method="setWoofSectionName" node="section@name" />
 		<value method="setSectionSourceClassName" node="section@source" />
 		<value method="setSectionLocation" node="section@location" />
 		<value method="setX" node="section@x" />
 		<value method="setY" node="section@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.woof.model.woof.PropertyModel">
+		<object method="addProperty" node="property" class="net.officefloor.woof.model.woof.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
-		<object method="addInput" node="input"
-			class="net.officefloor.woof.model.woof.WoofSectionInputModel">
+		<object method="addInput" node="input" class="net.officefloor.woof.model.woof.WoofSectionInputModel">
 			<value method="setWoofSectionInputName" node="input@name" />
 			<value method="setParameterType" node="input@parameter-type" />
 		</object>
-		<object method="addOutput" node="output"
-			class="net.officefloor.woof.model.woof.WoofSectionOutputModel">
+		<object method="addOutput" node="output" class="net.officefloor.woof.model.woof.WoofSectionOutputModel">
 			<value method="setWoofSectionOutputName" node="output@name" />
 			<value method="setArgumentType" node="output@argument-type" />
 			<object method="setWoofSectionInput" node="section"
@@ -168,19 +171,92 @@
 				class="net.officefloor.woof.model.woof.WoofSectionOutputToWoofHttpContinuationModel">
 				<value method="setApplicationPath" node="redirect@path" />
 			</object>
+			<object method="setWoofProcedure" node="procedure"
+				class="net.officefloor.woof.model.woof.WoofSectionOutputToWoofProcedureModel">
+				<value method="setProcedureName" node="procedure@name" />
+			</object>
+		</object>
+	</object>
+
+	<!-- PROCEDURES -->
+	<object method="addWoofProcedure" node="procedure" class="net.officefloor.woof.model.woof.WoofProcedureModel">
+		<value method="setWoofProcedureName" node="procedure@name" />
+		<value method="setResource" node="procedure@resource" />
+		<value method="setSourceName" node="procedure@source" />
+		<value method="setProcedureName" node="procedure@procedure" />
+		<value method="setX" node="procedure@x" />
+		<value method="setY" node="procedure@y" />
+		<object method="addProperty" node="property" class="net.officefloor.woof.model.woof.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+		<object method="setNext" node="next" class="net.officefloor.woof.model.woof.WoofProcedureNextModel">
+			<value method="setArgumentType" node="next@argument-type" />
+			<object method="setWoofSectionInput" node="section"
+				class="net.officefloor.woof.model.woof.WoofProcedureNextToWoofSectionInputModel">
+				<value method="setSectionName" node="section@name" />
+				<value method="setInputName" node="section@input" />
+			</object>
+			<object method="setWoofTemplate" node="template"
+				class="net.officefloor.woof.model.woof.WoofProcedureNextToWoofTemplateModel">
+				<value method="setApplicationPath" node="template@path" />
+			</object>
+			<object method="setWoofResource" node="resource"
+				class="net.officefloor.woof.model.woof.WoofProcedureNextToWoofResourceModel">
+				<value method="setResourcePath" node="resource@path" />
+			</object>
+			<object method="setWoofSecurity" node="security"
+				class="net.officefloor.woof.model.woof.WoofProcedureNextToWoofSecurityModel">
+				<value method="setHttpSecurityName" node="security@name" />
+			</object>
+			<object method="setWoofHttpContinuation" node="redirect"
+				class="net.officefloor.woof.model.woof.WoofProcedureNextToWoofHttpContinuationModel">
+				<value method="setApplicationPath" node="redirect@path" />
+			</object>
+			<object method="setWoofProcedure" node="procedure"
+				class="net.officefloor.woof.model.woof.WoofProcedureNextToWoofProcedureModel">
+				<value method="setProcedureName" node="procedure@name" />
+			</object>
+		</object>
+		<object method="addOutput" node="output" class="net.officefloor.woof.model.woof.WoofProcedureOutputModel">
+			<value method="setWoofProcedureOutputName" node="output@name" />
+			<value method="setArgumentType" node="output@argument-type" />
+			<object method="setWoofSectionInput" node="section"
+				class="net.officefloor.woof.model.woof.WoofProcedureOutputToWoofSectionInputModel">
+				<value method="setSectionName" node="section@name" />
+				<value method="setInputName" node="section@input" />
+			</object>
+			<object method="setWoofTemplate" node="template"
+				class="net.officefloor.woof.model.woof.WoofProcedureOutputToWoofTemplateModel">
+				<value method="setApplicationPath" node="template@path" />
+			</object>
+			<object method="setWoofResource" node="resource"
+				class="net.officefloor.woof.model.woof.WoofProcedureOutputToWoofResourceModel">
+				<value method="setResourcePath" node="resource@path" />
+			</object>
+			<object method="setWoofSecurity" node="security"
+				class="net.officefloor.woof.model.woof.WoofProcedureOutputToWoofSecurityModel">
+				<value method="setHttpSecurityName" node="security@name" />
+			</object>
+			<object method="setWoofHttpContinuation" node="redirect"
+				class="net.officefloor.woof.model.woof.WoofProcedureOutputToWoofHttpContinuationModel">
+				<value method="setApplicationPath" node="redirect@path" />
+			</object>
+			<object method="setWoofProcedure" node="procedure"
+				class="net.officefloor.woof.model.woof.WoofProcedureOutputToWoofProcedureModel">
+				<value method="setProcedureName" node="procedure@name" />
+			</object>
 		</object>
 	</object>
 
 	<!-- SECURITY -->
-	<object method="addWoofSecurity" node="security"
-		class="net.officefloor.woof.model.woof.WoofSecurityModel">
+	<object method="addWoofSecurity" node="security" class="net.officefloor.woof.model.woof.WoofSecurityModel">
 		<value method="setHttpSecurityName" node="security@name" />
 		<value method="setHttpSecuritySourceClassName" node="security@source" />
 		<value method="setTimeout" node="security@timeout" />
 		<value method="setX" node="security@x" />
 		<value method="setY" node="security@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.woof.model.woof.PropertyModel">
+		<object method="addProperty" node="property" class="net.officefloor.woof.model.woof.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
@@ -188,8 +264,7 @@
 			class="net.officefloor.woof.model.woof.WoofSecurityContentTypeModel">
 			<value method="setContentType" node="content@type" />
 		</object>
-		<object method="addOutput" node="output"
-			class="net.officefloor.woof.model.woof.WoofSecurityOutputModel">
+		<object method="addOutput" node="output" class="net.officefloor.woof.model.woof.WoofSecurityOutputModel">
 			<value method="setWoofSecurityOutputName" node="output@name" />
 			<value method="setArgumentType" node="output@argument-type" />
 			<object method="setWoofSectionInput" node="section"
@@ -213,18 +288,20 @@
 				class="net.officefloor.woof.model.woof.WoofSecurityOutputToWoofHttpContinuationModel">
 				<value method="setApplicationPath" node="redirect@path" />
 			</object>
+			<object method="setWoofProcedure" node="procedure"
+				class="net.officefloor.woof.model.woof.WoofSecurityOutputToWoofProcedureModel">
+				<value method="setProcedureName" node="procedure@name" />
+			</object>
 		</object>
 	</object>
 
 	<!-- GOVERNANCES -->
-	<object method="addWoofGovernance" node="governance"
-		class="net.officefloor.woof.model.woof.WoofGovernanceModel">
+	<object method="addWoofGovernance" node="governance" class="net.officefloor.woof.model.woof.WoofGovernanceModel">
 		<value method="setWoofGovernanceName" node="governance@name" />
 		<value method="setGovernanceSourceClassName" node="governance@source" />
 		<value method="setX" node="governance@x" />
 		<value method="setY" node="governance@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.woof.model.woof.PropertyModel">
+		<object method="addProperty" node="property" class="net.officefloor.woof.model.woof.PropertyModel">
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
@@ -238,16 +315,14 @@
 	</object>
 
 	<!-- RESOURCES -->
-	<object method="addWoofResource" node="resource"
-		class="net.officefloor.woof.model.woof.WoofResourceModel">
+	<object method="addWoofResource" node="resource" class="net.officefloor.woof.model.woof.WoofResourceModel">
 		<value method="setResourcePath" node="resource@path" />
 		<value method="setX" node="resource@x" />
 		<value method="setY" node="resource@y" />
 	</object>
 
 	<!-- EXCEPTIONS -->
-	<object method="addWoofException" node="exception"
-		class="net.officefloor.woof.model.woof.WoofExceptionModel">
+	<object method="addWoofException" node="exception" class="net.officefloor.woof.model.woof.WoofExceptionModel">
 		<value method="setClassName" node="exception@class" />
 		<value method="setX" node="exception@x" />
 		<value method="setY" node="exception@y" />
@@ -272,17 +347,24 @@
 			class="net.officefloor.woof.model.woof.WoofExceptionToWoofHttpContinuationModel">
 			<value method="setApplicationPath" node="redirect@path" />
 		</object>
+		<object method="setWoofProcedure" node="procedure"
+			class="net.officefloor.woof.model.woof.WoofExceptionToWoofProcedureModel">
+			<value method="setProcedureName" node="procedure@name" />
+		</object>
 	</object>
 
 	<!-- START -->
-	<object method="addWoofStart" node="start"
-		class="net.officefloor.woof.model.woof.WoofStartModel">
+	<object method="addWoofStart" node="start" class="net.officefloor.woof.model.woof.WoofStartModel">
 		<value method="setX" node="start@x" />
 		<value method="setY" node="start@y" />
 		<object method="setWoofSectionInput" node="section"
 			class="net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel">
 			<value method="setSectionName" node="section@name" />
 			<value method="setInputName" node="section@input" />
+		</object>
+		<object method="setWoofProcedure" node="procedure"
+			class="net.officefloor.woof.model.woof.WoofStartToWoofProcedureModel">
+			<value method="setProcedureName" node="procedure@name" />
 		</object>
 	</object>
 

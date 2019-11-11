@@ -178,7 +178,7 @@ public class MethodManagedFunctionBuilderUtil {
 		assertNotNull("No method supplied for class " + clazz.getName());
 
 		// Create source to load method
-		MethodManagedFunctionSource mos = new MethodManagedFunctionSource(method, clazz, objectInstanceFactory);
+		MethodManagedFunctionSource mos = new MethodManagedFunctionSource(method, objectInstanceFactory);
 
 		// Load the function name space type (ensuring correct type)
 		FunctionNamespaceType functionNamespaceType = ManagedFunctionLoaderUtil
@@ -203,11 +203,6 @@ public class MethodManagedFunctionBuilderUtil {
 		private final Method method;
 
 		/**
-		 * Instance {@link Class}.
-		 */
-		private final Class<?> instanceClass;
-
-		/**
 		 * {@link MethodObjectInstanceFactory}.
 		 */
 		private final MethodObjectInstanceFactory objectInstanceFactory;
@@ -216,13 +211,10 @@ public class MethodManagedFunctionBuilderUtil {
 		 * Instantiate.
 		 * 
 		 * @param method                {@link Method}.
-		 * @param instanceClass         Instance {@link Class}.
 		 * @param objectInstanceFactory {@link MethodObjectInstanceFactory}.
 		 */
-		public MethodManagedFunctionSource(Method method, Class<?> instanceClass,
-				MethodObjectInstanceFactory objectInstanceFactory) {
+		public MethodManagedFunctionSource(Method method, MethodObjectInstanceFactory objectInstanceFactory) {
 			this.method = method;
-			this.instanceClass = instanceClass;
 			this.objectInstanceFactory = objectInstanceFactory;
 		}
 
@@ -241,8 +233,7 @@ public class MethodManagedFunctionBuilderUtil {
 
 			// Build the method
 			MethodManagedFunctionBuilder builder = new MethodManagedFunctionBuilder();
-			builder.buildMethod(this.method, this.instanceClass, () -> this.objectInstanceFactory,
-					functionNamespaceTypeBuilder, context);
+			builder.buildMethod(this.method, () -> this.objectInstanceFactory, functionNamespaceTypeBuilder, context);
 		}
 	}
 

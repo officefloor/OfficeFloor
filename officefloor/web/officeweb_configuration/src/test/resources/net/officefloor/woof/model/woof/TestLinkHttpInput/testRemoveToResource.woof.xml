@@ -9,6 +9,7 @@
 		<http-input path="/inputA" method="POST" />
 		<http-input path="/inputB" method="PUT">
 			<template path="/template" />
+			<procedure name="PROCEDURE" />
 			<section name="SECTION" input="INPUT" />
 			<security name="SECURITY" />
 			<redirect path="/path" />
@@ -19,6 +20,11 @@
 		<template path="/template" />
 		<template path="/templateLink" />
 	</templates>
+	
+	<procedures>
+		<procedure name="PROCEDURE" />
+		<procedure name="PROCEDURE_LINK" />
+	</procedures>
 
 	<sections>
 		<section name="SECTION">

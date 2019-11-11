@@ -11,5 +11,4 @@ trait Flows {
   def flowWithCallback(callback: FlowCallback)
   def flowWithParameterAndCallback(parameter: String, callback: FlowCallback)
   def flowWithParameter(parameter: String)
-  def exception(ex: IOException)
 }

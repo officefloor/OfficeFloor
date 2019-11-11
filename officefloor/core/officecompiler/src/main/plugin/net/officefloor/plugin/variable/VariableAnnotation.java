@@ -50,12 +50,19 @@ public class VariableAnnotation {
 	private final String name;
 
 	/**
+	 * Type for the {@link Var}.
+	 */
+	private final String type;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param name Name for the {@link Var}.
+	 * @param type Type for the {@link Var}.
 	 */
-	public VariableAnnotation(String name) {
+	public VariableAnnotation(String name, String type) {
 		this.name = name;
+		this.type = type;
 	}
 
 	/**
@@ -64,7 +71,16 @@ public class VariableAnnotation {
 	 * @return Name of the {@link Var}.
 	 */
 	public String getVariableName() {
-		return name;
+		return this.name;
+	}
+
+	/**
+	 * Obtains the type of the {@link Var}.
+	 * 
+	 * @return Type of the {@link Var}.
+	 */
+	public String getVariableType() {
+		return this.type;
 	}
 
 }

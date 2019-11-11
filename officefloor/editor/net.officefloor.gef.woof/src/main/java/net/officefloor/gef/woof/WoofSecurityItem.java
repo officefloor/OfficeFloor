@@ -39,6 +39,8 @@ import net.officefloor.woof.model.woof.WoofExceptionToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofProcedureNextToWoofSecurityModel;
+import net.officefloor.woof.model.woof.WoofProcedureOutputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofSectionOutputToWoofSecurityModel;
 import net.officefloor.woof.model.woof.WoofSecurityModel;
@@ -112,7 +114,8 @@ public class WoofSecurityItem extends
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofSecurityModel.class,
 						WoofHttpInputToWoofSecurityModel.class, WoofTemplateOutputToWoofSecurityModel.class,
 						WoofSecurityOutputToWoofSecurityModel.class, WoofSectionOutputToWoofSecurityModel.class,
-						WoofExceptionToWoofSecurityModel.class).getNode());
+						WoofExceptionToWoofSecurityModel.class, WoofProcedureNextToWoofSecurityModel.class,
+						WoofProcedureOutputToWoofSecurityModel.class).getNode());
 		context.label(heading);
 		context.addNode(container, context.childGroup(WoofSecurityOutputItem.class.getSimpleName(), new VBox()));
 		return container;

@@ -28,6 +28,9 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
@@ -137,6 +140,44 @@ public class Singleton extends AbstractManagedObjectSource<None, None>
 		for (AutoWire autoWire : autoWires) {
 			managedObject.addTypeQualification(autoWire.getQualifier(), autoWire.getType());
 		}
+
+		// Return the managed object
+		return managedObject;
+	}
+
+	/**
+	 * Convenience method to load singleton {@link Object}.
+	 * 
+	 * @param designer  {@link SectionDesigner}.
+	 * @param singleton Singleton {@link Object}.
+	 * @return {@link SectionManagedObject}.
+	 */
+	public static SectionManagedObject load(SectionDesigner designer, Object singleton) {
+		return load(designer, null, singleton);
+	}
+
+	/**
+	 * Convenience method to load singleton {@link Object}.
+	 * 
+	 * @param designer          {@link SectionDesigner}.
+	 * @param managedObjectName Name of {@link SectionManagedObject}.
+	 * @param singleton         Singleton {@link Object}.
+	 * @return {@link SectionManagedObject}.
+	 */
+	public static SectionManagedObject load(SectionDesigner designer, String managedObjectName, Object singleton) {
+
+		// Ensure have a managed object name
+		if (managedObjectName == null) {
+			managedObjectName = singleton.getClass().getSimpleName();
+		}
+
+		// Load the managed object source
+		SectionManagedObjectSource managedObjectSource = designer.addSectionManagedObjectSource(managedObjectName,
+				new Singleton(singleton));
+
+		// Load the managed object
+		SectionManagedObject managedObject = managedObjectSource.addSectionManagedObject(managedObjectName,
+				ManagedObjectScope.PROCESS);
 
 		// Return the managed object
 		return managedObject;

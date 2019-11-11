@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="procedure name" />
+	<field type="WoofProcedureOutputModel" name="woof procedure output" end-field="woof procedure" />
+	<field type="WoofProcedureModel" name="woof procedure" end-list="woof procedure output" />
+</model>

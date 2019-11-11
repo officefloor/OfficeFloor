@@ -67,7 +67,7 @@ public class ValueParameterManufacturer
 
 		// Obtain the variable details
 		String qualifier = context.getParameterQualifier();
-		String type = context.getParameterType().getTypeName();
+		String type = VariableManagedObjectSource.type(context.getParameterType().getTypeName());
 		String qualifiedName = VariableManagedObjectSource.name(qualifier, type);
 
 		// Add the variable
@@ -77,7 +77,7 @@ public class ValueParameterManufacturer
 			for (Annotation annotation : annotations) {
 				builder.addAnnotation(annotation);
 			}
-			builder.addAnnotation(new VariableAnnotation(qualifiedName));
+			builder.addAnnotation(new VariableAnnotation(qualifiedName, type));
 		});
 
 		// Return value

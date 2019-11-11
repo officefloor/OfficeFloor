@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="woof procedure output name" />
+	<field type="String" name="argument type" />
+	<field type="WoofProcedureOutputToWoofSectionInputModel" name="woof section input" />
+	<field type="WoofProcedureOutputToWoofTemplateModel" name="woof template" />
+	<field type="WoofProcedureOutputToWoofSecurityModel" name="woof security" />
+	<field type="WoofProcedureOutputToWoofResourceModel" name="woof resource" />
+	<field type="WoofProcedureOutputToWoofHttpContinuationModel" name="woof http continuation" />
+	<field type="WoofProcedureOutputToWoofProcedureModel" name="woof procedure" />
+</model>

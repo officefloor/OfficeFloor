@@ -152,16 +152,92 @@ public class VariableTest extends OfficeFrameTestCase {
 			context.variable(varOneQualifier, varOneType, varOne);
 			context.variable(varTwoQualifier, varTwoType, varTwo);
 		});
-		OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor();
+		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 
-		// Trigger the function
-		isComplete = false;
-		CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.stepOne", null);
-		assertTrue("Should complete", isComplete);
+			// Trigger the function
+			isComplete = false;
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.stepOne", null);
+			assertTrue("Should complete", isComplete);
 
-		// Ensure correct values
-		assertEquals("Incorrect variable one value", varOneValue, varOne.getValue());
-		assertEquals("Incorrect variable two value", varTwoValue, varTwo.getValue());
+			// Ensure correct values
+			assertEquals("Incorrect variable one value", varOneValue, varOne.getValue());
+			assertEquals("Incorrect variable two value", varTwoValue, varTwo.getValue());
+		}
+	}
+
+	/**
+	 * <p>
+	 * Ensure auto-box of primitives is same variable.
+	 * <p>
+	 * Treating <code>int</code> and {@link Integer} as separate variable types
+	 * could get confusing and prone to errors.
+	 */
+	public void testMatchAutoBoxed() throws Throwable {
+
+		// Capture primitive variables
+		CompileVar<Boolean> varBoolean = new CompileVar<>();
+		CompileVar<Short> varShort = new CompileVar<>();
+		CompileVar<Character> varCharacter = new CompileVar<>();
+		CompileVar<Integer> varInteger = new CompileVar<>();
+		CompileVar<Long> varLong = new CompileVar<>();
+		CompileVar<Float> varFloat = new CompileVar<>();
+		CompileVar<Double> varDouble = new CompileVar<>();
+
+		// Compile section
+		CompileOfficeFloor compiler = new CompileOfficeFloor();
+		compiler.office((context) -> {
+			context.addSection("SECTION", PrimitiveSection.class);
+			context.variable(null, Boolean.class, varBoolean);
+			context.variable(null, Short.class, varShort);
+			context.variable(null, Character.class, varCharacter);
+			context.variable(null, Integer.class, varInteger);
+			context.variable(null, Long.class, varLong);
+			context.variable(null, Float.class, varFloat);
+			context.variable(null, Double.class, varDouble);
+		});
+		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
+
+			// Trigger the function
+			isComplete = false;
+			CompileOfficeFloor.invokeProcess(officeFloor, "SECTION.stepOne", null);
+			assertTrue("Should complete", isComplete);
+
+			// Ensure correct values
+			assertTrue("Incorrect boolean", varBoolean.getValue());
+			assertEquals("Incorrect short", Short.valueOf((short) 1), varShort.getValue());
+			assertEquals("Incorrect char", Character.valueOf((char) 2), varCharacter.getValue());
+			assertEquals("Incorrect int", Integer.valueOf(3), varInteger.getValue());
+			assertEquals("Incorrect long", Long.valueOf(4), varLong.getValue());
+			assertEquals("Incorrect float", Float.valueOf(5.0F), varFloat.getValue());
+			assertEquals("Incorrect double", Double.valueOf(6.0), varDouble.getValue());
+		}
+	}
+
+	public static class PrimitiveSection {
+
+		@Next("stepTwo")
+		public void stepOne(Out<Boolean> varBoolean, Out<Short> varShort, Out<Character> varCharacter,
+				Out<Integer> varInteger, Out<Long> varLong, Out<Float> varFloat, Out<Double> varDouble) {
+			varBoolean.set(true);
+			varShort.set((short) 1);
+			varCharacter.set((char) 2);
+			varInteger.set(3);
+			varLong.set(4L);
+			varFloat.set(5.0F);
+			varDouble.set(6.0);
+		}
+
+		public void stepTwo(@Val boolean varBoolean, @Val short varShort, @Val char varChar, @Val int varInt,
+				@Val long varLong, @Val float varFloat, @Val double varDouble) {
+			assertTrue("Incorrect boolean", varBoolean);
+			assertEquals("Incorrect short", 1, varShort);
+			assertEquals("Incorrect char", 2, varChar);
+			assertEquals("Incorrect int", 3, varInt);
+			assertEquals("Incorrect long", 4, varLong);
+			assertEquals("Incorrect float", 5.0F, varFloat);
+			assertEquals("Incorrect double", 6.0, varDouble);
+			isComplete = true;
+		}
 	}
 
 }

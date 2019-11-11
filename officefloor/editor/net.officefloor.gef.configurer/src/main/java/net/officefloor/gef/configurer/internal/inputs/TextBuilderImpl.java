@@ -42,8 +42,7 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, T
 	/**
 	 * Instantiate.
 	 * 
-	 * @param label
-	 *            Label.
+	 * @param label Label.
 	 */
 	public TextBuilderImpl(String label) {
 		super(label);
@@ -108,8 +107,7 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, T
 		/**
 		 * Instantiate.
 		 * 
-		 * @param column
-		 *            {@link TableColumn}.
+		 * @param column {@link TableColumn}.
 		 */
 		public EditingCell(TableColumn<R, String> column) {
 			this.column = column;
@@ -126,7 +124,7 @@ public class TextBuilderImpl<M> extends AbstractBuilder<M, String, ValueInput, T
 				this.textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
 
 				// Commit on lost focus
-				this.textField.focusedProperty().addListener((event, oldValue, newValue) -> {
+				this.textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
 					if (!newValue) {
 						this.commitEdit(this.textField.getText());
 					}
