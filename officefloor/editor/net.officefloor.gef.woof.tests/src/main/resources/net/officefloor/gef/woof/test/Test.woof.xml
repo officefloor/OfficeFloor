@@ -1,7 +1,7 @@
 <woof>
   <http-continuations>
     <http-continuation path="/continuation/procedure" secure="false" x="213" y="239">
-      <procedure name="procedure"/>
+      <procedure name="procedureToSection"/>
     </http-continuation>
     <http-continuation path="/continuation/redirect" secure="false" x="212" y="195">
       <redirect path="/continuation/section"/>
@@ -27,7 +27,7 @@
       <redirect path="/continuation/section"/>
     </http-input>
     <http-input path="/input/procedure" method="POST" secure="false" x="209" y="546">
-      <procedure name="procedure"/>
+      <procedure name="procedureToSection"/>
     </http-input>
     <http-input path="/input/section" method="POST" secure="false" x="217" y="333">
       <section name="Section" input="input"/>
@@ -42,7 +42,7 @@
   <templates>
     <template path="/template/procedure" location="net/officefloor/gef/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1242" y="692">
       <output name="link" argument-type="">
-        <procedure name="procedure"/>
+        <procedure name="procedureToSection"/>
       </output>
     </template>
     <template path="/template/resource" location="net/officefloor/gef/woof/test/Template.html" class="" content-type="" charset="" secure="false" redirect-values-function="" link-separator-character="" x="1242" y="568">
@@ -74,7 +74,7 @@
     <section name="Section to Procedure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="968" y="594">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
-        <procedure name="procedure"/>
+        <procedure name="procedureToSection"/>
       </output>
     </section>
     <section name="Section to Resource" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.woof.test.MockSection" x="964" y="390">
@@ -109,11 +109,52 @@
     </section>
   </sections>
   <procedures>
-    <procedure name="procedure" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="558" y="229">
+    <procedure name="procedureToSection" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="558" y="229">
       <next argument-type="">
         <section name="Section" input="input"/>
       </next>
       <output name="flow" argument-type="">
+        <section name="Section" input="input"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToTemplate" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="559" y="296">
+      <next argument-type="">
+        <template path="/template/sectionAndTemplate"/>
+      </next>
+      <output name="flow" argument-type="">
+        <template path="/template/sectionAndTemplate"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToResource" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="559" y="364">
+      <next argument-type="">
+        <resource path="/resource"/>
+      </next>
+      <output name="flow" argument-type="">
+        <resource path="/resource"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToSecurity" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="560" y="430">
+      <next argument-type="">
+        <security name="Basic Security"/>
+      </next>
+      <output name="flow" argument-type="">
+        <security name="Basic Security"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToContinuation" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="560" y="501">
+      <next argument-type="">
+        <redirect path="/continuation/section"/>
+      </next>
+      <output name="flow" argument-type="">
+        <redirect path="/continuation/section"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToProcedure" resource="net.officefloor.gef.woof.test.MockProcedure" source="Class" procedure="procedure" x="563" y="575">
+      <next argument-type="">
+        <procedure name="procedureToSection"/>
+      </next>
+      <output name="flow" argument-type="">
+        <procedure name="procedureToSection"/>
       </output>
     </procedure>
   </procedures>
@@ -156,7 +197,7 @@
     <security name="Security to Procedure" source="net.officefloor.web.security.scheme.FormHttpSecuritySource" timeout="5000" x="1320" y="396">
       <property name="realm" value="OfficeFloor"/>
       <output name="form" argument-type="java.lang.Void">
-        <procedure name="procedure"/>
+        <procedure name="procedureToSection"/>
       </output>
     </security>
   </securities>
@@ -177,7 +218,7 @@
       <redirect path="/continuation/section"/>
     </exception>
     <exception class="java.lang.IllegalArgumentException" x="200" y="863">
-      <procedure name="procedure"/>
+      <procedure name="procedureToSection"/>
     </exception>
     <exception class="java.lang.IllegalStateException" x="205" y="776">
       <security name="Security to Template"/>
@@ -194,7 +235,7 @@
       <section name="Section" input="input"/>
     </start>
     <start x="722" y="55">
-      <procedure name="procedure"/>
+      <procedure name="procedureToSection"/>
     </start>
   </starting>
 </woof>

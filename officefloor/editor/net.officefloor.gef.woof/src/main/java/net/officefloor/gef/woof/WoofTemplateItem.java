@@ -49,6 +49,8 @@ import net.officefloor.woof.model.woof.WoofExceptionToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofProcedureNextToWoofTemplateModel;
+import net.officefloor.woof.model.woof.WoofProcedureOutputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofSectionOutputToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofTemplateModel;
@@ -189,12 +191,15 @@ public class WoofTemplateItem extends
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofTemplateModel.class,
 						WoofHttpInputToWoofTemplateModel.class, WoofTemplateOutputToWoofTemplateModel.class,
 						WoofSecurityOutputToWoofTemplateModel.class, WoofSectionOutputToWoofTemplateModel.class,
-						WoofExceptionToWoofTemplateModel.class).target(WoofTemplateToSuperWoofTemplateModel.class)
+						WoofExceptionToWoofTemplateModel.class, WoofProcedureNextToWoofTemplateModel.class,
+						WoofProcedureOutputToWoofTemplateModel.class).target(WoofTemplateToSuperWoofTemplateModel.class)
 						.getNode());
 		context.label(heading);
 		context.addNode(heading, context.connector(DefaultConnectors.DERIVE)
 				.source(WoofTemplateToSuperWoofTemplateModel.class).getNode());
-		context.addNode(container, context.childGroup(WoofTemplateOutputItem.class.getSimpleName(), new VBox()));
+		HBox children = context.addNode(container, new HBox());
+		context.addIndent(children);
+		context.addNode(children, context.childGroup(WoofTemplateOutputItem.class.getSimpleName(), new VBox()));
 		return container;
 	}
 

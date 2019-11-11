@@ -54,6 +54,8 @@ import net.officefloor.woof.model.woof.WoofHttpInputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureNextToWoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureOutputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 import net.officefloor.woof.model.woof.WoofSectionOutputToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofSecurityOutputToWoofProcedureModel;
@@ -173,13 +175,14 @@ public class WoofProcedureItem extends
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofProcedureModel.class,
 						WoofHttpInputToWoofProcedureModel.class, WoofExceptionToWoofProcedureModel.class,
 						WoofStartToWoofProcedureModel.class, WoofSectionOutputToWoofProcedureModel.class,
-						WoofSecurityOutputToWoofProcedureModel.class, WoofTemplateOutputToWoofProcedureModel.class)
+						WoofSecurityOutputToWoofProcedureModel.class, WoofTemplateOutputToWoofProcedureModel.class,
+						WoofProcedureNextToWoofProcedureModel.class, WoofProcedureOutputToWoofProcedureModel.class)
 						.getNode());
 		context.label(procedure);
-		VBox next = context.addNode(procedure, new VBox());
-		context.childGroup(WoofProcedureNextItem.class.getSimpleName(), next);
-//		VBox outputs = context.addNode(children, new VBox());
-//		context.childGroup(WoofProcedureOutputItem.class.getSimpleName(), outputs);
+		context.addNode(procedure, context.childGroup(WoofProcedureNextItem.class.getSimpleName(), new VBox()));
+		HBox children = context.addNode(container, new HBox());
+		context.addIndent(children);
+		context.addNode(children, context.childGroup(WoofProcedureOutputItem.class.getSimpleName(), new VBox()));
 		return container;
 	}
 
@@ -212,7 +215,7 @@ public class WoofProcedureItem extends
 	@Override
 	protected void children(List<IdeChildrenGroup> childGroups) {
 		childGroups.add(new IdeChildrenGroup(new WoofProcedureNextItem()));
-//		childGroups.add(new IdeChildrenGroup(new WoofProcedureOutputItem()));
+		childGroups.add(new IdeChildrenGroup(new WoofProcedureOutputItem()));
 	}
 
 	@Override

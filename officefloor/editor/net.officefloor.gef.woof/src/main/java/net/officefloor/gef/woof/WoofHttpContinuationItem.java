@@ -39,6 +39,8 @@ import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofTemplateModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureNextToWoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofProcedureOutputToWoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
@@ -94,7 +96,8 @@ public class WoofHttpContinuationItem extends
 				WoofHttpContinuationToWoofHttpContinuationModel.class, WoofHttpInputToWoofHttpContinuationModel.class,
 				WoofTemplateOutputToWoofHttpContinuationModel.class,
 				WoofSecurityOutputToWoofHttpContinuationModel.class, WoofSectionOutputToWoofHttpContinuationModel.class,
-				WoofExceptionToWoofHttpContinuationModel.class).getNode());
+				WoofExceptionToWoofHttpContinuationModel.class, WoofProcedureNextToWoofHttpContinuationModel.class,
+				WoofProcedureOutputToWoofHttpContinuationModel.class).getNode());
 		context.label(container);
 		context.addNode(container,
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofSectionInputModel.class,

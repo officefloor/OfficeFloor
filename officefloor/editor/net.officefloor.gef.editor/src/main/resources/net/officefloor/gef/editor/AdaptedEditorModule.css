@@ -33,6 +33,10 @@
 	-fx-padding: 0.0 0.0 0.0 1.0em;
 }
 
+.parent .indent {
+	-fx-pref-width: 30px;
+}
+
 .parent .connector {
 	-fx-pref-width: 15.0px;
 	-fx-pref-height: 15.0px;
