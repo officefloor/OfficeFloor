@@ -29,10 +29,13 @@ import net.officefloor.model.ConnectionModel;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofSectionInputModel.WoofSectionInputEvent;
 import net.officefloor.woof.model.woof.WoofStartModel;
 import net.officefloor.woof.model.woof.WoofStartModel.WoofStartEvent;
+import net.officefloor.woof.model.woof.WoofStartToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofStartToWoofSectionInputModel;
 
 /**
@@ -62,8 +65,8 @@ public class WoofStartItem extends
 	public Node visual(WoofStartModel model, AdaptedChildVisualFactoryContext<WoofStartModel> context) {
 		HBox container = new HBox();
 		context.addNode(container, new Label("Start"));
-		context.addNode(container,
-				context.connector(DefaultConnectors.FLOW, WoofStartToWoofSectionInputModel.class).getNode());
+		context.addNode(container, context.connector(DefaultConnectors.FLOW, WoofStartToWoofSectionInputModel.class,
+				WoofStartToWoofProcedureModel.class).getNode());
 		return container;
 	}
 
@@ -95,6 +98,17 @@ public class WoofStartItem extends
 					ctx.getChangeExecutor().execute(ctx.getOperations().linkStartToSectionInput(s, t));
 				}).delete((ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().removeStartToSectionInput(ctx.getModel()));
+				}));
+
+		// Procedure
+		connections.add(new IdeConnection<>(WoofStartToWoofProcedureModel.class)
+				.connectOne(s -> s.getWoofProcedure(), c -> c.getWoofStart(), WoofStartEvent.CHANGE_WOOF_PROCEDURE)
+				.to(WoofProcedureModel.class).many(t -> t.getWoofStarts(), c -> c.getWoofProcedure(),
+						WoofProcedureEvent.ADD_WOOF_START, WoofProcedureEvent.REMOVE_WOOF_START)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkStartToProcedure(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeStartToProcedure(ctx.getModel()));
 				}));
 	}
 

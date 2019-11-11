@@ -84,7 +84,7 @@ public abstract class AbstractVariableParameterManufacturer
 			for (Annotation annotation : context.getParameterAnnotations()) {
 				builder.addAnnotation(annotation);
 			}
-			builder.addAnnotation(new VariableAnnotation(qualifiedName));
+			builder.addAnnotation(new VariableAnnotation(qualifiedName, type));
 		});
 
 		// Return variable

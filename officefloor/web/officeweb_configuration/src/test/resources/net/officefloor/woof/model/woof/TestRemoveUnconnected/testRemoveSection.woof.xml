@@ -9,17 +9,18 @@
 	</http-inputs>
 
 	<templates>
-		<template path="/template" location="example/Template.ofp"
-			class="net.example.LogicClass">
-			<extension
-				class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource" />
-			<extension
-				class="net.officefloor.woof.model.woof.MockChangeWoofTemplateExtensionSource">
+		<template path="/template" location="example/Template.ofp" class="net.example.LogicClass">
+			<extension class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource" />
+			<extension class="net.officefloor.woof.model.woof.MockChangeWoofTemplateExtensionSource">
 				<property name="ONE" value="A" />
 				<property name="TWO" value="B" />
 			</extension>
 		</template>
 	</templates>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method" />
+	</procedures>
 
 	<sections />
 

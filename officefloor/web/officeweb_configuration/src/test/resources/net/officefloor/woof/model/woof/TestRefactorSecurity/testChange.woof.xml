@@ -21,6 +21,17 @@
 		</template>
 	</templates>
 
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<security name="CHANGE" />
+			</next>
+			<output name="OUTPUT">
+				<security name="CHANGE" />
+			</output>
+		</procedure>
+	</procedures>
+
 	<sections>
 		<section name="SECTION" source="net.example.ExampleSectionSource"
 			location="SECTION_LOCATION">
@@ -40,7 +51,7 @@
 			<content type="text/html" />
 			<content type="confirm/change" />
 			<output name="OUTPUT_A" argument-type="java.lang.Integer">
-				<redirect path="/path" />
+				<procedure name="NAME" />
 			</output>
 			<output name="OUTPUT_B" argument-type="java.lang.String">
 				<section name="SECTION" input="INPUT" />
@@ -53,6 +64,9 @@
 			</output>
 			<output name="OUTPUT_E">
 				<resource path="/resource.html" />
+			</output>
+			<output name="OUTPUT_F">
+				<redirect path="/path" />
 			</output>
 		</security>
 		<security name="SECURITY_LINK" source="net.example.HttpSecuritySource">

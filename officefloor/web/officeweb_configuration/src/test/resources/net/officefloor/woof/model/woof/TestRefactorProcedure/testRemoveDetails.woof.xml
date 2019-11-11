@@ -1,0 +1,77 @@
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/path">
+			<procedure name="PROCEDURE" />
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/path" method="POST">
+			<procedure name="PROCEDURE" />
+		</http-input>
+	</http-inputs>
+
+	<templates>
+		<template path="/template" location="example/Template.ofp" class="net.example.LogicClass">
+			<output name="OUTPUT">
+				<procedure name="PROCEDURE" />
+			</output>
+		</template>
+	</templates>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<template path="/template" />
+				<section name="SECTION" input="INPUT" />
+				<security name="SECURITY" />
+				<resource path="/resource.html" />
+				<redirect path="/path" />
+				<procedure name="PROCEDURE_LINK" />
+			</next>
+		</procedure>
+		<procedure name="PROCEDURE_LINK" resource="resource" source="JavaScript" procedure="function">
+			<next>
+				<procedure name="PROCEDURE" />
+			</next>
+			<output name="OUTPUT">
+				<procedure name="PROCEDURE" />
+			</output>
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<procedure name="PROCEDURE" />
+			</output>
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<procedure name="PROCEDURE" />
+			</output>
+		</security>
+	</securities>
+
+	<resources>
+		<resource path="/resource.html" />
+	</resources>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<procedure name="PROCEDURE" />
+		</exception>
+	</exceptions>
+
+	<starts>
+		<start>
+			<procedure name="PROCEDURE" />
+		</start>
+	</starts>
+
+</woof>

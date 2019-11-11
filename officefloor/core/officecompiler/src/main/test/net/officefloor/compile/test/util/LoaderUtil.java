@@ -33,16 +33,12 @@ public class LoaderUtil {
 	 * Asserts the arrays are of the same length, providing useful debug information
 	 * if not.
 	 * 
-	 * @param <T>
-	 *            Entry type.
-	 * @param message
-	 *            Message.
-	 * @param expected
-	 *            Expected items of array.
-	 * @param actual
-	 *            Actual items of array.
-	 * @param toString
-	 *            {@link Function} to obtain {@link String} description of item.
+	 * @param <T>      Entry type.
+	 * @param message  Message.
+	 * @param expected Expected items of array.
+	 * @param actual   Actual items of array.
+	 * @param toString {@link Function} to obtain {@link String} description of
+	 *                 item.
 	 */
 	public static <T> void assertLength(String message, T[] expected, T[] actual, Function<T, String> toString) {
 		assertLength(message, expected, toString, actual, toString);
@@ -52,22 +48,15 @@ public class LoaderUtil {
 	 * Asserts the arrays are of the same length, providing useful debug information
 	 * if not.
 	 *
-	 * @param <E>
-	 *            Expected type.
-	 * @param <A>
-	 *            Actual type.
-	 * @param message
-	 *            Message.
-	 * @param expected
-	 *            Expected items of array.
-	 * @param expectedToString
-	 *            {@link Function} to obtain {@link String} description of expected
-	 *            item.
-	 * @param actual
-	 *            Actual items of array.
-	 * @param actualToString
-	 *            {@link Function} to obtain {@link String} description of actual
-	 *            item.
+	 * @param <E>              Expected type.
+	 * @param <A>              Actual type.
+	 * @param message          Message.
+	 * @param expected         Expected items of array.
+	 * @param expectedToString {@link Function} to obtain {@link String} description
+	 *                         of expected item.
+	 * @param actual           Actual items of array.
+	 * @param actualToString   {@link Function} to obtain {@link String} description
+	 *                         of actual item.
 	 */
 	public static <E, A> void assertLength(String message, E[] expected, Function<E, String> expectedToString,
 			A[] actual, Function<A, String> actualToString) {

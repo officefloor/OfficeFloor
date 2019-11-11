@@ -20,9 +20,19 @@
 		</template>
 	</templates>
 
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<resource path="/resource.html" />
+			</next>
+			<output name="OUTPUT">
+				<resource path="/resource.html" />
+			</output>
+		</procedure>
+	</procedures>
+
 	<sections>
-		<section name="SECTION" source="net.example.ExampleSectionSource"
-			location="SECTION_LOCATION">
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
 			<output name="OUTPUT">
 				<resource path="/resource.html" />
 			</output>

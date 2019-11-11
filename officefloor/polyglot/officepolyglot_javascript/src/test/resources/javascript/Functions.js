@@ -18,7 +18,7 @@ function primitives(_boolean, _byte, _short, _char, _int, _long, _float, _double
 }
 primitives.officefloor = [
     "boolean", "byte", "short", "char", "int", "long", "float", "double",
-    {next: "use", argumentType: PrimitiveTypes}
+    {nextArgumentType: PrimitiveTypes}
 ]
 
 
@@ -27,7 +27,7 @@ function objects(string, object, primitiveArray, objectArray) {
 }
 objects.officefloor = [
 	"java.lang.String", JavaObject, "int[]", [JavaObject],
-	{next: "use", argumentType: ObjectTypes}
+	{nextArgumentType: ObjectTypes}
 ]
 
 
@@ -36,7 +36,7 @@ function collections(list, set, map) {
 }
 collections.officefloor = [
 	"java.util.List", "java.util.Set", "java.util.Map",
-	{next: "use", argumentType: CollectionTypes}
+	{nextArgumentType: CollectionTypes}
 ]
 
 
@@ -47,8 +47,8 @@ function variables(_val, _in, _out, _var) {
 	return new VariableTypes(_val, _in.get(), value);
 }
 variables.officefloor = [
-	{val: "char"}, {in: "java.lang.String"}, {out: JavaObject}, {var: "java.lang.Integer"},
-	{next: "use", argumentType: VariableTypes}
+	{val: "char"}, {in: "java.lang.String"}, {out: JavaObject}, {var: "java.lang.Integer", qualifier: "qualified"},
+	{nextArgumentType: VariableTypes}
 ]
 
 
@@ -57,11 +57,11 @@ function parameter(param) {
 }
 parameter.officefloor = [
 	{param: "java.lang.String"},
-	{next: "use", argumentType: ParameterTypes}
+	{nextArgumentType: ParameterTypes}
 ]
 
 
-function serviceFlow(flowType, flow, flowWithCallback, flowWithParameterAndCallback, flowWithParameter, exception) {
+function serviceFlow(flowType, flow, flowWithCallback, flowWithParameter, flowWithParameterAndCallback) {
 	switch (flowType) {
 	case "nextFunction":
 		return; // do nothing so next function fires
@@ -76,8 +76,7 @@ function serviceFlow(flowType, flow, flowWithCallback, flowWithParameterAndCallb
 		});
 		return;
 	case "exception":
-		exception.doFlow(new IOException(), null);
-		return;
+		throw new IOException();
 	default:
 		Assert.fail("Invalid flow type: " + flowType);
 	}
@@ -86,10 +85,8 @@ serviceFlow.officefloor = [
 	{param: "java.lang.String"},
 	{flow: "flow"},
 	{flow: "flowWithCallback"},
-	{flow: "flowWithParameterAndCallback", argumentType: "java.lang.String"},
 	{flow: "flowWithParameter", argumentType: "java.lang.String"},
-	{flow: "exception", argumentType: IOException},
-	{next: "nextFunction"}
+	{flow: "flowWithParameterAndCallback", argumentType: "java.lang.String"}
 ]
 
 

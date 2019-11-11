@@ -17,9 +17,7 @@
  */
 package net.officefloor.polyglot.script;
 
-import javax.script.Bindings;
 import javax.script.Invocable;
-import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -38,6 +36,21 @@ import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexed> {
 
 	/**
+	 * Decorates the {@link ScriptEngine}.
+	 */
+	@FunctionalInterface
+	public static interface ScriptEngineDecorator {
+
+		/**
+		 * Decorates the {@link ScriptEngine}.
+		 * 
+		 * @param engine {@link ScriptEngine}.
+		 * @throws Exception If fails to decorate the {@link ScriptEngine}.
+		 */
+		void decorate(ScriptEngine engine) throws Exception;
+	}
+
+	/**
 	 * {@link ThreadLocal} for {@link Invocable}.
 	 */
 	private final ThreadLocal<Invocable> invocable = new ThreadLocal<>();
@@ -51,6 +64,11 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 	 * {@link ScriptEngine} name.
 	 */
 	private final String engineName;
+
+	/**
+	 * {@link ScriptEngineDecorator}.
+	 */
+	private final ScriptEngineDecorator scriptEngineDecorator;
 
 	/**
 	 * Setup script.
@@ -82,18 +100,19 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 	 * 
 	 * @param engineManager             {@link ScriptEngineManager}.
 	 * @param engineName                {@link ScriptEngine} name.
+	 * @param scriptEngineDecorator     {@link ScriptEngineDecorator}.
 	 * @param setupScript               Setup script.
 	 * @param script                    Script.
 	 * @param functionName              Name of the function.
-	 * @param parameterFactories        {@link MethodParameterFactory}
-	 *                                  instances.
+	 * @param parameterFactories        {@link MethodParameterFactory} instances.
 	 * @param scriptExceptionTranslator {@link ScriptExceptionTranslator}.
 	 */
-	public ScriptManagedFunction(ScriptEngineManager engineManager, String engineName, String setupScript,
-			String script, String functionName, MethodParameterFactory[] parameterFactories,
-			ScriptExceptionTranslator scriptExceptionTranslator) {
+	public ScriptManagedFunction(ScriptEngineManager engineManager, String engineName,
+			ScriptEngineDecorator scriptEngineDecorator, String setupScript, String script, String functionName,
+			MethodParameterFactory[] parameterFactories, ScriptExceptionTranslator scriptExceptionTranslator) {
 		this.engineManager = engineManager;
 		this.engineName = engineName;
+		this.scriptEngineDecorator = scriptEngineDecorator;
 		this.setupScript = setupScript;
 		this.script = script;
 		this.functionName = functionName;
@@ -112,20 +131,23 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 		Invocable invocable = this.invocable.get();
 		if (invocable == null) {
 
-			// Create and configure the engine
-			ScriptEngine engine = this.engineManager.getEngineByName(engineName);
-			Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-        		bindings.put("polyglot.js.allowAllAccess", true);
-			if (this.setupScript != null) {
-				engine.eval(this.setupScript);
+			// Script Engine Manager (not thread safe)
+			synchronized (this.engineManager) {
+
+				// Create and configure the engine
+				ScriptEngine engine = this.engineManager.getEngineByName(engineName);
+				this.scriptEngineDecorator.decorate(engine);
+				if (this.setupScript != null) {
+					engine.eval(this.setupScript);
+				}
+				engine.eval(this.script);
+
+				// Obtain the invocable
+				invocable = (Invocable) engine;
+
+				// Load for re-use
+				this.invocable.set(invocable);
 			}
-			engine.eval(this.script);
-
-			// Obtain the invocable
-			invocable = (Invocable) engine;
-
-			// Load for re-use
-			this.invocable.set(invocable);
 		}
 
 		// Obtain the arguments

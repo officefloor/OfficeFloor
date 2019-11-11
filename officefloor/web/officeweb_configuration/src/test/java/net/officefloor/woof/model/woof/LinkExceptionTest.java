@@ -54,8 +54,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofHttpContinuationModel}.
 	 * 
-	 * @param exceptionIndex
-	 *            {@link WoofExceptionModel} index.
+	 * @param exceptionIndex {@link WoofExceptionModel} index.
 	 */
 	private void doLinkToHttpContinuation(int exceptionIndex) {
 
@@ -105,8 +104,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofTemplateModel}.
 	 * 
-	 * @param exceptionIndex
-	 *            {@link WoofExceptionModel} index.
+	 * @param exceptionIndex {@link WoofExceptionModel} index.
 	 */
 	private void doLinkToTemplate(int exceptionIndex) {
 
@@ -137,6 +135,55 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
+	 * Ensure can link to {@link WoofProcedureModel}.
+	 */
+	public void testLinkToProcedure() {
+		this.doLinkToProcedure(A);
+	}
+
+	/**
+	 * Ensure link overrides other links for
+	 * {@link WoofExceptionToWoofProcedureModel}.
+	 */
+	public void testLinkOverrideToProcedure() {
+		this.doLinkToProcedure(B);
+	}
+
+	/**
+	 * Undertakes linking to a {@link WoofProcedureModel}.
+	 * 
+	 * @param exceptionIndex {@link WoofExceptionModel} index.
+	 */
+	private void doLinkToProcedure(int exceptionIndex) {
+
+		// Obtain the items to link
+		WoofExceptionModel exception = this.model.getWoofExceptions().get(exceptionIndex);
+		WoofProcedureModel procedure = this.model.getWoofProcedures().get(1);
+
+		// Link the exception to procedure
+		Change<WoofExceptionToWoofProcedureModel> change = this.operations.linkExceptionToProcedure(exception,
+				procedure);
+
+		// Validate change
+		this.assertChange(change, null, "Link Exception to Procedure", true);
+	}
+
+	/**
+	 * Ensure can remove the {@link WoofExceptionToWoofProcedureModel}.
+	 */
+	public void testRemoveToProcedure() {
+
+		// Obtain the link to remove
+		WoofExceptionToWoofProcedureModel link = this.model.getWoofExceptions().get(B).getWoofProcedure();
+
+		// Remove the link
+		Change<WoofExceptionToWoofProcedureModel> change = this.operations.removeExceptionToProcedure(link);
+
+		// Validate change
+		this.assertChange(change, null, "Remove Exception to Procedure", true);
+	}
+
+	/**
 	 * Ensure can link to {@link WoofSectionInputModel}.
 	 */
 	public void testLinkToSectionInput() {
@@ -154,8 +201,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofSectionInputModel}.
 	 * 
-	 * @param exceptionIndex
-	 *            {@link WoofExceptionModel} index.
+	 * @param exceptionIndex {@link WoofExceptionModel} index.
 	 */
 	private void doLinkToSectionInput(int exceptionIndex) {
 
@@ -204,8 +250,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofSecurityModel}.
 	 * 
-	 * @param exceptionIndex
-	 *            {@link WoofExceptionModel} index.
+	 * @param exceptionIndex {@link WoofExceptionModel} index.
 	 */
 	private void doLinkToSecurity(int exceptionIndex) {
 
@@ -253,8 +298,7 @@ public class LinkExceptionTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofResourceModel}.
 	 * 
-	 * @param exceptionIndex
-	 *            {@link WoofExceptionModel} index.
+	 * @param exceptionIndex {@link WoofExceptionModel} index.
 	 */
 	private void doLinkToResource(int exceptionIndex) {
 

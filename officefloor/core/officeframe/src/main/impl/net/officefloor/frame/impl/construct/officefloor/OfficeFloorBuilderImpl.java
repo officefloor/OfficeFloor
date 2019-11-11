@@ -263,6 +263,9 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 		ThreadLocalAwareExecutor threadLocalAwareExecutor = new ThreadLocalAwareExecutorImpl();
 		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaDataFactory(threadLocalAwareExecutor)
 				.constructRawOfficeFloorMetaData(this, issues);
+		if (rawMetaData == null) {
+			return null; // failed to construct
+		}
 
 		// Create the listing of OfficeFloor listeners
 		List<OfficeFloorListener> listeners = new ArrayList<>(this.listeners);

@@ -52,8 +52,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 	private final WoofRepository woofRepository = new WoofRepositoryImpl(this.modelRepository);
 
 	/**
-	 * Ensures on retrieving a {@link WoofModel} that all
-	 * {@link ConnectionModel} instances are connected.
+	 * Ensures on retrieving a {@link WoofModel} that all {@link ConnectionModel}
+	 * instances are connected.
 	 */
 	public void testRetrieveWoOF() throws Exception {
 
@@ -76,6 +76,12 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		section.addInput(sectionInput);
 		WoofSectionOutputModel sectionOutput = new WoofSectionOutputModel("SECTION_OUTPUT", null);
 		section.addOutput(sectionOutput);
+		WoofProcedureModel procedure = new WoofProcedureModel("PROCEDURE", null, null, null);
+		woof.addWoofProcedure(procedure);
+		WoofProcedureOutputModel procedureOutput = new WoofProcedureOutputModel("PROCEDURE_OUTPUT", null);
+		procedure.addOutput(procedureOutput);
+		WoofProcedureNextModel procedureNext = new WoofProcedureNextModel(null);
+		procedure.setNext(procedureNext);
 		WoofSecurityModel security = new WoofSecurityModel("SECURITY", null, 1000);
 		woof.addWoofSecurity(security);
 		WoofSecurityOutputModel securityOutput = new WoofSecurityOutputModel("SECURITY_OUTPUT", null);
@@ -116,6 +122,11 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				"HTTP_CONTINUATION_REDIRECT");
 		httpContinuation.setWoofRedirect(continuationToRedirect);
 
+		// Continuation -> Procedure
+		WoofHttpContinuationToWoofProcedureModel continuationToProcedure = new WoofHttpContinuationToWoofProcedureModel(
+				"PROCEDURE");
+		httpContinuation.setWoofProcedure(continuationToProcedure);
+
 		/*
 		 * HTTP Input links
 		 */
@@ -141,6 +152,10 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		WoofHttpInputToWoofHttpContinuationModel httpInputToContinuation = new WoofHttpInputToWoofHttpContinuationModel(
 				"HTTP_CONTINUATION");
 		httpInput.setWoofHttpContinuation(httpInputToContinuation);
+
+		// HTTP Input -> Procedure
+		WoofHttpInputToWoofProcedureModel httpInputToProcedure = new WoofHttpInputToWoofProcedureModel("PROCEDURE");
+		httpInput.setWoofProcedure(httpInputToProcedure);
 
 		/**
 		 * Template Output links
@@ -176,6 +191,11 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				"HTTP_CONTINUATION");
 		templateOutput.setWoofHttpContinuation(templateOutputToContinuation);
 
+		// Template Output -> Procedure
+		WoofTemplateOutputToWoofProcedureModel templateOutputToProcedure = new WoofTemplateOutputToWoofProcedureModel(
+				"PROCEDURE");
+		templateOutput.setWoofProcedure(templateOutputToProcedure);
+
 		/*
 		 * Section Output links
 		 */
@@ -204,6 +224,79 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		WoofSectionOutputToWoofHttpContinuationModel sectionOutputToContinuation = new WoofSectionOutputToWoofHttpContinuationModel(
 				"HTTP_CONTINUATION");
 		sectionOutput.setWoofHttpContinuation(sectionOutputToContinuation);
+
+		// Section Output -> Procedure
+		WoofSectionOutputToWoofProcedureModel sectionOutputToProcedure = new WoofSectionOutputToWoofProcedureModel(
+				"PROCEDURE");
+		sectionOutput.setWoofProcedure(sectionOutputToProcedure);
+
+		/*
+		 * Procedure next links
+		 */
+
+		// Procedure Next -> Section Input
+		WoofProcedureNextToWoofSectionInputModel procedureNextToSectionInput = new WoofProcedureNextToWoofSectionInputModel(
+				"SECTION", "SECTION_INPUT");
+		procedureNext.setWoofSectionInput(procedureNextToSectionInput);
+
+		// Procedure Next -> Template
+		WoofProcedureNextToWoofTemplateModel procedureNextToTemplate = new WoofProcedureNextToWoofTemplateModel(
+				"TEMPLATE");
+		procedureNext.setWoofTemplate(procedureNextToTemplate);
+
+		// Procedure Next -> Resource
+		WoofProcedureNextToWoofResourceModel procedureNextToResource = new WoofProcedureNextToWoofResourceModel(
+				"RESOURCE");
+		procedureNext.setWoofResource(procedureNextToResource);
+
+		// Procedure Next -> Security
+		WoofProcedureNextToWoofSecurityModel procedureNextToSecurity = new WoofProcedureNextToWoofSecurityModel(
+				"SECURITY");
+		procedureNext.setWoofSecurity(procedureNextToSecurity);
+
+		// Procedure Next -> Continuation
+		WoofProcedureNextToWoofHttpContinuationModel procedureNextToContinuation = new WoofProcedureNextToWoofHttpContinuationModel(
+				"HTTP_CONTINUATION");
+		procedureNext.setWoofHttpContinuation(procedureNextToContinuation);
+
+		// Section Next -> Procedure
+		WoofProcedureNextToWoofProcedureModel procedureNextToProcedure = new WoofProcedureNextToWoofProcedureModel(
+				"PROCEDURE");
+		procedureNext.setWoofProcedure(procedureNextToProcedure);
+
+		/*
+		 * Procedure output links
+		 */
+
+		// Procedure Output -> Section Input
+		WoofProcedureOutputToWoofSectionInputModel procedureOutputToSectionInput = new WoofProcedureOutputToWoofSectionInputModel(
+				"SECTION", "SECTION_INPUT");
+		procedureOutput.setWoofSectionInput(procedureOutputToSectionInput);
+
+		// Procedure Output -> Template
+		WoofProcedureOutputToWoofTemplateModel procedureOutputToTemplate = new WoofProcedureOutputToWoofTemplateModel(
+				"TEMPLATE");
+		procedureOutput.setWoofTemplate(procedureOutputToTemplate);
+
+		// Procedure Output -> Resource
+		WoofProcedureOutputToWoofResourceModel procedureOutputToResource = new WoofProcedureOutputToWoofResourceModel(
+				"RESOURCE");
+		procedureOutput.setWoofResource(procedureOutputToResource);
+
+		// Procedure Output -> Security
+		WoofProcedureOutputToWoofSecurityModel procedureOutputToSecurity = new WoofProcedureOutputToWoofSecurityModel(
+				"SECURITY");
+		procedureOutput.setWoofSecurity(procedureOutputToSecurity);
+
+		// Procedure Output -> Continuation
+		WoofProcedureOutputToWoofHttpContinuationModel procedureOutputToContinuation = new WoofProcedureOutputToWoofHttpContinuationModel(
+				"HTTP_CONTINUATION");
+		procedureOutput.setWoofHttpContinuation(procedureOutputToContinuation);
+
+		// Section Output -> Procedure
+		WoofProcedureOutputToWoofProcedureModel procedureOutputToProcedure = new WoofProcedureOutputToWoofProcedureModel(
+				"PROCEDURE");
+		procedureOutput.setWoofProcedure(procedureOutputToProcedure);
 
 		/*
 		 * Security Output links
@@ -234,6 +327,11 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				"HTTP_CONTINUATION");
 		securityOutput.setWoofHttpContinuation(securityOutputToContinuation);
 
+		// Security Output -> Procedure
+		WoofSecurityOutputToWoofProcedureModel securityOutputToProcedure = new WoofSecurityOutputToWoofProcedureModel(
+				"PROCEDURE");
+		securityOutput.setWoofProcedure(securityOutputToProcedure);
+
 		/*
 		 * Exception links
 		 */
@@ -260,6 +358,10 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				"HTTP_CONTINUATION");
 		exception.setWoofHttpContinuation(exceptionToContinuation);
 
+		// Exception -> Procedure
+		WoofExceptionToWoofProcedureModel exceptionToProcedure = new WoofExceptionToWoofProcedureModel("PROCEDURE");
+		exception.setWoofProcedure(exceptionToProcedure);
+
 		/*
 		 * Start links
 		 */
@@ -268,6 +370,10 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		WoofStartToWoofSectionInputModel startToSectionInput = new WoofStartToWoofSectionInputModel("SECTION",
 				"SECTION_INPUT");
 		start.setWoofSectionInput(startToSectionInput);
+
+		// Start -> Procedure
+		WoofStartToWoofProcedureModel startToProcedure = new WoofStartToWoofProcedureModel("PROCEDURE");
+		start.setWoofProcedure(startToProcedure);
 
 		// Record retrieving the WoOF
 		this.modelRepository.retrieve(null, this.configurationItem);
@@ -295,6 +401,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("http continuation -> redirect", httpContinuationLink, continuationToRedirect.getWoofRedirect());
 		assertEquals("http continuation <- redirect", httpContinuation,
 				continuationToRedirect.getWoofHttpContinuation());
+		assertHttpContinuation.assertLink(continuationToProcedure, "procedure", procedure);
 
 		// HTTP Input links
 		AssertLinks<WoofHttpInputModel> assertHttpInput = new AssertLinks<>("http input", httpInput);
@@ -303,6 +410,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertHttpInput.assertLink(httpInputToResource, "resource", resource);
 		assertHttpInput.assertLink(httpInputToSecurity, "security", security);
 		assertHttpInput.assertLink(httpInputToContinuation, "http continuation", httpContinuation);
+		assertHttpInput.assertLink(httpInputToProcedure, "procedure", procedure);
 
 		// Template links
 		AssertLinks<WoofTemplateModel> assertTemplate = new AssertLinks<>("template", template);
@@ -316,6 +424,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertTemplateOutput.assertLink(templateOutputToResource, "resource", resource);
 		assertTemplateOutput.assertLink(templateOutputToSecurity, "security", security);
 		assertTemplateOutput.assertLink(templateOutputToContinuation, "http continuation", httpContinuation);
+		assertTemplateOutput.assertLink(templateOutputToProcedure, "procedure", procedure);
 
 		// Section Output links
 		AssertLinks<WoofSectionOutputModel> assertSectionOutput = new AssertLinks<>("section output", sectionOutput);
@@ -324,6 +433,26 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertSectionOutput.assertLink(sectionOutputToResource, "resource", resource);
 		assertSectionOutput.assertLink(sectionOutputToSecurity, "security", security);
 		assertSectionOutput.assertLink(sectionOutputToContinuation, "http continuation", httpContinuation);
+		assertSectionOutput.assertLink(sectionOutputToProcedure, "procedure", procedure);
+
+		// Procedure Next links
+		AssertLinks<WoofProcedureNextModel> assertProcedureNext = new AssertLinks<>("procedure next", procedureNext);
+		assertProcedureNext.assertLink(procedureNextToSectionInput, "section input", sectionInput);
+		assertProcedureNext.assertLink(procedureNextToTemplate, "template", template);
+		assertProcedureNext.assertLink(procedureNextToResource, "resource", resource);
+		assertProcedureNext.assertLink(procedureNextToSecurity, "security", security);
+		assertProcedureNext.assertLink(procedureNextToContinuation, "http continuation", httpContinuation);
+		assertProcedureNext.assertLink(procedureNextToProcedure, "procedure", procedure);
+
+		// Procedure Output links
+		AssertLinks<WoofProcedureOutputModel> assertProcedureOutput = new AssertLinks<>("procedure output",
+				procedureOutput);
+		assertProcedureOutput.assertLink(procedureOutputToSectionInput, "section input", sectionInput);
+		assertProcedureOutput.assertLink(procedureOutputToTemplate, "template", template);
+		assertProcedureOutput.assertLink(procedureOutputToResource, "resource", resource);
+		assertProcedureOutput.assertLink(procedureOutputToSecurity, "security", security);
+		assertProcedureOutput.assertLink(procedureOutputToContinuation, "http continuation", httpContinuation);
+		assertProcedureOutput.assertLink(procedureOutputToProcedure, "procedure", procedure);
 
 		// Security Output links
 		AssertLinks<WoofSecurityOutputModel> assertSecurityOutput = new AssertLinks<>("security output",
@@ -333,6 +462,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertSecurityOutput.assertLink(securityOutputToResource, "resource", resource);
 		assertSecurityOutput.assertLink(securityOutputToSecurity, "security", security);
 		assertSecurityOutput.assertLink(securityOutputToContinuation, "http continuation", httpContinuation);
+		assertSecurityOutput.assertLink(securityOutputToProcedure, "procedure", procedure);
 
 		// Exception links
 		AssertLinks<WoofExceptionModel> assertException = new AssertLinks<>("exception", exception);
@@ -341,10 +471,12 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertException.assertLink(exceptionToResource, "resource", resource);
 		assertException.assertLink(exceptionToSecurity, "security", security);
 		assertException.assertLink(exceptionToContinuation, "http continuation", httpContinuation);
+		assertException.assertLink(exceptionToProcedure, "procedure", procedure);
 
 		// Start links
 		AssertLinks<WoofStartModel> assertStart = new AssertLinks<>("start", start);
 		assertStart.assertLink(startToSectionInput, "section input", sectionInput);
+		assertStart.assertLink(startToProcedure, "procedure", procedure);
 	}
 
 	/**
@@ -413,6 +545,12 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		section.addInput(sectionInput);
 		WoofSectionOutputModel sectionOutput = new WoofSectionOutputModel("SECTION_OUTPUT", null);
 		section.addOutput(sectionOutput);
+		WoofProcedureModel procedure = new WoofProcedureModel("PROCEDURE", null, null, null);
+		woof.addWoofProcedure(procedure);
+		WoofProcedureNextModel procedureNext = new WoofProcedureNextModel();
+		procedure.setNext(procedureNext);
+		WoofProcedureOutputModel procedureOutput = new WoofProcedureOutputModel("PROCEDURE OUTPUT", null);
+		procedure.addOutput(procedureOutput);
 		WoofSecurityModel security = new WoofSecurityModel("SECURITY", null, 1000);
 		woof.addWoofSecurity(security);
 		WoofSecurityOutputModel securityOutput = new WoofSecurityOutputModel("ACCESS_OUTPUT", null);
@@ -435,6 +573,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				new WoofHttpContinuationToWoofSecurityModel(), httpContinuation, security);
 		WoofHttpContinuationToWoofHttpContinuationModel continuationPathToApplicationPath = link(
 				new WoofHttpContinuationToWoofHttpContinuationModel(), httpContinuation, httpContinuation);
+		WoofHttpContinuationToWoofProcedureModel continuationToProcedure = link(
+				new WoofHttpContinuationToWoofProcedureModel(), httpContinuation, procedure);
 
 		// HTTP Input links
 		WoofHttpInputToWoofSectionInputModel httpInputToSectionInput = link(new WoofHttpInputToWoofSectionInputModel(),
@@ -447,6 +587,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				httpInput, security);
 		WoofHttpInputToWoofHttpContinuationModel httpInputPathToApplicationPath = link(
 				new WoofHttpInputToWoofHttpContinuationModel(), httpInput, httpContinuation);
+		WoofHttpInputToWoofProcedureModel httpInputPathToProcedure = link(new WoofHttpInputToWoofProcedureModel(),
+				httpInput, procedure);
 
 		// Template links
 		WoofTemplateToSuperWoofTemplateModel templateToSuperTemplate = link(new WoofTemplateToSuperWoofTemplateModel(),
@@ -463,6 +605,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				new WoofTemplateOutputToWoofSecurityModel(), templateOutput, security);
 		WoofTemplateOutputToWoofHttpContinuationModel templateOutputToApplicationPath = link(
 				new WoofTemplateOutputToWoofHttpContinuationModel(), templateOutput, httpContinuation);
+		WoofTemplateOutputToWoofProcedureModel templateOutputToProcedure = link(
+				new WoofTemplateOutputToWoofProcedureModel(), templateOutput, procedure);
 
 		// Section Output links
 		WoofSectionOutputToWoofSectionInputModel sectionOutputToSectionInput = link(
@@ -475,6 +619,36 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				sectionOutput, security);
 		WoofSectionOutputToWoofHttpContinuationModel sectionOutputToApplicationPath = link(
 				new WoofSectionOutputToWoofHttpContinuationModel(), sectionOutput, httpContinuation);
+		WoofSectionOutputToWoofProcedureModel sectionOutputToProcedure = link(
+				new WoofSectionOutputToWoofProcedureModel(), sectionOutput, procedure);
+
+		// Procedure Next links
+		WoofProcedureNextToWoofSectionInputModel procedureNextToSectionInput = link(
+				new WoofProcedureNextToWoofSectionInputModel(), procedureNext, sectionInput);
+		WoofProcedureNextToWoofTemplateModel procedureNextToTemplate = link(new WoofProcedureNextToWoofTemplateModel(),
+				procedureNext, template);
+		WoofProcedureNextToWoofResourceModel procedureNextToResource = link(new WoofProcedureNextToWoofResourceModel(),
+				procedureNext, resource);
+		WoofProcedureNextToWoofSecurityModel procedureNextToSecurity = link(new WoofProcedureNextToWoofSecurityModel(),
+				procedureNext, security);
+		WoofProcedureNextToWoofHttpContinuationModel procedureNextToApplicationPath = link(
+				new WoofProcedureNextToWoofHttpContinuationModel(), procedureNext, httpContinuation);
+		WoofProcedureNextToWoofProcedureModel procedureNextToProcedure = link(
+				new WoofProcedureNextToWoofProcedureModel(), procedureNext, procedure);
+
+		// Procedure Output links
+		WoofProcedureOutputToWoofSectionInputModel procedureOutputToSectionInput = link(
+				new WoofProcedureOutputToWoofSectionInputModel(), procedureOutput, sectionInput);
+		WoofProcedureOutputToWoofTemplateModel procedureOutputToTemplate = link(
+				new WoofProcedureOutputToWoofTemplateModel(), procedureOutput, template);
+		WoofProcedureOutputToWoofResourceModel procedureOutputToResource = link(
+				new WoofProcedureOutputToWoofResourceModel(), procedureOutput, resource);
+		WoofProcedureOutputToWoofSecurityModel procedureOutputToSecurity = link(
+				new WoofProcedureOutputToWoofSecurityModel(), procedureOutput, security);
+		WoofProcedureOutputToWoofHttpContinuationModel procedureOutputToApplicationPath = link(
+				new WoofProcedureOutputToWoofHttpContinuationModel(), procedureOutput, httpContinuation);
+		WoofProcedureOutputToWoofProcedureModel procedureOutputToProcedure = link(
+				new WoofProcedureOutputToWoofProcedureModel(), procedureOutput, procedure);
 
 		// Security Output links
 		WoofSecurityOutputToWoofSectionInputModel securityOutputToSectionInput = link(
@@ -487,6 +661,8 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				new WoofSecurityOutputToWoofSecurityModel(), securityOutput, security);
 		WoofSecurityOutputToWoofHttpContinuationModel securityOutputToApplicationPath = link(
 				new WoofSecurityOutputToWoofHttpContinuationModel(), securityOutput, httpContinuation);
+		WoofSecurityOutputToWoofProcedureModel securityOutputToProcedure = link(
+				new WoofSecurityOutputToWoofProcedureModel(), securityOutput, procedure);
 
 		// Exception links
 		WoofExceptionToWoofSectionInputModel exceptionToSectionInput = link(new WoofExceptionToWoofSectionInputModel(),
@@ -499,10 +675,13 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 				security);
 		WoofExceptionToWoofHttpContinuationModel exceptionToApplicationPath = link(
 				new WoofExceptionToWoofHttpContinuationModel(), exception, httpContinuation);
+		WoofExceptionToWoofProcedureModel exceptionToProcedure = link(new WoofExceptionToWoofProcedureModel(),
+				exception, procedure);
 
 		// Start -> Section Input
 		WoofStartToWoofSectionInputModel startToSectionInput = link(new WoofStartToWoofSectionInputModel(), start,
 				sectionInput);
+		WoofStartToWoofProcedureModel startToProcedure = link(new WoofStartToWoofProcedureModel(), start, procedure);
 
 		// Record storing the WoOf
 		this.modelRepository.store(woof, this.configurationItem);
@@ -522,6 +701,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("http continuation - security", "SECURITY", continuationPathToSecurity.getHttpSecurityName());
 		assertEquals("http continuation - application path", "HTTP_CONTINUATION",
 				continuationPathToApplicationPath.getApplicationPath());
+		assertEquals("http continuation - procedure", "PROCEDURE", continuationToProcedure.getProcedureName());
 
 		// Assert HTTP Input links
 		assertEquals("http input - section input (section name)", "SECTION", httpInputToSectionInput.getSectionName());
@@ -532,6 +712,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("http input - security", "SECURITY", httpInputPathToSecurity.getHttpSecurityName());
 		assertEquals("http input - application path", "HTTP_CONTINUATION",
 				httpInputPathToApplicationPath.getApplicationPath());
+		assertEquals("http input - procedure", "PROCEDURE", httpInputPathToProcedure.getProcedureName());
 
 		// Assert Template links
 		assertEquals("template - super template", "TEMPLATE",
@@ -547,6 +728,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("template output - security", "SECURITY", templateOutputToSecurity.getHttpSecurityName());
 		assertEquals("template output - application path", "HTTP_CONTINUATION",
 				templateOutputToApplicationPath.getApplicationPath());
+		assertEquals("template output - procedure", "PROCEDURE", templateOutputToProcedure.getProcedureName());
 
 		// Assert Section Output links
 		assertEquals("section output - section input (section name)", "SECTION",
@@ -558,6 +740,31 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("section output - security", "SECURITY", sectionOutputToSecurity.getHttpSecurityName());
 		assertEquals("section output - application path", "HTTP_CONTINUATION",
 				sectionOutputToApplicationPath.getApplicationPath());
+		assertEquals("section output - procedure", "PROCEDURE", sectionOutputToProcedure.getProcedureName());
+
+		// Assert Procedure Next links
+		assertEquals("procedure next - section input (section name)", "SECTION",
+				procedureNextToSectionInput.getSectionName());
+		assertEquals("procedure next - section input (input name)", "SECTION_INPUT",
+				procedureNextToSectionInput.getInputName());
+		assertEquals("procedure next - template", "TEMPLATE", procedureNextToTemplate.getApplicationPath());
+		assertEquals("procedure next - resource", "RESOURCE", procedureNextToResource.getResourcePath());
+		assertEquals("procedure next - security", "SECURITY", procedureNextToSecurity.getHttpSecurityName());
+		assertEquals("procedure next - application path", "HTTP_CONTINUATION",
+				procedureNextToApplicationPath.getApplicationPath());
+		assertEquals("procedure next - procedure", "PROCEDURE", procedureNextToProcedure.getProcedureName());
+
+		// Assert Procedure Output links
+		assertEquals("procedure output - section input (section name)", "SECTION",
+				procedureOutputToSectionInput.getSectionName());
+		assertEquals("procedure output - section input (input name)", "SECTION_INPUT",
+				procedureOutputToSectionInput.getInputName());
+		assertEquals("procedure output - template", "TEMPLATE", procedureOutputToTemplate.getApplicationPath());
+		assertEquals("procedure output - resource", "RESOURCE", procedureOutputToResource.getResourcePath());
+		assertEquals("procedure output - security", "SECURITY", procedureOutputToSecurity.getHttpSecurityName());
+		assertEquals("procedure output - application path", "HTTP_CONTINUATION",
+				procedureOutputToApplicationPath.getApplicationPath());
+		assertEquals("procedure output - procedure", "PROCEDURE", procedureOutputToProcedure.getProcedureName());
 
 		// Assert Security Output links
 		assertEquals("security output - section input (section name)", "SECTION",
@@ -569,6 +776,7 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("security output - security", "SECURITY", securityOutputToSecurity.getHttpSecurityName());
 		assertEquals("security output - application path", "HTTP_CONTINUATION",
 				securityOutputToApplicationPath.getApplicationPath());
+		assertEquals("security output - procedure", "PROCEDURE", securityOutputToProcedure.getProcedureName());
 
 		// Assert Exception links
 		assertEquals("exception - section input (section name)", "SECTION", exceptionToSectionInput.getSectionName());
@@ -578,10 +786,12 @@ public class WoofRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("exception - security", "SECURITY", exceptionToSecurity.getHttpSecurityName());
 		assertEquals("exception - application path", "HTTP_CONTINUATION",
 				exceptionToApplicationPath.getApplicationPath());
+		assertEquals("exception - procedure", "PROCEDURE", exceptionToProcedure.getProcedureName());
 
 		// Assert Start links
 		assertEquals("start - section input (section name)", "SECTION", startToSectionInput.getSectionName());
 		assertEquals("start - section input (input name)", "SECTION_INPUT", startToSectionInput.getInputName());
+		assertEquals("start - procedure", "PROCEDURE", startToProcedure.getProcedureName());
 	}
 
 	/**

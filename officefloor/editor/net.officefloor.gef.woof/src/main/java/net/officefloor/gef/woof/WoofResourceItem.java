@@ -30,6 +30,8 @@ import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofHttpInputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofProcedureNextToWoofResourceModel;
+import net.officefloor.woof.model.woof.WoofProcedureOutputToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
 import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
@@ -72,7 +74,8 @@ public class WoofResourceItem extends
 				context.connector(DefaultConnectors.FLOW, WoofHttpContinuationToWoofResourceModel.class,
 						WoofHttpInputToWoofResourceModel.class, WoofTemplateOutputToWoofResourceModel.class,
 						WoofSecurityOutputToWoofResourceModel.class, WoofSectionOutputToWoofResourceModel.class,
-						WoofExceptionToWoofResourceModel.class).getNode());
+						WoofExceptionToWoofResourceModel.class, WoofProcedureNextToWoofResourceModel.class,
+						WoofProcedureOutputToWoofResourceModel.class).getNode());
 		context.label(container);
 		return container;
 	}

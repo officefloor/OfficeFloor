@@ -1,5 +1,5 @@
 /*
- * OfficeFloor - http://www.officefloor.net
+Procedure * OfficeFloor - http://www.officefloor.net
  * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify

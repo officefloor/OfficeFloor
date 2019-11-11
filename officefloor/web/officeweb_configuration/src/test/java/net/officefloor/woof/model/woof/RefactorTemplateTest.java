@@ -66,6 +66,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 			context.addSectionOutput("OUTPUT_C", null, false);
 			context.addSectionOutput("OUTPUT_D", null, false);
 			context.addSectionOutput("OUTPUT_E", null, false);
+			context.addSectionOutput("OUTPUT_F", null, false);
 			context.addSectionOutput("OUTPUT_INHERIT", null, false);
 			context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
 			context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
@@ -77,6 +78,7 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		this.templateOutputNameMapping.put("OUTPUT_C", "OUTPUT_C");
 		this.templateOutputNameMapping.put("OUTPUT_D", "OUTPUT_D");
 		this.templateOutputNameMapping.put("OUTPUT_E", "OUTPUT_E");
+		this.templateOutputNameMapping.put("OUTPUT_F", "OUTPUT_F");
 
 		// Register the extension test details
 		Change<?> extensionChange = this.createMock(Change.class);
@@ -128,17 +130,15 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		assertEquals("Incorrect template", "/template", template.getApplicationPath());
 
 		// Create the type
-		WebTemplateType type = this.constructWebTemplateType(new SectionTypeConstructor() {
-			@Override
-			public void construct(SectionTypeContext context) {
-				context.addSectionInput("renderTemplate", null);
-				context.addSectionOutput("OUTPUT_A", Integer.class, false);
-				context.addSectionOutput("OUTPUT_B", String.class, false);
-				context.addSectionOutput("OUTPUT_C", null, false);
-				context.addSectionOutput("OUTPUT_D", null, false);
-				context.addSectionOutput("OUTPUT_E", null, false);
-				context.addSectionOutput("OUTPUT_INHERIT", null, false);
-			}
+		WebTemplateType type = this.constructWebTemplateType((context) -> {
+			context.addSectionInput("renderTemplate", null);
+			context.addSectionOutput("OUTPUT_A", Integer.class, false);
+			context.addSectionOutput("OUTPUT_B", String.class, false);
+			context.addSectionOutput("OUTPUT_C", null, false);
+			context.addSectionOutput("OUTPUT_D", null, false);
+			context.addSectionOutput("OUTPUT_E", null, false);
+			context.addSectionOutput("OUTPUT_F", null, false);
+			context.addSectionOutput("OUTPUT_INHERIT", null, false);
 		});
 
 		// Re-map template output names
@@ -146,7 +146,8 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		this.templateOutputNameMapping.put("OUTPUT_B", "OUTPUT_C");
 		this.templateOutputNameMapping.put("OUTPUT_C", "OUTPUT_D");
 		this.templateOutputNameMapping.put("OUTPUT_D", "OUTPUT_E");
-		this.templateOutputNameMapping.put("OUTPUT_E", "OUTPUT_A");
+		this.templateOutputNameMapping.put("OUTPUT_E", "OUTPUT_F");
+		this.templateOutputNameMapping.put("OUTPUT_F", "OUTPUT_A");
 
 		// Register the extension test details
 		Change<?> extensionChange = this.createMock(Change.class);
@@ -197,12 +198,9 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		assertEquals("Incorrect template", TEMPLATE_APPLICATION_PATH, template.getApplicationPath());
 
 		// Create the type
-		WebTemplateType type = this.constructWebTemplateType(new SectionTypeConstructor() {
-			@Override
-			public void construct(SectionTypeContext context) {
-				context.addSectionInput("renderTemplate", null);
-				// No outputs
-			}
+		WebTemplateType type = this.constructWebTemplateType((context) -> {
+			context.addSectionInput("renderTemplate", null);
+			// No outputs
 		});
 
 		// Register the extension to handle remove
@@ -241,18 +239,15 @@ public class RefactorTemplateTest extends AbstractWoofChangesTestCase {
 		assertEquals("Incorrect template", TEMPLATE_APPLICATION_PATH, template.getApplicationPath());
 
 		// Create the type
-		WebTemplateType type = this.constructWebTemplateType(new SectionTypeConstructor() {
-			@Override
-			public void construct(SectionTypeContext context) {
-				context.addSectionInput("renderTemplate", null);
-				context.addSectionOutput("OUTPUT_1", Integer.class, false);
-				context.addSectionOutput("OUTPUT_2", String.class, false);
-				context.addSectionOutput("OUTPUT_3", null, false);
-				context.addSectionOutput("OUTPUT_INHERIT", null, false);
-				context.addSectionOutput("OUTPUT_4", null, false);
-				context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
-				context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
-			}
+		WebTemplateType type = this.constructWebTemplateType((context) -> {
+			context.addSectionInput("renderTemplate", null);
+			context.addSectionOutput("OUTPUT_1", Integer.class, false);
+			context.addSectionOutput("OUTPUT_2", String.class, false);
+			context.addSectionOutput("OUTPUT_3", null, false);
+			context.addSectionOutput("OUTPUT_INHERIT", null, false);
+			context.addSectionOutput("OUTPUT_4", null, false);
+			context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
+			context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
 		});
 
 		// Register the extension test details

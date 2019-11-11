@@ -107,16 +107,18 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 	}
 
 	/**
-	 * Obtains the variable name.
+	 * Obtains the variable type.
 	 * 
-	 * @param qualifier Qualifier for variable.
-	 * @param type      Variable type.
-	 * @return Name for the variable.
+	 * @param type Raw type name.
+	 * @return Variable type.
 	 */
-	public static String name(String qualifier, String type) {
+	public static String type(String type) {
 
-		// Handle arrays
+		// Handle primitives and their arrays
 		switch (type) {
+		case "boolean":
+			type = Boolean.class.getName();
+			break;
 		case "byte":
 			type = Byte.class.getName();
 			break;
@@ -164,7 +166,7 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 			break;
 		}
 
-		// Determine if array
+		// Handle object array
 		final String START = "[L";
 		final String END = ";";
 		if (type.startsWith(START) && type.endsWith(END)) {
@@ -174,8 +176,19 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 			type = componentName + "[]";
 		}
 
-		// Return name
-		return (qualifier == null ? "" : qualifier + "-") + type;
+		// Return the type
+		return type;
+	}
+
+	/**
+	 * Obtains the variable name.
+	 * 
+	 * @param qualifier Qualifier for variable.
+	 * @param type      Variable type.
+	 * @return Name for the variable.
+	 */
+	public static String name(String qualifier, String type) {
+		return (qualifier == null ? "" : qualifier + "-") + type(type);
 	}
 
 	/**

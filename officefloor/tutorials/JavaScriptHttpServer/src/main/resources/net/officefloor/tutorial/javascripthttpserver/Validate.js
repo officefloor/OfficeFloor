@@ -10,6 +10,5 @@ function validate(request) {
 	}
 }
 validate.officefloor = [ 
-	{ httpObject : Request },
-	{ next : "valid" }
+	{ httpObject : Request }
 ];

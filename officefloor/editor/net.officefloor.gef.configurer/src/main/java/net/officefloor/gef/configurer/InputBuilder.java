@@ -19,6 +19,7 @@ package net.officefloor.gef.configurer;
 
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import net.officefloor.compile.properties.PropertyList;
@@ -33,34 +34,46 @@ public interface InputBuilder<M> extends ItemBuilder<M> {
 	/**
 	 * Builds choices in configuration.
 	 * 
-	 * @param label
-	 *            Label for the choices.
+	 * @param label Label for the choices.
 	 * @return {@link ChoiceBuilder}.
 	 */
 	ChoiceBuilder<M> choices(String label);
 
 	/**
-	 * Configures a list of items.
+	 * Configures creating a list of items.
 	 * 
-	 * @param <I>
-	 *            Item type.
-	 * @param label
-	 *            Label for the items.
-	 * @param itemType
-	 *            Item type.
+	 * @param <I>      Item type.
+	 * @param label    Label for the items.
+	 * @param itemType Item type.
 	 * @return {@link ListBuilder}.
 	 */
 	<I> ListBuilder<M, I> list(String label, Class<I> itemType);
 
 	/**
+	 * Configures selecting from a list of items.
+	 * 
+	 * @param <I>      Item type.
+	 * @param label    Label for the selection.
+	 * @param getItems Function to extract the items.
+	 * @return {@link SelectBuilder}.
+	 */
+	<I> SelectBuilder<M, I> select(String label, Function<M, ObservableList<I>> getItems);
+
+	/**
+	 * Configures optional configuration.
+	 * 
+	 * @param isShow {@link Predicate} on whether to show the optional
+	 *               configuration.
+	 * @return {@link OptionalBuilder}.
+	 */
+	OptionalBuilder<M> optional(Predicate<M> isShow);
+
+	/**
 	 * Configures multiple items.
 	 *
-	 * @param <I>
-	 *            Item type.
-	 * @param label
-	 *            Label for the items.
-	 * @param itemType
-	 *            Item type.
+	 * @param <I>      Item type.
+	 * @param label    Label for the items.
+	 * @param itemType Item type.
 	 * @return {@link MultipleBuilder}.
 	 */
 	<I> MultipleBuilder<M, I> multiple(String label, Class<I> itemType);
@@ -68,8 +81,7 @@ public interface InputBuilder<M> extends ItemBuilder<M> {
 	/**
 	 * Configures {@link PropertyList}.
 	 * 
-	 * @param label
-	 *            Label for the {@link Properties}.
+	 * @param label Label for the {@link Properties}.
 	 * @return {@link PropertiesBuilder}.
 	 */
 	PropertiesBuilder<M> properties(String label);
@@ -77,12 +89,9 @@ public interface InputBuilder<M> extends ItemBuilder<M> {
 	/**
 	 * Configures a mapping of name to name.
 	 * 
-	 * @param label
-	 *            Label for the mapping.
-	 * @param getSources
-	 *            {@link Function} to extract the sources.
-	 * @param getTargets
-	 *            {@link Function} to extract the targets.
+	 * @param label      Label for the mapping.
+	 * @param getSources {@link Function} to extract the sources.
+	 * @param getTargets {@link Function} to extract the targets.
 	 * @return {@link MappingBuilder}.
 	 */
 	MappingBuilder<M> map(String label, Function<M, ObservableList<String>> getSources,
@@ -91,8 +100,7 @@ public interface InputBuilder<M> extends ItemBuilder<M> {
 	/**
 	 * Adds a {@link Class} property to be configured.
 	 * 
-	 * @param label
-	 *            Label.
+	 * @param label Label.
 	 * @return {@link ClassBuilder}.
 	 */
 	ClassBuilder<M> clazz(String label);
@@ -100,8 +108,7 @@ public interface InputBuilder<M> extends ItemBuilder<M> {
 	/**
 	 * Adds a resource property to be configured.
 	 * 
-	 * @param label
-	 *            Label.
+	 * @param label Label.
 	 * @return {@link ResourceBuilder}.
 	 */
 	ResourceBuilder<M> resource(String label);
