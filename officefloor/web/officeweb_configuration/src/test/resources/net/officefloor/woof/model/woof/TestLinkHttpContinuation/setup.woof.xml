@@ -4,6 +4,7 @@
 		<http-continuation path="/pathA" />
 		<http-continuation path="/pathB">
 			<template path="/template" />
+			<procedure name="PROCEDURE" />
 			<section name="SECTION" input="INPUT" />
 			<security name="SECURITY" />
 			<resource path="/resource.html" />
@@ -15,6 +16,11 @@
 		<template path="/template" />
 		<template path="/templateLink" />
 	</templates>
+	
+	<procedures>
+		<procedure name="PROCEDURE" />
+		<procedure name="PROCEDURE_LINK" />
+	</procedures>
 
 	<sections>
 		<section name="SECTION">

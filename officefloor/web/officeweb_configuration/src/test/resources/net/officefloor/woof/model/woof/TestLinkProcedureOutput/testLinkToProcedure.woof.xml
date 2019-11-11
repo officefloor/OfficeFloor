@@ -1,0 +1,50 @@
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/path" />
+		<http-continuation path="/pathLink" />
+	</http-continuations>
+
+	<templates>
+		<template path="/template" />
+		<template path="/templateLink" />
+	</templates>
+
+	<procedures>
+		<procedure name="A">
+			<output name="OUTPUT">
+				<procedure name="B" />
+			</output>
+		</procedure>
+		<procedure name="B">
+			<output name="OUTPUT">
+				<template path="/template" />
+				<procedure name="A" />
+				<section name="SECTION" input="INPUT" />
+				<security name="SECURITY" />
+				<resource path="/resource.html" />
+				<redirect path="/path" />
+			</output>
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="SECTION">
+			<input name="INPUT" />
+		</section>
+		<section name="SECTION_LINK">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" />
+		<security name="SECURITY_LINK" />
+	</securities>
+
+	<resources>
+		<resource path="/resource.html" />
+		<resource path="/resource.png" />
+	</resources>
+
+</woof>

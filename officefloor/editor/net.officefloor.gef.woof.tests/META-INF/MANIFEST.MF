@@ -5,6 +5,8 @@ Bundle-SymbolicName: net.officefloor.gef.woof.tests;singleton:=true
 Bundle-Version: 3.15.0
 Bundle-Vendor: OfficeFloor
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Eclipse-RegisterBuddy: net.officefloor.core
+Eclipse-BuddyPolicy: registered 
 Require-Bundle: net.officefloor.core;bundle-version="3.15.0",
  net.officefloor.woof;bundle-version="3.15.0",
  net.officefloor.gef.common;bundle-version="3.15.0",

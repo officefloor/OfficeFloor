@@ -5,6 +5,8 @@
 	<list type="WoofTemplateOutputToWoofSectionInputModel" name="woof template output" />
 	<list type="WoofSecurityOutputToWoofSectionInputModel" name="woof security output" />
 	<list type="WoofSectionOutputToWoofSectionInputModel" name="woof section output" />
+	<list type="WoofProcedureOutputToWoofSectionInputModel" name="woof procedure output" />
+	<list type="WoofProcedureNextToWoofSectionInputModel" name="woof procedure next" />
 	<list type="WoofExceptionToWoofSectionInputModel" name="woof exception" />
 	<list type="WoofHttpContinuationToWoofSectionInputModel" name="woof http continuation" />
 	<list type="WoofHttpInputToWoofSectionInputModel" name="woof http input" />

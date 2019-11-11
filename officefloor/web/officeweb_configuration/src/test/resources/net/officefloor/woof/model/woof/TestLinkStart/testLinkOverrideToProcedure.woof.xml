@@ -1,0 +1,24 @@
+<woof>
+	
+	<procedures>
+		<procedure name="PROCEDURE" />
+		<procedure name="PROCEDURE_LINK" />
+	</procedures>
+
+	<sections>
+		<section name="SECTION">
+			<input name="INPUT" />
+		</section>
+		<section name="SECTION_LINK">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<starts>
+		<start />
+		<start>
+			<procedure name="PROCEDURE_LINK" />
+		</start>
+	</starts>
+
+</woof>

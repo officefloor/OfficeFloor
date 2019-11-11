@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
@@ -52,6 +54,9 @@ import net.officefloor.woof.model.woof.WoofGovernanceModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpInputModel;
 import net.officefloor.woof.model.woof.WoofModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureNextModel;
+import net.officefloor.woof.model.woof.WoofProcedureOutputModel;
 import net.officefloor.woof.model.woof.WoofRepository;
 import net.officefloor.woof.model.woof.WoofResourceModel;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
@@ -111,6 +116,7 @@ public class WoofLoaderImpl implements WoofLoader {
 		HttpSecurityArchitect securityArchitect = context.getHttpSecurityArchitect();
 		WebTemplateArchitect templaterArchitect = context.getWebTemplater();
 		HttpResourceArchitect resourceArchitect = context.getHttpResourceArchitect();
+		ProcedureArchitect<OfficeSection> procedureArchitect = context.getProcedureArchitect();
 
 		// Obtain the context
 		OfficeExtensionContext extensionContext = context.getOfficeExtensionContext();
@@ -121,6 +127,10 @@ public class WoofLoaderImpl implements WoofLoader {
 
 		// Configure the Sections
 		SectionConnector sections = new SectionConnector(woof, officeArchitect);
+
+		// Configure the Procedures
+		ProcedureConnector procedures = new ProcedureConnector(woof, officeArchitect, procedureArchitect,
+				extensionContext);
 
 		// Configure the Security
 		SecurityConnector securities = new SecurityConnector(woof, officeArchitect, securityArchitect);
@@ -140,16 +150,19 @@ public class WoofLoaderImpl implements WoofLoader {
 			HttpUrlContinuation httpContinuation = httpContinuations.httpContinuations.get(applicationPath);
 
 			// Undertake links
-			sections.linkToSectionInput(() -> httpContinuation.getInput(), httpContinuationModel.getWoofSectionInput(),
+			Supplier<OfficeFlowSourceNode> handleFlow = () -> httpContinuation.getInput();
+			sections.linkToSectionInput(handleFlow, httpContinuationModel.getWoofSectionInput(),
 					(link) -> link.getWoofSectionInput());
-			templates.linkToTemplate(() -> httpContinuation.getInput(), httpContinuationModel.getWoofTemplate(),
+			templates.linkToTemplate(handleFlow, httpContinuationModel.getWoofTemplate(),
 					(link) -> link.getWoofTemplate(), null);
-			securities.linkToSecurity(() -> httpContinuation.getInput(), httpContinuationModel.getWoofSecurity(),
+			securities.linkToSecurity(handleFlow, httpContinuationModel.getWoofSecurity(),
 					(link) -> link.getWoofSecurity());
-			resources.linkToResource(() -> httpContinuation.getInput(), httpContinuationModel.getWoofResource(),
+			resources.linkToResource(handleFlow, httpContinuationModel.getWoofResource(),
 					(link) -> link.getWoofResource());
-			httpContinuations.linkToHttpContinuation(() -> httpContinuation.getInput(),
-					httpContinuationModel.getWoofRedirect(), (link) -> link.getWoofRedirect(), null);
+			httpContinuations.linkToHttpContinuation(handleFlow, httpContinuationModel.getWoofRedirect(),
+					(link) -> link.getWoofRedirect(), null);
+			procedures.linkToProcedure(handleFlow, httpContinuationModel.getWoofProcedure(),
+					(link) -> link.getWoofProcedure());
 		}
 
 		// Link the HTTP inputs
@@ -162,16 +175,17 @@ public class WoofLoaderImpl implements WoofLoader {
 			HttpInput httpInput = webArchitect.getHttpInput(isSecure, httpMethod, applicationPath);
 
 			// Undertake links
-			sections.linkToSectionInput(() -> httpInput.getInput(), httpInputModel.getWoofSectionInput(),
+			Supplier<OfficeFlowSourceNode> handleFlow = () -> httpInput.getInput();
+			sections.linkToSectionInput(handleFlow, httpInputModel.getWoofSectionInput(),
 					(link) -> link.getWoofSectionInput());
-			templates.linkToTemplate(() -> httpInput.getInput(), httpInputModel.getWoofTemplate(),
-					(link) -> link.getWoofTemplate(), null);
-			securities.linkToSecurity(() -> httpInput.getInput(), httpInputModel.getWoofSecurity(),
-					(link) -> link.getWoofSecurity());
-			resources.linkToResource(() -> httpInput.getInput(), httpInputModel.getWoofResource(),
-					(link) -> link.getWoofResource());
-			httpContinuations.linkToHttpContinuation(() -> httpInput.getInput(),
-					httpInputModel.getWoofHttpContinuation(), (link) -> link.getWoofHttpContinuation(), null);
+			templates.linkToTemplate(handleFlow, httpInputModel.getWoofTemplate(), (link) -> link.getWoofTemplate(),
+					null);
+			securities.linkToSecurity(handleFlow, httpInputModel.getWoofSecurity(), (link) -> link.getWoofSecurity());
+			resources.linkToResource(handleFlow, httpInputModel.getWoofResource(), (link) -> link.getWoofResource());
+			httpContinuations.linkToHttpContinuation(handleFlow, httpInputModel.getWoofHttpContinuation(),
+					(link) -> link.getWoofHttpContinuation(), null);
+			procedures.linkToProcedure(handleFlow, httpInputModel.getWoofProcedure(),
+					(link) -> link.getWoofProcedure());
 		}
 
 		// Link the template outputs
@@ -202,17 +216,17 @@ public class WoofLoaderImpl implements WoofLoader {
 				}
 
 				// Undertake links
-				sections.linkToSectionInput(() -> template.getOutput(outputName), outputModel.getWoofSectionInput(),
+				Supplier<OfficeFlowSourceNode> outputFlow = () -> template.getOutput(outputName);
+				sections.linkToSectionInput(outputFlow, outputModel.getWoofSectionInput(),
 						(link) -> link.getWoofSectionInput());
-				templates.linkToTemplate(() -> template.getOutput(outputName), outputModel.getWoofTemplate(),
-						(link) -> link.getWoofTemplate(), outputArgumentTypeName);
-				securities.linkToSecurity(() -> template.getOutput(outputName), outputModel.getWoofSecurity(),
-						(link) -> link.getWoofSecurity());
-				resources.linkToResource(() -> template.getOutput(outputName), outputModel.getWoofResource(),
-						(link) -> link.getWoofResource());
-				httpContinuations.linkToHttpContinuation(() -> template.getOutput(outputName),
-						outputModel.getWoofHttpContinuation(), (link) -> link.getWoofHttpContinuation(),
+				templates.linkToTemplate(outputFlow, outputModel.getWoofTemplate(), (link) -> link.getWoofTemplate(),
 						outputArgumentTypeName);
+				securities.linkToSecurity(outputFlow, outputModel.getWoofSecurity(), (link) -> link.getWoofSecurity());
+				resources.linkToResource(outputFlow, outputModel.getWoofResource(), (link) -> link.getWoofResource());
+				httpContinuations.linkToHttpContinuation(outputFlow, outputModel.getWoofHttpContinuation(),
+						(link) -> link.getWoofHttpContinuation(), outputArgumentTypeName);
+				procedures.linkToProcedure(outputFlow, outputModel.getWoofProcedure(),
+						(link) -> link.getWoofProcedure());
 			}
 		}
 
@@ -236,17 +250,75 @@ public class WoofLoaderImpl implements WoofLoader {
 				}
 
 				// Undertake links
-				sections.linkToSectionInput(() -> section.getOfficeSectionOutput(outputName),
-						outputModel.getWoofSectionInput(), (link) -> link.getWoofSectionInput());
-				templates.linkToTemplate(() -> section.getOfficeSectionOutput(outputName),
-						outputModel.getWoofTemplate(), (link) -> link.getWoofTemplate(), outputArgumentTypeName);
-				securities.linkToSecurity(() -> section.getOfficeSectionOutput(outputName),
-						outputModel.getWoofSecurity(), (link) -> link.getWoofSecurity());
-				resources.linkToResource(() -> section.getOfficeSectionOutput(outputName),
-						outputModel.getWoofResource(), (link) -> link.getWoofResource());
-				httpContinuations.linkToHttpContinuation(() -> section.getOfficeSectionOutput(outputName),
-						outputModel.getWoofHttpContinuation(), (link) -> link.getWoofHttpContinuation(),
+				Supplier<OfficeFlowSourceNode> outputFlow = () -> section.getOfficeSectionOutput(outputName);
+				sections.linkToSectionInput(outputFlow, outputModel.getWoofSectionInput(),
+						(link) -> link.getWoofSectionInput());
+				templates.linkToTemplate(outputFlow, outputModel.getWoofTemplate(), (link) -> link.getWoofTemplate(),
 						outputArgumentTypeName);
+				securities.linkToSecurity(outputFlow, outputModel.getWoofSecurity(), (link) -> link.getWoofSecurity());
+				resources.linkToResource(outputFlow, outputModel.getWoofResource(), (link) -> link.getWoofResource());
+				httpContinuations.linkToHttpContinuation(outputFlow, outputModel.getWoofHttpContinuation(),
+						(link) -> link.getWoofHttpContinuation(), outputArgumentTypeName);
+				procedures.linkToProcedure(outputFlow, outputModel.getWoofProcedure(),
+						(link) -> link.getWoofProcedure());
+			}
+		}
+
+		// Link the procedures
+		for (WoofProcedureModel procedureModel : woof.getWoofProcedures()) {
+
+			// Obtain the auto-wire section
+			String procedureName = procedureModel.getWoofProcedureName();
+			OfficeSection procedure = procedures.procedures.get(procedureName);
+
+			// Link next for procedure
+			WoofProcedureNextModel nextModel = procedureModel.getNext();
+			if (nextModel != null) {
+
+				// Obtain the output argument type
+				String nextArgumentTypeName = nextModel.getArgumentType();
+				if (CompileUtil.isBlank(nextArgumentTypeName)) {
+					nextArgumentTypeName = null;
+				}
+
+				// Undertake links
+				Supplier<OfficeFlowSourceNode> nextFlow = () -> procedure
+						.getOfficeSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME);
+				sections.linkToSectionInput(nextFlow, nextModel.getWoofSectionInput(),
+						(link) -> link.getWoofSectionInput());
+				templates.linkToTemplate(nextFlow, nextModel.getWoofTemplate(), (link) -> link.getWoofTemplate(),
+						nextArgumentTypeName);
+				securities.linkToSecurity(nextFlow, nextModel.getWoofSecurity(), (link) -> link.getWoofSecurity());
+				resources.linkToResource(nextFlow, nextModel.getWoofResource(), (link) -> link.getWoofResource());
+				httpContinuations.linkToHttpContinuation(nextFlow, nextModel.getWoofHttpContinuation(),
+						(link) -> link.getWoofHttpContinuation(), nextArgumentTypeName);
+				procedures.linkToProcedure(nextFlow, nextModel.getWoofProcedure(), (link) -> link.getWoofProcedure());
+			}
+
+			// Link outputs for procedure
+			for (WoofProcedureOutputModel outputModel : procedureModel.getOutputs()) {
+
+				// Obtain output name
+				String outputName = outputModel.getWoofProcedureOutputName();
+
+				// Obtain the output argument type
+				String outputArgumentTypeName = outputModel.getArgumentType();
+				if (CompileUtil.isBlank(outputArgumentTypeName)) {
+					outputArgumentTypeName = null;
+				}
+
+				// Undertake links
+				Supplier<OfficeFlowSourceNode> outputFlow = () -> procedure.getOfficeSectionOutput(outputName);
+				sections.linkToSectionInput(outputFlow, outputModel.getWoofSectionInput(),
+						(link) -> link.getWoofSectionInput());
+				templates.linkToTemplate(outputFlow, outputModel.getWoofTemplate(), (link) -> link.getWoofTemplate(),
+						outputArgumentTypeName);
+				securities.linkToSecurity(outputFlow, outputModel.getWoofSecurity(), (link) -> link.getWoofSecurity());
+				resources.linkToResource(outputFlow, outputModel.getWoofResource(), (link) -> link.getWoofResource());
+				httpContinuations.linkToHttpContinuation(outputFlow, outputModel.getWoofHttpContinuation(),
+						(link) -> link.getWoofHttpContinuation(), outputArgumentTypeName);
+				procedures.linkToProcedure(outputFlow, outputModel.getWoofProcedure(),
+						(link) -> link.getWoofProcedure());
 			}
 		}
 
@@ -269,17 +341,17 @@ public class WoofLoaderImpl implements WoofLoader {
 				}
 
 				// Undertake links
-				sections.linkToSectionInput(() -> securityBuilder.getOutput(outputName),
-						outputModel.getWoofSectionInput(), (link) -> link.getWoofSectionInput());
-				templates.linkToTemplate(() -> securityBuilder.getOutput(outputName), outputModel.getWoofTemplate(),
-						(link) -> link.getWoofTemplate(), outputArgumentTypeName);
-				securities.linkToSecurity(() -> securityBuilder.getOutput(outputName), outputModel.getWoofSecurity(),
-						(link) -> link.getWoofSecurity());
-				resources.linkToResource(() -> securityBuilder.getOutput(outputName), outputModel.getWoofResource(),
-						(link) -> link.getWoofResource());
-				httpContinuations.linkToHttpContinuation(() -> securityBuilder.getOutput(outputName),
-						outputModel.getWoofHttpContinuation(), (link) -> link.getWoofHttpContinuation(),
+				Supplier<OfficeFlowSourceNode> outputFlow = () -> securityBuilder.getOutput(outputName);
+				sections.linkToSectionInput(outputFlow, outputModel.getWoofSectionInput(),
+						(link) -> link.getWoofSectionInput());
+				templates.linkToTemplate(outputFlow, outputModel.getWoofTemplate(), (link) -> link.getWoofTemplate(),
 						outputArgumentTypeName);
+				securities.linkToSecurity(outputFlow, outputModel.getWoofSecurity(), (link) -> link.getWoofSecurity());
+				resources.linkToResource(outputFlow, outputModel.getWoofResource(), (link) -> link.getWoofResource());
+				httpContinuations.linkToHttpContinuation(outputFlow, outputModel.getWoofHttpContinuation(),
+						(link) -> link.getWoofHttpContinuation(), outputArgumentTypeName);
+				procedures.linkToProcedure(outputFlow, outputModel.getWoofProcedure(),
+						(link) -> link.getWoofProcedure());
 			}
 		}
 
@@ -290,24 +362,29 @@ public class WoofLoaderImpl implements WoofLoader {
 			String exceptionClassName = exceptionModel.getClassName();
 
 			// Undertake links
-			sections.linkToSectionInput(() -> officeArchitect.addOfficeEscalation(exceptionClassName),
-					exceptionModel.getWoofSectionInput(), (link) -> link.getWoofSectionInput());
-			templates.linkToTemplate(() -> officeArchitect.addOfficeEscalation(exceptionClassName),
-					exceptionModel.getWoofTemplate(), (link) -> link.getWoofTemplate(), exceptionClassName);
-			securities.linkToSecurity(() -> officeArchitect.addOfficeEscalation(exceptionClassName),
-					exceptionModel.getWoofSecurity(), (link) -> link.getWoofSecurity());
-			resources.linkToResource(() -> officeArchitect.addOfficeEscalation(exceptionClassName),
-					exceptionModel.getWoofResource(), (link) -> link.getWoofResource());
-			httpContinuations.linkToHttpContinuation(() -> officeArchitect.addOfficeEscalation(exceptionClassName),
-					exceptionModel.getWoofHttpContinuation(), (link) -> link.getWoofHttpContinuation(),
+			Supplier<OfficeFlowSourceNode> handleFlow = () -> officeArchitect.addOfficeEscalation(exceptionClassName);
+			sections.linkToSectionInput(handleFlow, exceptionModel.getWoofSectionInput(),
+					(link) -> link.getWoofSectionInput());
+			templates.linkToTemplate(handleFlow, exceptionModel.getWoofTemplate(), (link) -> link.getWoofTemplate(),
 					exceptionClassName);
+			securities.linkToSecurity(handleFlow, exceptionModel.getWoofSecurity(), (link) -> link.getWoofSecurity());
+			resources.linkToResource(handleFlow, exceptionModel.getWoofResource(), (link) -> link.getWoofResource());
+			httpContinuations.linkToHttpContinuation(handleFlow, exceptionModel.getWoofHttpContinuation(),
+					(link) -> link.getWoofHttpContinuation(), exceptionClassName);
+			procedures.linkToProcedure(handleFlow, exceptionModel.getWoofProcedure(),
+					(link) -> link.getWoofProcedure());
 		}
 
 		// Link the starts
 		int startIndex[] = new int[] { 1 };
 		for (WoofStartModel startModel : woof.getWoofStarts()) {
-			sections.linkToSectionInput(() -> officeArchitect.addOfficeStart(String.valueOf(startIndex[0]++)),
-					startModel.getWoofSectionInput(), (link) -> link.getWoofSectionInput());
+
+			// Undertake links
+			Supplier<OfficeFlowSourceNode> startFlow = () -> officeArchitect
+					.addOfficeStart(String.valueOf(startIndex[0]++));
+			sections.linkToSectionInput(startFlow, startModel.getWoofSectionInput(),
+					(link) -> link.getWoofSectionInput());
+			procedures.linkToProcedure(startFlow, startModel.getWoofProcedure(), (link) -> link.getWoofProcedure());
 		}
 
 		// Load the governance
@@ -671,6 +748,98 @@ public class WoofLoaderImpl implements WoofLoader {
 					// Link the flow to the section input
 					this.officeArchitect.link(flowSourceFactory.get(),
 							targetSection.getOfficeSectionInput(targetInputName));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Connector for the {@link WoofProcedureModel} instances.
+	 */
+	private static class ProcedureConnector {
+
+		/**
+		 * {@link OfficeArchitect}.
+		 */
+		private final OfficeArchitect officeArchitect;
+
+		/**
+		 * {@link OfficeExtensionContext}.
+		 */
+		private final OfficeExtensionContext extensionContext;
+
+		/**
+		 * {@link Procedure} instances by name.
+		 */
+		private final Map<String, OfficeSection> procedures = new HashMap<>();
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param woof               {@link WoofModel}.
+		 * @param officeArchitect    {@link OfficeArchitect}.
+		 * @param procedureArchitect {@link ProcedureArchitect}.
+		 * @param extensionContext   {@link OfficeExtensionContext}.
+		 */
+		private ProcedureConnector(WoofModel woof, OfficeArchitect officeArchitect,
+				ProcedureArchitect<OfficeSection> procedureArchitect, OfficeExtensionContext extensionContext) {
+			this.officeArchitect = officeArchitect;
+			this.extensionContext = extensionContext;
+
+			// Configure the procedures
+			for (WoofProcedureModel procedureModel : woof.getWoofProcedures()) {
+
+				// Obtain the procedure details
+				String resource = procedureModel.getResource();
+				String sourceName = procedureModel.getSourceName();
+				String procedureName = procedureModel.getProcedureName();
+
+				// Determine if next
+				boolean isNext = procedureModel.getNext() != null;
+
+				// Load the properties
+				PropertyList properties = this.extensionContext.createPropertyList();
+				for (PropertyModel propertyModel : procedureModel.getProperties()) {
+					properties.addProperty(propertyModel.getName()).setValue(propertyModel.getValue());
+				}
+
+				// Configure the procedure
+				OfficeSection procedure = procedureArchitect.addProcedure(resource, sourceName, procedureName, isNext,
+						properties);
+
+				// Maintain reference to procedure by name
+				String woofProcedureName = procedureModel.getWoofProcedureName();
+				this.procedures.put(woofProcedureName, procedure);
+			}
+		}
+
+		/**
+		 * Link to {@link Procedure}.
+		 * 
+		 * @param flowSourceFactory {@link Supplier} of the
+		 *                          {@link OfficeFlowSourceNode}.
+		 * @param connectionModel   {@link ConnectionModel} to
+		 *                          {@link WoofProcedureModel}.
+		 * @param procedureFactory  Factory to extract procedure
+		 *                          {@link WoofProcedureModel} from
+		 *                          {@link ConnectionModel}.
+		 */
+		private <C extends ConnectionModel> void linkToProcedure(Supplier<OfficeFlowSourceNode> flowSourceFactory,
+				C connectionModel, Function<C, WoofProcedureModel> procedureFactory) {
+
+			// Determine if linking
+			if (connectionModel != null) {
+				WoofProcedureModel procedure = procedureFactory.apply(connectionModel);
+				if (procedure != null) {
+					// Obtain target procedure name
+					String targetProcedureName = procedure.getWoofProcedureName();
+
+					// Obtain the target procedure
+					OfficeSection targetProcedure = this.procedures.get(targetProcedureName);
+
+					// Link the flow to the procedure
+					this.officeArchitect.link(flowSourceFactory.get(),
+							targetProcedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 				}
 			}
 		}

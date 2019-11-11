@@ -247,6 +247,9 @@ public class CompileOfficeFloor extends AbstractOfficeFloorSource {
 
 		// Compile the OfficeFloor
 		OfficeFloor officeFloor = this.compileOfficeFloor();
+		if (officeFloor == null) {
+			return null; // failed to compile
+		}
 
 		// Open the OfficeFloor
 		officeFloor.openOfficeFloor();

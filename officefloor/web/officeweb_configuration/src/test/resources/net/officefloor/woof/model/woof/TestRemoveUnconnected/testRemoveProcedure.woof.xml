@@ -1,0 +1,47 @@
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/path" />
+	</http-continuations>
+
+	<http-inputs>
+		<http-input method="POST" path="/input" />
+	</http-inputs>
+
+	<templates>
+		<template path="/template" location="example/Template.ofp" class="net.example.LogicClass">
+			<extension class="net.officefloor.woof.model.woof.MockNoChangeWoofTemplateExtensionSource" />
+			<extension class="net.officefloor.woof.model.woof.MockChangeWoofTemplateExtensionSource">
+				<property name="ONE" value="A" />
+				<property name="TWO" value="B" />
+			</extension>
+		</template>
+	</templates>
+
+	<procedures />
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION" />
+	</sections>
+
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource" />
+	</securities>
+
+	<governances>
+		<governance name="GOVERNANCE" source="net.example.ExampleGovernanceSource" />
+	</governances>
+
+	<resources>
+		<resource path="Example.html" />
+	</resources>
+
+	<exceptions>
+		<exception class="java.lang.Exception" />
+	</exceptions>
+
+	<starts>
+		<start />
+	</starts>
+
+</woof>

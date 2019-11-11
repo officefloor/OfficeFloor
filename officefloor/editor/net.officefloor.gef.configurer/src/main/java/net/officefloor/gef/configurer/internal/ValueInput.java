@@ -19,6 +19,7 @@ package net.officefloor.gef.configurer.internal;
 
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import net.officefloor.gef.configurer.Builder;
 
 /**
  * Value input.
@@ -42,6 +43,13 @@ public interface ValueInput {
 	 * configuring a style sheet).
 	 */
 	default void activate() {
+	}
+
+	/**
+	 * Invoked on reload of {@link Builder}. This allows hooking in to changing view
+	 * on reload.
+	 */
+	default void reload() {
 	}
 
 }

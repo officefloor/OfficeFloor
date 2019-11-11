@@ -17,7 +17,9 @@
  */
 package net.officefloor.woof;
 
+import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.web.build.WebArchitect;
@@ -67,6 +69,13 @@ public interface WoofContext {
 	 * @return {@link HttpResourceArchitect}.
 	 */
 	HttpResourceArchitect getHttpResourceArchitect();
+
+	/**
+	 * Obtains the {@link ProcedureArchitect}.
+	 * 
+	 * @return {@link ProcedureArchitect}.
+	 */
+	ProcedureArchitect<OfficeSection> getProcedureArchitect();
 
 	/**
 	 * Obtains the {@link OfficeArchitect}.

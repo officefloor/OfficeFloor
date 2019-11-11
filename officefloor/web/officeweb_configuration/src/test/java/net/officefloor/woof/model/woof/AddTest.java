@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
@@ -137,8 +138,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddRootTemplate() {
 
 		// Create the type
-		WebTemplateType type = this.constructWebTemplateType((context) -> {
-		});
+		WebTemplateType type = this.constructWebTemplateType(null);
 
 		// Add the root template
 		Change<WoofTemplateModel> change = this.operations.addTemplate("/", "root.ofp", null, type, null, null, null,
@@ -154,8 +154,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddSecureLinkRenderTemplate() {
 
 		// Create the type
-		WebTemplateType type = this.constructWebTemplateType((context) -> {
-		});
+		WebTemplateType type = this.constructWebTemplateType(null);
 
 		// Add the template
 		Map<String, Boolean> secureLinks = new HashMap<String, Boolean>();
@@ -175,8 +174,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddMultipleTemplates() {
 
 		// Create the type
-		WebTemplateType type = this.constructWebTemplateType((SectionTypeContext context) -> {
-		});
+		WebTemplateType type = this.constructWebTemplateType(null);
 
 		// Add the first template
 		this.operations.addTemplate("/pathA", "example/TemplateOne.ofp", "Class1", type, null, null, null, false, null,
@@ -219,8 +217,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		extensionChange.apply();
 
 		// Create the type
-		WebTemplateType type = this.constructWebTemplateType((SectionTypeContext context) -> {
-		});
+		WebTemplateType type = this.constructWebTemplateType(null);
 
 		// Test
 		this.replayMockObjects();
@@ -244,18 +241,15 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddSection() {
 
 		// Create the section type
-		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
-			@Override
-			public void construct(SectionTypeContext context) {
-				context.addSectionInput("INPUT_A", Integer.class);
-				context.addSectionInput("INPUT_B", Long.class);
-				context.addSectionInput("INPUT_C", null);
-				context.addSectionInput("INPUT_D", null);
-				context.addSectionOutput("OUTPUT_1", String.class, false);
-				context.addSectionOutput("OUTPUT_2", null, false);
-				context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
-				context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
-			}
+		SectionType section = this.constructSectionType((context) -> {
+			context.addSectionInput("INPUT_A", Integer.class);
+			context.addSectionInput("INPUT_B", Long.class);
+			context.addSectionInput("INPUT_C", null);
+			context.addSectionInput("INPUT_D", null);
+			context.addSectionOutput("OUTPUT_1", String.class, false);
+			context.addSectionOutput("OUTPUT_2", null, false);
+			context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
+			context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);
 		});
 
 		// Create the properties
@@ -284,15 +278,59 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddMultipleSections() {
 
 		// Create the section type
-		SectionType section = this.constructSectionType(new SectionTypeConstructor() {
-			@Override
-			public void construct(SectionTypeContext context) {
-			}
-		});
+		SectionType section = this.constructSectionType(null);
 
 		// Add the sections
 		this.operations.addSection("SECTION", "Section1", "Location1", null, section).apply();
 		this.operations.addSection("SECTION", "Section2", "Location2", null, section).apply();
+
+		// Ensure appropriately added sections
+		this.validateModel();
+	}
+
+	/**
+	 * Ensure able to add {@link WoofProcedureModel}.
+	 */
+	public void testAddProcedure() {
+
+		// Create the procedure type
+		ProcedureType procedure = this.constructProcedureType("procedure", String.class, (context) -> {
+			context.addFlow("OUTPUT_A", String.class);
+			context.addFlow("OUTPUT_B", null);
+			context.setNextArgumentType(Short.class);
+		});
+
+		// Create the properties
+		PropertyList properties = OfficeFloorCompiler.newPropertyList();
+		properties.addProperty("name.one").setValue("value.one");
+		properties.addProperty("name.two").setValue("value.two");
+
+		// Add the procedure
+		Change<WoofProcedureModel> change = this.operations.addProcedure("PROCEDURE", "resource", "Class", "procedure",
+				properties, procedure);
+		change.getTarget().setX(100);
+		change.getTarget().setY(101);
+
+		// Validate change
+		this.assertChange(change, null, "Add Procedure", true);
+
+		// Ensure appropriately added procedure
+		change.apply();
+		WoofProcedureModel woofProcedure = this.model.getWoofProcedures().get(0);
+		assertSame("Incorrect section", woofProcedure, change.getTarget());
+	}
+
+	/**
+	 * Ensure able to add multiple procedures with clashing names.
+	 */
+	public void testAddMultipleProcedures() {
+
+		// Create the procedure type
+		ProcedureType procedure = this.constructProcedureType("procedure", null, null);
+
+		// Add the procedures
+		this.operations.addProcedure("PROCEDURE", "resource1", "Class", "method", null, procedure).apply();
+		this.operations.addProcedure("PROCEDURE", "resource2", "JavaScript", "function", null, procedure).apply();
 
 		// Ensure appropriately added sections
 		this.validateModel();
@@ -342,10 +380,7 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddSecurityWithNoApplicationBehaviour() {
 
 		// Create the HTTP Security type
-		HttpSecurityType<?, ?, ?, ?, ?> httpSecurityType = this.constructHttpSecurityType(HttpCredentials.class,
-				(context) -> {
-					// Nothing required of application
-				});
+		HttpSecurityType<?, ?, ?, ?, ?> httpSecurityType = this.constructHttpSecurityType(HttpCredentials.class, null);
 
 		// Create the properties
 		PropertyList properties = OfficeFloorCompiler.newPropertyList();

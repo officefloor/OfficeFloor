@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -127,6 +128,16 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 	private boolean isDelete = false;
 
 	/**
+	 * Indicates if active edit is underway.
+	 */
+	private int activeEditCount = 0;
+
+	/**
+	 * Index of change.
+	 */
+	private int changeIndex = 0;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param label Label.
@@ -146,6 +157,68 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		return builder;
 	}
 
+	/**
+	 * Undertakes an edit of the table.
+	 * 
+	 * @param editLogic Logic to edit the table.
+	 */
+	private void doEdit(Runnable editLogic) {
+
+		// Undertaking change, so update index
+		this.changeIndex++;
+
+		// Undertake edit
+		try {
+			this.activeEditCount++;
+			editLogic.run();
+		} finally {
+			this.activeEditCount--;
+		}
+	}
+
+	/**
+	 * {@link ObjectProperty} updates only fire if different
+	 * {@link Object#equals(Object)}. Can not trust objects to properly indicate
+	 * different. Therefore, enable update fire on every update.
+	 */
+	private static class ChangeArrayList<E> extends ArrayList<E> {
+
+		/**
+		 * Default serialise version.
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Index of change to identify if change.
+		 */
+		private final int changeIndex;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param size        Size of {@link ArrayList}.
+		 * @param changeIndex Index of change.
+		 */
+		private ChangeArrayList(int size, int changeIndex) {
+			super(size);
+			this.changeIndex = changeIndex;
+		}
+
+		/*
+		 * =========== Object ===================
+		 */
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public boolean equals(Object obj) {
+			if (!(obj instanceof ChangeArrayList)) {
+				return false; // never match other array type
+			}
+			ChangeArrayList<?> that = (ChangeArrayList<E>) obj;
+			return this.changeIndex == that.changeIndex;
+		}
+	}
+
 	/*
 	 * ============== AbstractBuilder ===============
 	 */
@@ -162,7 +235,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 
 		// Update the items
 		Runnable loadRowsToItems = () -> {
-			List<I> updatedItems = new ArrayList<>(rows.size());
+			List<I> updatedItems = new ChangeArrayList<>(rows.size(), this.changeIndex);
 			for (Row row : rows) {
 				if (row.item != null) {
 					updatedItems.add(row.item);
@@ -204,12 +277,10 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 				column.setOnEditCommit((event) -> {
 
 					// Load the value into the cell
+					// Note: cell change fires list change event
 					Row row = table.getItems().get(event.getTablePosition().getRow());
 					Property cellValue = row.cells[columnIndex].getValue();
 					cellValue.setValue(event.getNewValue());
-
-					// Update the items
-					loadRowsToItems.run();
 				});
 				column.getStyleClass().add("configurer-column-editable");
 
@@ -244,7 +315,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 						if ((!this.isEmpty()) && (item != null)) {
 
 							// Click anywhere on cell to delete
-							this.setOnMouseClicked((event) -> item.deleteRow());
+							this.setOnMouseClicked((event) -> ListBuilderImpl.this.doEdit(() -> item.deleteRow()));
 
 							// Delete row icon
 							this.setGraphic(
@@ -266,7 +337,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		table.getColumns().setAll(columns);
 
 		// Hook in typing to start edit
-		table.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
+		table.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> this.doEdit(() -> {
 
 			// Obtain the selected row
 			if (table.getSelectionModel().getSelectedCells().size() == 0) {
@@ -356,44 +427,36 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 					return;
 				}
 			}
-		});
+		}));
 
 		// Load the rows
-		boolean isUpdatingRows[] = new boolean[] { false };
 		Runnable loadRows = () -> {
 
-			// Ensure only update once
-			if (isUpdatingRows[0]) {
+			// Do not load if editing (avoid cyclic table change)
+			if (this.activeEditCount > 0) {
 				return;
 			}
 
 			// Load the rows
-			isUpdatingRows[0] = true;
-			try {
-				// Load the rows
-				List<I> items = itemsProperty.getValue();
-				List<Row> updatedRows = new ArrayList<>();
-				if (items != null) {
-					for (I item : items) {
-						updatedRows.add(new Row(table, loadRowsToItems, item, context));
-					}
+			List<I> items = itemsProperty.getValue();
+			List<Row> updatedRows = new ArrayList<>();
+			if (items != null) {
+				for (I item : items) {
+					updatedRows.add(new Row(table, loadRowsToItems, item, context));
 				}
-
-				// Determine if able to add rows
-				if (this.itemFactory != null) {
-					updatedRows.add(new AddRow(table, loadRowsToItems, context));
-				}
-
-				// Load rows to the table
-				rows.setAll(updatedRows);
-
-			} finally {
-				isUpdatingRows[0] = false;
 			}
+
+			// Determine if able to add rows
+			if (this.itemFactory != null) {
+				updatedRows.add(new AddRow(table, loadRowsToItems, context));
+			}
+
+			// Load rows to the table
+			rows.setAll(updatedRows);
 		};
 
-		// Handle change in rows
-		itemsProperty.addListener((event) -> loadRows.run());
+		// Handle external change in rows
+		itemsProperty.addListener((observable, oldValue, newValue) -> loadRows.run());
 
 		// Load initial rows
 		loadRows.run();
@@ -497,8 +560,9 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 			for (int i = 0; i < this.cells.length; i++) {
 				this.cells[i] = ListBuilderImpl.this.renderers.get(i).createCellRenderer(this);
 
-				// Trigger updating
-				this.cells[i].getValue().addListener((event) -> this.updater.run());
+				// Trigger updating (consider edit to fire change event)
+				this.cells[i].getValue().addListener(
+						(observable, oldValue, newValue) -> ListBuilderImpl.this.doEdit(() -> this.updater.run()));
 			}
 
 			// Provide the delete (except for add row - null item)
@@ -573,14 +637,16 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		 * @param table {@link TableView}.
 		 */
 		private void addRow() {
+			ListBuilderImpl.this.doEdit(() -> {
 
-			// Create the new row
-			I newItem = ListBuilderImpl.this.itemFactory.get();
-			Row newRow = new Row(this.table, this.updater, newItem, this.context);
+				// Create the new row
+				I newItem = ListBuilderImpl.this.itemFactory.get();
+				Row newRow = new Row(this.table, this.updater, newItem, this.context);
 
-			// Add the row (before the add row)
-			ObservableList<Row> items = this.table.getItems();
-			items.add(items.size() - 1, newRow);
+				// Add the row (before the add row)
+				ObservableList<Row> items = this.table.getItems();
+				items.add(items.size() - 1, newRow);
+			});
 		}
 	}
 
@@ -614,7 +680,7 @@ public class ListBuilderImpl<M, I> extends AbstractBuilder<M, List<I>, ValueInpu
 		 * Deletes the {@link Row}.
 		 */
 		public void deleteRow() {
-			this.table.getItems().remove(this.row);
+			ListBuilderImpl.this.doEdit(() -> this.table.getItems().remove(this.row));
 		}
 	}
 

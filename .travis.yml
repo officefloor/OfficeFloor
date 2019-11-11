@@ -21,8 +21,8 @@ jobs:
       env: officefloor_skip_stress_tests=true officefloor_docker_available=false officefloor_gcloud_available=false
       install:
         - choco install -y jdk8
-        - export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_221"
-        - choco install -y maven
+        - export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_231"
+        - choco install -y maven --version=3.6.1
         - export "MAVEN_OPTS=-Xmx2048m"
       script: cd officefloor/bom; /c/ProgramData/chocolatey/lib/maven/apache-maven-3.6.2/bin/mvn -B -DskipTests clean install
     - name: Java 11 (Linux)

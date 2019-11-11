@@ -42,8 +42,7 @@ public interface ValueRenderer<M, I extends ValueInput> {
 	/**
 	 * Obtains the label text.
 	 * 
-	 * @param valueInput
-	 *            {@link ValueInput}.
+	 * @param valueInput {@link ValueInput}.
 	 * @return Label text.
 	 */
 	String getLabel(I valueInput);
@@ -51,10 +50,8 @@ public interface ValueRenderer<M, I extends ValueInput> {
 	/**
 	 * Creates a new label {@link Node}.
 	 * 
-	 * @param labelText
-	 *            Label text.
-	 * @param valueInput
-	 *            {@link ValueInput}.
+	 * @param labelText  Label text.
+	 * @param valueInput {@link ValueInput}.
 	 * @return New label {@link Node}.
 	 */
 	Node createLabel(String labelText, I valueInput);
@@ -62,8 +59,7 @@ public interface ValueRenderer<M, I extends ValueInput> {
 	/**
 	 * Creates a new error feedback {@link Node}.
 	 * 
-	 * @param valueInput
-	 *            {@link ValueInput}.
+	 * @param valueInput {@link ValueInput}.
 	 * @return Error feedback {@link Node}.
 	 */
 	Node createErrorFeedback(I valueInput);
@@ -71,17 +67,16 @@ public interface ValueRenderer<M, I extends ValueInput> {
 	/**
 	 * Triggers to reload the value if matches the {@link Builder}.
 	 * 
-	 * @param builder
-	 *            {@link Builder} identifying the value to be reloaded from the
-	 *            model.
+	 * @param builder {@link Builder} identifying the value to be reloaded from the
+	 *                model.
+	 * @return <code>true</code> if the {@link Builder}.
 	 */
-	void reloadIf(Builder<?, ?, ?> builder);
+	boolean reloadIf(Builder<?, ?, ?> builder);
 
 	/**
 	 * Obtains the error with value.
 	 * 
-	 * @param valueInput
-	 *            {@link ValueInput}.
+	 * @param valueInput {@link ValueInput}.
 	 * @return Error with value. <code>null</code> to indicate no error.
 	 * 
 	 * @see MessageOnlyException

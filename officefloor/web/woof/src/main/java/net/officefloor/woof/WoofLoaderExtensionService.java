@@ -25,8 +25,11 @@ import java.util.List;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
+import net.officefloor.activity.procedure.build.ProcedureArchitect;
+import net.officefloor.activity.procedure.build.ProcedureEmployer;
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
@@ -221,9 +224,8 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	/**
 	 * Undertakes a contextual load.
 	 *
-	 * @param          <R> Return type from {@link WoofLoaderRunnable}.
-	 * @param          <E> Possible {@link Throwable} from
-	 *                 {@link WoofLoaderRunnable}.
+	 * @param <R>      Return type from {@link WoofLoaderRunnable}.
+	 * @param <E>      Possible {@link Throwable} from {@link WoofLoaderRunnable}.
 	 * @param runnable {@link WoofLoaderRunnable} to configure the contextual load.
 	 * @return Returned object from {@link WoofLoaderRunnable}.
 	 * @throws E Potential failure.
@@ -382,6 +384,8 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		WebTemplateArchitect templater = WebTemplateArchitectEmployer.employWebTemplater(web, officeArchitect, context);
 		HttpResourceArchitect resources = HttpResourceArchitectEmployer.employHttpResourceArchitect(web, security,
 				officeArchitect, context);
+		ProcedureArchitect<OfficeSection> procedure = ProcedureEmployer.employProcedureArchitect(officeArchitect,
+				context);
 
 		// Load the default object parser / responders
 		web.setDefaultHttpObjectParser(new JacksonHttpObjectParserServiceFactory());
@@ -423,6 +427,11 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 			@Override
 			public HttpResourceArchitect getHttpResourceArchitect() {
 				return resources;
+			}
+
+			@Override
+			public ProcedureArchitect<OfficeSection> getProcedureArchitect() {
+				return procedure;
 			}
 		};
 

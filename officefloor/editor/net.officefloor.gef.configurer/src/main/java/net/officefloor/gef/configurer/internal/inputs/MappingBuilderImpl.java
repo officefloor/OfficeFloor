@@ -231,7 +231,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 			this.targets = targets;
 
 			// Trigger change event on changes
-			this.mapping.addListener((event) -> this.reloadModels(true));
+			this.mapping.addListener((observable, oldValue, newValue) -> this.reloadModels(true));
 			this.sources.addListener((Change<? extends String> event) -> this.reloadModels(false));
 			this.targets.addListener((Change<? extends String> event) -> this.reloadModels(false));
 
@@ -239,7 +239,7 @@ public class MappingBuilderImpl<M> extends AbstractBuilder<M, Map<String, String
 			this.reloadModels(true);
 
 			// Update position of targets on resize
-			this.parent.widthProperty().addListener((event) -> this.reloadModels(false));
+			this.parent.widthProperty().addListener((observable, oldValue, newValue) -> this.reloadModels(false));
 		}
 
 		/**

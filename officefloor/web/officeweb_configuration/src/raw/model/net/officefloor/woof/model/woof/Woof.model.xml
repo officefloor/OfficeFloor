@@ -5,6 +5,7 @@
 	<list type="WoofTemplateModel" name="woof template" />
 	<list type="WoofSecurityModel" name="woof security" plural="woof securities" />
 	<list type="WoofSectionModel" name="woof section" />
+	<list type="WoofProcedureModel" name="woof procedure" />
 	<list type="WoofGovernanceModel" name="woof governance" />
 	<list type="WoofResourceModel" name="woof resource" />
 	<list type="WoofExceptionModel" name="woof exception" />

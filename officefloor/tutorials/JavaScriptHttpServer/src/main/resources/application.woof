@@ -1,7 +1,7 @@
 <woof>
   <http-continuations>
     <http-continuation path="/" secure="false" x="52" y="64">
-      <section name="Validate" input="validate"/>
+      <procedure name="Validate" />
     </http-continuation>
   </http-continuations>
   <http-inputs>
@@ -9,17 +9,15 @@
   <templates>
   </templates>
   <sections>
-    <section name="Respond" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.javascripthttpserver.ResponseLogic" x="378" y="47">
-      <input name="send" parameter-type=""/>
-    </section>
-    <section name="Validate" source="net.officefloor.polyglot.javascript.JavaScriptFunctionSectionSource" location="net/officefloor/tutorial/javascripthttpserver/Validate.js" x="145" y="48">
-      <property name="function.name" value="validate"/>
-      <input name="validate" parameter-type=""/>
-      <output name="valid" argument-type="">
-        <section name="Respond" input="send"/>
-      </output>
-    </section>
   </sections>
+  <procedures>
+    <procedure name="Respond" resource="net.officefloor.tutorial.javascripthttpserver.ResponseLogic" source="Class" procedure="send" x="378" y="47" />
+    <procedure name="Validate" resource="net/officefloor/tutorial/javascripthttpserver/Validate.js" source="JavaScript" procedure="validate" x="145" y="48">
+      <next>
+      	<procedure name="Respond" />
+      </next>
+    </procedure>  	
+  </procedures>
   <securities>
   </securities>
   <governances>

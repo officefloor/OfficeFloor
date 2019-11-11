@@ -25,9 +25,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 
+import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpClientTestUtil;
@@ -154,6 +156,44 @@ public class WoofServerTest extends OfficeFrameTestCase {
 			HttpResponse response = client.execute(post);
 			assertEquals("Incorrect template", "{\"message\":\"TEST-mock\"}",
 					HttpClientTestUtil.entityToString(response));
+		}
+	}
+
+	/**
+	 * Ensure can configure {@link Team}.
+	 * 
+	 * @throws IOException
+	 */
+	public void testTeams() throws IOException {
+
+		// Open the OfficeFloor
+		this.officeFloor = WoOF.open();
+
+		// Create client
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+
+			// Ensure obtain different team
+			HttpGet get = new HttpGet("http://localhost:7878/teams");
+			HttpResponse response = client.execute(get);
+			assertEquals("Incorrect team", "\"DIFFERENT THREAD\"", HttpClientTestUtil.entityToString(response));
+		}
+	}
+
+	/**
+	 * Ensure can invoke a {@link Procedure}.
+	 */
+	public void testProcedure() throws IOException {
+
+		// Open the OfficeFloor
+		this.officeFloor = WoOF.open();
+
+		// Create client
+		try (CloseableHttpClient client = HttpClientTestUtil.createHttpClient()) {
+
+			// Ensure execute procedure
+			HttpGet get = new HttpGet("http://localhost:7878/procedure");
+			HttpResponse response = client.execute(get);
+			assertEquals("Should execute procedure", "\"PROCEDURE\"", HttpClientTestUtil.entityToString(response));
 		}
 	}
 

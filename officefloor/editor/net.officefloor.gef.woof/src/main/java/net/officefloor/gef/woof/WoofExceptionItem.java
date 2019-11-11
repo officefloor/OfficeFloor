@@ -30,6 +30,7 @@ import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofExceptionModel;
 import net.officefloor.woof.model.woof.WoofExceptionModel.WoofExceptionEvent;
 import net.officefloor.woof.model.woof.WoofExceptionToWoofHttpContinuationModel;
+import net.officefloor.woof.model.woof.WoofExceptionToWoofProcedureModel;
 import net.officefloor.woof.model.woof.WoofExceptionToWoofResourceModel;
 import net.officefloor.woof.model.woof.WoofExceptionToWoofSectionInputModel;
 import net.officefloor.woof.model.woof.WoofExceptionToWoofSecurityModel;
@@ -38,6 +39,8 @@ import net.officefloor.woof.model.woof.WoofHttpContinuationModel;
 import net.officefloor.woof.model.woof.WoofHttpContinuationModel.WoofHttpContinuationEvent;
 import net.officefloor.woof.model.woof.WoofModel;
 import net.officefloor.woof.model.woof.WoofModel.WoofEvent;
+import net.officefloor.woof.model.woof.WoofProcedureModel;
+import net.officefloor.woof.model.woof.WoofProcedureModel.WoofProcedureEvent;
 import net.officefloor.woof.model.woof.WoofResourceModel;
 import net.officefloor.woof.model.woof.WoofResourceModel.WoofResourceEvent;
 import net.officefloor.woof.model.woof.WoofSectionInputModel;
@@ -82,8 +85,8 @@ public class WoofExceptionItem extends
 		context.addNode(container,
 				context.connector(DefaultConnectors.FLOW, WoofExceptionToWoofSectionInputModel.class,
 						WoofExceptionToWoofTemplateModel.class, WoofExceptionToWoofResourceModel.class,
-						WoofExceptionToWoofSecurityModel.class, WoofExceptionToWoofHttpContinuationModel.class)
-						.getNode());
+						WoofExceptionToWoofSecurityModel.class, WoofExceptionToWoofHttpContinuationModel.class,
+						WoofExceptionToWoofProcedureModel.class).getNode());
 		return container;
 	}
 
@@ -176,6 +179,18 @@ public class WoofExceptionItem extends
 				}).delete((ctx) -> {
 					ctx.getChangeExecutor()
 							.execute(ctx.getOperations().removeExceptionToHttpContinuation(ctx.getModel()));
+				}));
+
+		// Procedure
+		connections.add(new IdeConnection<>(WoofExceptionToWoofProcedureModel.class)
+				.connectOne(s -> s.getWoofProcedure(), c -> c.getWoofException(),
+						WoofExceptionEvent.CHANGE_WOOF_PROCEDURE)
+				.to(WoofProcedureModel.class).many(t -> t.getWoofExceptions(), c -> c.getWoofProcedure(),
+						WoofProcedureEvent.ADD_WOOF_EXCEPTION, WoofProcedureEvent.REMOVE_WOOF_EXCEPTION)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkExceptionToProcedure(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeExceptionToProcedure(ctx.getModel()));
 				}));
 	}
 

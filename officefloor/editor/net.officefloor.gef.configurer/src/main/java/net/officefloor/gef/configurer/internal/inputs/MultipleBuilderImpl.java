@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -35,8 +36,10 @@ import net.officefloor.gef.configurer.FlagBuilder;
 import net.officefloor.gef.configurer.ListBuilder;
 import net.officefloor.gef.configurer.MappingBuilder;
 import net.officefloor.gef.configurer.MultipleBuilder;
+import net.officefloor.gef.configurer.OptionalBuilder;
 import net.officefloor.gef.configurer.PropertiesBuilder;
 import net.officefloor.gef.configurer.ResourceBuilder;
+import net.officefloor.gef.configurer.SelectBuilder;
 import net.officefloor.gef.configurer.TextBuilder;
 import net.officefloor.gef.configurer.internal.AbstractBuilder;
 import net.officefloor.gef.configurer.internal.AbstractConfigurationBuilder;
@@ -140,7 +143,7 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 				loadTabs.run();
 
 				// Update the tabs on change
-				context.getInputValue().addListener((event) -> loadTabs.run());
+				context.getInputValue().addListener((observable, oldValue, newValue) -> loadTabs.run());
 			}
 		};
 	}
@@ -157,6 +160,16 @@ public class MultipleBuilderImpl<M, V> extends AbstractBuilder<M, List<V>, Value
 	@Override
 	public <I> ListBuilder<V, I> list(String label, Class<I> itemType) {
 		return this.delegate.list(label, itemType);
+	}
+
+	@Override
+	public <I> SelectBuilder<V, I> select(String label, Function<V, ObservableList<I>> getItems) {
+		return this.delegate.select(label, getItems);
+	}
+
+	@Override
+	public OptionalBuilder<V> optional(Predicate<V> isShow) {
+		return this.delegate.optional(isShow);
 	}
 
 	@Override

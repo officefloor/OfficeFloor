@@ -10,6 +10,9 @@
 		<http-continuation path="/teams">
 			<section name="Section" input="teams" />
 		</http-continuation>
+		<http-continuation path="/procedure">
+			<procedure name="Procedure" />
+		</http-continuation>
 	</http-continuations>
 
 	<templates>
@@ -24,5 +27,9 @@
 			<input name="teams" />
 		</section>
 	</sections>
+	
+	<procedures>
+		<procedure name="Procedure" resource="net.officefloor.woof.MockProcedure" source="Class" procedure="procedure" />
+	</procedures>
 
 </woof>

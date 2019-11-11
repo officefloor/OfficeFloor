@@ -84,8 +84,8 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor.core</groupId>
-			<artifactId>officecompiler</artifactId>
+			<groupId>net.officefloor.activity</groupId>
+			<artifactId>officeprocedure</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.scala-lang</groupId>

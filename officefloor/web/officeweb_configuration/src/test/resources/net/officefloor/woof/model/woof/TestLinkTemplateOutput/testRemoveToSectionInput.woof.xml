@@ -12,12 +12,18 @@
 		<template path="/templateLink">
 			<output name="OUTPUT">
 				<template path="/template" />
+				<procedure name="PROCEDURE" />
 				<security name="SECURITY" />
 				<resource path="/resource.html" />
 				<redirect path="/path" />
 			</output>
 		</template>
 	</templates>
+	
+	<procedures>
+		<procedure name="PROCEDURE" />
+		<procedure name="PROCEDURE_LINK" />
+	</procedures>
 
 	<sections>
 		<section name="SECTION">

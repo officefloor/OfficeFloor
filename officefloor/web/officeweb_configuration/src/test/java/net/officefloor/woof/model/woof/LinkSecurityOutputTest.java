@@ -61,8 +61,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofTemplateModel}.
 	 * 
-	 * @param securityIndex
-	 *            {@link WoofSecurityOutputModel} index.
+	 * @param securityIndex {@link WoofSecurityOutputModel} index.
 	 */
 	private void doLinkToHttpContinuation(int securityIndex) {
 
@@ -79,8 +78,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
-	 * Ensure can remove the
-	 * {@link WoofSecurityOutputToWoofHttpContinuationModel}.
+	 * Ensure can remove the {@link WoofSecurityOutputToWoofHttpContinuationModel}.
 	 */
 	public void testRemoveToHttpContinuation() {
 
@@ -90,7 +88,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 
 		// Remove the link
 		Change<WoofSecurityOutputToWoofHttpContinuationModel> change = this.operations
-				.removeSecurityOuputToHttpContinuation(link);
+				.removeSecurityOutputToHttpContinuation(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Security Output to HTTP Continuation", true);
@@ -114,8 +112,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofTemplateModel}.
 	 * 
-	 * @param securityIndex
-	 *            {@link WoofSecurityOutputModel} index.
+	 * @param securityIndex {@link WoofSecurityOutputModel} index.
 	 */
 	private void doLinkToTemplate(int securityIndex) {
 
@@ -141,10 +138,60 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 				.getWoofTemplate();
 
 		// Remove the link
-		Change<WoofSecurityOutputToWoofTemplateModel> change = this.operations.removeSecurityOuputToTemplate(link);
+		Change<WoofSecurityOutputToWoofTemplateModel> change = this.operations.removeSecurityOutputToTemplate(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Security Output to Template", true);
+	}
+
+	/**
+	 * Ensure can link to {@link WoofProcedureModel}.
+	 */
+	public void testLinkToProcedure() {
+		this.doLinkToProcedure(A);
+	}
+
+	/**
+	 * Ensure link overrides other links for
+	 * {@link WoofSecurityOutputToWoofProcedureModel}.
+	 */
+	public void testLinkOverrideToProcedure() {
+		this.doLinkToProcedure(B);
+	}
+
+	/**
+	 * Undertakes linking to a {@link WoofProcedureModel}.
+	 * 
+	 * @param securityIndex {@link WoofSecurityOutputModel} index.
+	 */
+	private void doLinkToProcedure(int securityIndex) {
+
+		// Obtain the items to link
+		WoofSecurityOutputModel securityOutput = this.model.getWoofSecurities().get(securityIndex).getOutputs().get(0);
+		WoofProcedureModel procedure = this.model.getWoofProcedures().get(1);
+
+		// Link the security output to procedure
+		Change<WoofSecurityOutputToWoofProcedureModel> change = this.operations
+				.linkSecurityOutputToProcedure(securityOutput, procedure);
+
+		// Validate change
+		this.assertChange(change, null, "Link Security Output to Procedure", true);
+	}
+
+	/**
+	 * Ensure can remove the {@link WoofSecurityOutputToWoofProcedureModel}.
+	 */
+	public void testRemoveToProcedure() {
+
+		// Obtain the link to remove
+		WoofSecurityOutputToWoofProcedureModel link = this.model.getWoofSecurities().get(B).getOutputs().get(0)
+				.getWoofProcedure();
+
+		// Remove the link
+		Change<WoofSecurityOutputToWoofProcedureModel> change = this.operations.removeSecurityOutputToProcedure(link);
+
+		// Validate change
+		this.assertChange(change, null, "Remove Security Output to Procedure", true);
 	}
 
 	/**
@@ -165,8 +212,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofSectionInputModel}.
 	 * 
-	 * @param securityIndex
-	 *            {@link WoofSecurityOutputModel} index.
+	 * @param securityIndex {@link WoofSecurityOutputModel} index.
 	 */
 	private void doLinkToSectionInput(int securityIndex) {
 
@@ -193,7 +239,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 
 		// Remove the link
 		Change<WoofSecurityOutputToWoofSectionInputModel> change = this.operations
-				.removeSecurityOuputToSectionInput(link);
+				.removeSecurityOutputToSectionInput(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Security Output to Section Input", true);
@@ -217,8 +263,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofSecurityModel}.
 	 * 
-	 * @param securityIndex
-	 *            {@link WoofSecurityOutputModel} index.
+	 * @param securityIndex {@link WoofSecurityOutputModel} index.
 	 */
 	private void doLinkToSecurity(int securityIndex) {
 
@@ -244,7 +289,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 				.getWoofSecurity();
 
 		// Remove the link
-		Change<WoofSecurityOutputToWoofSecurityModel> change = this.operations.removeSecurityOuputToSecurity(link);
+		Change<WoofSecurityOutputToWoofSecurityModel> change = this.operations.removeSecurityOutputToSecurity(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Security Output to Security", true);
@@ -268,8 +313,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofResourceModel}.
 	 * 
-	 * @param securityIndex
-	 *            {@link WoofSecurityOutputModel} index.
+	 * @param securityIndex {@link WoofSecurityOutputModel} index.
 	 */
 	private void doLinkToResource(int securityIndex) {
 
@@ -295,7 +339,7 @@ public class LinkSecurityOutputTest extends AbstractWoofChangesTestCase {
 				.getWoofResource();
 
 		// Remove the link
-		Change<WoofSecurityOutputToWoofResourceModel> change = this.operations.removeSecurityOuputToResource(link);
+		Change<WoofSecurityOutputToWoofResourceModel> change = this.operations.removeSecurityOutputToResource(link);
 
 		// Validate change
 		this.assertChange(change, null, "Remove Security Output to Resource", true);

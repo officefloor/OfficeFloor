@@ -54,8 +54,7 @@ public class LinkHttpInputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofTemplateModel}.
 	 * 
-	 * @param index
-	 *            {@link WoofHttpInputModel} index.
+	 * @param index {@link WoofHttpInputModel} index.
 	 */
 	private void doLinkToHttpContinuation(int index) {
 
@@ -105,8 +104,7 @@ public class LinkHttpInputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofTemplateModel}.
 	 * 
-	 * @param index
-	 *            {@link WoofHttpInputModel} index.
+	 * @param index {@link WoofHttpInputModel} index.
 	 */
 	private void doLinkToTemplate(int index) {
 
@@ -154,8 +152,7 @@ public class LinkHttpInputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofSectionInputModel}.
 	 * 
-	 * @param index
-	 *            {@link WoofHttpInputModel} index.
+	 * @param index {@link WoofHttpInputModel} index.
 	 */
 	private void doLinkToSectionInput(int index) {
 
@@ -187,6 +184,55 @@ public class LinkHttpInputTest extends AbstractWoofChangesTestCase {
 	}
 
 	/**
+	 * Ensure can link to {@link WoofProcedureModel}.
+	 */
+	public void testLinkToProcedure() {
+		this.doLinkToProcedure(A);
+	}
+
+	/**
+	 * Ensure link overrides other links for
+	 * {@link WoofHttpInputToWoofProcedureModel}.
+	 */
+	public void testLinkOverrideToProcedure() {
+		this.doLinkToProcedure(B);
+	}
+
+	/**
+	 * Undertakes linking to a {@link WoofProcedureModel}.
+	 * 
+	 * @param index {@link WoofHttpInputModel} index.
+	 */
+	private void doLinkToProcedure(int index) {
+
+		// Obtain the items to link
+		WoofHttpInputModel httpInput = this.model.getWoofHttpInputs().get(index);
+		WoofProcedureModel procedure = this.model.getWoofProcedures().get(1);
+
+		// Link to procedure
+		Change<WoofHttpInputToWoofProcedureModel> change = this.operations.linkHttpInputToProcedure(httpInput,
+				procedure);
+
+		// Validate change
+		this.assertChange(change, null, "Link HTTP Input to Procedure", true);
+	}
+
+	/**
+	 * Ensure can remove the {@link WoofHttpInputToWoofProcedureModel}.
+	 */
+	public void testRemoveToProcedure() {
+
+		// Obtain the link to remove
+		WoofHttpInputToWoofProcedureModel link = this.model.getWoofHttpInputs().get(B).getWoofProcedure();
+
+		// Remove the link
+		Change<WoofHttpInputToWoofProcedureModel> change = this.operations.removeHttpInputToProcedure(link);
+
+		// Validate change
+		this.assertChange(change, null, "Remove HTTP Input to Procedure", true);
+	}
+
+	/**
 	 * Ensure can link to {@link WoofSecurityModel}.
 	 */
 	public void testLinkToSecurity() {
@@ -204,8 +250,7 @@ public class LinkHttpInputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofSecurityModel}.
 	 * 
-	 * @param index
-	 *            {@link WoofHttpInputModel} index.
+	 * @param index {@link WoofHttpInputModel} index.
 	 */
 	private void doLinkToSecurity(int index) {
 
@@ -253,8 +298,7 @@ public class LinkHttpInputTest extends AbstractWoofChangesTestCase {
 	/**
 	 * Undertakes linking to a {@link WoofResourceModel}.
 	 * 
-	 * @param index
-	 *            {@link WoofHttpInputModel} index.
+	 * @param index {@link WoofHttpInputModel} index.
 	 */
 	private void doLinkToResource(int index) {
 

@@ -15,7 +15,7 @@ primitives.officefloor = {
 		{type: "float"},
 		{type: "double"}
 	],
-	nextFunction: {name: "use", argumentType: PrimitiveTypes.class.getName()}
+	nextArgumentType: PrimitiveTypes.class.getName()
 }
 
 
@@ -29,7 +29,7 @@ objects.officefloor = {
 		{type: "int[]"},
 		{type: JavaObject.class.getName() + "[]"}
 	],
-	nextFunction: {name: "use", argumentType: ObjectTypes.class.getName()}
+	nextArgumentType: ObjectTypes.class.getName()
 }
 
 
@@ -42,7 +42,7 @@ collections.officefloor = {
 		{type: "java.util.Set"},
 		{type: "java.util.Map"}
 	],
-	nextFunction: {name: "use", argumentType: CollectionTypes.class.getName()}
+	nextArgumentType: CollectionTypes.class.getName()
 }
 
 
@@ -57,9 +57,9 @@ variables.officefloor = {
 		{type: "char", nature: "val"},
 		{type: "java.lang.String", nature: "in"},
 		{type: JavaObject.class.getName(), nature: "out"},
-		{type: "java.lang.Integer", nature: "var"}
+		{type: "java.lang.Integer", qualifier: "qualified", nature: "var"}
 	],
-	nextFunction: {name: "use", argumentType: VariableTypes.class.getName()}
+	nextArgumentType: VariableTypes.class.getName()
 }
 
 
@@ -70,11 +70,11 @@ parameter.officefloor = {
 	parameters: [
 		{type: "java.lang.String", nature: "parameter"}
 	],
-	nextFunction: {name: "use", argumentType: ParameterTypes.class.getName()}
+	nextArgumentType: ParameterTypes.class.getName()
 }
 
 
-function serviceFlow(flowType, flow, flowWithCallback, flowWithParameterAndCallback, flowWithParameter, exception) {
+function serviceFlow(flowType, flow, flowWithCallback, flowWithParameter, flowWithParameterAndCallback) {
 	switch (flowType) {
 	case "nextFunction":
 		return; // do nothing so next function fires
@@ -89,8 +89,7 @@ function serviceFlow(flowType, flow, flowWithCallback, flowWithParameterAndCallb
 		});
 		return
 	case "exception":
-		exception.doFlow(new IOException(), null);
-		return;
+		throw new IOException()
 	default:
 		Assert.fail("Invalid flow type: " + flowType);
 	}
@@ -100,11 +99,9 @@ serviceFlow.officefloor = {
 		{type: "java.lang.String", nature: "parameter"},
 		{name: "flow", nature: "flow"},		
 		{name: "flowWithCallback", nature: "flow"},
-		{name: "flowWithParameterAndCallback", type: "java.lang.String", nature: "flow"},
 		{name: "flowWithParameter", type: "java.lang.String", nature: "flow"},
-		{name: "exception", nature: "flow"}
-	],
-	nextFunction: {name: "nextFunction"}
+		{name: "flowWithParameterAndCallback", type: "java.lang.String", nature: "flow"},
+	]
 }
 
 

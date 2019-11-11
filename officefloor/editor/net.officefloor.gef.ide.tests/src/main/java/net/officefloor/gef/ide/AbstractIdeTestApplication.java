@@ -17,7 +17,9 @@
  */
 package net.officefloor.gef.ide;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +48,7 @@ import net.officefloor.gef.bridge.ClassLoaderEnvironmentBridge;
 import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.configurer.ConfigurationBuilder;
 import net.officefloor.gef.configurer.Configurer;
+import net.officefloor.gef.editor.ChangeAdapter;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor.ViewManager;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
@@ -123,8 +126,14 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 	@Override
 	public void start(Stage stage) throws Exception {
 
+		// Obtain the class loader
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		if (classLoader == null) {
+			classLoader = this.getClass().getClassLoader();
+		}
+
 		// Setup environment
-		EnvironmentBridge envBridge = new ClassLoaderEnvironmentBridge(this.getClass().getClassLoader());
+		EnvironmentBridge envBridge = new ClassLoaderEnvironmentBridge(classLoader);
 
 		// Function to load configuration
 		LoadConfiguration loadConfiguration = (configurationFileName) -> {
@@ -152,6 +161,7 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 		Tab editorTab = new Tab("Editor");
 		folder.getTabs().add(editorTab);
 		AbstractAdaptedIdeEditor<R, RE, O> editor = this.createEditor(envBridge);
+		editor.initNonOsgiEnvironment();
 		editor.init(null, (injector) -> {
 			injector.injectMembers(this);
 			return this.domain;
@@ -174,6 +184,26 @@ public abstract class AbstractIdeTestApplication<R extends Model, RE extends Enu
 			editorContainer.getChildren().add(view);
 		});
 		this.domain.activate();
+
+		// Add listener for changes
+		editor.getConfigurableContext().getChangeExecutor().addChangeListener(new ChangeAdapter() {
+			@Override
+			public void postApply(Change<?> change) {
+
+				// Write out the change
+				viewManager.save();
+				System.out.println("=============== " + change.getChangeDescription() + " ===============");
+				BufferedReader reader = new BufferedReader(configurationItem.getReader());
+				String line;
+				try {
+					while ((line = reader.readLine()) != null) {
+						System.out.println(line);
+					}
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
 
 		// Handle replace model
 		BorderPane editorButtons = new BorderPane();
