@@ -4,7 +4,7 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<JWT Tutorial>>
+JWT Tutorial
 
   This tutorial demonstrates securing resources with JWT.
                                                                                                                           
@@ -16,7 +16,7 @@
 
 
 
-WoOF configuration
+*WoOF configuration
 
   The resource is configured with access restriction to prevent unauthorized access.  The claims object may also be injected for more specific security logic.
 
@@ -43,7 +43,8 @@ WoOF configuration
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/jwtresourcehttpserver/JwtRoles.java|ignoreDownloadError=false}
 
 
-JWKS
+
+*JWKS
 
   RFC 7517 defines a format for publishing keys.  The tutorial uses the default {{{/apidocs/net/officefloor/web/jwt/jwks/JwksSectionSource.html}JwksSectionSource}} that adheres to this format to retrieve keys.
   
@@ -54,7 +55,7 @@ JWKS
 
 
 
-Testing
+*Testing
 
   The following shows the ease of testing with JWT security:
   

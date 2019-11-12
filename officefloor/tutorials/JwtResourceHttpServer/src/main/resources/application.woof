@@ -1,7 +1,7 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/resource" secure="true" x="69" y="70">
-      <section name="Resource" input="secure"/>
+    <http-continuation path="/resource" secure="true" x="26" y="55">
+      <procedure name="secure"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
@@ -9,23 +9,27 @@
   <templates>
   </templates>
   <sections>
-    <section name="JwtChallenge" source="net.officefloor.web.jwt.DefaultJwtChallengeSectionSource" location="" x="801" y="76">
+    <section name="JwtChallenge" source="net.officefloor.web.jwt.DefaultJwtChallengeSectionSource" location="" x="651" y="47">
       <input name="EXPIRED_JWT" parameter-type=""/>
       <input name="INVALID_JWT" parameter-type=""/>
       <input name="NO_JWT" parameter-type=""/>
     </section>
-    <section name="Resource" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.jwtresourcehttpserver.SecuredResource" x="267" y="50">
-      <input name="secure" parameter-type=""/>
-    </section>
-    <section name="RetrieveKeys" source="net.officefloor.web.jwt.jwks.JwksSectionSource" location="" x="798" y="188">
+    <section name="RetrieveKeys" source="net.officefloor.web.jwt.jwks.JwksSectionSource" location="" x="648" y="159">
       <input name="retrieveJwtValidateKeys" parameter-type="net.officefloor.web.jwt.validate.JwtValidateKeyCollector"/>
     </section>
-    <section name="RetrieveRoles" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.jwtresourcehttpserver.JwtRoles" x="804" y="267">
-      <input name="retrieveRoles" parameter-type="net.officefloor.web.jwt.role.JwtRoleCollector"/>
-    </section>
   </sections>
+  <procedures>
+    <procedure name="retrieveRoles" resource="net.officefloor.tutorial.jwtresourcehttpserver.JwtRoles" source="Class" procedure="retrieveRoles" x="652" y="231">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="secure" resource="net.officefloor.tutorial.jwtresourcehttpserver.SecuredResource" source="Class" procedure="secure" x="167" y="52">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
   <securities>
-    <security name="JWT" source="net.officefloor.web.jwt.JwtHttpSecuritySource" timeout="5000" x="535" y="71">
+    <security name="JWT" source="net.officefloor.web.jwt.JwtHttpSecuritySource" timeout="5000" x="385" y="42">
       <property name="claims.class" value="net.officefloor.tutorial.jwtresourcehttpserver.Claims"/>
       <output name="EXPIRED_JWT" argument-type="java.lang.Void">
         <section name="JwtChallenge" input="EXPIRED_JWT"/>
@@ -40,7 +44,7 @@
         <section name="RetrieveKeys" input="retrieveJwtValidateKeys"/>
       </output>
       <output name="RETRIEVE_ROLES" argument-type="net.officefloor.web.jwt.role.JwtRoleCollector">
-        <section name="RetrieveRoles" input="retrieveRoles"/>
+        <procedure name="retrieveRoles"/>
       </output>
     </security>
   </securities>
