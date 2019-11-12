@@ -6,7 +6,9 @@ import net.officefloor.web.ObjectResponse;
 
 public class HelloLogic {
 
-	public void hello(@HttpPathParameter("name") String name, ObjectResponse<Message> response) {
+	public void hello(
+			@HttpPathParameter("name") String name, 
+			ObjectResponse<Message> response) {
 		response.send(new Message("Hello " + name));
 	}
 

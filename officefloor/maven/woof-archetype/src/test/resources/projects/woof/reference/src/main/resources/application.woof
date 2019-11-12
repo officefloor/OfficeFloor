@@ -11,7 +11,7 @@
   <sections>
   </sections>
   <procedures>
-    <procedure name="hello" resource="net.officefloor.test.HelloLogic" source="Class" procedure="hello" x="242" y="53">
+    <procedure name="hello" resource="your.domain.HelloLogic" source="Class" procedure="hello" x="242" y="53">
       <next argument-type="">
       </next>
     </procedure>

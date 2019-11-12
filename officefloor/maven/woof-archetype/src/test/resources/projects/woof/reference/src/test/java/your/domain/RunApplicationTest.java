@@ -1,4 +1,4 @@
-package net.officefloor.test;
+package your.domain;
 
 import org.junit.Rule;
 import org.junit.Test;

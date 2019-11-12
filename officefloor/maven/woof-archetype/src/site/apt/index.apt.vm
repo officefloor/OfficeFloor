@@ -26,43 +26,29 @@ My first OfficeFloor application
 
 %{snippet|file=${basedir}/src/test/resources/projects/woof/archetype.properties|ignoreDownloadError=false}
   
-  Once complete there should now be a directory created by the name of the artifactId.
-  
-  Change into the created directory and run the following to build the project:
-  
-+-----------------------------------------+
-
-
-    mvn install
-
-
-+-----------------------------------------+
-
 
 
 *Application code
 
-  Web on OfficeFloor (WoOF) is configured through the <<<application.woof>>> file.  Opening this file will provide the following graphical configuration for the application. See {{{../../install.html}install}} for adding the OfficeFloor plugin to your favourite IDE.
+  The application is configured through the <<<application.woof>>> file.  Opening this file will provide the following graphical configuration for this tutorial's application. See {{{../../install.html}install}} for adding the OfficeFloor plugin to your favourite IDE.
   
 [./images/woof-archetype-configuration.png] WoOF archetype project configuration.
 
-  The very simple configuration shows servicing a REST call.
+  The very simple configuration shows servicing a REST call.  This is a simple application with the following code:
   
-  This is a simple application with the following servicing code:
-  
-%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/main/java/net/officefloor/test/HelloLogic.java|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/main/java/your/domain/HelloLogic.java|ignoreDownloadError=false}
 
   Please see the {{{../../tutorials/index.html}other tutorials}} for explanation of the code and the further features available.
 
 
 
-*Unit testing the application
+*Testing the application
 
-  The following unit test shows the ease in which to start and stop the application for unit testing.
+  The following test shows the ease in which to start and stop the application for testing.
   
-%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/test/java/net/officefloor/test/RunApplicationTest.java|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/test/resources/projects/woof/reference/src/test/java/your/domain/RunApplicationTest.java|ignoreDownloadError=false}
 
-  As there are no socket overheads, the server is fast enough to be started and stopped for unit testing.
+  As there are no socket overheads, the server is fast enough to be started and stopped for unit testing.  See the {{{../../tutorials/TestHttpServer/index.html}testing tutorial}} for further means of testing.
 
 
 *Running the application
