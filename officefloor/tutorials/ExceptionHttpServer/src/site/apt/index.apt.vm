@@ -1,10 +1,10 @@
                                                -----------------------
                                              Exception Handling Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Exception Handling Tutorial>>
+Exception Handling Tutorial
 
   This tutorial demonstrates the ease in handling exceptions within an WoOF web application.
   
@@ -16,7 +16,7 @@
 
 
 
-Template throwing exception
+*Template throwing exception
 
   The following is the template:
   
@@ -32,29 +32,25 @@ Template throwing exception
   
 
 
-Exception handling configuration
+*Exception handling configuration
   
   The following shows the configuration for handling the above template exception.
   
 [./images/ExceptionHttpServer-configuration.png] ExceptionHttpServer screen shot.
 
-  The exception being handled is an <<<SQLException>>>.
-  
-  The exception is linked to the <<<Handler>>>.  The <<<Handler>>> is the following POJO.  It is added as a class section.
+  The exception is linked to be handled by the following:
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/exceptionhttpserver/ExceptionHandler.java|ignoreDownloadError=false}
-
-  As per the configuration above, the <<<handleSqlException>>> method is invoked to handle the <<<SQLException>>>.
   
-  Once the method completes it follows normal WoOF behaviour.  In other words, the <<<@Next>>> annotation is honoured resulting in the static error page being sent to the client.
+  Once the handling method completes it follows normal WoOF behaviour.  In other words, the static error page is then sent to the client.
 
 
 
-@Parameter
+*@Parameter
   
-  The <<<@Parameter>>> annotation identifies a value to be passed from the previous function.
+  The <<<@Parameter>>> annotation identifies a value to be passed from the previous method.
   
-  The handling of an exception is actually via OfficeFloor functionality.  The exception is caught by WoOF and passed as a parameter to the configured function.  In this case, the <<<handleSqlException(...)>>> method.
+  The handling of an exception is actually via OfficeFloor functionality.  The exception is caught by WoOF and passed as a parameter to the configured method.  In this case, the <<<handleSqlException(...)>>> method.
   
   The <<<@Parameter>>> annotation can also be used to obtain the value from the following:
   
@@ -64,28 +60,21 @@ Exception handling configuration
    
    * parameter to a <<<@FlowInterface>>> method
    
-  This functionality is useful and provided by the underlying OfficeFloor framework.  However, within WoOF the necessity to pass parameters is used typically only for exception handling.  The use of dependency injected objects is typically a better way to pass state between methods (i.e. {{{/apidocs/net/officefloor/web/HttpRequestStateful.html}HttpRequestStateful}}).
+  This functionality is useful and provided by the underlying OfficeFloor framework.  However, within WoOF the necessity to pass parameters is used typically only for exception handling.  The use of dependency injected objects is often a better way to pass state between methods (i.e. {{{/apidocs/net/officefloor/web/HttpRequestStateful.html}HttpRequestStateful}}).
 
 
 
-Resource
+*Resource
   
-  The remaining configuration indicates that the <<<TechnicalFault>>> should send the following static response.
+  The remaining configuration indicates that the following static response should be sent.
   
 %{snippet|file=${basedir}/src/main/resources/PUBLIC/Error.html|ignoreDownloadError=false}
 
-  It is possible to use the details of the exception within a template to generate a response.  For simplicity of this tutorial however a static resource is used.
-  
-  
-Template specific exception handling
-
-  For exceptions specific to the template, the template logic class may provide a method with a parameter of the exception type that is annotated with <<<@Parameter>>>.  WoOF will reflectively interrogate the template logic class for these methods and use them for exception handling before escalating to the <<<application.woof>>> configuration.
-  
-  In other words, the <<<handleSqlException(...)>>> method can be moved to the <<<TemplateLogic>>> class to provide specific handling of <<<SQLException>>>s occurring within the template.
+  It is possible to use the details of the exception within a template to generate a response.  However, for simplicity a static resource is used.
 
 
 
-Unit Test
+*Unit Test
 
   The following unit test shows the exception handling by listening in on <<<stderr>>> to ensure the exception message is written to it:
   

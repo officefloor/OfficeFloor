@@ -8,7 +8,9 @@ Configuring Flow Tutorial
 
   This tutorial demonstrates configuring flows within a WoOF application.
   
-  Flows are means to compose/link the execution of one method to another method.  The flow is represented as connections in the <<<application.woof>>>.  By having the graphical configuration, it makes 
+  Flows are means to compose/link the execution of one method to another method.  They are the continuations in Continuation Injection of {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}Inversion of Coupling Control}}.  We, however, find the term <<<flow>>> easier to understand (plus it's less typing).
+  
+  The flow is represented as connections in the <<<application.woof>>>.  By having the graphical configuration, it makes 
   
    * refactoring your applications significantly easier
   
@@ -20,7 +22,7 @@ Configuring Flow Tutorial
   
    * plus many other great reasons
   
-  <Just as a note>: while much of the web is now dominated by rich front-ends calling to back-end service APIs, we will focus on dynamic web pages.  This allows you something tangible to try out in browsers (rather than constructing REST calls).  See the {{{../index.html}other tutorials}} regarding building richer applications.
+  <Just as a note>: while much of the web is now dominated by rich front-ends calling to back-end service APIs, we will focus on dynamic web pages.  This allows you something tangible to try out in browsers (rather than constructing REST calls).  Plus, the use of flows between REST and dynamic web pages is similar.  See the {{{../index.html}other tutorials}} regarding building richer applications.
   
   Therefore, to simplify demonstrating flows, the following two web pages are used in this tutorial:
   
