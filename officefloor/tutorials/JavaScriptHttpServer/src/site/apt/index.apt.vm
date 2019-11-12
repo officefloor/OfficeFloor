@@ -4,11 +4,9 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<JavaScript Polyglot Tutorial>>
+JavaScript Polyglot Tutorial
 
   This tutorial demonstrates using JavaScript within WoOF.
-
-  It will use the {{{/apidocs/net/officefloor/polyglot/javascript/JavaScriptFunctionSectionSource.html}JavaScriptFunctionSectionSource}} to enable use of JavaScript functions.
 
   The use of JavaScript in this tutorial will be to validate the request.  This allows JavaScript in a single page application to be re-used on the server.  In other words, validation rules used to confirm correctly entered information can be re-used server side to ensure correct defensive checks regarding the data sent.  This avoids having to recode and maintain two separate sets of validation rules in different languages.
 
@@ -20,7 +18,7 @@
 
 
 
-Enable JavaScript
+*Enable JavaScript
 
   To enable using JavaScript, add the following:
   
@@ -28,14 +26,12 @@ Enable JavaScript
 
 
 
-JavaScript
+*JavaScript
 
   The JavaScript to validate the request is as follows:
   
 %{snippet|file=${basedir}/src/main/resources/net/officefloor/tutorial/javascripthttpserver/Validate.js|ignoreDownloadError=false}
 
-  The JavaScript is interpreted by the {{{http://www.graalvm.org}graal.js}} script engine and integrated into WoOF with the {{{/apidocs/net/officefloor/polyglot/javascript/JavaScriptFunctionSectionSource.html}JavaScriptFunctionSectionSource}}.
-  
   The representation of the JavaScript function is very similar to Java methods.
   
   However, due to lack of type information, the meta-data for the JavaScript function must be defined.  The <<<officefloor>>> object configured against the function provides this meta-data.  Please see the JavaScript {{{https://github.com/officefloor/OfficeFloor/blob/master/officefloor/polyglot/officepolyglot_javascript/src/test/resources/javascript/Functions.js}polyglot tests}} for the various configurations.
@@ -44,7 +40,7 @@ JavaScript
 
 
 
-Send Response
+*Send Response
 
   Now that the JavaScript has validated the request, the response can be sent:
   
@@ -54,7 +50,7 @@ Send Response
 
 
 
-Note on scripting and threading
+*Note on scripting and threading
   
   As the JavaScript script engine requires single threads, an engine is created per thread.
   
@@ -63,7 +59,8 @@ Note on scripting and threading
   Also, as a script engine is created per thread this can push up memory.  For validation (as per this tutorial), the engines run on the socket listener threads.  Therefore, there is only going to be an engine per CPU (following one socket listener thread per CPU).  However, be aware that using JavaScript later in the application when handled by other {{{/apidocs/net/officefloor/frame/api/team/Team.html}Team}} instances, that number of engines can increase causing additional memory.
 
 
-Testing
+
+*Testing
 
   The following shows the JavaScript validation rejecting an invalid request and allowing a valid request:
   

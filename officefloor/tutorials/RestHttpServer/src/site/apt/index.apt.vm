@@ -4,7 +4,7 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<REST Tutorial>>
+REST Tutorial
 
   This tutorial demonstrates REST with WoOF.
                                                                                                                           
@@ -18,7 +18,7 @@
 
 
 
-WoOF configuration
+*WoOF configuration
 
   To configure REST end-points with WoOF, use the following from the palette:
   
@@ -32,11 +32,11 @@ WoOF configuration
   
 [./images/RestHttpServer-configuration.png] RestHttpServer screen shot.
 
-  The implementation of the end-points is provided by connecting to other items.  In this case, a <<<Section>>> provides the implementation of the end points.
+  The handling of the end-points is provided by connecting them to other items.  In this case, <<<procedures>>> provide the implementation of the end points.
   
 
 
-Object parsing / responding
+*Object parsing / responding
 
   Similar to {{{../JavaScriptApp/index.html}AJAX with templates tutorial}} object parsing and responding is via the {{{/apidocs/net/officefloor/web/HttpObject.html}@HttpObject}} and {{{/apidocs/net/officefloor/web/ObjectResponse.html}ObjectResponse}}.  The below is the object used in this tutorial:
   
@@ -50,11 +50,11 @@ Object parsing / responding
 
   As the JSON data is loaded onto the object, it is passed to the <<<EntityManager>>> to store within the database.
   
-  Should there be invalid data, a <<<HttpException>>> can be thrown to specify the response status code and entity pay load.  In this case, a custom status code is used.  Note that status code may be specified.
+  Should there be invalid data, a {{{/apidocs/net/officefloor/server/http/HttpException.html}HttpException}} can be thrown to specify the response status code and entity pay load.  In this case, a custom status code is used.
 
 
 
-Path parameters
+*Path parameters
 
   Using <<<\{...\}>>> within the path specifies a path parameter.
   
@@ -66,16 +66,16 @@ Path parameters
   
 %{snippet|id=get|file=${basedir}/src/main/java/net/officefloor/tutorial/resthttpserver/RestLogic.java|ignoreDownloadError=false}
 
-  The <<<@HttpPathParameter>>> annotation on the parameter specifies the argument value to be the path parameter value.
+  The {{{/apidocs/net/officefloor/web/HttpPathParameter.html}@HttpPathParameter}} annotation specifies to load the path value.  See the other annotations in the package for extracting various aspects of the HTTP request.
 
 
-Testing
+*Testing
 
   The following shows the ease of testing the REST end points:
   
 %{snippet|id=calling|file=${basedir}/src/test/java/net/officefloor/tutorial/resthttpserver/RestHttpServerTest.java|ignoreDownloadError=false}
 
-  However, as the <<<Section>>> logic is a POJO (plain old java object), the logic can also be unit tested as follows:
+  However, as the logic is a POJO (plain old java object), the logic can also be unit tested as follows:
   
 %{snippet|id=pojo|file=${basedir}/src/test/java/net/officefloor/tutorial/resthttpserver/RestHttpServerTest.java|ignoreDownloadError=false}
 
