@@ -4,9 +4,25 @@
                      					        Daniel Sagenschneider
                                                -----------------------
 
-  <<Configuring Flow Tutorial>>
+Configuring Flow Tutorial
 
-  This tutorial demonstrates configuring flows within a WoOF application.  To simplify demonostrating this feature, the following two web pages are used in this tutorial:
+  This tutorial demonstrates configuring flows within a WoOF application.
+  
+  Flows are means to compose/link the execution of one method to another method.  The flow is represented as connections in the <<<application.woof>>>.  By having the graphical configuration, it makes 
+  
+   * refactoring your applications significantly easier
+  
+   * much easier for new developers to comprehend how the application works
+  
+   * easier to demonstrate to non-technical users why certain changes (refactorings) need to be made
+  
+   * easier to show why some changes are harder, while others easier
+  
+   * plus many other great reasons
+  
+  <Just as a note>: while much of the web is now dominated by rich front-ends calling to back-end service APIs, we will focus on dynamic web pages.  This allows you something tangible to try out in browsers (rather than constructing REST calls).  See the {{{../index.html}other tutorials}} regarding building richer applications.
+  
+  Therefore, to simplify demonstrating flows, the following two web pages are used in this tutorial:
   
 [./images/NavigateHttpServer-one-screenshot.png] NavigateHttpServer one screen shot.
 
@@ -32,7 +48,9 @@ application.woof
 
 %{snippet|file=${basedir}/src/main/resources/TemplateOne.woof.html|ignoreDownloadError=false}
 
-  The link is handled by the following method.  The annotation indicates the next function within the flow.
+  The link is handled by the following method.  This is because the method name matches the link name in the template.
+  
+  The annotation indicates the next function within the flow.
 
 %{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/navigatehttpserver/TemplateOne.java|ignoreDownloadError=false}
 
@@ -60,7 +78,7 @@ application.woof
    
    * an external flow from the template.  This is then linked by the <<<application.woof>>> configuration (as is the case above)
    
-  This allows programmatically determining which is the next function.  It is possible to add further methods to the interface to provide alternate navigation paths.  Navigation only occurs if the method is invoked.  Please also be aware that navigation to the page happens after the method has completed.
+  This allows programmatically determining which is the next function.  It is possible to add further methods to the interface to provide alternate navigation paths.  Navigation only occurs if the method is invoked.  Please also be aware that navigation to the page happens after the current method has completed.
   
   Both <<<@Next>>> and <<<@FlowInterface>>> may also be used in combination. <<<@Next>>> will provide the default next unless overridden by a method of a <<<@FlowInterface>>> being invoked.
 
