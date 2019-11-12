@@ -4,13 +4,17 @@
 					                             Daniel Sagenschneider
                                                -----------------------
 
-  <<Deploy Tutorial>>
+Deploy Tutorial
 
   This tutorial demonstrates the ease of deploying OfficeFloor applications.
 
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DeployHttpServer/${projectVersion}/DeployHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+* Deploying
   
-  To deploy an OfficeFloor application, add the following build configuration to your <pom.xml>:
+  To deploy an OfficeFloor application, add the following build configuration to your <<<pom.xml>>>:
   
 %{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
 
@@ -26,7 +30,7 @@
     java -jar DeployHttpServer-${project.version}.jar
 ---------------
 
-Docker
+*Docker
 
   As OfficeFloor applications can be run as a single command, it is easy to copy the jar file into a Docker image and run it.
   
@@ -47,6 +51,6 @@ CMD ["java", "-Dhttp.port=8080", "-jar", "server.jar"]
    * {{{/apidocs/net/officefloor/server/http/HttpServer.html}HttpServer}}
 
 
-Next
+*Next
 
   The {{{../HttpServletHttpServer/index.html}next tutorial}} looks at deploying to Servlet container (useful for PaaS cloud providers).

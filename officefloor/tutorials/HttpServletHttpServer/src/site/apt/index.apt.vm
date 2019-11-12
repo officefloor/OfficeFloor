@@ -1,10 +1,10 @@
                                                -----------------------
                                              Servlet Container Integration 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Servlet Container Tutorial>>
+Servlet Container Tutorial
 
   This tutorial demonstrates the ease of embedding a WoOF application into a Servlet container.  This is typically necessary to run with PaaS Cloud providers.
   
@@ -14,7 +14,7 @@
 
 
 
-Configuring for Servlet container
+*Configuring for Servlet container
 
   To run within a Servlet container, add the following dependency:
   
@@ -23,10 +23,12 @@ Configuring for Servlet container
   Then package the application as a <<<war>>> to enable being deployed to Servlet container.
   
   Note that WoOF will run as a <<<Filter>>> and only intercept requests it can handle.  This means existing Servlet functionality can work side by side with WoOF.  Very useful for phased migration of existing Servlet applications to WoOF.
+  
+  Also, WoOF does not do class path scanning.  Therefore, the start times are very fast.  This makes WoOF ideal for scale to zero PaaS deployments. See the {{{https://officefloor.appspot.com/}OfficeFloor Subscription App}} for an example (code also available {{https://github.com/officefloor/Subscription}}).
 
 
 
-Integration Test
+*Integration Test
 
   The following integration test has the project started as follows:
   
