@@ -3,16 +3,19 @@
   </http-continuations>
   <http-inputs>
     <http-input path="/increment" method="POST" secure="false" x="86" y="79">
-      <section name="Increment" input="increment"/>
+      <procedure name="increment"/>
     </http-input>
   </http-inputs>
   <templates>
   </templates>
   <sections>
-    <section name="Increment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.httpservlet.Increment" x="371" y="58">
-      <input name="increment" parameter-type=""/>
-    </section>
   </sections>
+  <procedures>
+    <procedure name="increment" resource="net.officefloor.tutorial.httpservlet.Increment" source="Class" procedure="increment" x="329" y="73">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
   <securities>
   </securities>
   <governances>
