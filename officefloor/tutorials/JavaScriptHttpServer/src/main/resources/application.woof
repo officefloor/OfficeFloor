@@ -1,7 +1,7 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/" secure="false" x="52" y="64">
-      <procedure name="Validate" />
+    <http-continuation path="/" secure="false" x="27" y="46">
+      <procedure name="validate"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
@@ -11,12 +11,15 @@
   <sections>
   </sections>
   <procedures>
-    <procedure name="Respond" resource="net.officefloor.tutorial.javascripthttpserver.ResponseLogic" source="Class" procedure="send" x="378" y="47" />
-    <procedure name="Validate" resource="net/officefloor/tutorial/javascripthttpserver/Validate.js" source="JavaScript" procedure="validate" x="145" y="48">
-      <next>
-      	<procedure name="Respond" />
+    <procedure name="send" resource="net.officefloor.tutorial.javascripthttpserver.ResponseLogic" source="Class" procedure="send" x="292" y="40">
+      <next argument-type="">
       </next>
-    </procedure>  	
+    </procedure>
+    <procedure name="validate" resource="net/officefloor/tutorial/javascripthttpserver/Validate.js" source="JavaScript" procedure="validate" x="117" y="41">
+      <next argument-type="">
+        <procedure name="send"/>
+      </next>
+    </procedure>
   </procedures>
   <securities>
   </securities>
