@@ -1,5 +1,6 @@
 package net.officefloor.tutorial.corshttpserver;
 
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.HttpResponseHeaders;
@@ -21,6 +22,7 @@ public class Cors {
 
 	public static HttpHeaderValue ALL = new HttpHeaderValue("*");
 
+	@Next("service")
 	public static void cors(ServerHttpConnection connection) {
 		HttpResponseHeaders headers = connection.getResponse().getHeaders();
 		headers.addHeader(ALLOW_ORIGIN, ALL);
