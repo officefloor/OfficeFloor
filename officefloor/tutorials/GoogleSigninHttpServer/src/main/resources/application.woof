@@ -3,16 +3,19 @@
   </http-continuations>
   <http-inputs>
     <http-input path="/login" method="POST" secure="false" x="60" y="66">
-      <section name="Login" input="login"/>
+      <procedure name="login"/>
     </http-input>
   </http-inputs>
   <templates>
   </templates>
   <sections>
-    <section name="Login" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.googlesigninhttpserver.LoginLogic" x="232" y="48">
-      <input name="login" parameter-type=""/>
-    </section>
   </sections>
+  <procedures>
+    <procedure name="login" resource="net.officefloor.tutorial.googlesigninhttpserver.LoginLogic" source="Class" procedure="login" x="223" y="63">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
   <securities>
   </securities>
   <governances>
