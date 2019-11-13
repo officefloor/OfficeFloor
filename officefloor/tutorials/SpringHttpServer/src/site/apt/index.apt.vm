@@ -4,7 +4,7 @@
                                                 Daniel Sagenschneider
                                                -----------------------
 
-  <<Spring HTTP Server Tutorial>>
+Spring HTTP Server Tutorial
 
   This tutorial demonstrates wiring Spring beans into an OfficeFloor application.
 
@@ -15,16 +15,18 @@
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/SpringHttpServer/${projectVersion}/SpringHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
 
-Spring
 
-  In terms of Inversion of Control, Spring focuses heavily on Dependency Injection.  This makes Spring a very useful library of pre-built objects.  In actuality Spring has provided great abstract APIs across various different vendors for various key services (e.g. {{{http://spring.io/projects/spring-data}Spring Data}}, {{{http://projects.spring.io/spring-cloud}Spring Cloud}}, {{{https://cloud.spring.io/spring-cloud-stream/}Spring Cloud Stream}} ).
+*Spring
 
-  However, Spring is still primarily only a Dependency Injection engine.  It does not provide Continuation Injection nor Thread Injection for modelling functionality of your applications.
+  In terms of Inversion of Control, Spring focuses heavily on Dependency Injection.  This makes Spring a very useful library of pre-built objects.  In actuality Spring has provided great abstract APIs across various different vendors for various key services (e.g. {{{http://spring.io/projects/spring-data}Spring Data}}).
+
+  However, Spring is still primarily only a Dependency Injection engine.  It does not provide Continuation Injection nor Thread Injection for modeling functionality and execution of your applications.
 
   Therefore, rather than re-invent the wheel for these great APIs, OfficeFloor enables integrating Spring in as a {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} (supplier of objects for dependency injection).
 
 
-Supplier
+
+*Supplier
 
   Similar to suppliers providing items to a business, a {{{/apidocs/net/officefloor/compile/spi/supplier/source/SupplierSource.html}SupplierSource}} supplies objects to OfficeFloor dependency injection.  This is a convenient means for Dependency Injection frameworks, such as Spring, to provide their objects to OfficeFloor.
 
@@ -54,7 +56,7 @@ Supplier
 
 
 
-Spring depending on OfficeFloor
+*Spring depending on OfficeFloor
 
   In the previous section, the Spring bean required a dependency to be injected.  This dependency is provided by an OfficeFloor {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}}.  This enables:
 
@@ -76,10 +78,11 @@ Spring depending on OfficeFloor
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/springhttpserver/Other.java|ignoreDownloadError=false}
 
-  Typically, Spring depending on OfficeFloor objects should be used sparingly.  In most cases, dependency should be single direction of OfficeFloor depending on Spring beans.  However, the above reverse in dependency is available for more complex situations (e.g. staged migration of Spring beans into {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances to avoid <big bang> changes).
+  Typically, Spring depending on OfficeFloor objects should be used sparingly.  In most cases, dependency should be single direction of OfficeFloor depending on Spring beans.  However, the above reverse in dependency direction is available for more complex situations (e.g. staged migration of Spring beans into {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} instances to avoid <big bang> changes).
 
 
-Building the application
+
+*Building the application
 
   Due to Spring Boot generating meta-data about the application to run, the following should be used to build the executable jar:
   
@@ -88,7 +91,7 @@ Building the application
   This ensures Spring Boot can generate the necessary meta-data, while still allowing OfficeFloor to manage the execution.  It also keeps the original jar (via the classifier) to allow using as a dependency in larger applications.
 
 
-Unit Test
+*Unit Test
 
   Suppliers are integrated into OfficeFloor, so the application can be tested just like any other WoOF application:
   

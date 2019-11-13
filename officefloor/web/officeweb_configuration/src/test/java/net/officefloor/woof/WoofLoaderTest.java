@@ -156,20 +156,20 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.recordReturn(procedurePropertiesA, procedurePropertiesA.addProperty("name.TWO"), procedurePropertyTwo);
 		procedurePropertyTwo.setValue("value.TWO");
 		final OfficeSection procedureA = this.createMock(OfficeSection.class);
-		this.recordReturn(this.procedure, this.procedure.addProcedure("net.example.ExampleProcedure", "Class",
-				"procedure", true, procedurePropertiesA), procedureA);
+		this.recordReturn(this.procedure, this.procedure.addProcedure("PROCEDURE_A", "net.example.ExampleProcedure",
+				"Class", "procedure", true, procedurePropertiesA), procedureA);
 
 		// Remaining procedures
 		OfficeSection procedureB = null;
-		for (String procedureSource : new String[] { "net.example.SecondProcedure", "net.example.ThirdProcedure" }) {
+		for (String procedureSuffix : new String[] { "B", "C" }) {
 			final PropertyList procedureProperties = this.createMock(PropertyList.class);
 			this.recordReturn(this.extensionContext, this.extensionContext.createPropertyList(), procedureProperties);
 			final OfficeSection procedure = this.createMock(OfficeSection.class);
 			if (procedureB == null) {
-				procedureB = procedure;
+				procedureB = procedure; // first is procedure B
 			}
-			this.recordReturn(this.procedure,
-					this.procedure.addProcedure(procedureSource, "JavaScript", "function", false, procedureProperties),
+			this.recordReturn(this.procedure, this.procedure.addProcedure("PROCEDURE_" + procedureSuffix,
+					"net.example.Procedure" + procedureSuffix, "JavaScript", "function", false, procedureProperties),
 					procedure);
 		}
 

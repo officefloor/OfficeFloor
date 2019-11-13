@@ -105,7 +105,7 @@ public class ScalaProcedureTest extends AbstractPolyglotProcedureTest {
 			OfficeArchitect officeArchitect = context.getOfficeArchitect();
 			ProcedureArchitect<OfficeSection> procedureArchitect = ProcedureEmployer
 					.employProcedureArchitect(officeArchitect, context.getOfficeSourceContext());
-			OfficeSection procedure = procedureArchitect.addProcedure(ScalaRequestService.class.getName(),
+			OfficeSection procedure = procedureArchitect.addProcedure("service", ScalaRequestService.class.getName(),
 					ClassProcedureSource.SOURCE_NAME, "service", false, new PropertyListImpl());
 			officeArchitect.link(context.getWebArchitect().getHttpInput(false, "/").getInput(),
 					procedure.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));

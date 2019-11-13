@@ -790,6 +790,7 @@ public class WoofLoaderImpl implements WoofLoader {
 			for (WoofProcedureModel procedureModel : woof.getWoofProcedures()) {
 
 				// Obtain the procedure details
+				String sectionName = procedureModel.getWoofProcedureName();
 				String resource = procedureModel.getResource();
 				String sourceName = procedureModel.getSourceName();
 				String procedureName = procedureModel.getProcedureName();
@@ -808,8 +809,8 @@ public class WoofLoaderImpl implements WoofLoader {
 				}
 
 				// Configure the procedure
-				OfficeSection procedure = procedureArchitect.addProcedure(resource, sourceName, procedureName, isNext,
-						properties);
+				OfficeSection procedure = procedureArchitect.addProcedure(sectionName, resource, sourceName,
+						procedureName, isNext, properties);
 
 				// Maintain reference to procedure by name
 				String woofProcedureName = procedureModel.getWoofProcedureName();

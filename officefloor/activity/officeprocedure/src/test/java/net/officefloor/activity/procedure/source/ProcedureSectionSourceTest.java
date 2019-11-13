@@ -34,7 +34,7 @@ public class ProcedureSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		SectionLoaderUtil.validateSpecification(ProcedureSectionSource.class,
-				ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, "Class",
+				ProcedureManagedFunctionSource.RESOURCE_PROPERTY_NAME, "Class",
 				ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, "Source");
 	}
 

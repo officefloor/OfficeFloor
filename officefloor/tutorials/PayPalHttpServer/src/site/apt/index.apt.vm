@@ -4,7 +4,7 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<PayPal Tutorial>>
+PayPal Tutorial
 
   This tutorial demonstrates the ease of integrating PayPal to take payments.
 
@@ -12,7 +12,7 @@
 
 
 
-Server side PayPal
+*Server side PayPal
 
   The latest PayPal can be invoked completely from the client side.  This is very convenient, however still requires verifying the funds were appropriately captured on server side.
   
@@ -34,7 +34,7 @@ Server side PayPal
   
   
   
-Configure PayPal
+*Configure PayPal
 
   The {{{/apidocs/net/officefloor/pay/paypal/PayPalHttpClientManagedObjectSource.html}PayPalHttpClientManagedObjectSource}} depends on a {{{/apidocs/net/officefloor/pay/paypal/PayPalConfigurationRepository.html}PayPalConfigurationRepository}} to provide the PayPal configuration.  This enables different implementations to pull from configuration, database, etc.
   
@@ -48,7 +48,7 @@ Configure PayPal
   
 
 
-Testing
+*Testing
 
   The {{{/apidocs/net/officefloor/pay/paypal/mock/PayPalRule.html}PayPalRule}} provides ability to mock PayPal for testing.  This provides the following ease of testing:
   

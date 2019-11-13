@@ -48,9 +48,9 @@ import net.officefloor.plugin.section.clazz.SectionClassManagedFunctionSource;
 public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSource {
 
 	/**
-	 * {@link Property} name providing the {@link Class} name.
+	 * {@link Property} name providing the resource.
 	 */
-	public static final String RESOURCE_NAME_PROPERTY_NAME = "resource";
+	public static final String RESOURCE_PROPERTY_NAME = "resource";
 
 	/**
 	 * {@link Property} name providing the source to create the procedure.
@@ -68,7 +68,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(RESOURCE_NAME_PROPERTY_NAME, "Class");
+		context.addProperty(RESOURCE_PROPERTY_NAME, "Class");
 		context.addProperty(SOURCE_NAME_PROPERTY_NAME, "Source");
 		context.addProperty(PROCEDURE_PROPERTY_NAME, "Procedure");
 	}
@@ -78,7 +78,7 @@ public class ProcedureManagedFunctionSource extends AbstractManagedFunctionSourc
 			ManagedFunctionSourceContext context) throws Exception {
 
 		// Obtain the procedure details
-		String resource = context.getProperty(RESOURCE_NAME_PROPERTY_NAME);
+		String resource = context.getProperty(RESOURCE_PROPERTY_NAME);
 		String serviceName = context.getProperty(SOURCE_NAME_PROPERTY_NAME);
 		String procedureName = context.getProperty(PROCEDURE_PROPERTY_NAME);
 
