@@ -1,10 +1,10 @@
 <woof>
   <http-continuations>
     <http-continuation path="/reactive" secure="false" x="28" y="58">
-      <section name="Reactive" input="reactive"/>
+      <procedure name="reactive"/>
     </http-continuation>
     <http-continuation path="/server" secure="false" x="35" y="140">
-      <section name="Server" input="service"/>
+      <procedure name="service"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
@@ -12,13 +12,17 @@
   <templates>
   </templates>
   <sections>
-    <section name="Reactive" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.reactivehttpserver.ReactiveLogic" x="221" y="37">
-      <input name="reactive" parameter-type=""/>
-    </section>
-    <section name="Server" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.reactivehttpserver.ServerLogic" x="225" y="120">
-      <input name="service" parameter-type=""/>
-    </section>
   </sections>
+  <procedures>
+    <procedure name="reactive" resource="net.officefloor.tutorial.reactivehttpserver.ReactiveLogic" source="Class" procedure="reactive" x="176" y="54">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="service" resource="net.officefloor.tutorial.reactivehttpserver.ServerLogic" source="Class" procedure="service" x="177" y="135">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
   <securities>
   </securities>
   <governances>
