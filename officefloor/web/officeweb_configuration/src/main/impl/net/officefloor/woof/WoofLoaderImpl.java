@@ -422,6 +422,15 @@ public class WoofLoaderImpl implements WoofLoader {
 						section.addGovernance(governance);
 					}
 				}
+
+				// Govern the procedures within the governance area
+				for (WoofProcedureModel procedureModel : woof.getWoofProcedures()) {
+					if (this.isWithinGovernanceArea(procedureModel.getX(), procedureModel.getY(), area)) {
+						// Procedure within governance area so govern
+						OfficeSection procedure = procedures.procedures.get(procedureModel.getWoofProcedureName());
+						procedure.addGovernance(governance);
+					}
+				}
 			}
 		}
 	}

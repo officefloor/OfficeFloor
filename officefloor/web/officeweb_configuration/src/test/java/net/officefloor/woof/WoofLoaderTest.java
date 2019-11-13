@@ -280,7 +280,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		governanceA.addProperty("name.b", "value.b");
 		governanceA.enableAutoWireExtensions();
 		templateA.record((template) -> template.addGovernance(governanceA));
-		sectionA.addGovernance(governanceA);
+		sectionA.addGovernance(governanceA);		
+		procedureA.addGovernance(governanceA);
 		final OfficeGovernance governanceB = this.createMock(OfficeGovernance.class);
 		this.recordReturn(this.office, this.office.addOfficeGovernance("GOVERNANCE_B", "CLASS"), governanceB);
 		governanceB.enableAutoWireExtensions();

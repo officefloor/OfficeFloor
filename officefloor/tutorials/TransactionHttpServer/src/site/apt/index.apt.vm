@@ -52,19 +52,21 @@ Transaction HTTP Server Tutorial
   
 
 
-*Unit Test
+*Application logic
 
   The transaction logic is as follows:
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/transactionhttpserver/TransactionLogic.java}
 
   This will attempt to write two posts to the database.  As per the configuration, the exception handled is either within the transaction (committing) or outside (roll back).
-  
-  Note that this is demonstrating the impact of exception handling on transaction (governance) scope.  Completion of flows without exceptions will commit the transaction.
-  
+    
   The application also has the following {{{/apidocs/net/officefloor/frame/api/team/Team.html}Team}} configuration to demonstrate Spring Data transaction working across threads.
   
 %{snippet|file=${basedir}/src/main/resources/application.teams}
+
+
+
+*Unit Test
   
   The following unit test demonstrates committing the transaction (as exception handled within transaction). 
 
@@ -72,7 +74,7 @@ Transaction HTTP Server Tutorial
 
   The following unit test demonstrates rolling back the transaction (as exception handled outside transaction scope).
 
-%{snippet|id=commit|file=${basedir}/src/test/java/net/officefloor/tutorial/transactionhttpserver/TransactionHttpServerTest.java}
+%{snippet|id=rollback|file=${basedir}/src/test/java/net/officefloor/tutorial/transactionhttpserver/TransactionHttpServerTest.java}
 
 
 

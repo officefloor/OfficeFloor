@@ -22,9 +22,14 @@
   <procedures>
     <procedure name="commit" resource="net.officefloor.tutorial.transactionhttpserver.TransactionLogic" source="Class" procedure="commit" x="287" y="235">
       <next argument-type="java.io.EOFException">
+        <procedure name="fail"/>
       </next>
     </procedure>
     <procedure name="create" resource="net.officefloor.tutorial.transactionhttpserver.PostLogic" source="Class" procedure="create" x="194" y="68">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="fail" resource="net.officefloor.tutorial.transactionhttpserver.TransactionLogic" source="Class" procedure="fail" x="457" y="254">
       <next argument-type="">
       </next>
     </procedure>
@@ -42,6 +47,7 @@
     </procedure>
     <procedure name="rollback" resource="net.officefloor.tutorial.transactionhttpserver.TransactionLogic" source="Class" procedure="rollback" x="287" y="283">
       <next argument-type="java.lang.IllegalArgumentException">
+        <procedure name="fail"/>
       </next>
     </procedure>
   </procedures>
