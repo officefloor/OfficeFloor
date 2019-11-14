@@ -4,7 +4,7 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<Objectify Tutorial>>
+Objectify Tutorial
 
   This tutorial demonstrates using {{{https://github.com/objectify/objectify}Objectify}} to read/write data from the Google App Engine DataStore.
                                                                                                                           
@@ -20,7 +20,7 @@
 
 
 
-WoOF configuration
+*WoOF configuration
 
   The configuration of the end points are as follows:
   
@@ -37,13 +37,14 @@ WoOF configuration
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/objectifyhttpserver/Post.java|ignoreDownloadError=false}
 
 
-Configuring Objectify
+
+*Configuring Objectify
 
   Objectify is configured in <<<application.objects>>> as follows:
   
 %{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
 
-  For performance reasons, the entities are not dynamically discovered.  As Google App Engine allows scaling to zero instances, the application must be brought up quickly to scale up to one to service the first request.  Having to inspect all jars and classes for entities is typically too slow.  Therefore, Objectify requires registering all entities with it manually.
+  For performance reasons, the entities are not dynamically discovered.  As Google App Engine allows scaling to zero instances, the application must be brought up quickly to service the first request.  Having to inspect all jars and classes for entities is typically too slow.  Therefore, Objectify requires registering all entities with it manually.
   
   Therefore, to make the entities available to Objectify, the following is the above configured class:
   
@@ -53,7 +54,7 @@ Configuring Objectify
     
 
 
-Testing
+*Testing
 
   To make local testing easier, the {{{/apidocs/net/officefloor/nosql/objectify/mock/ObjectifyRule.html}ObjectifyRule}} automatically sets up a local data store for testing.
   

@@ -19,16 +19,15 @@ public class ObjectifyLogic {
 		objectify.save().entities(post).now();
 	}
 
-	public void retrieveAllPosts(Objectify objectify, ObjectResponse<List<Post>> response) {
-		List<Post> posts = objectify.load().type(Post.class).list();
-		response.send(posts);
-	}
-
 	public void retrievePost(@HttpPathParameter("id") String identifier, Objectify objectify,
 			ObjectResponse<Post> response) {
 		Post post = objectify.load().type(Post.class).id(Long.parseLong(identifier)).now();
 		response.send(post);
 	}
 
+	public void retrieveAllPosts(Objectify objectify, ObjectResponse<List<Post>> response) {
+		List<Post> posts = objectify.load().type(Post.class).list();
+		response.send(posts);
+	}
 }
 // END SNIPPET: tutorial
