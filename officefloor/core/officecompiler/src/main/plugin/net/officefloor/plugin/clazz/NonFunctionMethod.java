@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 
 /**
  * Enables flagging a <code>public</code> method of a {@link Class} to not be

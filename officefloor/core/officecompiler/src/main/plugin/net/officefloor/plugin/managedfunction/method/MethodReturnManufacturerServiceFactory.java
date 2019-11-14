@@ -22,9 +22,6 @@ import net.officefloor.frame.api.source.ServiceFactory;
 /**
  * {@link ServiceFactory} for the {@link MethodReturnManufacturer}.
  * 
- * @param <R> {@link MethodFunction} return type.
- * @param <T> Translated type.
- * 
  * @author Daniel Sagenschneider
  */
 public interface MethodReturnManufacturerServiceFactory extends ServiceFactory<MethodReturnManufacturer<?, ?>> {

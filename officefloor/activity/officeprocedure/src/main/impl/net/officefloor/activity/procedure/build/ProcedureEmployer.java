@@ -68,7 +68,7 @@ public class ProcedureEmployer {
 	 * @param clazz   {@link Class} to extract {@link Procedure} names.
 	 * @param exclude {@link Predicate} to filter out {@link Method} instances. May
 	 *                be <code>null</code> to include all.
-	 * @return {@link Procedure} names.
+	 * @param handler Handler for the candidate {@link Method}.
 	 */
 	public static void listMethods(Class<?> clazz, Predicate<Method> exclude, Consumer<Method> handler) {
 

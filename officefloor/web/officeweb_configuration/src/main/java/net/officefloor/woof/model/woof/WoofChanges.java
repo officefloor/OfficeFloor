@@ -24,6 +24,7 @@ import java.util.Set;
 import org.apache.tika.metadata.Property.PropertyType;
 
 import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.ProcedureFlowType;
 import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.compile.governance.GovernanceType;
 import net.officefloor.compile.properties.PropertyList;
@@ -282,7 +283,7 @@ public interface WoofChanges {
 	 * @param properties        {@link PropertyList}.
 	 * @param procedureType     {@link PropertyType} for the
 	 *                          {@link WoofProcedureModel}.
-	 * @param outputNameMapping Mapping of {@link ProcedureOutputType} name to
+	 * @param outputNameMapping Mapping of {@link ProcedureFlowType} name to
 	 *                          existing {@link WoofProcedureOutputModel} name to
 	 *                          allow maintaining links to other items within the
 	 *                          {@link WoofModel}.
@@ -890,7 +891,7 @@ public interface WoofChanges {
 	 * {@link WoofSectionInputModel}.
 	 * 
 	 * @param procedureNext  {@link WoofProcedureNextModel}.
-	 * @param procedureInput {@link WoofSectionInputModel}.
+	 * @param sectionInput {@link WoofSectionInputModel}.
 	 * @return {@link Change} to make the link.
 	 */
 	Change<WoofProcedureNextToWoofSectionInputModel> linkProcedureNextToSectionInput(
@@ -1006,7 +1007,7 @@ public interface WoofChanges {
 	 * {@link WoofSectionInputModel}.
 	 * 
 	 * @param procedureOutput {@link WoofProcedureOutputModel}.
-	 * @param procedureInput  {@link WoofSectionInputModel}.
+	 * @param sectionInput  {@link WoofSectionInputModel}.
 	 * @return {@link Change} to make the link.
 	 */
 	Change<WoofProcedureOutputToWoofSectionInputModel> linkProcedureOutputToSectionInput(
