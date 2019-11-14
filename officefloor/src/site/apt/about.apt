@@ -18,13 +18,13 @@ OfficeFloor
 
   {{{http://doi.acm.org/10.1145/2739011.2739013}http://doi.acm.org/10.1145/2739011.2739013}}
 
-  and has given rise to a more complete "inversion of control":
+  and has given rise to a more complete "inversion of control" (or more appropriately <<<Inversion of Coupling Control>>>):
   
 ---
-        Inversion of Control = Dependency Injection + Continuation Injection + Thread Injection
+        Inversion of Coupling Control = Dependency Injection + Continuation Injection + Thread Injection
 ---
 
-  A summary of the paper is available {{{./inversion-of-control.html}here}}.
+  A summary of the paper is available {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}here}}.
   
   To see how these concepts have made software development easier, please try out the {{{./tutorials/index.html}tutorials}}.
   

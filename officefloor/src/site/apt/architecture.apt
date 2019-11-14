@@ -1,4 +1,4 @@
-                                       ------------------
+                       ------------------
 				         Architecture
 				       ------------------
 				      Daniel Sagenschneider
@@ -26,7 +26,7 @@ OfficeFloor Architecture
 
 {Graphical Editors}
 
-  The OfficeFloor graphical editors are plugins to the Eclipse IDE.  They utilise the OfficeCompiler to compile the Sources into 'types'.  These 'types' are then graphically configured together by the Eclipse Plug-ins to make up the OfficeFloor configuration.
+  The OfficeFloor graphical editors are plugins to the IDE.  They utilise the OfficeCompiler to compile the Sources into 'types'.  These 'types' are then graphically configured together by the IDE plug-ins to make up the OfficeFloor configuration.
 
   
 
@@ -38,7 +38,7 @@ OfficeFloor Architecture
 
 {OfficeFrame}
 
-  The OfficeFrame is the core of the {{{./inversion-of-control.html}Inversion of Control}} that gives OfficeFloor its flexibility and performance.  It simplifies the functionality of an application into functions where each type of function is executed by a particular Team.  These functions then can depend on other objects and functions for their execution.
+  The OfficeFrame is the core of the {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}Inversion of Coupling Control}} that gives OfficeFloor its flexibility and performance.  It simplifies the functionality of an application into functions where each type of function is executed by a particular Team.  These functions then can depend on other objects and functions for their execution.
 
 
   
@@ -114,7 +114,5 @@ OfficeFloor Architecture
 * Compiling to types
 
   To aid in rapid application development (RAD), graphical editors are available in the IDEs to reduce time spent configuring.  To allow the graphical editors to validate the connections between Sources, the graphical editors require the type information of the Sources.  OfficeCompiler provides this functionality so that the graphical editors can focus on graphical editing.
-  
-  See {{{./graphical-configuration.html}Graphical Configuration}} for further details.
 
    

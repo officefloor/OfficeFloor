@@ -21,8 +21,7 @@
 		<site>
 			<id>repo.officefloor.sf.net</id>
 			<name>Site on SourceForge - http://www.officefloor.net</name>
-			<url>scp://sagenschneider@shell.sourceforge.net:/home/project-web/officefloor/htdocs
-			</url>
+			<url>scp://sagenschneider@shell.sourceforge.net:/home/project-web/officefloor/htdocs</url>
 		</site>
 	</distributionManagement>
 	<repositories>
@@ -1079,6 +1078,7 @@
 						<excludedLink>//dl.acm.org/**</excludedLink>
 						<excludedLink>http://dl.acm.org/**</excludedLink>
 						<excludedLink>https://dl.acm.org/**</excludedLink>
+						<excludedLink>http://localhost:7878/hi/World</excludedLink>
 						<excludedLink>#</excludedLink>
 					</excludedLinks>
 				</configuration>

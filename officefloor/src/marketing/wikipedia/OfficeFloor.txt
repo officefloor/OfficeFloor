@@ -8,7 +8,7 @@ TODO: link from Inversion of Control
 | name                   = OfficeFloor
 | logo                   = 
 | screenshot             = 
-| caption                = True inversion of control for building simple static to complex real-time web applications that are build once run anywhere - even with Cloud Computing
+| caption                = Inversion of Coupling Control for building simple static to complex real-time web applications that are build once run anywhere - even with Cloud Computing
 | developer              = 
 | latest release version = 2.3.0
 | latest release date    = {{release date|2012|07|07}}
@@ -20,11 +20,11 @@ TODO: link from Inversion of Control
 | website                = http://www.officefloor.net
 }}
 
-'''OfficeFloor''' is an [[application framework]] that combines concepts from [[inversion of control]] with stages inspired by the [[staged event-driven architecture]].
+'''OfficeFloor''' is an [[application framework]] that combines concepts from [[Inversion of Coupling Control]] with stages inspired by the [[staged event-driven architecture]].
 
 The framework
 * segments to the application functionality into jobs
-* each job defines its dependencies for dependency injection (via [[inversion of control]])
+* each job defines its dependencies for dependency injection (via [[Inversion of Coupling Control]])
 * jobs are executed by particular thread pools (stage) based on their dependencies
 
 == Example ==
