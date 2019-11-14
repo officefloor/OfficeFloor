@@ -1,10 +1,10 @@
                                                -----------------------
                                             Template Inheritance Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Template Inheritance Tutorial>>
+Template Inheritance Tutorial
   
   This tutorial demonstrates the inheritance of both HTML and logic for templates.
       
@@ -20,7 +20,7 @@
 
 
 
-Template Inheritance Configuration
+*Template Inheritance Configuration
 
   The below shows the template inheritance configuration.
 
@@ -28,7 +28,7 @@ Template Inheritance Configuration
 
 
 
-Parent
+*Parent
 
   For the parent that does not inherit from a template, it is just a normal template.  It however does specify sections for overriding when inherited from.  The HTML for the parent page is as follows:
 
@@ -44,7 +44,7 @@ Parent
 
 
 
-\<!-- \{:section\} --\>
+*\<!-- \{:section\} --\>
 
   Template inheritance occurs by the child template overriding sections within the parent template.  To specify which sections are being overridden by the child template, the child template prefixes the section name with ':'.
   
@@ -52,7 +52,7 @@ Parent
 
   
 
-\<!-- \{!\} --\>
+*\<!-- \{!\} --\>
 
   To continue to allow the child template to be rendered in a web browser for easy editing, sections named '!' are ignored.  These ignored sections allow including HTML tags for correctly rendering the child raw template content.
   
@@ -60,7 +60,7 @@ Parent
 
 
 
-Child
+*Child
 
   The child template of this tutorial demonstrates overriding a section, introducing a section and ignoring sections.  
 
@@ -88,7 +88,7 @@ Child
 
 
 
-Grand Child
+*Grand Child
 
   The grand child template of this tutorial demonstrates overriding the first section, overriding an introduced section and overriding a data method.
 

@@ -1,12 +1,12 @@
                                                -----------------------
                                               Wire Frame Prototype Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Wireframe Prototype Tutorial>>
+Wireframe Prototype Tutorial
 
-  This tutorial demonstrates the ease of building a web application prototype that can be later extended to fully a functional web application.  This is demonstrated by the WoOF prototyping by providing wire frame navigation back and forth between the following two pages:
+  This tutorial demonstrates the ease of building a web application prototype that can be later extended to fully a functional web application.  This is demonstrated by providing wire frame navigation back and forth between the following two pages:
   
 [./images/PrototypeHttpServer-href-screenshot.png] PrototypeHttpServer href screen shot.
 
@@ -20,7 +20,7 @@
 
 
 
-HTML pages
+*HTML pages
 
   The web pages have the following HTML.
 
@@ -40,7 +40,7 @@ HTML pages
 
 
 
-Configuring the links
+*Configuring the links
 
   The following configuration shows wiring up the links within the <<<application.woof>>>.
 

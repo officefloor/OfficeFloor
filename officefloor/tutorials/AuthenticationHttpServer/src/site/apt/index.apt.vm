@@ -1,10 +1,10 @@
                                                -----------------------
                                                Authentication Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Authentication Tutorial>>
+Authentication Tutorial
 
   This tutorial looks at configuring authentication.
   
@@ -20,7 +20,7 @@
 
 
 
-Restricted access page
+*Restricted access page
 
   The page being restricted from access is as follows.
 
@@ -46,13 +46,13 @@ Restricted access page
 
 
 
-Configuring access
+*Configuring access
 
   The following is the configuration for authentication.
   
 [./images/AuthenticationHttpServer-configuration.png] Authentication configuration screen shot.
   
-  While some authentication schemes are straight forward (e.g. {{{/apidocs/net/officefloor/web/security/scheme/BasicHttpSecuritySource.html}Basic}}), others such as {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}form based login}} require application specific behaviour (e.g. a form login page).  On selecting the authentication scheme, links necessary for the chosen authentication will be displayed for configuration.  In the case of this tutorial, the form login link and authentication link are required to be configured to/from the login page.  This allows the application to tailor the login page while still being able to re-use the {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}}.
+  While some authentication schemes are straight forward (e.g. {{{/apidocs/net/officefloor/web/security/scheme/BasicHttpSecuritySource.html}Basic}}), others such as {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}form based login}} require application specific behaviour (e.g. a form login page).  On selecting the authentication scheme, flows necessary for the chosen authentication will be displayed for configuration.  In the case of this tutorial, the form login flow and authentication flow are required to be configured to/from the login page.  This allows the application to tailor the login page while still being able to re-use the {{{/apidocs/net/officefloor/web/security/scheme/FormHttpSecuritySource.html}FormHttpSecuritySource}}.
   
   To enable differing credential stores (e.g. database, LDAP, etc), the WoOF supplied authentication depends on a {{{/apidocs/net/officefloor/web/security/store/CredentialStore.html}CredentialStore}} managed object being configured.  The following is the managed object configuration for this tutorial.   
   
@@ -64,7 +64,7 @@ Configuring access
 
   
 
-Login page
+*Login page
 
   The login page is as follows.
   
@@ -78,21 +78,21 @@ Login page
 
 
   
-Remaining code
+*Remaining code
 
   The remaining code is included for completeness.
   
-* Logout page
+**Logout page
 
 %{snippet|file=${basedir}/src/main/resources/logout.woof.html|ignoreDownloadError=false}
 
-* Error page
+**Error page
 
 %{snippet|file=${basedir}/src/main/resources/error.woof.html|ignoreDownloadError=false}
 
 
 
-Unit Test
+*Unit Test
 
   The unit test demonstrates logging in and logging out. 
 

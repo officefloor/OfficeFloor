@@ -1,10 +1,10 @@
                                                -----------------------
                                              Session HTTP Server Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Session HTTP Server Tutorial>>
+Session HTTP Server Tutorial
 
   This tutorial demonstrates maintaining state within the HTTP session.
   
@@ -16,7 +16,7 @@
 
 
   
-Template.woof.html
+*Template.woof.html
 
   The template for displaying the posts and adding posts is as follows:
 
@@ -26,7 +26,7 @@ Template.woof.html
 
 
 
-@HttpSessionStateful
+*@HttpSessionStateful
 
   Session objects within WoOF are dependency injected.  The following shows the <<<@HttpSessionStateful>>> annotation necessary to identify the dependency as a HTTP session bound object.  Note HTTP session objects must also be serializable.
 
@@ -48,7 +48,7 @@ Template.woof.html
 
 
 
-Unit Test
+*Unit Test
 
   WoOF again allows easy unit testing by it's dependency injection into methods:
   
