@@ -1,4 +1,4 @@
-package ${package};
+package your.domain;
 
 import lombok.Value;
 import net.officefloor.web.HttpPathParameter;

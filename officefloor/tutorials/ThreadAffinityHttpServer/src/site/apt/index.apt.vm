@@ -1,10 +1,10 @@
                                                -----------------------
                                                Thread Affinity Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Thread Affinity Tutorial>>
+Thread Affinity Tutorial
 
   
   This tutorial looks at configuring an {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}} to provide thread affinity for a web application.
@@ -17,7 +17,7 @@
 
 
   
-Thread Affinity
+*Thread Affinity
 
   Thread affinity binds the thread to only run on a particular CPU core.  The advantage of using thread affinity is that it can increase the CPU cache hits, as the thread will always be run on a particular core.  Increasing CPU cache hits reduces bus contention and improves performance of processing.
   
@@ -45,7 +45,8 @@ Thread Affinity
   The result of this is that the web request is serviced entirely on one CPU core.  This allows for improved CPU cache hits even if you require multiple threads (teams) to service the request.  All threads for servicing the request will be bound to the same CPU core.  This subsequently, in many cases, boosts your application performance - as each CPU core can act like it's own server without having to have <heavy weight> synchronising between the cores slowing application performance.
 
 
-Proving the Thread Affinity
+
+*Proving the Thread Affinity
 
   The tutorial outputs the name of the thread at the top of the page.  The thread name is comprised of:
   
@@ -62,9 +63,11 @@ Proving the Thread Affinity
 %{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/threadaffinityhttpserver/ThreadAffinityHttpServerTest.java|ignoreDownloadError=false}
 
 
-ExecutiveSource
+
+*ExecutiveSource
   
   For further details on how you can control threads within an application see the {{{/apidocs/net/officefloor/frame/api/executive/source/ExecutiveSource.html}ExecutiveSource}}.  It is beyond this tutorial to explain it's full capabilities, however it is geared to following how the executives would manage personal in an office.
+
 
 
 Next

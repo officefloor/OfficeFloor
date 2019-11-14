@@ -1,10 +1,10 @@
                                                -----------------------
                             Dependency Injection of a Plain Old Java Object (POJO) Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Dependency Injection of a Plain Old Java Object (POJO) Tutorial>>
+Dependency Injection Tutorial
 
   This tutorial demonstrates the dependency injection of a Plain Old Java Object (POJO).
   
@@ -16,7 +16,7 @@
 
 
 
-Template
+*Template
   
   The following is the content of the template.
 
@@ -26,14 +26,14 @@ Template
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/TemplateLogic.java|ignoreDownloadError=false}
 
-  WoOF (via its underlying OfficeFloor framework) injects dependencies into methods.  By injecting dependencies into methods, WoOF makes development of applications simpler.  This is because the application logic is written as loosely coupled methods rather than highly coupled objects.
+  WoOF (via its underlying OfficeFloor framework) injects dependencies into methods.  By injecting dependencies into methods, WoOF makes development of applications simpler.  This is because the application logic is written as loosely coupled methods rather than highly coupled objects.  See {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}Inversion of Coupling Control}} for more details.
   
   The injected dependency (POJO) will provide the remaining text of the rendered content.  The code of the injected POJO is as follows.
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/dipojohttpserver/Pojo.java|ignoreDownloadError=false}
   
 
-Dependency Injection
+*Dependency Injection
 
   Objects for dependency injection are configured in the <<<application.objects>>> file contained at the root of the class path.  Providing this file is optional, as it is anticipated that WoOF annotations will provide most POJO dependency configuration.  However, it is supported to extend WoOF applications with additional dependencies as required.
       
@@ -49,7 +49,7 @@ Dependency Injection
 
 
 
-Unit Test
+*Unit Test
 
   The unit test ensures the correct rendered content is received.
 

@@ -1,7 +1,7 @@
 <woof>
   <http-continuations>
     <http-continuation path="/" secure="false" x="42" y="64">
-      <procedure name="Kotlin" />
+      <procedure name="Kotlin"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
@@ -11,7 +11,10 @@
   <sections>
   </sections>
   <procedures>
-    <procedure name="Kotlin" resource="net.officefloor.tutorial.kotlinhttpserver.KotlinLogicKt" source="Kotlin" procedure="service" x="176" y="46" />
+    <procedure name="Kotlin" resource="net.officefloor.tutorial.kotlinhttpserver.KotlinLogicKt" source="Kotlin" procedure="service" x="136" y="61">
+      <next argument-type="">
+      </next>
+    </procedure>
   </procedures>
   <securities>
   </securities>

@@ -4,7 +4,7 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<Google Sign-in Tutorial>>
+Google Sign-in Tutorial
 
   This tutorial demonstrates {{{https://developers.google.com/identity/sign-in/web/}Google Sign-in}} integrated into WoOF.
    
@@ -12,9 +12,11 @@
 
 
 
-Sign-in JavaScript
+*Sign-in JavaScript
 
-  The Google Sign-on tutorial page is the following, as per {{{https://developers.google.com/identity/sign-in/web/}Google Sign-in}}.  Note that JQuery has been used, however any supported web / mobile front-end technology can be used.
+  As per the {{{https://developers.google.com/identity/sign-in/web/}Google Sign-in tutorial}}, Google sign-in is configured as follows.
+  
+  Note that JQuery has been used.  However, any supported web / mobile front-end technology can be used.  See the {{{https://officefloor.appspot.com/}OfficeFloor Subscription App}} for example (code available {{{https://github.com/officefloor/Subscription}here}}).
       
 %{snippet|file=${basedir}/src/main/resources/PUBLIC/index.html|ignoreDownloadError=false}
 
@@ -22,7 +24,7 @@ Sign-in JavaScript
 
 
 
-Configuring Google Sign-in Integration
+*Configuring Google Sign-in Integration
 
   Google sign-in is configured in <<<application.objects>>> as follows:
   
@@ -34,7 +36,7 @@ Configuring Google Sign-in Integration
     
 
 
-Testing
+*Testing
 
   To avoid having to call Google with real users, the {{{/apidocs/net/officefloor/identity/google/mock/GoogleIdTokenRule.html}GoogleIdTokenRule}} creates mock tokens for unit testing.
   

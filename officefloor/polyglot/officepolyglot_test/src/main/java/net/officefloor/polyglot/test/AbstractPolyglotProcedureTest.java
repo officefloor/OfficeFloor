@@ -118,7 +118,8 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 				.employProcedureArchitect(context.getOfficeArchitect(), context.getOfficeSourceContext());
 
 		// Create and return procedure
-		return procedureArchitect.addProcedure(resourceName, sourceName, procedureName, isNext, properties);
+		return procedureArchitect.addProcedure(procedureName, resourceName, sourceName, procedureName, isNext,
+				properties);
 	}
 
 	/**

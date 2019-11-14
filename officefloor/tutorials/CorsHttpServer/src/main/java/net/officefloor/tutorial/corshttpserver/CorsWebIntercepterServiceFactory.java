@@ -1,8 +1,6 @@
 package net.officefloor.tutorial.corshttpserver;
 
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.plugin.section.clazz.Next;
-import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.build.WebInterceptServiceFactory;
 
 /**
@@ -13,16 +11,9 @@ import net.officefloor.web.build.WebInterceptServiceFactory;
 // START SNIPPET: tutorial
 public class CorsWebIntercepterServiceFactory implements WebInterceptServiceFactory {
 
-	public static class CorsWebIntercepter {
-		@Next("service")
-		public static void cors(ServerHttpConnection connection) {
-			Cors.cors(connection);
-		}
-	}
-
 	@Override
 	public Class<?> createService(ServiceContext context) throws Throwable {
-		return CorsWebIntercepter.class;
+		return Cors.class;
 	}
 
 }

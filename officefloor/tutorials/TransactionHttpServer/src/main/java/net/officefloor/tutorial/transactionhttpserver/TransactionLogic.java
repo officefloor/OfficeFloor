@@ -19,7 +19,6 @@ package net.officefloor.tutorial.transactionhttpserver;
 
 import java.io.EOFException;
 
-import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**
@@ -30,13 +29,11 @@ import net.officefloor.plugin.section.clazz.Parameter;
 // START SNIPPET: tutorial
 public class TransactionLogic {
 
-	@Next("fail")
 	public IllegalArgumentException rollback(Post post, PostRepository repository) {
 		repository.save(post);
 		return new IllegalArgumentException("rolled back");
 	}
 
-	@Next("fail")
 	public EOFException commit(Post post, PostRepository repository) throws EOFException {
 		repository.save(post);
 		return new EOFException("committed");

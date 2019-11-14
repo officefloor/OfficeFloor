@@ -4,7 +4,7 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<CORS Tutorial>>
+CORS Tutorial
 
   This tutorial demonstrates configuring Cross-Origin Resource Sharing (CORS) handling.
   
@@ -16,7 +16,7 @@
 
 
 
-OPTIONS
+*OPTIONS
 
   CORS will make <<<OPTIONS>>> calls to determine if able to make the request.  This can be configured as follows:
 
@@ -32,9 +32,9 @@ OPTIONS
 
 
 
-Intercepting Requests
+*Intercepting Requests
 
-  CORS headers are also required on servicing requests.  The {{{/apidocs/net/officefloor/web/build/WebInterceptServiceFactory.html}WebInterceptServiceFactory}} provides means to register intercepting requests before being serviced.  This is similar to <Servlet Filters>.
+  CORS headers are also required on servicing requests.  The {{{/apidocs/net/officefloor/web/build/WebInterceptServiceFactory.html}WebInterceptServiceFactory}} provides means to intercept requests before being serviced.  This is similar to <Servlet Filters>.
   
   The CORS intercepting is the following:
   
@@ -48,7 +48,7 @@ Intercepting Requests
 
 
 
-Testing
+*Testing
 
   The following confirms the handling of the OPTIONS requests:
   

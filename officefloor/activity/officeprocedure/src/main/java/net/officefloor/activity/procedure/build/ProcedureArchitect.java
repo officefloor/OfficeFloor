@@ -46,13 +46,18 @@ public interface ProcedureArchitect<S> {
 	/**
 	 * Adds a {@link Procedure}.
 	 * 
+	 * @param sectionName   Name to uniquely identify the use of the
+	 *                      {@link Procedure}. It is possible to configure the same
+	 *                      {@link Procedure}, so need to name them each uniquely.
 	 * @param resource      Resource.
 	 * @param sourceName    {@link ProcedureSource} name.
-	 * @param procedureName Name of {@link Procedure}.
+	 * @param procedureName Name of {@link Procedure} to be provided to
+	 *                      {@link ProcedureSource}.
 	 * @param isNext        Indicates if next {@link Flow} configured.
 	 * @param properties    {@link PropertyList} for extra configuration.
 	 * @return {@link OfficeSection}/{@link SubSection} for the {@link Procedure}.
 	 */
-	S addProcedure(String resource, String sourceName, String procedureName, boolean isNext, PropertyList properties);
+	S addProcedure(String sectionName, String resource, String sourceName, String procedureName, boolean isNext,
+			PropertyList properties);
 
 }

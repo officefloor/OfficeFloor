@@ -1,4 +1,4 @@
-package net.officefloor.test;
+package your.domain;
 
 import static org.junit.Assert.assertEquals;
 

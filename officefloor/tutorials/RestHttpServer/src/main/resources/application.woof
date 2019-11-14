@@ -1,25 +1,32 @@
 <woof>
   <http-continuations>
     <http-continuation path="/vehicle/{id}" secure="false" x="9" y="99">
-      <section name="Logic" input="getVehicle"/>
+      <procedure name="getVehicle"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
     <http-input path="/vehicle" method="POST" secure="false" x="10" y="32">
-      <section name="Logic" input="createVehicle"/>
+      <procedure name="createVehicle"/>
     </http-input>
   </http-inputs>
   <templates>
   </templates>
   <sections>
-    <section name="Logic" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.resthttpserver.RestLogic" x="206" y="31">
-      <input name="createVehicle" parameter-type=""/>
-      <input name="getVehicle" parameter-type=""/>
-    </section>
-    <section name="Setup" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.resthttpserver.Setup" x="207" y="177">
-      <input name="setup" parameter-type=""/>
-    </section>
   </sections>
+  <procedures>
+    <procedure name="createVehicle" resource="net.officefloor.tutorial.resthttpserver.RestLogic" source="Class" procedure="createVehicle" x="168" y="29">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="getVehicle" resource="net.officefloor.tutorial.resthttpserver.RestLogic" source="Class" procedure="getVehicle" x="169" y="93">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="setup" resource="net.officefloor.tutorial.resthttpserver.Setup" source="Class" procedure="setup" x="179" y="191">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
   <securities>
   </securities>
   <governances>
@@ -30,7 +37,7 @@
   </exceptions>
   <starting>
     <start x="53" y="194">
-      <section name="Setup" input="setup"/>
+      <procedure name="setup"/>
     </start>
   </starting>
 </woof>

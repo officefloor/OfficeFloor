@@ -4,7 +4,7 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<Scala Polyglot Tutorial>>
+Scala Polyglot Tutorial
 
   This tutorial demonstrates using Scala within WoOF.
   
@@ -14,7 +14,7 @@
 
 
 
-Enable Scala
+*Enable Scala
 
   To enable using Scala, add the following:
   
@@ -22,17 +22,15 @@ Enable Scala
 
 
 
-Scala
+*Scala
 
   The Scala to service the request is:
   
 %{snippet|file=${basedir}/src/main/scala/net/officefloor/tutorial/scalahttpserver/ScalaService.scala|ignoreDownloadError=false}
 
-  The Scala function is configured via the {{{/apidocs/net/officefloor/polyglot/scala/ScalaFunctionSectionSource.html}ScalaFunctionSectionSource}}.
 
 
-
-Scala Classes
+*Scala Classes
 
   As part of supporting Scala, the necessary Jackson support is included to enable sending/receiving Scala classes as JSON.
   
@@ -44,7 +42,7 @@ Scala Classes
 
 
 
-Testing
+*Testing
 
   WoOF is integrated with ScalaTest via traits.  This allows the following ease of testing:
   

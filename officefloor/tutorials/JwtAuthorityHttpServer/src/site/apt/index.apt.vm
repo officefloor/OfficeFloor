@@ -4,7 +4,7 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<JWT Authority Tutorial>>
+JWT Authority Tutorial
 
   This tutorial demonstrates providing a JWT authority server.
 
@@ -20,7 +20,7 @@
 
 
 
-WoOF configuration
+*WoOF configuration
 
   The configuration is the following:
   
@@ -31,21 +31,24 @@ WoOF configuration
 %{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
 
 
-JWT Authority
+
+*JWT Authority
 
   As per the objects above, the {{{/apidocs/net/officefloor/web/jwt/authority/JwtAuthorityManagedObjectSource.html}JwtAuthorityManagedObjectSource}} provides the {{{/apidocs/net/officefloor/web/jwt/authority/JwtAuthority.html}JwtAuthority}}.  This provides the necessary means for creating and refreshing the tokens for a JWT authority server.
   
   This requires persisting the keys and depends on a {{{/apidocs/net/officefloor/web/jwt/authority/repository/JwtAuthorityRepository.html}JwtAuthorityRepository}} to provide this persistence.  This allows a cluster of JWT authority servers sharing the same persistent storage of keys.
 
 
-Login
+
+*Login
 
   Login is specific to the JWT authentication server.  It can use it's own store of credentials.  It may use third party Open ID servers.  Once authenticated, then the tokens may be created:
   
 %{snippet|id=login|file=${basedir}/src/main/java/net/officefloor/tutorial/jwtauthorityhttpserver/JwtTokens.java|ignoreDownloadError=false}
 
 
-Refreshing Access Tokens
+
+*Refreshing Access Tokens
 
   Access tokens, as per JWT, should be short lived.  Refresh tokens maintain the length of the session for the user.  Using a refresh token, access tokens can be obtained until the refresh token expires:
   
@@ -54,12 +57,14 @@ Refreshing Access Tokens
   Once the refresh token is expired, the user is likely required to re-authenticate.  However, this again is application specific, as refresh tokens may be recreated also.
   
 
-JWKS publishing  
+
+*JWKS publishing  
 
   RFC 7517 defines a format for publishing keys.  The tutorial uses the default {{{/apidocs/net/officefloor/web/jwt/authority/jwks/JwksPublishSectionSource.html}JwksPublishSectionSource}} that adheres to this format to publish keys.
     
 
-Testing
+
+*Testing
 
   The following shows the ease of using the JWT authority:
   

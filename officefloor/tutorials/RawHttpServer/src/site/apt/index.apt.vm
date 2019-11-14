@@ -1,10 +1,10 @@
                                                -----------------------
                                              Rendering Raw HTML Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Rendering Raw HTML Tutorial>>
+Rendering Raw HTML Tutorial
 
   This tutorial demonstrates the rendering of raw HTML for a WoOF web application.
                                                                                                                           
@@ -16,7 +16,7 @@
 
 
 
-Template.woof.html
+*Template.woof.html
 
   The HTML for the page is as follows:
 
@@ -26,13 +26,13 @@ Template.woof.html
 
 
 
-TemplateLogic Class
+*TemplateLogic Class
 
   The logic for the rendering the page is the following POJO (plain old java object).
     
 %{snippet|id=example|file=${basedir}/src/main/java/net/officefloor/tutorial/rawhttpserver/TemplateLogic.java|ignoreDownloadError=false}
 
-  To generate HTML for the page and not have it automatically escaped by WoOF, annotate the property method with <<<@NotEscaped>>>.  This informs WoOF to not escape the property value and render it as is.
+  To generate HTML for the page and not have it automatically escaped by WoOF, annotate the property method with {{{/apidocs/net/officefloor/web/template/NotEscaped.html}@NotEscaped}}.  This informs WoOF to not escape the property value and render it as is.
   
   This is a very simple example.  More complex use of this would be presentation beans that provide dynamic generation of HTML.  Please however consider using the <<<$\{bean ... $\}>>> tag first before generating raw HTML, as the tag will provide the necessary functionality in the majority of cases.
 

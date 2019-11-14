@@ -1,10 +1,10 @@
                                                -----------------------
                                     Dependency Injection of Managed Object Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Dependency Injection of Managed Object Tutorial>>
+Dependency Injection of Managed Object Tutorial
 
   This tutorial demonstrates the dependency injection of a <<<Connection>>>.   The <<<Connection>>> is provided by a {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementation (i.e. {{{/apidocs/net/officefloor/jdbc/ConnectionManagedObjectSource.html}ConnectionManagedObjectSource}}).
 
@@ -18,7 +18,7 @@
 
 
 
-Configuring Objects
+*Configuring Objects
 
   Objects for dependency injection are configured in the <<<application.objects>>> file contained at the root of the class path.  
   
@@ -32,17 +32,17 @@ Configuring Objects
   
   Properties to configure the {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations can be provided in the above file or within a properties file.  The reason for using a property file is that different property files can be used for each environment.
   
-  The contents of <<<Connection>>> property file is as follows.
+  The contents of configured property file is as follows.
 
 %{snippet|file=${basedir}/src/main/resources/datasource.properties|ignoreDownloadError=false}
 
-  Objects to be dependency injected within OfficeFloor are made available by {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations.  Many dependency injection frameworks are based solely on the object's <<<Class>>> and its necessary dependency injection configuration.  OfficeFloor goes beyond this by providing more capabilities to the object such as invoking {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectExecuteContext.html}processes}}.  For example the socket listener within a stand-alone WoOF HTTP Server is actually a {{{/apidocs/net/officefloor/server/http/HttpServerSocketManagedObjectSource.html}HttpServerSocketManagedObjectSource}} that invokes an OfficeFloor lightweight process to service the HTTP request.
+  Objects to be dependency injected within OfficeFloor are made available by {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectSource.html}ManagedObjectSource}} implementations.  Many dependency injection frameworks are based solely on the object's <<<Class>>> and its necessary dependency injection of other objects.  OfficeFloor goes beyond this by providing more capabilities to the object such as invoking {{{/apidocs/net/officefloor/frame/api/managedobject/source/ManagedObjectExecuteContext.html}processes}}.  For example the socket listener within a stand-alone WoOF HTTP Server is actually a {{{/apidocs/net/officefloor/server/http/HttpServerSocketManagedObjectSource.html}HttpServerSocketManagedObjectSource}} that invokes an OfficeFloor lightweight process to service the HTTP request.
   
   The {{{/apidocs/net/officefloor/plugin/managedobject/clazz/ClassManagedObjectSource.html}ClassManagedObjectSource}} is available to provide the typical POJO dependency injection.
 
 
 
-Setup the database
+*Setup the database
 
   The following is the <<<application.woof>>> configuration for the application.
 
@@ -59,7 +59,7 @@ Setup the database
 
 
 
-Dependency Injection
+*Dependency Injection
   
   The following is the content of the template. 
 
@@ -89,7 +89,7 @@ Dependency Injection
 
 
 
-Unit Test
+*Unit Test
 
   The unit test requests the page and then adds a row and deletes a row.
   

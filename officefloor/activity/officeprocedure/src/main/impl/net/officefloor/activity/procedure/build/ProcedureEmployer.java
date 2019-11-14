@@ -127,12 +127,12 @@ public class ProcedureEmployer {
 		return new ProcedureArchitect<OfficeSection>() {
 
 			@Override
-			public OfficeSection addProcedure(String className, String serviceName, String procedureName,
-					boolean isNext, PropertyList properties) {
-				OfficeSection procedure = officeArchitect.addOfficeSection(procedureName,
+			public OfficeSection addProcedure(String sectionName, String className, String serviceName,
+					String procedureName, boolean isNext, PropertyList properties) {
+				OfficeSection procedure = officeArchitect.addOfficeSection(sectionName,
 						ProcedureSectionSource.class.getName(), procedureName);
 				properties.configureProperties(procedure);
-				procedure.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, className);
+				procedure.addProperty(ProcedureManagedFunctionSource.RESOURCE_PROPERTY_NAME, className);
 				procedure.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, serviceName);
 				if (isNext) {
 					procedure.addProperty(ProcedureSectionSource.IS_NEXT_PROPERTY_NAME, Boolean.TRUE.toString());
@@ -154,12 +154,12 @@ public class ProcedureEmployer {
 		return new ProcedureArchitect<SubSection>() {
 
 			@Override
-			public SubSection addProcedure(String className, String serviceName, String procedureName, boolean isNext,
-					PropertyList properties) {
-				SubSection procedure = sectionDesigner.addSubSection(procedureName,
+			public SubSection addProcedure(String sectionName, String resource, String serviceName,
+					String procedureName, boolean isNext, PropertyList properties) {
+				SubSection procedure = sectionDesigner.addSubSection(sectionName,
 						ProcedureSectionSource.class.getName(), procedureName);
 				properties.configureProperties(procedure);
-				procedure.addProperty(ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, className);
+				procedure.addProperty(ProcedureManagedFunctionSource.RESOURCE_PROPERTY_NAME, resource);
 				procedure.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, serviceName);
 				if (isNext) {
 					procedure.addProperty(ProcedureSectionSource.IS_NEXT_PROPERTY_NAME, Boolean.TRUE.toString());

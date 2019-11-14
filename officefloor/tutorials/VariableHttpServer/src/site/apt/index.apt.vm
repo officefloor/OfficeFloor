@@ -4,7 +4,7 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<Variable Tutorial>>
+Variable Tutorial
 
   This tutorial demonstrates passing values downstream with variables.
   
@@ -14,7 +14,7 @@
 
 
 
-Out\<T\> / Var\<T\>
+*Out\<T\> / Var\<T\>
 
   The following method demonstrates setting values for variables.
   
@@ -30,13 +30,13 @@ Out\<T\> / Var\<T\>
 
   Typically, the {{{/apidocs/net/officefloor/plugin/variable/Out.html}Out\<T\>}} should always be used to set the variable.  This allows reasoning when compiling flows for out/in combinations to avoid uninitialised variables (i.e. null values).
   
-  However, there are times when you both need to get and set the variable value.  This can be achieved with the {{{/apidocs/net/officefloor/plugin/variable/Var.html}Var\<T\>}}.  However, please not that this is discouraged, as reduces ability for reasoning of flow composition (i.e. whether out/in combinations line up).
+  However, there are times when you both need to get and set the variable value.  This can be achieved with the {{{/apidocs/net/officefloor/plugin/variable/Var.html}Var\<T\>}}.  However, please note that this is discouraged, as reduces ability for reasoning of flow composition (i.e. whether out/in combinations line up).
 
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/variablehttpserver/VarLogic.java|ignoreDownloadError=false}
 
 
 
-@Val / In\<T\>
+*@Val / In\<T\>
 
   The following method demonstrates obtaining values for variables.
   
@@ -52,7 +52,7 @@ Out\<T\> / Var\<T\>
 
 
 
-Composing Flows
+*Composing Flows
 
   The following demonstrates weaving together different combinations of the above.
 
@@ -60,7 +60,7 @@ Composing Flows
 
 
 
-Testing
+*Testing
 
   As always, OfficeFloor encourages ease of testing.  As all dependencies are injected directly into the methods, it is very easy to unit test the methods.
   

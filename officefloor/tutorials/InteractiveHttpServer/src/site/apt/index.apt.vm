@@ -1,14 +1,16 @@
                                                -----------------------
                                             Interactive HTTP Server Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Interactive HTTP Server Tutorial>>
+Interactive HTTP Server Tutorial
   
   This tutorial looks at handling a form submission.
   
-  The below example for this tutorial will implement a simple form submission.  The form submission will validate a name was entered and provide a message if successfully entered.  The simple form for this tutorial is as follows:
+  The below example for this tutorial will implement a simple form submission.  The form submission will validate a name was entered and provide a message if successfully entered.
+  
+  The simple form for this tutorial is as follows:
     
 [./images/InteractiveHttpServer-screenshot.png] InteractiveHttpServer screen shot.
   
@@ -16,7 +18,7 @@
   
 
 
-Template.woof.html
+*Template.woof.html
 
   The below is the content of the <<<Template.woof.html>>>.
 
@@ -27,7 +29,8 @@ Template.woof.html
   The default handling for unqualified links is both GET and POST.  This is to support common use cases of link navigation and form submissions. 
 
 
-TemplateLogic Class
+
+*TemplateLogic Class
 
   The logic to handle the form submission is the following:
   
@@ -45,7 +48,7 @@ TemplateLogic Class
 
 
 
-Unit Test
+*Unit Test
 
   The unit test requests the various URL's exposed from the template.
 

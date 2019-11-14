@@ -1,10 +1,10 @@
                                                -----------------------
                                                 Secure Link Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Secure Link Tutorial>>
+Secure Link Tutorial
   
   This tutorial looks at configuring a specific link for a page to only be accessed via a secure channel (HTTPS).
   
@@ -16,7 +16,7 @@
 
 
 
-HTML
+*HTML
 
   The page template content is as follows.  Please note the link in the form action.
 
@@ -24,7 +24,7 @@ HTML
 
 
 
-Secure Link
+*Secure Link
 
   To configure the link (form action) to always be communicated via a secure channel, the following is the configuration:
   
@@ -36,7 +36,7 @@ Secure Link
 
 
 
-Logic
+*Logic
 
   The logic for the page is the following:
   
@@ -46,7 +46,7 @@ Logic
 
 
 
-Unit Test
+*Unit Test
 
   The unit test demonstrates the rendering of the secure link. 
 

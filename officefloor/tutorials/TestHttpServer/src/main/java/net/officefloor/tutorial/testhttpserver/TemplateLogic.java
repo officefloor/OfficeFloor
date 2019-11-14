@@ -27,31 +27,26 @@ import net.officefloor.web.HttpParameters;
  * 
  * @author Daniel Sagenschneider
  */
+@SuppressWarnings("serial")
 // START SNIPPET: tutorial
 public class TemplateLogic {
 
 	@Data
 	@HttpParameters
 	public static class Parameters implements Serializable {
-		private static final long serialVersionUID = 1L;
-
 		private String a;
-
 		private String b;
-
 		private String result;
+	}
+
+	public void add(Parameters parameters) {
+		int a = Integer.parseInt(parameters.getA());
+		int b = Integer.parseInt(parameters.getB());
+		parameters.setResult(String.valueOf(a + b));
 	}
 
 	public Parameters getTemplateData(Parameters parameters) {
 		return parameters;
-	}
-
-	public void add(Parameters parameters) {
-
-		int a = Integer.parseInt(parameters.getA());
-		int b = Integer.parseInt(parameters.getB());
-
-		parameters.setResult(String.valueOf(a + b));
 	}
 
 }

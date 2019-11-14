@@ -33,7 +33,7 @@ public class ProcedureManagedFunctionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testSpecification() {
 		ManagedFunctionLoaderUtil.validateSpecification(ProcedureManagedFunctionSource.class,
-				ProcedureManagedFunctionSource.RESOURCE_NAME_PROPERTY_NAME, "Class",
+				ProcedureManagedFunctionSource.RESOURCE_PROPERTY_NAME, "Class",
 				ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, "Source",
 				ProcedureManagedFunctionSource.PROCEDURE_PROPERTY_NAME, "Procedure");
 	}

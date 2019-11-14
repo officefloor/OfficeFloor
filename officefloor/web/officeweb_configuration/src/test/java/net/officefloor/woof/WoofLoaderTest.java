@@ -156,13 +156,22 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.recordReturn(procedurePropertiesA, procedurePropertiesA.addProperty("name.TWO"), procedurePropertyTwo);
 		procedurePropertyTwo.setValue("value.TWO");
 		final OfficeSection procedureA = this.createMock(OfficeSection.class);
-		this.recordReturn(this.procedure, this.procedure.addProcedure("net.example.ExampleProcedure", "Class",
-				"procedure", true, procedurePropertiesA), procedureA);
-		final PropertyList procedurePropertiesB = this.createMock(PropertyList.class);
-		this.recordReturn(this.extensionContext, this.extensionContext.createPropertyList(), procedurePropertiesB);
-		final OfficeSection procedureB = this.createMock(OfficeSection.class);
-		this.recordReturn(this.procedure, this.procedure.addProcedure("net.example.SecondProcedure", "JavaScript",
-				"function", false, procedurePropertiesB), procedureB);
+		this.recordReturn(this.procedure, this.procedure.addProcedure("PROCEDURE_A", "net.example.ExampleProcedure",
+				"Class", "procedure", true, procedurePropertiesA), procedureA);
+
+		// Remaining procedures
+		OfficeSection procedureB = null;
+		for (String procedureSuffix : new String[] { "B", "C" }) {
+			final PropertyList procedureProperties = this.createMock(PropertyList.class);
+			this.recordReturn(this.extensionContext, this.extensionContext.createPropertyList(), procedureProperties);
+			final OfficeSection procedure = this.createMock(OfficeSection.class);
+			if (procedureB == null) {
+				procedureB = procedure; // first is procedure B
+			}
+			this.recordReturn(this.procedure, this.procedure.addProcedure("PROCEDURE_" + procedureSuffix,
+					"net.example.Procedure" + procedureSuffix, "JavaScript", "function", false, procedureProperties),
+					procedure);
+		}
 
 		// Record loading securities
 		final HttpSecurityBuilder securityOne = this.createMock(HttpSecurityBuilder.class);
@@ -271,7 +280,8 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		governanceA.addProperty("name.b", "value.b");
 		governanceA.enableAutoWireExtensions();
 		templateA.record((template) -> template.addGovernance(governanceA));
-		sectionA.addGovernance(governanceA);
+		sectionA.addGovernance(governanceA);		
+		procedureA.addGovernance(governanceA);
 		final OfficeGovernance governanceB = this.createMock(OfficeGovernance.class);
 		this.recordReturn(this.office, this.office.addOfficeGovernance("GOVERNANCE_B", "CLASS"), governanceB);
 		governanceB.enableAutoWireExtensions();

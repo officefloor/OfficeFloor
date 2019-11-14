@@ -4,7 +4,7 @@
 					                            Daniel Sagenschneider
                                                -----------------------
 
-  <<Reactive Tutorial>>
+Reactive Tutorial
 
   This tutorial demonstrates using Reactive logic within WoOF.
 
@@ -18,7 +18,7 @@
 
 
 
-Server
+*Server
 
   Before getting to the Reactive logic, the Server logic that is called asynchronously is the following:
   
@@ -32,7 +32,7 @@ Server
 
 
 
-Reactive logic
+*Reactive logic
 
   The following is the reactive logic to call the above server:
   
@@ -48,13 +48,13 @@ Reactive logic
 
 
 
-Note on thread safety  
+*Note on thread safety  
   
   It is expected that the Reactive subscribe handler will be called in a different thread than the one invoking the Reactive stream.  In other words, the web call will be triggered by the OfficeFloor provided thread, but the callback once the response is returned is done on the Netty event loop thread.  Therefore, to ensure thread safety by OfficeFloor, updates of injected objects should be done within the {{{/apidocs/net/officefloor/frame/api/function/AsynchronousFlow.html}AsynchronousFlow}} completion method.
 
 
 
-Testing
+*Testing
 
   The following shows invoking the reactive code that asynchronously pulls data from the server:
   

@@ -1,10 +1,10 @@
                                                -----------------------
                                               Section Rendering Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Section Rendering Tutorial>>
+Section Rendering Tutorial
 
   This tutorial demonstrates the segmenting of a template into sections and controlling which sections are rendered.
       
@@ -16,7 +16,7 @@
 
 
 
-Template.woof.html
+*Template.woof.html
 
   The HTML for the page is as follows:
 
@@ -30,7 +30,7 @@ Template.woof.html
   
 
 
-TemplateLogic Class
+*TemplateLogic Class
 
   For each section containing a <<<$\{bean ...$\}>>> or <<<$\{property\}>>> tag there must be a corresponding method by the naming convention <<<get\<SectionName\>[Data]>>>  (the <<<Data>>> suffix is optional but provided to give better naming to the purpose of the method).  This method is responsible for providing a bean that has the necessary properties for rendering the section.
   

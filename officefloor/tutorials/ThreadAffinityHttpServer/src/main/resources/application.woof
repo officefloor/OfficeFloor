@@ -8,10 +8,13 @@
     </template>
   </templates>
   <sections>
-    <section name="Setup" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.threadaffinityhttpserver.Setup" x="175" y="94">
-      <input name="setup" parameter-type=""/>
-    </section>
   </sections>
+  <procedures>
+    <procedure name="setup" resource="net.officefloor.tutorial.threadaffinityhttpserver.Setup" source="Class" procedure="setup" x="143" y="115">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
   <securities>
   </securities>
   <governances>
@@ -22,7 +25,7 @@
   </exceptions>
   <starting>
     <start x="49" y="118">
-      <section name="Setup" input="setup"/>
+      <procedure name="setup"/>
     </start>
   </starting>
 </woof>

@@ -3,7 +3,7 @@
   </http-continuations>
   <http-inputs>
     <http-input path="/scala" method="POST" secure="false" x="34" y="82">
-      <procedure name="Scala" />
+      <procedure name="service"/>
     </http-input>
   </http-inputs>
   <templates>
@@ -11,7 +11,10 @@
   <sections>
   </sections>
   <procedures>
-    <procedure name="Scala" resource="net.officefloor.tutorial.scalahttpserver.ScalaService$" source="Scala" procedure="service" x="207" y="63" />
+    <procedure name="service" resource="net.officefloor.tutorial.scalahttpserver.ScalaService" source="Class" procedure="service" x="180" y="78">
+      <next argument-type="">
+      </next>
+    </procedure>
   </procedures>
   <securities>
   </securities>

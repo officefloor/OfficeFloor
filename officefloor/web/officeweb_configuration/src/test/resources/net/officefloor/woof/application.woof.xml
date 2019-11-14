@@ -105,7 +105,8 @@
 	</sections>
 
 	<procedures>
-		<procedure name="PROCEDURE_A" resource="net.example.ExampleProcedure" source="Class" procedure="procedure">
+		<procedure name="PROCEDURE_A" resource="net.example.ExampleProcedure" source="Class" procedure="procedure"
+			x="80" y="80">
 			<property name="name.ONE" value="value.ONE" />
 			<property name="name.TWO" value="value.TWO" />
 			<next argument-type="java.lang.String">
@@ -135,8 +136,10 @@
 				<procedure name="PROCEDURE_B" />
 			</output>
 		</procedure>
-		<procedure name="PROCEDURE_B" resource="net.example.SecondProcedure" source="JavaScript"
-			procedure="function" />
+		<procedure name="PROCEDURE_B" resource="net.example.ProcedureB" source="JavaScript" procedure="function">
+			<next />
+		</procedure>
+		<procedure name="PROCEDURE_C" resource="net.example.ProcedureC" source="JavaScript" procedure="function" />
 	</procedures>
 
 	<securities>

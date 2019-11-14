@@ -3,24 +3,33 @@
   </http-continuations>
   <http-inputs>
     <http-input path="/capture" method="POST" secure="false" x="95" y="47">
-      <section name="PayPal" input="captureOrder"/>
+      <procedure name="captureOrder"/>
     </http-input>
     <http-input path="/configure" method="POST" secure="false" x="93" y="144">
-      <section name="PayPal" input="configure"/>
+      <procedure name="configure"/>
     </http-input>
     <http-input path="/create" method="POST" secure="false" x="99" y="94">
-      <section name="PayPal" input="createOrder"/>
+      <procedure name="createOrder"/>
     </http-input>
   </http-inputs>
   <templates>
   </templates>
   <sections>
-    <section name="PayPal" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.tutorial.paypalhttpserver.PayPalLogic" x="296" y="60">
-      <input name="captureOrder" parameter-type=""/>
-      <input name="configure" parameter-type=""/>
-      <input name="createOrder" parameter-type=""/>
-    </section>
   </sections>
+  <procedures>
+    <procedure name="captureOrder" resource="net.officefloor.tutorial.paypalhttpserver.PayPalLogic" source="Class" procedure="captureOrder" x="257" y="44">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="configure" resource="net.officefloor.tutorial.paypalhttpserver.PayPalLogic" source="Class" procedure="configure" x="261" y="143">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="createOrder" resource="net.officefloor.tutorial.paypalhttpserver.PayPalLogic" source="Class" procedure="createOrder" x="257" y="93">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
   <securities>
   </securities>
   <governances>

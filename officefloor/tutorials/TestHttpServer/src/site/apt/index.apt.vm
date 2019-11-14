@@ -1,10 +1,10 @@
                                                -----------------------
                                                     Test Tutorial 
                                                -----------------------
-					        Daniel Sagenschneider
+                                                Daniel Sagenschneider
                                                -----------------------
 
-  <<Test Tutorial>>
+Test Tutorial
 
   This tutorial looks at testing a WoOF application.
     
@@ -14,9 +14,11 @@
 
   {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/TestHttpServer/${projectVersion}/TestHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
 
+  Production quality testing would cover a lot more test scenarios for the application.  The additional scenarios have been excluded for brevity as they would follow a similar pattern as described by this tutorial.
 
 
-Application code
+
+*Application code
 
   The application being tested has one page.
 
@@ -26,11 +28,9 @@ Application code
   
 %{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/testhttpserver/TemplateLogic.java|ignoreDownloadError=false}
 
-  The focus of the tutorial is to test that the two numbers are added correctly.  Production quality testing would cover a lot more test scenarios for the application.  The additional scenarios have been excluded for brevity as they would follow a similar pattern as described by this tutorial.
 
 
-
-Unit Testing
+*Unit Testing
 
   The following demonstrates unit testing the template logic class.  As the template logic class is a POJO (Plain Old Java Object), it is unit tested like any other Java class.
 
@@ -40,7 +40,7 @@ Unit Testing
   
 
 
-System Testing
+*System Testing
 
   As OfficeFloor is a very light weight framework, it starts and stops fast enough to be run with the unit tests.
   
@@ -54,7 +54,7 @@ System Testing
 
 
 
-Integration Testing
+*Integration Testing
 
   OfficeFloor provides a {{{http://maven.apache.org}Maven}} plug-in to enable integration testing.  The following is the <<<pom.xml>>> plug-ins configuration of running integration tests.
   
@@ -64,7 +64,7 @@ Integration Testing
   
 %{snippet|id=integration|file=${basedir}/src/test/int/net/officefloor/tutorial/testhttpserver/TemplateLogicIT.java|ignoreDownloadError=false}
 
-  Note that the above is a simple request test.  This enables using more complex integration test tools (e.g. {{{http://seleniumhq.org}SeleniumHQ}}) to validate the application before deploying it.
+  While this is a simple request test, it also enables using more complex integration test tools (e.g. {{{http://seleniumhq.org}SeleniumHQ}}).
 
 
 
