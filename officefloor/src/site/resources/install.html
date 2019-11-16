@@ -5,6 +5,7 @@
 <style>
 body {
 	background: linear-gradient(to bottom right, #BBE0FF, #FFF);
+	color: black;
 }
 
 .step {
@@ -43,15 +44,23 @@ img {
 </style>
 </head>
 <body>
-	<img src="http://officefloor.net/images/OfficeFloorBannerImage.png">
+	<a href="../index.html" target="_blank"> <img
+		src="http://officefloor.net/images/OfficeFloorBannerImage.png">
+	</a>
 	<p>Thank you for taking interest in OfficeFloor.</p>
 
-	<p>Please install OfficeFloor into your IDE to begin using:</p>
+	<p>OfficeFloor plug-ins are available in:</p>
 
 	<ul>
-		<li><a href="#eclipse">Eclipse</a></li>
 		<li><a href="#intellij">IntelliJ</a></li>
+		<li><a href="#eclipse">Eclipse</a></li>
 	</ul>
+	<p>
+		We are happy to look to support other IDEs. However, will do this
+		based on interest. Therefore, please add (or up vote) issue at <a
+			href="https://github.com/officefloor/OfficeFloor/issues"
+			target="_blank">OfficeFloor Support</a> to support your IDE.
+	</p>
 	<p>
 		If any issues in installation, see <a
 			href="http://www.officefloor.net/getting-help.html" target="_blank">getting
@@ -60,6 +69,41 @@ img {
 	<br />
 
 
+	<hr />
+	<h2>
+		<a name="intellij">IntelliJ</a>
+	</h2>
+
+	<p class="step">
+		<strong>Step 1</strong>: Install the latest version of <a
+			href="https://www.jetbrains.com/idea/download" target="_blank">IntelliJ</a>
+	</p>
+
+	<p class="step">
+		<strong>Step 2</strong>: Within IntelliJ open File -&gt; Settings
+		-&gt; Plugins -&gt; Marketplace
+	</p>
+
+	<p class="step">
+		<strong>Step 3</strong>: Search for <span class="code">OfficeFloor</span>
+	</p>
+
+	<p class="step">
+		<strong>Step 4</strong>: Install (and restart)
+	</p>
+
+	<p class="step">
+		<strong>Step 5</strong>: build your application with OfficeFloor
+	</p>
+	<p class="instruction">
+		More information is available in the <a
+			href="http://officefloor.net/tutorials" target="_blank">tutorials</a>
+		to start developing with <a href="http://officefloor.net/"
+			target="_blank">OfficeFloor</a>
+	</p>
+
+
+	<hr />
 	<h2>
 		<a name="eclipse">Eclipse</a>
 	</h2>
@@ -68,11 +112,10 @@ img {
 		<strong>Step 1</strong>: install latest version of <a
 			href="https://www.eclipse.org/downloads/" target="_blank">Eclipse</a>
 	</p>
-	<p class="note">Note that OfficeFloor do test builds back to
-		Eclipse Oxygen. However, support is lesser for these older versions.</p>
 
 	<p class="step">
-		<strong>Step 2</strong>: ensure JavaFx available on Eclipse class path
+		<strong>Step 2</strong>: ensure JavaFx available on Eclipse class
+		path. (Note: Eclipse requires JavaFx to be specifically installed)
 	</p>
 	<p class="instruction">
 		<strong>Java 11 (and above)</strong> where JavaFx no longer part of
@@ -139,30 +182,23 @@ img {
 			target="_blank">OfficeFloor</a>
 	</p>
 
+	<script type="text/javascript">
+		// Google
+		var _gaq = _gaq || [];
+		_gaq.push([ '_setAccount', 'UA-23477455-1' ]);
+		_gaq.push([ '_trackPageview' ]);
 
-	<h2>
-		<a name="intellij">IntelliJ</a>
-	</h2>
-
-	<p class="step">
-		<strong>Step 1</strong>: Install the latest version of <a
-			href="https://www.jetbrains.com/idea/download" target="_blank">IntelliJ</a>
-	</p>
-
-	<p class="step">
-		<strong>Step 2</strong>: Within IntelliJ open File -&gt; Settings -&gt; Plugins -&gt;
-		Marketplace
-	</p>
-
-	<p class="step">
-		<strong>Step 3</strong>: Search for <span class="code">OfficeFloor</span>
-	</p>
-
-	<p class="step">
-		<strong>Step 4</strong>: Install (and restart)
-	</p>
-	<p class="instruction">IntelliJ already has JavaFx available, so
-		should not need to be installed.</p>
+		(function() {
+			var ga = document.createElement('script');
+			ga.type = 'text/javascript';
+			ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl'
+					: 'http://www')
+					+ '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0];
+			s.parentNode.insertBefore(ga, s);
+		})();
+	</script>
 
 </body>
 </html>
