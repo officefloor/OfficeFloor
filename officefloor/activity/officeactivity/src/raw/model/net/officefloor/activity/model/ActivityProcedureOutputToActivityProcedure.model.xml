@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="procedure name" />
+	<field type="ActivityProcedureOutputModel" name="activity procedure output" end-field="activity procedure" />
+	<field type="ActivityProcedureModel" name="activity procedure" end-list="activity procedure output" />
+</model>
