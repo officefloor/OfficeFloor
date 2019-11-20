@@ -1,0 +1,92 @@
+<activity>
+
+	<inputs>
+		<input name="INPUT_1" argument-type="java.lang.String" x="100" y="101">
+			<section name="SECTION_A" input="INPUT_A" />
+		</input>
+		<input name="INPUT_2" x="102" y="103">
+			<procedure name="PROCEDURE_A" />
+		</input>
+		<input name="INPUT_3" x="104" y="105">
+			<output name="OUTPUT_2" />
+		</input>
+		<input name="INPUT_2" x="106" y="107" />
+	</inputs>
+
+	<procedures>
+		<procedure name="PROCEDURE_A" resource="net.example.ExampleProcedure" source="Class" procedure="procedure"
+			x="100" y="101">
+			<property name="name.ONE" value="value.ONE" />
+			<property name="name.TWO" value="value.TWO" />
+			<next argument-type="java.lang.Byte">
+				<section name="SECTION_A" input="INPUT_A" />
+			</next>
+			<output name="OUTPUT_A" argument-type="java.lang.String">
+				<section name="SECTION_B" input="INPUT_0" />
+			</output>
+			<output name="OUTPUT_B">
+				<procedure name="PROCEDURE_B" />
+			</output>
+			<output name="OUTPUT_C">
+				<output name="OUTPUT_2" />
+			</output>
+			<output name="OUTPUT_D" />
+		</procedure>
+		<procedure name="PROCEDURE_B" resource="net.example.KotlinProcedure" source="Kotlin" procedure="method"
+			x="102" y="103">
+			<next>
+				<procedure name="PROCEDURE_B" />
+			</next>
+		</procedure>
+		<procedure name="PROCEDURE_C" resource="net.example.ScalaProcedure" source="Scala" procedure="func" x="104"
+			y="105">
+			<next>
+				<output path="OUTPUT_2" />
+			</next>
+		</procedure>
+		<procedure name="PROCEDURE_D" resource="net.example.JavaScriptProcedure" source="JavaScript"
+			procedure="function" x="106" y="107" />
+	</procedures>
+
+	<sections>
+		<section name="SECTION_A" source="SECTION" location="SECTION_LOCATION" x="200" y="201">
+			<property name="name.one" value="value.one" />
+			<property name="name.two" value="value.two" />
+			<input name="INPUT_A" parameter-type="java.lang.Integer" />
+			<input name="INPUT_B" uri="example" />
+			<output name="OUTPUT_A" argument-type="java.lang.String">
+				<section name="SECTION_B" input="INPUT_0" />
+			</output>
+			<output name="OUTPUT_B">
+				<procedure name="PROCEDURE_B" />
+			</output>
+			<output name="OUTPUT_C">
+				<output name="OUTPUT_2" />
+			</output>
+			<output name="OUTPUT_D" />
+		</section>
+		<section name="SECTION_B" source="net.example.ExampleSectionSource" location="EXAMPLE_LOCATION" x="202"
+			y="203">
+			<input name="INPUT_0" />
+		</section>
+	</sections>
+
+	<exceptions>
+		<exception class="java.lang.Exception" x="300" y="301">
+			<section name="SECTION_A" input="INPUT_A" />
+		</exception>
+		<exception class="java.io.IOException" x="302" y="303">
+			<procedure name="PROCEDURE_A" />
+		</exception>
+		<exception class="java.lang.NullPointerException" x="306" y="307">
+			<output name="OUTPUT_2" />
+		</exception>
+		<exception class="java.lang.Throwable" x="304" y="305" />
+	</exceptions>
+
+	<outputs>
+		<output name="OUTPUT_1" argument-type="java.lang.String" x="400" y="401" />
+		<input name="INPUT_2" x="402" y="403" />
+	</outputs>
+
+</activity>

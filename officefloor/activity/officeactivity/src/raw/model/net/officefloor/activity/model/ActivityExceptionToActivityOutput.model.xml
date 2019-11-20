@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<field type="String" name="input name" />
+	<field type="String" name="output name" />
 	<field type="ActivityExceptionModel" name="activity exception" end-field="activity output" />
 	<field type="ActivityOutputModel" name="activity output" end-list="activity exception" />
 </model>
