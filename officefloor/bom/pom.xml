@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -88,7 +87,6 @@
 		<netty-version>4.1.37.Final</netty-version>
 		<objectify-version>6.0.4</objectify-version>
 		<postgresql-version>42.2.6</postgresql-version>
-		<rapidoid-version>5.5.4</rapidoid-version>
 		<scala-maven-version>4.0.2</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
 		<scalacheck-version>1.14.0</scalacheck-version>
@@ -98,6 +96,7 @@
 		<slf4j-version>1.7.26</slf4j-version>
 		<spring-version>2.1.6.RELEASE</spring-version>
 		<tika-version>1.21</tika-version>
+		<undertow-version>2.0.28.Final</undertow-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
 	</properties>
 	<dependencyManagement>
@@ -214,7 +213,7 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.server</groupId>
-				<artifactId>officeserver_rapidoid</artifactId>
+				<artifactId>officeserver_undertow</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Web -->
@@ -412,9 +411,9 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.rapidoid</groupId>
-				<artifactId>rapidoid-web</artifactId>
-				<version>${rapidoid-version}</version>
+				<groupId>io.undertow</groupId>
+				<artifactId>undertow-core</artifactId>
+				<version>${undertow-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -798,10 +797,8 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
+										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true" command="create" />
 									</target>
 								</configuration>
 							</execution>
@@ -816,10 +813,8 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
+										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true" command="create" />
 									</target>
 								</configuration>
 							</execution>
