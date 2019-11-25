@@ -52,6 +52,7 @@ import net.officefloor.server.http.impl.NonMaterialisedHttpHeader;
 import net.officefloor.server.http.impl.NonMaterialisedHttpHeaders;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
 import net.officefloor.server.http.impl.SerialisableHttpHeader;
+import net.officefloor.server.stream.BufferJvmFix;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBuffer.FileBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
@@ -369,7 +370,7 @@ public class UndertowHttpServerImplementation extends AbstractUndertowHttpServer
 		 */
 		private void prepareStreamBuffer(StreamBuffer<ByteBuffer> buffer) {
 			if (buffer.pooledBuffer != null) {
-				buffer.pooledBuffer.flip();
+				BufferJvmFix.flip(buffer.pooledBuffer);
 			}
 		}
 
