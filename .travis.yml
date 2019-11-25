@@ -1,7 +1,5 @@
 sudo: required
 services: docker
-cache:
-  directories: $HOME/.m2
 install: ./.travis-install.sh
 script: ./.travis-script.sh
 jobs:
