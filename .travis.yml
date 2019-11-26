@@ -1,8 +1,6 @@
 sudo: required
 services: docker
-install:
-	- ./.travis-maven.sh
-	- ./.travis-install.sh
+install: ./.travis-install.sh
 script: ./.travis-script.sh
 jobs:
   include:
