@@ -520,6 +520,16 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	}
 
 	/**
+	 * Ensure can handle raw single HTTP request.
+	 * 
+	 * @throws Exception If test failure.
+	 */
+	public void testRawSingleRequest() throws Exception {
+		this.startAppropriateHttpServer(null);
+		this.doSingleRequest(false);
+	}
+
+	/**
 	 * Ensure can send a single HTTP request.
 	 * 
 	 * @throws Exception If test failure.
@@ -764,12 +774,15 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 	private void doSocketTest(boolean isSecure) throws Exception {
 		this.startHttpServer(Servicer.class);
 
+		// Ensure can connect
+		this.doSingleRequest(isSecure);
+
 		// Create connection to server
-		try (Socket socket = (isSecure
-				? OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
-						.createSocket(InetAddress.getLocalHost(), this.serverLocation.getHttpsPort())
-				: SocketFactory.getDefault().createSocket(InetAddress.getLocalHost(),
-						this.serverLocation.getHttpPort()))) {
+		InetAddress localhost = isSecure ? InetAddress.getLocalHost() : InetAddress.getByName("localhost");
+		int port = isSecure ? this.serverLocation.getHttpsPort() : this.serverLocation.getHttpPort();
+		try (Socket socket = (isSecure ? OfficeFloorDefaultSslContextSource.createClientSslContext(null)
+				.getSocketFactory().createSocket(localhost, port)
+				: SocketFactory.getDefault().createSocket(localhost, port))) {
 
 			// Send the request
 			socket.getOutputStream().write(this.createPipelineRequestData());
@@ -945,37 +958,38 @@ public abstract class AbstractHttpServerImplementationTest<M> extends OfficeFram
 		}
 
 		// Create connection to server
-		Socket socket = (isSecure
-				? OfficeFloorDefaultSslContextSource.createClientSslContext(null).getSocketFactory()
-						.createSocket(InetAddress.getLocalHost(), this.serverLocation.getHttpsPort())
-				: SocketFactory.getDefault().createSocket(InetAddress.getLocalHost(),
-						this.serverLocation.getHttpPort()));
+		InetAddress localhost = InetAddress.getLocalHost();
+		int port = isSecure ? this.serverLocation.getHttpsPort() : this.serverLocation.getHttpPort();
+		try (Socket socket = (isSecure ? OfficeFloorDefaultSslContextSource.createClientSslContext(null)
+				.getSocketFactory().createSocket(localhost, port)
+				: SocketFactory.getDefault().createSocket(localhost, port))) {
 
-		// Send many requests
-		OutputStream socketOutput = socket.getOutputStream();
-		socketOutput.write(this.createPipelineRequestData());
-		socketOutput.flush();
+			// Send many requests
+			OutputStream socketOutput = socket.getOutputStream();
+			socketOutput.write(this.createPipelineRequestData());
+			socketOutput.flush();
 
-		// Wait for blocking on servicing
-		long startTime = System.currentTimeMillis();
-		synchronized (CancelConnectionServicer.isContinue) {
-			while (!CancelConnectionServicer.isBlocked) {
-				this.timeout(startTime);
-				CancelConnectionServicer.isContinue.wait(10);
+			// Wait for blocking on servicing
+			long startTime = System.currentTimeMillis();
+			synchronized (CancelConnectionServicer.isContinue) {
+				while (!CancelConnectionServicer.isBlocked) {
+					this.timeout(startTime);
+					CancelConnectionServicer.isContinue.wait(10);
+				}
 			}
+
+			// Sever (close) the connection
+			socket.close();
+
+			// Trigger servicing
+			synchronized (CancelConnectionServicer.isContinue) {
+				CancelConnectionServicer.isContinue[0] = true;
+				CancelConnectionServicer.isContinue.notifyAll();
+			}
+
+			// Wait for completion
+			this.waitForTrue(() -> mos.completed.get() == 1);
 		}
-
-		// Sever (close) the connection
-		socket.close();
-
-		// Trigger servicing
-		synchronized (CancelConnectionServicer.isContinue) {
-			CancelConnectionServicer.isContinue[0] = true;
-			CancelConnectionServicer.isContinue.notifyAll();
-		}
-
-		// Wait for completion
-		this.waitForTrue(() -> mos.completed.get() == 1);
 	}
 
 	public static class CancelConnectionServicer {
