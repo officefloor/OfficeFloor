@@ -85,7 +85,7 @@
 	</exceptions>
 
 	<outputs>
-		<output name="OUTPUT_1" argument-type="java.lang.String" x="400" y="401" />
+		<output name="OUTPUT_1" parameter-type="java.lang.String" x="400" y="401" />
 		<input name="INPUT_2" x="402" y="403" />
 	</outputs>
 

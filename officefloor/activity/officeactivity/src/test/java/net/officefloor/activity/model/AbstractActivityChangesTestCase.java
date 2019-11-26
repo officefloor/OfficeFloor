@@ -74,9 +74,9 @@ public abstract class AbstractActivityChangesTestCase extends AbstractChangesTes
 
 	@Override
 	protected ActivityModel retrieveModel(ConfigurationItem configurationItem) throws Exception {
-		ActivityModel woof = new ActivityModel();
-		new ActivityRepositoryImpl(new ModelRepositoryImpl()).retrieveActivity(woof, configurationItem);
-		return woof;
+		ActivityModel activity = new ActivityModel();
+		new ActivityRepositoryImpl(new ModelRepositoryImpl()).retrieveActivity(activity, configurationItem);
+		return activity;
 	}
 
 	@Override

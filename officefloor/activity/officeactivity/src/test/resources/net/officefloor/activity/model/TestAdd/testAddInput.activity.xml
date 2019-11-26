@@ -1,0 +1,7 @@
+<activity>
+
+	<inputs>
+		<input name="INPUT" argument-type="java.lang.String" />
+	</inputs>
+
+</activity>

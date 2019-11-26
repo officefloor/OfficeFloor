@@ -1,0 +1,12 @@
+<activity>
+
+	<procedures>
+		<procedure name="PROCEDURE-2" resource="resource2" source="JavaScript" procedure="function">
+			<next />
+		</procedure>
+		<procedure name="PROCEDURE" resource="resource1" source="Class" procedure="method">
+			<next />
+		</procedure>
+	</procedures>
+
+</activity>
