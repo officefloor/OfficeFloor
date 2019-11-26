@@ -1,6 +1,6 @@
 sudo: required
 services: docker
-install: ./.travis-install.sh
+install: . ./.travis-install.sh
 script: ./.travis-script.sh
 jobs:
   include:

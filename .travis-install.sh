@@ -3,7 +3,7 @@ set -x
 set -e
 
 # Ensure appropriate maven version installed
-./.travis-maven.sh
+. ./.travis-maven.sh
 
 # Default Travix install except avoids archetype integration test also
 cd officefloor/bom
