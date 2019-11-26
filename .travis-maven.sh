@@ -2,6 +2,7 @@
 set -x
 set -e
 
+# Determine if configured custom maven version
 if [ -z "${CUSTOM_MVN_VERSION}" ]; then
 	# No customisation of maven
 	echo "Using default Maven"
