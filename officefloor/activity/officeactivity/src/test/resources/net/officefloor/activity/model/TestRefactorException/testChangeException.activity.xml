@@ -1,0 +1,29 @@
+<woof>
+
+	<procedures>
+		<procedure name="PROCEDURE" />
+	</procedures>
+
+	<sections>
+		<section name="SECTION">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<outputs>
+		<output name="OUTPUT" />
+	</outputs>
+
+	<exceptions>
+		<exception class="java.lang.NullPointerException">
+			<procedure name="PROCEDURE" />
+		</exception>
+		<exception class="java.io.IOException">
+			<input section="SECTION" input="INPUT" />
+		</exception>
+		<exception class="java.sql.SQLException">
+			<output name="OUTPUT" />
+		</exception>
+	</exceptions>
+
+</woof>

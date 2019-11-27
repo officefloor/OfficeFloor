@@ -258,7 +258,7 @@ public interface ActivityChanges {
 	 * @param output        {@link ActivityOutputModel}.
 	 * @return {@link Change} to make the link.
 	 */
-	Change<ActivityProcedureNextToActivityProcedureModel> linkProcedureNextToOutput(
+	Change<ActivityProcedureNextToActivityOutputModel> linkProcedureNextToOutput(
 			ActivityProcedureNextModel procedureNext, ActivityOutputModel output);
 
 	/**
@@ -318,7 +318,7 @@ public interface ActivityChanges {
 	 * @param output          {@link ActivityOutputModel}.
 	 * @return {@link Change} to make the link.
 	 */
-	Change<ActivityProcedureOutputToActivityProcedureModel> linkProcedureOutputToOutput(
+	Change<ActivityProcedureOutputToActivityOutputModel> linkProcedureOutputToOutput(
 			ActivityProcedureOutputModel procedureOutput, ActivityOutputModel output);
 
 	/**
@@ -378,7 +378,7 @@ public interface ActivityChanges {
 	 * @param output        {@link ActivityOutputModel}.
 	 * @return {@link Change} to make the link.
 	 */
-	Change<ActivitySectionOutputToActivityProcedureModel> linkSectionOutputToOutput(
+	Change<ActivitySectionOutputToActivityOutputModel> linkSectionOutputToOutput(
 			ActivitySectionOutputModel sectionOutput, ActivityOutputModel output);
 
 	/**

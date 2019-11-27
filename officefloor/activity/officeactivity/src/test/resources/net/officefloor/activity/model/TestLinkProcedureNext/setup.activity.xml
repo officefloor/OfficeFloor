@@ -1,0 +1,30 @@
+<activity>
+
+	<procedures>
+		<procedure name="A">
+			<next />
+		</procedure>
+		<procedure name="B">
+			<next>
+				<procedure name="A" />
+				<section name="SECTION" input="INPUT" />
+				<output name="OUTPUT" />
+			</next>
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="SECTION">
+			<input name="INPUT" />
+		</section>
+		<section name="SECTION_LINK">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<outputs>
+		<output name="OUTPUT" />
+		<output name="OUTPUT_LINK" />
+	</outputs>
+
+</activity>
