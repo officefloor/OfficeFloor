@@ -62,7 +62,7 @@ public class ActivityModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the Inputs
 		// ----------------------------------------
 		List<ActivityInputModel> inputs = activity.getActivityInputs();
-		assertList(new String[] { "getInputName", "getArgumentTYpe", "getX", "getY" }, inputs,
+		assertList(new String[] { "getActivityInputName", "getArgumentType", "getX", "getY" }, inputs,
 				new ActivityInputModel("INPUT_1", String.class.getName(), 100, 101),
 				new ActivityInputModel("INPUT_2", null, 102, 103), new ActivityInputModel("INPUT_3", null, 104, 105),
 				new ActivityInputModel("INPUT_4", null, 106, 107));
@@ -83,7 +83,7 @@ public class ActivityModelRepositoryTest extends OfficeFrameTestCase {
 				new ActivityProcedureModel("PROCEDURE_A", "net.example.ExampleProcedure", "Class", "procedure", 100,
 						101),
 				new ActivityProcedureModel("PROCEDURE_B", "net.example.KotlinProcedure", "Kotlin", "method", 102, 103),
-				new ActivityProcedureModel("PROCEDURE_C", "net.example.ScalaProcedure", "Scala", "function", 104, 105),
+				new ActivityProcedureModel("PROCEDURE_C", "net.example.ScalaProcedure", "Scala", "func", 104, 105),
 				new ActivityProcedureModel("PROCEDURE_D", "net.example.JavaScriptProcedure", "JavaScript", "function",
 						106, 107));
 		List<ActivityProcedureModel> procedures = activity.getActivityProcedures();
@@ -115,7 +115,7 @@ public class ActivityModelRepositoryTest extends OfficeFrameTestCase {
 		ActivityProcedureOutputModel procedureOutputProcedure = procedure.getOutputs().get(1);
 		assertProperties(new ActivityProcedureOutputToActivityProcedureModel("PROCEDURE_B"),
 				procedureOutputProcedure.getActivityProcedure(), "getProcedureName");
-		ActivityProcedureOutputModel procedureOutputOutput = procedure.getOutputs().get(1);
+		ActivityProcedureOutputModel procedureOutputOutput = procedure.getOutputs().get(2);
 		assertProperties(new ActivityProcedureOutputToActivityOutputModel("OUTPUT_2"),
 				procedureOutputOutput.getActivityOutput(), "getOutputName");
 
@@ -143,7 +143,7 @@ public class ActivityModelRepositoryTest extends OfficeFrameTestCase {
 		assertProperties(new ActivitySectionOutputToActivitySectionInputModel("SECTION_B", "INPUT_0"),
 				sectionOutputSectionInput.getActivitySectionInput(), "getSectionName", "getInputName");
 		ActivitySectionOutputModel sectionOutputProcedure = section.getOutputs().get(1);
-		assertProperties(new ActivitySectionOutputToActivityProcedureModel("PROCEDURE_A"),
+		assertProperties(new ActivitySectionOutputToActivityProcedureModel("PROCEDURE_B"),
 				sectionOutputProcedure.getActivityProcedure(), "getProcedureName");
 		ActivitySectionOutputModel sectionOutputOutput = section.getOutputs().get(2);
 		assertProperties(new ActivitySectionOutputToActivityOutputModel("OUTPUT_2"),
@@ -170,8 +170,8 @@ public class ActivityModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the outputs
 		// ----------------------------------------
-		assertList(new String[] { "getOutputName", "getParameterType", "getX", "getY" }, activity.getActivityOutputs(),
-				new ActivityOutputModel("OUTPUT_1", String.class.getName(), 400, 401),
+		assertList(new String[] { "getActivityOutputName", "getParameterType", "getX", "getY" },
+				activity.getActivityOutputs(), new ActivityOutputModel("OUTPUT_1", String.class.getName(), 400, 401),
 				new ActivityOutputModel("OUTPUT_2", null, 402, 403));
 	}
 

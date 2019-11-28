@@ -73,6 +73,38 @@ public class ActivityRepositoryImpl implements ActivityRepository {
 			procedures.put(procedure.getActivityProcedureName(), procedure);
 		}
 
+		// Create the set of Outputs
+		Map<String, ActivityOutputModel> outputs = new HashMap<>();
+		for (ActivityOutputModel output : woof.getActivityOutputs()) {
+			outputs.put(output.getActivityOutputName(), output);
+		}
+
+		// Connect Inputs
+		for (ActivityInputModel input : woof.getActivityInputs()) {
+			Connector<ActivityInputModel> connector = new Connector<>(input);
+
+			// Section Inputs
+			connector.connect(input.getActivitySectionInput(),
+					(conn) -> sectionInputs.get(conn.getSectionName(), conn.getInputName()), (conn, source, target) -> {
+						conn.setActivityInput(input);
+						conn.setActivitySectionInput(target);
+					});
+
+			// Procedures
+			connector.connect(input.getActivityProcedure(), (conn) -> procedures.get(conn.getProcedureName()),
+					(conn, source, target) -> {
+						conn.setActivityInput(source);
+						conn.setActivityProcedure(target);
+					});
+
+			// Outputs
+			connector.connect(input.getActivityOutput(), (conn) -> outputs.get(conn.getOutputName()),
+					(conn, source, target) -> {
+						conn.setActivityInput(source);
+						conn.setActivityOutput(target);
+					});
+		}
+
 		// Connect Section Outputs
 		for (ActivitySectionModel section : woof.getActivitySections()) {
 			for (ActivitySectionOutputModel sectionOutput : section.getOutputs()) {
@@ -91,6 +123,13 @@ public class ActivityRepositoryImpl implements ActivityRepository {
 						(conn) -> procedures.get(conn.getProcedureName()), (conn, source, target) -> {
 							conn.setActivitySectionOutput(source);
 							conn.setActivityProcedure(target);
+						});
+
+				// Outputs
+				connector.connect(sectionOutput.getActivityOutput(), (conn) -> outputs.get(conn.getOutputName()),
+						(conn, source, target) -> {
+							conn.setActivitySectionOutput(source);
+							conn.setActivityOutput(target);
 						});
 			}
 		}
@@ -117,6 +156,13 @@ public class ActivityRepositoryImpl implements ActivityRepository {
 							conn.setActivityProcedureNext(source);
 							conn.setActivityProcedure(target);
 						});
+
+				// Outputs
+				connector.connect(procedureNext.getActivityOutput(), (conn) -> outputs.get(conn.getOutputName()),
+						(conn, source, target) -> {
+							conn.setActivityProcedureNext(source);
+							conn.setActivityOutput(target);
+						});
 			}
 
 			// Link outputs
@@ -137,6 +183,13 @@ public class ActivityRepositoryImpl implements ActivityRepository {
 							conn.setActivityProcedureOutput(source);
 							conn.setActivityProcedure(target);
 						});
+
+				// Outputs
+				connector.connect(procedureOutput.getActivityOutput(), (conn) -> outputs.get(conn.getOutputName()),
+						(conn, source, target) -> {
+							conn.setActivityProcedureOutput(source);
+							conn.setActivityOutput(target);
+						});
 			}
 		}
 
@@ -156,6 +209,13 @@ public class ActivityRepositoryImpl implements ActivityRepository {
 					(conn, source, target) -> {
 						conn.setActivityException(source);
 						conn.setActivityProcedure(target);
+					});
+
+			// Outputs
+			connector.connect(exception.getActivityOutput(), (conn) -> outputs.get(conn.getOutputName()),
+					(conn, source, target) -> {
+						conn.setActivityException(source);
+						conn.setActivityOutput(target);
 					});
 		}
 	}
@@ -223,6 +283,12 @@ public class ActivityRepositoryImpl implements ActivityRepository {
 		for (ActivitySectionModel section : woof.getActivitySections()) {
 			for (ActivitySectionInputModel input : section.getInputs()) {
 
+				// Specify inputs
+				for (ActivityInputToActivitySectionInputModel conn : input.getActivityInputs()) {
+					conn.setSectionName(section.getActivitySectionName());
+					conn.setInputName(input.getActivitySectionInputName());
+				}
+
 				// Specify section outputs
 				for (ActivitySectionOutputToActivitySectionInputModel conn : input.getActivitySectionOutputs()) {
 					conn.setSectionName(section.getActivitySectionName());
@@ -252,6 +318,11 @@ public class ActivityRepositoryImpl implements ActivityRepository {
 		// Specify procedure
 		for (ActivityProcedureModel procedure : woof.getActivityProcedures()) {
 
+			// Specify inputs
+			for (ActivityInputToActivityProcedureModel conn : procedure.getActivityInputs()) {
+				conn.setProcedureName(procedure.getActivityProcedureName());
+			}
+
 			// Specify section outputs
 			for (ActivitySectionOutputToActivityProcedureModel conn : procedure.getActivitySectionOutputs()) {
 				conn.setProcedureName(procedure.getActivityProcedureName());
@@ -270,6 +341,35 @@ public class ActivityRepositoryImpl implements ActivityRepository {
 			// Specify exceptions
 			for (ActivityExceptionToActivityProcedureModel conn : procedure.getActivityExceptions()) {
 				conn.setProcedureName(procedure.getActivityProcedureName());
+			}
+		}
+
+		// Specify outputs
+		for (ActivityOutputModel output : woof.getActivityOutputs()) {
+
+			// Specify inputs
+			for (ActivityInputToActivityOutputModel conn : output.getActivityInputs()) {
+				conn.setOutputName(output.getActivityOutputName());
+			}
+
+			// Specify section outputs
+			for (ActivitySectionOutputToActivityOutputModel conn : output.getActivitySectionOutputs()) {
+				conn.setOutputName(output.getActivityOutputName());
+			}
+
+			// Specify procedure next
+			for (ActivityProcedureNextToActivityOutputModel conn : output.getActivityProcedureNexts()) {
+				conn.setOutputName(output.getActivityOutputName());
+			}
+
+			// Specify procedure output
+			for (ActivityProcedureOutputToActivityOutputModel conn : output.getActivityProcedureOutputs()) {
+				conn.setOutputName(output.getActivityOutputName());
+			}
+
+			// Specify exceptions
+			for (ActivityExceptionToActivityOutputModel conn : output.getActivityExceptions()) {
+				conn.setOutputName(output.getActivityOutputName());
 			}
 		}
 

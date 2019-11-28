@@ -75,7 +75,7 @@ public class ActivityRepositoryTest extends OfficeFrameTestCase {
 		procedure.setNext(procedureNext);
 		ActivityExceptionModel exception = new ActivityExceptionModel("EXCEPTION");
 		activity.addActivityException(exception);
-		ActivityOutputModel output = new ActivityOutputModel();
+		ActivityOutputModel output = new ActivityOutputModel("OUTPUT", null);
 		activity.addActivityOutput(output);
 
 		/*
@@ -288,7 +288,7 @@ public class ActivityRepositoryTest extends OfficeFrameTestCase {
 		procedure.addOutput(procedureOutput);
 		ActivityExceptionModel exception = new ActivityExceptionModel("EXCEPTION");
 		woof.addActivityException(exception);
-		ActivityOutputModel output = new ActivityOutputModel();
+		ActivityOutputModel output = new ActivityOutputModel("OUTPUT", null);
 		woof.addActivityOutput(output);
 
 		// Input links

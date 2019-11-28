@@ -10,7 +10,7 @@
 		<input name="INPUT_3" x="104" y="105">
 			<output name="OUTPUT_2" />
 		</input>
-		<input name="INPUT_2" x="106" y="107" />
+		<input name="INPUT_4" x="106" y="107" />
 	</inputs>
 
 	<procedures>
@@ -41,7 +41,7 @@
 		<procedure name="PROCEDURE_C" resource="net.example.ScalaProcedure" source="Scala" procedure="func" x="104"
 			y="105">
 			<next>
-				<output path="OUTPUT_2" />
+				<output name="OUTPUT_2" />
 			</next>
 		</procedure>
 		<procedure name="PROCEDURE_D" resource="net.example.JavaScriptProcedure" source="JavaScript"
@@ -78,15 +78,15 @@
 		<exception class="java.io.IOException" x="302" y="303">
 			<procedure name="PROCEDURE_A" />
 		</exception>
-		<exception class="java.lang.NullPointerException" x="306" y="307">
+		<exception class="java.lang.NullPointerException" x="304" y="305">
 			<output name="OUTPUT_2" />
 		</exception>
-		<exception class="java.lang.Throwable" x="304" y="305" />
+		<exception class="java.lang.Throwable" x="306" y="307" />
 	</exceptions>
 
 	<outputs>
 		<output name="OUTPUT_1" parameter-type="java.lang.String" x="400" y="401" />
-		<input name="INPUT_2" x="402" y="403" />
+		<output name="OUTPUT_2" x="402" y="403" />
 	</outputs>
 
 </activity>
