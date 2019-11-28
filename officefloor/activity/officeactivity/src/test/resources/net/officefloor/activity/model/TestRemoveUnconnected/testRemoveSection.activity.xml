@@ -1,0 +1,21 @@
+<activity>
+
+	<inputs>
+		<input input="INPUT" />
+	</inputs>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method" />
+	</procedures>
+
+	<sections />
+
+	<exceptions>
+		<exception class="java.lang.Exception" />
+	</exceptions>
+
+	<outputs>
+		<output name="OUTPUT" />
+	</outputs>
+
+</activity>

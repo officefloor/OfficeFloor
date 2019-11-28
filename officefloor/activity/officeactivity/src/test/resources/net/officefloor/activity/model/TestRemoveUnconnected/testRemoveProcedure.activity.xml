@@ -1,0 +1,21 @@
+<activity>
+
+	<inputs>
+		<input input="INPUT" />
+	</inputs>
+
+	<procedures />
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION" />
+	</sections>
+
+	<exceptions>
+		<exception class="java.lang.Exception" />
+	</exceptions>
+
+	<outputs>
+		<output name="OUTPUT" />
+	</outputs>
+
+</activity>
