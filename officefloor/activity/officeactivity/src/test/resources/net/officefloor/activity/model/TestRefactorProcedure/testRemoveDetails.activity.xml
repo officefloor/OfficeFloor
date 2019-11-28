@@ -1,0 +1,49 @@
+<activity>
+
+	<inputs>
+		<input name="INPUT">
+			<procedure name="PROCEDURE" />
+		</input>
+	</inputs>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<template path="/template" />
+				<section name="SECTION" input="INPUT" />
+				<security name="SECURITY" />
+				<resource path="/resource.html" />
+				<redirect path="/path" />
+				<procedure name="PROCEDURE_LINK" />
+			</next>
+		</procedure>
+		<procedure name="PROCEDURE_LINK" resource="resource" source="JavaScript" procedure="function">
+			<next>
+				<procedure name="PROCEDURE" />
+			</next>
+			<output name="OUTPUT">
+				<procedure name="PROCEDURE" />
+			</output>
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<procedure name="PROCEDURE" />
+			</output>
+		</section>
+	</sections>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<procedure name="PROCEDURE" />
+		</exception>
+	</exceptions>
+
+	<outputs>
+		<output name="OUTPUT" />
+	</outputs>
+
+</activity>

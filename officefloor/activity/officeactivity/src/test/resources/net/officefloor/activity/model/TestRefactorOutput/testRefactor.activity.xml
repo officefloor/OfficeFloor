@@ -1,0 +1,47 @@
+<activity>
+
+	<inputs>
+		<input name="INPUT">
+			<output path="CHANGE" />
+		</input>
+	</inputs>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<output path="CHANGE" />
+			</next>
+			<output name="OUTPUT">
+				<output path="CHANGE" />
+			</output>
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
+			<output name="OUTPUT">
+				<output path="CHANGE" />
+			</output>
+		</section>
+	</sections>
+
+	<securities>
+		<security name="SECURITY" source="net.example.HttpSecuritySource">
+			<output name="OUTPUT">
+				<output path="CHANGE" />
+			</output>
+		</security>
+	</securities>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<output path="CHANGE" />
+		</exception>
+	</exceptions>
+
+	<outputs>
+		<output name="CHANGE" parameter-type="java.lang.String" />
+		<input name="EXISTS" />
+	</outputs>
+
+</activity>

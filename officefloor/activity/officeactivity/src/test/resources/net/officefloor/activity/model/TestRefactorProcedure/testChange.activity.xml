@@ -1,0 +1,55 @@
+<activity>
+
+	<inputs>
+		<input name="INPUT">
+			<procedure name="CHANGE" />
+		</input>
+	</inputs>
+
+	<procedures>
+		<procedure name="CHANGE" resource="resource_change" source="JavaScript" procedure="function">
+			<property name="name.1" value="value.one" />
+			<property name="name.two" value="value.2" />
+			<next argument-type="java.lang.Short">
+				<section name="SECTION" input="INPUT" />
+			</next>
+			<output name="OUTPUT_A" argument-type="java.lang.Integer">
+				<procedure name="PROCEDURE_LINK" />
+			</output>
+			<output name="OUTPUT_B" argument-type="java.lang.String">
+				<section name="SECTION" input="INPUT" />
+			</output>
+			<output name="OUTPUT_C">
+				<output name="OUTPUT" />
+			</output>
+		</procedure>
+		<procedure name="PROCEDURE_LINK" resource="resource" source="JavaScript" procedure="function">
+			<next>
+				<procedure name="CHANGE" />
+			</next>
+			<output name="OUTPUT">
+				<procedure name="CHANGE" />
+			</output>
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<procedure name="CHANGE" />
+			</output>
+		</section>
+	</sections>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<procedure name="CHANGE" />
+		</exception>
+	</exceptions>
+
+	<outputs>
+		<output name="OUTPUT" />
+	</outputs>
+
+</activity>

@@ -1,0 +1,53 @@
+<activity>
+
+	<inputs>
+		<input name="INPUT">
+			<section name="CHANGE" input="INPUT_CHANGE" />
+		</input>
+	</inputs>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<section name="CHANGE" input="INPUT_CHANGE" />
+			</next>
+			<output name="OUTPUT">
+				<section name="CHANGE" input="INPUT_CHANGE" />
+			</output>
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="CHANGE" source="net.example.ChangeSectionSource" location="CHANGE_LOCATION">
+			<property name="name.1" value="value.one" />
+			<property name="name.two" value="value.2" />
+			<input name="INPUT_CHANGE" parameter-type="java.lang.Double" />
+			<output name="OUTPUT_A" argument-type="java.lang.Integer">
+				<procedure name="PROCEDURE" />
+			</output>
+			<output name="OUTPUT_B" argument-type="java.lang.String">
+				<section name="SECTION_LINK" input="INPUT" />
+			</output>
+			<output name="OUTPUT_C">
+				<output name="OUTPUT" />
+			</output>
+		</section>
+		<section name="SECTION_LINK" source="net.example.LinkSectionSource" location="LINK_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<section name="CHANGE" input="INPUT_CHANGE" />
+			</output>
+		</section>
+	</sections>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<section name="CHANGE" input="INPUT_CHANGE" />
+		</exception>
+	</exceptions>
+
+	<outputs>
+		<output name="OUTPUT" />
+	</outputs>
+
+</activity>
