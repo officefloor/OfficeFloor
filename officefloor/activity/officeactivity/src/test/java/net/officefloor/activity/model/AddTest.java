@@ -57,16 +57,11 @@ public class AddTest extends AbstractActivityChangesTestCase {
 	 */
 	public void testAddMultipleInputs() {
 
-		// Add the input
+		// Add the inputs
+		this.operations.addInput("INPUT", Integer.class.getName()).apply();
 		this.operations.addInput("INPUT", String.class.getName()).apply();
-		this.validateModel();
 
-		// Ensure can not add input again
-		Change<ActivityInputModel> change = this.operations.addInput("INPUT", null);
-		assertFalse("Should not be able to add same input", change.canApply());
-
-		// Ensure not add
-		change.apply();
+		// Ensure appropriately added sections
 		this.validateModel();
 	}
 
@@ -229,16 +224,11 @@ public class AddTest extends AbstractActivityChangesTestCase {
 	 */
 	public void testAddMultipleOutputs() {
 
-		// Add the output
+		// Add the outputs
 		this.operations.addOutput("OUTPUT", String.class.getName()).apply();
-		this.validateModel();
+		this.operations.addOutput("OUTPUT", Integer.class.getName()).apply();
 
-		// Ensure can not add output again
-		Change<ActivityOutputModel> change = this.operations.addOutput("OUTPUT", null);
-		assertFalse("Should not be able to add same output", change.canApply());
-
-		// Ensure not add
-		change.apply();
+		// Ensure appropriately added sections
 		this.validateModel();
 	}
 

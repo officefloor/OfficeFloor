@@ -2,17 +2,17 @@
 
 	<inputs>
 		<input name="INPUT">
-			<output name="CHANGE" />
+			<output name="EXISTS-2" />
 		</input>
 	</inputs>
 
 	<procedures>
 		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
 			<next>
-				<output name="CHANGE" />
+				<output name="EXISTS-2" />
 			</next>
 			<output name="OUTPUT">
-				<output name="CHANGE" />
+				<output name="EXISTS-2" />
 			</output>
 		</procedure>
 	</procedures>
@@ -20,20 +20,20 @@
 	<sections>
 		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
 			<output name="OUTPUT">
-				<output name="CHANGE" />
+				<output name="EXISTS-2" />
 			</output>
 		</section>
 	</sections>
 
 	<exceptions>
 		<exception class="java.io.IOException">
-			<output name="CHANGE" />
+			<output name="EXISTS-2" />
 		</exception>
 	</exceptions>
 
 	<outputs>
-		<output name="CHANGE" parameter-type="java.lang.String" />
 		<output name="EXISTS" />
+		<output name="EXISTS-2" />
 	</outputs>
 
 </activity>

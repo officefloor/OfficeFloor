@@ -3,7 +3,7 @@
 	<procedures>
 		<procedure name="A">
 			<output name="OUTPUT">
-				<resource path="/resource.png" />
+				<output name="OUTPUT_LINK" />
 			</output>
 		</procedure>
 		<procedure name="B">

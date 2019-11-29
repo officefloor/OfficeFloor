@@ -178,7 +178,7 @@ public class LinkInputTest extends AbstractActivityChangesTestCase {
 		Change<ActivityInputToActivityOutputModel> change = this.operations.removeInputToOutput(link);
 
 		// Validate change
-		this.assertChange(change, null, "Remove HTTP Input to Output", true);
+		this.assertChange(change, null, "Remove Input to Output", true);
 	}
 
 }

@@ -81,7 +81,7 @@ public abstract class AbstractActivityChangesTestCase extends AbstractChangesTes
 
 	@Override
 	protected ActivityChanges createModelOperations(ActivityModel model) {
-		return null; // new ActivityChangesImpl(model);
+		return new ActivityChangesImpl(model);
 	}
 
 	@Override

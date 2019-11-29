@@ -70,9 +70,9 @@ public class RefactorSectionTest extends AbstractActivityChangesTestCase {
 
 		// Create the section type
 		SectionType sectionType = this.constructSectionType((context) -> {
-			context.addSectionInput("INPUT", Double.class);
+			context.addSectionInput("INPUT", null);
 			context.addSectionOutput("OUTPUT_A", Integer.class, false);
-			context.addSectionOutput("OUTPUT_B", String.class, false);
+			context.addSectionOutput("OUTPUT_B", null, false);
 			context.addSectionOutput("OUTPUT_C", null, false);
 			context.addSectionOutput("NOT_INCLUDE_ESCALTION", IOException.class, true);
 			context.addSectionObject("IGNORE_OBJECT", DataSource.class, null);

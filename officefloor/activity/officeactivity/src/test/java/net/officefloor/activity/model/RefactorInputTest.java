@@ -34,7 +34,7 @@ public class RefactorInputTest extends AbstractActivityChangesTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.input = this.model.getActivityInputs().get(0);
+		this.input = this.model.getActivityInputs().get(1);
 	}
 
 	/**
@@ -62,15 +62,15 @@ public class RefactorInputTest extends AbstractActivityChangesTestCase {
 	}
 
 	/**
-	 * Ensure not able to refactor to an existing {@link ActivityInputModel}.
+	 * Ensure keeps unique {@link ActivityInputModel} name.
 	 */
 	public void testInputAlreadyExists() {
 
-		// Change to a unique input
+		// Refactor to existing name
 		Change<ActivityInputModel> change = this.operations.refactorInput(this.input, "EXISTS", null);
 
-		// Validate no change (as input is already handled)
-		this.assertChange(change, this.input, "Refactor Input", false, "Input already exists for 'EXISTS'");
+		// Validate change
+		this.assertChange(change, null, "Refactor Input", true);
 	}
 
 }

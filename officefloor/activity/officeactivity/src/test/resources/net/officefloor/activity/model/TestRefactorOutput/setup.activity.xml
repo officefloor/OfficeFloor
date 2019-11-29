@@ -32,7 +32,7 @@
 	</exceptions>
 
 	<outputs>
-		<input name="EXISTS" />
+		<output name="EXISTS" />
 		<output name="OUTPUT" />
 	</outputs>
 

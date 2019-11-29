@@ -1,4 +1,4 @@
-<woof>
+<activity>
 
 	<procedures>
 		<procedure name="PROCEDURE" />
@@ -26,4 +26,4 @@
 		</exception>
 	</exceptions>
 
-</woof>
+</activity>

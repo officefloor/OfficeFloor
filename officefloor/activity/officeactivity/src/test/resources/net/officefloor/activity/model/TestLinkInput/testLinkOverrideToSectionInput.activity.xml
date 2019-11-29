@@ -2,7 +2,7 @@
 
 	<inputs>
 		<input name="INPUT_A" />
-		<input path="INPUT_B">
+		<input name="INPUT_B">
 			<section name="SECTION_LINK" input="INPUT" />
 		</input>
 	</inputs>

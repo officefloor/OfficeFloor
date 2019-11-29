@@ -1,18 +1,8 @@
-<woof>
+<activity>
 
-	<http-continuations>
-		<http-continuation path="/path" />
-	</http-continuations>
-
-	<http-inputs>
-		<http-input path="/path" method="POST" />
-	</http-inputs>
-
-	<templates>
-		<template path="/template" location="example/Template.ofp" class="net.example.LogicClass">
-			<output name="OUTPUT" />
-		</template>
-	</templates>
+	<inputs>
+		<input name="INPUT" />
+	</inputs>
 
 	<procedures>
 		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
@@ -30,22 +20,12 @@
 		</section>
 	</sections>
 
-	<securities>
-		<security name="SECURITY" source="net.example.HttpSecuritySource">
-			<output name="OUTPUT" />
-		</security>
-	</securities>
-
-	<resources>
-		<resource path="/resource.html" />
-	</resources>
-
 	<exceptions>
 		<exception class="java.io.IOException" />
 	</exceptions>
 
-	<starts>
-		<start />
-	</starts>
+	<outputs>
+		<output name="OUTPUT" />
+	</outputs>
 
-</woof>
+</activity>

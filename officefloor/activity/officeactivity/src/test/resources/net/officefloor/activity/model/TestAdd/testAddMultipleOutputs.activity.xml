@@ -2,6 +2,7 @@
 
 	<outputs>
 		<output name="OUTPUT" parameter-type="java.lang.String" />
+		<output name="OUTPUT-2" parameter-type="java.lang.Integer" />
 	</outputs>
 
 </activity>

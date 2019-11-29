@@ -3,7 +3,7 @@
 	<inputs>
 		<input name="INPUT_A" />
 		<input name="INPUT_B">
-			<output path="OUTPUT_LINK" />
+			<output name="OUTPUT_LINK" />
 		</input>
 	</inputs>
 

@@ -9,12 +9,7 @@
 	<procedures>
 		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
 			<next>
-				<template path="/template" />
 				<section name="SECTION" input="INPUT" />
-				<security name="SECURITY" />
-				<resource path="/resource.html" />
-				<redirect path="/path" />
-				<procedure name="PROCEDURE_LINK" />
 			</next>
 		</procedure>
 		<procedure name="PROCEDURE_LINK" resource="resource" source="JavaScript" procedure="function">

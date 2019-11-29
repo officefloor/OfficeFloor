@@ -9,7 +9,7 @@
 		<section name="A">
 			<input name="INPUT" />
 			<output name="OUTPUT">
-				<resource path="/resource.png" />
+				<output name="OUTPUT_LINK" />
 			</output>
 		</section>
 		<section name="B">

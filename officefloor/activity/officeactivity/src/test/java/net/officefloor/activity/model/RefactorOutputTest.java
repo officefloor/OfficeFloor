@@ -34,14 +34,14 @@ public class RefactorOutputTest extends AbstractActivityChangesTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.output = this.model.getActivityOutputs().get(0);
+		this.output = this.model.getActivityOutputs().get(1);
 	}
 
 	/**
 	 * Ensure can refactor.
 	 */
 	public void testRefactor() {
-
+		
 		// Refactor template to change path
 		Change<ActivityOutputModel> change = this.operations.refactorOutput(this.output, "CHANGE",
 				String.class.getName());
@@ -55,11 +55,11 @@ public class RefactorOutputTest extends AbstractActivityChangesTestCase {
 	 */
 	public void testOutputAlreadyExists() {
 
-		// Change to a unique output
+		// Change to a existing output
 		Change<ActivityOutputModel> change = this.operations.refactorOutput(this.output, "EXISTS", null);
 
-		// Validate no change (as output is already handled)
-		this.assertChange(change, this.output, "Refactor Output", false, "Output already exists for 'EXISTS'");
+		// Validate the change
+		this.assertChange(change, this.output, "Refactor Output", true);
 	}
 
 }

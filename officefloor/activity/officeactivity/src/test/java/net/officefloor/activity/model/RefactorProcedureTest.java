@@ -66,7 +66,7 @@ public class RefactorProcedureTest extends AbstractActivityChangesTestCase {
 		// Create the procedure type
 		ProcedureType procedureType = this.constructProcedureType("procedure", String.class, (context) -> {
 			context.addFlow("OUTPUT_A", Integer.class);
-			context.addFlow("OUTPUT_B", String.class);
+			context.addFlow("OUTPUT_B", null);
 			context.addFlow("OUTPUT_C", null);
 			context.addEscalation(IOException.class);
 			context.addObject("IGNORE_OBJECT", DataSource.class, null);

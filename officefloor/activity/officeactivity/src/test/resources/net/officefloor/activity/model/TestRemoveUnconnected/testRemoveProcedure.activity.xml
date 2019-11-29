@@ -1,7 +1,7 @@
 <activity>
 
 	<inputs>
-		<input input="INPUT" />
+		<input name="INPUT" />
 	</inputs>
 
 	<procedures />
