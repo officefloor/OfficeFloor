@@ -59,8 +59,8 @@ public class ManagedObjectLoaderUtil {
 	 * Validates the {@link ManagedObjectSourceSpecification} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param                     <M> Dependency keys type.
-	 * @param                     <F> {@link Flow} keys type.
+	 * @param <M>                 Dependency keys type.
+	 * @param <F>                 {@link Flow} keys type.
 	 * @param managedObjectSource {@link ManagedObjectSource} class.
 	 * @param propertyNameLabels  Listing of name/label pairs for the
 	 *                            {@link Property} instances.
@@ -84,9 +84,9 @@ public class ManagedObjectLoaderUtil {
 	 * Validates the {@link ManagedObjectSourceSpecification} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param                          <M> Dependency keys type.
-	 * @param                          <F> {@link Flow} keys type.
-	 * @param                          <S> {@link ManagedObjectSource} type.
+	 * @param <M>                      Dependency keys type.
+	 * @param <F>                      {@link Flow} keys type.
+	 * @param <S>                      {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
 	 * @param propertyNameLabels       Listing of name/label pairs for the
 	 *                                 {@link Property} instances.
@@ -122,9 +122,9 @@ public class ManagedObjectLoaderUtil {
 	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType} loaded
 	 * from the {@link ManagedObjectSource}.
 	 * 
-	 * @param                           <M> Dependency keys type.
-	 * @param                           <F> {@link Flow} keys type.
-	 * @param                           <S> {@link ManagedObjectSource} type.
+	 * @param <M>                       Dependency keys type.
+	 * @param <F>                       {@link Flow} keys type.
+	 * @param <S>                       {@link ManagedObjectSource} type.
 	 * @param expectedManagedObjectType Expected {@link ManagedObjectType}.
 	 * @param managedObjectSourceClass  {@link ManagedObjectSource} {@link Class}.
 	 * @param propertyNameValues        Property values to configure the
@@ -148,8 +148,8 @@ public class ManagedObjectLoaderUtil {
 	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType} loaded
 	 * from the {@link ManagedObjectSource}.
 	 * 
-	 * @param                           <M> Dependency keys type.
-	 * @param                           <F> {@link Flow} keys type.
+	 * @param <M>                       Dependency keys type.
+	 * @param <F>                       {@link Flow} keys type.
 	 * @param expectedManagedObjectType Expected {@link ManagedObjectType}.
 	 * @param managedObjectSource       {@link ManagedObjectSource} instance.
 	 * @param propertyNameValues        Property values to configure the
@@ -179,13 +179,8 @@ public class ManagedObjectLoaderUtil {
 	private static <M extends Enum<M>, F extends Enum<F>> ManagedObjectType<M> validateManagedObjectType(
 			ManagedObjectTypeBuilder expectedManagedObjectType, ManagedObjectType<M> aType) {
 
-		// Cast to obtain expected managed object type
-		if (!(expectedManagedObjectType instanceof ManagedObjectType)) {
-			Assert.fail("builder must be created from createManagedObjectTypeBuilder");
-		}
-
-		@SuppressWarnings("unchecked")
-		ManagedObjectType<M> eType = (ManagedObjectType<M>) expectedManagedObjectType;
+		// Build the expected managed object type
+		ManagedObjectType<M> eType = expectedManagedObjectType.build();
 
 		// Verify the types match
 		Assert.assertEquals("Incorrect object type", eType.getObjectType(), aType.getObjectType());
@@ -276,9 +271,9 @@ public class ManagedObjectLoaderUtil {
 	 * {@link ManagedObjectSource} utilising the {@link ClassLoader} from the input
 	 * {@link ManagedObjectSource} class.
 	 * 
-	 * @param                          <M> Dependency keys type.
-	 * @param                          <F> {@link Flow} keys type.
-	 * @param                          <S> {@link ManagedObjectSource} type.
+	 * @param <M>                      Dependency keys type.
+	 * @param <F>                      {@link Flow} keys type.
+	 * @param <S>                      {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
 	 * @param propertyNameValues       {@link Property} name/value listing.
 	 * @return {@link ManagedObjectType}.
@@ -296,9 +291,9 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.
 	 * 
-	 * @param                          <M> Dependency keys type.
-	 * @param                          <F> {@link Flow} keys type.
-	 * @param                          <S> {@link ManagedObjectSource} type.
+	 * @param <M>                      Dependency keys type.
+	 * @param <F>                      {@link Flow} keys type.
+	 * @param <S>                      {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
 	 * @param classLoader              {@link ClassLoader}.
 	 * @param propertyNameValues       {@link Property} name/value listing.
@@ -315,8 +310,8 @@ public class ManagedObjectLoaderUtil {
 	/**
 	 * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.
 	 * 
-	 * @param                     <M> Dependency keys type.
-	 * @param                     <F> {@link Flow} keys type.
+	 * @param <M>                 Dependency keys type.
+	 * @param <F>                 {@link Flow} keys type.
 	 * @param managedObjectSource {@link ManagedObjectSource} instance.
 	 * @param propertyNameValues  {@link Property} name/value listing.
 	 * @return {@link ManagedObjectType}.
@@ -375,8 +370,8 @@ public class ManagedObjectLoaderUtil {
 	 * This is useful for testing abstract {@link ManagedObjectSource} instances
 	 * that delegate configuration to sub classes.
 	 * 
-	 * @param                    <M> Dependency keys type.
-	 * @param                    <F> {@link Flow} keys type.
+	 * @param <M>                Dependency keys type.
+	 * @param <F>                {@link Flow} keys type.
 	 * @param dependenciesEnum   Dependency {@link Enum}.
 	 * @param flowsEnum          Flows {@link Enum}.
 	 * @param propertyNameValues Property name values for the
@@ -586,6 +581,12 @@ public class ManagedObjectLoaderUtil {
 		@Override
 		public void addExtensionInterface(Class<?> extensionInterface) {
 			this.extensionInterfaces.add(extensionInterface);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <D extends Enum<D>> ManagedObjectType<D> build() {
+			return (ManagedObjectType<D>) this;
 		}
 	}
 

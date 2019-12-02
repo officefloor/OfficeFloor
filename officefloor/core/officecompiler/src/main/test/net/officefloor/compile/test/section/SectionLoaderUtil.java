@@ -67,12 +67,10 @@ public class SectionLoaderUtil {
 	 * Validates the {@link SectionSourceSpecification} for the
 	 * {@link SectionSource}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param sectionSourceClass
-	 *            {@link SectionSource} class.
-	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property} instances.
+	 * @param <S>                {@link SectionSource} type.
+	 * @param sectionSourceClass {@link SectionSource} class.
+	 * @param propertyNameLabels Listing of name/label pairs for the
+	 *                           {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <S extends SectionSource> PropertyList validateSpecification(Class<S> sectionSourceClass,
@@ -92,10 +90,9 @@ public class SectionLoaderUtil {
 	 * Validates the {@link SectionSourceSpecification} for the
 	 * {@link SectionSource}.
 	 * 
-	 * @param sectionSource
-	 *            {@link SectionSource}.
-	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property} instances.
+	 * @param sectionSource      {@link SectionSource}.
+	 * @param propertyNameLabels Listing of name/label pairs for the
+	 *                           {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static PropertyList validateSpecification(SectionSource sectionSource, String... propertyNameLabels) {
@@ -113,11 +110,9 @@ public class SectionLoaderUtil {
 	/**
 	 * Convenience method to obtain the class path location.
 	 * 
-	 * @param offsetClass
-	 *            Class indicating the package that the resource is within.
-	 *            Typically this will be the {@link Assert} instance.
-	 * @param resourceName
-	 *            Name of the resource.
+	 * @param offsetClass  Class indicating the package that the resource is within.
+	 *                     Typically this will be the {@link Assert} instance.
+	 * @param resourceName Name of the resource.
 	 * @return Class path location of the resource.
 	 */
 	public static String getClassPathLocation(Class<?> offsetClass, String resourceName) {
@@ -145,24 +140,47 @@ public class SectionLoaderUtil {
 	}
 
 	/**
+	 * Creates the {@link SectionTypeBuilder}.
+	 * 
+	 * @return {@link SectionTypeBuilder}.
+	 */
+	public static SectionTypeBuilder createSectionTypeBuilder() {
+		return new SectionTypeBuilderImpl(createSectionDesigner());
+	}
+
+	/**
+	 * Builds the {@link SectionType} for the {@link SectionDesigner}.
+	 * 
+	 * @param designer {@link SectionDesigner}.
+	 * @return {@link SectionType}.
+	 */
+	public static SectionType buildSectionType(SectionDesigner designer) {
+
+		// Compile Context
+		CompileContext compileContext = new CompileContextImpl(null);
+
+		// Cast to obtain expected section type
+		if (!(designer instanceof SectionNode)) {
+			Assert.fail("designer must be created from createSectionDesigner");
+		}
+		return ((SectionNode) designer).loadSectionType(compileContext);
+	}
+
+	/**
 	 * Facade method to validate the {@link SectionType} and {@link OfficeSection}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param designer
-	 *            {@link SectionDesigner} containing the expected
-	 *            {@link SectionType}/{@link OfficeSection}.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource} being tested.
-	 * @param offsetClass
-	 *            Object indicating the package that the resource is within.
-	 *            Typically this will be the {@link Assert} instance.
-	 * @param resourceName
-	 *            Name of the resource. This is used with the
-	 *            <code>offsetObject</code> to determine the {@link OfficeSection}
-	 *            location.
-	 * @param propertyNameValuePairs
-	 *            Listing of {@link Property} name/value pairs.
+	 * @param <S>                    {@link SectionSource} type.
+	 * @param designer               {@link SectionDesigner} containing the expected
+	 *                               {@link SectionType}/{@link OfficeSection}.
+	 * @param sectionSourceClass     Class of the {@link SectionSource} being
+	 *                               tested.
+	 * @param offsetClass            Object indicating the package that the resource
+	 *                               is within. Typically this will be the
+	 *                               {@link Assert} instance.
+	 * @param resourceName           Name of the resource. This is used with the
+	 *                               <code>offsetObject</code> to determine the
+	 *                               {@link OfficeSection} location.
+	 * @param propertyNameValuePairs Listing of {@link Property} name/value pairs.
 	 */
 	public static <S extends SectionSource> void validateSection(SectionDesigner designer, Class<S> sectionSourceClass,
 			Class<?> offsetClass, String resourceName, String... propertyNameValuePairs) {
@@ -179,17 +197,13 @@ public class SectionLoaderUtil {
 	 * {@link OfficeSection} against expected {@link SectionType}/
 	 * {@link OfficeSection} from the {@link SectionDesigner}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param designer
-	 *            {@link SectionDesigner} containing the expected
-	 *            {@link SectionType}/{@link OfficeSection}.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource} being tested.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyNameValuePairs
-	 *            Listing of {@link Property} name/value pairs.
+	 * @param <S>                    {@link SectionSource} type.
+	 * @param designer               {@link SectionDesigner} containing the expected
+	 *                               {@link SectionType}/{@link OfficeSection}.
+	 * @param sectionSourceClass     Class of the {@link SectionSource} being
+	 *                               tested.
+	 * @param sectionLocation        Location of the {@link OfficeSection}.
+	 * @param propertyNameValuePairs Listing of {@link Property} name/value pairs.
 	 */
 	public static <S extends SectionSource> void validateSection(SectionDesigner designer, Class<S> sectionSourceClass,
 			String sectionLocation, String... propertyNameValuePairs) {
@@ -205,15 +219,11 @@ public class SectionLoaderUtil {
 	 * Convenience method that validates the loaded {@link SectionType} against
 	 * expected {@link SectionType} from the {@link SectionDesigner}.
 	 * 
-	 * @param designer
-	 *            {@link SectionDesigner} containing the expected
-	 *            {@link SectionType}.
-	 * @param sectionSource
-	 *            {@link SectionSource} instance being tested.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyNameValuePairs
-	 *            Listing of {@link Property} name/value pairs.
+	 * @param designer               {@link SectionDesigner} containing the expected
+	 *                               {@link SectionType}.
+	 * @param sectionSource          {@link SectionSource} instance being tested.
+	 * @param sectionLocation        Location of the {@link OfficeSection}.
+	 * @param propertyNameValuePairs Listing of {@link Property} name/value pairs.
 	 */
 	public static void validateSectionType(SectionDesigner designer, SectionSource sectionSource,
 			String sectionLocation, String... propertyNameValuePairs) {
@@ -229,17 +239,13 @@ public class SectionLoaderUtil {
 	 * Convenience method that validates the loaded {@link SectionType} against
 	 * expected {@link SectionType} from the {@link SectionDesigner}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param designer
-	 *            {@link SectionDesigner} containing the expected
-	 *            {@link SectionType}.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource} being tested.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyNameValuePairs
-	 *            Listing of {@link Property} name/value pairs.
+	 * @param <S>                    {@link SectionSource} type.
+	 * @param designer               {@link SectionDesigner} containing the expected
+	 *                               {@link SectionType}.
+	 * @param sectionSourceClass     Class of the {@link SectionSource} being
+	 *                               tested.
+	 * @param sectionLocation        Location of the {@link OfficeSection}.
+	 * @param propertyNameValuePairs Listing of {@link Property} name/value pairs.
 	 */
 	public static <S extends SectionSource> void validateSectionType(SectionDesigner designer,
 			Class<S> sectionSourceClass, String sectionLocation, String... propertyNameValuePairs) {
@@ -254,22 +260,14 @@ public class SectionLoaderUtil {
 	/**
 	 * Validates the {@link SectionType}.
 	 * 
-	 * @param designer
-	 *            {@link SectionDesigner} containing the expected
-	 *            {@link SectionType}.
-	 * @param actualSection
-	 *            Actual {@link SectionType} to validate.
+	 * @param designer      {@link SectionDesigner} containing the expected
+	 *                      {@link SectionType}.
+	 * @param actualSection Actual {@link SectionType} to validate.
 	 */
 	public static void validateSectionType(SectionDesigner designer, SectionType actualSection) {
 
-		// Compile Context
-		CompileContext compileContext = new CompileContextImpl(null);
-
-		// Cast to obtain expected section type
-		if (!(designer instanceof SectionNode)) {
-			Assert.fail("designer must be created from createSectionDesigner");
-		}
-		SectionType expectedSection = ((SectionNode) designer).loadSectionType(compileContext);
+		// Build the expected section type
+		SectionType expectedSection = buildSectionType(designer);
 
 		// Validate section inputs are as expected
 		SectionInputType[] eInputs = expectedSection.getSectionInputTypes();
@@ -332,17 +330,13 @@ public class SectionLoaderUtil {
 	 * Convenience method that validates the loaded {@link OfficeSection} against
 	 * expected {@link OfficeSection} from the {@link SectionDesigner}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param designer
-	 *            {@link SectionDesigner} containing the expected
-	 *            {@link OfficeSection}.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource} being tested.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyNameValuePairs
-	 *            Listing of {@link Property} name/value pairs.
+	 * @param <S>                    {@link SectionSource} type.
+	 * @param designer               {@link SectionDesigner} containing the expected
+	 *                               {@link OfficeSection}.
+	 * @param sectionSourceClass     Class of the {@link SectionSource} being
+	 *                               tested.
+	 * @param sectionLocation        Location of the {@link OfficeSection}.
+	 * @param propertyNameValuePairs Listing of {@link Property} name/value pairs.
 	 */
 	public static <S extends SectionSource> void validateOfficeSection(SectionDesigner designer,
 			Class<S> sectionSourceClass, String sectionLocation, String... propertyNameValuePairs) {
@@ -420,12 +414,9 @@ public class SectionLoaderUtil {
 	/**
 	 * Validates the {@link OfficeSubSection}.
 	 * 
-	 * @param subSectionName
-	 *            Name of the {@link OfficeSubSection} being validated.
-	 * @param eSection
-	 *            Expected {@link OfficeSubSection}.
-	 * @param aSection
-	 *            Actual {@link OfficeSubSection}.
+	 * @param subSectionName Name of the {@link OfficeSubSection} being validated.
+	 * @param eSection       Expected {@link OfficeSubSection}.
+	 * @param aSection       Actual {@link OfficeSubSection}.
 	 */
 	private static void validateOfficeSubSectionType(String subSectionName, OfficeSubSectionType eSection,
 			OfficeSubSectionType aSection) {
@@ -568,14 +559,10 @@ public class SectionLoaderUtil {
 	 * {@link SectionSource} class's {@link ClassLoader} and subsequent
 	 * {@link ClassLoaderConfigurationContext}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyNameValuePairs
-	 *            Listing of {@link Property} name/value pairs.
+	 * @param <S>                    {@link SectionSource} type.
+	 * @param sectionSourceClass     Class of the {@link SectionSource}.
+	 * @param sectionLocation        Location of the {@link OfficeSection}.
+	 * @param propertyNameValuePairs Listing of {@link Property} name/value pairs.
 	 * @return {@link SectionType}.
 	 */
 	public static <S extends SectionSource> SectionType loadSectionType(Class<S> sectionSourceClass,
@@ -589,12 +576,9 @@ public class SectionLoaderUtil {
 	/**
 	 * Convenience method to load the {@link SectionType}.
 	 * 
-	 * @param sectionSource
-	 *            {@link SectionSource} instance.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyNameValuePairs
-	 *            Listing of {@link Property} name/value pairs.
+	 * @param sectionSource          {@link SectionSource} instance.
+	 * @param sectionLocation        Location of the {@link OfficeSection}.
+	 * @param propertyNameValuePairs Listing of {@link Property} name/value pairs.
 	 * @return {@link SectionType}.
 	 */
 	public static SectionType loadSectionType(SectionSource sectionSource, String sectionLocation,
@@ -610,16 +594,11 @@ public class SectionLoaderUtil {
 	 * {@link SectionSource} class's {@link ClassLoader} and subsequent
 	 * {@link ClassLoaderConfigurationContext}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyNameValuePairs
-	 *            Listing of {@link Property} name/value pairs.
+	 * @param <S>                    {@link SectionSource} type.
+	 * @param sectionName            Name of the {@link OfficeSection}.
+	 * @param sectionSourceClass     Class of the {@link SectionSource}.
+	 * @param sectionLocation        Location of the {@link OfficeSection}.
+	 * @param propertyNameValuePairs Listing of {@link Property} name/value pairs.
 	 * @return {@link OfficeSectionType}.
 	 */
 	public static <S extends SectionSource> OfficeSectionType loadOfficeSectionType(String sectionName,
@@ -645,12 +624,9 @@ public class SectionLoaderUtil {
 	/**
 	 * Creates a compare listing of the items.
 	 * 
-	 * @param expectedItems
-	 *            Expected items.
-	 * @param actualItems
-	 *            Actual items.
-	 * @param valueExtractor
-	 *            Extracts the value from the item.
+	 * @param expectedItems  Expected items.
+	 * @param actualItems    Actual items.
+	 * @param valueExtractor Extracts the value from the item.
 	 * @return {@link IntFunction} to generate the compare list highlighting the
 	 *         items at the particular index.
 	 */
@@ -665,10 +641,8 @@ public class SectionLoaderUtil {
 	/**
 	 * Generates a list from the items.
 	 * 
-	 * @param items
-	 *            Items to generate list.
-	 * @param valueExtractor
-	 *            Extracts the value from the item.
+	 * @param items          Items to generate list.
+	 * @param valueExtractor Extracts the value from the item.
 	 * @return {@link IntFunction} to generate the list highlighting the items at
 	 *         the particular index.
 	 */
@@ -697,6 +671,51 @@ public class SectionLoaderUtil {
 	 * All access via static methods.
 	 */
 	private SectionLoaderUtil() {
+	}
+
+	/**
+	 * {@link SectionTypeBuilder} implementation.
+	 */
+	private static class SectionTypeBuilderImpl implements SectionTypeBuilder {
+
+		/**
+		 * {@link SectionDesigner}.
+		 */
+		private final SectionDesigner designer;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param designer {@link SectionDesigner}.
+		 */
+		private SectionTypeBuilderImpl(SectionDesigner designer) {
+			this.designer = designer;
+		}
+
+		/*
+		 * ===================== SectionTypeBuilder =====================
+		 */
+
+		@Override
+		public void addSectionInput(String name, Class<?> parameterType) {
+			this.designer.addSectionInput(name, parameterType == null ? null : parameterType.getName());
+		}
+
+		@Override
+		public void addSectionOutput(String name, Class<?> argumentType, boolean isEscalationOnly) {
+			this.designer.addSectionOutput(name, argumentType == null ? null : argumentType.getName(),
+					isEscalationOnly);
+		}
+
+		@Override
+		public void addSectionObject(String name, Class<?> objectType, String typeQualifier) {
+			this.designer.addSectionObject(name, objectType.getName()).setTypeQualifier(typeQualifier);
+		}
+
+		@Override
+		public SectionDesigner getSectionDesigner() {
+			return this.designer;
+		}
 	}
 
 }

@@ -22,8 +22,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Assert;
-
 import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.activity.impl.procedure.ProcedureEscalationTypeImpl;
 import net.officefloor.activity.impl.procedure.ProcedureFlowTypeImpl;
@@ -341,10 +339,7 @@ public class ProcedureLoaderUtil {
 			ProcedureType actualType) {
 
 		// Obtain the expected type
-		if (!(expectedProcedureType instanceof ProcedureType)) {
-			Assert.fail("expectedProcedureType must be created from createProcedureTypeBuilder");
-		}
-		ProcedureType expectedType = (ProcedureType) expectedProcedureType;
+		ProcedureType expectedType = expectedProcedureType.build();
 
 		// Verify actual is as expected
 		assertEquals("Incorrect procedure name", expectedType.getProcedureName(), actualType.getProcedureName());
@@ -562,6 +557,11 @@ public class ProcedureLoaderUtil {
 		}
 
 		@Override
+		public void addVariableType(String variableName, Class<?> variableType) {
+			this.addVariableType(variableName, variableType.getName());
+		}
+
+		@Override
 		public void addVariableType(String variableName, String variableType) {
 			this.variableTypes.add(new ProcedureVariableTypeImpl(variableName, variableType));
 		}
@@ -611,6 +611,11 @@ public class ProcedureLoaderUtil {
 		}
 
 		@Override
+		public void addEscalationType(Class<? extends Throwable> escalationType) {
+			this.addEscalationType(escalationType.getSimpleName(), escalationType);
+		}
+
+		@Override
 		public ProcedureEscalationType[] getEscalationTypes() {
 			return this.escalationTypes.toArray(new ProcedureEscalationType[this.escalationTypes.size()]);
 		}
@@ -618,6 +623,11 @@ public class ProcedureLoaderUtil {
 		@Override
 		public Class<?> getNextArgumentType() {
 			return this.nextArgumentType;
+		}
+
+		@Override
+		public ProcedureType build() {
+			return this;
 		}
 	}
 
