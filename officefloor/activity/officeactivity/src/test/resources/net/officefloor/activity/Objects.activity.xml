@@ -1,0 +1,11 @@
+<activity>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="net.example.Example" source="Class" procedure="function" />
+	</procedures>
+
+	<sections>
+		<section name="SECTION" source="net.example.Example" location="EXAMPLE_LOCATION" />
+	</sections>
+
+</activity>

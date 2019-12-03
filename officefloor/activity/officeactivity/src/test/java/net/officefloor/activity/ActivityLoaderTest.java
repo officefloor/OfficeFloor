@@ -17,6 +17,7 @@
  */
 package net.officefloor.activity;
 
+import net.officefloor.activity.model.ActivityModel;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoader;
 import net.officefloor.activity.procedure.ProcedureType;
@@ -26,9 +27,11 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
@@ -125,7 +128,63 @@ public class ActivityLoaderTest extends OfficeFrameTestCase implements ActivityT
 		this.sectionDesigner.link(this.output(sectionA, "OUTPUT_C"), output2);
 
 		// Load the activity
-		ConfigurationItem item = this.createConfigurationItem("LoadConfiguration.activity.xml");
+		this.loadActivity("LoadConfiguration.activity.xml");
+	}
+
+	/**
+	 * Ensure all objects are made available for linking.
+	 */
+	public void testObjects() throws Exception {
+
+		// Record procedures
+		SubSection procedure = this.record_addProcedure_loadProcedureType("PROCEDURE", "net.example.Example", "Class",
+				"function", false, (builder) -> {
+					builder.addObjectType("OBJECT_A", Object.class, null);
+					builder.addObjectType("OBJECT_B", Object.class, "qualified");
+					builder.addObjectType("OBJECT_C", Object.class, "another");
+					builder.addObjectType("OBJECT_D", String.class, null);
+				});
+		SectionObject object = this.record_addSectionObject(Object.class, null);
+		this.sectionDesigner.link(this.object(procedure, "OBJECT_A"), object);
+		SectionObject qualifiedObject = this.record_addSectionObject(Object.class, "qualified");
+		this.sectionDesigner.link(this.object(procedure, "OBJECT_B"), qualifiedObject);
+		this.sectionDesigner.link(this.object(procedure, "OBJECT_C"),
+				this.record_addSectionObject(Object.class, "another"));
+		this.sectionDesigner.link(this.object(procedure, "OBJECT_D"), this.record_addSectionObject(String.class, null));
+
+		// Record sections
+		SubSection section = this.record_addSection_loadSectionType("SECTION", "net.example.Example",
+				"EXAMPLE_LOCATION", (builder) -> {
+					builder.addSectionObject("OBJECT_1", Object.class, null);
+					builder.addSectionObject("OBJECT_2", Object.class, "qualified");
+					builder.addSectionObject("OBJECT_3", Object.class, "different");
+					builder.addSectionObject("OBJECT_4", Integer.class, null);
+				});
+		this.sectionDesigner.link(this.object(section, "OBJECT_1"), object);
+		this.sectionDesigner.link(this.object(section, "OBJECT_2"), qualifiedObject);
+		this.sectionDesigner.link(this.object(section, "OBJECT_3"),
+				this.record_addSectionObject(Object.class, "different"));
+		this.sectionDesigner.link(this.object(section, "OBJECT_4"), this.record_addSectionObject(Integer.class, null));
+
+		// Load the activity
+		this.loadActivity("Objects.activity.xml");
+	}
+
+	/**
+	 * Loads the {@link ActivityModel} from the file via the {@link ActivityLoader}.
+	 * 
+	 * @param fileName Name of file.
+	 * @throws Exception If fails to load {@link ActivityModel}.
+	 */
+	private void loadActivity(String fileName) throws Exception {
+
+		// Obtain the configuration item
+		String filePath = this.getClass().getPackage().getName().replace('.', '/') + "/" + fileName;
+		ConfigurationItem item = new ClassLoaderConfigurationContext(this.getClass().getClassLoader(), null)
+				.getConfigurationItem(filePath, null);
+		assertNotNull("Can not find configuration " + fileName, item);
+
+		// Load the activity
 		this.replayMockObjects();
 		new ActivityLoaderImpl().loadActivityConfiguration(new MockActivityContext(item));
 		this.verifyMockObjects();
@@ -144,6 +203,29 @@ public class ActivityLoaderTest extends OfficeFrameTestCase implements ActivityT
 		this.recordReturn(this.sectionDesigner, this.sectionDesigner.addSectionInput(inputName, parameterTypeName),
 				input);
 		return input;
+	}
+
+	/**
+	 * Records adding a {@link SectionObject}.
+	 * 
+	 * @param objectType    Object type.
+	 * @param typeQualifier Type qualifier.
+	 * @return {@link SectionObject}.
+	 */
+	private SectionObject record_addSectionObject(Class<?> objectType, String typeQualifier) {
+
+		// Derive the object name
+		String objectName = (typeQualifier == null ? "" : typeQualifier + "-") + objectType.getName();
+
+		// Record adding the section object
+		SectionObject object = this.createMock(SectionObject.class);
+		String objectTypeName = (objectType == null) ? null : objectType.getName();
+		this.recordReturn(this.sectionDesigner, this.sectionDesigner.addSectionObject(objectName, objectTypeName),
+				object);
+		if (typeQualifier != null) {
+			object.setTypeQualifier(typeQualifier);
+		}
+		return object;
 	}
 
 	/**
@@ -199,6 +281,19 @@ public class ActivityLoaderTest extends OfficeFrameTestCase implements ActivityT
 	 */
 	private SubSectionInput procedure(SubSection procedure) {
 		return this.input(procedure, ProcedureArchitect.INPUT_NAME);
+	}
+
+	/**
+	 * Records getting {@link SubSectionObject}.
+	 * 
+	 * @param section    {@link SubSection}.
+	 * @param objectName Name of {@link SubSectionObject}.
+	 * @return {@link SubSectionObject}.
+	 */
+	private SubSectionObject object(SubSection section, String objectName) {
+		SubSectionObject object = this.createMock(SubSectionObject.class);
+		this.recordReturn(section, section.getSubSectionObject(objectName), object);
+		return object;
 	}
 
 	/**
@@ -288,20 +383,6 @@ public class ActivityLoaderTest extends OfficeFrameTestCase implements ActivityT
 		this.recordReturn(this.sectionDesigner,
 				this.sectionDesigner.addSectionOutput(outputName, argumentTypeName, false), output);
 		return output;
-	}
-
-	/**
-	 * Creates the {@link ConfigurationItem}.
-	 * 
-	 * @param fileName Name of {@link ConfigurationItem} file.
-	 * @return {@link ConfigurationItem}.
-	 */
-	private ConfigurationItem createConfigurationItem(String fileName) {
-		String filePath = this.getClass().getPackage().getName().replace('.', '/') + "/" + fileName;
-		ConfigurationItem item = new ClassLoaderConfigurationContext(this.getClass().getClassLoader(), null)
-				.getConfigurationItem(filePath, null);
-		assertNotNull("Can not find configuration " + fileName, item);
-		return item;
 	}
 
 	/**

@@ -19,6 +19,7 @@ package net.officefloor.activity;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -35,15 +36,19 @@ import net.officefloor.activity.model.ActivitySectionOutputModel;
 import net.officefloor.activity.model.PropertyModel;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoader;
+import net.officefloor.activity.procedure.ProcedureObjectType;
 import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionFlowSourceNode;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
@@ -75,12 +80,37 @@ public class ActivityLoaderImpl implements ActivityLoader {
 		SectionDesigner designer = context.getSectionDesigner();
 		SectionSourceContext sourceContext = context.getSectionSourceContext();
 
+		// Function to create objects
+		DoubleKeyMap<String, String, SectionObject> objects = new DoubleKeyMap<>();
+		BiFunction<String, String, SectionObject> objectFactory = (objectType, typeQualifier) -> {
+
+			// Derive the object name
+			String objectName;
+			if (CompileUtil.isBlank(typeQualifier)) {
+				typeQualifier = "";
+				objectName = objectType;
+			} else {
+				objectName = typeQualifier + "-" + objectType;
+			}
+
+			// Lazy create the object
+			SectionObject object = objects.get(objectType, typeQualifier);
+			if (object == null) {
+				object = designer.addSectionObject(objectName, objectType);
+				if (!CompileUtil.isBlank(typeQualifier)) {
+					object.setTypeQualifier(typeQualifier);
+				}
+				objects.put(objectType, typeQualifier, object);
+			}
+			return object;
+		};
+
 		// Load the procedures and their types
 		ProcedureConnector procedures = new ProcedureConnector(activityModel, designer, procedureArchitect,
-				procedureLoader, sourceContext);
+				procedureLoader, sourceContext, objectFactory);
 
 		// Load the sections and their types
-		SectionConnector sections = new SectionConnector(activityModel, designer, sourceContext);
+		SectionConnector sections = new SectionConnector(activityModel, designer, sourceContext, objectFactory);
 
 		// Load outputs
 		OutputConnector outputs = new OutputConnector(activityModel, designer, sourceContext);
@@ -196,11 +226,6 @@ public class ActivityLoaderImpl implements ActivityLoader {
 		private final Map<String, SubSection> procedures = new HashMap<>();
 
 		/**
-		 * {@link ProcedureType} instances by name.
-		 */
-		private final Map<String, ProcedureType> procedureTypes = new HashMap<>();
-
-		/**
 		 * Instantiate.
 		 * 
 		 * @param activity             {@link ActivityModel}.
@@ -208,10 +233,11 @@ public class ActivityLoaderImpl implements ActivityLoader {
 		 * @param procedureArchitect   {@link ProcedureArchitect}.
 		 * @param procedureLoader      {@link ProcedureLoader}.
 		 * @param sectionSourceContext {@link SectionSourceContext}.
+		 * @param objectFactory        Creates the {@link SectionObject}.
 		 */
 		private ProcedureConnector(ActivityModel activity, SectionDesigner sectionDesigner,
 				ProcedureArchitect<SubSection> procedureArchitect, ProcedureLoader procedureLoader,
-				SectionSourceContext sectionSourceContext) {
+				SectionSourceContext sectionSourceContext, BiFunction<String, String, SectionObject> objectFactory) {
 			this.sectionDesigner = sectionDesigner;
 
 			// Configure the procedures
@@ -239,10 +265,24 @@ public class ActivityLoaderImpl implements ActivityLoader {
 						isNext, properties);
 				this.procedures.put(sectionName, procedure);
 
-				// Load the types
+				// Load the type
 				ProcedureType procedureType = procedureLoader.loadProcedureType(resource, sourceName, procedureName,
 						properties);
-				this.procedureTypes.put(sectionName, procedureType);
+
+				// Link objects
+				for (ProcedureObjectType objectType : procedureType.getObjectTypes()) {
+
+					// Obtain the object details
+					String objectName = objectType.getObjectName();
+					Class<?> objectClass = objectType.getObjectType();
+					String typeQualifier = objectType.getTypeQualifier();
+
+					// Obtain the object
+					SectionObject object = objectFactory.apply(objectClass.getName(), typeQualifier);
+
+					// Link to object
+					sectionDesigner.link(procedure.getSubSectionObject(objectName), object);
+				}
 			}
 		}
 
@@ -293,11 +333,6 @@ public class ActivityLoaderImpl implements ActivityLoader {
 		private final Map<String, SubSection> sections = new HashMap<>();
 
 		/**
-		 * {@link SectionType} instances by name.
-		 */
-		private final Map<String, SectionType> sectionTypes = new HashMap<>();
-
-		/**
 		 * {@link ActivitySectionInputModel} mapping to its
 		 * {@link ActivitySectionModel}.
 		 */
@@ -309,9 +344,10 @@ public class ActivityLoaderImpl implements ActivityLoader {
 		 * @param activity             {@link ActivityModel}.
 		 * @param sectionDesigner      {@link SectionDesigner}.
 		 * @param sectionSourceContext {@link SectionSourceContext}.
+		 * @param objectFactory        Creates the {@link SectionObject}.
 		 */
 		private SectionConnector(ActivityModel activity, SectionDesigner sectionDesigner,
-				SectionSourceContext sectionSourceContext) {
+				SectionSourceContext sectionSourceContext, BiFunction<String, String, SectionObject> objectFactory) {
 			this.sectionDesigner = sectionDesigner;
 
 			// Configure the sections
@@ -333,14 +369,28 @@ public class ActivityLoaderImpl implements ActivityLoader {
 				properties.configureProperties(section);
 				this.sections.put(sectionName, section);
 
-				// Load and register the section type
-				SectionType sectionType = sectionSourceContext.loadSectionType(sectionName, sectionSourceClassName,
-						location, properties);
-				this.sectionTypes.put(sectionName, sectionType);
-
 				// Maintain references from inputs to section
 				for (ActivitySectionInputModel inputModel : sectionModel.getInputs()) {
 					this.inputToSection.put(inputModel, sectionModel);
+				}
+
+				// Load the section type
+				SectionType sectionType = sectionSourceContext.loadSectionType(sectionName, sectionSourceClassName,
+						location, properties);
+
+				// Link objects
+				for (SectionObjectType objectType : sectionType.getSectionObjectTypes()) {
+
+					// Obtain the object details
+					String objectName = objectType.getSectionObjectName();
+					String objectClass = objectType.getObjectType();
+					String typeQualifier = objectType.getTypeQualifier();
+
+					// Obtain the object
+					SectionObject object = objectFactory.apply(objectClass, typeQualifier);
+
+					// Link to object
+					sectionDesigner.link(section.getSubSectionObject(objectName), object);
 				}
 			}
 		}
