@@ -125,8 +125,8 @@ public class AddTest extends AbstractActivityChangesTestCase {
 
 		// Create the procedure type
 		ProcedureType procedure = this.constructProcedureType("procedure", String.class, (context) -> {
-			context.addFlow("OUTPUT_A", String.class);
-			context.addFlow("OUTPUT_B", null);
+			context.addFlowType("OUTPUT_A", String.class);
+			context.addFlowType("OUTPUT_B", null);
 			context.setNextArgumentType(Short.class);
 		});
 

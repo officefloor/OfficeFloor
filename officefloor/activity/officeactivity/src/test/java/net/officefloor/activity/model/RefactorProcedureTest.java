@@ -65,12 +65,12 @@ public class RefactorProcedureTest extends AbstractActivityChangesTestCase {
 
 		// Create the procedure type
 		ProcedureType procedureType = this.constructProcedureType("procedure", String.class, (context) -> {
-			context.addFlow("OUTPUT_A", Integer.class);
-			context.addFlow("OUTPUT_B", null);
-			context.addFlow("OUTPUT_C", null);
-			context.addEscalation(IOException.class);
-			context.addObject("IGNORE_OBJECT", DataSource.class, null);
-			context.addVariable("IGNORE_VARIABLE", Boolean.class);
+			context.addFlowType("OUTPUT_A", Integer.class);
+			context.addFlowType("OUTPUT_B", null);
+			context.addFlowType("OUTPUT_C", null);
+			context.addEscalationType(IOException.class);
+			context.addObjectType("IGNORE_OBJECT", DataSource.class, null);
+			context.addVariableType("IGNORE_VARIABLE", Boolean.class);
 			context.setNextArgumentType(Byte.class);
 		});
 
@@ -99,12 +99,12 @@ public class RefactorProcedureTest extends AbstractActivityChangesTestCase {
 
 		// Create the procedure type
 		ProcedureType procedureType = this.constructProcedureType("method_change", Character.class, (context) -> {
-			context.addFlow("OUTPUT_A", Integer.class);
-			context.addFlow("OUTPUT_B", String.class);
-			context.addFlow("OUTPUT_C", null);
-			context.addEscalation(IOException.class);
-			context.addObject("IGNORE_OBJECT", DataSource.class, null);
-			context.addVariable("IGNORE_VARIABLE", Boolean.class);
+			context.addFlowType("OUTPUT_A", Integer.class);
+			context.addFlowType("OUTPUT_B", String.class);
+			context.addFlowType("OUTPUT_C", null);
+			context.addEscalationType(IOException.class);
+			context.addObjectType("IGNORE_OBJECT", DataSource.class, null);
+			context.addVariableType("IGNORE_VARIABLE", Boolean.class);
 			context.setNextArgumentType(Short.class);
 		});
 
@@ -152,12 +152,12 @@ public class RefactorProcedureTest extends AbstractActivityChangesTestCase {
 
 		// Create the procedure type
 		ProcedureType procedureType = this.constructProcedureType("method", Character.class, (context) -> {
-			context.addFlow("OUTPUT_A", Integer.class);
-			context.addFlow("OUTPUT_B", String.class);
-			context.addFlow("OUTPUT_C", null);
-			context.addEscalation(IOException.class);
-			context.addObject("IGNORE_OBJECT", DataSource.class, null);
-			context.addVariable("IGNORE_VARIABLE", Boolean.class);
+			context.addFlowType("OUTPUT_A", Integer.class);
+			context.addFlowType("OUTPUT_B", String.class);
+			context.addFlowType("OUTPUT_C", null);
+			context.addEscalationType(IOException.class);
+			context.addObjectType("IGNORE_OBJECT", DataSource.class, null);
+			context.addVariableType("IGNORE_VARIABLE", Boolean.class);
 			context.setNextArgumentType(Long.class);
 		});
 
