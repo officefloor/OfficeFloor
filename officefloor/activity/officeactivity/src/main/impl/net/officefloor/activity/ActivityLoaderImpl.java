@@ -18,11 +18,14 @@
 package net.officefloor.activity;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import net.officefloor.activity.model.ActivityExceptionModel;
 import net.officefloor.activity.model.ActivityInputModel;
 import net.officefloor.activity.model.ActivityModel;
 import net.officefloor.activity.model.ActivityOutputModel;
@@ -35,6 +38,7 @@ import net.officefloor.activity.model.ActivitySectionModel;
 import net.officefloor.activity.model.ActivitySectionOutputModel;
 import net.officefloor.activity.model.PropertyModel;
 import net.officefloor.activity.procedure.Procedure;
+import net.officefloor.activity.procedure.ProcedureEscalationType;
 import net.officefloor.activity.procedure.ProcedureLoader;
 import net.officefloor.activity.procedure.ProcedureObjectType;
 import net.officefloor.activity.procedure.ProcedureType;
@@ -43,6 +47,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionObjectType;
+import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -52,6 +57,7 @@ import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 
@@ -208,12 +214,23 @@ public class ActivityLoaderImpl implements ActivityLoader {
 				outputs.linkToOutput(outputFlow, outputModel.getActivityOutput(), (link) -> link.getActivityOutput());
 			}
 		}
+
+		// Link the escalations
+		ExceptionConnector exceptions = new ExceptionConnector(activityModel, designer, sourceContext, procedures,
+				sections, outputs);
+		procedures.linkEscalations(exceptions);
+		sections.linkEscalations(exceptions);
 	}
 
 	/**
 	 * Connector for the {@link ActivityProcedureModel} instances.
 	 */
 	private static class ProcedureConnector {
+
+		/**
+		 * {@link ActivityModel}.
+		 */
+		private final ActivityModel activity;
 
 		/**
 		 * {@link SectionDesigner}.
@@ -224,6 +241,11 @@ public class ActivityLoaderImpl implements ActivityLoader {
 		 * {@link Procedure} instances by name.
 		 */
 		private final Map<String, SubSection> procedures = new HashMap<>();
+
+		/**
+		 * {@link ProcedureType} instances by name.
+		 */
+		private final Map<String, ProcedureType> procedureTypes = new HashMap<>();
 
 		/**
 		 * Instantiate.
@@ -238,6 +260,7 @@ public class ActivityLoaderImpl implements ActivityLoader {
 		private ProcedureConnector(ActivityModel activity, SectionDesigner sectionDesigner,
 				ProcedureArchitect<SubSection> procedureArchitect, ProcedureLoader procedureLoader,
 				SectionSourceContext sectionSourceContext, BiFunction<String, String, SectionObject> objectFactory) {
+			this.activity = activity;
 			this.sectionDesigner = sectionDesigner;
 
 			// Configure the procedures
@@ -268,6 +291,7 @@ public class ActivityLoaderImpl implements ActivityLoader {
 				// Load the type
 				ProcedureType procedureType = procedureLoader.loadProcedureType(resource, sourceName, procedureName,
 						properties);
+				this.procedureTypes.put(sectionName, procedureType);
 
 				// Link objects
 				for (ProcedureObjectType objectType : procedureType.getObjectTypes()) {
@@ -315,6 +339,31 @@ public class ActivityLoaderImpl implements ActivityLoader {
 				}
 			}
 		}
+
+		/**
+		 * Links the {@link Escalation}.
+		 * 
+		 * @param exceptions {@link ExceptionConnector}.
+		 */
+		private void linkEscalations(ExceptionConnector exceptions) {
+
+			// Configure the escalations
+			for (ActivityProcedureModel procedureModel : this.activity.getActivityProcedures()) {
+
+				// Obtain the procedure
+				String procedureName = procedureModel.getActivityProcedureName();
+				SubSection procedure = this.procedures.get(procedureName);
+				ProcedureType procedureType = this.procedureTypes.get(procedureName);
+
+				// Link the escalations
+				for (ProcedureEscalationType escalation : procedureType.getEscalationTypes()) {
+					String escalationName = escalation.getEscalationName();
+					Class<?> escalationType = escalation.getEscalationType();
+					exceptions.handleEscalation(escalationType, procedureName + "-" + escalationName,
+							() -> procedure.getSubSectionOutput(escalationName));
+				}
+			}
+		}
 	}
 
 	/**
@@ -323,14 +372,29 @@ public class ActivityLoaderImpl implements ActivityLoader {
 	private static class SectionConnector {
 
 		/**
+		 * {@link ActivityModel}.
+		 */
+		private final ActivityModel activity;
+
+		/**
 		 * {@link SectionDesigner}.
 		 */
 		private final SectionDesigner sectionDesigner;
 
 		/**
+		 * {@link SectionSourceContext}.
+		 */
+		private final SectionSourceContext sectionSourceContext;
+
+		/**
 		 * {@link SubSection} instances by name.
 		 */
 		private final Map<String, SubSection> sections = new HashMap<>();
+
+		/**
+		 * {@link SectionType} instances by name.
+		 */
+		private final Map<String, SectionType> sectionTypes = new HashMap<>();
 
 		/**
 		 * {@link ActivitySectionInputModel} mapping to its
@@ -348,7 +412,9 @@ public class ActivityLoaderImpl implements ActivityLoader {
 		 */
 		private SectionConnector(ActivityModel activity, SectionDesigner sectionDesigner,
 				SectionSourceContext sectionSourceContext, BiFunction<String, String, SectionObject> objectFactory) {
+			this.activity = activity;
 			this.sectionDesigner = sectionDesigner;
+			this.sectionSourceContext = sectionSourceContext;
 
 			// Configure the sections
 			for (ActivitySectionModel sectionModel : activity.getActivitySections()) {
@@ -377,6 +443,7 @@ public class ActivityLoaderImpl implements ActivityLoader {
 				// Load the section type
 				SectionType sectionType = sectionSourceContext.loadSectionType(sectionName, sectionSourceClassName,
 						location, properties);
+				this.sectionTypes.put(sectionName, sectionType);
 
 				// Link objects
 				for (SectionObjectType objectType : sectionType.getSectionObjectTypes()) {
@@ -423,6 +490,44 @@ public class ActivityLoaderImpl implements ActivityLoader {
 					// Link the flow to the section input
 					this.sectionDesigner.link(flowSourceFactory.get(),
 							targetSection.getSubSectionInput(targetInputName));
+				}
+			}
+		}
+
+		/**
+		 * Links the {@link Escalation}.
+		 * 
+		 * @param exceptions {@link ExceptionConnector}.
+		 */
+		private void linkEscalations(ExceptionConnector exceptions) {
+
+			// Configure the escalations
+			for (ActivitySectionModel sectionModel : this.activity.getActivitySections()) {
+
+				// Obtain the section
+				String sectionName = sectionModel.getActivitySectionName();
+				SubSection section = this.sections.get(sectionName);
+				SectionType sectionType = this.sectionTypes.get(sectionName);
+
+				// Link the escalations
+				NEXT_OUTPUT: for (SectionOutputType output : sectionType.getSectionOutputTypes()) {
+
+					// Non-escalation only should be configured
+					if (!output.isEscalationOnly()) {
+						continue NEXT_OUTPUT;
+					}
+
+					// Handle the escalation
+					String escalationName = output.getSectionOutputName();
+					String escalationTypeName = output.getArgumentType();
+					if (CompileUtil.isBlank(escalationTypeName)) {
+						this.sectionDesigner.addIssue(
+								"No escalation type for section " + sectionName + " escalation " + escalationName);
+					} else {
+						Class<?> escalationType = this.sectionSourceContext.loadClass(escalationTypeName);
+						exceptions.handleEscalation(escalationType, sectionName + "-" + escalationName,
+								() -> section.getSubSectionOutput(escalationName));
+					}
 				}
 			}
 		}
@@ -489,6 +594,142 @@ public class ActivityLoaderImpl implements ActivityLoader {
 					this.sectionDesigner.link(flowSourceFactory.get(), targetOutput);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Connector for the {@link ActivityExceptionModel} instances.
+	 */
+	private static class ExceptionConnector {
+
+		/**
+		 * {@link SectionDesigner}.
+		 */
+		private final SectionDesigner sectionDesigner;
+
+		/**
+		 * {@link Catch} instances in ascending typing (from more specific to less
+		 * specific).
+		 */
+		private final Catch[] catches;
+
+		/**
+		 * {@link ProcedureConnector}.
+		 */
+		private final ProcedureConnector procedureConnector;
+
+		/**
+		 * {@link SectionConnector}.
+		 */
+		private final SectionConnector sectionConnector;
+
+		/**
+		 * {@link OutputConnector}.
+		 */
+		private final OutputConnector outputConnector;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param activity             {@link ActivityModel}.
+		 * @param sectionDesigner      {@link SectionDesigner}.
+		 * @param sectionSourceContext {@link SectionSourceContext}.
+		 * @param procedureConnector   {@link ProcedureConnector}.
+		 * @param sectionConnector     {@link SectionConnector}.
+		 * @param outputConnector      {@link OutputConnector}.
+		 */
+		private ExceptionConnector(ActivityModel activity, SectionDesigner sectionDesigner,
+				SectionSourceContext sectionSourceContext, ProcedureConnector procedureConnector,
+				SectionConnector sectionConnector, OutputConnector outputConnector) {
+			this.sectionDesigner = sectionDesigner;
+			this.procedureConnector = procedureConnector;
+			this.sectionConnector = sectionConnector;
+			this.outputConnector = outputConnector;
+
+			// Configure and sort catches
+			List<Catch> catchList = new LinkedList<>();
+			for (ActivityExceptionModel exceptionModel : activity.getActivityExceptions()) {
+				String exceptionTypeName = exceptionModel.getClassName();
+				Class<?> exceptionType = sectionSourceContext.loadClass(exceptionTypeName);
+				catchList.add(new Catch(exceptionType, exceptionModel));
+			}
+
+			// Sort and specify the catches
+			catchList.sort((a, b) -> {
+				if (a.escalationType.equals(b.escalationType)) {
+					return 0; // same
+				} else if (a.escalationType.isAssignableFrom(b.escalationType)) {
+					return 1;
+				} else if (b.escalationType.isAssignableFrom(a.escalationType)) {
+					return -1;
+				} else {
+					return 0; // no relationship, so consider same
+				}
+			});
+			this.catches = catchList.toArray(new Catch[catchList.size()]);
+		}
+
+		/**
+		 * Handles the {@link Escalation}.
+		 * 
+		 * @param escalationType    Type of {@link Escalation}.
+		 * @param flowSourceFactory {@link Supplier} of the
+		 *                          {@link SectionFlowSourceNode} triggering the
+		 *                          {@link Escalation}.
+		 */
+		private void handleEscalation(Class<?> escalationType, String escalationOutputName,
+				Supplier<SectionFlowSourceNode> flowSourceFactory) {
+
+			// Find the first handling escalation
+			for (Catch handlingCatch : this.catches) {
+				if (handlingCatch.escalationType.isAssignableFrom(escalationType)) {
+
+					// Found handling catch, so link
+					this.procedureConnector.linkToProcedure(flowSourceFactory,
+							handlingCatch.exceptionModel.getActivityProcedure(), (link) -> link.getActivityProcedure());
+					this.sectionConnector.linkToSectionInput(flowSourceFactory,
+							handlingCatch.exceptionModel.getActivitySectionInput(),
+							(link) -> link.getActivitySectionInput());
+					this.outputConnector.linkToOutput(flowSourceFactory,
+							handlingCatch.exceptionModel.getActivityOutput(), (link) -> link.getActivityOutput());
+
+					// Handled
+					return;
+				}
+			}
+
+			// Not handled, so link to section output
+			SectionOutput output = this.sectionDesigner.addSectionOutput(escalationOutputName, escalationType.getName(),
+					true);
+			this.sectionDesigner.link(flowSourceFactory.get(), output);
+		}
+	}
+
+	/**
+	 * Catch for {@link Escalation}.
+	 */
+	private static class Catch {
+
+		/**
+		 * Handled {@link Escalation} type.
+		 */
+		private final Class<?> escalationType;
+
+		/**
+		 * {@link ActivityExceptionModel} for the {@link Escalation}.
+		 */
+		private final ActivityExceptionModel exceptionModel;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param escalationType Handled {@link Escalation} type.
+		 * @param exceptionModel {@link ActivityExceptionModel} for the
+		 *                       {@link Escalation}.
+		 */
+		private Catch(Class<?> escalationType, ActivityExceptionModel exceptionModel) {
+			this.escalationType = escalationType;
+			this.exceptionModel = exceptionModel;
 		}
 	}
 

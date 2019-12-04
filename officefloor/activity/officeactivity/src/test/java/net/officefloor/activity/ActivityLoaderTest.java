@@ -17,6 +17,12 @@
  */
 package net.officefloor.activity;
 
+import java.io.EOFException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.NoSuchElementException;
+
 import net.officefloor.activity.model.ActivityModel;
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureLoader;
@@ -37,6 +43,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -93,10 +100,10 @@ public class ActivityLoaderTest extends OfficeFrameTestCase implements ActivityT
 				(builder) -> {
 					builder.addSectionInput("INPUT_A", Integer.class);
 					builder.addSectionInput("INPUT_B", null);
-					builder.addSectionOutput("OUTPUT_A", String.class, false);
-					builder.addSectionOutput("OUTPUT_B", null, false);
-					builder.addSectionOutput("OUTPUT_C", null, false);
-					builder.addSectionOutput("OUTPUT_D", null, false);
+					builder.addSectionOutput("OUTPUT_A", String.class);
+					builder.addSectionOutput("OUTPUT_B", null);
+					builder.addSectionOutput("OUTPUT_C", null);
+					builder.addSectionOutput("OUTPUT_D", null);
 				}, "name.one", "value.one", "name.two", "value.two");
 		SubSection sectionB = this.record_addSection_loadSectionType("SECTION_B", "net.example.ExampleSectionSource",
 				"EXAMPLE_LOCATION", (builder) -> builder.addSectionInput("INPUT_0", null));
@@ -128,7 +135,7 @@ public class ActivityLoaderTest extends OfficeFrameTestCase implements ActivityT
 		this.sectionDesigner.link(this.output(sectionA, "OUTPUT_C"), output2);
 
 		// Load the activity
-		this.loadActivity("LoadConfiguration.activity.xml");
+		this.loadActivity("Configuration.activity.xml");
 	}
 
 	/**
@@ -168,6 +175,74 @@ public class ActivityLoaderTest extends OfficeFrameTestCase implements ActivityT
 
 		// Load the activity
 		this.loadActivity("Objects.activity.xml");
+	}
+
+	/**
+	 * Ensure handle {@link Exception}.
+	 */
+	public void testExceptions() throws Exception {
+
+		// Record procedures
+		SubSection procedure = this.record_addProcedure_loadProcedureType("PROCEDURE", "net.example.Example", "Class",
+				"function", false, (builder) -> {
+					builder.addEscalationType(FileNotFoundException.class);
+					builder.addEscalationType(EOFException.class);
+					builder.addEscalationType(IOException.class);
+					builder.addEscalationType(SQLException.class);
+					builder.addEscalationType(NullPointerException.class);
+					builder.addEscalationType(RuntimeException.class);
+				});
+
+		// Record sections
+		SubSection section = this.record_addSection_loadSectionType("SECTION", "net.example.Example",
+				"EXAMPLE_LOCATION", (builder) -> {
+					builder.addSectionInput("INPUT", IOException.class);
+					builder.addSectionEscalation(FileNotFoundException.class);
+					builder.addSectionEscalation(EOFException.class);
+					builder.addSectionEscalation(SQLException.class);
+					builder.addSectionEscalation(IOException.class);
+					builder.addSectionEscalation(NoSuchElementException.class);
+					builder.addSectionEscalation(RuntimeException.class);
+				});
+
+		// Record outputs
+		SectionOutput output = this.record_addSectionOutput("OUTPUT", null);
+
+		// Record loading escalations
+		this.record_loadClass(IOException.class);
+		this.record_loadClass(FileNotFoundException.class);
+		this.record_loadClass(SQLException.class);
+
+		// Record linking procedure escalations
+		this.sectionDesigner.link(this.escalation(procedure, FileNotFoundException.class), this.procedure(procedure));
+		this.sectionDesigner.link(this.escalation(procedure, EOFException.class), this.input(section, "INPUT"));
+		this.sectionDesigner.link(this.escalation(procedure, IOException.class), this.input(section, "INPUT"));
+		this.sectionDesigner.link(this.escalation(procedure, SQLException.class), output);
+		this.sectionDesigner.link(this.escalation(procedure, NullPointerException.class),
+				this.record_addSectionEscalation("PROCEDURE-" + NullPointerException.class.getSimpleName(),
+						NullPointerException.class));
+		this.sectionDesigner.link(this.escalation(procedure, RuntimeException.class), this.record_addSectionEscalation(
+				"PROCEDURE-" + RuntimeException.class.getSimpleName(), RuntimeException.class));
+
+		// Record linking section escalations
+		this.record_loadClass(EOFException.class);
+		this.sectionDesigner.link(this.escalation(section, EOFException.class), this.input(section, "INPUT"));
+		this.record_loadClass(FileNotFoundException.class);
+		this.sectionDesigner.link(this.escalation(section, FileNotFoundException.class), this.procedure(procedure));
+		this.record_loadClass(IOException.class);
+		this.sectionDesigner.link(this.escalation(section, IOException.class), this.input(section, "INPUT"));
+		this.record_loadClass(NoSuchElementException.class);
+		this.sectionDesigner.link(this.escalation(section, NoSuchElementException.class),
+				this.record_addSectionEscalation("SECTION-" + NoSuchElementException.class.getSimpleName(),
+						NoSuchElementException.class));
+		this.record_loadClass(RuntimeException.class);
+		this.sectionDesigner.link(this.escalation(section, RuntimeException.class), this.record_addSectionEscalation(
+				"SECTION-" + RuntimeException.class.getSimpleName(), RuntimeException.class));
+		this.record_loadClass(SQLException.class);
+		this.sectionDesigner.link(this.escalation(section, SQLException.class), output);
+
+		// Load the activity
+		this.loadActivity("Exceptions.activity.xml");
 	}
 
 	/**
@@ -310,6 +385,17 @@ public class ActivityLoaderTest extends OfficeFrameTestCase implements ActivityT
 	}
 
 	/**
+	 * Records getting {@link SubSectionOutput} for {@link Escalation}
+	 * 
+	 * @param section        {@link SubSection}.
+	 * @param escalationType Type of {@link Escalation}.
+	 * @return {@link SubSectionOutput}.
+	 */
+	private SubSectionOutput escalation(SubSection section, Class<? extends Throwable> escalationType) {
+		return this.output(section, escalationType.getSimpleName());
+	}
+
+	/**
 	 * Records getting {@link Procedure} next.
 	 * 
 	 * @param procedure {@link SubSection} for {@link Procedure}.
@@ -383,6 +469,32 @@ public class ActivityLoaderTest extends OfficeFrameTestCase implements ActivityT
 		this.recordReturn(this.sectionDesigner,
 				this.sectionDesigner.addSectionOutput(outputName, argumentTypeName, false), output);
 		return output;
+	}
+
+	/**
+	 * Records adding a {@link SectionOutput} for {@link Escalation}.
+	 * 
+	 * @param outputName   Name of {@link SectionOutput}.
+	 * @param argumentType Argument type.
+	 * @return {@link SectionOutput}.
+	 */
+	private SectionOutput record_addSectionEscalation(String outputName, Class<? extends Throwable> argumentType) {
+		SectionOutput output = this.createMock(SectionOutput.class);
+		String argumentTypeName = argumentType == null ? null : argumentType.getName();
+		this.recordReturn(this.sectionDesigner,
+				this.sectionDesigner.addSectionOutput(outputName, argumentTypeName, true), output);
+		return output;
+	}
+
+	/**
+	 * Records loading {@link Escalation} {@link Class}.
+	 * 
+	 * @param <E>             {@link Escalation} type.
+	 * @param escalationClass {@link Escalation} {@link Class}.
+	 */
+	private <E extends Throwable> void record_loadClass(Class<E> escalationClass) {
+		this.recordReturn(this.sectionSourceContext, this.sectionSourceContext.loadClass(escalationClass.getName()),
+				escalationClass);
 	}
 
 	/**

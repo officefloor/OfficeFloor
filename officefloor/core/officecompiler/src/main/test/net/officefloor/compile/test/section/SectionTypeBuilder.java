@@ -22,6 +22,7 @@ import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.frame.api.escalate.Escalation;
 
 /**
  * Facade builder for the {@link SectionType}.
@@ -46,6 +47,21 @@ public interface SectionTypeBuilder {
 	 * @param isEscalationOnly Flag indicating if escalation only.
 	 */
 	void addSectionOutput(String name, Class<?> argumentType, boolean isEscalationOnly);
+
+	/**
+	 * Adds a non-{@link Escalation} {@link SectionOutputType}.
+	 * 
+	 * @param name         Name.
+	 * @param argumentType Argument type.
+	 */
+	void addSectionOutput(String name, Class<?> argumentType);
+
+	/**
+	 * Adds an {@link Escalation} {@link SectionOutputType}.
+	 * 
+	 * @param escalationType {@link Escalation} type.
+	 */
+	void addSectionEscalation(Class<?> escalationType);
 
 	/**
 	 * Adds an {@link SectionObjectType}.

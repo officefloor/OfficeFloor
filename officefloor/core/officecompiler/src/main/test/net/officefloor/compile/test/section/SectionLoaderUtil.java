@@ -708,6 +708,16 @@ public class SectionLoaderUtil {
 		}
 
 		@Override
+		public void addSectionOutput(String name, Class<?> argumentType) {
+			this.addSectionOutput(name, argumentType, false);
+		}
+
+		@Override
+		public void addSectionEscalation(Class<?> escalationType) {
+			this.addSectionOutput(escalationType.getSimpleName(), escalationType, true);
+		}
+
+		@Override
 		public void addSectionObject(String name, Class<?> objectType, String typeQualifier) {
 			this.designer.addSectionObject(name, objectType.getName()).setTypeQualifier(typeQualifier);
 		}

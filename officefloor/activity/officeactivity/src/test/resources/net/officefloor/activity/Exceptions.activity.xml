@@ -1,0 +1,29 @@
+<activity>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="net.example.Example" source="Class" procedure="function" />
+	</procedures>
+
+	<sections>
+		<section name="SECTION" source="net.example.Example" location="EXAMPLE_LOCATION">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<section name="SECTION" input="INPUT" />
+		</exception>
+		<exception class="java.io.FileNotFoundException">
+			<procedure name="PROCEDURE" />
+		</exception>
+		<exception class="java.sql.SQLException">
+			<output name="OUTPUT" />
+		</exception>
+	</exceptions>
+
+	<outputs>
+		<output name="OUTPUT" />
+	</outputs>
+
+</activity>
