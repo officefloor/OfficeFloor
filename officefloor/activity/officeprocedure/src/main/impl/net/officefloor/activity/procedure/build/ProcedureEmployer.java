@@ -131,7 +131,9 @@ public class ProcedureEmployer {
 					String procedureName, boolean isNext, PropertyList properties) {
 				OfficeSection procedure = officeArchitect.addOfficeSection(sectionName,
 						ProcedureSectionSource.class.getName(), procedureName);
-				properties.configureProperties(procedure);
+				if (properties != null) {
+					properties.configureProperties(procedure);
+				}
 				procedure.addProperty(ProcedureManagedFunctionSource.RESOURCE_PROPERTY_NAME, className);
 				procedure.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, serviceName);
 				if (isNext) {
@@ -158,7 +160,9 @@ public class ProcedureEmployer {
 					String procedureName, boolean isNext, PropertyList properties) {
 				SubSection procedure = sectionDesigner.addSubSection(sectionName,
 						ProcedureSectionSource.class.getName(), procedureName);
-				properties.configureProperties(procedure);
+				if (properties != null) {
+					properties.configureProperties(procedure);
+				}
 				procedure.addProperty(ProcedureManagedFunctionSource.RESOURCE_PROPERTY_NAME, resource);
 				procedure.addProperty(ProcedureManagedFunctionSource.SOURCE_NAME_PROPERTY_NAME, serviceName);
 				if (isNext) {

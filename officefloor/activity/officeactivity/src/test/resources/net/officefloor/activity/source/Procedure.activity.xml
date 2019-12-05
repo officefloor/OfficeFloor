@@ -1,0 +1,8 @@
+<activity>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="net.officefloor.activity.source.ExampleProcedure" source="Class"
+			procedure="procedure" />
+	</procedures>
+
+</activity>
