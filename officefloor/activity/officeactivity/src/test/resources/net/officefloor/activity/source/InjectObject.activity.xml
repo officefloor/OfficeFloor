@@ -1,0 +1,8 @@
+<activity>
+
+	<procedures>
+		<procedure name="INJECT_OBJECT" resource="net.officefloor.activity.source.ExampleProcedure" source="Class"
+			procedure="injectObject" />
+	</procedures>
+
+</activity>

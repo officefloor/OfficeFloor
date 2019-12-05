@@ -277,8 +277,8 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		type.addVariableType(Character.class.getName());
 		type.addFlowType("flowOne", null);
 		type.addFlowType("flowTwo", Byte.class);
-		type.addEscalationType(IOException.class.getSimpleName(), IOException.class);
-		type.addEscalationType(SQLException.class.getSimpleName(), SQLException.class);
+		type.addEscalationType(IOException.class.getName(), IOException.class);
+		type.addEscalationType(SQLException.class.getName(), SQLException.class);
 		type.setNextArgumentType(Integer.class);
 		ProcedureLoaderUtil.validateProcedureType(type, LoadComplexTypeProcedure.class.getName(), "complex");
 	}
@@ -366,8 +366,8 @@ public class ProcedureLoaderTest extends OfficeFrameTestCase {
 		expected.addVariableType("qualified-" + Integer.class.getName(), Integer.class.getName());
 		expected.addFlowType("flowOne", null);
 		expected.addFlowType("flowTwo", Byte.class);
-		expected.addEscalationType(IOException.class.getSimpleName(), IOException.class);
-		expected.addEscalationType(SQLException.class.getSimpleName(), SQLException.class);
+		expected.addEscalationType(IOException.class.getName(), IOException.class);
+		expected.addEscalationType(SQLException.class.getName(), SQLException.class);
 		expected.setNextArgumentType(Integer.class);
 		ProcedureType type = MockManagedFunctionProcedureSource.run(null, (context) -> {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = context.setManagedFunction(() -> null,

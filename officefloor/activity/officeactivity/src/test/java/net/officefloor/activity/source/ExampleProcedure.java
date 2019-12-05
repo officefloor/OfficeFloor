@@ -17,6 +17,8 @@
  */
 package net.officefloor.activity.source;
 
+import java.sql.SQLException;
+
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.plugin.section.clazz.Parameter;
 
@@ -37,6 +39,11 @@ public class ExampleProcedure {
 	 */
 	public static String result = null;
 
+	/**
+	 * {@link SQLException}.
+	 */
+	public static SQLException failure = null;
+
 	/*
 	 * ============ Procedures =================
 	 */
@@ -52,4 +59,17 @@ public class ExampleProcedure {
 	public void result(@Parameter String value) {
 		result = value;
 	}
+
+	public void injectObject(String value) {
+		result = value;
+	}
+
+	public void propagate(@Parameter SQLException value) throws SQLException {
+		throw value;
+	}
+
+	public void handleEscalation(@Parameter SQLException value) {
+		failure = value;
+	}
+
 }
