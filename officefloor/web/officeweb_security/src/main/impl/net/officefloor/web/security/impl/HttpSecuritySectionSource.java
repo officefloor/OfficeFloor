@@ -164,13 +164,13 @@ public class HttpSecuritySectionSource<A, AC extends Serializable, C, O extends 
 			String flowName = flowType.getFlowName();
 
 			// Create and register the section outputs for flows
-			SectionOutput sectionOutput = designer.addSectionOutput(flowName, flowType.getArgumentType().getName(),
-					false);
+			Class<?> argumentType = flowType.getArgumentType();
+			String argumentTypeName = argumentType == null ? null : argumentType.getName();
+			SectionOutput sectionOutput = designer.addSectionOutput(flowName, argumentTypeName, false);
 			sectionOutputs.put(flowName, sectionOutput);
 
 			// Create and link the section inputs
-			SectionInput sectionInput = designer.addSectionInput(INPUT_FLOW_PREFIX + flowName,
-					flowType.getArgumentType().getName());
+			SectionInput sectionInput = designer.addSectionInput(INPUT_FLOW_PREFIX + flowName, argumentTypeName);
 			designer.link(sectionInput, sectionOutput);
 		}
 
