@@ -904,7 +904,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		this.httpException(builder);
 		ProcedureTypeBuilder type = ProcedureLoaderUtil.createProcedureTypeBuilder(builder.getProcedureName(), null);
 		if (this.isSupportExceptions()) {
-			type.addEscalationType(HttpException.class.getSimpleName(), HttpException.class);
+			type.addEscalationType(HttpException.class.getName(), HttpException.class);
 		}
 		validateProcedureType(type, builder);
 	}
@@ -948,7 +948,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		type.addFlowType("flowWithParameter", String.class);
 		type.addFlowType("flowWithParameterAndCallback", String.class);
 		if (this.isSupportExceptions()) {
-			type.addEscalationType(IOException.class.getSimpleName(), IOException.class);
+			type.addEscalationType(IOException.class.getName(), IOException.class);
 		}
 		validateProcedureType(type, builder);
 	}

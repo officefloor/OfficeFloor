@@ -69,13 +69,13 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 		// Create the security type
 		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.constructHttpSecurityType(HttpCredentials.class,
 				(context) -> {
-					context.addFlow("OUTPUT_A", Integer.class, null);
-					context.addFlow("OUTPUT_B", String.class, null);
-					context.addFlow("OUTPUT_C", null, null);
-					context.addFlow("OUTPUT_D", null, null);
-					context.addFlow("OUTPUT_E", null, null);
-					context.addFlow("OUTPUT_F", null, null);
-					context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
+					context.addFlow("OUTPUT_A", Integer.class, 0, null);
+					context.addFlow("OUTPUT_B", String.class, 1, null);
+					context.addFlow("OUTPUT_C", null, 2, null);
+					context.addFlow("OUTPUT_D", null, 3, null);
+					context.addFlow("OUTPUT_E", null, 4, null);
+					context.addFlow("OUTPUT_F", null, 5, null);
+					context.addDependency("IGNORE_OBJECT", DataSource.class, null, 0, null);
 				});
 
 		// Create the properties
@@ -107,13 +107,13 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 
 		// Create the security type
 		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.constructHttpSecurityType(String.class, (context) -> {
-			context.addFlow("OUTPUT_A", Integer.class, null);
-			context.addFlow("OUTPUT_B", String.class, null);
-			context.addFlow("OUTPUT_C", null, null);
-			context.addFlow("OUTPUT_D", null, null);
-			context.addFlow("OUTPUT_E", null, null);
-			context.addFlow("OUTPUT_F", null, null);
-			context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
+			context.addFlow("OUTPUT_A", Integer.class, 0, null);
+			context.addFlow("OUTPUT_B", String.class, 1, null);
+			context.addFlow("OUTPUT_C", null, 2, null);
+			context.addFlow("OUTPUT_D", null, 3, null);
+			context.addFlow("OUTPUT_E", null, 4, null);
+			context.addFlow("OUTPUT_F", null, 5, null);
+			context.addDependency("IGNORE_OBJECT", DataSource.class, null, 0, null);
 		});
 
 		// Create the properties
@@ -164,10 +164,10 @@ public class RefactorSecurityTest extends AbstractWoofChangesTestCase {
 
 		// Create the security type
 		HttpSecurityType<?, ?, ?, ?, ?> securityType = this.constructHttpSecurityType(String.class, (context) -> {
-			context.addFlow("OUTPUT_A", Integer.class, null);
-			context.addFlow("OUTPUT_B", String.class, null);
-			context.addFlow("OUTPUT_C", null, null);
-			context.addDependency("IGNORE_OBJECT", DataSource.class, null, null);
+			context.addFlow("OUTPUT_A", Integer.class, 0, null);
+			context.addFlow("OUTPUT_B", String.class, 1, null);
+			context.addFlow("OUTPUT_C", null, 2, null);
+			context.addDependency("IGNORE_OBJECT", DataSource.class, null, 0, null);
 		});
 
 		// Create the properties

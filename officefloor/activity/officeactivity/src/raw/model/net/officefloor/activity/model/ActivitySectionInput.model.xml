@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="activity section input name" />
+	<field type="String" name="parameter type" />
+	<list type="ActivitySectionOutputToActivitySectionInputModel" name="activity section output" />
+	<list type="ActivityProcedureNextToActivitySectionInputModel" name="activity procedure next" />
+	<list type="ActivityProcedureOutputToActivitySectionInputModel" name="activity procedure output" />
+	<list type="ActivityExceptionToActivitySectionInputModel" name="activity exception" />
+	<list type="ActivityInputToActivitySectionInputModel" name="activity input" />
+</model>

@@ -1,0 +1,31 @@
+<activity>
+
+	<inputs>
+		<input name="INPUT_A" />
+		<input name="INPUT_B">
+			<procedure name="PROCEDURE" />
+			<section name="SECTION" input="INPUT" />
+			<output name="OUTPUT" />
+		</input>
+	</inputs>
+
+	<procedures>
+		<procedure name="PROCEDURE" />
+		<procedure name="PROCEDURE_LINK" />
+	</procedures>
+
+	<sections>
+		<section name="SECTION">
+			<input name="INPUT" />
+		</section>
+		<section name="SECTION_LINK">
+			<input name="INPUT" />
+		</section>
+	</sections>
+
+	<outputs>
+		<output name="OUTPUT" />
+		<output name="OUTPUT_LINK" />
+	</outputs>
+
+</activity>

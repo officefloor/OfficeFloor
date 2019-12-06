@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="section name" />
+	<field type="String" name="input name" />
+	<field type="ActivityInputModel" name="activity input" end-field="activity section input" />
+	<field type="ActivitySectionInputModel" name="activity section input" end-list="activity input" />
+</model>

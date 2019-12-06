@@ -1,0 +1,22 @@
+<activity>
+
+	<inputs>
+		<input name="INPUT" argument-type="java.lang.String">
+			<section name="SECTION" input="input" />
+		</input>
+	</inputs>
+
+	<sections>
+		<section name="SECTION" source="CLASS" location="net.officefloor.activity.source.ExampleSection">
+			<input name="input" parameter-type="java.lang.String" />
+			<output name="output" argument-type="java.lang.String">
+				<output name="OUTPUT" />
+			</output>
+		</section>
+	</sections>
+
+	<outputs>
+		<output name="OUTPUT" parameter-type="java.lang.String" />
+	</outputs>
+
+</activity>

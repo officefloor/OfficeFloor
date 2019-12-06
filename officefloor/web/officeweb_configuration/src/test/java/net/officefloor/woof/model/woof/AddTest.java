@@ -294,10 +294,10 @@ public class AddTest extends AbstractWoofChangesTestCase {
 	public void testAddProcedure() {
 
 		// Create the procedure type
-		ProcedureType procedure = this.constructProcedureType("procedure", String.class, (context) -> {
-			context.addFlow("OUTPUT_A", String.class);
-			context.addFlow("OUTPUT_B", null);
-			context.setNextArgumentType(Short.class);
+		ProcedureType procedure = this.constructProcedureType("procedure", String.class, (builder) -> {
+			builder.addFlowType("OUTPUT_A", String.class);
+			builder.addFlowType("OUTPUT_B", null);
+			builder.setNextArgumentType(Short.class);
 		});
 
 		// Create the properties
@@ -345,11 +345,11 @@ public class AddTest extends AbstractWoofChangesTestCase {
 		HttpSecurityType<?, ?, ?, ?, ?> httpSecurityType = this.constructHttpSecurityType(HttpCredentials.class,
 				(context) -> {
 					// Should be auto-wired (not in configuration)
-					context.addDependency("DEPENDENCY", String.class, "qualifier", null);
+					context.addDependency("DEPENDENCY", String.class, "qualifier", 0, null);
 
 					// Include flows
-					context.addFlow("OUTPUT_1", String.class, null);
-					context.addFlow("OUTPUT_2", null, null);
+					context.addFlow("OUTPUT_1", String.class, 0, null);
+					context.addFlow("OUTPUT_2", null, 1, null);
 				});
 
 		// Create the properties

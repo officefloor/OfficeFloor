@@ -1,0 +1,7 @@
+<activity>
+
+	<outputs>
+		<output name="OUTPUT" parameter-type="java.lang.String" />
+	</outputs>
+
+</activity>

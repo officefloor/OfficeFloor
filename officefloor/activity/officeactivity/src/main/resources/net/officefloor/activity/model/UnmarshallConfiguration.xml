@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unmarshall node="activity" class="net.officefloor.activity.model.ActivityModel">
+
+	<!-- INPUT -->
+	<object method="addActivityInput" node="input" class="net.officefloor.activity.model.ActivityInputModel">
+		<value method="setActivityInputName" node="input@name" />
+		<value method="setArgumentType" node="input@argument-type" />
+		<value method="setX" node="input@x" />
+		<value method="setY" node="input@y" />
+		<object method="setActivitySectionInput" node="section"
+			class="net.officefloor.activity.model.ActivityInputToActivitySectionInputModel">
+			<value method="setSectionName" node="section@name" />
+			<value method="setInputName" node="section@input" />
+		</object>
+		<object method="setActivityOutput" node="output"
+			class="net.officefloor.activity.model.ActivityInputToActivityOutputModel">
+			<value method="setOutputName" node="output@name" />
+		</object>
+		<object method="setActivityProcedure" node="procedure"
+			class="net.officefloor.activity.model.ActivityInputToActivityProcedureModel">
+			<value method="setProcedureName" node="procedure@name" />
+		</object>
+	</object>
+
+
+	<!-- SECTIONS -->
+	<object method="addActivitySection" node="section" class="net.officefloor.activity.model.ActivitySectionModel">
+		<value method="setActivitySectionName" node="section@name" />
+		<value method="setSectionSourceClassName" node="section@source" />
+		<value method="setSectionLocation" node="section@location" />
+		<value method="setX" node="section@x" />
+		<value method="setY" node="section@y" />
+		<object method="addProperty" node="property" class="net.officefloor.activity.model.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+		<object method="addInput" node="input" class="net.officefloor.activity.model.ActivitySectionInputModel">
+			<value method="setActivitySectionInputName" node="input@name" />
+			<value method="setParameterType" node="input@parameter-type" />
+		</object>
+		<object method="addOutput" node="output" class="net.officefloor.activity.model.ActivitySectionOutputModel">
+			<value method="setActivitySectionOutputName" node="output@name" />
+			<value method="setArgumentType" node="output@argument-type" />
+			<object method="setActivitySectionInput" node="section"
+				class="net.officefloor.activity.model.ActivitySectionOutputToActivitySectionInputModel">
+				<value method="setSectionName" node="section@name" />
+				<value method="setInputName" node="section@input" />
+			</object>
+			<object method="setActivityOutput" node="output"
+				class="net.officefloor.activity.model.ActivitySectionOutputToActivityOutputModel">
+				<value method="setOutputName" node="output@name" />
+			</object>
+			<object method="setActivityProcedure" node="procedure"
+				class="net.officefloor.activity.model.ActivitySectionOutputToActivityProcedureModel">
+				<value method="setProcedureName" node="procedure@name" />
+			</object>
+		</object>
+	</object>
+
+	<!-- PROCEDURES -->
+	<object method="addActivityProcedure" node="procedure"
+		class="net.officefloor.activity.model.ActivityProcedureModel">
+		<value method="setActivityProcedureName" node="procedure@name" />
+		<value method="setResource" node="procedure@resource" />
+		<value method="setSourceName" node="procedure@source" />
+		<value method="setProcedureName" node="procedure@procedure" />
+		<value method="setX" node="procedure@x" />
+		<value method="setY" node="procedure@y" />
+		<object method="addProperty" node="property" class="net.officefloor.activity.model.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
+		<object method="setNext" node="next" class="net.officefloor.activity.model.ActivityProcedureNextModel">
+			<value method="setArgumentType" node="next@argument-type" />
+			<object method="setActivitySectionInput" node="section"
+				class="net.officefloor.activity.model.ActivityProcedureNextToActivitySectionInputModel">
+				<value method="setSectionName" node="section@name" />
+				<value method="setInputName" node="section@input" />
+			</object>
+			<object method="setActivityOutput" node="output"
+				class="net.officefloor.activity.model.ActivityProcedureNextToActivityOutputModel">
+				<value method="setOutputName" node="output@name" />
+			</object>
+			<object method="setActivityProcedure" node="procedure"
+				class="net.officefloor.activity.model.ActivityProcedureNextToActivityProcedureModel">
+				<value method="setProcedureName" node="procedure@name" />
+			</object>
+		</object>
+		<object method="addOutput" node="output" class="net.officefloor.activity.model.ActivityProcedureOutputModel">
+			<value method="setActivityProcedureOutputName" node="output@name" />
+			<value method="setArgumentType" node="output@argument-type" />
+			<object method="setActivitySectionInput" node="section"
+				class="net.officefloor.activity.model.ActivityProcedureOutputToActivitySectionInputModel">
+				<value method="setSectionName" node="section@name" />
+				<value method="setInputName" node="section@input" />
+			</object>
+			<object method="setActivityOutput" node="output"
+				class="net.officefloor.activity.model.ActivityProcedureOutputToActivityOutputModel">
+				<value method="setOutputName" node="output@name" />
+			</object>
+			<object method="setActivityProcedure" node="procedure"
+				class="net.officefloor.activity.model.ActivityProcedureOutputToActivityProcedureModel">
+				<value method="setProcedureName" node="procedure@name" />
+			</object>
+		</object>
+	</object>
+
+	<!-- EXCEPTIONS -->
+	<object method="addActivityException" node="exception"
+		class="net.officefloor.activity.model.ActivityExceptionModel">
+		<value method="setClassName" node="exception@class" />
+		<value method="setX" node="exception@x" />
+		<value method="setY" node="exception@y" />
+		<object method="setActivitySectionInput" node="section"
+			class="net.officefloor.activity.model.ActivityExceptionToActivitySectionInputModel">
+			<value method="setSectionName" node="section@name" />
+			<value method="setInputName" node="section@input" />
+		</object>
+		<object method="setActivityOutput" node="output"
+			class="net.officefloor.activity.model.ActivityExceptionToActivityOutputModel">
+			<value method="setOutputName" node="output@name" />
+		</object>
+		<object method="setActivityProcedure" node="procedure"
+			class="net.officefloor.activity.model.ActivityExceptionToActivityProcedureModel">
+			<value method="setProcedureName" node="procedure@name" />
+		</object>
+	</object>
+
+	<!-- RESOURCES -->
+	<object method="addActivityOutput" node="output" class="net.officefloor.activity.model.ActivityOutputModel">
+		<value method="setActivityOutputName" node="output@name" />
+		<value method="setParameterType" node="output@parameter-type" />
+		<value method="setX" node="output@x" />
+		<value method="setY" node="output@y" />
+	</object>
+
+</unmarshall>

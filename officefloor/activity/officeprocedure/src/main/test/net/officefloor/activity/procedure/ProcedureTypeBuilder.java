@@ -55,6 +55,14 @@ public interface ProcedureTypeBuilder {
 	void addVariableType(String variableName, String variableType);
 
 	/**
+	 * Adds a {@link ProcedureVariableType}.
+	 * 
+	 * @param variableName Name of {@link Var}.
+	 * @param variableType Type of {@link Var}.
+	 */
+	void addVariableType(String variableName, Class<?> variableType);
+
+	/**
 	 * Adds a {@link ProcedureFlowType}.
 	 * 
 	 * @param flowName     Name of {@link Flow}.
@@ -62,6 +70,14 @@ public interface ProcedureTypeBuilder {
 	 *                     argument.
 	 */
 	void addFlowType(String flowName, Class<?> argumentType);
+
+	/**
+	 * Convenience method to add {@link ProcedureEscalationType} defaulting the
+	 * name.
+	 * 
+	 * @param escalationType Escalation type.
+	 */
+	void addEscalationType(Class<? extends Throwable> escalationType);
 
 	/**
 	 * Adds a {@link ProcedureEscalationType}.
@@ -77,5 +93,12 @@ public interface ProcedureTypeBuilder {
 	 * @param nextArgumentType Next argument type.
 	 */
 	void setNextArgumentType(Class<?> nextArgumentType);
+
+	/**
+	 * Builds the {@link ProcedureType}.
+	 * 
+	 * @return {@link ProcedureType}
+	 */
+	ProcedureType build();
 
 }

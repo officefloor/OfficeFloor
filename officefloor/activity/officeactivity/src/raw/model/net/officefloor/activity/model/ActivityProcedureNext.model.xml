@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="argument type" />
+	<field type="ActivityProcedureNextToActivitySectionInputModel" name="activity section input" />
+	<field type="ActivityProcedureNextToActivityProcedureModel" name="activity procedure" />
+	<field type="ActivityProcedureNextToActivityOutputModel" name="activity output" />
+</model>

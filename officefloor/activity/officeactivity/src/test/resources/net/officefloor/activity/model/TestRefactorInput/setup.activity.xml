@@ -1,0 +1,8 @@
+<activity>
+
+	<inputs>
+		<input name="EXISTS" />
+		<input name="INPUT" argument-type="java.lang.String" />
+	</inputs>
+
+</activity>

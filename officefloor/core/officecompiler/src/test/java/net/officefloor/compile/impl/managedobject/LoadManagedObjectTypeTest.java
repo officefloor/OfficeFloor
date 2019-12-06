@@ -594,9 +594,9 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to default the flow argument type.
+	 * Ensure able to have no flow argument type.
 	 */
-	public void testDefaultFlowArgumentType() {
+	public void testNoFlowArgumentType() {
 
 		final ManagedObjectFlowMetaData<?> flowDefaulted = this.createMock(ManagedObjectFlowMetaData.class);
 		final ManagedObjectFlowMetaData<?> flowProvided = this.createMock(ManagedObjectFlowMetaData.class);
@@ -606,7 +606,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getDependencyMetaData(), null);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				new ManagedObjectFlowMetaData[] { flowDefaulted, flowProvided });
-		this.recordReturn(flowDefaulted, flowDefaulted.getLabel(), "DEFAULTED");
+		this.recordReturn(flowDefaulted, flowDefaulted.getLabel(), "NO_ARGUMENT");
 		this.recordReturn(flowDefaulted, flowDefaulted.getKey(), null);
 		this.recordReturn(flowDefaulted, flowDefaulted.getArgumentType(), null);
 		this.recordReturn(flowProvided, flowProvided.getLabel(), null);
@@ -622,8 +622,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		ManagedObjectFlowType<?>[] flowTypes = moType.getFlowTypes();
 		assertEquals("Incorrect number of flows", 2, flowTypes.length);
 		ManagedObjectFlowType<?> defaulted = flowTypes[0];
-		assertEquals("Incorrect name for defaulted argument flow", "DEFAULTED", defaulted.getFlowName());
-		assertEquals("Incorrect defaulted argument type", Void.class, defaulted.getArgumentType());
+		assertEquals("Incorrect name for defaulted argument flow", "NO_ARGUMENT", defaulted.getFlowName());
+		assertNull("Incorrect no argument type", defaulted.getArgumentType());
 		ManagedObjectFlowType<?> provided = flowTypes[1];
 		assertEquals("Incorrect name for provided argument flow", "1", provided.getFlowName());
 		assertEquals("Incorrect provided argument type", Connection.class, provided.getArgumentType());

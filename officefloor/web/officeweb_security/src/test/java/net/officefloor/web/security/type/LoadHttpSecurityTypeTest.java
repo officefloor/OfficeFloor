@@ -483,7 +483,7 @@ public class LoadHttpSecurityTypeTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of flows", 2, flowTypes.length);
 		HttpSecurityFlowType<?> defaulted = flowTypes[0];
 		assertEquals("Incorrect name for defaulted argument flow", "DEFAULTED", defaulted.getFlowName());
-		assertEquals("Incorrect defaulted argument type", Void.class, defaulted.getArgumentType());
+		assertNull("Incorrect no argument type", defaulted.getArgumentType());
 		HttpSecurityFlowType<?> provided = flowTypes[1];
 		assertEquals("Incorrect name for provided argument flow", "1", provided.getFlowName());
 		assertEquals("Incorrect provided argument type", Connection.class, provided.getArgumentType());

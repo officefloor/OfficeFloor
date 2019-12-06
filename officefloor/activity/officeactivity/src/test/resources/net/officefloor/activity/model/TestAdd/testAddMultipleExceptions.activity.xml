@@ -1,0 +1,7 @@
+<activity>
+
+	<exceptions>
+		<exception class="java.sql.SQLException" />
+	</exceptions>
+
+</activity>

@@ -50,7 +50,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.15.0</revision>
+		<revision>3.16.0</revision>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
@@ -137,6 +137,11 @@
 				<artifactId>activity</artifactId>
 				<version>${revision}</version>
 				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.activity</groupId>
+				<artifactId>officeactivity</artifactId>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.activity</groupId>

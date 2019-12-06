@@ -1,0 +1,8 @@
+<activity>
+
+	<inputs>
+		<input name="EXISTS" />
+		<input name="EXISTS-2" />
+	</inputs>
+
+</activity>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marshall type="net.officefloor.activity.model.ActivityModel" element="activity">
+
+	<!-- INPUTS -->
+	<collection method="getActivityInputs" element="inputs">
+		<item type="net.officefloor.activity.model.ActivityInputModel" element="input">
+			<attributes>
+				<attribute method="getActivityInputName" attribute="name" />
+				<attribute method="getArgumentType" attribute="argument-type" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<object method="getActivitySectionInput" element="section">
+				<attributes>
+					<attribute method="getSectionName" attribute="name" />
+					<attribute method="getInputName" attribute="input" />
+				</attributes>
+			</object>
+			<object method="getActivityOutput" element="output">
+				<attributes>
+					<attribute method="getOutputName" attribute="name" />
+				</attributes>
+			</object>
+			<object method="getActivityProcedure" element="procedure">
+				<attributes>
+					<attribute method="getProcedureName" attribute="name" />
+				</attributes>
+			</object>
+		</item>
+	</collection>
+
+	<!-- SECTIONS -->
+	<collection method="getActivitySections" element="sections">
+		<item type="net.officefloor.activity.model.ActivitySectionModel" element="section">
+			<attributes>
+				<attribute method="getActivitySectionName" attribute="name" />
+				<attribute method="getSectionSourceClassName" attribute="source" />
+				<attribute method="getSectionLocation" attribute="location" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties">
+				<item type="net.officefloor.activity.model.PropertyModel" element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getInputs">
+				<item type="net.officefloor.activity.model.ActivitySectionInputModel" element="input">
+					<attributes>
+						<attribute method="getActivitySectionInputName" attribute="name" />
+						<attribute method="getParameterType" attribute="parameter-type" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getOutputs">
+				<item type="net.officefloor.activity.model.ActivitySectionOutputModel" element="output">
+					<attributes>
+						<attribute method="getActivitySectionOutputName" attribute="name" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+					</attributes>
+					<object method="getActivitySectionInput" element="section">
+						<attributes>
+							<attribute method="getSectionName" attribute="name" />
+							<attribute method="getInputName" attribute="input" />
+						</attributes>
+					</object>
+					<object method="getActivityOutput" element="output">
+						<attributes>
+							<attribute method="getOutputName" attribute="name" />
+						</attributes>
+					</object>
+					<object method="getActivityProcedure" element="procedure">
+						<attributes>
+							<attribute method="getProcedureName" attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- PROCEDURES -->
+	<collection method="getActivityProcedures" element="procedures">
+		<item type="net.officefloor.activity.model.ActivityProcedureModel" element="procedure">
+			<attributes>
+				<attribute method="getActivityProcedureName" attribute="name" />
+				<attribute method="getResource" attribute="resource" />
+				<attribute method="getSourceName" attribute="source" />
+				<attribute method="getProcedureName" attribute="procedure" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<collection method="getProperties">
+				<item type="net.officefloor.activity.model.PropertyModel" element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
+			<object method="getNext" element="next">
+				<attributes>
+					<attribute method="getArgumentType" attribute="argument-type" />
+				</attributes>
+				<object method="getActivitySectionInput" element="section">
+					<attributes>
+						<attribute method="getSectionName" attribute="name" />
+						<attribute method="getInputName" attribute="input" />
+					</attributes>
+				</object>
+				<object method="getActivityOutput" element="output">
+					<attributes>
+						<attribute method="getOutputName" attribute="name" />
+					</attributes>
+				</object>
+				<object method="getActivityProcedure" element="procedure">
+					<attributes>
+						<attribute method="getProcedureName" attribute="name" />
+					</attributes>
+				</object>
+			</object>
+			<collection method="getOutputs">
+				<item type="net.officefloor.activity.model.ActivityProcedureOutputModel" element="output">
+					<attributes>
+						<attribute method="getActivityProcedureOutputName" attribute="name" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+					</attributes>
+					<object method="getActivitySectionInput" element="section">
+						<attributes>
+							<attribute method="getSectionName" attribute="name" />
+							<attribute method="getInputName" attribute="input" />
+						</attributes>
+					</object>
+					<object method="getActivityOutput" element="output">
+						<attributes>
+							<attribute method="getOutputName" attribute="name" />
+						</attributes>
+					</object>
+					<object method="getActivityProcedure" element="procedure">
+						<attributes>
+							<attribute method="getProcedureName" attribute="name" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+		</item>
+	</collection>
+
+	<!-- EXCEPTIONS -->
+	<collection method="getActivityExceptions" element="exceptions">
+		<item type="net.officefloor.activity.model.ActivityExceptionModel" element="exception">
+			<attributes>
+				<attribute method="getClassName" attribute="class" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+			<object method="getActivitySectionInput" element="section">
+				<attributes>
+					<attribute method="getSectionName" attribute="name" />
+					<attribute method="getInputName" attribute="input" />
+				</attributes>
+			</object>
+			<object method="getActivityOutput" element="output">
+				<attributes>
+					<attribute method="getOutputName" attribute="name" />
+				</attributes>
+			</object>
+			<object method="getActivityProcedure" element="procedure">
+				<attributes>
+					<attribute method="getProcedureName" attribute="name" />
+				</attributes>
+			</object>
+		</item>
+	</collection>
+
+	<!-- OUTPUTS -->
+	<collection method="getActivityOutputs" element="outputs">
+		<item type="net.officefloor.activity.model.ActivityOutputModel" element="output">
+			<attributes>
+				<attribute method="getActivityOutputName" attribute="name" />
+				<attribute method="getParameterType" attribute="parameter-type" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
+			</attributes>
+		</item>
+	</collection>
+
+</marshall>

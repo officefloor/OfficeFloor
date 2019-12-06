@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="class name" />
+	<field type="ActivityExceptionToActivitySectionInputModel" name="activity section input" />
+	<field type="ActivityExceptionToActivityProcedureModel" name="activity procedure" />
+	<field type="ActivityExceptionToActivityOutputModel" name="activity output" />
+</model>
