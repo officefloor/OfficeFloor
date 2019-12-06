@@ -94,7 +94,7 @@ public class ActivitySectionSourceTest extends OfficeFrameTestCase {
 		// Undertake test
 		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
 			ExampleProcedure.result = null;
-			final String ARGUMENT = new String("TEST");
+			final String ARGUMENT = "TEST";
 			CompileOfficeFloor.invokeProcess(officeFloor, "INPUT.procedure", ARGUMENT);
 			assertSame("Should pass through value in/out of activity", ARGUMENT, ExampleProcedure.result);
 		}
@@ -105,7 +105,7 @@ public class ActivitySectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testInjectObject() throws Throwable {
 
-		final String OBJECT = new String("TEST");
+		final String OBJECT = "TEST";
 
 		// Compile the activity
 		CompileOfficeFloor compiler = new CompileOfficeFloor();

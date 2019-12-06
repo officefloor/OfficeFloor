@@ -119,7 +119,7 @@ public class ActivityLoaderImpl implements ActivityLoader {
 		SectionConnector sections = new SectionConnector(activityModel, designer, sourceContext, objectFactory);
 
 		// Load outputs
-		OutputConnector outputs = new OutputConnector(activityModel, designer, sourceContext);
+		OutputConnector outputs = new OutputConnector(activityModel, designer);
 
 		// Link the inputs
 		for (ActivityInputModel inputModel : activityModel.getActivityInputs()) {
@@ -555,8 +555,7 @@ public class ActivityLoaderImpl implements ActivityLoader {
 		 * @param sectionDesigner      {@link SectionDesigner}.
 		 * @param sectionSourceContext {@link SectionSourceContext}.
 		 */
-		private OutputConnector(ActivityModel activity, SectionDesigner sectionDesigner,
-				SectionSourceContext sectionSourceContext) {
+		private OutputConnector(ActivityModel activity, SectionDesigner sectionDesigner) {
 			this.sectionDesigner = sectionDesigner;
 
 			// Configure the outputs

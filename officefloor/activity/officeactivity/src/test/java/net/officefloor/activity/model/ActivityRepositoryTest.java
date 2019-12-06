@@ -249,13 +249,11 @@ public class ActivityRepositoryTest extends OfficeFrameTestCase {
 
 		private <L extends ConnectionModel> Object getModel(L link, Class<?> modelType) {
 			for (Method method : link.getClass().getMethods()) {
-				if (method.getReturnType() == modelType) {
-					if (!method.getName().equals(this.previousMethodName)) {
-						try {
-							return method.invoke(link);
-						} catch (Exception ex) {
-							throw fail(ex);
-						}
+				if ((method.getReturnType() == modelType) && (!method.getName().equals(this.previousMethodName))) {
+					try {
+						return method.invoke(link);
+					} catch (Exception ex) {
+						throw fail(ex);
 					}
 				}
 			}
@@ -383,18 +381,15 @@ public class ActivityRepositoryTest extends OfficeFrameTestCase {
 		final Closure<String> previousMethodName = new Closure<>();
 		final Consumer<Model> loadEndModel = (model) -> {
 			for (Method method : link.getClass().getMethods()) {
-				if (method.getParameterTypes().length == 1) {
-					if (method.getParameterTypes()[0] == model.getClass()) {
-						if (!method.getName().equals(previousMethodName.value)) {
-							try {
-								method.invoke(link, model);
-							} catch (Exception ex) {
-								throw fail(ex);
-							}
-							previousMethodName.value = method.getName();
-							return; // loaded
-						}
+				if ((method.getParameterTypes().length == 1) && (method.getParameterTypes()[0] == model.getClass())
+						&& (!method.getName().equals(previousMethodName.value))) {
+					try {
+						method.invoke(link, model);
+					} catch (Exception ex) {
+						throw fail(ex);
 					}
+					previousMethodName.value = method.getName();
+					return; // loaded
 				}
 			}
 			fail("Unable to set model " + model.getClass().getName() + " on connection " + link.getClass().getName());
