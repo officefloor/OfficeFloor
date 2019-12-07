@@ -36,10 +36,10 @@ import org.eclipse.gef.mvc.fx.models.SelectionModel;
 import org.eclipse.gef.mvc.fx.operations.DeselectOperation;
 import org.eclipse.gef.mvc.fx.parts.IContentPart;
 import org.eclipse.gef.mvc.fx.parts.IRootPart;
+import org.eclipse.gef.mvc.fx.parts.LayeredRootPart;
 import org.eclipse.gef.mvc.fx.policies.CreationPolicy;
 import org.eclipse.gef.mvc.fx.policies.DeletionPolicy;
 import org.eclipse.gef.mvc.fx.viewer.IViewer;
-import org.eclipse.gef.mvc.fx.viewer.InfiniteCanvasViewer;
 
 import com.google.common.collect.HashMultimap;
 
@@ -98,13 +98,12 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 	/**
 	 * Obtains the location of the {@link MouseEvent}.
 	 * 
-	 * @param e {@link MouseEvent}.
+	 * @param event {@link MouseEvent}.
 	 * @return Location of the {@link MouseEvent}.
 	 */
-	protected Point getLocation(MouseEvent e) {
-		Point2D location = ((InfiniteCanvasViewer) getHost().getRoot().getViewer()).getCanvas().getContentGroup()
-				.sceneToLocal(e.getSceneX(), e.getSceneY());
-		return new Point(location.getX(), location.getY());
+	protected Point2D getLocation(MouseEvent event) {
+		return ((LayeredRootPart) getContentViewer().getRootPart()).getContentLayer().sceneToLocal(event.getSceneX(),
+				event.getSceneY());
 	}
 
 	/**
@@ -117,7 +116,7 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 	protected void completeDrag(boolean isCreateAdaptedParent, MouseEvent event) {
 		this.prototypePart.getErrorHandler().isError(() -> {
 			// Obtain location to create parent
-			Point location = this.getLocation(event);
+			Point2D location = this.getLocation(event);
 
 			// Delete the proxy
 			this.restoreRefreshVisuals(this.prototypePart);
@@ -131,7 +130,7 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 			if (isCreateAdaptedParent) {
 
 				// Create the parent at the location
-				this.prototype.newAdaptedParent(location);
+				this.prototype.newAdaptedParent(new Point(location.getX(), location.getY()));
 			}
 		});
 
@@ -171,7 +170,14 @@ public class CreateAdaptedParentOnDragHandler<R extends Model, O, M extends Mode
 					+ AdaptedPrototype.class.getSimpleName() + " for model " + parent.getModel().getClass().getName());
 		}
 		parentPart.getErrorHandler().isError(() -> {
+
+			// Create proxy visual for feedback of drag
 			ProxyCreateAdaptedParent proxy = new ProxyCreateAdaptedParent(parent, this.prototype);
+
+			// Initially position (drag anchor keeps in sync to relative mouse movement)
+			Point2D location = this.getLocation(event);
+			proxy.getModel().setX((int) location.getX());
+			proxy.getModel().setY((int) location.getY());
 
 			// Create part for proxy to visual parent in drag
 			IRootPart<? extends Node> contentRoot = this.getContentViewer().getRootPart();
