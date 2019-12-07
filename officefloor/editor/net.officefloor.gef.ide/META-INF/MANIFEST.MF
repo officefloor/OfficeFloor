@@ -10,7 +10,8 @@ Require-Bundle: net.officefloor.core;bundle-version="3.16.0",
  net.officefloor.gef.bridge;bundle-version="3.16.0",
  net.officefloor.gef.editor;bundle-version="3.16.0",
  net.officefloor.gef.configurer;bundle-version="3.16.0"
-Export-Package: net.officefloor.gef.ide.editor,
+Export-Package: net.officefloor.gef.ide,
+ net.officefloor.gef.ide.editor,
  net.officefloor.gef.ide.preferences
 Bundle-ActivationPolicy: lazy
 Import-Package: com.google.inject,

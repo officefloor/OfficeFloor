@@ -29,6 +29,7 @@
       <import plugin="net.officefloor.gef.bridge" version="3.16.0" match="greaterOrEqual"/>
       <import plugin="net.officefloor.gef.configurer" version="3.16.0" match="greaterOrEqual"/>
       <import plugin="net.officefloor.gef.ide" version="3.16.0" match="greaterOrEqual"/>
+      <import plugin="net.officefloor.gef.items" version="3.16.0" match="greaterOrEqual"/>
       <import plugin="com.google.inject"/>
       <import plugin="org.eclipse.gef.mvc.fx"/>
       <import plugin="org.eclipse.gef.geometry"/>
@@ -54,6 +55,13 @@
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="net.officefloor.gef.items"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
          id="net.officefloor.gef.woof"
