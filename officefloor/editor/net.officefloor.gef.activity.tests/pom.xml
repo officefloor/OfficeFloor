@@ -7,17 +7,10 @@
 		<artifactId>editor</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>net.officefloor.woof</artifactId>
-	<name>OfficeFloor WoOF for Editor</name>
-	<description>OfficeFloor WoOF for Editor</description>
-	<packaging>eclipse-plugin</packaging>
+	<artifactId>net.officefloor.gef.activity.tests</artifactId>
+	<packaging>eclipse-test-plugin</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<skipTests>true</skipTests>
 	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>woof</artifactId>
-		</dependency>
-	</dependencies>
 </project>

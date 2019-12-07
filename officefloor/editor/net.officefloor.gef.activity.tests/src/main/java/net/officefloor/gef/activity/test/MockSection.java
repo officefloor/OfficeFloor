@@ -1,5 +1,5 @@
 /*
- * OfficeFloor - http://www.officefloor.net
+Procedure * OfficeFloor - http://www.officefloor.net
  * Copyright (C) 2005-2018 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,27 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.gef.woof.test;
+package net.officefloor.gef.activity.test;
 
 import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
- * Example template logic.
+ * Mock section {@link Class} for testing.
  * 
  * @author Daniel Sagenschneider
  */
-public class Template {
+public class MockSection {
 
 	@FlowInterface
 	public static interface Flows {
-
 		void flow();
 	}
-	
-	public Template redirect() {
-		return this;
+
+	public void input(Flows flows) {
 	}
 
-	public void getTemplate(Flows flows) {
-	}
 }

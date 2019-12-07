@@ -17,10 +17,11 @@ Procedure * OfficeFloor - http://www.officefloor.net
  */
 package net.officefloor.gef.woof.test;
 
+import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.plugin.clazz.FlowInterface;
 
 /**
- * Mock section {@link Class} for testing.
+ * Mock {@link Procedure} for testing.
  * 
  * @author Daniel Sagenschneider
  */

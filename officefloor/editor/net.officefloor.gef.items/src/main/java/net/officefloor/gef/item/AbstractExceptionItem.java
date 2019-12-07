@@ -28,10 +28,9 @@ import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
-import net.officefloor.woof.model.woof.WoofExceptionModel;
 
 /**
- * Configuration for the {@link WoofExceptionModel}.
+ * Configuration for abstract {@link Exception} item.
  * 
  * @author Daniel Sagenschneider
  */
