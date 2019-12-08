@@ -20,12 +20,17 @@ package net.officefloor.gef.activity;
 import java.util.Map;
 
 import net.officefloor.activity.model.ActivityChanges;
+import net.officefloor.activity.model.ActivityExceptionToActivityProcedureModel;
+import net.officefloor.activity.model.ActivityInputToActivityProcedureModel;
 import net.officefloor.activity.model.ActivityModel;
 import net.officefloor.activity.model.ActivityModel.ActivityEvent;
 import net.officefloor.activity.model.ActivityProcedureModel.ActivityProcedureEvent;
 import net.officefloor.activity.procedure.ProcedureType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.activity.model.ActivityProcedureModel;
+import net.officefloor.activity.model.ActivityProcedureNextToActivityProcedureModel;
+import net.officefloor.activity.model.ActivityProcedureOutputToActivityProcedureModel;
+import net.officefloor.activity.model.ActivitySectionOutputToActivityProcedureModel;
 import net.officefloor.gef.ide.editor.AbstractItem;
 import net.officefloor.gef.item.AbstractProcedureItem;
 import net.officefloor.model.ConnectionModel;
@@ -98,7 +103,10 @@ public class ActivityProcedureItem extends
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Class<? extends ConnectionModel>[] getInputConnectionClasses() {
-		return new Class[] {};
+		return new Class[] { ActivityInputToActivityProcedureModel.class,
+				ActivityExceptionToActivityProcedureModel.class, ActivityProcedureNextToActivityProcedureModel.class,
+				ActivityProcedureOutputToActivityProcedureModel.class,
+				ActivitySectionOutputToActivityProcedureModel.class };
 	}
 
 	@Override

@@ -17,11 +17,22 @@
  */
 package net.officefloor.gef.activity;
 
+import java.util.List;
+
 import net.officefloor.activity.model.ActivityChanges;
 import net.officefloor.activity.model.ActivityExceptionModel;
 import net.officefloor.activity.model.ActivityExceptionModel.ActivityExceptionEvent;
+import net.officefloor.activity.model.ActivityExceptionToActivityOutputModel;
+import net.officefloor.activity.model.ActivityExceptionToActivityProcedureModel;
+import net.officefloor.activity.model.ActivityExceptionToActivitySectionInputModel;
 import net.officefloor.activity.model.ActivityModel;
 import net.officefloor.activity.model.ActivityModel.ActivityEvent;
+import net.officefloor.activity.model.ActivityOutputModel;
+import net.officefloor.activity.model.ActivityOutputModel.ActivityOutputEvent;
+import net.officefloor.activity.model.ActivityProcedureModel;
+import net.officefloor.activity.model.ActivityProcedureModel.ActivityProcedureEvent;
+import net.officefloor.activity.model.ActivitySectionInputModel;
+import net.officefloor.activity.model.ActivitySectionInputModel.ActivitySectionInputEvent;
 import net.officefloor.gef.item.AbstractExceptionItem;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
@@ -72,7 +83,54 @@ public class ActivityExceptionItem extends
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Class<? extends ConnectionModel>[] getInputConnectionClasses() {
-		return new Class[] {};
+		return new Class[] { ActivityExceptionToActivityProcedureModel.class,
+				ActivityExceptionToActivitySectionInputModel.class, ActivityExceptionToActivityOutputModel.class };
+	}
+
+	@Override
+	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
+
+		// Procedure
+		connections.add(new IdeConnection<>(ActivityExceptionToActivityProcedureModel.class)
+				.connectOne(s -> s.getActivityProcedure(), c -> c.getActivityException(),
+						ActivityExceptionEvent.CHANGE_ACTIVITY_PROCEDURE)
+				.to(ActivityProcedureModel.class)
+				.many(t -> t.getActivityExceptions(), c -> c.getActivityProcedure(),
+						ActivityProcedureEvent.ADD_ACTIVITY_EXCEPTION, ActivityProcedureEvent.REMOVE_ACTIVITY_EXCEPTION)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkExceptionToProcedure(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeExceptionToProcedure(ctx.getModel()));
+				}));
+
+		// Section Input
+		connections
+				.add(new IdeConnection<>(ActivityExceptionToActivitySectionInputModel.class)
+						.connectOne(s -> s.getActivitySectionInput(), c -> c.getActivityException(),
+								ActivityExceptionEvent.CHANGE_ACTIVITY_SECTION_INPUT)
+						.to(ActivitySectionInputModel.class)
+						.many(t -> t.getActivityExceptions(), c -> c.getActivitySectionInput(),
+								ActivitySectionInputEvent.ADD_ACTIVITY_EXCEPTION,
+								ActivitySectionInputEvent.REMOVE_ACTIVITY_EXCEPTION)
+						.create((s, t, ctx) -> {
+							ctx.getChangeExecutor().execute(ctx.getOperations().linkExceptionToSectionInput(s, t));
+						}).delete((ctx) -> {
+							ctx.getChangeExecutor()
+									.execute(ctx.getOperations().removeExceptionToSectionInput(ctx.getModel()));
+						}));
+
+		// Output
+		connections.add(new IdeConnection<>(ActivityExceptionToActivityOutputModel.class)
+				.connectOne(s -> s.getActivityOutput(), c -> c.getActivityException(),
+						ActivityExceptionEvent.CHANGE_ACTIVITY_OUTPUT)
+				.to(ActivityOutputModel.class)
+				.many(t -> t.getActivityExceptions(), c -> c.getActivityOutput(),
+						ActivityOutputEvent.ADD_ACTIVITY_EXCEPTION, ActivityOutputEvent.REMOVE_ACTIVITY_EXCEPTION)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkExceptionToOutput(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeExceptionToOutput(ctx.getModel()));
+				}));
 	}
 
 	@Override

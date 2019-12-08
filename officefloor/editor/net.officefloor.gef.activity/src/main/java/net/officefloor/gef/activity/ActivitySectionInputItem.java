@@ -20,10 +20,15 @@ package net.officefloor.gef.activity;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.activity.model.ActivityChanges;
+import net.officefloor.activity.model.ActivityExceptionToActivitySectionInputModel;
+import net.officefloor.activity.model.ActivityInputToActivitySectionInputModel;
 import net.officefloor.activity.model.ActivityModel;
+import net.officefloor.activity.model.ActivityProcedureNextToActivitySectionInputModel;
+import net.officefloor.activity.model.ActivityProcedureOutputToActivitySectionInputModel;
 import net.officefloor.activity.model.ActivitySectionInputModel;
 import net.officefloor.activity.model.ActivitySectionInputModel.ActivitySectionInputEvent;
 import net.officefloor.activity.model.ActivitySectionModel;
+import net.officefloor.activity.model.ActivitySectionOutputToActivitySectionInputModel;
 import net.officefloor.activity.model.ActivitySectionModel.ActivitySectionEvent;
 import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.gef.editor.DefaultConnectors;
@@ -57,7 +62,12 @@ public class ActivitySectionInputItem extends
 	public Pane visual(ActivitySectionInputModel model,
 			AdaptedChildVisualFactoryContext<ActivitySectionInputModel> context) {
 		HBox container = new HBox();
-		context.addNode(container, context.connector(DefaultConnectors.FLOW).getNode());
+		context.addNode(container,
+				context.connector(DefaultConnectors.FLOW, ActivityInputToActivitySectionInputModel.class,
+						ActivityExceptionToActivitySectionInputModel.class,
+						ActivityProcedureNextToActivitySectionInputModel.class,
+						ActivityProcedureOutputToActivitySectionInputModel.class,
+						ActivitySectionOutputToActivitySectionInputModel.class).getNode());
 		context.label(container);
 		return container;
 	}

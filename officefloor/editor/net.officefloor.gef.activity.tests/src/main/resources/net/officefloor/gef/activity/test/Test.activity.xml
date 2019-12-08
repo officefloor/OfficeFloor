@@ -1,28 +1,74 @@
 <activity>
   <inputs>
-    <input name="INPUT" argument-type="java.lang.String" x="168" y="50">
+    <input name="inputToOutput" argument-type="java.lang.String" x="174" y="175">
+      <output name="OUTPUT"/>
+    </input>
+    <input name="inputToProcedure" argument-type="" x="168" y="50">
+      <procedure name="procedureToProcedure"/>
+    </input>
+    <input name="inputToSection" argument-type="" x="170" y="108">
+      <section name="SectionToProcedure" input="input"/>
     </input>
   </inputs>
   <sections>
-    <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.activity.test.MockSection" x="188" y="245">
+    <section name="SectionToOutput" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.activity.test.MockSection" x="827" y="533">
       <input name="input" parameter-type=""/>
       <output name="flow" argument-type="">
+        <output name="OUTPUT"/>
+      </output>
+    </section>
+    <section name="SectionToProcedure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.activity.test.MockSection" x="819" y="384">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+        <procedure name="procedureToProcedure"/>
+      </output>
+    </section>
+    <section name="SectionToSection" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.activity.test.MockSection" x="823" y="458">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+        <section name="SectionToProcedure" input="input"/>
       </output>
     </section>
   </sections>
   <procedures>
-    <procedure name="procedure" resource="net.officefloor.gef.activity.test.MockProcedure" source="Class" procedure="procedure" x="171" y="137">
+    <procedure name="procedureToProcedure" resource="net.officefloor.gef.activity.test.MockProcedure" source="Class" procedure="procedure" x="429" y="129">
       <next argument-type="">
+        <procedure name="procedureToOutput"/>
       </next>
       <output name="flow" argument-type="">
+        <procedure name="procedureToOutput"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToSection" resource="net.officefloor.gef.activity.test.MockProcedure" source="Class" procedure="procedure" x="429" y="219">
+      <next argument-type="">
+        <section name="SectionToProcedure" input="input"/>
+      </next>
+      <output name="flow" argument-type="">
+        <section name="SectionToProcedure" input="input"/>
+      </output>
+    </procedure>
+    <procedure name="procedureToOutput" resource="net.officefloor.gef.activity.test.MockProcedure" source="Class" procedure="procedure" x="435" y="305">
+      <next argument-type="">
+        <output name="OUTPUT"/>
+      </next>
+      <output name="flow" argument-type="">
+        <output name="OUTPUT"/>
       </output>
     </procedure>
   </procedures>
   <exceptions>
-    <exception class="java.io.IOException" x="196" y="363">
+    <exception class="java.io.IOException" x="149" y="418">
+      <procedure name="procedureToProcedure"/>
+    </exception>
+    <exception class="java.lang.NullPointerException" x="152" y="531">
+      <output name="OUTPUT"/>
+    </exception>
+    <exception class="java.sql.SQLException" x="152" y="473">
+      <section name="SectionToProcedure" input="input"/>
     </exception>
   </exceptions>
   <outputs>
-    <output name="OUTPUT" parameter-type="java.lang.String" x="195" y="431"/>
+    <output name="OUTPUT" parameter-type="java.lang.String" x="1119" y="78"/>
+    <output name="OUTPUT_2" parameter-type="java.lang.String" x="1123" y="126"/>
   </outputs>
 </activity>

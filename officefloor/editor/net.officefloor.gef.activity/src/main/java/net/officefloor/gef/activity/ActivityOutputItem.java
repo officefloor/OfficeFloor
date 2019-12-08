@@ -22,9 +22,14 @@ import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import net.officefloor.activity.model.ActivityChanges;
+import net.officefloor.activity.model.ActivityExceptionToActivityOutputModel;
+import net.officefloor.activity.model.ActivityInputToActivityOutputModel;
 import net.officefloor.activity.model.ActivityModel;
 import net.officefloor.activity.model.ActivityModel.ActivityEvent;
 import net.officefloor.activity.model.ActivityOutputModel;
+import net.officefloor.activity.model.ActivityProcedureNextToActivityOutputModel;
+import net.officefloor.activity.model.ActivityProcedureOutputToActivityOutputModel;
+import net.officefloor.activity.model.ActivitySectionOutputToActivityOutputModel;
 import net.officefloor.activity.model.ActivityOutputModel.ActivityOutputEvent;
 import net.officefloor.gef.configurer.ValueValidator;
 import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
@@ -68,7 +73,11 @@ public class ActivityOutputItem extends
 	@Override
 	public Node visual(ActivityOutputModel model, AdaptedChildVisualFactoryContext<ActivityOutputModel> context) {
 		HBox container = new HBox();
-		context.addNode(container, context.connector(DefaultConnectors.FLOW).target().getNode());
+		context.addNode(container,
+				context.connector(DefaultConnectors.FLOW, ActivityInputToActivityOutputModel.class,
+						ActivityExceptionToActivityOutputModel.class, ActivityProcedureNextToActivityOutputModel.class,
+						ActivityProcedureOutputToActivityOutputModel.class,
+						ActivitySectionOutputToActivityOutputModel.class).target().getNode());
 		context.label(container);
 		return container;
 	}

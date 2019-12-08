@@ -23,10 +23,19 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import net.officefloor.activity.model.ActivityChanges;
 import net.officefloor.activity.model.ActivityModel;
+import net.officefloor.activity.model.ActivityOutputModel;
+import net.officefloor.activity.model.ActivityOutputModel.ActivityOutputEvent;
+import net.officefloor.activity.model.ActivityProcedureModel;
+import net.officefloor.activity.model.ActivityProcedureModel.ActivityProcedureEvent;
+import net.officefloor.activity.model.ActivitySectionInputModel;
+import net.officefloor.activity.model.ActivitySectionInputModel.ActivitySectionInputEvent;
 import net.officefloor.activity.model.ActivitySectionModel;
 import net.officefloor.activity.model.ActivitySectionModel.ActivitySectionEvent;
 import net.officefloor.activity.model.ActivitySectionOutputModel;
 import net.officefloor.activity.model.ActivitySectionOutputModel.ActivitySectionOutputEvent;
+import net.officefloor.activity.model.ActivitySectionOutputToActivityOutputModel;
+import net.officefloor.activity.model.ActivitySectionOutputToActivityProcedureModel;
+import net.officefloor.activity.model.ActivitySectionOutputToActivitySectionInputModel;
 import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.gef.editor.DefaultConnectors;
 import net.officefloor.gef.ide.editor.AbstractItem;
@@ -57,11 +66,14 @@ public class ActivitySectionOutputItem extends
 	}
 
 	@Override
-	public Pane visual(ActivitySectionOutputModel model, AdaptedChildVisualFactoryContext<ActivitySectionOutputModel> context) {
+	public Pane visual(ActivitySectionOutputModel model,
+			AdaptedChildVisualFactoryContext<ActivitySectionOutputModel> context) {
 		HBox container = new HBox();
 		context.label(container);
 		context.addNode(container,
-				context.connector(DefaultConnectors.FLOW).getNode());
+				context.connector(DefaultConnectors.FLOW, ActivitySectionOutputToActivityProcedureModel.class,
+						ActivitySectionOutputToActivitySectionInputModel.class,
+						ActivitySectionOutputToActivityOutputModel.class).getNode());
 		return container;
 	}
 
@@ -74,45 +86,49 @@ public class ActivitySectionOutputItem extends
 	@Override
 	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
 
-		// Section Input
-//		connections.add(new IdeConnection<>(ActivitySectionOutputToActivitySectionInputModel.class)
-//				.connectOne(s -> s.getActivitySectionInput(), c -> c.getActivitySectionOutput(),
-//						ActivitySectionOutputEvent.CHANGE_WOOF_SECTION_INPUT)
-//				.to(ActivitySectionInputModel.class)
-//				.many(t -> t.getActivitySectionOutputs(), c -> c.getActivitySectionInput(),
-//						ActivitySectionInputEvent.ADD_WOOF_SECTION_OUTPUT, ActivitySectionInputEvent.REMOVE_WOOF_SECTION_OUTPUT)
-//				.create((s, t, ctx) -> {
-//					ctx.getChangeExecutor().execute(ctx.getOperations().linkSectionOutputToSectionInput(s, t));
-//				}).delete((ctx) -> {
-//					ctx.getChangeExecutor()
-//							.execute(ctx.getOperations().removeSectionOutputToSectionInput(ctx.getModel()));
-//				}));
-
 		// Procedure
-//		connections.add(new IdeConnection<>(ActivitySectionOutputToActivityProcedureModel.class)
-//				.connectOne(s -> s.getActivityProcedure(), c -> c.getActivitySectionOutput(),
-//						ActivitySectionOutputEvent.CHANGE_WOOF_PROCEDURE)
-//				.to(ActivityProcedureModel.class)
-//				.many(t -> t.getActivitySectionOutputs(), c -> c.getActivityProcedure(),
-//						ActivityProcedureEvent.ADD_WOOF_SECTION_OUTPUT, ActivityProcedureEvent.REMOVE_WOOF_SECTION_OUTPUT)
-//				.create((s, t, ctx) -> {
-//					ctx.getChangeExecutor().execute(ctx.getOperations().linkSectionOutputToProcedure(s, t));
-//				}).delete((ctx) -> {
-//					ctx.getChangeExecutor().execute(ctx.getOperations().removeSectionOutputToProcedure(ctx.getModel()));
-//				}));
+		connections.add(new IdeConnection<>(ActivitySectionOutputToActivityProcedureModel.class)
+				.connectOne(s -> s.getActivityProcedure(), c -> c.getActivitySectionOutput(),
+						ActivitySectionOutputEvent.CHANGE_ACTIVITY_PROCEDURE)
+				.to(ActivityProcedureModel.class)
+				.many(t -> t.getActivitySectionOutputs(), c -> c.getActivityProcedure(),
+						ActivityProcedureEvent.ADD_ACTIVITY_SECTION_OUTPUT,
+						ActivityProcedureEvent.REMOVE_ACTIVITY_SECTION_OUTPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkSectionOutputToProcedure(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSectionOutputToProcedure(ctx.getModel()));
+				}));
 
-		// Resource
-//		connections.add(new IdeConnection<>(ActivitySectionOutputToActivityResourceModel.class)
-//				.connectOne(s -> s.getActivityResource(), c -> c.getActivitySectionOutput(),
-//						ActivitySectionOutputEvent.CHANGE_WOOF_RESOURCE)
-//				.to(ActivityResourceModel.class)
-//				.many(t -> t.getActivitySectionOutputs(), c -> c.getActivityResource(),
-//						ActivityResourceEvent.ADD_WOOF_SECTION_OUTPUT, ActivityResourceEvent.REMOVE_WOOF_SECTION_OUTPUT)
-//				.create((s, t, ctx) -> {
-//					ctx.getChangeExecutor().execute(ctx.getOperations().linkSectionOutputToResource(s, t));
-//				}).delete((ctx) -> {
-//					ctx.getChangeExecutor().execute(ctx.getOperations().removeSectionOutputToResource(ctx.getModel()));
-//				}));
+		// Section Input
+		connections
+				.add(new IdeConnection<>(ActivitySectionOutputToActivitySectionInputModel.class)
+						.connectOne(s -> s.getActivitySectionInput(), c -> c.getActivitySectionOutput(),
+								ActivitySectionOutputEvent.CHANGE_ACTIVITY_SECTION_INPUT)
+						.to(ActivitySectionInputModel.class)
+						.many(t -> t.getActivitySectionOutputs(), c -> c.getActivitySectionInput(),
+								ActivitySectionInputEvent.ADD_ACTIVITY_SECTION_OUTPUT,
+								ActivitySectionInputEvent.REMOVE_ACTIVITY_SECTION_OUTPUT)
+						.create((s, t, ctx) -> {
+							ctx.getChangeExecutor().execute(ctx.getOperations().linkSectionOutputToSectionInput(s, t));
+						}).delete((ctx) -> {
+							ctx.getChangeExecutor()
+									.execute(ctx.getOperations().removeSectionOutputToSectionInput(ctx.getModel()));
+						}));
+
+		// Output
+		connections.add(new IdeConnection<>(ActivitySectionOutputToActivityOutputModel.class)
+				.connectOne(s -> s.getActivityOutput(), c -> c.getActivitySectionOutput(),
+						ActivitySectionOutputEvent.CHANGE_ACTIVITY_OUTPUT)
+				.to(ActivityOutputModel.class)
+				.many(t -> t.getActivitySectionOutputs(), c -> c.getActivityOutput(),
+						ActivityOutputEvent.ADD_ACTIVITY_SECTION_OUTPUT,
+						ActivityOutputEvent.REMOVE_ACTIVITY_SECTION_OUTPUT)
+				.create((s, t, ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().linkSectionOutputToOutput(s, t));
+				}).delete((ctx) -> {
+					ctx.getChangeExecutor().execute(ctx.getOperations().removeSectionOutputToOutput(ctx.getModel()));
+				}));
 	}
 
 }
