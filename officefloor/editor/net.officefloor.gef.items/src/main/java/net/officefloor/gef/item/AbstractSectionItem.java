@@ -23,6 +23,7 @@ import java.util.Map;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import net.officefloor.activity.ActivitySectionSource;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
@@ -69,14 +70,19 @@ public abstract class AbstractSectionItem<R extends Model, RE extends Enum<RE>, 
 	}
 
 	/**
+	 * Choice {@link ActivitySectionSource}.
+	 */
+	private static final int CHOICE_ACTIVITY = 0;
+
+	/**
 	 * Choice {@link Class}.
 	 */
-	private static final int CHOICE_CLASS = 0;
+	private static final int CHOICE_CLASS = 1;
 
 	/**
 	 * Choice {@link SectionSource}.
 	 */
-	private static final int CHOICE_SECTION = 1;
+	private static final int CHOICE_SECTION = 2;
 
 	/**
 	 * Name.
@@ -267,7 +273,9 @@ public abstract class AbstractSectionItem<R extends Model, RE extends Enum<RE>, 
 			item.sourceClassName = this.getSectionSourceClassName(model);
 			item.location = this.getSectionLocation(model);
 			item.properties = this.getSectionProperties(model);
-			if (ClassSectionSource.class.getName().equals(item.sourceClassName)) {
+			if (ActivitySectionSource.class.getName().equals(item.sourceClassName)) {
+				item.choice = CHOICE_ACTIVITY;
+			} else if (ClassSectionSource.class.getName().equals(item.sourceClassName)) {
 				item.choice = CHOICE_CLASS;
 			} else {
 				item.choice = CHOICE_SECTION;
@@ -290,10 +298,18 @@ public abstract class AbstractSectionItem<R extends Model, RE extends Enum<RE>, 
 					.setValue((item, value) -> item.name = value);
 			ChoiceBuilder<I> choices = builder.choices("").init((item) -> item.choice)
 					.validate(ValueValidator.notNull("Must select")).setValue((item, value) -> {
-						if (value.equals(CHOICE_CLASS)) {
+						if (value.equals(CHOICE_ACTIVITY)) {
+							item.sourceClassName = ActivitySectionSource.class.getName();
+						} else if (value.equals(CHOICE_CLASS)) {
 							item.sourceClassName = ClassSectionSource.class.getName();
 						}
 					});
+
+			// Choice: activity
+			ConfigurationBuilder<I> activityBuilder = choices.choice("Activity");
+			activityBuilder.resource("Activity").init((item) -> item.location)
+					.validate(ValueValidator.notEmptyString("Must specify activity"))
+					.setValue((item, value) -> item.location = value);
 
 			// Choice: class
 			ConfigurationBuilder<I> classBuilder = choices.choice("Class");
