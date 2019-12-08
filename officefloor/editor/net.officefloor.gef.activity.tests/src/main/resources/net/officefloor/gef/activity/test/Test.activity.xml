@@ -1,1 +1,28 @@
-<activity />
+<activity>
+  <inputs>
+    <input name="INPUT" argument-type="java.lang.String" x="168" y="50">
+    </input>
+  </inputs>
+  <sections>
+    <section name="Section" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.gef.activity.test.MockSection" x="188" y="245">
+      <input name="input" parameter-type=""/>
+      <output name="flow" argument-type="">
+      </output>
+    </section>
+  </sections>
+  <procedures>
+    <procedure name="procedure" resource="net.officefloor.gef.activity.test.MockProcedure" source="Class" procedure="procedure" x="171" y="137">
+      <next argument-type="">
+      </next>
+      <output name="flow" argument-type="">
+      </output>
+    </procedure>
+  </procedures>
+  <exceptions>
+    <exception class="java.io.IOException" x="196" y="363">
+    </exception>
+  </exceptions>
+  <outputs>
+    <output name="OUTPUT" parameter-type="java.lang.String" x="195" y="431"/>
+  </outputs>
+</activity>

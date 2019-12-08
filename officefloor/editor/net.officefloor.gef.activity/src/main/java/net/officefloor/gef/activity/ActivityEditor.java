@@ -90,11 +90,11 @@ public class ActivityEditor extends AbstractAdaptedIdeEditor<ActivityModel, Acti
 	@Override
 	protected void loadParents(
 			List<AbstractConfigurableItem<ActivityModel, ActivityEvent, ActivityChanges, ?, ?, ?>> parents) {
-//		parents.add(new ActivityInputItem());
-//		parents.add(new ActivityProcedureItem());
-//		parents.add(new ActivitySectionItem());
-//		parents.add(new ActivityExceptionItem());
-//		parents.add(new ActivityOutputItem());
+		parents.add(new ActivityInputItem());
+		parents.add(new ActivityProcedureItem());
+		parents.add(new ActivitySectionItem());
+		parents.add(new ActivityExceptionItem());
+		parents.add(new ActivityOutputItem());
 	}
 
 	@Override

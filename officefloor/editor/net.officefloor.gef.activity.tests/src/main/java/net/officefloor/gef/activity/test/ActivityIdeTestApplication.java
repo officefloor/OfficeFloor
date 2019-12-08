@@ -66,6 +66,7 @@ public class ActivityIdeTestApplication
 	public void init() throws Exception {
 		this.register(ActivityInputModel.class, (model) -> {
 			model.setActivityInputName("INPUT");
+			model.setArgumentType(String.class.getName());
 		});
 		this.register(ActivityProcedureModel.class, (model) -> {
 			model.setActivityProcedureName("Procedure");
