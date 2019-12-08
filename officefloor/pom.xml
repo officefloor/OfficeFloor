@@ -90,7 +90,7 @@
 				<type>pom</type>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.eclipse</groupId>
+				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.activity</artifactId>
 				<type>eclipse-plugin</type>
 				<version>${revision}</version>
@@ -236,6 +236,12 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.section</artifactId>
+				<type>eclipse-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.activity</artifactId>
 				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>

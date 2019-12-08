@@ -9,23 +9,23 @@
 	<extension point="org.eclipse.ui.newWizards">
 		<wizard 
 		category="net.officefloor.category"
-        class="net.officefloor.eclipse.ide.woof.WoofNewWizard"
-        icon="icons/WoOF.png"
-        id="net.officefloor.eclipse.woof.WoofNewWizard"
-        name="WoOF"/>
+        class="net.officefloor.eclipse.ide.activity.ActivityNewWizard"
+        icon="icons/Activity.png"
+        id="net.officefloor.eclipse.activity.ActivityNewWizard"
+        name="Activity"/>
 	</extension>
 
 	<extension point="org.eclipse.ui.editors"
 		id="net.officefloor.ui.OfficeFloorEditors" 
 		name="OfficeFloor Editors">
 		<editor
-        class="net.officefloor.eclipse.ide.woof.WoofEditPart"
+        class="net.officefloor.eclipse.ide.activity.ActivityEditPart"
         contributorClass="net.officefloor.eclipse.ide.IdeEditorActionBarContributor"
         default="true"
-        extensions="woof"
-        icon="icons/WoOF.png"
-        id="net.officefloor.eclipse.woof"
-        name="WoOF Editor"/>
+        extensions="activity"
+        icon="icons/Activity.png"
+        id="net.officefloor.eclipse.activity"
+        name="Activity Editor"/>
 	</extension>
 
 </plugin>

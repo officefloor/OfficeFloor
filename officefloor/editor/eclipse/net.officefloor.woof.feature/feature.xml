@@ -53,18 +53,6 @@
    </requires>
 
    <plugin
-         id="net.officefloor.activity"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="net.officefloor.woof"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="net.officefloor.gef.items"
          download-size="0"
          install-size="0"
@@ -72,11 +60,30 @@
          unpack="false"/>
 
    <plugin
+         id="net.officefloor.activity"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
          id="net.officefloor.gef.activity"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="net.officefloor.eclipse.activity"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="net.officefloor.woof"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
    <plugin
          id="net.officefloor.gef.woof"
