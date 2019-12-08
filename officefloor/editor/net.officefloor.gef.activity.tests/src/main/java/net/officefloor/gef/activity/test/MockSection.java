@@ -32,6 +32,7 @@ public class MockSection {
 	}
 
 	public void input(Flows flows) {
+		// Test method
 	}
 
 }

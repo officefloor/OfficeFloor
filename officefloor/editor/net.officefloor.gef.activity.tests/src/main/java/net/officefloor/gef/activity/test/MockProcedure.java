@@ -33,6 +33,7 @@ public class MockProcedure {
 	}
 
 	public void procedure(Flows flows) {
+		// Test method
 	}
 
 }
