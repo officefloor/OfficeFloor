@@ -17,6 +17,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<modules>
+		<module>net.officefloor.gef.target</module>
 		<module>net.officefloor.core</module>
 		<module>net.officefloor.gef.bridge</module>
 		<module>net.officefloor.gef.common</module>
@@ -26,13 +27,16 @@
 		<module>net.officefloor.gef.editor.tests</module>
 		<module>net.officefloor.gef.ide</module>
 		<module>net.officefloor.gef.ide.tests</module>
+		<module>net.officefloor.gef.items</module>
 		<module>net.officefloor.gef.section</module>
 		<module>net.officefloor.gef.section.tests</module>
-		<module>net.officefloor.gef.shade</module>
-		<module>net.officefloor.gef.target</module>
+		<module>net.officefloor.activity</module>
+		<module>net.officefloor.gef.activity</module>
+		<module>net.officefloor.gef.activity.tests</module>
+		<module>net.officefloor.woof</module>
 		<module>net.officefloor.gef.woof</module>
 		<module>net.officefloor.gef.woof.tests</module>
-		<module>net.officefloor.woof</module>
+		<module>net.officefloor.gef.shade</module>
 		<module>eclipse</module>
 	</modules>
 	<build>

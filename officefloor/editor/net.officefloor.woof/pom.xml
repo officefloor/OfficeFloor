@@ -9,7 +9,7 @@
 	</parent>
 	<artifactId>net.officefloor.woof</artifactId>
 	<name>OfficeFloor WoOF for Editor</name>
-	<description>OfficeFloor WoOF Eclipse plug-in</description>
+	<description>OfficeFloor WoOF for Editor</description>
 	<packaging>eclipse-plugin</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

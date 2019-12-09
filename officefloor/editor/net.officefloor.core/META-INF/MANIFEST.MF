@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Eclipse Core
+Bundle-Name: OfficeFloor Core
 Bundle-SymbolicName: net.officefloor.core
 Bundle-Vendor: OfficeFloor
 Bundle-Version: 3.16.0

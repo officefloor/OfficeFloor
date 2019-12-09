@@ -19,6 +19,7 @@
 	<modules>
 		<module>net.officefloor.eclipse.ide</module>
 		<module>net.officefloor.eclipse.section</module>
+		<module>net.officefloor.eclipse.activity</module>
 		<module>net.officefloor.eclipse.woof</module>
 		<module>net.officefloor.eclipse.launch</module>
 		<module>net.officefloor.feature</module>

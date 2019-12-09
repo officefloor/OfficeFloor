@@ -27,6 +27,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import net.officefloor.gef.editor.AdaptedBuilderContext;
 import net.officefloor.gef.editor.AdaptedEditorModule;
+import net.officefloor.gef.editor.AdaptedEditorPlugin;
 import net.officefloor.gef.editor.AdaptedModel;
 import net.officefloor.gef.editor.SelectOnly;
 import net.officefloor.model.Model;
@@ -92,6 +93,7 @@ public abstract class AbstractEditorTestApplication<R extends Model> extends App
 	public void start(Stage stage) throws Exception {
 
 		// Create the module
+		AdaptedEditorPlugin.initNonOsgiEnvironment();
 		AdaptedEditorModule module = this.createModule();
 
 		// Configure select only (if specified)

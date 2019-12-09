@@ -91,8 +91,26 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.activity</artifactId>
+				<type>eclipse-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.core</artifactId>
 				<type>eclipse-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.activity</artifactId>
+				<type>eclipse-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.activity.tests</artifactId>
+				<type>eclipse-test-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -141,6 +159,12 @@
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.ide.tests</artifactId>
 				<type>eclipse-test-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.items</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -212,6 +236,12 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.section</artifactId>
+				<type>eclipse-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.activity</artifactId>
 				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
