@@ -618,6 +618,7 @@ public class SectionLoaderUtil {
 		// Create the OfficeFloor compiler that fails on first issue
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
+		compiler.addSourceAliases();
 		return compiler;
 	}
 

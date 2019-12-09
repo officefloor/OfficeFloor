@@ -1,0 +1,21 @@
+<activity>
+  <inputs>
+    <input name="Input" argument-type="net.officefloor.tutorial.activityhttpserver.Depth" x="35" y="33">
+      <procedure name="increase"/>
+    </input>
+  </inputs>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="increase" resource="net.officefloor.tutorial.activityhttpserver.IncreaseDepthLogic" source="Class" procedure="increase" x="140" y="31">
+      <next argument-type="net.officefloor.tutorial.activityhttpserver.Depth">
+        <output name="Output"/>
+      </next>
+    </procedure>
+  </procedures>
+  <exceptions>
+  </exceptions>
+  <outputs>
+    <output name="Output" parameter-type="net.officefloor.tutorial.activityhttpserver.Depth" x="319" y="33"/>
+  </outputs>
+</activity>
