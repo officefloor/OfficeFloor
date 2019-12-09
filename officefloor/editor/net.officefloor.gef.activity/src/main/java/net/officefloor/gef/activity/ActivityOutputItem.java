@@ -27,15 +27,14 @@ import net.officefloor.activity.model.ActivityInputToActivityOutputModel;
 import net.officefloor.activity.model.ActivityModel;
 import net.officefloor.activity.model.ActivityModel.ActivityEvent;
 import net.officefloor.activity.model.ActivityOutputModel;
+import net.officefloor.activity.model.ActivityOutputModel.ActivityOutputEvent;
 import net.officefloor.activity.model.ActivityProcedureNextToActivityOutputModel;
 import net.officefloor.activity.model.ActivityProcedureOutputToActivityOutputModel;
 import net.officefloor.activity.model.ActivitySectionOutputToActivityOutputModel;
-import net.officefloor.activity.model.ActivityOutputModel.ActivityOutputEvent;
 import net.officefloor.gef.configurer.ValueValidator;
 import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
 import net.officefloor.gef.editor.DefaultConnectors;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
-import net.officefloor.model.ConnectionModel;
 
 /**
  * Configuration of the {@link ActivityOutputModel}.
@@ -108,10 +107,6 @@ public class ActivityOutputItem extends
 		styles.add(
 				new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 50.0%, dodgerblue, lightskyblue)"));
 		styles.add(new IdeStyle(".${model} .label").rule("-fx-text-fill", "blue"));
-	}
-
-	@Override
-	protected void connections(List<IdeConnectionTarget<? extends ConnectionModel, ?, ?>> connections) {
 	}
 
 	@Override
