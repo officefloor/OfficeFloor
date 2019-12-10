@@ -26,6 +26,7 @@ import lombok.NoArgsConstructor;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,3 +34,4 @@ public class Depth {
 
 	private Integer level;
 }
+// END SNIPPET: tutorial

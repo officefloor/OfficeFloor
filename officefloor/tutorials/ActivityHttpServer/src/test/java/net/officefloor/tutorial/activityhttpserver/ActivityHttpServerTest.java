@@ -33,6 +33,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class ActivityHttpServerTest {
 
+	// START SNIPPET: tutorial
 	@Rule
 	public MockWoofServerRule server = new MockWoofServerRule();
 
@@ -43,4 +44,5 @@ public class ActivityHttpServerTest {
 		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest());
 		response.assertResponse(200, mapper.writeValueAsString(new Depth(2)));
 	}
+	// END SNIPPET: tutorial
 }

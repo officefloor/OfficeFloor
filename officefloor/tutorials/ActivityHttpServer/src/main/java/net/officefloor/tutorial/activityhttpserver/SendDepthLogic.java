@@ -27,7 +27,9 @@ import net.officefloor.web.ObjectResponse;
  */
 public class SendDepthLogic {
 
+	// START SNIPPET: tutorial
 	public void send(@Parameter Depth depth, ObjectResponse<Depth> response) {
 		response.send(depth);
 	}
+	// END SNIPPET: tutorial
 }
