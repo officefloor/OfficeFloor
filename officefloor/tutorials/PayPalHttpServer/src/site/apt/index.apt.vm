@@ -58,4 +58,4 @@ PayPal Tutorial
 
 Next
 
-  The {{{../SpringHttpServer/index.html}next tutorial}} covers integrating Spring beans into OfficeFloor.
+  The {{{../ActivityHttpServer/index.html}next tutorial}} covers modularising configuration.

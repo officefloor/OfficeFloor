@@ -221,7 +221,7 @@ public class ActivityChangesImpl implements ActivityChanges {
 	 * Sorts the {@link ActivityProcedureModel} instances.
 	 */
 	private void sortProcedures() {
-		sortModelList(this.model.getActivityProcedures(), (model) -> model.getProcedureName());
+		sortModelList(this.model.getActivityProcedures(), (model) -> model.getActivityProcedureName());
 	}
 
 	/**

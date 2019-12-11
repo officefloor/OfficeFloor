@@ -76,5 +76,6 @@ Export-Package: net.officefloor.server,
  net.officefloor.woof.teams,
  net.officefloor.woof.template,
  net.officefloor.woof.template.impl
-Require-Bundle: net.officefloor.core;bundle-version="3.16.0"
+Require-Bundle: net.officefloor.core;bundle-version="3.16.0",
+ net.officefloor.activity;bundle-version="3.16.0"
 Automatic-Module-Name: net.officefloor.woof

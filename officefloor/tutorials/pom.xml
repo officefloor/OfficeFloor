@@ -14,6 +14,7 @@
 	<name>Tutorials</name>
 	<description>Tutorials for OfficeFloor</description>
 	<modules>
+		<module>ActivityHttpServer</module>
 		<module>AuthenticationHttpServer</module>
 		<module>CorsHttpServer</module>
 		<module>DatabaseHttpServer</module>

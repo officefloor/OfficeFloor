@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.office.OfficeOutput;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -54,8 +55,7 @@ public abstract class AbstractOfficeFloorChangesTestCase
 	/**
 	 * Initiate.
 	 * 
-	 * @param isSpecificSetupFilePerTest
-	 *            Flag if specific setup file to be used.
+	 * @param isSpecificSetupFilePerTest Flag if specific setup file to be used.
 	 */
 	public AbstractOfficeFloorChangesTestCase(boolean isSpecificSetupFilePerTest) {
 		super(isSpecificSetupFilePerTest);
@@ -73,6 +73,11 @@ public abstract class AbstractOfficeFloorChangesTestCase
 	}
 
 	@Override
+	protected void storeModel(OfficeFloorModel model, WritableConfigurationItem configurationItem) throws Exception {
+		new OfficeFloorRepositoryImpl(new ModelRepositoryImpl()).storeOfficeFloor(model, configurationItem);
+	}
+
+	@Override
 	protected OfficeFloorChanges createModelOperations(OfficeFloorModel model) {
 		return new OfficeFloorChangesImpl(model);
 	}
@@ -85,8 +90,7 @@ public abstract class AbstractOfficeFloorChangesTestCase
 	/**
 	 * Constructs the {@link OfficeType}.
 	 * 
-	 * @param constructor
-	 *            {@link OfficeTypeConstructor}.
+	 * @param constructor {@link OfficeTypeConstructor}.
 	 * @return {@link OfficeType}.
 	 */
 	protected OfficeType constructOfficeType(OfficeTypeConstructor constructor) {
@@ -103,8 +107,7 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		/**
 		 * Constructs the {@link OfficeType}.
 		 * 
-		 * @param context
-		 *            {@link OfficeTypeContext}.
+		 * @param context {@link OfficeTypeContext}.
 		 */
 		void construct(OfficeTypeContext context);
 	}
@@ -117,26 +120,19 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		/**
 		 * Add {@link OfficeAvailableSectionInputType}.
 		 * 
-		 * @param name
-		 *            Name of {@link OfficeSection}.
-		 * @param inputName
-		 *            Name of {@link OfficeSectionInput}.
-		 * @param parameterType
-		 *            Parameter type.
+		 * @param name          Name of {@link OfficeSection}.
+		 * @param inputName     Name of {@link OfficeSectionInput}.
+		 * @param parameterType Parameter type.
 		 */
 		void addOfficeSectionInput(String sectionName, String inputName, Class<?> parameterType);
 
 		/**
 		 * Add {@link OfficeManagedObjectType}.
 		 * 
-		 * @param name
-		 *            Name of {@link OfficeManagedObjectType}.
-		 * @param objectType
-		 *            Object type.
-		 * @param typeQualifier
-		 *            Type qualifier.
-		 * @param extensionInterfaces
-		 *            Extension interfaces.
+		 * @param name                Name of {@link OfficeManagedObjectType}.
+		 * @param objectType          Object type.
+		 * @param typeQualifier       Type qualifier.
+		 * @param extensionInterfaces Extension interfaces.
 		 */
 		void addOfficeManagedObject(String name, Class<?> objectType, String typeQualifier,
 				Class<?>... extensionInterfaces);
@@ -144,28 +140,23 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		/**
 		 * Add {@link OfficeTeamType}.
 		 * 
-		 * @param name
-		 *            Name of {@link OfficeTeamType}.
+		 * @param name Name of {@link OfficeTeamType}.
 		 */
 		void addOfficeTeam(String name);
 
 		/**
 		 * Add {@link OfficeInputType}.
 		 * 
-		 * @param inputName
-		 *            Name of {@link OfficeInput}.
-		 * @param parameterType
-		 *            Parameter type.
+		 * @param inputName     Name of {@link OfficeInput}.
+		 * @param parameterType Parameter type.
 		 */
 		void addOfficeInput(String inputName, Class<?> parameterType);
 
 		/**
 		 * Add {@link OfficeOutputType}.
 		 * 
-		 * @param outputName
-		 *            Name of {@link OfficeOutput}.
-		 * @param argumentType
-		 *            Argument type.
+		 * @param outputName   Name of {@link OfficeOutput}.
+		 * @param argumentType Argument type.
 		 */
 		void addOfficeOutput(String outputName, Class<?> argumentType);
 	}
@@ -294,12 +285,9 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		/**
 		 * Initialise for {@link OfficeAvailableSectionInputType}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param inputName
-		 *            Input name.
-		 * @param parameterType
-		 *            Parameter type.
+		 * @param name          Name.
+		 * @param inputName     Input name.
+		 * @param parameterType Parameter type.
 		 */
 		public OfficeTypeItem(String name, String inputName, String parameterType) {
 			this.name = name;
@@ -312,10 +300,8 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		/**
 		 * Initialise for {@link OfficeInputType}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param parameterType
-		 *            Parameter type.
+		 * @param name          Name.
+		 * @param parameterType Parameter type.
 		 */
 		public OfficeTypeItem(String name, String parameterType) {
 			this.name = name;
@@ -328,14 +314,10 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		/**
 		 * Initialise for {@link OfficeManagedObjectType}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param objectType
-		 *            Object type.
-		 * @param typeQualifier
-		 *            Type qualifier.
-		 * @param extensionInterfaces
-		 *            Extension interfaces.
+		 * @param name                Name.
+		 * @param objectType          Object type.
+		 * @param typeQualifier       Type qualifier.
+		 * @param extensionInterfaces Extension interfaces.
 		 */
 		public OfficeTypeItem(String name, String objectType, String typeQualifier, Class<?>[] extensionInterfaces) {
 			this.name = name;
@@ -351,8 +333,7 @@ public abstract class AbstractOfficeFloorChangesTestCase
 		/**
 		 * Initialise for {@link OfficeTeamType}.
 		 * 
-		 * @param name
-		 *            Name.
+		 * @param name Name.
 		 */
 		public OfficeTypeItem(String name) {
 			this.name = name;

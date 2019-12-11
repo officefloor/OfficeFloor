@@ -21,7 +21,6 @@ import junit.framework.TestCase;
 import net.officefloor.activity.ActivityTestTrait;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
-import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
 
@@ -71,32 +70,8 @@ public abstract class AbstractActivityChangesTestCase extends AbstractChangesTes
 	}
 
 	@Override
-	protected void assertModels(ActivityModel expected, ActivityModel actual) throws Exception {
-
-		// Determine if output XML of actual
-		if (this.isPrintMessages()) {
-
-			// Provide details of the model compare
-			this.printMessage("=============== MODEL COMPARE ================");
-
-			// Provide details of expected model
-			this.printMessage("------------------ EXPECTED ------------------");
-			WritableConfigurationItem expectedConfig = MemoryConfigurationContext
-					.createWritableConfigurationItem("location");
-			new ActivityRepositoryImpl(new ModelRepositoryImpl()).storeActivity(expected, expectedConfig);
-			this.printMessage(expectedConfig.getReader());
-
-			// Provide details of actual model
-			this.printMessage("------------------- ACTUAL -------------------");
-			WritableConfigurationItem actualConfig = MemoryConfigurationContext
-					.createWritableConfigurationItem("location");
-			new ActivityRepositoryImpl(new ModelRepositoryImpl()).storeActivity(actual, actualConfig);
-			this.printMessage(actualConfig.getReader());
-			this.printMessage("================ END COMPARE =================");
-		}
-
-		// Under take the compare
-		super.assertModels(expected, actual);
+	protected void storeModel(ActivityModel model, WritableConfigurationItem configurationItem) throws Exception {
+		new ActivityRepositoryImpl(new ModelRepositoryImpl()).storeActivity(model, configurationItem);
 	}
 
 }

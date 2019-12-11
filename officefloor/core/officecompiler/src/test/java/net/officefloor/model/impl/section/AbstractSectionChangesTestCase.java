@@ -29,6 +29,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionFlowTyp
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -52,8 +53,7 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 	/**
 	 * Initiate.
 	 *
-	 * @param isSpecificSetupFilePerTest
-	 *            Flag if specific setup file to be used.
+	 * @param isSpecificSetupFilePerTest Flag if specific setup file to be used.
 	 */
 	public AbstractSectionChangesTestCase(boolean isSpecificSetupFilePerTest) {
 		super(isSpecificSetupFilePerTest);
@@ -71,6 +71,11 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 	}
 
 	@Override
+	protected void storeModel(SectionModel model, WritableConfigurationItem configurationItem) throws Exception {
+		new SectionRepositoryImpl(new ModelRepositoryImpl()).storeSection(model, configurationItem);
+	}
+
+	@Override
 	protected SectionChanges createModelOperations(SectionModel model) {
 		return new SectionChangesImpl(model);
 	}
@@ -83,9 +88,8 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 	/**
 	 * Creates a {@link FunctionNamespaceType}.
 	 * 
-	 * @param constructor
-	 *            {@link NamespaceTypeConstructor} to construct the
-	 *            {@link FunctionNamespaceType}.
+	 * @param constructor {@link NamespaceTypeConstructor} to construct the
+	 *                    {@link FunctionNamespaceType}.
 	 * @return {@link FunctionNamespaceType}.
 	 */
 	protected FunctionNamespaceType constructNamespaceType(NamespaceTypeConstructor constructor) {
@@ -110,8 +114,7 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 		/**
 		 * Constructs the {@link FunctionNamespaceType}.
 		 * 
-		 * @param context
-		 *            {@link NamespaceTypeContext}.
+		 * @param context {@link NamespaceTypeContext}.
 		 */
 		void construct(NamespaceTypeContext context);
 	}
@@ -124,8 +127,7 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 		/**
 		 * Adds a {@link ManagedFunctionType}.
 		 * 
-		 * @param functionName
-		 *            Name of the {@link ManagedFunction}.
+		 * @param functionName Name of the {@link ManagedFunction}.
 		 * @return {@link FunctionTypeConstructor} to provide simplified
 		 *         {@link ManagedFunctionType} construction.
 		 */
@@ -134,12 +136,9 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 		/**
 		 * Adds a {@link ManagedFunctionTypeBuilder}.
 		 * 
-		 * @param functionName
-		 *            Name of the {@link ManagedFunction}.
-		 * @param dependencyKeys
-		 *            Dependency keys {@link Enum}.
-		 * @param flowKeys
-		 *            Flow keys {@link Enum}.
+		 * @param functionName   Name of the {@link ManagedFunction}.
+		 * @param dependencyKeys Dependency keys {@link Enum}.
+		 * @param flowKeys       Flow keys {@link Enum}.
 		 * @return {@link ManagedFunctionTypeBuilder}.
 		 */
 		<M extends Enum<M>, F extends Enum<F>> ManagedFunctionTypeBuilder<M, F> addFunction(String functionName,
@@ -154,10 +153,8 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 		/**
 		 * Adds a {@link ManagedFunctionObjectType}.
 		 * 
-		 * @param objectType
-		 *            {@link Object} type.
-		 * @param key
-		 *            Key identifying the {@link ManagedFunctionObjectType}.
+		 * @param objectType {@link Object} type.
+		 * @param key        Key identifying the {@link ManagedFunctionObjectType}.
 		 * @return {@link ManagedFunctionObjectTypeBuilder} for the added
 		 *         {@link ManagedFunctionObjectType}.
 		 */
@@ -166,10 +163,8 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 		/**
 		 * Adds a {@link ManagedFunctionFlowType}.
 		 * 
-		 * @param argumentType
-		 *            Argument type.
-		 * @param key
-		 *            Key identifying the {@link ManagedFunctionFlowType}.
+		 * @param argumentType Argument type.
+		 * @param key          Key identifying the {@link ManagedFunctionFlowType}.
 		 * @return {@link ManagedFunctionFlowTypeBuilder} for the added
 		 *         {@link ManagedFunctionObjectType}.
 		 */
@@ -178,8 +173,7 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 		/**
 		 * Adds a {@link ManagedFunctionEscalationType}.
 		 * 
-		 * @param escalationType
-		 *            Escalation type.
+		 * @param escalationType Escalation type.
 		 * @return {@link ManagedFunctionEscalationTypeBuilder} for the added
 		 *         {@link ManagedFunctionEscalationType}.
 		 */
@@ -206,8 +200,7 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 		/**
 		 * Initiate.
 		 * 
-		 * @param namespaceBuilder
-		 *            {@link FunctionNamespaceBuilder}.
+		 * @param namespaceBuilder {@link FunctionNamespaceBuilder}.
 		 */
 		public NamespaceTypeContextImpl(FunctionNamespaceBuilder namespaceBuilder) {
 			this.namespaceBuilder = namespaceBuilder;
@@ -249,8 +242,7 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 		/**
 		 * Initiate.
 		 * 
-		 * @param functionTypeBuilder
-		 *            {@link ManagedFunctionTypeBuilder}.
+		 * @param functionTypeBuilder {@link ManagedFunctionTypeBuilder}.
 		 */
 		public FunctionTypeConstructorImpl(ManagedFunctionTypeBuilder<?, ?> functionTypeBuilder) {
 			this.functionTypeBuilder = functionTypeBuilder;
@@ -301,8 +293,7 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 		/**
 		 * Constructs the {@link ManagedFunctionType}.
 		 * 
-		 * @param function
-		 *            {@link ManagedFunctionType}.
+		 * @param function {@link ManagedFunctionType}.
 		 */
 		void construct(FunctionTypeConstructor function);
 	}
@@ -310,10 +301,8 @@ public abstract class AbstractSectionChangesTestCase extends AbstractChangesTest
 	/**
 	 * Constructs the {@link ManagedFunctionType}.
 	 * 
-	 * @param functionName
-	 *            Name of the {@link ManagedFunctionType}.
-	 * @param constructor
-	 *            {@link FunctionConstructor}.
+	 * @param functionName Name of the {@link ManagedFunctionType}.
+	 * @param constructor  {@link FunctionConstructor}.
 	 * @return {@link ManagedFunctionType}.
 	 */
 	protected ManagedFunctionType<?, ?> constructFunctionType(final String functionName,
