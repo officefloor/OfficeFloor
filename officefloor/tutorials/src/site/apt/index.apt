@@ -84,6 +84,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 || Tutorial                                                    || Description                                               || Covered
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./ActivityHttpServer/index.html}Activity}}                | Modularising configuration                                 | Activity (Section)
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./SpringHttpServer/index.html}Spring}}                    | Wiring in Spring beans (ease of re-using code from dependency injection only frameworks) | Supplier
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TransactionHttpServer/index.html}Transaction}}          | Managing transactions with Governance.                     | Governance

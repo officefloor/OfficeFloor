@@ -18,11 +18,16 @@
 package net.officefloor.model.test.changes;
 
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringWriter;
+import java.util.function.Supplier;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
+import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.Model;
 import net.officefloor.model.RemoveConnectionsAction;
@@ -88,6 +93,16 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 	 * @throws Exception If fails to retrieve the {@link Model}.
 	 */
 	protected abstract M retrieveModel(ConfigurationItem configurationItem) throws Exception;
+
+	/**
+	 * Stores the {@link Model}.
+	 * 
+	 * @param model             {@link Model}.
+	 * @param configurationItem {@link WritableConfigurationItem} to store the
+	 *                          {@link Model}.
+	 * @throws Exception If fails to store the {@link Model}.
+	 */
+	protected abstract void storeModel(M model, WritableConfigurationItem configurationItem) throws Exception;
 
 	/**
 	 * Creates the {@link Model} operations.
@@ -204,8 +219,7 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 
 			} catch (AssertionError ex) {
 				// Provide detail of where failed to aid diagnosis
-				System.err.println(this.getName() + " failed at state " + state + " with " + ex.getMessage());
-				throw ex;
+				throw new AssertionFailedError(ex.getMessage() + "\n\n" + this.getName() + " failed at state " + state);
 			}
 		}
 	}
@@ -291,8 +305,54 @@ public abstract class AbstractChangesTestCase<M extends Model, O> extends Office
 	 */
 	protected void assertModels(M expected, M actual) throws Exception {
 
+		// Lazy generate the message
+		Supplier<String> generateMessage = () -> {
+			StringWriter buffer = new StringWriter();
+			try (PrintWriter msg = new PrintWriter(buffer)) {
+
+				// Provide details of the model compare
+				msg.println("=============== MODEL COMPARE ================");
+
+				// Provide details of expected model
+				msg.println("------------------ EXPECTED ------------------");
+				WritableConfigurationItem expectedConfig = MemoryConfigurationContext
+						.createWritableConfigurationItem("location");
+				this.storeModel(expected, expectedConfig);
+				Reader expectedReader = expectedConfig.getReader();
+				for (int character = expectedReader.read(); character != -1; character = expectedReader.read()) {
+					msg.write(character);
+				}
+
+				// Provide details of actual model
+				msg.println("------------------- ACTUAL -------------------");
+				WritableConfigurationItem actualConfig = MemoryConfigurationContext
+						.createWritableConfigurationItem("location");
+				this.storeModel(actual, actualConfig);
+				Reader actualReader = actualConfig.getReader();
+				for (int character = actualReader.read(); character != -1; character = actualReader.read()) {
+					msg.write(character);
+				}
+
+				msg.println("================ END COMPARE =================");
+
+			} catch (Exception ex) {
+				buffer.append("Failed to write models: " + ex.getMessage());
+			}
+			return buffer.toString();
+		};
+
+		// Determine if output XML of actual
+		if (this.isPrintMessages()) {
+			this.printMessage(generateMessage.get());
+		}
+
 		// Ensure the models are the same
-		assertGraph(expected, actual, RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
+		try {
+			assertGraph(expected, actual, RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
+		} catch (AssertionFailedError ex) {
+			// Propagate with details of models
+			throw new AssertionFailedError(ex.getMessage() + "\n\n" + generateMessage.get());
+		}
 	}
 
 	/**

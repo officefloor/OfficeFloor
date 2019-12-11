@@ -452,7 +452,7 @@ public class WoofChangesImpl implements WoofChanges {
 	 * Sorts the {@link WoofProcedureModel} instances.
 	 */
 	private void sortProcedures() {
-		sortModelList(this.model.getWoofProcedures(), (model) -> model.getProcedureName());
+		sortModelList(this.model.getWoofProcedures(), (model) -> model.getWoofProcedureName());
 	}
 
 	/**

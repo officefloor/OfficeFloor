@@ -1,0 +1,109 @@
+                                               -----------------------
+                                                  Activity Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Activity Tutorial
+
+  This tutorial demonstrates modularising configuration.
+
+  To focus on modular configuration, this tutorial uses a simple application that returns the depth of modules within modules. 
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ActivityHttpServer/${projectVersion}/ActivityHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+*Background
+
+  Modularising configuration is necessary when working on bigger projects by bigger teams.
+  
+  Trying to configure all logic of a large application into the single WoOF configuration file yields a lot of complexity.  The idea of the graphical configuration is easy understanding of how the application is put together.  When the single graphical configuration file becomes too involved it looses its readability.  Therefore, it is broken into modules to make it easier to understand.
+  
+  Also, scaling teams requires developers to work in isolated parts of the applications.  Having the single configuration file creates a focal point for changes.  This causes developers to <step on each other's toes> and creates problems through increased number of merge conflicts.  Breaking configuration into smaller files reduces risk of merge conflicts.
+  
+  By modularising the configuration to smaller files, it allows:
+  
+   * developers to work in isolation of each other
+   
+   * lower chances of merge conflicts
+  
+   * easier to comprehend configuration
+   
+   * less responsibilities for individual configuration files
+   
+   * and many other benefits
+
+
+
+*Activity
+
+  Modularising the configuration is undertaken with the {{{/apidocs/net/officefloor/activity/ActivitySectionSource.html}ActivitySectionSource}}.  The name <<<Activity>>> comes from business.  An <<<Activity>>> is a composition of many <<<Procedures>>>.
+  
+  The IDE plugins natively support <<<Activities>>> so this only becomes a selection when adding a <<<Section>>>.  However, the application must add support via the following dependency:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+  
+  To demonstrate using <<<Activities>>> to modularise configuraiton, the top level WoOF configuration file is as follows:
+  
+[./images/ActivityHttpServer-configuration.png] ActivityHttpServer screen shot.
+  
+  The above configuration has a <<<Procedure>>>:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/activityhttpserver/InitiateDepthLogic.java|ignoreDownloadError=false}
+
+  creating and passing on the following parameter:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/activityhttpserver/Depth.java|ignoreDownloadError=false}
+  
+  to the following modular <<<Activity>>>:
+  
+[./images/LevelOne-configuration.png] Level One screen shot.
+  
+  Within the above <<<Activity>>>, the <<<Procedure>>> increments the depth:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/activityhttpserver/IncreaseDepthLogic.java|ignoreDownloadError=false}
+  
+  that is passed onto a further modularised <<<Activity>>>:
+
+[./images/LevelTwo-configuration.png] Level One screen shot.
+
+   that also increases the depth.
+   
+   The result is then passed out of the modularised <<<Activity>>> configurations to the top level <<<WoOF>>> configuration to send the result via the following <<<Procedure>>>:
+   
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/activityhttpserver/SendDepthLogic.java|ignoreDownloadError=false}
+
+
+
+Complex Modularising
+
+  This is only a simple example of modularising configuration.
+  
+  More complex <<<Activity>>> configurations may have multiple inputs and outputs.  Furthermore, they may internally provide exception handling (or let exceptions propagate to a higher <<<Activity>>>).
+  
+  However, only the inputs/outputs are shown to higher level configuration.  This encapsulates the modularised <<<Activity>>> so developers can change without impacting higher level configurations.  This is akin to coding behind interfaces (i.e. configuring behind input/output interfaces).
+
+  Furthermore, as the <<<Activity>>> is loaded from the class path, <<<Activities>>> may be built as libraries.  Applications can then import the resulting built jars to re-use the modularised <<<Activity>>> functionality.
+
+
+Section
+
+  The <<<Activity>>> is actually an implementation of a {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}}.  The <<<Section>>> is the generic modularisation of all configurations.  Many of plugins are implemented through <<<Sections>>>.
+  
+  It is beyond this tutorial to give a full explanation of the {{{/apidocs/net/officefloor/compile/spi/section/source/SectionSource.html}SectionSource}}.  See existing plugins for examples of implementations.
+
+
+
+*Testing
+
+  The following tests the increased depth of configuration modularisation:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/activityhttpserver/ActivityHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+
+Next
+
+  The {{{../SpringHttpServer/index.html}next tutorial}} covers integrating Spring beans into OfficeFloor.

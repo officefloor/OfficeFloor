@@ -125,28 +125,6 @@ public abstract class AbstractSectionItem<R extends Model, RE extends Enum<RE>, 
 	protected Map<String, String> outputNameMapping;
 
 	/**
-	 * Creates the visual for the {@link Model}.
-	 * 
-	 * @param model                  {@link Model}.
-	 * @param context                {@link AdaptedChildVisualFactoryContext}.
-	 * @param sectionInputItemClass  {@link Class} of the {@link SectionInput} item.
-	 * @param sectionOutputItemClass {@link Class} of the {@link SectionOutput}
-	 *                               item.
-	 * @return Visual for the {@link Model}.
-	 */
-	protected Pane createVisual(M model, AdaptedChildVisualFactoryContext<M> context, Class<?> sectionInputItemClass,
-			Class<?> sectionOutputItemClass) {
-		VBox container = new VBox();
-		context.label(container);
-		HBox children = context.addNode(container, new HBox());
-		VBox inputs = context.addNode(children, new VBox());
-		context.childGroup(sectionInputItemClass.getSimpleName(), inputs);
-		VBox outputs = context.addNode(children, new VBox());
-		context.childGroup(sectionOutputItemClass.getSimpleName(), outputs);
-		return container;
-	}
-
-	/**
 	 * Creates the {@link AbstractSectionItem} implementation.
 	 * 
 	 * @return {@link AbstractSectionItem} implementation.
@@ -307,8 +285,19 @@ public abstract class AbstractSectionItem<R extends Model, RE extends Enum<RE>, 
 
 			// Choice: activity
 			ConfigurationBuilder<I> activityBuilder = choices.choice("Activity");
-			activityBuilder.resource("Activity").init((item) -> item.location)
-					.validate(ValueValidator.notEmptyString("Must specify activity"))
+			activityBuilder.resource("Activity").init((item) -> item.location).validate((ctx) -> {
+				// Ensure Activity is available
+				EnvironmentBridge envBridge = this.getConfigurableContext().getEnvironmentBridge();
+				Class<?> activitySectionSourceClass = null;
+				try {
+					activitySectionSourceClass = envBridge.loadClass(ActivitySectionSource.class.getName(), null);
+				} catch (ClassNotFoundException ex) {
+					activitySectionSourceClass = null;
+				}
+				if (activitySectionSourceClass == null) {
+					ctx.setError("Please add Activity to project's class path");
+				}
+			}).validate(ValueValidator.notEmptyString("Must specify activity"))
 					.setValue((item, value) -> item.location = value);
 
 			// Choice: class

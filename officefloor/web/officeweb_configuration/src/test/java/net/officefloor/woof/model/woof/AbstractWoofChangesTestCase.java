@@ -30,7 +30,6 @@ import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.configuration.impl.configuration.ClassLoaderConfigurationContext;
-import net.officefloor.configuration.impl.configuration.MemoryConfigurationContext;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.test.changes.AbstractChangesTestCase;
 import net.officefloor.web.security.HttpAccessControl;
@@ -115,37 +114,13 @@ public abstract class AbstractWoofChangesTestCase extends AbstractChangesTestCas
 	}
 
 	@Override
-	protected WoofChanges createModelOperations(WoofModel model) {
-		return new WoofChangesImpl(model);
+	protected void storeModel(WoofModel model, WritableConfigurationItem configurationItem) throws Exception {
+		new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoof(model, configurationItem);
 	}
 
 	@Override
-	protected void assertModels(WoofModel expected, WoofModel actual) throws Exception {
-
-		// Determine if output XML of actual
-		if (this.isPrintMessages()) {
-
-			// Provide details of the model compare
-			this.printMessage("=============== MODEL COMPARE ================");
-
-			// Provide details of expected model
-			this.printMessage("------------------ EXPECTED ------------------");
-			WritableConfigurationItem expectedConfig = MemoryConfigurationContext
-					.createWritableConfigurationItem("location");
-			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoof(expected, expectedConfig);
-			this.printMessage(expectedConfig.getReader());
-
-			// Provide details of actual model
-			this.printMessage("------------------- ACTUAL -------------------");
-			WritableConfigurationItem actualConfig = MemoryConfigurationContext
-					.createWritableConfigurationItem("location");
-			new WoofRepositoryImpl(new ModelRepositoryImpl()).storeWoof(actual, actualConfig);
-			this.printMessage(actualConfig.getReader());
-			this.printMessage("================ END COMPARE =================");
-		}
-
-		// Under take the compare
-		super.assertModels(expected, actual);
+	protected WoofChanges createModelOperations(WoofModel model) {
+		return new WoofChangesImpl(model);
 	}
 
 	/**

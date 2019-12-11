@@ -62,7 +62,7 @@ public class RefactorProcedureTest extends AbstractActivityChangesTestCase {
 	 * Ensure handle no change.
 	 */
 	public void testNoChange() {
-
+		
 		// Create the procedure type
 		ProcedureType procedureType = this.constructProcedureType("procedure", String.class, (context) -> {
 			context.addFlowType("OUTPUT_A", Integer.class);

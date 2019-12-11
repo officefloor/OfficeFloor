@@ -30,6 +30,8 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor;
+import net.officefloor.compile.test.section.SectionLoaderUtil;
+import net.officefloor.compile.test.section.SectionTypeBuilder;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.manage.Office;
@@ -43,6 +45,13 @@ import net.officefloor.plugin.managedobject.singleton.Singleton;
  * @author Daniel Sagenschneider
  */
 public class ActivitySectionSourceTest extends OfficeFrameTestCase {
+
+	/**
+	 * Ensure no specification.
+	 */
+	public void testSpecification() {
+		SectionLoaderUtil.validateSpecification(ActivitySectionSource.class);
+	}
 
 	/**
 	 * Ensure can execute {@link Procedure}.
@@ -60,6 +69,15 @@ public class ActivitySectionSourceTest extends OfficeFrameTestCase {
 			CompileOfficeFloor.invokeProcess(officeFloor, "ACTIVITY.PROCEDURE.procedure", null);
 			assertTrue("Procedure should be executed", ExampleProcedure.isProcedureRun);
 		}
+	}
+
+	/**
+	 * Ensure correct type.
+	 */
+	public void testProcedureType() {
+		SectionTypeBuilder type = SectionLoaderUtil.createSectionTypeBuilder();
+		SectionLoaderUtil.validateSectionType(type.getSectionDesigner(), ActivitySectionSource.class,
+				this.getLocation("Procedure.activity.xml"));
 	}
 
 	/**
@@ -101,6 +119,17 @@ public class ActivitySectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure correct type.
+	 */
+	public void testInputThroughToOutputType() {
+		SectionTypeBuilder type = SectionLoaderUtil.createSectionTypeBuilder();
+		type.addSectionInput("INPUT", String.class);
+		type.addSectionOutput("OUTPUT", String.class);
+		SectionLoaderUtil.validateSectionType(type.getSectionDesigner(), ActivitySectionSource.class,
+				this.getLocation("InputToOutput.activity.xml"));
+	}
+
+	/**
 	 * Ensure can auto-wire in the necessary objects.
 	 */
 	public void testInjectObject() throws Throwable {
@@ -128,6 +157,16 @@ public class ActivitySectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure correct type.
+	 */
+	public void testInjectObjectType() {
+		SectionTypeBuilder type = SectionLoaderUtil.createSectionTypeBuilder();
+		type.addSectionObject(String.class.getName(), String.class, null);
+		SectionLoaderUtil.validateSectionType(type.getSectionDesigner(), ActivitySectionSource.class,
+				this.getLocation("InjectObject.activity.xml"));
+	}
+
+	/**
 	 * Ensure can handle {@link Escalation} within {@link ActivitySectionSource}.
 	 */
 	public void testHandleEscalation() throws Throwable {
@@ -149,6 +188,15 @@ public class ActivitySectionSourceTest extends OfficeFrameTestCase {
 			CompileOfficeFloor.invokeProcess(officeFloor, "ACTIVITY.PROPAGATE.procedure", escalation);
 			assertSame("Should handle escalation within activity", escalation, ExampleProcedure.failure);
 		}
+	}
+
+	/**
+	 * Ensure correct type.
+	 */
+	public void testHandleEscalationType() {
+		SectionTypeBuilder type = SectionLoaderUtil.createSectionTypeBuilder();
+		SectionLoaderUtil.validateSectionType(type.getSectionDesigner(), ActivitySectionSource.class,
+				this.getLocation("HandleEscalation.activity.xml"));
 	}
 
 	/**
@@ -182,6 +230,16 @@ public class ActivitySectionSourceTest extends OfficeFrameTestCase {
 			CompileOfficeFloor.invokeProcess(officeFloor, "ACTIVITY.PROPAGATE.procedure", failure);
 			assertSame("Should handle escalation within activity", failure, ExampleProcedure.failure);
 		}
+	}
+
+	/**
+	 * Ensure correct type.
+	 */
+	public void testPropagateEscalationType() {
+		SectionTypeBuilder type = SectionLoaderUtil.createSectionTypeBuilder();
+		type.addSectionOutput("PROPAGATE-" + SQLException.class.getName(), SQLException.class, true);
+		SectionLoaderUtil.validateSectionType(type.getSectionDesigner(), ActivitySectionSource.class,
+				this.getLocation("Propagate.activity.xml"));
 	}
 
 	/**
