@@ -105,9 +105,9 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Instantiates and initialises the {@link ManagedObjectSource}.
 	 * 
-	 * @param                          <O> Dependency key type.
-	 * @param                          <F> Flow key type.
-	 * @param                          <MS> {@link ManagedObjectSource} type.
+	 * @param <O>                      Dependency key type.
+	 * @param <F>                      Flow key type.
+	 * @param <MS>                     {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass Class of the {@link ManagedObjectSource}.
 	 * @return Initialised {@link ManagedObjectSource}.
 	 * @throws Exception If fails to initialise {@link ManagedObjectSource}.
@@ -125,9 +125,9 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Instantiates and initialises the {@link ManagedObjectSource}.
 	 * 
-	 * @param                     <O> Dependency key type.
-	 * @param                     <F> Flow key type.
-	 * @param                     <MS> {@link ManagedObjectSource} type.
+	 * @param <O>                 Dependency key type.
+	 * @param <F>                 Flow key type.
+	 * @param <MS>                {@link ManagedObjectSource} type.
 	 * @param managedObjectSource {@link ManagedObjectSource} instance.
 	 * @return Initialised {@link ManagedObjectSource}.
 	 * @throws Exception If fails to initialise {@link ManagedObjectSource}.
@@ -144,8 +144,8 @@ public class ManagedObjectSourceStandAlone {
 		OfficeBuilder officeBuilder = officeFloorBuilder.addOffice(STAND_ALONE_MANAGING_OFFICE_NAME);
 
 		// Create the delegate source context
-		SourceContext context = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
-				this.clockFactory);
+		SourceContext context = new SourceContextImpl(this.getClass().getName(), false,
+				Thread.currentThread().getContextClassLoader(), this.clockFactory);
 
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(false,
@@ -160,9 +160,9 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Starts the {@link ManagedObjectSource}.
 	 *
-	 * @param                     <O> Dependency key type.
-	 * @param                     <F> Flow key type.
-	 * @param                     <MS> {@link ManagedObjectSource} type.
+	 * @param <O>                 Dependency key type.
+	 * @param <F>                 Flow key type.
+	 * @param <MS>                {@link ManagedObjectSource} type.
 	 * @param managedObjectSource {@link ManagedObjectSource}.
 	 * @throws Exception If fails to start the {@link ManagedObjectSource}.
 	 */
@@ -176,9 +176,9 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Loads (init and start) the {@link ManagedObjectSource}.
 	 *
-	 * @param                          <O> Dependency key type.
-	 * @param                          <F> Flow key type.
-	 * @param                          <MS> {@link ManagedObjectSource} type.
+	 * @param <O>                      Dependency key type.
+	 * @param <F>                      Flow key type.
+	 * @param <MS>                     {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
 	 * @return Loaded {@link ManagedObjectSource}.
 	 * @throws Exception If fails to init and start the {@link ManagedObjectSource}.
@@ -199,9 +199,9 @@ public class ManagedObjectSourceStandAlone {
 	/**
 	 * Loads (init and start) the {@link ManagedObjectSource}.
 	 *
-	 * @param                     <O> Dependency key type.
-	 * @param                     <F> Flow key type.
-	 * @param                     <MS> {@link ManagedObjectSource} type.
+	 * @param <O>                 Dependency key type.
+	 * @param <F>                 Flow key type.
+	 * @param <MS>                {@link ManagedObjectSource} type.
 	 * @param managedObjectSource {@link ManagedObjectSource} instance.
 	 * @return Loaded {@link ManagedObjectSource}.
 	 * @throws Exception If fails to init and start the {@link ManagedObjectSource}.

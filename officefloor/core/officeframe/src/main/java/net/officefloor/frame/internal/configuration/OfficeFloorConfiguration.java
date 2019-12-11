@@ -57,11 +57,12 @@ public interface OfficeFloorConfiguration {
 	/**
 	 * Obtains the {@link SourceContext}.
 	 * 
+	 * @param sourceName           Name of source.
 	 * @param clockFactoryProvider Provides {@link ClockFactory} if one not
 	 *                             configured.
 	 * @return {@link SourceContext}.
 	 */
-	SourceContext getSourceContext(Supplier<ClockFactory> clockFactoryProvider);
+	SourceContext getSourceContext(String sourceName, Supplier<ClockFactory> clockFactoryProvider);
 
 	/**
 	 * Obtains the decorator of {@link Thread} instances created by the

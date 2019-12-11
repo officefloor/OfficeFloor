@@ -65,7 +65,7 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link SourceContext}.
 	 */
-	private final SourceContextImpl sourceContext = new SourceContextImpl(false,
+	private final SourceContextImpl sourceContext = new SourceContextImpl(this.getClass().getName(), false,
 			Thread.currentThread().getContextClassLoader(), new MockClockFactory());
 
 	/**

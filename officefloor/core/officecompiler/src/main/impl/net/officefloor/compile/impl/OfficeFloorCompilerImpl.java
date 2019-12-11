@@ -486,7 +486,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SourceContext createRootSourceContext() {
-		return new SourceContextImpl(false, this.getClassLoader(), this.clockFactory,
+		return new SourceContextImpl(OfficeFloor.class.getSimpleName(), false, this.getClassLoader(), this.clockFactory,
 				this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
 	}
 

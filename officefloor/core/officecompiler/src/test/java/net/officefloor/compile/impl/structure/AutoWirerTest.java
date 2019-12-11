@@ -43,8 +43,8 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link SourceContext}.
 	 */
-	private final SourceContext context = new SourceContextImpl(false, AutoWirerTest.class.getClassLoader(),
-			new MockClockFactory());
+	private final SourceContext context = new SourceContextImpl(this.getClass().getName(), false,
+			AutoWirerTest.class.getClassLoader(), new MockClockFactory());
 
 	/**
 	 * Mock {@link CompilerIssues}.
