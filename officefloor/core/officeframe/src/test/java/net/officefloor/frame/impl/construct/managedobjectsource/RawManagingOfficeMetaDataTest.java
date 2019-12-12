@@ -391,9 +391,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.rawMoMetaData.getMetaDataBuilder().addFlow(null, Flows.KEY);
 
 		// Configure function through managed object source context
-		ManagedObjectSourceContextImpl<Flows> context = new ManagedObjectSourceContextImpl<Flows>(false,
-				INPUT_MANAGED_OBJECT_NAME, this.configuration, null, null, this.configuration,
-				this.officeMetaData.getBuilder());
+		ManagedObjectSourceContextImpl<Flows> context = new ManagedObjectSourceContextImpl<Flows>(
+				this.getClass().getName(), false, INPUT_MANAGED_OBJECT_NAME, this.configuration, null, null,
+				this.configuration, this.officeMetaData.getBuilder());
 		context.addManagedFunction("FUNCTION", null);
 		context.getFlow(Flows.KEY).linkFunction("FUNCTION");
 
@@ -418,9 +418,9 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.rawMoMetaData.getMetaDataBuilder().addFlow(null, Flows.KEY);
 
 		// Configure function through managed object source context
-		ManagedObjectSourceContextImpl<Flows> context = new ManagedObjectSourceContextImpl<Flows>(false,
-				INPUT_MANAGED_OBJECT_NAME, this.configuration, null, null, this.configuration,
-				this.officeMetaData.getBuilder());
+		ManagedObjectSourceContextImpl<Flows> context = new ManagedObjectSourceContextImpl<Flows>(
+				this.getClass().getName(), false, INPUT_MANAGED_OBJECT_NAME, this.configuration, null, null,
+				this.configuration, this.officeMetaData.getBuilder());
 		context.addManagedFunction("FUNCTION", null);
 		context.getFlow(Flows.KEY).linkFunction("FUNCTION");
 

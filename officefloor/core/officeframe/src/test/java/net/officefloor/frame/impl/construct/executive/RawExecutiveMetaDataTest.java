@@ -125,7 +125,7 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 			throw instantiateFailure;
 		}
 	}
-
+	
 	/**
 	 * Ensures issue if required property is not specified.
 	 */
@@ -521,7 +521,7 @@ public class RawExecutiveMetaDataTest extends OfficeFrameTestCase {
 		RawExecutiveMetaData metaData = this.constructRawExecutiveMetaData(true);
 		this.verifyMockObjects();
 
-		// Ensure exeuction strategy available
+		// Ensure execution strategy available
 		Map<String, TeamOversight> executionStrategies = metaData.getTeamOversights();
 		assertEquals("Should have one execution strategy", 1, executionStrategies.size());
 		assertSame("Incorrect team oversight", oversight, executionStrategies.get(OVERSIGHT_NAME));

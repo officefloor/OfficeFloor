@@ -225,7 +225,8 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		this.usedGovernanceSource = governanceSource;
 
 		// Load and return the governance type
-		return loader.loadGovernanceType(governanceSource, overrideProperties);
+		String qualifiedName = this.officeNode.getQualifiedName(this.governanceName);
+		return loader.loadGovernanceType(qualifiedName, governanceSource, overrideProperties);
 	}
 
 	@Override

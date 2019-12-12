@@ -175,7 +175,7 @@ public class SupplierNodeImpl implements SupplierNode {
 	 * Obtains the {@link OfficeFloorManagedObjectSource} /
 	 * {@link OfficeManagedObjectSource}.
 	 *
-	 * @param           <S> {@link OfficeFloorManagedObjectSource} /
+	 * @param <S>       {@link OfficeFloorManagedObjectSource} /
 	 *                  {@link OfficeManagedObjectSource} type.
 	 * @param qualifier Qualifier. May be <code>null</code>.
 	 * @param type      Type.
@@ -342,9 +342,12 @@ public class SupplierNodeImpl implements SupplierNode {
 		// Keep track of the used supplier source
 		this.usedSupplierSource = supplierSource;
 
+		// Obtain the qualified name
+		String qualifiedName = this.getQualifiedName(this.supplierName);
+
 		// Load and return the type
 		SupplierLoader loader = this.context.getSupplierLoader(this);
-		return loader.loadSupplierType(supplierSource, this.propertyList);
+		return loader.loadSupplierType(qualifiedName, supplierSource, this.propertyList);
 	}
 
 	@Override
@@ -378,7 +381,8 @@ public class SupplierNodeImpl implements SupplierNode {
 						autoWirer.addAutoWireTarget(targetNodeFactory, new AutoWire(extensionType));
 					}
 
-				}, (mos, office) -> {
+				},
+				(mos, office) -> {
 					// Decorate to the office
 					mos.autoWireToOffice(office, this.context.getCompilerIssues());
 				});
@@ -424,21 +428,21 @@ public class SupplierNodeImpl implements SupplierNode {
 		// Load the supplied managed objects for auto-wiring
 		Arrays.stream(supplierType.getSuppliedManagedObjectTypes()).forEach((suppliedMosType) -> {
 
+			// Obtain the managed object name
+			String qualifier = suppliedMosType.getQualifier();
+			String type = suppliedMosType.getObjectType().getName();
+			String managedObjectName = (qualifier == null ? "" : qualifier + "-") + type;
+
 			// Determine if flows for managed object
 			ManagedObjectLoader loader = this.context.getManagedObjectLoader(this);
-			ManagedObjectType<?> moType = loader.loadManagedObjectType(suppliedMosType.getManagedObjectSource(),
-					suppliedMosType.getPropertyList());
+			ManagedObjectType<?> moType = loader.loadManagedObjectType(managedObjectName,
+					suppliedMosType.getManagedObjectSource(), suppliedMosType.getPropertyList());
 			if ((moType.getFlowTypes().length > 0) || (moType.getTeamTypes().length > 0)) {
 				return; // can not auto-wire input managed object
 			}
 
 			// Load the supplied managed object source
 			autoWireLoader.load(suppliedMosType, moType, (office) -> {
-
-				// Obtain the managed object name
-				String qualifier = suppliedMosType.getQualifier();
-				String type = suppliedMosType.getObjectType().getName();
-				String managedObjectName = (qualifier == null ? "" : qualifier + "-") + type;
 
 				// Determine if office supplier
 				ManagedObjectSourceNode mos;
@@ -530,8 +534,9 @@ public class SupplierNodeImpl implements SupplierNode {
 
 		// Ensure no thread locals
 		boolean[] isNoThreadLocals = new boolean[] { true };
-		this.supplierThreadLocals.values().stream().sorted((a, b) -> CompileUtil
-				.sortCompare(a.getOfficeFloorSupplierThreadLocalName(), b.getOfficeFloorSupplierThreadLocalName()))
+		this.supplierThreadLocals.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeFloorSupplierThreadLocalName(),
+						b.getOfficeFloorSupplierThreadLocalName()))
 				.forEachOrdered((threadLocal) -> {
 
 					// Flag that have thread local

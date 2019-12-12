@@ -117,8 +117,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	/**
 	 * Loads the {@link PropertyList} specification.
 	 * 
-	 * @param                     <D> Dependency key.
-	 * @param                     <H> Flow key.
+	 * @param <D>                 Dependency key.
+	 * @param <H>                 Flow key.
 	 * @param managedObjectSource {@link ManagedObjectSource}.
 	 * @return {@link PropertyList} specification or <code>null</code> if issue.
 	 */
@@ -207,7 +207,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
-			Class<MS> managedObjectSourceClass, PropertyList propertyList) {
+			String managedObjectSourceName, Class<MS> managedObjectSourceClass, PropertyList propertyList) {
 
 		// Create an instance of the managed object source
 		MS managedObjectSource = CompileUtil.newInstance(managedObjectSourceClass, ManagedObjectSource.class, this.node,
@@ -217,21 +217,21 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 		}
 
 		// Load and return the managed object type
-		return this.loadManagedObjectType(managedObjectSource, propertyList);
+		return this.loadManagedObjectType(managedObjectSourceName, managedObjectSource, propertyList);
 	}
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
-			ManagedObjectSource<D, F> managedObjectSource, PropertyList propertyList) {
+			String managedObjectSourceName, ManagedObjectSource<D, F> managedObjectSource, PropertyList propertyList) {
 
 		// Create the managed object source context to initialise
 		String officeName = null;
 		ManagingOfficeConfiguration<F> managingOffice = new ManagingOfficeBuilderImpl<F>(officeName);
 		OfficeConfiguration office = new OfficeBuilderImpl(officeName);
 		String namespaceName = null; // stops the name spacing
-		ManagedObjectSourceContextImpl<F> sourceContext = new ManagedObjectSourceContextImpl<F>(true, namespaceName,
-				managingOffice, new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext(),
-				managingOffice.getBuilder(), office.getBuilder());
+		ManagedObjectSourceContextImpl<F> sourceContext = new ManagedObjectSourceContextImpl<F>(managedObjectSourceName,
+				true, namespaceName, managingOffice, new PropertyListSourceProperties(propertyList),
+				this.nodeContext.getRootSourceContext(), managingOffice.getBuilder(), office.getBuilder());
 
 		// Initialise the managed object source and obtain meta-data
 		ManagedObjectSourceMetaData<D, F> metaData;

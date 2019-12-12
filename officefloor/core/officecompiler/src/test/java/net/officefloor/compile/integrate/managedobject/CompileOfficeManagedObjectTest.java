@@ -105,7 +105,8 @@ public class CompileOfficeManagedObjectTest extends AbstractCompileTestCase {
 
 		// Setup to provide managed object source instance
 		MockSupplierSource.reset();
-		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(Object.class);
+		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(Object.class,
+				"OFFICE.MANAGED_OBJECT_SOURCE");
 		MockSupplierSource.managedObjectSource = mos;
 
 		// Record building the OfficeFloor

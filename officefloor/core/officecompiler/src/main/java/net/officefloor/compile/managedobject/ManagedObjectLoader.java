@@ -33,17 +33,12 @@ public interface ManagedObjectLoader {
 
 	/**
 	 * Loads and returns the {@link PropertyList} from the
-	 * {@link ManagedObjectSourceSpecification} for the
-	 * {@link ManagedObjectSource}.
+	 * {@link ManagedObjectSourceSpecification} for the {@link ManagedObjectSource}.
 	 * 
-	 * @param <D>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceClass
-	 *            {@link ManagedObjectSource} class.
+	 * @param <D>                      Dependency key type.
+	 * @param <F>                      Flow key type.
+	 * @param <MS>                     {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceClass {@link ManagedObjectSource} class.
 	 * @return {@link PropertyList} of the {@link ManagedObjectSourceProperty}
 	 *         instances of the {@link ManagedObjectSourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
@@ -54,15 +49,11 @@ public interface ManagedObjectLoader {
 
 	/**
 	 * Loads and returns the {@link PropertyList} from the
-	 * {@link ManagedObjectSourceSpecification} for the
-	 * {@link ManagedObjectSource}.
+	 * {@link ManagedObjectSourceSpecification} for the {@link ManagedObjectSource}.
 	 * 
-	 * @param <D>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance.
+	 * @param <D>                 Dependency key type.
+	 * @param <F>                 Flow key type.
+	 * @param managedObjectSource {@link ManagedObjectSource} instance.
 	 * @return {@link PropertyList} of the {@link ManagedObjectSourceProperty}
 	 *         instances of the {@link ManagedObjectSourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
@@ -75,61 +66,50 @@ public interface ManagedObjectLoader {
 	 * Loads and returns the {@link ManagedObjectType} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param <D>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceClass
-	 *            Class of the {@link ManagedObjectSource}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link ManagedObjectType}.
-	 * @return {@link ManagedObjectType} or <code>null</code> if issues, which
-	 *         are reported to the {@link CompilerIssues}.
+	 * @param <D>                      Dependency key type.
+	 * @param <F>                      Flow key type.
+	 * @param <MS>                     {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceName  Name of {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClass Class of the {@link ManagedObjectSource}.
+	 * @param propertyList             {@link PropertyList} containing the
+	 *                                 properties to source the
+	 *                                 {@link ManagedObjectType}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
-			Class<MS> managedObjectSourceClass, PropertyList propertyList);
+			String managedObjectSourceName, Class<MS> managedObjectSourceClass, PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link ManagedObjectType} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param <D>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance to use.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link ManagedObjectType}.
-	 * @return {@link ManagedObjectType} or <code>null</code> if issues, which
-	 *         are reported to the {@link CompilerIssues}.
+	 * @param <D>                     Dependency key type.
+	 * @param <F>                     Flow key type.
+	 * @param managedObjectSourceName Name of {@link ManagedObjectSource}.
+	 * @param managedObjectSource     {@link ManagedObjectSource} instance to use.
+	 * @param propertyList            {@link PropertyList} containing the properties
+	 *                                to source the {@link ManagedObjectType}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
 	 */
-	<D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
+	<D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(String managedObjectSourceName,
 			ManagedObjectSource<D, F> managedObjectSource, PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link OfficeFloorManagedObjectSourceType} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param <D>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSourceClass
-	 *            Class of the {@link ManagedObjectSource}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link OfficeFloorManagedObjectSourceType}.
-	 * @return {@link OfficeFloorManagedObjectSourceType} or <code>null</code>
-	 *         if issues, which are reported to the {@link CompilerIssues}.
+	 * @param <D>                      Dependency key type.
+	 * @param <F>                      Flow key type.
+	 * @param <MS>                     {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceName  Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClass Class of the {@link ManagedObjectSource}.
+	 * @param propertyList             {@link PropertyList} containing the
+	 *                                 properties to source the
+	 *                                 {@link OfficeFloorManagedObjectSourceType}.
+	 * @return {@link OfficeFloorManagedObjectSourceType} or <code>null</code> if
+	 *         issues, which are reported to the {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
 			String managedObjectSourceName, Class<MS> managedObjectSourceClass, PropertyList propertyList);
@@ -138,21 +118,16 @@ public interface ManagedObjectLoader {
 	 * Loads and returns the {@link OfficeFloorManagedObjectSourceType} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param <D>
-	 *            Dependency key type.
-	 * @param <F>
-	 *            Flow key type.
-	 * @param <MS>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instances to use.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link OfficeFloorManagedObjectSourceType}.
-	 * @return {@link OfficeFloorManagedObjectSourceType} or <code>null</code>
-	 *         if issues, which are reported to the {@link CompilerIssues}.
+	 * @param <D>                     Dependency key type.
+	 * @param <F>                     Flow key type.
+	 * @param <MS>                    {@link ManagedObjectSource} type.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource     {@link ManagedObjectSource} instances to use.
+	 * @param propertyList            {@link PropertyList} containing the properties
+	 *                                to source the
+	 *                                {@link OfficeFloorManagedObjectSourceType}.
+	 * @return {@link OfficeFloorManagedObjectSourceType} or <code>null</code> if
+	 *         issues, which are reported to the {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(
 			String managedObjectSourceName, MS managedObjectSource, PropertyList propertyList);

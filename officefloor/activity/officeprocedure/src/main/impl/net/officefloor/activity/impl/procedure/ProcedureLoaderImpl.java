@@ -83,8 +83,8 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 
 			@Override
 			public FunctionNamespaceType loadManagedFunctionType(PropertyList properties) {
-				return compiler.getManagedFunctionLoader().loadManagedFunctionType(ProcedureManagedFunctionSource.class,
-						properties);
+				return compiler.getManagedFunctionLoader().loadManagedFunctionType("procedure",
+						ProcedureManagedFunctionSource.class, properties);
 			}
 
 			@Override

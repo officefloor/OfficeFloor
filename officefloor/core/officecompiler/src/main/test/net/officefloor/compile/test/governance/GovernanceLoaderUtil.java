@@ -47,29 +47,23 @@ public class GovernanceLoaderUtil {
 	 * Validates the {@link GovernanceSourceSpecification} for the
 	 * {@link GovernanceSource}.
 	 * 
-	 * @param <I>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            {@link Flow} type keys.
-	 * @param <S>
-	 *            {@link GovernanceSource} type.
-	 * @param governanceSourceClass
-	 *            {@link GovernanceSource} class.
-	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 * @param <I>                   Extension interface type.
+	 * @param <F>                   {@link Flow} type keys.
+	 * @param <S>                   {@link GovernanceSource} type.
+	 * @param governanceSourceClass {@link GovernanceSource} class.
+	 * @param propertyNameLabels    Listing of name/label pairs for the
+	 *                              {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <I, F extends Enum<F>, S extends GovernanceSource<I, F>> PropertyList validateSpecification(
 			Class<S> governanceSourceClass, String... propertyNameLabels) {
 
 		// Load the specification
-		PropertyList propertyList = getOfficeFloorCompiler()
-				.getGovernanceLoader().loadSpecification(governanceSourceClass);
+		PropertyList propertyList = getOfficeFloorCompiler().getGovernanceLoader()
+				.loadSpecification(governanceSourceClass);
 
 		// Verify the properties
-		PropertyListUtil.validatePropertyNameLabels(propertyList,
-				propertyNameLabels);
+		PropertyListUtil.validatePropertyNameLabels(propertyList, propertyNameLabels);
 
 		// Return the property list
 		return propertyList;
@@ -88,27 +82,22 @@ public class GovernanceLoaderUtil {
 
 	/**
 	 * Validates the {@link GovernanceType} contained in the
-	 * {@link GovernanceTypeBuilder} against the {@link GovernanceType} loaded
-	 * from the {@link GovernanceSource}.
+	 * {@link GovernanceTypeBuilder} against the {@link GovernanceType} loaded from
+	 * the {@link GovernanceSource}.
 	 * 
-	 * @param <I>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            {@link Flow} type keys.
-	 * @param <S>
-	 *            {@link GovernanceSource} type.
-	 * @param expectedGovernanceType
-	 *            Expected {@link GovernanceType}.
-	 * @param governanceSourceClass
-	 *            {@link GovernanceSource} class.
-	 * @param propertyNameValues
-	 *            Properties to configure the {@link GovernanceSource}.
+	 * @param <I>                    Extension interface type.
+	 * @param <F>                    {@link Flow} type keys.
+	 * @param <S>                    {@link GovernanceSource} type.
+	 * @param expectedGovernanceType Expected {@link GovernanceType}.
+	 * @param governanceSourceClass  {@link GovernanceSource} class.
+	 * @param propertyNameValues     Properties to configure the
+	 *                               {@link GovernanceSource}.
 	 * @return {@link GovernanceType} loaded from the {@link GovernanceSource}.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <I, F extends Enum<F>, S extends GovernanceSource<I, F>> GovernanceType<I, F> validateGovernanceType(
-			GovernanceTypeBuilder<?> expectedGovernanceType,
-			Class<S> governanceSourceClass, String... propertyNameValues) {
+			GovernanceTypeBuilder<?> expectedGovernanceType, Class<S> governanceSourceClass,
+			String... propertyNameValues) {
 
 		// Cast to obtain expected governance type
 		if (!(expectedGovernanceType instanceof GovernanceType)) {
@@ -117,14 +106,11 @@ public class GovernanceLoaderUtil {
 		GovernanceType<I, F> eType = (GovernanceType<I, F>) expectedGovernanceType;
 
 		// Load the governance type
-		GovernanceType<I, F> aType = loadGovernanceType(governanceSourceClass,
-				propertyNameValues);
+		GovernanceType<I, F> aType = loadGovernanceType(governanceSourceClass, propertyNameValues);
 
 		// Ensure correct governance type
-		TestCase.assertNotNull("Must have GovernanceFactory",
-				aType.getGovernanceFactory());
-		TestCase.assertEquals("Incorrect extension interface type",
-				eType.getExtensionType(), aType.getExtensionType());
+		TestCase.assertNotNull("Must have GovernanceFactory", aType.getGovernanceFactory());
+		TestCase.assertEquals("Incorrect extension interface type", eType.getExtensionType(), aType.getExtensionType());
 
 		// Validate the flows
 		GovernanceFlowType<?>[] eFlows = eType.getFlowTypes();
@@ -134,14 +120,11 @@ public class GovernanceLoaderUtil {
 			GovernanceFlowType<?> aFlow = aFlows[f];
 
 			// Validate the flow
-			TestCase.assertEquals("Incorrect name for flow " + f,
-					eFlow.getFlowName(), aFlow.getFlowName());
-			TestCase.assertEquals("Incorrect index for flow " + f,
-					eFlow.getIndex(), aFlow.getIndex());
-			TestCase.assertEquals("Incorrect key for flow " + f,
-					eFlow.getKey(), aFlow.getKey());
-			TestCase.assertEquals("Incorrect argument type for flow " + f,
-					eFlow.getArgumentType(), aFlow.getArgumentType());
+			TestCase.assertEquals("Incorrect name for flow " + f, eFlow.getFlowName(), aFlow.getFlowName());
+			TestCase.assertEquals("Incorrect index for flow " + f, eFlow.getIndex(), aFlow.getIndex());
+			TestCase.assertEquals("Incorrect key for flow " + f, eFlow.getKey(), aFlow.getKey());
+			TestCase.assertEquals("Incorrect argument type for flow " + f, eFlow.getArgumentType(),
+					aFlow.getArgumentType());
 		}
 
 		// Validate the escalations
@@ -152,11 +135,9 @@ public class GovernanceLoaderUtil {
 			GovernanceEscalationType aEscalation = aEscalations[e];
 
 			// Validate the escalation
-			TestCase.assertEquals("Incorrect name for escalation " + e,
-					eEscalation.getEscalationName(),
+			TestCase.assertEquals("Incorrect name for escalation " + e, eEscalation.getEscalationName(),
 					aEscalation.getEscalationName());
-			TestCase.assertEquals("Incorrect type for escalation " + e,
-					eEscalation.getEscalationType(),
+			TestCase.assertEquals("Incorrect type for escalation " + e, eEscalation.getEscalationType(),
 					aEscalation.getEscalationType());
 		}
 
@@ -167,25 +148,19 @@ public class GovernanceLoaderUtil {
 	/**
 	 * Loads the {@link GovernanceType} from the {@link GovernanceSource}.
 	 * 
-	 * @param <I>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            {@link Flow} type keys.
-	 * @param <S>
-	 *            {@link GovernanceSource} type.
-	 * @param governanceSourceClass
-	 *            {@link GovernanceSource} class.
-	 * @param propertyNameValues
-	 *            {@link Property} name/value listing.
+	 * @param <I>                   Extension interface type.
+	 * @param <F>                   {@link Flow} type keys.
+	 * @param <S>                   {@link GovernanceSource} type.
+	 * @param governanceSourceClass {@link GovernanceSource} class.
+	 * @param propertyNameValues    {@link Property} name/value listing.
 	 * @return {@link GovernanceType}.
 	 */
 	public static <I, F extends Enum<F>, S extends GovernanceSource<I, F>> GovernanceType<I, F> loadGovernanceType(
 			Class<S> governanceSourceClass, String... propertyNameValues) {
 
 		// Load and return the administrator type
-		return getOfficeFloorCompiler().getGovernanceLoader()
-				.loadGovernanceType(governanceSourceClass,
-						new PropertyListImpl(propertyNameValues));
+		return getOfficeFloorCompiler().getGovernanceLoader().loadGovernanceType(GovernanceLoaderUtil.class.getName(),
+				governanceSourceClass, new PropertyListImpl(propertyNameValues));
 	}
 
 	/**
@@ -195,8 +170,7 @@ public class GovernanceLoaderUtil {
 	 */
 	private static OfficeFloorCompiler getOfficeFloorCompiler() {
 		// Create the office floor compiler that fails on first issue
-		OfficeFloorCompiler compiler = OfficeFloorCompiler
-				.newOfficeFloorCompiler(null);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(new FailTestCompilerIssues());
 		return compiler;
 	}
@@ -238,16 +212,13 @@ public class GovernanceLoaderUtil {
 		}
 
 		@Override
-		public void addFlow(String flowName, Class<?> argumentType, int index,
-				F flowKey) {
-			this.flows.add(new GovernanceFlowTypeImpl<F>(flowName,
-					argumentType, index, flowKey));
+		public void addFlow(String flowName, Class<?> argumentType, int index, F flowKey) {
+			this.flows.add(new GovernanceFlowTypeImpl<F>(flowName, argumentType, index, flowKey));
 		}
 
 		@Override
 		public void addEscalation(Class<?> escalationType) {
-			this.escalations.add(new GovernanceEscalationTypeImpl(
-					escalationType));
+			this.escalations.add(new GovernanceEscalationTypeImpl(escalationType));
 		}
 
 		/*
@@ -269,23 +240,19 @@ public class GovernanceLoaderUtil {
 		@Override
 		@SuppressWarnings("unchecked")
 		public GovernanceFlowType<F>[] getFlowTypes() {
-			return this.flows
-					.toArray(new GovernanceFlowType[this.flows.size()]);
+			return this.flows.toArray(new GovernanceFlowType[this.flows.size()]);
 		}
 
 		@Override
 		public GovernanceEscalationType[] getEscalationTypes() {
-			return this.escalations
-					.toArray(new GovernanceEscalationType[this.escalations
-							.size()]);
+			return this.escalations.toArray(new GovernanceEscalationType[this.escalations.size()]);
 		}
 	}
 
 	/**
 	 * {@link GovernanceFlowType} implementation.
 	 */
-	private static class GovernanceFlowTypeImpl<F extends Enum<F>> implements
-			GovernanceFlowType<F> {
+	private static class GovernanceFlowTypeImpl<F extends Enum<F>> implements GovernanceFlowType<F> {
 
 		/**
 		 * Name of the {@link Flow}.
@@ -310,17 +277,12 @@ public class GovernanceLoaderUtil {
 		/**
 		 * Initiate.
 		 * 
-		 * @param flowName
-		 *            Name of the {@link Flow}.
-		 * @param argumentType
-		 *            Argument type to the {@link Flow}.
-		 * @param index
-		 *            Index identifying the {@link Flow}.
-		 * @param key
-		 *            Key identifying the {@link Flow}.
+		 * @param flowName     Name of the {@link Flow}.
+		 * @param argumentType Argument type to the {@link Flow}.
+		 * @param index        Index identifying the {@link Flow}.
+		 * @param key          Key identifying the {@link Flow}.
 		 */
-		public GovernanceFlowTypeImpl(String flowName, Class<?> argumentType,
-				int index, F key) {
+		public GovernanceFlowTypeImpl(String flowName, Class<?> argumentType, int index, F key) {
 			this.flowName = flowName;
 			this.argumentType = argumentType;
 			this.index = index;
@@ -355,8 +317,7 @@ public class GovernanceLoaderUtil {
 	/**
 	 * {@link GovernanceEscalationType} implementation.
 	 */
-	private static class GovernanceEscalationTypeImpl implements
-			GovernanceEscalationType {
+	private static class GovernanceEscalationTypeImpl implements GovernanceEscalationType {
 
 		/**
 		 * {@link Escalation} type.
@@ -366,8 +327,7 @@ public class GovernanceLoaderUtil {
 		/**
 		 * Initiate.
 		 * 
-		 * @param escalationType
-		 *            {@link Escalation} type.
+		 * @param escalationType {@link Escalation} type.
 		 */
 		public GovernanceEscalationTypeImpl(Class<?> escalationType) {
 			this.escalationType = escalationType;

@@ -110,15 +110,15 @@ public class MockLoadSupplierSource extends AbstractSupplierSource {
 		TestCase.assertEquals("Property should be available", PROPERTY_TEST, value);
 
 		// Load the managed object source
-		MockTypeManagedObjectSource simple = new MockTypeManagedObjectSource(Object.class);
+		MockTypeManagedObjectSource simple = new MockTypeManagedObjectSource(Object.class, "TODO LOGGER NAME");
 		context.addManagedObjectSource(null, Object.class, simple);
 
 		// Load the qualified managed object source
-		MockTypeManagedObjectSource qualified = new MockTypeManagedObjectSource(Object.class);
+		MockTypeManagedObjectSource qualified = new MockTypeManagedObjectSource(Object.class, "TODO LOGGER NAME");
 		context.addManagedObjectSource("QUALIFIED", Object.class, qualified);
 
 		// Load complex managed object source
-		MockTypeManagedObjectSource complex = new MockTypeManagedObjectSource(Map.class);
+		MockTypeManagedObjectSource complex = new MockTypeManagedObjectSource(Map.class, "TODO LOGGER NAME");
 		complex.addDependency("dependency", Connection.class, "QUALIFIER");
 		complex.addDependency("overridden", Object.class, null);
 		complex.addFlow("flow", Integer.class);

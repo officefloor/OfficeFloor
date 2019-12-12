@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.pool;
 
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
@@ -37,6 +38,7 @@ import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListenerFactory;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -45,6 +47,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
+
+	/**
+	 * Name of the {@link ManagedObjectPool}.
+	 */
+	private final String MANAGED_OBJECT_POOL_NAME = "MANAGED OBJECT POOL";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -111,18 +118,33 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getThreadCompleteListenerFactories(), null);
 
 		// Attempt to load
-		this.loadManagedObjectPoolType(true, new Init() {
-			@Override
-			public void init(ManagedObjectPoolSourceContext context) {
-				assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
-				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties.size());
-				assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
-			}
+		this.loadManagedObjectPoolType(true, (context) -> {
+			assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
+			assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
+			assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
+			Properties properties = context.getProperties();
+			assertEquals("Incorrect number of properties", 2, properties.size());
+			assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
+			assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
 		}, "ONE", "1", "TWO", "2");
+	}
+
+	/**
+	 * Ensure correctly named {@link Logger}.
+	 */
+	public void testLogger() {
+
+		// Record basic meta-data
+		this.recordReturn(this.metaData, this.metaData.getPooledObjectType(), Connection.class);
+		this.recordReturn(this.metaData, this.metaData.getManagedObjectPoolFactory(), this.factory);
+		this.recordReturn(this.metaData, this.metaData.getThreadCompleteListenerFactories(), null);
+
+		// Ensure correct logger
+		Closure<String> loggerName = new Closure<>();
+		this.loadManagedObjectPoolType(true, (context) -> {
+			loggerName.value = context.getLogger().getName();
+		});
+		assertEquals("Incorrect logger name", "TODO LOGGER NAME", loggerName.value);
 	}
 
 	/**
@@ -179,8 +201,7 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code>
-	 * {@link ManagedObjectPoolSourceMetaData}.
+	 * Ensure issue if <code>null</code> {@link ManagedObjectPoolSourceMetaData}.
 	 */
 	public void testNullManagedObjectPoolSourceMetaData() {
 
@@ -266,8 +287,9 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Record initial details of extension and {@link ManagedObjectPoolFactory}.
 	 * 
-	 * @param threadCompletionListenerFactories
-	 *            Optional {@link ThreadCompletionListenerFactory} instances.
+	 * @param threadCompletionListenerFactories Optional
+	 *                                          {@link ThreadCompletionListenerFactory}
+	 *                                          instances.
 	 */
 	private void record_init(ThreadCompletionListenerFactory... threadCompletionListenerFactories) {
 		this.recordReturn(this.metaData, this.metaData.getPooledObjectType(), Connection.class);
@@ -279,13 +301,10 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link ManagedObjectPoolType}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the
-	 *            {@link ManagedObjectPoolType}.
-	 * @param init
-	 *            {@link Init}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link ManagedObjectPoolType}.
+	 * @param init                   {@link Init}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link ManagedObjectPoolType}.
 	 */
 	public ManagedObjectPoolType loadManagedObjectPoolType(boolean isExpectedToLoad, Init init,
@@ -307,8 +326,8 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		ManagedObjectPoolLoader adminLoader = compiler.getManagedObjectPoolLoader();
 		MockManagedObjectPoolSource.init = init;
-		ManagedObjectPoolType adminType = adminLoader.loadManagedObjectPoolType(MockManagedObjectPoolSource.class,
-				propertyList);
+		ManagedObjectPoolType adminType = adminLoader.loadManagedObjectPoolType(MANAGED_OBJECT_POOL_NAME,
+				MockManagedObjectPoolSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();
@@ -332,8 +351,7 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Implemented to init the {@link ManagedObjectPoolSource}.
 		 * 
-		 * @param context
-		 *            {@link ManagedObjectPoolSourceContext}.
+		 * @param context {@link ManagedObjectPoolSourceContext}.
 		 */
 		void init(ManagedObjectPoolSourceContext context);
 	}
@@ -362,8 +380,7 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param metaData
-		 *            {@link ManagedObjectPoolSourceMetaData}.
+		 * @param metaData {@link ManagedObjectPoolSourceMetaData}.
 		 */
 		public static void reset(ManagedObjectPoolSourceMetaData metaData) {
 			instantiateFailure = null;

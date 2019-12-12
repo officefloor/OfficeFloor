@@ -118,7 +118,7 @@ public interface NodeContext {
 	/**
 	 * Creates a new {@link AutoWirer}.
 	 * 
-	 * @param           <N> Type of {@link Node}.
+	 * @param <N>       Type of {@link Node}.
 	 * @param nodeType  {@link Class} type of {@link Node}.
 	 * @param direction {@link AutoWireDirection}.
 	 * @return New {@link AutoWirer}.
@@ -128,7 +128,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link OfficeFloorSource} class.
 	 * 
-	 * @param                            <S> {@link OfficeFloorSource} type.
+	 * @param <S>                        {@link OfficeFloorSource} type.
 	 * @param officeFloorSourceClassName {@link Class} name of the
 	 *                                   {@link OfficeFloorSource}.
 	 * @param node                       {@link Node} requirining the
@@ -163,7 +163,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link OfficeSource} class.
 	 * 
-	 * @param                       <S> {@link OfficeSource} type.
+	 * @param <S>                   {@link OfficeSource} type.
 	 * @param officeSourceClassName {@link OfficeSource} class name or an alias to
 	 *                              an {@link OfficeSource} class.
 	 * @param node                  {@link Node} requiring the {@link OfficeSource}
@@ -238,7 +238,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link SectionSource} class.
 	 * 
-	 * @param                        <S> {@link SectionSource} type.
+	 * @param <S>                    {@link SectionSource} type.
 	 * @param sectionSourceClassName {@link SectionSource} class name or an alias to
 	 *                               an {@link SectionSource} class.
 	 * @param node                   {@link Node} requiring the
@@ -314,7 +314,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedFunctionSource} class.
 	 * 
-	 * @param                           <S> {@link ManagedFunctionSource} type.
+	 * @param <S>                       {@link ManagedFunctionSource} type.
 	 * @param managedFunctionSourceName {@link ManagedFunctionSource} class name or
 	 *                                  an alias to a {@link ManagedFunctionSource}
 	 *                                  class.
@@ -382,7 +382,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedObjectSource} class.
 	 * 
-	 * @param                         <S> {@link ManagedObjectSource} type.
+	 * @param <S>                     {@link ManagedObjectSource} type.
 	 * @param managedObjectSourceName {@link ManagedObjectSource} class name or an
 	 *                                alias to a {@link ManagedObjectSource} class.
 	 * @param node                    {@link Node} for reporting issues.
@@ -531,7 +531,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ManagedObjectPoolSource} class.
 	 * 
-	 * @param                             <S> {@link ManagedObjectPoolSource} type.
+	 * @param <S>                         {@link ManagedObjectPoolSource} type.
 	 * @param managedObjectPoolSourceName {@link ManagedObjectPoolSource} class name
 	 *                                    or an alias to a
 	 *                                    {@link ManagedObjectPoolSource} class.
@@ -581,7 +581,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link SupplierSource} class.
 	 * 
-	 * @param                         <S> {@link SupplierSource} type.
+	 * @param <S>                     {@link SupplierSource} type.
 	 * @param supplierSourceClassName {@link SupplierSource} class name or an alias
 	 *                                to a {@link SupplierSource} class.
 	 * @param node                    {@link Node} requiring the
@@ -641,7 +641,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link AdministrationSource} class.
 	 * 
-	 * @param                               <S> {@link AdministrationSource} type.
+	 * @param <S>                           {@link AdministrationSource} type.
 	 * @param administrationSourceClassName {@link AdministrationSource} class name
 	 *                                      or an alias to an
 	 *                                      {@link AdministrationSource} class.
@@ -674,7 +674,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link GovernanceSource} class.
 	 * 
-	 * @param                      <S> {@link GovernanceSource} type.
+	 * @param <S>                  {@link GovernanceSource} type.
 	 * @param governanceSourceName {@link GovernanceSource} class name or an alias
 	 *                             to an {@link GovernanceSource} class.
 	 * @param node                 {@link Node} requiring the
@@ -704,7 +704,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link TeamSource} class.
 	 * 
-	 * @param                     <S> {@link TeamSource} type.
+	 * @param <S>                 {@link TeamSource} type.
 	 * @param teamSourceClassName {@link TeamSource} class name or an alias to a
 	 *                            {@link TeamSource} class.
 	 * @param node                {@link Node} requiring the {@link TeamSource}
@@ -734,7 +734,7 @@ public interface NodeContext {
 	/**
 	 * Obtains the {@link ExecutiveSource} class.
 	 * 
-	 * @param                          <S> {@link ExecutiveSource} type.
+	 * @param <S>                      {@link ExecutiveSource} type.
 	 * @param executiveSourceClassName {@link ExecutiveSource} class name or an
 	 *                                 alias to a {@link ExecutiveSource} class.
 	 * @param node                     {@link Node} requiring the

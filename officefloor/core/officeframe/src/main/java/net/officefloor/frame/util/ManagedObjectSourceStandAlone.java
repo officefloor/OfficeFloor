@@ -148,8 +148,8 @@ public class ManagedObjectSourceStandAlone {
 				Thread.currentThread().getContextClassLoader(), this.clockFactory);
 
 		// Initialise the managed object source
-		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(false,
-				STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, null, this.properties, context, managingOfficeBuilder,
+		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(this.getClass().getName(),
+				false, STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, null, this.properties, context, managingOfficeBuilder,
 				officeBuilder);
 		managedObjectSource.init(sourceContext);
 

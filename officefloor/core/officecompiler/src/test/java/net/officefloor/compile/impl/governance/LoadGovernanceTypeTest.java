@@ -19,6 +19,8 @@ package net.officefloor.compile.impl.governance;
 
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.FailServiceFactory;
 import net.officefloor.compile.MissingServiceFactory;
@@ -38,10 +40,12 @@ import net.officefloor.compile.spi.governance.source.GovernanceSourceMetaData;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -50,6 +54,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
+
+	/**
+	 * Name of {@link Governance}.
+	 */
+	private static final String GOVERNANCE_NAME = "GOVERNANCE NAME";
 
 	/**
 	 * {@link GovernanceSourceMetaData}.
@@ -93,11 +102,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Must specify property 'missing'");
 
 		// Attempt to load
-		this.loadGovernanceType(false, new Init<None>() {
-			@Override
-			public void init(GovernanceSourceContext context) {
-				context.getProperty("missing");
-			}
+		this.loadGovernanceType(false, (context) -> {
+			context.getProperty("missing");
 		});
 	}
 
@@ -110,18 +116,31 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.record_simpleMetaData();
 
 		// Attempt to load
-		this.loadGovernanceType(true, new Init<None>() {
-			@Override
-			public void init(GovernanceSourceContext context) {
-				assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
-				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties.size());
-				assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
-			}
+		this.loadGovernanceType(true, (context) -> {
+			assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
+			assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
+			assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
+			Properties properties = context.getProperties();
+			assertEquals("Incorrect number of properties", 2, properties.size());
+			assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
+			assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
 		}, "ONE", "1", "TWO", "2");
+	}
+
+	/**
+	 * Ensure correct {@link Logger} name.
+	 */
+	public void testLogger() {
+
+		// Record simple meta-data
+		this.record_simpleMetaData();
+
+		// Ensure correct logger name
+		Closure<String> loggerName = new Closure<>();
+		this.loadGovernanceType(true, (context) -> {
+			loggerName.value = context.getLogger().getName();
+		});
+		assertEquals("Incorrect logger name", "TODO LOGGER NAME", loggerName.value);
 	}
 
 	/**
@@ -133,11 +152,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Can not load class 'missing'");
 
 		// Attempt to load
-		this.loadGovernanceType(false, new Init<None>() {
-			@Override
-			public void init(GovernanceSourceContext context) {
-				context.loadClass("missing");
-			}
+		this.loadGovernanceType(false, (context) -> {
+			context.loadClass("missing");
 		});
 	}
 
@@ -150,11 +166,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Can not obtain resource at location 'missing'");
 
 		// Attempt to load
-		this.loadGovernanceType(false, new Init<None>() {
-			@Override
-			public void init(GovernanceSourceContext context) {
-				context.getResource("missing");
-			}
+		this.loadGovernanceType(false, (context) -> {
+			context.getResource("missing");
 		});
 	}
 
@@ -170,13 +183,10 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		final String objectPath = Object.class.getName().replace('.', '/') + ".class";
 
 		// Attempt to load
-		this.loadGovernanceType(true, new Init<None>() {
-			@Override
-			public void init(GovernanceSourceContext context) {
-				assertEquals("Incorrect resource locator",
-						LoadGovernanceTypeTest.class.getClassLoader().getResource(objectPath),
-						context.getClassLoader().getResource(objectPath));
-			}
+		this.loadGovernanceType(true, (context) -> {
+			assertEquals("Incorrect resource locator",
+					LoadGovernanceTypeTest.class.getClassLoader().getResource(objectPath),
+					context.getClassLoader().getResource(objectPath));
 		});
 	}
 
@@ -189,11 +199,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue(MissingServiceFactory.getIssueDescription());
 
 		// Attempt to load
-		this.loadGovernanceType(false, new Init<None>() {
-			@Override
-			public void init(GovernanceSourceContext context) {
-				context.loadService(MissingServiceFactory.class, null);
-			}
+		this.loadGovernanceType(false, (context) -> {
+			context.loadService(MissingServiceFactory.class, null);
 		});
 	}
 
@@ -206,11 +213,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue(FailServiceFactory.getIssueDescription(), FailServiceFactory.getCause());
 
 		// Attempt to load
-		this.loadGovernanceType(false, new Init<None>() {
-			@Override
-			public void init(GovernanceSourceContext context) {
-				context.loadService(FailServiceFactory.class, null);
-			}
+		this.loadGovernanceType(false, (context) -> {
+			context.loadService(FailServiceFactory.class, null);
 		});
 	}
 
@@ -225,11 +229,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Failed to initialise " + MockGovernanceSource.class.getName(), failure);
 
 		// Attempt to load
-		this.loadGovernanceType(false, new Init<None>() {
-			@Override
-			public void init(GovernanceSourceContext context) {
-				throw failure;
-			}
+		this.loadGovernanceType(false, (context) -> {
+			throw failure;
 		});
 	}
 
@@ -242,11 +243,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Must provide meta-data");
 
 		// Attempt to load
-		this.loadGovernanceType(false, new Init<None>() {
-			@Override
-			public void init(GovernanceSourceContext context) {
-				MockGovernanceSource.metaData = null;
-			}
+		this.loadGovernanceType(false, (context) -> {
+			MockGovernanceSource.metaData = null;
 		});
 	}
 
@@ -318,8 +316,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link GovernanceFlowMetaData} in
-	 * array.
+	 * Ensure issue if <code>null</code> {@link GovernanceFlowMetaData} in array.
 	 */
 	public void testNullFlowMetaData() {
 
@@ -501,17 +498,14 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link GovernanceType}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the
-	 *            {@link GovernanceType}.
-	 * @param init
-	 *            {@link Init}. May be <code>null</code>.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link GovernanceType}.
+	 * @param init                   {@link Init}. May be <code>null</code>.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link GovernanceType}.
 	 */
-	private GovernanceType<Object, None> loadGovernanceType(boolean isExpectedToLoad, Init<?> init,
-			String... propertyNameValuePairs) {
+	private GovernanceType<Object, None> loadGovernanceType(boolean isExpectedToLoad,
+			Consumer<GovernanceSourceContext> init, String... propertyNameValuePairs) {
 
 		// Replay mock objects
 		this.replayMockObjects();
@@ -531,8 +525,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		GovernanceLoader governanceLoader = compiler.getGovernanceLoader();
-		GovernanceType<Object, None> governanceType = governanceLoader.loadGovernanceType(MockGovernanceSource.class,
-				propertyList);
+		GovernanceType<Object, None> governanceType = governanceLoader.loadGovernanceType(GOVERNANCE_NAME,
+				MockGovernanceSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();
@@ -563,8 +557,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the {@link GovernanceFactory} and extension interface
-	 * type from the {@link GovernanceSourceMetaData}.
+	 * Records obtaining the {@link GovernanceFactory} and extension interface type
+	 * from the {@link GovernanceSourceMetaData}.
 	 */
 	private void record_factoryAndExtensionInterfaceType() {
 		this.recordReturn(this.metaData, this.metaData.getGovernanceFactory(),
@@ -588,27 +582,12 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining simple meta-data from the
-	 * {@link GovernanceSourceMetaData}.
+	 * Records obtaining simple meta-data from the {@link GovernanceSourceMetaData}.
 	 */
 	private void record_simpleMetaData() {
 		this.record_factoryAndExtensionInterfaceType();
 		this.record_flowMetaData();
 		this.record_escalationTypes();
-	}
-
-	/**
-	 * Implement to initialise the {@link MockGovernanceSource}.
-	 */
-	private static interface Init<F extends Enum<F>> {
-
-		/**
-		 * Implemented to init the {@link GovernanceSource}.
-		 * 
-		 * @param context
-		 *            {@link GovernanceSourceContext}.
-		 */
-		void init(GovernanceSourceContext context);
 	}
 
 	/**
@@ -625,7 +604,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		/**
 		 * {@link Init} to init the {@link GovernanceSource}.
 		 */
-		public static Init<?> init = null;
+		public static Consumer<GovernanceSourceContext> init = null;
 
 		/**
 		 * Failure to obtain the {@link GovernanceSourceMetaData}.
@@ -640,8 +619,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Resets state of {@link MockGovernanceSource} for testing.
 		 * 
-		 * @param metaData
-		 *            {@link GovernanceSourceMetaData}.
+		 * @param metaData {@link GovernanceSourceMetaData}.
 		 */
 		public static void reset(GovernanceSourceMetaData<Object, None> metaData) {
 			instantiateFailure = null;
@@ -653,8 +631,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Instantiate.
 		 * 
-		 * @throws Exception
-		 *             Possible instantiate failure.
+		 * @throws Exception Possible instantiate failure.
 		 */
 		public MockGovernanceSource() throws Exception {
 			if (instantiateFailure != null) {
@@ -677,7 +654,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 
 			// Run the init if available
 			if (init != null) {
-				init.init(context);
+				init.accept(context);
 			}
 
 			// Throw meta-data failure

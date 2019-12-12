@@ -84,12 +84,12 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 	 */
 	public TeamSourceContextWrapper(ExecutiveContext context, Function<Integer, Integer> teamSizeCalculator,
 			String teamNameSuffix, WorkerEnvironment workerEnvironment) {
-		super(context.isLoadingType(), context, context);
+		super(getTeamName(context, teamNameSuffix), context.isLoadingType(), context, context);
 		this.executiveContext = context;
 		this.teamSizeCalculator = teamSizeCalculator;
 
 		// Specify the team name
-		this.teamName = context.getTeamName() + (teamNameSuffix == null ? "" : "-" + teamNameSuffix);
+		this.teamName = getTeamName(context, teamNameSuffix);
 
 		// Obtain the thread factory
 		ThreadFactory threadFactory = context.createThreadFactory(this.teamName);
@@ -99,6 +99,17 @@ public class TeamSourceContextWrapper extends SourceContextImpl implements TeamS
 			threadFactory = (worker) -> delegate.newThread(workerEnvironment.createWorkerEnvironment(worker));
 		}
 		this.threadFactory = threadFactory;
+	}
+
+	/**
+	 * Determines the {@link Team} name.
+	 * 
+	 * @param context        {@link ExecutiveContext}.
+	 * @param teamNameSuffix {@link Team} name suffix.
+	 * @return {@link Team} name.
+	 */
+	private static String getTeamName(ExecutiveContext context, String teamNameSuffix) {
+		return context.getTeamName() + (teamNameSuffix == null ? "" : "-" + teamNameSuffix);
 	}
 
 	/*

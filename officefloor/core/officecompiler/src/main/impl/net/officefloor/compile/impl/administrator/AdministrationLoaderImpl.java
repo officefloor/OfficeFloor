@@ -68,10 +68,8 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 	/**
 	 * Instantiate.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link Administration}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link Administration}.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public AdministrationLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -182,7 +180,7 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 
 	@Override
 	public <E, F extends Enum<F>, G extends Enum<G>, AS extends AdministrationSource<E, F, G>> AdministrationType<E, F, G> loadAdministrationType(
-			Class<AS> administratorSourceClass, PropertyList propertyList) {
+			String administrationName, Class<AS> administratorSourceClass, PropertyList propertyList) {
 
 		// Create an instance of the administrator source
 		AS administratorSource = CompileUtil.newInstance(administratorSourceClass, AdministrationSource.class,
@@ -192,20 +190,21 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 		}
 
 		// Load and return type
-		return this.loadAdministrationType(administratorSource, propertyList);
+		return this.loadAdministrationType(administrationName, administratorSource, propertyList);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <E, F extends Enum<F>, G extends Enum<G>> AdministrationType<E, F, G> loadAdministrationType(
-			AdministrationSource<E, F, G> administratorSource, PropertyList propertyList) {
+			String administrationName, AdministrationSource<E, F, G> administratorSource, PropertyList propertyList) {
 
 		// Obtain the source context
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
 
 		// Create the administrator source context
 		SourceProperties properties = new PropertyListSourceProperties(propertyList);
-		AdministrationSourceContext context = new AdministrationSourceContextImpl(true, properties, sourceContext);
+		AdministrationSourceContext context = new AdministrationSourceContextImpl(administrationName, true, properties,
+				sourceContext);
 
 		// Initialise the administration source and obtain the meta-data
 		AdministrationSourceMetaData<E, F, G> metaData;
@@ -424,16 +423,14 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 		/**
 		 * Initiate.
 		 * 
-		 * @param isLoadingType
-		 *            Indicates if loading type.
-		 * @param properties
-		 *            {@link SourceProperties}.
-		 * @param sourceContext
-		 *            Delegate {@link SourceContext}.
+		 * @param administrationSourceName Name of {@link AdministrationSource}.
+		 * @param isLoadingType            Indicates if loading type.
+		 * @param properties               {@link SourceProperties}.
+		 * @param sourceContext            Delegate {@link SourceContext}.
 		 */
-		public AdministrationSourceContextImpl(boolean isLoadingType, SourceProperties properties,
-				SourceContext sourceContext) {
-			super(isLoadingType, sourceContext, properties);
+		public AdministrationSourceContextImpl(String administrationSourceName, boolean isLoadingType,
+				SourceProperties properties, SourceContext sourceContext) {
+			super(administrationSourceName, isLoadingType, sourceContext, properties);
 		}
 	}
 

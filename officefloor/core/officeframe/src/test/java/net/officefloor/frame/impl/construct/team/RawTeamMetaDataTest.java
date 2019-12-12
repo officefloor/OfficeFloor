@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.construct.team;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -167,6 +168,39 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		 */
 		public FailInstantiateTeamSource() throws Exception {
 			throw instantiateFailure;
+		}
+	}
+
+	/**
+	 * Ensure correct {@link Logger}.
+	 */
+	public void testLogger() {
+
+		// Record
+		this.configuration = new TeamBuilderImpl<>(TEAM_NAME, LoggerTeamSource.class);
+
+		// Construct
+		LoggerTeamSource.loggerName = null;
+		this.replayMockObjects();
+		this.constructRawTeamMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure correct logger name
+		assertEquals("Incorrect logger name", TEAM_NAME, LoggerTeamSource.loggerName);
+	}
+
+	/**
+	 * {@link TeamSource} to confirm correct {@link Logger} name.
+	 */
+	@TestSource
+	public static class LoggerTeamSource extends TeamSourceAdapter {
+
+		public static String loggerName;
+
+		@Override
+		public Team createTeam(TeamSourceContext context) throws Exception {
+			loggerName = context.getLogger().getName();
+			return super.createTeam(context);
 		}
 	}
 

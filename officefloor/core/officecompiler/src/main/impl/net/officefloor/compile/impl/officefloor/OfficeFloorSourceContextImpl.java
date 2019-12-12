@@ -61,20 +61,16 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 	/**
 	 * Initiate.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 * @param propertyList
-	 *            {@link PropertyList}.
-	 * @param officeFloorNode
-	 *            {@link OfficeFloorNode}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param isLoadingType       Indicates if loading type.
+	 * @param officeFloorLocation Location of the {@link OfficeFloor}.
+	 * @param propertyList        {@link PropertyList}.
+	 * @param officeFloorNode     {@link OfficeFloorNode}.
+	 * @param nodeContext         {@link NodeContext}.
 	 */
 	public OfficeFloorSourceContextImpl(boolean isLoadingType, String officeFloorLocation, PropertyList propertyList,
 			OfficeFloorNode officeFloorNode, NodeContext nodeContext) {
-		super(isLoadingType, nodeContext.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
+		super(officeFloorNode.getNodeName(), isLoadingType, nodeContext.getRootSourceContext(),
+				new PropertyListSourceProperties(propertyList));
 		this.officeFloorLocation = officeFloorLocation;
 		this.officeFloorNode = officeFloorNode;
 		this.context = nodeContext;
@@ -106,7 +102,8 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 
 					// Load and return the managed object type
 					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeFloorNode);
-					return managedObjectLoader.loadManagedObjectType(managedObjectSource, overrideProperties);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSourceName, managedObjectSource,
+							overrideProperties);
 				});
 	}
 
@@ -130,7 +127,8 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 
 					// Load and return the managed object type
 					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeFloorNode);
-					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, overrideProperties);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSourceName, managedObjectSourceClass,
+							overrideProperties);
 				});
 	}
 
@@ -153,7 +151,7 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 
 					// Load and return the supplier type
 					SupplierLoader supplierLoader = this.context.getSupplierLoader(this.officeFloorNode);
-					return supplierLoader.loadSupplierType(supplierSourceClass, overrideProperties);
+					return supplierLoader.loadSupplierType(supplierName, supplierSourceClass, overrideProperties);
 				});
 	}
 

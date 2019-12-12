@@ -56,6 +56,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	 * Initiate the raw {@link SourceContext} to seed other {@link SourceContext}
 	 * instances.
 	 * 
+	 * @param sourceName      Name of source.
 	 * @param isLoadingType   Indicates if loading type.
 	 * @param classLoader     {@link ClassLoader}.
 	 * @param clockFactory    {@link ClockFactory}.
@@ -71,13 +72,15 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	 * Initiate specific {@link SourceContext} with necessary
 	 * {@link SourceProperties}.
 	 * 
+	 * @param sourceName       Name of source.
 	 * @param isLoadingType    Indicates if loading type.
 	 * @param delegate         Delegate {@link SourceContext}.
 	 * @param sourceProperties {@link SourceProperties}.
 	 */
-	public SourceContextImpl(boolean isLoadingType, SourceContext delegate, SourceProperties sourceProperties) {
+	public SourceContextImpl(String sourceName, boolean isLoadingType, SourceContext delegate,
+			SourceProperties sourceProperties) {
 		super(sourceProperties);
-		this.delegate = new DelegateWrapSourceContext(isLoadingType, delegate);
+		this.delegate = new DelegateWrapSourceContext(sourceName, isLoadingType, delegate);
 	}
 
 	/*
@@ -163,6 +166,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		private final boolean isLoadingType;
 
 		/**
+		 * {@link Logger}.
+		 */
+		private final Logger logger;
+
+		/**
 		 * {@link SourceContext}.
 		 */
 		private final SourceContext delegate;
@@ -170,12 +178,14 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		/**
 		 * Initiate.
 		 * 
+		 * @param sourceName    Name of source.
 		 * @param isLoadingType Indicates if loading type.
 		 * @param delegate      Delegate {@link SourceContext}.
 		 */
-		public DelegateWrapSourceContext(boolean isLoadingType, SourceContext delegate) {
+		public DelegateWrapSourceContext(String sourceName, boolean isLoadingType, SourceContext delegate) {
 			this.isLoadingType = isLoadingType;
 			this.delegate = delegate;
+			this.logger = Logger.getLogger(sourceName);
 		}
 
 		/*
@@ -234,7 +244,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 
 		@Override
 		public Logger getLogger() {
-			return this.delegate.getLogger();
+			return this.logger;
 		}
 
 		@Override

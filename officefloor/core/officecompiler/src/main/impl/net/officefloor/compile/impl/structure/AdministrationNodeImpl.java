@@ -253,8 +253,9 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		this.usedAdministrationSource = administrationSource;
 
 		// Load and return the administration type
+		String qualifiedName = this.officeNode.getQualifiedName(this.administrationName);
 		AdministrationLoader loader = this.context.getAdministrationLoader(this);
-		return loader.loadAdministrationType(administrationSource, overrideProperties);
+		return loader.loadAdministrationType(qualifiedName, administrationSource, overrideProperties);
 	}
 
 	@Override

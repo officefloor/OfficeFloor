@@ -168,8 +168,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	}
 
 	@Override
-	public <S extends SupplierSource> SupplierType loadSupplierType(Class<S> supplierSourceClass,
-			PropertyList propertyList) {
+	public <S extends SupplierSource> SupplierType loadSupplierType(String supplierSourceName,
+			Class<S> supplierSourceClass, PropertyList propertyList) {
 
 		// Instantiate the supplier source
 		S supplierSource = CompileUtil.newInstance(supplierSourceClass, SupplierSource.class, this.node,
@@ -179,14 +179,16 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		}
 
 		// Load and return the type
-		return this.loadSupplierType(supplierSource, propertyList);
+		return this.loadSupplierType(supplierSourceName, supplierSource, propertyList);
 	}
 
 	@Override
-	public SupplierType loadSupplierType(SupplierSource supplierSource, PropertyList propertyList) {
+	public SupplierType loadSupplierType(String supplierSourceName, SupplierSource supplierSource,
+			PropertyList propertyList) {
 
 		// Create the supplier source context
-		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(true, propertyList, this.nodeContext);
+		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(supplierSourceName, true, propertyList,
+				this.nodeContext);
 
 		try {
 			// Source the supplier

@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.managedobject;
 import java.net.URLConnection;
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import javax.transaction.xa.XAResource;
 
@@ -62,6 +63,7 @@ import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
@@ -71,6 +73,11 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * @author Daniel Sagenschneider
  */
 public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
+
+	/**
+	 * Name of the {@link ManagedObjectSource}.
+	 */
+	private static final String MANAGED_OBJECT_SOURCE_NAME = "MANAGED OBJECT SOURCE NAME";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -110,7 +117,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Load the managed object type
 		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
-		ManagedObjectType moType = moLoader.loadManagedObjectType(ClassManagedObjectSource.class, properties);
+		ManagedObjectType moType = moLoader.loadManagedObjectType(MANAGED_OBJECT_SOURCE_NAME,
+				ClassManagedObjectSource.class, properties);
 		MockLoadManagedObject.assertManagedObjectType(moType);
 	}
 
@@ -132,7 +140,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Load the managed object type
 		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
-		ManagedObjectType moType = moLoader.loadManagedObjectType(new ClassManagedObjectSource(), properties);
+		ManagedObjectType moType = moLoader.loadManagedObjectType(MANAGED_OBJECT_SOURCE_NAME,
+				new ClassManagedObjectSource(), properties);
 		MockLoadManagedObject.assertManagedObjectType(moType);
 	}
 
@@ -185,6 +194,22 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
 			assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
 		}, "ONE", "1", "TWO", "2");
+	}
+
+	/**
+	 * Ensure correctly named {@link Logger}.
+	 */
+	public void testLogger() {
+
+		// Record basic meta-data
+		this.record_basicMetaData();
+
+		// Ensure correctly named logger
+		Closure<String> loggerName = new Closure<>();
+		this.loadManagedObjectType(true, (context, util) -> {
+			loggerName.value = context.getLogger().getName();
+		});
+		assertEquals("Incorrect logger name", "TODO LOGGER NAME", loggerName.value);
 	}
 
 	/**
@@ -1525,7 +1550,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
 		MockManagedObjectSource.init = init;
-		ManagedObjectType moType = moLoader.loadManagedObjectType(MockManagedObjectSource.class, propertyList);
+		ManagedObjectType moType = moLoader.loadManagedObjectType(MANAGED_OBJECT_SOURCE_NAME,
+				MockManagedObjectSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

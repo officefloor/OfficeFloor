@@ -108,7 +108,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 
 		// Setup to provide managed object source instance
 		MockSupplierSource.reset();
-		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(Object.class);
+		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(Object.class, "MANAGED_OBJECT_SOURCE");
 		MockSupplierSource.managedObjectSource = mos;
 
 		// Record building the OfficeFloor
@@ -543,7 +543,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("DEPENDENT_SOURCE", FunctionDependencyManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		
+
 		// Map the function dependency
 		this.record_managingOfficeBuilder_mapFunctionDependency("DEPENDENCY", "SIMPLE");
 

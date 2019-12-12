@@ -57,7 +57,7 @@ public class SupplierLoaderUtil {
 	 * Validates the {@link SupplierSourceSpecification} for the
 	 * {@link SupplierSource}.
 	 * 
-	 * @param                     <S> {@link SupplierSource} type.
+	 * @param <S>                 {@link SupplierSource} type.
 	 * @param supplierSourceClass {@link SupplierSource} class.
 	 * @param propertyNameLabels  Listing of name/label pairs for the
 	 *                            {@link Property} instances.
@@ -93,7 +93,7 @@ public class SupplierLoaderUtil {
 	 * input {@link SupplierSource} against the expected {@link SupplierType} from
 	 * the {@link SupplierTypeBuilder}.
 	 * 
-	 * @param                      <S> {@link SupplierSource} type.
+	 * @param <S>                  {@link SupplierSource} type.
 	 * @param expectedSupplierType {@link SupplierTypeBuilder} that has had the
 	 *                             expected {@link SupplierType} built against it.
 	 * @param supplierSourceClass  {@link SupplierSource} class.
@@ -215,7 +215,7 @@ public class SupplierLoaderUtil {
 	 * Convenience method that loads the {@link SupplierType} by obtaining the
 	 * {@link ClassLoader} from the {@link SupplierSource} class.
 	 * 
-	 * @param                     <S> {@link SupplierSource} type.
+	 * @param <S>                 {@link SupplierSource} type.
 	 * @param supplierSourceClass {@link SupplierSource} class.
 	 * @param propertyNameValues  Listing of name/value pairs that comprise the
 	 *                            properties for the {@link SupplierSource}.
@@ -231,7 +231,7 @@ public class SupplierLoaderUtil {
 	 * Convenience method that loads the {@link SupplierType} with the provided
 	 * {@link OfficeFloorCompiler}.
 	 * 
-	 * @param                     <S> {@link SupplierSource} type.
+	 * @param <S>                 {@link SupplierSource} type.
 	 * @param supplierSourceClass {@link SupplierSource} class.
 	 * @param compiler            {@link OfficeFloorCompiler}.
 	 * @param propertyNameValues  Listing of name/value pairs that comprise the
@@ -250,7 +250,8 @@ public class SupplierLoaderUtil {
 		}
 
 		// Return the loaded supplier
-		return getOfficeFloorCompiler(compiler).getSupplierLoader().loadSupplierType(supplierSourceClass, propertyList);
+		return getOfficeFloorCompiler(compiler).getSupplierLoader().loadSupplierType(SupplierLoaderUtil.class.getName(),
+				supplierSourceClass, propertyList);
 	}
 
 	/**

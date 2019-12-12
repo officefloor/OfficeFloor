@@ -722,8 +722,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceClassName,
-			PropertyList properties) {
+	public FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceName,
+			String managedFunctionSourceClassName, PropertyList properties) {
 
 		// Obtain the managed function source class
 		Class managedFunctionSourceClass = this.getManagedFunctionSourceClass(managedFunctionSourceClassName, this);
@@ -732,12 +732,14 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		}
 
 		// Load and return the managed function type
-		return this.getManagedFunctionLoader().loadManagedFunctionType(managedFunctionSourceClass, properties);
+		return this.getManagedFunctionLoader().loadManagedFunctionType(managedFunctionSourceName,
+				managedFunctionSourceClass, properties);
 	}
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties) {
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties) {
 
 		// Obtain the managed object source class
 		Class managedObjectSourceClass = this.getManagedObjectSourceClass(managedObjectSourceClassName, this);
@@ -746,7 +748,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		}
 
 		// Load and return the managed object type
-		return this.getManagedObjectLoader().loadManagedObjectType(managedObjectSourceClass, properties);
+		return this.getManagedObjectLoader().loadManagedObjectType(managedObjectSourceName, managedObjectSourceClass,
+				properties);
 	}
 
 	/*

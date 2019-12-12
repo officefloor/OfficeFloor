@@ -35,6 +35,11 @@ import net.officefloor.frame.impl.execute.executive.DefaultExecutive;
 public class ExecutiveSourceContextImpl extends SourceContextImpl implements ExecutiveSourceContext {
 
 	/**
+	 * Name for the {@link Executive}.
+	 */
+	public static final String EXECUTIVE_NAME = "Executive";
+
+	/**
 	 * {@link ThreadFactoryManufacturer}.
 	 */
 	private final ThreadFactoryManufacturer threadFactoryManufacturer;
@@ -54,7 +59,7 @@ public class ExecutiveSourceContextImpl extends SourceContextImpl implements Exe
 	 */
 	public ExecutiveSourceContextImpl(boolean isLoadingType, SourceContext sourceContext,
 			SourceProperties sourceProperties, ThreadFactoryManufacturer threadFactoryManufacturer) {
-		super(isLoadingType, sourceContext, sourceProperties);
+		super(EXECUTIVE_NAME, isLoadingType, sourceContext, sourceProperties);
 		this.threadFactoryManufacturer = threadFactoryManufacturer;
 
 		// Create the default executive

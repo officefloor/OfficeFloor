@@ -514,7 +514,11 @@ public class SourceContextTest extends OfficeFrameTestCase {
 		properties.addProperty("NAME", "VALUE");
 
 		// Create context with the properties
-		SourceContext context = new SourceContextImpl(true, delegate, properties);
+		final String NAME = "TEST";
+		SourceContext context = new SourceContextImpl(NAME, true, delegate, properties);
+
+		// Ensure correct logger name
+		assertEquals("Incorrect logger name", NAME, context.getLogger().getName());
 
 		// Ensure the property is available
 		assertEquals("Property should be available", "VALUE", context.getProperty("NAME"));

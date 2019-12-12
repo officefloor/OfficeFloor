@@ -65,10 +65,9 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	/**
 	 * Initiate for building.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link ManagedFunction} instances.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link ManagedFunction}
+	 *                    instances.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public ManagedFunctionLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -177,7 +176,7 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 
 	@Override
 	public <S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(
-			Class<S> managedFunctionSourceClass, PropertyList propertyList) {
+			String managedFunctionSourceName, Class<S> managedFunctionSourceClass, PropertyList propertyList) {
 
 		// Instantiate the managed function source
 		ManagedFunctionSource managedFunctionSource = CompileUtil.newInstance(managedFunctionSourceClass,
@@ -187,16 +186,16 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 		}
 
 		// Load and return the type
-		return this.loadManagedFunctionType(managedFunctionSource, propertyList);
+		return this.loadManagedFunctionType(managedFunctionSourceName, managedFunctionSource, propertyList);
 	}
 
 	@Override
-	public FunctionNamespaceType loadManagedFunctionType(ManagedFunctionSource managedFunctionSource,
-			PropertyList propertyList) {
+	public FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceName,
+			ManagedFunctionSource managedFunctionSource, PropertyList propertyList) {
 
 		// Create the managed function source context
-		ManagedFunctionSourceContext context = new ManagedFunctionSourceContextImpl(true, propertyList,
-				this.nodeContext);
+		ManagedFunctionSourceContext context = new ManagedFunctionSourceContextImpl(managedFunctionSourceName, true,
+				propertyList, this.nodeContext);
 
 		// Create the namespace type builder
 		FunctionNamespaceTypeImpl namespaceType = new FunctionNamespaceTypeImpl();
@@ -245,14 +244,11 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	/**
 	 * Determines if the input {@link ManagedFunctionType} is valid.
 	 * 
-	 * @param functionType
-	 *            {@link ManagedFunctionType} to validate.
-	 * @param functionIndex
-	 *            Index of the {@link ManagedFunctionType} on the
-	 *            {@link FunctionNamespaceType}.
-	 * @param managedFunctionSourceClass
-	 *            {@link ManagedFunctionSource} providing the
-	 *            {@link FunctionNamespaceType}.
+	 * @param functionType               {@link ManagedFunctionType} to validate.
+	 * @param functionIndex              Index of the {@link ManagedFunctionType} on
+	 *                                   the {@link FunctionNamespaceType}.
+	 * @param managedFunctionSourceClass {@link ManagedFunctionSource} providing the
+	 *                                   {@link FunctionNamespaceType}.
 	 * @return <code>true</code> if {@link ManagedFunctionType} is valid.
 	 */
 	private <M extends Enum<M>, F extends Enum<F>> boolean isValidFunctionType(ManagedFunctionType<M, F> functionType,
@@ -393,19 +389,14 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	 * Determines that the {@link ManagedFunctionObjectType} instances are valid
 	 * given an {@link Enum} providing the dependent {@link Object} keys.
 	 * 
-	 * @param functionType
-	 *            {@link ManagedFunctionType}.
-	 * @param objectKeysClass
-	 *            {@link Enum} providing the keys.
-	 * @param functionIndex
-	 *            Index of the {@link ManagedFunctionType} on the
-	 *            {@link FunctionNamespaceType}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunctionType}.
-	 * @param managedFunctionSourceClass
-	 *            {@link ManagedFunctionSource} class.
-	 * @return <code>true</code> if {@link ManagedFunctionObjectType} instances
-	 *         are valid.
+	 * @param functionType               {@link ManagedFunctionType}.
+	 * @param objectKeysClass            {@link Enum} providing the keys.
+	 * @param functionIndex              Index of the {@link ManagedFunctionType} on
+	 *                                   the {@link FunctionNamespaceType}.
+	 * @param functionName               Name of the {@link ManagedFunctionType}.
+	 * @param managedFunctionSourceClass {@link ManagedFunctionSource} class.
+	 * @return <code>true</code> if {@link ManagedFunctionObjectType} instances are
+	 *         valid.
 	 */
 	private <M extends Enum<M>> boolean isValidObjects(ManagedFunctionType<M, ?> functionType, Class<M> objectKeysClass,
 			int functionIndex, String functionName, Class<?> managedFunctionSourceClass) {
@@ -477,17 +468,13 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	 * Determines that the {@link ManagedFunctionObjectType} instances are valid
 	 * given they are {@link Indexed}.
 	 * 
-	 * @param functionType
-	 *            {@link ManagedFunctionType}.
-	 * @param functionIndex
-	 *            Index of the {@link ManagedFunctionType} on the
-	 *            {@link FunctionNamespaceType}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunctionType}.
-	 * @param managedFunctionSourceClass
-	 *            {@link ManagedFunctionSource} class.
-	 * @return <code>true</code> if {@link ManagedFunctionObjectType} instances
-	 *         are valid.
+	 * @param functionType               {@link ManagedFunctionType}.
+	 * @param functionIndex              Index of the {@link ManagedFunctionType} on
+	 *                                   the {@link FunctionNamespaceType}.
+	 * @param functionName               Name of the {@link ManagedFunctionType}.
+	 * @param managedFunctionSourceClass {@link ManagedFunctionSource} class.
+	 * @return <code>true</code> if {@link ManagedFunctionObjectType} instances are
+	 *         valid.
 	 */
 	private boolean isValidObjects(ManagedFunctionType<?, ?> functionType, int functionIndex, String functionName,
 			Class<?> managedFunctionSourceClass) {
@@ -518,22 +505,17 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	}
 
 	/**
-	 * Determines that the {@link ManagedFunctionFlowType} instances are valid
-	 * given an {@link Enum} providing the instigated {@link Flow} keys.
+	 * Determines that the {@link ManagedFunctionFlowType} instances are valid given
+	 * an {@link Enum} providing the instigated {@link Flow} keys.
 	 * 
-	 * @param functionType
-	 *            {@link ManagedFunctionType}.
-	 * @param objectKeysClass
-	 *            {@link Enum} providing the keys.
-	 * @param functionIndex
-	 *            Index of the {@link ManagedFunctionType} on the
-	 *            {@link FunctionNamespaceType}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunctionType}.
-	 * @param managedFunctionSourceClass
-	 *            {@link ManagedFunctionSource} class.
-	 * @return <code>true</code> if {@link ManagedFunctionFlowType} instances
-	 *         are valid.
+	 * @param functionType               {@link ManagedFunctionType}.
+	 * @param objectKeysClass            {@link Enum} providing the keys.
+	 * @param functionIndex              Index of the {@link ManagedFunctionType} on
+	 *                                   the {@link FunctionNamespaceType}.
+	 * @param functionName               Name of the {@link ManagedFunctionType}.
+	 * @param managedFunctionSourceClass {@link ManagedFunctionSource} class.
+	 * @return <code>true</code> if {@link ManagedFunctionFlowType} instances are
+	 *         valid.
 	 */
 	private <F extends Enum<F>> boolean isValidFlows(ManagedFunctionType<?, F> functionType, Class<F> flowKeysClass,
 			int functionIndex, String functionName, Class<?> managedFunctionSourceClass) {
@@ -602,20 +584,16 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	}
 
 	/**
-	 * Determines that the {@link ManagedFunctionFlowType} instances are valid
-	 * given they are {@link Indexed}.
+	 * Determines that the {@link ManagedFunctionFlowType} instances are valid given
+	 * they are {@link Indexed}.
 	 * 
-	 * @param functionType
-	 *            {@link ManagedFunctionType}.
-	 * @param functionIndex
-	 *            Index of the {@link ManagedFunctionType} on the
-	 *            {@link FunctionNamespaceType}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunctionType}.
-	 * @param managedFunctionSourceClass
-	 *            {@link ManagedFunctionSource} class.
-	 * @return <code>true</code> if {@link ManagedFunctionFlowType} instances
-	 *         are valid.
+	 * @param functionType               {@link ManagedFunctionType}.
+	 * @param functionIndex              Index of the {@link ManagedFunctionType} on
+	 *                                   the {@link FunctionNamespaceType}.
+	 * @param functionName               Name of the {@link ManagedFunctionType}.
+	 * @param managedFunctionSourceClass {@link ManagedFunctionSource} class.
+	 * @return <code>true</code> if {@link ManagedFunctionFlowType} instances are
+	 *         valid.
 	 */
 	private boolean isValidFlows(ManagedFunctionType<?, ?> functionType, int functionIndex, String functionName,
 			Class<?> managedFunctionSourceClass) {
@@ -651,12 +629,9 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	 * <p>
 	 * Duplicate names are reported as issues.
 	 * 
-	 * @param items
-	 *            Items to be checked for unique naming.
-	 * @param extractor
-	 *            {@link NameExtractor}.
-	 * @param issueDescription
-	 *            {@link CompilerIssues} description if duplicate name
+	 * @param items            Items to be checked for unique naming.
+	 * @param extractor        {@link NameExtractor}.
+	 * @param issueDescription {@link CompilerIssues} description if duplicate name
 	 * @return <code>true</code> if there are duplicate item names.
 	 */
 	private <N> boolean isDuplicateNaming(N[] items, NameExtractor<N> extractor, String issueDescription) {
@@ -710,8 +685,7 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 		/**
 		 * Extracts the particular name from the item.
 		 * 
-		 * @param item
-		 *            Item to have name extracted.
+		 * @param item Item to have name extracted.
 		 * @return
 		 */
 		String extractName(N item);
@@ -720,14 +694,10 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	/**
 	 * Obtains the {@link ManagedFunction} issue description.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param functionIndex
-	 *            Index of the {@link ManagedFunction}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param managedFunctionSourceClass
-	 *            {@link ManagedFunctionSource} class.
+	 * @param issueDescription           Description of the issue.
+	 * @param functionIndex              Index of the {@link ManagedFunction}.
+	 * @param functionName               Name of the {@link ManagedFunction}.
+	 * @param managedFunctionSourceClass {@link ManagedFunctionSource} class.
 	 * @return {@link ManagedFunction} issue description.
 	 */
 	private String getFunctionIssueDescription(String issueDescription, int functionIndex, String functionName,
@@ -740,14 +710,10 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param functionIndex
-	 *            Index of the {@link ManagedFunction}.
-	 * @param functionName
-	 *            Name of the {@link ManagedFunction}.
-	 * @param managedFunctionSourceClass
-	 *            {@link ManagedFunctionSource} class.
+	 * @param issueDescription           Description of the issue.
+	 * @param functionIndex              Index of the {@link ManagedFunction}.
+	 * @param functionName               Name of the {@link ManagedFunction}.
+	 * @param managedFunctionSourceClass {@link ManagedFunctionSource} class.
 	 */
 	private void addFunctionIssue(String issueDescription, int functionIndex, String functionName,
 			Class<?> managedFunctionSourceClass) {

@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.AvailableServiceFactory;
@@ -56,6 +57,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
+import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.configuration.ConfigurationItem;
 import net.officefloor.frame.api.source.ResourceSource;
 import net.officefloor.frame.api.source.TestSource;
@@ -330,14 +332,23 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to get the {@link Logger}.
+	 */
+	public void testGetLogger() {
+		this.loadSectionType(true, (section, context) -> {
+			assertEquals("Should log to section name", SectionLoaderUtil.class.getName(),
+					context.getLogger().getName());
+		});
+	}
+
+	/**
 	 * Ensure able to get the {@link ClassLoader}.
 	 */
 	public void testGetClassLoader() {
 
 		// Attempt to load section type
 		this.loadSectionType(true, (section, context) -> {
-			assertEquals("Incorrect class loader", LoadSectionTypeTest.class.getClassLoader(),
-					context.getClassLoader());
+			assertEquals("Incorrect class loader", "<office>.<type>", context.getClassLoader());
 		});
 	}
 

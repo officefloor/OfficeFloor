@@ -100,11 +100,11 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedObjectPoolSourceClassName
-		 *            {@link Class} name of the {@link ManagedObjectPoolSource}.
-		 * @param managedObjectPoolSource
-		 *            Optional {@link ManagedObjectPoolSource}. May be
-		 *            <code>null</code>.
+		 * @param managedObjectPoolSourceClassName {@link Class} name of the
+		 *                                         {@link ManagedObjectPoolSource}.
+		 * @param managedObjectPoolSource          Optional
+		 *                                         {@link ManagedObjectPoolSource}. May
+		 *                                         be <code>null</code>.
 		 */
 		private InitialisedState(String managedObjectPoolSourceClassName,
 				ManagedObjectPoolSource managedObjectPoolSource) {
@@ -122,18 +122,15 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param managedObjectPoolName
-	 *            Name of this {@link ManagedObjectPoolNode}.
-	 * @param containingSectionNode
-	 *            Containing {@link SectionNode}. <code>null</code> if contained in
-	 *            the {@link Office} or {@link OfficeFloor}.
-	 * @param containingOfficeNode
-	 *            Containing {@link OfficeNode}. <code>null</code> if contained in
-	 *            the {@link OfficeFloor}.
-	 * @param containingOfficeFloorNode
-	 *            Containing {@link OfficeFloorNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param managedObjectPoolName     Name of this {@link ManagedObjectPoolNode}.
+	 * @param containingSectionNode     Containing {@link SectionNode}.
+	 *                                  <code>null</code> if contained in the
+	 *                                  {@link Office} or {@link OfficeFloor}.
+	 * @param containingOfficeNode      Containing {@link OfficeNode}.
+	 *                                  <code>null</code> if contained in the
+	 *                                  {@link OfficeFloor}.
+	 * @param containingOfficeFloorNode Containing {@link OfficeFloorNode}.
+	 * @param context                   {@link NodeContext}.
 	 */
 	public ManagedObjectPoolNodeImpl(String managedObjectPoolName, SectionNode containingSectionNode,
 			OfficeNode containingOfficeNode, OfficeFloorNode containingOfficeFloorNode, NodeContext context) {
@@ -272,7 +269,7 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 
 		// Load and return the managed object pool type
 		ManagedObjectPoolLoader loader = this.context.getManagedObjectPoolLoader(this);
-		return loader.loadManagedObjectPoolType(managedObjectPoolSource, overrideProperties);
+		return loader.loadManagedObjectPoolType(qualifiedName, managedObjectPoolSource, overrideProperties);
 	}
 
 	@Override

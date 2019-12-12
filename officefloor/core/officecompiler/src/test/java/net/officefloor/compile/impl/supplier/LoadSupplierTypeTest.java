@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.supplier;
 
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
@@ -39,6 +40,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.thread.ThreadSynchroniserFactory;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
@@ -48,6 +50,11 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
  * @author Daniel Sagenschneider
  */
 public class LoadSupplierTypeTest extends OfficeFrameTestCase {
+
+	/**
+	 * Name of the {@link SupplierSource}.
+	 */
+	private final String SUPPLIER_SOURCE_NAME = "SUPPLIER SOURCE";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -84,11 +91,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.issues.recordIssue("Missing property 'missing' for SupplierSource " + MockSupplierSource.class.getName());
 
 		// Attempt to load
-		this.loadSupplierType(false, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				context.getProperty("missing");
-			}
+		this.loadSupplierType(false, (context) -> {
+			context.getProperty("missing");
 		});
 	}
 
@@ -98,18 +102,26 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 	public void testGetProperties() {
 
 		// Attempt to load
-		this.loadSupplierType(true, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
-				assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
-				assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
-				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties.size());
-				assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
-				assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
-			}
+		this.loadSupplierType(true, (context) -> {
+			assertEquals("Ensure get defaulted property", "DEFAULT", context.getProperty("missing", "DEFAULT"));
+			assertEquals("Ensure get property ONE", "1", context.getProperty("ONE"));
+			assertEquals("Ensure get property TWO", "2", context.getProperty("TWO"));
+			Properties properties = context.getProperties();
+			assertEquals("Incorrect number of properties", 2, properties.size());
+			assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
+			assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
 		}, "ONE", "1", "TWO", "2");
+	}
+
+	/**
+	 * Ensure correctly named {@link Logger}.
+	 */
+	public void testLogger() {
+		Closure<String> closure = new Closure<>();
+		this.loadSupplierType(true, (context) -> {
+			closure.value = context.getLogger().getName();
+		});
+		assertEquals("Incorrect logger name", "TODO LOGGER NAME", closure.value);
 	}
 
 	/**
@@ -122,11 +134,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				.recordIssue("Can not load class 'missing' for SupplierSource " + MockSupplierSource.class.getName());
 
 		// Attempt to load
-		this.loadSupplierType(false, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				context.loadClass("missing");
-			}
+		this.loadSupplierType(false, (context) -> {
+			context.loadClass("missing");
 		});
 	}
 
@@ -140,11 +149,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				+ MockSupplierSource.class.getName());
 
 		// Attempt to load
-		this.loadSupplierType(false, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				context.getResource("missing");
-			}
+		this.loadSupplierType(false, (context) -> {
+			context.getResource("missing");
 		});
 	}
 
@@ -157,13 +163,10 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		final String objectPath = Object.class.getName().replace('.', '/') + ".class";
 
 		// Attempt to load
-		this.loadSupplierType(true, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				assertEquals("Incorrect resource locator",
-						LoadSupplierTypeTest.class.getClassLoader().getResource(objectPath),
-						context.getClassLoader().getResource(objectPath));
-			}
+		this.loadSupplierType(true, (context) -> {
+			assertEquals("Incorrect resource locator",
+					LoadSupplierTypeTest.class.getClassLoader().getResource(objectPath),
+					context.getClassLoader().getResource(objectPath));
 		});
 	}
 
@@ -180,11 +183,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 				failure);
 
 		// Attempt to load
-		this.loadSupplierType(false, new Init() {
-			@Override
-			public void supply(SupplierSourceContext context) {
-				throw failure;
-			}
+		this.loadSupplierType(false, (context) -> {
+			throw failure;
 		});
 	}
 
@@ -276,10 +276,13 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 
 		// Load the managed objects
 		SupplierType type = this.loadSupplierType(true, (context) -> {
-			context.addManagedObjectSource(null, Object.class, new MockTypeManagedObjectSource(Object.class));
-			context.addManagedObjectSource(null, Connection.class, new MockTypeManagedObjectSource(Connection.class));
+			context.addManagedObjectSource(null, Object.class,
+					new MockTypeManagedObjectSource(Object.class, "TODO LOGGER NAME"));
+			context.addManagedObjectSource(null, Connection.class,
+					new MockTypeManagedObjectSource(Connection.class, "TODO LOGGER NAME"));
 			addClassManagedObjectSource(context, SimpleManagedObject.class);
-			context.addManagedObjectSource("QUALIFIER", Object.class, new MockTypeManagedObjectSource(Object.class));
+			context.addManagedObjectSource("QUALIFIER", Object.class,
+					new MockTypeManagedObjectSource(Object.class, "TODO LOGGER NAME"));
 		});
 
 		// Validate the managed object types (and order)
@@ -425,7 +428,8 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		SupplierLoader supplierLoader = compiler.getSupplierLoader();
 		MockSupplierSource.init = init;
-		SupplierType supplierType = supplierLoader.loadSupplierType(MockSupplierSource.class, propertyList);
+		SupplierType supplierType = supplierLoader.loadSupplierType(SUPPLIER_SOURCE_NAME, MockSupplierSource.class,
+				propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

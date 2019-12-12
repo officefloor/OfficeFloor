@@ -588,8 +588,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public ManagedObjectType<?> loadManagedObjectType(CompileContext compileContext) {
 
 		// Load and return the managed object type
-		return this.loadType(compileContext,
-				(mos, properties, loader) -> loader.loadManagedObjectType(mos, properties));
+		return this.loadType(compileContext, (mos, properties, loader) -> loader
+				.loadManagedObjectType(this.getManagedObjectSourceName(), mos, properties));
 	}
 
 	@Override
@@ -865,7 +865,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		this.loadType(compileContext, (managedObjectSource, properties, loader) -> {
 
 			// Load the managed object type
-			ManagedObjectType<?> managedObjectType = loader.loadManagedObjectType(managedObjectSource, properties);
+			ManagedObjectType<?> managedObjectType = loader.loadManagedObjectType(this.getManagedObjectSourceName(),
+					managedObjectSource, properties);
 			if (managedObjectType == null) {
 				return null; // must load type
 			}

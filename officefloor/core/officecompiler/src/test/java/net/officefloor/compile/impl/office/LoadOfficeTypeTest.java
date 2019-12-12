@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import javax.transaction.xa.XAResource;
 
@@ -74,6 +75,7 @@ import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.plugin.administration.clazz.ClassAdministrationSource;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -361,14 +363,25 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensure correctly named {@link Logger}.
+	 */
+	public void testLogger() {
+		Closure<String> loggerName = new Closure<>();
+		this.loadOfficeType(true, (office, context) -> {
+			loggerName.value = context.getLogger().getName();
+		});
+		assertEquals("Incorrect logger name", "TODO LOGGER NAME", loggerName.value);
+	}
+
+	/**
 	 * Ensure able to get the {@link ClassLoader}.
 	 */
 	public void testGetClassLoader() {
-
-		// Attempt to load office type
+		Closure<ClassLoader> classLoader = new Closure<>();
 		this.loadOfficeType(true, (office, context) -> {
-			assertEquals("Incorrect class loader", LoadOfficeTypeTest.class.getClassLoader(), context.getClassLoader());
+			classLoader.value = context.getClassLoader();
 		});
+		assertEquals("Incorrect class loader", LoadOfficeTypeTest.class.getClassLoader(), classLoader.value);
 	}
 
 	/**
@@ -480,8 +493,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link OfficeManagedObjectType}
-	 * required type.
+	 * Ensure issue if <code>null</code> {@link OfficeManagedObjectType} required
+	 * type.
 	 */
 	public void testNullManagedObjectType() {
 
@@ -527,8 +540,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure get qualified {@link OfficeManagedObjectType} not being
-	 * administered (no extension interfaces).
+	 * Ensure get qualified {@link OfficeManagedObjectType} not being administered
+	 * (no extension interfaces).
 	 */
 	public void testQualifiedManagedObjectType() {
 
@@ -549,8 +562,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure get {@link OfficeManagedObjectType} being administered (has
-	 * extension interfaces).
+	 * Ensure get {@link OfficeManagedObjectType} being administered (has extension
+	 * interfaces).
 	 */
 	public void testAdministeredManagedObjectType() {
 		final AdministrationFactory<?, ?, ?> factory = this.createMock(AdministrationFactory.class);
@@ -875,12 +888,10 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	/**
 	 * Loads the {@link OfficeType} within the input {@link Loader}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the {@link OfficeType}.
-	 * @param loader
-	 *            {@link Loader}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link OfficeType}.
+	 * @param loader                 {@link Loader}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link OfficeType}.
 	 */
 	private OfficeType loadOfficeType(boolean isExpectedToLoad, Loader loader, String... propertyNameValuePairs) {
@@ -926,12 +937,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		/**
 		 * Implemented to load the {@link OfficeType}.
 		 * 
-		 * @param office
-		 *            {@link OfficeArchitect}.
-		 * @param context
-		 *            {@link OfficeSourceContext}.
-		 * @throws Exception
-		 *             If fails to source {@link OfficeType}.
+		 * @param office  {@link OfficeArchitect}.
+		 * @param context {@link OfficeSourceContext}.
+		 * @throws Exception If fails to source {@link OfficeType}.
 		 */
 		void sourceOffice(OfficeArchitect office, OfficeSourceContext context) throws Exception;
 	}

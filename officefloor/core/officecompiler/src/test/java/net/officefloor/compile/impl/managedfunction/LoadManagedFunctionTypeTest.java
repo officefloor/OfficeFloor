@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.managedfunction;
 
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.FailServiceFactory;
 import net.officefloor.compile.MissingServiceFactory;
@@ -45,6 +46,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -54,6 +56,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
+
+	/**
+	 * Name of {@link ManagedFunctionSource}.
+	 */
+	private final String MANAGED_FUNCTION_SOURCE_NAME = "MANAGED FUNCTION SOURCE NAME";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -179,6 +186,17 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadManagedFunctionType(false,
 				(namespace, context) -> context.loadService(FailServiceFactory.class, null));
+	}
+
+	/**
+	 * Ensure correctly named {@link Logger}.
+	 */
+	public void testLogger() {
+		Closure<String> loggerName = new Closure<>();
+		this.loadManagedFunctionType(true, (namespace, context) -> {
+			loggerName.value = context.getLogger().getName();
+		});
+		assertEquals("Incorrect logger name", "TODO LOGGER NAME", loggerName.value);
 	}
 
 	/**
@@ -916,8 +934,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		ManagedFunctionLoader functionLoader = compiler.getManagedFunctionLoader();
 		MockManagedFunctionSource.loader = loader;
-		FunctionNamespaceType namespaceType = functionLoader.loadManagedFunctionType(MockManagedFunctionSource.class,
-				propertyList);
+		FunctionNamespaceType namespaceType = functionLoader.loadManagedFunctionType(MANAGED_FUNCTION_SOURCE_NAME,
+				MockManagedFunctionSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();
