@@ -195,8 +195,11 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		Closure<String> loggerName = new Closure<>();
 		this.loadManagedFunctionType(true, (namespace, context) -> {
 			loggerName.value = context.getLogger().getName();
+			
+			// Providing minimal namespace type
+			namespace.addManagedFunctionType("IGNORE", this.functionFactory, null, null);
 		});
-		assertEquals("Incorrect logger name", "TODO LOGGER NAME", loggerName.value);
+		assertEquals("Incorrect logger name", MANAGED_FUNCTION_SOURCE_NAME, loggerName.value);
 	}
 
 	/**

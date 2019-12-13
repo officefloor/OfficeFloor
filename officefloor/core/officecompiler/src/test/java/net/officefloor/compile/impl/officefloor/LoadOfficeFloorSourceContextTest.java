@@ -332,10 +332,11 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 		final NullPointerException failure = new NullPointerException("Fail source office floor");
 
 		// Record failure to source the office floor
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME,
-				OfficeFloorNodeImpl.class, "Failed to source OfficeFloor from OfficeFloorSource (source="
-						+ MakerOfficeFloorSource.class.getName() + ", location=" + OFFICE_FLOOR_LOCATION + ")",
-				failure);
+		this.issues
+				.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+						"Failed to source OfficeFloor from OfficeFloorSource (source="
+								+ MakerOfficeFloorSource.class.getName() + ", location=" + OFFICE_FLOOR_LOCATION + ")",
+						failure);
 
 		// Attempt to load office floor
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {
@@ -552,8 +553,9 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 	public void testFailLoadingOfficeType() {
 
 		// Ensure issue in not loading office type
+		final String OFFICE_NAME = "OFFICE";
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue("Type", OfficeNodeImpl.class, "Must specify property 'required.property'");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class, "Must specify property 'required.property'");
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
 				"Failure loading OfficeType from source " + MockLoadOfficeSource.class.getName(), issues);
 
@@ -565,7 +567,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = ofsContext.createPropertyList();
-				ofsContext.loadOfficeType("OFFICE", MockLoadOfficeSource.class.getName(), "mock", properties);
+				ofsContext.loadOfficeType(OFFICE_NAME, MockLoadOfficeSource.class.getName(), "mock", properties);
 
 				// Should not reach this point
 				fail("Should not successfully load office type");
@@ -574,8 +576,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 	}
 
 	/**
-	 * Ensure can obtain the {@link OfficeType} by {@link OfficeSource}
-	 * instance.
+	 * Ensure can obtain the {@link OfficeType} by {@link OfficeSource} instance.
 	 */
 	public void testLoadOfficeTypeByInstance() {
 
@@ -603,14 +604,15 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 	}
 
 	/**
-	 * Ensure issue if fails to load the {@link OfficeType} by
-	 * {@link OfficeSource} instance.
+	 * Ensure issue if fails to load the {@link OfficeType} by {@link OfficeSource}
+	 * instance.
 	 */
 	public void testFailLoadingOfficeTypeByInstance() {
 
 		// Ensure issue in not loading office type
+		final String OFFICE_NAME = "OFFICE";
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue("Type", OfficeNodeImpl.class, "Must specify property 'required.property'");
+		this.issues.recordIssue(OFFICE_NAME, OfficeNodeImpl.class, "Must specify property 'required.property'");
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
 				"Failure loading OfficeType from source " + MockLoadOfficeSource.class.getName(), issues);
 
@@ -622,7 +624,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 
 				// Do not specify class causing failure to load type
 				PropertyList properties = ofsContext.createPropertyList();
-				ofsContext.loadOfficeType("OFFICE", new MockLoadOfficeSource(), "mock", properties);
+				ofsContext.loadOfficeType(OFFICE_NAME, new MockLoadOfficeSource(), "mock", properties);
 
 				// Should not reach this point
 				fail("Should not successfully load office type");

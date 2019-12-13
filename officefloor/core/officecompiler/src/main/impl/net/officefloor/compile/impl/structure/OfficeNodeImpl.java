@@ -478,11 +478,6 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	 */
 
 	@Override
-	public String getQualifiedName(String simpleName) {
-		return this.officeName + "." + simpleName;
-	}
-
-	@Override
 	public OfficeFloorNode getOfficeFloorNode() {
 		return this.officeFloor;
 	}
@@ -532,12 +527,12 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		// Keep track of the office source
 		this.usedOfficeSource = source;
 
-		// Obtain the override properties
-		PropertyList overrideProperties = this.context.overrideProperties(this, this.officeName, this.properties);
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.context.overrideProperties(this, this.officeName, this.properties);
 
 		// Create the office source context
 		OfficeSourceContextImpl context = new OfficeSourceContextImpl(false, this.state.officeLocation,
-				overrideProperties, this, this.context);
+				overriddenProperties, this, this.context);
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeExtensionService> extensionServices = new ArrayList<>();

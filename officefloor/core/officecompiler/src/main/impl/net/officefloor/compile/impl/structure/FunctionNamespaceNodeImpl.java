@@ -216,14 +216,10 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 		// Keep track of the managed function source
 		this.usedManagedFunctionSource = managedFunctionSource;
 
-		// Obtain the override properties
-		PropertyList overrideProperties = this.context.overrideProperties(this,
-				this.section.getQualifiedName(this.namespaceName), this.propertyList);
-
 		// Load and return the managed function type
-		String qualifiedName = this.section.getQualifiedName(this.namespaceName);
 		ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(this);
-		return managedFunctionLoader.loadManagedFunctionType(qualifiedName, managedFunctionSource, overrideProperties);
+		return managedFunctionLoader.loadManagedFunctionType(this.namespaceName, managedFunctionSource,
+				this.propertyList);
 	}
 
 	@Override

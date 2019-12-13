@@ -60,15 +60,15 @@ public class ConfigurationSourceContextImpl extends SourceContextImpl implements
 	 */
 
 	@Override
-	public ConfigurationItem getConfigurationItem(String location, PropertyList overrideProperties)
+	public ConfigurationItem getConfigurationItem(String location, PropertyList properties)
 			throws UnknownResourceError, ConfigurationError {
-		return this.configurationContext.getConfigurationItem(location, overrideProperties);
+		return this.configurationContext.getConfigurationItem(location, properties);
 	}
 
 	@Override
-	public ConfigurationItem getOptionalConfigurationItem(String location, PropertyList overrideProperties)
+	public ConfigurationItem getOptionalConfigurationItem(String location, PropertyList properties)
 			throws ConfigurationError {
-		return this.configurationContext.getOptionalConfigurationItem(location, overrideProperties);
+		return this.configurationContext.getOptionalConfigurationItem(location, properties);
 	}
 
 }

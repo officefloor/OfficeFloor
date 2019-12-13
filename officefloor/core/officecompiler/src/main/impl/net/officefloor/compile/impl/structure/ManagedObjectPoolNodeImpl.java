@@ -241,10 +241,6 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 	@Override
 	public ManagedObjectPoolType loadManagedObjectPoolType() {
 
-		// Obtain the override properties
-		String qualifiedName = this.getQualifiedManagedObjectPoolName();
-		PropertyList overrideProperties = this.context.overrideProperties(this, qualifiedName, this.properties);
-
 		// Obtain the managed object pool source
 		ManagedObjectPoolSource managedObjectPoolSource = this.state.managedObjectPoolSource;
 		if (managedObjectPoolSource == null) {
@@ -269,7 +265,7 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 
 		// Load and return the managed object pool type
 		ManagedObjectPoolLoader loader = this.context.getManagedObjectPoolLoader(this);
-		return loader.loadManagedObjectPoolType(qualifiedName, managedObjectPoolSource, overrideProperties);
+		return loader.loadManagedObjectPoolType(this.managedObjectPoolName, managedObjectPoolSource, this.properties);
 	}
 
 	@Override

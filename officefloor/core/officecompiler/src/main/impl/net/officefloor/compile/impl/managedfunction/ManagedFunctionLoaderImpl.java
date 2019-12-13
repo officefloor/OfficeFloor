@@ -193,9 +193,15 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 	public FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceName,
 			ManagedFunctionSource managedFunctionSource, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(managedFunctionSourceName);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create the managed function source context
-		ManagedFunctionSourceContext context = new ManagedFunctionSourceContextImpl(managedFunctionSourceName, true,
-				propertyList, this.nodeContext);
+		ManagedFunctionSourceContext context = new ManagedFunctionSourceContextImpl(qualifiedName, true,
+				overriddenProperties, this.nodeContext);
 
 		// Create the namespace type builder
 		FunctionNamespaceTypeImpl namespaceType = new FunctionNamespaceTypeImpl();

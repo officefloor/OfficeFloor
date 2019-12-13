@@ -178,9 +178,15 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	public ManagedObjectPoolType loadManagedObjectPoolType(String managedObjectPoolName,
 			ManagedObjectPoolSource managedObjectPoolSource, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(managedObjectPoolName);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create the managed object pool source context to initialise
-		ManagedObjectPoolSourceContext sourceContext = new ManagedObjectPoolSourceContextImpl(managedObjectPoolName,
-				true, new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext());
+		ManagedObjectPoolSourceContext sourceContext = new ManagedObjectPoolSourceContextImpl(qualifiedName, true,
+				new PropertyListSourceProperties(overriddenProperties), this.nodeContext.getRootSourceContext());
 
 		// Initialise the managed object pool source
 		ManagedObjectPoolSourceMetaData metaData;

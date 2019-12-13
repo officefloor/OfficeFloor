@@ -56,11 +56,9 @@ public class ConfigurationContextImpl implements ConfigurationContext {
 		/**
 		 * Implement to obtain the configuration.
 		 * 
-		 * @param location
-		 *            Location of the {@link ConfigurationItem}.
+		 * @param location Location of the {@link ConfigurationItem}.
 		 * @return {@link Reader} to the {@link ConfigurationItem}.
-		 * @throws IOException
-		 *             If fails to obtain the {@link ConfigurationItem}.
+		 * @throws IOException If fails to obtain the {@link ConfigurationItem}.
 		 */
 		InputStream getConfigurationInputStream(String location) throws IOException;
 	}
@@ -78,10 +76,8 @@ public class ConfigurationContextImpl implements ConfigurationContext {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param configurationSource
-	 *            {@link ConfigurationSource}.
-	 * @param properties
-	 *            {@link SourceProperties}.
+	 * @param configurationSource {@link ConfigurationSource}.
+	 * @param properties          {@link SourceProperties}.
 	 */
 	public ConfigurationContextImpl(ConfigurationSource configurationSource, SourceProperties properties) {
 		this.configurationSource = configurationSource;
@@ -101,17 +97,13 @@ public class ConfigurationContextImpl implements ConfigurationContext {
 	 * <p>
 	 * Creates the {@link ConfigurationItem}.
 	 * <p>
-	 * Provided to enable overriding the creation of the
-	 * {@link ConfigurationItem}.
+	 * Provided to enable overriding the creation of the {@link ConfigurationItem}.
 	 * 
-	 * @param location
-	 *            Location of the {@link ConfigurationItem}.
-	 * @param rawConfiguration
-	 *            Raw configuration read from {@link ConfigurationSource}.
-	 * @param configuration
-	 *            Configuration with {@link Property} replacement.
-	 * @param charset
-	 *            Output {@link Charset}.
+	 * @param location         Location of the {@link ConfigurationItem}.
+	 * @param rawConfiguration Raw configuration read from
+	 *                         {@link ConfigurationSource}.
+	 * @param configuration    Configuration with {@link Property} replacement.
+	 * @param charset          Output {@link Charset}.
 	 * @return {@link ConfigurationItem}.
 	 */
 	protected ConfigurationItem createConfigurationItem(String location, byte[] rawConfiguration, String configuration,
@@ -124,10 +116,10 @@ public class ConfigurationContextImpl implements ConfigurationContext {
 	 */
 
 	@Override
-	public ConfigurationItem getConfigurationItem(String location, PropertyList overrideProperties) {
+	public ConfigurationItem getConfigurationItem(String location, PropertyList properties) {
 
 		// Obtain the configuration item
-		ConfigurationItem item = this.getOptionalConfigurationItem(location, overrideProperties);
+		ConfigurationItem item = this.getOptionalConfigurationItem(location, properties);
 		if (item == null) {
 			throw new ConfigurationError(location);
 		}
@@ -137,7 +129,7 @@ public class ConfigurationContextImpl implements ConfigurationContext {
 	}
 
 	@Override
-	public ConfigurationItem getOptionalConfigurationItem(String location, PropertyList overrideProperties) {
+	public ConfigurationItem getOptionalConfigurationItem(String location, PropertyList properties) {
 		try {
 
 			// Obtain the configuration input stream
@@ -147,24 +139,24 @@ public class ConfigurationContextImpl implements ConfigurationContext {
 			}
 
 			// Obtain the properties
-			Properties properties = new Properties();
+			Properties tags = new Properties();
 			if (this.properties != null) {
 				String[] propertyNames = this.properties.getPropertyNames();
 				for (String propertyName : propertyNames) {
 					String propertyValue = this.properties.getProperty(propertyName);
-					properties.setProperty(propertyName, propertyValue);
+					tags.setProperty(propertyName, propertyValue);
 				}
 			}
 
 			// Override the properties
-			if (overrideProperties != null) {
-				for (Property property : overrideProperties) {
-					properties.setProperty(property.getName(), property.getValue());
+			if (properties != null) {
+				for (Property property : properties) {
+					tags.setProperty(property.getName(), property.getValue());
 				}
 			}
 
 			// Obtain the charset
-			String charsetName = properties.getProperty(PROPERTY_CONFIGURATION_INPUT_CHARSET);
+			String charsetName = tags.getProperty(PROPERTY_CONFIGURATION_INPUT_CHARSET);
 			if (CompileUtil.isBlank(charsetName)) {
 				charsetName = DEFAULT_CHARSET_NAME;
 			}
@@ -183,18 +175,18 @@ public class ConfigurationContextImpl implements ConfigurationContext {
 			String content = new String(rawContent, charset);
 
 			// Obtain the tag prefix/suffix
-			String tagPrefix = properties.getProperty(PROPERTY_CONFIGURATION_INPUT_TAG_PREFIX);
+			String tagPrefix = tags.getProperty(PROPERTY_CONFIGURATION_INPUT_TAG_PREFIX);
 			if (CompileUtil.isBlank(tagPrefix)) {
 				tagPrefix = DEFAULT_TAG_PREFIX;
 			}
-			String tagSuffix = properties.getProperty(PROPERTY_CONFIGURATION_INPUT_TAG_SUFFIX);
+			String tagSuffix = tags.getProperty(PROPERTY_CONFIGURATION_INPUT_TAG_SUFFIX);
 			if (CompileUtil.isBlank(tagSuffix)) {
 				tagSuffix = DEFAULT_TAG_SUFFIX;
 			}
 
 			// Tag replace the content
-			for (String propertyName : properties.stringPropertyNames()) {
-				String propertyValue = properties.getProperty(propertyName);
+			for (String propertyName : tags.stringPropertyNames()) {
+				String propertyValue = tags.getProperty(propertyName);
 
 				// Tag replace content
 				content = content.replace(tagPrefix + propertyName + tagSuffix, propertyValue);
@@ -210,7 +202,7 @@ public class ConfigurationContextImpl implements ConfigurationContext {
 			}
 
 			// Obtain the output charset
-			String outputCharsetName = properties.getProperty(PROPERTY_CONFIGURATION_OUTPUT_CHARSET);
+			String outputCharsetName = tags.getProperty(PROPERTY_CONFIGURATION_OUTPUT_CHARSET);
 			if (CompileUtil.isBlank(outputCharsetName)) {
 				outputCharsetName = charsetName;
 			}
@@ -243,10 +235,8 @@ public class ConfigurationContextImpl implements ConfigurationContext {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param content
-		 *            Content.
-		 * @param inputStreamCharset
-		 *            {@link InputStream} {@link Charset}.
+		 * @param content            Content.
+		 * @param inputStreamCharset {@link InputStream} {@link Charset}.
 		 */
 		private ConfigurationItemImpl(String content, Charset inputStreamCharset) {
 			this.content = content;

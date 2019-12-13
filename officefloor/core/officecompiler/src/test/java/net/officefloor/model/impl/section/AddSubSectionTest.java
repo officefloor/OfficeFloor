@@ -68,8 +68,8 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	public void testAddSubSectionWithPropertiesOnly() {
 
 		// Create the sub section
-		SectionType sectionType = this.compiler.getSectionLoader().loadSectionType(EmptySectionSource.class, "location",
-				this.compiler.createPropertyList());
+		SectionType sectionType = this.compiler.getSectionLoader().loadSectionType("SUB_SECTION",
+				EmptySectionSource.class, "location", this.compiler.createPropertyList());
 
 		// Ensure can add
 		Change<SubSectionModel> change = this.operations.addSubSection("SUB_SECTION",
@@ -83,9 +83,8 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	}
 
 	/**
-	 * Ensure can add a {@link SubSectionModel} with
-	 * {@link SubSectionInputModel}, {@link SubSectionOutputModel},
-	 * {@link SubSectionObjectModel} instances.
+	 * Ensure can add a {@link SubSectionModel} with {@link SubSectionInputModel},
+	 * {@link SubSectionOutputModel}, {@link SubSectionObjectModel} instances.
 	 */
 	public void testAddSubSectionWithInputsOutputsObjects() {
 
@@ -111,8 +110,8 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	public void testAddMultipleSubSections() {
 
 		// Create the section type
-		SectionType sectionType = this.compiler.getSectionLoader().loadSectionType(EmptySectionSource.class, "location",
-				this.compiler.createPropertyList());
+		SectionType sectionType = this.compiler.getSectionLoader().loadSectionType("SUB_SECTION",
+				EmptySectionSource.class, "location", this.compiler.createPropertyList());
 
 		// Add multiple section types
 		Change<SubSectionModel> changeB = this.operations.addSubSection("SUB_SECTION_B",

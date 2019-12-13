@@ -160,15 +160,6 @@ public class TeamNodeImpl implements TeamNode {
 	}
 
 	/**
-	 * Obtains the {@link PropertyList}.
-	 * 
-	 * @return {@link PropertyList}.
-	 */
-	private PropertyList getProperties() {
-		return this.context.overrideProperties(this, this.teamName, this.propertyList);
-	}
-
-	/**
 	 * Convenience method to add a {@link CompilerIssue}.
 	 * 
 	 * @param issueDescription Description for the {@link CompilerIssue}.
@@ -270,7 +261,6 @@ public class TeamNodeImpl implements TeamNode {
 	public TeamType loadTeamType() {
 
 		// Obtain the loader
-		TeamLoader loader = this.context.getTeamLoader(this);
 
 		// Obtain the team source
 		TeamSource teamSource = this.getTeamSource();
@@ -279,7 +269,8 @@ public class TeamNodeImpl implements TeamNode {
 		}
 
 		// Load and return the team type
-		return loader.loadTeamType(this.teamName, teamSource, this.getProperties());
+		TeamLoader loader = this.context.getTeamLoader(this);
+		return loader.loadTeamType(this.teamName, teamSource, this.propertyList);
 	}
 
 	@Override
@@ -297,9 +288,6 @@ public class TeamNodeImpl implements TeamNode {
 			return null; // must have source
 		}
 
-		// Obtain the loader
-		TeamLoader loader = this.context.getTeamLoader(this);
-
 		// Obtain the team source
 		TeamSource teamSource = this.getTeamSource();
 		if (teamSource == null) {
@@ -307,7 +295,8 @@ public class TeamNodeImpl implements TeamNode {
 		}
 
 		// Load and return the team source type
-		return loader.loadOfficeFloorTeamSourceType(this.teamName, teamSource, this.getProperties());
+		TeamLoader loader = this.context.getTeamLoader(this);
+		return loader.loadOfficeFloorTeamSourceType(this.teamName, teamSource, this.propertyList);
 	}
 
 	@Override
@@ -327,9 +316,12 @@ public class TeamNodeImpl implements TeamNode {
 		// Possibly register team source as MBean
 		compileContext.registerPossibleMBean(TeamSource.class, this.teamName, teamSource);
 
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.context.overrideProperties(this, this.teamName, this.propertyList);
+
 		// Build the team
 		TeamBuilder<?> teamBuilder = builder.addTeam(this.teamName, teamSource);
-		for (Property property : this.getProperties()) {
+		for (Property property : overriddenProperties) {
 			teamBuilder.addProperty(property.getName(), property.getValue());
 		}
 		if (this.teamSize != null) {

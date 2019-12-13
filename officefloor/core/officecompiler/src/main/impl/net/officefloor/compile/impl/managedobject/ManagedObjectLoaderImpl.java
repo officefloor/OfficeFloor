@@ -224,13 +224,19 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
 			String managedObjectSourceName, ManagedObjectSource<D, F> managedObjectSource, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(managedObjectSourceName);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create the managed object source context to initialise
 		String officeName = null;
 		ManagingOfficeConfiguration<F> managingOffice = new ManagingOfficeBuilderImpl<F>(officeName);
 		OfficeConfiguration office = new OfficeBuilderImpl(officeName);
 		String namespaceName = null; // stops the name spacing
-		ManagedObjectSourceContextImpl<F> sourceContext = new ManagedObjectSourceContextImpl<F>(managedObjectSourceName,
-				true, namespaceName, managingOffice, new PropertyListSourceProperties(propertyList),
+		ManagedObjectSourceContextImpl<F> sourceContext = new ManagedObjectSourceContextImpl<F>(qualifiedName, true,
+				namespaceName, managingOffice, new PropertyListSourceProperties(overriddenProperties),
 				this.nodeContext.getRootSourceContext(), managingOffice.getBuilder(), office.getBuilder());
 
 		// Initialise the managed object source and obtain meta-data

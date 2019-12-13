@@ -186,6 +186,12 @@ public class ExecutiveLoaderImpl implements ExecutiveLoader, IssueTarget {
 	@Override
 	public ExecutiveType loadExecutiveType(ExecutiveSource executiveSource, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(ExecutiveSourceContextImpl.EXECUTIVE_NAME);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create thread factory manufacturer
 		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(
 				new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]), null);
@@ -195,7 +201,7 @@ public class ExecutiveLoaderImpl implements ExecutiveLoader, IssueTarget {
 		try {
 			executive = executiveSource
 					.createExecutive(new ExecutiveSourceContextImpl(true, this.nodeContext.getRootSourceContext(),
-							new PropertyListSourceProperties(propertyList), threadFactoryManufacturer));
+							new PropertyListSourceProperties(overriddenProperties), threadFactoryManufacturer));
 
 		} catch (AbstractSourceError ex) {
 			ex.addIssue(this);

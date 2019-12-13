@@ -144,7 +144,7 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 		this.loadManagedObjectPoolType(true, (context) -> {
 			loggerName.value = context.getLogger().getName();
 		});
-		assertEquals("Incorrect logger name", "TODO LOGGER NAME", loggerName.value);
+		assertEquals("Incorrect logger name", MANAGED_OBJECT_POOL_NAME, loggerName.value);
 	}
 
 	/**

@@ -54,9 +54,21 @@ public interface Node {
 	Node getParentNode();
 
 	/**
-	 * Indicates if the {@link Node} has been initialised. {@link Node}
-	 * instances should only be initialised once. Initialising the {@link Node}
-	 * twice is an issue.
+	 * Obtains the qualified name.
+	 * 
+	 * @param name Name.
+	 * @return Name qualified by this {@link Node}.
+	 */
+	default String getQualifiedName(String name) {
+		String nodeQualifiedName = this.getNodeName() + (name == null ? "" : "." + name);
+		Node parent = this.getParentNode();
+		return (parent != null) ? parent.getQualifiedName(nodeQualifiedName) : nodeQualifiedName;
+	}
+
+	/**
+	 * Indicates if the {@link Node} has been initialised. {@link Node} instances
+	 * should only be initialised once. Initialising the {@link Node} twice is an
+	 * issue.
 	 * 
 	 * @return <code>true</code> if initialised.
 	 */

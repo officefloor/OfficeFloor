@@ -209,7 +209,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.loadManagedObjectType(true, (context, util) -> {
 			loggerName.value = context.getLogger().getName();
 		});
-		assertEquals("Incorrect logger name", "TODO LOGGER NAME", loggerName.value);
+		assertEquals("Incorrect logger name", MANAGED_OBJECT_SOURCE_NAME, loggerName.value);
 	}
 
 	/**

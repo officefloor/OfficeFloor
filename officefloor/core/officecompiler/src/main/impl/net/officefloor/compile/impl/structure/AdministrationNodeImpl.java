@@ -226,10 +226,6 @@ public class AdministrationNodeImpl implements AdministrationNode {
 	@Override
 	public AdministrationType<?, ?, ?> loadAdministrationType() {
 
-		// Obtain the override properties
-		PropertyList overrideProperties = this.context.overrideProperties(this,
-				this.officeNode.getQualifiedName(this.administrationName), this.properties);
-
 		// Obtain the administration source
 		AdministrationSource<?, ?, ?> administrationSource = this.state.administrationSource;
 		if (administrationSource == null) {
@@ -253,9 +249,8 @@ public class AdministrationNodeImpl implements AdministrationNode {
 		this.usedAdministrationSource = administrationSource;
 
 		// Load and return the administration type
-		String qualifiedName = this.officeNode.getQualifiedName(this.administrationName);
 		AdministrationLoader loader = this.context.getAdministrationLoader(this);
-		return loader.loadAdministrationType(qualifiedName, administrationSource, overrideProperties);
+		return loader.loadAdministrationType(this.administrationName, administrationSource, this.properties);
 	}
 
 	@Override

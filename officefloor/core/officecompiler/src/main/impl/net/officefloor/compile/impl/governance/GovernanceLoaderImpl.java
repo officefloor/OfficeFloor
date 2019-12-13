@@ -190,10 +190,16 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 	public <I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceType<I, F> loadGovernanceType(
 			String governanceName, GS governanceSource, PropertyList properties) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(governanceName);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, properties);
+
 		// Create the context for the governance source
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
-		SourceProperties sourceProperties = new PropertyListSourceProperties(properties);
-		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(governanceName, true, sourceContext,
+		SourceProperties sourceProperties = new PropertyListSourceProperties(overriddenProperties);
+		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(qualifiedName, true, sourceContext,
 				sourceProperties);
 
 		// Initialise the governance source and obtain the meta-data

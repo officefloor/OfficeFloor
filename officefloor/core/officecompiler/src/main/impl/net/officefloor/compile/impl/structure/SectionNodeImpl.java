@@ -270,15 +270,6 @@ public class SectionNodeImpl implements SectionNode {
 		this.propertyList = this.context.createPropertyList();
 	}
 
-	/**
-	 * Obtains the overridden {@link PropertyList}.
-	 * 
-	 * @return Overridden {@link PropertyList}.
-	 */
-	private PropertyList getProperties() {
-		return this.context.overrideProperties(this, this.getQualifiedName(null), this.propertyList);
-	}
-
 	/*
 	 * ======================= Node =================================
 	 */
@@ -388,9 +379,13 @@ public class SectionNodeImpl implements SectionNode {
 		// Keep track of the section source
 		this.usedSectionSource = source;
 
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.context.overrideProperties(this, this.getQualifiedName(null),
+				this.propertyList);
+
 		// Create the section source context
 		SectionSourceContext context = new SectionSourceContextImpl(false, this.state.sectionLocation,
-				this.getProperties(), this, this.context);
+				overriddenProperties, this, this.context);
 
 		try {
 			// Source the section type
@@ -692,22 +687,6 @@ public class SectionNodeImpl implements SectionNode {
 
 		// Return the governing governances
 		return governingGovernances.toArray(new GovernanceNode[governingGovernances.size()]);
-	}
-
-	@Override
-	public String getQualifiedName(String simpleName) {
-
-		// Obtain the qualified name for this section
-		String qualifiedName = this.sectionName + (simpleName != null ? "." + simpleName : "");
-
-		// Recursively determine the qualified name
-		if (this.parentSection == null) {
-			// Top level section
-			return this.office.getQualifiedName(qualifiedName);
-		} else {
-			// Further parent sections
-			return this.parentSection.getQualifiedName(qualifiedName);
-		}
 	}
 
 	@Override

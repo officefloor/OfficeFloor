@@ -195,13 +195,6 @@ public class GovernanceNodeImpl implements GovernanceNode {
 	@Override
 	public GovernanceType<?, ?> loadGovernanceType() {
 
-		// Load the override properties
-		PropertyList overrideProperties = this.context.overrideProperties(this,
-				this.officeNode.getQualifiedName(this.governanceName), this.properties);
-
-		// Create the governance loader
-		GovernanceLoader loader = this.context.getGovernanceLoader(this);
-
 		// Obtain the goverannce source
 		GovernanceSource<?, ?> governanceSource = this.state.governanceSource;
 		if (governanceSource == null) {
@@ -225,8 +218,8 @@ public class GovernanceNodeImpl implements GovernanceNode {
 		this.usedGovernanceSource = governanceSource;
 
 		// Load and return the governance type
-		String qualifiedName = this.officeNode.getQualifiedName(this.governanceName);
-		return loader.loadGovernanceType(qualifiedName, governanceSource, overrideProperties);
+		GovernanceLoader loader = this.context.getGovernanceLoader(this);
+		return loader.loadGovernanceType(this.governanceName, governanceSource, this.properties);
 	}
 
 	@Override

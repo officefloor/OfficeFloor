@@ -213,7 +213,7 @@ public class SupplierNodeImpl implements SupplierNode {
 
 	@Override
 	public String getNodeName() {
-		return (this.officeNode != null) ? this.officeNode.getQualifiedName(this.supplierName) : this.supplierName;
+		return this.supplierName;
 	}
 
 	@Override
@@ -301,11 +301,6 @@ public class SupplierNodeImpl implements SupplierNode {
 	/*
 	 * =================== SupplierNode =========================
 	 */
-
-	@Override
-	public String getQualifiedName(String simpleName) {
-		return (this.officeNode != null) ? this.officeNode.getQualifiedName(simpleName) : simpleName;
-	}
 
 	@Override
 	public OfficeNode getOfficeNode() {

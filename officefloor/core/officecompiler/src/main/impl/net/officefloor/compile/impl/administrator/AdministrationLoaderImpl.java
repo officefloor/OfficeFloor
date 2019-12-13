@@ -198,12 +198,18 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 	public <E, F extends Enum<F>, G extends Enum<G>> AdministrationType<E, F, G> loadAdministrationType(
 			String administrationName, AdministrationSource<E, F, G> administratorSource, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(administrationName);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Obtain the source context
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
 
 		// Create the administrator source context
-		SourceProperties properties = new PropertyListSourceProperties(propertyList);
-		AdministrationSourceContext context = new AdministrationSourceContextImpl(administrationName, true, properties,
+		SourceProperties properties = new PropertyListSourceProperties(overriddenProperties);
+		AdministrationSourceContext context = new AdministrationSourceContextImpl(qualifiedName, true, properties,
 				sourceContext);
 
 		// Initialise the administration source and obtain the meta-data

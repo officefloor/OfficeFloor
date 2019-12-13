@@ -140,7 +140,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.loadGovernanceType(true, (context) -> {
 			loggerName.value = context.getLogger().getName();
 		});
-		assertEquals("Incorrect logger name", "TODO LOGGER NAME", loggerName.value);
+		assertEquals("Incorrect logger name", GOVERNANCE_NAME, loggerName.value);
 	}
 
 	/**

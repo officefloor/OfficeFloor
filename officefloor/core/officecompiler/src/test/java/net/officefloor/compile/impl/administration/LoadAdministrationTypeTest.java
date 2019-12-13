@@ -161,7 +161,7 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		MockAdministrationSource.loggerName = null;
 		this.loadAdministrationType(true, null);
-		assertEquals("Incorrect logger name", "TODO LOGGER NAME", MockAdministrationSource.loggerName);
+		assertEquals("Incorrect logger name", ADMINISTRATION_NAME, MockAdministrationSource.loggerName);
 	}
 
 	/**

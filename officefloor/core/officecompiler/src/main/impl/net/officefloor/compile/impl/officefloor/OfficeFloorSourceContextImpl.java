@@ -96,14 +96,10 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 		return CompileUtil.loadType(ManagedObjectType.class, managedObjectSource.getClass().getName(),
 				this.context.getCompilerIssues(), () -> {
 
-					// Obtain the override properties
-					PropertyList overrideProperties = this.context.overrideProperties(this.officeFloorNode,
-							managedObjectSourceName, properties);
-
 					// Load and return the managed object type
 					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeFloorNode);
 					return managedObjectLoader.loadManagedObjectType(managedObjectSourceName, managedObjectSource,
-							overrideProperties);
+							properties);
 				});
 	}
 
@@ -121,14 +117,10 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 						return null;
 					}
 
-					// Obtain the override properties
-					PropertyList overrideProperties = this.context.overrideProperties(this.officeFloorNode,
-							managedObjectSourceName, properties);
-
 					// Load and return the managed object type
 					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeFloorNode);
 					return managedObjectLoader.loadManagedObjectType(managedObjectSourceName, managedObjectSourceClass,
-							overrideProperties);
+							properties);
 				});
 	}
 
@@ -145,13 +137,9 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 						return null;
 					}
 
-					// Obtain the override properties
-					PropertyList overrideProperties = this.context.overrideProperties(this.officeFloorNode,
-							supplierName, properties);
-
 					// Load and return the supplier type
 					SupplierLoader supplierLoader = this.context.getSupplierLoader(this.officeFloorNode);
-					return supplierLoader.loadSupplierType(supplierName, supplierSourceClass, overrideProperties);
+					return supplierLoader.loadSupplierType(supplierName, supplierSourceClass, properties);
 				});
 	}
 
@@ -167,13 +155,9 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 				return null;
 			}
 
-			// Obtain the override properties
-			PropertyList overrideProperties = this.context.overrideProperties(this.officeFloorNode, officeName,
-					properties);
-
 			// Load and return the office type
 			OfficeLoader officeLoader = this.context.getOfficeLoader(this.officeFloorNode);
-			return officeLoader.loadOfficeType(officeSourceClass, location, overrideProperties);
+			return officeLoader.loadOfficeType(officeName, officeSourceClass, location, properties);
 		});
 	}
 
@@ -183,13 +167,9 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 		return CompileUtil.loadType(OfficeType.class, officeSource.getClass().getName(),
 				this.context.getCompilerIssues(), () -> {
 
-					// Obtain the override properties
-					PropertyList overrideProperties = this.context.overrideProperties(this.officeFloorNode, officeName,
-							properties);
-
 					// Load and return the office type
 					OfficeLoader officeLoader = this.context.getOfficeLoader(this.officeFloorNode);
-					return officeLoader.loadOfficeType(officeSource, location, overrideProperties);
+					return officeLoader.loadOfficeType(officeName, officeSource, location, properties);
 				});
 	}
 

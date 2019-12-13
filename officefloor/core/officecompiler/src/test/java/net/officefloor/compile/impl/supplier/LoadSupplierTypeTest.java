@@ -121,7 +121,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.loadSupplierType(true, (context) -> {
 			closure.value = context.getLogger().getName();
 		});
-		assertEquals("Incorrect logger name", "TODO LOGGER NAME", closure.value);
+		assertEquals("Incorrect logger name", SUPPLIER_SOURCE_NAME, closure.value);
 	}
 
 	/**

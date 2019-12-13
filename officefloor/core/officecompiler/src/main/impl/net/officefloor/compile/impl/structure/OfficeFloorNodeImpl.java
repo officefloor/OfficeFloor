@@ -277,6 +277,11 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	}
 
 	@Override
+	public String getQualifiedName(String name) {
+		return name; // do not qualify
+	}
+
+	@Override
 	public Node[] getChildNodes() {
 		return NodeUtil.getChildNodes(this.teams, this.managedObjectSources, this.inputManagedObjects, this.suppliers,
 				this.managedObjects, this.offices);

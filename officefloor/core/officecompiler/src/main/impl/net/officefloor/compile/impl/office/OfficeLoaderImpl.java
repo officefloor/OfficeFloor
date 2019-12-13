@@ -154,8 +154,8 @@ public class OfficeLoaderImpl implements OfficeLoader {
 	}
 
 	@Override
-	public <O extends OfficeSource> OfficeType loadOfficeType(Class<O> officeSourceClass, String officeLocation,
-			PropertyList propertyList) {
+	public <O extends OfficeSource> OfficeType loadOfficeType(String officeName, Class<O> officeSourceClass,
+			String officeLocation, PropertyList propertyList) {
 
 		// Instantiate the office source
 		OfficeSource officeSource = CompileUtil.newInstance(officeSourceClass, OfficeSource.class, this.node,
@@ -165,18 +165,25 @@ public class OfficeLoaderImpl implements OfficeLoader {
 		}
 
 		// Return loaded office type
-		return this.loadOfficeType(officeSource, officeLocation, propertyList);
+		return this.loadOfficeType(officeName, officeSource, officeLocation, propertyList);
 	}
 
 	@Override
-	public OfficeType loadOfficeType(OfficeSource officeSource, String officeLocation, PropertyList propertyList) {
+	public OfficeType loadOfficeType(String officeName, OfficeSource officeSource, String officeLocation,
+			PropertyList propertyList) {
+
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(officeName);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
 
 		// Create the office node
-		OfficeNode officeNode = this.nodeContext.createOfficeNode("Type", null);
+		OfficeNode officeNode = this.nodeContext.createOfficeNode(officeName, null);
 		officeNode.initialise(officeSource.getClass().getName(), officeSource, officeLocation);
 
 		// Configure the office node
-		propertyList.configureProperties(officeNode);
+		overriddenProperties.configureProperties(officeNode);
 
 		// Create the compile context
 		CompileContext compileContext = this.nodeContext.createCompileContext();

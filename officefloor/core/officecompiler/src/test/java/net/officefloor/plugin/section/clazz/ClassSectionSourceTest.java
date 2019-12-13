@@ -598,6 +598,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testMultipleQualifiedObject() {
 
+		final String SECTION_NAME = "invalid";
 		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Enable recording issue
@@ -606,11 +607,11 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Record issue
 		CompilerIssue[] cause = issues.recordCaptureIssues(true);
-		issues.recordIssue("<type>", SectionNodeImpl.class,
+		issues.recordIssue(SECTION_NAME, SectionNodeImpl.class,
 				"Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
 						+ SectionClassManagedFunctionSource.class.getName(),
 				new IllegalArgumentException("Method doInput parameter 0 has more than one Qualifier"));
-		issues.recordIssue("<type>", SectionNodeImpl.class, "Failure loading FunctionNamespaceType from source "
+		issues.recordIssue(SECTION_NAME, SectionNodeImpl.class, "Failure loading FunctionNamespaceType from source "
 				+ SectionClassManagedFunctionSource.class.getName(), cause);
 
 		// Create the expected section
@@ -626,7 +627,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Validate section
-		SectionType type = compiler.getSectionLoader().loadSectionType(ClassSectionSource.class,
+		SectionType type = compiler.getSectionLoader().loadSectionType(SECTION_NAME, ClassSectionSource.class,
 				MockMultipleQualifiedObjectSection.class.getName(), compiler.createPropertyList());
 		assertNull("Should not load type as multiple qualifiers", type);
 
@@ -746,6 +747,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testMulipleQualifiedDependency() {
 
+		final String SECTION_NAME = "invalid";
 		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Enable loading with compiler issues
@@ -753,14 +755,15 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.recordIssue("<type>", SectionNodeImpl.class, "Unable to obtain type qualifier for dependency connection",
+		issues.recordIssue(SECTION_NAME, SectionNodeImpl.class,
+				"Unable to obtain type qualifier for dependency connection",
 				new IllegalArgumentException("Dependency connection has more than one Qualifier"));
 
 		// Test
 		this.replayMockObjects();
 
 		// Validate section
-		compiler.getSectionLoader().loadSectionType(ClassSectionSource.class,
+		compiler.getSectionLoader().loadSectionType(SECTION_NAME, ClassSectionSource.class,
 				MockMultipleQualifiedDependencySection.class.getName(), compiler.createPropertyList());
 
 		// Verify

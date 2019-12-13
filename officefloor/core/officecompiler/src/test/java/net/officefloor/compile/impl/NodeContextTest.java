@@ -634,6 +634,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		this.recordReturn(this.managedObjectSource, this.managedObjectSource.getSectionNode(), this.section);
 		this.recordReturn(this.section, this.section.getOfficeNode(), this.office);
 		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		this.recordReturn(this.officeFloor, this.officeFloor.getQualifiedName("OFFICE.name"), "OFFICE.name");
 		OfficeNode node = this.doTest(() -> {
 			OfficeNode office = this.context.createOfficeNode("OFFICE", this.officeFloor);
 			assertNode(office, "OFFICE", "Office", "[NOT INITIALISED]", this.officeFloor);
@@ -648,10 +649,10 @@ public class NodeContextTest extends OfficeFrameTestCase {
 					office.addOfficeGovernance("GOVERNANCE", "net.example.ExampleGovernanceSource"),
 					office.addOfficeAdministration("ADMINISTRATION", "net.example.ExampleAdministrationSource"),
 					office.addOfficeEscalation("net.example.ExampleEscalation"), office.addOfficeStart("START"));
+			assertEquals("Incorrect qualified name", "OFFICE.name", office.getQualifiedName("name"));
 			return office;
 		});
 		assertEquals("Incorrect office name", "OFFICE", node.getDeployedOfficeName());
-		assertEquals("Incorrect qualified name", "OFFICE.name", node.getQualifiedName("name"));
 		assertInitialise(node, (n) -> n.initialise("ExampleOfficeSource", null, "LOCATION"));
 		assertEquals("Should be initialised with location", "ExampleOfficeSource(LOCATION)", node.getLocation());
 	}
@@ -748,6 +749,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link SupplierNode} within {@link OfficeFloor}.
 	 */
 	public void testCreateSupplierNode_withinOfficeFloor() {
+		this.recordReturn(this.officeFloor, this.officeFloor.getQualifiedName("SUPPLIER.QUALIFIED"),
+				"SUPPLIER.QUALIFIED");
 		SuppliedManagedObjectSourceNode[] suppliedManagedObjectNode = new SuppliedManagedObjectSourceNode[] { null };
 		this.recordReturn(this.officeFloor,
 				this.officeFloor.addManagedObjectSource("MOS",
@@ -765,7 +768,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 		SupplierNode node = this.doTest(() -> {
 			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.officeFloor);
 			assertNode(supplier, "SUPPLIER", "Supplier", null, this.officeFloor);
-			assertEquals("Incorrect qualified name", "QUALIFIED", supplier.getQualifiedName("QUALIFIED"));
+			assertEquals("Incorrect qualified name", "SUPPLIER.QUALIFIED", supplier.getQualifiedName("QUALIFIED"));
 			supplier.getOfficeFloorManagedObjectSource("MOS", null, "TYPE");
 			assertChildren(supplier, supplier.getOfficeFloorSupplierThreadLocal("QUALIFIER", Object.class.getName()),
 					suppliedManagedObjectNode[0]);
@@ -781,8 +784,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateSupplierNode_withinOffice() {
 		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
-		this.recordReturn(this.office, this.office.getQualifiedName("SUPPLIER"), "OFFICE.SUPPLIER");
-		this.recordReturn(this.office, this.office.getQualifiedName("QUALIFIED"), "OFFICE.QUALIFIED");
+		this.recordReturn(this.office, this.office.getQualifiedName("SUPPLIER.QUALIFIED"), "OFFICE.SUPPLIER.QUALIFIED");
 		SuppliedManagedObjectSourceNode[] suppliedManagedObjectNode = new SuppliedManagedObjectSourceNode[] { null };
 		this.recordReturn(this.office,
 				this.office.addManagedObjectSource("MOS",
@@ -799,8 +801,9 @@ public class NodeContextTest extends OfficeFrameTestCase {
 				});
 		SupplierNode node = this.doTest(() -> {
 			SupplierNode supplier = this.context.createSupplierNode("SUPPLIER", this.office);
-			assertNode(supplier, "OFFICE.SUPPLIER", "Supplier", null, this.office);
-			assertEquals("Incorrect qualified name", "OFFICE.QUALIFIED", supplier.getQualifiedName("QUALIFIED"));
+			assertNode(supplier, "SUPPLIER", "Supplier", null, this.office);
+			assertEquals("Incorrect qualified name", "OFFICE.SUPPLIER.QUALIFIED",
+					supplier.getQualifiedName("QUALIFIED"));
 			supplier.getOfficeManagedObjectSource("MOS", null, "TYPE");
 			assertChildren(supplier, suppliedManagedObjectNode[0]);
 			return supplier;

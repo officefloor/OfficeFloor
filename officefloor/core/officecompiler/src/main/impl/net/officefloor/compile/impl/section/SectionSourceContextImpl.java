@@ -100,18 +100,11 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 						return null;
 					}
 
-					// Obtain the qualified name
-					String qualifiedName = this.sectionNode.getQualifiedName(functionNamespace);
-
-					// Load override properties
-					PropertyList overrideProperties = this.context.overrideProperties(this.sectionNode, qualifiedName,
-							properties);
-
 					// Load and return the function namespace type
 					ManagedFunctionLoader managedFunctionLoader = this.context
 							.getManagedFunctionLoader(this.sectionNode);
-					return managedFunctionLoader.loadManagedFunctionType(qualifiedName, managedFunctionSourceClass,
-							overrideProperties);
+					return managedFunctionLoader.loadManagedFunctionType(functionNamespace, managedFunctionSourceClass,
+							properties);
 				});
 	}
 
@@ -129,19 +122,11 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 						return null;
 					}
 
-					// Obtain the qualified name
-					String qualifiedName = this.sectionNode.getQualifiedName(managedObjectSourceName);
-
-					// Load override properties
-					PropertyList overrideProperties = this.context.overrideProperties(this.sectionNode, qualifiedName,
-							properties);
-
 					// Load and return the managed object type
 					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.sectionNode);
-					return managedObjectLoader.loadManagedObjectType(qualifiedName, managedObjectSourceClass,
-							overrideProperties);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSourceName, managedObjectSourceClass,
+							properties);
 				});
-
 	}
 
 	@Override
@@ -156,16 +141,9 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 				return null;
 			}
 
-			// Obtain the qualified name
-			String qualifiedName = this.sectionNode.getQualifiedName(sectionName);
-
-			// Load override properties
-			PropertyList overrideProperties = this.context.overrideProperties(this.sectionNode, qualifiedName,
-					properties);
-
 			// Load and return the section type
 			SectionLoader sectionLoader = this.context.getSectionLoader(this.sectionNode);
-			return sectionLoader.loadSectionType(sectionSourceClass, location, overrideProperties);
+			return sectionLoader.loadSectionType(sectionSourceClassName, sectionSourceClass, location, properties);
 		});
 	}
 

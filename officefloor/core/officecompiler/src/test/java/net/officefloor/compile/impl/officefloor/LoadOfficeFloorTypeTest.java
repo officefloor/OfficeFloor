@@ -248,7 +248,7 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 		this.loadType((officeFloor, context) -> {
 			loggerName.value = context.getLogger().getName();
 		}, new LoadedValidator());
-		assertEquals("Incorrect logger name", "TODO LOGGER NAME", loggerName.value);
+		assertEquals("Incorrect logger name", OfficeFloorNode.OFFICE_FLOOR_NAME, loggerName.value);
 	}
 
 	/**

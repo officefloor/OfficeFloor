@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.Node;
@@ -90,7 +91,12 @@ public class SectionLoaderImpl implements SectionLoader {
 		this.nodeContext = nodeContext;
 
 		// Provide defaults for creating the section node
-		this.officeNode = this.nodeContext.createOfficeNode("<office>", null);
+		this.officeNode = new OfficeNodeImpl("<load-section-type>", null, nodeContext) {
+			@Override
+			public String getQualifiedName(String simpleName) {
+				return simpleName; // don't qualify
+			}
+		};
 		this.parentSectionNode = null;
 	}
 
@@ -219,8 +225,8 @@ public class SectionLoaderImpl implements SectionLoader {
 	}
 
 	@Override
-	public <S extends SectionSource> SectionType loadSectionType(Class<S> sectionSourceClass, String sectionLocation,
-			PropertyList propertyList) {
+	public <S extends SectionSource> SectionType loadSectionType(String sectionName, Class<S> sectionSourceClass,
+			String sectionLocation, PropertyList propertyList) {
 
 		// Instantiate the section source
 		SectionSource sectionSource = CompileUtil.newInstance(sectionSourceClass, SectionSource.class, this.node,
@@ -230,16 +236,23 @@ public class SectionLoaderImpl implements SectionLoader {
 		}
 
 		// Return loaded section type
-		return this.loadSectionType(sectionSource, sectionLocation, propertyList);
+		return this.loadSectionType(sectionName, sectionSource, sectionLocation, propertyList);
 	}
 
 	@Override
-	public SectionType loadSectionType(SectionSource sectionSource, String sectionLocation, PropertyList propertyList) {
+	public SectionType loadSectionType(String sectionName, SectionSource sectionSource, String sectionLocation,
+			PropertyList propertyList) {
+
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(sectionName);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
 
 		// Create the section node
-		SectionNode sectionNode = this.createSectionNode("<type>", sectionSource.getClass().getName(), sectionSource,
+		SectionNode sectionNode = this.createSectionNode(sectionName, sectionSource.getClass().getName(), sectionSource,
 				sectionLocation);
-		propertyList.configureProperties(sectionNode);
+		overriddenProperties.configureProperties(sectionNode);
 
 		// Create the compile context
 		CompileContext compileContext = this.nodeContext.createCompileContext();
@@ -273,10 +286,16 @@ public class SectionLoaderImpl implements SectionLoader {
 	public OfficeSectionType loadOfficeSectionType(String sectionName, SectionSource sectionSource,
 			String sectionLocation, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(sectionName);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create the section node
 		SectionNode sectionNode = this.createSectionNode(sectionName, sectionSource.getClass().getName(), sectionSource,
 				sectionLocation);
-		propertyList.configureProperties(sectionNode);
+		overriddenProperties.configureProperties(sectionNode);
 
 		// Create the compile context
 		CompileContext compileContext = this.nodeContext.createCompileContext();

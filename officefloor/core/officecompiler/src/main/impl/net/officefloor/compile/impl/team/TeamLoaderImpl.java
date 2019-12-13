@@ -188,6 +188,12 @@ public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 	@Override
 	public TeamType loadTeamType(String teamName, TeamSource teamSource, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(teamName);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create thread factory manufacturer
 		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(
 				new ManagedExecutionFactoryImpl(new ThreadCompletionListener[0]), null);
@@ -196,8 +202,8 @@ public class TeamLoaderImpl implements TeamLoader, IssueTarget {
 		Executive executive = new DefaultExecutive(threadFactoryManufacturer);
 
 		// Create the team (executive) context
-		ExecutiveContextImpl context = new ExecutiveContextImpl(true, teamName, 10, null, executive,
-				threadFactoryManufacturer, new PropertyListSourceProperties(propertyList),
+		ExecutiveContextImpl context = new ExecutiveContextImpl(true, qualifiedName, 10, null, executive,
+				threadFactoryManufacturer, new PropertyListSourceProperties(overriddenProperties),
 				this.nodeContext.getRootSourceContext());
 
 		// Attempt to create the team
