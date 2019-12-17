@@ -321,7 +321,7 @@ public class SectionNodeImpl implements SectionNode {
 	public ManagedFunctionNode addManagedFunctionNode(String functionName, String functionTypeName,
 			FunctionNamespaceNode namespaceNode) {
 		return NodeUtil.getInitialisedNode(functionName, this.functionNodes, this.context,
-				() -> this.context.createFunctionNode(functionName),
+				() -> this.context.createFunctionNode(functionName, this),
 				(function) -> function.initialise(functionTypeName, namespaceNode));
 	}
 
@@ -332,14 +332,14 @@ public class SectionNodeImpl implements SectionNode {
 	@Override
 	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
 		return NodeUtil.getNode(managedObjectName, this.managedObjects,
-				() -> this.context.createManagedObjectNode(managedObjectName));
+				() -> this.context.createManagedObjectNode(managedObjectName, this));
 	}
 
 	@Override
 	public ManagedObjectNode addManagedObjectNode(String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
 		return NodeUtil.getInitialisedNode(managedObjectName, this.managedObjects, this.context,
-				() -> this.context.createManagedObjectNode(managedObjectName),
+				() -> this.context.createManagedObjectNode(managedObjectName, this),
 				(managedObject) -> managedObject.initialise(managedObjectScope, managedObjectSourceNode));
 	}
 
@@ -380,7 +380,7 @@ public class SectionNodeImpl implements SectionNode {
 		this.usedSectionSource = source;
 
 		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.context.overrideProperties(this, this.getQualifiedName(null),
+		PropertyList overriddenProperties = this.context.overrideProperties(this, this.getQualifiedName(),
 				this.propertyList);
 
 		// Create the section source context
@@ -764,8 +764,8 @@ public class SectionNodeImpl implements SectionNode {
 				.forEach((function) -> function.autoWireManagedFunctionResponsibility(autoWirer, compileContext));
 
 		// Auto-wire managed object source teams
-		this.managedObjectSourceNodes.values().stream().sorted(
-				(a, b) -> CompileUtil.sortCompare(a.getManagedObjectSourceName(), b.getManagedObjectSourceName()))
+		this.managedObjectSourceNodes.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getQualifiedName(), b.getQualifiedName()))
 				.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, compileContext));
 
 		// Auto-wire the sub sections
@@ -1060,13 +1060,14 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public OfficeSectionFunction getOfficeSectionFunction(String functionName) {
-		return NodeUtil.getNode(functionName, this.functionNodes, () -> this.context.createFunctionNode(functionName));
+		return NodeUtil.getNode(functionName, this.functionNodes,
+				() -> this.context.createFunctionNode(functionName, this));
 	}
 
 	@Override
 	public OfficeSectionManagedObject getOfficeSectionManagedObject(String managedObjectName) {
 		return NodeUtil.getNode(managedObjectName, this.managedObjects,
-				() -> this.context.createManagedObjectNode(managedObjectName));
+				() -> this.context.createManagedObjectNode(managedObjectName, this));
 	}
 
 	@Override

@@ -151,8 +151,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 				.setValue(MockMultipleQualifiedClass.class.getName());
 
 		// Validate the managed object type
-		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType("MOS",
-				ClassManagedObjectSource.class, properties);
+		ManagedObjectType type = compiler.getManagedObjectLoader().loadManagedObjectType(ClassManagedObjectSource.class,
+				properties);
 		assertNull("Should not load type", type);
 
 		// Verify

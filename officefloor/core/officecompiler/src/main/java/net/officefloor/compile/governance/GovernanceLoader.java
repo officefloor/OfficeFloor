@@ -22,7 +22,6 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceProperty;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecification;
-import net.officefloor.frame.api.governance.Governance;
 
 /**
  * Loads the {@link GovernanceSource}.
@@ -54,7 +53,6 @@ public interface GovernanceLoader {
 	 * @param <I>                   Extension interface type.
 	 * @param <F>                   Flow key type.
 	 * @param <GS>                  {@link GovernanceSource} type.
-	 * @param governanceName        Name of {@link Governance}.
 	 * @param governanceSourceClass Class of the {@link GovernanceSource}.
 	 * @param properties            {@link PropertyList} containing the properties
 	 *                              to source the {@link GovernanceType}.
@@ -62,7 +60,7 @@ public interface GovernanceLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceType<I, F> loadGovernanceType(
-			String governanceName, Class<GS> governanceSourceClass, PropertyList properties);
+			Class<GS> governanceSourceClass, PropertyList properties);
 
 	/**
 	 * Loads and returns the {@link GovernanceType} from the
@@ -71,7 +69,6 @@ public interface GovernanceLoader {
 	 * @param <I>              Extension interface type.
 	 * @param <F>              Flow key type.
 	 * @param <GS>             {@link GovernanceSource} type.
-	 * @param governanceName   Name of {@link Governance}.
 	 * @param governanceSource {@link GovernanceSource}.
 	 * @param properties       {@link PropertyList} containing the properties to
 	 *                         source the {@link GovernanceType}.
@@ -79,6 +76,6 @@ public interface GovernanceLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceType<I, F> loadGovernanceType(
-			String governanceName, GS governanceSource, PropertyList properties);
+			GS governanceSource, PropertyList properties);
 
 }

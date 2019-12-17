@@ -63,7 +63,6 @@ public interface ManagedFunctionLoader {
 	 * {@link ManagedFunctionSource} class.
 	 * 
 	 * @param <S>                        {@link ManagedFunctionSource} type.
-	 * @param managedFunctionSourceName  Name of the {@link ManagedFunctionSource}.
 	 * @param managedFunctionSourceClass Class of the {@link ManagedFunctionSource}.
 	 * @param properties                 {@link PropertyList} containing the
 	 *                                   properties to source the
@@ -71,22 +70,19 @@ public interface ManagedFunctionLoader {
 	 * @return {@link FunctionNamespaceType} or <code>null</code> if issues, which
 	 *         is reported to the {@link CompilerIssues}.
 	 */
-	<S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceName,
-			Class<S> managedFunctionSourceClass, PropertyList properties);
+	<S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(Class<S> managedFunctionSourceClass,
+			PropertyList properties);
 
 	/**
 	 * Loads and returns the {@link FunctionNamespaceType} from the
 	 * {@link ManagedFunctionSource} class.
 	 * 
-	 * @param managedFunctionSourceName Name of the {@link ManagedFunctionSource}.
-	 * @param managedFunctionSource     {@link ManagedFunctionSource} instance.
-	 * @param properties                {@link PropertyList} containing the
-	 *                                  properties to source the
-	 *                                  {@link FunctionNamespaceType}.
+	 * @param managedFunctionSource {@link ManagedFunctionSource} instance.
+	 * @param properties            {@link PropertyList} containing the properties
+	 *                              to source the {@link FunctionNamespaceType}.
 	 * @return {@link FunctionNamespaceType} or <code>null</code> if issues, which
 	 *         is reported to the {@link CompilerIssues}.
 	 */
-	FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceName,
-			ManagedFunctionSource managedFunctionSource, PropertyList properties);
+	FunctionNamespaceType loadManagedFunctionType(ManagedFunctionSource managedFunctionSource, PropertyList properties);
 
 }

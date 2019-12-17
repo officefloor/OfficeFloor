@@ -58,11 +58,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 
 	/**
-	 * Name of {@link ManagedFunctionSource}.
-	 */
-	private final String MANAGED_FUNCTION_SOURCE_NAME = "MANAGED FUNCTION SOURCE NAME";
-
-	/**
 	 * {@link CompilerIssues}.
 	 */
 	private final MockCompilerIssues issues = new MockCompilerIssues(this);
@@ -195,11 +190,11 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		Closure<String> loggerName = new Closure<>();
 		this.loadManagedFunctionType(true, (namespace, context) -> {
 			loggerName.value = context.getLogger().getName();
-			
+
 			// Providing minimal namespace type
 			namespace.addManagedFunctionType("IGNORE", this.functionFactory, null, null);
 		});
-		assertEquals("Incorrect logger name", MANAGED_FUNCTION_SOURCE_NAME, loggerName.value);
+		assertEquals("Incorrect logger name", OfficeFloorCompiler.TYPE, loggerName.value);
 	}
 
 	/**
@@ -937,8 +932,8 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		ManagedFunctionLoader functionLoader = compiler.getManagedFunctionLoader();
 		MockManagedFunctionSource.loader = loader;
-		FunctionNamespaceType namespaceType = functionLoader.loadManagedFunctionType(MANAGED_FUNCTION_SOURCE_NAME,
-				MockManagedFunctionSource.class, propertyList);
+		FunctionNamespaceType namespaceType = functionLoader.loadManagedFunctionType(MockManagedFunctionSource.class,
+				propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

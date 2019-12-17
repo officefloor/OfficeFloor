@@ -219,7 +219,7 @@ public class GovernanceNodeImpl implements GovernanceNode {
 
 		// Load and return the governance type
 		GovernanceLoader loader = this.context.getGovernanceLoader(this);
-		return loader.loadGovernanceType(this.governanceName, governanceSource, this.properties);
+		return loader.loadGovernanceType(governanceSource, this.properties);
 	}
 
 	@Override

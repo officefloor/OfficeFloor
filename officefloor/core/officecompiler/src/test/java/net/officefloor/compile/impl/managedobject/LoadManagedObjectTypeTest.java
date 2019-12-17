@@ -75,11 +75,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
-	 * Name of the {@link ManagedObjectSource}.
-	 */
-	private static final String MANAGED_OBJECT_SOURCE_NAME = "MANAGED OBJECT SOURCE NAME";
-
-	/**
 	 * {@link CompilerIssues}.
 	 */
 	private final MockCompilerIssues issues = new MockCompilerIssues(this);
@@ -117,8 +112,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Load the managed object type
 		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
-		ManagedObjectType moType = moLoader.loadManagedObjectType(MANAGED_OBJECT_SOURCE_NAME,
-				ClassManagedObjectSource.class, properties);
+		ManagedObjectType moType = moLoader.loadManagedObjectType(ClassManagedObjectSource.class, properties);
 		MockLoadManagedObject.assertManagedObjectType(moType);
 	}
 
@@ -140,8 +134,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 		// Load the managed object type
 		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
-		ManagedObjectType moType = moLoader.loadManagedObjectType(MANAGED_OBJECT_SOURCE_NAME,
-				new ClassManagedObjectSource(), properties);
+		ManagedObjectType moType = moLoader.loadManagedObjectType(new ClassManagedObjectSource(), properties);
 		MockLoadManagedObject.assertManagedObjectType(moType);
 	}
 
@@ -209,7 +202,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		this.loadManagedObjectType(true, (context, util) -> {
 			loggerName.value = context.getLogger().getName();
 		});
-		assertEquals("Incorrect logger name", MANAGED_OBJECT_SOURCE_NAME, loggerName.value);
+		assertEquals("Incorrect logger name", OfficeFloorCompiler.TYPE, loggerName.value);
 	}
 
 	/**
@@ -1550,8 +1543,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
 		MockManagedObjectSource.init = init;
-		ManagedObjectType moType = moLoader.loadManagedObjectType(MANAGED_OBJECT_SOURCE_NAME,
-				MockManagedObjectSource.class, propertyList);
+		ManagedObjectType moType = moLoader.loadManagedObjectType(MockManagedObjectSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

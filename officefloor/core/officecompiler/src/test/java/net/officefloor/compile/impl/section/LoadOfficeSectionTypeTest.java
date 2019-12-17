@@ -70,11 +70,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadEmptySection() {
 
 		// Load the empty office section
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				// Leave empty
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			// Leave empty
 		});
 
 		// Ensure empty
@@ -89,11 +86,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadSubSection() {
 
 		// Load the office section with a sub section
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.addSubSection("SUB_SECTION", null);
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.addSubSection("SUB_SECTION", null);
 		});
 
 		// Validate results
@@ -112,16 +106,13 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadSubSubSection() {
 
 		// Load the office section with a sub sub section
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.addSubSection("SUB_SECTION", new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						context.addSubSection("SUB_SUB_SECTION", null);
-					}
-				});
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.addSubSection("SUB_SECTION", new SectionMaker() {
+				@Override
+				public void make(SectionMakerContext context) {
+					context.addSubSection("SUB_SUB_SECTION", null);
+				}
+			});
 		});
 
 		// Validate the results
@@ -145,11 +136,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Load the office section with a section function
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.addFunction("NAMESPACE", "FUNCTION", functionFactory, null);
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.addFunction("NAMESPACE", "FUNCTION", functionFactory, null);
 		});
 
 		// Validate results
@@ -170,7 +158,7 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Record not linked on first attempt to retrieve dependent
-		this.issues.recordIssue("QUALIFIED-OBJECT", FunctionObjectNodeImpl.class,
+		this.issues.recordIssue("SECTION.NAMESPACE.FUNCTION.QUALIFIED-OBJECT", FunctionObjectNodeImpl.class,
 				"Function Object QUALIFIED-OBJECT is not linked to a DependentObjectNode");
 		// Note: does not make it to UNQUALIFIED-OBJECT
 
@@ -178,20 +166,17 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Load the function object dependency not linked
-		OfficeSectionType section = this.loadOfficeSectionType(false, "SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				SectionFunction function = context.addFunction("NAMESPACE", "FUNCTION", functionFactory,
-						new FunctionMaker() {
-							@Override
-							public void make(FunctionMakerContext maker) {
-								maker.addObject("UNQUALIFIED-OBJECT", Connection.class, null);
-								maker.addObject("QUALIFIED-OBJECT", String.class, "QUALIFIED");
-							}
-						});
-				function.getFunctionObject("UNQUALIFIED-OBJECT");
-				function.getFunctionObject("QUALIFIED-OBJECT");
-			}
+		OfficeSectionType section = this.loadOfficeSectionType(false, "SECTION", (context) -> {
+			SectionFunction function = context.addFunction("NAMESPACE", "FUNCTION", functionFactory,
+					new FunctionMaker() {
+						@Override
+						public void make(FunctionMakerContext maker) {
+							maker.addObject("UNQUALIFIED-OBJECT", Connection.class, null);
+							maker.addObject("QUALIFIED-OBJECT", String.class, "QUALIFIED");
+						}
+					});
+			function.getFunctionObject("UNQUALIFIED-OBJECT");
+			function.getFunctionObject("QUALIFIED-OBJECT");
 		});
 		assertNull("Should not load section", section);
 
@@ -247,11 +232,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadOfficeSectionOutput() {
 
 		// Load the office section with an office section output
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.getBuilder().addSectionOutput("OUTPUT", Exception.class.getName(), true);
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.getBuilder().addSectionOutput("OUTPUT", Exception.class.getName(), true);
 		});
 
 		// Validate results
@@ -294,11 +276,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadOfficeSectionObject() {
 
 		// Load the office section with an office section object
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.getBuilder().addSectionObject("OBJECT", Connection.class.getName());
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			context.getBuilder().addSectionObject("OBJECT", Connection.class.getName());
 		});
 
 		// Validate results
@@ -318,12 +297,9 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadQualifiedOfficeSectionObject() {
 
 		// Load the office section with an office section object
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				SectionObject object = context.getBuilder().addSectionObject("OBJECT", Connection.class.getName());
-				object.setTypeQualifier("QUALIFIED");
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			SectionObject object = context.getBuilder().addSectionObject("OBJECT", Connection.class.getName());
+			object.setTypeQualifier("QUALIFIED");
 		});
 
 		// Validate results
@@ -343,12 +319,9 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadSectionManagedObject() {
 
 		// Load the section managed object
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				SectionManagedObjectSource source = context.addManagedObjectSource("MO_SOURCE", null);
-				source.addSectionManagedObject("MO", ManagedObjectScope.PROCESS);
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			SectionManagedObjectSource source = context.addManagedObjectSource("MO_SOURCE", null);
+			source.addSectionManagedObject("MO", ManagedObjectScope.PROCESS);
 		});
 
 		// Validate the results
@@ -371,34 +344,29 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testSectionManagedObjectDependencyNotLinked() {
 
 		// Record not linked on first attempt to retrieve dependent
-		this.issues.recordIssue("QUALIFIED-DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("SECTION.MO.QUALIFIED-DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency QUALIFIED-DEPENDENCY is not linked to a DependentObjectNode");
 		// Note: does not make it to UNQUALIFIED-DEPENDENCY
 
 		// Load the section managed object with a dependency
 		this.replayMockObjects();
-		OfficeSectionType section = this.loadOfficeSectionType(false, "SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				SectionManagedObjectSource source = context.addManagedObjectSource("MO_SOURCE",
-						new ManagedObjectMaker() {
-							@Override
-							public void make(ManagedObjectMakerContext context) {
+		OfficeSectionType section = this.loadOfficeSectionType(false, "SECTION", (context) -> {
+			SectionManagedObjectSource source = context.addManagedObjectSource("MO_SOURCE", new ManagedObjectMaker() {
+				@Override
+				public void make(ManagedObjectMakerContext context) {
 
-								// Qualified dependency
-								DependencyLabeller<Indexed> qualified = context.getContext()
-										.addDependency(Connection.class);
-								qualified.setLabel("QUALIFIED-DEPENDENCY");
-								qualified.setTypeQualifier("QUALIFIED");
+					// Qualified dependency
+					DependencyLabeller<Indexed> qualified = context.getContext().addDependency(Connection.class);
+					qualified.setLabel("QUALIFIED-DEPENDENCY");
+					qualified.setTypeQualifier("QUALIFIED");
 
-								// Unqualified dependency
-								context.getContext().addDependency(String.class).setLabel("UNQUALIFIED-DEPENDENCY");
-							}
-						});
-				SectionManagedObject mo = source.addSectionManagedObject("MO", ManagedObjectScope.PROCESS);
-				mo.getSectionManagedObjectDependency("QUALIFIED-DEPENDENCY");
-				mo.getSectionManagedObjectDependency("UNQUALIFIED-DEPENDENCY");
-			}
+					// Unqualified dependency
+					context.getContext().addDependency(String.class).setLabel("UNQUALIFIED-DEPENDENCY");
+				}
+			});
+			SectionManagedObject mo = source.addSectionManagedObject("MO", ManagedObjectScope.PROCESS);
+			mo.getSectionManagedObjectDependency("QUALIFIED-DEPENDENCY");
+			mo.getSectionManagedObjectDependency("UNQUALIFIED-DEPENDENCY");
 		});
 		assertNull("Should not load section", section);
 
@@ -413,18 +381,14 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testLoadSectionManagedObjectSupportingAnExtensionInterface() {
 
 		// Load the section managed object supporting an extension interface
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				SectionManagedObjectSource source = context.addManagedObjectSource("MO_SOURCE",
-						new ManagedObjectMaker() {
-							@Override
-							public void make(ManagedObjectMakerContext context) {
-								context.addExtensionInterface(XAResource.class);
-							}
-						});
-				source.addSectionManagedObject("MO", ManagedObjectScope.FUNCTION);
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			SectionManagedObjectSource source = context.addManagedObjectSource("MO_SOURCE", new ManagedObjectMaker() {
+				@Override
+				public void make(ManagedObjectMakerContext context) {
+					context.addExtensionInterface(XAResource.class);
+				}
+			});
+			source.addSectionManagedObject("MO", ManagedObjectScope.FUNCTION);
 		});
 
 		// Validate the results
@@ -448,19 +412,16 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Load the function object dependent on managed object of same section
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
 
-				// Add the function object and managed object
-				FunctionObject object = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory, "OBJECT",
-						Connection.class, null);
-				SectionManagedObjectSource moSource = context.addManagedObjectSource("MO_SOURCE", null);
-				SectionManagedObject managedObject = moSource.addSectionManagedObject("MO", ManagedObjectScope.THREAD);
+			// Add the function object and managed object
+			FunctionObject object = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory, "OBJECT",
+					Connection.class, null);
+			SectionManagedObjectSource moSource = context.addManagedObjectSource("MO_SOURCE", null);
+			SectionManagedObject managedObject = moSource.addSectionManagedObject("MO", ManagedObjectScope.THREAD);
 
-				// Link function object to managed object
-				context.getBuilder().link(object, managedObject);
-			}
+			// Link function object to managed object
+			context.getBuilder().link(object, managedObject);
 		});
 
 		// Validate link to dependent managed object
@@ -486,23 +447,20 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Load the function object dependent on managed object of same section
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
 
-				// Add the function object and managed object
-				FunctionObject object = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory, "OBJECT",
-						Connection.class, null);
-				SectionManagedObjectSource moSource = context.addManagedObjectSource("MO_SOURCE", null);
-				SectionManagedObject managedObject = moSource.addSectionManagedObject("MO", ManagedObjectScope.THREAD);
+			// Add the function object and managed object
+			FunctionObject object = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory, "OBJECT",
+					Connection.class, null);
+			SectionManagedObjectSource moSource = context.addManagedObjectSource("MO_SOURCE", null);
+			SectionManagedObject managedObject = moSource.addSectionManagedObject("MO", ManagedObjectScope.THREAD);
 
-				// Add type qualification (allows distinguishing)
-				managedObject.addTypeQualification("QUALIFIED", Integer.class.getName());
-				managedObject.addTypeQualification(null, String.class.getName());
+			// Add type qualification (allows distinguishing)
+			managedObject.addTypeQualification("QUALIFIED", Integer.class.getName());
+			managedObject.addTypeQualification(null, String.class.getName());
 
-				// Link function object to managed object
-				context.getBuilder().link(object, managedObject);
-			}
+			// Link function object to managed object
+			context.getBuilder().link(object, managedObject);
 		});
 
 		// Validate link to dependent managed object
@@ -535,33 +493,30 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 
 		// Load the function object dependent on managed object of another
 		// section
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
 
-				// Add the section with function object
-				SubSection objectSection = context.addSubSection("OBJECT_SECTION", new SectionMaker() {
-					@Override
-					public void make(SectionMakerContext context) {
-						// Add the funtion object
-						FunctionObject object = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory,
-								"OBJECT", Connection.class, null);
+			// Add the section with function object
+			SubSection objectSection = context.addSubSection("OBJECT_SECTION", new SectionMaker() {
+				@Override
+				public void make(SectionMakerContext context) {
+					// Add the funtion object
+					FunctionObject object = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory,
+							"OBJECT", Connection.class, null);
 
-						// Link function object to section output
-						SectionObject sectionObject = context.getBuilder().addSectionObject("SECTION_OBJECT",
-								Connection.class.getName());
-						context.getBuilder().link(object, sectionObject);
-					}
-				});
-				SubSectionObject subSectionObject = objectSection.getSubSectionObject("SECTION_OBJECT");
+					// Link function object to section output
+					SectionObject sectionObject = context.getBuilder().addSectionObject("SECTION_OBJECT",
+							Connection.class.getName());
+					context.getBuilder().link(object, sectionObject);
+				}
+			});
+			SubSectionObject subSectionObject = objectSection.getSubSectionObject("SECTION_OBJECT");
 
-				// Add the managed object
-				SectionManagedObjectSource moSource = context.addManagedObjectSource("MO_SOURCE", null);
-				SectionManagedObject managedObject = moSource.addSectionManagedObject("MO", ManagedObjectScope.PROCESS);
+			// Add the managed object
+			SectionManagedObjectSource moSource = context.addManagedObjectSource("MO_SOURCE", null);
+			SectionManagedObject managedObject = moSource.addSectionManagedObject("MO", ManagedObjectScope.PROCESS);
 
-				// Link function object to managed object
-				context.getBuilder().link(subSectionObject, managedObject);
-			}
+			// Link function object to managed object
+			context.getBuilder().link(subSectionObject, managedObject);
 		});
 
 		// Validate link to dependent managed object
@@ -580,28 +535,25 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testManagedObjectDependentOnAnotherManagedObject() {
 
 		// Load the section managed object with a dependency
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
 
-				// Add the first managed object (with dependency)
-				SectionManagedObjectSource sourceOne = context.addManagedObjectSource("MO_SOURCE_ONE",
-						new ManagedObjectMaker() {
-							@Override
-							public void make(ManagedObjectMakerContext context) {
-								context.getContext().addDependency(Connection.class).setLabel("DEPENDENCY");
-							}
-						});
-				SectionManagedObject moOne = sourceOne.addSectionManagedObject("MO_ONE", ManagedObjectScope.PROCESS);
-				SectionManagedObjectDependency dependency = moOne.getSectionManagedObjectDependency("DEPENDENCY");
+			// Add the first managed object (with dependency)
+			SectionManagedObjectSource sourceOne = context.addManagedObjectSource("MO_SOURCE_ONE",
+					new ManagedObjectMaker() {
+						@Override
+						public void make(ManagedObjectMakerContext context) {
+							context.getContext().addDependency(Connection.class).setLabel("DEPENDENCY");
+						}
+					});
+			SectionManagedObject moOne = sourceOne.addSectionManagedObject("MO_ONE", ManagedObjectScope.PROCESS);
+			SectionManagedObjectDependency dependency = moOne.getSectionManagedObjectDependency("DEPENDENCY");
 
-				// Add the second managed object (no dependency)
-				SectionManagedObjectSource sourceTwo = context.addManagedObjectSource("MO_SOURCE_TWO", null);
-				SectionManagedObject moTwo = sourceTwo.addSectionManagedObject("MO_TWO", ManagedObjectScope.PROCESS);
+			// Add the second managed object (no dependency)
+			SectionManagedObjectSource sourceTwo = context.addManagedObjectSource("MO_SOURCE_TWO", null);
+			SectionManagedObject moTwo = sourceTwo.addSectionManagedObject("MO_TWO", ManagedObjectScope.PROCESS);
 
-				// Link dependency to second managed object
-				context.getBuilder().link(dependency, moTwo);
-			}
+			// Link dependency to second managed object
+			context.getBuilder().link(dependency, moTwo);
 		});
 
 		// Ensure correct number of managed object sources
@@ -646,35 +598,32 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Load the function object dependent on managed object of same section
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
 
-				// Add the function object
-				FunctionObject functionObject = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory,
-						"OBJECT", Connection.class, null);
+			// Add the function object
+			FunctionObject functionObject = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory,
+					"OBJECT", Connection.class, null);
 
-				// Add the first managed object with a dependency
-				SectionManagedObjectSource moSourceOne = context.addManagedObjectSource("MO_SOURCE_ONE",
-						new ManagedObjectMaker() {
-							@Override
-							public void make(ManagedObjectMakerContext context) {
-								context.getContext().addDependency(DataSource.class).setLabel("DEPENDENCY");
-							}
-						});
-				SectionManagedObject moOne = moSourceOne.addSectionManagedObject("MO_ONE", ManagedObjectScope.THREAD);
-				SectionManagedObjectDependency dependency = moOne.getSectionManagedObjectDependency("DEPENDENCY");
+			// Add the first managed object with a dependency
+			SectionManagedObjectSource moSourceOne = context.addManagedObjectSource("MO_SOURCE_ONE",
+					new ManagedObjectMaker() {
+						@Override
+						public void make(ManagedObjectMakerContext context) {
+							context.getContext().addDependency(DataSource.class).setLabel("DEPENDENCY");
+						}
+					});
+			SectionManagedObject moOne = moSourceOne.addSectionManagedObject("MO_ONE", ManagedObjectScope.THREAD);
+			SectionManagedObjectDependency dependency = moOne.getSectionManagedObjectDependency("DEPENDENCY");
 
-				// Add the second managed object (no dependency)
-				SectionManagedObjectSource sourceTwo = context.addManagedObjectSource("MO_SOURCE_TWO", null);
-				SectionManagedObject moTwo = sourceTwo.addSectionManagedObject("MO_TWO", ManagedObjectScope.PROCESS);
+			// Add the second managed object (no dependency)
+			SectionManagedObjectSource sourceTwo = context.addManagedObjectSource("MO_SOURCE_TWO", null);
+			SectionManagedObject moTwo = sourceTwo.addSectionManagedObject("MO_TWO", ManagedObjectScope.PROCESS);
 
-				// Link function object to first managed object
-				context.getBuilder().link(functionObject, moOne);
+			// Link function object to first managed object
+			context.getBuilder().link(functionObject, moOne);
 
-				// Link managed object dependency to managed object
-				context.getBuilder().link(dependency, moTwo);
-			}
+			// Link managed object dependency to managed object
+			context.getBuilder().link(dependency, moTwo);
 		});
 
 		// Validate link to dependent managed object
@@ -707,14 +656,11 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Load the function object dependent on managed object of same section
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				// Add the function object as parameter
-				FunctionObject functionObject = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory,
-						"OBJECT", Connection.class, null);
-				functionObject.flagAsParameter();
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			// Add the function object as parameter
+			FunctionObject functionObject = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory,
+					"OBJECT", Connection.class, null);
+			functionObject.flagAsParameter();
 		});
 
 		// Validate no dependent object
@@ -739,16 +685,13 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Issue as not linked
-		this.issues.recordIssue("OBJECT", FunctionObjectNodeImpl.class,
+		this.issues.recordIssue("SECTION.NAMESPACE.FUNCTION.OBJECT", FunctionObjectNodeImpl.class,
 				"Function Object OBJECT is not linked to a DependentObjectNode");
 
 		// Load the function object dependent on section object
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				// Add the function object as parameter
-				context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory, "OBJECT", Connection.class, null);
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			// Add the function object as parameter
+			context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory, "OBJECT", Connection.class, null);
 		});
 		assertNull("Should not load section", section);
 	}
@@ -761,17 +704,14 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Load the function object dependent on section object
-		OfficeSectionType section = this.loadOfficeSectionType("SECTION", new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				// Add the function object as parameter
-				FunctionObject functionObject = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory,
-						"OBJECT", Connection.class, null);
-				SectionObject sectionObject = context.getBuilder().addSectionObject("SECTION_OBJECT",
-						Connection.class.getName());
-				sectionObject.setTypeQualifier("QUALIFIER");
-				context.getBuilder().link(functionObject, sectionObject);
-			}
+		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {
+			// Add the function object as parameter
+			FunctionObject functionObject = context.addFunctionObject("NAMESPACE", "FUNCTION", functionFactory,
+					"OBJECT", Connection.class, null);
+			SectionObject sectionObject = context.getBuilder().addSectionObject("SECTION_OBJECT",
+					Connection.class.getName());
+			sectionObject.setTypeQualifier("QUALIFIER");
+			context.getBuilder().link(functionObject, sectionObject);
 		});
 
 		// Validate dependent object

@@ -40,7 +40,6 @@ import net.officefloor.compile.spi.governance.source.GovernanceSourceMetaData;
 import net.officefloor.compile.spi.governance.source.GovernanceSourceSpecification;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceFactory;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -54,11 +53,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel Sagenschneider
  */
 public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
-
-	/**
-	 * Name of {@link Governance}.
-	 */
-	private static final String GOVERNANCE_NAME = "GOVERNANCE NAME";
 
 	/**
 	 * {@link GovernanceSourceMetaData}.
@@ -140,7 +134,7 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		this.loadGovernanceType(true, (context) -> {
 			loggerName.value = context.getLogger().getName();
 		});
-		assertEquals("Incorrect logger name", GOVERNANCE_NAME, loggerName.value);
+		assertEquals("Incorrect logger name", OfficeFloorCompiler.TYPE, loggerName.value);
 	}
 
 	/**
@@ -525,8 +519,8 @@ public class LoadGovernanceTypeTest extends OfficeFrameTestCase {
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
 		compiler.setCompilerIssues(this.issues);
 		GovernanceLoader governanceLoader = compiler.getGovernanceLoader();
-		GovernanceType<Object, None> governanceType = governanceLoader.loadGovernanceType(GOVERNANCE_NAME,
-				MockGovernanceSource.class, propertyList);
+		GovernanceType<Object, None> governanceType = governanceLoader.loadGovernanceType(MockGovernanceSource.class,
+				propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

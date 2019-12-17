@@ -52,11 +52,6 @@ import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 
 	/**
-	 * Name of the {@link SupplierSource}.
-	 */
-	private final String SUPPLIER_SOURCE_NAME = "SUPPLIER SOURCE";
-
-	/**
 	 * {@link CompilerIssues}.
 	 */
 	private final MockCompilerIssues issues = new MockCompilerIssues(this);
@@ -121,7 +116,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		this.loadSupplierType(true, (context) -> {
 			closure.value = context.getLogger().getName();
 		});
-		assertEquals("Incorrect logger name", SUPPLIER_SOURCE_NAME, closure.value);
+		assertEquals("Incorrect logger name", OfficeFloorCompiler.TYPE, closure.value);
 	}
 
 	/**
@@ -428,8 +423,7 @@ public class LoadSupplierTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		SupplierLoader supplierLoader = compiler.getSupplierLoader();
 		MockSupplierSource.init = init;
-		SupplierType supplierType = supplierLoader.loadSupplierType(SUPPLIER_SOURCE_NAME, MockSupplierSource.class,
-				propertyList);
+		SupplierType supplierType = supplierLoader.loadSupplierType(MockSupplierSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

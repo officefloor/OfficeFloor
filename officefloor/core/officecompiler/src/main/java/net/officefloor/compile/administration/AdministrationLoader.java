@@ -22,7 +22,6 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceProperty;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceSpecification;
-import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.internal.structure.Flow;
 
@@ -78,7 +77,6 @@ public interface AdministrationLoader {
 	 * @param <G>                       {@link Enum} for the {@link Governance}
 	 *                                  keys.
 	 * @param <AS>                      {@link AdministrationSource} type.
-	 * @param administrationName        Name of the {@link Administration}.
 	 * @param administrationSourceClass Class of the {@link AdministrationSource}.
 	 * @param propertyList              {@link PropertyList} containing the
 	 *                                  properties to source the
@@ -87,7 +85,7 @@ public interface AdministrationLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<E, F extends Enum<F>, G extends Enum<G>, AS extends AdministrationSource<E, F, G>> AdministrationType<E, F, G> loadAdministrationType(
-			String administrationName, Class<AS> administrationSourceClass, PropertyList propertyList);
+			Class<AS> administrationSourceClass, PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link AdministrationType} sourced from the
@@ -96,7 +94,6 @@ public interface AdministrationLoader {
 	 * @param <E>                  Extension interface type.
 	 * @param <F>                  {@link Enum} for the {@link Flow} keys.
 	 * @param <G>                  {@link Enum} for the {@link Governance} keys.
-	 * @param administrationName   Name of the {@link Administration}.
 	 * @param administrationSource {@link AdministrationSource} instance.
 	 * @param propertyList         {@link PropertyList} containing the properties to
 	 *                             source the {@link AdministrationType}.
@@ -104,6 +101,6 @@ public interface AdministrationLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<E, F extends Enum<F>, G extends Enum<G>> AdministrationType<E, F, G> loadAdministrationType(
-			String administrationName, AdministrationSource<E, F, G> administrationSource, PropertyList propertyList);
+			AdministrationSource<E, F, G> administrationSource, PropertyList propertyList);
 
 }

@@ -60,7 +60,6 @@ public interface SectionLoader {
 	 * Loads and returns the {@link SectionType} from the {@link SectionSource}.
 	 * 
 	 * @param <S>                {@link SectionSource} type.
-	 * @param sectionName        Name of {@link SectionSource}.
 	 * @param sectionSourceClass Class of the {@link SectionSource}.
 	 * @param sectionLocation    Location of the {@link OfficeSection}.
 	 * @param propertyList       {@link PropertyList} containing the properties to
@@ -68,13 +67,12 @@ public interface SectionLoader {
 	 * @return {@link SectionType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<S extends SectionSource> SectionType loadSectionType(String sectionName, Class<S> sectionSourceClass,
-			String sectionLocation, PropertyList propertyList);
+	<S extends SectionSource> SectionType loadSectionType(Class<S> sectionSourceClass, String sectionLocation,
+			PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link SectionType} from the {@link SectionSource}.
 	 * 
-	 * @param sectionName     Name of {@link SectionSource}.
 	 * @param sectionSource   {@link SectionSource} instance.
 	 * @param sectionLocation Location of the {@link OfficeSection}.
 	 * @param propertyList    {@link PropertyList} containing the properties to
@@ -82,8 +80,7 @@ public interface SectionLoader {
 	 * @return {@link SectionType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	SectionType loadSectionType(String sectionName, SectionSource sectionSource, String sectionLocation,
-			PropertyList propertyList);
+	SectionType loadSectionType(SectionSource sectionSource, String sectionLocation, PropertyList propertyList);
 
 	/**
 	 * <p>

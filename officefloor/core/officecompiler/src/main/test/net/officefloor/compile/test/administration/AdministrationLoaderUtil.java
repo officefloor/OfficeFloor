@@ -201,8 +201,7 @@ public class AdministrationLoaderUtil {
 			Class<S> administrationSourceClass, String... propertyNameValues) {
 
 		// Load and return the administration type
-		return getOfficeFloorCompiler().getAdministrationLoader().loadAdministrationType(
-				AdministrationLoaderUtil.class.getName(), administrationSourceClass,
+		return getOfficeFloorCompiler().getAdministrationLoader().loadAdministrationType(administrationSourceClass,
 				new PropertyListImpl(propertyNameValues));
 	}
 

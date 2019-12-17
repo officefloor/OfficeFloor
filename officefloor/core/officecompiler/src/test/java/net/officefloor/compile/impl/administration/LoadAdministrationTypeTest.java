@@ -63,11 +63,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 
 	/**
-	 * Name of the {@link Administration}.
-	 */
-	private final String ADMINISTRATION_NAME = "ADMINISTRATOR NAME";
-
-	/**
 	 * {@link CompilerIssues}.
 	 */
 	private final MockCompilerIssues issues = new MockCompilerIssues(this);
@@ -161,7 +156,7 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		MockAdministrationSource.loggerName = null;
 		this.loadAdministrationType(true, null);
-		assertEquals("Incorrect logger name", ADMINISTRATION_NAME, MockAdministrationSource.loggerName);
+		assertEquals("Incorrect logger name", OfficeFloorCompiler.TYPE, MockAdministrationSource.loggerName);
 	}
 
 	/**
@@ -836,8 +831,7 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		AdministrationLoader adminLoader = compiler.getAdministrationLoader();
 		MockAdministrationSource.init = init;
-		AdministrationType adminType = adminLoader.loadAdministrationType(ADMINISTRATION_NAME,
-				MockAdministrationSource.class, propertyList);
+		AdministrationType adminType = adminLoader.loadAdministrationType(MockAdministrationSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

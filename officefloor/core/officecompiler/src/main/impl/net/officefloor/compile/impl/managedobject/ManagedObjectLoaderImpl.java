@@ -207,7 +207,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
-			String managedObjectSourceName, Class<MS> managedObjectSourceClass, PropertyList propertyList) {
+			Class<MS> managedObjectSourceClass, PropertyList propertyList) {
 
 		// Create an instance of the managed object source
 		MS managedObjectSource = CompileUtil.newInstance(managedObjectSourceClass, ManagedObjectSource.class, this.node,
@@ -217,15 +217,15 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 		}
 
 		// Load and return the managed object type
-		return this.loadManagedObjectType(managedObjectSourceName, managedObjectSource, propertyList);
+		return this.loadManagedObjectType(managedObjectSource, propertyList);
 	}
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
-			String managedObjectSourceName, ManagedObjectSource<D, F> managedObjectSource, PropertyList propertyList) {
+			ManagedObjectSource<D, F> managedObjectSource, PropertyList propertyList) {
 
 		// Obtain qualified name
-		String qualifiedName = this.node.getQualifiedName(managedObjectSourceName);
+		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
 		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);

@@ -47,7 +47,6 @@ public interface OfficeLoader {
 	 * Loads and returns the {@link OfficeType} from the {@link OfficeSource}.
 	 * 
 	 * @param <O>               {@link OfficeSource} type.
-	 * @param officeName        Name of {@link Office}.
 	 * @param officeSourceClass Class of the {@link OfficeSource}.
 	 * @param officeLocation    Location of the {@link Office}.
 	 * @param propertyList      {@link PropertyList} containing the properties to
@@ -55,13 +54,12 @@ public interface OfficeLoader {
 	 * @return {@link OfficeType} or <code>null</code> if issues, which are reported
 	 *         to the {@link CompilerIssues}.
 	 */
-	<O extends OfficeSource> OfficeType loadOfficeType(String officeName, Class<O> officeSourceClass,
-			String officeLocation, PropertyList propertyList);
+	<O extends OfficeSource> OfficeType loadOfficeType(Class<O> officeSourceClass, String officeLocation,
+			PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link OfficeType} from the {@link OfficeSource}.
 	 * 
-	 * @param officeName     Name of {@link Office}.
 	 * @param officeSource   {@link OfficeSource} instance.
 	 * @param officeLocation Location of the {@link Office}.
 	 * @param propertyList   {@link PropertyList} containing the properties to
@@ -69,7 +67,6 @@ public interface OfficeLoader {
 	 * @return {@link OfficeType} or <code>null</code> if issues, which are reported
 	 *         to the {@link CompilerIssues}.
 	 */
-	OfficeType loadOfficeType(String officeName, OfficeSource officeSource, String officeLocation,
-			PropertyList propertyList);
+	OfficeType loadOfficeType(OfficeSource officeSource, String officeLocation, PropertyList propertyList);
 
 }

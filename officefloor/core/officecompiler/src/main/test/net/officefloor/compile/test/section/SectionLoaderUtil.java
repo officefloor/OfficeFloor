@@ -569,8 +569,8 @@ public class SectionLoaderUtil {
 			String sectionLocation, String... propertyNameValuePairs) {
 
 		// Load and return the section type
-		return getOfficeFloorCompiler().getSectionLoader().loadSectionType(SectionLoaderUtil.class.getName(),
-				sectionSourceClass, sectionLocation, new PropertyListImpl(propertyNameValuePairs));
+		return getOfficeFloorCompiler().getSectionLoader().loadSectionType(sectionSourceClass, sectionLocation,
+				new PropertyListImpl(propertyNameValuePairs));
 	}
 
 	/**
@@ -585,8 +585,8 @@ public class SectionLoaderUtil {
 			String... propertyNameValuePairs) {
 
 		// Load and return the section type
-		return getOfficeFloorCompiler().getSectionLoader().loadSectionType(SectionLoaderUtil.class.getName(),
-				sectionSource, sectionLocation, new PropertyListImpl(propertyNameValuePairs));
+		return getOfficeFloorCompiler().getSectionLoader().loadSectionType(sectionSource, sectionLocation,
+				new PropertyListImpl(propertyNameValuePairs));
 	}
 
 	/**

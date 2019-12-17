@@ -463,9 +463,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@Override
 	public Node getParentNode() {
 		return (this.containingSectionNode != null ? this.containingSectionNode
-				: (this.suppliedManagedObjectNode != null ? this.suppliedManagedObjectNode
-						: (this.containingOfficeNode != null ? this.containingOfficeNode
-								: this.containingOfficeFloorNode)));
+				: (this.containingOfficeNode != null ? this.containingOfficeNode : this.containingOfficeFloorNode));
 	}
 
 	@Override
@@ -588,8 +586,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public ManagedObjectType<?> loadManagedObjectType(CompileContext compileContext) {
 
 		// Load and return the managed object type
-		return this.loadType(compileContext, (mos, properties, loader) -> loader
-				.loadManagedObjectType(this.getManagedObjectSourceName(), mos, properties));
+		return this.loadType(compileContext,
+				(mos, properties, loader) -> loader.loadManagedObjectType(mos, properties));
 	}
 
 	@Override
@@ -637,23 +635,6 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Load and return the type
 		return this.loadType(compileContext, (mos, properties, loader) -> loader
 				.loadOfficeFloorManagedObjectSourceType(this.managedObjectSourceName, mos, properties));
-	}
-
-	@Override
-	public String getManagedObjectSourceName() {
-		// Obtain the name based on location
-		if (this.containingSectionNode != null) {
-			// Use name qualified with both office and section
-			return this.containingSectionNode.getQualifiedName(this.managedObjectSourceName);
-
-		} else if (this.containingOfficeNode != null) {
-			// Use name qualified with office name
-			return this.containingOfficeNode.getQualifiedName(this.managedObjectSourceName);
-
-		} else {
-			// Use name unqualified
-			return this.managedObjectSourceName;
-		}
 	}
 
 	@Override
@@ -857,6 +838,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
+	public String getManagedObjectSourceName() {
+		return this.getQualifiedName();
+	}
+
+	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void buildManagedObject(OfficeFloorBuilder builder, OfficeNode managingOffice, OfficeBuilder officeBuilder,
 			OfficeBindings officeBindings, CompileContext compileContext) {
@@ -865,8 +851,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		this.loadType(compileContext, (managedObjectSource, properties, loader) -> {
 
 			// Load the managed object type
-			ManagedObjectType<?> managedObjectType = loader.loadManagedObjectType(this.getManagedObjectSourceName(),
-					managedObjectSource, properties);
+			ManagedObjectType<?> managedObjectType = loader.loadManagedObjectType(managedObjectSource, properties);
 			if (managedObjectType == null) {
 				return null; // must load type
 			}
@@ -934,8 +919,8 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 							if (!inputObjectType.isAssignableFrom(objectType)) {
 								// MOS object type not compatible to input type
 								this.context.getCompilerIssues().addIssue(this,
-										"Managed Object Source " + this.getManagedObjectSourceName() + " object "
-												+ objectType.getName() + " is not compatible with input managed object "
+										"Managed Object Source object " + objectType.getName()
+												+ " is not compatible with input managed object "
 												+ inputBoundManagedObjectName + " (input object type "
 												+ inputObjectType.getName() + ")");
 								return null; // invalid type for input

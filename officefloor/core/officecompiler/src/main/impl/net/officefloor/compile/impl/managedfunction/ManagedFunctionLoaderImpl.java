@@ -176,7 +176,7 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 
 	@Override
 	public <S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(
-			String managedFunctionSourceName, Class<S> managedFunctionSourceClass, PropertyList propertyList) {
+			Class<S> managedFunctionSourceClass, PropertyList propertyList) {
 
 		// Instantiate the managed function source
 		ManagedFunctionSource managedFunctionSource = CompileUtil.newInstance(managedFunctionSourceClass,
@@ -186,15 +186,15 @@ public class ManagedFunctionLoaderImpl implements ManagedFunctionLoader, IssueTa
 		}
 
 		// Load and return the type
-		return this.loadManagedFunctionType(managedFunctionSourceName, managedFunctionSource, propertyList);
+		return this.loadManagedFunctionType(managedFunctionSource, propertyList);
 	}
 
 	@Override
-	public FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceName,
-			ManagedFunctionSource managedFunctionSource, PropertyList propertyList) {
+	public FunctionNamespaceType loadManagedFunctionType(ManagedFunctionSource managedFunctionSource,
+			PropertyList propertyList) {
 
 		// Obtain qualified name
-		String qualifiedName = this.node.getQualifiedName(managedFunctionSourceName);
+		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
 		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);

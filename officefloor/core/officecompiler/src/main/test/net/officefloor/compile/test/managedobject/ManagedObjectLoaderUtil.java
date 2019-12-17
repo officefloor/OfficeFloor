@@ -303,9 +303,8 @@ public class ManagedObjectLoaderUtil {
 			Class<S> managedObjectSourceClass, ClassLoader classLoader, String... propertyNameValues) {
 
 		// Load and return the managed object type
-		return getOfficeFloorCompiler(classLoader).getManagedObjectLoader().loadManagedObjectType(
-				ManagedObjectLoaderUtil.class.getName(), managedObjectSourceClass,
-				new PropertyListImpl(propertyNameValues));
+		return getOfficeFloorCompiler(classLoader).getManagedObjectLoader()
+				.loadManagedObjectType(managedObjectSourceClass, new PropertyListImpl(propertyNameValues));
 	}
 
 	/**
@@ -321,8 +320,8 @@ public class ManagedObjectLoaderUtil {
 			ManagedObjectSource<M, F> managedObjectSource, String... propertyNameValues) {
 
 		// Load and return the managed object type
-		return getOfficeFloorCompiler(null).getManagedObjectLoader().loadManagedObjectType(
-				ManagedObjectLoaderUtil.class.getName(), managedObjectSource, new PropertyListImpl(propertyNameValues));
+		return getOfficeFloorCompiler(null).getManagedObjectLoader().loadManagedObjectType(managedObjectSource,
+				new PropertyListImpl(propertyNameValues));
 	}
 
 	/**

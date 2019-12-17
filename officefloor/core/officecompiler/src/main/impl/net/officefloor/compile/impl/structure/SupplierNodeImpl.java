@@ -337,12 +337,9 @@ public class SupplierNodeImpl implements SupplierNode {
 		// Keep track of the used supplier source
 		this.usedSupplierSource = supplierSource;
 
-		// Obtain the qualified name
-		String qualifiedName = this.getQualifiedName(this.supplierName);
-
 		// Load and return the type
 		SupplierLoader loader = this.context.getSupplierLoader(this);
-		return loader.loadSupplierType(qualifiedName, supplierSource, this.propertyList);
+		return loader.loadSupplierType(supplierSource, this.propertyList);
 	}
 
 	@Override
@@ -429,9 +426,12 @@ public class SupplierNodeImpl implements SupplierNode {
 			String managedObjectName = (qualifier == null ? "" : qualifier + "-") + type;
 
 			// Determine if flows for managed object
-			ManagedObjectLoader loader = this.context.getManagedObjectLoader(this);
-			ManagedObjectType<?> moType = loader.loadManagedObjectType(managedObjectName,
-					suppliedMosType.getManagedObjectSource(), suppliedMosType.getPropertyList());
+			ManagedObjectSourceNode mosNode = this.officeNode != null
+					? this.context.createManagedObjectSourceNode(managedObjectName, this.officeNode)
+					: this.context.createManagedObjectSourceNode(managedObjectName, this.officeFloorNode);
+			ManagedObjectLoader loader = this.context.getManagedObjectLoader(mosNode);
+			ManagedObjectType<?> moType = loader.loadManagedObjectType(suppliedMosType.getManagedObjectSource(),
+					suppliedMosType.getPropertyList());
 			if ((moType.getFlowTypes().length > 0) || (moType.getTeamTypes().length > 0)) {
 				return; // can not auto-wire input managed object
 			}

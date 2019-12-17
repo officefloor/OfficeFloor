@@ -161,7 +161,7 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 
 	@Override
 	public <PS extends ManagedObjectPoolSource> ManagedObjectPoolType loadManagedObjectPoolType(
-			String managedObjectPoolName, Class<PS> managedObjectPoolSourceClass, PropertyList propertyList) {
+			Class<PS> managedObjectPoolSourceClass, PropertyList propertyList) {
 
 		// Create an instance of the managed object pool source
 		ManagedObjectPoolSource managedObjectPoolSource = CompileUtil.newInstance(managedObjectPoolSourceClass,
@@ -171,15 +171,15 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 		}
 
 		// Load and return the managed object pool type
-		return this.loadManagedObjectPoolType(managedObjectPoolName, managedObjectPoolSource, propertyList);
+		return this.loadManagedObjectPoolType(managedObjectPoolSource, propertyList);
 	}
 
 	@Override
-	public ManagedObjectPoolType loadManagedObjectPoolType(String managedObjectPoolName,
-			ManagedObjectPoolSource managedObjectPoolSource, PropertyList propertyList) {
+	public ManagedObjectPoolType loadManagedObjectPoolType(ManagedObjectPoolSource managedObjectPoolSource,
+			PropertyList propertyList) {
 
 		// Obtain qualified name
-		String qualifiedName = this.node.getQualifiedName(managedObjectPoolName);
+		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
 		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);

@@ -182,8 +182,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Undertakes finding the furtherest target.
 	 * 
-	 * @param finder
-	 *            Finds the furtherest target.
+	 * @param finder Finds the furtherest target.
 	 */
 	private void doFindFurtherestTargetTest(Function<Node, TargetLinkNode> finder) {
 
@@ -365,8 +364,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue on detecting a cycle in the furtherest links when target
-	 * link.
+	 * Ensures issue on detecting a cycle in the furtherest links when target link.
 	 */
 	public void testDetectCycleWhenTargetInFurtherestLinks() {
 
@@ -479,7 +477,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 
 		// Create the managed object within the OfficeFloor
 		ManagedObjectSourceNode managedObjectSource = context.createManagedObjectSourceNode("MOS", officeFloor);
-		ManagedObjectNode managedObject = context.createManagedObjectNode("MO");
+		ManagedObjectNode managedObject = context.createManagedObjectNode("MO", officeFloor);
 		managedObject.initialise(ManagedObjectScope.THREAD, managedObjectSource);
 
 		// Record the auto-wiring
@@ -595,8 +593,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Retrieves the {@link TargetLinkNode}.
 	 * 
-	 * @param link
-	 *            Starting {@link LinkFlowNode}.
+	 * @param link Starting {@link LinkFlowNode}.
 	 * @return {@link TargetLinkNode}.
 	 */
 	private TargetLinkNode retrieveFlowTarget(LinkFlowNode link) {
@@ -609,8 +606,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Finds the {@link TargetLinkNode}.
 	 * 
-	 * @param link
-	 *            Starting {@link LinkFlowNode}.
+	 * @param link Starting {@link LinkFlowNode}.
 	 * @return {@link TargetLinkNode} or <code>null</code> if not found.
 	 */
 	private TargetLinkNode findFlowTarget(LinkFlowNode link) {
@@ -623,8 +619,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Retrieves the {@link TargetLinkNode}.
 	 * 
-	 * @param link
-	 *            Starting {@link LinkObjectNode}.
+	 * @param link Starting {@link LinkObjectNode}.
 	 * @return {@link TargetLinkNode}.
 	 */
 	private TargetLinkNode retrieveObjectTarget(LinkObjectNode link) {
@@ -637,8 +632,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Retrieves the {@link TargetLinkNode}.
 	 * 
-	 * @param link
-	 *            Starting {@link LinkTeamNode}.
+	 * @param link Starting {@link LinkTeamNode}.
 	 * @return {@link TargetLinkNode}.
 	 */
 	private TargetLinkNode retrieveTeamTarget(LinkTeamNode link) {
@@ -651,8 +645,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Retrieves the {@link TargetLinkNode}.
 	 * 
-	 * @param link
-	 *            Starting {@link LinkOfficeNode}.
+	 * @param link Starting {@link LinkOfficeNode}.
 	 * @return {@link TargetLinkNode}.
 	 */
 	private TargetLinkNode retrieveOfficeTarget(LinkOfficeNode link) {
@@ -665,8 +658,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Finds the {@link TargetLinkNode}.
 	 * 
-	 * @param link
-	 *            Starting {@link LinkPoolNode}.
+	 * @param link Starting {@link LinkPoolNode}.
 	 * @return {@link TargetLinkNode} or <code>null</code> if target not found.
 	 */
 	private TargetLinkNode findPoolTarget(LinkPoolNode link) {
@@ -699,10 +691,8 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		/**
 		 * Initiate.
 		 * 
-		 * @param nodeName
-		 *            Name of this {@link Node}.
-		 * @param linkedNode
-		 *            Linked {@link Node}.
+		 * @param nodeName   Name of this {@link Node}.
+		 * @param linkedNode Linked {@link Node}.
 		 */
 		public AbstractLinkNode(String nodeName, N linkedNode) {
 			this.nodeName = nodeName;
@@ -712,8 +702,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		/**
 		 * Links this {@link Node} to the input {@link Node}.
 		 * 
-		 * @param linkedNode
-		 *            Linked {@link Node}.
+		 * @param linkedNode Linked {@link Node}.
 		 */
 		public void linkNode(N linkedNode) {
 			this.linkedNode = linkedNode;
@@ -784,10 +773,8 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param nodeName
-		 *            Name of this {@link Node}.
-		 * @param linkedNode
-		 *            Linked {@link Node}.
+		 * @param nodeName   Name of this {@link Node}.
+		 * @param linkedNode Linked {@link Node}.
 		 */
 		public LinkNode(String nodeName, LinkNode linkedNode) {
 			super(nodeName, linkedNode);
@@ -877,8 +864,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		/**
 		 * Initiate without being linked to a {@link LinkNode}.
 		 * 
-		 * @param nodeName
-		 *            Name of this {@link Node}.
+		 * @param nodeName Name of this {@link Node}.
 		 */
 		public TargetLinkNode(String nodeName) {
 			super(nodeName, null);
@@ -887,10 +873,8 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		/**
 		 * Initiate.
 		 * 
-		 * @param nodeName
-		 *            Name of this {@link Node}.
-		 * @param linkedNode
-		 *            Linked node.
+		 * @param nodeName   Name of this {@link Node}.
+		 * @param linkedNode Linked node.
 		 */
 		public TargetLinkNode(String nodeName, LinkNode linkedNode) {
 			super(nodeName, linkedNode);

@@ -25,6 +25,44 @@ package net.officefloor.compile.internal.structure;
 public interface Node {
 
 	/**
+	 * Creates the qualified name, handling <code>null</code> names.
+	 * 
+	 * @param names Names. Entries may be <code>null</code>.
+	 * @return Qualified name.
+	 */
+	static String qualify(String... names) {
+		StringBuilder qualifiedName = new StringBuilder();
+		if (names != null) {
+			for (String name : names) {
+				if ((name == null) || (name.trim().length() == 0)) {
+					// Determine if already qualified
+					if (qualifiedName.length() > 0) {
+						// Append null / blank
+						qualifiedName.append(".[" + name + "]");
+					}
+				} else {
+					// Have name, so determine if qualifier
+					if (qualifiedName.length() > 0) {
+						qualifiedName.append(".");
+					}
+					qualifiedName.append(name);
+				}
+			}
+		}
+		return qualifiedName.toString();
+	}
+
+	/**
+	 * Creates an escaped name.
+	 * 
+	 * @param name Name.
+	 * @return Escaped name.
+	 */
+	static String escape(String name) {
+		return name != null ? name.replace('.', '_') : null;
+	}
+
+	/**
 	 * Obtains the name of the {@link Node}.
 	 * 
 	 * @return Name of the {@link Node}.
@@ -54,15 +92,24 @@ public interface Node {
 	Node getParentNode();
 
 	/**
-	 * Obtains the qualified name.
+	 * Obtains the qualified name of the {@link Node}.
 	 * 
-	 * @param name Name.
+	 * @return Qualified name of the {@link Node}.
+	 */
+	default String getQualifiedName() {
+		String name = escape(this.getNodeName());
+		Node parent = this.getParentNode();
+		return parent != null ? parent.getQualifiedName(name) : name;
+	}
+
+	/**
+	 * Obtains the qualified name for child {@link Node}.
+	 * 
+	 * @param name Name of child {@link Node}.
 	 * @return Name qualified by this {@link Node}.
 	 */
 	default String getQualifiedName(String name) {
-		String nodeQualifiedName = this.getNodeName() + (name == null ? "" : "." + name);
-		Node parent = this.getParentNode();
-		return (parent != null) ? parent.getQualifiedName(nodeQualifiedName) : nodeQualifiedName;
+		return qualify(this.getQualifiedName(), name);
 	}
 
 	/**

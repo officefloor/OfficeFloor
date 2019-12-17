@@ -172,7 +172,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 
 	@Override
 	public <I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceType<I, F> loadGovernanceType(
-			String governanceName, Class<GS> governanceSourceClass, PropertyList properties) {
+			Class<GS> governanceSourceClass, PropertyList properties) {
 
 		// Instantiate the governance source
 		GovernanceSource<I, F> governanceSource = CompileUtil.newInstance(governanceSourceClass, GovernanceSource.class,
@@ -183,15 +183,15 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 		}
 
 		// Return the governance type
-		return this.loadGovernanceType(governanceName, governanceSource, properties);
+		return this.loadGovernanceType(governanceSource, properties);
 	}
 
 	@Override
 	public <I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceType<I, F> loadGovernanceType(
-			String governanceName, GS governanceSource, PropertyList properties) {
+			GS governanceSource, PropertyList properties) {
 
 		// Obtain qualified name
-		String qualifiedName = this.node.getQualifiedName(governanceName);
+		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
 		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, properties);

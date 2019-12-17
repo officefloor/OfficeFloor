@@ -250,7 +250,7 @@ public class AdministrationNodeImpl implements AdministrationNode {
 
 		// Load and return the administration type
 		AdministrationLoader loader = this.context.getAdministrationLoader(this);
-		return loader.loadAdministrationType(this.administrationName, administrationSource, this.properties);
+		return loader.loadAdministrationType(administrationSource, this.properties);
 	}
 
 	@Override

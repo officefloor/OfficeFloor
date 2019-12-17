@@ -374,9 +374,8 @@ public class ManagedFunctionLoaderUtil {
 	public static <S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(
 			Class<S> managedFunctionSourceClass, OfficeFloorCompiler compiler, String... propertyNameValues) {
 		// Return the loaded namespace type
-		return getOfficeFloorCompiler(compiler).getManagedFunctionLoader().loadManagedFunctionType(
-				ManagedFunctionLoaderUtil.class.getName(), managedFunctionSourceClass,
-				new PropertyListImpl(propertyNameValues));
+		return getOfficeFloorCompiler(compiler).getManagedFunctionLoader()
+				.loadManagedFunctionType(managedFunctionSourceClass, new PropertyListImpl(propertyNameValues));
 	}
 
 	/**
@@ -392,8 +391,7 @@ public class ManagedFunctionLoaderUtil {
 	public static FunctionNamespaceType loadManagedFunctionType(ManagedFunctionSource managedFunctionSource,
 			String... propertyNameValues) {
 		// Return the loaded namespace type
-		return getOfficeFloorCompiler(null).getManagedFunctionLoader().loadManagedFunctionType(
-				ManagedFunctionLoaderUtil.class.getName(), managedFunctionSource,
+		return getOfficeFloorCompiler(null).getManagedFunctionLoader().loadManagedFunctionType(managedFunctionSource,
 				new PropertyListImpl(propertyNameValues));
 	}
 

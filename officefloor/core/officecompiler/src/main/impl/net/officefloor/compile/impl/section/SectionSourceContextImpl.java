@@ -19,6 +19,8 @@ package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.FunctionNamespaceNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
@@ -94,17 +96,17 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the managed function source class
+					FunctionNamespaceNode namespaceNode = this.context.createFunctionNamespaceNode(functionNamespace,
+							this.sectionNode);
 					Class managedFunctionSourceClass = this.context
-							.getManagedFunctionSourceClass(managedFunctionSourceClassName, this.sectionNode);
+							.getManagedFunctionSourceClass(managedFunctionSourceClassName, namespaceNode);
 					if (managedFunctionSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the function namespace type
-					ManagedFunctionLoader managedFunctionLoader = this.context
-							.getManagedFunctionLoader(this.sectionNode);
-					return managedFunctionLoader.loadManagedFunctionType(functionNamespace, managedFunctionSourceClass,
-							properties);
+					ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(namespaceNode);
+					return managedFunctionLoader.loadManagedFunctionType(managedFunctionSourceClass, properties);
 				});
 	}
 
@@ -116,16 +118,17 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the managed object source class
+					ManagedObjectSourceNode mosNode = this.context
+							.createManagedObjectSourceNode(managedObjectSourceName, this.sectionNode);
 					Class managedObjectSourceClass = this.context
-							.getManagedObjectSourceClass(managedObjectSourceClassName, this.sectionNode);
+							.getManagedObjectSourceClass(managedObjectSourceClassName, mosNode);
 					if (managedObjectSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the managed object type
-					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.sectionNode);
-					return managedObjectLoader.loadManagedObjectType(managedObjectSourceName, managedObjectSourceClass,
-							properties);
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(mosNode);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, properties);
 				});
 	}
 
@@ -143,7 +146,7 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 
 			// Load and return the section type
 			SectionLoader sectionLoader = this.context.getSectionLoader(this.sectionNode);
-			return sectionLoader.loadSectionType(sectionSourceClassName, sectionSourceClass, location, properties);
+			return sectionLoader.loadSectionType(sectionSourceClass, location, properties);
 		});
 	}
 

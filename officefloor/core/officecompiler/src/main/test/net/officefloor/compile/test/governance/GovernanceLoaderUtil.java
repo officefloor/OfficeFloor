@@ -159,8 +159,8 @@ public class GovernanceLoaderUtil {
 			Class<S> governanceSourceClass, String... propertyNameValues) {
 
 		// Load and return the administrator type
-		return getOfficeFloorCompiler().getGovernanceLoader().loadGovernanceType(GovernanceLoaderUtil.class.getName(),
-				governanceSourceClass, new PropertyListImpl(propertyNameValues));
+		return getOfficeFloorCompiler().getGovernanceLoader().loadGovernanceType(governanceSourceClass,
+				new PropertyListImpl(propertyNameValues));
 	}
 
 	/**

@@ -263,8 +263,8 @@ public class OfficeLoaderUtil {
 			String... propertyNameValuePairs) {
 
 		// Return the loaded office type
-		return getOfficeFloorCompiler().getOfficeLoader().loadOfficeType(OfficeLoaderUtil.class.getName(),
-				officeSourceClass, officeLocation, new PropertyListImpl(propertyNameValuePairs));
+		return getOfficeFloorCompiler().getOfficeLoader().loadOfficeType(officeSourceClass, officeLocation,
+				new PropertyListImpl(propertyNameValuePairs));
 	}
 
 	/**

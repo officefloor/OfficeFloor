@@ -617,7 +617,7 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 
 		// Load type to trigger issue with cause
 		ManagedObjectLoader loader = this.compiler.getManagedObjectLoader();
-		ManagedObjectType<None> type = loader.loadManagedObjectType("MO", new MockFailManagedObjectSource(cause),
+		ManagedObjectType<None> type = loader.loadManagedObjectType(new MockFailManagedObjectSource(cause),
 				this.compiler.createPropertyList());
 		assertNull("Should not load type", type);
 

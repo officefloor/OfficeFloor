@@ -250,8 +250,7 @@ public class SupplierLoaderUtil {
 		}
 
 		// Return the loaded supplier
-		return getOfficeFloorCompiler(compiler).getSupplierLoader().loadSupplierType(SupplierLoaderUtil.class.getName(),
-				supplierSourceClass, propertyList);
+		return getOfficeFloorCompiler(compiler).getSupplierLoader().loadSupplierType(supplierSourceClass, propertyList);
 	}
 
 	/**

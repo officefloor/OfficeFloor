@@ -378,14 +378,14 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	@Override
 	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
 		return NodeUtil.getNode(managedObjectName, this.managedObjects,
-				() -> this.context.createManagedObjectNode(managedObjectName));
+				() -> this.context.createManagedObjectNode(managedObjectName, this));
 	}
 
 	@Override
 	public ManagedObjectNode addManagedObjectNode(String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
 		return NodeUtil.getInitialisedNode(managedObjectName, this.managedObjects, this.context,
-				() -> this.context.createManagedObjectNode(managedObjectName),
+				() -> this.context.createManagedObjectNode(managedObjectName, this),
 				(managedObject) -> managedObject.initialise(managedObjectScope, managedObjectSourceNode));
 	}
 
@@ -820,8 +820,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 					.forEachOrdered((administration) -> administration.autoWireTeam(autoWirer, compileContext));
 
 			// Auto-wire managed object source teams
-			this.managedObjectSources.values().stream().sorted(
-					(a, b) -> CompileUtil.sortCompare(a.getManagedObjectSourceName(), b.getManagedObjectSourceName()))
+			this.managedObjectSources.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getQualifiedName(), b.getQualifiedName()))
 					.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, compileContext));
 		}
 

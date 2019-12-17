@@ -265,7 +265,7 @@ public class ManagedObjectPoolNodeImpl implements ManagedObjectPoolNode {
 
 		// Load and return the managed object pool type
 		ManagedObjectPoolLoader loader = this.context.getManagedObjectPoolLoader(this);
-		return loader.loadManagedObjectPoolType(this.managedObjectPoolName, managedObjectPoolSource, this.properties);
+		return loader.loadManagedObjectPoolType(managedObjectPoolSource, this.properties);
 	}
 
 	@Override

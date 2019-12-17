@@ -24,6 +24,7 @@ import net.officefloor.compile.impl.structure.SupplierNodeImpl;
 import net.officefloor.compile.impl.structure.SupplierThreadLocalNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.internal.structure.BoundManagedObjectNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSupplierThreadLocal;
@@ -95,7 +96,7 @@ public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 	public void testUnknownSupplierThreadLocal() {
 
 		// Record no supplier thread local for configuration
-		this.issues.recordIssueRegex("OFFICE.UNKNOWN-" + ThreadLocalManagedObject.class.getName(),
+		this.issues.recordIssueRegex("OFFICE.SUPPLIER.UNKNOWN-" + Node.escape(ThreadLocalManagedObject.class.getName()),
 				SupplierThreadLocalNodeImpl.class, "Supplier Thread Local not implemented.+");
 
 		// Should compile
@@ -115,9 +116,9 @@ public class CompileSupplierThreadingTest extends AbstractCompileTestCase {
 		this.record_supplierSetup();
 		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.issues.recordIssue("OFFICE." + ThreadLocalManagedObject.class.getName(), SupplierThreadLocalNodeImpl.class,
-				"Supplier Thread Local " + "OFFICE." + ThreadLocalManagedObject.class.getName() + " is not linked to a "
-						+ BoundManagedObjectNode.class.getSimpleName());
+		this.issues.recordIssue("OFFICE.SUPPLIER." + Node.escape(ThreadLocalManagedObject.class.getName()),
+				SupplierThreadLocalNodeImpl.class, "Supplier Thread Local " + ThreadLocalManagedObject.class.getName()
+						+ " is not linked to a " + BoundManagedObjectNode.class.getSimpleName());
 
 		// Should compile
 		this.compile(true);

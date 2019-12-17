@@ -49,11 +49,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 
 	/**
-	 * Name of the {@link ManagedObjectPool}.
-	 */
-	private final String MANAGED_OBJECT_POOL_NAME = "MANAGED OBJECT POOL";
-
-	/**
 	 * {@link CompilerIssues}.
 	 */
 	private final MockCompilerIssues issues = new MockCompilerIssues(this);
@@ -144,7 +139,7 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 		this.loadManagedObjectPoolType(true, (context) -> {
 			loggerName.value = context.getLogger().getName();
 		});
-		assertEquals("Incorrect logger name", MANAGED_OBJECT_POOL_NAME, loggerName.value);
+		assertEquals("Incorrect logger name", OfficeFloorCompiler.TYPE, loggerName.value);
 	}
 
 	/**
@@ -326,8 +321,8 @@ public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(this.issues);
 		ManagedObjectPoolLoader adminLoader = compiler.getManagedObjectPoolLoader();
 		MockManagedObjectPoolSource.init = init;
-		ManagedObjectPoolType adminType = adminLoader.loadManagedObjectPoolType(MANAGED_OBJECT_POOL_NAME,
-				MockManagedObjectPoolSource.class, propertyList);
+		ManagedObjectPoolType adminType = adminLoader.loadManagedObjectPoolType(MockManagedObjectPoolSource.class,
+				propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

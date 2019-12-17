@@ -51,7 +51,6 @@ public interface ManagedObjectPoolLoader {
 	 * {@link ManagedObjectPoolSource}.
 	 * 
 	 * @param <PS>                         {@link ManagedObjectPoolSource} type.
-	 * @param managedObjectPoolName        Name of the {@link ManagedObjectPool}.
 	 * @param managedObjectPoolSourceClass Class of the
 	 *                                     {@link ManagedObjectPoolSource}.
 	 * @param propertyList                 {@link PropertyList} containing the
@@ -60,21 +59,20 @@ public interface ManagedObjectPoolLoader {
 	 * @return {@link ManagedObjectPoolType} or <code>null</code> if issues, which
 	 *         are reported to the {@link CompilerIssues}.
 	 */
-	<PS extends ManagedObjectPoolSource> ManagedObjectPoolType loadManagedObjectPoolType(String managedObjectPoolName,
+	<PS extends ManagedObjectPoolSource> ManagedObjectPoolType loadManagedObjectPoolType(
 			Class<PS> managedObjectPoolSourceClass, PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link ManagedObjectPoolType} sourced from the
 	 * {@link ManagedObjectPoolSource}.
 	 * 
-	 * @param managedObjectPoolName   Name of the {@link ManagedObjectPool}.
 	 * @param managedObjectPoolSource {@link ManagedObjectPoolSource} instance.
 	 * @param propertyList            {@link PropertyList} containing the properties
 	 *                                to source the {@link ManagedObjectPoolType}.
 	 * @return {@link ManagedObjectPoolType} or <code>null</code> if issues, which
 	 *         are reported to the {@link CompilerIssues}.
 	 */
-	ManagedObjectPoolType loadManagedObjectPoolType(String managedObjectPoolName,
-			ManagedObjectPoolSource managedObjectPoolSource, PropertyList propertyList);
+	ManagedObjectPoolType loadManagedObjectPoolType(ManagedObjectPoolSource managedObjectPoolSource,
+			PropertyList propertyList);
 
 }

@@ -310,7 +310,7 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 
 			@Override
 			public String getManagedObjectSourceName() {
-				return managedObjectSourceNode.getManagedObjectSourceName();
+				return managedObjectSourceNode.getQualifiedName();
 			}
 
 			@Override
@@ -426,14 +426,14 @@ public class OfficeFloorNodeImpl implements OfficeFloorNode, ManagedObjectSource
 	@Override
 	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
 		return NodeUtil.getNode(managedObjectName, this.managedObjects,
-				() -> this.context.createManagedObjectNode(managedObjectName));
+				() -> this.context.createManagedObjectNode(managedObjectName, this));
 	}
 
 	@Override
 	public ManagedObjectNode addManagedObjectNode(String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
 		return NodeUtil.getInitialisedNode(managedObjectName, this.managedObjects, this.context,
-				() -> this.context.createManagedObjectNode(managedObjectName),
+				() -> this.context.createManagedObjectNode(managedObjectName, this),
 				(managedObject) -> managedObject.initialise(managedObjectScope, managedObjectSourceNode));
 	}
 

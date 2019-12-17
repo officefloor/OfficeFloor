@@ -43,6 +43,7 @@ import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeOutputNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeTeamNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -119,8 +120,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 
 		// Load the office type
 		OfficeLoader officeLoader = compiler.getOfficeLoader();
-		OfficeType officeType = officeLoader.loadOfficeType(OFFICE_NAME, MockLoadOfficeSource.class, "LOCATION",
-				properties);
+		OfficeType officeType = officeLoader.loadOfficeType(MockLoadOfficeSource.class, "LOCATION", properties);
 		MockLoadOfficeSource.assertOfficeType(officeType);
 	}
 
@@ -139,8 +139,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 
 		// Load the office type
 		OfficeLoader officeLoader = compiler.getOfficeLoader();
-		OfficeType officeType = officeLoader.loadOfficeType(OFFICE_NAME, new MockLoadOfficeSource(), "LOCATION",
-				properties);
+		OfficeType officeType = officeLoader.loadOfficeType(new MockLoadOfficeSource(), "LOCATION", properties);
 		MockLoadOfficeSource.assertOfficeType(officeType);
 	}
 
@@ -432,7 +431,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if duplicate name for {@link OfficeInput} instances.
 	 */
 	public void testInputType_DuplicateName() {
-		this.issues.recordIssue("TEST", OfficeInputNodeImpl.class, "Office Input TEST already added");
+		this.issues.recordIssue(Node.qualify(OFFICE_NAME, "TEST"), OfficeInputNodeImpl.class,
+				"Office Input TEST already added");
 
 		// Load the type
 		OfficeType type = this.loadOfficeType(true, (office, context) -> {
@@ -470,7 +470,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Ensure issue if duplicate name for {@link OfficeOutput} instances.
 	 */
 	public void testOutputType_DuplicateName() {
-		this.issues.recordIssue("TEST", OfficeOutputNodeImpl.class, "Office Output TEST already added");
+		this.issues.recordIssue(Node.qualify(OFFICE_NAME, "TEST"), OfficeOutputNodeImpl.class,
+				"Office Output TEST already added");
 
 		// Load the type
 		OfficeType type = this.loadOfficeType(true, (office, context) -> {
@@ -492,7 +493,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testNullManagedObjectName() {
 
 		// Record null managed object name
-		this.issues.recordIssue(null, OfficeObjectNodeImpl.class, "Null name for Office Object");
+		this.issues.recordIssue(Node.qualify(OFFICE_NAME, null), OfficeObjectNodeImpl.class,
+				"Null name for Office Object");
 
 		// Attempt to load office type
 		this.loadOfficeType(false, (office, context) -> {
@@ -507,7 +509,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testNullManagedObjectType() {
 
 		// Record null required type
-		this.issues.recordIssue("MO", OfficeObjectNodeImpl.class, "Null type for managed object (name=MO)");
+		this.issues.recordIssue(Node.qualify(OFFICE_NAME, "MO"), OfficeObjectNodeImpl.class,
+				"Null type for managed object (name=MO)");
 
 		// Attempt to load office type
 		this.loadOfficeType(false, (office, context) -> {
@@ -629,7 +632,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testNullTeamName() {
 
 		// Record null required type
-		this.issues.recordIssue(null, OfficeTeamNodeImpl.class, "Null name for Office Team");
+		this.issues.recordIssue(Node.qualify(OFFICE_NAME, null), OfficeTeamNodeImpl.class, "Null name for Office Team");
 
 		// Attempt to load office type
 		this.loadOfficeType(false, (office, context) -> {
@@ -921,8 +924,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		compiler.addResources(this.resourceSource);
 		OfficeLoader officeLoader = compiler.getOfficeLoader();
 		MockOfficeSource.loader = loader;
-		OfficeType officeType = officeLoader.loadOfficeType(OFFICE_NAME, MockOfficeSource.class, OFFICE_LOCATION,
-				propertyList);
+		OfficeType officeType = officeLoader.loadOfficeType(MockOfficeSource.class, OFFICE_LOCATION, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

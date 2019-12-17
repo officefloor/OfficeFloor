@@ -168,8 +168,8 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	}
 
 	@Override
-	public <S extends SupplierSource> SupplierType loadSupplierType(String supplierSourceName,
-			Class<S> supplierSourceClass, PropertyList propertyList) {
+	public <S extends SupplierSource> SupplierType loadSupplierType(Class<S> supplierSourceClass,
+			PropertyList propertyList) {
 
 		// Instantiate the supplier source
 		S supplierSource = CompileUtil.newInstance(supplierSourceClass, SupplierSource.class, this.node,
@@ -179,15 +179,14 @@ public class SupplierLoaderImpl implements SupplierLoader {
 		}
 
 		// Load and return the type
-		return this.loadSupplierType(supplierSourceName, supplierSource, propertyList);
+		return this.loadSupplierType(supplierSource, propertyList);
 	}
 
 	@Override
-	public SupplierType loadSupplierType(String supplierSourceName, SupplierSource supplierSource,
-			PropertyList propertyList) {
+	public SupplierType loadSupplierType(SupplierSource supplierSource, PropertyList propertyList) {
 
 		// Obtain qualified name
-		String qualifiedName = this.node.getQualifiedName(supplierSourceName);
+		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
 		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);

@@ -107,19 +107,21 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	public void testSuppliedManagedObjectSource() {
 
 		// Setup to provide managed object source instance
+		final String managedObjectSourceName = "SUPPLIER.QUALIFIER-" + Connection.class.getName()
+				+ ".MANAGED_OBJECT_SOURCE";
 		MockSupplierSource.reset();
-		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(Object.class, "MANAGED_OBJECT_SOURCE");
+		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(Object.class, managedObjectSourceName);
 		MockSupplierSource.managedObjectSource = mos;
 
 		// Record building the OfficeFloor
 		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
+		office.registerManagedObjectSource("MANAGED_OBJECT", managedObjectSourceName);
 		this.recordReturn(office, office.addProcessManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT"), null);
 
 		// Record instance (as supplied)
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", mos, 0, "MO_NAME", "MO_VALUE");
+		this.record_officeFloorBuilder_addManagedObject(managedObjectSourceName, mos, 0, "MO_NAME", "MO_VALUE");
 
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 

@@ -69,7 +69,6 @@ public interface ManagedObjectLoader {
 	 * @param <D>                      Dependency key type.
 	 * @param <F>                      Flow key type.
 	 * @param <MS>                     {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceName  Name of {@link ManagedObjectSource}.
 	 * @param managedObjectSourceClass Class of the {@link ManagedObjectSource}.
 	 * @param propertyList             {@link PropertyList} containing the
 	 *                                 properties to source the
@@ -78,22 +77,21 @@ public interface ManagedObjectLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
-			String managedObjectSourceName, Class<MS> managedObjectSourceClass, PropertyList propertyList);
+			Class<MS> managedObjectSourceClass, PropertyList propertyList);
 
 	/**
 	 * Loads and returns the {@link ManagedObjectType} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @param <D>                     Dependency key type.
-	 * @param <F>                     Flow key type.
-	 * @param managedObjectSourceName Name of {@link ManagedObjectSource}.
-	 * @param managedObjectSource     {@link ManagedObjectSource} instance to use.
-	 * @param propertyList            {@link PropertyList} containing the properties
-	 *                                to source the {@link ManagedObjectType}.
+	 * @param <D>                 Dependency key type.
+	 * @param <F>                 Flow key type.
+	 * @param managedObjectSource {@link ManagedObjectSource} instance to use.
+	 * @param propertyList        {@link PropertyList} containing the properties to
+	 *                            source the {@link ManagedObjectType}.
 	 * @return {@link ManagedObjectType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(String managedObjectSourceName,
+	<D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
 			ManagedObjectSource<D, F> managedObjectSource, PropertyList propertyList);
 
 	/**

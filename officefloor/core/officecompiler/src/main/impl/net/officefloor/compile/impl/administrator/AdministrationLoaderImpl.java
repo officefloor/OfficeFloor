@@ -180,7 +180,7 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 
 	@Override
 	public <E, F extends Enum<F>, G extends Enum<G>, AS extends AdministrationSource<E, F, G>> AdministrationType<E, F, G> loadAdministrationType(
-			String administrationName, Class<AS> administratorSourceClass, PropertyList propertyList) {
+			Class<AS> administratorSourceClass, PropertyList propertyList) {
 
 		// Create an instance of the administrator source
 		AS administratorSource = CompileUtil.newInstance(administratorSourceClass, AdministrationSource.class,
@@ -190,16 +190,16 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 		}
 
 		// Load and return type
-		return this.loadAdministrationType(administrationName, administratorSource, propertyList);
+		return this.loadAdministrationType(administratorSource, propertyList);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <E, F extends Enum<F>, G extends Enum<G>> AdministrationType<E, F, G> loadAdministrationType(
-			String administrationName, AdministrationSource<E, F, G> administratorSource, PropertyList propertyList) {
+			AdministrationSource<E, F, G> administratorSource, PropertyList propertyList) {
 
 		// Obtain qualified name
-		String qualifiedName = this.node.getQualifiedName(administrationName);
+		String qualifiedName = this.node.getQualifiedName();
 
 		// Obtain the overridden properties
 		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);

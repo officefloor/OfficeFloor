@@ -627,7 +627,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Validate section
-		SectionType type = compiler.getSectionLoader().loadSectionType(SECTION_NAME, ClassSectionSource.class,
+		SectionType type = compiler.getSectionLoader().loadSectionType(ClassSectionSource.class,
 				MockMultipleQualifiedObjectSection.class.getName(), compiler.createPropertyList());
 		assertNull("Should not load type as multiple qualifiers", type);
 
@@ -763,7 +763,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Validate section
-		compiler.getSectionLoader().loadSectionType(SECTION_NAME, ClassSectionSource.class,
+		compiler.getSectionLoader().loadSectionType(ClassSectionSource.class,
 				MockMultipleQualifiedDependencySection.class.getName(), compiler.createPropertyList());
 
 		// Verify

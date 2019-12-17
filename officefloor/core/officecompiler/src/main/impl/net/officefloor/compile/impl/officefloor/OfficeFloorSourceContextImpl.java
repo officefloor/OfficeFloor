@@ -19,8 +19,11 @@ package net.officefloor.compile.impl.officefloor;
 
 import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
+import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.SupplierNode;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.office.OfficeLoader;
@@ -97,9 +100,10 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 				this.context.getCompilerIssues(), () -> {
 
 					// Load and return the managed object type
-					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeFloorNode);
-					return managedObjectLoader.loadManagedObjectType(managedObjectSourceName, managedObjectSource,
-							properties);
+					ManagedObjectSourceNode mosNode = this.context
+							.createManagedObjectSourceNode(managedObjectSourceName, this.officeFloorNode);
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(mosNode);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSource, properties);
 				});
 	}
 
@@ -111,16 +115,17 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 				this.context.getCompilerIssues(), () -> {
 
 					// Obtain the managed object source class
+					ManagedObjectSourceNode mosNode = this.context
+							.createManagedObjectSourceNode(managedObjectSourceName, this.officeFloorNode);
 					Class managedObjectSourceClass = this.context
-							.getManagedObjectSourceClass(managedObjectSourceClassName, this.officeFloorNode);
+							.getManagedObjectSourceClass(managedObjectSourceClassName, mosNode);
 					if (managedObjectSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the managed object type
-					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(this.officeFloorNode);
-					return managedObjectLoader.loadManagedObjectType(managedObjectSourceName, managedObjectSourceClass,
-							properties);
+					ManagedObjectLoader managedObjectLoader = this.context.getManagedObjectLoader(mosNode);
+					return managedObjectLoader.loadManagedObjectType(managedObjectSourceClass, properties);
 				});
 	}
 
@@ -131,15 +136,16 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 				() -> {
 
 					// Obtain the supplier source class
+					SupplierNode supplierNode = this.context.createSupplierNode(supplierName, this.officeFloorNode);
 					Class supplierSourceClass = this.context.getSupplierSourceClass(supplierSourceClassName,
-							this.officeFloorNode);
+							supplierNode);
 					if (supplierSourceClass == null) {
 						return null;
 					}
 
 					// Load and return the supplier type
-					SupplierLoader supplierLoader = this.context.getSupplierLoader(this.officeFloorNode);
-					return supplierLoader.loadSupplierType(supplierName, supplierSourceClass, properties);
+					SupplierLoader supplierLoader = this.context.getSupplierLoader(supplierNode);
+					return supplierLoader.loadSupplierType(supplierSourceClass, properties);
 				});
 	}
 
@@ -150,14 +156,15 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 		return CompileUtil.loadType(OfficeType.class, officeSourceClassName, this.context.getCompilerIssues(), () -> {
 
 			// Obtain the office source class
-			Class officeSourceClass = this.context.getOfficeSourceClass(officeSourceClassName, this.officeFloorNode);
+			OfficeNode officeNode = this.context.createOfficeNode(officeName, this.officeFloorNode);
+			Class officeSourceClass = this.context.getOfficeSourceClass(officeSourceClassName, officeNode);
 			if (officeSourceClass == null) {
 				return null;
 			}
 
 			// Load and return the office type
-			OfficeLoader officeLoader = this.context.getOfficeLoader(this.officeFloorNode);
-			return officeLoader.loadOfficeType(officeName, officeSourceClass, location, properties);
+			OfficeLoader officeLoader = this.context.getOfficeLoader(officeNode);
+			return officeLoader.loadOfficeType(officeSourceClass, location, properties);
 		});
 	}
 
@@ -168,8 +175,9 @@ public class OfficeFloorSourceContextImpl extends ConfigurationSourceContextImpl
 				this.context.getCompilerIssues(), () -> {
 
 					// Load and return the office type
-					OfficeLoader officeLoader = this.context.getOfficeLoader(this.officeFloorNode);
-					return officeLoader.loadOfficeType(officeName, officeSource, location, properties);
+					OfficeNode officeNode = this.context.createOfficeNode(officeName, this.officeFloorNode);
+					OfficeLoader officeLoader = this.context.getOfficeLoader(officeNode);
+					return officeLoader.loadOfficeType(officeSource, location, properties);
 				});
 	}
 

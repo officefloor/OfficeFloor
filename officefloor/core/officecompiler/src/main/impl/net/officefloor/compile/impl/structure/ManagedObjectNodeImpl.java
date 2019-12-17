@@ -81,6 +81,23 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final String managedObjectName;
 
 	/**
+	 * Containing {@link SectionNode}. <code>null</code> if contained in the
+	 * {@link Office} or {@link OfficeFloor}.
+	 */
+	private final SectionNode containingSectionNode;
+
+	/**
+	 * Containing {@link OfficeNode}. <code>null</code> if contained in the
+	 * {@link OfficeFloor}.
+	 */
+	private final OfficeNode containingOfficeNode;
+
+	/**
+	 * Containing {@link OfficeFloorNode}.
+	 */
+	private final OfficeFloorNode containingOfficeFloorNode;
+
+	/**
 	 * {@link ManagedObjectDependencyNode} instances by their
 	 * {@link ManagedObjectDependency} names.
 	 */
@@ -182,11 +199,24 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectName Name of this {@link ManagedObject}.
-	 * @param context           {@link NodeContext}.
+	 * @param managedObjectName         Name of this {@link ManagedObject}.
+	 * @param containingSectionNode     {@link SectionNode} containing this
+	 *                                  {@link ManagedObjectNode}. <code>null</code>
+	 *                                  if contained in the {@link Office} or
+	 *                                  {@link OfficeFloor}.
+	 * @param containingOfficeNode      {@link OfficeNode} containing this
+	 *                                  {@link ManagedObjectNode}. <code>null</code>
+	 *                                  if contained in the {@link OfficeFloor}.
+	 * @param containingOfficeFloorNode {@link OfficeFloorNode} containing this
+	 *                                  {@link ManagedObjectNode}.
+	 * @param context                   {@link NodeContext}.
 	 */
-	public ManagedObjectNodeImpl(String managedObjectName, NodeContext context) {
+	public ManagedObjectNodeImpl(String managedObjectName, SectionNode containingSectionNode,
+			OfficeNode containingOfficeNode, OfficeFloorNode containingOfficeFloorNode, NodeContext context) {
 		this.managedObjectName = managedObjectName;
+		this.containingSectionNode = containingSectionNode;
+		this.containingOfficeNode = containingOfficeNode;
+		this.containingOfficeFloorNode = containingOfficeFloorNode;
 		this.context = context;
 	}
 
@@ -211,7 +241,29 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public Node getParentNode() {
-		return (this.state != null ? this.state.managedObjectSourceNode : null);
+		return (this.containingSectionNode != null) ? this.containingSectionNode
+				: ((this.containingOfficeNode != null) ? this.containingOfficeNode : this.containingOfficeFloorNode);
+	}
+
+	@Override
+	public String getQualifiedName() {
+
+		// Obtain name
+		String name = Node.escape(this.managedObjectName);
+
+		// Obtain the name based on location
+		if (this.state.containingSectionNode != null) {
+			// Use name qualified with both office and section
+			return this.state.containingSectionNode.getQualifiedName(name);
+
+		} else if (this.state.containingOfficeNode != null) {
+			// Use name qualified with office name
+			return this.state.containingOfficeNode.getQualifiedName(name);
+
+		} else {
+			// Use name unqualified
+			return name;
+		}
 	}
 
 	@Override
@@ -395,19 +447,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			return null;
 		}
 
-		// Obtain the name based on location
-		if (this.state.containingSectionNode != null) {
-			// Use name qualified with both office and section
-			return this.state.containingSectionNode.getQualifiedName(this.managedObjectName);
-
-		} else if (this.state.containingOfficeNode != null) {
-			// Use name qualified with office name
-			return this.state.containingOfficeNode.getQualifiedName(this.managedObjectName);
-
-		} else {
-			// Use name unqualified
-			return this.managedObjectName;
-		}
+		// Use the qualified name
+		return this.getQualifiedName();
 	}
 
 	@Override
@@ -457,7 +498,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 		// Register to the office
 		officeBuilder.registerManagedObjectSource(managedObjectName,
-				this.state.managedObjectSourceNode.getManagedObjectSourceName());
+				this.state.managedObjectSourceNode.getQualifiedName());
 
 		// Add the managed object to the office
 		ThreadDependencyMappingBuilder mapper;
