@@ -546,7 +546,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SectionLoader getSectionLoader() {
-		return new SectionLoaderImpl(this, this);
+		OfficeNode officeNode = this.createOfficeNode(this.getNodeName(), null);
+		return new SectionLoaderImpl(officeNode, null, this);
 	}
 
 	@Override
@@ -950,6 +951,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
+	public SectionLoader getSectionLoader(OfficeNode officeNode) {
+		return new SectionLoaderImpl(officeNode, null, this);
+	}
+
+	@Override
 	public SectionInputNode createSectionInputNode(String inputName, SectionNode section) {
 		return new SectionInputNodeImpl(inputName, section, this);
 	}
@@ -966,12 +972,12 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SectionNode createSectionNode(String sectionName, SectionNode parentSection) {
-		return new SectionNodeImpl(sectionName, parentSection, parentSection.getOfficeNode(), this);
+		return new SectionNodeImpl(true, sectionName, parentSection, parentSection.getOfficeNode(), this);
 	}
 
 	@Override
 	public SectionNode createSectionNode(String sectionName, OfficeNode office) {
-		return new SectionNodeImpl(sectionName, null, office, this);
+		return new SectionNodeImpl(true, sectionName, null, office, this);
 	}
 
 	@Override

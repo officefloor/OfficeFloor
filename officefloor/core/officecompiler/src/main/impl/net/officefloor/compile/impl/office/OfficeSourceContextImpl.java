@@ -77,7 +77,7 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 	 */
 	public OfficeSourceContextImpl(boolean isLoadingType, String officeLocation, PropertyList propertyList,
 			OfficeNode officeNode, NodeContext nodeContext) {
-		super(officeNode.getNodeName(), isLoadingType, nodeContext.getRootSourceContext(),
+		super(officeNode.getQualifiedName(), isLoadingType, nodeContext.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
 		this.officeLocation = officeLocation;
 		this.officeNode = officeNode;
@@ -113,7 +113,7 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 					}
 
 					// Load and return the section type
-					SectionLoader sectionLoader = this.context.getSectionLoader(sectionNode);
+					SectionLoader sectionLoader = this.context.getSectionLoader(this.officeNode);
 					return sectionLoader.loadOfficeSectionType(sectionName, sectionSourceClass, sectionLocation,
 							properties);
 				});
@@ -126,8 +126,7 @@ public class OfficeSourceContextImpl extends ConfigurationSourceContextImpl
 				this.context.getCompilerIssues(), () -> {
 
 					// Load and return the section type
-					SectionNode sectionNode = this.context.createSectionNode(sectionName, this.officeNode);
-					SectionLoader sectionLoader = this.context.getSectionLoader(sectionNode);
+					SectionLoader sectionLoader = this.context.getSectionLoader(this.officeNode);
 					return sectionLoader.loadOfficeSectionType(sectionName, sectionSource, sectionLocation, properties);
 				});
 	}

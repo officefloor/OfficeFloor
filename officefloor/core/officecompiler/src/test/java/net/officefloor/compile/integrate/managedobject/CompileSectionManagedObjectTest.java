@@ -96,7 +96,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 
 		// Record managed object type
 		this.issues.recordCaptureIssues(false);
-		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("OFFICE.SECTION.DEPENDENT.dependency", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency dependency is not linked to a DependentObjectNode");
 		this.issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 				"Failure loading " + OfficeSectionType.class.getSimpleName() + " from source SECTION");
@@ -187,7 +187,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 				ClassManagedObjectSource.class, 0, "class.name", ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("OFFICE.SECTION.MANAGED_OBJECT_SOURCE");
-		this.issues.recordIssue("doProcess", ManagedObjectFlowNodeImpl.class,
+		this.issues.recordIssue("OFFICE.SECTION.MANAGED_OBJECT_SOURCE.doProcess", ManagedObjectFlowNodeImpl.class,
 				"Managed Object Source Flow doProcess is not linked to a ManagedFunctionNode");
 
 		// Compile the OfficeFloor
@@ -195,8 +195,8 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests linking the {@link ManagedObjectSource} invoked
-	 * {@link ProcessState} with a {@link SubSectionInput}.
+	 * Tests linking the {@link ManagedObjectSource} invoked {@link ProcessState}
+	 * with a {@link SubSectionInput}.
 	 */
 	public void testManagedObjectSourceFlowLinkedToSubSectionInput() {
 
@@ -219,8 +219,8 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Tests linking the {@link ManagedObjectSource} invoked
-	 * {@link ProcessState} with an {@link ExternalFlowModel}.
+	 * Tests linking the {@link ManagedObjectSource} invoked {@link ProcessState}
+	 * with an {@link ExternalFlowModel}.
 	 */
 	public void testManagedObjectSourceFlowLinkedToExternalFlow() {
 
@@ -276,8 +276,7 @@ public class CompileSectionManagedObjectTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Class for {@link ClassManagedObjectSource} containing a
-	 * {@link Dependency}.
+	 * Class for {@link ClassManagedObjectSource} containing a {@link Dependency}.
 	 */
 	public static class DependencyManagedObject {
 

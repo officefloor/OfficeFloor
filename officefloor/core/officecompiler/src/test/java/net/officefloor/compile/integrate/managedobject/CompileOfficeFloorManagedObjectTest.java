@@ -107,8 +107,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	public void testSuppliedManagedObjectSource() {
 
 		// Setup to provide managed object source instance
-		final String managedObjectSourceName = "SUPPLIER.QUALIFIER-" + Connection.class.getName()
-				+ ".MANAGED_OBJECT_SOURCE";
+		final String managedObjectSourceName = "MANAGED_OBJECT_SOURCE";
 		MockSupplierSource.reset();
 		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(Object.class, managedObjectSourceName);
 		MockSupplierSource.managedObjectSource = mos;
@@ -186,7 +185,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("DEPENDENT", "DEPENDENT_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("DEPENDENT", "DEPENDENT");
-		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("DEPENDENT.dependency", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency dependency is not linked to a BoundManagedObjectNode");
 
 		// Add managed objects to OfficeFloor
@@ -305,7 +304,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 				"class.name", ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
-		this.issues.recordIssue("doProcess", ManagedObjectFlowNodeImpl.class,
+		this.issues.recordIssue("MANAGED_OBJECT_SOURCE.doProcess", ManagedObjectFlowNodeImpl.class,
 				"Managed Object Source Flow doProcess is not linked to a ManagedFunctionNode");
 
 		// Compile the OfficeFloor
@@ -459,7 +458,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 				"class.name", ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.issues.recordIssue("MANAGED_OBJECT_SOURCE", ManagedObjectSourceNodeImpl.class,
-				"Managed Object Source MANAGED_OBJECT_SOURCE object " + ProcessManagedObject.class.getName()
+				"Managed Object Source object " + ProcessManagedObject.class.getName()
 						+ " is not compatible with input managed object INPUT_MO (input object type "
 						+ String.class.getName() + ")");
 

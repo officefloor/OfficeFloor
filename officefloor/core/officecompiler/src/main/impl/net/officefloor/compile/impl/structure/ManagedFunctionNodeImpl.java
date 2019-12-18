@@ -182,7 +182,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		this.context = context;
 
 		// Create additional objects
-		this.teamResponsible = this.context.createResponsibleTeamNode("Team for function " + this.functionName, this);
+		this.teamResponsible = this.context.createResponsibleTeamNode("TEAM", this);
 	}
 
 	/**

@@ -120,6 +120,12 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 public class SectionNodeImpl implements SectionNode {
 
 	/**
+	 * Indicates if this {@link SectionNode} is named. For {@link SectionType} need
+	 * to create unnamed {@link SectionNode}.
+	 */
+	private final boolean isSectionNamed;
+
+	/**
 	 * Name of this {@link SubSection}.
 	 */
 	private final String sectionName;
@@ -254,13 +260,16 @@ public class SectionNodeImpl implements SectionNode {
 	/**
 	 * Initialises this {@link SectionNode} with the basic information.
 	 * 
+	 * @param isNamed       Indicates if named.
 	 * @param sectionName   Name of this {@link OfficeSection}.
 	 * @param parentSection Optional parent {@link SectionNode}. May be
 	 *                      <code>null</code>.
 	 * @param office        {@link Office} containing the {@link OfficeSection}.
 	 * @param context       {@link NodeContext}.
 	 */
-	public SectionNodeImpl(String sectionName, SectionNode parentSection, OfficeNode office, NodeContext context) {
+	public SectionNodeImpl(boolean isSectionNamed, String sectionName, SectionNode parentSection, OfficeNode office,
+			NodeContext context) {
+		this.isSectionNamed = isSectionNamed;
 		this.sectionName = sectionName;
 		this.parentSection = parentSection;
 		this.office = office;
@@ -276,7 +285,12 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public String getNodeName() {
-		return this.sectionName;
+		return this.isSectionNamed ? this.sectionName : this.getParentNode().getNodeName();
+	}
+
+	@Override
+	public String getQualifiedName() {
+		return this.isSectionNamed ? SectionNode.super.getQualifiedName() : this.getParentNode().getQualifiedName();
 	}
 
 	@Override
@@ -380,8 +394,8 @@ public class SectionNodeImpl implements SectionNode {
 		this.usedSectionSource = source;
 
 		// Obtain the overridden properties
-		PropertyList overriddenProperties = this.context.overrideProperties(this, this.getQualifiedName(),
-				this.propertyList);
+		String qualifiedName = this.getQualifiedName();
+		PropertyList overriddenProperties = this.context.overrideProperties(this, qualifiedName, this.propertyList);
 
 		// Create the section source context
 		SectionSourceContext context = new SectionSourceContextImpl(false, this.state.sectionLocation,
@@ -502,7 +516,7 @@ public class SectionNodeImpl implements SectionNode {
 						// Cyclic inheritance, so provide issue
 						StringBuilder hierarchyLog = new StringBuilder();
 						for (Iterator<SectionNode> iterator = inheritanceHierarchy.iterator(); iterator.hasNext();) {
-							hierarchyLog.append(iterator.next().getQualifiedName(null) + " : ");
+							hierarchyLog.append(iterator.next().getQualifiedName() + " : ");
 						}
 						this.context.getCompilerIssues().addIssue(this,
 								"Cyclic section inheritance hierarchy ( " + hierarchyLog.toString() + "... )");

@@ -116,7 +116,7 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends OfficeFrameTestC
 		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Record failure to instantiate
-		this.recordReturn(node, node.getNodeName(), "mos");
+		this.recordReturn(node, node.getQualifiedName(), "mos");
 		issues.recordIssue("mos", node.getClass(),
 				"Failed to obtain ManagedObjectSourceSpecification from " + MockManagedObjectSource.class.getName(),
 				failure);

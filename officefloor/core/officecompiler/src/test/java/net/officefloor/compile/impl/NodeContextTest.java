@@ -118,6 +118,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateSectionNode_withinOffice() {
 		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
 		this.recordReturn(this.office, this.office.getQualifiedName("SECTION"), "OFFICE.SECTION");
 		SectionNode node = this.doTest(() -> {
 			SectionNode section = this.context.createSectionNode("SECTION", this.office);
@@ -312,6 +313,8 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link ManagedObjectNode} within {@link SectionNode}.
 	 */
 	public void testCreateManagedObjectNode_withinSection() {
+		this.recordReturn(this.section, this.section.getOfficeNode(), this.office);
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
 		final CompileContext compileContext = this.context.createCompileContext();
 		this.recordReturn(this.managedObjectSource, this.managedObjectSource.getSectionNode(), this.section);
 		this.recordReturn(this.section, this.section.getOfficeNode(), this.office);
@@ -325,7 +328,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			ManagedObjectNode mo = this.context.createManagedObjectNode("MO", this.section);
 
 			// Ensure uninitialised that provides values
-			assertNode(mo, "MO", "Managed Object", null, null);
+			assertNode(mo, "MO", "Managed Object", null, this.section);
 			assertEquals("Incorrect office name", "MO", mo.getOfficeManagedObjectName());
 			assertEquals("Incorrect section name", "MO", mo.getSectionManagedObjectName());
 			assertEquals("Incorrect administerable name", "MO", mo.getAdministerableManagedObjectName());
@@ -343,7 +346,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 			return mo;
 		});
-		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
+		assertNode(node, "MO", "Managed Object", null, this.section);
 
 		// Validate type qualifications
 		node.addTypeQualification("QUALIFIER", "TYPE");
@@ -357,6 +360,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link ManagedObjectNode} within {@link OfficeNode}.
 	 */
 	public void testCreateManagedObjectNode_withinOffice() {
+		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
 		this.recordReturn(this.managedObjectSource, this.managedObjectSource.getSectionNode(), null);
 		this.recordReturn(this.managedObjectSource, this.managedObjectSource.getOfficeNode(), this.office);
 		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
@@ -365,7 +369,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			ManagedObjectNode mo = this.context.createManagedObjectNode("MO", this.office);
 
 			// Validate correct details
-			assertNode(mo, "MO", "Managed Object", null, null);
+			assertNode(mo, "MO", "Managed Object", null, this.office);
 			assertEquals("Incorrect section name", "MO", mo.getSectionManagedObjectName());
 			assertEquals("Incorrect office name", "MO", mo.getOfficeManagedObjectName());
 			assertEquals("Incorrect office section name", "MO", mo.getOfficeSectionManagedObjectName());
@@ -379,7 +383,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 			return mo;
 		});
-		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
+		assertNode(node, "MO", "Managed Object", null, this.office);
 	}
 
 	/**
@@ -393,7 +397,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 			ManagedObjectNode mo = this.context.createManagedObjectNode("MO", this.officeFloor);
 
 			// Ensure uninitialised that provides values
-			assertNode(mo, "MO", "Managed Object", null, null);
+			assertNode(mo, "MO", "Managed Object", null, this.officeFloor);
 			assertEquals("Incorrect section name", "MO", mo.getSectionManagedObjectName());
 			assertEquals("Incorrect office name", "MO", mo.getOfficeManagedObjectName());
 			assertEquals("Incorrect office section name", "MO", mo.getOfficeSectionManagedObjectName());
@@ -406,7 +410,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 
 			return mo;
 		});
-		assertNode(node, "MO", "Managed Object", null, this.managedObjectSource);
+		assertNode(node, "MO", "Managed Object", null, this.officeFloor);
 	}
 
 	/**
@@ -910,7 +914,7 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	public void testCreateManagedFunctionNode() {
 		FunctionNamespaceNode namespace = this.createMock(FunctionNamespaceNode.class);
 		ManagedFunctionNode node = this.doTest(() -> this.context.createFunctionNode("FUNCTION", this.section));
-		assertNode(node, "FUNCTION", "Managed Function", null, null);
+		assertNode(node, "FUNCTION", "Managed Function", null, this.section);
 		assertEquals("Incorrct office function name", "FUNCTION", node.getOfficeFunctionName());
 		assertEquals("Incorrect section function name", "FUNCTION", node.getSectionFunctionName());
 		assertNull("Should not have namespace", node.getFunctionNamespaceNode());

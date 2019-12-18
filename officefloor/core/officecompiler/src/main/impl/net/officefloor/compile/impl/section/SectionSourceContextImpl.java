@@ -67,7 +67,7 @@ public class SectionSourceContextImpl extends ConfigurationSourceContextImpl imp
 	 */
 	public SectionSourceContextImpl(boolean isLoadingType, String sectionLocation, PropertyList propertyList,
 			SectionNode sectionNode, NodeContext context) {
-		super(sectionNode.getQualifiedName(null), isLoadingType, context.getRootSourceContext(),
+		super(sectionNode.getQualifiedName(), isLoadingType, context.getRootSourceContext(),
 				new PropertyListSourceProperties(propertyList));
 		this.sectionLocation = sectionLocation;
 		this.sectionNode = sectionNode;

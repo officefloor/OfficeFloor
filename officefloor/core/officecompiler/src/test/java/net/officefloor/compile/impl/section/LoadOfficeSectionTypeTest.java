@@ -22,9 +22,11 @@ import java.sql.Connection;
 import javax.sql.DataSource;
 import javax.transaction.xa.XAResource;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedObjectDependencyNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.object.DependentObjectType;
 import net.officefloor.compile.object.ObjectDependencyType;
@@ -158,7 +160,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Record not linked on first attempt to retrieve dependent
-		this.issues.recordIssue("SECTION.NAMESPACE.FUNCTION.QUALIFIED-OBJECT", FunctionObjectNodeImpl.class,
+		this.issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, "SECTION", "FUNCTION", "QUALIFIED-OBJECT"),
+				FunctionObjectNodeImpl.class,
 				"Function Object QUALIFIED-OBJECT is not linked to a DependentObjectNode");
 		// Note: does not make it to UNQUALIFIED-OBJECT
 
@@ -344,7 +347,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 	public void testSectionManagedObjectDependencyNotLinked() {
 
 		// Record not linked on first attempt to retrieve dependent
-		this.issues.recordIssue("SECTION.MO.QUALIFIED-DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, "SECTION", "MO", "QUALIFIED-DEPENDENCY"),
+				ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency QUALIFIED-DEPENDENCY is not linked to a DependentObjectNode");
 		// Note: does not make it to UNQUALIFIED-DEPENDENCY
 
@@ -685,8 +689,8 @@ public class LoadOfficeSectionTypeTest extends AbstractStructureTestCase {
 		final ManagedFunctionFactory<?, ?> functionFactory = this.createMock(ManagedFunctionFactory.class);
 
 		// Issue as not linked
-		this.issues.recordIssue("SECTION.NAMESPACE.FUNCTION.OBJECT", FunctionObjectNodeImpl.class,
-				"Function Object OBJECT is not linked to a DependentObjectNode");
+		this.issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, "SECTION", "FUNCTION", "OBJECT"),
+				FunctionObjectNodeImpl.class, "Function Object OBJECT is not linked to a DependentObjectNode");
 
 		// Load the function object dependent on section object
 		OfficeSectionType section = this.loadOfficeSectionType("SECTION", (context) -> {

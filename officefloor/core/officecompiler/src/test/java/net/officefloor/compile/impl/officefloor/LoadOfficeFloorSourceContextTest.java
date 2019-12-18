@@ -26,8 +26,10 @@ import java.util.Properties;
 
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
 import net.officefloor.compile.impl.office.MockLoadOfficeSource;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.impl.structure.SupplierNodeImpl;
 import net.officefloor.compile.impl.supplier.MockLoadSupplierSource;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssue;
@@ -382,8 +384,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 
 		// Ensure issue in not loading managed object type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
-				"Must specify property 'class.name'");
+		this.issues.recordIssue("MOS", ManagedObjectSourceNodeImpl.class, "Must specify property 'class.name'");
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
 				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(), issues);
 
@@ -440,8 +441,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 
 		// Ensure issue in not loading managed object type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
-				"Must specify property 'class.name'");
+		this.issues.recordIssue("MOS", ManagedObjectSourceNodeImpl.class, "Must specify property 'class.name'");
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
 				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(), issues);
 
@@ -498,7 +498,7 @@ public class LoadOfficeFloorSourceContextTest extends AbstractOfficeFloorTestCas
 
 		// Ensure issue in not loading supplier type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
+		this.issues.recordIssue("SUPPLIER", SupplierNodeImpl.class,
 				"Missing property 'TEST' for SupplierSource " + MockLoadSupplierSource.class.getName());
 		this.issues.recordIssue(OfficeFloorNode.OFFICE_FLOOR_NAME, OfficeFloorNodeImpl.class,
 				"Failure loading SupplierType from source " + MockLoadSupplierSource.class.getName(), issues);
