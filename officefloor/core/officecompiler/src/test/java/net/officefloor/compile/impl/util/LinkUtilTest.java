@@ -747,8 +747,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 
 		@Override
 		public Node getParentNode() {
-			fail("Should not require parent");
-			return null;
+			return null; // no parent for qualified naming
 		}
 
 		@Override

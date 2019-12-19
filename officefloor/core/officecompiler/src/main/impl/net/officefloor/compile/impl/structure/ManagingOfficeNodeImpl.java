@@ -69,8 +69,7 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 
 	@Override
 	public String getNodeName() {
-		return "Managing Office for " + ManagedObjectSourceNode.TYPE + " "
-				+ this.managedObjectSourceNode.getQualifiedName();
+		return "MANAGING_OFFICE";
 	}
 
 	@Override

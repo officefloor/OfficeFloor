@@ -588,11 +588,9 @@ public class NodeContextTest extends OfficeFrameTestCase {
 	 * Ensure can create {@link ManagingOfficeNode}.
 	 */
 	public void testCreateManagingOfficeNode() {
-		this.recordReturn(this.managedObjectSource, this.managedObjectSource.getQualifiedName(), "MOS");
 		ManagingOfficeNode node = this.doTest(() -> {
 			ManagingOfficeNode office = this.context.createManagingOfficeNode(this.managedObjectSource);
-			assertNode(office, "Managing Office for Managed Object Source MOS", "Managing Office", null,
-					this.managedObjectSource);
+			assertNode(office, "MANAGING_OFFICE", "Managing Office", null, this.managedObjectSource);
 			return office;
 		});
 		assertInitialise(node, (n) -> n.initialise());

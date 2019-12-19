@@ -26,7 +26,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.SectionType;
@@ -598,7 +600,6 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testMultipleQualifiedObject() {
 
-		final String SECTION_NAME = "invalid";
 		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Enable recording issue
@@ -607,12 +608,14 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Record issue
 		CompilerIssue[] cause = issues.recordCaptureIssues(true);
-		issues.recordIssue(SECTION_NAME, SectionNodeImpl.class,
+		issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, "NAMESPACE"), FunctionNamespaceNodeImpl.class,
 				"Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
 						+ SectionClassManagedFunctionSource.class.getName(),
 				new IllegalArgumentException("Method doInput parameter 0 has more than one Qualifier"));
-		issues.recordIssue(SECTION_NAME, SectionNodeImpl.class, "Failure loading FunctionNamespaceType from source "
-				+ SectionClassManagedFunctionSource.class.getName(), cause);
+		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
+				"Failure loading FunctionNamespaceType from source "
+						+ SectionClassManagedFunctionSource.class.getName(),
+				cause);
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockMultipleQualifiedObjectSection.class,
@@ -747,7 +750,6 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testMulipleQualifiedDependency() {
 
-		final String SECTION_NAME = "invalid";
 		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Enable loading with compiler issues
@@ -755,7 +757,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.recordIssue(SECTION_NAME, SectionNodeImpl.class,
+		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Unable to obtain type qualifier for dependency connection",
 				new IllegalArgumentException("Dependency connection has more than one Qualifier"));
 

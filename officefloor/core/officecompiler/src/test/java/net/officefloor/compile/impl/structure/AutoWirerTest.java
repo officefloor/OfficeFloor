@@ -76,7 +76,7 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	 * Ensure issue if no {@link AutoWire} provided.
 	 */
 	public void testIssueIfNoAutoWire() {
-		this.recordReturn(this.source, this.source.getNodeName(), "SOURCE");
+		this.recordReturn(this.source, this.source.getQualifiedName(), "SOURCE");
 		this.issues.recordIssue("SOURCE", this.source.getClass(), "Must specify at least one AutoWire");
 		this.replayMockObjects();
 		assertEquals("Should be no link", 0, this.wirer.getAutoWireLinks(this.source).length);
@@ -226,7 +226,7 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	 * Ensure issue if no matching target.
 	 */
 	public void testIssueAsNoMatchingTarget() {
-		this.recordReturn(this.source, this.source.getNodeName(), "SOURCE");
+		this.recordReturn(this.source, this.source.getQualifiedName(), "SOURCE");
 		this.issues.recordIssue("SOURCE", this.source.getClass(), "No target found by auto-wiring");
 		this.replayMockObjects();
 		AutoWireLink<Node, Node>[] links = this.wirer.getAutoWireLinks(this.source, new AutoWire("NOT_MATCH"));
@@ -266,7 +266,7 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	private void doIssueIfDuplicateMatchingTarget(Function<AutoWire[], AutoWireLink<Node, Node>[]> retriever) {
 		LinkObjectNode one = this.createMock(LinkObjectNode.class);
 		LinkObjectNode two = this.createMock(LinkObjectNode.class);
-		this.recordReturn(this.source, this.source.getNodeName(), "SOURCE");
+		this.recordReturn(this.source, this.source.getQualifiedName(), "SOURCE");
 		this.issues.recordIssue("SOURCE", this.source.getClass(),
 				"Duplicate auto-wire targets (java.lang.Object -> java.lang.Object, java.lang.Object).  Please qualify to avoid this issue.");
 		this.replayMockObjects();
@@ -322,7 +322,7 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	public void doIssueIfMultipleMatchMultipleTargets(Function<AutoWire[], AutoWireLink<Node, Node>[]> retriever) {
 		LinkObjectNode one = this.createMock(LinkObjectNode.class);
 		LinkObjectNode two = this.createMock(LinkObjectNode.class);
-		this.recordReturn(this.source, this.source.getNodeName(), "SOURCE");
+		this.recordReturn(this.source, this.source.getQualifiedName(), "SOURCE");
 		this.issues.recordIssue("SOURCE", this.source.getClass(),
 				"Multiple auto-wires (java.lang.Integer, java.lang.String) matching multiple targets (java.lang.Integer, java.lang.String).  Please qualify, reduce dependencies or remove auto-wire targets to avoid this issue.");
 		this.replayMockObjects();
@@ -382,7 +382,7 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	 * Ensure issue if unknown source type.
 	 */
 	public void testUnknownSourceType() {
-		this.recordReturn(this.source, this.source.getNodeName(), "SOURCE");
+		this.recordReturn(this.source, this.source.getQualifiedName(), "SOURCE");
 		this.issues.recordIssue("SOURCE", this.source.getClass(), "Unable to load source auto-wire type UNKNOWN");
 		this.replayMockObjects();
 		this.wirer.addAutoWireTarget(this.target, new AutoWire(Object.class));
@@ -394,7 +394,7 @@ public class AutoWirerTest extends OfficeFrameTestCase {
 	 * Ensure issue if unknown target type.
 	 */
 	public void testUnknownTargetType() {
-		this.recordReturn(this.source, this.source.getNodeName(), "SOURCE");
+		this.recordReturn(this.source, this.source.getQualifiedName(), "SOURCE");
 		this.issues.recordIssue("SOURCE", this.source.getClass(), "Unable to load target auto-wire type UNKNOWN");
 		this.replayMockObjects();
 		this.wirer.addAutoWireTarget(this.target, new AutoWire("UNKNOWN"));

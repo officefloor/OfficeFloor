@@ -820,7 +820,7 @@ public class SectionNodeImpl implements SectionNode {
 			CompileContext compileContext) {
 
 		// Register as possible MBean
-		String qualifiedName = this.getQualifiedName(null);
+		String qualifiedName = this.getQualifiedName();
 		compileContext.registerPossibleMBean(SectionSource.class, qualifiedName, this.usedSectionSource);
 
 		// Build the functions (in deterministic order)

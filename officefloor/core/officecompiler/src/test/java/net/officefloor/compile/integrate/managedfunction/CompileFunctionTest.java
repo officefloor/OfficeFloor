@@ -22,6 +22,7 @@ import net.officefloor.compile.impl.structure.FunctionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.ManagedFunctionNodeImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -50,8 +51,8 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.managedfunction.clazz.ClassManagedFunctionSource;
 import net.officefloor.plugin.managedfunction.method.DefaultConstructorMethodObjectInstanceFactory;
-import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 import net.officefloor.plugin.managedfunction.method.MethodFunctionFactory;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 /**
@@ -126,7 +127,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
-		this.issues.recordIssue("flow", FunctionFlowNodeImpl.class,
+		this.issues.recordIssue("OFFICE.SECTION.FUNCTION.flow", FunctionFlowNodeImpl.class,
 				"Function Flow flow is not linked to a ManagedFunctionNode");
 
 		// Compile the OfficeFloor
@@ -308,7 +309,8 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		CompilerIssue[] capturedIssues = this.issues.recordCaptureIssues(true);
 
 		// Record building the OfficeFloor (fails on loading type, so no build)
-		this.issues.recordIssue(CompileManagedObject.class.getName(), FunctionObjectNodeImpl.class,
+		this.issues.recordIssue("OFFICE.SECTION.FUNCTION." + Node.escape(CompileManagedObject.class.getName()),
+				FunctionObjectNodeImpl.class,
 				"Function Object " + CompileManagedObject.class.getName() + " is not linked to a DependentObjectNode");
 		this.issues.recordIssue("OFFICE", OfficeNodeImpl.class, "Failure loading OfficeSectionType from source SECTION",
 				capturedIssues);
@@ -536,7 +538,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 		this.record_init();
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+		this.issues.recordIssue("OFFICE.SECTION.FUNCTION", ManagedFunctionNodeImpl.class,
 				"Escalation " + Exception.class.getName() + " not handled by a Function nor propagated to the Office");
 
 		// Compile the OfficeFloor
