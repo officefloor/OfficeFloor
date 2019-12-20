@@ -391,7 +391,8 @@ public class WoofTemplateExtensionLoaderImpl implements WoofTemplateExtensionLoa
 		public WoofTemplateExtensionServiceContextImpl(String applicationPath, WebTemplate template,
 				OfficeArchitect officeArchitect, WebArchitect webArchitect, PropertyList properties,
 				SourceContext sourceContext) {
-			super(sourceContext.isLoadingType(), sourceContext, new PropertyListSourceProperties(properties));
+			super(sourceContext.getLogger().getName(), sourceContext.isLoadingType(), sourceContext,
+					new PropertyListSourceProperties(properties));
 			this.applicationPath = applicationPath;
 			this.template = template;
 			this.officeArchitect = officeArchitect;

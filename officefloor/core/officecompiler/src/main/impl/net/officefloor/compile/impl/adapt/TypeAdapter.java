@@ -34,6 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * {@link InvocationHandler} to enable type compatibility between interface
@@ -249,6 +250,11 @@ public class TypeAdapter implements InvocationHandler {
 			Enum<?> enumObject = (Enum<?>) object;
 			Class<?> adaptObjectClass = translateClass(objectClass, implClassLoader);
 			return Enum.valueOf((Class) adaptObjectClass, enumObject.name());
+		}
+		
+		// Transform for logger
+		if (Logger.class.getName().equals(objectClass.getName())) {
+			return object; // use logger as is
 		}
 
 		// Transform for InputStream

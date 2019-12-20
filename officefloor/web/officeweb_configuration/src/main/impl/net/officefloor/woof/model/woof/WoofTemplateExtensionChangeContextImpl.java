@@ -57,27 +57,20 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 	/**
 	 * Initiate.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param sourceContext
-	 *            {@link SourceContext}.
-	 * @param oldUri
-	 *            Old URI.
-	 * @param oldProperties
-	 *            Old {@link SourceProperties}.
-	 * @param newUri
-	 *            New URI.
-	 * @param newProperties
-	 *            New {@link SourceProperties}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param issues
-	 *            {@link WoofChangeIssues}.
+	 * @param isLoadingType        Indicates if loading type.
+	 * @param sourceContext        {@link SourceContext}.
+	 * @param oldUri               Old URI.
+	 * @param oldProperties        Old {@link SourceProperties}.
+	 * @param newUri               New URI.
+	 * @param newProperties        New {@link SourceProperties}.
+	 * @param configurationContext {@link ConfigurationContext}.
+	 * @param issues               {@link WoofChangeIssues}.
 	 */
 	public WoofTemplateExtensionChangeContextImpl(boolean isLoadingType, SourceContext sourceContext, String oldUri,
 			SourceProperties oldProperties, String newUri, SourceProperties newProperties,
 			ConfigurationContext configurationContext, WoofChangeIssues issues) {
-		super(isLoadingType, sourceContext, (newUri == null ? null : newProperties));
+		super(sourceContext.getLogger().getName(), isLoadingType, sourceContext,
+				(newUri == null ? null : newProperties));
 
 		// Store state
 		this.configurationContext = configurationContext;
@@ -136,10 +129,8 @@ public class WoofTemplateExtensionChangeContextImpl extends SourceContextImpl
 		/**
 		 * Initiate.
 		 * 
-		 * @param uri
-		 *            URI.
-		 * @param sourceProperties
-		 *            {@link SourceProperties}.
+		 * @param uri              URI.
+		 * @param sourceProperties {@link SourceProperties}.
 		 */
 		public WoofTemplateExtensionConfigurationImpl(String uri, SourceProperties sourceProperties) {
 			super(sourceProperties);

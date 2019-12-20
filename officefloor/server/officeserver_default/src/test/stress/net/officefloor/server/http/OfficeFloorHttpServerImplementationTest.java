@@ -43,6 +43,17 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	private static final HttpHeaderValue textPlain = new HttpHeaderValue("text/plain");
 
 	@Override
+	protected void setUp() throws Exception {
+
+		// Ensure clean start of test
+		assertFalse("Should not have active socket manager",
+				HttpServerSocketManagedObjectSource.isSocketManagerActive());
+
+		// Continue setup
+		super.setUp();
+	}
+
+	@Override
 	protected Class<? extends HttpServerImplementation> getHttpServerImplementationClass() {
 		return OfficeFloorHttpServerImplementation.class;
 	}

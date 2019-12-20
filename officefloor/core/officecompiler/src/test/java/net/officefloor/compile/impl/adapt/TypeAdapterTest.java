@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -133,6 +134,20 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can adapt {@link Logger}.
+	 */
+	public void testAdaptLogger() {
+		this.doParameterTest(LoggerParameter.class, Logger.getLogger("LOGGER"));
+	}
+
+	public static class LoggerParameter {
+		public boolean run(Logger logger) {
+			assertEquals("Incorrect logger", "LOGGER", logger.getName());
+			return true;
+		}
+	}
+
+	/**
 	 * Ensure can adapt an {@link Exception}.
 	 */
 	public void testAdaptException() {
@@ -154,6 +169,9 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 		}
 	}
 
+	/**
+	 * Ensure adapt {@link Exception}.
+	 */
 	public void testAdaptedException() {
 		this.doParameterTest(AdaptedExceptionParameter.class, new NonAdaptableException());
 	}
@@ -222,6 +240,9 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 		}
 	}
 
+	/**
+	 * Ensure adapt object array.
+	 */
 	public void testAdaptObjectArray() {
 		this.doParameterTest(ObjectArray.class,
 				(Object) new MockInterface[] { new MockClass("ONE"), new MockClass("TWO") });
@@ -316,6 +337,25 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 		}
 	}
 
+	/**
+	 * Adapt the return {@link Logger}.
+	 */
+	public void testLoggerReturnValue() {
+		Object value = this.doTest(LoggerReturnValue.class);
+		assertTrue("Should be the logger", value instanceof Logger);
+		Logger adapted = (Logger) value;
+		assertEquals("Incorrect looger", Logger.getLogger("TEST"), adapted);
+	}
+
+	public static class LoggerReturnValue {
+		public Logger run() {
+			return Logger.getLogger("TEST");
+		}
+	}
+
+	/**
+	 * Handle {@link Class} not on {@link ClassLoader}.
+	 */
 	public void testClassNotOnClasspath() {
 		Object value = this.doTest(ClassNotOnClasspath.class);
 		assertNotNull("Should always get the class", value);
@@ -331,6 +371,9 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 		}
 	}
 
+	/**
+	 * Ensure can obtain {@link Class} from property of returned adapted object.
+	 */
 	public void testPropertyClassReturnValue() throws ClassNotFoundException {
 		Object value = this.doTest(PropertyClassReturnValue.class);
 		assertTrue("Should be adapted return value", value instanceof PropertyClass);

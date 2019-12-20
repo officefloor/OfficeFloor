@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
@@ -280,7 +281,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		governanceA.addProperty("name.b", "value.b");
 		governanceA.enableAutoWireExtensions();
 		templateA.record((template) -> template.addGovernance(governanceA));
-		sectionA.addGovernance(governanceA);		
+		sectionA.addGovernance(governanceA);
 		procedureA.addGovernance(governanceA);
 		final OfficeGovernance governanceB = this.createMock(OfficeGovernance.class);
 		this.recordReturn(this.office, this.office.addOfficeGovernance("GOVERNANCE_B", "CLASS"), governanceB);
@@ -370,7 +371,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 
 		// Record extending template
 		this.recordTemplateExtension(null);
-
+		
 		// Test
 		this.replayMockObjects();
 		this.loadConfiguration("implicit-template-extension.woof.xml");
@@ -709,6 +710,7 @@ public class WoofLoaderTest extends OfficeFrameTestCase {
 		this.recordReturn(this.extensionContext, this.extensionContext.createPropertyList(), properties);
 
 		// Load the source context
+		this.recordReturn(this.extensionContext, this.extensionContext.getLogger(), Logger.getLogger("template"));
 		this.recordReturn(this.extensionContext, this.extensionContext.isLoadingType(), true);
 	}
 

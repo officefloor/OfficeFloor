@@ -49,7 +49,7 @@ public class WoofTemplateChangeContextImpl extends SourceContextImpl implements 
 	 */
 	public WoofTemplateChangeContextImpl(boolean isLoadingType, SourceContext sourceContext,
 			ConfigurationContext configurationContext, WoofChangeIssues issues) {
-		super(isLoadingType, sourceContext, new SourcePropertiesImpl());
+		super(sourceContext.getLogger().getName(), isLoadingType, sourceContext, new SourcePropertiesImpl());
 		this.configurationContext = configurationContext;
 		this.issues = issues;
 	}
