@@ -35,6 +35,7 @@ import net.officefloor.frame.impl.construct.flow.FlowMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
+import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionAdministrationMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministrationConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
@@ -43,6 +44,7 @@ import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -166,11 +168,11 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(escalationFlows);
 
 		// Create the administrations
-		AdministrationMetaData<?, ?, ?>[] preAdministrations = this
+		ManagedFunctionAdministrationMetaData<?, ?, ?>[] preAdministrations = this
 				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects("pre",
 						configuration.getPreAdministration(), rawAdministrationMetaDataFactory, assetManagerFactory,
 						defaultAsynchronousFlowTimeout, issues);
-		AdministrationMetaData<?, ?, ?>[] postAdministrations = this
+		ManagedFunctionAdministrationMetaData<?, ?, ?>[] postAdministrations = this
 				.constructAdministrationMetaDataAndRegisterAdministeredManagedObjects("post",
 						configuration.getPostAdministration(), rawAdministrationMetaDataFactory, assetManagerFactory,
 						defaultAsynchronousFlowTimeout, issues);
@@ -252,9 +254,9 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * @param defaultAsynchronousFlowTimeout Default {@link AsynchronousFlow}
 	 *                                       timeout.
 	 * @param issues                         {@link OfficeFloorIssues}.
-	 * @return Constructed {@link AdministrationMetaData} instances.
+	 * @return Constructed {@link ManagedFunctionAdministrationMetaData} instances.
 	 */
-	private AdministrationMetaData<?, ?, ?>[] constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
+	private ManagedFunctionAdministrationMetaData<?, ?, ?>[] constructAdministrationMetaDataAndRegisterAdministeredManagedObjects(
 			String administrationQualifier, AdministrationConfiguration<?, ?, ?>[] configuration,
 			RawAdministrationMetaDataFactory rawAdminFactory, AssetManagerFactory assetManagerFactory,
 			long defaultAsynchronousFlowTimeout, OfficeFloorIssues issues) {
@@ -262,15 +264,22 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 		// Construct the raw administration meta-data
 		RawAdministrationMetaData[] rawAdministrations = rawAdminFactory.constructRawAdministrationMetaData(
 				this.functionName, administrationQualifier, configuration, this.functionScopedManagedObjects,
-				AssetType.FUNCTION, functionName, assetManagerFactory, defaultAsynchronousFlowTimeout, issues);
+				AssetType.FUNCTION, this.functionName, assetManagerFactory, defaultAsynchronousFlowTimeout, issues);
 
 		// Create array of administration meta-data and register managed objects
-		AdministrationMetaData<?, ?, ?>[] administrations = new AdministrationMetaData[rawAdministrations.length];
+		ManagedFunctionAdministrationMetaData<?, ?, ?>[] administrations = new ManagedFunctionAdministrationMetaData[rawAdministrations.length];
 		for (int i = 0; i < rawAdministrations.length; i++) {
 			RawAdministrationMetaData rawAdministration = rawAdministrations[i];
+			AdministrationMetaData<?, ?, ?> administrationMetaData = rawAdministration.getAdministrationMetaData();
+
+			// Create the logger
+			String functionAdminName = this.functionName + "." + administrationQualifier + "."
+					+ administrationMetaData.getAdministrationName();
+			Logger logger = Logger.getLogger(functionAdminName);
 
 			// Add administration to listing
-			administrations[i] = rawAdministration.getAdministrationMetaData();
+			administrations[i] = new ManagedFunctionAdministrationMetaDataImpl<>(logger,
+					rawAdministration.getAdministrationMetaData());
 
 			// Register the administered managed objects
 			for (RawBoundManagedObjectMetaData boundManagedObject : rawAdministration

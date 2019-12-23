@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.construct.managedfunction;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -324,10 +325,14 @@ public class RawManagedFunctionMetaDataFactory {
 		AssetManager asynchronousFlowsAssetManager = assetManagerFactory.createAssetManager(AssetType.FUNCTION,
 				functionName, AsynchronousFlow.class.getSimpleName(), issues);
 
+		// Create the logger
+		Logger logger = Logger.getLogger(functionName);
+
 		// Create the function meta-data
 		ManagedFunctionMetaDataImpl<?, ?> functionMetaData = new ManagedFunctionMetaDataImpl<>(functionName,
 				functionFactory, annotations, parameterType, responsibleTeam, functionIndexedManagedObjects,
-				functionBoundMoMetaData, requiredGovernance, asynchronousFlowTimeout, asynchronousFlowsAssetManager);
+				functionBoundMoMetaData, requiredGovernance, asynchronousFlowTimeout, asynchronousFlowsAssetManager,
+				logger);
 
 		// Return the raw function meta-data
 		@SuppressWarnings({ "rawtypes", "unchecked" })

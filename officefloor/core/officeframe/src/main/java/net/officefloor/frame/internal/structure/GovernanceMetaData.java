@@ -44,10 +44,9 @@ public interface GovernanceMetaData<E, F extends Enum<F>> extends ManagedFunctio
 	/**
 	 * Creates the {@link GovernanceContainer}.
 	 * 
-	 * @param threadState
-	 *            {@link ThreadState}.
-	 * @param governanceIndex
-	 *            Index of the {@link Governance} within the {@link ThreadState}.
+	 * @param threadState     {@link ThreadState}.
+	 * @param governanceIndex Index of the {@link Governance} within the
+	 *                        {@link ThreadState}.
 	 * @return {@link GovernanceContainer}.
 	 */
 	GovernanceContainer<E> createGovernanceContainer(ThreadState threadState, int governanceIndex);
@@ -56,8 +55,7 @@ public interface GovernanceMetaData<E, F extends Enum<F>> extends ManagedFunctio
 	 * Creates the {@link ManagedFunctionContainer} for the
 	 * {@link GovernanceActivity}.
 	 * 
-	 * @param activity
-	 *            {@link GovernanceActivity}.
+	 * @param activity {@link GovernanceActivity}.
 	 * @return {@link ManagedFunctionLogic} for the {@link GovernanceActivity}.
 	 */
 	ManagedFunctionLogic createGovernanceFunctionLogic(GovernanceActivity<F> activity);

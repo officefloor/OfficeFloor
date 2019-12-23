@@ -46,11 +46,11 @@ import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectM
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.internal.configuration.ManagedFunctionConfiguration;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -707,8 +707,11 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 
 		// Ensure have administration
 		assertEquals("Should have pre administration", 1, functionMetaData.getPreAdministrationMetaData().length);
-		AdministrationMetaData<?, ?, ?> adminMetaData = functionMetaData.getPreAdministrationMetaData()[0];
-		assertEquals("Incorrect administration meta-data", "ADMIN", adminMetaData.getAdministrationName());
+		ManagedFunctionAdministrationMetaData<?, ?, ?> adminMetaData = functionMetaData
+				.getPreAdministrationMetaData()[0];
+		assertEquals("Incorrect administration meta-data", "ADMIN",
+				adminMetaData.getAdministrationMetaData().getAdministrationName());
+		assertEquals("Incorrect logger name", "FUNCTION.pre.ADMIN", adminMetaData.getLogger().getName());
 		assertEquals("Should not have post administration", 0, functionMetaData.getPostAdministrationMetaData().length);
 	}
 

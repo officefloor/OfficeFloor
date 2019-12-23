@@ -20,6 +20,7 @@ package net.officefloor.frame.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -50,11 +51,6 @@ import net.officefloor.frame.test.MockClockFactory;
  * @author Daniel Sagenschneider
  */
 public class ManagedObjectSourceStandAlone {
-
-	/**
-	 * Name of the {@link ManagedObjectSource} being loaded.
-	 */
-	public static final String STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME = "managed.object.source";
 
 	/**
 	 * Name of the {@link Office} managing the {@link ManagedObjectSource} being
@@ -136,11 +132,13 @@ public class ManagedObjectSourceStandAlone {
 	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> MS initManagedObjectSource(
 			MS managedObjectSource) throws Exception {
 
+		// Obtain the managed object source name
+		final String managedObjectSourceName = this.getClass().getName();
+
 		// Create necessary builders
 		OfficeFloorBuilder officeFloorBuilder = OfficeFrame.createOfficeFloorBuilder();
 		ManagingOfficeBuilder<F> managingOfficeBuilder = officeFloorBuilder
-				.addManagedObject(STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, managedObjectSource)
-				.setManagingOffice("STAND ALONE");
+				.addManagedObject(managedObjectSourceName, managedObjectSource).setManagingOffice("STAND ALONE");
 		OfficeBuilder officeBuilder = officeFloorBuilder.addOffice(STAND_ALONE_MANAGING_OFFICE_NAME);
 
 		// Create the delegate source context
@@ -148,9 +146,8 @@ public class ManagedObjectSourceStandAlone {
 				Thread.currentThread().getContextClassLoader(), this.clockFactory);
 
 		// Initialise the managed object source
-		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(this.getClass().getName(),
-				false, STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, null, this.properties, context, managingOfficeBuilder,
-				officeBuilder);
+		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(managedObjectSourceName,
+				false, managedObjectSourceName, null, this.properties, context, managingOfficeBuilder, officeBuilder);
 		managedObjectSource.init(sourceContext);
 
 		// Return the initialised managed object source
@@ -169,8 +166,13 @@ public class ManagedObjectSourceStandAlone {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <O extends Enum<O>, F extends Enum<F>, MS extends ManagedObjectSource<O, F>> void startManagedObjectSource(
 			MS managedObjectSource) throws Exception {
+
+		// Obtain the logger
+		final String managedObjectSourceName = this.getClass().getName();
+		Logger logger = Logger.getLogger(managedObjectSourceName);
+
 		// Start the managed object source
-		managedObjectSource.start(new LoadExecuteContext());
+		managedObjectSource.start(new LoadExecuteContext(logger));
 	}
 
 	/**
@@ -332,6 +334,20 @@ public class ManagedObjectSourceStandAlone {
 			implements ManagedObjectExecuteContext<F>, ManagedObjectStartupProcess {
 
 		/**
+		 * {@link Logger}.
+		 */
+		private final Logger logger;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param logger {@link Logger}.
+		 */
+		private LoadExecuteContext(Logger logger) {
+			this.logger = logger;
+		}
+
+		/**
 		 * Processes the {@link ManagedFunction} for the invoked {@link ProcessState}.
 		 * 
 		 * @param processIndex  Index of the {@link ProcessState} to invoke.
@@ -393,6 +409,11 @@ public class ManagedObjectSourceStandAlone {
 		/*
 		 * ================ ManagedObjectExecuteContext =====================
 		 */
+
+		@Override
+		public Logger getLogger() {
+			return this.logger;
+		}
 
 		@Override
 		public ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, ManagedObject managedObject,

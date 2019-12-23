@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
@@ -289,8 +290,11 @@ public class MethodManagedFunctionBuilderUtil {
 	public static MethodResult runMethod(ManagedFunctionType<Indexed, Indexed> functionType,
 			Consumer<ManagedFunctionContextBuilder> contextBuilder) throws Throwable {
 
+		// Create the logger
+		Logger logger = Logger.getLogger(functionType.getFunctionName());
+
 		// Setup the context
-		MockManagedFunctionContext context = new MockManagedFunctionContext();
+		MockManagedFunctionContext context = new MockManagedFunctionContext(logger);
 		if (contextBuilder != null) {
 			contextBuilder.accept(context);
 		}
@@ -454,9 +458,28 @@ public class MethodManagedFunctionBuilderUtil {
 		 */
 		private final List<MockAsynchronousFlow> asyncFlows = new LinkedList<>();
 
+		/**
+		 * {@link Logger}.
+		 */
+		private final Logger logger;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param logger {@link Logger}.
+		 */
+		private MockManagedFunctionContext(Logger logger) {
+			this.logger = logger;
+		}
+
 		/*
 		 * =============== ManagedFunctionContextBuilder ===========
 		 */
+
+		@Override
+		public Logger getLogger() {
+			return this.logger;
+		}
 
 		@Override
 		public void setObject(int dependencyIndex, Object object) {

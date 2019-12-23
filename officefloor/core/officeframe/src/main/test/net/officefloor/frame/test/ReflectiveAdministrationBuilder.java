@@ -101,7 +101,7 @@ public class ReflectiveAdministrationBuilder {
 	/**
 	 * Instantiate.
 	 *
-	 * @param                        <C> {@link Administration} {@link Class} type.
+	 * @param <C>                    {@link Administration} {@link Class} type.
 	 * @param clazz                  {@link Class} to determine the {@link Method}
 	 *                               instances for the {@link Administration}
 	 *                               instances.
@@ -171,6 +171,18 @@ public class ReflectiveAdministrationBuilder {
 	 */
 	public void administerManagedObject(String managedObjectName) {
 		this.administrationBuilder.administerManagedObject(managedObjectName);
+	}
+
+	/**
+	 * Builds the {@link AdministrationContext} as parameter.
+	 */
+	public void buildAdministrationContext() {
+
+		// Link the administration context
+		this.parameterFactories[this.parameterIndex] = (context) -> context;
+
+		// Set for next parameter
+		this.parameterIndex++;
 	}
 
 	/**

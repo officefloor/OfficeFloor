@@ -18,8 +18,10 @@
 package net.officefloor.frame.impl.execute.flow;
 
 import java.lang.reflect.Array;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.governance.Governance;
@@ -42,6 +44,7 @@ import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.GovernanceActivity;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.LinkedListSet;
+import net.officefloor.frame.internal.structure.ManagedFunctionAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionContainer;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -135,8 +138,10 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			ManagedFunctionContainer parallelFunctionOwner) {
 
 		// Obtain the administration meta-data to determine
-		AdministrationMetaData<?, ?, ?>[] preAdministration = managedFunctionMetaData.getPreAdministrationMetaData();
-		AdministrationMetaData<?, ?, ?>[] postAdministration = managedFunctionMetaData.getPostAdministrationMetaData();
+		ManagedFunctionAdministrationMetaData<?, ?, ?>[] preAdministration = managedFunctionMetaData
+				.getPreAdministrationMetaData();
+		ManagedFunctionAdministrationMetaData<?, ?, ?>[] postAdministration = managedFunctionMetaData
+				.getPostAdministrationMetaData();
 
 		// Post administration unloads managed objects, otherwise function
 		boolean isFunctionUnload = (postAdministration.length == 0);
@@ -156,10 +161,11 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 
 		// Load the pre-function administration (as parallel functions)
 		for (int i = 0; i < preAdministration.length; i++) {
-			AdministrationMetaData<?, ?, ?> administrationMetaData = preAdministration[i];
+			ManagedFunctionAdministrationMetaData<?, ?, ?> administrationMetaData = preAdministration[i];
 
 			// Create the administration function container
-			ManagedFunctionContainer adminFunction = this.createAdministrationFunction(administrationMetaData,
+			ManagedFunctionContainer adminFunction = this.createAdministrationFunction(
+					administrationMetaData.getAdministrationMetaData(), administrationMetaData.getLogger(),
 					requiredManagedObjects, requiredGovernance, isEnforceGovernance, parallelFunctionOwner,
 					boundManagedObjects, false);
 
@@ -170,13 +176,14 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		// Load the post-function administration (as next functions)
 		ManagedFunctionContainer lastAdministration = null;
 		for (int i = 0; i < postAdministration.length; i++) {
-			AdministrationMetaData<?, ?, ?> administrationMetaData = postAdministration[i];
+			ManagedFunctionAdministrationMetaData<?, ?, ?> administrationMetaData = postAdministration[i];
 
 			// Determine if unload managed objects (last administration)
 			boolean isUnloadResponsible = (i == (postAdministration.length - 1));
 
 			// Create the administration function container
-			ManagedFunctionContainer adminFunction = this.createAdministrationFunction(administrationMetaData,
+			ManagedFunctionContainer adminFunction = this.createAdministrationFunction(
+					administrationMetaData.getAdministrationMetaData(), administrationMetaData.getLogger(),
 					requiredManagedObjects, requiredGovernance, isEnforceGovernance, parallelFunctionOwner,
 					boundManagedObjects, isUnloadResponsible);
 
@@ -214,7 +221,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	public <E, F extends Enum<F>, G extends Enum<G>> ManagedFunctionContainer createAdministrationFunction(
 			ManagedObjectAdministrationMetaData<E, F, G> adminMetaData,
 			ManagedFunctionContainer parallelFunctionOwner) {
-		return this.createAdministrationFunction(adminMetaData.getAdministrationMetaData(),
+		return this.createAdministrationFunction(adminMetaData.getAdministrationMetaData(), adminMetaData.getLogger(),
 				adminMetaData.getRequiredManagedObjects(), null, true, parallelFunctionOwner, null, false);
 	}
 
@@ -222,6 +229,8 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 * Creates the {@link ManagedFunctionContainer} for the {@link Administration}.
 	 * 
 	 * @param administrationMetaData      {@link AdministrationMetaData}.
+	 * @param logger                      {@link Logger} for
+	 *                                    {@link AdministrationContext}.
 	 * @param requiredManagedObjects      {@link ManagedObjectIndex} instances to
 	 *                                    the {@link ManagedObject} instances that
 	 *                                    must be loaded before the
@@ -240,9 +249,10 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 * @return {@link AdministrationFunctionLogic}.
 	 */
 	private <E> ManagedFunctionContainer createAdministrationFunction(
-			AdministrationMetaData<E, ?, ?> administrationMetaData, ManagedObjectIndex[] requiredManagedObjects,
-			boolean[] requiredGovernance, boolean isEnforceGovernance, ManagedFunctionContainer parallelOwner,
-			ManagedFunctionBoundManagedObjects functionBoundManagedObjects, boolean isUnloadResponsible) {
+			AdministrationMetaData<E, ?, ?> administrationMetaData, Logger logger,
+			ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance, boolean isEnforceGovernance,
+			ManagedFunctionContainer parallelOwner, ManagedFunctionBoundManagedObjects functionBoundManagedObjects,
+			boolean isUnloadResponsible) {
 
 		// Obtain the responsible team (ensure all done on same thread)
 		// (this ensures safe to add to extensions list in setup)
@@ -260,7 +270,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 		// Create the administration function logic
 		// (extensions loaded all on same thread in setup functions)
 		AdministrationFunctionLogic<E, ?, ?> administrationLogic = new AdministrationFunctionLogic<>(
-				administrationMetaData, extensions, this.threadState);
+				administrationMetaData, extensions, this.threadState, logger);
 
 		// Obtain the extensions to be managed
 		FunctionState allExtractions = null;
