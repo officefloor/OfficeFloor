@@ -305,7 +305,7 @@ public class StatePoller<S, F extends Enum<F>> {
 		 * @return <code>this</code>.
 		 */
 		public Builder<S, F> logger(Logger logger) {
-			this.logger = logger != null ? logger : Logger.getLogger(StatePoller.class.getName());
+			this.logger = logger != null ? logger : this.executeContext.getLogger();
 			return this;
 		}
 

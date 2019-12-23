@@ -34,14 +34,14 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
 public class DataSourceManagedObjectSource extends AbstractConnectionManagedObjectSource implements ManagedObject {
 
 	/**
-	 * {@link Logger}.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(DataSourceManagedObjectSource.class.getName());
-
-	/**
 	 * {@link DataSource}.
 	 */
 	private DataSource dataSource;
+
+	/**
+	 * {@link Logger}.
+	 */
+	private Logger logger;
 
 	/*
 	 * ============== AbstractConnectionManagedObjectSource =================
@@ -55,6 +55,9 @@ public class DataSourceManagedObjectSource extends AbstractConnectionManagedObje
 	@Override
 	protected void loadFurtherMetaData(MetaDataContext<None, None> context) throws Exception {
 		ManagedObjectSourceContext<None> mosContext = context.getManagedObjectSourceContext();
+
+		// Capture the logger
+		this.logger = mosContext.getLogger();
 
 		// Load the type
 		context.setObjectClass(DataSource.class);
@@ -76,7 +79,7 @@ public class DataSourceManagedObjectSource extends AbstractConnectionManagedObje
 	public void stop() {
 
 		// Close the DataSource
-		this.closeDataSource(this.dataSource, LOGGER);
+		this.closeDataSource(this.dataSource, this.logger);
 	}
 
 	@Override

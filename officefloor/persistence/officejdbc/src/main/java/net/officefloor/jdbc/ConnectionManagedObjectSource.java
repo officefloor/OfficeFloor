@@ -48,11 +48,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
 public class ConnectionManagedObjectSource extends AbstractConnectionManagedObjectSource {
 
 	/**
-	 * {@link Logger}.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(ConnectionManagedObjectSource.class.getName());
-
-	/**
 	 * Wrapper factory.
 	 */
 	private static interface WrapperFactory {
@@ -106,7 +101,8 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 
 		// Load close handling
 		context.getManagedObjectSourceContext().setDefaultManagedObjectPool(
-				(poolContext) -> new DefaultManagedObjectPool(poolContext.getManagedObjectSource()));
+				(poolContext) -> new DefaultManagedObjectPool(poolContext.getManagedObjectSource(),
+						this.mosContext.getLogger()));
 		context.getManagedObjectSourceContext().getRecycleFunction(new RecycleFunction()).linkParameter(0,
 				RecycleManagedObjectParameter.class);
 
@@ -162,7 +158,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	public void stop() {
 
 		// Close the DataSource
-		this.closeDataSource(this.dataSource, LOGGER);
+		this.closeDataSource(this.dataSource, this.mosContext.getLogger());
 	}
 
 	@Override
@@ -263,12 +259,18 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 		private final ManagedObjectSource<?, ?> managedObjectSource;
 
 		/**
+		 * {@link Logger}.
+		 */
+		private final Logger logger;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param managedObjectSource {@link ManagedObjectSource}.
 		 */
-		public DefaultManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource) {
+		public DefaultManagedObjectPool(ManagedObjectSource<?, ?> managedObjectSource, Logger logger) {
 			this.managedObjectSource = managedObjectSource;
+			this.logger = logger;
 		}
 
 		/**
@@ -280,7 +282,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 			try {
 				((ConnectionManagedObject) managedObject).connection.close();
 			} catch (SQLException ex) {
-				LOGGER.log(Level.WARNING, "Failed to close connection", ex);
+				this.logger.log(Level.WARNING, "Failed to close connection", ex);
 			}
 		}
 
