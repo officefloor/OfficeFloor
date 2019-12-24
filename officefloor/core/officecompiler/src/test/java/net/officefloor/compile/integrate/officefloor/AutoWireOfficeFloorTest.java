@@ -23,6 +23,7 @@ import java.util.List;
 import net.officefloor.compile.impl.structure.OfficeObjectNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
@@ -339,12 +340,12 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, mos);
 
 		// Should supply and auto-wire the dependency
-		final String mosName = CompileManagedObject.class.getName();
-		final String moName = CompileManagedObject.class.getName();
+		final String mosName = Node.escape(CompileManagedObject.class.getName());
+		final String moName = Node.escape(CompileManagedObject.class.getName());
 		this.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource(mosName, mosName);
-		this.record_officeBuilder_addThreadManagedObject(moName, mosName);
+		office.registerManagedObjectSource(moName, mosName);
+		this.record_officeBuilder_addThreadManagedObject(moName, moName);
 
 		// Build the office
 		CompileOfficeSource.registerOffice(null, CompileManagedObject.class, moName, null, this);
@@ -380,12 +381,12 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 				"DEPENDENCY");
 
 		// Should supply and auto-wire the dependency
-		final String mosName = CompileManagedObject.class.getName();
-		final String moName = CompileManagedObject.class.getName();
+		final String mosName = Node.escape(CompileManagedObject.class.getName());
+		final String moName = Node.escape(CompileManagedObject.class.getName());
 		this.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource(mosName, mosName);
-		this.record_officeBuilder_addThreadManagedObject(moName, mosName);
+		office.registerManagedObjectSource(moName, mosName);
+		this.record_officeBuilder_addThreadManagedObject(moName, moName);
 		dependency.mapDependency(0, moName);
 
 		// Build the office
@@ -418,10 +419,10 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new FlowManagedObjectSource());
 
 		// Should not supply managed object as requires flow configuration
-		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring");
-		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class,
+		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring");
+		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class,
 				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
-		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class,
+		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class,
 				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
 
 		// Build the office
@@ -456,10 +457,10 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, new TeamManagedObjectSource());
 
 		// Should not supply managed object as requires flow configuration
-		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring");
-		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class,
+		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class, "No target found by auto-wiring");
+		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class,
 				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
-		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class,
+		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class,
 				"Office Object OBJECT is not linked to a BoundManagedObjectNode");
 
 		// Build the office

@@ -378,14 +378,14 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	@Override
 	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
 		return NodeUtil.getNode(managedObjectName, this.managedObjects,
-				() -> this.context.createManagedObjectNode(managedObjectName));
+				() -> this.context.createManagedObjectNode(managedObjectName, this));
 	}
 
 	@Override
 	public ManagedObjectNode addManagedObjectNode(String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
 		return NodeUtil.getInitialisedNode(managedObjectName, this.managedObjects, this.context,
-				() -> this.context.createManagedObjectNode(managedObjectName),
+				() -> this.context.createManagedObjectNode(managedObjectName, this),
 				(managedObject) -> managedObject.initialise(managedObjectScope, managedObjectSourceNode));
 	}
 
@@ -478,11 +478,6 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	 */
 
 	@Override
-	public String getQualifiedName(String simpleName) {
-		return this.officeName + "." + simpleName;
-	}
-
-	@Override
 	public OfficeFloorNode getOfficeFloorNode() {
 		return this.officeFloor;
 	}
@@ -532,12 +527,12 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		// Keep track of the office source
 		this.usedOfficeSource = source;
 
-		// Obtain the override properties
-		PropertyList overrideProperties = this.context.overrideProperties(this, this.officeName, this.properties);
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.context.overrideProperties(this, this.officeName, this.properties);
 
 		// Create the office source context
 		OfficeSourceContextImpl context = new OfficeSourceContextImpl(false, this.state.officeLocation,
-				overrideProperties, this, this.context);
+				overriddenProperties, this, this.context);
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeExtensionService> extensionServices = new ArrayList<>();
@@ -825,8 +820,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 					.forEachOrdered((administration) -> administration.autoWireTeam(autoWirer, compileContext));
 
 			// Auto-wire managed object source teams
-			this.managedObjectSources.values().stream().sorted(
-					(a, b) -> CompileUtil.sortCompare(a.getManagedObjectSourceName(), b.getManagedObjectSourceName()))
+			this.managedObjectSources.values().stream()
+					.sorted((a, b) -> CompileUtil.sortCompare(a.getQualifiedName(), b.getQualifiedName()))
 					.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, compileContext));
 		}
 

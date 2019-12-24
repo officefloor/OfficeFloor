@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.CompileContext;
 import net.officefloor.compile.internal.structure.Node;
@@ -77,45 +78,6 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Default to appropriate node
 		this.node = (this.parentSectionNode != null) ? this.parentSectionNode : this.officeNode;
-	}
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param node        {@link Node} requiring the {@link SectionLoader}.
-	 * @param nodeContext {@link NodeContext}.
-	 */
-	public SectionLoaderImpl(Node node, NodeContext nodeContext) {
-		this.node = node;
-		this.nodeContext = nodeContext;
-
-		// Provide defaults for creating the section node
-		this.officeNode = this.nodeContext.createOfficeNode("<office>", null);
-		this.parentSectionNode = null;
-	}
-
-	/**
-	 * Creates the {@link SectionNode} to load the {@link OfficeSectionType} or
-	 * {@link SectionType}.
-	 * 
-	 * @param sectionName            Name of the {@link SectionNode}.
-	 * @param sectionSourceClassName {@link SectionSource} {@link Class} name.
-	 * @param sectionSource          {@link SectionSource} instance. May be
-	 *                               <code>null</code>.
-	 * @param sectionLocation        Location of the {@link SectionNode}.
-	 * @return {@link SectionNode}.
-	 */
-	private SectionNode createSectionNode(String sectionName, String sectionSourceClassName,
-			SectionSource sectionSource, String sectionLocation) {
-
-		// Create the section node
-		SectionNode sectionNode = (this.parentSectionNode != null)
-				? this.nodeContext.createSectionNode(sectionName, this.parentSectionNode)
-				: this.nodeContext.createSectionNode(sectionName, this.officeNode);
-		sectionNode.initialise(sectionSourceClassName, sectionSource, sectionLocation);
-
-		// Return the section node
-		return sectionNode;
 	}
 
 	/*
@@ -237,9 +199,16 @@ public class SectionLoaderImpl implements SectionLoader {
 	public SectionType loadSectionType(SectionSource sectionSource, String sectionLocation, PropertyList propertyList) {
 
 		// Create the section node
-		SectionNode sectionNode = this.createSectionNode("<type>", sectionSource.getClass().getName(), sectionSource,
-				sectionLocation);
-		propertyList.configureProperties(sectionNode);
+		SectionNode sectionNode = new SectionNodeImpl(false, null, this.parentSectionNode, this.officeNode,
+				this.nodeContext);
+
+		// Obtain the overridden properties
+		String qualifiedName = sectionNode.getQualifiedName();
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
+		// Create the section node
+		sectionNode.initialise(sectionSource.getClass().getName(), sectionSource, sectionLocation);
+		overriddenProperties.configureProperties(sectionNode);
 
 		// Create the compile context
 		CompileContext compileContext = this.nodeContext.createCompileContext();
@@ -273,10 +242,18 @@ public class SectionLoaderImpl implements SectionLoader {
 	public OfficeSectionType loadOfficeSectionType(String sectionName, SectionSource sectionSource,
 			String sectionLocation, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(sectionName);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create the section node
-		SectionNode sectionNode = this.createSectionNode(sectionName, sectionSource.getClass().getName(), sectionSource,
-				sectionLocation);
-		propertyList.configureProperties(sectionNode);
+		SectionNode sectionNode = (this.parentSectionNode != null)
+				? this.nodeContext.createSectionNode(sectionName, this.parentSectionNode)
+				: this.nodeContext.createSectionNode(sectionName, this.officeNode);
+		sectionNode.initialise(sectionSource.getClass().getName(), sectionSource, sectionLocation);
+		overriddenProperties.configureProperties(sectionNode);
 
 		// Create the compile context
 		CompileContext compileContext = this.nodeContext.createCompileContext();

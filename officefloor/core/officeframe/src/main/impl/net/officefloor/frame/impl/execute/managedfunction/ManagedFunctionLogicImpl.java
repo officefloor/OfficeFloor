@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.managedfunction;
 
+import java.util.logging.Logger;
+
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
@@ -120,6 +122,11 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 		/*
 		 * ====================== ManagedFunctionContext ======================
 		 */
+
+		@Override
+		public Logger getLogger() {
+			return ManagedFunctionLogicImpl.this.functionMetaData.getLogger();
+		}
 
 		@Override
 		public Object getObject(O key) {

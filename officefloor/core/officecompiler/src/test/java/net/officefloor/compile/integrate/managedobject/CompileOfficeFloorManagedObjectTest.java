@@ -107,19 +107,20 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 	public void testSuppliedManagedObjectSource() {
 
 		// Setup to provide managed object source instance
+		final String managedObjectSourceName = "MANAGED_OBJECT_SOURCE";
 		MockSupplierSource.reset();
-		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(Object.class);
+		final MockTypeManagedObjectSource mos = new MockTypeManagedObjectSource(Object.class, managedObjectSourceName);
 		MockSupplierSource.managedObjectSource = mos;
 
 		// Record building the OfficeFloor
 		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("MANAGED_OBJECT", "MANAGED_OBJECT_SOURCE");
+		office.registerManagedObjectSource("MANAGED_OBJECT", managedObjectSourceName);
 		this.recordReturn(office, office.addProcessManagedObject("MANAGED_OBJECT", "MANAGED_OBJECT"), null);
 
 		// Record instance (as supplied)
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT_SOURCE", mos, 0, "MO_NAME", "MO_VALUE");
+		this.record_officeFloorBuilder_addManagedObject(managedObjectSourceName, mos, 0, "MO_NAME", "MO_VALUE");
 
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
@@ -184,7 +185,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		office.registerManagedObjectSource("DEPENDENT", "DEPENDENT_SOURCE");
 		this.record_officeBuilder_addProcessManagedObject("DEPENDENT", "DEPENDENT");
-		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("DEPENDENT.dependency", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency dependency is not linked to a BoundManagedObjectNode");
 
 		// Add managed objects to OfficeFloor
@@ -303,7 +304,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 				"class.name", ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_managingOfficeBuilder_setInputManagedObjectName("INPUT_MO");
-		this.issues.recordIssue("doProcess", ManagedObjectFlowNodeImpl.class,
+		this.issues.recordIssue("MANAGED_OBJECT_SOURCE.doProcess", ManagedObjectFlowNodeImpl.class,
 				"Managed Object Source Flow doProcess is not linked to a ManagedFunctionNode");
 
 		// Compile the OfficeFloor
@@ -457,7 +458,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 				"class.name", ProcessManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.issues.recordIssue("MANAGED_OBJECT_SOURCE", ManagedObjectSourceNodeImpl.class,
-				"Managed Object Source MANAGED_OBJECT_SOURCE object " + ProcessManagedObject.class.getName()
+				"Managed Object Source object " + ProcessManagedObject.class.getName()
 						+ " is not compatible with input managed object INPUT_MO (input object type "
 						+ String.class.getName() + ")");
 
@@ -543,7 +544,7 @@ public class CompileOfficeFloorManagedObjectTest extends AbstractCompileTestCase
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
 		this.record_officeFloorBuilder_addManagedObject("DEPENDENT_SOURCE", FunctionDependencyManagedObject.class, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		
+
 		// Map the function dependency
 		this.record_managingOfficeBuilder_mapFunctionDependency("DEPENDENCY", "SIMPLE");
 

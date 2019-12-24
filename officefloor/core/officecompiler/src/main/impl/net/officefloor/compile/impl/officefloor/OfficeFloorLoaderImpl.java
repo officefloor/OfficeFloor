@@ -299,13 +299,19 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	public <OF extends OfficeFloorSource> OfficeFloorType loadOfficeFloorType(OF officeFloorSource,
 			String officeFloorLocation, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName(OfficeFloorNode.OFFICE_FLOOR_NAME);
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create the compile context
 		CompileContext compileContext = this.nodeContext.createCompileContext();
 
 		// Source the OfficeFloor
 		OfficeFloorNode node = this.nodeContext.createOfficeFloorNode(officeFloorSource.getClass().getName(),
 				officeFloorSource, officeFloorLocation);
-		propertyList.configureProperties(node);
+		overriddenProperties.configureProperties(node);
 		boolean isSourced = node.sourceOfficeFloor(compileContext);
 		if (!isSourced) {
 			return null; // must be sourced

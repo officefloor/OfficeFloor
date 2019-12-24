@@ -17,18 +17,21 @@
  */
 package net.officefloor.frame.impl.execute.managedfunction;
 
+import java.util.logging.Logger;
+
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.api.team.Team;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -99,6 +102,11 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final AssetManager asynchronousFlowAssetManager;
 
 	/**
+	 * {@link Logger} for {@link ManagedFunctionContext}.
+	 */
+	private final Logger logger;
+
+	/**
 	 * {@link OfficeMetaData}.
 	 */
 	private OfficeMetaData officeMetaData;
@@ -124,16 +132,18 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private EscalationProcedure escalationProcedure;
 
 	/**
-	 * {@link AdministrationMetaData} specifying the {@link Administration}
-	 * instances to be completed before executing the {@link ManagedFunction}.
+	 * {@link ManagedFunctionAdministrationMetaData} specifying the
+	 * {@link Administration} instances to be completed before executing the
+	 * {@link ManagedFunction}.
 	 */
-	private AdministrationMetaData<?, ?, ?>[] preAdministration;
+	private ManagedFunctionAdministrationMetaData<?, ?, ?>[] preAdministration;
 
 	/**
-	 * {@link AdministrationMetaData} specifying the {@link Administration}
-	 * instances to be completed after executing the {@link ManagedFunction}.
+	 * {@link ManagedFunctionAdministrationMetaData} specifying the
+	 * {@link Administration} instances to be completed after executing the
+	 * {@link ManagedFunction}.
 	 */
-	private AdministrationMetaData<?, ?, ?>[] postAdministration;
+	private ManagedFunctionAdministrationMetaData<?, ?, ?>[] postAdministration;
 
 	/**
 	 * {@link ManagedObjectIndex} instances identifying the {@link ManagedObject}
@@ -167,11 +177,14 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 * @param asynchronousFlowTimeout       {@link AsynchronousFlow} timeout.
 	 * @param asynchronousFlowsAssetManager {@link AssetManager} for the invoked
 	 *                                      {@link AsynchronousFlow} instances.
+	 * @param logger                        {@link Logger} for
+	 *                                      {@link ManagedFunctionContext}.
 	 */
 	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory,
 			Object[] annotations, Class<?> parameterType, TeamManagement responsibleTeam,
 			ManagedObjectIndex[] functionIndexedManagedObjects, ManagedObjectMetaData<?>[] functionBoundManagedObjects,
-			boolean[] requiredGovernance, long asynchronousFlowTimeout, AssetManager asynchronousFlowsAssetManager) {
+			boolean[] requiredGovernance, long asynchronousFlowTimeout, AssetManager asynchronousFlowsAssetManager,
+			Logger logger) {
 		this.functionName = functionName;
 		this.functionFactory = functionFactory;
 		this.annotations = annotations;
@@ -182,6 +195,7 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 		this.requiredGovernance = requiredGovernance;
 		this.asynchronousFlowTimeout = asynchronousFlowTimeout;
 		this.asynchronousFlowAssetManager = asynchronousFlowsAssetManager;
+		this.logger = logger;
 	}
 
 	/**
@@ -195,13 +209,13 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 * @param escalationProcedure    {@link EscalationProcedure} for exceptions of
 	 *                               the {@link ManagedFunction} of this
 	 *                               {@link ManagedFunctionMetaData}.
-	 * @param preAdministration      {@link AdministrationMetaData} specifying the
-	 *                               {@link Administration} instances to be
-	 *                               completed before executing the
+	 * @param preAdministration      {@link ManagedFunctionAdministrationMetaData}
+	 *                               specifying the {@link Administration} instances
+	 *                               to be completed before executing the
 	 *                               {@link ManagedFunction}.
-	 * @param postAdministration     {@link AdministrationMetaData} specifying the
-	 *                               {@link Administration} instances to be
-	 *                               completed after executing the
+	 * @param postAdministration     {@link ManagedFunctionAdministrationMetaData}
+	 *                               specifying the {@link Administration} instances
+	 *                               to be completed after executing the
 	 *                               {@link ManagedFunction}.
 	 * @param requiredManagedObjects {@link ManagedObjectIndex} instances
 	 *                               identifying the {@link ManagedObject} instances
@@ -210,7 +224,8 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 */
 	public void loadOfficeMetaData(OfficeMetaData officeMetaData, FlowMetaData[] flowMetaData,
 			ManagedFunctionMetaData<?, ?> nextFunctionMetaData, EscalationProcedure escalationProcedure,
-			AdministrationMetaData<?, ?, ?>[] preAdministration, AdministrationMetaData<?, ?, ?>[] postAdministration,
+			ManagedFunctionAdministrationMetaData<?, ?, ?>[] preAdministration,
+			ManagedFunctionAdministrationMetaData<?, ?, ?>[] postAdministration,
 			ManagedObjectIndex[] requiredManagedObjects) {
 		this.officeMetaData = officeMetaData;
 		this.flowMetaData = flowMetaData;
@@ -243,6 +258,11 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	@Override
 	public Class<?> getParameterType() {
 		return this.parameterType;
+	}
+
+	@Override
+	public Logger getLogger() {
+		return this.logger;
 	}
 
 	@Override
@@ -296,12 +316,12 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	}
 
 	@Override
-	public AdministrationMetaData<?, ?, ?>[] getPreAdministrationMetaData() {
+	public ManagedFunctionAdministrationMetaData<?, ?, ?>[] getPreAdministrationMetaData() {
 		return this.preAdministration;
 	}
 
 	@Override
-	public AdministrationMetaData<?, ?, ?>[] getPostAdministrationMetaData() {
+	public ManagedFunctionAdministrationMetaData<?, ?, ?>[] getPostAdministrationMetaData() {
 		return this.postAdministration;
 	}
 

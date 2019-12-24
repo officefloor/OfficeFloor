@@ -449,6 +449,13 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	/**
+	 * Sorts the {@link WoofSecurityModel} instances.
+	 */
+	private void sortSecurities() {
+		sortModelList(this.model.getWoofSecurities(), (model) -> model.getHttpSecurityName());
+	}
+
+	/**
 	 * Sorts the {@link WoofProcedureModel} instances.
 	 */
 	private void sortProcedures() {
@@ -2554,6 +2561,7 @@ public class WoofChangesImpl implements WoofChanges {
 			@Override
 			public void apply() {
 				WoofChangesImpl.this.model.addWoofSecurity(woofSecurity);
+				WoofChangesImpl.this.sortSecurities();
 			}
 
 			@Override
@@ -2574,6 +2582,7 @@ public class WoofChangesImpl implements WoofChanges {
 			@Override
 			public void apply() {
 				sortSecurityOutputs(security);
+				WoofChangesImpl.this.sortSecurities();
 			}
 
 			@Override
@@ -2887,6 +2896,7 @@ public class WoofChangesImpl implements WoofChanges {
 				WoofChangesImpl.this.model.addWoofSecurity(security);
 				reconnectConnections(this.connections);
 				sortSecurityOutputs(security);
+				WoofChangesImpl.this.sortSecurities();
 			}
 		};
 	}

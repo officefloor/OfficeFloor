@@ -41,8 +41,7 @@ public interface OfficeFloorSourceContext extends SourceContext, ConfigurationCo
 	 * <p>
 	 * Obtains the location of the {@link OfficeFloor}.
 	 * <p>
-	 * How &quot;location&quot; is interpreted is for the
-	 * {@link OfficeFloorSource}.
+	 * How &quot;location&quot; is interpreted is for the {@link OfficeFloorSource}.
 	 * 
 	 * @return Location of the {@link OfficeFloor}.
 	 */
@@ -63,16 +62,14 @@ public interface OfficeFloorSourceContext extends SourceContext, ConfigurationCo
 	 * {@link ManagedObject} to allow reflective configuration by the
 	 * {@link OfficeFloorSource}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSourceClassName
-	 *            Name of the implementing {@link ManagedObjectSource} class.
-	 *            May also be an alias.
-	 * @param properties
-	 *            {@link PropertyList} to configure the
-	 *            {@link ManagedObjectSource}.
-	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
-	 *         the {@link ManagedObjectType}.
+	 * @param managedObjectSourceName      Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClassName Name of the implementing
+	 *                                     {@link ManagedObjectSource} class. May
+	 *                                     also be an alias.
+	 * @param properties                   {@link PropertyList} to configure the
+	 *                                     {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load the
+	 *         {@link ManagedObjectType}.
 	 */
 	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName, String managedObjectSourceClassName,
 			PropertyList properties);
@@ -85,15 +82,12 @@ public interface OfficeFloorSourceContext extends SourceContext, ConfigurationCo
 	 * {@link ManagedObject} to allow reflective configuration by the
 	 * {@link OfficeFloorSource}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance.
-	 * @param properties
-	 *            {@link PropertyList} to configure the
-	 *            {@link ManagedObjectSource}.
-	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
-	 *         the {@link ManagedObjectType}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource     {@link ManagedObjectSource} instance.
+	 * @param properties              {@link PropertyList} to configure the
+	 *                                {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load the
+	 *         {@link ManagedObjectType}.
 	 */
 	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties);
@@ -106,13 +100,12 @@ public interface OfficeFloorSourceContext extends SourceContext, ConfigurationCo
 	 * {@link SupplierSource} to allow reflective configuration by the
 	 * {@link OfficeFloorSource}.
 	 * 
-	 * @param supplierName
-	 *            Name of the {@link SupplierSource}.
-	 * @param supplierSourceClassName
-	 *            Name of the implementing {@link SupplierSource} class. May
-	 *            also be an alias.
-	 * @param properties
-	 *            {@link PropertyList} to configure the {@link SupplierSource}.
+	 * @param supplierName            Name of the {@link SupplierSource}.
+	 * @param supplierSourceClassName Name of the implementing
+	 *                                {@link SupplierSource} class. May also be an
+	 *                                alias.
+	 * @param properties              {@link PropertyList} to configure the
+	 *                                {@link SupplierSource}.
 	 * @return {@link SupplierType} or <code>null</code> if fails to load the
 	 *         {@link SupplierType}.
 	 */
@@ -122,18 +115,15 @@ public interface OfficeFloorSourceContext extends SourceContext, ConfigurationCo
 	 * <p>
 	 * Loads the {@link OfficeType}.
 	 * <p>
-	 * This is to enable obtaining the type information for the {@link Office}
-	 * to allow reflective configuration by the {@link OfficeFloorSource}.
+	 * This is to enable obtaining the type information for the {@link Office} to
+	 * allow reflective configuration by the {@link OfficeFloorSource}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
-	 * @param officeSourceClassName
-	 *            Name of the implementing {@link OfficeSource} class. May also
-	 *            be an alias.
-	 * @param location
-	 *            Location of the {@link Office}.
-	 * @param properties
-	 *            {@link PropertyList} to configure the {@link OfficeSource}.
+	 * @param officeName            Name of the {@link Office}.
+	 * @param officeSourceClassName Name of the implementing {@link OfficeSource}
+	 *                              class. May also be an alias.
+	 * @param location              Location of the {@link Office}.
+	 * @param properties            {@link PropertyList} to configure the
+	 *                              {@link OfficeSource}.
 	 * @return {@link OfficeType} or <code>null</code> if fails to load the
 	 *         {@link OfficeType}.
 	 */
@@ -144,17 +134,14 @@ public interface OfficeFloorSourceContext extends SourceContext, ConfigurationCo
 	 * <p>
 	 * Loads the {@link OfficeType}.
 	 * <p>
-	 * This is to enable obtaining the type information for the {@link Office}
-	 * to allow reflective configuration by the {@link OfficeFloorSource}.
+	 * This is to enable obtaining the type information for the {@link Office} to
+	 * allow reflective configuration by the {@link OfficeFloorSource}.
 	 * 
-	 * @param officeName
-	 *            Name of the {@link Office}.
-	 * @param officeSource
-	 *            {@link OfficeSource} instance.
-	 * @param location
-	 *            Location of the {@link Office}.
-	 * @param properties
-	 *            {@link PropertyList} to configure the {@link OfficeSource}.
+	 * @param officeName   Name of the {@link Office}.
+	 * @param officeSource {@link OfficeSource} instance.
+	 * @param location     Location of the {@link Office}.
+	 * @param properties   {@link PropertyList} to configure the
+	 *                     {@link OfficeSource}.
 	 * @return {@link OfficeType} or <code>null</code> if fails to load the
 	 *         {@link OfficeType}.
 	 */

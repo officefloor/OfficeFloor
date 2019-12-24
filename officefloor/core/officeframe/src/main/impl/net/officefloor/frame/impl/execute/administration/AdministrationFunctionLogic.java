@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.administration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.administration.AdministrationContext;
@@ -61,17 +62,24 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 	private final ThreadState threadState;
 
 	/**
+	 * {@link Logger}.
+	 */
+	private final Logger logger;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param metaData    {@link AdministrationMetaData}.
 	 * @param extensions  Extensions to administer.
 	 * @param threadState {@link ThreadState}.
+	 * @param logger      {@link Logger}.
 	 */
 	public AdministrationFunctionLogic(AdministrationMetaData<E, F, G> metaData, E[] extensions,
-			ThreadState threadState) {
+			ThreadState threadState, Logger logger) {
 		this.metaData = metaData;
 		this.extensions = extensions;
 		this.threadState = threadState;
+		this.logger = logger;
 	}
 
 	/*
@@ -143,6 +151,11 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 		/*
 		 * ==================== AdministrationContext ====================
 		 */
+
+		@Override
+		public Logger getLogger() {
+			return AdministrationFunctionLogic.this.logger;
+		}
 
 		@Override
 		public E[] getExtensions() {

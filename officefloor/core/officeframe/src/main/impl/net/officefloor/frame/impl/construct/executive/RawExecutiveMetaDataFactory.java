@@ -44,11 +44,6 @@ import net.officefloor.frame.internal.configuration.ExecutiveConfiguration;
 public class RawExecutiveMetaDataFactory {
 
 	/**
-	 * {@link AssetType} name for the {@link Executive}.
-	 */
-	private final String EXECUTIVE_NAME = "Executive";
-
-	/**
 	 * {@link SourceContext}.
 	 */
 	private final SourceContext sourceContext;
@@ -73,7 +68,7 @@ public class RawExecutiveMetaDataFactory {
 	/**
 	 * Creates the {@link RawExecutiveMetaData}.
 	 *
-	 * @param                 <XS> {@link ExecutiveSource} type.
+	 * @param <XS>            {@link ExecutiveSource} type.
 	 * @param configuration   {@link ExecutiveConfiguration}.
 	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 * @param issues          {@link OfficeFloorIssues}.
@@ -82,6 +77,9 @@ public class RawExecutiveMetaDataFactory {
 	 */
 	public <XS extends ExecutiveSource> RawExecutiveMetaData constructRawExecutiveMetaData(
 			ExecutiveConfiguration<XS> configuration, String officeFloorName, OfficeFloorIssues issues) {
+
+		// Obtain the executive name
+		final String EXECUTIVE_NAME = ExecutiveSourceContextImpl.EXECUTIVE_NAME;
 
 		// Obtain the executive source
 		XS executiveSource = configuration.getExecutiveSource();

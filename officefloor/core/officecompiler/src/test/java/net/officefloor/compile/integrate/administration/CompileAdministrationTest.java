@@ -18,9 +18,11 @@
 package net.officefloor.compile.integrate.administration;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
+import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorSupplier;
 import net.officefloor.compile.spi.supplier.source.SupplierSource;
@@ -151,13 +153,14 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 		AdministrationBuilder<?, ?> admin = this.record_functionBuilder_preAdministration("ADMIN",
 				SimpleManagedObject.class);
-		admin.administerManagedObject(SimpleManagedObject.class.getName());
-		this.record_officeFloorBuilder_addManagedObject(SimpleManagedObject.class.getName(),
+		admin.administerManagedObject(Node.escape(SimpleManagedObject.class.getName()));
+		this.record_officeFloorBuilder_addManagedObject(Node.escape(SimpleManagedObject.class.getName()),
 				ClassManagedObjectSource.class, 0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource(SimpleManagedObject.class.getName(), SimpleManagedObject.class.getName());
-		this.record_officeBuilder_addThreadManagedObject(SimpleManagedObject.class.getName(),
-				SimpleManagedObject.class.getName());
+		office.registerManagedObjectSource(Node.escape(SimpleManagedObject.class.getName()),
+				Node.escape(SimpleManagedObject.class.getName()));
+		this.record_officeBuilder_addThreadManagedObject(Node.escape(SimpleManagedObject.class.getName()),
+				Node.escape(SimpleManagedObject.class.getName()));
 
 		// Compile
 		this.compile(true);
@@ -243,17 +246,17 @@ public class CompileAdministrationTest extends AbstractCompileTestCase {
 		this.record_supplierSetup();
 		this.record_init();
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject("OFFICE." + SimpleManagedObject.class.getName(),
+		this.record_officeFloorBuilder_addManagedObject("OFFICE." + Node.escape(SimpleManagedObject.class.getName()),
 				ClassManagedObjectSource.class, 0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE." + SimpleManagedObject.class.getName(),
-				"OFFICE." + SimpleManagedObject.class.getName());
-		this.record_officeBuilder_addThreadManagedObject("OFFICE." + SimpleManagedObject.class.getName(),
-				"OFFICE." + SimpleManagedObject.class.getName());
+		office.registerManagedObjectSource("OFFICE." + Node.escape(SimpleManagedObject.class.getName()),
+				"OFFICE." + Node.escape(SimpleManagedObject.class.getName()));
+		this.record_officeBuilder_addThreadManagedObject("OFFICE." + Node.escape(SimpleManagedObject.class.getName()),
+				"OFFICE." + Node.escape(SimpleManagedObject.class.getName()));
 		this.record_officeBuilder_addFunction("SECTION", "FUNCTION");
 		AdministrationBuilder<?, ?> admin = this.record_functionBuilder_preAdministration("ADMIN",
 				SimpleManagedObject.class);
-		admin.administerManagedObject("OFFICE." + SimpleManagedObject.class.getName());
+		admin.administerManagedObject("OFFICE." + Node.escape(SimpleManagedObject.class.getName()));
 
 		// Compile
 		this.compile(true);

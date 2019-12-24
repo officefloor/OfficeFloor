@@ -181,7 +181,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 		this.templateIssue((issues) -> {
 			issues.recordCaptureIssues(false);
 			issues.recordCaptureIssues(false);
-			issues.recordIssue("TEMPLATE", FunctionNamespaceNodeImpl.class,
+			issues.recordIssue("OFFICE./path.TEMPLATE", FunctionNamespaceNodeImpl.class,
 					"Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
 							+ WebTemplateManagedFunctionSource.class.getName(),
 					new Exception("Property 'missing' can not be sourced from bean type " + BeanLogic.class.getName()));
@@ -369,7 +369,7 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 		this.templateIssue((issues) -> {
 			issues.recordCaptureIssues(false);
 			issues.recordCaptureIssues(false);
-			issues.recordIssue("/path", SectionNodeImpl.class,
+			issues.recordIssue("OFFICE./path", SectionNodeImpl.class,
 					"Template bean method 'getTemplate' (function GETTEMPLATE) must not be annotated with @Next (next function is always rendering template section)");
 			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
@@ -414,7 +414,8 @@ public class WebTemplateArchitectTest extends OfficeFrameTestCase {
 		this.templateIssue((issues) -> {
 			issues.recordCaptureIssues(false);
 			issues.recordCaptureIssues(false);
-			issues.recordIssue("/path", SectionNodeImpl.class, "Must provide template logic class for template /path");
+			issues.recordIssue("OFFICE./path", SectionNodeImpl.class,
+					"Must provide template logic class for template /path");
 			issues.recordIssue("OFFICE", OfficeNodeImpl.class,
 					"Failure loading OfficeSectionType from source " + WebTemplateSectionSource.class.getName());
 		}, (context, templater) -> {

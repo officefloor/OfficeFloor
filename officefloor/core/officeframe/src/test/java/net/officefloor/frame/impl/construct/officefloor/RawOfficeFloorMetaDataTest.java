@@ -137,9 +137,13 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		this.configuration.addResources((location) -> new ByteArrayInputStream(location.getBytes()));
 
 		// Obtain the source context
+		final String NAME = "TEST";
 		long mockCurrentTime = 1000;
 		Supplier<ClockFactory> defaultClockFactoryProvider = () -> new MockClockFactory(mockCurrentTime);
-		SourceContext context = this.configuration.getSourceContext(defaultClockFactoryProvider);
+		SourceContext context = this.configuration.getSourceContext(NAME, defaultClockFactoryProvider);
+
+		// Ensure correct logger
+		assertEquals("Incorrect logger", NAME, context.getLogger().getName());
 
 		// Obtain resource
 		InputStream resource = context.getResource("test");
@@ -158,8 +162,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Override the clock
 		long mockOverrideTime = 2000;
 		this.configuration.setClockFactory(new MockClockFactory(mockOverrideTime));
-		assertEquals("Incorrect override clock", Long.valueOf(mockOverrideTime),
-				this.configuration.getSourceContext(defaultClockFactoryProvider).getClock((time) -> time).getTime());
+		assertEquals("Incorrect override clock", Long.valueOf(mockOverrideTime), this.configuration
+				.getSourceContext(NAME, defaultClockFactoryProvider).getClock((time) -> time).getTime());
 	}
 
 	/**

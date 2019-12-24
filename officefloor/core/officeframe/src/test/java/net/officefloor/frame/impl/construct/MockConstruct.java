@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Logger;
 
 import org.junit.Assert;
 
@@ -93,12 +94,12 @@ import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
+import net.officefloor.frame.internal.structure.ManagedFunctionAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -1137,7 +1138,7 @@ public class MockConstruct {
 			this.governanceName = governanceName;
 			this.extensionType = extensionType;
 			this.configuration = new GovernanceBuilderImpl<>(governanceName, extensionType, () -> null);
-			this.metaData = new GovernanceMetaDataImpl<>(governanceName, () -> null, null, 1, null);
+			this.metaData = new GovernanceMetaDataImpl<>(governanceName, () -> null, null, 1, null, null);
 		}
 
 		/**
@@ -1462,7 +1463,8 @@ public class MockConstruct {
 		 * {@link EscalationFlow}.
 		 */
 		private EscalationFlow officeFloorEscalation = new EscalationFlowImpl(Throwable.class,
-				new ManagedFunctionMetaDataImpl<>("HANDLER", () -> null, null, null, null, null, null, null, 1, null));
+				new ManagedFunctionMetaDataImpl<>("HANDLER", () -> null, null, null, null, null, null, null, 1, null,
+						null));
 
 		/**
 		 * {@link RawOfficeFloorMetaData}.
@@ -1647,7 +1649,7 @@ public class MockConstruct {
 			this.assertNotBuilt();
 			ManagedFunctionMetaDataImpl<?, ?> function = new ManagedFunctionMetaDataImpl<>(functionName,
 					() -> (context) -> null, new Object[0], parameterType, null, new ManagedObjectIndex[0],
-					new ManagedObjectMetaData[0], new boolean[0], 1, null);
+					new ManagedObjectMetaData[0], new boolean[0], 1, null, Logger.getLogger(functionName));
 			this.functions.add(function);
 			return function;
 		}
@@ -1673,7 +1675,7 @@ public class MockConstruct {
 						}
 					}
 					functions.add(new ManagedFunctionMetaDataImpl<>(functionName, null, null, parameterType, null, null,
-							null, null, 1, null));
+							null, null, 1, null, null));
 				}
 
 				// Load the convenience functions
@@ -1690,7 +1692,8 @@ public class MockConstruct {
 				// Load the office meta-data to functions
 				for (ManagedFunctionMetaDataImpl<?, ?> function : functions) {
 					function.loadOfficeMetaData(this.built, new FlowMetaData[0], null, null,
-							new AdministrationMetaData[0], new AdministrationMetaData[0], new ManagedObjectIndex[0]);
+							new ManagedFunctionAdministrationMetaData[0], new ManagedFunctionAdministrationMetaData[0],
+							new ManagedObjectIndex[0]);
 				}
 			}
 			return this.built;

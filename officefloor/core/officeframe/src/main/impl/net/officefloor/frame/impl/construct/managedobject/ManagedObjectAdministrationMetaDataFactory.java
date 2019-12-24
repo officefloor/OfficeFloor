@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.construct.managedobject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -38,7 +39,7 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * Factory for the createion of {@link ManagedObjectAdministrationMetaData}.
+ * Factory for the creation of {@link ManagedObjectAdministrationMetaData}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -147,8 +148,12 @@ public class ManagedObjectAdministrationMetaDataFactory {
 				return null;
 			}
 
+			// Create the logger
+			String loggerName = administeredObjectName + ".pre." + adminMetaData.getAdministrationName();
+			Logger logger = Logger.getLogger(loggerName);
+
 			// Create the managed object administration
-			metaDatas[a] = new ManagedObjectAdministrationMetaDataImpl<>(required, adminMetaData);
+			metaDatas[a] = new ManagedObjectAdministrationMetaDataImpl<>(required, adminMetaData, logger);
 		}
 
 		// Return the managed object administration

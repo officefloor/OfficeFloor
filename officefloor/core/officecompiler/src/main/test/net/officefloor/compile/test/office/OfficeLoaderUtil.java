@@ -55,16 +55,12 @@ public class OfficeLoaderUtil {
 	private static final String OFFICE_LOCATION = OfficeLoaderUtil.class.getSimpleName();
 
 	/**
-	 * Validates the {@link OfficeSourceSpecification} for the
-	 * {@link OfficeSource}.
+	 * Validates the {@link OfficeSourceSpecification} for the {@link OfficeSource}.
 	 * 
-	 * @param <O>
-	 *            {@link OfficeSource} type.
-	 * @param officeSourceClass
-	 *            {@link OfficeSource} class.
-	 * @param propertyNameLabels
-	 *            Listing of name/label pairs for the {@link Property}
-	 *            instances.
+	 * @param <O>                {@link OfficeSource} type.
+	 * @param officeSourceClass  {@link OfficeSource} class.
+	 * @param propertyNameLabels Listing of name/label pairs for the
+	 *                           {@link Property} instances.
 	 * @return Loaded {@link PropertyList}.
 	 */
 	public static <O extends OfficeSource> PropertyList validateSpecification(Class<O> officeSourceClass,
@@ -83,11 +79,9 @@ public class OfficeLoaderUtil {
 	/**
 	 * Convenience method to obtain the class path location.
 	 * 
-	 * @param offsetClass
-	 *            Class indicating the package that the resource is within.
-	 *            Typically this will be the {@link TestCase} instance.
-	 * @param resourceName
-	 *            Name of the resource.
+	 * @param offsetClass  Class indicating the package that the resource is within.
+	 *                     Typically this will be the {@link TestCase} instance.
+	 * @param resourceName Name of the resource.
 	 * @return Class path location of the resource.
 	 */
 	public static String getClassPathLocation(Class<?> offsetClass, String resourceName) {
@@ -98,8 +92,7 @@ public class OfficeLoaderUtil {
 	 * Creates the {@link OfficeArchitect} to create the expected
 	 * {@link OfficeType}.
 	 * 
-	 * @param officeSourceClassName
-	 *            {@link OfficeSource} class name.
+	 * @param officeSourceClassName {@link OfficeSource} class name.
 	 * @return {@link OfficeArchitect}.
 	 */
 	public static OfficeArchitect createOfficeArchitect(String officeSourceClassName) {
@@ -114,8 +107,7 @@ public class OfficeLoaderUtil {
 	 * Creates the {@link OfficeArchitect} to create the expected
 	 * {@link OfficeType}.
 	 * 
-	 * @param officeSource
-	 *            {@link OfficeSource} instance.
+	 * @param officeSource {@link OfficeSource} instance.
 	 * @return {@link OfficeArchitect}.
 	 */
 	public static OfficeArchitect createOfficeArchitect(OfficeSource officeSource) {
@@ -127,23 +119,19 @@ public class OfficeLoaderUtil {
 	}
 
 	/**
-	 * Convenience method to validate the {@link OfficeType} via an offset
-	 * object to locate the {@link Office}.
+	 * Convenience method to validate the {@link OfficeType} via an offset object to
+	 * locate the {@link Office}.
 	 * 
-	 * @param <O>
-	 *            {@link OfficeSource} type.
-	 * @param architect
-	 *            {@link OfficeArchitect} containing the expected
-	 *            {@link OfficeType}.
-	 * @param officeSourceClass
-	 *            {@link OfficeSource} class.
-	 * @param offsetClass
-	 *            Class indicating the package that the resource is within.
-	 *            Typically this will be the {@link TestCase} instance.
-	 * @param resourceName
-	 *            Name of the resource for the {@link Office} location.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name/value listings.
+	 * @param <O>                    {@link OfficeSource} type.
+	 * @param architect              {@link OfficeArchitect} containing the expected
+	 *                               {@link OfficeType}.
+	 * @param officeSourceClass      {@link OfficeSource} class.
+	 * @param offsetClass            Class indicating the package that the resource
+	 *                               is within. Typically this will be the
+	 *                               {@link TestCase} instance.
+	 * @param resourceName           Name of the resource for the {@link Office}
+	 *                               location.
+	 * @param propertyNameValuePairs {@link Property} name/value listings.
 	 * @return {@link OfficeType}.
 	 */
 	public static <O extends OfficeSource> OfficeType validateOffice(OfficeArchitect architect,
@@ -160,17 +148,12 @@ public class OfficeLoaderUtil {
 	 * Validates the loaded {@link OfficeType} against the expected
 	 * {@link OfficeType} from the {@link OfficeArchitect}.
 	 * 
-	 * @param <O>
-	 *            {@link OfficeSource} type.
-	 * @param architect
-	 *            {@link OfficeArchitect} containing the expected
-	 *            {@link OfficeType}.
-	 * @param officeSourceClass
-	 *            {@link OfficeSource} class.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name/value listings.
+	 * @param <O>                    {@link OfficeSource} type.
+	 * @param architect              {@link OfficeArchitect} containing the expected
+	 *                               {@link OfficeType}.
+	 * @param officeSourceClass      {@link OfficeSource} class.
+	 * @param officeLocation         Location of the {@link Office}.
+	 * @param propertyNameValuePairs {@link Property} name/value listings.
 	 * @return {@link OfficeType}.
 	 */
 	public static <O extends OfficeSource> OfficeType validateOffice(OfficeArchitect architect,
@@ -266,18 +249,14 @@ public class OfficeLoaderUtil {
 	}
 
 	/**
-	 * Convenience method to use the {@link ClassLoader} of the
-	 * {@link OfficeSource} class and {@link ClassLoaderConfigurationContext} to
-	 * load the {@link OfficeType}.
+	 * Convenience method to use the {@link ClassLoader} of the {@link OfficeSource}
+	 * class and {@link ClassLoaderConfigurationContext} to load the
+	 * {@link OfficeType}.
 	 * 
-	 * @param <O>
-	 *            {@link OfficeSource} type.
-	 * @param officeSourceClass
-	 *            {@link OfficeSource} class.
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name/value listing.
+	 * @param <O>                    {@link OfficeSource} type.
+	 * @param officeSourceClass      {@link OfficeSource} class.
+	 * @param officeLocation         Location of the {@link Office}.
+	 * @param propertyNameValuePairs {@link Property} name/value listing.
 	 * @return {@link OfficeType}.
 	 */
 	public static <O extends OfficeSource> OfficeType loadOfficeType(Class<O> officeSourceClass, String officeLocation,

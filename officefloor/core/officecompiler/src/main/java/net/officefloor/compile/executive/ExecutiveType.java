@@ -22,7 +22,6 @@ import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.TeamOversight;
 
 /**
- * <p>
  * <code>Type definition</code> of an {@link Executive}.
  * 
  * @author Daniel Sagenschneider

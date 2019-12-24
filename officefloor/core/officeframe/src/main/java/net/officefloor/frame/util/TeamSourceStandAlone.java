@@ -94,7 +94,7 @@ public class TeamSourceStandAlone {
 	/**
 	 * Initialises and returns the {@link TeamSource} instance.
 	 * 
-	 * @param                 <TS> {@link TeamSource} type.
+	 * @param <TS>            {@link TeamSource} type.
 	 * @param teamSourceClass {@link Class} of the {@link TeamSource}.
 	 * @return Initialised {@link TeamSource}.
 	 * @throws Exception If fails instantiation and initialising the
@@ -159,7 +159,7 @@ public class TeamSourceStandAlone {
 	/**
 	 * Returns a {@link Team} from the loaded {@link TeamSource}.
 	 * 
-	 * @param                 <TS> {@link TeamSource} type.
+	 * @param <TS>            {@link TeamSource} type.
 	 * @param teamSourceClass {@link Class} of the {@link TeamSource}.
 	 * @return {@link Team} from the loaded {@link TeamSource}.
 	 * @throws Exception If fails loading the {@link TeamSource} and creating a
@@ -174,8 +174,8 @@ public class TeamSourceStandAlone {
 		String teamName = (this.teamName != null ? this.teamName : teamSourceClass.getSimpleName());
 
 		// Create team source context
-		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
-				this.clockFactory);
+		SourceContext sourceContext = new SourceContextImpl(this.getClass().getName(), false,
+				Thread.currentThread().getContextClassLoader(), this.clockFactory);
 		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
 				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));
 		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,

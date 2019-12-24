@@ -87,6 +87,7 @@ public class ExecutiveDecorateFunctionInvokedProcessThreadTest extends AbstractO
 
 		@Override
 		public Executive createExecutive(ExecutiveSourceContext context) throws Exception {
+			assertEquals("Incorrect logger name", "Executive", context.getLogger().getName());
 			return this;
 		}
 

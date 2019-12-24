@@ -21,7 +21,6 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -39,11 +38,6 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext
  */
 public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionManagedObjectSource
 		implements ManagedObject {
-
-	/**
-	 * {@link Logger}.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(ReadOnlyConnectionManagedObjectSource.class.getName());
 
 	/**
 	 * {@link ManagedObjectSourceContext}.
@@ -139,9 +133,9 @@ public class ReadOnlyConnectionManagedObjectSource extends AbstractConnectionMan
 		try {
 			this.connection.close();
 		} catch (SQLException ex) {
-			LOGGER.log(Level.WARNING, "Failed to close read-only connection", ex);
+			this.mosContext.getLogger().log(Level.WARNING, "Failed to close read-only connection", ex);
 		} finally {
-			this.closeDataSource(this.dataSource, LOGGER);
+			this.closeDataSource(this.dataSource, this.mosContext.getLogger());
 		}
 	}
 

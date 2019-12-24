@@ -17,8 +17,11 @@
  */
 package net.officefloor.compile.impl.supplier;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.junit.Assert;
 
@@ -49,6 +52,11 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 	private final Class<?> objectType;
 
 	/**
+	 * Expected name of {@link Logger}.
+	 */
+	private final String loggerName;
+
+	/**
 	 * {@link MockTypeDependency} instances.
 	 */
 	private final List<MockTypeDependency> dependencies = new LinkedList<MockTypeDependency>();
@@ -71,11 +79,12 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 	/**
 	 * Initiate.
 	 * 
-	 * @param objectType
-	 *            Object type.
+	 * @param objectType Object type.
+	 * @param loggerName Expected name of {@link Logger}.
 	 */
-	public MockTypeManagedObjectSource(Class<?> objectType) {
+	public MockTypeManagedObjectSource(Class<?> objectType, String loggerName) {
 		this.objectType = objectType;
+		this.loggerName = loggerName;
 	}
 
 	/**
@@ -90,12 +99,9 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 	/**
 	 * Adds a dependency.
 	 * 
-	 * @param name
-	 *            Name of dependency.
-	 * @param type
-	 *            Type of dependency.
-	 * @param qualifier
-	 *            Qualifier of dependency type.
+	 * @param name      Name of dependency.
+	 * @param type      Type of dependency.
+	 * @param qualifier Qualifier of dependency type.
 	 */
 	public void addDependency(String name, Class<?> type, String qualifier) {
 		this.dependencies.add(new MockTypeDependency(name, type, qualifier));
@@ -104,10 +110,8 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 	/**
 	 * Adds a flow.
 	 * 
-	 * @param name
-	 *            Name of flow.
-	 * @param argumentType
-	 *            Argument type for flow.
+	 * @param name         Name of flow.
+	 * @param argumentType Argument type for flow.
 	 */
 	public void addFlow(String name, Class<?> argumentType) {
 		this.flows.add(new MockTypeFlow(name, argumentType));
@@ -116,8 +120,7 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 	/**
 	 * Adds a team.
 	 * 
-	 * @param name
-	 *            Name of team.
+	 * @param name Name of team.
 	 */
 	public void addTeam(String name) {
 		this.teams.add(name);
@@ -126,8 +129,7 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 	/**
 	 * Adds an extension interface.
 	 * 
-	 * @param extensionInterface
-	 *            Extension interface.
+	 * @param extensionInterface Extension interface.
 	 */
 	public void addExtensionInterface(Class<?> extensionInterface) {
 		this.extensionInterfaces.add(extensionInterface);
@@ -145,6 +147,10 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void loadMetaData(MetaDataContext<Indexed, Indexed> context) throws Exception {
+		ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
+
+		// Ensure correct logger name
+		assertEquals("Incorrect logger name", this.loggerName, mosContext.getLogger().getName());
 
 		// Specify the meta-data
 		context.setObjectClass(this.objectType);
@@ -166,7 +172,6 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 
 		// Configure the required teams
 		for (String teamName : this.teams) {
-			ManagedObjectSourceContext<Indexed> mosContext = context.getManagedObjectSourceContext();
 			ManagedObjectFunctionBuilder<Indexed, Indexed> function = mosContext
 					.addManagedFunction("FUNCTION-" + teamName, this);
 			function.setResponsibleTeam(teamName);
@@ -227,12 +232,9 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 		/**
 		 * Initiate.
 		 * 
-		 * @param name
-		 *            Name of dependency.
-		 * @param type
-		 *            Type of dependency.
-		 * @param qualifier
-		 *            Qualifier of dependency type.
+		 * @param name      Name of dependency.
+		 * @param type      Type of dependency.
+		 * @param qualifier Qualifier of dependency type.
 		 */
 		public MockTypeDependency(String name, Class<?> type, String qualifier) {
 			this.name = name;
@@ -259,10 +261,8 @@ public class MockTypeManagedObjectSource extends AbstractManagedObjectSource<Ind
 		/**
 		 * Initiate.
 		 * 
-		 * @param name
-		 *            Name of flow.
-		 * @param argumentType
-		 *            Argument type for flow.
+		 * @param name         Name of flow.
+		 * @param argumentType Argument type for flow.
 		 */
 		public MockTypeFlow(String name, Class<?> argumentType) {
 			this.name = name;

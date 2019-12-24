@@ -81,9 +81,9 @@ public class RawManagedObjectMetaDataFactory {
 	/**
 	 * Creates the {@link RawManagedObjectMetaData}.
 	 * 
-	 * @param                 <d> Dependency key type.
-	 * @param                 <h> {@link Flow} key type.
-	 * @param                 <MS> {@link ManagedObjectSource} type.
+	 * @param <d>             Dependency key type.
+	 * @param <h>             {@link Flow} key type.
+	 * @param <MS>            {@link ManagedObjectSource} type.
 	 * @param configuration   {@link ManagedObjectSourceConfiguration}.
 	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 * @param issues          {@link OfficeFloorIssues}.
@@ -149,8 +149,8 @@ public class RawManagedObjectMetaDataFactory {
 		ManagingOfficeBuilder<h> managingOfficeBuilder = managingOfficeConfiguration.getBuilder();
 
 		// Create the context for the managed object source
-		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(false,
-				managedObjectSourceName, managingOfficeConfiguration, properties, this.sourceContext,
+		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(managedObjectSourceName,
+				false, managedObjectSourceName, managingOfficeConfiguration, properties, this.sourceContext,
 				managingOfficeBuilder, officeBuilder);
 
 		// Initialise the managed object source and obtain meta-data

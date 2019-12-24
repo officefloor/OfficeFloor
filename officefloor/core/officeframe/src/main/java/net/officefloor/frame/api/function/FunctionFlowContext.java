@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.api.function;
 
+import java.util.logging.Logger;
+
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 
@@ -26,6 +28,13 @@ import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
  * @author Daniel Sagenschneider
  */
 public interface FunctionFlowContext<F extends Enum<F>> {
+
+	/**
+	 * Obtains the {@link Logger}.
+	 * 
+	 * @return {@link Logger}.
+	 */
+	Logger getLogger();
 
 	/**
 	 * Instigates a {@link Flow} to be run from the {@link ManagedFunctionLogic}.

@@ -88,7 +88,7 @@ public class ExecutiveContextImpl extends SourceContextImpl implements Executive
 	public ExecutiveContextImpl(boolean isLoadingType, String teamName, int teamSize, TeamSource teamSource,
 			Executive executive, ThreadFactoryManufacturer threadFactoryManufacturer, SourceProperties properties,
 			SourceContext sourceContext) {
-		super(isLoadingType, sourceContext, properties);
+		super(teamName, isLoadingType, sourceContext, properties);
 		this.teamName = teamName;
 		this.teamSize = teamSize;
 		this.teamSource = teamSource;

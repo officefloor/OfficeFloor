@@ -20,9 +20,11 @@ package net.officefloor.compile.impl.structure;
 import java.sql.Connection;
 
 import net.officefloor.compile.internal.structure.FunctionFlowNode;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
@@ -71,11 +73,6 @@ import net.officefloor.plugin.section.clazz.ClassSectionSource;
 public class SectionNodeTest extends AbstractStructureTestCase {
 
 	/**
-	 * Name of the {@link SectionNode}.
-	 */
-	private static final String SECTION_NAME = "SECTION";
-
-	/**
 	 * Location of the {@link OfficeSection} being built.
 	 */
 	private static final String SECTION_LOCATION = "SECTION_LOCATION";
@@ -93,7 +90,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	/**
 	 * {@link SectionDesigner} to be tested.
 	 */
-	private final SectionNode node = this.nodeContext.createSectionNode(SECTION_NAME, this.office);
+	private final SectionNode node = this.nodeContext.createSectionNode("SECTION", this.office);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -108,7 +105,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddIssue() {
 
 		// Record adding the issue
-		this.issues.recordIssue(SECTION_NAME, SectionNodeImpl.class, "TEST_ISSUE");
+		this.recordIssue("OFFICE.SECTION", SectionNodeImpl.class, "TEST_ISSUE");
 
 		// Add the issue
 		this.replayMockObjects();
@@ -125,7 +122,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		final Exception failure = new Exception("cause");
 
 		// Record adding the issue
-		this.issues.recordIssue(SECTION_NAME, SectionNodeImpl.class, "TEST_ISSUE", failure);
+		this.recordReturn(this.office, this.office.getQualifiedName("SECTION"), "OFFICE.SECTION");
+		this.issues.recordIssue("OFFICE.SECTION", SectionNodeImpl.class, "TEST_ISSUE", failure);
 
 		// Add the issue
 		this.replayMockObjects();
@@ -153,7 +151,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionInputTwice() {
 
 		// Record issue in adding the input twice
-		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class, "Section Input INPUT already added");
+		this.recordIssue("OFFICE.SECTION.INPUT", SectionInputNodeImpl.class, "Section Input INPUT already added");
 
 		// Add the input twice
 		this.replayMockObjects();
@@ -185,7 +183,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionOutputTwice() {
 
 		// Record issue in adding the input twice
-		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class, "Section Output OUTPUT already added");
+		this.recordIssue("OFFICE.SECTION.OUTPUT", SectionOutputNodeImpl.class, "Section Output OUTPUT already added");
 
 		// Add the output twice
 		this.replayMockObjects();
@@ -217,7 +215,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionObjectTwice() {
 
 		// Record issue in adding the object twice
-		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class, "Section Object OBJECT already added");
+		this.recordIssue("OFFICE.SECTION.OBJECT", SectionObjectNodeImpl.class, "Section Object OBJECT already added");
 
 		// Add the object twice
 		this.replayMockObjects();
@@ -251,8 +249,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if add {@link SectionManagedObjectSource} by same name
-	 * twice.
+	 * Ensure issue if add {@link SectionManagedObjectSource} by same name twice.
 	 */
 	public void testAddSectionManagedObjectSourceTwice() {
 
@@ -260,7 +257,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record issue in adding the section managed object source twice
-		this.issues.recordIssue("MO", ManagedObjectSourceNodeImpl.class, "Managed Object Source MO already added");
+		this.recordIssue("OFFICE.SECTION.MO", ManagedObjectSourceNodeImpl.class,
+				"Managed Object Source MO already added");
 
 		// Add the section managed object source twice
 		this.replayMockObjects();
@@ -296,8 +294,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if add {@link SectionManagedObjectSource} instance by same
-	 * name twice.
+	 * Ensure issue if add {@link SectionManagedObjectSource} instance by same name
+	 * twice.
 	 */
 	public void testAddSectionManagedObjectSourceInstanceTwice() {
 
@@ -305,7 +303,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record issue in adding the section managed object source twice
-		this.issues.recordIssue("MO", ManagedObjectSourceNodeImpl.class, "Managed Object Source MO already added");
+		this.recordIssue("OFFICE.SECTION.MO", ManagedObjectSourceNodeImpl.class,
+				"Managed Object Source MO already added");
 
 		// Add the section managed object source twice
 		this.replayMockObjects();
@@ -325,9 +324,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionManagedObject() {
 
 		// Record obtaining the OfficeFloor for the managed objects
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
+		this.recordOfficeFloorNode(5);
 
 		// Add the managed object source
 		this.replayMockObjects();
@@ -349,11 +346,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionManagedObjectTwice() {
 
 		// Record obtaining the OfficeFloor for the managed objects
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
+		this.recordOfficeFloorNode(3);
 
 		// Record issue in adding the section managed object twice
-		this.issues.recordIssue("MO", ManagedObjectNodeImpl.class, "Managed Object MO already added");
+		this.recordIssue("OFFICE.SECTION.MO", ManagedObjectNodeImpl.class, "Managed Object MO already added");
 
 		// Add the managed object source
 		this.replayMockObjects();
@@ -376,12 +372,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionManagedObjectTwiceByDifferentSources() {
 
 		// Record obtaining the OfficeFloor for the managed objects
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
+		this.recordOfficeFloorNode(4);
 
 		// Record issue in adding the section managed object twice
-		this.issues.recordIssue("MO", ManagedObjectNodeImpl.class, "Managed Object MO already added");
+		this.recordIssue("OFFICE.SECTION.MO", ManagedObjectNodeImpl.class, "Managed Object MO already added");
 
 		// Add the managed object sources
 		this.replayMockObjects();
@@ -407,8 +401,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testSectionManagedObjectGetDependenciesAndFlows() {
 
 		// Record obtaining the OfficeFloor for the managed objects
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
+		this.recordOfficeFloorNode(3);
 
 		// Ensure able to get dependencies/flows from section managed object
 		this.replayMockObjects();
@@ -459,7 +452,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionFunctionNamespaceTwice() {
 
 		// Record issue in adding the section namespace twice
-		this.issues.recordIssue("NAMESPACE", FunctionNamespaceNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.NAMESPACE", FunctionNamespaceNodeImpl.class,
 				"Function Namespace NAMESPACE already added");
 
 		// Add the section namespace twice
@@ -490,13 +483,13 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure issue if add {@link SectionFunctionNamespace} instance by same
-	 * name twice.
+	 * Ensure issue if add {@link SectionFunctionNamespace} instance by same name
+	 * twice.
 	 */
 	public void testAddSectionFunctionNamespaceInstanceTwice() {
 
 		// Record issue in adding the section namespace twice
-		this.issues.recordIssue("NAMESPACE", FunctionNamespaceNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.NAMESPACE", FunctionNamespaceNodeImpl.class,
 				"Function Namespace NAMESPACE already added");
 
 		// Add the section namespace twice
@@ -533,7 +526,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionFunctionTwice() {
 
 		// Record issue in adding the section function twice
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Managed Function FUNCTION already added");
+		this.recordIssue("OFFICE.SECTION.FUNCTION", ManagedFunctionNodeImpl.class,
+				"Managed Function FUNCTION already added");
 
 		// Add the section function twice by same namespace
 		this.replayMockObjects();
@@ -554,7 +548,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionFunctionTwiceByDifferentSectionFunctionNamespace() {
 
 		// Record issue in adding the section function twice
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class, "Managed Function FUNCTION already added");
+		this.recordIssue("OFFICE.SECTION.FUNCTION", ManagedFunctionNodeImpl.class,
+				"Managed Function FUNCTION already added");
 
 		// Add the section function twice by different namespace
 		this.replayMockObjects();
@@ -571,8 +566,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure able to get {@link FunctionFlow} and {@link FunctionObject}
-	 * instances from the {@link SectionFunction}.
+	 * Ensure able to get {@link FunctionFlow} and {@link FunctionObject} instances
+	 * from the {@link SectionFunction}.
 	 */
 	public void testSectionFunctionGetFlowsAndObjects() {
 		// Ensure able to get flow/objects from section function
@@ -629,7 +624,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSubSectionTwice() {
 
 		// Record issue in adding the sub section twice
-		this.issues.recordIssue("SUB_SECTION", SectionNodeImpl.class, "Section SUB_SECTION already added");
+		this.recordIssue("OFFICE.SECTION.SUB_SECTION", SectionNodeImpl.class, "Section SUB_SECTION already added");
 
 		// Add the sub section twice
 		this.replayMockObjects();
@@ -681,8 +676,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	/**
 	 * Ensures able to add a {@link SectionInput}, {@link SectionOutput} and
 	 * {@link SectionObject} after obtaining them as {@link SubSectionInput},
-	 * {@link SubSectionOutput} and {@link SubSectionObject} instances from the
-	 * node as a {@link SubSection}.
+	 * {@link SubSectionOutput} and {@link SubSectionObject} instances from the node
+	 * as a {@link SubSection}.
 	 */
 	public void testSectionAddInputOutputObjectAfterSubSectionGet() {
 		this.replayMockObjects();
@@ -728,8 +723,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testQualifiedName() {
 
 		// Record obtaining the office qualified name
-		this.recordReturn(this.office, this.office.getQualifiedName("SECTION.SUB_SECTION.NAMESPACE"),
-				"OFFICE.SECTION.SUB_SECTION.NAMESPACE");
+		this.recordReturn(this.office, this.office.getQualifiedName("SECTION"), "OFFICE.SECTION");
 		this.replayMockObjects();
 
 		// Create sub sections that provide qualified name
@@ -752,7 +746,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionInputToSectionFunction() {
 
 		// Record already being linked
-		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class, "Section Input INPUT linked more than once");
+		this.recordIssue("OFFICE.SECTION.INPUT", SectionInputNodeImpl.class,
+				"Section Input INPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -777,7 +772,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionInputToSubSectionInput() {
 
 		// Record already being linked
-		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class, "Section Input INPUT linked more than once");
+		this.recordIssue("OFFICE.SECTION.INPUT", SectionInputNodeImpl.class,
+				"Section Input INPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -801,7 +797,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionInputToSectionOutput() {
 
 		// Record already being linked
-		this.issues.recordIssue("INPUT", SectionInputNodeImpl.class, "Section Input INPUT linked more than once");
+		this.recordIssue("OFFICE.SECTION.INPUT", SectionInputNodeImpl.class,
+				"Section Input INPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -824,7 +821,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkFunctionFlowToSectionFunction() {
 
 		// Record already being linked
-		this.issues.recordIssue("FLOW", FunctionFlowNodeImpl.class, "Function Flow FLOW linked more than once");
+		this.recordIssue("OFFICE.SECTION.FUNCTION.FLOW", FunctionFlowNodeImpl.class,
+				"Function Flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
@@ -854,7 +852,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkFunctionFlowToSubSectionInput() {
 
 		// Record already being linked
-		this.issues.recordIssue("FLOW", FunctionFlowNodeImpl.class, "Function Flow FLOW linked more than once");
+		this.recordIssue("OFFICE.SECTION.FUNCTION.FLOW", FunctionFlowNodeImpl.class,
+				"Function Flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
@@ -883,7 +882,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkFunctionFlowToSectionOutput() {
 
 		// Record already being linked
-		this.issues.recordIssue("FLOW", FunctionFlowNodeImpl.class, "Function Flow FLOW linked more than once");
+		this.recordIssue("OFFICE.SECTION.FUNCTION.FLOW", FunctionFlowNodeImpl.class,
+				"Function Flow FLOW linked more than once");
 
 		this.replayMockObjects();
 
@@ -907,13 +907,12 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link SectionFunction} to its next
-	 * {@link SectionFunction}.
+	 * Ensures can link {@link SectionFunction} to its next {@link SectionFunction}.
 	 */
 	public void testLinkSectionFunctionToNextSectionFunction() {
 
 		// Record already being linked
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.FUNCTION", ManagedFunctionNodeImpl.class,
 				"Managed Function FUNCTION linked more than once");
 
 		this.replayMockObjects();
@@ -934,13 +933,12 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link SectionFunction} to its next
-	 * {@link SubSectionInput}.
+	 * Ensures can link {@link SectionFunction} to its next {@link SubSectionInput}.
 	 */
 	public void testLinkSectionFunctionToNextSubSectionInput() {
 
 		// Record already being linked
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.FUNCTION", ManagedFunctionNodeImpl.class,
 				"Managed Function FUNCTION linked more than once");
 
 		this.replayMockObjects();
@@ -967,7 +965,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSectionFunctionToNextSectionOutput() {
 
 		// Record already being linked
-		this.issues.recordIssue("FUNCTION", ManagedFunctionNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.FUNCTION", ManagedFunctionNodeImpl.class,
 				"Managed Function FUNCTION linked more than once");
 
 		this.replayMockObjects();
@@ -993,7 +991,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSubSectionOutputToSectionFunction() {
 
 		// Record already being linked
-		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class, "Section Output OUTPUT linked more than once");
+		this.recordIssue("OFFICE.SECTION.SUB_SECTION.OUTPUT", SectionOutputNodeImpl.class,
+				"Section Output OUTPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1020,7 +1019,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSubSectionOutputToSubSectionInput() {
 
 		// Record already being linked
-		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class, "Section Output OUTPUT linked more than once");
+		this.recordIssue("OFFICE.SECTION.SUB_SECTION.OUTPUT", SectionOutputNodeImpl.class,
+				"Section Output OUTPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1045,7 +1045,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSubSectionOutputToSectionOutput() {
 
 		// Record already being linked
-		this.issues.recordIssue("OUTPUT", SectionOutputNodeImpl.class, "Section Output OUTPUT linked more than once");
+		this.recordIssue("OFFICE.SECTION.SUB_SECTION.OUTPUT", SectionOutputNodeImpl.class,
+				"Section Output OUTPUT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1065,8 +1066,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link ManagedObjectFlow} to the
-	 * {@link SectionFunction}.
+	 * Ensures can link {@link ManagedObjectFlow} to the {@link SectionFunction}.
 	 */
 	public void testLinkManagedObjectFlowToSectionFunction() {
 
@@ -1074,7 +1074,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record already being linked
-		this.issues.recordIssue("FLOW", ManagedObjectFlowNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.MO.FLOW", ManagedObjectFlowNodeImpl.class,
 				"Managed Object Source Flow FLOW linked more than once");
 
 		this.replayMockObjects();
@@ -1105,7 +1105,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record already being linked
-		this.issues.recordIssue("FLOW", ManagedObjectFlowNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.MO.FLOW", ManagedObjectFlowNodeImpl.class,
 				"Managed Object Source Flow FLOW linked more than once");
 
 		this.replayMockObjects();
@@ -1136,7 +1136,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record already being linked
-		this.issues.recordIssue("FLOW", ManagedObjectFlowNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.MO.FLOW", ManagedObjectFlowNodeImpl.class,
 				"Managed Object Source Flow FLOW linked more than once");
 
 		this.replayMockObjects();
@@ -1162,7 +1162,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkFunctionObjectToSectionObject() {
 
 		// Record already being linked
-		this.issues.recordIssue("OBJECT", FunctionObjectNodeImpl.class, "Function Object OBJECT linked more than once");
+		this.recordIssue("OFFICE.SECTION.FUNCTION.OBJECT", FunctionObjectNodeImpl.class,
+				"Function Object OBJECT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1182,18 +1183,16 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link FunctionObject} to the
-	 * {@link SectionManagedObject}.
+	 * Ensures can link {@link FunctionObject} to the {@link SectionManagedObject}.
 	 */
 	public void testLinkFunctionObjectToSectionManagedObject() {
 
 		// Record obtaining the OfficeFloor for the managed objects
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
+		this.recordOfficeFloorNode(5);
 
 		// Record already being linked
-		this.issues.recordIssue("OBJECT", FunctionObjectNodeImpl.class, "Function Object OBJECT linked more than once");
+		this.recordIssue("OFFICE.SECTION.FUNCTION.OBJECT", FunctionObjectNodeImpl.class,
+				"Function Object OBJECT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1220,7 +1219,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSubSectionObjectToSectionObject() {
 
 		// Record already being linked
-		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class, "Section Object OBJECT linked more than once");
+		this.recordIssue("OFFICE.SECTION.SUB_SECTION.OBJECT", SectionObjectNodeImpl.class,
+				"Section Object OBJECT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1245,12 +1245,11 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkSubSectionObjectToSectionManagedObject() {
 
 		// Record obtaining the OfficeFloor for the managed objects
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
+		this.recordOfficeFloorNode(5);
 
 		// Record already being linked
-		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class, "Section Object OBJECT linked more than once");
+		this.recordIssue("OFFICE.SECTION.SUB_SECTION.OBJECT", SectionObjectNodeImpl.class,
+				"Section Object OBJECT linked more than once");
 
 		this.replayMockObjects();
 
@@ -1276,11 +1275,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectDependencyToSectionObject() {
 
 		// Record obtaining the OfficeFloor for the managed objects
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
+		this.recordOfficeFloorNode(3);
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.MO.DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
@@ -1308,14 +1306,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectDependencyToSectionManagedObject() {
 
 		// Record obtaining the OfficeFloor for the managed objects
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
+		this.recordOfficeFloorNode(8);
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.MO.DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
@@ -1348,7 +1342,7 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.recordOfficeFloorNode();
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.MO_SOURCE.DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
@@ -1374,13 +1368,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testLinkInputManagedObjectDependencyToSectionManagedObject() {
 
 		// Record obtaining the OfficeFloor for the managed objects
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
-		this.recordOfficeFloorNode();
+		this.recordOfficeFloorNode(6);
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
+		this.recordIssue("OFFICE.SECTION.MO_SOURCE.DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
@@ -1402,19 +1393,47 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Records obtaining the {@link OfficeFloorNode}.F
+	 * Records obtaining the {@link OfficeFloorNode} once.
 	 */
 	private void recordOfficeFloorNode() {
-		this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		this.recordOfficeFloorNode(1);
+	}
+
+	/**
+	 * Records obtaining the {@link OfficeFloorNode} multiple times.
+	 * 
+	 * @param count
+	 */
+	private void recordOfficeFloorNode(int count) {
+		for (int i = 0; i < count; i++) {
+			this.recordReturn(this.office, this.office.getOfficeFloorNode(), this.officeFloor);
+		}
+	}
+
+	/**
+	 * Records qualifying the {@link SectionNode} name.
+	 */
+	private void recordSectionQualifiedName() {
+		this.recordReturn(this.office, this.office.getQualifiedName("SECTION"), "OFFICE.SECTION");
+	}
+
+	/**
+	 * Records an issue handling qualifying the {@link SectionNode} name.
+	 * 
+	 * @param name             Name.
+	 * @param nodeType         {@link Node} {@link Class}.
+	 * @param issueDescription {@link CompilerIssue} description.
+	 */
+	private void recordIssue(String name, Class<? extends Node> nodeType, String issueDescription) {
+		this.recordSectionQualifiedName();
+		this.issues.recordIssue(name, nodeType, issueDescription);
 	}
 
 	/**
 	 * Asserts the spawn {@link ThreadState} for the {@link FunctionFlow}.
 	 * 
-	 * @param functionFlow
-	 *            {@link FunctionFlow} to check.
-	 * @param isSpawnThreadState
-	 *            Expected spawn {@link ThreadState}.
+	 * @param functionFlow       {@link FunctionFlow} to check.
+	 * @param isSpawnThreadState Expected spawn {@link ThreadState}.
 	 */
 	private static void assertSpawnThreadState(FunctionFlow functionFlow, boolean isSpawnThreadState) {
 		assertTrue("Function flow must be " + FunctionFlowNode.class, functionFlow instanceof FunctionFlowNode);

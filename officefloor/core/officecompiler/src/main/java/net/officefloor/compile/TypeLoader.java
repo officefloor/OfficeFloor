@@ -41,23 +41,24 @@ public interface TypeLoader {
 	/**
 	 * Loads the {@link FunctionNamespaceType}.
 	 * 
-	 * @param managedFunctionSourceClassName
-	 *            {@link ManagedFunctionSource} class name.
-	 * @param properties
-	 *            {@link PropertyList}.
+	 * @param managedFunctionName            Name of {@link ManagedFunctionSource}.
+	 * @param managedFunctionSourceClassName {@link ManagedFunctionSource} class
+	 *                                       name.
+	 * @param properties                     {@link PropertyList}.
 	 * @return {@link FunctionNamespaceType}.
 	 */
-	FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceClassName, PropertyList properties);
+	FunctionNamespaceType loadManagedFunctionType(String managedFunctionName, String managedFunctionSourceClassName,
+			PropertyList properties);
 
 	/**
 	 * Loads the {@link ManagedObjectType}.
 	 * 
-	 * @param managedObjectSourceClassName
-	 *            {@link ManagedObjectSource} class name.
-	 * @param properties
-	 *            {@link PropertyList}.
+	 * @param managedObjectName            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClassName {@link ManagedObjectSource} class name.
+	 * @param properties                   {@link PropertyList}.
 	 * @return {@link ManagedObjectType}.
 	 */
-	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties);
+	ManagedObjectType<?> loadManagedObjectType(String managedObjectName, String managedObjectSourceClassName,
+			PropertyList properties);
 
 }

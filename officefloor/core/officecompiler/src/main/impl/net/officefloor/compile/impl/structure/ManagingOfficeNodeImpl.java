@@ -55,10 +55,8 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	/**
 	 * Initiate.
 	 *
-	 * @param managedObjectSource
-	 *            Parent {@link ManagedObjectSourceNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param managedObjectSource Parent {@link ManagedObjectSourceNode}.
+	 * @param context             {@link NodeContext}.
 	 */
 	public ManagingOfficeNodeImpl(ManagedObjectSourceNode managedObjectSource, NodeContext context) {
 		this.managedObjectSourceNode = managedObjectSource;
@@ -71,8 +69,7 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 
 	@Override
 	public String getNodeName() {
-		return "Managing Office for " + ManagedObjectSourceNode.TYPE + " "
-				+ this.managedObjectSourceNode.getManagedObjectSourceName();
+		return "MANAGING_OFFICE";
 	}
 
 	@Override

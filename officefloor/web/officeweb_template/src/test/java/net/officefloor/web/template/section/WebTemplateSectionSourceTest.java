@@ -387,7 +387,8 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		issues.recordCaptureIssues(false);
 
 		// Record errors
-		issues.recordIssue("<type>", SectionNodeImpl.class, "Link 'LINK' does not exist on template /path");
+		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
+				"Link 'LINK' does not exist on template /path");
 
 		// Create loader
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -478,7 +479,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		issues.recordCaptureIssues(false);
 
 		// Record errors
-		issues.recordIssue("<type>", SectionNodeImpl.class, issueDescription);
+		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class, issueDescription);
 
 		// Create loader
 		OfficeFloorCompiler compiler = OfficeFloorCompiler.newOfficeFloorCompiler(null);
@@ -512,7 +513,7 @@ public class WebTemplateSectionSourceTest extends OfficeFrameTestCase {
 		issues.recordCaptureIssues(false);
 
 		// Record errors
-		issues.recordIssue("<type>", SectionNodeImpl.class,
+		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Template bean method 'getSection' (function GETSECTION) must not be annotated with @Next (next function is always rendering template section)");
 
 		// Create loader

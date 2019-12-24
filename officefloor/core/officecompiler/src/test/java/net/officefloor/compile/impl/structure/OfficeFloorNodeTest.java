@@ -477,8 +477,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagingOfficeToDeployedOffice() {
 
 		// Record already being linked
-		this.issues.recordIssue("Managing Office for Managed Object Source MO", ManagingOfficeNodeImpl.class,
-				"Managing Office Managing Office for Managed Object Source MO linked more than once");
+		this.issues.recordIssue("MO.MANAGING_OFFICE", ManagingOfficeNodeImpl.class,
+				"Managing Office MANAGING_OFFICE linked more than once");
 
 		this.replayMockObjects();
 
@@ -528,7 +528,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectTeamToOfficeFloorTeam() {
 
 		// Record already being linked
-		this.issues.recordIssue("TEAM", ManagedObjectTeamNodeImpl.class,
+		this.issues.recordIssue("MO.TEAM", ManagedObjectTeamNodeImpl.class,
 				"Managed Object Source Team TEAM linked more than once");
 
 		this.replayMockObjects();
@@ -554,7 +554,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectDependencyToOfficeFloorManagedObject() {
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("MO.DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
@@ -584,7 +584,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectDependencyToOfficeFloorInputManagedObject() {
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("MO.DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
@@ -612,7 +612,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	public void testLinkInputManagedObjectDependencyToOfficeFloorManagedObject() {
 
 		// Record already being linked
-		this.issues.recordIssue("DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("MO_SOURCE.DEPENDENCY", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency DEPENDENCY linked more than once");
 
 		this.replayMockObjects();
@@ -642,7 +642,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	public void testLinkManagedObjectFlowToDeployedOfficeInput() {
 
 		// Record already being linked
-		this.issues.recordIssue("FLOW", ManagedObjectFlowNodeImpl.class,
+		this.issues.recordIssue("MO.FLOW", ManagedObjectFlowNodeImpl.class,
 				"Managed Object Source Flow FLOW linked more than once");
 
 		this.replayMockObjects();
@@ -668,7 +668,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeTeamToOfficeFloorTeam() {
 
 		// Record already being linked
-		this.issues.recordIssue("TEAM", OfficeTeamNodeImpl.class, "Office Team TEAM linked more than once");
+		this.issues.recordIssue("OFFICE.TEAM", OfficeTeamNodeImpl.class, "Office Team TEAM linked more than once");
 
 		this.replayMockObjects();
 
@@ -692,7 +692,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeObjectToOfficeFloorManagedObject() {
 
 		// Record already being linked
-		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class, "Office Object OBJECT linked more than once");
+		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class,
+				"Office Object OBJECT linked more than once");
 
 		this.replayMockObjects();
 
@@ -718,7 +719,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	public void testLinkOfficeObjectToOfficeFloorInputManagedObject() {
 
 		// Record already being linked
-		this.issues.recordIssue("OBJECT", OfficeObjectNodeImpl.class, "Office Object OBJECT linked more than once");
+		this.issues.recordIssue("OFFICE.OBJECT", OfficeObjectNodeImpl.class,
+				"Office Object OBJECT linked more than once");
 
 		this.replayMockObjects();
 

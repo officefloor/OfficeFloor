@@ -25,6 +25,7 @@ import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.integrate.officefloor.AugmentManagedObjectSourceFlowTest.Section;
 import net.officefloor.compile.internal.structure.AutoWire;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
@@ -328,8 +329,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		CompileSupplierSource.addSuppliedManagedObjectSource(CompileManagedObject.class, mos);
 
 		// Should supply and auto-wire the dependency
-		final String mosName = "OFFICE." + CompileManagedObject.class.getName();
-		final String moName = "OFFICE." + CompileManagedObject.class.getName();
+		final String mosName = "OFFICE." + Node.escape(CompileManagedObject.class.getName());
+		final String moName = "OFFICE." + Node.escape(CompileManagedObject.class.getName());
 		office.registerManagedObjectSource(mosName, mosName);
 		this.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -365,8 +366,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 				DependencyManagedObject.class.getName());
 
 		// Should supply the dependency for auto-wiring
-		final String mosName = "OFFICE." + DependencyManagedObject.class.getName();
-		final String moName = "OFFICE." + DependencyManagedObject.class.getName();
+		final String mosName = "OFFICE." + Node.escape(DependencyManagedObject.class.getName());
+		final String moName = "OFFICE." + Node.escape(DependencyManagedObject.class.getName());
 		office.registerManagedObjectSource(mosName, mosName);
 		this.record_officeFloorBuilder_addManagedObject(mosName, ClassManagedObjectSource.class, 0,
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, DependencyManagedObject.class.getName());
@@ -420,8 +421,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 				"OFFICE.DEPENDENCY");
 
 		// Should supply the dependency for auto-wiring
-		final String mosName = CompileManagedObject.class.getName();
-		final String moName = CompileManagedObject.class.getName();
+		final String mosName = Node.escape(CompileManagedObject.class.getName());
+		final String moName = Node.escape(CompileManagedObject.class.getName());
 		office.registerManagedObjectSource(mosName, mosName);
 		this.record_officeFloorBuilder_addManagedObject(mosName, mos, 0);
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -457,8 +458,8 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		CompileSupplierSource.addSuppliedManagedObjectSource(DependencyManagedObject.class,
 				new ClassManagedObjectSource(), ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				DependencyManagedObject.class.getName());
-		final String mosName = DependencyManagedObject.class.getName();
-		final String moName = DependencyManagedObject.class.getName();
+		final String mosName = Node.escape(DependencyManagedObject.class.getName());
+		final String moName = Node.escape(DependencyManagedObject.class.getName());
 
 		// Build the section
 		ManagedFunctionBuilder<?, ?> function = this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION",
@@ -520,8 +521,9 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 
 		// Should not supply managed object as requires flow configuration
 		// (both instance and input require dependency)
-		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class, "No target found by auto-wiring");
-		this.issues.recordIssue("dependency", ManagedObjectDependencyNodeImpl.class,
+		this.issues.recordIssue("OFFICE.DEPENDENCY.dependency", ManagedObjectDependencyNodeImpl.class,
+				"No target found by auto-wiring");
+		this.issues.recordIssue("OFFICE.DEPENDENCY.dependency", ManagedObjectDependencyNodeImpl.class,
 				"Managed Object Dependency dependency is not linked to a BoundManagedObjectNode");
 
 		// Compile the OfficeFloor
@@ -560,10 +562,11 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addSectionClassFunction("OFFICE", "SECTION", TeamSectionClass.class, "function");
 
 		// Should not supply managed object as requires team configuration
-		this.issues.recordIssue(TeamManagedObjectSource.class.getName(), SectionObjectNodeImpl.class,
-				"No target found by auto-wiring");
-		this.issues.recordIssue(TeamManagedObjectSource.class.getName(), SectionObjectNodeImpl.class, "Section Object "
-				+ TeamManagedObjectSource.class.getName() + " is not linked to a BoundManagedObjectNode");
+		this.issues.recordIssue("OFFICE.SECTION." + Node.escape(TeamManagedObjectSource.class.getName()),
+				SectionObjectNodeImpl.class, "No target found by auto-wiring");
+		this.issues.recordIssue("OFFICE.SECTION." + Node.escape(TeamManagedObjectSource.class.getName()),
+				SectionObjectNodeImpl.class, "Section Object " + TeamManagedObjectSource.class.getName()
+						+ " is not linked to a BoundManagedObjectNode");
 
 		// Compile the OfficeFloor
 		this.compile(true);
@@ -586,7 +589,7 @@ public class AutoWireOfficeTest extends AbstractCompileTestCase {
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, CompileManagedObject.class.getName());
 
 		// Managed Object name
-		final String MO_NAME = "OFFICE." + CompileManagedObject.class.getName();
+		final String MO_NAME = "OFFICE." + Node.escape(CompileManagedObject.class.getName());
 
 		// Record loading section type
 		this.issues.recordCaptureIssues(true);

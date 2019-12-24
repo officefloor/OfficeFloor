@@ -33,16 +33,14 @@ public class ManagedObjectPoolSourceContextImpl extends SourceContextImpl implem
 	/**
 	 * Initiate.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param properties
-	 *            Properties.
-	 * @param sourceContext
-	 *            Delegate {@link SourceContext}.
+	 * @param managedObjectPoolName Name of the {@link ManagedObjectPool}.
+	 * @param isLoadingType         Indicates if loading type.
+	 * @param properties            Properties.
+	 * @param sourceContext         Delegate {@link SourceContext}.
 	 */
-	public ManagedObjectPoolSourceContextImpl(boolean isLoadingType, SourceProperties properties,
-			SourceContext sourceContext) {
-		super(isLoadingType, sourceContext, properties);
+	public ManagedObjectPoolSourceContextImpl(String managedObjectPoolName, boolean isLoadingType,
+			SourceProperties properties, SourceContext sourceContext) {
+		super(managedObjectPoolName, isLoadingType, sourceContext, properties);
 	}
 
 }

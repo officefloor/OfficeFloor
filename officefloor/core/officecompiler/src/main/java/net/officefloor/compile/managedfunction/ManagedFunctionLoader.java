@@ -36,10 +36,8 @@ public interface ManagedFunctionLoader {
 	 * {@link ManagedFunctionSourceSpecification} for the
 	 * {@link ManagedFunctionSource}.
 	 * 
-	 * @param <S>
-	 *            {@link ManagedFunctionSource} type.
-	 * @param mangedFunctionSourceClass
-	 *            Class of the {@link ManagedFunctionSource}.
+	 * @param <S>                       {@link ManagedFunctionSource} type.
+	 * @param mangedFunctionSourceClass Class of the {@link ManagedFunctionSource}.
 	 * @return {@link PropertyList} of the {@link ManagedFunctionSourceProperty}
 	 *         instances of the {@link ManagedFunctionSourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
@@ -52,8 +50,7 @@ public interface ManagedFunctionLoader {
 	 * {@link ManagedFunctionSourceSpecification} for the
 	 * {@link ManagedFunctionSource}.
 	 * 
-	 * @param managedFunctionSource
-	 *            {@link ManagedFunctionSource} instance.
+	 * @param managedFunctionSource {@link ManagedFunctionSource} instance.
 	 * @return {@link PropertyList} of the {@link ManagedFunctionSourceProperty}
 	 *         instances of the {@link ManagedFunctionSourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
@@ -65,15 +62,13 @@ public interface ManagedFunctionLoader {
 	 * Loads and returns the {@link FunctionNamespaceType} from the
 	 * {@link ManagedFunctionSource} class.
 	 * 
-	 * @param <S>
-	 *            {@link ManagedFunctionSource} type.
-	 * @param managedFunctionSourceClass
-	 *            Class of the {@link ManagedFunctionSource}.
-	 * @param properties
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link FunctionNamespaceType}.
-	 * @return {@link FunctionNamespaceType} or <code>null</code> if issues,
-	 *         which is reported to the {@link CompilerIssues}.
+	 * @param <S>                        {@link ManagedFunctionSource} type.
+	 * @param managedFunctionSourceClass Class of the {@link ManagedFunctionSource}.
+	 * @param properties                 {@link PropertyList} containing the
+	 *                                   properties to source the
+	 *                                   {@link FunctionNamespaceType}.
+	 * @return {@link FunctionNamespaceType} or <code>null</code> if issues, which
+	 *         is reported to the {@link CompilerIssues}.
 	 */
 	<S extends ManagedFunctionSource> FunctionNamespaceType loadManagedFunctionType(Class<S> managedFunctionSourceClass,
 			PropertyList properties);
@@ -82,13 +77,11 @@ public interface ManagedFunctionLoader {
 	 * Loads and returns the {@link FunctionNamespaceType} from the
 	 * {@link ManagedFunctionSource} class.
 	 * 
-	 * @param managedFunctionSource
-	 *            {@link ManagedFunctionSource} instance.
-	 * @param properties
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link FunctionNamespaceType}.
-	 * @return {@link FunctionNamespaceType} or <code>null</code> if issues,
-	 *         which is reported to the {@link CompilerIssues}.
+	 * @param managedFunctionSource {@link ManagedFunctionSource} instance.
+	 * @param properties            {@link PropertyList} containing the properties
+	 *                              to source the {@link FunctionNamespaceType}.
+	 * @return {@link FunctionNamespaceType} or <code>null</code> if issues, which
+	 *         is reported to the {@link CompilerIssues}.
 	 */
 	FunctionNamespaceType loadManagedFunctionType(ManagedFunctionSource managedFunctionSource, PropertyList properties);
 

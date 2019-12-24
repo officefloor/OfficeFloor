@@ -359,6 +359,40 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 		aliasMap.put(alias, aliasSourceClass);
 	}
 
+	/**
+	 * Obtains the {@link ManagedFunctionSource} {@link Class}.
+	 * 
+	 * @param <S>                       Type of {@link ManagedFunctionSource}.
+	 * @param node                      {@link Node} requiring the
+	 *                                  {@link ManagedFunctionSource} {@link Class}.
+	 * @param managedFunctionSourceName Name of {@link ManagedFunctionSource}
+	 *                                  {@link Class} or alias.
+	 * @return {@link ManagedFunctionSource} {@link Class}.
+	 */
+	@SuppressWarnings("unchecked")
+	private <S extends ManagedFunctionSource> Class<S> getManagedFunctionSourceClass(Node node,
+			String managedFunctionSourceName) {
+		return (Class<S>) CompileUtil.obtainClass(managedFunctionSourceName, ManagedFunctionSource.class,
+				this.managedFunctionSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectSource} {@link Class}.
+	 * 
+	 * @param <S>                     Type of {@link ManagedObjectSource}.
+	 * @param node                    {@link Node} requiring the
+	 *                                {@link ManagedObjectSource} {@link Class}.
+	 * @param managedObjectSourceName Name of {@link ManagedObjectSource}
+	 *                                {@link Class} or alias.
+	 * @return {@link ManagedObjectSource} {@link Class}.
+	 */
+	@SuppressWarnings("unchecked")
+	private <S extends ManagedObjectSource<?, ?>> Class<S> getManagedObjectSourceClass(Node node,
+			String managedObjectSourceName) {
+		return (Class<S>) CompileUtil.obtainClass(managedObjectSourceName, ManagedObjectSource.class,
+				this.managedObjectSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
+	}
+
 	/*
 	 * ==================== OfficeFloorCompiler ==============================
 	 */
@@ -486,7 +520,7 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SourceContext createRootSourceContext() {
-		return new SourceContextImpl(false, this.getClassLoader(), this.clockFactory,
+		return new SourceContextImpl(OfficeFloor.class.getSimpleName(), false, this.getClassLoader(), this.clockFactory,
 				this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
 	}
 
@@ -512,7 +546,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SectionLoader getSectionLoader() {
-		return new SectionLoaderImpl(this, this);
+		OfficeNode officeNode = this.createOfficeNode(this.getNodeName(), null);
+		return new SectionLoaderImpl(officeNode, null, this);
 	}
 
 	@Override
@@ -722,11 +757,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceClassName,
-			PropertyList properties) {
+	public FunctionNamespaceType loadManagedFunctionType(String managedFunctionSourceName,
+			String managedFunctionSourceClassName, PropertyList properties) {
 
 		// Obtain the managed function source class
-		Class managedFunctionSourceClass = this.getManagedFunctionSourceClass(managedFunctionSourceClassName, this);
+		Class managedFunctionSourceClass = this.getManagedFunctionSourceClass(this, managedFunctionSourceClassName);
 		if (managedFunctionSourceClass == null) {
 			return null; // not able to load type
 		}
@@ -737,10 +772,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceClassName, PropertyList properties) {
+	public ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties) {
 
 		// Obtain the managed object source class
-		Class managedObjectSourceClass = this.getManagedObjectSourceClass(managedObjectSourceClassName, this);
+		Class managedObjectSourceClass = this.getManagedObjectSourceClass(this, managedObjectSourceClassName);
 		if (managedObjectSourceClass == null) {
 			return null; // not able to load type
 		}
@@ -838,13 +874,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	@SuppressWarnings("unchecked")
 	public <S extends OfficeFloorSource> Class<S> getOfficeFloorSourceClass(String officeFloorSourceClassName,
-			Node node) {
+			OfficeFloorNode node) {
 		return (Class<S>) CompileUtil.obtainClass(officeFloorSourceClassName, OfficeFloorSource.class,
 				this.officeFloorAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public OfficeFloorLoader getOfficeFloorLoader(Node node) {
+	public OfficeFloorLoader getOfficeFloorLoader(OfficeFloorNode node) {
 		return new OfficeFloorLoaderImpl(node, this);
 	}
 
@@ -857,13 +893,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends OfficeSource> Class<S> getOfficeSourceClass(String officeSourceName, Node node) {
+	public <S extends OfficeSource> Class<S> getOfficeSourceClass(String officeSourceName, OfficeNode node) {
 		return (Class<S>) CompileUtil.obtainClass(officeSourceName, OfficeSource.class, this.officeSourceAliases,
 				this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public OfficeLoader getOfficeLoader(Node node) {
+	public OfficeLoader getOfficeLoader(OfficeNode node) {
 		return new OfficeLoaderImpl(node, this);
 	}
 
@@ -904,19 +940,19 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends SectionSource> Class<S> getSectionSourceClass(String sectionSourceName, Node node) {
+	public <S extends SectionSource> Class<S> getSectionSourceClass(String sectionSourceName, SectionNode node) {
 		return (Class<S>) CompileUtil.obtainClass(sectionSourceName, SectionSource.class, this.sectionSourceAliases,
 				this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public SectionLoader getSectionLoader(OfficeNode officeNode) {
-		return new SectionLoaderImpl(officeNode, null, this);
+	public SectionLoader getSectionLoader(SectionNode sectionNode) {
+		return new SectionLoaderImpl(sectionNode.getOfficeNode(), sectionNode, this);
 	}
 
 	@Override
-	public SectionLoader getSectionLoader(SectionNode parentSectionNode) {
-		return new SectionLoaderImpl(parentSectionNode.getOfficeNode(), parentSectionNode, this);
+	public SectionLoader getSectionLoader(OfficeNode officeNode) {
+		return new SectionLoaderImpl(officeNode, null, this);
 	}
 
 	@Override
@@ -936,37 +972,33 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	public SectionNode createSectionNode(String sectionName, SectionNode parentSection) {
-		return new SectionNodeImpl(sectionName, parentSection, parentSection.getOfficeNode(), this);
+		return new SectionNodeImpl(true, sectionName, parentSection, parentSection.getOfficeNode(), this);
 	}
 
 	@Override
 	public SectionNode createSectionNode(String sectionName, OfficeNode office) {
-		return new SectionNodeImpl(sectionName, null, office, this);
+		return new SectionNodeImpl(true, sectionName, null, office, this);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <S extends ManagedFunctionSource> Class<S> getManagedFunctionSourceClass(String managedFunctionSourceName,
-			Node node) {
-		return (Class<S>) CompileUtil.obtainClass(managedFunctionSourceName, ManagedFunctionSource.class,
-				this.managedFunctionSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
+			FunctionNamespaceNode node) {
+		return this.getManagedFunctionSourceClass(node, managedFunctionSourceName);
 	}
 
 	@Override
-	public ManagedFunctionLoader getManagedFunctionLoader(Node node) {
+	public ManagedFunctionLoader getManagedFunctionLoader(FunctionNamespaceNode node) {
 		return new ManagedFunctionLoaderImpl(node, this);
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <S extends ManagedObjectSource<?, ?>> Class<S> getManagedObjectSourceClass(String managedObjectSourceName,
-			Node node) {
-		return (Class<S>) CompileUtil.obtainClass(managedObjectSourceName, ManagedObjectSource.class,
-				this.managedObjectSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
+			ManagedObjectSourceNode node) {
+		return this.getManagedObjectSourceClass(node, managedObjectSourceName);
 	}
 
 	@Override
-	public ManagedObjectLoader getManagedObjectLoader(Node node) {
+	public ManagedObjectLoader getManagedObjectLoader(ManagedObjectSourceNode node) {
 		return new ManagedObjectLoaderImpl(node, this);
 	}
 
@@ -1018,8 +1050,21 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public ManagedObjectNode createManagedObjectNode(String managedObjectName) {
-		return new ManagedObjectNodeImpl(managedObjectName, this);
+	public ManagedObjectNode createManagedObjectNode(String managedObjectName, SectionNode section) {
+		OfficeNode office = section.getOfficeNode();
+		OfficeFloorNode officeFloor = (office != null ? office.getOfficeFloorNode() : null);
+		return new ManagedObjectNodeImpl(managedObjectName, section, office, officeFloor, this);
+	}
+
+	@Override
+	public ManagedObjectNode createManagedObjectNode(String managedObjectName, OfficeNode office) {
+		OfficeFloorNode officeFloor = office.getOfficeFloorNode();
+		return new ManagedObjectNodeImpl(managedObjectName, null, office, officeFloor, this);
+	}
+
+	@Override
+	public ManagedObjectNode createManagedObjectNode(String managedObjectName, OfficeFloorNode officeFloor) {
+		return new ManagedObjectNodeImpl(managedObjectName, null, null, officeFloor, this);
 	}
 
 	@Override
@@ -1058,13 +1103,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	@SuppressWarnings("unchecked")
 	public <S extends ManagedObjectPoolSource> Class<S> getManagedObjectPoolSourceClass(
-			String managedObjectPoolSourceName, Node node) {
+			String managedObjectPoolSourceName, ManagedObjectPoolNode node) {
 		return (Class<S>) CompileUtil.obtainClass(managedObjectPoolSourceName, ManagedObjectPoolSource.class,
 				this.managedObjectPoolSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public ManagedObjectPoolLoader getManagedObjectPoolLoader(Node node) {
+	public ManagedObjectPoolLoader getManagedObjectPoolLoader(ManagedObjectPoolNode node) {
 		return new ManagedObjectPoolLoaderImpl(node, this);
 	}
 
@@ -1089,13 +1134,14 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends SupplierSource> Class<S> getSupplierSourceClass(String supplierSourceClassName, Node node) {
+	public <S extends SupplierSource> Class<S> getSupplierSourceClass(String supplierSourceClassName,
+			SupplierNode node) {
 		return (Class<S>) CompileUtil.obtainClass(supplierSourceClassName, SupplierSource.class,
 				this.supplierSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public SupplierLoader getSupplierLoader(Node node) {
+	public SupplierLoader getSupplierLoader(SupplierNode node) {
 		return new SupplierLoaderImpl(node, this);
 	}
 
@@ -1124,13 +1170,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	@SuppressWarnings("unchecked")
 	public <S extends AdministrationSource<?, ?, ?>> Class<S> getAdministrationSourceClass(
-			String administrationSourceName, Node node) {
+			String administrationSourceName, AdministrationNode node) {
 		return (Class<S>) CompileUtil.obtainClass(administrationSourceName, AdministrationSource.class,
 				this.administrationSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public AdministrationLoader getAdministrationLoader(Node node) {
+	public AdministrationLoader getAdministrationLoader(AdministrationNode node) {
 		return new AdministrationLoaderImpl(node, this);
 	}
 
@@ -1142,13 +1188,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	@Override
 	@SuppressWarnings("unchecked")
 	public <S extends GovernanceSource<?, ?>> Class<S> getGovernanceSourceClass(String governanceSourceName,
-			Node node) {
+			GovernanceNode node) {
 		return (Class<S>) CompileUtil.obtainClass(governanceSourceName, GovernanceSource.class,
 				this.governanceSourceAliases, this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public GovernanceLoader getGovernanceLoader(Node node) {
+	public GovernanceLoader getGovernanceLoader(GovernanceNode node) {
 		return new GovernanceLoaderImpl(node, this);
 	}
 
@@ -1159,13 +1205,13 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends TeamSource> Class<S> getTeamSourceClass(String teamSourceName, Node node) {
+	public <S extends TeamSource> Class<S> getTeamSourceClass(String teamSourceName, TeamNode node) {
 		return (Class<S>) CompileUtil.obtainClass(teamSourceName, TeamSource.class, this.teamSourceAliases,
 				this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
 
 	@Override
-	public TeamLoader getTeamLoader(Node node) {
+	public TeamLoader getTeamLoader(TeamNode node) {
 		return new TeamLoaderImpl(node, this);
 	}
 
@@ -1176,7 +1222,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends ExecutiveSource> Class<S> getExecutiveSourceClass(String executiveSourceClassName, Node node) {
+	public <S extends ExecutiveSource> Class<S> getExecutiveSourceClass(String executiveSourceClassName,
+			ExecutiveNode node) {
 		return (Class<S>) CompileUtil.obtainClass(executiveSourceClassName, ExecutiveSource.class, new HashMap<>(),
 				this.getRootSourceContext(), node, this.getCompilerIssues());
 	}
@@ -1213,8 +1260,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements Node
 	}
 
 	@Override
-	public ManagedFunctionNode createFunctionNode(String functionName) {
-		return new ManagedFunctionNodeImpl(functionName, this);
+	public ManagedFunctionNode createFunctionNode(String functionName, SectionNode section) {
+		return new ManagedFunctionNodeImpl(functionName, section, this);
 	}
 
 	@Override

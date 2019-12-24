@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.officefloor;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.FlowCallback;
@@ -66,6 +67,11 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	private final ThreadFactory[][] executionStrategies;
 
 	/**
+	 * {@link Logger} for the {@link ManagedObjectExecuteContext}.
+	 */
+	private final Logger executeLogger;
+
+	/**
 	 * {@link OfficeMetaData} to create {@link ProcessState} instances.
 	 */
 	private final OfficeMetaData officeMetaData;
@@ -96,15 +102,19 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 	 *                              {@link ManagedObjectSource}.
 	 * @param executionStrategies   {@link ExecutionStrategy} instances in index
 	 *                              order for the {@link ManagedObjectSource}.
+	 * @param executeLogger         {@link Logger} for the
+	 *                              {@link ManagedObjectExecuteContext}.
 	 * @param officeMetaData        {@link OfficeMetaData} to create
 	 *                              {@link ProcessState} instances.
 	 */
 	public ManagedObjectExecuteManagerImpl(ManagedObjectMetaData<?> managedObjectMetaData, int processMoIndex,
-			FlowMetaData[] processLinks, ThreadFactory[][] executionStrategies, OfficeMetaData officeMetaData) {
+			FlowMetaData[] processLinks, ThreadFactory[][] executionStrategies, Logger executeLogger,
+			OfficeMetaData officeMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
 		this.executionStrategies = executionStrategies;
+		this.executeLogger = executeLogger;
 		this.officeMetaData = officeMetaData;
 	}
 
@@ -187,6 +197,11 @@ public class ManagedObjectExecuteManagerImpl<F extends Enum<F>> implements Manag
 		/*
 		 * =============== ManagedObjectExecuteContext =============================
 		 */
+
+		@Override
+		public Logger getLogger() {
+			return ManagedObjectExecuteManagerImpl.this.executeLogger;
+		}
 
 		@Override
 		public ManagedObjectStartupProcess registerStartupProcess(F key, Object parameter, ManagedObject managedObject,

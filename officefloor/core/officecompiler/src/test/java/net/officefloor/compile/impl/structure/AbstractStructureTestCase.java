@@ -485,6 +485,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Makes the {@link SubSection}.
 	 */
+	@FunctionalInterface
 	protected static interface SectionMaker {
 
 		/**

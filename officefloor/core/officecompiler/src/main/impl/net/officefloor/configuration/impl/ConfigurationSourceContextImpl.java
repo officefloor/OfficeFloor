@@ -41,16 +41,14 @@ public class ConfigurationSourceContextImpl extends SourceContextImpl implements
 	/**
 	 * Instantiate.
 	 * 
-	 * @param isLoadingType
-	 *            Indicates if loading type.
-	 * @param delegate
-	 *            Delegate {@link SourceContext}.
-	 * @param sourceProperties
-	 *            {@link SourceProperties}.
+	 * @param sourceName       Name of source.
+	 * @param isLoadingType    Indicates if loading type.
+	 * @param delegate         Delegate {@link SourceContext}.
+	 * @param sourceProperties {@link SourceProperties}.
 	 */
-	public ConfigurationSourceContextImpl(boolean isLoadingType, SourceContext delegate,
+	public ConfigurationSourceContextImpl(String sourceName, boolean isLoadingType, SourceContext delegate,
 			SourceProperties sourceProperties) {
-		super(isLoadingType, delegate, sourceProperties);
+		super(sourceName, isLoadingType, delegate, sourceProperties);
 
 		// Configure the configuration context
 		this.configurationContext = new ConfigurationContextImpl((location) -> this.getOptionalResource(location),
@@ -62,15 +60,15 @@ public class ConfigurationSourceContextImpl extends SourceContextImpl implements
 	 */
 
 	@Override
-	public ConfigurationItem getConfigurationItem(String location, PropertyList overrideProperties)
+	public ConfigurationItem getConfigurationItem(String location, PropertyList properties)
 			throws UnknownResourceError, ConfigurationError {
-		return this.configurationContext.getConfigurationItem(location, overrideProperties);
+		return this.configurationContext.getConfigurationItem(location, properties);
 	}
 
 	@Override
-	public ConfigurationItem getOptionalConfigurationItem(String location, PropertyList overrideProperties)
+	public ConfigurationItem getOptionalConfigurationItem(String location, PropertyList properties)
 			throws ConfigurationError {
-		return this.configurationContext.getOptionalConfigurationItem(location, overrideProperties);
+		return this.configurationContext.getOptionalConfigurationItem(location, properties);
 	}
 
 }

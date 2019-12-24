@@ -296,7 +296,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	}
 
 	@Override
-	public SourceContext getSourceContext(Supplier<ClockFactory> clockFactoryProvider) {
+	public SourceContext getSourceContext(String sourceName, Supplier<ClockFactory> clockFactoryProvider) {
 
 		// Obtain the class loader
 		ClassLoader classLoader = this.classLoader;
@@ -311,7 +311,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 		}
 
 		// Create and return the source context
-		return new SourceContextImpl(false, classLoader, clockFactory,
+		return new SourceContextImpl(sourceName, false, classLoader, clockFactory,
 				this.resourceSources.toArray(new ResourceSource[this.resourceSources.size()]));
 	}
 

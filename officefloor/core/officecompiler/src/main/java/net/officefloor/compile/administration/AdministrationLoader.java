@@ -37,16 +37,12 @@ public interface AdministrationLoader {
 	 * {@link AdministrationSourceSpecification} for the
 	 * {@link AdministrationSource}.
 	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            {@link Enum} for the {@link Flow} keys.
-	 * @param <G>
-	 *            {@link Enum} for the {@link Governance} keys.
-	 * @param <AS>
-	 *            {@link AdministrationSource} type.
-	 * @param administrationSourceClass
-	 *            {@link AdministrationSource} class.
+	 * @param <E>                       Extension interface type.
+	 * @param <F>                       {@link Enum} for the {@link Flow} keys.
+	 * @param <G>                       {@link Enum} for the {@link Governance}
+	 *                                  keys.
+	 * @param <AS>                      {@link AdministrationSource} type.
+	 * @param administrationSourceClass {@link AdministrationSource} class.
 	 * @return {@link PropertyList} of the {@link AdministrationSourceProperty}
 	 *         instances of the {@link AdministrationSourceSpecification} or
 	 *         <code>null</code> if issues, which are reported to the
@@ -60,14 +56,10 @@ public interface AdministrationLoader {
 	 * {@link AdministrationSourceSpecification} for the
 	 * {@link AdministrationSource}.
 	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            {@link Enum} for the {@link Flow} keys.
-	 * @param <G>
-	 *            {@link Enum} for the {@link Governance} keys.
-	 * @param administrationSource
-	 *            {@link AdministrationSource} instance.
+	 * @param <E>                  Extension interface type.
+	 * @param <F>                  {@link Enum} for the {@link Flow} keys.
+	 * @param <G>                  {@link Enum} for the {@link Governance} keys.
+	 * @param administrationSource {@link AdministrationSource} instance.
 	 * @return {@link PropertyList} of the {@link AdministrationSourceProperty}
 	 *         instances of the {@link AdministrationSourceSpecification} or
 	 *         <code>null</code> if issues, which are reported to the
@@ -80,21 +72,17 @@ public interface AdministrationLoader {
 	 * Loads and returns the {@link AdministrationType} sourced from the
 	 * {@link AdministrationSource}.
 	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            {@link Enum} for the {@link Flow} keys.
-	 * @param <G>
-	 *            {@link Enum} for the {@link Governance} keys.
-	 * @param <AS>
-	 *            {@link AdministrationSource} type.
-	 * @param administrationSourceClass
-	 *            Class of the {@link AdministrationSource}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link AdministrationType}.
-	 * @return {@link AdministrationType} or <code>null</code> if issues, which
-	 *         are reported to the {@link CompilerIssues}.
+	 * @param <E>                       Extension interface type.
+	 * @param <F>                       {@link Enum} for the {@link Flow} keys.
+	 * @param <G>                       {@link Enum} for the {@link Governance}
+	 *                                  keys.
+	 * @param <AS>                      {@link AdministrationSource} type.
+	 * @param administrationSourceClass Class of the {@link AdministrationSource}.
+	 * @param propertyList              {@link PropertyList} containing the
+	 *                                  properties to source the
+	 *                                  {@link AdministrationType}.
+	 * @return {@link AdministrationType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
 	 */
 	<E, F extends Enum<F>, G extends Enum<G>, AS extends AdministrationSource<E, F, G>> AdministrationType<E, F, G> loadAdministrationType(
 			Class<AS> administrationSourceClass, PropertyList propertyList);
@@ -103,19 +91,14 @@ public interface AdministrationLoader {
 	 * Loads and returns the {@link AdministrationType} sourced from the
 	 * {@link AdministrationSource}.
 	 * 
-	 * @param <E>
-	 *            Extension interface type.
-	 * @param <F>
-	 *            {@link Enum} for the {@link Flow} keys.
-	 * @param <G>
-	 *            {@link Enum} for the {@link Governance} keys.
-	 * @param administrationSource
-	 *            {@link AdministrationSource} instance.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link AdministrationType}.
-	 * @return {@link AdministrationType} or <code>null</code> if issues, which
-	 *         are reported to the {@link CompilerIssues}.
+	 * @param <E>                  Extension interface type.
+	 * @param <F>                  {@link Enum} for the {@link Flow} keys.
+	 * @param <G>                  {@link Enum} for the {@link Governance} keys.
+	 * @param administrationSource {@link AdministrationSource} instance.
+	 * @param propertyList         {@link PropertyList} containing the properties to
+	 *                             source the {@link AdministrationType}.
+	 * @return {@link AdministrationType} or <code>null</code> if issues, which are
+	 *         reported to the {@link CompilerIssues}.
 	 */
 	<E, F extends Enum<F>, G extends Enum<G>> AdministrationType<E, F, G> loadAdministrationType(
 			AdministrationSource<E, F, G> administrationSource, PropertyList propertyList);

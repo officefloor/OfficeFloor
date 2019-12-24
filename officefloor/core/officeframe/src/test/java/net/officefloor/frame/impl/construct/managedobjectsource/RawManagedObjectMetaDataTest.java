@@ -22,6 +22,7 @@ import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -227,6 +228,25 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		this.constructRawManagedObjectMetaData(false);
 		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure correct logger name.
+	 */
+	public void testLoggerName() {
+
+		// Record fail instantiate due to missing property
+		this.configuration.setManagingOffice("OFFICE");
+		this.officeFloorConfiguration.addOffice("OFFICE");
+		MockManagedObjectSource.loggerName = null;
+
+		// Construct managed object
+		this.replayMockObjects();
+		this.constructRawManagedObjectMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure correct logger name
+		assertEquals("Incorrect logger name", MANAGED_OBJECT_NAME, MockManagedObjectSource.loggerName);
 	}
 
 	/**
@@ -1005,6 +1025,11 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public static ManagedObjectSourceMetaData<Indexed, FlowKey> metaData;
 
 		/**
+		 * {@link Logger} name.
+		 */
+		public static String loggerName = null;
+
+		/**
 		 * Resets state of {@link MockManagedObjectSource} for testing.
 		 * 
 		 * @param taskFactory {@link ManagedFunctionFactory}.
@@ -1027,6 +1052,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			initFailure = null;
 			startupFunctionName = null;
 			MockManagedObjectSource.metaData = metaData;
+			loggerName = null;
 		}
 
 		/**
@@ -1052,6 +1078,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		@Override
 		public ManagedObjectSourceMetaData init(ManagedObjectSourceContext context) throws Exception {
+
+			// Capture the logger name
+			loggerName = context.getLogger().getName();
 
 			// Obtain the required property
 			if (requiredPropertyName != null) {

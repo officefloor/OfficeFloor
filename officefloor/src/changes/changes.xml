@@ -2,7 +2,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0 http://maven.apache.org/xsd/changes-1.0.0.xsd">
 	<body>
-		<release version="3.16.0" date="InSCM" description="Activity">
+		<release version="3.17.0" date="InSCM" description="Logger">
+			<action type="add" dev="sagenschneider">Logger</action>
+		</release>
+		<release version="3.16.0" date="2019-12-12" description="Activity">
 			<action type="add" dev="sagenschneider">Activity</action>
 		</release>
 		<release version="3.15.0" date="2019-11-15" description="First-Class Procedure">

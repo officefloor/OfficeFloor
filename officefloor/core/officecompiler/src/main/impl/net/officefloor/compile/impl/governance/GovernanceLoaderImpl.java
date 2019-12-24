@@ -68,10 +68,8 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link Governance}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link Governance}.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public GovernanceLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -192,10 +190,17 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 	public <I, F extends Enum<F>, GS extends GovernanceSource<I, F>> GovernanceType<I, F> loadGovernanceType(
 			GS governanceSource, PropertyList properties) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName();
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, properties);
+
 		// Create the context for the governance source
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
-		SourceProperties sourceProperties = new PropertyListSourceProperties(properties);
-		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(true, sourceContext, sourceProperties);
+		SourceProperties sourceProperties = new PropertyListSourceProperties(overriddenProperties);
+		GovernanceSourceContextImpl context = new GovernanceSourceContextImpl(qualifiedName, true, sourceContext,
+				sourceProperties);
 
 		// Initialise the governance source and obtain the meta-data
 		GovernanceSourceMetaData<I, F> metaData;
@@ -268,8 +273,7 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 	 * Obtains the {@link GovernanceFlowType} instances from the
 	 * {@link GovernanceSourceMetaData}.
 	 * 
-	 * @param metaData
-	 *            {@link GovernanceSourceMetaData}.
+	 * @param metaData {@link GovernanceSourceMetaData}.
 	 * @return {@link GovernanceFlowType} instances.
 	 */
 	@SuppressWarnings("unchecked")
@@ -386,10 +390,9 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 	/**
 	 * Obtains the {@link GovernanceEscalationType} instances.
 	 * 
-	 * @param metaData
-	 *            {@link GovernanceSourceMetaData}.
-	 * @return {@link GovernanceEscalationType} instances or <code>null</code>
-	 *         if issue obtaining.
+	 * @param metaData {@link GovernanceSourceMetaData}.
+	 * @return {@link GovernanceEscalationType} instances or <code>null</code> if
+	 *         issue obtaining.
 	 */
 	private GovernanceEscalationType[] getGovernanceEscalationTypes(GovernanceSourceMetaData<?, ?> metaData) {
 
@@ -443,14 +446,14 @@ public class GovernanceLoaderImpl implements GovernanceLoader, IssueTarget {
 		/**
 		 * Initiate.
 		 * 
-		 * @param delegate
-		 *            {@link SourceContext}.
-		 * @param sourceProperties
-		 *            {@link SourceProperties}.
+		 * @param governanceName   Name of {@link Governance}.
+		 * @param isLoadingType    Indicates if loading type.
+		 * @param delegate         {@link SourceContext}.
+		 * @param sourceProperties {@link SourceProperties}.
 		 */
-		public GovernanceSourceContextImpl(boolean isLoadingType, SourceContext delegate,
+		public GovernanceSourceContextImpl(String governanceName, boolean isLoadingType, SourceContext delegate,
 				SourceProperties sourceProperties) {
-			super(isLoadingType, delegate, sourceProperties);
+			super(governanceName, isLoadingType, delegate, sourceProperties);
 		}
 	}
 

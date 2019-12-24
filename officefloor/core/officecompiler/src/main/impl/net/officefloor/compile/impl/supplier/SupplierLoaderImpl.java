@@ -185,8 +185,15 @@ public class SupplierLoaderImpl implements SupplierLoader {
 	@Override
 	public SupplierType loadSupplierType(SupplierSource supplierSource, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName();
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create the supplier source context
-		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(true, propertyList, this.nodeContext);
+		SupplierSourceContextImpl sourceContext = new SupplierSourceContextImpl(qualifiedName, true,
+				overriddenProperties, this.nodeContext);
 
 		try {
 			// Source the supplier

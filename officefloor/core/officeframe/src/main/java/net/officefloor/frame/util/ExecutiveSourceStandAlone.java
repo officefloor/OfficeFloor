@@ -105,7 +105,7 @@ public class ExecutiveSourceStandAlone {
 	/**
 	 * Creates the {@link Executive}.
 	 * 
-	 * @param                      <XS> {@link ExecutiveSource} type.
+	 * @param <XS>                 {@link ExecutiveSource} type.
 	 * @param executiveSourceClass Class of the {@link ExecutiveSource}.
 	 * @return Loaded {@link Executive}.
 	 * @throws Exception If fails to initialise {@link ExecutiveSource}.
@@ -129,8 +129,8 @@ public class ExecutiveSourceStandAlone {
 	public Executive loadExecutive(ExecutiveSource executiveSource) throws Exception {
 
 		// Create executive source context
-		SourceContext sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
-				this.clockFactory);
+		SourceContext sourceContext = new SourceContextImpl(this.getClass().getName(), false,
+				Thread.currentThread().getContextClassLoader(), this.clockFactory);
 		ManagedExecutionFactory managedExecutionFactory = new ManagedExecutionFactoryImpl(
 				this.threadCompletionListeners.toArray(new ThreadCompletionListener[0]));
 		ThreadFactoryManufacturer threadFactoryManufacturer = new ThreadFactoryManufacturer(managedExecutionFactory,

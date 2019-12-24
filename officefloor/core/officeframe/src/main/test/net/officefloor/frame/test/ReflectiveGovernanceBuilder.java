@@ -110,7 +110,7 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 	/**
 	 * Instantiate.
 	 *
-	 * @param                <C> {@link Governance} {@link Class} type.
+	 * @param <C>            {@link Governance} {@link Class} type.
 	 * @param clazz          {@link Class}.
 	 * @param object         Object should the method not be <code>static</code>.
 	 *                       May be <code>null</code> if <code>static</code>
@@ -329,6 +329,18 @@ public class ReflectiveGovernanceBuilder implements GovernanceFactory<Object, In
 			// Create the parameter factories for the method
 			this.parameterTypes = this.method.getParameterTypes();
 			this.parameterFactories = new ParameterFactory[this.parameterTypes.length];
+		}
+
+		/**
+		 * Builds the {@link GovernanceContext}.
+		 */
+		public void buildGovernanceContext() {
+
+			// Provide the governance context
+			this.parameterFactories[this.parameterIndex] = (extensions, context) -> context;
+
+			// Set for next parameter
+			this.parameterIndex++;
 		}
 
 		/**

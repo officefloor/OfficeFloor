@@ -37,14 +37,11 @@ public interface SectionLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link SectionSourceSpecification} for the {@link SectionSource}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource}.
-	 * @return {@link PropertyList} of the {@link SectionSourceProperty}
-	 *         instances of the {@link SectionSourceSpecification} or
-	 *         <code>null</code> if issue, which is reported to the
-	 *         {@link CompilerIssues}.
+	 * @param <S>                {@link SectionSource} type.
+	 * @param sectionSourceClass Class of the {@link SectionSource}.
+	 * @return {@link PropertyList} of the {@link SectionSourceProperty} instances
+	 *         of the {@link SectionSourceSpecification} or <code>null</code> if
+	 *         issue, which is reported to the {@link CompilerIssues}.
 	 */
 	<S extends SectionSource> PropertyList loadSpecification(Class<S> sectionSourceClass);
 
@@ -52,27 +49,21 @@ public interface SectionLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link SectionSourceSpecification} for the {@link SectionSource}.
 	 * 
-	 * @param sectionSource
-	 *            {@link SectionSource}.
-	 * @return {@link PropertyList} of the {@link SectionSourceProperty}
-	 *         instances of the {@link SectionSourceSpecification} or
-	 *         <code>null</code> if issue, which is reported to the
-	 *         {@link CompilerIssues}.
+	 * @param sectionSource {@link SectionSource}.
+	 * @return {@link PropertyList} of the {@link SectionSourceProperty} instances
+	 *         of the {@link SectionSourceSpecification} or <code>null</code> if
+	 *         issue, which is reported to the {@link CompilerIssues}.
 	 */
 	PropertyList loadSpecification(SectionSource sectionSource);
 
 	/**
 	 * Loads and returns the {@link SectionType} from the {@link SectionSource}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link SectionType}.
+	 * @param <S>                {@link SectionSource} type.
+	 * @param sectionSourceClass Class of the {@link SectionSource}.
+	 * @param sectionLocation    Location of the {@link OfficeSection}.
+	 * @param propertyList       {@link PropertyList} containing the properties to
+	 *                           source the {@link SectionType}.
 	 * @return {@link SectionType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -82,13 +73,10 @@ public interface SectionLoader {
 	/**
 	 * Loads and returns the {@link SectionType} from the {@link SectionSource}.
 	 * 
-	 * @param sectionSource
-	 *            {@link SectionSource} instance.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link SectionType}.
+	 * @param sectionSource   {@link SectionSource} instance.
+	 * @param sectionLocation Location of the {@link OfficeSection}.
+	 * @param propertyList    {@link PropertyList} containing the properties to
+	 *                        source the {@link SectionType}.
 	 * @return {@link SectionType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -103,17 +91,12 @@ public interface SectionLoader {
 	 * {@link SubSection} instances to fully construct the
 	 * {@link OfficeSectionType}.
 	 * 
-	 * @param <S>
-	 *            {@link SectionSource} type.
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClass
-	 *            Class of the {@link SectionSource}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link OfficeSectionType}.
+	 * @param <S>                {@link SectionSource} type.
+	 * @param sectionName        Name of the {@link OfficeSection}.
+	 * @param sectionSourceClass Class of the {@link SectionSource}.
+	 * @param sectionLocation    Location of the {@link OfficeSection}.
+	 * @param propertyList       {@link PropertyList} containing the properties to
+	 *                           source the {@link OfficeSectionType}.
 	 * @return {@link OfficeSectionType}.
 	 */
 	<S extends SectionSource> OfficeSectionType loadOfficeSectionType(String sectionName, Class<S> sectionSourceClass,
@@ -128,15 +111,11 @@ public interface SectionLoader {
 	 * {@link SubSection} instances to fully construct the
 	 * {@link OfficeSectionType}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSource
-	 *            {@link SectionSource} instance.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link OfficeSectionType}.
+	 * @param sectionName     Name of the {@link OfficeSection}.
+	 * @param sectionSource   {@link SectionSource} instance.
+	 * @param sectionLocation Location of the {@link OfficeSection}.
+	 * @param propertyList    {@link PropertyList} containing the properties to
+	 *                        source the {@link OfficeSectionType}.
 	 * @return {@link OfficeSectionType}.
 	 */
 	OfficeSectionType loadOfficeSectionType(String sectionName, SectionSource sectionSource, String sectionLocation,

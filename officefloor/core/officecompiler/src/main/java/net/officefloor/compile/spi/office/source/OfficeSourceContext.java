@@ -67,16 +67,14 @@ public interface OfficeSourceContext extends SourceContext, ConfigurationContext
 	 * {@link OfficeSection} to allow reflective configuration by the
 	 * {@link OfficeSource}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClassName
-	 *            Name of the implementing {@link SectionSource} class.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param properties
-	 *            {@link PropertyList} to configure the {@link OfficeSection}.
-	 * @return {@link OfficeSectionType} or <code>null</code> if fails to load
-	 *         the {@link OfficeSectionType}.
+	 * @param sectionName            Name of the {@link OfficeSection}.
+	 * @param sectionSourceClassName Name of the implementing {@link SectionSource}
+	 *                               class.
+	 * @param sectionLocation        Location of the {@link OfficeSection}.
+	 * @param properties             {@link PropertyList} to configure the
+	 *                               {@link OfficeSection}.
+	 * @return {@link OfficeSectionType} or <code>null</code> if fails to load the
+	 *         {@link OfficeSectionType}.
 	 */
 	OfficeSectionType loadOfficeSectionType(String sectionName, String sectionSourceClassName, String sectionLocation,
 			PropertyList properties);
@@ -89,16 +87,13 @@ public interface OfficeSourceContext extends SourceContext, ConfigurationContext
 	 * {@link OfficeSection} to allow reflective configuration by the
 	 * {@link OfficeSource}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSource
-	 *            {@link SectionSource} instance.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
-	 * @param properties
-	 *            {@link PropertyList} to configure the {@link OfficeSection}.
-	 * @return {@link OfficeSectionType} or <code>null</code> if fails to load
-	 *         the {@link OfficeSectionType}.
+	 * @param sectionName     Name of the {@link OfficeSection}.
+	 * @param sectionSource   {@link SectionSource} instance.
+	 * @param sectionLocation Location of the {@link OfficeSection}.
+	 * @param properties      {@link PropertyList} to configure the
+	 *                        {@link OfficeSection}.
+	 * @return {@link OfficeSectionType} or <code>null</code> if fails to load the
+	 *         {@link OfficeSectionType}.
 	 */
 	OfficeSectionType loadOfficeSectionType(String sectionName, SectionSource sectionSource, String sectionLocation,
 			PropertyList properties);
@@ -111,16 +106,14 @@ public interface OfficeSourceContext extends SourceContext, ConfigurationContext
 	 * {@link ManagedObject} to allow reflective configuration by the
 	 * {@link OfficeSource}.
 	 *
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSourceClassName
-	 *            Name of the implementing {@link ManagedObjectSource} class.
-	 *            May also be an alias.
-	 * @param properties
-	 *            {@link PropertyList} to configure the
-	 *            {@link ManagedObjectSource}.
-	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
-	 *         the {@link ManagedObjectType}.
+	 * @param managedObjectSourceName      Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClassName Name of the implementing
+	 *                                     {@link ManagedObjectSource} class. May
+	 *                                     also be an alias.
+	 * @param properties                   {@link PropertyList} to configure the
+	 *                                     {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load the
+	 *         {@link ManagedObjectType}.
 	 */
 	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName, String managedObjectSourceClassName,
 			PropertyList properties);
@@ -133,15 +126,12 @@ public interface OfficeSourceContext extends SourceContext, ConfigurationContext
 	 * {@link ManagedObject} to allow reflective configuration by the
 	 * {@link OfficeFloorSource}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance.
-	 * @param properties
-	 *            {@link PropertyList} to configure the
-	 *            {@link ManagedObjectSource}.
-	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
-	 *         the {@link ManagedObjectType}.
+	 * @param managedObjectSourceName Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource     {@link ManagedObjectSource} instance.
+	 * @param properties              {@link PropertyList} to configure the
+	 *                                {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load the
+	 *         {@link ManagedObjectType}.
 	 */
 	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName,
 			ManagedObjectSource<?, ?> managedObjectSource, PropertyList properties);
@@ -154,16 +144,14 @@ public interface OfficeSourceContext extends SourceContext, ConfigurationContext
 	 * {@link Administration} to allow reflective configuration by the
 	 * {@link OfficeSource}.
 	 * 
-	 * @param administrationName
-	 *            Name of the {@link Administration}.
-	 * @param administrationSourceClassName
-	 *            Name of the implementing {@link AdministrationSource} class.
-	 *            May also be an alias.
-	 * @param properties
-	 *            {@link PropertyList} to configure the
-	 *            {@link AdministrationSource}.
-	 * @return {@link AdministrationType} or <code>null</code> if fails to load
-	 *         the {@link AdministrationType}.
+	 * @param administrationName            Name of {@link Administration}.
+	 * @param administrationSourceClassName Name of the implementing
+	 *                                      {@link AdministrationSource} class. May
+	 *                                      also be an alias.
+	 * @param properties                    {@link PropertyList} to configure the
+	 *                                      {@link AdministrationSource}.
+	 * @return {@link AdministrationType} or <code>null</code> if fails to load the
+	 *         {@link AdministrationType}.
 	 */
 	AdministrationType<?, ?, ?> loadAdministrationType(String administrationName, String administrationSourceClassName,
 			PropertyList properties);
@@ -176,15 +164,12 @@ public interface OfficeSourceContext extends SourceContext, ConfigurationContext
 	 * {@link Administration} to allow reflective configuration by the
 	 * {@link OfficeSource}.
 	 * 
-	 * @param administrationName
-	 *            Name of the {@link Administration}.
-	 * @param administrationSource
-	 *            {@link AdministrationSource} instance.
-	 * @param properties
-	 *            {@link PropertyList} to configure the
-	 *            {@link AdministrationSource}.
-	 * @return {@link AdministrationType} or <code>null</code> if fails to load
-	 *         the {@link AdministrationType}.
+	 * @param administrationName   Name of {@link Administration}.
+	 * @param administrationSource {@link AdministrationSource} instance.
+	 * @param properties           {@link PropertyList} to configure the
+	 *                             {@link AdministrationSource}.
+	 * @return {@link AdministrationType} or <code>null</code> if fails to load the
+	 *         {@link AdministrationType}.
 	 */
 	AdministrationType<?, ?, ?> loadAdministrationType(String administrationName,
 			AdministrationSource<?, ?, ?> administrationSource, PropertyList properties);
@@ -193,18 +178,15 @@ public interface OfficeSourceContext extends SourceContext, ConfigurationContext
 	 * <p>
 	 * Loads the {@link GovernanceType}.
 	 * <p>
-	 * This is to enable obtaining the type information for the
-	 * {@link Governance} to allow reflective configuration by the
-	 * {@link OfficeSource}.
+	 * This is to enable obtaining the type information for the {@link Governance}
+	 * to allow reflective configuration by the {@link OfficeSource}.
 	 * 
-	 * @param governanceName
-	 *            Name of the {@link Governance}.
-	 * @param governanceSourceClassName
-	 *            Name of the implementing {@link GovernanceSource} class. May
-	 *            also be an alias.
-	 * @param properties
-	 *            {@link PropertyList} for configuring the
-	 *            {@link GovernanceSource}.
+	 * @param governanceName            Name of {@link Governance}.
+	 * @param governanceSourceClassName Name of the implementing
+	 *                                  {@link GovernanceSource} class. May also be
+	 *                                  an alias.
+	 * @param properties                {@link PropertyList} for configuring the
+	 *                                  {@link GovernanceSource}.
 	 * @return {@link GovernanceType} or <code>null</code> if fails to load the
 	 *         {@link GovernanceType}.
 	 */
@@ -215,17 +197,13 @@ public interface OfficeSourceContext extends SourceContext, ConfigurationContext
 	 * <p>
 	 * Loads the {@link GovernanceType}.
 	 * <p>
-	 * This is to enable obtaining the type information for the
-	 * {@link Governance} to allow reflective configuration by the
-	 * {@link OfficeSource}.
+	 * This is to enable obtaining the type information for the {@link Governance}
+	 * to allow reflective configuration by the {@link OfficeSource}.
 	 * 
-	 * @param governanceName
-	 *            Name of the {@link Governance}.
-	 * @param governanceSource
-	 *            {@link GovernanceSource} instance.
-	 * @param properties
-	 *            {@link PropertyList} for configuring the
-	 *            {@link GovernanceSource}.
+	 * @param governanceName   Name of {@link Governance}.
+	 * @param governanceSource {@link GovernanceSource} instance.
+	 * @param properties       {@link PropertyList} for configuring the
+	 *                         {@link GovernanceSource}.
 	 * @return {@link GovernanceType} or <code>null</code> if fails to load the
 	 *         {@link GovernanceType}.
 	 */
