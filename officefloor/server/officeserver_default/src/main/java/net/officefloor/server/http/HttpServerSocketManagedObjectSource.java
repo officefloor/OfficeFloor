@@ -81,11 +81,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		implements ManagedFunction<Indexed, None> {
 
 	/**
-	 * {@link Logger}.
-	 */
-	private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
-
-	/**
 	 * Name of {@link System} property to specify the number of
 	 * {@link SocketServicer} instances. If not specified, will default to
 	 * {@link Runtime#availableProcessors()}.
@@ -610,6 +605,11 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	private AcceptedSocketDecorator acceptedSocketDecorator;
 
 	/**
+	 * {@link Logger}.
+	 */
+	private Logger logger;
+
+	/**
 	 * Default constructor to configure from {@link PropertyList}.
 	 */
 	public HttpServerSocketManagedObjectSource() {
@@ -753,6 +753,9 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
 
+		// Capture the logger
+		this.logger = context.getLogger();
+
 		// Obtain the execution strategy
 		ThreadFactory[] executionStrategy = context.getExecutionStrategy(0);
 
@@ -807,8 +810,8 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 
 		} catch (IOException | TimeoutException ex) {
 			// Shutting down so just log issue
-			if (LOGGER.isLoggable(Level.INFO)) {
-				LOGGER.log(Level.INFO, "Failed to release " + SocketManager.class.getSimpleName(), ex);
+			if (this.logger.isLoggable(Level.INFO)) {
+				this.logger.log(Level.INFO, "Failed to release " + SocketManager.class.getSimpleName(), ex);
 			}
 		}
 	}
