@@ -267,6 +267,16 @@ public class StatePoller<S, F extends Enum<F>> {
 		}
 
 		/**
+		 * Obtains the default {@link Logger}.
+		 * 
+		 * @return Default {@link Logger}.
+		 */
+		private Logger getDefaultLogger() {
+			return this.executeContext != null ? this.executeContext.getLogger()
+					: Logger.getLogger(StatePoller.class.getName());
+		}
+
+		/**
 		 * Allows specifying the default poll interval.
 		 * 
 		 * @param defaultPollInterval Default poll interval.
@@ -305,7 +315,7 @@ public class StatePoller<S, F extends Enum<F>> {
 		 * @return <code>this</code>.
 		 */
 		public Builder<S, F> logger(Logger logger) {
-			this.logger = logger != null ? logger : this.executeContext.getLogger();
+			this.logger = logger != null ? logger : this.getDefaultLogger();
 			return this;
 		}
 
