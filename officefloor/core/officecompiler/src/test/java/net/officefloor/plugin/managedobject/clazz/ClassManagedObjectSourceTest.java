@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.util.logging.Logger;
 
 import org.easymock.AbstractMatcher;
 
@@ -214,7 +215,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY,
+				Logger.getLogger(OfficeFloorCompiler.TYPE), connection);
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -303,7 +305,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY,
+				Logger.getLogger(OfficeFloorCompiler.TYPE), connection);
 
 		// Verify the processes injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
@@ -336,7 +339,8 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 				"processes", processInterface);
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY,
+				Logger.getLogger(OfficeFloorCompiler.TYPE), connection);
 
 		// Verify the process interfaces injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
@@ -391,21 +395,28 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		private String qualifiedDependency;
 
 		/**
+		 * {@link Logger}.
+		 */
+		@Dependency
+		private Logger logger;
+
+		/**
 		 * Verifies the dependencies.
 		 * 
 		 * @param unqualifiedDependency Unqualified dependency.
 		 * @param qualifiedDependency   Qualified dependency.
+		 * @param logger                {@link Logger}.
 		 * @param connection            Expected {@link Connection}.
 		 */
-		public void verifyDependencyInjection(String unqualifiedDependency, String qualifiedDependency,
+		public void verifyDependencyInjection(String unqualifiedDependency, String qualifiedDependency, Logger logger,
 				Connection connection) {
 
 			// Verify dependency injection
-			TestCase.assertNotNull("Expecting unqualified dependency", unqualifiedDependency);
-			TestCase.assertEquals("Incorrect unqualified dependency", unqualifiedDependency,
-					this.unqualifiedDependency);
-			TestCase.assertNotNull("Expecting qualified dependency", qualifiedDependency);
-			TestCase.assertEquals("Incorrect qualified dependency", qualifiedDependency, this.qualifiedDependency);
+			assertNotNull("Expecting unqualified dependency", unqualifiedDependency);
+			assertEquals("Incorrect unqualified dependency", unqualifiedDependency, this.unqualifiedDependency);
+			assertNotNull("Expecting qualified dependency", qualifiedDependency);
+			assertEquals("Incorrect qualified dependency", qualifiedDependency, this.qualifiedDependency);
+			assertEquals("Incorrect logger", logger.getName(), this.logger.getName());
 
 			// Verify parent dependencies
 			super.verifyDependencyInjection(connection);
