@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.concurrent.RejectedExecutionException;
 
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.frame.api.team.TeamOverloadException;
@@ -123,9 +123,9 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	private ServerWriter entityWriter = null;
 
 	/**
-	 * {@link ProcessAwareContext}.
+	 * {@link ManagedObjectContext}.
 	 */
-	private final ProcessAwareContext processAwareContext;
+	private final ManagedObjectContext managedObjectContext;
 
 	/**
 	 * {@link CleanupEscalation} instances. Will be <code>null</code> if successful
@@ -164,18 +164,18 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 * 
 	 * @param serverHttpConnection {@link ServerHttpConnection}.
 	 * @param version              {@link HttpVersion}.
-	 * @param processAwareContext  {@link ProcessAwareContext}.
+	 * @param managedObjectContext {@link ManagedObjectContext}.
 	 */
 	public ProcessAwareHttpResponse(ProcessAwareServerHttpConnectionManagedObject<B> serverHttpConnection,
-			HttpVersion version, ProcessAwareContext processAwareContext) {
+			HttpVersion version, ManagedObjectContext managedObjectContext) {
 		this.serverHttpConnection = serverHttpConnection;
 		this.clientVersion = version;
 		this.version = version;
-		this.headers = new ProcessAwareHttpResponseHeaders(processAwareContext);
-		this.cookies = new ProcessAwareHttpResponseCookies(processAwareContext);
+		this.headers = new ProcessAwareHttpResponseHeaders(managedObjectContext);
+		this.cookies = new ProcessAwareHttpResponseCookies(managedObjectContext);
 		this.bufferPoolOutputStream = new BufferPoolServerOutputStream<>(this.serverHttpConnection.bufferPool, this);
-		this.safeOutputStream = new ProcessAwareServerOutputStream(this.bufferPoolOutputStream, processAwareContext);
-		this.processAwareContext = processAwareContext;
+		this.safeOutputStream = new ProcessAwareServerOutputStream(this.bufferPoolOutputStream, managedObjectContext);
+		this.managedObjectContext = managedObjectContext;
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		}
 
 		// Store the clean up escalations
-		this.processAwareContext.run(() -> {
+		this.managedObjectContext.run(() -> {
 			this.cleanupEscalations = cleanupEscalations;
 			return null;
 		});
@@ -391,8 +391,8 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		// Reset the response
 		this.version = this.clientVersion;
 		this.status = HttpStatus.OK;
-		this.headers = new ProcessAwareHttpResponseHeaders(this.processAwareContext);
-		this.cookies = new ProcessAwareHttpResponseCookies(this.processAwareContext);
+		this.headers = new ProcessAwareHttpResponseHeaders(this.managedObjectContext);
+		this.cookies = new ProcessAwareHttpResponseCookies(this.managedObjectContext);
 
 		// Release writing content
 		this.contentType = null;
@@ -442,7 +442,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 	 * @throws T Possible {@link Throwable} from {@link ProcessSafeOperation}.
 	 */
 	private <R, T extends Throwable> R safe(ProcessSafeOperation<R, T> operation) throws T {
-		return this.processAwareContext.run(operation);
+		return this.managedObjectContext.run(operation);
 	}
 
 	/*
@@ -547,7 +547,7 @@ public class ProcessAwareHttpResponse<B> implements HttpResponse, CloseHandler {
 		return this.safe(() -> {
 			if (this.entityWriter == null) {
 				this.entityWriter = new ProcessAwareServerWriter(
-						this.bufferPoolOutputStream.getServerWriter(this.charset), this.processAwareContext);
+						this.bufferPoolOutputStream.getServerWriter(this.charset), this.managedObjectContext);
 			}
 			return this.entityWriter;
 		});

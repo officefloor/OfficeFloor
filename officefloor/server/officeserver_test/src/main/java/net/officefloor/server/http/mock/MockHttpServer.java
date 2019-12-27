@@ -151,7 +151,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	 * @return {@link HttpResponseCookie}.
 	 */
 	public static WritableHttpCookie mockResponseCookie(String name, String value) {
-		return new WritableHttpCookie(name, value, new MockProcessAwareContext());
+		return new WritableHttpCookie(name, value, new MockManagedObjectContext());
 	}
 
 	/**
@@ -848,7 +848,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 					serverLocation, false, () -> HttpMethod.GET, () -> "/", HttpVersion.HTTP_1_1, null, null, null,
 					null, true, new MockHttpResponseWriter(this.request, this.server, this, null), bufferPool);
 			this.delegate = new ProcessAwareHttpResponse<>(serverHttpConnection, HttpVersion.HTTP_1_1,
-					new MockProcessAwareContext());
+					new MockManagedObjectContext());
 		}
 
 		/*
@@ -1209,7 +1209,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		public MockServerHttpConnectionImpl(MockHttpRequestBuilder request) {
 			MockHttpServer server = new MockHttpServer();
 			this.delegate = createServerHttpConnection(request, server, server, this);
-			this.delegate.setProcessAwareContext(new MockProcessAwareContext());
+			this.delegate.setManagedObjectContext(new MockManagedObjectContext());
 		}
 
 		/*

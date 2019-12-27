@@ -31,7 +31,7 @@ import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockProcessAwareContext;
+import net.officefloor.server.http.mock.MockManagedObjectContext;
 import net.officefloor.web.session.spi.CreateHttpSessionOperation;
 import net.officefloor.web.session.spi.FreshHttpSession;
 import net.officefloor.web.session.spi.HttpSessionIdGenerator;
@@ -357,7 +357,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 				this.serverHttpConnectionIndex, -1, new MockHttpSessionIdGenerator(), -1, new MockHttpSessionStore());
 
 		// Load the managed object
-		mo.setProcessAwareContext(new MockProcessAwareContext());
+		mo.setProcessAwareContext(new MockManagedObjectContext());
 		mo.setAsynchronousContext(this.asynchronousContext);
 		ManagedObjectUserStandAlone registry = new ManagedObjectUserStandAlone();
 		registry.mapDependency(this.serverHttpConnectionIndex, connection);

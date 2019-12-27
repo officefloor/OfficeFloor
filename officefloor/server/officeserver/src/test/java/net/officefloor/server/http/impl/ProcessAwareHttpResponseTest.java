@@ -41,7 +41,7 @@ import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
-import net.officefloor.server.http.mock.MockProcessAwareContext;
+import net.officefloor.server.http.mock.MockManagedObjectContext;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.ServerOutputStream;
 import net.officefloor.server.stream.ServerWriter;
@@ -70,7 +70,7 @@ public class ProcessAwareHttpResponseTest extends OfficeFrameTestCase implements
 	 * {@link ProcessAwareHttpResponse} to test.
 	 */
 	private final ProcessAwareHttpResponse<ByteBuffer> response = new ProcessAwareHttpResponse<ByteBuffer>(
-			this.connection, HttpVersion.HTTP_1_1, new MockProcessAwareContext());
+			this.connection, HttpVersion.HTTP_1_1, new MockManagedObjectContext());
 
 	/**
 	 * Ensure correct defaults on writing.
