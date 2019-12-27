@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -18,18 +18,16 @@
 package net.officefloor.frame.api.managedobject;
 
 /**
- * Name aware {@link ManagedObject}.
- *
+ * Context aware {@link ManagedObject}.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface NameAwareManagedObject extends ManagedObject {
+public interface ContextAwareManagedObject extends ManagedObject {
 
 	/**
-	 * Provides the {@link ManagedObject} its bound name.
-	 *
-	 * @param boundManagedObjectName
-	 *            Bound name for the {@link ManagedObject}.
+	 * Provides the {@link ManagedObjectContext} to the {@link ManagedObject}.
+	 * 
+	 * @param context {@link ManagedObjectContext}.
 	 */
-	void setBoundManagedObjectName(String boundManagedObjectName);
-
+	void setManagedObjectContext(ManagedObjectContext context);
 }

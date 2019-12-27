@@ -17,12 +17,13 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import java.util.logging.Logger;
+
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -42,6 +43,13 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	 *         {@link ManagedObjectScope}.
 	 */
 	String getBoundManagedObjectName();
+
+	/**
+	 * Obtains the {@link Logger} for the {@link ManagedObject}.
+	 * 
+	 * @return {@link Logger} for the {@link ManagedObject}.
+	 */
+	Logger getLogger();
 
 	/**
 	 * Obtains the type of the {@link Object} returned from the
@@ -112,21 +120,12 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
-	 * {@link ProcessAwareManagedObject}.
+	 * {@link ContextAwareManagedObject}.
 	 * 
 	 * @return <code>true</code> if the {@link ManagedObject} implements
-	 *         {@link ProcessAwareManagedObject}.
+	 *         {@link ContextAwareManagedObject}.
 	 */
-	boolean isProcessAwareManagedObject();
-
-	/**
-	 * Indicates if the {@link ManagedObject} implements
-	 * {@link NameAwareManagedObject}.
-	 * 
-	 * @return <code>true</code> if the {@link ManagedObject} implements
-	 *         {@link NameAwareManagedObject}.
-	 */
-	boolean isNameAwareManagedObject();
+	boolean isContextAwareManagedObject();
 
 	/**
 	 * <p>

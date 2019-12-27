@@ -104,8 +104,7 @@ public class ManagedObjectPoolAdaptedManagedObjectTest extends AbstractOfficeCon
 	public void testLoadContexts() throws Throwable {
 
 		// Configure context
-		this.object.isProcessAwareManagedObject = true;
-		this.object.isNameAwareManagedObject = true;
+		this.object.isContextAwareManagedObject = true;
 		this.object.isAsynchronousManagedObject = true;
 		this.object.isCoordinatingManagedObject = true;
 		this.object.managedObjectBuilder.setTimeout(1000);
@@ -115,8 +114,8 @@ public class ManagedObjectPoolAdaptedManagedObjectTest extends AbstractOfficeCon
 
 		// Ensure the sourced managed object gets loaded
 		assertTrue("Should adapt managed object", this.isAdapted);
-		assertEquals("Incorrect name", "MO", this.object.boundManagedObjectName);
-		assertNotNull("Ensure have process aware context", this.object.processAwareContext);
+		assertNotNull("Ensure have managed object context", this.object.managedObjectContext);
+		assertEquals("Incorrect name", "MO", this.object.managedObjectContext.getBoundName());
 		assertNotNull("Ensure have asynchronous context", this.object.asynchronousContext);
 		assertNotNull("Ensure have object registry", this.object.objectRegistry);
 	}

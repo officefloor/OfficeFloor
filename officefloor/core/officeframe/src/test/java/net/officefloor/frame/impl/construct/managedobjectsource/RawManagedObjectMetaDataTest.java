@@ -33,10 +33,9 @@ import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -741,8 +740,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect object type", Object.class, moMetaData.getObjectType());
 		assertEquals("Incorrect instance index", INSTANCE_INDEX, moMetaData.getInstanceIndex());
 		assertEquals("Incorrect timeout", 0, moMetaData.getTimeout());
-		assertFalse("Should not be process aware", moMetaData.isProcessAwareManagedObject());
-		assertFalse("Should not be name aware", moMetaData.isNameAwareManagedObject());
+		assertFalse("Should not be context aware", moMetaData.isContextAwareManagedObject());
 		assertFalse("Should not be asynchronous", moMetaData.isManagedObjectAsynchronous());
 		assertFalse("Should not be coordinating", moMetaData.isCoordinatingManagedObject());
 
@@ -767,15 +765,15 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures flag name aware for {@link ProcessAwareManagedObject}.
+	 * Ensures flag name aware for {@link ContextAwareManagedObject}.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void testProcessAwareManagedObject() {
+	public void testContextAwareManagedObject() {
 
 		// Record plain managed object
 		this.configuration.setManagingOffice("OFFICE");
 		this.officeFloorConfiguration.addOffice("OFFICE");
-		this.metaData.setManagedObjectClass(ProcessAwareManagedObject.class);
+		this.metaData.setManagedObjectClass(ContextAwareManagedObject.class);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -797,43 +795,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				this.issues);
 		this.verifyMockObjects();
 
-		// Verify is process aware
-		assertTrue("Should be process aware", moMetaData.isProcessAwareManagedObject());
-	}
-
-	/**
-	 * Ensures flag name aware for {@link NameAwareManagedObject}.
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void testNameAwareManagedObject() {
-
-		// Record plain managed object
-		this.configuration.setManagingOffice("OFFICE");
-		this.officeFloorConfiguration.addOffice("OFFICE");
-		this.metaData.setManagedObjectClass(NameAwareManagedObject.class);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		RawManagedObjectMetaData rawMetaData = this.constructRawManagedObjectMetaData(true);
-
-		// Provide the bound configuration
-		final int INSTANCE_INDEX = 0;
-		final String BOUND_NAME = "BOUND_NAME";
-		RawBoundManagedObjectMetaDataMockBuilder<?, ?> boundMetaData = MockConstruct
-				.mockRawBoundManagedObjectMetaData(BOUND_NAME, rawMetaData);
-		boundMetaData.setManagedObjectIndex(ManagedObjectScope.FUNCTION, INSTANCE_INDEX);
-		RawBoundManagedObjectInstanceMetaDataMockBuilder<?, ?> boundInstanceMetaData = boundMetaData
-				.addRawBoundManagedObjectInstanceMetaData();
-
-		// Create the managed object meta-data
-		ManagedObjectMetaData<?> moMetaData = rawMetaData.createManagedObjectMetaData(AssetType.FUNCTION,
-				"testFunction", boundMetaData.build(), INSTANCE_INDEX, boundInstanceMetaData.build(),
-				new ManagedObjectIndex[0], new ManagedObjectGovernanceMetaData[0], this.assetManagerFactory,
-				this.issues);
-		this.verifyMockObjects();
-
-		// Verify is name aware
-		assertTrue("Should be name aware", moMetaData.isNameAwareManagedObject());
+		// Verify is context aware
+		assertTrue("Should be context aware", moMetaData.isContextAwareManagedObject());
 	}
 
 	/**

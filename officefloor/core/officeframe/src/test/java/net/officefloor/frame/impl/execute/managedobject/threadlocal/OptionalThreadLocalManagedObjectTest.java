@@ -23,12 +23,11 @@ import net.officefloor.frame.api.build.ThreadDependencyMappingBuilder;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.TestSource;
 import net.officefloor.frame.api.team.Team;
@@ -184,8 +183,7 @@ public class OptionalThreadLocalManagedObjectTest extends AbstractOfficeConstruc
 		}
 
 		public void service(ThreadLocalManagedObjectSource mo) {
-			assertTrue("Accessible via name", mo.isBoundManagedObjectName);
-			assertTrue("Accessible via process aware", mo.isProcessAware);
+			assertTrue("Accessible via context aware", mo.isContextAware);
 			assertTrue("Accessible via asynchronous", mo.isAsynchronousContext);
 			assertTrue("Accessible via co-ordination", mo.isLoadObjects);
 			assertSame("Incorrect dependency", this.expectedDependency, mo.dependency);
@@ -204,16 +202,14 @@ public class OptionalThreadLocalManagedObjectTest extends AbstractOfficeConstruc
 
 	@TestSource
 	public static class ThreadLocalManagedObjectSource extends AbstractManagedObjectSource<DependencyKeys, None>
-			implements NameAwareManagedObject, ProcessAwareManagedObject, AsynchronousManagedObject,
-			CoordinatingManagedObject<DependencyKeys>, ManagedObject {
+			implements ContextAwareManagedObject, AsynchronousManagedObject, CoordinatingManagedObject<DependencyKeys>,
+			ManagedObject {
 
 		private final OptionalThreadLocal<String> threadLocal;
 
 		private final String expectedThreadLocalValue;
 
-		private boolean isBoundManagedObjectName = false;
-
-		private boolean isProcessAware = false;
+		private boolean isContextAware = false;
 
 		private boolean isAsynchronousContext = false;
 
@@ -255,23 +251,13 @@ public class OptionalThreadLocalManagedObjectTest extends AbstractOfficeConstruc
 		}
 
 		/*
-		 * ================= NameAwareManagedObject ========================
+		 * ================ ContextAwareManagedObject ======================
 		 */
 
 		@Override
-		public void setBoundManagedObjectName(String boundManagedObjectName) {
-			assertSame("Incorrect setBoundManagedObjectName", this.expectedThreadLocalValue, this.threadLocal.get());
-			this.isBoundManagedObjectName = true;
-		}
-
-		/*
-		 * ================ ProcessAwareManagedObject ======================
-		 */
-
-		@Override
-		public void setProcessAwareContext(ProcessAwareContext context) {
-			assertSame("Incorrect setProcessAwareContext", this.expectedThreadLocalValue, this.threadLocal.get());
-			this.isProcessAware = true;
+		public void setManagedObjectContext(ManagedObjectContext context) {
+			assertSame("Incorrect setManagedObjectContext", this.expectedThreadLocalValue, this.threadLocal.get());
+			this.isContextAware = true;
 		}
 
 		/*

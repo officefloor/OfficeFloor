@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.impl.execute.managedobject.nameaware;
+package net.officefloor.frame.impl.execute.managedobject.contextaware;
 
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -27,11 +28,12 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.TestObject;
 
 /**
- * Ensure handle failure on loading name to {@link NameAwareManagedObject}.
+ * Ensure handle failure on loading {@link ManagedObjectContext} to
+ * {@link ContextAwareManagedObject}.
  *
  * @author Daniel Sagenschneider
  */
-public class _fail_NameAwareManagedObjectTest extends AbstractOfficeConstructTestCase {
+public class _fail_ContextAwareManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensure handle failure on loading name to {@link ProcessState} bound
@@ -64,8 +66,8 @@ public class _fail_NameAwareManagedObjectTest extends AbstractOfficeConstructTes
 
 		// Construct the managed object
 		TestObject object = new TestObject("MO", this);
-		object.isNameAwareManagedObject = true;
-		object.bindNameAwareFailure = new RuntimeException("TEST");
+		object.isContextAwareManagedObject = true;
+		object.contextAwareFailure = new RuntimeException("TEST");
 
 		// Construct functions
 		TestWork work = new TestWork();
@@ -76,7 +78,7 @@ public class _fail_NameAwareManagedObjectTest extends AbstractOfficeConstructTes
 			this.invokeFunction("task", null);
 			fail("Should not be successful");
 		} catch (Exception ex) {
-			assertSame("Incorrect cause", object.bindNameAwareFailure, ex);
+			assertSame("Incorrect cause", object.contextAwareFailure, ex);
 		}
 	}
 

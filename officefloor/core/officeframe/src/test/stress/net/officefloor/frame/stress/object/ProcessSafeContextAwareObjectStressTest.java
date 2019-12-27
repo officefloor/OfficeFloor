@@ -18,22 +18,24 @@
 package net.officefloor.frame.stress.object;
 
 import junit.framework.TestSuite;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.stress.AbstractStressTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
- * Stress tests the {@link ProcessAwareManagedObject}.
+ * Stress tests the {@link ContextAwareManagedObject} for
+ * {@link ProcessSafeOperation}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ProcessAwareObjectStressTest extends AbstractStressTestCase {
+public class ProcessSafeContextAwareObjectStressTest extends AbstractStressTestCase {
 
 	public static TestSuite suite() {
-		return createSuite(ProcessAwareObjectStressTest.class);
+		return createSuite(ProcessSafeContextAwareObjectStressTest.class);
 	}
 
 	@Override
@@ -104,11 +106,11 @@ public class ProcessAwareObjectStressTest extends AbstractStressTestCase {
 	}
 
 	/**
-	 * Stress {@link ProcessAwareManagedObject}.
+	 * Stress {@link ContextAwareManagedObject}.
 	 */
-	public static class StressProcessAwareManagedObject implements ProcessAwareManagedObject {
+	public static class StressProcessAwareManagedObject implements ContextAwareManagedObject {
 
-		private ProcessAwareContext context;
+		private ManagedObjectContext context;
 
 		private long value = 0;
 
@@ -120,7 +122,7 @@ public class ProcessAwareObjectStressTest extends AbstractStressTestCase {
 		}
 
 		@Override
-		public void setProcessAwareContext(ProcessAwareContext context) {
+		public void setManagedObjectContext(ManagedObjectContext context) {
 			this.context = context;
 		}
 
