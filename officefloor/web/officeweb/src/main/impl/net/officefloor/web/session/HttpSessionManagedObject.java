@@ -26,11 +26,11 @@ import java.util.Map;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.server.http.HttpRequest;
 import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.HttpResponse;
@@ -49,7 +49,7 @@ import net.officefloor.web.session.spi.StoreHttpSessionOperation;
  * @author Daniel Sagenschneider
  */
 public class HttpSessionManagedObject
-		implements CoordinatingManagedObject<Indexed>, AsynchronousManagedObject, ProcessAwareManagedObject {
+		implements CoordinatingManagedObject<Indexed>, AsynchronousManagedObject, ContextAwareManagedObject {
 
 	/**
 	 * Use epoch to expire cookies.
@@ -98,9 +98,9 @@ public class HttpSessionManagedObject
 	private AsynchronousContext asynchronousContext;
 
 	/**
-	 * {@link ProcessAwareContext}.
+	 * {@link ManagedObjectContext}.
 	 */
-	private ProcessAwareContext processAwareContext;
+	private ManagedObjectContext managedContextContext;
 
 	/**
 	 * {@link ServerHttpConnection}.
@@ -150,20 +150,20 @@ public class HttpSessionManagedObject
 	/**
 	 * Initiate.
 	 * 
-	 * @param sessionIdCookieName
-	 *            Name of the {@link HttpCookie} containing the Session Id.
-	 * @param serverHttpConnectionIndex
-	 *            Index of the dependency {@link ServerHttpConnection}.
-	 * @param httpSessionIdGeneratorIndex
-	 *            Index of the dependency {@link HttpSessionIdGenerator}.
-	 * @param httpSessionIdGenerator
-	 *            {@link HttpSessionIdGenerator}. <code>null</code> to obtain
-	 *            via dependency.
-	 * @param httpSessionStoreIndex
-	 *            Index of the dependency {@link HttpSessionStore}.
-	 * @param httpSessionStore
-	 *            {@link HttpSessionStore}. <code>null</code> to obtain via
-	 *            dependency.
+	 * @param sessionIdCookieName         Name of the {@link HttpCookie} containing
+	 *                                    the Session Id.
+	 * @param serverHttpConnectionIndex   Index of the dependency
+	 *                                    {@link ServerHttpConnection}.
+	 * @param httpSessionIdGeneratorIndex Index of the dependency
+	 *                                    {@link HttpSessionIdGenerator}.
+	 * @param httpSessionIdGenerator      {@link HttpSessionIdGenerator}.
+	 *                                    <code>null</code> to obtain via
+	 *                                    dependency.
+	 * @param httpSessionStoreIndex       Index of the dependency
+	 *                                    {@link HttpSessionStore}.
+	 * @param httpSessionStore            {@link HttpSessionStore}.
+	 *                                    <code>null</code> to obtain via
+	 *                                    dependency.
 	 */
 	public HttpSessionManagedObject(String sessionIdCookieName, int serverHttpConnectionIndex,
 			int httpSessionIdGeneratorIndex, HttpSessionIdGenerator httpSessionIdGenerator, int httpSessionStoreIndex,
@@ -202,10 +202,8 @@ public class HttpSessionManagedObject
 	 * Loads the Session Id and continues processing loading the
 	 * {@link HttpSession}.
 	 * 
-	 * @param sessionId
-	 *            Session Id.
-	 * @param isNewSession
-	 *            Flag indicating if a new {@link HttpSession}.
+	 * @param sessionId    Session Id.
+	 * @param isNewSession Flag indicating if a new {@link HttpSession}.
 	 */
 	private void loadSessionId(String sessionId, boolean isNewSession) {
 		this.isIdLoaded = true;
@@ -234,12 +232,9 @@ public class HttpSessionManagedObject
 	/**
 	 * Loads the {@link HttpSession}.
 	 * 
-	 * @param creationTime
-	 *            Creation Time.
-	 * @param expireTime
-	 *            Time to expire the {@link HttpSession} should it be idle.
-	 * @param attributes
-	 *            {@link HttpSession} Attributes.
+	 * @param creationTime Creation Time.
+	 * @param expireTime   Time to expire the {@link HttpSession} should it be idle.
+	 * @param attributes   {@link HttpSession} Attributes.
 	 */
 	private void loadSession(Instant creationTime, Instant expireTime, Map<String, Serializable> attributes) {
 		this.isSessionLoaded = true;
@@ -257,16 +252,11 @@ public class HttpSessionManagedObject
 	/**
 	 * Triggers storing the {@link HttpSession}.
 	 * 
-	 * @param sessionId
-	 *            Session Id.
-	 * @param creationTime
-	 *            Creation time.
-	 * @param expireTime
-	 *            Time to expire the {@link HttpSession} should it be idle.
-	 * @param attributes
-	 *            Attributes.
-	 * @throws Throwable
-	 *             If immediate failure in storing Session.
+	 * @param sessionId    Session Id.
+	 * @param creationTime Creation time.
+	 * @param expireTime   Time to expire the {@link HttpSession} should it be idle.
+	 * @param attributes   Attributes.
+	 * @throws Throwable If immediate failure in storing Session.
 	 */
 	private void storeSession(String sessionId, Instant creationTime, Instant expireTime,
 			Map<String, Serializable> attributes) throws Throwable {
@@ -300,8 +290,8 @@ public class HttpSessionManagedObject
 	/**
 	 * Triggers invalidating the {@link HttpSession}.
 	 * 
-	 * @param isRequireNewSession
-	 *            Flag indicating if requires a new {@link HttpSession}.
+	 * @param isRequireNewSession Flag indicating if requires a new
+	 *                            {@link HttpSession}.
 	 */
 	private void invalidateSession(boolean isRequireNewSession) {
 		// No longer loaded
@@ -345,8 +335,7 @@ public class HttpSessionManagedObject
 	/**
 	 * Loads failure.
 	 * 
-	 * @param cause
-	 *            Cause of the failure.
+	 * @param cause Cause of the failure.
 	 */
 	private void loadFailure(Throwable cause) {
 		this.failure = cause;
@@ -393,8 +382,7 @@ public class HttpSessionManagedObject
 	 * {@link HttpSession}).
 	 * 
 	 * @return <code>true</code> if can complete the {@link HttpSession}.
-	 * @throws Throwable
-	 *             If failure in operation.
+	 * @throws Throwable If failure in operation.
 	 */
 	private boolean isOperationComplete() throws Throwable {
 
@@ -410,14 +398,21 @@ public class HttpSessionManagedObject
 	/**
 	 * Adds the Session Id {@link HttpCookie} to the {@link HttpResponse}.
 	 * 
-	 * @param sessionId
-	 *            Session Id.
-	 * @param expireTime
-	 *            Time that the {@link HttpCookie} is to expire.
+	 * @param sessionId  Session Id.
+	 * @param expireTime Time that the {@link HttpCookie} is to expire.
 	 */
 	private void setSessionIdCookieToHttpResponse(String sessionId, Instant expireTime) {
 		this.connection.getResponse().getCookies().setCookie(this.sessionIdCookieName, sessionId,
 				(cookie) -> cookie.setExpires(expireTime));
+	}
+
+	/*
+	 * ================ ContextAwareManagedObject ===========================
+	 */
+
+	@Override
+	public void setManagedObjectContext(ManagedObjectContext context) {
+		this.managedContextContext = context;
 	}
 
 	/*
@@ -427,15 +422,6 @@ public class HttpSessionManagedObject
 	@Override
 	public void setAsynchronousContext(AsynchronousContext asynchronousContext) {
 		this.asynchronousContext = asynchronousContext;
-	}
-
-	/*
-	 * ================ ProcessAwareManagedObject ===========================
-	 */
-
-	@Override
-	public void setProcessAwareContext(ProcessAwareContext context) {
-		this.processAwareContext = context;
 	}
 
 	/*
@@ -532,16 +518,11 @@ public class HttpSessionManagedObject
 		/**
 		 * Loads the state of this {@link HttpSession}.
 		 * 
-		 * @param sessionId
-		 *            Session Id.
-		 * @param creationTime
-		 *            Creation time.
-		 * @param expireTime
-		 *            Time to expire the {@link HttpSession} should it be idle.
-		 * @param isNew
-		 *            If a new {@link HttpSession}.
-		 * @param attributes
-		 *            Attributes.
+		 * @param sessionId    Session Id.
+		 * @param creationTime Creation time.
+		 * @param expireTime   Time to expire the {@link HttpSession} should it be idle.
+		 * @param isNew        If a new {@link HttpSession}.
+		 * @param attributes   Attributes.
 		 */
 		private void loadState(String sessionId, Instant creationTime, Instant expireTime, boolean isNew,
 				Map<String, Serializable> attributes) {
@@ -559,9 +540,8 @@ public class HttpSessionManagedObject
 		/**
 		 * Flags this {@link HttpSession} as invalid.
 		 * 
-		 * @param failure
-		 *            Potential failure invalidating this {@link HttpSession}.
-		 *            May be <code>null</code>.
+		 * @param failure Potential failure invalidating this {@link HttpSession}. May
+		 *                be <code>null</code>.
 		 */
 		private void invalidate(Throwable failure) {
 			this.isInvalid = true;
@@ -571,8 +551,8 @@ public class HttpSessionManagedObject
 		/**
 		 * Ensures {@link HttpSession} is valid for use.
 		 * 
-		 * @throws InvalidatedSessionHttpException
-		 *             If {@link HttpSession} is not valid for use.
+		 * @throws InvalidatedSessionHttpException If {@link HttpSession} is not valid
+		 *                                         for use.
 		 */
 		private void ensureValid() throws InvalidatedSessionHttpException {
 			// Not valid if:
@@ -586,8 +566,8 @@ public class HttpSessionManagedObject
 		/**
 		 * Ensures can alter the {@link HttpSession}.
 		 * 
-		 * @throws StoringSessionHttpException
-		 *             If not able to alter the {@link HttpSession}.
+		 * @throws StoringSessionHttpException If not able to alter the
+		 *                                     {@link HttpSession}.
 		 */
 		private void ensureCanAlter() throws StoringSessionHttpException {
 			if (HttpSessionManagedObject.this.isStoring) {
@@ -601,7 +581,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public String getSessionId() {
-			return HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			return HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				this.ensureValid();
 				return this.sessionId;
 			});
@@ -609,13 +589,13 @@ public class HttpSessionManagedObject
 
 		@Override
 		public String getTokenName() {
-			return HttpSessionManagedObject.this.processAwareContext
+			return HttpSessionManagedObject.this.managedContextContext
 					.run(() -> HttpSessionManagedObject.this.sessionIdCookieName);
 		}
 
 		@Override
 		public Instant getCreationTime() {
-			return HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			return HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				this.ensureValid();
 				return this.creationTime;
 			});
@@ -623,7 +603,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public Instant getExpireTime() throws InvalidatedSessionHttpException {
-			return HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			return HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				this.ensureValid();
 				return this.expireTime;
 			});
@@ -632,7 +612,7 @@ public class HttpSessionManagedObject
 		@Override
 		public void setExpireTime(Instant expireTime)
 				throws StoringSessionHttpException, InvalidatedSessionHttpException {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				this.ensureValid();
 				this.ensureCanAlter();
 
@@ -647,7 +627,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public boolean isNew() {
-			return HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			return HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				this.ensureValid();
 				return this.isNew;
 			});
@@ -655,7 +635,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public Serializable getAttribute(String name) {
-			return HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			return HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				this.ensureValid();
 				return this.attributes.get(name);
 			});
@@ -663,7 +643,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public Iterator<String> getAttributeNames() {
-			return HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			return HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				this.ensureValid();
 				return this.attributes.keySet().iterator();
 			});
@@ -671,7 +651,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void setAttribute(String name, Serializable object) {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				this.ensureValid();
 				this.ensureCanAlter();
 				this.attributes.put(name, object);
@@ -681,7 +661,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void removeAttribute(String name) {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				this.ensureValid();
 				this.ensureCanAlter();
 				this.attributes.remove(name);
@@ -700,7 +680,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void invalidate(boolean isRequireNewSession) throws Throwable {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.invalidateSession(isRequireNewSession);
 				return null;
 			});
@@ -708,7 +688,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void store() throws Throwable {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.storeSession(this.sessionId, this.creationTime, this.expireTime,
 						this.attributes);
 				return null;
@@ -717,7 +697,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public boolean isOperationComplete() throws Throwable {
-			return HttpSessionManagedObject.this.processAwareContext
+			return HttpSessionManagedObject.this.managedContextContext
 					.run(() -> HttpSessionManagedObject.this.isOperationComplete());
 		}
 	}
@@ -735,8 +715,7 @@ public class HttpSessionManagedObject
 		/**
 		 * Initiate.
 		 * 
-		 * @param connection
-		 *            {@link ServerHttpConnection}.
+		 * @param connection {@link ServerHttpConnection}.
 		 */
 		public FreshHttpSessionImpl(ServerHttpConnection connection) {
 			this.connection = connection;
@@ -753,7 +732,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void setSessionId(String sessionId) {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.loadSessionId(sessionId, true);
 				return null;
 			});
@@ -761,7 +740,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void failedToGenerateSessionId(Throwable failure) {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.loadFailure(failure);
 				return null;
 			});
@@ -781,8 +760,7 @@ public class HttpSessionManagedObject
 		/**
 		 * Initiate.
 		 * 
-		 * @param sessionId
-		 *            Session Id.
+		 * @param sessionId Session Id.
 		 */
 		public CreateHttpSessionOperationImpl(String sessionId) {
 			this.sessionId = sessionId;
@@ -799,7 +777,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void sessionCreated(Instant creationTime, Instant expireTime, Map<String, Serializable> attributes) {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.loadSession(creationTime, expireTime, attributes);
 				return null;
 			});
@@ -808,7 +786,7 @@ public class HttpSessionManagedObject
 		@Override
 		public void sessionIdCollision() {
 			// Generate a new Session Id
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.generateSessionId();
 				return null;
 			});
@@ -816,7 +794,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void failedToCreateSession(Throwable cause) {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.loadFailure(cause);
 				return null;
 			});
@@ -836,8 +814,7 @@ public class HttpSessionManagedObject
 		/**
 		 * Initiate.
 		 * 
-		 * @param sessionId
-		 *            Session Id.
+		 * @param sessionId Session Id.
 		 */
 		public RetrieveHttpSessionOperationImpl(String sessionId) {
 			this.sessionId = sessionId;
@@ -854,7 +831,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void sessionRetrieved(Instant creationTime, Instant expireTime, Map<String, Serializable> attributes) {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.loadSession(creationTime, expireTime, attributes);
 				return null;
 			});
@@ -863,7 +840,7 @@ public class HttpSessionManagedObject
 		@Override
 		public void sessionNotAvailable() {
 			// Session not available so generate new Session
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.generateSessionId();
 				return null;
 			});
@@ -871,7 +848,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void failedToRetreiveSession(Throwable cause) {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.loadFailure(cause);
 				return null;
 			});
@@ -906,14 +883,10 @@ public class HttpSessionManagedObject
 		/**
 		 * Initiate.
 		 * 
-		 * @param sessionId
-		 *            Session Id.
-		 * @param creationTime
-		 *            Creation time.
-		 * @param expireTime
-		 *            Time to expire the {@link HttpSession} should it be idle.
-		 * @param attributes
-		 *            Attributes.
+		 * @param sessionId    Session Id.
+		 * @param creationTime Creation time.
+		 * @param expireTime   Time to expire the {@link HttpSession} should it be idle.
+		 * @param attributes   Attributes.
 		 */
 		public StoreHttpSessionOperationImpl(String sessionId, Instant creationTime, Instant expireTime,
 				Map<String, Serializable> attributes) {
@@ -949,7 +922,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void sessionStored() {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.storeComplete();
 				return null;
 			});
@@ -957,7 +930,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void failedToStoreSession(Throwable cause) {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.loadFailure(cause);
 				return null;
 			});
@@ -982,10 +955,9 @@ public class HttpSessionManagedObject
 		/**
 		 * Initiate.
 		 * 
-		 * @param sessionId
-		 *            Session Id.
-		 * @param isRequireNewSession
-		 *            Flag indicating if require a new {@link HttpSession}.
+		 * @param sessionId           Session Id.
+		 * @param isRequireNewSession Flag indicating if require a new
+		 *                            {@link HttpSession}.
 		 */
 		public InvalidateHttpSessionOperationImpl(String sessionId, boolean isRequireNewSession) {
 			this.sessionId = sessionId;
@@ -1003,7 +975,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void sessionInvalidated() {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				if (this.isRequireNewSession) {
 					// Generate a new Session as required
 					HttpSessionManagedObject.this.generateSessionId();
@@ -1017,7 +989,7 @@ public class HttpSessionManagedObject
 
 		@Override
 		public void failedToInvalidateSession(Throwable cause) {
-			HttpSessionManagedObject.this.processAwareContext.run(() -> {
+			HttpSessionManagedObject.this.managedContextContext.run(() -> {
 				HttpSessionManagedObject.this.loadFailure(cause);
 				return null;
 			});

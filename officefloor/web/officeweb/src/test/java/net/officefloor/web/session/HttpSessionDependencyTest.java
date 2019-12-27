@@ -101,7 +101,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		// Create the HTTP Session Managed Object
 		this.replayMockObjects();
 		HttpSessionManagedObject mo = new HttpSessionManagedObject("JSESSIONID", 0, -1, generator, -1, this.store);
-		mo.setProcessAwareContext(new MockManagedObjectContext());
+		mo.setManagedObjectContext(new MockManagedObjectContext());
 		mo.setAsynchronousContext(this.asynchronousContext);
 		mo.loadObjects(this.objectRegistry);
 		this.verifyMockObjects();
@@ -140,7 +140,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		// Create the HTTP Session Managed Object
 		this.replayMockObjects();
 		HttpSessionManagedObject mo = new HttpSessionManagedObject("JSESSIONID", 0, 1, null, 2, null);
-		mo.setProcessAwareContext(new MockManagedObjectContext());
+		mo.setManagedObjectContext(new MockManagedObjectContext());
 		mo.setAsynchronousContext(this.asynchronousContext);
 		mo.loadObjects(this.objectRegistry);
 		this.verifyMockObjects();

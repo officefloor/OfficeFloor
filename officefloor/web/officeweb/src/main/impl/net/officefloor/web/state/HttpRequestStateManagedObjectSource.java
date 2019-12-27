@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
@@ -55,7 +55,7 @@ public class HttpRequestStateManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum HttpRequestStateDependencies {
-			SERVER_HTTP_CONNECTION
+		SERVER_HTTP_CONNECTION
 	}
 
 	/**
@@ -160,13 +160,13 @@ public class HttpRequestStateManagedObjectSource
 	/**
 	 * {@link ManagedObject} for the {@link HttpRequestState}.
 	 */
-	private class HttpRequestStateManagedObject implements ProcessAwareManagedObject,
+	private class HttpRequestStateManagedObject implements ContextAwareManagedObject,
 			CoordinatingManagedObject<HttpRequestStateDependencies>, HttpRequestState, ValueLoader {
 
 		/**
-		 * {@link ProcessAwareContext}.
+		 * {@link ManagedObjectContext}.
 		 */
-		private ProcessAwareContext context;
+		private ManagedObjectContext context;
 
 		/**
 		 * {@link ServerHttpConnection}.
@@ -226,7 +226,7 @@ public class HttpRequestStateManagedObjectSource
 		 */
 
 		@Override
-		public void setProcessAwareContext(ProcessAwareContext context) {
+		public void setManagedObjectContext(ManagedObjectContext context) {
 			this.context = context;
 		}
 
