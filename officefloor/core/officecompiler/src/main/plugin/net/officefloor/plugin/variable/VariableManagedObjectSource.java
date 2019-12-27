@@ -22,9 +22,9 @@ import java.lang.reflect.Type;
 import java.util.function.Consumer;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 
@@ -237,12 +237,12 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 	/**
 	 * Variable {@link ManagedObject}.
 	 */
-	private class VariableManagedObject implements ProcessAwareManagedObject, Var<T> {
+	private class VariableManagedObject implements ContextAwareManagedObject, Var<T> {
 
 		/**
-		 * {@link ProcessAwareContext}.
+		 * {@link ManagedObjectContext}.
 		 */
-		private ProcessAwareContext context;
+		private ManagedObjectContext context;
 
 		/**
 		 * Value for the {@link Var}.
@@ -250,11 +250,11 @@ public class VariableManagedObjectSource<T> extends AbstractManagedObjectSource<
 		private T value;
 
 		/*
-		 * ============= ProcessAwareManagedObject ================
+		 * ============= ContextAwareManagedObject ================
 		 */
 
 		@Override
-		public void setProcessAwareContext(ProcessAwareContext context) {
+		public void setManagedObjectContext(ManagedObjectContext context) {
 			this.context = context;
 		}
 

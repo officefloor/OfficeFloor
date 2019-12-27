@@ -36,6 +36,7 @@ import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.source.SourceContext;
@@ -188,6 +189,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
 		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
 		final Connection connection = this.createMock(Connection.class);
+		final String MO_BOUND_NAME = "MO";
 		final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
 
 		// Record obtaining the dependencies
@@ -205,6 +207,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Source the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.setBoundManagedObjectName(MO_BOUND_NAME);
 		user.setObjectRegistry(objectRegistry);
 		ManagedObject managedObject = user.sourceManagedObject(source);
 		assertTrue("Managed object must be coordinating", managedObject instanceof CoordinatingManagedObject);
@@ -216,7 +219,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Verify the dependencies injected
 		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY,
-				Logger.getLogger(OfficeFloorCompiler.TYPE), connection);
+				Logger.getLogger(MO_BOUND_NAME), connection);
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -249,6 +252,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		final String QUALIFIED_DEPENDENCY = "SELECT NAME FROM QUALIFIED";
 		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
 		final Connection connection = this.createMock(Connection.class);
+		final String MO_BOUND_NAME = "MO";
 		final ObjectRegistry<Indexed> objectRegistry = this.createMock(ObjectRegistry.class);
 		final ManagedObjectExecuteContext<Indexed> executeContext = this.createMock(ManagedObjectExecuteContext.class);
 		final Integer PROCESS_PARAMETER = Integer.valueOf(100);
@@ -295,6 +299,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Source the managed object
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
+		user.setBoundManagedObjectName(MO_BOUND_NAME);
 		user.setObjectRegistry(objectRegistry);
 		ManagedObject managedObject = user.sourceManagedObject(source);
 		assertTrue("Managed object must be coordinating", managedObject instanceof CoordinatingManagedObject);
@@ -306,7 +311,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Verify the dependencies injected
 		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY,
-				Logger.getLogger(OfficeFloorCompiler.TYPE), connection);
+				Logger.getLogger(MO_BOUND_NAME), connection);
 
 		// Verify the processes injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
@@ -325,6 +330,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		final String UNQUALIFIED_DEPENDENCY = "SELECT * FROM UNQUALIFIED";
 		final MockProcessInterface processInterface = this.createMock(MockProcessInterface.class);
 		final Integer PROCESS_PARAMETER = Integer.valueOf(200);
+		final Logger logger = Logger.getLogger("MO");
+		final ManagedObjectContext moContext = this.createMock(ManagedObjectContext.class);
+
+		// Record obtaining logger
+		this.recordReturn(moContext, moContext.getLogger(), logger);
 
 		// Record invoking processes
 		processInterface.doProcess();
@@ -336,11 +346,10 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Create the instance
 		MockClass mockClass = ClassManagedObjectSource.newInstance(MockClass.class, "unqualifiedDependency",
 				UNQUALIFIED_DEPENDENCY, "qualifiedDependency", QUALIFIED_DEPENDENCY, "connection", connection,
-				"processes", processInterface);
+				"processes", processInterface, "logger", logger, "context", moContext);
 
 		// Verify the dependencies injected
-		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY,
-				Logger.getLogger(OfficeFloorCompiler.TYPE), connection);
+		mockClass.verifyDependencyInjection(UNQUALIFIED_DEPENDENCY, QUALIFIED_DEPENDENCY, logger, connection);
 
 		// Verify the process interfaces injected
 		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
@@ -401,6 +410,12 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		private Logger logger;
 
 		/**
+		 * {@link ManagedObjectContext}.
+		 */
+		@Dependency
+		private ManagedObjectContext context;
+
+		/**
 		 * Verifies the dependencies.
 		 * 
 		 * @param unqualifiedDependency Unqualified dependency.
@@ -416,7 +431,9 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect unqualified dependency", unqualifiedDependency, this.unqualifiedDependency);
 			assertNotNull("Expecting qualified dependency", qualifiedDependency);
 			assertEquals("Incorrect qualified dependency", qualifiedDependency, this.qualifiedDependency);
-			assertEquals("Incorrect logger", logger.getName(), this.logger.getName());
+			assertEquals("Incorrect logger", this.logger.getName(), logger.getName());
+			assertNotNull("Should have managed object context", this.context);
+			assertSame("Should be same logger from managed object context", this.logger, this.context.getLogger());
 
 			// Verify parent dependencies
 			super.verifyDependencyInjection(connection);
