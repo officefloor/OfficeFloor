@@ -76,8 +76,8 @@
 		</dependency>
 		<!-- START SNIPPET: tutorial -->
 		<dependency>
-			<groupId>net.officefloor.polyglot</groupId>
-			<artifactId>officepolyglot_kotlin</artifactId>
+			<groupId>net.officefloor.kotlin</groupId>
+			<artifactId>officekotlin</artifactId>
 		</dependency>
 		<!-- END SNIPPET: tutorial -->
 		<dependency>

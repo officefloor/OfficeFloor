@@ -23,8 +23,8 @@
 		</dependency>
 		<!-- START SNIPPET: tutorial -->
 		<dependency>
-			<groupId>net.officefloor.polyglot</groupId>
-			<artifactId>officepolyglot_javascript</artifactId>
+			<groupId>net.officefloor.javascript</groupId>
+			<artifactId>officejavascript</artifactId>
 		</dependency>
 		<!-- END SNIPPET: tutorial -->
 		<dependency>

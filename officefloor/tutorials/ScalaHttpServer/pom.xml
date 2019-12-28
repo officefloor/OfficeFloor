@@ -101,12 +101,12 @@
 		</dependency>
 		<!-- START SNIPPET: tutorial -->
 		<dependency>
-			<groupId>net.officefloor.polyglot</groupId>
-			<artifactId>officepolyglot_scala</artifactId>
+			<groupId>net.officefloor.scala</groupId>
+			<artifactId>officescala</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.polyglot</groupId>
-			<artifactId>officepolyglot_scalatest</artifactId>
+			<groupId>net.officefloor.scala</groupId>
+			<artifactId>officescalatest</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<!-- END SNIPPET: tutorial -->
