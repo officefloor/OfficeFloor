@@ -23,11 +23,11 @@ import java.util.function.Consumer;
 
 import org.junit.runners.model.Statement;
 
-import com.braintreepayments.http.HttpRequest;
-import com.braintreepayments.http.HttpResponse;
-import com.braintreepayments.http.serializer.Json;
 import com.paypal.core.PayPalEnvironment;
 import com.paypal.core.PayPalHttpClient;
+import com.paypal.http.HttpRequest;
+import com.paypal.http.HttpResponse;
+import com.paypal.http.serializer.Json;
 import com.paypal.orders.AmountBreakdown;
 import com.paypal.orders.AmountWithBreakdown;
 import com.paypal.orders.ApplicationContext;
