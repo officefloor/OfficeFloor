@@ -2,6 +2,7 @@
 **/.project
 **/.classpath
 **/*.iml
+**/.idea/
 !editor/**/.project
 !editor/**/.classpath
 /target/

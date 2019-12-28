@@ -14,8 +14,6 @@ class WoofScalaTest extends FlatSpec with WoofRules {
         httpMethod("POST")).header("Content-Type", "application/json")
         .entity(jsonEntity(new ScalaRequest("test"))))
 
-      print("Hello World")
-
       response.assertResponse(200, jsonEntity(new ScalaResponse("REQUEST = test")))
     }
     }

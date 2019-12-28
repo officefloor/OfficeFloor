@@ -162,6 +162,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.polyglot</groupId>
+				<artifactId>officepolyglot_script</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.polyglot</groupId>
 				<artifactId>officepolyglot_javascript</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -171,18 +176,23 @@
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.polyglot</groupId>
-				<artifactId>officepolyglot_scala</artifactId>
+				<groupId>net.officefloor.scala</groupId>
+				<artifactId>scala</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.polyglot</groupId>
-				<artifactId>officepolyglot_scalatest</artifactId>
+				<groupId>net.officefloor.scala</groupId>
+				<artifactId>officescala</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.polyglot</groupId>
-				<artifactId>officepolyglot_script</artifactId>
+				<groupId>net.officefloor.scala</groupId>
+				<artifactId>officescalatest</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.scala</groupId>
+				<artifactId>officescala_zio</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Server -->

@@ -8,12 +8,25 @@
 		<artifactId>polyglot</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officepolyglot_scala</artifactId>
-	<name>Scala</name>
-	<description>OfficeFloor plug-in for using Scala</description>
+	<groupId>net.officefloor.scala</groupId>
+	<artifactId>scala</artifactId>
+	<packaging>pom</packaging>
+	<name>Scala Parent</name>
+	<description>OfficeFloor parent project for using Scala</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	<modules>
+		<module>officescala</module>
+		<module>officescalatest</module>
+		<module>officescala_zio</module>
+	</modules>
+	<dependencies>
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -62,47 +75,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/test/scala</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
-	<dependencies>
-		<dependency>
-			<groupId>net.officefloor.activity</groupId>
-			<artifactId>officeprocedure</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>officejson_default</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-scala_2.12</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.polyglot</groupId>
-			<artifactId>officepolyglot_test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
 </project>
