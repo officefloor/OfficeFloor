@@ -17,20 +17,21 @@
  */
 package net.officefloor.tutorial.loggerhttpserver;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import net.officefloor.web.HttpObject;
+import java.util.logging.Logger;
 
 /**
- * Request to be logged.
+ * Logic for logging {@link LoggedRequest}.
  * 
  * @author Daniel Sagenschneider
  */
-@HttpObject
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class LoggedRequest {
-	private String message;
+public class LogLogic {
+
+	public void log(LoggedRequest request, Logger procedureLogger, LogObject object) {
+
+		// Log the request via procedure logger
+		procedureLogger.info("PROCEDURE: " + request.getMessage());
+
+		// Have dependency injected object use it's logger
+		object.log(request);
+	}
 }

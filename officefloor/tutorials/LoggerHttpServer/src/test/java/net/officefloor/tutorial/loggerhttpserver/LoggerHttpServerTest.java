@@ -47,12 +47,12 @@ public class LoggerHttpServerTest {
 		// Send request to be logged
 		MockHttpResponse response = this.server
 				.send(MockWoofServer.mockJsonRequest(HttpMethod.POST, new LoggedRequest("TEST")));
-		response.assertResponse(200, null);
+		response.assertResponse(204, "");
 
 		// Ensure log input message (from procedure)
-		this.log.assertLog("OFFICE.procedure", Level.INFO, "TEST");
+		this.log.assertLog("log.procedure", Level.INFO, "PROCEDURE: TEST");
 
 		// Ensure log from object
-		this.log.assertLog("MO", Level.INFO, "Message from object");
+		this.log.assertLog("OFFICE.net_officefloor_tutorial_loggerhttpserver_LogObject", Level.INFO, "OBJECT: TEST");
 	}
 }
