@@ -1,0 +1,53 @@
+<activity>
+
+	<inputs>
+		<input name="INPUT">
+			<section name="SECTION" input="INPUT" />
+		</input>
+	</inputs>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next>
+				<section name="SECTION" input="INPUT" />
+			</next>
+			<output name="OUTPUT">
+				<section name="SECTION" input="INPUT" />
+			</output>
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="SECTION" source="net.example.ExampleSectionSource" location="SECTION_LOCATION">
+			<property name="name.one" value="value.one" />
+			<property name="name.two" value="value.two" />
+			<input name="INPUT" />
+			<output name="OUTPUT_A" argument-type="java.lang.Integer">
+				<section name="SECTION_LINK" input="INPUT" />
+			</output>
+			<output name="OUTPUT_B">
+				<output name="OUTPUT" />
+			</output>
+			<output name="OUTPUT_C">
+				<procedure name="PROCEDURE" />
+			</output>
+		</section>
+		<section name="SECTION_LINK" source="net.example.LinkSectionSource" location="LINK_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT">
+				<section name="SECTION" input="INPUT" />
+			</output>
+		</section>
+	</sections>
+
+	<exceptions>
+		<exception class="java.io.IOException">
+			<section name="SECTION" input="INPUT" />
+		</exception>
+	</exceptions>
+
+	<outputs>
+		<output name="OUTPUT" />
+	</outputs>
+
+</activity>

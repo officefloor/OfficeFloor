@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<field type="String" name="activity procedure name" />
+	<field type="String" name="resource" />
+	<field type="String" name="source name" />
+	<field type="String" name="procedure name" />
+	<field type="ActivityProcedureNextModel" name="next" />
+	<list type="PropertyModel" name="property" plural="properties" />
+	<list type="ActivityProcedureOutputModel" name="output" />
+	<list type="ActivitySectionOutputToActivityProcedureModel" name="activity section output" />
+	<list type="ActivityProcedureOutputToActivityProcedureModel" name="activity procedure output" />
+	<list type="ActivityProcedureNextToActivityProcedureModel" name="activity procedure next" />
+	<list type="ActivityExceptionToActivityProcedureModel" name="activity exception" />
+	<list type="ActivityInputToActivityProcedureModel" name="activity input" />
+</model>

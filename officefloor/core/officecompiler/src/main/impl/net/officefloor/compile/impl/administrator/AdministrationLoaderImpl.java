@@ -68,10 +68,8 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 	/**
 	 * Instantiate.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link Administration}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link Administration}.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public AdministrationLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -200,12 +198,19 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 	public <E, F extends Enum<F>, G extends Enum<G>> AdministrationType<E, F, G> loadAdministrationType(
 			AdministrationSource<E, F, G> administratorSource, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName();
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Obtain the source context
 		SourceContext sourceContext = this.nodeContext.getRootSourceContext();
 
 		// Create the administrator source context
-		SourceProperties properties = new PropertyListSourceProperties(propertyList);
-		AdministrationSourceContext context = new AdministrationSourceContextImpl(true, properties, sourceContext);
+		SourceProperties properties = new PropertyListSourceProperties(overriddenProperties);
+		AdministrationSourceContext context = new AdministrationSourceContextImpl(qualifiedName, true, properties,
+				sourceContext);
 
 		// Initialise the administration source and obtain the meta-data
 		AdministrationSourceMetaData<E, F, G> metaData;
@@ -424,16 +429,14 @@ public class AdministrationLoaderImpl implements AdministrationLoader, IssueTarg
 		/**
 		 * Initiate.
 		 * 
-		 * @param isLoadingType
-		 *            Indicates if loading type.
-		 * @param properties
-		 *            {@link SourceProperties}.
-		 * @param sourceContext
-		 *            Delegate {@link SourceContext}.
+		 * @param administrationSourceName Name of {@link AdministrationSource}.
+		 * @param isLoadingType            Indicates if loading type.
+		 * @param properties               {@link SourceProperties}.
+		 * @param sourceContext            Delegate {@link SourceContext}.
 		 */
-		public AdministrationSourceContextImpl(boolean isLoadingType, SourceProperties properties,
-				SourceContext sourceContext) {
-			super(isLoadingType, sourceContext, properties);
+		public AdministrationSourceContextImpl(String administrationSourceName, boolean isLoadingType,
+				SourceProperties properties, SourceContext sourceContext) {
+			super(administrationSourceName, isLoadingType, sourceContext, properties);
 		}
 	}
 

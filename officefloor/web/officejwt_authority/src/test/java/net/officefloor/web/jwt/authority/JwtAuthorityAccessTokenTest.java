@@ -39,7 +39,7 @@ public class JwtAuthorityAccessTokenTest extends AbstractJwtAuthorityTokenTest {
 		// Record issue in configuration
 		this.compilerIssues = new MockCompilerIssues(this);
 		this.compilerIssues.recordCaptureIssues(false);
-		this.compilerIssues.recordIssue("JWT_AUTHORITY", ManagedObjectSourceNodeImpl.class, "Failed to init",
+		this.compilerIssues.recordIssue("OFFICE.JWT_AUTHORITY", ManagedObjectSourceNodeImpl.class, "Failed to init",
 				new IllegalArgumentException(
 						"JwtAccessKey expiration period (8 seconds) is below overlap period ((1 seconds period * 4 periods = 4 seconds) * 2 for overlap start/end = 8 seconds)"));
 

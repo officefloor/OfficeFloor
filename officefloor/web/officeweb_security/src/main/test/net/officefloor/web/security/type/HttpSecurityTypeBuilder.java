@@ -17,6 +17,8 @@
  */
 package net.officefloor.web.security.type;
 
+import java.io.Serializable;
+
 import net.officefloor.web.security.type.HttpSecurityDependencyType;
 import net.officefloor.web.security.type.HttpSecurityFlowType;
 import net.officefloor.web.security.type.HttpSecurityType;
@@ -33,16 +35,14 @@ public interface HttpSecurityTypeBuilder {
 	/**
 	 * Specifies the authentication class.
 	 * 
-	 * @param authenticationClass
-	 *            Class of the authentication.
+	 * @param authenticationClass Class of the authentication.
 	 */
 	void setAuthenticationClass(Class<?> authenticationClass);
 
 	/**
 	 * Specifies the access control class.
 	 * 
-	 * @param accessControlClass
-	 *            Class of the access control.
+	 * @param accessControlClass Class of the access control.
 	 */
 	void setAccessControlClass(Class<?> accessControlClass);
 
@@ -53,79 +53,76 @@ public interface HttpSecurityTypeBuilder {
 	 * May be not specified if no application behaviour required to provide
 	 * credentials.
 	 * 
-	 * @param credentialsClass
-	 *            Class of the credentials.
+	 * @param credentialsClass Class of the credentials.
 	 */
 	void setCredentialsClass(Class<?> credentialsClass);
 
 	/**
 	 * Adds a {@link HttpSecurityDependencyType}.
 	 * 
-	 * @param name
-	 *            Name of the {@link HttpSecurityDependencyType}.
-	 * @param type
-	 *            Type of the {@link HttpSecurityDependencyType}.
-	 * @param typeQualifier
-	 *            Qualifier for the type of {@link HttpSecurityDependencyType}.
-	 * @param index
-	 *            Index of the {@link HttpSecurityDependencyType}.
-	 * @param key
-	 *            Key identifying the {@link HttpSecurityDependencyType}.
+	 * @param name          Name of the {@link HttpSecurityDependencyType}.
+	 * @param type          Type of the {@link HttpSecurityDependencyType}.
+	 * @param typeQualifier Qualifier for the type of
+	 *                      {@link HttpSecurityDependencyType}.
+	 * @param index         Index of the {@link HttpSecurityDependencyType}.
+	 * @param key           Key identifying the {@link HttpSecurityDependencyType}.
 	 */
 	void addDependency(String name, Class<?> type, String typeQualifier, int index, Enum<?> key);
 
 	/**
 	 * Indicates if input.
 	 * 
-	 * @param isInput
-	 *            <code>true</code> if input.
+	 * @param isInput <code>true</code> if input.
 	 */
 	void setInput(boolean isInput);
 
 	/**
 	 * <p>
-	 * Convenience method to add a {@link HttpSecurityDependencyType} based on
-	 * the key.
-	 * <p>
-	 * Both the <code>name</code> and <code>index</code> are extracted from the
+	 * Convenience method to add a {@link HttpSecurityDependencyType} based on the
 	 * key.
+	 * <p>
+	 * Both the <code>name</code> and <code>index</code> are extracted from the key.
 	 * 
-	 * @param key
-	 *            Key identifying the {@link HttpSecurityDependencyType}.
-	 * @param type
-	 *            Type of the {@link HttpSecurityDependencyType}.
-	 * @param typeQualifier
-	 *            Qualifier for the type of {@link HttpSecurityDependencyType}.
+	 * @param key           Key identifying the {@link HttpSecurityDependencyType}.
+	 * @param type          Type of the {@link HttpSecurityDependencyType}.
+	 * @param typeQualifier Qualifier for the type of
+	 *                      {@link HttpSecurityDependencyType}.
 	 */
 	void addDependency(Enum<?> key, Class<?> type, String typeQualifier);
 
 	/**
 	 * Adds a {@link HttpSecurityFlowType}.
 	 * 
-	 * @param name
-	 *            Name of the {@link HttpSecurityFlowType}.
-	 * @param argumentType
-	 *            Type of argument passed to the {@link HttpSecurityFlowType}.
-	 * @param index
-	 *            Index of the {@link HttpSecurityFlowType}.
-	 * @param key
-	 *            Key identifying the {@link HttpSecurityFlowType}.
+	 * @param name         Name of the {@link HttpSecurityFlowType}.
+	 * @param argumentType Type of argument passed to the
+	 *                     {@link HttpSecurityFlowType}.
+	 * @param index        Index of the {@link HttpSecurityFlowType}.
+	 * @param key          Key identifying the {@link HttpSecurityFlowType}.
 	 */
 	void addFlow(String name, Class<?> argumentType, int index, Enum<?> key);
 
 	/**
 	 * <p>
-	 * Convenience method to add a {@link HttpSecurityFlowType} based on the
-	 * key.
+	 * Convenience method to add a {@link HttpSecurityFlowType} based on the key.
 	 * <p>
-	 * Both the <code>name</code> and <code>index</code> are extracted from the
-	 * key.
+	 * Both the <code>name</code> and <code>index</code> are extracted from the key.
 	 * 
-	 * @param key
-	 *            Key identifying the {@link HttpSecurityFlowType}.
-	 * @param argumentType
-	 *            Type of argument passed to the {@link HttpSecurityFlowType}.
+	 * @param key          Key identifying the {@link HttpSecurityFlowType}.
+	 * @param argumentType Type of argument passed to the
+	 *                     {@link HttpSecurityFlowType}.
 	 */
 	void addFlow(Enum<?> key, Class<?> argumentType);
+
+	/**
+	 * Builds the {@link HttpSecurityType}.
+	 * 
+	 * @param <A>  Authorization type.
+	 * @param <AC> Access control type.
+	 * @param <C>  Credentials type.
+	 * @param <O>  Dependency keys.
+	 * @param <F>  Flow keys.
+	 * @return {@link HttpSecurityType}.
+	 */
+	<A, AC extends Serializable, C, O extends Enum<O>, F extends Enum<F>> HttpSecurityType<A, AC, C, O, F> build();
 
 }

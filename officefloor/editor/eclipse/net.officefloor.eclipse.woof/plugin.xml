@@ -10,7 +10,7 @@
 		<wizard 
 		category="net.officefloor.category"
         class="net.officefloor.eclipse.ide.woof.WoofNewWizard"
-        icon="icons/OfficeFloor.png"
+        icon="icons/WoOF.png"
         id="net.officefloor.eclipse.woof.WoofNewWizard"
         name="WoOF"/>
 	</extension>
@@ -23,7 +23,7 @@
         contributorClass="net.officefloor.eclipse.ide.IdeEditorActionBarContributor"
         default="true"
         extensions="woof"
-        icon="icons/OfficeFloor.png"
+        icon="icons/WoOF.png"
         id="net.officefloor.eclipse.woof"
         name="WoOF Editor"/>
 	</extension>

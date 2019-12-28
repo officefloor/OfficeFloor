@@ -1,4 +1,3 @@
- [![Download OfficeFloor](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/officefloor/files/latest/download)
 
  [![Download BlockingFramework](https://img.shields.io/sourceforge/dm/officefloor.svg)](https://sourceforge.net/projects/officefloor/files/latest/download)
  [![Website](https://img.shields.io/website-up-down-green-red/http/officefloor.net.svg?label=http://officefloor.net)](http://officefloor.net)
@@ -20,7 +19,6 @@ OfficeFloor - inversion of coupling control
 
 More information available at [http://officefloor.net](http://officefloor.net)
 
-[![Download OfficeFloor](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/officefloor/files/latest/download)
 
 ## Inversion of Coupling Control
 

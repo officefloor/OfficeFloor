@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+	<list type="ActivitySectionModel" name="activity section" />
+	<list type="ActivityProcedureModel" name="activity procedure" />
+	<list type="ActivityExceptionModel" name="activity exception" />
+	<list type="ActivityInputModel" name="activity input" /> 
+	<list type="ActivityOutputModel" name="activity output" /> 
+</model>

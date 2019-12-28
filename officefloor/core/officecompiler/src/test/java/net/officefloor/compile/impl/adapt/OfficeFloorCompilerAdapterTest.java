@@ -474,8 +474,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		PropertyList properties = this.compiler.createPropertyList();
 		properties.addProperty(ClassManagedFunctionSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(AdaptManagedObjectWork.class.getName());
-		FunctionNamespaceType namespaceType = this.typeLoader
-				.loadManagedFunctionType(ClassManagedFunctionSource.class.getName(), properties);
+		FunctionNamespaceType namespaceType = this.typeLoader.loadManagedFunctionType("MANAGED_FUNCTION",
+				ClassManagedFunctionSource.class.getName(), properties);
 		assertNotNull("Must have managed function type", namespaceType);
 	}
 
@@ -495,8 +495,8 @@ public class OfficeFloorCompilerAdapterTest extends OfficeFrameTestCase {
 		PropertyList properties = this.compiler.createPropertyList();
 		properties.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME)
 				.setValue(AdaptManagedObjectImpl.class.getName());
-		ManagedObjectType<?> managedObjectType = this.typeLoader
-				.loadManagedObjectType(ClassManagedObjectSource.class.getName(), properties);
+		ManagedObjectType<?> managedObjectType = this.typeLoader.loadManagedObjectType("MANAGED_OBJECT",
+				ClassManagedObjectSource.class.getName(), properties);
 		assertNotNull("Must have managed object type", managedObjectType);
 	}
 

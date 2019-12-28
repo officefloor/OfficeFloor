@@ -19,17 +19,18 @@ package net.officefloor.frame.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.AsynchronousOperation;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
@@ -42,7 +43,7 @@ import net.officefloor.frame.api.managedobject.source.ManagedObjectUser;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class ManagedObjectUserStandAlone
-		implements ManagedObjectUser, ProcessAwareContext, AsynchronousContext, ObjectRegistry {
+		implements ManagedObjectUser, ManagedObjectContext, AsynchronousContext, ObjectRegistry {
 
 	/**
 	 * Object to synchronise sourcing the {@link ManagedObject}.
@@ -66,12 +67,7 @@ public class ManagedObjectUserStandAlone
 	private long sourceTimeout = -1;
 
 	/**
-	 * {@link ProcessAwareContext}.
-	 */
-	private ProcessAwareContext processAwareContext = this;
-
-	/**
-	 * Bound name for a {@link NameAwareManagedObject}.
+	 * Bound name for a {@link ContextAwareManagedObject}.
 	 */
 	private String boundManagedObjectName = "STAND_ALONE";
 
@@ -100,20 +96,10 @@ public class ManagedObjectUserStandAlone
 	}
 
 	/**
-	 * Allows overriding the {@link ProcessAwareContext}. to initialise a
-	 * {@link ProcessAwareManagedObject}.
-	 * 
-	 * @param processAwareContext {@link ProcessAwareContext}.
-	 */
-	public void setProcessAwareContext(ProcessAwareContext processAwareContext) {
-		this.processAwareContext = processAwareContext;
-	}
-
-	/**
-	 * Specifies the bound name for a {@link NameAwareManagedObject}.
+	 * Specifies the bound name for a {@link ContextAwareManagedObject}.
 	 * 
 	 * @param boundManagedObjectName Bound name for a
-	 *                               {@link NameAwareManagedObject}.
+	 *                               {@link ContextAwareManagedObject}.
 	 */
 	public void setBoundManagedObjectName(String boundManagedObjectName) {
 		this.boundManagedObjectName = boundManagedObjectName;
@@ -226,15 +212,9 @@ public class ManagedObjectUserStandAlone
 				return null; // no managed object sourced
 			}
 
-			// Have managed object so determine if process aware
-			if (mo instanceof ProcessAwareManagedObject) {
-				((ProcessAwareManagedObject) mo).setProcessAwareContext(this.processAwareContext);
-			}
-
-			// Have managed object so determine if name aware
-			if (mo instanceof NameAwareManagedObject) {
-				// Provide the bound name
-				((NameAwareManagedObject) mo).setBoundManagedObjectName(this.boundManagedObjectName);
+			// Have managed object so determine if context aware
+			if (mo instanceof ContextAwareManagedObject) {
+				((ContextAwareManagedObject) mo).setManagedObjectContext(this);
 			}
 
 			// Provide asynchronous listener
@@ -276,8 +256,18 @@ public class ManagedObjectUserStandAlone
 	}
 
 	/*
-	 * ==================== ProcessAwareContext ==========================
+	 * ==================== ManagedObjectContext ==========================
 	 */
+
+	@Override
+	public String getBoundName() {
+		return this.boundManagedObjectName;
+	}
+
+	@Override
+	public Logger getLogger() {
+		return OfficeFrame.getLogger(this.getBoundName());
+	}
 
 	@Override
 	public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {

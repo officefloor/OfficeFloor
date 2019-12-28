@@ -36,7 +36,6 @@ import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Team;
 
@@ -127,15 +126,6 @@ public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObj
 	 *         issue loading with issue reported to the {@link CompilerIssues}.
 	 */
 	OfficeFloorManagedObjectSourceType loadOfficeFloorManagedObjectSourceType(CompileContext compileContext);
-
-	/**
-	 * Obtains the name that this {@link ManagedObjectSource} was added to the
-	 * {@link OfficeFloor}.
-	 *
-	 * @return Name that this {@link ManagedObjectSource} was added to the
-	 *         {@link OfficeFloor}.
-	 */
-	String getManagedObjectSourceName();
 
 	/**
 	 * Obtains the {@link SectionNode} containing this
@@ -254,6 +244,13 @@ public interface ManagedObjectSourceNode extends LinkPoolNode, SectionManagedObj
 	 */
 	void buildManagedObject(OfficeFloorBuilder builder, OfficeNode managingOffice, OfficeBuilder managingOfficeBuilder,
 			OfficeBindings officeBindings, CompileContext compileContext);
+
+	/**
+	 * Obtains the name to build the {@link ManagedObjectSource}.
+	 * 
+	 * @return Name to build the {@link ManagedObjectSource}.
+	 */
+	String getManagedObjectSourceName();
 
 	/**
 	 * Builds the {@link SupplierThreadLocal} for the {@link InputManagedObjectNode}

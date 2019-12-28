@@ -57,10 +57,8 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param node
-	 *            {@link Node} requiring the {@link ManagedObjectPool}.
-	 * @param nodeContext
-	 *            {@link NodeContext}.
+	 * @param node        {@link Node} requiring the {@link ManagedObjectPool}.
+	 * @param nodeContext {@link NodeContext}.
 	 */
 	public ManagedObjectPoolLoaderImpl(Node node, NodeContext nodeContext) {
 		this.node = node;
@@ -180,9 +178,15 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	public ManagedObjectPoolType loadManagedObjectPoolType(ManagedObjectPoolSource managedObjectPoolSource,
 			PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName();
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create the managed object pool source context to initialise
-		ManagedObjectPoolSourceContext sourceContext = new ManagedObjectPoolSourceContextImpl(true,
-				new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext());
+		ManagedObjectPoolSourceContext sourceContext = new ManagedObjectPoolSourceContextImpl(qualifiedName, true,
+				new PropertyListSourceProperties(overriddenProperties), this.nodeContext.getRootSourceContext());
 
 		// Initialise the managed object pool source
 		ManagedObjectPoolSourceMetaData metaData;
@@ -252,8 +256,7 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	 * @param issueDescription Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription);
@@ -262,10 +265,8 @@ public class ManagedObjectPoolLoaderImpl implements ManagedObjectPoolLoader {
 	/**
 	 * Adds an issue.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 * @param cause
-	 *            Cause of the issue.
+	 * @param issueDescription Description of the issue.
+	 * @param cause            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
 		this.nodeContext.getCompilerIssues().addIssue(this.node, issueDescription, cause);

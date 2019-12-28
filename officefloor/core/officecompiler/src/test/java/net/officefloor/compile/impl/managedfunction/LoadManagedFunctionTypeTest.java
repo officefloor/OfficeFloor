@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.managedfunction;
 
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.FailServiceFactory;
 import net.officefloor.compile.MissingServiceFactory;
@@ -45,6 +46,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.source.TestSource;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -179,6 +181,20 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load
 		this.loadManagedFunctionType(false,
 				(namespace, context) -> context.loadService(FailServiceFactory.class, null));
+	}
+
+	/**
+	 * Ensure correctly named {@link Logger}.
+	 */
+	public void testLogger() {
+		Closure<String> loggerName = new Closure<>();
+		this.loadManagedFunctionType(true, (namespace, context) -> {
+			loggerName.value = context.getLogger().getName();
+
+			// Providing minimal namespace type
+			namespace.addManagedFunctionType("IGNORE", this.functionFactory, null, null);
+		});
+		assertEquals("Incorrect logger name", OfficeFloorCompiler.TYPE, loggerName.value);
 	}
 
 	/**

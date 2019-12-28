@@ -57,7 +57,7 @@ public class MockCompilerIssuesTest extends OfficeFrameTestCase {
 	 */
 	public void testIssue() {
 		this.issues.recordIssue("NODE", this.node.getClass(), "TEST");
-		this.recordReturn(this.node, this.node.getNodeName(), "NODE");
+		this.recordReturn(this.node, this.node.getQualifiedName(), "NODE");
 		this.replayMockObjects();
 		this.issues.addIssue(this.node, "TEST");
 		this.verifyMockObjects();
@@ -83,7 +83,7 @@ public class MockCompilerIssuesTest extends OfficeFrameTestCase {
 	 */
 	public void testIssueRegularExpression() {
 		this.issues.recordIssueRegex("NODE", this.node.getClass(), "start.+");
-		this.recordReturn(this.node, this.node.getNodeName(), "NODE");
+		this.recordReturn(this.node, this.node.getQualifiedName(), "NODE");
 		this.replayMockObjects();
 		this.issues.addIssue(this.node, "start and more ignored description");
 		this.verifyMockObjects();
@@ -94,7 +94,7 @@ public class MockCompilerIssuesTest extends OfficeFrameTestCase {
 	 */
 	public void testIssueWithException() {
 		this.issues.recordIssue("NODE", this.node.getClass(), "failure", new Exception("TEST"));
-		this.recordReturn(this.node, this.node.getNodeName(), "NODE");
+		this.recordReturn(this.node, this.node.getQualifiedName(), "NODE");
 		this.replayMockObjects();
 		this.issues.addIssue(this.node, "failure", new Exception("TEST"));
 		this.verifyMockObjects();
@@ -105,7 +105,7 @@ public class MockCompilerIssuesTest extends OfficeFrameTestCase {
 	 */
 	public void testIssueRegularExpressionWithException() {
 		this.issues.recordIssueRegex("NODE", this.node.getClass(), "start.+", new UnsupportedOperationException());
-		this.recordReturn(this.node, this.node.getNodeName(), "NODE");
+		this.recordReturn(this.node, this.node.getQualifiedName(), "NODE");
 		this.replayMockObjects();
 		this.issues.addIssue(this.node, "start and more ignored description \n including \n new \n lines",
 				new UnsupportedOperationException());
@@ -118,7 +118,7 @@ public class MockCompilerIssuesTest extends OfficeFrameTestCase {
 	public void testIssueCapture() {
 		MockCompilerIssue issue = new MockCompilerIssue();
 		this.issues.recordIssue("NODE", this.node.getClass(), "TEST", issue);
-		this.recordReturn(this.node, this.node.getNodeName(), "NODE");
+		this.recordReturn(this.node, this.node.getQualifiedName(), "NODE");
 		this.replayMockObjects();
 		this.issues.addIssue(this.node, "TEST", issue);
 		this.verifyMockObjects();

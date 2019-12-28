@@ -24,6 +24,7 @@ import net.officefloor.compile.impl.properties.PropertyListSourceProperties;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.supplier.source.SuppliedManagedObjectSource;
+import net.officefloor.compile.spi.supplier.source.SupplierSource;
 import net.officefloor.compile.spi.supplier.source.SupplierSourceContext;
 import net.officefloor.compile.spi.supplier.source.SupplierThreadLocal;
 import net.officefloor.compile.supplier.SuppliedManagedObjectSourceType;
@@ -62,12 +63,15 @@ public class SupplierSourceContextImpl extends SourceContextImpl implements Supp
 	/**
 	 * Initiate.
 	 * 
-	 * @param isLoadingType Indicates if loading type.
-	 * @param propertyList  {@link PropertyList}.
-	 * @param context       {@link NodeContext}.
+	 * @param supplierSourceName Name of the {@link SupplierSource}.
+	 * @param isLoadingType      Indicates if loading type.
+	 * @param propertyList       {@link PropertyList}.
+	 * @param context            {@link NodeContext}.
 	 */
-	public SupplierSourceContextImpl(boolean isLoadingType, PropertyList propertyList, NodeContext context) {
-		super(isLoadingType, context.getRootSourceContext(), new PropertyListSourceProperties(propertyList));
+	public SupplierSourceContextImpl(String supplierSourceName, boolean isLoadingType, PropertyList propertyList,
+			NodeContext context) {
+		super(supplierSourceName, isLoadingType, context.getRootSourceContext(),
+				new PropertyListSourceProperties(propertyList));
 		this.context = context;
 	}
 

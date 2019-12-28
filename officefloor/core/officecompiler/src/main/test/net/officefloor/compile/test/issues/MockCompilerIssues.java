@@ -187,7 +187,7 @@ public class MockCompilerIssues implements CompilerIssues {
 
 	@Override
 	public CompileError addIssue(Node node, String issueDescription, CompilerIssue... causes) {
-		String nodeName = node.getNodeName();
+		String nodeName = node.getQualifiedName();
 		Class<? extends Node> nodeClass = node.getClass();
 		this.mock.addIssue(nodeName, nodeClass, new MockIssueDescription(issueDescription, false),
 				new MockCompilerIssuesArray(causes));
@@ -203,7 +203,7 @@ public class MockCompilerIssues implements CompilerIssues {
 		}
 
 		// Undertake adding the issue
-		String nodeName = node.getNodeName();
+		String nodeName = node.getQualifiedName();
 		Class<? extends Node> nodeClass = node.getClass();
 		this.mock.addIssue(nodeName, nodeClass, new MockIssueDescription(issueDescription, false),
 				new MockThrowable(cause));

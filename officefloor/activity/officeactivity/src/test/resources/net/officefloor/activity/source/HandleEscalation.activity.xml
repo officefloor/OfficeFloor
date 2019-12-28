@@ -1,0 +1,16 @@
+<activity>
+
+	<procedures>
+		<procedure name="PROPAGATE" resource="net.officefloor.activity.source.ExampleProcedure" source="Class"
+			procedure="propagate" />
+		<procedure name="HANDLE" resource="net.officefloor.activity.source.ExampleProcedure" source="Class"
+			procedure="handleEscalation" />
+	</procedures>
+
+	<exceptions>
+		<exception class="java.sql.SQLException">
+			<procedure name="HANDLE" />
+		</exception>
+	</exceptions>
+
+</activity>

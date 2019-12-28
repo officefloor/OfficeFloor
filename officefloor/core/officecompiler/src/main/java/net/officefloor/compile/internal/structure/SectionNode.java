@@ -197,16 +197,6 @@ public interface SectionNode extends Node, ManagedObjectRegistry, ManagedFunctio
 	OfficeNode getOfficeNode();
 
 	/**
-	 * Obtain the {@link OfficeSection} qualified name. This includes the
-	 * {@link Office} name.
-	 * 
-	 * @param simpleName Simple name to qualify with the {@link OfficeSection} name
-	 *                   space.
-	 * @return {@link OfficeSection} qualified name.
-	 */
-	String getQualifiedName(String simpleName);
-
-	/**
 	 * Obtains the {@link SectionNode} qualified name within the {@link OfficeNode}.
 	 * 
 	 * @param simpleName Simple name to qualify with the {@link SectionNode} name

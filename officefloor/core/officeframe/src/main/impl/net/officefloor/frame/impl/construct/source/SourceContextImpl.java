@@ -25,7 +25,9 @@ import java.util.Properties;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.source.LoadServiceError;
@@ -55,27 +57,31 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	 * Initiate the raw {@link SourceContext} to seed other {@link SourceContext}
 	 * instances.
 	 * 
+	 * @param sourceName      Name of source.
 	 * @param isLoadingType   Indicates if loading type.
 	 * @param classLoader     {@link ClassLoader}.
 	 * @param clockFactory    {@link ClockFactory}.
 	 * @param resourceSources {@link ResourceSource} instances.
 	 */
-	public SourceContextImpl(boolean isLoadingType, ClassLoader classLoader, ClockFactory clockFactory,
-			ResourceSource... resourceSources) {
-		this.delegate = new DelegateSourceContext(isLoadingType, classLoader, clockFactory, resourceSources);
+	public SourceContextImpl(String sourceName, boolean isLoadingType, ClassLoader classLoader,
+			ClockFactory clockFactory, ResourceSource... resourceSources) {
+		this.delegate = new DelegateSourceContext(sourceName, isLoadingType, classLoader, clockFactory,
+				resourceSources);
 	}
 
 	/**
 	 * Initiate specific {@link SourceContext} with necessary
 	 * {@link SourceProperties}.
 	 * 
+	 * @param sourceName       Name of source.
 	 * @param isLoadingType    Indicates if loading type.
 	 * @param delegate         Delegate {@link SourceContext}.
 	 * @param sourceProperties {@link SourceProperties}.
 	 */
-	public SourceContextImpl(boolean isLoadingType, SourceContext delegate, SourceProperties sourceProperties) {
+	public SourceContextImpl(String sourceName, boolean isLoadingType, SourceContext delegate,
+			SourceProperties sourceProperties) {
 		super(sourceProperties);
-		this.delegate = new DelegateWrapSourceContext(isLoadingType, delegate);
+		this.delegate = new DelegateWrapSourceContext(sourceName, isLoadingType, delegate);
 	}
 
 	/*
@@ -141,6 +147,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 	}
 
 	@Override
+	public Logger getLogger() {
+		return this.delegate.getLogger();
+	}
+
+	@Override
 	public ClassLoader getClassLoader() {
 		return this.delegate.getClassLoader();
 	}
@@ -156,6 +167,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		private final boolean isLoadingType;
 
 		/**
+		 * {@link Logger}.
+		 */
+		private final Logger logger;
+
+		/**
 		 * {@link SourceContext}.
 		 */
 		private final SourceContext delegate;
@@ -163,12 +179,14 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		/**
 		 * Initiate.
 		 * 
+		 * @param sourceName    Name of source.
 		 * @param isLoadingType Indicates if loading type.
 		 * @param delegate      Delegate {@link SourceContext}.
 		 */
-		public DelegateWrapSourceContext(boolean isLoadingType, SourceContext delegate) {
+		public DelegateWrapSourceContext(String sourceName, boolean isLoadingType, SourceContext delegate) {
 			this.isLoadingType = isLoadingType;
 			this.delegate = delegate;
+			this.logger = OfficeFrame.getLogger(sourceName);
 		}
 
 		/*
@@ -223,6 +241,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		@Override
 		public <T> Clock<T> getClock(Function<Long, T> translator) {
 			return this.delegate.getClock(translator);
+		}
+
+		@Override
+		public Logger getLogger() {
+			return this.logger;
 		}
 
 		@Override
@@ -286,19 +309,26 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		private final ResourceSource[] resourceSources;
 
 		/**
+		 * {@link Logger}.
+		 */
+		private final Logger logger;
+
+		/**
 		 * Initiate.
 		 * 
+		 * @param sourceName      Source name.
 		 * @param isLoadingType   Indicates if loading type.
 		 * @param classLoader     {@link ClassLoader}.
 		 * @param clockFactory    {@link ClockFactory}.
 		 * @param resourceSources {@link ResourceSource} instances.
 		 */
-		public DelegateSourceContext(boolean isLoadingType, ClassLoader classLoader, ClockFactory clockFactory,
-				ResourceSource[] resourceSources) {
+		public DelegateSourceContext(String sourceName, boolean isLoadingType, ClassLoader classLoader,
+				ClockFactory clockFactory, ResourceSource[] resourceSources) {
 			this.isLoadingType = isLoadingType;
 			this.classLoader = classLoader;
 			this.clockFactory = clockFactory;
 			this.resourceSources = resourceSources;
+			this.logger = OfficeFrame.getLogger(sourceName);
 		}
 
 		/*
@@ -513,6 +543,11 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		@Override
 		public <T> Clock<T> getClock(Function<Long, T> translator) {
 			return this.clockFactory.createClock(translator);
+		}
+
+		@Override
+		public Logger getLogger() {
+			return this.logger;
 		}
 
 		@Override

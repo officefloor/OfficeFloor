@@ -7,9 +7,9 @@
 	</bannerLeft>
 	<googleAnalyticsAccountId>UA-23477455-1</googleAnalyticsAccountId>
 	<poweredBy>
-		<logo name="Donate"
-			href="http://sourceforge.net/donate/index.php?group_id=156349"
-			img="http://images.sourceforge.net/images/project-support.jpg" />
+		<logo name="Support"
+			href="https://github.com/sponsors/sagenschneider"
+			img="./images/sponsor.jpg" />
 	</poweredBy>
 	<publishDate position="right" />
 	<version position="right" />

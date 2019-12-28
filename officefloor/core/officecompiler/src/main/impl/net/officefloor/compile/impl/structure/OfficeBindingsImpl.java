@@ -80,14 +80,10 @@ public class OfficeBindingsImpl implements OfficeBindings {
 	/**
 	 * Instantiates.
 	 * 
-	 * @param office
-	 *            {@link OfficeNode}.
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder}.
-	 * @param officeFloorBuilder
-	 *            {@link OfficeFloorBuilder}.
-	 * @param compileContext
-	 *            {@link CompileContext}.
+	 * @param office             {@link OfficeNode}.
+	 * @param officeBuilder      {@link OfficeBuilder}.
+	 * @param officeFloorBuilder {@link OfficeFloorBuilder}.
+	 * @param compileContext     {@link CompileContext}.
 	 */
 	public OfficeBindingsImpl(OfficeNode office, OfficeBuilder officeBuilder, OfficeFloorBuilder officeFloorBuilder,
 			CompileContext compileContext) {
@@ -145,7 +141,7 @@ public class OfficeBindingsImpl implements OfficeBindings {
 
 		// Build the Input managed object
 		this.officeBuilder.setBoundInputManagedObject(inputManagedObjectNode.getBoundManagedObjectName(),
-				inputManagedObjectNode.getBoundManagedObjectSourceNode().getManagedObjectSourceName());
+				inputManagedObjectNode.getBoundManagedObjectSourceNode().getQualifiedName());
 	}
 
 	@Override

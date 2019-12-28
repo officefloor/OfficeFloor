@@ -18,9 +18,9 @@
 package net.officefloor.web.security.impl;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
@@ -46,10 +46,8 @@ public class HttpChallengeContextManagedObjectSource extends AbstractManagedObje
 	/**
 	 * Loads the {@link HttpChallenge} to the {@link HttpResponse}.
 	 * 
-	 * @param httpChallengeContext
-	 *            {@link HttpChallengeContext}.
-	 * @param response
-	 *            {@link HttpResponse}.
+	 * @param httpChallengeContext {@link HttpChallengeContext}.
+	 * @param response             {@link HttpResponse}.
 	 */
 	public static void loadHttpChallenge(HttpChallengeContext httpChallengeContext, HttpResponse response) {
 
@@ -57,7 +55,7 @@ public class HttpChallengeContextManagedObjectSource extends AbstractManagedObje
 		HttpChallengeContextManagedObject managedObject = (HttpChallengeContextManagedObject) httpChallengeContext;
 
 		// Determine if challenge and if so send challenge
-		managedObject.processAwareContext.run(() -> {
+		managedObject.managedObjectContext.run(() -> {
 			if (managedObject.challenge.length() > 0) {
 				response.setStatus(HttpStatus.UNAUTHORIZED);
 				response.getHeaders().addHeader(CHALLENGE_NAME, managedObject.challenge.toString());
@@ -89,12 +87,12 @@ public class HttpChallengeContextManagedObjectSource extends AbstractManagedObje
 	 * {@link HttpChallenge} {@link ManagedObject}.
 	 */
 	private class HttpChallengeContextManagedObject
-			implements ProcessAwareManagedObject, HttpChallengeContext, HttpChallenge {
+			implements ContextAwareManagedObject, HttpChallengeContext, HttpChallenge {
 
 		/**
-		 * {@link ProcessAwareContext}.
+		 * {@link ManagedObjectContext}.
 		 */
-		private ProcessAwareContext processAwareContext;
+		private ManagedObjectContext managedObjectContext;
 
 		/**
 		 * {@link StringBuilder} to load the {@link HttpChallenge}.
@@ -106,8 +104,8 @@ public class HttpChallengeContextManagedObjectSource extends AbstractManagedObje
 		 */
 
 		@Override
-		public void setProcessAwareContext(ProcessAwareContext context) {
-			this.processAwareContext = context;
+		public void setManagedObjectContext(ManagedObjectContext context) {
+			this.managedObjectContext = context;
 		}
 
 		@Override
@@ -121,7 +119,7 @@ public class HttpChallengeContextManagedObjectSource extends AbstractManagedObje
 
 		@Override
 		public HttpChallenge setChallenge(String authenticationScheme, String realm) {
-			return this.processAwareContext.run(() -> {
+			return this.managedObjectContext.run(() -> {
 				if (this.challenge.length() > 0) {
 					this.challenge.append(", ");
 				}
@@ -139,7 +137,7 @@ public class HttpChallengeContextManagedObjectSource extends AbstractManagedObje
 
 		@Override
 		public void addParameter(String name, String value) {
-			this.processAwareContext.run(() -> {
+			this.managedObjectContext.run(() -> {
 				this.challenge.append(", ");
 				this.challenge.append(name);
 				this.challenge.append("=");

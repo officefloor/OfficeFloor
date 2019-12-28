@@ -54,7 +54,7 @@
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>8</java-lowest-version>
 		<jetty-version>9.4.24.v20191120</jetty-version>
-		<maven-version>3.6.2</maven-version>
+		<maven-version>3.6.3</maven-version>
 		<maven-changes-version>2.12.1</maven-changes-version>
 		<maven.compiler.source>${java-lowest-version}</maven.compiler.source>
 		<maven.compiler.target>${java-lowest-version}</maven.compiler.target>
@@ -91,8 +91,26 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.editor</groupId>
+				<artifactId>net.officefloor.activity</artifactId>
+				<type>eclipse-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.core</artifactId>
 				<type>eclipse-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.activity</artifactId>
+				<type>eclipse-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.activity.tests</artifactId>
+				<type>eclipse-test-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -141,6 +159,12 @@
 				<groupId>net.officefloor.editor</groupId>
 				<artifactId>net.officefloor.gef.ide.tests</artifactId>
 				<type>eclipse-test-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.gef.items</artifactId>
+				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -212,6 +236,12 @@
 			<dependency>
 				<groupId>net.officefloor.eclipse</groupId>
 				<artifactId>net.officefloor.eclipse.section</artifactId>
+				<type>eclipse-plugin</type>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.eclipse</groupId>
+				<artifactId>net.officefloor.eclipse.activity</artifactId>
 				<type>eclipse-plugin</type>
 				<version>${revision}</version>
 			</dependency>
@@ -685,7 +715,7 @@
 											tycho-shade-maven-plugin
 										</artifactId>
 										<versionRange>
-											[3.15.0,)
+											[3.17.0,)
 										</versionRange>
 										<goals>
 											<goal>shade</goal>

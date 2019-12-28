@@ -19,7 +19,7 @@ package net.officefloor.compile.impl.managedobject;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.officefloor.OfficeFloorManagedObjectSourceType;
@@ -51,7 +51,7 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends OfficeFrameTestC
 	public void testLoadByClass() {
 
 		// Node
-		final Node node = this.createMock(Node.class);
+		final ManagedObjectSourceNode node = this.createMock(ManagedObjectSourceNode.class);
 
 		// Name of the managed object source
 		final String MANAGED_OBJECT_SOURCE_NAME = "MOS";
@@ -81,7 +81,7 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends OfficeFrameTestC
 	public void testLoadByInstance() {
 
 		// Node
-		final Node node = this.createMock(Node.class);
+		final ManagedObjectSourceNode node = this.createMock(ManagedObjectSourceNode.class);
 
 		// Name of the managed object source
 		final String MANAGED_OBJECT_SOURCE_NAME = "MOS";
@@ -111,12 +111,12 @@ public class LoadOfficeFloorManagedObjectSourceTypeTest extends OfficeFrameTestC
 	 */
 	public void testFailGetManagedObjectSourceSpecification() {
 
-		final Node node = this.createMock(Node.class);
+		final ManagedObjectSourceNode node = this.createMock(ManagedObjectSourceNode.class);
 		final Error failure = new Error("specification failure");
 		final MockCompilerIssues issues = new MockCompilerIssues(this);
 
 		// Record failure to instantiate
-		this.recordReturn(node, node.getNodeName(), "mos");
+		this.recordReturn(node, node.getQualifiedName(), "mos");
 		issues.recordIssue("mos", node.getClass(),
 				"Failed to obtain ManagedObjectSourceSpecification from " + MockManagedObjectSource.class.getName(),
 				failure);

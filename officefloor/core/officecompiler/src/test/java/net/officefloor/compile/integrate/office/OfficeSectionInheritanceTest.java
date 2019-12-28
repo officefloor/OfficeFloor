@@ -118,7 +118,7 @@ public class OfficeSectionInheritanceTest extends AbstractCompileTestCase {
 		issues.recordCaptureIssues(false);
 
 		// Ensure issue if cyclic inheritance
-		issues.recordIssue("CHILD", SectionNodeImpl.class,
+		issues.recordIssue("OFFICE.CHILD", SectionNodeImpl.class,
 				"Cyclic section inheritance hierarchy ( OFFICE.PARENT : OFFICE.CHILD : OFFICE.PARENT : ... )");
 
 		// Test

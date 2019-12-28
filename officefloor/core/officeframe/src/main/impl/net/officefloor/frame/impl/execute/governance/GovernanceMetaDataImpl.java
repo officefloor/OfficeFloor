@@ -17,6 +17,8 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
+import java.util.logging.Logger;
+
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.governance.Governance;
@@ -73,6 +75,11 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	private final AssetManager asynchronousFlowAssetManager;
 
 	/**
+	 * {@link Logger} for {@link GovernanceContext}.
+	 */
+	private final Logger logger;
+
+	/**
 	 * {@link OfficeMetaData}.
 	 */
 	private OfficeMetaData officeMetaData;
@@ -98,14 +105,18 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	 * @param asynchronousFlowTimeout      {@link AsynchronousFlow} timeout.
 	 * @param asynchronousFlowAssetManager {@link AssetManager} for
 	 *                                     {@link AsynchronousFlow} instances.
+	 * @param logger                       {@link Logger} for
+	 *                                     {@link GovernanceContext}.
 	 */
 	public GovernanceMetaDataImpl(String governanceName, GovernanceFactory<? super I, F> governanceFactory,
-			TeamManagement responsibleTeam, long asynchronousFlowTimeout, AssetManager asynchronousFlowAssetManager) {
+			TeamManagement responsibleTeam, long asynchronousFlowTimeout, AssetManager asynchronousFlowAssetManager,
+			Logger logger) {
 		this.governanceName = governanceName;
 		this.governanceFactory = governanceFactory;
 		this.responsibleTeam = responsibleTeam;
 		this.asynchronousFlowTimeout = asynchronousFlowTimeout;
 		this.asynchronousFlowAssetManager = asynchronousFlowAssetManager;
+		this.logger = logger;
 	}
 
 	/**
@@ -219,6 +230,11 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 
 			// Create the governance context
 			GovernanceContext<F> governanceContext = new GovernanceContext<F>() {
+
+				@Override
+				public Logger getLogger() {
+					return GovernanceMetaDataImpl.this.logger;
+				}
 
 				@Override
 				public void doFlow(F key, Object parameter, FlowCallback callback) {

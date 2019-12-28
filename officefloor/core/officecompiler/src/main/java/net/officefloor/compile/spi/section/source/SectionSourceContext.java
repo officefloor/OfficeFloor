@@ -61,16 +61,16 @@ public interface SectionSourceContext extends SourceContext, ConfigurationContex
 	 * {@link ManagedFunctionSource} to allow reflective configuration by the
 	 * {@link SectionSource}.
 	 * 
-	 * @param functionNamespace
-	 *            Name space of the {@link ManagedFunctionSource}.
-	 * @param managedFunctionSourceClassName
-	 *            Name of the implementing {@link ManagedFunctionSource} class.
-	 *            May also be an alias.
-	 * @param properties
-	 *            {@link PropertyList} to configure the implementing
-	 *            {@link ManagedFunctionSource}.
-	 * @return {@link FunctionNamespaceType} or <code>null</code> if fails to
-	 *         load the {@link FunctionNamespaceType}.
+	 * @param functionNamespace              Name space of the
+	 *                                       {@link ManagedFunctionSource}.
+	 * @param managedFunctionSourceClassName Name of the implementing
+	 *                                       {@link ManagedFunctionSource} class.
+	 *                                       May also be an alias.
+	 * @param properties                     {@link PropertyList} to configure the
+	 *                                       implementing
+	 *                                       {@link ManagedFunctionSource}.
+	 * @return {@link FunctionNamespaceType} or <code>null</code> if fails to load
+	 *         the {@link FunctionNamespaceType}.
 	 */
 	FunctionNamespaceType loadManagedFunctionType(String functionNamespace, String managedFunctionSourceClassName,
 			PropertyList properties);
@@ -83,16 +83,14 @@ public interface SectionSourceContext extends SourceContext, ConfigurationContex
 	 * {@link ManagedObject} to allow reflective configuration by the
 	 * {@link SectionSource}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSourceClassName
-	 *            Name of the implementing {@link ManagedObjectSource} class.
-	 *            May also be an alias.
-	 * @param properties
-	 *            {@link PropertyList} to configure the
-	 *            {@link ManagedObjectSource}.
-	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load
-	 *         the {@link ManagedObjectType}.
+	 * @param managedObjectSourceName      Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClassName Name of the implementing
+	 *                                     {@link ManagedObjectSource} class. May
+	 *                                     also be an alias.
+	 * @param properties                   {@link PropertyList} to configure the
+	 *                                     {@link ManagedObjectSource}.
+	 * @return {@link ManagedObjectType} or <code>null</code> if fails to load the
+	 *         {@link ManagedObjectType}.
 	 */
 	ManagedObjectType<?> loadManagedObjectType(String managedObjectSourceName, String managedObjectSourceClassName,
 			PropertyList properties);
@@ -101,19 +99,15 @@ public interface SectionSourceContext extends SourceContext, ConfigurationContex
 	 * <p>
 	 * Loads the {@link SectionType}.
 	 * <p>
-	 * This is to enable obtaining the type information for the
-	 * {@link SubSection} to allow reflective configuration by the
-	 * {@link SectionSource}.
+	 * This is to enable obtaining the type information for the {@link SubSection}
+	 * to allow reflective configuration by the {@link SectionSource}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link SubSection}.
-	 * @param sectionSourceClassName
-	 *            Name of the implementing {@link SectionSource} class. May also
-	 *            be an alias.
-	 * @param location
-	 *            Location of the {@link SubSection}.
-	 * @param properties
-	 *            {@link PropertyList} to configure the {@link SectionSource}.
+	 * @param sectionName            Name of the {@link SubSection}.
+	 * @param sectionSourceClassName Name of the implementing {@link SectionSource}
+	 *                               class. May also be an alias.
+	 * @param location               Location of the {@link SubSection}.
+	 * @param properties             {@link PropertyList} to configure the
+	 *                               {@link SectionSource}.
 	 * @return {@link SectionType} or <code>null</code> if fails to load the
 	 *         {@link SectionType}.
 	 */

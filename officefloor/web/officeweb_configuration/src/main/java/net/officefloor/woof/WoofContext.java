@@ -26,10 +26,9 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.resource.build.HttpResourceArchitect;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.template.build.WebTemplateArchitect;
-import net.officefloor.woof.objects.WoofObjectsLoader;
 
 /**
- * Context for the {@link WoofObjectsLoader}.
+ * Context for the {@link WoofLoader}.
  *
  * @author Daniel Sagenschneider
  */

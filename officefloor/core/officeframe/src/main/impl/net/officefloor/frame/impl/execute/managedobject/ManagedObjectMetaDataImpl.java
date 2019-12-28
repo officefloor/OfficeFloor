@@ -17,13 +17,14 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import java.util.logging.Logger;
+
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.team.Job;
@@ -78,15 +79,9 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
-	 * {@link ProcessAwareManagedObject}.
+	 * {@link ContextAwareManagedObject}.
 	 */
-	private final boolean isProcessAwareManagedObject;
-
-	/**
-	 * Indicates if the {@link ManagedObject} implements
-	 * {@link NameAwareManagedObject}.
-	 */
-	private final boolean isNameAwareManagedObject;
+	private final boolean isContextAwareManagedObject;
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
@@ -138,6 +133,11 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	private final ManagedObjectGovernanceMetaData<?>[] governanceMetaData;
 
 	/**
+	 * {@link Logger} for the {@link ManagedObject}.
+	 */
+	private final Logger logger;
+
+	/**
 	 * {@link OfficeMetaData} containing this {@link ManagedObjectMetaData} to
 	 * create the {@link Job} instances.
 	 */
@@ -165,12 +165,9 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	 *                                    {@link ManagedObject}.
 	 * @param pool                        {@link ManagedObjectPool} of the
 	 *                                    {@link ManagedObject}.
-	 * @param isProcessAwareManagedObject <code>true</code> if the
+	 * @param isContextAwareManagedObject <code>true</code> if the
 	 *                                    {@link ManagedObject} is
-	 *                                    {@link ProcessAwareManagedObject}.
-	 * @param isNameAwareManagedObject    <code>true</code> if the
-	 *                                    {@link ManagedObject} is
-	 *                                    {@link NameAwareManagedObject}.
+	 *                                    {@link ContextAwareManagedObject}.
 	 * @param sourcingManager             {@link AssetManager} to manage the
 	 *                                    sourcing of the {@link ManagedObject}
 	 *                                    instances.
@@ -190,19 +187,20 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	 * @param governanceMetaData          {@link ManagedObjectGovernanceMetaData}
 	 *                                    instances applicable to this
 	 *                                    {@link ManagedObject}.
+	 * @param logger                      {@link Logger} for the
+	 *                                    {@link ManagedObject}.
 	 */
 	public ManagedObjectMetaDataImpl(String boundManagedObjectName, Class<?> objectType, int instanceIndex,
-			ManagedObjectSource<?, ?> source, ManagedObjectPool pool, boolean isProcessAwareManagedObject,
-			boolean isNameAwareManagedObject, AssetManager sourcingManager, boolean isManagedObjectAsynchronous,
-			AssetManager operationsManager, boolean isCoordinatingManagedObject, ManagedObjectIndex[] dependencyMapping,
-			long timeout, ManagedObjectGovernanceMetaData<?>[] governanceMetaData) {
+			ManagedObjectSource<?, ?> source, ManagedObjectPool pool, boolean isContextAwareManagedObject,
+			AssetManager sourcingManager, boolean isManagedObjectAsynchronous, AssetManager operationsManager,
+			boolean isCoordinatingManagedObject, ManagedObjectIndex[] dependencyMapping, long timeout,
+			ManagedObjectGovernanceMetaData<?>[] governanceMetaData, Logger logger) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.objectType = objectType;
 		this.instanceIndex = instanceIndex;
 		this.source = source;
 		this.timeout = timeout;
-		this.isProcessAwareManagedObject = isProcessAwareManagedObject;
-		this.isNameAwareManagedObject = isNameAwareManagedObject;
+		this.isContextAwareManagedObject = isContextAwareManagedObject;
 		this.isCoordinatingManagedObject = isCoordinatingManagedObject;
 		this.dependencyMapping = dependencyMapping;
 		this.pool = pool;
@@ -210,6 +208,7 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 		this.sourcingManager = sourcingManager;
 		this.operationsManager = operationsManager;
 		this.governanceMetaData = governanceMetaData;
+		this.logger = logger;
 	}
 
 	/**
@@ -236,6 +235,11 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	@Override
 	public String getBoundManagedObjectName() {
 		return this.boundManagedObjectName;
+	}
+
+	@Override
+	public Logger getLogger() {
+		return this.logger;
 	}
 
 	@Override
@@ -269,13 +273,8 @@ public class ManagedObjectMetaDataImpl<O extends Enum<O>> implements ManagedObje
 	}
 
 	@Override
-	public boolean isProcessAwareManagedObject() {
-		return this.isProcessAwareManagedObject;
-	}
-
-	@Override
-	public boolean isNameAwareManagedObject() {
-		return this.isNameAwareManagedObject;
+	public boolean isContextAwareManagedObject() {
+		return this.isContextAwareManagedObject;
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 **/.settings/
 **/.project
 **/.classpath
+**/*.iml
 !editor/**/.project
 !editor/**/.classpath
 /target/

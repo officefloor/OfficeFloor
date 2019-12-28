@@ -1,0 +1,31 @@
+<activity>
+
+	<inputs>
+		<input name="INPUT" />
+	</inputs>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="method">
+			<next />
+			<output name="OUTPUT" />
+		</procedure>
+	</procedures>
+
+	<sections>
+		<section name="REMOVE" source="net.example.RemoveSectionSource" location="REMOVE_LOCATION">
+		</section>
+		<section name="SECTION_LINK" source="net.example.LinkSectionSource" location="LINK_LOCATION">
+			<input name="INPUT" />
+			<output name="OUTPUT" />
+		</section>
+	</sections>
+
+	<exceptions>
+		<exception class="java.io.IOException" />
+	</exceptions>
+
+	<outputs>
+		<output name="OUTPUT" />
+	</outputs>
+
+</activity>

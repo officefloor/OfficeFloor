@@ -120,6 +120,12 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 public class SectionNodeImpl implements SectionNode {
 
 	/**
+	 * Indicates if this {@link SectionNode} is named. For {@link SectionType} need
+	 * to create unnamed {@link SectionNode}.
+	 */
+	private final boolean isSectionNamed;
+
+	/**
 	 * Name of this {@link SubSection}.
 	 */
 	private final String sectionName;
@@ -254,13 +260,16 @@ public class SectionNodeImpl implements SectionNode {
 	/**
 	 * Initialises this {@link SectionNode} with the basic information.
 	 * 
-	 * @param sectionName   Name of this {@link OfficeSection}.
-	 * @param parentSection Optional parent {@link SectionNode}. May be
-	 *                      <code>null</code>.
-	 * @param office        {@link Office} containing the {@link OfficeSection}.
-	 * @param context       {@link NodeContext}.
+	 * @param isSectionNamed Indicates if named.
+	 * @param sectionName    Name of this {@link OfficeSection}.
+	 * @param parentSection  Optional parent {@link SectionNode}. May be
+	 *                       <code>null</code>.
+	 * @param office         {@link Office} containing the {@link OfficeSection}.
+	 * @param context        {@link NodeContext}.
 	 */
-	public SectionNodeImpl(String sectionName, SectionNode parentSection, OfficeNode office, NodeContext context) {
+	public SectionNodeImpl(boolean isSectionNamed, String sectionName, SectionNode parentSection, OfficeNode office,
+			NodeContext context) {
+		this.isSectionNamed = isSectionNamed;
 		this.sectionName = sectionName;
 		this.parentSection = parentSection;
 		this.office = office;
@@ -270,22 +279,18 @@ public class SectionNodeImpl implements SectionNode {
 		this.propertyList = this.context.createPropertyList();
 	}
 
-	/**
-	 * Obtains the overridden {@link PropertyList}.
-	 * 
-	 * @return Overridden {@link PropertyList}.
-	 */
-	private PropertyList getProperties() {
-		return this.context.overrideProperties(this, this.getQualifiedName(null), this.propertyList);
-	}
-
 	/*
 	 * ======================= Node =================================
 	 */
 
 	@Override
 	public String getNodeName() {
-		return this.sectionName;
+		return this.isSectionNamed ? this.sectionName : this.getParentNode().getNodeName();
+	}
+
+	@Override
+	public String getQualifiedName() {
+		return this.isSectionNamed ? SectionNode.super.getQualifiedName() : this.getParentNode().getQualifiedName();
 	}
 
 	@Override
@@ -330,7 +335,7 @@ public class SectionNodeImpl implements SectionNode {
 	public ManagedFunctionNode addManagedFunctionNode(String functionName, String functionTypeName,
 			FunctionNamespaceNode namespaceNode) {
 		return NodeUtil.getInitialisedNode(functionName, this.functionNodes, this.context,
-				() -> this.context.createFunctionNode(functionName),
+				() -> this.context.createFunctionNode(functionName, this),
 				(function) -> function.initialise(functionTypeName, namespaceNode));
 	}
 
@@ -341,14 +346,14 @@ public class SectionNodeImpl implements SectionNode {
 	@Override
 	public ManagedObjectNode getManagedObjectNode(String managedObjectName) {
 		return NodeUtil.getNode(managedObjectName, this.managedObjects,
-				() -> this.context.createManagedObjectNode(managedObjectName));
+				() -> this.context.createManagedObjectNode(managedObjectName, this));
 	}
 
 	@Override
 	public ManagedObjectNode addManagedObjectNode(String managedObjectName, ManagedObjectScope managedObjectScope,
 			ManagedObjectSourceNode managedObjectSourceNode) {
 		return NodeUtil.getInitialisedNode(managedObjectName, this.managedObjects, this.context,
-				() -> this.context.createManagedObjectNode(managedObjectName),
+				() -> this.context.createManagedObjectNode(managedObjectName, this),
 				(managedObject) -> managedObject.initialise(managedObjectScope, managedObjectSourceNode));
 	}
 
@@ -388,9 +393,13 @@ public class SectionNodeImpl implements SectionNode {
 		// Keep track of the section source
 		this.usedSectionSource = source;
 
+		// Obtain the overridden properties
+		String qualifiedName = this.getQualifiedName();
+		PropertyList overriddenProperties = this.context.overrideProperties(this, qualifiedName, this.propertyList);
+
 		// Create the section source context
 		SectionSourceContext context = new SectionSourceContextImpl(false, this.state.sectionLocation,
-				this.getProperties(), this, this.context);
+				overriddenProperties, this, this.context);
 
 		try {
 			// Source the section type
@@ -507,7 +516,7 @@ public class SectionNodeImpl implements SectionNode {
 						// Cyclic inheritance, so provide issue
 						StringBuilder hierarchyLog = new StringBuilder();
 						for (Iterator<SectionNode> iterator = inheritanceHierarchy.iterator(); iterator.hasNext();) {
-							hierarchyLog.append(iterator.next().getQualifiedName(null) + " : ");
+							hierarchyLog.append(iterator.next().getQualifiedName() + " : ");
 						}
 						this.context.getCompilerIssues().addIssue(this,
 								"Cyclic section inheritance hierarchy ( " + hierarchyLog.toString() + "... )");
@@ -695,22 +704,6 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public String getQualifiedName(String simpleName) {
-
-		// Obtain the qualified name for this section
-		String qualifiedName = this.sectionName + (simpleName != null ? "." + simpleName : "");
-
-		// Recursively determine the qualified name
-		if (this.parentSection == null) {
-			// Top level section
-			return this.office.getQualifiedName(qualifiedName);
-		} else {
-			// Further parent sections
-			return this.parentSection.getQualifiedName(qualifiedName);
-		}
-	}
-
-	@Override
 	public String getSectionQualifiedName(String simpleName) {
 
 		// Obtain the qualified name for this section
@@ -785,8 +778,8 @@ public class SectionNodeImpl implements SectionNode {
 				.forEach((function) -> function.autoWireManagedFunctionResponsibility(autoWirer, compileContext));
 
 		// Auto-wire managed object source teams
-		this.managedObjectSourceNodes.values().stream().sorted(
-				(a, b) -> CompileUtil.sortCompare(a.getManagedObjectSourceName(), b.getManagedObjectSourceName()))
+		this.managedObjectSourceNodes.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getQualifiedName(), b.getQualifiedName()))
 				.forEachOrdered((mos) -> mos.autoWireTeams(autoWirer, compileContext));
 
 		// Auto-wire the sub sections
@@ -827,7 +820,7 @@ public class SectionNodeImpl implements SectionNode {
 			CompileContext compileContext) {
 
 		// Register as possible MBean
-		String qualifiedName = this.getQualifiedName(null);
+		String qualifiedName = this.getQualifiedName();
 		compileContext.registerPossibleMBean(SectionSource.class, qualifiedName, this.usedSectionSource);
 
 		// Build the functions (in deterministic order)
@@ -1081,13 +1074,14 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public OfficeSectionFunction getOfficeSectionFunction(String functionName) {
-		return NodeUtil.getNode(functionName, this.functionNodes, () -> this.context.createFunctionNode(functionName));
+		return NodeUtil.getNode(functionName, this.functionNodes,
+				() -> this.context.createFunctionNode(functionName, this));
 	}
 
 	@Override
 	public OfficeSectionManagedObject getOfficeSectionManagedObject(String managedObjectName) {
 		return NodeUtil.getNode(managedObjectName, this.managedObjects,
-				() -> this.context.createManagedObjectNode(managedObjectName));
+				() -> this.context.createManagedObjectNode(managedObjectName, this));
 	}
 
 	@Override

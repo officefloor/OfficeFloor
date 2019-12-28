@@ -87,6 +87,11 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	private final String functionName;
 
 	/**
+	 * {@link SectionNode} containing this {@link ManagedFunctionNode}.
+	 */
+	private final SectionNode sectionNode;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
@@ -167,14 +172,17 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 	 * Initiate.
 	 * 
 	 * @param functionName Name of this {@link SectionFunction}.
+	 * @param sectionNode  {@link SectionNode} containing this
+	 *                     {@link ManagedFunctionNode}.
 	 * @param context      {@link NodeContext}.
 	 */
-	public ManagedFunctionNodeImpl(String functionName, NodeContext context) {
+	public ManagedFunctionNodeImpl(String functionName, SectionNode sectionNode, NodeContext context) {
 		this.functionName = functionName;
+		this.sectionNode = sectionNode;
 		this.context = context;
 
 		// Create additional objects
-		this.teamResponsible = this.context.createResponsibleTeamNode("Team for function " + this.functionName, this);
+		this.teamResponsible = this.context.createResponsibleTeamNode("TEAM", this);
 	}
 
 	/**
@@ -209,7 +217,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 	@Override
 	public Node getParentNode() {
-		return (this.state != null ? this.state.namespaceNode : null);
+		return this.sectionNode;
 	}
 
 	@Override

@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -432,6 +433,9 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 			}
 		}
 
+		// Obtain the execute logger
+		Logger executeLogger = this.rawManagedObjectMetaData.getExecuteLogger();
+
 		// Obtain the flow configuration
 		ManagedObjectFlowConfiguration<F>[] flowConfigurations = this.managingOfficeConfiguration
 				.getFlowConfiguration();
@@ -448,7 +452,8 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 			}
 
 			// No flows, so provide empty execution context
-			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteManagerFactoryImpl<F>(threadFactories);
+			this.managedObjectExecuteContextFactory = new ManagedObjectExecuteManagerFactoryImpl<F>(threadFactories,
+					executeLogger);
 			return;
 		}
 
@@ -558,7 +563,7 @@ public class RawManagingOfficeMetaData<F extends Enum<F>> {
 
 		// Specify the managed object execute context
 		this.managedObjectExecuteContextFactory = new ManagedObjectExecuteManagerFactoryImpl<F>(managedObjectMetaData,
-				processBoundIndex, flows, threadFactories, officeMetaData);
+				processBoundIndex, flows, threadFactories, executeLogger, officeMetaData);
 	}
 
 	/**

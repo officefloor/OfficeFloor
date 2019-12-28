@@ -81,11 +81,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		implements ManagedFunction<Indexed, None> {
 
 	/**
-	 * {@link Logger}.
-	 */
-	private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
-
-	/**
 	 * Name of {@link System} property to specify the number of
 	 * {@link SocketServicer} instances. If not specified, will default to
 	 * {@link Runtime#availableProcessors()}.
@@ -258,6 +253,16 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 		// Create and return the socket manager
 		return new SocketManager(numberOfSocketListeners, receiveBufferSize, maxReadsOnSelect, bufferPool,
 				sendBufferSize);
+	}
+
+	/**
+	 * Indicates if there is an active {@link SocketManager} for
+	 * {@link HttpServerSocketManagedObjectSource} instances.
+	 * 
+	 * @return <code>true</code> if active {@link SocketManager}.
+	 */
+	public static synchronized boolean isSocketManagerActive() {
+		return (singletonSocketManager != null);
 	}
 
 	/**
@@ -474,30 +479,32 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	 *                          {@link SocketManager}.
 	 */
 	private static synchronized void closeSocketManager() throws TimeoutException, IOException {
+		try {
+			// Clear all registered server sockets
+			registeredServerSocketManagedObjectSources.clear();
 
-		// Clear all registered server sockets
-		registeredServerSocketManagedObjectSources.clear();
+			// Determine if active socket manager
+			if (singletonSocketManager != null) {
+				// Shutdown the socket manager
+				singletonSocketManager.shutdown();
 
-		// Determine if active socket manager
-		if (singletonSocketManager != null) {
-			// Shutdown the socket manager
-			singletonSocketManager.shutdown();
-
-			// Wait on shut down
-			try {
-				int waitTime = 10; // 10 seconds
-				serviceExecutor.dumpActiveThreadsAfter((waitTime - 1) * 1000);
-				serviceExecutor.awaitTermination(waitTime * 1000);
-			} catch (InterruptedException ex) {
-				throw new IOException("Interrupted waiting on Socket Manager shut down", ex);
-			} finally {
-				serviceExecutor.stopDump();
+				// Wait on shut down
+				try {
+					int waitTime = 10; // 10 seconds
+					serviceExecutor.dumpActiveThreadsAfter((waitTime - 1) * 1000);
+					serviceExecutor.awaitTermination(waitTime * 1000);
+				} catch (InterruptedException ex) {
+					throw new IOException("Interrupted waiting on Socket Manager shut down", ex);
+				} finally {
+					serviceExecutor.stopDump();
+				}
 			}
-		}
 
-		// Close (release) the socket manager to create again
-		singletonSocketManager = null;
-		serviceExecutor = null;
+		} finally {
+			// Close (release) the socket manager to create again
+			singletonSocketManager = null;
+			serviceExecutor = null;
+		}
 	}
 
 	/**
@@ -596,6 +603,11 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	 * {@link AcceptedSocketDecorator}.
 	 */
 	private AcceptedSocketDecorator acceptedSocketDecorator;
+
+	/**
+	 * {@link Logger}.
+	 */
+	private Logger logger;
 
 	/**
 	 * Default constructor to configure from {@link PropertyList}.
@@ -741,6 +753,9 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void start(ManagedObjectExecuteContext<Indexed> context) throws Exception {
 
+		// Capture the logger
+		this.logger = context.getLogger();
+
 		// Obtain the execution strategy
 		ThreadFactory[] executionStrategy = context.getExecutionStrategy(0);
 
@@ -795,8 +810,8 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 
 		} catch (IOException | TimeoutException ex) {
 			// Shutting down so just log issue
-			if (LOGGER.isLoggable(Level.INFO)) {
-				LOGGER.log(Level.INFO, "Failed to release " + SocketManager.class.getSimpleName(), ex);
+			if (this.logger.isLoggable(Level.INFO)) {
+				this.logger.log(Level.INFO, "Failed to release " + SocketManager.class.getSimpleName(), ex);
 			}
 		}
 	}

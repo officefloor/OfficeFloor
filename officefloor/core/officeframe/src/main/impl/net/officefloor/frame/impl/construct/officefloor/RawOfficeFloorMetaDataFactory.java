@@ -131,14 +131,14 @@ public class RawOfficeFloorMetaDataFactory {
 		};
 
 		// Obtain the Source Context
-		SourceContext sourceContext = configuration.getSourceContext(clockFactoryProvider);
+		SourceContext sourceContext = configuration.getSourceContext(officeFloorName, clockFactoryProvider);
 		if (sourceContext == null) {
 			issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName,
 					"No " + SourceContext.class.getSimpleName() + " provided from configuration");
 
 			// Use default source context
-			sourceContext = new SourceContextImpl(false, Thread.currentThread().getContextClassLoader(),
-					clockFactoryProvider.get());
+			sourceContext = new SourceContextImpl(officeFloorName, false,
+					Thread.currentThread().getContextClassLoader(), clockFactoryProvider.get());
 		}
 
 		// Create the managed object source factory

@@ -24,11 +24,11 @@ import java.util.List;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -145,7 +145,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 	/**
 	 * {@link AuthenticationContext} {@link ManagedObject}.
 	 */
-	private class AuthenticationContextManagedObject implements ProcessAwareManagedObject, AsynchronousManagedObject,
+	private class AuthenticationContextManagedObject implements ContextAwareManagedObject, AsynchronousManagedObject,
 			CoordinatingManagedObject<Dependencies>, AuthenticationContext<AC, C> {
 
 		/**
@@ -155,9 +155,9 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		private final List<AccessControlListener<? super AC>> listeners = new ArrayList<>(2);
 
 		/**
-		 * {@link ProcessAwareContext}.
+		 * {@link ManagedObjectContext}.
 		 */
-		private ProcessAwareContext processAwareContext;
+		private ManagedObjectContext managedObjectContext;
 
 		/**
 		 * {@link AsynchronousContext}.
@@ -196,7 +196,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		 * @param escalation    {@link Throwable}.
 		 */
 		private void loadAccessControl(AC accessControl, Throwable escalation) {
-			this.processAwareContext.run(() -> {
+			this.managedObjectContext.run(() -> {
 
 				// Change state
 				this.accessControl = accessControl;
@@ -243,7 +243,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		 */
 		private void safeNotifyChange(Throwable escalation, AuthenticateRequest authenticateRequest,
 				LogoutRequest logoutRequest) {
-			this.processAwareContext.run(() -> {
+			this.managedObjectContext.run(() -> {
 
 				// Notify of failure
 				if (escalation != null) {
@@ -267,8 +267,8 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 		 */
 
 		@Override
-		public void setProcessAwareContext(ProcessAwareContext context) {
-			this.processAwareContext = context;
+		public void setManagedObjectContext(ManagedObjectContext context) {
+			this.managedObjectContext = context;
 		}
 
 		@Override
@@ -299,12 +299,12 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 
 		@Override
 		public void register(AccessControlListener<? super AC> accessControlListener) {
-			this.processAwareContext.run(() -> this.listeners.add(accessControlListener));
+			this.managedObjectContext.run(() -> this.listeners.add(accessControlListener));
 		}
 
 		@Override
 		public void authenticate(C credentials, AuthenticateRequest authenticateRequest) {
-			this.processAwareContext.run(() -> {
+			this.managedObjectContext.run(() -> {
 
 				// Determine if cached authentication
 				if ((this.accessControl != null) || (this.escalation != null)) {
@@ -378,7 +378,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 
 		@Override
 		public void logout(LogoutRequest logoutRequest) {
-			this.processAwareContext.run(() -> {
+			this.managedObjectContext.run(() -> {
 
 				// Determine if already logged out
 				if ((this.accessControl == null) && (this.escalation == null)) {
@@ -402,7 +402,7 @@ public class AuthenticationContextManagedObjectSource<A, AC extends Serializable
 
 		@Override
 		public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
-			return this.processAwareContext.run(operation);
+			return this.managedObjectContext.run(operation);
 		}
 
 		/**

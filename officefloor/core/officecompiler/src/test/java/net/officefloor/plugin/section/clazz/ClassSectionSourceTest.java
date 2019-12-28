@@ -24,9 +24,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.section.SectionType;
@@ -606,12 +609,14 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 		// Record issue
 		CompilerIssue[] cause = issues.recordCaptureIssues(true);
-		issues.recordIssue("<type>", SectionNodeImpl.class,
+		issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, "NAMESPACE"), FunctionNamespaceNodeImpl.class,
 				"Failed to source FunctionNamespaceType definition from ManagedFunctionSource "
 						+ SectionClassManagedFunctionSource.class.getName(),
 				new IllegalArgumentException("Method doInput parameter 0 has more than one Qualifier"));
-		issues.recordIssue("<type>", SectionNodeImpl.class, "Failure loading FunctionNamespaceType from source "
-				+ SectionClassManagedFunctionSource.class.getName(), cause);
+		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
+				"Failure loading FunctionNamespaceType from source "
+						+ SectionClassManagedFunctionSource.class.getName(),
+				cause);
 
 		// Create the expected section
 		SectionDesigner expected = this.createSectionDesigner(MockMultipleQualifiedObjectSection.class,
@@ -753,7 +758,8 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 		compiler.setCompilerIssues(issues);
 
 		// Record issue
-		issues.recordIssue("<type>", SectionNodeImpl.class, "Unable to obtain type qualifier for dependency connection",
+		issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
+				"Unable to obtain type qualifier for dependency connection",
 				new IllegalArgumentException("Dependency connection has more than one Qualifier"));
 
 		// Test
@@ -798,6 +804,26 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 
 	public static class MockManagedFunctionContextSection {
 		public void function(ManagedFunctionContext<?, ?> context) {
+			// Testing
+		}
+	}
+
+	/**
+	 * Ensure able to access {@link Logger}.
+	 */
+	public void testLogger() throws Exception {
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockLoggerSection.class,
+				this.configureClassSectionFunction("function"));
+		expected.addSectionInput("function", null);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class, MockLoggerSection.class.getName());
+	}
+
+	public static class MockLoggerSection {
+		public void function(Logger logger) {
 			// Testing
 		}
 	}
@@ -1512,7 +1538,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can pass primitive parameters.
 	 */
-	public void testPrimtiiveParameters() throws Throwable {
+	public void testPrimitiveParameters() throws Throwable {
 
 		// Configure flows
 		CompileOfficeFloor compiler = new CompileOfficeFloor();

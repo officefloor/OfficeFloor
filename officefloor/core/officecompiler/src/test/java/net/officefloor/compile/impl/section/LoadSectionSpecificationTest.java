@@ -18,6 +18,7 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -62,7 +63,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		final RuntimeException failure = new RuntimeException("instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
 				"Failed to instantiate " + MockSectionSource.class.getName() + " by default constructor", failure);
 
 		// Attempt to obtain specification
@@ -73,16 +74,15 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if failure in obtaining the
-	 * {@link SectionSourceSpecification}.
+	 * Ensures issue if failure in obtaining the {@link SectionSourceSpecification}.
 	 */
 	public void testFailGetSectionSpecification() {
 
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue("Failed to obtain SectionSourceSpecification from " + MockSectionSource.class.getName(),
-				failure);
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
+				"Failed to obtain SectionSourceSpecification from " + MockSectionSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		MockSectionSource.specificationFailure = failure;
@@ -97,7 +97,8 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	public void testNoSectionSpecification() {
 
 		// Record no specification returned
-		this.issues.recordIssue("No SectionSourceSpecification returned from " + MockSectionSource.class.getName());
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
+				"No SectionSourceSpecification returned from " + MockSectionSource.class.getName());
 
 		// Attempt to obtain specification
 		MockSectionSource.specification = null;
@@ -107,8 +108,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to obtain the {@link SectionSourceProperty}
-	 * instances.
+	 * Ensures issue if fails to obtain the {@link SectionSourceProperty} instances.
 	 */
 	public void testFailGetSectionProperties() {
 
@@ -116,8 +116,10 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 
 		// Record null section properties
 		this.control(this.specification).expectAndThrow(this.specification.getProperties(), failure);
-		this.issues.recordIssue("Failed to obtain SectionSourceProperty instances from SectionSourceSpecification for "
-				+ MockSectionSource.class.getName(), failure);
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
+				"Failed to obtain SectionSourceProperty instances from SectionSourceSpecification for "
+						+ MockSectionSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -126,8 +128,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures considers null {@link SectionSourceProperty} array as no
-	 * properties.
+	 * Ensures considers null {@link SectionSourceProperty} array as no properties.
 	 */
 	public void testNullSectionPropertiesArray() {
 
@@ -147,8 +148,9 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 
 		// Record null section properties
 		this.recordReturn(this.specification, this.specification.getProperties(), new SectionSourceProperty[] { null });
-		this.issues.recordIssue("SectionSourceProperty 0 is null from SectionSourceSpecification for "
-				+ MockSectionSource.class.getName());
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
+				"SectionSourceProperty 0 is null from SectionSourceSpecification for "
+						+ MockSectionSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -167,8 +169,9 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new SectionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
-		this.issues.recordIssue("SectionSourceProperty 0 provided blank name from SectionSourceSpecification for "
-				+ MockSectionSource.class.getName());
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
+				"SectionSourceProperty 0 provided blank name from SectionSourceSpecification for "
+						+ MockSectionSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -188,8 +191,10 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		this.recordReturn(this.specification, this.specification.getProperties(),
 				new SectionSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
-		this.issues.recordIssue("Failed to get name for SectionSourceProperty 0 from SectionSourceSpecification for "
-				+ MockSectionSource.class.getName(), failure);
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
+				"Failed to get name for SectionSourceProperty 0 from SectionSourceSpecification for "
+						+ MockSectionSource.class.getName(),
+				failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -210,7 +215,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 				new SectionSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.issues.recordIssue(
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
 				"Failed to get label for SectionSourceProperty 0 (NAME) from SectionSourceSpecification for "
 						+ MockSectionSource.class.getName(),
 				failure);
@@ -246,11 +251,9 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link SectionSourceSpecification}.
 	 * 
-	 * @param isExpectToLoad
-	 *            Flag indicating if expect to obtain the
-	 *            {@link SectionSourceSpecification}.
-	 * @param propertyNames
-	 *            Expected {@link Property} names for being returned.
+	 * @param isExpectToLoad Flag indicating if expect to obtain the
+	 *                       {@link SectionSourceSpecification}.
+	 * @param propertyNames  Expected {@link Property} names for being returned.
 	 */
 	private void loadSpecification(boolean isExpectToLoad, String... propertyNameLabelPairs) {
 
@@ -296,8 +299,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param specification
-		 *            {@link SectionSourceSpecification}.
+		 * @param specification {@link SectionSourceSpecification}.
 		 */
 		public static void reset(SectionSourceSpecification specification) {
 			instantiateFailure = null;

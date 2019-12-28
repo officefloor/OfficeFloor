@@ -17,8 +17,11 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import java.util.logging.Logger;
+
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
@@ -55,6 +58,13 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> e
 	Class<?> getParameterType();
 
 	/**
+	 * Obtains the {@link Logger} for {@link ManagedFunctionContext}.
+	 * 
+	 * @return {@link Logger} for {@link ManagedFunctionContext}.
+	 */
+	Logger getLogger();
+
+	/**
 	 * <p>
 	 * Obtains the {@link ManagedObjectIndex} instances identifying the
 	 * {@link ManagedObject} instances that must be loaded before the
@@ -79,8 +89,8 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> e
 	/**
 	 * Obtains the {@link ManagedObjectIndex} for the {@link ManagedFunction} index.
 	 * 
-	 * @param managedObjectIndex
-	 *            {@link ManagedObjectIndex} for the {@link ManagedFunction} index.
+	 * @param managedObjectIndex {@link ManagedObjectIndex} for the
+	 *                           {@link ManagedFunction} index.
 	 * @return {@link ManagedObjectIndex} to obtain the {@link ManagedObject} for
 	 *         the {@link ManagedFunction}.
 	 */
@@ -102,7 +112,7 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> e
 	 * @return Listing of the {@link Administration} instances to undertake before
 	 *         executing the {@link ManagedFunction}.
 	 */
-	AdministrationMetaData<?, ?, ?>[] getPreAdministrationMetaData();
+	ManagedFunctionAdministrationMetaData<?, ?, ?>[] getPreAdministrationMetaData();
 
 	/**
 	 * Meta-data of the {@link Administration} to undertake after executing the
@@ -111,6 +121,6 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> e
 	 * @return Listing the {@link Administration} instances to undertake after
 	 *         executing the {@link ManagedFunction}.
 	 */
-	AdministrationMetaData<?, ?, ?>[] getPostAdministrationMetaData();
+	ManagedFunctionAdministrationMetaData<?, ?, ?>[] getPostAdministrationMetaData();
 
 }

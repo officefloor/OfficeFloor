@@ -27,7 +27,7 @@ import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.WritableHttpHeader;
-import net.officefloor.server.http.mock.MockProcessAwareContext;
+import net.officefloor.server.http.mock.MockManagedObjectContext;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
@@ -42,7 +42,7 @@ public class ProcessAwareHttpResponseHeadersTest extends OfficeFrameTestCase {
 	 * {@link ProcessAwareHttpResponseHeaders} to be tested.
 	 */
 	private final ProcessAwareHttpResponseHeaders headers = new ProcessAwareHttpResponseHeaders(
-			new MockProcessAwareContext());
+			new MockManagedObjectContext());
 
 	@Override
 	protected void setUp() throws Exception {

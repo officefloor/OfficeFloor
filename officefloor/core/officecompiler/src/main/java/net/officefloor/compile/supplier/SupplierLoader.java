@@ -34,10 +34,8 @@ public interface SupplierLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link SupplierSourceSpecification} for the {@link SupplierSource}.
 	 * 
-	 * @param <S>
-	 *            {@link SupplierSource} type.
-	 * @param supplierSourceClass
-	 *            {@link SupplierSource} class.
+	 * @param <S>                 {@link SupplierSource} type.
+	 * @param supplierSourceClass {@link SupplierSource} class.
 	 * @return {@link PropertyList} of the {@link SupplierSourceProperty} instances
 	 *         of the {@link SupplierSourceSpecification} or <code>null</code> if
 	 *         issue, which is reported to the {@link CompilerIssues}.
@@ -48,8 +46,7 @@ public interface SupplierLoader {
 	 * Loads and returns the {@link PropertyList} from the
 	 * {@link SupplierSourceSpecification} for the {@link SupplierSource}.
 	 * 
-	 * @param supplierSource
-	 *            {@link SupplierSource} instance.
+	 * @param supplierSource {@link SupplierSource} instance.
 	 * @return {@link PropertyList} of the {@link SupplierSourceProperty} instances
 	 *         of the {@link SupplierSourceSpecification} or <code>null</code> if
 	 *         issue, which is reported to the {@link CompilerIssues}.
@@ -59,13 +56,10 @@ public interface SupplierLoader {
 	/**
 	 * Loads and returns {@link SupplierType} for the {@link SupplierSource}.
 	 * 
-	 * @param <S>
-	 *            {@link SupplierSource} type.
-	 * @param supplierSourceClass
-	 *            Class of the {@link SupplierSource}.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link SupplierType}.
+	 * @param <S>                 {@link SupplierSource} type.
+	 * @param supplierSourceClass Class of the {@link SupplierSource}.
+	 * @param propertyList        {@link PropertyList} containing the properties to
+	 *                            source the {@link SupplierType}.
 	 * @return {@link SupplierType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -74,11 +68,9 @@ public interface SupplierLoader {
 	/**
 	 * Loads and returns {@link SupplierType} for the {@link SupplierSource}.
 	 * 
-	 * @param supplierSource
-	 *            {@link SupplierSource} instance.
-	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link SupplierType}.
+	 * @param supplierSource {@link SupplierSource} instance.
+	 * @param propertyList   {@link PropertyList} containing the properties to
+	 *                       source the {@link SupplierType}.
 	 * @return {@link SupplierType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */

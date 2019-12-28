@@ -35,12 +35,11 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.api.function.StaticManagedFunction;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
@@ -57,8 +56,8 @@ import net.officefloor.frame.api.source.TestSource;
  *
  * @author Daniel Sagenschneider
  */
-public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements NameAwareManagedObject,
-		AsynchronousManagedObject, CoordinatingManagedObject<O>, ProcessAwareManagedObject, ManagedObject {
+public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
+		implements ContextAwareManagedObject, AsynchronousManagedObject, CoordinatingManagedObject<O>, ManagedObject {
 
 	/*
 	 * ================= Setup parameters ================
@@ -75,9 +74,9 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	public final ManagingOfficeBuilder<F> managingOfficeBuilder;
 
 	/**
-	 * Indicates if {@link NameAwareManagedObject}.
+	 * Indicates if {@link ContextAwareManagedObject}.
 	 */
-	public boolean isNameAwareManagedObject = false;
+	public boolean isContextAwareManagedObject = false;
 
 	/**
 	 * Indicates if {@link AsynchronousManagedObject}.
@@ -88,11 +87,6 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	 * Indicates if {@link CoordinatingManagedObject}.
 	 */
 	public boolean isCoordinatingManagedObject = false;
-
-	/**
-	 * Indicates if {@link ProcessAwareManagedObject}.
-	 */
-	public boolean isProcessAwareManagedObject = false;
 
 	/**
 	 * Optional {@link Consumer} to enhance the {@link ManagedObjectSourceMetaData}.
@@ -115,9 +109,9 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	public Throwable sourceFailure = null;
 
 	/**
-	 * Possible failure in binding the {@link NameAwareManagedObject} name.
+	 * Possible failure in loading the {@link ManagedObjectContext}.
 	 */
-	public RuntimeException bindNameAwareFailure = null;
+	public RuntimeException contextAwareFailure = null;
 
 	/**
 	 * Possible failure in registering the {@link AsynchronousContext}.
@@ -165,9 +159,9 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	public ManagedObjectUser managedObjectUser;
 
 	/**
-	 * {@link NameAwareManagedObject} bound name.
+	 * {@link ManagedObjectContext}.
 	 */
-	public String boundManagedObjectName = null;
+	public ManagedObjectContext managedObjectContext = null;
 
 	/**
 	 * {@link AsynchronousContext}.
@@ -178,11 +172,6 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	 * {@link ObjectRegistry}.
 	 */
 	public ObjectRegistry<O> objectRegistry = null;
-
-	/**
-	 * {@link ProcessAwareContext}.
-	 */
-	public ProcessAwareContext processAwareContext = null;
 
 	/*
 	 * =================== Results =========================
@@ -250,17 +239,17 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 		}
 	}
 
-	/**
-	 * ================== NameAwareManagedObject =====================
+	/*
+	 * ================== ContextAwareManagedObject ====================
 	 */
 
 	@Override
-	public void setBoundManagedObjectName(String boundManagedObjectName) {
-		this.boundManagedObjectName = boundManagedObjectName;
+	public void setManagedObjectContext(ManagedObjectContext context) {
+		this.managedObjectContext = context;
 
 		// Propagate possible failure
-		if (this.bindNameAwareFailure != null) {
-			throw this.bindNameAwareFailure;
+		if (this.contextAwareFailure != null) {
+			throw this.contextAwareFailure;
 		}
 	}
 
@@ -293,15 +282,6 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 	}
 
 	/*
-	 * ================== ProcessAwareManagedObject ====================
-	 */
-
-	@Override
-	public void setProcessAwareContext(ProcessAwareContext context) {
-		this.processAwareContext = context;
-	}
-
-	/*
 	 * ====================== ManagedObject ===========================
 	 */
 
@@ -331,17 +311,14 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>> implements 
 			// Create the managed object class
 			List<Class<?>> interfaces = new ArrayList<>(4);
 			interfaces.add(ManagedObject.class);
-			if (TestManagedObject.this.isNameAwareManagedObject) {
-				interfaces.add(NameAwareManagedObject.class);
+			if (TestManagedObject.this.isContextAwareManagedObject) {
+				interfaces.add(ContextAwareManagedObject.class);
 			}
 			if (TestManagedObject.this.isAsynchronousManagedObject) {
 				interfaces.add(AsynchronousManagedObject.class);
 			}
 			if (TestManagedObject.this.isCoordinatingManagedObject) {
 				interfaces.add(CoordinatingManagedObject.class);
-			}
-			if (TestManagedObject.this.isProcessAwareManagedObject) {
-				interfaces.add(ProcessAwareManagedObject.class);
 			}
 			Object proxy = Proxy.newProxyInstance(this.getClass().getClassLoader(), interfaces.toArray(new Class[0]),
 					new InvocationHandler() {

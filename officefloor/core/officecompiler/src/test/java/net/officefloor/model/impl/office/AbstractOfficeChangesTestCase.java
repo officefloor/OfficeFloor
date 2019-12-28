@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.configuration.ConfigurationItem;
+import net.officefloor.configuration.WritableConfigurationItem;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.OfficeChanges;
@@ -54,8 +55,7 @@ public abstract class AbstractOfficeChangesTestCase extends AbstractChangesTestC
 	/**
 	 * Initiate.
 	 * 
-	 * @param isSpecificSetupFilePerTest
-	 *            Flag if specific setup file to be used.
+	 * @param isSpecificSetupFilePerTest Flag if specific setup file to be used.
 	 */
 	public AbstractOfficeChangesTestCase(boolean isSpecificSetupFilePerTest) {
 		super(isSpecificSetupFilePerTest);
@@ -73,6 +73,11 @@ public abstract class AbstractOfficeChangesTestCase extends AbstractChangesTestC
 	}
 
 	@Override
+	protected void storeModel(OfficeModel model, WritableConfigurationItem configurationItem) throws Exception {
+		new OfficeRepositoryImpl(new ModelRepositoryImpl()).storeOffice(model, configurationItem);
+	}
+
+	@Override
 	protected OfficeChanges createModelOperations(OfficeModel model) {
 		return new OfficeChangesImpl(model);
 	}
@@ -85,8 +90,7 @@ public abstract class AbstractOfficeChangesTestCase extends AbstractChangesTestC
 	/**
 	 * Constructs an {@link OfficeSection} for testing.
 	 * 
-	 * @param constructor
-	 *            {@link OfficeSectionConstructor}.
+	 * @param constructor {@link OfficeSectionConstructor}.
 	 * @return {@link OfficeSection}.
 	 */
 	protected OfficeSectionType constructOfficeSectionType(OfficeSectionConstructor constructor) {
@@ -107,8 +111,7 @@ public abstract class AbstractOfficeChangesTestCase extends AbstractChangesTestC
 		/**
 		 * Constructs the {@link OfficeSection}.
 		 * 
-		 * @param context
-		 *            {@link OfficeSection}.
+		 * @param context {@link OfficeSection}.
 		 */
 		void construct(OfficeSectionContext context);
 	}
@@ -121,34 +124,26 @@ public abstract class AbstractOfficeChangesTestCase extends AbstractChangesTestC
 		/**
 		 * Adds an {@link OfficeSectionInput}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param parameterType
-		 *            Parameter type.
+		 * @param name          Name.
+		 * @param parameterType Parameter type.
 		 */
 		void addOfficeSectionInput(String name, Class<?> parameterType);
 
 		/**
 		 * Adds an {@link OfficeSectionOutput}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param argumentType
-		 *            Argument type.
-		 * @param isEscalationOnly
-		 *            Flag indicating if escalation only.
+		 * @param name             Name.
+		 * @param argumentType     Argument type.
+		 * @param isEscalationOnly Flag indicating if escalation only.
 		 */
 		void addOfficeSectionOutput(String name, Class<?> argumentType, boolean isEscalationOnly);
 
 		/**
 		 * Adds an {@link OfficeSectionObject}.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param objectType
-		 *            Object type.
-		 * @param qualifier
-		 *            Type qualifier.
+		 * @param name       Name.
+		 * @param objectType Object type.
+		 * @param qualifier  Type qualifier.
 		 */
 		void addOfficeSectionObject(String name, Class<?> objectType, String qualifier);
 	}
@@ -270,12 +265,9 @@ public abstract class AbstractOfficeChangesTestCase extends AbstractChangesTestC
 		/**
 		 * Initialise.
 		 * 
-		 * @param name
-		 *            Name.
-		 * @param type
-		 *            Type.
-		 * @param isEscalationOnly
-		 *            Flag indicating only {@link Escalation}.
+		 * @param name             Name.
+		 * @param type             Type.
+		 * @param isEscalationOnly Flag indicating only {@link Escalation}.
 		 */
 		public OfficeSectionItem(String name, Class<?> type, boolean isEscalationOnly) {
 			this.name = name;

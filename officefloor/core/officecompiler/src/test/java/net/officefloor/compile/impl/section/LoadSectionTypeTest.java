@@ -24,6 +24,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import junit.framework.TestCase;
 import net.officefloor.compile.AvailableServiceFactory;
@@ -32,10 +33,14 @@ import net.officefloor.compile.MissingServiceFactory;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.managedfunction.MockLoadFunctionNamespace;
 import net.officefloor.compile.impl.managedobject.MockLoadManagedObject;
+import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
+import net.officefloor.compile.impl.structure.ManagedObjectSourceNodeImpl;
+import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
 import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.issues.CompileError;
 import net.officefloor.compile.issues.CompilerIssue;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -100,7 +105,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		final RuntimeException failure = new RuntimeException("instantiate failure");
 
 		// Record failure to instantiate
-		this.issues.recordIssue(
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, OfficeNodeImpl.class,
 				"Failed to instantiate " + MockSectionSource.class.getName() + " by default constructor", failure);
 
 		// Attempt to obtain specification
@@ -123,7 +128,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.issues.recordIssue("<type>", SectionNodeImpl.class, "Must specify property 'missing'");
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class, "Must specify property 'missing'");
 
 		// Attempt to load section type
 		this.loadSectionType(false, (section, context) -> {
@@ -158,7 +163,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testMissingClass() {
 
 		// Record missing class
-		this.issues.recordIssue("<type>", SectionNodeImpl.class, "Can not load class 'missing'");
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class, "Can not load class 'missing'");
 
 		// Attempt to load section type
 		this.loadSectionType(false, (section, context) -> {
@@ -173,7 +178,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Record missing resource
 		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("missing"), null);
-		this.issues.recordIssue("<type>", SectionNodeImpl.class, "Can not obtain resource at location 'missing'");
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
+				"Can not obtain resource at location 'missing'");
 
 		// Attempt to load section type
 		this.loadSectionType(false, (section, context) -> {
@@ -204,7 +210,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testMissingService() {
 
 		// Record missing service
-		this.issues.recordIssue("<type>", SectionNodeImpl.class, MissingServiceFactory.getIssueDescription());
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
+				MissingServiceFactory.getIssueDescription());
 
 		// Attempt to load
 		this.loadSectionType(false, (section, context) -> context.loadService(MissingServiceFactory.class, null));
@@ -216,8 +223,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testFailLoadService() {
 
 		// Record load issue for service
-		this.issues.recordIssue("<type>", SectionNodeImpl.class, FailServiceFactory.getIssueDescription(),
-				FailServiceFactory.getCause());
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
+				FailServiceFactory.getIssueDescription(), FailServiceFactory.getCause());
 
 		// Attempt to load
 		this.loadSectionType(false, (section, context) -> context.loadService(FailServiceFactory.class, null));
@@ -241,7 +248,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Record missing configuration item
 		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("missing"), null);
-		this.issues.recordIssue("<type>", SectionNodeImpl.class,
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Can not obtain ConfigurationItem at location 'missing'");
 
 		// Attempt to load section
@@ -258,7 +265,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Record missing resource
 		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource("configuration"),
 				new ByteArrayInputStream("${missing}".getBytes()));
-		this.issues.recordIssue("<type>", SectionNodeImpl.class,
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Can not obtain ConfigurationItem at location 'configuration' as missing property 'missing'");
 
 		// Attempt to load section
@@ -319,7 +326,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Record obtaining the configuration item
 		this.recordReturn(this.resourceSource, this.resourceSource.sourceResource(location), resource);
-		this.issues.recordIssue("<type>", SectionNodeImpl.class,
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Failed to obtain ConfigurationItem at location 'LOCATION': TEST", failure);
 
 		// Obtain the configuration item
@@ -330,15 +337,25 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to get the {@link Logger}.
+	 */
+	public void testGetLogger() {
+		Closure<String> loggerName = new Closure<>();
+		this.loadSectionType(true, (section, context) -> {
+			loggerName.value = context.getLogger().getName();
+		});
+		assertEquals("Should log to section name", OfficeFloorCompiler.TYPE, loggerName.value);
+	}
+
+	/**
 	 * Ensure able to get the {@link ClassLoader}.
 	 */
 	public void testGetClassLoader() {
-
-		// Attempt to load section type
+		Closure<ClassLoader> classLoader = new Closure<>();
 		this.loadSectionType(true, (section, context) -> {
-			assertEquals("Incorrect class loader", LoadSectionTypeTest.class.getClassLoader(),
-					context.getClassLoader());
+			classLoader.value = context.getClassLoader();
 		});
+		assertEquals("Incorrect class loader", Thread.currentThread().getContextClassLoader(), classLoader.value);
 	}
 
 	/**
@@ -349,7 +366,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		final NullPointerException failure = new NullPointerException("Fail source section type");
 
 		// Record failure to source the section type
-		this.issues.recordIssue("<type>", SectionNodeImpl.class,
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Failed to source SectionType definition from SectionSource " + MockSectionSource.class.getName(),
 				failure);
 
@@ -365,7 +382,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullInputName() {
 
 		// Record null input name
-		this.issues.recordIssue(null, SectionInputNodeImpl.class, "Null name for Section Input");
+		this.issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, null), SectionInputNodeImpl.class,
+				"Null name for Section Input");
 
 		// Attempt to load section type
 		this.loadSectionType(false, (section, context) -> {
@@ -432,7 +450,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullOutputName() {
 
 		// Record null output name
-		this.issues.recordIssue(null, SectionOutputNodeImpl.class, "Null name for Section Output");
+		this.issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, null), SectionOutputNodeImpl.class,
+				"Null name for Section Output");
 
 		// Attempt to load section type
 		this.loadSectionType(false, (section, context) -> {
@@ -501,7 +520,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullObjectName() {
 
 		// Record null object name
-		this.issues.recordIssue(null, SectionObjectNodeImpl.class, "Null name for Section Object");
+		this.issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, null), SectionObjectNodeImpl.class,
+				"Null name for Section Object");
 
 		// Attempt to load section type
 		this.loadSectionType(false, (section, context) -> {
@@ -515,7 +535,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullObjectType() {
 
 		// Record null object type
-		this.issues.recordIssue("OBJECT", SectionObjectNodeImpl.class, "Null type for Section Object (name=OBJECT)");
+		this.issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, "OBJECT"), SectionObjectNodeImpl.class,
+				"Null type for Section Object (name=OBJECT)");
 
 		// Attempt to load section type
 		this.loadSectionType(false, (section, context) -> {
@@ -637,8 +658,9 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Ensure issue in not loading work type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue("<type>", SectionNodeImpl.class, "Must specify property 'class.name'");
-		this.issues.recordIssue("<type>", SectionNodeImpl.class,
+		this.issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, "NAMESPACE"), FunctionNamespaceNodeImpl.class,
+				"Must specify property 'class.name'");
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Failure loading FunctionNamespaceType from source " + ClassManagedFunctionSource.class.getName(),
 				issues);
 
@@ -684,8 +706,9 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Ensure issue in not loading managed object type
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue("<type>", SectionNodeImpl.class, "Must specify property 'class.name'");
-		this.issues.recordIssue("<type>", SectionNodeImpl.class,
+		this.issues.recordIssue(Node.qualify(OfficeFloorCompiler.TYPE, "NAMESPACE"), ManagedObjectSourceNodeImpl.class,
+				"Must specify property 'class.name'");
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Failure loading ManagedObjectType from source " + ClassManagedObjectSource.class.getName(), issues);
 
 		// Fail to load the managed object type
@@ -728,9 +751,10 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testIssueLoadingSectionType() {
 
 		// Ensure issue in not loading managed object type
+		final String SUB_SECTION_NAME = "SUB_SECTION";
 		CompilerIssue[] issues = this.issues.recordCaptureIssues(true);
-		this.issues.recordIssue("<type>", SectionNodeImpl.class, "Must specify property 'missing'");
-		this.issues.recordIssue("<type>", SectionNodeImpl.class,
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class, "Must specify property 'missing'");
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class,
 				"Failure loading SectionType from source " + FailSectionSource.class.getName(), issues);
 
 		// Fail to load the managed object type
@@ -738,7 +762,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 			// Do not specify class causing failure to load type
 			PropertyList properties = context.createPropertyList();
-			context.loadSectionType("SECTION", FailSectionSource.class.getName(), "FailLocation", properties);
+			context.loadSectionType(SUB_SECTION_NAME, FailSectionSource.class.getName(), "FailLocation", properties);
 		});
 	}
 
@@ -765,7 +789,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testHandleCompileError() {
 
 		// Record issue
-		this.issues.recordIssue("<type>", SectionNodeImpl.class, "test");
+		this.issues.recordIssue(OfficeFloorCompiler.TYPE, SectionNodeImpl.class, "test");
 
 		// Ensure handle compile error
 		this.loadSectionType(false, (section, context) -> {

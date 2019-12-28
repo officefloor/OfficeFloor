@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.lang.reflect.Proxy;
 import java.util.ServiceLoader;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.clock.Clock;
 
@@ -86,8 +87,8 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Loads the specific service.
 	 * 
-	 * @param                <S> Service type
-	 * @param                <F> {@link ServiceFactory} type to create service.
+	 * @param <S>            Service type
+	 * @param <F>            {@link ServiceFactory} type to create service.
 	 * @param serviceFactory {@link ServiceFactory}.
 	 * @return Service.
 	 * @throws LoadServiceError If fails to load the service.
@@ -97,10 +98,9 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Loads a single service.
 	 * 
-	 * @param                       <S> Service type
-	 * @param                       <F> {@link ServiceFactory} type to create
-	 *                              service.
-	 * @param                       <D> Default {@link ServiceFactory} type.
+	 * @param <S>                   Service type
+	 * @param <F>                   {@link ServiceFactory} type to create service.
+	 * @param <D>                   Default {@link ServiceFactory} type.
 	 * @param serviceFactoryType    Type of {@link ServiceFactory}.
 	 * @param defaultServiceFactory Default {@link ServiceFactory} implementation.
 	 *                              May be <code>null</code> to indicate no default
@@ -117,8 +117,8 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Optionally loads a single service.
 	 *
-	 * @param                    <S> Service type
-	 * @param                    <F> {@link ServiceFactory} type to create service.
+	 * @param <S>                Service type
+	 * @param <F>                {@link ServiceFactory} type to create service.
 	 * @param serviceFactoryType Type of {@link ServiceFactory}.
 	 * @return Service or <code>null</code> if no service configured.
 	 * @throws LoadServiceError If fails to load the service or
@@ -130,10 +130,9 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Loads multiple services.
 	 * 
-	 * @param                       <S> Service type
-	 * @param                       <F> {@link ServiceFactory} type to create
-	 *                              service.
-	 * @param                       <D> Default {@link ServiceFactory} type.
+	 * @param <S>                   Service type
+	 * @param <F>                   {@link ServiceFactory} type to create service.
+	 * @param <D>                   Default {@link ServiceFactory} type.
 	 * @param serviceFactoryType    Type of {@link ServiceFactory}.
 	 * @param defaultServiceFactory Default {@link ServiceFactory} implementation.
 	 *                              May be <code>null</code> to indicate no default
@@ -150,8 +149,8 @@ public interface SourceContext extends SourceProperties {
 	/**
 	 * Optionally loads multiple services.
 	 * 
-	 * @param                    <S> Service type
-	 * @param                    <F> {@link ServiceFactory} type to create service.
+	 * @param <S>                Service type
+	 * @param <F>                {@link ServiceFactory} type to create service.
 	 * @param serviceFactoryType Type of {@link ServiceFactory}.
 	 * @return {@link Iterable} over the services. May be no entries available. The
 	 *         {@link Iterable} may also throw {@link LoadServiceError} if fails to
@@ -172,6 +171,18 @@ public interface SourceContext extends SourceProperties {
 	 * @return {@link ClassLoader}.
 	 */
 	ClassLoader getClassLoader();
+
+	/**
+	 * <p>
+	 * Obtains the {@link Logger}.
+	 * <p>
+	 * The {@link Logger} is named specific to the source. This is especially the
+	 * case for re-use of {@link Class} within sources, as would not be able to
+	 * differentiate.
+	 * 
+	 * @return {@link Logger}.
+	 */
+	Logger getLogger();
 
 	/**
 	 * Obtains the {@link Clock}.

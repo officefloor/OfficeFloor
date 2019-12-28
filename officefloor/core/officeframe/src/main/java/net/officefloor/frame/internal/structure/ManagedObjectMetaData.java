@@ -17,12 +17,13 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import java.util.logging.Logger;
+
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -44,11 +45,17 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	String getBoundManagedObjectName();
 
 	/**
+	 * Obtains the {@link Logger} for the {@link ManagedObject}.
+	 * 
+	 * @return {@link Logger} for the {@link ManagedObject}.
+	 */
+	Logger getLogger();
+
+	/**
 	 * Obtains the type of the {@link Object} returned from the
 	 * {@link ManagedObject}.
 	 * 
-	 * @return Type of the {@link Object} returned from the
-	 *         {@link ManagedObject}.
+	 * @return Type of the {@link Object} returned from the {@link ManagedObject}.
 	 */
 	Class<?> getObjectType();
 
@@ -113,29 +120,20 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
-	 * {@link ProcessAwareManagedObject}.
+	 * {@link ContextAwareManagedObject}.
 	 * 
 	 * @return <code>true</code> if the {@link ManagedObject} implements
-	 *         {@link ProcessAwareManagedObject}.
+	 *         {@link ContextAwareManagedObject}.
 	 */
-	boolean isProcessAwareManagedObject();
-
-	/**
-	 * Indicates if the {@link ManagedObject} implements
-	 * {@link NameAwareManagedObject}.
-	 * 
-	 * @return <code>true</code> if the {@link ManagedObject} implements
-	 *         {@link NameAwareManagedObject}.
-	 */
-	boolean isNameAwareManagedObject();
+	boolean isContextAwareManagedObject();
 
 	/**
 	 * <p>
 	 * Indicates if the {@link ManagedObject} implements
 	 * {@link AsynchronousManagedObject}.
 	 * <p>
-	 * Should the {@link ManagedObject} implement
-	 * {@link AsynchronousManagedObject} then it will require checking if ready.
+	 * Should the {@link ManagedObject} implement {@link AsynchronousManagedObject}
+	 * then it will require checking if ready.
 	 * 
 	 * @return <code>true</code> if the {@link ManagedObject} implements
 	 *         {@link AsynchronousManagedObject}.
@@ -143,8 +141,8 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	boolean isManagedObjectAsynchronous();
 
 	/**
-	 * Obtains the {@link AssetManager} that manages asynchronous operations on
-	 * the {@link ManagedObject}.
+	 * Obtains the {@link AssetManager} that manages asynchronous operations on the
+	 * {@link ManagedObject}.
 	 * 
 	 * @return {@link AssetManager} that manages asynchronous operations on the
 	 *         {@link ManagedObject}.
@@ -175,21 +173,18 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	 * {@link ManagedObject} are ready.
 	 * <p>
 	 * Should a {@link ManagedObject} not be ready, then will latch the
-	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to
-	 * be ready.
+	 * {@link ManagedFunctionContainer} to wait for the {@link ManagedObject} to be
+	 * ready.
 	 * 
-	 * @param managedFunction
-	 *            {@link ManagedFunctionContainer} requesting the check of the
-	 *            {@link ManagedObject} to be ready.
-	 * @param check
-	 *            {@link ManagedObjectReadyCheck}.
-	 * @param currentContainer
-	 *            Optional able to include the current
-	 *            {@link ManagedObjectContainer} for this
-	 *            {@link ManagedObjectMetaData} in ready check. May be
-	 *            <code>null</code> to not include.
-	 * @return {@link FunctionState} instances to check if the dependencies of
-	 *         this {@link ManagedObject} are ready.
+	 * @param managedFunction  {@link ManagedFunctionContainer} requesting the check
+	 *                         of the {@link ManagedObject} to be ready.
+	 * @param check            {@link ManagedObjectReadyCheck}.
+	 * @param currentContainer Optional able to include the current
+	 *                         {@link ManagedObjectContainer} for this
+	 *                         {@link ManagedObjectMetaData} in ready check. May be
+	 *                         <code>null</code> to not include.
+	 * @return {@link FunctionState} instances to check if the dependencies of this
+	 *         {@link ManagedObject} are ready.
 	 */
 	FunctionState checkReady(ManagedFunctionContainer managedFunction, ManagedObjectReadyCheck check,
 			ManagedObjectContainer currentContainer);
@@ -197,8 +192,7 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	/**
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.
 	 *
-	 * @param currentContainer
-	 *            {@link ManagedFunctionContainer}.
+	 * @param currentContainer {@link ManagedFunctionContainer}.
 	 * @return {@link ObjectRegistry}.
 	 */
 	ObjectRegistry<O> createObjectRegistry(ManagedFunctionContainer currentContainer);
@@ -214,14 +208,12 @@ public interface ManagedObjectMetaData<O extends Enum<O>> {
 	 * Creates the {@link FunctionState} for the recycling of the
 	 * {@link ManagedObject}.
 	 * 
-	 * @param managedObject
-	 *            {@link ManagedObject} to be recycled. Obtained by the
-	 *            {@link RecycleManagedObjectParameter#getManagedObject()}.
-	 * @param cleanupSequence
-	 *            {@link ManagedObjectCleanup}.
-	 * @return {@link FunctionState} for the recycling this
-	 *         {@link ManagedObject} or <code>null</code> if no recycling is
-	 *         required for this {@link ManagedObject}.
+	 * @param managedObject   {@link ManagedObject} to be recycled. Obtained by the
+	 *                        {@link RecycleManagedObjectParameter#getManagedObject()}.
+	 * @param cleanupSequence {@link ManagedObjectCleanup}.
+	 * @return {@link FunctionState} for the recycling this {@link ManagedObject} or
+	 *         <code>null</code> if no recycling is required for this
+	 *         {@link ManagedObject}.
 	 */
 	FunctionState recycle(ManagedObject managedObject, ManagedObjectCleanup cleanupSequence);
 

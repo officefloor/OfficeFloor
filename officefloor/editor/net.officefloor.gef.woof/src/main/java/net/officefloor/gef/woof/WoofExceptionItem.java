@@ -19,13 +19,9 @@ package net.officefloor.gef.woof;
 
 import java.util.List;
 
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import net.officefloor.gef.configurer.ValueValidator;
-import net.officefloor.gef.editor.AdaptedChildVisualFactoryContext;
-import net.officefloor.gef.editor.DefaultConnectors;
-import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
+import net.officefloor.gef.item.AbstractExceptionItem;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.change.Change;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofExceptionModel;
 import net.officefloor.woof.model.woof.WoofExceptionModel.WoofExceptionEvent;
@@ -56,12 +52,7 @@ import net.officefloor.woof.model.woof.WoofTemplateModel.WoofTemplateEvent;
  * @author Daniel Sagenschneider
  */
 public class WoofExceptionItem extends
-		AbstractConfigurableItem<WoofModel, WoofEvent, WoofChanges, WoofExceptionModel, WoofExceptionEvent, WoofExceptionItem> {
-
-	/**
-	 * {@link Exception} {@link Class}.
-	 */
-	private String exceptionClassName;
+		AbstractExceptionItem<WoofModel, WoofEvent, WoofChanges, WoofExceptionModel, WoofExceptionEvent, WoofExceptionItem> {
 
 	/*
 	 * ================ AbstractConfigurableItem =====================
@@ -79,18 +70,6 @@ public class WoofExceptionItem extends
 	}
 
 	@Override
-	public Pane visual(WoofExceptionModel model, AdaptedChildVisualFactoryContext<WoofExceptionModel> context) {
-		HBox container = new HBox();
-		context.label(container);
-		context.addNode(container,
-				context.connector(DefaultConnectors.FLOW, WoofExceptionToWoofSectionInputModel.class,
-						WoofExceptionToWoofTemplateModel.class, WoofExceptionToWoofResourceModel.class,
-						WoofExceptionToWoofSecurityModel.class, WoofExceptionToWoofHttpContinuationModel.class,
-						WoofExceptionToWoofProcedureModel.class).getNode());
-		return container;
-	}
-
-	@Override
 	public IdeLabeller label() {
 		return new IdeLabeller((model) -> model.getClassName(), WoofExceptionEvent.CHANGE_CLASS_NAME);
 	}
@@ -101,18 +80,37 @@ public class WoofExceptionItem extends
 	}
 
 	@Override
-	public WoofExceptionItem item(WoofExceptionModel model) {
-		WoofExceptionItem item = new WoofExceptionItem();
-		if (model != null) {
-			item.exceptionClassName = model.getClassName();
-		}
-		return item;
+	protected WoofExceptionItem createItem() {
+		return new WoofExceptionItem();
 	}
 
 	@Override
-	protected void loadStyles(List<IdeStyle> styles) {
-		styles.add(new IdeStyle().rule("-fx-background-color", "radial-gradient(radius 100.0%, tomato, darkorange)"));
-		styles.add(new IdeStyle(".${model} .label").rule("-fx-text-fill", "moccasin"));
+	protected String getExceptionClassName(WoofExceptionModel model) {
+		return model.getClassName();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	protected Class<? extends ConnectionModel>[] getInputConnectionClasses() {
+		return new Class[] { WoofExceptionToWoofSectionInputModel.class, WoofExceptionToWoofTemplateModel.class,
+				WoofExceptionToWoofResourceModel.class, WoofExceptionToWoofSecurityModel.class,
+				WoofExceptionToWoofHttpContinuationModel.class, WoofExceptionToWoofProcedureModel.class };
+	}
+
+	@Override
+	protected Change<WoofExceptionModel> addException(WoofChanges operations, String exceptionClassName) {
+		return operations.addException(exceptionClassName);
+	}
+
+	@Override
+	protected Change<WoofExceptionModel> refactorException(WoofChanges operations, WoofExceptionModel model,
+			String exceptionClassName) {
+		return operations.refactorException(model, exceptionClassName);
+	}
+
+	@Override
+	protected Change<WoofExceptionModel> removeException(WoofChanges operations, WoofExceptionModel model) {
+		return operations.removeException(model);
 	}
 
 	@Override
@@ -192,30 +190,6 @@ public class WoofExceptionItem extends
 				}).delete((ctx) -> {
 					ctx.getChangeExecutor().execute(ctx.getOperations().removeExceptionToProcedure(ctx.getModel()));
 				}));
-	}
-
-	@Override
-	public IdeConfigurer configure() {
-		return new IdeConfigurer().addAndRefactor((builder, context) -> {
-			builder.title("Exception");
-			builder.clazz("Exception").init((item) -> item.exceptionClassName).superType(Throwable.class)
-					.validate(ValueValidator.notEmptyString("Must provide exception class"))
-					.setValue((item, value) -> item.exceptionClassName = value);
-
-		}).add((builder, context) -> {
-			builder.apply("Add", (item) -> {
-				context.execute(context.getOperations().addException(item.exceptionClassName));
-			});
-
-		}).refactor((builder, context) -> {
-			builder.apply("Refactor", (item) -> {
-				context.execute(context.getOperations().refactorException(context.getModel(), item.exceptionClassName));
-			});
-
-		}).delete((context) -> {
-			context.execute(context.getOperations().removeException(context.getModel()));
-
-		});
 	}
 
 }

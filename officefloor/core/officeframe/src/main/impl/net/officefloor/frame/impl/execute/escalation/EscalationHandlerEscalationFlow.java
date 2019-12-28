@@ -28,10 +28,10 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionMetaDataImpl;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedFunctionAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -63,10 +63,10 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 	private static final boolean[] NO_GOVERNANCE = null;
 
 	/**
-	 * No {@link AdministrationDuty} instances bound to
+	 * No {@link ManagedFunctionAdministrationMetaData} instances bound to
 	 * {@link EscalationHandlerManagedFunction}.
 	 */
-	private static final AdministrationMetaData<?, ?, ?>[] NO_ADMINISTRATOR_META_DATA = new AdministrationMetaData[0];
+	private static final ManagedFunctionAdministrationMetaData<?, ?, ?>[] NO_ADMINISTRATOR_META_DATA = new ManagedFunctionAdministrationMetaData[0];
 
 	/**
 	 * No {@link FlowMetaData} instances for
@@ -111,9 +111,9 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 		TeamManagement anyTeam = null;
 		EscalationHandlerManagedFunctionFactory functionFactory = new EscalationHandlerManagedFunctionFactory(
 				escalationHandler);
-		ManagedFunctionMetaDataImpl<EscalationKey, None> functionMetaData = new ManagedFunctionMetaDataImpl<EscalationKey, None>(
+		ManagedFunctionMetaDataImpl<EscalationKey, None> functionMetaData = new ManagedFunctionMetaDataImpl<>(
 				EscalationHandler.class.getSimpleName(), functionFactory, null, Throwable.class, anyTeam,
-				MANGED_OBJECT_DEPENDENCIES, NO_MANAGED_OBJECT_META_DATA, NO_GOVERNANCE, -1, null);
+				MANGED_OBJECT_DEPENDENCIES, NO_MANAGED_OBJECT_META_DATA, NO_GOVERNANCE, -1, null, null);
 		functionMetaData.loadOfficeMetaData(officeMetaData, NO_FLOW_META_DATA, null, FURTHER_ESCALATION_PROCEDURE,
 				NO_ADMINISTRATOR_META_DATA, NO_ADMINISTRATOR_META_DATA, NO_MANAGED_OBJECTS);
 		this.functionMetaData = functionMetaData;

@@ -21,8 +21,6 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.tika.metadata.Property.PropertyType;
-
 import net.officefloor.activity.procedure.Procedure;
 import net.officefloor.activity.procedure.ProcedureFlowType;
 import net.officefloor.activity.procedure.ProcedureType;
@@ -266,7 +264,8 @@ public interface WoofChanges {
 	 * @param sourceName    Source name.
 	 * @param procedure     {@link Procedure} name.
 	 * @param properties    {@link PropertyList}
-	 * @param procedureType {@link PropertyType} for the {@link WoofProcedureModel}.
+	 * @param procedureType {@link ProcedureType} for the
+	 *                      {@link WoofProcedureModel}.
 	 * @return {@link Change} to add the {@link WoofProcedureModel}.
 	 */
 	Change<WoofProcedureModel> addProcedure(String procedureName, String resource, String sourceName, String procedure,
@@ -281,7 +280,7 @@ public interface WoofChanges {
 	 * @param sourceName        Source name.
 	 * @param procedure         {@link Procedure} name.
 	 * @param properties        {@link PropertyList}.
-	 * @param procedureType     {@link PropertyType} for the
+	 * @param procedureType     {@link ProcedureType} for the
 	 *                          {@link WoofProcedureModel}.
 	 * @param outputNameMapping Mapping of {@link ProcedureFlowType} name to
 	 *                          existing {@link WoofProcedureOutputModel} name to
@@ -890,8 +889,8 @@ public interface WoofChanges {
 	 * Links the {@link WoofProcedureNextModel} to the
 	 * {@link WoofSectionInputModel}.
 	 * 
-	 * @param procedureNext  {@link WoofProcedureNextModel}.
-	 * @param sectionInput {@link WoofSectionInputModel}.
+	 * @param procedureNext {@link WoofProcedureNextModel}.
+	 * @param sectionInput  {@link WoofSectionInputModel}.
 	 * @return {@link Change} to make the link.
 	 */
 	Change<WoofProcedureNextToWoofSectionInputModel> linkProcedureNextToSectionInput(
@@ -1007,7 +1006,7 @@ public interface WoofChanges {
 	 * {@link WoofSectionInputModel}.
 	 * 
 	 * @param procedureOutput {@link WoofProcedureOutputModel}.
-	 * @param sectionInput  {@link WoofSectionInputModel}.
+	 * @param sectionInput    {@link WoofSectionInputModel}.
 	 * @return {@link Change} to make the link.
 	 */
 	Change<WoofProcedureOutputToWoofSectionInputModel> linkProcedureOutputToSectionInput(

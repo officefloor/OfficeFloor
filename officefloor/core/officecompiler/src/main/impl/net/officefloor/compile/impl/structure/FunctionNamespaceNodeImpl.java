@@ -80,19 +80,19 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 		private final String managedFunctionSourceClassName;
 
 		/**
-		 * {@link ManagedFunctionSource} instance to use. If this is specified
-		 * it overrides using the {@link Class} name.
+		 * {@link ManagedFunctionSource} instance to use. If this is specified it
+		 * overrides using the {@link Class} name.
 		 */
 		private final ManagedFunctionSource managedFunctionSource;
 
 		/**
 		 * Instantiate.
 		 * 
-		 * @param managedFunctionSourceClassName
-		 *            Class name of the {@link ManagedFunctionSource}.
-		 * @param managedFunctionSource
-		 *            {@link ManagedFunctionSource} instance to use. If this is
-		 *            specified it overrides using the {@link Class} name.
+		 * @param managedFunctionSourceClassName Class name of the
+		 *                                       {@link ManagedFunctionSource}.
+		 * @param managedFunctionSource          {@link ManagedFunctionSource} instance
+		 *                                       to use. If this is specified it
+		 *                                       overrides using the {@link Class} name.
 		 */
 		public InitialisedState(String managedFunctionSourceClassName, ManagedFunctionSource managedFunctionSource) {
 			this.managedFunctionSourceClassName = managedFunctionSourceClassName;
@@ -108,13 +108,10 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param namespaceName
-	 *            Name of this {@link SectionFunctionNamespace}.
-	 * @param section
-	 *            {@link OfficeSection} containing this
-	 *            {@link FunctionNamespaceNode}.
-	 * @param context
-	 *            {@link NodeContext}.
+	 * @param namespaceName Name of this {@link SectionFunctionNamespace}.
+	 * @param section       {@link OfficeSection} containing this
+	 *                      {@link FunctionNamespaceNode}.
+	 * @param context       {@link NodeContext}.
 	 */
 	public FunctionNamespaceNodeImpl(String namespaceName, SectionNode section, NodeContext context) {
 		this.namespaceName = namespaceName;
@@ -219,13 +216,9 @@ public class FunctionNamespaceNodeImpl implements FunctionNamespaceNode {
 		// Keep track of the managed function source
 		this.usedManagedFunctionSource = managedFunctionSource;
 
-		// Obtain the override properties
-		PropertyList overrideProperties = this.context.overrideProperties(this,
-				this.section.getQualifiedName(this.namespaceName), this.propertyList);
-
 		// Load and return the managed function type
 		ManagedFunctionLoader managedFunctionLoader = this.context.getManagedFunctionLoader(this);
-		return managedFunctionLoader.loadManagedFunctionType(managedFunctionSource, overrideProperties);
+		return managedFunctionLoader.loadManagedFunctionType(managedFunctionSource, this.propertyList);
 	}
 
 	@Override

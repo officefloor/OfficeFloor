@@ -19,6 +19,7 @@ package net.officefloor.compile.integrate.governance;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.integrate.managedobject.CompileOfficeFloorManagedObjectTest.InputManagedObject;
+import net.officefloor.compile.internal.structure.Node;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionFunction;
@@ -95,12 +96,13 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
 				SimpleManagedObject.class);
-		this.record_officeFloorBuilder_addManagedObject(SimpleManagedObject.class.getName(),
+		this.record_officeFloorBuilder_addManagedObject(Node.escape(SimpleManagedObject.class.getName()),
 				ClassManagedObjectSource.class, 0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource(SimpleManagedObject.class.getName(), SimpleManagedObject.class.getName());
+		office.registerManagedObjectSource(Node.escape(SimpleManagedObject.class.getName()),
+				Node.escape(SimpleManagedObject.class.getName()));
 		DependencyMappingBuilder dependencies = this.record_officeBuilder_addThreadManagedObject(
-				SimpleManagedObject.class.getName(), SimpleManagedObject.class.getName());
+				Node.escape(SimpleManagedObject.class.getName()), Node.escape(SimpleManagedObject.class.getName()));
 		dependencies.mapGovernance("GOVERNANCE");
 
 		// Compile the OfficeFloor
@@ -203,13 +205,14 @@ public class CompileGovernanceTest extends AbstractCompileTestCase {
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addGovernance("GOVERNANCE", "OFFICE_TEAM", ClassGovernanceSource.class,
 				SimpleManagedObject.class);
-		this.record_officeFloorBuilder_addManagedObject("OFFICE." + SimpleManagedObject.class.getName(),
+		this.record_officeFloorBuilder_addManagedObject("OFFICE." + Node.escape(SimpleManagedObject.class.getName()),
 				ClassManagedObjectSource.class, 0, "class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		office.registerManagedObjectSource("OFFICE." + SimpleManagedObject.class.getName(),
-				"OFFICE." + SimpleManagedObject.class.getName());
+		office.registerManagedObjectSource("OFFICE." + Node.escape(SimpleManagedObject.class.getName()),
+				"OFFICE." + Node.escape(SimpleManagedObject.class.getName()));
 		DependencyMappingBuilder dependencies = this.record_officeBuilder_addThreadManagedObject(
-				"OFFICE." + SimpleManagedObject.class.getName(), "OFFICE." + SimpleManagedObject.class.getName());
+				"OFFICE." + Node.escape(SimpleManagedObject.class.getName()),
+				"OFFICE." + Node.escape(SimpleManagedObject.class.getName()));
 		dependencies.mapGovernance("GOVERNANCE");
 
 		// Compile the OfficeFloor

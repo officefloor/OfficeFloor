@@ -18,7 +18,9 @@
 package net.officefloor.frame.impl.construct.governance;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.AsynchronousFlow;
@@ -67,8 +69,8 @@ public class RawGovernanceMetaDataFactory {
 	/**
 	 * Creates the {@link RawGovernanceMetaData}.
 	 * 
-	 * @param                                <E> Extension interface type.
-	 * @param                                <F> Flow key type.
+	 * @param <E>                            Extension interface type.
+	 * @param <F>                            Flow key type.
 	 * @param configuration                  {@link GovernanceConfiguration}.
 	 * @param governanceIndex                Index of the {@link Governance} within
 	 *                                       the {@link ProcessState}.
@@ -127,9 +129,12 @@ public class RawGovernanceMetaDataFactory {
 		AssetManager asynchronousFlowAssetManager = assetManagerFactory.createAssetManager(AssetType.GOVERNANCE,
 				governanceName, AsynchronousFlow.class.getSimpleName(), issues);
 
+		// Create the logger
+		Logger logger = OfficeFrame.getLogger(governanceName);
+
 		// Create the Governance Meta-Data
 		GovernanceMetaDataImpl<E, F> governanceMetaData = new GovernanceMetaDataImpl<>(governanceName,
-				governanceFactory, responsibleTeam, asynchronousFlowTimeout, asynchronousFlowAssetManager);
+				governanceFactory, responsibleTeam, asynchronousFlowTimeout, asynchronousFlowAssetManager, logger);
 
 		// Create the raw Governance meta-data
 		RawGovernanceMetaData<E, F> rawGovernanceMetaData = new RawGovernanceMetaData<>(governanceName, governanceIndex,

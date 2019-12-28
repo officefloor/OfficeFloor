@@ -260,8 +260,8 @@ public class ProcedureLoaderImpl implements ProcedureLoader {
 		// Load the escalations
 		List<ProcedureEscalationType> escalationTypes = new LinkedList<>();
 		for (ManagedFunctionEscalationType functionEscalationType : managedFunctionType.getEscalationTypes()) {
-			escalationTypes.add(new ProcedureEscalationTypeImpl(functionEscalationType.getEscalationName(),
-					functionEscalationType.getEscalationType()));
+			Class<? extends Throwable> escalationType = functionEscalationType.getEscalationType();
+			escalationTypes.add(new ProcedureEscalationTypeImpl(escalationType.getName(), escalationType));
 		}
 
 		// Obtain the next argument type

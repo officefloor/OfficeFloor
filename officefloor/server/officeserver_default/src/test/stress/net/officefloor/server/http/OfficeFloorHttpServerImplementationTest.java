@@ -22,9 +22,10 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.manage.ProcessManager;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.server.SocketManager;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
@@ -41,6 +42,17 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 
 	private static final byte[] helloWorld = "hello world".getBytes(ServerHttpConnection.DEFAULT_HTTP_ENTITY_CHARSET);
 	private static final HttpHeaderValue textPlain = new HttpHeaderValue("text/plain");
+
+	@Override
+	protected void setUp() throws Exception {
+
+		// Ensure clean start of test
+		assertFalse("Should not have active socket manager",
+				HttpServerSocketManagedObjectSource.isSocketManagerActive());
+
+		// Continue setup
+		super.setUp();
+	}
 
 	@Override
 	protected Class<? extends HttpServerImplementation> getHttpServerImplementationClass() {
@@ -93,9 +105,22 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 	private static class RawHttpServicerFactory extends AbstractHttpServicerFactory {
 
 		/**
-		 * {@link ProcessAwareContext}.
+		 * {@link ManagedObjectContext}.
 		 */
-		private static ProcessAwareContext processAwareContext = new ProcessAwareContext() {
+		private static ManagedObjectContext managedObjectContext = new ManagedObjectContext() {
+
+			@Override
+			public String getBoundName() {
+				fail("Should not require bound name");
+				return null;
+			}
+
+			@Override
+			public Logger getLogger() {
+				fail("Should not require logger");
+				return null;
+			}
+
 			@Override
 			public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
 				return operation.run();
@@ -122,8 +147,8 @@ public class OfficeFloorHttpServerImplementationTest extends AbstractHttpServerI
 		protected ProcessManager service(ProcessAwareServerHttpConnectionManagedObject<ByteBuffer> connection)
 				throws IOException {
 
-			// Configure process awareness
-			connection.setProcessAwareContext(processAwareContext);
+			// Configure context awareness
+			connection.setManagedObjectContext(managedObjectContext);
 
 			// Service the connection
 			HttpResponse response = connection.getResponse();

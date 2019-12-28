@@ -31,6 +31,10 @@ public class Template {
 
 		void flow();
 	}
+	
+	public Template redirect() {
+		return this;
+	}
 
 	public void getTemplate(Flows flows) {
 	}

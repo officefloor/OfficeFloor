@@ -1,0 +1,13 @@
+<activity>
+
+	<procedures>
+		<procedure name="PROCEDURE" resource="resource" source="Class" procedure="procedure">
+			<property name="name.one" value="value.one" />
+			<property name="name.two" value="value.two" />
+			<output name="OUTPUT_A" argument-type="java.lang.String" />
+			<output name="OUTPUT_B" />
+			<next argument-type="java.lang.Short" />
+		</procedure>
+	</procedures>
+
+</activity>

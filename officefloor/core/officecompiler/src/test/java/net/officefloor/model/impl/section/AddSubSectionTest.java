@@ -83,9 +83,8 @@ public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 	}
 
 	/**
-	 * Ensure can add a {@link SubSectionModel} with
-	 * {@link SubSectionInputModel}, {@link SubSectionOutputModel},
-	 * {@link SubSectionObjectModel} instances.
+	 * Ensure can add a {@link SubSectionModel} with {@link SubSectionInputModel},
+	 * {@link SubSectionOutputModel}, {@link SubSectionObjectModel} instances.
 	 */
 	public void testAddSubSectionWithInputsOutputsObjects() {
 

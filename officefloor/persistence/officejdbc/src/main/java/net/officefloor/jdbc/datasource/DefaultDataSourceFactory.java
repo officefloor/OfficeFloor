@@ -92,9 +92,9 @@ public class DefaultDataSourceFactory implements DataSourceFactory, ConnectionPo
 		}
 
 		// Create the source context
-		SourceContext rootContext = new SourceContextImpl(false, DefaultDataSourceFactory.class.getClassLoader(),
-				new MockClockFactory());
-		SourceContext configuredContext = new SourceContextImpl(false, rootContext,
+		SourceContext rootContext = new SourceContextImpl("ROOT", false,
+				DefaultDataSourceFactory.class.getClassLoader(), new MockClockFactory());
+		SourceContext configuredContext = new SourceContextImpl("ROOT.DataSource", false, rootContext,
 				new SourcePropertiesImpl(sourceProperties));
 
 		// Create the data source
@@ -109,7 +109,7 @@ public class DefaultDataSourceFactory implements DataSourceFactory, ConnectionPo
 	/**
 	 * Loads the properties onto the {@link DataSource}.
 	 * 
-	 * @param            <S> {@link DataSource} type.
+	 * @param <S>        {@link DataSource} type.
 	 * @param dataSource {@link DataSource}.
 	 * @param context    {@link SourceContext}.
 	 * @throws Exception If fails to load properties.

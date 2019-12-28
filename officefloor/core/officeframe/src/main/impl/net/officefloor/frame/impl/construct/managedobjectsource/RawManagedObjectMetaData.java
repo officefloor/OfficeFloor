@@ -17,18 +17,21 @@
  */
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
+import java.util.logging.Logger;
+
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
+import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
@@ -71,8 +74,8 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	private final ManagedObjectSourceMetaData<O, F> managedObjectSourceMetaData;
 
 	/**
-	 * Timeout for sourcing the {@link ManagedObject} and asynchronous
-	 * operations on the {@link ManagedObject}.
+	 * Timeout for sourcing the {@link ManagedObject} and asynchronous operations on
+	 * the {@link ManagedObject}.
 	 */
 	private final long timeout;
 
@@ -92,14 +95,9 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	private final Class<?> objectType;
 
 	/**
-	 * Flag indiating if {@link ProcessAwareManagedObject}.
+	 * Flag indicating if {@link ContextAwareManagedObject}.
 	 */
-	private final boolean isProcessAware;
-
-	/**
-	 * Flag indicating if {@link NameAwareManagedObject}.
-	 */
-	private final boolean isNameAware;
+	private final boolean isContextAware;
 
 	/**
 	 * Flag indicating if {@link AsynchronousManagedObject}.
@@ -119,42 +117,33 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject}.
-	 * @param managedObjectSourceConfiguration
-	 *            {@link ManagedObjectSourceConfiguration}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
-	 * @param managedObjectSourceMetaData
-	 *            {@link ManagedObjectSourceMetaData} for the
-	 *            {@link ManagedObjectSource}.
-	 * @param timeout
-	 *            Timeout for the {@link ManagedObjectSource}.
-	 * @param managedObjectPool
-	 *            {@link ManagedObjectPool}.
-	 * @param threadCompletionListeners
-	 *            {@link ThreadCompletionListener} instances.
-	 * @param objectType
-	 *            Type of the {@link Object} returned from the
-	 *            {@link ManagedObject}.
-	 * @param isProcessAware
-	 *            Flag indicating if {@link ProcessAwareManagedObject}.
-	 * @param isNameAware
-	 *            Flag indicating if {@link NameAwareManagedObject}.
-	 * @param isAsynchronous
-	 *            Flag indicating if {@link AsynchronousManagedObject}.
-	 * @param isCoordinating
-	 *            Flag indicating if {@link CoordinatingManagedObject}.
-	 * @param rawManagingOfficeMetaData
-	 *            {@link RawManagingOfficeMetaData}.
+	 * @param managedObjectName                Name of the {@link ManagedObject}.
+	 * @param managedObjectSourceConfiguration {@link ManagedObjectSourceConfiguration}.
+	 * @param managedObjectSource              {@link ManagedObjectSource}.
+	 * @param managedObjectSourceMetaData      {@link ManagedObjectSourceMetaData}
+	 *                                         for the {@link ManagedObjectSource}.
+	 * @param timeout                          Timeout for the
+	 *                                         {@link ManagedObjectSource}.
+	 * @param managedObjectPool                {@link ManagedObjectPool}.
+	 * @param threadCompletionListeners        {@link ThreadCompletionListener}
+	 *                                         instances.
+	 * @param objectType                       Type of the {@link Object} returned
+	 *                                         from the {@link ManagedObject}.
+	 * @param isContextAware                   Flag indicating if
+	 *                                         {@link ContextAwareManagedObject}.
+	 * @param isAsynchronous                   Flag indicating if
+	 *                                         {@link AsynchronousManagedObject}.
+	 * @param isCoordinating                   Flag indicating if
+	 *                                         {@link CoordinatingManagedObject}.
+	 * @param rawManagingOfficeMetaData        {@link RawManagingOfficeMetaData}.
 	 */
 	public RawManagedObjectMetaData(String managedObjectName,
 			ManagedObjectSourceConfiguration<F, ?> managedObjectSourceConfiguration,
 			ManagedObjectSource<O, F> managedObjectSource,
 			ManagedObjectSourceMetaData<O, F> managedObjectSourceMetaData, long timeout,
 			ManagedObjectPool managedObjectPool, ThreadCompletionListener[] threadCompletionListeners,
-			Class<?> objectType, boolean isProcessAware, boolean isNameAware, boolean isAsynchronous,
-			boolean isCoordinating, RawManagingOfficeMetaData<F> rawManagingOfficeMetaData) {
+			Class<?> objectType, boolean isContextAware, boolean isAsynchronous, boolean isCoordinating,
+			RawManagingOfficeMetaData<F> rawManagingOfficeMetaData) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
@@ -163,8 +152,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 		this.managedObjectPool = managedObjectPool;
 		this.threadCompletionListeners = threadCompletionListeners;
 		this.objectType = objectType;
-		this.isProcessAware = isProcessAware;
-		this.isNameAware = isNameAware;
+		this.isContextAware = isContextAware;
 		this.isAsynchronous = isAsynchronous;
 		this.isCoordinating = isCoordinating;
 		this.rawManagingOfficeMetaData = rawManagingOfficeMetaData;
@@ -209,8 +197,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	/**
 	 * Obtains the {@link ManagedObjectPoolFactory}.
 	 * 
-	 * @return {@link ManagedObjectPoolFactory} or <code>null</code> if not
-	 *         pooled.
+	 * @return {@link ManagedObjectPoolFactory} or <code>null</code> if not pooled.
 	 */
 	public ManagedObjectPool getManagedObjectPool() {
 		return this.managedObjectPool;
@@ -228,8 +215,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	}
 
 	/**
-	 * Obtains the type of {@link Object} returned from the
-	 * {@link ManagedObject}.
+	 * Obtains the type of {@link Object} returned from the {@link ManagedObject}.
 	 * 
 	 * @return Obtains the type of {@link Object} returned from the
 	 *         {@link ManagedObject}.
@@ -239,11 +225,20 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	}
 
 	/**
-	 * Obtains the {@link RawManagingOfficeMetaData} of the {@link Office}
-	 * managing this {@link ManagedObject}.
+	 * Obtains the {@link Logger} for the {@link ManagedObjectExecuteContext}.
 	 * 
-	 * @return {@link RawManagingOfficeMetaData} of the {@link Office} managing
-	 *         this {@link ManagedObject}.
+	 * @return {@link Logger} for the {@link ManagedObjectExecuteContext}..
+	 */
+	public Logger getExecuteLogger() {
+		return OfficeFrame.getLogger(this.managedObjectName);
+	}
+
+	/**
+	 * Obtains the {@link RawManagingOfficeMetaData} of the {@link Office} managing
+	 * this {@link ManagedObject}.
+	 * 
+	 * @return {@link RawManagingOfficeMetaData} of the {@link Office} managing this
+	 *         {@link ManagedObject}.
 	 */
 	public RawManagingOfficeMetaData<F> getRawManagingOfficeMetaData() {
 		return this.rawManagingOfficeMetaData;
@@ -252,30 +247,24 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	/**
 	 * Creates the {@link ManagedObjectMetaData}.
 	 *
-	 * @param assetType
-	 *            {@link AssetType} of the {@link Asset} requiring the
-	 *            {@link ManagedObject}.
-	 * @param assetName
-	 *            Name of the {@link Asset} requiring the {@link ManagedObject}.
-	 * @param boundMetaData
-	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param instanceIndex
-	 *            Index of the {@link RawBoundManagedObjectInstanceMetaData} on
-	 *            the {@link RawBoundManagedObjectMetaData}.
-	 * @param boundInstanceMetaData
-	 *            {@link RawBoundManagedObjectInstanceMetaData}.
-	 * @param dependencyMappings
-	 *            {@link ManagedObjectIndex} instances identifying the dependent
-	 *            {@link ManagedObject} instances in dependency index order
-	 *            required.
-	 * @param governanceMetaData
-	 *            {@link ManagedObjectGovernanceMetaData} identifying the
-	 *            {@link Governance} for the {@link ManagedObject}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory} of the {@link Office} using the
-	 *            {@link ManagedObject}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
+	 * @param assetType             {@link AssetType} of the {@link Asset} requiring
+	 *                              the {@link ManagedObject}.
+	 * @param assetName             Name of the {@link Asset} requiring the
+	 *                              {@link ManagedObject}.
+	 * @param boundMetaData         {@link RawBoundManagedObjectMetaData}.
+	 * @param instanceIndex         Index of the
+	 *                              {@link RawBoundManagedObjectInstanceMetaData} on
+	 *                              the {@link RawBoundManagedObjectMetaData}.
+	 * @param boundInstanceMetaData {@link RawBoundManagedObjectInstanceMetaData}.
+	 * @param dependencyMappings    {@link ManagedObjectIndex} instances identifying
+	 *                              the dependent {@link ManagedObject} instances in
+	 *                              dependency index order required.
+	 * @param governanceMetaData    {@link ManagedObjectGovernanceMetaData}
+	 *                              identifying the {@link Governance} for the
+	 *                              {@link ManagedObject}.
+	 * @param assetManagerFactory   {@link AssetManagerFactory} of the
+	 *                              {@link Office} using the {@link ManagedObject}.
+	 * @param issues                {@link OfficeFloorIssues}.
 	 * @return {@link ManagedObjectMetaData}.
 	 */
 	public ManagedObjectMetaDataImpl<O> createManagedObjectMetaData(AssetType assetType, String assetName,
@@ -304,11 +293,14 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 					boundReferenceName, "operations", issues);
 		}
 
+		// Create the logger
+		Logger logger = OfficeFrame.getLogger(boundName);
+
 		// Create the managed object meta-data
 		ManagedObjectMetaDataImpl<O> moMetaData = new ManagedObjectMetaDataImpl<>(boundName, this.objectType,
-				instanceIndex, this.managedObjectSource, this.managedObjectPool, this.isProcessAware, this.isNameAware,
+				instanceIndex, this.managedObjectSource, this.managedObjectPool, this.isContextAware,
 				sourcingAssetManager, this.isAsynchronous, operationsAssetManager, this.isCoordinating,
-				dependencyMappings, this.timeout, governanceMetaData);
+				dependencyMappings, this.timeout, governanceMetaData, logger);
 
 		// Return the managed object meta-data
 		return moMetaData;

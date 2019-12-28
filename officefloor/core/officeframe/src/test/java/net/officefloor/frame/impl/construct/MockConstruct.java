@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadFactory;
 
 import org.junit.Assert;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -39,10 +40,9 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.extension.ExtensionFactory;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
@@ -93,12 +93,12 @@ import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.structure.AdministrationMetaData;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.GovernanceMetaData;
 import net.officefloor.frame.internal.structure.ManagedExecutionFactory;
+import net.officefloor.frame.internal.structure.ManagedFunctionAdministrationMetaData;
 import net.officefloor.frame.internal.structure.ManagedFunctionLocator;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -186,9 +186,9 @@ public class MockConstruct {
 			String boundManagedObjectName, Class<?> objectType) {
 		AssetManagerFactory assetManagerFactory = mockAssetManagerFactory();
 		return new ManagedObjectMetaDataImpl<>(boundManagedObjectName, objectType, 0,
-				new ConstructManagedObjectSource<>(), null, false, false,
+				new ConstructManagedObjectSource<>(), null, false,
 				assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT, boundManagedObjectName, "mock", null),
-				false, null, false, null, 0, null);
+				false, null, false, null, 0, null, OfficeFrame.getLogger(boundManagedObjectName));
 	}
 
 	/**
@@ -657,14 +657,9 @@ public class MockConstruct {
 		private final List<ThreadCompletionListener> threadCompletionListeners = new LinkedList<>();
 
 		/**
-		 * Indicates if {@link ProcessAwareManagedObject}.
+		 * Indicates if {@link ContextAwareManagedObject}.
 		 */
-		private boolean isProcessAware = false;
-
-		/**
-		 * Indicates if {@link NameAwareManagedObject}.
-		 */
-		private boolean isNameAware = false;
+		private boolean isContextAware = false;
 
 		/**
 		 * Indicates if {@link AsynchronousManagedObject}.
@@ -766,24 +761,13 @@ public class MockConstruct {
 		}
 
 		/**
-		 * Flags as {@link ProcessAwareManagedObject}.
+		 * Flags as {@link ContextAwareManagedObject}.
 		 * 
 		 * @return <code>this<code>.
 		 */
-		public RawManagedObjectMetaDataMockBuilder<O, F> processAware() {
+		public RawManagedObjectMetaDataMockBuilder<O, F> contextAware() {
 			this.assetNotBuilt();
-			this.isProcessAware = true;
-			return this;
-		}
-
-		/**
-		 * Flags as {@link NameAwareManagedObject}.
-		 * 
-		 * @return <code>this<code>.
-		 */
-		public RawManagedObjectMetaDataMockBuilder<O, F> nameAware() {
-			this.assetNotBuilt();
-			this.isNameAware = true;
+			this.isContextAware = true;
 			return this;
 		}
 
@@ -830,8 +814,8 @@ public class MockConstruct {
 					this.managedObjectPool,
 					this.threadCompletionListeners
 							.toArray(new ThreadCompletionListener[this.threadCompletionListeners.size()]),
-					this.managedObjectSourceMetaDataBuilder.objectClass, this.isProcessAware, this.isNameAware,
-					this.isAsynchronous, this.isCoordinating, rawManagingOfficeMetaData);
+					this.managedObjectSourceMetaDataBuilder.objectClass, this.isContextAware, this.isAsynchronous,
+					this.isCoordinating, rawManagingOfficeMetaData);
 			return this.built;
 		}
 
@@ -1137,7 +1121,7 @@ public class MockConstruct {
 			this.governanceName = governanceName;
 			this.extensionType = extensionType;
 			this.configuration = new GovernanceBuilderImpl<>(governanceName, extensionType, () -> null);
-			this.metaData = new GovernanceMetaDataImpl<>(governanceName, () -> null, null, 1, null);
+			this.metaData = new GovernanceMetaDataImpl<>(governanceName, () -> null, null, 1, null, null);
 		}
 
 		/**
@@ -1462,7 +1446,8 @@ public class MockConstruct {
 		 * {@link EscalationFlow}.
 		 */
 		private EscalationFlow officeFloorEscalation = new EscalationFlowImpl(Throwable.class,
-				new ManagedFunctionMetaDataImpl<>("HANDLER", () -> null, null, null, null, null, null, null, 1, null));
+				new ManagedFunctionMetaDataImpl<>("HANDLER", () -> null, null, null, null, null, null, null, 1, null,
+						null));
 
 		/**
 		 * {@link RawOfficeFloorMetaData}.
@@ -1647,7 +1632,7 @@ public class MockConstruct {
 			this.assertNotBuilt();
 			ManagedFunctionMetaDataImpl<?, ?> function = new ManagedFunctionMetaDataImpl<>(functionName,
 					() -> (context) -> null, new Object[0], parameterType, null, new ManagedObjectIndex[0],
-					new ManagedObjectMetaData[0], new boolean[0], 1, null);
+					new ManagedObjectMetaData[0], new boolean[0], 1, null, OfficeFrame.getLogger(functionName));
 			this.functions.add(function);
 			return function;
 		}
@@ -1673,7 +1658,7 @@ public class MockConstruct {
 						}
 					}
 					functions.add(new ManagedFunctionMetaDataImpl<>(functionName, null, null, parameterType, null, null,
-							null, null, 1, null));
+							null, null, 1, null, null));
 				}
 
 				// Load the convenience functions
@@ -1690,7 +1675,8 @@ public class MockConstruct {
 				// Load the office meta-data to functions
 				for (ManagedFunctionMetaDataImpl<?, ?> function : functions) {
 					function.loadOfficeMetaData(this.built, new FlowMetaData[0], null, null,
-							new AdministrationMetaData[0], new AdministrationMetaData[0], new ManagedObjectIndex[0]);
+							new ManagedFunctionAdministrationMetaData[0], new ManagedFunctionAdministrationMetaData[0],
+							new ManagedObjectIndex[0]);
 				}
 			}
 			return this.built;

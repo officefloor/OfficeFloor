@@ -684,6 +684,11 @@ public class StatePollerTest extends OfficeFrameTestCase implements ManagedObjec
 	 */
 
 	@Override
+	public Logger getLogger() {
+		return this.logger;
+	}
+
+	@Override
 	public ManagedObjectStartupProcess registerStartupProcess(Flows key, Object parameter, ManagedObject managedObject,
 			FlowCallback callback) throws IllegalArgumentException {
 		assertEquals("Should be no invoked process on start up", 0, this.invokedProcesses.size());

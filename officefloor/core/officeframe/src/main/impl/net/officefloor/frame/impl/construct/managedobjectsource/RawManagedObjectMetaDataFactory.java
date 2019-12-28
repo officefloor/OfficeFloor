@@ -23,9 +23,8 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
@@ -81,9 +80,9 @@ public class RawManagedObjectMetaDataFactory {
 	/**
 	 * Creates the {@link RawManagedObjectMetaData}.
 	 * 
-	 * @param                 <d> Dependency key type.
-	 * @param                 <h> {@link Flow} key type.
-	 * @param                 <MS> {@link ManagedObjectSource} type.
+	 * @param <d>             Dependency key type.
+	 * @param <h>             {@link Flow} key type.
+	 * @param <MS>            {@link ManagedObjectSource} type.
 	 * @param configuration   {@link ManagedObjectSourceConfiguration}.
 	 * @param officeFloorName Name of the {@link OfficeFloor}.
 	 * @param issues          {@link OfficeFloorIssues}.
@@ -149,8 +148,8 @@ public class RawManagedObjectMetaDataFactory {
 		ManagingOfficeBuilder<h> managingOfficeBuilder = managingOfficeConfiguration.getBuilder();
 
 		// Create the context for the managed object source
-		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(false,
-				managedObjectSourceName, managingOfficeConfiguration, properties, this.sourceContext,
+		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(managedObjectSourceName,
+				false, managedObjectSourceName, managingOfficeConfiguration, properties, this.sourceContext,
 				managingOfficeBuilder, officeBuilder);
 
 		// Initialise the managed object source and obtain meta-data
@@ -198,9 +197,8 @@ public class RawManagedObjectMetaDataFactory {
 			return null; // can not carry on
 		}
 
-		// Determine if process aware, name aware, asynchronous, coordinating
-		boolean isManagedObjectProcessAware = ProcessAwareManagedObject.class.isAssignableFrom(managedObjectClass);
-		boolean isManagedObjectNameAware = NameAwareManagedObject.class.isAssignableFrom(managedObjectClass);
+		// Determine if context aware, asynchronous, coordinating
+		boolean isManagedObjectContextAware = ContextAwareManagedObject.class.isAssignableFrom(managedObjectClass);
 		boolean isManagedObjectAsynchronous = AsynchronousManagedObject.class.isAssignableFrom(managedObjectClass);
 		boolean isManagedObjectCoordinating = CoordinatingManagedObject.class.isAssignableFrom(managedObjectClass);
 
@@ -282,8 +280,8 @@ public class RawManagedObjectMetaDataFactory {
 		// Created raw managed object meta-data
 		RawManagedObjectMetaData<d, h> rawMoMetaData = new RawManagedObjectMetaData<d, h>(managedObjectSourceName,
 				configuration, managedObjectSource, metaData, timeout, managedObjectPool, threadCompletionListeners,
-				objectType, isManagedObjectProcessAware, isManagedObjectNameAware, isManagedObjectAsynchronous,
-				isManagedObjectCoordinating, rawManagingOfficeMetaData);
+				objectType, isManagedObjectContextAware, isManagedObjectAsynchronous, isManagedObjectCoordinating,
+				rawManagingOfficeMetaData);
 
 		// Make raw managed object available to the raw managing office
 		rawManagingOfficeMetaData.setRawManagedObjectMetaData(rawMoMetaData);

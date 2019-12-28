@@ -25,8 +25,8 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceCleanupEscalationH
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.FlowCallback;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.recycle.CleanupEscalation;
 import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpHeader;
@@ -52,7 +52,7 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * @author Daniel Sagenschneider
  */
 public class ProcessAwareServerHttpConnectionManagedObject<B>
-		implements ServerHttpConnection, ProcessAwareManagedObject, FlowCallback {
+		implements ServerHttpConnection, ContextAwareManagedObject, FlowCallback {
 
 	/**
 	 * Obtains the {@link ExternalServiceCleanupEscalationHandler}.
@@ -125,9 +125,9 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	final HttpResponseWriter<B> httpResponseWriter;
 
 	/**
-	 * {@link ProcessAwareContext}.
+	 * {@link ManagedObjectContext}.
 	 */
-	private ProcessAwareContext processAwareContext;
+	private ManagedObjectContext managedObjectContext;
 
 	/**
 	 * Instantiate.
@@ -205,12 +205,12 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 	}
 
 	/*
-	 * =============== ProcessAwareContext ============================
+	 * =============== ContextAwareManagedObject =====================
 	 */
 
 	@Override
-	public void setProcessAwareContext(ProcessAwareContext context) {
-		this.processAwareContext = context;
+	public void setManagedObjectContext(ManagedObjectContext context) {
+		this.managedObjectContext = context;
 
 		// Create the HTTP response (with context awareness)
 		this.response = new ProcessAwareHttpResponse<B>(this, this.request.getVersion(), context);
@@ -237,7 +237,7 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 
 	@Override
 	public HttpRequest getRequest() {
-		return this.processAwareContext.run(() -> this.request);
+		return this.managedObjectContext.run(() -> this.request);
 	}
 
 	@Override
@@ -252,7 +252,7 @@ public class ProcessAwareServerHttpConnectionManagedObject<B>
 
 	@Override
 	public void importState(Serializable momento) throws IllegalArgumentException, IOException {
-		this.processAwareContext.run(() -> {
+		this.managedObjectContext.run(() -> {
 			if (!(momento instanceof SerialisableHttpRequest)) {
 				throw new IllegalArgumentException("Invalid momento to import state");
 			}

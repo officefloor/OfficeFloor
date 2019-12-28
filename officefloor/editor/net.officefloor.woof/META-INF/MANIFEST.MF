@@ -1,26 +1,20 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Eclipse WoOF
+Bundle-Name: OfficeFloor WoOF for Editor
 Bundle-SymbolicName: net.officefloor.woof
 Bundle-Vendor: OfficeFloor
-Bundle-Version: 3.15.0
+Bundle-Version: 3.17.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
- officeprocedure-3.15.0.jar,
- officeserver-3.15.0.jar,
- officeserver_default-3.15.0.jar,
- officeweb-3.15.0.jar,
- officeweb_security-3.15.0.jar,
- officeweb_resource-3.15.0.jar,
- officeweb_template-3.15.0.jar,
- officeweb_configuration-3.15.0.jar,
- woof-3.15.0.jar
-Export-Package: net.officefloor.activity.impl.procedure,
- net.officefloor.activity.procedure,
- net.officefloor.activity.procedure.build,
- net.officefloor.activity.procedure.section,
- net.officefloor.activity.procedure.spi,
- net.officefloor.server,
+ officeserver-3.17.0.jar,
+ officeserver_default-3.17.0.jar,
+ officeweb-3.17.0.jar,
+ officeweb_security-3.17.0.jar,
+ officeweb_resource-3.17.0.jar,
+ officeweb_template-3.17.0.jar,
+ officeweb_configuration-3.17.0.jar,
+ woof-3.17.0.jar
+Export-Package: net.officefloor.server,
  net.officefloor.server.buffer,
  net.officefloor.server.filesystem,
  net.officefloor.server.http,
@@ -82,5 +76,6 @@ Export-Package: net.officefloor.activity.impl.procedure,
  net.officefloor.woof.teams,
  net.officefloor.woof.template,
  net.officefloor.woof.template.impl
-Require-Bundle: net.officefloor.core;bundle-version="3.15.0"
+Require-Bundle: net.officefloor.core;bundle-version="3.17.0",
+ net.officefloor.activity;bundle-version="3.17.0"
 Automatic-Module-Name: net.officefloor.woof

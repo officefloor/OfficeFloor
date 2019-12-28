@@ -61,11 +61,11 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 	/**
 	 * Undertakes the operation for the {@link HttpSecuritySource}.
 	 * 
-	 * @param                    <A> Authentication type.
-	 * @param                    <AC> Access control type.
-	 * @param                    <C> Credentials type.
-	 * @param                    <O> Dependency keys type.
-	 * @param                    <F> {@link Flow} keys type.
+	 * @param <A>                Authentication type.
+	 * @param <AC>               Access control type.
+	 * @param <C>                Credentials type.
+	 * @param <O>                Dependency keys type.
+	 * @param <F>                {@link Flow} keys type.
 	 * @param httpSecuritySource {@link HttpSecuritySource}.
 	 * @param operation          {@link Runnable} containing the operation to
 	 *                           undertake.
@@ -303,7 +303,7 @@ public class HttpSecurityManagedObjectAdapterSource<O extends Enum<O>> implement
 		 * @param context       {@link ManagedObjectSourceContext}.
 		 */
 		public ManagedObjectHttpSecuritySourceContext(boolean isLoadingType, ManagedObjectSourceContext<F> context) {
-			super(isLoadingType, context, context);
+			super(context.getLogger().getName(), isLoadingType, context, context);
 		}
 
 		/*

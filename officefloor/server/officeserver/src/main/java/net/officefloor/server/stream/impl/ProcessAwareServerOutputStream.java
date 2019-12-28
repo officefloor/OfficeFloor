@@ -22,14 +22,14 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.server.stream.FileCompleteCallback;
 import net.officefloor.server.stream.ServerOutputStream;
 
 /**
- * {@link ProcessAwareContext} wrapping {@link ServerOutputStream}.
+ * {@link ProcessState} aware wrapping {@link ServerOutputStream}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -41,19 +41,17 @@ public class ProcessAwareServerOutputStream extends ServerOutputStream {
 	private final ServerOutputStream unsafeOutputStream;
 
 	/**
-	 * {@link ProcessAwareContext}.
+	 * {@link ManagedObjectContext}.
 	 */
-	private final ProcessAwareContext context;
+	private final ManagedObjectContext context;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param unsafeOutputStream
-	 *            Unsafe {@link ServerOutputStream}.
-	 * @param context
-	 *            {@link ProcessAwareContext}.
+	 * @param unsafeOutputStream Unsafe {@link ServerOutputStream}.
+	 * @param context            {@link ManagedObjectContext}.
 	 */
-	public ProcessAwareServerOutputStream(ServerOutputStream unsafeOutputStream, ProcessAwareContext context) {
+	public ProcessAwareServerOutputStream(ServerOutputStream unsafeOutputStream, ManagedObjectContext context) {
 		this.unsafeOutputStream = unsafeOutputStream;
 		this.context = context;
 	}
@@ -66,8 +64,7 @@ public class ProcessAwareServerOutputStream extends ServerOutputStream {
 		/**
 		 * Undertake operation.
 		 * 
-		 * @throws T
-		 *             Possible failure from operation.
+		 * @throws T Possible failure from operation.
 		 */
 		void run() throws T;
 	}
@@ -75,11 +72,9 @@ public class ProcessAwareServerOutputStream extends ServerOutputStream {
 	/**
 	 * Wraps execution to be {@link ProcessState} ({@link Thread}) safe.
 	 * 
-	 * @param operation
-	 *            {@link ProcessSafeOperation}.
+	 * @param operation {@link ProcessSafeOperation}.
 	 * @return Result of {@link ProcessSafeOperation}.
-	 * @throws T
-	 *             If {@link ProcessSafeOperation} fails.
+	 * @throws T If {@link ProcessSafeOperation} fails.
 	 */
 	private <T extends Throwable> void safe(SafeVoidOperation<T> operation) throws T {
 		this.context.run(() -> {

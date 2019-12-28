@@ -64,17 +64,17 @@ public class RefactorProcedureTest extends AbstractWoofChangesTestCase {
 	public void testNoChange() {
 
 		// Create the procedure type
-		ProcedureType procedureType = this.constructProcedureType("procedure", String.class, (context) -> {
-			context.addFlow("OUTPUT_A", Integer.class);
-			context.addFlow("OUTPUT_B", String.class);
-			context.addFlow("OUTPUT_C", null);
-			context.addFlow("OUTPUT_D", null);
-			context.addFlow("OUTPUT_E", null);
-			context.addFlow("OUTPUT_F", null);
-			context.addEscalation(IOException.class);
-			context.addObject("IGNORE_OBJECT", DataSource.class, null);
-			context.addVariable("IGNORE_VARIABLE", Boolean.class);
-			context.setNextArgumentType(Byte.class);
+		ProcedureType procedureType = this.constructProcedureType("procedure", String.class, (builder) -> {
+			builder.addFlowType("OUTPUT_A", Integer.class);
+			builder.addFlowType("OUTPUT_B", String.class);
+			builder.addFlowType("OUTPUT_C", null);
+			builder.addFlowType("OUTPUT_D", null);
+			builder.addFlowType("OUTPUT_E", null);
+			builder.addFlowType("OUTPUT_F", null);
+			builder.addEscalationType(IOException.class);
+			builder.addObjectType("IGNORE_OBJECT", DataSource.class, null);
+			builder.addVariableType("IGNORE_VARIABLE", Boolean.class);
+			builder.setNextArgumentType(Byte.class);
 		});
 
 		// Create the properties
@@ -104,17 +104,17 @@ public class RefactorProcedureTest extends AbstractWoofChangesTestCase {
 	public void testChange() {
 
 		// Create the procedure type
-		ProcedureType procedureType = this.constructProcedureType("method_change", Character.class, (context) -> {
-			context.addFlow("OUTPUT_A", Integer.class);
-			context.addFlow("OUTPUT_B", String.class);
-			context.addFlow("OUTPUT_C", null);
-			context.addFlow("OUTPUT_D", null);
-			context.addFlow("OUTPUT_E", null);
-			context.addFlow("OUTPUT_F", null);
-			context.addEscalation(IOException.class);
-			context.addObject("IGNORE_OBJECT", DataSource.class, null);
-			context.addVariable("IGNORE_VARIABLE", Boolean.class);
-			context.setNextArgumentType(Short.class);
+		ProcedureType procedureType = this.constructProcedureType("method_change", Character.class, (builder) -> {
+			builder.addFlowType("OUTPUT_A", Integer.class);
+			builder.addFlowType("OUTPUT_B", String.class);
+			builder.addFlowType("OUTPUT_C", null);
+			builder.addFlowType("OUTPUT_D", null);
+			builder.addFlowType("OUTPUT_E", null);
+			builder.addFlowType("OUTPUT_F", null);
+			builder.addEscalationType(IOException.class);
+			builder.addObjectType("IGNORE_OBJECT", DataSource.class, null);
+			builder.addVariableType("IGNORE_VARIABLE", Boolean.class);
+			builder.setNextArgumentType(Short.class);
 		});
 
 		// Create the properties
@@ -163,14 +163,14 @@ public class RefactorProcedureTest extends AbstractWoofChangesTestCase {
 	public void testAddDetails() {
 
 		// Create the procedure type
-		ProcedureType procedureType = this.constructProcedureType("method", Character.class, (context) -> {
-			context.addFlow("OUTPUT_A", Integer.class);
-			context.addFlow("OUTPUT_B", String.class);
-			context.addFlow("OUTPUT_C", null);
-			context.addEscalation(IOException.class);
-			context.addObject("IGNORE_OBJECT", DataSource.class, null);
-			context.addVariable("IGNORE_VARIABLE", Boolean.class);
-			context.setNextArgumentType(Long.class);
+		ProcedureType procedureType = this.constructProcedureType("method", Character.class, (builder) -> {
+			builder.addFlowType("OUTPUT_A", Integer.class);
+			builder.addFlowType("OUTPUT_B", String.class);
+			builder.addFlowType("OUTPUT_C", null);
+			builder.addEscalationType(IOException.class);
+			builder.addObjectType("IGNORE_OBJECT", DataSource.class, null);
+			builder.addVariableType("IGNORE_VARIABLE", Boolean.class);
+			builder.setNextArgumentType(Long.class);
 		});
 
 		// Create the properties

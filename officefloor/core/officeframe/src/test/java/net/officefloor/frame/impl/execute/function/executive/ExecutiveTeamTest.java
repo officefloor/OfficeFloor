@@ -166,6 +166,9 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		@Override
 		public Team createTeam(ExecutiveContext context) throws Exception {
 
+			// Ensure correct logger
+			assertEquals("Incorrect logging team name", "of-FUNCTION_TEAM", context.getLogger().getName());
+
 			// Indicate controlling the team
 			isControlTeam = true;
 

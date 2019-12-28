@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.officefloor;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.AvailableServiceFactory;
 import net.officefloor.compile.FailServiceFactory;
@@ -240,13 +241,25 @@ public class LoadOfficeFloorTypeTest extends AbstractStructureTestCase {
 	}
 
 	/**
+	 * Ensure correctly name {@link Logger}.
+	 */
+	public void testLogger() {
+		Closure<String> loggerName = new Closure<>();
+		this.loadType((officeFloor, context) -> {
+			loggerName.value = context.getLogger().getName();
+		}, new LoadedValidator());
+		assertEquals("Incorrect logger name", OfficeFloorNode.OFFICE_FLOOR_NAME, loggerName.value);
+	}
+
+	/**
 	 * Ensure able to get the {@link ClassLoader}.
 	 */
 	public void testGetClassLoader() {
+		Closure<ClassLoader> classLoader = new Closure<>();
 		this.loadType((officeFloor, context) -> {
-			assertEquals("Incorrect class loader", LoadOfficeFloorTypeTest.class.getClassLoader(),
-					context.getClassLoader());
+			classLoader.value = context.getClassLoader();
 		}, new LoadedValidator());
+		assertEquals("Incorrect class loader", LoadOfficeFloorTypeTest.class.getClassLoader(), classLoader.value);
 	}
 
 	/**

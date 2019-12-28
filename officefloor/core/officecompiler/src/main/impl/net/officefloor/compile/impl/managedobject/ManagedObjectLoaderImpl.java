@@ -117,8 +117,8 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	/**
 	 * Loads the {@link PropertyList} specification.
 	 * 
-	 * @param                     <D> Dependency key.
-	 * @param                     <H> Flow key.
+	 * @param <D>                 Dependency key.
+	 * @param <H>                 Flow key.
 	 * @param managedObjectSource {@link ManagedObjectSource}.
 	 * @return {@link PropertyList} specification or <code>null</code> if issue.
 	 */
@@ -224,14 +224,20 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader, IssueTarget
 	public <D extends Enum<D>, F extends Enum<F>> ManagedObjectType<D> loadManagedObjectType(
 			ManagedObjectSource<D, F> managedObjectSource, PropertyList propertyList) {
 
+		// Obtain qualified name
+		String qualifiedName = this.node.getQualifiedName();
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.nodeContext.overrideProperties(this.node, qualifiedName, propertyList);
+
 		// Create the managed object source context to initialise
 		String officeName = null;
 		ManagingOfficeConfiguration<F> managingOffice = new ManagingOfficeBuilderImpl<F>(officeName);
 		OfficeConfiguration office = new OfficeBuilderImpl(officeName);
 		String namespaceName = null; // stops the name spacing
-		ManagedObjectSourceContextImpl<F> sourceContext = new ManagedObjectSourceContextImpl<F>(true, namespaceName,
-				managingOffice, new PropertyListSourceProperties(propertyList), this.nodeContext.getRootSourceContext(),
-				managingOffice.getBuilder(), office.getBuilder());
+		ManagedObjectSourceContextImpl<F> sourceContext = new ManagedObjectSourceContextImpl<F>(qualifiedName, true,
+				namespaceName, managingOffice, new PropertyListSourceProperties(overriddenProperties),
+				this.nodeContext.getRootSourceContext(), managingOffice.getBuilder(), office.getBuilder());
 
 		// Initialise the managed object source and obtain meta-data
 		ManagedObjectSourceMetaData<D, F> metaData;

@@ -17,6 +17,8 @@
  */
 package net.officefloor.woof.template;
 
+import java.util.logging.Logger;
+
 import net.officefloor.compile.properties.Property;
 import net.officefloor.configuration.ConfigurationContext;
 import net.officefloor.frame.api.source.SourceContext;
@@ -108,6 +110,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 		// Record adapting
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
+		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
 
 		// Record failing to create extension
 		this.sourceContext.loadClass("UNKNOWN CLASS");
@@ -134,6 +137,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 		// Record adapting
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
+		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
 
 		// Do refactoring
 		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
@@ -156,6 +160,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 		// Record adapting
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
+		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
 
 		// Do refactoring
 		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
@@ -176,6 +181,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 		// Record adapting
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
+		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
 
 		// Do refactoring
 		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
@@ -197,6 +203,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 		// Record adapting
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
+		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
 
 		// Do refactoring
 		Change<?> change = this.refactorTemplateExtension("OLD", new String[] { "OldName", "OldValue" }, "NEW",
@@ -220,6 +227,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 		// Record adapting
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
+		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
 
 		// Do refactoring with no configuration
 		Change<?> change = this.refactorTemplateExtension(null, null, null, null);
@@ -238,6 +246,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 		// Record adapting
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), this.classLoader);
+		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
 
 		// Record the change issues
 		this.issues.addIssue("Template OLD Extension " + MockWoofTemplateExtensionSource.class.getName() + ": APPLY");
@@ -312,6 +321,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 
 		// Record adapting
 		this.recordReturn(this.sourceContext, this.sourceContext.getClassLoader(), adaptClassLoader);
+		this.recordReturn(this.sourceContext, this.sourceContext.getLogger(), Logger.getLogger("template"));
 
 		// Record loading class
 		this.recordReturn(this.sourceContext, this.sourceContext.loadClass(adaptClassName), adaptClass);
@@ -351,10 +361,9 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	/**
 	 * Asserts a {@link Conflict} on the {@link Change}.
 	 * 
-	 * @param change
-	 *            {@link Change}.
-	 * @param expectedConflictDescription
-	 *            Expected description for the {@link Conflict}.
+	 * @param change                      {@link Change}.
+	 * @param expectedConflictDescription Expected description for the
+	 *                                    {@link Conflict}.
 	 */
 	private static void assertConflictForChange(Change<?> change, String expectedConflictDescription) {
 		// Ensure no change and correct conflict reporting issue
@@ -367,17 +376,12 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	/**
 	 * Undertakes the refactoring of the {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param oldUri
-	 *            Old URI.
-	 * @param oldPropertyNameValues
-	 *            Old {@link Property} name/value pairs.
-	 * @param newUri
-	 *            New URI.
-	 * @param newPropertyNameValues
-	 *            New {@link Property} name/value pairs.
+	 * @param oldUri                Old URI.
+	 * @param oldPropertyNameValues Old {@link Property} name/value pairs.
+	 * @param newUri                New URI.
+	 * @param newPropertyNameValues New {@link Property} name/value pairs.
 	 * @return {@link Change}.
-	 * @throws WoofTemplateExtensionException
-	 *             If failure in refactoring.
+	 * @throws WoofTemplateExtensionException If failure in refactoring.
 	 */
 	private Change<?> refactorTemplateExtension(String oldUri, String[] oldPropertyNameValues, String newUri,
 			String[] newPropertyNameValues) {
@@ -395,19 +399,14 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 	/**
 	 * Undertakes the refactoring of the {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param extensionSourceClassName
-	 *            {@link WoofTemplateExtensionSource} class name.
-	 * @param oldUri
-	 *            Old URI.
-	 * @param oldPropertyNameValues
-	 *            Old {@link Property} name/value pairs.
-	 * @param newUri
-	 *            New URI.
-	 * @param newPropertyNameValues
-	 *            New {@link Property} name/value pairs.
+	 * @param extensionSourceClassName {@link WoofTemplateExtensionSource} class
+	 *                                 name.
+	 * @param oldUri                   Old URI.
+	 * @param oldPropertyNameValues    Old {@link Property} name/value pairs.
+	 * @param newUri                   New URI.
+	 * @param newPropertyNameValues    New {@link Property} name/value pairs.
 	 * @return {@link Change}.
-	 * @throws WoofTemplateExtensionException
-	 *             If failure in refactoring.
+	 * @throws WoofTemplateExtensionException If failure in refactoring.
 	 */
 	private Change<?> refactorTemplateExtension(String extensionSourceClassName, String oldUri,
 			String[] oldPropertyNameValues, String newUri, String[] newPropertyNameValues) {
@@ -446,8 +445,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		/**
 		 * Creates the {@link Change}.
 		 * 
-		 * @param context
-		 *            {@link WoofTemplateExtensionChangeContext}.
+		 * @param context {@link WoofTemplateExtensionChangeContext}.
 		 * @return {@link Change}.
 		 */
 		Change<?> createChange(WoofTemplateExtensionChangeContext context);
@@ -466,8 +464,7 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		/**
 		 * Initiate.
 		 * 
-		 * @param change
-		 *            {@link Change}.
+		 * @param change {@link Change}.
 		 */
 		public MockChangeFactory(Change<?> change) {
 			this.change = change;
@@ -511,14 +508,10 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		/**
 		 * Resets for next test.
 		 * 
-		 * @param test
-		 *            {@link RefactorWoofTemplateExtensionLoaderTest}.
-		 * @param instantiateFailure
-		 *            Failure in instantiating the extension.
-		 * @param createFailure
-		 *            Failure in creating the extension.
-		 * @param changeFactory
-		 *            {@link ChangeFactory}.
+		 * @param test               {@link RefactorWoofTemplateExtensionLoaderTest}.
+		 * @param instantiateFailure Failure in instantiating the extension.
+		 * @param createFailure      Failure in creating the extension.
+		 * @param changeFactory      {@link ChangeFactory}.
 		 */
 		public static void reset(RefactorWoofTemplateExtensionLoaderTest test, Error instantiateFailure,
 				RuntimeException createFailure, ChangeFactory changeFactory) {
@@ -566,14 +559,11 @@ public class RefactorWoofTemplateExtensionLoaderTest extends OfficeFrameTestCase
 		/**
 		 * Ensure {@link WoofTemplateExtensionConfiguration} is as expected.
 		 * 
-		 * @param configurationType
-		 *            Type of {@link WoofTemplateExtensionConfiguration} (old or new).
-		 * @param configuration
-		 *            {@link WoofTemplateExtensionConfiguration} to test.
-		 * @param uri
-		 *            Expected URI.
-		 * @param properties
-		 *            Expected properties.
+		 * @param configurationType Type of {@link WoofTemplateExtensionConfiguration}
+		 *                          (old or new).
+		 * @param configuration     {@link WoofTemplateExtensionConfiguration} to test.
+		 * @param uri               Expected URI.
+		 * @param properties        Expected properties.
 		 */
 		private static void assertConfiguration(String configurationType,
 				WoofTemplateExtensionConfiguration configuration, String uri, String[] properties) {

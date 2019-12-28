@@ -31,7 +31,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.server.http.mock.MockProcessAwareContext;
+import net.officefloor.server.http.mock.MockManagedObjectContext;
 import net.officefloor.server.http.mock.MockServerHttpConnection;
 import net.officefloor.web.session.spi.CreateHttpSessionOperation;
 import net.officefloor.web.session.spi.HttpSessionIdGenerator;
@@ -101,7 +101,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		// Create the HTTP Session Managed Object
 		this.replayMockObjects();
 		HttpSessionManagedObject mo = new HttpSessionManagedObject("JSESSIONID", 0, -1, generator, -1, this.store);
-		mo.setProcessAwareContext(new MockProcessAwareContext());
+		mo.setManagedObjectContext(new MockManagedObjectContext());
 		mo.setAsynchronousContext(this.asynchronousContext);
 		mo.loadObjects(this.objectRegistry);
 		this.verifyMockObjects();
@@ -140,7 +140,7 @@ public class HttpSessionDependencyTest extends OfficeFrameTestCase {
 		// Create the HTTP Session Managed Object
 		this.replayMockObjects();
 		HttpSessionManagedObject mo = new HttpSessionManagedObject("JSESSIONID", 0, 1, null, 2, null);
-		mo.setProcessAwareContext(new MockProcessAwareContext());
+		mo.setManagedObjectContext(new MockManagedObjectContext());
 		mo.setAsynchronousContext(this.asynchronousContext);
 		mo.loadObjects(this.objectRegistry);
 		this.verifyMockObjects();

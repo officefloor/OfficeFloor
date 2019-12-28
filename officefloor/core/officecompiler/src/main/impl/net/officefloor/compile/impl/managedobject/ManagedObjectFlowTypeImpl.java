@@ -53,21 +53,16 @@ public class ManagedObjectFlowTypeImpl<F extends Enum<F>> implements ManagedObje
 	 * Initiate for a {@link ManagedObjectFlowType} invoked from a
 	 * {@link ManagedFunction} added by the {@link ManagedObjectSource}.
 	 * 
-	 * @param index
-	 *            Index identifying this flow.
-	 * @param argumentType
-	 *            Type of argument given to this flow. May be <code>null</code>.
-	 * @param key
-	 *            Key identifying this flow. May be <code>null</code>.
-	 * @param label
-	 *            Label describing this flow. May be <code>null</code>.
+	 * @param index        Index identifying this flow.
+	 * @param argumentType Type of argument given to this flow. May be
+	 *                     <code>null</code>.
+	 * @param key          Key identifying this flow. May be <code>null</code>.
+	 * @param label        Label describing this flow. May be <code>null</code>.
 	 */
 	public ManagedObjectFlowTypeImpl(int index, Class<?> argumentType, F key, String label) {
 		this.index = index;
+		this.argumentType = argumentType;
 		this.key = key;
-
-		// Ensure have argument type (default to void to indicate no argument)
-		this.argumentType = (argumentType != null ? argumentType : Void.class);
 
 		// Obtain the name for this flow
 		if (!CompileUtil.isBlank(label)) {

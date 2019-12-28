@@ -133,4 +133,12 @@ public interface ManagedObjectTypeBuilder {
 	 */
 	void addExtensionInterface(Class<?> extensionInterface);
 
+	/**
+	 * Builds the {@link ManagedObjectType}.
+	 * 
+	 * @param <D> Dependency keys.
+	 * @return {@link ManagedObjectType}.
+	 */
+	<D extends Enum<D>> ManagedObjectType<D> build();
+
 }

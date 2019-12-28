@@ -103,6 +103,7 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	/**
 	 * Initiate.
 	 * 
+	 * @param managedObjectSourceName     Name of the {@link ManagedObjectSource}.
 	 * @param isLoadingType               Indicates if loading type.
 	 * @param managedObjectName           Name of the {@link ManagedObject}.
 	 * @param managingOfficeConfiguration {@link ManagingOfficeConfiguration}.
@@ -112,10 +113,11 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> extends SourceCon
 	 * @param officeBuilder               {@link OfficeBuilder} for the office using
 	 *                                    the {@link ManagedObjectSource}.
 	 */
-	public ManagedObjectSourceContextImpl(boolean isLoadingType, String managedObjectName,
-			ManagingOfficeConfiguration<F> managingOfficeConfiguration, SourceProperties properties,
-			SourceContext sourceContext, ManagingOfficeBuilder<F> managingOfficeBuilder, OfficeBuilder officeBuilder) {
-		super(isLoadingType, sourceContext, properties);
+	public ManagedObjectSourceContextImpl(String managedObjectSourceName, boolean isLoadingType,
+			String managedObjectName, ManagingOfficeConfiguration<F> managingOfficeConfiguration,
+			SourceProperties properties, SourceContext sourceContext, ManagingOfficeBuilder<F> managingOfficeBuilder,
+			OfficeBuilder officeBuilder) {
+		super(managedObjectSourceName, isLoadingType, sourceContext, properties);
 		this.managedObjectName = managedObjectName;
 		this.managingOfficeConfiguration = managingOfficeConfiguration;
 		this.managingOfficeBuilder = managingOfficeBuilder;

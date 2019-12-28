@@ -18,6 +18,7 @@
 package net.officefloor.frame.api.managedobject.source;
 
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.executive.ExecutionStrategy;
 import net.officefloor.frame.api.function.FlowCallback;
@@ -49,6 +50,13 @@ import net.officefloor.frame.internal.structure.ProcessState;
  * @author Daniel Sagenschneider
  */
 public interface ManagedObjectExecuteContext<F extends Enum<F>> {
+
+	/**
+	 * Obtains the {@link Logger}.
+	 * 
+	 * @return {@link Logger}.
+	 */
+	Logger getLogger();
 
 	/**
 	 * Registers a start up {@link Flow}.

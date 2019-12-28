@@ -150,15 +150,6 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 		return executiveSource;
 	}
 
-	/**
-	 * Obtains the {@link PropertyList}.
-	 * 
-	 * @return {@link PropertyList}.
-	 */
-	private PropertyList getProperties() {
-		return this.context.overrideProperties(this, this.getNodeName(), this.propertyList);
-	}
-
 	/*
 	 * ==================== Node ============================
 	 */
@@ -211,6 +202,12 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 	@Override
 	public void buildExecutive(OfficeFloorBuilder builder, CompileContext compileContext) {
 
+		// Obtain qualified name
+		String qualifiedName = this.officeFloorNode.getQualifiedName(this.getNodeName());
+
+		// Obtain the overridden properties
+		PropertyList overriddenProperties = this.context.overrideProperties(this, qualifiedName, this.propertyList);
+
 		// Obtain the executive source
 		ExecutiveSource executiveSource = this.getExecutiveSource();
 		if (executiveSource == null) {
@@ -222,7 +219,7 @@ public class ExecutiveNodeImpl implements ExecutiveNode {
 
 		// Build the executive
 		ExecutiveBuilder<?> executiveBuilder = builder.setExecutive(executiveSource);
-		for (Property property : this.getProperties()) {
+		for (Property property : overriddenProperties) {
 			executiveBuilder.addProperty(property.getName(), property.getValue());
 		}
 	}

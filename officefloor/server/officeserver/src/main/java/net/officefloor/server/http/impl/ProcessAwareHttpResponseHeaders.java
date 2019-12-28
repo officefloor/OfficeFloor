@@ -21,8 +21,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderName;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -31,7 +32,7 @@ import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.WritableHttpHeader;
 
 /**
- * {@link ProcessAwareContext} {@link HttpResponseHeaders}.
+ * {@link ProcessState} aware {@link HttpResponseHeaders}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -48,17 +49,16 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	private WritableHttpHeader tail = null;
 
 	/**
-	 * {@link ProcessAwareContext}.
+	 * {@link ManagedObjectContext}.
 	 */
-	private final ProcessAwareContext context;
+	private final ManagedObjectContext context;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param context
-	 *            {@link ProcessAwareContext}.
+	 * @param context {@link ManagedObjectContext}.
 	 */
-	public ProcessAwareHttpResponseHeaders(ProcessAwareContext context) {
+	public ProcessAwareHttpResponseHeaders(ManagedObjectContext context) {
 		this.context = context;
 	}
 
@@ -77,8 +77,7 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	/**
 	 * Removes the {@link HttpHeader}.
 	 * 
-	 * @param header
-	 *            {@link WritableHttpHeader} to remove.
+	 * @param header {@link WritableHttpHeader} to remove.
 	 * @return Previous {@link WritableHttpHeader}. May be <code>null</code> if
 	 *         head.
 	 */
@@ -116,12 +115,9 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	/**
 	 * Easy access to running {@link ProcessSafeOperation}.
 	 * 
-	 * @param operation
-	 *            {@link ProcessSafeOperation}.
+	 * @param operation {@link ProcessSafeOperation}.
 	 * @return Result of {@link ProcessSafeOperation}.
-	 * @throws T
-	 *             Potential {@link Throwable} from
-	 *             {@link ProcessSafeOperation}.
+	 * @throws T Potential {@link Throwable} from {@link ProcessSafeOperation}.
 	 */
 	private final <R, T extends Throwable> R safe(ProcessSafeOperation<R, T> operation) throws T {
 		return this.context.run(operation);
@@ -130,10 +126,8 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	/**
 	 * Safely adds a {@link HttpHeader}.
 	 * 
-	 * @param headerName
-	 *            {@link HttpHeaderName}.
-	 * @param headerValue
-	 *            {@link HttpHeaderValue}.
+	 * @param headerName  {@link HttpHeaderName}.
+	 * @param headerValue {@link HttpHeaderValue}.
 	 * @return Added {@link HttpHeader}.
 	 */
 	private final HttpHeader safeAddHeader(HttpHeaderName headerName, HttpHeaderValue headerValue) {
@@ -153,8 +147,7 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 	}
 
 	/**
-	 * Obtains the {@link Iterator} to all the {@link WritableHttpHeader}
-	 * instances.
+	 * Obtains the {@link Iterator} to all the {@link WritableHttpHeader} instances.
 	 * 
 	 * @return {@link Iterator} to all the {@link WritableHttpHeader} instances.
 	 */
@@ -209,8 +202,7 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param unsafeIterator
-		 *            Unsafe {@link Iterator}.
+		 * @param unsafeIterator Unsafe {@link Iterator}.
 		 */
 		private SafeIterator(Iterator<? extends HttpHeader> unsafeIterator) {
 			this.unsafeIterator = unsafeIterator;
@@ -219,12 +211,9 @@ public class ProcessAwareHttpResponseHeaders implements HttpResponseHeaders {
 		/**
 		 * Easy access to running {@link ProcessSafeOperation}.
 		 * 
-		 * @param operation
-		 *            {@link ProcessSafeOperation}.
+		 * @param operation {@link ProcessSafeOperation}.
 		 * @return Result of {@link ProcessSafeOperation}.
-		 * @throws T
-		 *             Potential {@link Throwable} from
-		 *             {@link ProcessSafeOperation}.
+		 * @throws T Potential {@link Throwable} from {@link ProcessSafeOperation}.
 		 */
 		private final <R, T extends Throwable> R safe(ProcessSafeOperation<R, T> operation) throws T {
 			return ProcessAwareHttpResponseHeaders.this.safe(operation);

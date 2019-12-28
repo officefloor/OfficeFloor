@@ -52,15 +52,6 @@ public interface SupplierNode extends Node, OfficeFloorSupplier, OfficeSupplier 
 	void initialise(String supplierSourceClassName, SupplierSource supplierSource);
 
 	/**
-	 * Obtain the qualified name.
-	 * 
-	 * @param simpleName Simple name to qualify with the {@link SupplierSource} name
-	 *                   space.
-	 * @return Qualified name.
-	 */
-	String getQualifiedName(String simpleName);
-
-	/**
 	 * Obtains the parent {@link OfficeNode}.
 	 * 
 	 * @return Parent {@link OfficeNode} or <code>null</code> if configured at the

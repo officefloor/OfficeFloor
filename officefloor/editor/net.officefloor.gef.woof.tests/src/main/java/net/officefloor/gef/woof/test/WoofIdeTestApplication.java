@@ -24,7 +24,6 @@ import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.ide.AbstractIdeTestApplication;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.gef.woof.WoofEditor;
-import net.officefloor.plugin.clazz.FlowInterface;
 import net.officefloor.plugin.governance.clazz.ClassGovernanceSource;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
@@ -118,7 +117,7 @@ public class WoofIdeTestApplication extends AbstractIdeTestApplication<WoofModel
 			model.addLink(new WoofTemplateLinkModel("link", false));
 			model.addLink(new WoofTemplateLinkModel("secure", true));
 			model.setTemplateLocation("net/officefloor/gef/woof/test/Template.html");
-			model.setTemplateClassName(MockLogic.class.getName());
+			model.setTemplateClassName(Template.class.getName());
 			model.setRedirectValuesFunction("redirect");
 			model.setTemplateContentType("application/text");
 			model.setTemplateCharset("UTF-8");
@@ -126,38 +125,6 @@ public class WoofIdeTestApplication extends AbstractIdeTestApplication<WoofModel
 			model.addRenderHttpMethod(new WoofTemplateRenderHttpMethodModel("POST"));
 			model.addRenderHttpMethod(new WoofTemplateRenderHttpMethodModel("PUT"));
 		});
-	}
-
-	/**
-	 * Mock section {@link Class} for testing.
-	 */
-	public static class MockSection {
-
-		@FlowInterface
-		public static interface Flows {
-			void flow();
-		}
-
-		public void input(Flows flows) {
-		}
-	}
-
-	/**
-	 * Mock logic class for testing.
-	 */
-	public static class MockLogic {
-
-		@FlowInterface
-		public static interface Flows {
-			void flow();
-		}
-
-		public MockLogic redirect() {
-			return this;
-		}
-
-		public void getTemplate(Flows flows) {
-		}
 	}
 
 }

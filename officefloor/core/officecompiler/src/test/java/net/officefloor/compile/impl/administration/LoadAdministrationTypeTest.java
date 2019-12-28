@@ -20,6 +20,7 @@ package net.officefloor.compile.impl.administration;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import javax.transaction.xa.XAResource;
 
@@ -136,6 +137,26 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 			assertEquals("Incorrect property ONE", "1", properties.get("ONE"));
 			assertEquals("Incorrect property TWO", "2", properties.get("TWO"));
 		}, "ONE", "1", "TWO", "2");
+	}
+
+	/**
+	 * Ensure correct {@link Logger} name.
+	 */
+	public void testLogger() {
+
+		// Record basic meta-data
+		this.recordReturn(this.metaData, this.metaData.getAdministrationFactory(), this.factory);
+		this.recordReturn(this.metaData, this.metaData.getExtensionInterface(), XAResource.class);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(), new AdministrationFlowMetaData[0]);
+		this.recordReturn(this.metaData, this.metaData.getEscalationMetaData(),
+				new AdministrationEscalationMetaData[0]);
+		this.recordReturn(this.metaData, this.metaData.getGovernanceMetaData(),
+				new AdministrationGovernanceMetaData[0]);
+
+		// Attempt to load
+		MockAdministrationSource.loggerName = null;
+		this.loadAdministrationType(true, null);
+		assertEquals("Incorrect logger name", OfficeFloorCompiler.TYPE, MockAdministrationSource.loggerName);
 	}
 
 	/**
@@ -264,9 +285,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure can load simple {@link Administration} (without
-	 * {@link AdministrationFlowMetaData},
-	 * {@link AdministrationEscalationMetaData} nor
-	 * {@link AdministrationGovernanceMetaData}).
+	 * {@link AdministrationFlowMetaData}, {@link AdministrationEscalationMetaData}
+	 * nor {@link AdministrationGovernanceMetaData}).
 	 */
 	public void testSimpleAdministration() {
 
@@ -288,8 +308,7 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link AdministrationFlowMetaData}
-	 * array.
+	 * Ensure issue if <code>null</code> {@link AdministrationFlowMetaData} array.
 	 */
 	public void testNullFlowMetaDataArray() {
 
@@ -303,8 +322,7 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link AdministrationFlowMetaData}
-	 * entry.
+	 * Ensure issue if <code>null</code> {@link AdministrationFlowMetaData} entry.
 	 */
 	public void testNullFlowMetaData() {
 
@@ -444,8 +462,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code>
-	 * {@link AdministrationEscalationMetaData} array.
+	 * Ensure issue if <code>null</code> {@link AdministrationEscalationMetaData}
+	 * array.
 	 */
 	public void testNullEscalationMetaDataArray() {
 
@@ -460,8 +478,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure no issue if <code>null</code>
-	 * {@link AdministrationEscalationMetaData} entry.
+	 * Ensure no issue if <code>null</code> {@link AdministrationEscalationMetaData}
+	 * entry.
 	 */
 	public void testNullEscalationMetaData() {
 
@@ -565,8 +583,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code>
-	 * {@link AdministrationGovernanceMetaData} array.
+	 * Ensure issue if <code>null</code> {@link AdministrationGovernanceMetaData}
+	 * array.
 	 */
 	public void testNullGovernanceMetaDataArray() {
 
@@ -582,8 +600,8 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code>
-	 * {@link AdministrationGovernanceMetaData} entry.
+	 * Ensure issue if <code>null</code> {@link AdministrationGovernanceMetaData}
+	 * entry.
 	 */
 	public void testNullGovernanceMetaData() {
 
@@ -600,8 +618,7 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can load with empty {@link AdministrationGovernanceMetaData}
-	 * details.
+	 * Ensure can load with empty {@link AdministrationGovernanceMetaData} details.
 	 */
 	public void testEmptyGovernanceMetaDataDetails() {
 
@@ -788,13 +805,10 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link AdministrationType}.
 	 * 
-	 * @param isExpectedToLoad
-	 *            Flag indicating if expecting to load the
-	 *            {@link FunctionNamespaceType}.
-	 * @param init
-	 *            {@link Init}.
-	 * @param propertyNameValuePairs
-	 *            {@link Property} name value pairs.
+	 * @param isExpectedToLoad       Flag indicating if expecting to load the
+	 *                               {@link FunctionNamespaceType}.
+	 * @param init                   {@link Init}.
+	 * @param propertyNameValuePairs {@link Property} name value pairs.
 	 * @return Loaded {@link AdministrationType}.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -841,8 +855,7 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		/**
 		 * Implemented to init the {@link AdministrationSource}.
 		 * 
-		 * @param context
-		 *            {@link AdministrationSourceContext}.
+		 * @param context {@link AdministrationSourceContext}.
 		 */
 		void init(AdministrationSourceContext context);
 	}
@@ -875,16 +888,21 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 		public static AdministrationSourceMetaData metaData;
 
 		/**
+		 * Name of {@link Logger}.
+		 */
+		public static String loggerName;
+
+		/**
 		 * Resets the state for next test.
 		 * 
-		 * @param metaData
-		 *            {@link AdministrationSourceMetaData}.
+		 * @param metaData {@link AdministrationSourceMetaData}.
 		 */
 		public static void reset(AdministrationSourceMetaData<?, ?, ?> metaData) {
 			instantiateFailure = null;
 			init = null;
 			metaDataFailure = null;
 			MockAdministrationSource.metaData = metaData;
+			loggerName = null;
 		}
 
 		/**
@@ -909,6 +927,9 @@ public class LoadAdministrationTypeTest extends OfficeFrameTestCase {
 
 		@Override
 		public AdministrationSourceMetaData init(AdministrationSourceContext context) throws Exception {
+
+			// Capture the logger name
+			loggerName = context.getLogger().getName();
 
 			// Run the init if available
 			if (init != null) {

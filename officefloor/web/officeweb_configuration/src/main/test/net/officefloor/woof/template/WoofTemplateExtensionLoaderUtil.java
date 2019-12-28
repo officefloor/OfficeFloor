@@ -57,8 +57,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Validates the {@link WoofTemplateExtensionSourceSpecification} for the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param                                  <S>
-	 *                                         {@link WoofTemplateExtensionSource}
+	 * @param <S>                              {@link WoofTemplateExtensionSource}
 	 *                                         type.
 	 * @param woofTemplateExtensionSourceClass {@link WoofTemplateExtensionSource}
 	 *                                         class.
@@ -75,8 +74,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Validates the {@link WoofTemplateExtensionSourceSpecification} for the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param                                  <S>
-	 *                                         {@link WoofTemplateExtensionSource}
+	 * @param <S>                              {@link WoofTemplateExtensionSource}
 	 *                                         type.
 	 * @param woofTemplateExtensionSourceClass {@link WoofTemplateExtensionSource}
 	 *                                         class.
@@ -135,8 +133,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	/**
 	 * Creates the {@link Change} for refactoring.
 	 * 
-	 * @param                                  <S>
-	 *                                         {@link WoofTemplateExtensionSource}
+	 * @param <S>                              {@link WoofTemplateExtensionSource}
 	 *                                         type.
 	 * @param woofTemplateExtensionSourceClass {@link WoofTemplateExtensionSource}
 	 *                                         class.
@@ -156,8 +153,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	/**
 	 * Creates the {@link Change} for refactoring.
 	 * 
-	 * @param                                  <S>
-	 *                                         {@link WoofTemplateExtensionSource}
+	 * @param <S>                              {@link WoofTemplateExtensionSource}
 	 *                                         type.
 	 * @param woofTemplateExtensionSourceClass {@link WoofTemplateExtensionSource}
 	 *                                         class.
@@ -267,7 +263,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Undertakes the extending of the {@link WebTemplate} by the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param                      <S> {@link WoofTemplateExtensionSource} type.
+	 * @param <S>                  {@link WoofTemplateExtensionSource} type.
 	 * @param extensionSourceClass {@link WoofTemplateExtensionSource} class.
 	 * @param applicationPath      Application path to the {@link WebTemplate}.
 	 * @param template             {@link WebTemplate}.
@@ -287,7 +283,7 @@ public class WoofTemplateExtensionLoaderUtil {
 	 * Undertakes the extending of the {@link WebTemplate} by the
 	 * {@link WoofTemplateExtensionSource}.
 	 * 
-	 * @param                      <S> {@link WoofTemplateExtensionSource} type.
+	 * @param <S>                  {@link WoofTemplateExtensionSource} type.
 	 * @param extensionSourceClass {@link WoofTemplateExtensionSource} class.
 	 * @param templatePath         URL path to the {@link WebTemplate}.
 	 * @param template             {@link WebTemplate}.
@@ -344,7 +340,8 @@ public class WoofTemplateExtensionLoaderUtil {
 		}
 
 		// Return the source context
-		return new SourceContextImpl(false, classLoader, new MockClockFactory(), resourceSources);
+		return new SourceContextImpl(WoofTemplateExtensionLoaderUtil.class.getName(), false, classLoader,
+				new MockClockFactory(), resourceSources);
 	}
 
 	/**
