@@ -235,7 +235,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	/**
 	 * Timeout in milliseconds for synchronous send.
 	 */
-	private int timeout = 1000;
+	private int timeout = 3000; // allow reasonably generous time for busy build servers
 
 	/**
 	 * Instantiated via static methods or extending.
@@ -1321,7 +1321,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 					// Determine if timed out
 					long runTimeInSeconds = (System.currentTimeMillis() - startTime);
 					if (runTimeInSeconds > maxWaitTimeInMilliseconds) {
-						throw new Error("Timed out waiting for " + MockHttpResponse.class.getSimpleName());
+						throw new Error("Timed out waiting for " + MockHttpResponse.class.getSimpleName() + " (waited "
+								+ maxWaitTimeInMilliseconds + " milliseconds)");
 					}
 
 					// Wait some time for response
