@@ -161,16 +161,6 @@
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.polyglot</groupId>
-				<artifactId>officepolyglot_script</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
-				<groupId>net.officefloor.polyglot</groupId>
-				<artifactId>officepolyglot_javascript</artifactId>
-				<version>${revision}</version>
-			</dependency>
-			<dependency>
 				<groupId>net.officefloor.kotlin</groupId>
 				<artifactId>kotlin</artifactId>
 				<version>${revision}</version>
@@ -198,6 +188,21 @@
 			<dependency>
 				<groupId>net.officefloor.scala</groupId>
 				<artifactId>officescala_zio</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.script</groupId>
+				<artifactId>script</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.script</groupId>
+				<artifactId>officescript</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.javascript</groupId>
+				<artifactId>officejavascript</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<!-- Server -->

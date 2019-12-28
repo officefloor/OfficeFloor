@@ -4,11 +4,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.polyglot</groupId>
-		<artifactId>polyglot</artifactId>
+		<groupId>net.officefloor.script</groupId>
+		<artifactId>script</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officepolyglot_script</artifactId>
+	<artifactId>officescript</artifactId>
 	<name>PolyglotScript</name>
 	<description>OfficeFloor plug-in for using ScriptEngine</description>
 	<properties>

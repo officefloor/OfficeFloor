@@ -4,11 +4,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.officefloor.polyglot</groupId>
-		<artifactId>polyglot</artifactId>
+		<groupId>net.officefloor.script</groupId>
+		<artifactId>script</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officepolyglot_javascript</artifactId>
+	<groupId>net.officefloor.javascript</groupId>
+	<artifactId>officejavascript</artifactId>
 	<name>JavaScript</name>
 	<description>OfficeFloor plug-in for using JavaScript</description>
 	<properties>
@@ -16,8 +17,8 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor.polyglot</groupId>
-			<artifactId>officepolyglot_script</artifactId>
+			<groupId>net.officefloor.script</groupId>
+			<artifactId>officescript</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.graalvm.js</groupId>
