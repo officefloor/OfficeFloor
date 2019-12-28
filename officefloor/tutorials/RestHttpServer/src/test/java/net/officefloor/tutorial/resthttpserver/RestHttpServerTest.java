@@ -24,9 +24,9 @@ import static org.junit.Assert.fail;
 import java.sql.Connection;
 
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,19 +49,21 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 public class RestHttpServerTest {
 
 	// START SNIPPET: calling
-	@ClassRule
-	public static DataSourceRule dataSource = new DataSourceRule("datasource.properties");
+	private final DataSourceRule dataSource = new DataSourceRule("datasource.properties");
 
-	@Rule
-	public EntityManagerRule entityManager = new EntityManagerRule("entitymanager.properties",
+	private final EntityManagerRule entityManager = new EntityManagerRule("entitymanager.properties",
 			new HibernateJpaManagedObjectSource(), dataSource);
 
+	private final MockWoofServerRule server = new MockWoofServerRule();
+
 	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	public final RuleChain ordered = RuleChain.outerRule(this.dataSource).around(this.entityManager)
+			.around(this.server);
 
 	@Before
 	public void cleanDatabase() throws Exception {
 		try (Connection connection = dataSource.getConnection()) {
+			new Setup().setup(connection);
 			connection.createStatement().executeUpdate("TRUNCATE TABLE VEHICLE");
 		}
 	}

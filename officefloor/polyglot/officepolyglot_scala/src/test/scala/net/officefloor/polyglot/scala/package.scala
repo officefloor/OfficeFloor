@@ -1,15 +1,15 @@
 package net.officefloor.polyglot
 
-import net.officefloor.polyglot.test.{CollectionTypes, JavaObject, MockHttpObject, MockHttpParameters, ObjectTypes, ParameterTypes, PrimitiveTypes, VariableTypes, WebTypes}
-import net.officefloor.plugin.variable.{In, Out, Val, Var}
-import net.officefloor.plugin.section.clazz.{Next, Parameter}
-import net.officefloor.web.{HttpCookieParameter, HttpHeaderParameter, HttpPathParameter, HttpQueryParameter, ObjectResponse}
-import net.officefloor.frame.api.function.AsynchronousFlow
-import net.officefloor.plugin.clazz.{FlowInterface, Qualified}
 import java.io.IOException
 
-import org.junit.Assert
+import net.officefloor.frame.api.function.AsynchronousFlow
+import net.officefloor.plugin.clazz.Qualified
+import net.officefloor.plugin.section.clazz.Parameter
+import net.officefloor.plugin.variable.{In, Out, Val, Var}
+import net.officefloor.polyglot.test._
 import net.officefloor.server.http.HttpException
+import net.officefloor.web._
+import org.junit.Assert
 
 package object scala {
 

@@ -233,9 +233,25 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> serviceInput;
 
 	/**
+	 * Timeout in milliseconds for synchronous send.
+	 */
+	private int timeout = 3000; // allow reasonably generous time for busy build servers
+
+	/**
 	 * Instantiated via static methods or extending.
 	 */
 	protected MockHttpServer() {
+	}
+
+	/**
+	 * Specifies the timeout for synchronous send.
+	 * 
+	 * @param timeout Timeout in milliseconds.
+	 * @return <code>this</code>.
+	 */
+	public MockHttpServer timeout(int timeout) {
+		this.timeout = timeout;
+		return this;
 	}
 
 	/**
@@ -377,7 +393,7 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 		this.send(request, callback);
 
 		// Block waiting for response
-		return callback.waitForResponse(1000);
+		return callback.waitForResponse(this.timeout);
 	}
 
 	/**
@@ -1305,7 +1321,8 @@ public class MockHttpServer implements HttpServerLocation, HttpServerImplementat
 					// Determine if timed out
 					long runTimeInSeconds = (System.currentTimeMillis() - startTime);
 					if (runTimeInSeconds > maxWaitTimeInMilliseconds) {
-						throw new Error("Timed out waiting for " + MockHttpResponse.class.getSimpleName());
+						throw new Error("Timed out waiting for " + MockHttpResponse.class.getSimpleName() + " (waited "
+								+ maxWaitTimeInMilliseconds + " milliseconds)");
 					}
 
 					// Wait some time for response
