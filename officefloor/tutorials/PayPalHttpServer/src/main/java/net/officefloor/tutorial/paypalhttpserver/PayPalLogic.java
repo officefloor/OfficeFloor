@@ -20,8 +20,8 @@ package net.officefloor.tutorial.paypalhttpserver;
 import java.io.IOException;
 import java.util.Arrays;
 
-import com.braintreepayments.http.HttpResponse;
 import com.paypal.core.PayPalHttpClient;
+import com.paypal.http.HttpResponse;
 import com.paypal.orders.AmountBreakdown;
 import com.paypal.orders.AmountWithBreakdown;
 import com.paypal.orders.Item;
