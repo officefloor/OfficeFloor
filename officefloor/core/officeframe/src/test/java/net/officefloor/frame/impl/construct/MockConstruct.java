@@ -22,10 +22,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Logger;
 
 import org.junit.Assert;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.GovernanceBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -188,7 +188,7 @@ public class MockConstruct {
 		return new ManagedObjectMetaDataImpl<>(boundManagedObjectName, objectType, 0,
 				new ConstructManagedObjectSource<>(), null, false,
 				assetManagerFactory.createAssetManager(AssetType.MANAGED_OBJECT, boundManagedObjectName, "mock", null),
-				false, null, false, null, 0, null, Logger.getLogger(boundManagedObjectName));
+				false, null, false, null, 0, null, OfficeFrame.getLogger(boundManagedObjectName));
 	}
 
 	/**
@@ -1632,7 +1632,7 @@ public class MockConstruct {
 			this.assertNotBuilt();
 			ManagedFunctionMetaDataImpl<?, ?> function = new ManagedFunctionMetaDataImpl<>(functionName,
 					() -> (context) -> null, new Object[0], parameterType, null, new ManagedObjectIndex[0],
-					new ManagedObjectMetaData[0], new boolean[0], 1, null, Logger.getLogger(functionName));
+					new ManagedObjectMetaData[0], new boolean[0], 1, null, OfficeFrame.getLogger(functionName));
 			this.functions.add(function);
 			return function;
 		}

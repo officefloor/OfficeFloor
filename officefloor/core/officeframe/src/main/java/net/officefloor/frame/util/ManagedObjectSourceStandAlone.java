@@ -169,7 +169,7 @@ public class ManagedObjectSourceStandAlone {
 
 		// Obtain the logger
 		final String managedObjectSourceName = this.getClass().getName();
-		Logger logger = Logger.getLogger(managedObjectSourceName);
+		Logger logger = OfficeFrame.getLogger(managedObjectSourceName);
 
 		// Start the managed object source
 		managedObjectSource.start(new LoadExecuteContext(logger));

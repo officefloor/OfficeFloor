@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.construct.governance;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.AsynchronousFlow;
@@ -129,7 +130,7 @@ public class RawGovernanceMetaDataFactory {
 				governanceName, AsynchronousFlow.class.getSimpleName(), issues);
 
 		// Create the logger
-		Logger logger = Logger.getLogger(governanceName);
+		Logger logger = OfficeFrame.getLogger(governanceName);
 
 		// Create the Governance Meta-Data
 		GovernanceMetaDataImpl<E, F> governanceMetaData = new GovernanceMetaDataImpl<>(governanceName,

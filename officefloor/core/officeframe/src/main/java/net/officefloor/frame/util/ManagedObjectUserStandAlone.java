@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
@@ -265,7 +266,7 @@ public class ManagedObjectUserStandAlone
 
 	@Override
 	public Logger getLogger() {
-		return Logger.getLogger(this.getBoundName());
+		return OfficeFrame.getLogger(this.getBoundName());
 	}
 
 	@Override

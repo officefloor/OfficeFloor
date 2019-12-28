@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.governance.Governance;
@@ -229,7 +230,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * @return {@link Logger} for the {@link ManagedObjectExecuteContext}..
 	 */
 	public Logger getExecuteLogger() {
-		return Logger.getLogger(this.managedObjectName);
+		return OfficeFrame.getLogger(this.managedObjectName);
 	}
 
 	/**
@@ -293,7 +294,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 		}
 
 		// Create the logger
-		Logger logger = Logger.getLogger(boundName);
+		Logger logger = OfficeFrame.getLogger(boundName);
 
 		// Create the managed object meta-data
 		ManagedObjectMetaDataImpl<O> moMetaData = new ManagedObjectMetaDataImpl<>(boundName, this.objectType,

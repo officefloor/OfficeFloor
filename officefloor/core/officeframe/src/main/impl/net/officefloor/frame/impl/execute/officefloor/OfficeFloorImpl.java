@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
@@ -65,7 +66,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 	/**
 	 * {@link Logger} of the {@link OfficeFloor} framework.
 	 */
-	private static final Logger logger = Logger.getLogger(OfficeFloor.class.getName());
+	private static final Logger logger = OfficeFrame.getLogger(OfficeFloor.class.getName());
 
 	/**
 	 * {@link OfficeFloorMetaData} for this {@link OfficeFloor}.
