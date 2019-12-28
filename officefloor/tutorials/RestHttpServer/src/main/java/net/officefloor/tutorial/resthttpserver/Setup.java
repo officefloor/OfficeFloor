@@ -31,9 +31,15 @@ public class Setup {
 		try {
 			connection.createStatement().executeQuery("SELECT * FROM VEHICLE");
 			return; // table exists
-		} catch (SQLException ex) {
-			connection.createStatement()
-					.executeUpdate("CREATE TABLE VEHICLE ( ID IDENTITY, VEHICLE_TYPE VARCHAR(10), WHEELS INT)");
+		} catch (SQLException exCreate) {
+			try {
+				connection.createStatement()
+						.executeUpdate("CREATE TABLE VEHICLE ( ID IDENTITY, VEHICLE_TYPE VARCHAR(10), WHEELS INT)");
+			} catch (SQLException exConcurrentSetup) {
+				if (!exConcurrentSetup.getMessage().contains("Table \"VEHICLE\" already exists")) {
+					throw exConcurrentSetup; // failure creating table
+				}
+			}
 		}
 	}
 
