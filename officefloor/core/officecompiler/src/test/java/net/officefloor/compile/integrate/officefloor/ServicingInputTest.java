@@ -30,8 +30,9 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.manage.FunctionManager;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
@@ -252,15 +253,15 @@ public class ServicingInputTest extends OfficeFrameTestCase {
 		}
 	}
 
-	private static class ServiceInputObject implements NameAwareManagedObject {
+	private static class ServiceInputObject implements ContextAwareManagedObject {
 
 		private String name;
 
 		private String value = null;
 
 		@Override
-		public void setBoundManagedObjectName(String boundManagedObjectName) {
-			this.name = boundManagedObjectName;
+		public void setManagedObjectContext(ManagedObjectContext context) {
+			this.name = context.getBoundName();
 		}
 
 		@Override

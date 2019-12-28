@@ -35,7 +35,7 @@ import net.officefloor.server.http.HttpResponseCookies;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
-import net.officefloor.server.http.mock.MockProcessAwareContext;
+import net.officefloor.server.http.mock.MockManagedObjectContext;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.StreamBuffer;
 
@@ -50,7 +50,7 @@ public class ProcessAwareHttpResponseCookiesTest extends OfficeFrameTestCase {
 	 * {@link ProcessAwareHttpResponseCookies} to be tested.
 	 */
 	private final ProcessAwareHttpResponseCookies cookies = new ProcessAwareHttpResponseCookies(
-			new MockProcessAwareContext());
+			new MockManagedObjectContext());
 
 	/**
 	 * Expire time.

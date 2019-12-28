@@ -31,17 +31,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.ManagedObjectSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.managedobject.clazz.DependencyMetaData.DependencyType;
 
 /**
  * {@link ManagedObjectSource} that manages an {@link Object} via reflection.
@@ -54,7 +57,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	/**
 	 * Convenience method to aid in unit testing.
 	 * 
-	 * @param                             <T> {@link Class} type.
+	 * @param <T>                         {@link Class} type.
 	 * @param clazz                       {@link Class} to instantiate and have
 	 *                                    dependencies injected.
 	 * @param dependencyNameObjectListing Listing of dependency name and dependency
@@ -86,7 +89,7 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 	 * a specific constructor is provided. This method enables instantiation and
 	 * injecting of dependencies to enable unit testing.
 	 * 
-	 * @param              <T> {@link Class} type.
+	 * @param <T>          {@link Class} type.
 	 * @param clazz        {@link Class} to instantiate and have dependencies
 	 *                     injected.
 	 * @param dependencies Map of dependencies by the dependency name. The
@@ -209,12 +212,26 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		int dependencyIndex = 0;
 		for (Field dependencyField : dependencyFields) {
 
-			// Obtain the name for the dependency
-			String dependencyName = retrieveDependencyName(dependencyField, dependencyFields);
-
-			// Add the dependency meta-data, ensuring can access field
+			// Ensure field is accessible (for injection)
 			dependencyField.setAccessible(true);
-			dependencyListing.add(new DependencyMetaData(dependencyName, dependencyIndex++, dependencyField));
+
+			// Obtain the required type for the field
+			Class<?> requiredType = dependencyField.getType();
+
+			// Determine if requiring managed object context
+			if (requiredType.isAssignableFrom(ManagedObjectContext.class)) {
+				// Inject the Managed Object Context
+				dependencyListing.add(new DependencyMetaData(DependencyType.MANAGE_OBJECT_CONTEXT, dependencyField));
+
+			} else if (requiredType.isAssignableFrom(Logger.class)) {
+				// Inject Logger from Managed Object Context
+				dependencyListing.add(new DependencyMetaData(DependencyType.LOGGER, dependencyField));
+
+			} else {
+				// Inject dependent object
+				String dependencyName = retrieveDependencyName(dependencyField, dependencyFields);
+				dependencyListing.add(new DependencyMetaData(dependencyName, dependencyIndex++, dependencyField));
+			}
 		}
 		DependencyMetaData[] dependencyMetaData = dependencyListing
 				.toArray(new DependencyMetaData[dependencyListing.size()]);
@@ -266,17 +283,22 @@ public class ClassManagedObjectSource extends AbstractManagedObjectSource<Indexe
 		// Create the dependency meta-data and register the dependencies
 		this.dependencyMetaData = this.extractDependencyMetaData(objectClass);
 		for (DependencyMetaData dependency : this.dependencyMetaData) {
-			// Register the dependency
-			DependencyLabeller<Indexed> labeller = context.addDependency(dependency.field.getType());
 
-			// Use field name as name of dependency
-			labeller.setLabel(dependency.name);
+			// Only register dependencies
+			if (DependencyType.DEPENDENCY.equals(dependency.type)) {
 
-			// Determine type qualifier
-			String typeQualifier = dependency.getTypeQualifier();
-			if (!CompileUtil.isBlank(typeQualifier)) {
-				// Specify the type qualifier
-				labeller.setTypeQualifier(typeQualifier);
+				// Register the dependency
+				DependencyLabeller<Indexed> labeller = context.addDependency(dependency.field.getType());
+
+				// Use field name as name of dependency
+				labeller.setLabel(dependency.name);
+
+				// Determine type qualifier
+				String typeQualifier = dependency.getTypeQualifier();
+				if (!CompileUtil.isBlank(typeQualifier)) {
+					// Specify the type qualifier
+					labeller.setTypeQualifier(typeQualifier);
+				}
 			}
 		}
 

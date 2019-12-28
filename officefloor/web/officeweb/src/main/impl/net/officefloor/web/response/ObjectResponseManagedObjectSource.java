@@ -24,11 +24,11 @@ import java.util.List;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.api.source.PrivateSource;
@@ -200,13 +200,13 @@ public class ObjectResponseManagedObjectSource
 	/**
 	 * {@link ObjectResponse} {@link ManagedObject}.
 	 */
-	private class ObjectResponseManagedObject<T> implements ProcessAwareManagedObject,
+	private class ObjectResponseManagedObject<T> implements ContextAwareManagedObject,
 			CoordinatingManagedObject<ObjectResponseDependencies>, ObjectResponse<T> {
 
 		/**
-		 * {@link ProcessAwareContext}.
+		 * {@link ManagedObjectContext}.
 		 */
-		private ProcessAwareContext context;
+		private ManagedObjectContext context;
 
 		/**
 		 * {@link ServerHttpConnection}.
@@ -223,7 +223,7 @@ public class ObjectResponseManagedObjectSource
 		 */
 
 		@Override
-		public void setProcessAwareContext(ProcessAwareContext context) {
+		public void setManagedObjectContext(ManagedObjectContext context) {
 			this.context = context;
 		}
 

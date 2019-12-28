@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,26 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.server.http.mock;
-
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+package net.officefloor.frame.api.managedobject;
 
 /**
- * Mock {@link ProcessAwareContext} that just runs the
- * {@link ProcessSafeOperation}.
+ * Context aware {@link ManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */
-public class MockProcessAwareContext implements ProcessAwareContext {
+public interface ContextAwareManagedObject extends ManagedObject {
 
-	/*
-	 * =================== ProcessAwareContext =====================
+	/**
+	 * Provides the {@link ManagedObjectContext} to the {@link ManagedObject}.
+	 * 
+	 * @param context {@link ManagedObjectContext}.
 	 */
-
-	@Override
-	public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
-		return operation.run();
-	}
-
+	void setManagedObjectContext(ManagedObjectContext context);
 }

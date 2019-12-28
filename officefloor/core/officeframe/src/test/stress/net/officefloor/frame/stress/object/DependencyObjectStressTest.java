@@ -20,14 +20,13 @@ package net.officefloor.frame.stress.object;
 import junit.framework.TestSuite;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.stress.AbstractStressTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
- * Stress tests the {@link NameAwareManagedObject}.
+ * Stress tests the {@link CoordinateManagedObject}.
  * 
  * @author Daniel Sagenschneider
  */

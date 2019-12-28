@@ -58,12 +58,11 @@ import net.officefloor.frame.api.manage.ProcessManager;
 import net.officefloor.frame.api.manage.UnknownFunctionException;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -553,8 +552,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * {@link ManagedObject} providing <code>null</code> value. Must implement all
 	 * {@link ManagedObject} interfaces to avoid {@link ClassCastException}.
 	 */
-	private static class NullManagedObject implements ManagedObject, NameAwareManagedObject,
-			CoordinatingManagedObject<None>, AsynchronousManagedObject, ProcessAwareManagedObject {
+	private static class NullManagedObject implements ManagedObject, ContextAwareManagedObject,
+			CoordinatingManagedObject<None>, AsynchronousManagedObject {
 
 		/*
 		 * =================== ManagedObject ====================
@@ -566,12 +565,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		}
 
 		@Override
-		public void setBoundManagedObjectName(String boundManagedObjectName) {
-			// Ignored
-		}
-
-		@Override
-		public void setProcessAwareContext(ProcessAwareContext context) {
+		public void setManagedObjectContext(ManagedObjectContext context) {
 			// Ignored
 		}
 

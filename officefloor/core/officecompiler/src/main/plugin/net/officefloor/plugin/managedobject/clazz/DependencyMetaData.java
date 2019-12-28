@@ -32,12 +32,25 @@ import net.officefloor.plugin.clazz.QualifierNameFactory;
 public class DependencyMetaData {
 
 	/**
-	 * Name of the dependency.
+	 * Type of dependency.
+	 */
+	public static enum DependencyType {
+		MANAGE_OBJECT_CONTEXT, LOGGER, DEPENDENCY
+	}
+
+	/**
+	 * Type of the dependency.
+	 */
+	public final DependencyType type;
+
+	/**
+	 * Name of the dependency. Only applicable if {@link DependencyType#DEPENDENCY}.
 	 */
 	public final String name;
 
 	/**
-	 * Index of the dependency within the {@link ObjectRegistry}.
+	 * Index of the dependency within the {@link ObjectRegistry}. Only applicable if
+	 * {@link DependencyType#DEPENDENCY}.
 	 */
 	public final int index;
 
@@ -49,11 +62,25 @@ public class DependencyMetaData {
 	/**
 	 * Initiate.
 	 * 
+	 * @param type  {@link DependencyType}.
+	 * @param field {@link Field} to receive the injected dependency.
+	 */
+	public DependencyMetaData(DependencyType type, Field field) {
+		this.type = type;
+		this.name = null;
+		this.index = -1;
+		this.field = field;
+	}
+
+	/**
+	 * Initiate.
+	 * 
 	 * @param name  Name of the dependency.
 	 * @param index Index of the dependency within the {@link ObjectRegistry}.
 	 * @param field {@link Field} to receive the injected dependency.
 	 */
 	public DependencyMetaData(String name, int index, Field field) {
+		this.type = DependencyType.DEPENDENCY;
 		this.name = name;
 		this.index = index;
 		this.field = field;

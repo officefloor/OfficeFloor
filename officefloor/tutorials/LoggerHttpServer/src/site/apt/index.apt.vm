@@ -1,0 +1,59 @@
+                                               -----------------------
+                                                  Logger Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Logger Tutorial
+
+  This tutorial demonstrates using logging.
+
+  To focus on logging, this tutorial uses a simple application that logs the input string sent by the client. 
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/LoggerHttpServer/${projectVersion}/LoggerHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+*Logging from procedure
+
+  To log from a first-class procedure, have the <<<Logger>>> injected as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/loggerhttpserver/LogLogic.java|ignoreDownloadError=false}
+
+  The <<<Logger>>> will log the message from the input request object:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/loggerhttpserver/LoggedRequest.java|ignoreDownloadError=false}
+
+
+
+*Logging from object
+
+  As alluded to in the procedure, it is also possible to log from an injected object.  The injected object is as follows:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/loggerhttpserver/LogObject.java|ignoreDownloadError=false}
+
+  The <<<Logger>>> for the object is different to the procedure.  This is because the respective injected <<<Logger>>> identifies each component individually in the log.
+  
+
+
+*Why inject the Logger?
+
+  Statically creating, i.e. <<<Logger.getLogger("name")>>>, ties the <<<Logger>>> to the creating <<<Class>>>.  This is ok for Dependency Injection only frameworks.  These frameworks typically only have single instances of classes serving a request (i.e. an application, thread local or request scoped singleton).  Therefore, inferring the class name in the log messages provides reasonable traceability to the single instance of the class logging the message.
+
+  When building with {{{https://sagenschneider.blogspot.com/2019/02/inversion-of-coupling-control.html}Inversion of Coupling Control}}, there is a lot more re-use of classes.  Just identifying the class name does not identify the various places the class may be re-used.
+  
+  The injected <<<Logger>>> is configured to identify the component within the application.  Therefore, if the <<<Class>>> is re-used in the configuration of the application, the logs don't become ambiguous.  The logs will identify the component within the application configuration.  Just follow the dot notation down the levels of configuration.  
+  
+  
+
+*Testing
+
+  The following test demonstrates the component naming of the injected <<<Logger>>> instances:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/loggerhttpserver/LoggerHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../JavaScriptHttpServer/index.html}next tutorial}} covers polyglot JavaScript.

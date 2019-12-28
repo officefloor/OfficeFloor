@@ -39,6 +39,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBui
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
 import net.officefloor.compile.test.managedfunction.ManagedFunctionLoaderUtil;
 import net.officefloor.compile.test.managedfunction.MockAsynchronousFlow;
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.FlowCallback;
@@ -291,7 +292,7 @@ public class MethodManagedFunctionBuilderUtil {
 			Consumer<ManagedFunctionContextBuilder> contextBuilder) throws Throwable {
 
 		// Create the logger
-		Logger logger = Logger.getLogger(functionType.getFunctionName());
+		Logger logger = OfficeFrame.getLogger(functionType.getFunctionName());
 
 		// Setup the context
 		MockManagedFunctionContext context = new MockManagedFunctionContext(logger);

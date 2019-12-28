@@ -33,6 +33,7 @@
 		<module>JwtHttpServer</module>
 		<module>JwtResourceHttpServer</module>
 		<module>KotlinHttpServer</module>
+		<module>LoggerHttpServer</module>
 		<module>NavigateHttpServer</module>
 		<module>ObjectifyHttpServer</module>
 		<module>PayPalHttpServer</module>

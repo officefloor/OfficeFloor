@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -137,7 +138,7 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 	 * Ensure can adapt {@link Logger}.
 	 */
 	public void testAdaptLogger() {
-		this.doParameterTest(LoggerParameter.class, Logger.getLogger("LOGGER"));
+		this.doParameterTest(LoggerParameter.class, OfficeFrame.getLogger("LOGGER"));
 	}
 
 	public static class LoggerParameter {
@@ -344,12 +345,12 @@ public class TypeAdapterTest extends OfficeFrameTestCase {
 		Object value = this.doTest(LoggerReturnValue.class);
 		assertTrue("Should be the logger", value instanceof Logger);
 		Logger adapted = (Logger) value;
-		assertEquals("Incorrect looger", Logger.getLogger("TEST"), adapted);
+		assertEquals("Incorrect looger", OfficeFrame.getLogger("TEST"), adapted);
 	}
 
 	public static class LoggerReturnValue {
 		public Logger run() {
-			return Logger.getLogger("TEST");
+			return OfficeFrame.getLogger("TEST");
 		}
 	}
 

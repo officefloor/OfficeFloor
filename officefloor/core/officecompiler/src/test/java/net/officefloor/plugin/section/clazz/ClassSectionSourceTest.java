@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.structure.FunctionNamespaceNodeImpl;
@@ -808,6 +809,26 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to access {@link Logger}.
+	 */
+	public void testLogger() throws Exception {
+
+		// Create the expected section
+		SectionDesigner expected = this.createSectionDesigner(MockLoggerSection.class,
+				this.configureClassSectionFunction("function"));
+		expected.addSectionInput("function", null);
+
+		// Validate section
+		SectionLoaderUtil.validateSection(expected, ClassSectionSource.class, MockLoggerSection.class.getName());
+	}
+
+	public static class MockLoggerSection {
+		public void function(Logger logger) {
+			// Testing
+		}
+	}
+
+	/**
 	 * Ensure able to access {@link AsynchronousFlow}.
 	 */
 	public void testAsynchronousFlow() throws Exception {
@@ -1517,7 +1538,7 @@ public class ClassSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can pass primitive parameters.
 	 */
-	public void testPrimtiiveParameters() throws Throwable {
+	public void testPrimitiveParameters() throws Throwable {
 
 		// Configure flows
 		CompileOfficeFloor compiler = new CompileOfficeFloor();

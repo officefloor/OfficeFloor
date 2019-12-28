@@ -51,8 +51,8 @@ import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.WritableHttpCookie;
 import net.officefloor.server.http.WritableHttpHeader;
+import net.officefloor.server.http.mock.MockManagedObjectContext;
 import net.officefloor.server.http.mock.MockNonMaterialisedHttpHeaders;
-import net.officefloor.server.http.mock.MockProcessAwareContext;
 import net.officefloor.server.http.mock.MockStreamBufferPool;
 import net.officefloor.server.stream.ServerWriter;
 import net.officefloor.server.stream.StreamBuffer;
@@ -130,7 +130,7 @@ public class ProcessAwareServerHttpConnectionManagerTest extends OfficeFrameTest
 				this.serverLocation, true, () -> this.method, () -> this.requestUri, this.requestVersion,
 				this.requestHeaders, requestEntity, serverHttpHeaderValue, dateHttpHeaderClock, true, this,
 				this.bufferPool);
-		connection.setProcessAwareContext(new MockProcessAwareContext());
+		connection.setManagedObjectContext(new MockManagedObjectContext());
 		return connection;
 	}
 

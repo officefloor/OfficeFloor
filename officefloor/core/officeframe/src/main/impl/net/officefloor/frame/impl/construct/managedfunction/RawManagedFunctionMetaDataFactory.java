@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.function.AsynchronousFlow;
@@ -326,7 +327,7 @@ public class RawManagedFunctionMetaDataFactory {
 				functionName, AsynchronousFlow.class.getSimpleName(), issues);
 
 		// Create the logger
-		Logger logger = Logger.getLogger(functionName);
+		Logger logger = OfficeFrame.getLogger(functionName);
 
 		// Create the function meta-data
 		ManagedFunctionMetaDataImpl<?, ?> functionMetaData = new ManagedFunctionMetaDataImpl<>(functionName,

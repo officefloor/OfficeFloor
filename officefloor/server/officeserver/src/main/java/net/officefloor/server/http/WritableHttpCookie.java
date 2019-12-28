@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.server.stream.StreamBuffer;
 import net.officefloor.server.stream.StreamBufferPool;
 
@@ -166,9 +166,9 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	private String value;
 
 	/**
-	 * {@link ProcessAwareContext}.
+	 * {@link ManagedObjectContext}.
 	 */
-	private final ProcessAwareContext context;
+	private final ManagedObjectContext context;
 
 	/**
 	 * Expires.
@@ -208,14 +208,11 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param name
-	 *            Name.
-	 * @param value
-	 *            Value.
-	 * @param context
-	 *            {@link ProcessAwareContext}.
+	 * @param name    Name.
+	 * @param value   Value.
+	 * @param context {@link ManagedObjectContext}.
 	 */
-	public WritableHttpCookie(String name, String value, ProcessAwareContext context) {
+	public WritableHttpCookie(String name, String value, ManagedObjectContext context) {
 		this.name = name;
 		this.value = value;
 		this.context = context;
@@ -224,13 +221,10 @@ public class WritableHttpCookie implements HttpResponseCookie {
 	/**
 	 * Writes this HTTP Cookie to the {@link StreamBuffer} stream.
 	 * 
-	 * @param <B>
-	 *            Buffer type.
-	 * @param head
-	 *            Head {@link StreamBuffer} of linked list of {@link StreamBuffer}
-	 *            instances.
-	 * @param bufferPool
-	 *            {@link StreamBufferPool}.
+	 * @param <B>        Buffer type.
+	 * @param head       Head {@link StreamBuffer} of linked list of
+	 *                   {@link StreamBuffer} instances.
+	 * @param bufferPool {@link StreamBufferPool}.
 	 */
 	public <B> void write(StreamBuffer<B> head, StreamBufferPool<B> bufferPool) {
 		SET_COOKIE.write(head, bufferPool);

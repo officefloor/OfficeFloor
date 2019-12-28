@@ -22,9 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
@@ -48,7 +49,7 @@ public class HttpRequestObjectManagedObjectSource
 	 * Dependency keys.
 	 */
 	public static enum HttpRequestObjectDependencies {
-			HTTP_REQUEST_STATE
+		HTTP_REQUEST_STATE
 	}
 
 	/**
@@ -170,7 +171,7 @@ public class HttpRequestObjectManagedObjectSource
 	 * {@link HttpRequestState}.
 	 */
 	public class HttpRequestObjectManagedObject
-			implements NameAwareManagedObject, CoordinatingManagedObject<HttpRequestObjectDependencies> {
+			implements ContextAwareManagedObject, CoordinatingManagedObject<HttpRequestObjectDependencies> {
 
 		/**
 		 * Name to bind the object to the {@link HttpRequestState}.
@@ -187,11 +188,11 @@ public class HttpRequestObjectManagedObjectSource
 		 */
 
 		@Override
-		public void setBoundManagedObjectName(String boundManagedObjectName) {
+		public void setManagedObjectContext(ManagedObjectContext context) {
 			// Use bind name in preference to managed object name
 			this.boundName = (HttpRequestObjectManagedObjectSource.this.bindName != null
 					? HttpRequestObjectManagedObjectSource.this.bindName
-					: boundManagedObjectName);
+					: context.getBoundName());
 		}
 
 		@Override

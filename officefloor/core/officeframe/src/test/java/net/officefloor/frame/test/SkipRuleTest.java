@@ -33,7 +33,7 @@ public class SkipRuleTest extends OfficeFrameTestCase {
 	 */
 	public void testSkip() throws Throwable {
 		try {
-			this.evaluteSkipRule(new SkipRule(true), null);
+			this.evaluateSkipRule(new SkipRule(true), null);
 			fail("Should not be successful");
 		} catch (AssumptionViolatedException ex) {
 			assertEquals("Incorrect skip reason", "NOT RUNNING TEST", ex.getMessage());
@@ -45,7 +45,7 @@ public class SkipRuleTest extends OfficeFrameTestCase {
 	 */
 	public void testSkipWithDescription() throws Throwable {
 		try {
-			this.evaluteSkipRule(new SkipRule(true, "TEST SKIP"),
+			this.evaluateSkipRule(new SkipRule(true, "TEST SKIP"),
 					Description.createTestDescription(SkipRuleTest.class, "testMethod"));
 			fail("Should not be successful");
 		} catch (AssumptionViolatedException ex) {
@@ -58,7 +58,7 @@ public class SkipRuleTest extends OfficeFrameTestCase {
 	 * Ensure not skip test.
 	 */
 	public void testNotSkip() throws Throwable {
-		assertTrue("Should run test", this.evaluteSkipRule(new SkipRule(false, "Not skip"), null));
+		assertTrue("Should run test", this.evaluateSkipRule(new SkipRule(false, "Not skip"), null));
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class SkipRuleTest extends OfficeFrameTestCase {
 	 * @param description {@link Description}.
 	 * @return <code>true</code> if test run.
 	 */
-	private boolean evaluteSkipRule(SkipRule rule, Description description) throws Throwable {
+	private boolean evaluateSkipRule(SkipRule rule, Description description) throws Throwable {
 		Closure<Boolean> isRun = new Closure<>(false);
 		rule.apply(new Statement() {
 

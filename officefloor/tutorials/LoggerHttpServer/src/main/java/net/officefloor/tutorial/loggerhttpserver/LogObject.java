@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,28 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.managedobject;
+package net.officefloor.tutorial.loggerhttpserver;
+
+import java.util.logging.Logger;
+
+import net.officefloor.plugin.managedobject.clazz.Dependency;
 
 /**
- * Context for running {@link ProcessSafeOperation} instances.
- *
+ * Object with dependency injected {@link Logger}.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface ProcessAwareContext {
+// START SNIPPET: tutorial
+public class LogObject {
 
-	/**
-	 * Undertakes a {@link ProcessSafeOperation}.
-	 * 
-	 * @param <R>
-	 *            Return type from operation
-	 * @param <T>
-	 *            Possible {@link Throwable} type from operation.
-	 * @param operation
-	 *            {@link ProcessSafeOperation}.
-	 * @return Return value.
-	 * @throws T
-	 *             Possible {@link Throwable}.
-	 */
-	<R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T;
+	@Dependency
+	private Logger logger;
 
+	public void log(LoggedRequest request) {
+		this.logger.info("OBJECT: " + request.getMessage());
+	}
 }
+// END SNIPPET: tutorial

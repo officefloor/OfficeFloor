@@ -15,29 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.managedobject;
+package net.officefloor.plugin.managedfunction.method.parameter;
 
-import net.officefloor.frame.internal.structure.ProcessState;
+import java.util.logging.Logger;
+
+import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 
 /**
- * <p>
- * Enables the {@link ManagedObject} to undertake {@link ProcessSafeOperation}
- * instances.
- * <p>
- * This should be the preferred means to undertake any {@link ProcessState}
- * critical sections, as locks are only obtained if required. This,
- * subsequently, reduces {@link Thread} overheads and improves performance.
- *
+ * {@link MethodParameterFactory} for the {@link Logger}.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface ProcessAwareManagedObject extends ManagedObject {
+public class LoggerParameterFactory implements MethodParameterFactory {
 
-	/**
-	 * Provides the {@link ProcessAwareContext} to the {@link ManagedObject}.
-	 * 
-	 * @param context
-	 *            {@link ProcessAwareContext}.
+	/*
+	 * ====================== ParameterFactory =============================
 	 */
-	void setProcessAwareContext(ProcessAwareContext context);
+
+	@Override
+	public Object createParameter(ManagedFunctionContext<?, ?> context) {
+		return context.getLogger();
+	}
 
 }

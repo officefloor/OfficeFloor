@@ -15,21 +15,42 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.frame.api.managedobject;
+package net.officefloor.server.http.mock;
+
+import static org.junit.Assert.fail;
+
+import java.util.logging.Logger;
+
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
+import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 
 /**
- * Name aware {@link ManagedObject}.
- *
+ * Mock {@link ManagedObjectContext} that just runs the
+ * {@link ProcessSafeOperation}.
+ * 
  * @author Daniel Sagenschneider
  */
-public interface NameAwareManagedObject extends ManagedObject {
+public class MockManagedObjectContext implements ManagedObjectContext {
 
-	/**
-	 * Provides the {@link ManagedObject} its bound name.
-	 *
-	 * @param boundManagedObjectName
-	 *            Bound name for the {@link ManagedObject}.
+	/*
+	 * =================== ManagedObjectContext =====================
 	 */
-	void setBoundManagedObjectName(String boundManagedObjectName);
+
+	@Override
+	public String getBoundName() {
+		fail("Should not require bound name");
+		return null;
+	}
+
+	@Override
+	public Logger getLogger() {
+		fail("Should not require logger");
+		return null;
+	}
+
+	@Override
+	public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {
+		return operation.run();
+	}
 
 }

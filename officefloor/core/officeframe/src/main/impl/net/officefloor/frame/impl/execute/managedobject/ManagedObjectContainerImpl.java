@@ -20,6 +20,7 @@ package net.officefloor.frame.impl.execute.managedobject;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
@@ -28,12 +29,11 @@ import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.api.managedobject.AsynchronousOperation;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
@@ -181,7 +181,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	/**
 	 * Initiate the container.
 	 * 
-	 * @param                        <D> Dependency key type.
+	 * @param <D>                    Dependency key type.
 	 * @param metaData               Meta-data of the {@link ManagedObject}.
 	 * @param responsibleThreadState {@link ThreadState} responsible for making
 	 *                               changes to this {@link ManagedObjectContainer}.
@@ -210,7 +210,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	/**
 	 * Initiate the container with a provided {@link ManagedObject}.
 	 * 
-	 * @param                        <D> Dependency key type.
+	 * @param <D>                    Dependency key type.
 	 * @param managedObject          {@link ManagedObject} triggering the
 	 *                               {@link ProcessState}.
 	 * @param metaData               {@link ManagedObjectMetaData} of the
@@ -229,14 +229,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 		try {
 
 			// Provide process awareness if process aware
-			if (this.metaData.isProcessAwareManagedObject()) {
-				((ProcessAwareManagedObject) this.managedObject).setProcessAwareContext(new ProcessAwareContextImpl());
-			}
-
-			// Provide bound name if name aware
-			if (this.metaData.isNameAwareManagedObject()) {
-				((NameAwareManagedObject) this.managedObject)
-						.setBoundManagedObjectName(this.metaData.getBoundManagedObjectName());
+			if (this.metaData.isContextAwareManagedObject()) {
+				((ContextAwareManagedObject) this.managedObject)
+						.setManagedObjectContext(new ManagedObjectContextImpl());
 			}
 
 			// Provide listener if asynchronous managed object
@@ -444,16 +439,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 						sourceManagedObject = pool.getSourcedManagedObject(sourceManagedObject);
 					}
 
-					// Provide process awareness if process aware
-					if (container.metaData.isProcessAwareManagedObject()) {
-						((ProcessAwareManagedObject) sourceManagedObject)
-								.setProcessAwareContext(new ProcessAwareContextImpl());
-					}
-
-					// Provide bound name if name aware
-					if (container.metaData.isNameAwareManagedObject()) {
-						((NameAwareManagedObject) sourceManagedObject)
-								.setBoundManagedObjectName(container.metaData.getBoundManagedObjectName());
+					// Provide context awareness if process aware
+					if (container.metaData.isContextAwareManagedObject()) {
+						((ContextAwareManagedObject) sourceManagedObject)
+								.setManagedObjectContext(new ManagedObjectContextImpl());
 						isCheckReady = true;
 					}
 
@@ -818,9 +807,19 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer, Asset
 	}
 
 	/**
-	 * {@link ProcessAwareContext} implementation.
+	 * {@link ManagedObjectContext} implementation.
 	 */
-	private class ProcessAwareContextImpl implements ProcessAwareContext {
+	private class ManagedObjectContextImpl implements ManagedObjectContext {
+
+		@Override
+		public String getBoundName() {
+			return ManagedObjectContainerImpl.this.metaData.getBoundManagedObjectName();
+		}
+
+		@Override
+		public Logger getLogger() {
+			return ManagedObjectContainerImpl.this.metaData.getLogger();
+		}
 
 		@Override
 		public <R, T extends Throwable> R run(ProcessSafeOperation<R, T> operation) throws T {

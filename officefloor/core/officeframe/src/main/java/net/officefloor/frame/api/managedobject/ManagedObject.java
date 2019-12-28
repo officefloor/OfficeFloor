@@ -24,10 +24,9 @@ package net.officefloor.frame.api.managedobject;
  * Additional managed functionality is available by implementing the following
  * interfaces:
  * <ol>
- * <li>{@link NameAwareManagedObject}</li>
+ * <li>{@link ContextAwareManagedObject}</li>
  * <li>{@link AsynchronousManagedObject}</li>
  * <li>{@link CoordinatingManagedObject}</li>
- * <li>{@link ProcessAwareManagedObject}</li>
  * </ol>
  * 
  * @author Daniel Sagenschneider

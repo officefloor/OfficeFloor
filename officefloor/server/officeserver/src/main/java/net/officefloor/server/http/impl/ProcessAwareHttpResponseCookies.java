@@ -21,8 +21,9 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
-import net.officefloor.frame.api.managedobject.ProcessAwareContext;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ProcessSafeOperation;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.server.http.HttpRequestCookie;
 import net.officefloor.server.http.HttpResponseCookie;
 import net.officefloor.server.http.HttpResponseCookies;
@@ -30,7 +31,7 @@ import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.WritableHttpCookie;
 
 /**
- * {@link ProcessAwareContext} {@link HttpResponseCookies}.
+ * {@link ProcessState} aware {@link HttpResponseCookies}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -47,17 +48,16 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 	private WritableHttpCookie tail = null;
 
 	/**
-	 * {@link ProcessAwareContext}.
+	 * {@link ManagedObjectContext}.
 	 */
-	private final ProcessAwareContext context;
+	private final ManagedObjectContext context;
 
 	/**
 	 * Instantiate.
 	 * 
-	 * @param context
-	 *            {@link ProcessAwareContext}.
+	 * @param context {@link ManagedObjectContext}.
 	 */
-	public ProcessAwareHttpResponseCookies(ProcessAwareContext context) {
+	public ProcessAwareHttpResponseCookies(ManagedObjectContext context) {
 		this.context = context;
 	}
 
@@ -76,8 +76,7 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 	/**
 	 * Removes the {@link WritableHttpCookie}.
 	 * 
-	 * @param cookie
-	 *            {@link WritableHttpCookie} to remove.
+	 * @param cookie {@link WritableHttpCookie} to remove.
 	 * @return Previous {@link WritableHttpCookie}. May be <code>null</code> if
 	 *         head.
 	 */
@@ -115,12 +114,9 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 	/**
 	 * Easy access to running {@link ProcessSafeOperation}.
 	 * 
-	 * @param operation
-	 *            {@link ProcessSafeOperation}.
+	 * @param operation {@link ProcessSafeOperation}.
 	 * @return Result of {@link ProcessSafeOperation}.
-	 * @throws T
-	 *             Potential {@link Throwable} from
-	 *             {@link ProcessSafeOperation}.
+	 * @throws T Potential {@link Throwable} from {@link ProcessSafeOperation}.
 	 */
 	private final <R, T extends Throwable> R safe(ProcessSafeOperation<R, T> operation) throws T {
 		return this.context.run(operation);
@@ -129,13 +125,10 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 	/**
 	 * Safely adds a {@link HttpResponseCookie}.
 	 * 
-	 * @param name
-	 *            Name of {@link HttpResponseCookie}.
-	 * @param value
-	 *            Value of {@link HttpResponseCookie}.
-	 * @param initialiser
-	 *            Optional {@link Consumer} to initialise the
-	 *            {@link HttpResponseCookie}. May be <code>null</code>.
+	 * @param name        Name of {@link HttpResponseCookie}.
+	 * @param value       Value of {@link HttpResponseCookie}.
+	 * @param initialiser Optional {@link Consumer} to initialise the
+	 *                    {@link HttpResponseCookie}. May be <code>null</code>.
 	 * @return Added {@link HttpResponseCookie}.
 	 */
 	private final HttpResponseCookie safeSetCookie(String name, String value,
@@ -178,8 +171,7 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 	}
 
 	/**
-	 * Obtains the {@link Iterator} to all the {@link WritableHttpCookie}
-	 * instances.
+	 * Obtains the {@link Iterator} to all the {@link WritableHttpCookie} instances.
 	 * 
 	 * @return {@link Iterator} to all the {@link WritableHttpCookie} instances.
 	 */
@@ -234,8 +226,7 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param unsafeIterator
-		 *            Unsafe {@link Iterator}.
+		 * @param unsafeIterator Unsafe {@link Iterator}.
 		 */
 		private SafeIterator(Iterator<? extends HttpResponseCookie> unsafeIterator) {
 			this.unsafeIterator = unsafeIterator;
@@ -244,12 +235,9 @@ public class ProcessAwareHttpResponseCookies implements HttpResponseCookies {
 		/**
 		 * Easy access to running {@link ProcessSafeOperation}.
 		 * 
-		 * @param operation
-		 *            {@link ProcessSafeOperation}.
+		 * @param operation {@link ProcessSafeOperation}.
 		 * @return Result of {@link ProcessSafeOperation}.
-		 * @throws T
-		 *             Potential {@link Throwable} from
-		 *             {@link ProcessSafeOperation}.
+		 * @throws T Potential {@link Throwable} from {@link ProcessSafeOperation}.
 		 */
 		private final <R, T extends Throwable> R safe(ProcessSafeOperation<R, T> operation) throws T {
 			return ProcessAwareHttpResponseCookies.this.safe(operation);

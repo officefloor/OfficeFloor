@@ -17,6 +17,11 @@
  */
 package net.officefloor.frame.api;
 
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.OfficeFrameImpl;
@@ -42,6 +47,23 @@ public abstract class OfficeFrame {
 	 * Note: it is anticipated that {@link OfficeFrameImpl} will always be used.
 	 */
 	public static final String IMPLEMENTATION_CLASS_PROPERTY_NAME = "net.officefloor.frame.implementation";
+
+	/**
+	 * <p>
+	 * {@link System#getProperty(String)} that flags to infer the source
+	 * {@link Class} undertaking the logging.
+	 * <p>
+	 * By default the {@link Logger} instances will specify a <code>null</code>
+	 * source {@link Class} name so that the {@link Logger} name is used by the
+	 * {@link SimpleFormatter}. This will then result in {@link LogRecord} instances
+	 * formatted with the {@link Logger} name.
+	 * <p>
+	 * Flagging this <code>true</code> will allow the source {@link Class} name to
+	 * be inferred. However, a {@link Formatter} will likely need to be configured
+	 * to indicate the specific {@link Logger} name to distinguish the configured
+	 * instance.
+	 */
+	public static final String LOG_SOURCE_CLASS_PROPERTY_NAME = "net.officefloor.log.source.class";
 
 	/**
 	 * Singleton {@link OfficeFrame}.
@@ -113,6 +135,29 @@ public abstract class OfficeFrame {
 
 		// Create the OfficeFloor builder by the default name
 		return OfficeFrame.getInstance().createOfficeFloorBuilder(officeFloorName);
+	}
+
+	/**
+	 * Obtains the {@link Logger}.
+	 * 
+	 * @param loggerName Name of {@link Logger}.
+	 * @return {@link Logger}.
+	 */
+	public static Logger getLogger(String loggerName) {
+
+		// Create the logger
+		Logger logger = Logger.getLogger(loggerName);
+
+		// Determine if allow inferring source class name
+		if (!Boolean.getBoolean(LOG_SOURCE_CLASS_PROPERTY_NAME)) {
+			logger.setFilter((record) -> {
+				record.setSourceClassName(null); // avoid inferring
+				return true; // always log
+			});
+		}
+
+		// Return the logger
+		return logger;
 	}
 
 	/*

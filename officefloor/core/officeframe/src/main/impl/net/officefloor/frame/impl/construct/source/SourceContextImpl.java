@@ -27,6 +27,7 @@ import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.clock.Clock;
 import net.officefloor.frame.api.clock.ClockFactory;
 import net.officefloor.frame.api.source.LoadServiceError;
@@ -185,7 +186,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		public DelegateWrapSourceContext(String sourceName, boolean isLoadingType, SourceContext delegate) {
 			this.isLoadingType = isLoadingType;
 			this.delegate = delegate;
-			this.logger = Logger.getLogger(sourceName);
+			this.logger = OfficeFrame.getLogger(sourceName);
 		}
 
 		/*
@@ -327,7 +328,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 			this.classLoader = classLoader;
 			this.clockFactory = clockFactory;
 			this.resourceSources = resourceSources;
-			this.logger = Logger.getLogger(sourceName);
+			this.logger = OfficeFrame.getLogger(sourceName);
 		}
 
 		/*

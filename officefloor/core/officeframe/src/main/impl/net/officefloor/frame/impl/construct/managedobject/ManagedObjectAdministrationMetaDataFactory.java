@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -150,7 +151,7 @@ public class ManagedObjectAdministrationMetaDataFactory {
 
 			// Create the logger
 			String loggerName = administeredObjectName + ".pre." + adminMetaData.getAdministrationName();
-			Logger logger = Logger.getLogger(loggerName);
+			Logger logger = OfficeFrame.getLogger(loggerName);
 
 			// Create the managed object administration
 			metaDatas[a] = new ManagedObjectAdministrationMetaDataImpl<>(required, adminMetaData, logger);

@@ -18,9 +18,10 @@
 package net.officefloor.web.state;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.api.managedobject.ObjectRegistry;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSourceContext;
@@ -41,7 +42,7 @@ public class HttpApplicationObjectManagedObjectSource
 	 * Dependency keys for the {@link HttpApplicationObjectManagedObject}.
 	 */
 	public static enum Dependencies {
-			HTTP_APPLICATION_STATE
+		HTTP_APPLICATION_STATE
 	}
 
 	/**
@@ -101,7 +102,7 @@ public class HttpApplicationObjectManagedObjectSource
 	 * {@link HttpApplicationState}.
 	 */
 	public static class HttpApplicationObjectManagedObject
-			implements NameAwareManagedObject, CoordinatingManagedObject<Dependencies> {
+			implements ContextAwareManagedObject, CoordinatingManagedObject<Dependencies> {
 
 		/**
 		 * Class of the object.
@@ -140,9 +141,9 @@ public class HttpApplicationObjectManagedObjectSource
 		 */
 
 		@Override
-		public void setBoundManagedObjectName(String boundManagedObjectName) {
+		public void setManagedObjectContext(ManagedObjectContext context) {
 			// Use bind name in preference to managed object name
-			this.boundName = (this.bindName != null ? this.bindName : boundManagedObjectName);
+			this.boundName = (this.bindName != null ? this.bindName : context.getBoundName());
 		}
 
 		@Override

@@ -31,7 +31,7 @@ import net.officefloor.frame.api.managedobject.AsynchronousContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.server.http.ServerHttpConnection;
-import net.officefloor.server.http.mock.MockProcessAwareContext;
+import net.officefloor.server.http.mock.MockManagedObjectContext;
 import net.officefloor.web.session.spi.CreateHttpSessionOperation;
 import net.officefloor.web.session.spi.FreshHttpSession;
 import net.officefloor.web.session.spi.HttpSessionIdGenerator;
@@ -133,8 +133,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Asserts the correctness of the {@link HttpSession}.
 	 * 
-	 * @param session
-	 *            Actual {@link HttpSession}.
+	 * @param session Actual {@link HttpSession}.
 	 */
 	protected static void assertHttpSession(String sessionId, Instant creationTime, boolean isNew,
 			HttpSession session) {
@@ -163,8 +162,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Records specifying the Session Id.
 	 * 
-	 * @param sessionId
-	 *            Session Id.
+	 * @param sessionId Session Id.
 	 */
 	protected void record_generate_setSessionId(final String sessionId) {
 		this.mockOperations.add(new MockOperation() {
@@ -178,8 +176,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Records failing to generate the Session Id.
 	 * 
-	 * @param cause
-	 *            Cause of the failure.
+	 * @param cause Cause of the failure.
 	 */
 	protected void record_generate_failedToGenerateSessionId(final Throwable cause) {
 		this.mockOperations.add(new MockOperation() {
@@ -193,12 +190,9 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Records creating the {@link HttpSession}.
 	 * 
-	 * @param creationTime
-	 *            Creation time.
-	 * @param expireTime
-	 *            Time the {@link HttpSession} will expire if idle.
-	 * @param attributes
-	 *            Attributes.
+	 * @param creationTime Creation time.
+	 * @param expireTime   Time the {@link HttpSession} will expire if idle.
+	 * @param attributes   Attributes.
 	 */
 	protected void record_create_sessionCreated(final Instant creationTime, final Instant expireTime,
 			final Map<String, Serializable> attributes) {
@@ -225,8 +219,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Records failing to create the {@link HttpSession}.
 	 * 
-	 * @param cause
-	 *            Cause of the failure.
+	 * @param cause Cause of the failure.
 	 */
 	protected void record_create_failedToCreateSession(final Throwable cause) {
 		this.mockOperations.add(new MockOperation() {
@@ -240,12 +233,9 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Records retrieving the {@link HttpSession}.
 	 * 
-	 * @param creationTime
-	 *            Creation time.
-	 * @param expireTime
-	 *            Time the {@link HttpSession} will expire if idle.
-	 * @param attributes
-	 *            Attributes.
+	 * @param creationTime Creation time.
+	 * @param expireTime   Time the {@link HttpSession} will expire if idle.
+	 * @param attributes   Attributes.
 	 */
 	protected void record_retrieve_sessionRetrieved(final Instant creationTime, final Instant expireTime,
 			final Map<String, Serializable> attributes) {
@@ -272,8 +262,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Records failing to retrieve the {@link HttpSession}.
 	 * 
-	 * @param cause
-	 *            Cause of the failure.
+	 * @param cause Cause of the failure.
 	 */
 	protected void record_retrieve_failedToRetrieveSession(final Throwable cause) {
 		this.mockOperations.add(new MockOperation() {
@@ -299,8 +288,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Records failing to store the {@link HttpSession}.
 	 * 
-	 * @param cause
-	 *            Cause of the failure.
+	 * @param cause Cause of the failure.
 	 */
 	protected void record_store_failedToStoreSession(final Throwable cause) {
 		this.mockOperations.add(new MockOperation() {
@@ -326,8 +314,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Records failing to invalidate the {@link HttpSession}.
 	 * 
-	 * @param cause
-	 *            Cause of failure.
+	 * @param cause Cause of failure.
 	 */
 	protected void record_invalidate_failedToInvalidateSession(final Throwable cause) {
 		this.mockOperations.add(new MockOperation() {
@@ -345,8 +332,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Creates the {@link HttpSessionManagedObject}.
 	 * 
-	 * @param connection
-	 *            {@link ServerHttpConnection}.
+	 * @param connection {@link ServerHttpConnection}.
 	 * @return New {@link HttpSessionManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -357,7 +343,7 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 				this.serverHttpConnectionIndex, -1, new MockHttpSessionIdGenerator(), -1, new MockHttpSessionStore());
 
 		// Load the managed object
-		mo.setProcessAwareContext(new MockProcessAwareContext());
+		mo.setManagedObjectContext(new MockManagedObjectContext());
 		mo.setAsynchronousContext(this.asynchronousContext);
 		ManagedObjectUserStandAlone registry = new ManagedObjectUserStandAlone();
 		registry.mapDependency(this.serverHttpConnectionIndex, connection);
@@ -382,16 +368,11 @@ public abstract class AbstractHttpSessionManagedObjectTestCase extends OfficeFra
 	/**
 	 * Runs the next {@link MockOperation}.
 	 * 
-	 * @param session
-	 *            {@link FreshHttpSession}.
-	 * @param create
-	 *            {@link CreateHttpSessionOperation}.
-	 * @param retrieve
-	 *            {@link RetrieveHttpSessionOperation}.
-	 * @param store
-	 *            {@link StoreHttpSessionOperation}.
-	 * @param invalidate
-	 *            {@link InvalidateHttpSessionOperation}.
+	 * @param session    {@link FreshHttpSession}.
+	 * @param create     {@link CreateHttpSessionOperation}.
+	 * @param retrieve   {@link RetrieveHttpSessionOperation}.
+	 * @param store      {@link StoreHttpSessionOperation}.
+	 * @param invalidate {@link InvalidateHttpSessionOperation}.
 	 */
 	private void runNextMockOperation(FreshHttpSession session, CreateHttpSessionOperation create,
 			RetrieveHttpSessionOperation retrieve, StoreHttpSessionOperation store,

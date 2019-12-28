@@ -18,20 +18,21 @@
 package net.officefloor.frame.stress.object;
 
 import junit.framework.TestSuite;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
+import net.officefloor.frame.api.managedobject.ManagedObjectContext;
 import net.officefloor.frame.stress.AbstractStressTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 
 /**
- * Stress tests the {@link NameAwareManagedObject}.
+ * Stress tests the {@link ContextAwareManagedObject} name.
  * 
  * @author Daniel Sagenschneider
  */
-public class NameAwareObjectStressTest extends AbstractStressTestCase {
+public class NameContextAwareObjectStressTest extends AbstractStressTestCase {
 
 	public static TestSuite suite() {
-		return createSuite(NameAwareObjectStressTest.class);
+		return createSuite(NameContextAwareObjectStressTest.class);
 	}
 
 	@Override
@@ -80,7 +81,8 @@ public class NameAwareObjectStressTest extends AbstractStressTestCase {
 		public void task(StressNameAwareManagedObject nameAware, ReflectiveFlow flow) {
 
 			// Ensure the bound name is correct
-			assertEquals("Incorrect bound name", this.expectedBoundName, nameAware.boundName);
+			assertEquals("Incorrect bound name", this.expectedBoundName, nameAware.context.getBoundName());
+			assertEquals("Incorrect logger", this.expectedBoundName, nameAware.context.getLogger().getName());
 
 			// Determine if complete
 			if (context.incrementIterationAndIsComplete()) {
@@ -93,15 +95,15 @@ public class NameAwareObjectStressTest extends AbstractStressTestCase {
 	}
 
 	/**
-	 * {@link NameAwareManagedObject} for the stress test.
+	 * {@link ContextAwareManagedObject} for the stress test.
 	 */
-	private static class StressNameAwareManagedObject implements NameAwareManagedObject {
+	private static class StressNameAwareManagedObject implements ContextAwareManagedObject {
 
-		private String boundName = null;
+		private ManagedObjectContext context = null;
 
 		@Override
-		public void setBoundManagedObjectName(String boundManagedObjectName) {
-			this.boundName = boundManagedObjectName;
+		public void setManagedObjectContext(ManagedObjectContext context) {
+			this.context = context;
 		}
 
 		@Override

@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.administration.Administration;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -60,7 +61,7 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 	/**
 	 * {@link Logger}.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(RawManagedFunctionMetaData.class.getName());
+	private static final Logger LOGGER = OfficeFrame.getLogger(RawManagedFunctionMetaData.class.getName());
 
 	/**
 	 * Name of the {@link ManagedFunction}.
@@ -275,7 +276,7 @@ public class RawManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> {
 			// Create the logger
 			String functionAdminName = this.functionName + "." + administrationQualifier + "."
 					+ administrationMetaData.getAdministrationName();
-			Logger logger = Logger.getLogger(functionAdminName);
+			Logger logger = OfficeFrame.getLogger(functionAdminName);
 
 			// Add administration to listing
 			administrations[i] = new ManagedFunctionAdministrationMetaDataImpl<>(logger,

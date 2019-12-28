@@ -19,15 +19,15 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.api.managedobject.ContextAwareManagedObject;
 import net.officefloor.frame.api.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.api.managedobject.ManagedObject;
-import net.officefloor.frame.api.managedobject.NameAwareManagedObject;
-import net.officefloor.frame.api.managedobject.ProcessAwareManagedObject;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPoolFactory;
 import net.officefloor.frame.api.managedobject.pool.ThreadCompletionListener;
@@ -95,14 +95,9 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	private final Class<?> objectType;
 
 	/**
-	 * Flag indiating if {@link ProcessAwareManagedObject}.
+	 * Flag indicating if {@link ContextAwareManagedObject}.
 	 */
-	private final boolean isProcessAware;
-
-	/**
-	 * Flag indicating if {@link NameAwareManagedObject}.
-	 */
-	private final boolean isNameAware;
+	private final boolean isContextAware;
 
 	/**
 	 * Flag indicating if {@link AsynchronousManagedObject}.
@@ -134,10 +129,8 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 *                                         instances.
 	 * @param objectType                       Type of the {@link Object} returned
 	 *                                         from the {@link ManagedObject}.
-	 * @param isProcessAware                   Flag indicating if
-	 *                                         {@link ProcessAwareManagedObject}.
-	 * @param isNameAware                      Flag indicating if
-	 *                                         {@link NameAwareManagedObject}.
+	 * @param isContextAware                   Flag indicating if
+	 *                                         {@link ContextAwareManagedObject}.
 	 * @param isAsynchronous                   Flag indicating if
 	 *                                         {@link AsynchronousManagedObject}.
 	 * @param isCoordinating                   Flag indicating if
@@ -149,8 +142,8 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 			ManagedObjectSource<O, F> managedObjectSource,
 			ManagedObjectSourceMetaData<O, F> managedObjectSourceMetaData, long timeout,
 			ManagedObjectPool managedObjectPool, ThreadCompletionListener[] threadCompletionListeners,
-			Class<?> objectType, boolean isProcessAware, boolean isNameAware, boolean isAsynchronous,
-			boolean isCoordinating, RawManagingOfficeMetaData<F> rawManagingOfficeMetaData) {
+			Class<?> objectType, boolean isContextAware, boolean isAsynchronous, boolean isCoordinating,
+			RawManagingOfficeMetaData<F> rawManagingOfficeMetaData) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
@@ -159,8 +152,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 		this.managedObjectPool = managedObjectPool;
 		this.threadCompletionListeners = threadCompletionListeners;
 		this.objectType = objectType;
-		this.isProcessAware = isProcessAware;
-		this.isNameAware = isNameAware;
+		this.isContextAware = isContextAware;
 		this.isAsynchronous = isAsynchronous;
 		this.isCoordinating = isCoordinating;
 		this.rawManagingOfficeMetaData = rawManagingOfficeMetaData;
@@ -238,7 +230,7 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 	 * @return {@link Logger} for the {@link ManagedObjectExecuteContext}..
 	 */
 	public Logger getExecuteLogger() {
-		return Logger.getLogger(this.managedObjectName);
+		return OfficeFrame.getLogger(this.managedObjectName);
 	}
 
 	/**
@@ -301,11 +293,14 @@ public class RawManagedObjectMetaData<O extends Enum<O>, F extends Enum<F>> {
 					boundReferenceName, "operations", issues);
 		}
 
+		// Create the logger
+		Logger logger = OfficeFrame.getLogger(boundName);
+
 		// Create the managed object meta-data
 		ManagedObjectMetaDataImpl<O> moMetaData = new ManagedObjectMetaDataImpl<>(boundName, this.objectType,
-				instanceIndex, this.managedObjectSource, this.managedObjectPool, this.isProcessAware, this.isNameAware,
+				instanceIndex, this.managedObjectSource, this.managedObjectPool, this.isContextAware,
 				sourcingAssetManager, this.isAsynchronous, operationsAssetManager, this.isCoordinating,
-				dependencyMappings, this.timeout, governanceMetaData);
+				dependencyMappings, this.timeout, governanceMetaData, logger);
 
 		// Return the managed object meta-data
 		return moMetaData;
