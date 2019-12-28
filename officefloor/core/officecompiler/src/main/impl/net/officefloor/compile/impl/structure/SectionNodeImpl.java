@@ -260,12 +260,12 @@ public class SectionNodeImpl implements SectionNode {
 	/**
 	 * Initialises this {@link SectionNode} with the basic information.
 	 * 
-	 * @param isNamed       Indicates if named.
-	 * @param sectionName   Name of this {@link OfficeSection}.
-	 * @param parentSection Optional parent {@link SectionNode}. May be
-	 *                      <code>null</code>.
-	 * @param office        {@link Office} containing the {@link OfficeSection}.
-	 * @param context       {@link NodeContext}.
+	 * @param isSectionNamed Indicates if named.
+	 * @param sectionName    Name of this {@link OfficeSection}.
+	 * @param parentSection  Optional parent {@link SectionNode}. May be
+	 *                       <code>null</code>.
+	 * @param office         {@link Office} containing the {@link OfficeSection}.
+	 * @param context        {@link NodeContext}.
 	 */
 	public SectionNodeImpl(boolean isSectionNamed, String sectionName, SectionNode parentSection, OfficeNode office,
 			NodeContext context) {
