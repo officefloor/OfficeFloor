@@ -31,7 +31,7 @@ public class JwtAuthorityHttpServerTest {
 	private static ObjectMapper mapper = new ObjectMapper();
 
 	@Rule
-	public MockWoofServerRule server = new MockWoofServerRule();
+	public MockWoofServerRule server = new MockWoofServerRule().timeout(3000);
 
 	private String refreshToken;
 

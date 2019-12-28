@@ -46,6 +46,16 @@ public class MockWoofServerRule extends MockWoofServer implements TestRule {
 				} };
 	}
 
+	/**
+	 * =============== MockWoofServer =====================
+	 */
+
+	@Override
+	public MockWoofServerRule timeout(int timeout) {
+		super.timeout(timeout);
+		return this;
+	}
+
 	/*
 	 * =================== TestRule =======================
 	 */
