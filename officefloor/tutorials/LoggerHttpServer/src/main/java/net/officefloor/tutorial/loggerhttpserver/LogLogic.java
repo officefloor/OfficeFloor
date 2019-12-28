@@ -26,6 +26,7 @@ import java.util.logging.Logger;
  */
 public class LogLogic {
 
+	// START SNIPPET: tutorial
 	public void log(LoggedRequest request, Logger procedureLogger, LogObject object) {
 
 		// Log the request via procedure logger
@@ -34,4 +35,5 @@ public class LogLogic {
 		// Have dependency injected object use it's logger
 		object.log(request);
 	}
+	// END SNIPPET: tutorial
 }

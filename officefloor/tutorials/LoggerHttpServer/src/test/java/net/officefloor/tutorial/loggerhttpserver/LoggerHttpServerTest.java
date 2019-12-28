@@ -35,6 +35,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class LoggerHttpServerTest {
 
+	// START SNIPPET: tutorial
 	@Rule
 	public MockWoofServerRule server = new MockWoofServerRule();
 
@@ -55,4 +56,6 @@ public class LoggerHttpServerTest {
 		// Ensure log from object
 		this.log.assertLog("OFFICE.net_officefloor_tutorial_loggerhttpserver_LogObject", Level.INFO, "OBJECT: TEST");
 	}
+	// END SNIPPET: tutorial
+
 }

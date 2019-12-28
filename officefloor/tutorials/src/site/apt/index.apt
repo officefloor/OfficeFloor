@@ -61,6 +61,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./StaticContentHttpServer/index.html}Static content}}     | Serving the single page files                              | /PUBLIC
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./LoggerHttpServer/index.html}Logging}}                   | Loggers identifying location within application            | Logger
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./JavaScriptHttpServer/index.html}JavaScript}}            | Re-using JavaScript validation                             | Polyglot JavaScript
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./JwtResourceHttpServer/index.html}JWT}}                  | JWT Security                                               | JWT Security

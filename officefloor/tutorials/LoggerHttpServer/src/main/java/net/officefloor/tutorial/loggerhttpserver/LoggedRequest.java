@@ -27,6 +27,7 @@ import net.officefloor.web.HttpObject;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @HttpObject
 @Data
 @AllArgsConstructor
@@ -34,3 +35,4 @@ import net.officefloor.web.HttpObject;
 public class LoggedRequest {
 	private String message;
 }
+// END SNIPPET: tutorial

@@ -26,6 +26,7 @@ import net.officefloor.plugin.managedobject.clazz.Dependency;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 public class LogObject {
 
 	@Dependency
@@ -34,5 +35,5 @@ public class LogObject {
 	public void log(LoggedRequest request) {
 		this.logger.info("OBJECT: " + request.getMessage());
 	}
-
 }
+// END SNIPPET: tutorial
