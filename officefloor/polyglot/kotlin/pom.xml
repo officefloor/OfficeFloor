@@ -8,12 +8,23 @@
 		<artifactId>polyglot</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>officepolyglot_kotlin</artifactId>
-	<name>Kotlin</name>
-	<description>OfficeFloor plug-in for using Kotlin</description>
+	<groupId>net.officefloor.kotlin</groupId>
+	<artifactId>kotlin</artifactId>
+	<packaging>pom</packaging>
+	<name>Kotlin Parent</name>
+	<description>OfficeFloor parent project for using Kotlin</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+	<modules>
+		<module>officekotlin</module>
+	</modules>
+	<dependencies>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-stdlib</artifactId>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -57,47 +68,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-test-source</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>add-test-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/test/kotlin</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
-	<dependencies>
-		<dependency>
-			<groupId>net.officefloor.activity</groupId>
-			<artifactId>officeprocedure</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jetbrains.kotlin</groupId>
-			<artifactId>kotlin-stdlib</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>officejson_default</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-kotlin</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor.polyglot</groupId>
-			<artifactId>officepolyglot_test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
 </project>

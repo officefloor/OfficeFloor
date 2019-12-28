@@ -16,7 +16,7 @@
 	<modules>
 		<module>officepolyglot_test</module>
 		<module>officepolyglot_javascript</module>
-		<module>officepolyglot_kotlin</module>
+		<module>kotlin</module>
 		<module>scala</module>
 		<module>officepolyglot_script</module>
 	</modules>

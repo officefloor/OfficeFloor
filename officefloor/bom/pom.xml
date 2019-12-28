@@ -171,8 +171,13 @@
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.officefloor.polyglot</groupId>
-				<artifactId>officepolyglot_kotlin</artifactId>
+				<groupId>net.officefloor.kotlin</groupId>
+				<artifactId>kotlin</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.kotlin</groupId>
+				<artifactId>officekotlin</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
