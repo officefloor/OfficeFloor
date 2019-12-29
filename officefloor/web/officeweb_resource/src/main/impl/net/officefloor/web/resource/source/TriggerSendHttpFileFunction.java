@@ -51,7 +51,7 @@ public class TriggerSendHttpFileFunction extends StaticManagedFunction<None, Non
 	 */
 
 	@Override
-	public void execute(ManagedFunctionContext<None, None> context) {
+	public void execute(ManagedFunctionContext<None, None> context) throws Exception {
 		// Trigger send file
 		context.setNextFunctionArgument(this.path);
 	}

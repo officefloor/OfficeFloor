@@ -46,7 +46,7 @@ public class ServiceHttpRequestFunction extends StaticManagedFunction<ServiceHtt
 	 */
 
 	@Override
-	public void execute(ManagedFunctionContext<Dependencies, None> context) {
+	public void execute(ManagedFunctionContext<Dependencies, None> context) throws Exception {
 
 		// Obtain the dependencies
 		ServerHttpConnection connection = (ServerHttpConnection) context.getObject(Dependencies.SERVER_HTTP_CONNECTION);

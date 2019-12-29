@@ -85,7 +85,7 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 	 */
 
 	@Override
-	public void execute(ManagedFunctionContext<HttpRouteDependencies, Indexed> context) {
+	public void execute(ManagedFunctionContext<HttpRouteDependencies, Indexed> context) throws Exception {
 
 		// Obtain the server HTTP connection
 		ServerHttpConnection connection = (ServerHttpConnection) context
