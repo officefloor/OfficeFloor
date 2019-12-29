@@ -87,10 +87,14 @@ public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> ex
 			throws UnknownFunctionException, InvalidParameterTypeException;
 
 	/**
-	 * Allows to asynchronously overwrite the next {@link ManagedFunction} argument.
+	 * Specifies the next {@link ManagedFunction} argument.
 	 * 
 	 * @param argument Argument for the next {@link ManagedFunction}.
+	 * @throws Exception If invalid argument. Typically this is not a recoverable
+	 *                   exception, so let propagate from the
+	 *                   {@link ManagedFunction} or
+	 *                   {@link AsynchronousFlowCompletion}.
 	 */
-	void setNextFunctionArgument(Object argument);
+	void setNextFunctionArgument(Object argument) throws Exception;
 
 }

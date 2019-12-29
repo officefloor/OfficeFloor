@@ -19,10 +19,15 @@ package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
+import net.officefloor.frame.api.manage.InvalidParameterTypeException;
+import net.officefloor.frame.api.manage.UnknownFunctionException;
 
 /**
  * {@link ManagedFunction} to invoke a {@link Method}.
@@ -143,18 +148,107 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 		Object instance = (this.methodObjectInstanceFactory == null) ? null
 				: this.methodObjectInstanceFactory.createInstance(context);
 
+		// May inject context, so need to wrap translating next value
+		ManagedFunctionContext<Indexed, Indexed> runContext = (this.returnTranslator != null)
+				? new TranslateManagedFunctionContext(context)
+				: context;
+
 		// Create the listing of parameters
 		Object[] params = new Object[this.parameterFactories.length];
 		for (int i = 0; i < params.length; i++) {
-			params[i] = this.parameterFactories[i].createParameter(context);
+			params[i] = this.parameterFactories[i].createParameter(runContext);
 		}
 
 		// Invoke the method as the function
 		Object returnValue = invokeMethod(instance, this.method, params);
 
-		// Return the possibly translated return value
-		context.setNextFunctionArgument(
-				(this.returnTranslator != null) ? this.returnTranslator.translate(returnValue, context) : returnValue);
+		// Determine if translate return value
+		if (returnValue != null) {
+			runContext.setNextFunctionArgument(returnValue);
+		}
+	}
+
+	/**
+	 * {@link ManagedFunctionContext} to translate the return value.
+	 */
+	private class TranslateManagedFunctionContext implements ManagedFunctionContext<Indexed, Indexed> {
+
+		/**
+		 * {@link ManagedFunctionContext} delegate.
+		 */
+		private final ManagedFunctionContext<Indexed, Indexed> delegate;
+
+		/**
+		 * Instantiate.
+		 * 
+		 * @param delegate {@link ManagedFunctionContext} delegate.
+		 */
+		private TranslateManagedFunctionContext(ManagedFunctionContext<Indexed, Indexed> delegate) {
+			this.delegate = delegate;
+		}
+
+		/*
+		 * ======================= ManagedFunctionContext ============================
+		 */
+
+		@Override
+		public Logger getLogger() {
+			return this.delegate.getLogger();
+		}
+
+		@Override
+		public void doFlow(Indexed key, Object parameter, FlowCallback callback) {
+			this.delegate.doFlow(key, parameter, callback);
+		}
+
+		@Override
+		public void doFlow(int flowIndex, Object parameter, FlowCallback callback) {
+			this.delegate.doFlow(flowIndex, parameter, callback);
+		}
+
+		@Override
+		public AsynchronousFlow createAsynchronousFlow() {
+			return this.delegate.createAsynchronousFlow();
+		}
+
+		@Override
+		public Object getObject(Indexed key) {
+			return this.delegate.getObject(key);
+		}
+
+		@Override
+		public Object getObject(int dependencyIndex) {
+			return this.delegate.getObject(dependencyIndex);
+		}
+
+		@Override
+		public void doFlow(String functionName, Object parameter, FlowCallback callback)
+				throws UnknownFunctionException, InvalidParameterTypeException {
+			this.delegate.doFlow(functionName, parameter, callback);
+		}
+
+		@Override
+		public void setNextFunctionArgument(Object argument) throws Exception {
+
+			// Translate the return value
+			MethodFunction.this.returnTranslator.translate(new MethodReturnTranslatorContext<Object, Object>() {
+
+				@Override
+				public Object getReturnValue() {
+					return argument;
+				}
+
+				@Override
+				public void setTranslatedReturnValue(Object value) throws Exception {
+					TranslateManagedFunctionContext.this.delegate.setNextFunctionArgument(value);
+				}
+
+				@Override
+				public ManagedFunctionContext<?, ?> getManagedFunctionContext() {
+					return TranslateManagedFunctionContext.this.delegate;
+				}
+			});
+		}
 	}
 
 }

@@ -252,9 +252,10 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 			// Provide translation of class
 			closure.value = context.getReturnClass();
 			context.setTranslatedReturnClass(String.class);
-			return (returnValue, functionContext) -> {
-				assertNotNull("Should have " + ManagedFunctionContext.class.getSimpleName(), functionContext);
-				return (String) returnValue.value;
+			return (translateContext) -> {
+				assertNotNull("Should have " + ManagedFunctionContext.class.getSimpleName(),
+						translateContext.getManagedFunctionContext());
+				translateContext.setTranslatedReturnValue((String) translateContext.getReturnValue().value);
 			};
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFunction(), "method", (type) -> {
 			type.setReturnType(String.class);
@@ -284,12 +285,11 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 
 			// Provide asynchronous translate of class
 			context.setTranslatedReturnClass(String.class);
-			return (returnValue, functionContext) -> {
-				AsynchronousFlow flow = functionContext.createAsynchronousFlow();
+			return (translateContext) -> {
+				AsynchronousFlow flow = translateContext.getManagedFunctionContext().createAsynchronousFlow();
 				thread.value = new Thread(() -> {
-					flow.complete(() -> functionContext.setNextFunctionArgument(ASYNC_TRANSLATED_RESULT));
+					flow.complete(() -> translateContext.setTranslatedReturnValue(ASYNC_TRANSLATED_RESULT));
 				});
-				return null; // will be overridden
 			};
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFunction(), "method", (type) -> {
 			type.setReturnType(String.class);
@@ -310,8 +310,8 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	 * Translate function on return.
 	 */
 	public void testFunctionNameReturn() throws Exception {
-		MethodResult result = MockReturnManufacturer.run(Void.class, String.class, (context) -> {
-			return (none, functionContext) -> context.getFunctionName();
+		MethodResult result = MockReturnManufacturer.run(String.class, String.class, (context) -> {
+			return (translateContext) -> translateContext.setTranslatedReturnValue(context.getFunctionName());
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new FunctionNameReturnFunction(), "method", (type) -> {
 			type.setReturnType(String.class);
 		}, null));
@@ -319,8 +319,8 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	}
 
 	public static class FunctionNameReturnFunction {
-		public void method() {
-			// No return, but will translate in a value
+		public String method() {
+			return "TRANSLATED";
 		}
 	}
 
@@ -329,8 +329,9 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	 */
 	public void testReturnAnnotation() throws Exception {
 		Next annotation = ReturnAnnotationFunction.class.getMethod("method").getAnnotation(Next.class);
-		MethodResult result = MockReturnManufacturer.run(Void.class, Next.class, (context) -> {
-			return (none, functionContext) -> (Next) context.getMethodAnnotations()[0];
+		MethodResult result = MockReturnManufacturer.run(String.class, Next.class, (context) -> {
+			return (translateContext) -> translateContext
+					.setTranslatedReturnValue((Next) context.getMethodAnnotations()[0]);
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new ReturnAnnotationFunction(), "method", (type) -> {
 			type.addAnnotation(annotation);
 			type.setReturnType(Next.class);
@@ -341,8 +342,8 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	public static class ReturnAnnotationFunction {
 
 		@Next("TEST")
-		public void method() {
-			// No return, but will translate in a value
+		public String method() {
+			return "TRANSLATED";
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
+ * Copyright (C) 2005-2019 Daniel Sagenschneider
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,25 +19,34 @@ package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.reflect.Method;
 
-import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 
 /**
- * Translate the return value of the {@link MethodFunction}.
- * 
- * @param <R> {@link MethodFunction} return type.
- * @param <T> Translated type.
+ * Context for the {@link MethodReturnTranslator}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface MethodReturnTranslator<R, T> {
+public interface MethodReturnTranslatorContext<R, T> {
 
 	/**
-	 * Translates the {@link Method} return value for next {@link ManagedFunction}
-	 * argument.
+	 * Obtains the return value from the {@link Method}.
 	 * 
-	 * @param context {@link MethodReturnTranslatorContext}.
-	 * @throws Exception If fails to translate.
+	 * @return Return value from the {@link Method}.
 	 */
-	void translate(MethodReturnTranslatorContext<R, T> context) throws Exception;
+	R getReturnValue();
+
+	/**
+	 * Specifies the translated return value.
+	 * 
+	 * @param value Translated return value.
+	 */
+	void setTranslatedReturnValue(T value) throws Exception;
+
+	/**
+	 * Obtains the {@link ManagedFunctionContext}.
+	 * 
+	 * @return {@link ManagedFunctionContext}.
+	 */
+	ManagedFunctionContext<?, ?> getManagedFunctionContext();
 
 }
