@@ -1,4 +1,4 @@
-package net.officefloor.polyglot.scala
+package net.officefloor.scala
 
 import net.officefloor.frame.api.function.FlowCallback
 import net.officefloor.plugin.clazz.FlowInterface

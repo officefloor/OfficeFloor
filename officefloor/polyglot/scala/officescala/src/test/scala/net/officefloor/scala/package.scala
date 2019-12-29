@@ -1,4 +1,4 @@
-package net.officefloor.polyglot
+package net.officefloor
 
 import java.io.IOException
 

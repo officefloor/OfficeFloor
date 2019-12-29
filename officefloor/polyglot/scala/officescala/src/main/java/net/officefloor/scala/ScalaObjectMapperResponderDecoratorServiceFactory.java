@@ -15,34 +15,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.scala;
+package net.officefloor.scala;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.web.json.ObjectMapperParserDecorator;
-import net.officefloor.web.json.ObjectMapperParserDecoratorServiceFactory;
+import net.officefloor.web.json.ObjectMapperResponderDecorator;
+import net.officefloor.web.json.ObjectMapperResponderDecoratorServiceFactory;
 
 /**
- * Scala {@link ObjectMapperParserDecoratorServiceFactory}.
+ * Scala {@link ObjectMapperResponderDecoratorServiceFactory}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ScalaObjectMapperParserDecoratorServiceFactory
-		implements ObjectMapperParserDecoratorServiceFactory, ObjectMapperParserDecorator {
+public class ScalaObjectMapperResponderDecoratorServiceFactory
+		implements ObjectMapperResponderDecoratorServiceFactory, ObjectMapperResponderDecorator {
 
 	/*
-	 * ================ ObjectMapperParserDecoratorServiceFactory ================
+	 * ============== ObjectMapperResponderDecoratorServiceFactory ==============
 	 */
 
 	@Override
-	public ObjectMapperParserDecorator createService(ServiceContext context) throws Throwable {
+	public ObjectMapperResponderDecorator createService(ServiceContext context) throws Throwable {
 		return this;
 	}
 
 	/*
-	 * ======================== ObjectMapperParserDecorator =======================
+	 * ====================== ObjectMapperResponderDecorator ======================
 	 */
 
 	@Override
