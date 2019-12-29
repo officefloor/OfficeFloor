@@ -153,7 +153,7 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 		Object returnValue = invokeMethod(instance, this.method, params);
 
 		// Return the possibly translated return value
-		return (this.returnTranslator != null) ? this.returnTranslator.translate(returnValue) : returnValue;
+		return (this.returnTranslator != null) ? this.returnTranslator.translate(returnValue, context) : returnValue;
 	}
 
 }

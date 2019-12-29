@@ -63,6 +63,18 @@ public interface MethodReturnManufacturerContext<T> {
 	String getFunctionName();
 
 	/**
+	 * <p>
+	 * Obtains the {@link Method}.
+	 * <p>
+	 * Due to type erasure, the type information on the return {@link Class} may be
+	 * lost. This allows more information to be derived about the return type.
+	 * 
+	 * @return {@link Method}.
+	 */
+
+	Method getMethod();
+
+	/**
 	 * Obtains the {@link SourceContext}.
 	 * 
 	 * @return {@link SourceContext}.

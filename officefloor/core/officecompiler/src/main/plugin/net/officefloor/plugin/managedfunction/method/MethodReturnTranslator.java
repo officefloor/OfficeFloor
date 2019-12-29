@@ -33,9 +33,10 @@ public interface MethodReturnTranslator<R, T> {
 	 * Creates the parameter from the {@link ManagedFunctionContext}.
 	 * 
 	 * @param returnValue Return value of {@link MethodFunction}.
+	 * @param context     {@link ManagedFunctionContext}.
 	 * @return Translated return value.
 	 * @throws Exception If fails to translate.
 	 */
-	T translate(R returnValue) throws Exception;
+	T translate(R returnValue, ManagedFunctionContext<?, ?> context) throws Exception;
 
 }

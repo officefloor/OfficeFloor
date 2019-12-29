@@ -165,7 +165,7 @@ public class MethodManagedFunctionBuilder {
 		// Note: even if void, allows successful after method execution
 		MethodReturnTranslator returnTranslator = null;
 		MethodReturnManufacturerContextImpl<?> returnContext = new MethodReturnManufacturerContextImpl<>(returnType,
-				methodAnnotations, methodName, context);
+				methodAnnotations, methodName, method, context);
 		FOUND_TRANSLATOR: for (MethodReturnManufacturer manufacturer : context
 				.loadOptionalServices(MethodReturnManufacturerServiceFactory.class)) {
 			returnTranslator = manufacturer.createReturnTranslator(returnContext);
@@ -280,8 +280,8 @@ public class MethodManagedFunctionBuilder {
 			// Create the context
 			MethodParameterManufacturerContext manufacturerContext = new MethodParameterManufacturerContextImpl(
 					paramClass, paramType, allAnnotations.toArray(new Annotation[allAnnotations.size()]),
-					parameterQualifier, objectSequence, flowSequence, functionTypeBuilder, escalationTypes, methodName,
-					context);
+					parameterQualifier, methodName, method, i, objectSequence, flowSequence, functionTypeBuilder,
+					escalationTypes, context);
 
 			// Obtain the parameter factory
 			MethodParameterFactory parameterFactory = null;
@@ -602,6 +602,11 @@ public class MethodManagedFunctionBuilder {
 		private final String functionName;
 
 		/**
+		 * {@link Method}.
+		 */
+		private final Method method;
+
+		/**
 		 * {@link SourceContext}.
 		 */
 		private final SourceContext sourceContext;
@@ -617,13 +622,15 @@ public class MethodManagedFunctionBuilder {
 		 * @param returnClass       {@link Method} return type.
 		 * @param methodAnnotations {@link Method} {@link Annotation} instances.
 		 * @param functionName      Name of {@link ManagedFunction}.
+		 * @param method            {@link Method}.
 		 * @param sourceContext     {@link SourceContext}.
 		 */
 		public MethodReturnManufacturerContextImpl(Class<?> returnClass, Annotation[] methodAnnotations,
-				String functionName, SourceContext sourceContext) {
+				String functionName, Method method, SourceContext sourceContext) {
 			this.returnClass = returnClass;
 			this.methodAnnotations = methodAnnotations;
 			this.functionName = functionName;
+			this.method = method;
 			this.sourceContext = sourceContext;
 		}
 
@@ -649,6 +656,11 @@ public class MethodManagedFunctionBuilder {
 		@Override
 		public String getFunctionName() {
 			return this.functionName;
+		}
+
+		@Override
+		public Method getMethod() {
+			return this.method;
 		}
 
 		@Override
@@ -683,6 +695,21 @@ public class MethodManagedFunctionBuilder {
 		private final String parameterQualifier;
 
 		/**
+		 * {@link ManagedFunction} name.
+		 */
+		private final String functionName;
+
+		/**
+		 * {@link Method}.
+		 */
+		private final Method method;
+
+		/**
+		 * Index of the parameter on the m
+		 */
+		private final int parameterIndex;
+
+		/**
 		 * {@link Sequence} for object indexes.
 		 */
 		private final Sequence objectSequence;
@@ -704,11 +731,6 @@ public class MethodManagedFunctionBuilder {
 		private final Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes;
 
 		/**
-		 * {@link ManagedFunction} name.
-		 */
-		private final String functionName;
-
-		/**
 		 * {@link SourceContext}.
 		 */
 		private final SourceContext sourceContext;
@@ -720,28 +742,33 @@ public class MethodManagedFunctionBuilder {
 		 * @param parameterType        Parameter {@link Type}.
 		 * @param parameterAnnotations Parameter {@link Annotation} instances.
 		 * @param parameterQualifier   Parameter qualifier.
+		 * @param functionName         {@link ManagedFunction} name.
+		 * @param method               {@link Method}.
+		 * @param parameterIndex       Index of the parameter on the {@link Method}.
 		 * @param objectSequence       {@link Sequence} for object indexes.
 		 * @param flowSequence         {@link Sequence} for {@link Flow} indexes.
 		 * @param functionTypeBuilder  {@link ManagedFunctionTypeBuilder}.
 		 * @param escalationTypes      {@link Map} of {@link Throwable} type to
 		 *                             {@link ManagedFunctionEscalationTypeBuilder}.
-		 * @param functionName         {@link ManagedFunction} name.
 		 * @param sourceContext        {@link SourceContext}.
 		 */
 		private MethodParameterManufacturerContextImpl(Class<?> parameterClass, Type parameterType,
-				Annotation[] parameterAnnotations, String parameterQualifier, Sequence objectSequence,
-				Sequence flowSequence, ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder,
+				Annotation[] parameterAnnotations, String parameterQualifier, String functionName, Method method,
+				int parameterIndex, Sequence objectSequence, Sequence flowSequence,
+				ManagedFunctionTypeBuilder<Indexed, Indexed> functionTypeBuilder,
 				Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes,
-				String functionName, SourceContext sourceContext) {
+				SourceContext sourceContext) {
 			this.parameterClass = parameterClass;
 			this.parameterType = parameterType;
 			this.parameterAnnotations = parameterAnnotations;
 			this.parameterQualifier = parameterQualifier;
+			this.functionName = functionName;
+			this.method = method;
+			this.parameterIndex = parameterIndex;
 			this.objectSequence = objectSequence;
 			this.flowSequence = flowSequence;
 			this.functionTypeBuilder = functionTypeBuilder;
 			this.escalationTypes = escalationTypes;
-			this.functionName = functionName;
 			this.sourceContext = sourceContext;
 		}
 
@@ -770,6 +797,21 @@ public class MethodManagedFunctionBuilder {
 		}
 
 		@Override
+		public String getFunctionName() {
+			return this.functionName;
+		}
+
+		@Override
+		public Method getMethod() {
+			return this.method;
+		}
+
+		@Override
+		public int getParameterIndex() {
+			return this.parameterIndex;
+		}
+
+		@Override
 		public int addObject(Class<?> objectType, Consumer<ManagedFunctionObjectTypeBuilder<Indexed>> builder) {
 			int objectIndex = this.objectSequence.nextIndex();
 			ManagedFunctionObjectTypeBuilder<Indexed> object = this.functionTypeBuilder.addObject(objectType);
@@ -792,11 +834,6 @@ public class MethodManagedFunctionBuilder {
 				builder.accept(flow);
 			}
 			return flowIndex;
-		}
-
-		@Override
-		public String getFunctionName() {
-			return this.functionName;
 		}
 
 		@Override
