@@ -216,9 +216,6 @@ public class JwksSectionSource extends AbstractSectionSource {
 						} catch (Exception ex) {
 							collector.setFailure(ex, -1, null);
 						}
-
-						// Nothing further
-						return null;
 					}, Dependencies.class, None.class);
 			retrieveJwtValidateKeys.addObject(JwtValidateKeyCollector.class)
 					.setKey(Dependencies.JWT_VALIDATE_KEY_COLLECTOR);

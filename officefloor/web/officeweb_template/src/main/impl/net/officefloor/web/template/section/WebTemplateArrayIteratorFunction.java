@@ -49,12 +49,12 @@ public class WebTemplateArrayIteratorFunction extends
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<DependencyKeys, FlowKeys> context) {
+	public void execute(ManagedFunctionContext<DependencyKeys, FlowKeys> context) {
 
 		// Obtain the array
 		Object[] array = (Object[]) context.getObject(DependencyKeys.ARRAY);
 		if (array == null) {
-			return null; // no array, no rendering
+			return; // no array, no rendering
 		}
 
 		// Iterate over the array rendering the elements
@@ -64,9 +64,6 @@ public class WebTemplateArrayIteratorFunction extends
 
 		// Continue the template
 		context.doFlow(FlowKeys.CONTINUE_TEMPLATE, null, null);
-
-		// No next function (as invoking flows)
-		return null;
 	}
 
 }

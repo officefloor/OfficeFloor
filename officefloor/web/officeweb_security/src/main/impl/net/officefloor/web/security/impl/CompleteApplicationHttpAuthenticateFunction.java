@@ -50,7 +50,7 @@ public class CompleteApplicationHttpAuthenticateFunction<AC extends Serializable
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Dependencies, None> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Dependencies, None> context) throws Throwable {
 
 		// Obtain the access control (handles not logged in)
 		context.getObject(Dependencies.ACCESS_CONTROL);
@@ -75,9 +75,6 @@ public class CompleteApplicationHttpAuthenticateFunction<AC extends Serializable
 			// Failure as must reinstate request
 			throw new AuthenticationContinuationException("No previous request state to continue after login");
 		}
-
-		// No further functions
-		return null;
 	}
 
 }

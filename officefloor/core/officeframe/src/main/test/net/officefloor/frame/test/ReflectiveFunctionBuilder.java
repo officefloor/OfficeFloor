@@ -93,7 +93,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	/**
 	 * Initiate.
 	 *
-	 * @param               <C> {@link ManagedFunction} {@link Method} containing
+	 * @param <C>           {@link ManagedFunction} {@link Method} containing
 	 *                      {@link Class} type.
 	 * @param clazz         {@link Class}.
 	 * @param object        Object should the method not be <code>static</code>. May
@@ -306,7 +306,7 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 		// Create the parameters
 		Object[] parameters = new Object[this.method.getParameterTypes().length];
@@ -318,16 +318,12 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 		this.testCase.recordReflectiveFunctionMethodInvoked(this.method.getName());
 
 		// Invoke the method on object to get return
-		Object returnValue;
 		try {
-			returnValue = this.method.invoke(this.object, parameters);
+			context.setNextFunctionArgument(this.method.invoke(this.object, parameters));
 		} catch (InvocationTargetException ex) {
 			// Throw cause of exception
 			throw ex.getCause();
 		}
-
-		// Return the value from method
-		return returnValue;
 	}
 
 	/**

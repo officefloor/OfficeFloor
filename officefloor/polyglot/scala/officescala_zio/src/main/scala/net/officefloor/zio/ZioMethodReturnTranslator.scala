@@ -12,9 +12,23 @@ import zio.{FiberFailure, ZIO}
  */
 class ZioMethodReturnTranslator[A] extends MethodReturnTranslator[ZIO[Any, _, A], A] {
 
-  override def translate(zio: ZIO[Any, _, A], context: ManagedFunctionContext[_, _]): A =
-    OfficeFloorZio.defaultRuntime.unsafeRunAsync(zio) { _ match {
-        case Success(value) => value
-        case Failure(cause) => throw FiberFailure(cause)
+  override def translate(zio: ZIO[Any, _, A], context: ManagedFunctionContext[_, _]): A = {
+
+    // Start asynchronous flow
+    val flow = context.createAsynchronousFlow()
+
+    // Asynchronously run effects
+    OfficeFloorZio.defaultRuntime.unsafeRunAsync(zio) { exit =>
+      flow.complete { () =>
+        exit match {
+          case Success(value) => context.setNextFunctionArgument(value)
+          case Failure(cause) => throw FiberFailure(cause)
+        }
       }
     }
+
+    // Nothing synchronously to return
+    1.asInstanceOf[A]
+  }
+
+}

@@ -246,7 +246,6 @@ public class ObjectifySupplierSource extends AbstractSupplierSource {
 				RecycleManagedObjectParameter<ObjectifyManagedObject> recycle = RecycleManagedObjectParameter
 						.getRecycleManagedObjectParameter(recyleContext);
 				recycle.getManagedObject().closable.close();
-				return null;
 			}).linkParameter(0, RecycleManagedObjectParameter.class);
 
 		}

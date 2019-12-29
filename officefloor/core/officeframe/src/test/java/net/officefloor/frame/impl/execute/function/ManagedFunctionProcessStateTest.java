@@ -88,8 +88,7 @@ public class ManagedFunctionProcessStateTest extends AbstractOfficeConstructTest
 		/**
 		 * Initiate.
 		 * 
-		 * @param parameter
-		 *            Parameter to invoke delegate work with.
+		 * @param parameter Parameter to invoke delegate work with.
 		 */
 		public WorkOne(Object parameter) {
 			this.parameter = parameter;
@@ -100,7 +99,7 @@ public class ManagedFunctionProcessStateTest extends AbstractOfficeConstructTest
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> context)
+		public void execute(ManagedFunctionContext<WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> context)
 				throws Exception {
 
 			// Obtain the Managed Object
@@ -115,9 +114,6 @@ public class ManagedFunctionProcessStateTest extends AbstractOfficeConstructTest
 
 			// Obtain the Work Supervisor to initiate the second work
 			context.doFlow(WorkOneDelegatesEnum.WORK_TWO, null, null);
-
-			// No further parameter
-			return null;
 		}
 	}
 
@@ -153,7 +149,7 @@ public class ManagedFunctionProcessStateTest extends AbstractOfficeConstructTest
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<WorkTwoManagedObjectsEnum, NoDelegatesEnum> context)
+		public void execute(ManagedFunctionContext<WorkTwoManagedObjectsEnum, NoDelegatesEnum> context)
 				throws Exception {
 
 			// Obtain the Managed Object
@@ -165,9 +161,6 @@ public class ManagedFunctionProcessStateTest extends AbstractOfficeConstructTest
 
 			// Obtain the parameter
 			this.parameter = managedObjectOne.getParameter();
-
-			// No parameter
-			return null;
 		}
 
 	}
@@ -192,8 +185,7 @@ public class ManagedFunctionProcessStateTest extends AbstractOfficeConstructTest
 		/**
 		 * Specifies the parameter.
 		 * 
-		 * @param parameter
-		 *            Parameter.
+		 * @param parameter Parameter.
 		 */
 		public void setParameter(Object parameter) {
 			this.parameter = parameter;

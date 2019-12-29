@@ -152,7 +152,7 @@ public class RunManagedObjectFunctionTest extends AbstractRunTestCase {
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+		public void execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 			// Obtain the dependency
 			Object dependency = context.getObject(0);
@@ -160,9 +160,6 @@ public class RunManagedObjectFunctionTest extends AbstractRunTestCase {
 
 			// Capture the managed object
 			this.mo = (RunManagedObjectSource) dependency;
-
-			// Nothing further
-			return null;
 		}
 	}
 

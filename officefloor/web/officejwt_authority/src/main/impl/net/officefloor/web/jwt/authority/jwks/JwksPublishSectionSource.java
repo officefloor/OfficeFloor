@@ -236,8 +236,6 @@ public class JwksPublishSectionSource extends AbstractSectionSource {
 						// Write out the JWKS response
 						mapper.writeValue(connection.getResponse().getEntity(), jwksNode);
 
-						// Nothing further
-						return null;
 					}, Dependencies.class, None.class);
 			function.addObject(JwtAuthority.class).setKey(Dependencies.JWT_AUTHORITY);
 			function.addObject(ServerHttpConnection.class).setKey(Dependencies.SERVER_HTTP_CONNECTION);

@@ -25,9 +25,9 @@ public class TranslateHttpPathToWebServicerFunction
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Dependencies, None> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Dependencies, None> context) throws Throwable {
 		HttpPath path = (HttpPath) context.getObject(Dependencies.HTTP_PATH);
-		return path.getWebServicer();
+		context.setNextFunctionArgument(path.getWebServicer());
 	}
 
 }

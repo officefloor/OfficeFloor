@@ -87,7 +87,7 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionLogicContext context) throws Throwable {
+	public void execute(ManagedFunctionLogicContext context) throws Throwable {
 
 		// Create the administration
 		Administration<E, F, G> administration = this.metaData.getAdministrationFactory().createAdministration();
@@ -110,9 +110,6 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 				}
 			});
 		}
-
-		// No next function
-		return null;
 	}
 
 	/**

@@ -129,13 +129,10 @@ public class PassParameterTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<None, FunctionOneDelegatesEnum> context) throws Exception {
+		public void execute(ManagedFunctionContext<None, FunctionOneDelegatesEnum> context) throws Exception {
 
 			// Delegate to the next function
 			context.doFlow(FunctionOneDelegatesEnum.FUNCTION_TWO, this.parameter, null);
-
-			// No parameter
-			return null;
 		}
 	}
 
@@ -167,13 +164,10 @@ public class PassParameterTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<FunctionTwoDependenciesEnum, None> context) throws Exception {
+		public void execute(ManagedFunctionContext<FunctionTwoDependenciesEnum, None> context) throws Exception {
 
 			// Store the parameter
 			this.parameter = context.getObject(FunctionTwoDependenciesEnum.PARAMETER);
-
-			// No parameter
-			return null;
 		}
 	}
 

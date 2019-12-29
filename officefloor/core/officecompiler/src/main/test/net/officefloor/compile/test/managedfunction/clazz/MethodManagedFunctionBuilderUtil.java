@@ -304,7 +304,7 @@ public class MethodManagedFunctionBuilderUtil {
 		ManagedFunction<Indexed, Indexed> function = functionType.getManagedFunctionFactory().createManagedFunction();
 		Throwable failure;
 		try {
-			context.nextFunctionArgument = function.execute(context);
+			function.execute(context);
 			failure = null;
 		} catch (AssertionError ex) {
 			throw ex; // propagate assertion failures

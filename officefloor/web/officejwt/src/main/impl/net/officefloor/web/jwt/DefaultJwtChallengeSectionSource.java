@@ -65,8 +65,8 @@ public class DefaultJwtChallengeSectionSource extends AbstractSectionSource {
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Provide empty function
-			functionNamespaceTypeBuilder.addManagedFunctionType("function", () -> (functionContext) -> null, None.class,
-					None.class);
+			functionNamespaceTypeBuilder.addManagedFunctionType("function", () -> (functionContext) -> {
+			}, None.class, None.class);
 		}
 	}
 

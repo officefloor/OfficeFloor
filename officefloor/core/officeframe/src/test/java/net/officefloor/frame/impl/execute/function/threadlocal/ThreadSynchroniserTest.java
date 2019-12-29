@@ -308,10 +308,7 @@ public class ThreadSynchroniserTest extends AbstractOfficeConstructTestCase {
 			context.addFlow(null);
 			mosContext.getFlow(0).linkFunction("input");
 			ManagedObjectFunctionBuilder<None, Indexed> input = mosContext.addManagedFunction("input",
-					() -> (function) -> {
-						new InvokedFunction("inputMo");
-						return null;
-					});
+					() -> (function) -> new InvokedFunction("inputMo"));
 			if (this.isTeams) {
 				input.setResponsibleTeam("TEAM");
 			}

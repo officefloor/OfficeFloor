@@ -83,7 +83,7 @@ public class HandleAuthenticationRequiredFunction
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Dependencies, Indexed> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Dependencies, Indexed> context) throws Throwable {
 
 		// Obtain the dependencies
 		AuthenticationRequiredException exception = (AuthenticationRequiredException) context
@@ -143,9 +143,6 @@ public class HandleAuthenticationRequiredFunction
 
 		// Lastly, trigger sending challenge after challenges
 		context.doFlow(HandleAuthenticationRequiredFunction.this.httpSecurityNameToFlowIndex.length, null, null);
-
-		// Nothing further
-		return null;
 	}
 
 }

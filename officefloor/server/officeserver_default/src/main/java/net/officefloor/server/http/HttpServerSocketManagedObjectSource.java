@@ -821,7 +821,7 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 		// Obtain the parameter
 		RecycleManagedObjectParameter<ProcessAwareServerHttpConnectionManagedObject<ByteBuffer>> parameter = RecycleManagedObjectParameter
@@ -832,9 +832,6 @@ public class HttpServerSocketManagedObjectSource extends AbstractManagedObjectSo
 
 		// Load potential clean up escalations
 		managedObject.setCleanupEscalations(parameter.getCleanupEscalations());
-
-		// Nothing further
-		return null;
 	}
 
 	/**

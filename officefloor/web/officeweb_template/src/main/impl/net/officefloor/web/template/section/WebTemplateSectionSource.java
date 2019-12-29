@@ -1663,8 +1663,8 @@ public class WebTemplateSectionSource extends ClassSectionSource {
 				ManagedFunctionSourceContext context) throws Exception {
 
 			// Provide completion function
-			functionNamespaceTypeBuilder.addManagedFunctionType(FUNCTION_NAME, () -> (executeContext) -> null,
-					None.class, None.class);
+			functionNamespaceTypeBuilder.addManagedFunctionType(FUNCTION_NAME, () -> (executeContext) -> {
+			}, None.class, None.class);
 		}
 	}
 

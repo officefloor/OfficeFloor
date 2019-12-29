@@ -1631,8 +1631,9 @@ public class MockConstruct {
 		public ManagedFunctionMetaData<?, ?> addManagedFunction(String functionName, Class<?> parameterType) {
 			this.assertNotBuilt();
 			ManagedFunctionMetaDataImpl<?, ?> function = new ManagedFunctionMetaDataImpl<>(functionName,
-					() -> (context) -> null, new Object[0], parameterType, null, new ManagedObjectIndex[0],
-					new ManagedObjectMetaData[0], new boolean[0], 1, null, OfficeFrame.getLogger(functionName));
+					() -> (context) -> {
+					}, new Object[0], parameterType, null, new ManagedObjectIndex[0], new ManagedObjectMetaData[0],
+					new boolean[0], 1, null, OfficeFrame.getLogger(functionName));
 			this.functions.add(function);
 			return function;
 		}

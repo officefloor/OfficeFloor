@@ -137,7 +137,7 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 		// Obtain the instance to invoke the method on (null if static method)
 		Object instance = (this.methodObjectInstanceFactory == null) ? null
@@ -153,7 +153,8 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 		Object returnValue = invokeMethod(instance, this.method, params);
 
 		// Return the possibly translated return value
-		return (this.returnTranslator != null) ? this.returnTranslator.translate(returnValue, context) : returnValue;
+		context.setNextFunctionArgument(
+				(this.returnTranslator != null) ? this.returnTranslator.translate(returnValue, context) : returnValue);
 	}
 
 }

@@ -383,7 +383,7 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 	public class TestRecycle extends StaticManagedFunction<O, F> {
 
 		@Override
-		public Object execute(ManagedFunctionContext<O, F> context) throws Throwable {
+		public void execute(ManagedFunctionContext<O, F> context) throws Throwable {
 
 			// Obtain the recycle parameter and managed object
 			RecycleManagedObjectParameter<TestManagedObject<O, F>> parameter = RecycleManagedObjectParameter
@@ -404,9 +404,6 @@ public class TestManagedObject<O extends Enum<O>, F extends Enum<F>>
 			if (TestManagedObject.this.isRecycle) {
 				parameter.reuseManagedObject();
 			}
-
-			// No further functionality
-			return null;
 		}
 	}
 

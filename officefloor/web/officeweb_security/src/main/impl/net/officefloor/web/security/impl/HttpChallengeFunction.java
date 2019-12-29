@@ -63,7 +63,7 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>> extends
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
 
 		// Obtain the dependencies
 		HttpChallengeContext httpChallengeContext = (HttpChallengeContext) context.getObject(0);
@@ -74,9 +74,6 @@ public class HttpChallengeFunction<O extends Enum<O>, F extends Enum<F>> extends
 		// Undertake challenge
 		this.httpSecurity.challenge(
 				new HttpChallengeContextImpl(connection, session, requestState, context, httpChallengeContext));
-
-		// No further functions
-		return null;
 	}
 
 	/**

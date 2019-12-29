@@ -43,9 +43,8 @@ public class InterceptFunction implements ManagedFunctionFactory<None, None>, Ma
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
+	public void execute(ManagedFunctionContext<None, None> context) throws Throwable {
 		// Do nothing, as just linked next to interception
-		return null;
 	}
 
 }

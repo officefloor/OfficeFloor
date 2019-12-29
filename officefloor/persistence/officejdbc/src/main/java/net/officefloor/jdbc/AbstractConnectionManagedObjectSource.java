@@ -394,10 +394,8 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 		// Provide start up function to ensure can connect
 		String validateSql = mosContext.getProperty(PROPERTY_DATA_SOURCE_VALIDATE_SQL, null);
 		final String validateFunctionName = "confirm";
-		mosContext.addManagedFunction(validateFunctionName, () -> (functionContext) -> {
-			this.validateConnectivity(validateSql);
-			return null;
-		});
+		mosContext.addManagedFunction(validateFunctionName,
+				() -> (functionContext) -> this.validateConnectivity(validateSql));
 		mosContext.addStartupFunction(validateFunctionName);
 	}
 

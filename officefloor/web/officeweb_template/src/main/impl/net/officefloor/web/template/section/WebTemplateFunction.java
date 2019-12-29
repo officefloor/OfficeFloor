@@ -55,12 +55,10 @@ public class WebTemplateFunction extends StaticManagedFunction<Indexed, None> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param contentWriters
-	 *            {@link WebTemplateWriter} instances to write the content.
-	 * @param isBean
-	 *            Flag indicating if a bean.
-	 * @param charset
-	 *            Default {@link Charset} for the template.
+	 * @param contentWriters {@link WebTemplateWriter} instances to write the
+	 *                       content.
+	 * @param isBean         Flag indicating if a bean.
+	 * @param charset        Default {@link Charset} for the template.
 	 */
 	public WebTemplateFunction(WebTemplateWriter[] contentWriters, boolean isBean, Charset charset) {
 		this.contentWriters = contentWriters;
@@ -73,7 +71,7 @@ public class WebTemplateFunction extends StaticManagedFunction<Indexed, None> {
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Indexed, None> context) throws IOException {
+	public void execute(ManagedFunctionContext<Indexed, None> context) throws IOException {
 
 		// Obtain the bean dependency
 		Object bean;
@@ -83,7 +81,7 @@ public class WebTemplateFunction extends StaticManagedFunction<Indexed, None> {
 
 			// No bean, no content
 			if (bean == null) {
-				return null;
+				return;
 			}
 
 		} else {
@@ -112,9 +110,6 @@ public class WebTemplateFunction extends StaticManagedFunction<Indexed, None> {
 		for (WebTemplateWriter contentWriter : this.contentWriters) {
 			contentWriter.write(writer, isDefaultCharset, bean, connection, path);
 		}
-
-		// Template written, nothing to return
-		return null;
 	}
 
 }

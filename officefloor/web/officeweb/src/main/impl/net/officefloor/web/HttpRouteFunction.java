@@ -60,12 +60,10 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 	/**
 	 * Instantiate.
 	 * 
-	 * @param escalationHandler
-	 *            {@link HttpEscalationHandler}. May be <code>null</code>.
-	 * @param handleRedirectFlowIndex
-	 *            {@link Flow} index to handle a redirect.
-	 * @param router
-	 *            {@link HttpRouter}.
+	 * @param escalationHandler       {@link HttpEscalationHandler}. May be
+	 *                                <code>null</code>.
+	 * @param handleRedirectFlowIndex {@link Flow} index to handle a redirect.
+	 * @param router                  {@link HttpRouter}.
 	 */
 	public HttpRouteFunction(HttpEscalationHandler escalationHandler, int handleRedirectFlowIndex, HttpRouter router) {
 		this.escalationHandler = escalationHandler;
@@ -87,7 +85,7 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<HttpRouteDependencies, Indexed> context) {
+	public void execute(ManagedFunctionContext<HttpRouteDependencies, Indexed> context) {
 
 		// Obtain the server HTTP connection
 		ServerHttpConnection connection = (ServerHttpConnection) context
@@ -104,11 +102,11 @@ public class HttpRouteFunction implements ManagedFunctionFactory<HttpRouteFuncti
 		if (cookie != null) {
 			// Redirect, so trigger flow to import previous state
 			context.doFlow(this.handleRedirectFlowIndex, cookie, null);
-			return null; // serviced by redirect
+			return; // serviced by redirect
 		}
 
 		// No redirect, so route the request
-		return this.router.route(connection, context);
+		context.setNextFunctionArgument(this.router.route(connection, context));
 	}
 
 }

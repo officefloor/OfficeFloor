@@ -84,9 +84,8 @@ public class ManagedObjectFunctionDependencyTest extends AbstractOfficeConstruct
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<None, Indexed> context) throws Throwable {
+		public void execute(ManagedFunctionContext<None, Indexed> context) throws Throwable {
 			this.dependency = (MockDependency) context.getObject(0);
-			return null;
 		}
 	}
 

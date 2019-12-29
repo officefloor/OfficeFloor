@@ -55,8 +55,7 @@ public class HttpHandleRedirectFunction
 	/**
 	 * Instantiate.
 	 * 
-	 * @param router
-	 *            {@link HttpRouter}.
+	 * @param router {@link HttpRouter}.
 	 */
 	public HttpHandleRedirectFunction(HttpRouter router) {
 		this.router = router;
@@ -76,7 +75,7 @@ public class HttpHandleRedirectFunction
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<HttpHandleRedirectDependencies, Indexed> context) throws Throwable {
+	public void execute(ManagedFunctionContext<HttpHandleRedirectDependencies, Indexed> context) throws Throwable {
 
 		// Obtain the dependencies
 		HttpRequestCookie cookie = (HttpRequestCookie) context.getObject(HttpHandleRedirectDependencies.COOKIE);
@@ -101,7 +100,7 @@ public class HttpHandleRedirectFunction
 		HttpRequestStateManagedObjectSource.importHttpRequestState(serialisable.momento, requestState);
 
 		// Undertake routing (with re-instated request state)
-		return this.router.route(connection, context);
+		context.setNextFunctionArgument(this.router.route(connection, context));
 	}
 
 }

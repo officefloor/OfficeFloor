@@ -125,7 +125,7 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 		// Obtain the invocable
 		Invocable invocable = this.invocable.get();
@@ -158,7 +158,7 @@ public class ScriptManagedFunction extends StaticManagedFunction<Indexed, Indexe
 
 		try {
 			// Invoke the function
-			return invocable.invokeFunction(this.functionName, arguments);
+			context.setNextFunctionArgument(invocable.invokeFunction(this.functionName, arguments));
 
 		} catch (ScriptException ex) {
 			// Translate and throw

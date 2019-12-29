@@ -210,7 +210,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 	private static class RecycleFunction extends StaticManagedFunction<Indexed, None> {
 
 		@Override
-		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+		public void execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 			// Obtain the connection
 			RecycleManagedObjectParameter<AbstractConnectionManagedObject> recycle = RecycleManagedObjectParameter
@@ -222,7 +222,7 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 			if (connection == null) {
 				// No "real" connection, so no need to clean up
 				recycle.reuseManagedObject();
-				return null;
+				return;
 			}
 
 			// Determine if within transaction
@@ -241,9 +241,6 @@ public class ConnectionManagedObjectSource extends AbstractConnectionManagedObje
 
 			// Reuse the connection
 			recycle.reuseManagedObject();
-
-			// Nothing further
-			return null;
 		}
 	}
 

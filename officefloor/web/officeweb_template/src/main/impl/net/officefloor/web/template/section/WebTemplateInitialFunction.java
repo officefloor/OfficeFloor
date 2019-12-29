@@ -82,17 +82,15 @@ public class WebTemplateInitialFunction extends
 	/**
 	 * Initiate.
 	 * 
-	 * @param isRequireSecure
-	 *            Indicates if a secure {@link ServerHttpConnection} is required.
-	 * @param contentType
-	 *            Content-type for the {@link ParsedTemplate}. May be
-	 *            <code>null</code>.
-	 * @param charset
-	 *            {@link Charset} for {@link ParsedTemplate}.
-	 * @param inputPath
-	 *            {@link HttpInputPath} for the {@link WebTemplate}.
-	 * @param terminatingPathCharacter
-	 *            {@link Character} to use to terminate the path.
+	 * @param isRequireSecure          Indicates if a secure
+	 *                                 {@link ServerHttpConnection} is required.
+	 * @param contentType              Content-type for the {@link ParsedTemplate}.
+	 *                                 May be <code>null</code>.
+	 * @param charset                  {@link Charset} for {@link ParsedTemplate}.
+	 * @param inputPath                {@link HttpInputPath} for the
+	 *                                 {@link WebTemplate}.
+	 * @param terminatingPathCharacter {@link Character} to use to terminate the
+	 *                                 path.
 	 */
 	public WebTemplateInitialFunction(boolean isRequireSecure, String contentType, Charset charset,
 			HttpInputPath inputPath, int terminatingPathCharacter) {
@@ -108,7 +106,7 @@ public class WebTemplateInitialFunction extends
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<WebTemplateInitialDependencies, Flows> context) throws IOException {
+	public void execute(ManagedFunctionContext<WebTemplateInitialDependencies, Flows> context) throws IOException {
 
 		// Obtain the dependencies
 		ServerHttpConnection connection = (ServerHttpConnection) context
@@ -149,7 +147,7 @@ public class WebTemplateInitialFunction extends
 		// Undertake the redirect
 		if (isRedirectRequired) {
 			context.doFlow(Flows.REDIRECT, null, null);
-			return null;
+			return;
 		}
 
 		// Configure the response
@@ -157,7 +155,6 @@ public class WebTemplateInitialFunction extends
 
 		// Render the template
 		context.doFlow(Flows.RENDER, null, null);
-		return null;
 	}
 
 }

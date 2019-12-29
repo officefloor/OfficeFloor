@@ -66,7 +66,7 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
 
 		// Obtain the dependencies
 		final FunctionLogoutContext<AC> logoutContext = (FunctionLogoutContext<AC>) context.getObject(0);
@@ -81,9 +81,6 @@ public class ManagedObjectLogoutFunction<AC extends Serializable, O extends Enum
 		} catch (Throwable ex) {
 			logoutContext.accessControlChange(null, ex);
 		}
-
-		// No further functions
-		return null;
 	}
 
 	/**

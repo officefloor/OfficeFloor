@@ -452,7 +452,6 @@ public abstract class AbstractProcedureTestCase extends OfficeFrameTestCase {
 			assertEquals("Incorrect property", propertyValue, context.getSourceContext().getProperty(propertyName));
 			context.setManagedFunction(() -> (managedFunctionContext) -> {
 				isRun.value = true; // flag run
-				return null;
 			}, None.class, None.class);
 		}, () -> {
 			this.doTest((setup) -> {

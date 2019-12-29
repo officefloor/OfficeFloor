@@ -58,8 +58,7 @@ public abstract class AbstractSendHttpFileFunction<R>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param contextPath
-	 *            Context path. May be <code>null</code>.
+	 * @param contextPath Context path. May be <code>null</code>.
 	 */
 	public AbstractSendHttpFileFunction(String contextPath) {
 		this.contextPath = contextPath;
@@ -68,13 +67,10 @@ public abstract class AbstractSendHttpFileFunction<R>
 	/**
 	 * Obtains the {@link HttpResource}.
 	 * 
-	 * @param resources
-	 *            Resources.
-	 * @param resourcePath
-	 *            Path to the {@link HttpResource}.
+	 * @param resources    Resources.
+	 * @param resourcePath Path to the {@link HttpResource}.
 	 * @return {@link HttpResource}.
-	 * @throws IOException
-	 *             If fails to obtain the {@link HttpResource}.
+	 * @throws IOException If fails to obtain the {@link HttpResource}.
 	 */
 	protected abstract HttpResource getHttpResource(R resources, String resourcePath) throws IOException;
 
@@ -84,7 +80,7 @@ public abstract class AbstractSendHttpFileFunction<R>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(ManagedFunctionContext<Dependencies, Flows> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Dependencies, Flows> context) throws Throwable {
 
 		// Obtain the dependencies
 		HttpPath path = (HttpPath) context.getObject(Dependencies.HTTP_PATH);
@@ -106,7 +102,7 @@ public abstract class AbstractSendHttpFileFunction<R>
 		} else {
 			// Must match context path
 			context.doFlow(Flows.NOT_AVAILABLE, path, null);
-			return null;
+			return;
 		}
 
 		// Obtain the HTTP resource
@@ -131,14 +127,11 @@ public abstract class AbstractSendHttpFileFunction<R>
 		if (file == null) {
 			// Not available
 			context.doFlow(Flows.NOT_AVAILABLE, path, null);
-			return null;
+			return;
 		}
 
 		// Send the file
 		file.writeTo(connection.getResponse());
-
-		// File sent
-		return null;
 	}
 
 }

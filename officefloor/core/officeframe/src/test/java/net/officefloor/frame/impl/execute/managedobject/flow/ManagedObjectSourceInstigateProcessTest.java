@@ -112,9 +112,9 @@ public class ManagedObjectSourceInstigateProcessTest extends AbstractOfficeConst
 	 * <p>
 	 * Ensures the process is actually invoked.
 	 * <p>
-	 * This is invoked as a {@link StressTest} as it requires waiting which
-	 * slows down unit testing. It therefore is bundled into the
-	 * {@link StressTest} when long testing run is to occur.
+	 * This is invoked as a {@link StressTest} as it requires waiting which slows
+	 * down unit testing. It therefore is bundled into the {@link StressTest} when
+	 * long testing run is to occur.
 	 */
 	@StressTest
 	public void testEnsureDelayInvocation() throws Exception {
@@ -161,16 +161,13 @@ public class ManagedObjectSourceInstigateProcessTest extends AbstractOfficeConst
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
+		public void execute(ManagedFunctionContext<Indexed, Indexed> context) throws Throwable {
 
 			// Obtain the object
 			this.object = context.getObject(0);
 
 			// Obtain the parameter
 			this.parameter = context.getObject(1);
-
-			// No return
-			return null;
 		}
 	}
 

@@ -164,16 +164,13 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<EscalationKey, None> context) throws Throwable {
+		public void execute(ManagedFunctionContext<EscalationKey, None> context) throws Throwable {
 
 			// Obtain the exception
 			Throwable exception = (Throwable) context.getObject(EscalationKey.EXCEPTION);
 
 			// Handle the exception
 			this.escalationHandler.handleEscalation(exception);
-
-			// Nothing to return
-			return null;
 		}
 	}
 

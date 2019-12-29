@@ -226,7 +226,7 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 		 */
 
 		@Override
-		public Object execute(final ManagedFunctionLogicContext context) throws Throwable {
+		public void execute(final ManagedFunctionLogicContext context) throws Throwable {
 
 			// Create the governance context
 			GovernanceContext<F> governanceContext = new GovernanceContext<F>() {
@@ -269,9 +269,6 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 					}
 				});
 			}
-
-			// No next function for governance
-			return null;
 		}
 	}
 

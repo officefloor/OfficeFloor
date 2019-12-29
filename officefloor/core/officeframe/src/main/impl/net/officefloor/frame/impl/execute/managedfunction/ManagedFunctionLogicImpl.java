@@ -85,14 +85,14 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionLogicContext context) throws Throwable {
+	public void execute(ManagedFunctionLogicContext context) throws Throwable {
 
 		// Create the manage function
 		ManagedFunction<O, F> function = functionMetaData.getManagedFunctionFactory().createManagedFunction();
 
 		// Execute the managed function
 		ManagedFunctionContextToken token = new ManagedFunctionContextToken(context);
-		return function.execute(token);
+		function.execute(token);
 	}
 
 	/**

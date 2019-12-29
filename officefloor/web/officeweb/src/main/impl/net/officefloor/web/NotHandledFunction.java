@@ -54,7 +54,7 @@ public class NotHandledFunction implements ManagedFunctionFactory<NotHandledFunc
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<NotHandledDependencies, None> context) throws NotFoundHttpException {
+	public void execute(ManagedFunctionContext<NotHandledDependencies, None> context) throws NotFoundHttpException {
 
 		// Obtain details
 		ServerHttpConnection connection = (ServerHttpConnection) context
@@ -69,9 +69,6 @@ public class NotHandledFunction implements ManagedFunctionFactory<NotHandledFunc
 			// Provide default not match servicing
 			WebServicer.NO_MATCH.service(connection);
 		}
-
-		// Nothing further
-		return null;
 	}
 
 }

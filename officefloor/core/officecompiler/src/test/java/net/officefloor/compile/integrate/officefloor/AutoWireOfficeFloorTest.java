@@ -716,8 +716,8 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		}
 
 		@Override
-		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
-			return null;
+		public void execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+			// testing
 		}
 	}
 
@@ -775,8 +775,8 @@ public class AutoWireOfficeFloorTest extends AbstractCompileTestCase {
 		}
 
 		@Override
-		public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
-			return null;
+		public void execute(ManagedFunctionContext<None, None> context) throws Throwable {
+			// testing
 		}
 	}
 

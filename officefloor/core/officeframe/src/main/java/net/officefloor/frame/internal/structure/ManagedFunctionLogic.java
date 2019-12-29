@@ -17,8 +17,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.function.ManagedFunction;
-
 /**
  * Managed {@link FunctionLogic}.
  *
@@ -30,8 +28,8 @@ public interface ManagedFunctionLogic {
 	 * Indicates if {@link ThreadState} safety is required for this
 	 * {@link ManagedFunctionLogic}.
 	 * 
-	 * @return <code>true</code> should {@link ThreadState} safety be required
-	 *         for this {@link ManagedFunctionLogic}.
+	 * @return <code>true</code> should {@link ThreadState} safety be required for
+	 *         this {@link ManagedFunctionLogic}.
 	 */
 	default boolean isRequireThreadStateSafety() {
 		return false;
@@ -40,12 +38,9 @@ public interface ManagedFunctionLogic {
 	/**
 	 * Executes the {@link ManagedFunctionLogic}.
 	 * 
-	 * @param context
-	 *            {@link ManagedFunctionLogicContext}.
-	 * @return Parameter for the next {@link ManagedFunction}.
-	 * @throws Throwable
-	 *             Failure of logic.
+	 * @param context {@link ManagedFunctionLogicContext}.
+	 * @throws Throwable Failure of logic.
 	 */
-	Object execute(ManagedFunctionLogicContext context) throws Throwable;
+	void execute(ManagedFunctionLogicContext context) throws Throwable;
 
 }
