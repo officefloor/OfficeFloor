@@ -23,6 +23,7 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectT
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil.MethodResult;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.Closure;
@@ -269,6 +270,40 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 		public Closure<String> method() {
 			return new Closure<>(VALUE);
 		}
+	}
+
+	/**
+	 * Ensure can asynchronously translate return value.
+	 */
+	public void testAsynchronousTranslateReturn() throws Throwable {
+
+		// Initiate method to asynchronously complete
+		final String ASYNC_TRANSLATED_RESULT = "ASYNC";
+		Closure<Thread> thread = new Closure<>();
+		MethodResult result = MockReturnManufacturer.run(Closure.class, String.class, (context) -> {
+
+			// Provide asynchronous translate of class
+			context.setTranslatedReturnClass(String.class);
+			return (returnValue, functionContext) -> {
+				AsynchronousFlow flow = functionContext.createAsynchronousFlow();
+				thread.value = new Thread(() -> {
+					flow.complete(() -> functionContext.setNextFunctionArgument(ASYNC_TRANSLATED_RESULT));
+				});
+				return null; // will be overridden
+			};
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFunction(), "method", (type) -> {
+			type.setReturnType(String.class);
+		}, null));
+
+		// Should not yet have result
+		assertNull("Should not have result", result.getReturnValue());
+
+		// Trigger asynchronous translation and wait for its completion
+		thread.value.start();
+		result.getAsynchronousFlows()[0].waitOnCompletion().run();
+
+		// Should now have result
+		assertEquals("Incorrect asynchronous translated result", ASYNC_TRANSLATED_RESULT, result.getReturnValue());
 	}
 
 	/**

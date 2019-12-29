@@ -25,6 +25,10 @@
             <artifactId>officescala</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+        </dependency>
+        <dependency>
             <groupId>net.officefloor.scala</groupId>
             <artifactId>officescalatest</artifactId>
             <scope>test</scope>

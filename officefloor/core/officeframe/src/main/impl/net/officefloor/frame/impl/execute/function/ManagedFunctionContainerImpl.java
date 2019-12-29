@@ -784,6 +784,42 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Return the asynchronous flow
 			return flow;
 		}
+
+		@Override
+		public void setNextFunctionArgument(Object argument) {
+
+			// Easy access to container
+			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
+
+			// Ensure to overwrite the next function argument
+			switch (container.containerState) {
+			case EXECUTE_FUNCTION:
+			case AWAIT_FLOW_COMPLETIONS:
+				break; // correct states to invoke flow
+
+			default:
+				throw new IllegalStateException(
+						"Can not override next function argument outside function/callback execution (state: "
+								+ container.containerState + ")");
+			}
+
+			// Ensure the appropriate type (null always appropriate)
+			if (argument != null) {
+				Class<?> argumentType = argument.getClass();
+				ManagedFunctionMetaData<?, ?> nextMetaData = container.functionLogicMetaData
+						.getNextManagedFunctionMetaData();
+				if (nextMetaData != null) {
+					Class<?> expectedParameterType = nextMetaData.getParameterType();
+					if ((expectedParameterType != null) && (!expectedParameterType.isAssignableFrom(argumentType))) {
+						throw new IllegalArgumentException("Next expecting " + expectedParameterType.getName()
+								+ " (provided " + argumentType.getName() + ")");
+					}
+				}
+			}
+
+			// Specify the next function argument
+			container.nextManagedFunctionParameter = argument;
+		}
 	}
 
 	/**

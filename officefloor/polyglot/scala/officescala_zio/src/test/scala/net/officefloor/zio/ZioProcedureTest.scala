@@ -7,7 +7,6 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor
 import net.officefloor.plugin.section.clazz.Parameter
 import net.officefloor.polyglot.scalatest.WoofRules
 import org.scalatest.FlatSpec
-import zio.ZIO
 
 /**
  * Tests resolution of returning ZIO from procedure.
@@ -19,61 +18,6 @@ class ZioProcedureTest extends FlatSpec with WoofRules {
       builder.setNextArgumentType(classOf[Int])
     })
   }
-
-  it must "infer types" in {
-    doZioTest("zioReturn")
-    doZioTest("uioReturn")
-    doZioTest("urioReturn")
-    doZioTest("taskReturn")
-    doZioTest("rioReturn")
-    doZioTest("ioReturn")
-    doZioTest("zioUnitReturn")
-    doZioTest("intReturn")
-    doZioTest("unitReturn")
-  }
-
-  def doZioTest(methodName: String): Unit = {
-    println("TEST: " + methodName)
-    inferZio(classOf[Procedure], methodName) match {
-      case ZioReturn(runtime, exception, result) => println("ZIO: " + runtime + ", " + exception + ", " + result)
-      case NonZio() => println("Not ZIO return")
-    }
-    println()
-  }
-
-  def inferZio(procedureClass: Class[_], methodName: String): ReflectionResult = {
-    import scala.reflect.runtime.universe._
-
-    val m = runtimeMirror(procedureClass.getClassLoader())
-    val zioSymbol = typeOf[ZIO[_,_,_]].typeSymbol
-
-    // Determine class from type
-    val specialScalaTypes = Array(typeOf[Any], typeOf[AnyVal], typeOf[AnyVal], typeOf[Nothing], typeOf[Null])
-    val classFromType: Type => Class[_] = (t: Type) => {
-      if (specialScalaTypes.contains(t)) null else m.runtimeClass(t.typeSymbol.asClass)
-    }
-
-    // Interrogate class for ZIO return
-    val procedureClassSymbol = m.staticClass(procedureClass.getName())
-    procedureClassSymbol.info.member(TermName(methodName)) match {
-      case method: MethodSymbol => method.returnType.baseType(zioSymbol) match {
-        case zioReturnType: TypeRef => {
-          val runtimeClass = classFromType(zioReturnType.typeArgs(0))
-          val exceptionClass = classFromType(zioReturnType.typeArgs(1))
-          val resultClass = classFromType(zioReturnType.typeArgs(2))
-          ZioReturn(runtimeClass, exceptionClass, resultClass)
-        }
-        case _ => NonZio()
-      }
-      case _ => NonZio()
-    }
-  }
-
-  trait ReflectionResult
-
-  case class ZioReturn(runtime: Class[_], exception: Class[_], result: Class[_]) extends ReflectionResult
-
-  case class NonZio() extends ReflectionResult
 
   /**
    * Undertakes test.

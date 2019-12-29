@@ -196,6 +196,11 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 		public AsynchronousFlow createAsynchronousFlow() {
 			return this.context.createAsynchronousFlow();
 		}
+
+		@Override
+		public void setNextFunctionArgument(Object argument) {
+			this.context.setNextFunctionArgument(argument);
+		}
 	}
 
 }

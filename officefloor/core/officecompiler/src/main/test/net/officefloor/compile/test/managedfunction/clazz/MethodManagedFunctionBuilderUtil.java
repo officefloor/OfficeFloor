@@ -302,20 +302,18 @@ public class MethodManagedFunctionBuilderUtil {
 
 		// Run the function
 		ManagedFunction<Indexed, Indexed> function = functionType.getManagedFunctionFactory().createManagedFunction();
-		Object result;
 		Throwable failure;
 		try {
-			result = function.execute(context);
+			context.nextFunctionArgument = function.execute(context);
 			failure = null;
 		} catch (AssertionError ex) {
 			throw ex; // propagate assertion failures
 		} catch (Throwable ex) {
-			result = null;
 			failure = ex;
 		}
 
 		// Return the result
-		return new MethodResult(result, failure,
+		return new MethodResult(context, failure,
 				context.asyncFlows.toArray(new MockAsynchronousFlow[context.asyncFlows.size()]));
 	}
 
@@ -325,9 +323,9 @@ public class MethodManagedFunctionBuilderUtil {
 	public static class MethodResult {
 
 		/**
-		 * Return value.
+		 * {@link MockManagedFunctionContext}.
 		 */
-		private final Object returnValue;
+		private final MockManagedFunctionContext context;
 
 		/**
 		 * Possible failure.
@@ -342,13 +340,13 @@ public class MethodManagedFunctionBuilderUtil {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param returnValue Return value.
-		 * @param failure     Possible failure.
-		 * @param asyncFlows  Created {@link AsynchronousFlow} in running the
-		 *                    {@link ManagedFunction}.
+		 * @param context    {@link MockManagedFunctionContext}.
+		 * @param failure    Possible failure.
+		 * @param asyncFlows Created {@link AsynchronousFlow} in running the
+		 *                   {@link ManagedFunction}.
 		 */
-		private MethodResult(Object returnValue, Throwable failure, MockAsynchronousFlow[] asyncFlows) {
-			this.returnValue = returnValue;
+		private MethodResult(MockManagedFunctionContext context, Throwable failure, MockAsynchronousFlow[] asyncFlows) {
+			this.context = context;
 			this.failure = failure;
 			this.asyncFlows = asyncFlows;
 		}
@@ -363,7 +361,7 @@ public class MethodManagedFunctionBuilderUtil {
 				fail("No return value as function threw " + this.failure.getMessage() + " ["
 						+ this.failure.getClass().getName() + "]");
 			}
-			return this.returnValue;
+			return this.context.nextFunctionArgument;
 		}
 
 		/**
@@ -465,6 +463,11 @@ public class MethodManagedFunctionBuilderUtil {
 		private final Logger logger;
 
 		/**
+		 * Argument for the next {@link ManagedFunction}.
+		 */
+		private volatile Object nextFunctionArgument = null;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param logger {@link Logger}.
@@ -540,6 +543,11 @@ public class MethodManagedFunctionBuilderUtil {
 			MockAsynchronousFlow asyncFlow = new MockAsynchronousFlow();
 			this.asyncFlows.add(asyncFlow);
 			return asyncFlow;
+		}
+
+		@Override
+		public void setNextFunctionArgument(Object argument) {
+			this.nextFunctionArgument = argument;
 		}
 	}
 

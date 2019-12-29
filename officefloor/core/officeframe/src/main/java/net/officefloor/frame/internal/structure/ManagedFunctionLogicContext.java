@@ -63,4 +63,11 @@ public interface ManagedFunctionLogicContext {
 	 */
 	AsynchronousFlow createAsynchronousFlow();
 
+	/**
+	 * Allows to asynchronously overwrite the next {@link ManagedFunction} argument.
+	 * 
+	 * @param argument Argument for the next {@link ManagedFunction}.
+	 */
+	void setNextFunctionArgument(Object argument);
+
 }
