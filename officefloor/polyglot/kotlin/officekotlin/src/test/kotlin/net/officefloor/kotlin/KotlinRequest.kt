@@ -1,4 +1,4 @@
-package net.officefloor.polyglot.kotlin
+package net.officefloor.kotlin
 
 import net.officefloor.web.HttpObject
 

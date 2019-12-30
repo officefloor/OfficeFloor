@@ -1,4 +1,4 @@
-package net.officefloor.polyglot.scalatest
+package net.officefloor.scalatest
 
 import net.officefloor.web.HttpObject
 

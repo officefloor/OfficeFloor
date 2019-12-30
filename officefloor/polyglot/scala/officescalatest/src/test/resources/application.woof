@@ -9,7 +9,7 @@
   <templates>
   </templates>
   <procedures>
-    <procedure name="Scala" resource="net.officefloor.polyglot.scalatest.ScalaService$" source="Scala" procedure="service" x="141" y="54" />
+    <procedure name="Scala" resource="net.officefloor.scalatest.ScalaService$" source="Scala" procedure="service" x="141" y="54" />
   </procedures>
   <sections/>
   <securities>

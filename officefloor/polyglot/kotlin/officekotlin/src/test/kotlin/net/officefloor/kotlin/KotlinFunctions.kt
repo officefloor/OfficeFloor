@@ -1,4 +1,4 @@
-package net.officefloor.polyglot.kotlin
+package net.officefloor.kotlin
 
 import net.officefloor.frame.api.function.AsynchronousFlow
 import net.officefloor.frame.api.function.FlowCallback

@@ -1,4 +1,4 @@
-package net.officefloor.polyglot.kotlin
+package net.officefloor.kotlin
 
 import net.officefloor.plugin.managedobject.clazz.Dependency
 import net.officefloor.polyglot.test.JavaObject

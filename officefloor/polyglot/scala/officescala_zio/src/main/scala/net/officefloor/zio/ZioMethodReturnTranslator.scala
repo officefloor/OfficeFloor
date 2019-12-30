@@ -1,5 +1,7 @@
 package net.officefloor.zio
 
+import java.util.concurrent.Executor
+
 import net.officefloor.plugin.managedfunction.method.{MethodReturnTranslator, MethodReturnTranslatorContext}
 import zio.Exit.{Failure, Success}
 import zio.{FiberFailure, ZIO}
@@ -16,11 +18,15 @@ class ZioMethodReturnTranslator[A] extends MethodReturnTranslator[ZIO[Any, _, A]
     // Obtain the ZIO
     val zio = context.getReturnValue
 
-    // Start asynchronous flow
-    val flow = context.getManagedFunctionContext.createAsynchronousFlow
+    // Obtain the runtime details
+    val logger = context.getManagedFunctionContext.getLogger
 
-    // Asynchronously run effects
-    OfficeFloorZio.defaultRuntime.unsafeRunAsync(zio) { exit =>
+    // TODO Use Executor from ManagedFunction
+    val executor: Executor = (runnable) => runnable.run();
+
+    // Asynchronously run effects return result
+    val flow = context.getManagedFunctionContext.createAsynchronousFlow
+    OfficeFloorZio.runtime(executor, logger).unsafeRunAsync(zio) { exit =>
       flow.complete { () =>
         exit match {
           case Success(value) => context.setTranslatedReturnValue(value)

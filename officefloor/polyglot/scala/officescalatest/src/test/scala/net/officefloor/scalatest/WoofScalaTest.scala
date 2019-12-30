@@ -1,4 +1,4 @@
-package net.officefloor.polyglot.scalatest
+package net.officefloor.scalatest
 
 import org.scalatest.FlatSpec
 
