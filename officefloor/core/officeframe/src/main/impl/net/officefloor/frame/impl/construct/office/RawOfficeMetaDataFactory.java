@@ -210,6 +210,9 @@ public class RawOfficeMetaDataFactory {
 		// Obtain the break chain team
 		TeamManagement breakChainTeam = this.rawOfficeFloorMetaData.getBreakChainTeamManagement();
 
+		// Obtain the break chain executor
+		Executor breakChainExecutor = this.rawOfficeFloorMetaData.getBreakChainExecutor();
+
 		// Obtain the thread local aware executor (if required)
 		ThreadLocalAwareExecutor threadLocalAwareExecutor = null;
 		if (isRequireThreadLocalAwareness) {
@@ -239,7 +242,8 @@ public class RawOfficeMetaDataFactory {
 		boolean isManuallyManageGovernance = configuration.isManuallyManageGovernance();
 
 		// Create the governance factory
-		RawGovernanceMetaDataFactory rawGovernanceFactory = new RawGovernanceMetaDataFactory(officeName, officeTeams);
+		RawGovernanceMetaDataFactory rawGovernanceFactory = new RawGovernanceMetaDataFactory(officeName, officeTeams,
+				breakChainExecutor);
 
 		// Register the governances to office
 		GovernanceConfiguration<?, ?>[] governanceConfigurations = configuration.getGovernanceConfiguration();
@@ -493,9 +497,6 @@ public class RawOfficeMetaDataFactory {
 		// Obtain the managed execution factory
 		ManagedExecutionFactory managedExecutionFactory = this.rawOfficeFloorMetaData.getManagedExecutionFactory();
 
-		// Obtain the break chain executor
-		Executor breakChainExecutor = this.rawOfficeFloorMetaData.getBreakChainExecutor();
-
 		// Load the office meta-data
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, monitorClock, timer,
 				functionLoop, breakChainExecutor, threadLocalAwareExecutor, executive, managedExecutionFactory,
@@ -506,7 +507,7 @@ public class RawOfficeMetaDataFactory {
 		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactory(officeMetaData);
 		EscalationFlowFactory escalationFlowFactory = new EscalationFlowFactory(officeMetaData);
 		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
-				flowMetaDataFactory, escalationFlowFactory, officeTeams);
+				flowMetaDataFactory, escalationFlowFactory, officeTeams, breakChainExecutor);
 		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
 				rawAdminFactory, threadScopeMo, processScopeMo);
 

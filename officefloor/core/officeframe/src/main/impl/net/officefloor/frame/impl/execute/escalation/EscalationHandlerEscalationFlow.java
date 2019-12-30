@@ -113,7 +113,7 @@ public class EscalationHandlerEscalationFlow implements EscalationFlow {
 				escalationHandler);
 		ManagedFunctionMetaDataImpl<EscalationKey, None> functionMetaData = new ManagedFunctionMetaDataImpl<>(
 				EscalationHandler.class.getSimpleName(), functionFactory, null, Throwable.class, anyTeam,
-				MANGED_OBJECT_DEPENDENCIES, NO_MANAGED_OBJECT_META_DATA, NO_GOVERNANCE, -1, null, null);
+				MANGED_OBJECT_DEPENDENCIES, NO_MANAGED_OBJECT_META_DATA, NO_GOVERNANCE, -1, null, null, null);
 		functionMetaData.loadOfficeMetaData(officeMetaData, NO_FLOW_META_DATA, null, FURTHER_ESCALATION_PROCEDURE,
 				NO_ADMINISTRATOR_META_DATA, NO_ADMINISTRATOR_META_DATA, NO_MANAGED_OBJECTS);
 		this.functionMetaData = functionMetaData;

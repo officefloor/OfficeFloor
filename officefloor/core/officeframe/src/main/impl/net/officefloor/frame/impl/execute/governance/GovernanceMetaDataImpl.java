@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.governance;
 
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
@@ -80,6 +81,11 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	private final Logger logger;
 
 	/**
+	 * {@link Executor} for {@link GovernanceContext}.
+	 */
+	private final Executor executor;
+
+	/**
 	 * {@link OfficeMetaData}.
 	 */
 	private OfficeMetaData officeMetaData;
@@ -107,16 +113,19 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 	 *                                     {@link AsynchronousFlow} instances.
 	 * @param logger                       {@link Logger} for
 	 *                                     {@link GovernanceContext}.
+	 * @param executor                     {@link Executor} for
+	 *                                     {@link GovernanceContext}.
 	 */
 	public GovernanceMetaDataImpl(String governanceName, GovernanceFactory<? super I, F> governanceFactory,
 			TeamManagement responsibleTeam, long asynchronousFlowTimeout, AssetManager asynchronousFlowAssetManager,
-			Logger logger) {
+			Logger logger, Executor executor) {
 		this.governanceName = governanceName;
 		this.governanceFactory = governanceFactory;
 		this.responsibleTeam = responsibleTeam;
 		this.asynchronousFlowTimeout = asynchronousFlowTimeout;
 		this.asynchronousFlowAssetManager = asynchronousFlowAssetManager;
 		this.logger = logger;
+		this.executor = executor;
 	}
 
 	/**
@@ -254,6 +263,11 @@ public class GovernanceMetaDataImpl<I, F extends Enum<F>> implements GovernanceM
 				@Override
 				public AsynchronousFlow createAsynchronousFlow() {
 					return context.createAsynchronousFlow();
+				}
+
+				@Override
+				public Executor getExecutor() {
+					return GovernanceMetaDataImpl.this.executor;
 				}
 			};
 

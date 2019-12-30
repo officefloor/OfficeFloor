@@ -17,7 +17,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import java.util.concurrent.Executor;
+
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.managedobject.ManagedObject;
@@ -67,10 +70,16 @@ public interface AdministrationMetaData<E, F extends Enum<F>, G extends Enum<G>>
 	 * Translates the {@link Administration} {@link Governance} index to the
 	 * {@link ThreadState} {@link Governance} index.
 	 * 
-	 * @param governanceIndex
-	 *            {@link Administration} {@link Governance} index.
+	 * @param governanceIndex {@link Administration} {@link Governance} index.
 	 * @return {@link ThreadState} {@link Governance} index.
 	 */
 	int translateGovernanceIndexToThreadIndex(int governanceIndex);
+
+	/**
+	 * Obtains the {@link Executor} for {@link AdministrationContext}.
+	 * 
+	 * @return {@link Executor} for {@link AdministrationContext}.
+	 */
+	Executor getExecutor();
 
 }

@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.managedfunction;
 
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
@@ -195,6 +196,11 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 		@Override
 		public AsynchronousFlow createAsynchronousFlow() {
 			return this.context.createAsynchronousFlow();
+		}
+
+		@Override
+		public Executor getExecutor() {
+			return ManagedFunctionLogicImpl.this.functionMetaData.getExecutor();
 		}
 
 		@Override

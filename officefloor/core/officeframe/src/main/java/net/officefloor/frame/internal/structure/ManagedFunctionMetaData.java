@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.administration.Administration;
@@ -63,6 +64,13 @@ public interface ManagedFunctionMetaData<O extends Enum<O>, F extends Enum<F>> e
 	 * @return {@link Logger} for {@link ManagedFunctionContext}.
 	 */
 	Logger getLogger();
+
+	/**
+	 * Obtains the {@link Executor} for {@link ManagedFunctionContext}.
+	 * 
+	 * @return {@link Executor} for {@link ManagedFunctionContext}.
+	 */
+	Executor getExecutor();
 
 	/**
 	 * <p>

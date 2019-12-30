@@ -25,7 +25,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
  *
  * @author Daniel Sagenschneider
  */
-public interface ManagedFunctionContainer extends FunctionState {
+public interface ManagedFunctionContainer extends BlockState {
 
 	/**
 	 * Obtains the {@link Flow} containing this {@link ManagedObjectContainer}.
@@ -38,9 +38,8 @@ public interface ManagedFunctionContainer extends FunctionState {
 	 * Specifies a {@link ManagedFunctionContainer} to be executed before this
 	 * {@link ManagedFunctionContainer}.
 	 * 
-	 * @param container
-	 *            {@link ManagedFunctionContainer} to be executed before this
-	 *            {@link ManagedFunctionContainer}.
+	 * @param container {@link ManagedFunctionContainer} to be executed before this
+	 *                  {@link ManagedFunctionContainer}.
 	 */
 	void setParallelManagedFunctionContainer(ManagedFunctionContainer container);
 
@@ -48,9 +47,8 @@ public interface ManagedFunctionContainer extends FunctionState {
 	 * Specifies a {@link ManagedFunctionContainer} to be sequentially executed
 	 * after this {@link ManagedFunctionContainer}.
 	 * 
-	 * @param container
-	 *            {@link ManagedFunctionContainer} to be sequentially executed
-	 *            after this {@link ManagedFunctionContainer}.
+	 * @param container {@link ManagedFunctionContainer} to be sequentially executed
+	 *                  after this {@link ManagedFunctionContainer}.
 	 */
 	void setNextManagedFunctionContainer(ManagedFunctionContainer container);
 
@@ -58,8 +56,7 @@ public interface ManagedFunctionContainer extends FunctionState {
 	 * Obtains the {@link ManagedObjectContainer} bound to this
 	 * {@link ManagedFunctionContainer}.
 	 * 
-	 * @param index
-	 *            Index of the {@link ManagedObjectContainer}.
+	 * @param index Index of the {@link ManagedObjectContainer}.
 	 * @return {@link ManagedObjectContainer} bound to this
 	 *         {@link ManagedFunctionContainer}.
 	 */
@@ -72,8 +69,7 @@ public interface ManagedFunctionContainer extends FunctionState {
 	 * <p>
 	 * The {@link ManagedFunctionContainer} will not unload its
 	 * {@link ManagedFunction} bound {@link ManagedObject} instances until all
-	 * registered {@link ManagedFunctionInterest} instances have been
-	 * unregistered.
+	 * registered {@link ManagedFunctionInterest} instances have been unregistered.
 	 * 
 	 * @return New {@link ManagedFunctionInterest} in this
 	 *         {@link ManagedFunctionContainer}.

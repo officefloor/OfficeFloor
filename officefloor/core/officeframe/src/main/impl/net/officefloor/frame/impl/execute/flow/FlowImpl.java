@@ -35,6 +35,7 @@ import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEnt
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedfunction.ManagedFunctionLogicImpl;
 import net.officefloor.frame.internal.structure.AdministrationMetaData;
+import net.officefloor.frame.internal.structure.BlockState;
 import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowCompletion;
@@ -135,7 +136,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	@Override
 	public <O extends Enum<O>, F extends Enum<F>> ManagedFunctionContainer createManagedFunction(Object parameter,
 			ManagedFunctionMetaData<O, F> managedFunctionMetaData, boolean isEnforceGovernance,
-			ManagedFunctionContainer parallelFunctionOwner) {
+			BlockState parallelFunctionOwner) {
 
 		// Obtain the administration meta-data to determine
 		ManagedFunctionAdministrationMetaData<?, ?, ?>[] preAdministration = managedFunctionMetaData
@@ -241,8 +242,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	 * @param isEnforceGovernance         Whether to enforce {@link Governance}.
 	 * @param functionBoundManagedObjects {@link ManagedFunction} bound
 	 *                                    {@link ManagedObjectContainer} instances.
-	 * @param parallelOwner               Parallel {@link ManagedFunctionContainer}
-	 *                                    owner.
+	 * @param parallelOwner               Parallel {@link BlockState} owner.
 	 * @param isUnloadManagedObjects      Whether the {@link Administration} is to
 	 *                                    unload the {@link ManagedObject} instances
 	 *                                    for the {@link ManagedFunction}.
@@ -251,7 +251,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 	private <E> ManagedFunctionContainer createAdministrationFunction(
 			AdministrationMetaData<E, ?, ?> administrationMetaData, Logger logger,
 			ManagedObjectIndex[] requiredManagedObjects, boolean[] requiredGovernance, boolean isEnforceGovernance,
-			ManagedFunctionContainer parallelOwner, ManagedFunctionBoundManagedObjects functionBoundManagedObjects,
+			BlockState parallelOwner, ManagedFunctionBoundManagedObjects functionBoundManagedObjects,
 			boolean isUnloadResponsible) {
 
 		// Obtain the responsible team (ensure all done on same thread)

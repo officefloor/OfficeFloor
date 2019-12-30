@@ -45,27 +45,26 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 	 * Creates a new managed {@link ManagedFunctionContainer} contained in this
 	 * {@link Flow} for the {@link ManagedFunction}.
 	 * 
-	 * @param                         <O> Dependency key type.
-	 * @param                         <F> {@link Flow} key type.
+	 * @param <O>                     Dependency key type.
+	 * @param <F>                     {@link Flow} key type.
 	 * @param parameter               Parameter for the {@link ManagedFunction}.
 	 * @param managedFunctionMetaData {@link ManagedFunctionMetaData} for the new
 	 *                                {@link ManagedFunction}.
 	 * @param isEnforceGovernance     <code>true</code> to enforce
 	 *                                {@link Governance} on deactivation.
-	 * @param parallelFunctionOwner   {@link ManagedFunctionContainer} that is the
-	 *                                parallel owner of the new
-	 *                                {@link ManagedFunction}.
+	 * @param parallelFunctionOwner   {@link BlockState} that is the parallel owner
+	 *                                of the new {@link ManagedFunction}.
 	 * @return New {@link ManagedFunctionContainer}.
 	 */
 	<O extends Enum<O>, F extends Enum<F>> ManagedFunctionContainer createManagedFunction(Object parameter,
 			ManagedFunctionMetaData<O, F> managedFunctionMetaData, boolean isEnforceGovernance,
-			ManagedFunctionContainer parallelFunctionOwner);
+			BlockState parallelFunctionOwner);
 
 	/**
 	 * Creates a new {@link ManagedFunctionContainer} contained in this {@link Flow}
 	 * for the {@link GovernanceActivity}.
 	 * 
-	 * @param                    <F> {@link Flow} key type.
+	 * @param <F>                {@link Flow} key type.
 	 * @param governanceActivity {@link GovernanceActivity}.
 	 * @param governanceMetaData {@link GovernanceMetaData}.
 	 * @return New {@link ManagedFunctionContainer}.
@@ -77,9 +76,9 @@ public interface Flow extends LinkedListSetEntry<Flow, ThreadState> {
 	 * Creates a new {@link ManagedFunctionContainer} contained in this {@link Flow}
 	 * for the {@link ManagedObjectAdministrationMetaData}.
 	 *
-	 * @param                       <E> Extension type.
-	 * @param                       <F> {@link Flow} key type.
-	 * @param                       <G> {@link Governance} key type.
+	 * @param <E>                   Extension type.
+	 * @param <F>                   {@link Flow} key type.
+	 * @param <G>                   {@link Governance} key type.
 	 * @param adminMetaData         {@link ManagedObjectAdministrationMetaData}.
 	 * @param parallelFunctionOwner {@link ManagedFunctionContainer} that is the
 	 *                              parallel owner of the new

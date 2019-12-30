@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.construct.managedfunction;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.OfficeFrame;
@@ -329,11 +330,14 @@ public class RawManagedFunctionMetaDataFactory {
 		// Create the logger
 		Logger logger = OfficeFrame.getLogger(functionName);
 
+		// Obtain the executor
+		Executor executor = this.rawOfficeMetaData.getRawOfficeFloorMetaData().getBreakChainExecutor();
+
 		// Create the function meta-data
 		ManagedFunctionMetaDataImpl<?, ?> functionMetaData = new ManagedFunctionMetaDataImpl<>(functionName,
 				functionFactory, annotations, parameterType, responsibleTeam, functionIndexedManagedObjects,
 				functionBoundMoMetaData, requiredGovernance, asynchronousFlowTimeout, asynchronousFlowsAssetManager,
-				logger);
+				logger, executor);
 
 		// Return the raw function meta-data
 		@SuppressWarnings({ "rawtypes", "unchecked" })

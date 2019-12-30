@@ -20,8 +20,10 @@ package net.officefloor.frame.impl.construct.administration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -80,6 +82,11 @@ public class RawAdministrationMetaDataFactory {
 	private final Map<String, TeamManagement> officeTeams;
 
 	/**
+	 * {@link Executor} for {@link AdministrationContext}.
+	 */
+	private final Executor executor;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param officeMetaData        {@link OfficeMetaData}.
@@ -87,13 +94,16 @@ public class RawAdministrationMetaDataFactory {
 	 * @param escalationFlowFactory {@link EscalationFlowFactory}.
 	 * @param officeTeams           {@link TeamManagement} instances by their
 	 *                              {@link Office} registered names.
+	 * @param executor              {@link Executor} for
+	 *                              {@link AdministrationContext}.
 	 */
 	public RawAdministrationMetaDataFactory(OfficeMetaData officeMetaData, FlowMetaDataFactory flowMetaDataFactory,
-			EscalationFlowFactory escalationFlowFactory, Map<String, TeamManagement> officeTeams) {
+			EscalationFlowFactory escalationFlowFactory, Map<String, TeamManagement> officeTeams, Executor executor) {
 		this.officeMetaData = officeMetaData;
 		this.flowMetaDataFactory = flowMetaDataFactory;
 		this.escalationFlowFactory = escalationFlowFactory;
 		this.officeTeams = officeTeams;
+		this.executor = executor;
 	}
 
 	/**
@@ -347,7 +357,7 @@ public class RawAdministrationMetaDataFactory {
 				adminFactory, extensionType,
 				ConstructUtil.toArray(eiMetaDatas, new ManagedObjectExtensionExtractorMetaData[0]), responsibleTeam,
 				asynchronousFlowTimeout, asynchronousFlowAssetManager, flows, governanceMapping, escalationProcedure,
-				this.officeMetaData);
+				this.officeMetaData, this.executor);
 
 		// Create the listing of administered managed objects
 		RawBoundManagedObjectMetaData[] rawBoundAdministeredManagedObjects = administeredManagedObjects

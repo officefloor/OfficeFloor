@@ -609,7 +609,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Manage by office
 		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
-				new RawAdministrationMetaDataFactory(this.officeMetaData.build(), null, null, null), null, null);
+				new RawAdministrationMetaDataFactory(this.officeMetaData.build(), null, null, null, null), null, null);
 		rawManagingOffice.manageByOffice(this.officeMetaData.build(), processBoundMetaData, moAdminFactory,
 				this.defaultExecutionStrategy, this.executionStrategies, new AssetManagerFactory(null, null, null), 1,
 				this.issues);
