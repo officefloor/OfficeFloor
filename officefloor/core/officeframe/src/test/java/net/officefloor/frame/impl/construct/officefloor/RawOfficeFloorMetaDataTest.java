@@ -55,6 +55,7 @@ import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
+import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TeamManagement;
 import net.officefloor.frame.internal.structure.ThreadLocalAwareExecutor;
@@ -218,21 +219,25 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct
 		this.replayMockObjects();
-		RawOfficeFloorMetaData metaData = this.constructRawOfficeFloorMetaData(true);
-		TeamManagement[] actualTeams = metaData.getOfficeFloorMetaData().getTeams();
+		RawOfficeFloorMetaData rawMetaData = this.constructRawOfficeFloorMetaData(true);
+		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();
+		TeamManagement[] actualTeams = metaData.getTeams();
+		TeamManagement breakChainTeam = metaData.getBreakChainTeam();
 		this.verifyMockObjects();
 
 		// Ensure teams registered
-		assertNotNull(metaData.getRawTeamMetaData("ONE"));
-		assertNotNull(metaData.getRawTeamMetaData("TWO"));
-		assertNotNull(metaData.getRawTeamMetaData("THREE"));
+		assertNotNull(rawMetaData.getRawTeamMetaData("ONE"));
+		assertNotNull(rawMetaData.getRawTeamMetaData("TWO"));
+		assertNotNull(rawMetaData.getRawTeamMetaData("THREE"));
 
 		// Validate the teams
-		assertEquals("Incorrect number of teams", 4, actualTeams.length);
+		assertEquals("Incorrect number of teams", 3, actualTeams.length);
 		assertSame("Incorrect team one", one, actualTeams[0].getTeam());
 		assertSame("Incorrect team two", two, actualTeams[1].getTeam());
 		assertSame("Incorrect team three", three, actualTeams[2].getTeam());
-		assertNotNull("Should have break chain team", actualTeams[3]);
+
+		// Ensure have the break chain team
+		assertNotNull("Should have break chain team", breakChainTeam);
 	}
 
 	/**

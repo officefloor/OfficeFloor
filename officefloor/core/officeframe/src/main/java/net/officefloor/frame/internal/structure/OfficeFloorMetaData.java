@@ -45,6 +45,13 @@ public interface OfficeFloorMetaData {
 	ManagedObjectSourceInstance<?>[] getManagedObjectSourceInstances();
 
 	/**
+	 * Obtains the {@link TeamManagement} to break thread stack chain of execution.
+	 * 
+	 * @return {@link TeamManagement} to break thread stack chain of execution.
+	 */
+	TeamManagement getBreakChainTeam();
+
+	/**
 	 * Obtains the {@link TeamManagement} over the {@link Team} instances of the
 	 * {@link OfficeFloor}.
 	 * 

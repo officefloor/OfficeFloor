@@ -215,7 +215,7 @@ public class FunctionLoopImpl implements FunctionLoop {
 		/**
 		 * Identifier of the current {@link Team} executing this {@link Job}.
 		 */
-		protected Object currentTeam;
+		protected final Object currentTeam;
 
 		/**
 		 * Instantiate.

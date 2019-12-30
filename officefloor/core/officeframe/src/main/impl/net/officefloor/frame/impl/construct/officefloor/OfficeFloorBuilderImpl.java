@@ -234,8 +234,10 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	}
 
 	@Override
-	public TeamConfiguration<?> getBreakChainTeamConfiguration() {
-		return this.breakChainTeam;
+	public <TS extends TeamSource> TeamBuilder<TS> setBreakChainTeam(Class<TS> teamSourceClass) {
+		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<>(BREAK_CHAIN_TEAM_NAME, teamSourceClass);
+		this.breakChainTeam = builder;
+		return builder;
 	}
 
 	@Override
@@ -273,7 +275,8 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 
 		// Obtain the OfficeFloor meta-data and return the OfficeFloor
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();
-		return new OfficeFloorImpl(metaData, listeners.toArray(new OfficeFloorListener[listeners.size()]));
+		return new OfficeFloorImpl(metaData, listeners.toArray(new OfficeFloorListener[listeners.size()]),
+				rawMetaData.getExecutive());
 	}
 
 	/*
@@ -331,10 +334,8 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 	}
 
 	@Override
-	public <TS extends TeamSource> TeamBuilder<TS> setBreakChainTeam(Class<TS> teamSourceClass) {
-		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<>(BREAK_CHAIN_TEAM_NAME, teamSourceClass);
-		this.breakChainTeam = builder;
-		return builder;
+	public TeamConfiguration<?> getBreakChainTeamConfiguration() {
+		return this.breakChainTeam;
 	}
 
 	@Override

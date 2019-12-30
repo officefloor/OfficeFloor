@@ -280,7 +280,6 @@ public class RawOfficeFloorMetaDataFactory {
 		RawTeamMetaData breakTeamMetaData = rawTeamFactory.constructRawTeamMetaData(breakTeamConfiguration,
 				officeFloorName, issues);
 		TeamManagement breakChainTeamManagement = breakTeamMetaData.getTeamManagement();
-		teamListing.add(breakChainTeamManagement);
 
 		// Undertake OfficeFloor escalation on any team available
 		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(null);
@@ -360,8 +359,8 @@ public class RawOfficeFloorMetaDataFactory {
 		}
 
 		// Create the office floor meta-data
-		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(teamListing.toArray(new TeamManagement[0]),
-				mosInstances.toArray(new ManagedObjectSourceInstance[0]),
+		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(breakChainTeamManagement,
+				teamListing.toArray(new TeamManagement[0]), mosInstances.toArray(new ManagedObjectSourceInstance[0]),
 				officeMetaDatas.toArray(new OfficeMetaData[0]), maxStartupWaitTime);
 
 		// Return the raw meta-data

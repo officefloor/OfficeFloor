@@ -58,6 +58,7 @@ public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends Abst
 		this.getOfficeFloorBuilder().setExecutive(MockExecutionSource.class);
 
 		// Open the OfficeFloor
+		MockExecutionSource.isOpenning = true;
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
@@ -67,6 +68,7 @@ public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends Abst
 		ThreadDecorateManagedObjectSource.isInvokeProcess = false;
 
 		// Invoke the process
+		MockExecutionSource.isOpenning = false;
 		ThreadDecorateManagedObjectSource.invokeProcess();
 
 		// Ensure registered
@@ -85,6 +87,8 @@ public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends Abst
 
 	@TestSource
 	public static class MockExecutionSource extends AbstractExecutiveSource implements Executive, ExecutionStrategy {
+
+		private static volatile boolean isOpenning = true;
 
 		private static Thread executionThread = null;
 
@@ -110,11 +114,17 @@ public class ExecutiveDecorateManagedObjectInvokedProcessThreadTest extends Abst
 		@Override
 		public <T extends Throwable> ProcessManager manageExecution(Execution<T> execution) throws T {
 
-			// Capture the execution thread
-			executionThread = Thread.currentThread();
+			// Determine if opening
+			if (isOpenning) {
+				execution.execute();
+				
+			} else {
+				// Capture the execution thread
+				executionThread = Thread.currentThread();
 
-			// Provide detail on the thread
-			markThread.set(execution);
+				// Provide detail on the thread
+				markThread.set(execution);
+			}
 
 			// Should not use process manager
 			return () -> {
