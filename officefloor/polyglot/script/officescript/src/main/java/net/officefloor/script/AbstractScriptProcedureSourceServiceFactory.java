@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.script;
+package net.officefloor.script;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,7 +60,7 @@ import net.officefloor.plugin.section.clazz.ParameterAnnotation;
 import net.officefloor.plugin.variable.Var;
 import net.officefloor.plugin.variable.VariableAnnotation;
 import net.officefloor.plugin.variable.VariableManagedObjectSource;
-import net.officefloor.polyglot.script.ScriptManagedFunction.ScriptEngineDecorator;
+import net.officefloor.script.ScriptManagedFunction.ScriptEngineDecorator;
 import net.officefloor.web.HttpCookieParameterAnnotation;
 import net.officefloor.web.HttpHeaderParameterAnnotation;
 import net.officefloor.web.HttpObjectAnnotation;

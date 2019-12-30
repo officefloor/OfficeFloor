@@ -13,6 +13,11 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
    */
   val nonJavaTypes = Array(typeOf[Any], typeOf[AnyVal], typeOf[AnyVal], typeOf[Nothing], typeOf[Null])
 
+  /**
+   * ZIO Symbol.
+   */
+  val zioSymbol = typeOf[ZIO[_, _, _]].typeSymbol
+
   /*
    * ================== MethodReturnManufacturerServiceFactory ==================
    */
@@ -27,7 +32,6 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
 
     // Create the mirror
     val mirror = runtimeMirror(context.getSourceContext.getClassLoader)
-    val zioSymbol = typeOf[ZIO[_, _, _]].typeSymbol
 
     // Determine class from type
     val classFromType: Type => Class[_] = (t: Type) => if (nonJavaTypes.contains(t)) null else mirror.runtimeClass(t.typeSymbol.asClass)
@@ -35,7 +39,7 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
     // Obtain the method
     val method = context.getMethod
 
-    // Interrogate class for ZIO return
+    // Interrogate method for ZIO return
     mirror.staticClass(method.getDeclaringClass.getName).info.member(TermName(method.getName)) match {
       case method: MethodSymbol => method.returnType.baseType(zioSymbol) match {
         case zioReturnType: TypeRef => {
@@ -45,7 +49,7 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
           val exceptionClass = classFromType(zioReturnType.typeArgs(1))
           val resultClass = classFromType(zioReturnType.typeArgs(2))
 
-          // Ensure not custom environment (Any that should result in null)
+          // Ensure not custom environment (Any/Nothing should result in null)
           if (runtimeClass != null) {
             throw new IllegalArgumentException("ZIO environment may not be custom")
           }
@@ -55,15 +59,15 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
             // TODO allow adding exception
           }
 
-          // Provide translated result
+          // Provide translated result type
           context.setTranslatedReturnClass(resultClass.asInstanceOf[Class[A]])
 
           // Return translator
           new ZioMethodReturnTranslator[A]()
         }
-        case _ => null // not ZIO return
+        case _ => null // not ZIO
       }
-      case _ => null // not ZIO return
+      case _ => null // not ZIO
     }
   }
 

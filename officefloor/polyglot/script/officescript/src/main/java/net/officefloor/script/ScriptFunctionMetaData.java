@@ -15,24 +15,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.script;
+package net.officefloor.script;
 
-import net.officefloor.frame.api.function.FlowCallback;
-import net.officefloor.frame.internal.structure.Flow;
+import java.util.List;
+
+import javax.script.ScriptEngine;
+
+import lombok.Data;
 
 /**
- * Provides means for script to invoke {@link Flow}.
+ * Meta-data for a {@link ScriptEngine} function.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ScriptFlow {
-
-	/**
-	 * Undertakes the {@link Flow}.
-	 * 
-	 * @param parameter Parameter. May be <code>null</code>.
-	 * @param callback  {@link FlowCallback}.
-	 */
-	void doFlow(Object parameter, FlowCallback callback);
-
+@Data
+public class ScriptFunctionMetaData {
+	private List<ScriptParameterMetaData> parameters;
+	private String nextArgumentType;
+	private String error;
 }

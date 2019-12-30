@@ -5,19 +5,50 @@ import net.officefloor.activity.procedure.build.{ProcedureArchitect, ProcedureEm
 import net.officefloor.activity.procedure.{ProcedureLoaderUtil, ProcedureTypeBuilder}
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor
 import net.officefloor.plugin.section.clazz.Parameter
-import net.officefloor.polyglot.scalatest.WoofRules
 import org.scalatest.FlatSpec
 
 /**
  * Tests resolution of returning ZIO from procedure.
  */
-class ZioProcedureTest extends FlatSpec with WoofRules {
+class ZioProcedureTest extends FlatSpec {
 
-  "ZIO" should "resolve int" in {
-    test(classOf[Procedure], "zioReturn", 42, { builder =>
+  "ZIO" should "resolve Int" in {
+    test("zioReturn", 42, { builder =>
       builder.setNextArgumentType(classOf[Int])
     })
   }
+
+  it should "handle Unit" in {
+    test("zioUnitReturn", (), null)
+  }
+
+  "UIO" should "handle String" in {
+    test("uioReturn", "TEST", { builder =>
+      builder.setNextArgumentType(classOf[String])
+    })
+  }
+
+  "Task" should "handle Long" in {
+    test("taskReturn", 10, { builder =>
+      builder.setNextArgumentType(classOf[Long])
+    })
+  }
+
+  "IO" should "handle Short" in {
+    test("ioReturn", 42, { builder =>
+      builder.setNextArgumentType(classOf[Short])
+    })
+  }
+
+  /**
+   * Undertakes test against Procedure class.
+   *
+   * @param methodName     Name of method for procedure.
+   * @param expectedResult Expected result.
+   * @param typeBuilder    Builds the expected type.
+   */
+  def test(methodName: String, expectedResult: Any, typeBuilder: ProcedureTypeBuilder => Unit): Unit =
+    test(classOf[Procedure], methodName, expectedResult, typeBuilder)
 
   /**
    * Undertakes test.
@@ -25,12 +56,15 @@ class ZioProcedureTest extends FlatSpec with WoofRules {
    * @param procedureClass Class containing the method.
    * @param methodName     Name of method for procedure.
    * @param expectedResult Expected result.
+   * @param typeBuilder    Builds the expected type.
    */
   def test(procedureClass: Class[_], methodName: String, expectedResult: Any, typeBuilder: ProcedureTypeBuilder => Unit): Unit = {
 
     // Ensure correct type
     val builder = ProcedureLoaderUtil.createProcedureTypeBuilder(methodName, null)
-    typeBuilder(builder)
+    if (typeBuilder != null) {
+      typeBuilder(builder)
+    }
     ProcedureLoaderUtil.validateProcedureType(builder, procedureClass.getName, methodName)
 
     // Ensure can invoke procedure and resolve ZIO

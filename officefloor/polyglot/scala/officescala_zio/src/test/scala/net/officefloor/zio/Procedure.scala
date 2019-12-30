@@ -8,6 +8,8 @@ class Procedure {
 
   def zioReturn(): ZIO[Any, NullPointerException, Int] = ZIO.succeed(42)
 
+  def zioUnitReturn(): ZIO[Any, Unit, Unit] = ZIO.succeed(())
+
   def uioReturn(): UIO[String] = ZIO.succeed("TEST")
 
   def urioReturn(): URIO[Int, String] = ZIO.fromFunction((i: Int) => String.valueOf(i))
@@ -17,8 +19,6 @@ class Procedure {
   def rioReturn(): RIO[Int, String] = ZIO.fromFunction((i: Int) => String.valueOf(i))
 
   def ioReturn(): IO[SQLException, Short] = ZIO.succeed(42)
-
-  def zioUnitReturn(): ZIO[Unit, Unit, Unit] = ZIO.succeed(())
 
   def intReturn(): Int = 1
 

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.script;
+package net.officefloor.script;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -26,6 +26,8 @@ import org.graalvm.polyglot.Value;
 
 import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.script.AbstractScriptProcedureSourceServiceFactory;
+import net.officefloor.script.ScriptExceptionTranslator;
 
 /**
  * Mock {@link ProcedureSourceServiceFactory} for testing.

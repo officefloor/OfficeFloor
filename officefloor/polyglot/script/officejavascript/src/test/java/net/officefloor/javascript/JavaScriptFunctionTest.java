@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.script;
+package net.officefloor.javascript;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,10 +31,10 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import net.officefloor.activity.procedure.Procedure;
-import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.spi.ProcedureSourceServiceFactory;
 import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.javascript.JavaScriptProcedureSourceServiceFactory;
 import net.officefloor.plugin.variable.In;
 import net.officefloor.plugin.variable.Out;
 import net.officefloor.plugin.variable.Var;
@@ -50,11 +51,11 @@ import net.officefloor.polyglot.test.WebTypes;
 import net.officefloor.web.ObjectResponse;
 
 /**
- * Tests adapting JavaScript function for {@link Procedure}.
+ * Tests adapting JavaScript function for {@link ManagedFunction}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
+public class JavaScriptFunctionTest extends AbstractPolyglotProcedureTest {
 
 	/**
 	 * {@link ScriptEngineManager}.
@@ -76,20 +77,16 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 					Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 					bindings.put("polyglot.js.allowAllAccess", true);
 
-					// Load the setup
-					InputStream setup = ScriptProcedureTest.class.getClassLoader()
-							.getResourceAsStream("javascript/Setup.js");
-					engine.eval(new InputStreamReader(setup));
-
 					// Load the script
-					InputStream content = ScriptProcedureTest.class.getClassLoader()
+					InputStream content = JavaScriptFunctionTest.class.getClassLoader()
 							.getResourceAsStream("javascript/Functions.js");
-					engine.eval(new InputStreamReader(content));
+					Reader reader = new InputStreamReader(content);
+					engine.eval(reader);
 
 					// Invoke the function
 					Invocable invocable = (Invocable) engine;
 
-					// Load for use
+					// Return for use
 					return invocable;
 				}
 			} catch (Exception ex) {
@@ -119,28 +116,13 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 		}
 	}
 
-	/**
-	 * Ensure manually specify {@link Procedure}.
-	 */
-	public void testManualSpecifyProcedure() {
-		ProcedureLoaderUtil.validateProcedures("javascript/Functions.js",
-				ProcedureLoaderUtil.procedure(null, MockScriptProcedureSourceServiceFactory.class));
-	}
-
-	/**
-	 * Ensure no manually specify for {@link Class} resource.
-	 */
-	public void testClassResource() {
-		ProcedureLoaderUtil.validateProcedures(Object.class.getName());
-	}
-
 	/*
-	 * ======================= AbstractPolyglotProcedureTest =======================
+	 * ======================= AbstractPolyglotFunctionTest =======================
 	 */
 
 	@Override
 	protected Class<? extends ProcedureSourceServiceFactory> getProcedureSourceServiceFactoryClass() {
-		return MockScriptProcedureSourceServiceFactory.class;
+		return JavaScriptProcedureSourceServiceFactory.class;
 	}
 
 	@Override
@@ -219,9 +201,8 @@ public class ScriptProcedureTest extends AbstractPolyglotProcedureTest {
 	protected void httpException() throws Throwable {
 		try {
 			directInvokeFunction("httpException", null);
-			fail("Should not be successful");
 		} catch (ScriptException ex) {
-			throw new MockScriptProcedureSourceServiceFactory().getScriptExceptionTranslator().translate(ex);
+			throw new JavaScriptProcedureSourceServiceFactory().getScriptExceptionTranslator().translate(ex);
 		}
 	}
 

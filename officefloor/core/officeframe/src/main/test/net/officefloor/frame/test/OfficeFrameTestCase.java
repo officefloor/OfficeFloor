@@ -1550,7 +1550,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 				// Try again after some time
 				try {
-					isComplete.wait(1000);
+					isComplete.wait(50);
 				} catch (InterruptedException ex) {
 					fail("Sleep interrupted: " + ex.getMessage());
 				}

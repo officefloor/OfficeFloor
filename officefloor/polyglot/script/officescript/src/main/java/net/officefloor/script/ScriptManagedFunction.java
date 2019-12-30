@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.script;
+package net.officefloor.script;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;

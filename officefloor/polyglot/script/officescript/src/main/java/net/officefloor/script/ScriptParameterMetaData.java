@@ -15,31 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package net.officefloor.polyglot.script;
+package net.officefloor.script;
 
-import javax.script.ScriptException;
+import javax.script.ScriptEngine;
 
-import net.officefloor.server.http.HttpException;
+import lombok.Data;
 
 /**
- * <p>
- * Translate {@link ScriptException} to possible more appropriate
- * {@link Throwable}.
- * <p>
- * For example, the {@link HttpException} may be wrapped in the
- * {@link ScriptException} and this provides means to extract and throw.
+ * Meta-data for a {@link ScriptEngine} function.
  * 
  * @author Daniel Sagenschneider
  */
-public interface ScriptExceptionTranslator {
-
-	/**
-	 * Translates the {@link ScriptException}.
-	 * 
-	 * @param scriptException {@link ScriptException}.
-	 * @return Translated {@link Throwable} or <code>null</code> to throw original
-	 *         {@link ScriptException}.
-	 */
-	Throwable translate(ScriptException scriptException);
-
+@Data
+public class ScriptParameterMetaData {
+	private String name;
+	private String qualifier;
+	private String type;
+	private String nature;
 }
