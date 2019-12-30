@@ -22,7 +22,6 @@ import java.util.logging.Logger;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.governance.Governance;
 import net.officefloor.frame.api.governance.GovernanceContext;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
 import net.officefloor.frame.test.ReflectiveGovernanceBuilder;
@@ -39,9 +38,6 @@ public class GovernanceLoggerTest extends AbstractOfficeConstructTestCase {
 	 */
 	public void testLogger() throws Exception {
 
-		// Obtain office name
-		final String officeName = this.getOfficeName();
-
 		// Create the task
 		TestWork work = new TestWork();
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "task");
@@ -54,12 +50,7 @@ public class GovernanceLoggerTest extends AbstractOfficeConstructTestCase {
 		governance.enforce("enforce").buildGovernanceContext();
 
 		// Invoke function confirming logger
-		try (OfficeFloor officeFloor = this.constructOfficeFloor()) {
-			officeFloor.openOfficeFloor();
-
-			// Invoke the function
-			officeFloor.getOffice(officeName).getFunctionManager("task").invokeProcess(null, null);
-		}
+		this.invokeFunction("task", null);
 
 		// Ensure correct logger
 		assertNotNull("Should have govenrance logger", govern.logger);

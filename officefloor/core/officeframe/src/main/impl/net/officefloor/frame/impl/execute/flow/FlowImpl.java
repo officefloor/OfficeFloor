@@ -171,7 +171,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 					boundManagedObjects, false);
 
 			// Push out previous administration functions to do this last
-			managedFunctionContainer.setParallelManagedFunctionContainer(adminFunction);
+			managedFunctionContainer.loadParallelBlock(adminFunction);
 		}
 
 		// Load the post-function administration (as next functions)
@@ -191,11 +191,11 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState> impl
 			// Load the post-administration function
 			if (i == 0) {
 				// Load administration as first next function
-				managedFunctionContainer.setNextManagedFunctionContainer(adminFunction);
+				managedFunctionContainer.loadSequentialBlock(adminFunction);
 				lastAdministration = adminFunction;
 			} else {
 				// Load subsequent administration
-				lastAdministration.setNextManagedFunctionContainer(adminFunction);
+				lastAdministration.loadSequentialBlock(adminFunction);
 				lastAdministration = adminFunction;
 			}
 		}

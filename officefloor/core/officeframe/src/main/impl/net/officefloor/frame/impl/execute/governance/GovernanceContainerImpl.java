@@ -25,6 +25,7 @@ import net.officefloor.frame.impl.execute.function.Promise;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectReadyCheckImpl;
+import net.officefloor.frame.internal.structure.BlockState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionStateContext;
 import net.officefloor.frame.internal.structure.FunctionState;
@@ -102,18 +103,18 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 	 * @param activity                  {@link GovernanceActivity}.
 	 * @return {@link FunctionState} to undertake the {@link GovernanceActivity}.
 	 */
-	private FunctionState doGovernanceActivity(boolean isWaitManagedObjectsReady, GovernanceActivity<F> activity) {
-		return new GovernanceOperation() {
+	private BlockState doGovernanceActivity(boolean isWaitManagedObjectsReady, GovernanceActivity<F> activity) {
+		return new GovernanceBlockOperation() {
+
+			/**
+			 * Indicates if the {@link GovernanceActivity} is loaded.
+			 */
+			private ManagedFunctionContainer governanceActivityContainer = null;
 
 			/**
 			 * {@link ManagedObjectReadyCheck}.
 			 */
 			private ManagedObjectReadyCheckImpl check = null;
-
-			/**
-			 * {@link ManagedFunctionContainer} for the {@link Governance}.
-			 */
-			private ManagedFunctionContainer governanceFunction = null;
 
 			@Override
 			public FunctionState execute(FunctionStateContext context) {
@@ -122,16 +123,17 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 				GovernanceContainerImpl<E, F> container = GovernanceContainerImpl.this;
 
 				// Create the governance activity in its own flow
-				if (this.governanceFunction == null) {
+				if (this.governanceActivityContainer == null) {
 					Flow flow = container.threadState.createFlow(null, null);
-					this.governanceFunction = flow.createGovernanceFunction(activity, container.metaData);
+					this.governanceActivityContainer = flow.createGovernanceFunction(activity, container.metaData);
+					this.loadSequentialBlock(this.governanceActivityContainer);
 				}
 
 				// Determine if check managed objects are ready
 				if (isWaitManagedObjectsReady) {
 					if (this.check == null) {
 						// Undertake check to ensure managed objects are ready
-						this.check = new ManagedObjectReadyCheckImpl(this, this.governanceFunction);
+						this.check = new ManagedObjectReadyCheckImpl(this, this.governanceActivityContainer);
 						FunctionState checkFunction = null;
 						RegisteredGovernanceEntry entry = container.registeredGovernances.getHead();
 						while (entry != null) {
@@ -151,7 +153,7 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 				}
 
 				// Return the governance function
-				return this.governanceFunction;
+				return this.getNextBlockToExecute();
 			}
 		};
 	}
@@ -318,7 +320,7 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 	}
 
 	@Override
-	public FunctionState activateGovernance() {
+	public BlockState activateGovernance() {
 		return this.doGovernanceActivity(true, new GovernanceActivity<F>() {
 			@Override
 			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
@@ -346,7 +348,7 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 	}
 
 	@Override
-	public FunctionState enforceGovernance() {
+	public BlockState enforceGovernance() {
 		return this.doGovernanceActivity(true, new GovernanceActivity<F>() {
 			@Override
 			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
@@ -366,7 +368,7 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 	}
 
 	@Override
-	public FunctionState disregardGovernance() {
+	public BlockState disregardGovernance() {
 		return this.doGovernanceActivity(true, new GovernanceActivity<F>() {
 			@Override
 			public FunctionState doActivity(GovernanceContext<F> context) throws Throwable {
@@ -428,6 +430,61 @@ public class GovernanceContainerImpl<E, F extends Enum<F>> implements Governance
 		@Override
 		public ThreadState getThreadState() {
 			return GovernanceContainerImpl.this.threadState;
+		}
+	}
+
+	/**
+	 * {@link Governance} {@link BlockState} operation.
+	 */
+	private abstract class GovernanceBlockOperation extends GovernanceOperation implements BlockState {
+
+		/**
+		 * Parallel owner.
+		 */
+		private BlockState parallelOwner;
+
+		/**
+		 * Parallel {@link BlockState}.
+		 */
+		private BlockState parallelBlock;
+
+		/**
+		 * Sequential {@link BlockState}.
+		 */
+		private BlockState sequentialBlock;
+
+		/**
+		 * ===================== BlockState ==========================
+		 */
+
+		@Override
+		public void setParallelOwner(BlockState parallelOwner) {
+			this.parallelOwner = parallelOwner;
+		}
+
+		@Override
+		public BlockState getParallelOwner() {
+			return this.parallelOwner;
+		}
+
+		@Override
+		public void setParallelBlock(BlockState parallelBlock) {
+			this.parallelBlock = parallelBlock;
+		}
+
+		@Override
+		public BlockState getParallelBlock() {
+			return this.parallelBlock;
+		}
+
+		@Override
+		public void setSequentialBlock(BlockState sequentialBlock) {
+			this.sequentialBlock = sequentialBlock;
+		}
+
+		@Override
+		public BlockState getSequentialBlock() {
+			return this.sequentialBlock;
 		}
 	}
 
