@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -314,7 +315,8 @@ public class MethodManagedFunctionBuilderUtil {
 
 		// Return the result
 		return new MethodResult(context, failure,
-				context.asyncFlows.toArray(new MockAsynchronousFlow[context.asyncFlows.size()]));
+				context.asyncFlows.toArray(new MockAsynchronousFlow[context.asyncFlows.size()]),
+				context.executorRunnables.toArray(new Runnable[context.executorRunnables.size()]));
 	}
 
 	/**
@@ -338,17 +340,26 @@ public class MethodManagedFunctionBuilderUtil {
 		private final MockAsynchronousFlow[] asyncFlows;
 
 		/**
+		 * {@link Runnable} instances passed to the {@link Executor}.
+		 */
+		private final Runnable[] executorRunnables;
+
+		/**
 		 * Instantiate.
 		 * 
-		 * @param context    {@link MockManagedFunctionContext}.
-		 * @param failure    Possible failure.
-		 * @param asyncFlows Created {@link AsynchronousFlow} in running the
-		 *                   {@link ManagedFunction}.
+		 * @param context           {@link MockManagedFunctionContext}.
+		 * @param failure           Possible failure.
+		 * @param asyncFlows        Created {@link AsynchronousFlow} in running the
+		 *                          {@link ManagedFunction}.
+		 * @param executorRunnables {@link Runnable} instances passed to the
+		 *                          {@link Executor}.
 		 */
-		private MethodResult(MockManagedFunctionContext context, Throwable failure, MockAsynchronousFlow[] asyncFlows) {
+		private MethodResult(MockManagedFunctionContext context, Throwable failure, MockAsynchronousFlow[] asyncFlows,
+				Runnable[] executorRunnables) {
 			this.context = context;
 			this.failure = failure;
 			this.asyncFlows = asyncFlows;
+			this.executorRunnables = executorRunnables;
 		}
 
 		/**
@@ -382,6 +393,15 @@ public class MethodManagedFunctionBuilderUtil {
 		 */
 		public MockAsynchronousFlow[] getAsynchronousFlows() {
 			return this.asyncFlows;
+		}
+
+		/**
+		 * Obtains the {@link Runnable} instances passed to the {@link Executor}.
+		 * 
+		 * @return {@link Runnable} instances passed to the {@link Executor}.
+		 */
+		public Runnable[] getExecutorRunnables() {
+			return this.executorRunnables;
 		}
 	}
 
@@ -456,6 +476,11 @@ public class MethodManagedFunctionBuilderUtil {
 		 * Listing of {@link MockAsynchronousFlow} instances.
 		 */
 		private final List<MockAsynchronousFlow> asyncFlows = new LinkedList<>();
+
+		/**
+		 * Listing of {@link Runnable} instances passed to the {@link Executor}.
+		 */
+		private final List<Runnable> executorRunnables = new LinkedList<>();
 
 		/**
 		 * {@link Logger}.
@@ -543,6 +568,11 @@ public class MethodManagedFunctionBuilderUtil {
 			MockAsynchronousFlow asyncFlow = new MockAsynchronousFlow();
 			this.asyncFlows.add(asyncFlow);
 			return asyncFlow;
+		}
+
+		@Override
+		public Executor getExecutor() {
+			return (runnable) -> this.executorRunnables.add(runnable);
 		}
 
 		@Override

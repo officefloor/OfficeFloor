@@ -19,6 +19,7 @@ package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.build.Indexed;
@@ -209,6 +210,11 @@ public class MethodFunction implements ManagedFunction<Indexed, Indexed> {
 		@Override
 		public AsynchronousFlow createAsynchronousFlow() {
 			return this.delegate.createAsynchronousFlow();
+		}
+
+		@Override
+		public Executor getExecutor() {
+			return this.delegate.getExecutor();
 		}
 
 		@Override
