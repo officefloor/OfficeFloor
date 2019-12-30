@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -492,9 +493,12 @@ public class RawOfficeMetaDataFactory {
 		// Obtain the managed execution factory
 		ManagedExecutionFactory managedExecutionFactory = this.rawOfficeFloorMetaData.getManagedExecutionFactory();
 
+		// Obtain the break chain executor
+		Executor breakChainExecutor = this.rawOfficeFloorMetaData.getBreakChainExecutor();
+
 		// Load the office meta-data
 		OfficeMetaData officeMetaData = new OfficeMetaDataImpl(officeName, officeManager, monitorClock, timer,
-				functionLoop, threadLocalAwareExecutor, executive, managedExecutionFactory,
+				functionLoop, breakChainExecutor, threadLocalAwareExecutor, executive, managedExecutionFactory,
 				functionMetaDatas.toArray(new ManagedFunctionMetaData[0]), functionLocator, processMetaData,
 				startupFunctions, profiler);
 

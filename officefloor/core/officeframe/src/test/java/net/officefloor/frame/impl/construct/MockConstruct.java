@@ -1546,7 +1546,7 @@ public class MockConstruct {
 
 				// Build
 				this.built = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy, executionStrategies,
-						this.teamRegistry, this.breakChainTeamManagement, this.threadLocalAwareExecutor,
+						this.teamRegistry, this.breakChainTeamManagement, null, this.threadLocalAwareExecutor,
 						this.managedExecutionFactory, mosRegistry, this.officeFloorEscalation,
 						new OfficeFloorListener[0]);
 			}
@@ -1671,7 +1671,7 @@ public class MockConstruct {
 				ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
 						functions.toArray(new ManagedFunctionMetaData[functions.size()]));
 				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null, null,
-						functionLocator, this.processMetaData.build(), null, null);
+						null, functionLocator, this.processMetaData.build(), null, null);
 
 				// Load the office meta-data to functions
 				for (ManagedFunctionMetaDataImpl<?, ?> function : functions) {

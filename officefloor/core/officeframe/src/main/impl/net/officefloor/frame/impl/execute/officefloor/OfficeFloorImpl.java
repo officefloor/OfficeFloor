@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -89,6 +90,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 	private final Executive executive;
 
 	/**
+	 * {@link Executor} to break the thread stack execution chain.
+	 */
+	private final Executor breakChainExecutor;
+
+	/**
 	 * {@link Office} instances by their name.
 	 */
 	private Map<String, Office> offices = null;
@@ -99,12 +105,15 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * @param officeFloorMetaData {@link OfficeFloorMetaData}.
 	 * @param listeners           {@link OfficeFloorListener} instances.
 	 * @param executive           {@link Executive}.
+	 * @param breakChainExecutor  {@link Executor} to break the thread stack
+	 *                            execution chain.
 	 */
 	public OfficeFloorImpl(OfficeFloorMetaData officeFloorMetaData, OfficeFloorListener[] listeners,
-			Executive executive) {
+			Executive executive, Executor breakChainExecutor) {
 		this.officeFloorMetaData = officeFloorMetaData;
 		this.listeners = listeners;
 		this.executive = executive;
+		this.breakChainExecutor = breakChainExecutor;
 	}
 
 	/*
@@ -217,7 +226,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 			} else {
 				// Run concurrently
 				concurrentStartups[0]++;
-				Thread concurrentThread = new Thread(() -> {
+				this.breakChainExecutor.execute(() -> {
 
 					// Start concurrently
 					startupProcess.run();
@@ -227,9 +236,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 						concurrentStartups[0]--;
 						concurrentStartups.notify();
 					}
-				}, "STARTUP");
-				concurrentThread.setDaemon(true);
-				concurrentThread.start();
+				});
 			}
 		}
 		if (concurrentStartups[0] > 0) {

@@ -56,6 +56,7 @@ import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorMetaDataImpl;
+import net.officefloor.frame.impl.execute.team.TeamExecutor;
 import net.officefloor.frame.internal.configuration.ExecutiveConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -281,10 +282,13 @@ public class RawOfficeFloorMetaDataFactory {
 				officeFloorName, issues);
 		TeamManagement breakChainTeamManagement = breakTeamMetaData.getTeamManagement();
 
+		// Create the break chain executor
+		TeamExecutor breakChainExecutor = new TeamExecutor(breakChainTeamManagement.getTeam(), executive);
+
 		// Undertake OfficeFloor escalation on any team available
 		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(null);
 		OfficeMetaData officeFloorManagement = new OfficeMetaDataImpl("Management", null, null, null,
-				officeFloorFunctionLoop, null, null, null, null, null, null, null, null);
+				officeFloorFunctionLoop, null, null, null, null, null, null, null, null, null);
 
 		// Obtain the escalation handler for the OfficeFloor
 		EscalationHandler officeFloorEscalationHandler = configuration.getEscalationHandler();
@@ -295,10 +299,10 @@ public class RawOfficeFloorMetaDataFactory {
 		EscalationFlow officeFloorEscalation = new EscalationHandlerEscalationFlow(officeFloorEscalationHandler,
 				officeFloorManagement);
 
-		// Create the raw office floor meta-data
+		// Create the raw OfficeFloor meta-data
 		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy,
-				executionStrategies, teamRegistry, breakChainTeamManagement, threadLocalAwareExecutor,
-				managedExecutionFactory, mosRegistry, officeFloorEscalation,
+				executionStrategies, teamRegistry, breakChainTeamManagement, breakChainExecutor,
+				threadLocalAwareExecutor, managedExecutionFactory, mosRegistry, officeFloorEscalation,
 				officeFloorListeners.toArray(new OfficeFloorListener[officeFloorListeners.size()]));
 
 		// Construct the office factory

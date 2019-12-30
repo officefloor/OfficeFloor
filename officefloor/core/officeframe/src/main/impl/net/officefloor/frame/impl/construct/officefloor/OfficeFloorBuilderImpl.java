@@ -276,7 +276,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder, OfficeFloorCo
 		// Obtain the OfficeFloor meta-data and return the OfficeFloor
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();
 		return new OfficeFloorImpl(metaData, listeners.toArray(new OfficeFloorListener[listeners.size()]),
-				rawMetaData.getExecutive());
+				rawMetaData.getExecutive(), rawMetaData.getBreakChainExecutor());
 	}
 
 	/*

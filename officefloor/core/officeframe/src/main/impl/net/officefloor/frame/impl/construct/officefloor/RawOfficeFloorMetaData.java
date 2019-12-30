@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.construct.officefloor;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
 import net.officefloor.frame.api.build.OfficeFloorListener;
@@ -69,6 +70,11 @@ public class RawOfficeFloorMetaData {
 	private final TeamManagement breakChainTeamManagement;
 
 	/**
+	 * {@link Executor} to break the thread stack execution chain.
+	 */
+	private final Executor breakChainExecutor;
+
+	/**
 	 * {@link ThreadLocalAwareExecutor}.
 	 */
 	private final ThreadLocalAwareExecutor threadLocalAwareExecutor;
@@ -109,6 +115,8 @@ public class RawOfficeFloorMetaData {
 	 *                                 {@link Team} name.
 	 * @param breakChainTeamManagement {@link TeamManagement} to break the
 	 *                                 {@link FunctionState} chain.
+	 * @param breakChainExecutor       {@link Executor} to break the thread stack
+	 *                                 execution chain.
 	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
 	 * @param managedExecutionFactory  {@link ManagedExecutionFactory}.
 	 * @param mosRegistry              Registry of {@link RawManagedObjectMetaData}
@@ -118,14 +126,16 @@ public class RawOfficeFloorMetaData {
 	 */
 	public RawOfficeFloorMetaData(Executive executive, ThreadFactory[] defaultExecutionStrategy,
 			Map<String, ThreadFactory[]> executionStrategies, Map<String, RawTeamMetaData> teamRegistry,
-			TeamManagement breakChainTeamManagement, ThreadLocalAwareExecutor threadLocalAwareExecutor,
-			ManagedExecutionFactory managedExecutionFactory, Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
-			EscalationFlow officeFloorEscalation, OfficeFloorListener[] officeFloorListeners) {
+			TeamManagement breakChainTeamManagement, Executor breakChainExecutor,
+			ThreadLocalAwareExecutor threadLocalAwareExecutor, ManagedExecutionFactory managedExecutionFactory,
+			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry, EscalationFlow officeFloorEscalation,
+			OfficeFloorListener[] officeFloorListeners) {
 		this.executive = executive;
 		this.defaultExecutionStrategy = defaultExecutionStrategy;
 		this.executionStrategies = executionStrategies;
 		this.teamRegistry = teamRegistry;
 		this.breakChainTeamManagement = breakChainTeamManagement;
+		this.breakChainExecutor = breakChainExecutor;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.managedExecutionFactory = managedExecutionFactory;
 		this.mosRegistry = mosRegistry;
@@ -177,6 +187,15 @@ public class RawOfficeFloorMetaData {
 	 */
 	public TeamManagement getBreakChainTeamManagement() {
 		return this.breakChainTeamManagement;
+	}
+
+	/**
+	 * Obtains the {@link Executor} to break the thread stack execution chain.
+	 * 
+	 * @return {@link Executor} to break the thread stack execution chain.
+	 */
+	public Executor getBreakChainExecutor() {
+		return this.breakChainExecutor;
 	}
 
 	/**
