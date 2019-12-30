@@ -183,7 +183,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		 * @param isLoadingType Indicates if loading type.
 		 * @param delegate      Delegate {@link SourceContext}.
 		 */
-		public DelegateWrapSourceContext(String sourceName, boolean isLoadingType, SourceContext delegate) {
+		private DelegateWrapSourceContext(String sourceName, boolean isLoadingType, SourceContext delegate) {
 			this.isLoadingType = isLoadingType;
 			this.delegate = delegate;
 			this.logger = OfficeFrame.getLogger(sourceName);
@@ -322,7 +322,7 @@ public class SourceContextImpl extends SourcePropertiesImpl implements SourceCon
 		 * @param clockFactory    {@link ClockFactory}.
 		 * @param resourceSources {@link ResourceSource} instances.
 		 */
-		public DelegateSourceContext(String sourceName, boolean isLoadingType, ClassLoader classLoader,
+		private DelegateSourceContext(String sourceName, boolean isLoadingType, ClassLoader classLoader,
 				ClockFactory clockFactory, ResourceSource[] resourceSources) {
 			this.isLoadingType = isLoadingType;
 			this.classLoader = classLoader;

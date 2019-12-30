@@ -26,9 +26,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.clock.ClockFactory;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.TeamOversight;
