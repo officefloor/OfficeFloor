@@ -2,21 +2,11 @@ package net.officefloor.zio
 
 import net.officefloor.frame.api.source.ServiceContext
 import net.officefloor.plugin.managedfunction.method.{MethodReturnManufacturer, MethodReturnManufacturerContext, MethodReturnManufacturerServiceFactory, MethodReturnTranslator}
-import zio.ZIO
+import zio.{ZEnv, ZIO}
 
 import scala.reflect.runtime.universe._
 
 class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufacturerServiceFactory with MethodReturnManufacturer[ZIO[Any, _, A], A] {
-
-  /**
-   * {@link Type} instances that can not be converted to a Java {@link Class}.
-   */
-  val nonJavaTypes = Array(typeOf[Any], typeOf[AnyVal], typeOf[AnyVal], typeOf[Nothing], typeOf[Null])
-
-  /**
-   * ZIO Symbol.
-   */
-  val zioSymbol = typeOf[ZIO[_, _, _]].typeSymbol
 
   /*
    * ================== MethodReturnManufacturerServiceFactory ==================
@@ -33,34 +23,40 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
     // Create the mirror
     val mirror = runtimeMirror(context.getSourceContext.getClassLoader)
 
-    // Determine class from type
-    val classFromType: Type => Class[_] = (t: Type) => if (nonJavaTypes.contains(t)) null else mirror.runtimeClass(t.typeSymbol.asClass)
-
-    // Obtain the method
-    val method = context.getMethod
-
     // Interrogate method for ZIO return
+    val method = context.getMethod
     mirror.staticClass(method.getDeclaringClass.getName).info.member(TermName(method.getName)) match {
-      case method: MethodSymbol => method.returnType.baseType(zioSymbol) match {
+      case method: MethodSymbol => method.returnType.baseType(typeOf[ZIO[_, _, _]].typeSymbol) match {
         case zioReturnType: TypeRef => {
 
           // Obtain the ZIO type information
-          val runtimeClass = classFromType(zioReturnType.typeArgs(0))
-          val exceptionClass = classFromType(zioReturnType.typeArgs(1))
-          val resultClass = classFromType(zioReturnType.typeArgs(2))
+          val runtimeType = zioReturnType.typeArgs(0)
+          val failureType = zioReturnType.typeArgs(1)
+          val successType = zioReturnType.typeArgs(2)
 
-          // Ensure not custom environment (Any/Nothing should result in null)
-          if (runtimeClass != null) {
-            throw new IllegalArgumentException("ZIO environment may not be custom (requiring " + runtimeClass.getName + ")")
+          // Determine if appropriate environment
+          if ((!typeOf[ZEnv].<:<(runtimeType)) && (!Array(typeOf[Any], typeOf[Nothing]).exists(runtimeType.=:=(_)))) {
+            throw new IllegalArgumentException("ZIO environment may not be custom (requiring " + runtimeType.typeSymbol.fullName + ")")
           }
 
+          // Determine Java Class from Type
+          val classFromType: (Type, String) => Class[_] = (t, message) => t match {
+            case _ if (typeOf[Nothing].=:=(t)) => null
+            case _ if (typeOf[Any].=:=(t)) => classOf[Object]
+            case _ => mirror.runtimeClass(t.typeSymbol.asClass)
+          }
+
+          // Translate failure/success type to Java Class
+          val failureClass = classFromType(failureType, "Failure")
+          val successClass = classFromType(successType, "Success")
+
           // Determine if exception
-          if (exceptionClass != null) {
+          if (failureClass != null) {
             // TODO allow adding exception
           }
 
           // Provide translated result type
-          context.setTranslatedReturnClass(resultClass.asInstanceOf[Class[A]])
+          context.setTranslatedReturnClass(successClass.asInstanceOf[Class[A]])
 
           // Return translator
           new ZioMethodReturnTranslator[A]()
