@@ -41,6 +41,7 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 import net.officefloor.web.executive.CpuCore.LogicalCpu;
 import net.openhft.affinity.Affinity;
+import net.openhft.affinity.AffinityLock;
 
 /**
  * Tests the {@link WebThreadAffinityExecutiveSource}.
@@ -135,10 +136,12 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 		});
 		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
 
+		// Determine number of CPUs
+		int cpuCount = AffinityLock.cpuLayout().cpus();
+
 		// Ensure have affinity
 		assertNotNull("Should have thread factories", mos.threadFactories);
-		assertEquals("Incorrect number of thread factories", Runtime.getRuntime().availableProcessors(),
-				mos.threadFactories.length);
+		assertEquals("Incorrect number of thread factories", cpuCount, mos.threadFactories.length);
 
 		// Ensure threads are bound to respective CPUs
 		int index = 0;
@@ -166,6 +169,8 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 
 		private ThreadFactory[] threadFactories;
 
+		private int executionStrategyIndex;
+
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
 		}
@@ -173,12 +178,14 @@ public class WebThreadAffinityExecutiveSourceTest extends OfficeFrameTestCase {
 		@Override
 		protected void loadMetaData(MetaDataContext<None, None> context) throws Exception {
 			context.setObjectClass(this.getClass());
-			context.addExecutionStrategy().setLabel("EXECUTION_STRATEGY");
+			ExecutionLabeller execution = context.addExecutionStrategy();
+			this.executionStrategyIndex = execution.getIndex();
+			execution.setLabel("EXECUTION_STRATEGY");
 		}
 
 		@Override
 		public void start(ManagedObjectExecuteContext<None> context) throws Exception {
-			this.threadFactories = context.getExecutionStrategy(0);
+			this.threadFactories = context.getExecutionStrategy(this.executionStrategyIndex);
 		}
 
 		@Override
