@@ -1,5 +1,6 @@
 package net.officefloor.zio
 
+import junit.framework.AssertionFailedError
 import net.officefloor.activity.impl.procedure.ClassProcedureSource
 import net.officefloor.activity.procedure.build.{ProcedureArchitect, ProcedureEmployer}
 import net.officefloor.activity.procedure.{ProcedureLoaderUtil, ProcedureTypeBuilder}
@@ -26,6 +27,10 @@ class ZioProcedureTest extends FlatSpec {
     test("uioReturn", "TEST", { builder =>
       builder.setNextArgumentType(classOf[String])
     })
+  }
+
+  "URIO" should "fail on custom environment" in {
+    testInvalidEnvironment("urioReturn", classOf[Int])
   }
 
   "Task" should "handle Long" in {
@@ -83,6 +88,32 @@ class ZioProcedureTest extends FlatSpec {
       assert(ZioProcedureTest.result == expectedResult)
     } finally {
       officeFloor.close()
+    }
+  }
+
+  /**
+   * Undertake test for invalid environment.
+   *
+   * @param methodName   Name of method for procedure.
+   * @param runtimeClass Runtime class.
+   */
+  def testInvalidEnvironment(methodName: String, runtimeClass: Class[_]): Unit = testInvalidEnvironment(classOf[Procedure], methodName, runtimeClass)
+
+  /**
+   * Undertake test for invalid environment.
+   *
+   * @param procedureClass Class containing the method.
+   * @param methodName     Name of method for procedure.
+   * @param runtimeClass   Runtime class.
+   */
+  def testInvalidEnvironment(procedureClass: Class[_], methodName: String, runtimeClass: Class[_]): Unit = {
+    // Ensure not able to load type
+    val builder = ProcedureLoaderUtil.createProcedureTypeBuilder(methodName, null)
+    try {
+      ProcedureLoaderUtil.validateProcedureType(builder, procedureClass.getName, methodName)
+      fail("Should not be successful")
+    } catch {
+      case ex: AssertionFailedError => assert(ex.getMessage.contains("ZIO environment may not be custom (requiring " + runtimeClass.getName + ")"))
     }
   }
 

@@ -51,7 +51,7 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
 
           // Ensure not custom environment (Any/Nothing should result in null)
           if (runtimeClass != null) {
-            throw new IllegalArgumentException("ZIO environment may not be custom")
+            throw new IllegalArgumentException("ZIO environment may not be custom (requiring " + runtimeClass.getName + ")")
           }
 
           // Determine if exception
