@@ -60,15 +60,13 @@ public class AsynchronousExecutorGovernanceTest extends AbstractOfficeConstructT
 		this.invokeFunction("function", null);
 
 		// Should complete servicing
-		assertNotNull("Should complete servicing", work.completeThread);
+		assertTrue("Should complete servicing", work.isComplete);
 
 		// Should trigger function on same thread
 		assertSame("Should trigger function on same thread", currentThread, work.triggerThread);
 
 		// Executor thread should be different
 		assertNotEquals("Executor should be invoked by different thread", currentThread, govern.executorThread);
-		assertSame("As default Team passive, should continue with Executor thread", govern.executorThread,
-				work.completeThread);
 	}
 
 	public class TestWork {
@@ -77,7 +75,7 @@ public class AsynchronousExecutorGovernanceTest extends AbstractOfficeConstructT
 
 		private volatile Thread triggerThread = null;
 
-		private volatile Thread completeThread = null;
+		private volatile boolean isComplete = false;
 
 		public TestWork(TestGovernance governance) {
 			this.governance = governance;
@@ -89,7 +87,7 @@ public class AsynchronousExecutorGovernanceTest extends AbstractOfficeConstructT
 
 		public void complete() {
 			assertNotNull("Should have executor thread", this.governance.executorThread);
-			this.completeThread = Thread.currentThread();
+			this.isComplete = true;
 		}
 	}
 

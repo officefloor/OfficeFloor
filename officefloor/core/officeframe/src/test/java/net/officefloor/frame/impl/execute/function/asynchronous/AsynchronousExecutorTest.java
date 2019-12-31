@@ -52,19 +52,17 @@ public class AsynchronousExecutorTest extends AbstractOfficeConstructTestCase {
 		this.invokeFunction("triggerExecutor", null);
 
 		// Should complete servicing
-		assertNotNull("Should complete servicing", work.completeThread);
+		assertTrue("Should complete servicing", work.isComplete);
 
 		// Executor thread should be different
 		assertNotEquals("Executor should be invoked by different thread", currentThread, work.executorThread);
-		assertSame("As default Team passive, should continue with Executor thread", work.executorThread,
-				work.completeThread);
 	}
 
 	public class TestWork {
 
 		private volatile Thread executorThread = null;
 
-		private volatile Thread completeThread = null;
+		private volatile boolean isComplete = false;
 
 		public void triggerExecutor(ManagedFunctionContext<?, ?> context) {
 			AsynchronousFlow flow = context.createAsynchronousFlow();
@@ -76,7 +74,7 @@ public class AsynchronousExecutorTest extends AbstractOfficeConstructTestCase {
 
 		public void servicingComplete() {
 			assertNotNull("Should have executor thread", this.executorThread);
-			this.completeThread = Thread.currentThread();
+			this.isComplete = true;
 		}
 	}
 
