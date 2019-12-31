@@ -9,7 +9,7 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>ScalaHttpServer</artifactId>
-	<name>ScalaScript Tutorial</name>
+	<name>Scala Tutorial</name>
 	<description>Tutorial of implementing logic with Scala</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

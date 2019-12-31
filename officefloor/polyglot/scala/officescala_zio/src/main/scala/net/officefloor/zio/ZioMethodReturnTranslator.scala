@@ -19,10 +19,9 @@ class ZioMethodReturnTranslator[A] extends MethodReturnTranslator[ZIO[Any, _, A]
     val zio = context.getReturnValue
 
     // Obtain the runtime details
-    val logger = context.getManagedFunctionContext.getLogger
-
-    // TODO Use Executor from ManagedFunction
-    val executor: Executor = (runnable) => runnable.run();
+    val managedFunctionContext = context.getManagedFunctionContext
+    val executor = managedFunctionContext.getExecutor
+    val logger = managedFunctionContext.getLogger
 
     // Asynchronously run effects return result
     val flow = context.getManagedFunctionContext.createAsynchronousFlow
