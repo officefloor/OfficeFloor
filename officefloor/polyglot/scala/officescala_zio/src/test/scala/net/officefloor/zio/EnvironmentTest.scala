@@ -14,7 +14,7 @@ import scala.reflect.runtime.universe._
  */
 class EnvironmentTest extends TestSpec {
 
-  type Env[R] = ZIO[R, Throwable, Object]
+  type Env[R] = ZIO[R, Any, Any]
 
   def envZEnv: Env[ZEnv] = zioObject
 
@@ -73,13 +73,11 @@ class EnvironmentTest extends TestSpec {
 
   def envNothing: Env[Nothing] = zioObject
 
-
   it can "Nothing" in {
     valid("Nothing")
   }
 
   def envObject: Env[Object] = zioObject
-
 
   it can "Object" in {
     valid("Object")
@@ -87,19 +85,17 @@ class EnvironmentTest extends TestSpec {
 
   def envAnyVal: Env[AnyVal] = zioObject
 
-
   it should "not AnyVal" in {
     invalid("AnyVal", typeOf[AnyVal])
   }
 
   def envInt: Env[Int] = zioObject
 
-
   it should "not Int" in {
     invalid("Int", typeOf[Int])
   }
 
-  def envString: Env[String] = zioObject
+  def envString: Env[String] = ZIO.fromFunction((i: String) => String.valueOf(i))
 
   it should "not String" in {
     invalid("String", typeOf[String])

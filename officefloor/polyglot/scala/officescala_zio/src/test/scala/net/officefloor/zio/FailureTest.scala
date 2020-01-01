@@ -12,9 +12,7 @@ class FailureTest extends TestSpec {
   def failThrowable: Fail[Any] = ZIO.fail(FailureTest.THROWABLE)
 
   it can "Throwable" in {
-    valid("Throwable", classOf[Throwable], { ex =>
-      assert(ex == FailureTest.THROWABLE)
-    })
+    valid("Throwable")
   }
 
   def failException: Fail[Exception] = ZIO.fail(FailureTest.EXCEPTION)
@@ -43,6 +41,34 @@ class FailureTest extends TestSpec {
       }
     })
   }
+
+  def failEither: Fail[Throwable] = ZIO.fromEither(Left(FailureTest.THROWABLE))
+
+  it can "Either" in {
+    valid("Either")
+  }
+
+  def failTry: Fail[Throwable] = ZIO.fromTry(throw FailureTest.THROWABLE)
+
+  it can "Try" in {
+    valid("Try")
+  }
+
+  def failFoldM: ZIO[Any, Nothing, Int] = ZIO.effect(throw FailureTest.THROWABLE).foldM(
+    error => ZIO.succeed(1),
+    success => throw new Exception("Should not be successful")
+  )
+
+  it can "foldM" in {
+    success("failFoldM", 1, { builder =>
+      builder.setNextArgumentType(classOf[Int])
+    })
+  }
+
+  def valid(methodSuffix: String): Unit =
+    valid(methodSuffix, classOf[Throwable], { ex =>
+      assert(ex == FailureTest.THROWABLE)
+    })
 
   def valid(methodSuffix: String, failureType: Class[_ <: Throwable], exceptionHandler: Throwable => Unit): Unit =
     failure("fail" + methodSuffix, exceptionHandler, { builder =>
