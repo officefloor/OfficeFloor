@@ -111,7 +111,5 @@ class SuccessTest extends TestSpec {
 }
 
 object SuccessTest {
-
   val OPTION: Option[Object] = Some(TestSpec.OBJECT)
-
 }

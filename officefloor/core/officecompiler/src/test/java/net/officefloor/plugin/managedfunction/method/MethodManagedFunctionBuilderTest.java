@@ -275,6 +275,23 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can translate to <code>null</code> return.
+	 */
+	public void testTranslateReturnNull() throws Throwable {
+		Closure<Class<?>> closure = new Closure<>();
+		MethodResult result = MockReturnManufacturer.run(Closure.class, null, (context) -> {
+
+			// Provide translation to null
+			closure.value = context.getReturnClass();
+			context.setTranslatedReturnClass(null);
+			return (translateContext) -> translateContext.setTranslatedReturnValue(null);
+
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFunction(), "method", null, null));
+		assertEquals("Incorrect return class", Closure.class, closure.value);
+		assertNull("Should translate to null", result.getReturnValue());
+	}
+
+	/**
 	 * Ensure can asynchronously translate return value.
 	 */
 	public void testAsynchronousTranslateReturn() throws Throwable {

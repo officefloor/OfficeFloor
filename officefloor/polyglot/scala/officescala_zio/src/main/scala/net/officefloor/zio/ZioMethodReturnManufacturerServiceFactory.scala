@@ -40,7 +40,7 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
           }
 
           // Determine Java Class from Type
-          val classFromType: (Type, String) => Class[_] = (t, message) => {
+          val classFromType: Type => Class[_] = t => {
             if (Array(typeOf[Null], typeOf[Nothing]).exists(t.=:=(_))) {
               null
             } else if (Array(typeOf[Any], typeOf[AnyVal]).exists(t.=:=(_))) {
@@ -51,8 +51,8 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
           }
 
           // Translate failure/success type to Java Class
-          val failureClass = classFromType(failureType, "Failure")
-          val successClass = classFromType(successType, "Success")
+          val failureClass = classFromType(failureType)
+          val successClass = classFromType(successType)
 
           // Determine if exception
           if (failureClass != null) {

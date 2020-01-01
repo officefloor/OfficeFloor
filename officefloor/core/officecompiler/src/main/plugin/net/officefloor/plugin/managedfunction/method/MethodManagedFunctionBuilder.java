@@ -172,7 +172,7 @@ public class MethodManagedFunctionBuilder {
 			if (returnTranslator != null) {
 
 				// Determine if translate return
-				if (returnContext.translatedReturnClass != null) {
+				if (returnContext.isTranslatedReturn) {
 					returnType = returnContext.translatedReturnClass;
 				}
 
@@ -617,6 +617,12 @@ public class MethodManagedFunctionBuilder {
 		private Class<? super T> translatedReturnClass = null;
 
 		/**
+		 * Indicates if there is a translated return. Allows to specify
+		 * <code>null</code> translated return.
+		 */
+		private boolean isTranslatedReturn = false;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param returnClass       {@link Method} return type.
@@ -646,6 +652,7 @@ public class MethodManagedFunctionBuilder {
 		@Override
 		public void setTranslatedReturnClass(Class<? super T> translatedReturnClass) {
 			this.translatedReturnClass = translatedReturnClass;
+			this.isTranslatedReturn = true;
 		}
 
 		@Override
