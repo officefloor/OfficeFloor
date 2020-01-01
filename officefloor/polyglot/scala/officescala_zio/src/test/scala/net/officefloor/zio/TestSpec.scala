@@ -1,11 +1,11 @@
 package net.officefloor.zio
 
-import net.officefloor.frame.api.manage.OfficeFloor
 import junit.framework.AssertionFailedError
 import net.officefloor.activity.impl.procedure.ClassProcedureSource
 import net.officefloor.activity.procedure.build.{ProcedureArchitect, ProcedureEmployer}
 import net.officefloor.activity.procedure.{ProcedureLoaderUtil, ProcedureTypeBuilder}
 import net.officefloor.compile.test.officefloor.CompileOfficeFloor
+import net.officefloor.frame.api.manage.OfficeFloor
 import net.officefloor.plugin.section.clazz.Parameter
 import org.scalatest.FlatSpec
 import zio.ZIO
@@ -38,17 +38,15 @@ trait TestSpec extends FlatSpec {
   /**
    * Undertake test for failed ZIO.
    *
-   * @param methodName    Name of method for procedure.
-   * @param exceptionType Expected failure type.
-   * @param message       Expected content of failure.
-   * @param typeBuilder   Builds the expected type.
+   * @param methodName       Name of method for procedure.
+   * @param exceptionHandler Handler of the exception.
+   * @param typeBuilder      Builds the expected type.
    */
-  def failure(methodName: String, exceptionType: Class[_ <: Throwable], message: String, typeBuilder: ProcedureTypeBuilder => Unit): Unit =
+  def failure(methodName: String, exceptionHandler: Throwable => Unit, typeBuilder: ProcedureTypeBuilder => Unit): Unit =
     test(methodName, typeBuilder, { officeFloor =>
       assert(TestSpec.success == null)
       assert(TestSpec.failure != null)
-      assert(TestSpec.failure.getClass == exceptionType)
-      assert(TestSpec.failure.getMessage.contains(message))
+      exceptionHandler(TestSpec.failure)
     })
 
   /**

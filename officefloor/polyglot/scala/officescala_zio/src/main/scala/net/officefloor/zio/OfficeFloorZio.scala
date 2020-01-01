@@ -27,5 +27,5 @@ object OfficeFloorZio {
   def runtime(executor: Executor, logger: Logger): Runtime[ZEnv] =
     defaultRuntime
       .withExecutor(internal.Executor.fromExecutionContext(defaultRuntime.platform.executor.yieldOpCount)(ExecutionContext.fromExecutor(executor)))
-      .withReportFailure(f => logger.info(f.prettyPrint))
+      .withReportFailure(f => logger.fine(f.prettyPrint))
 }

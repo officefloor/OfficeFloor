@@ -1,10 +1,8 @@
 package net.officefloor.zio
 
-import java.util.concurrent.Executor
-
 import net.officefloor.plugin.managedfunction.method.{MethodReturnTranslator, MethodReturnTranslatorContext}
 import zio.Exit.{Failure, Success}
-import zio.{FiberFailure, ZIO}
+import zio.ZIO
 
 /**
  * ZIO {@link MethodReturnTranslator} to resolve the {@link ZIO} to its result.
@@ -29,7 +27,11 @@ class ZioMethodReturnTranslator[A] extends MethodReturnTranslator[ZIO[Any, _, A]
       flow.complete { () =>
         exit match {
           case Success(value) => context.setTranslatedReturnValue(value)
-          case Failure(cause) => throw FiberFailure(cause)
+          case Failure(cause) => cause.failureOption match {
+            case Some(ex: Throwable) => throw ex;
+            case Some(failure) => throw new ZioException(cause.prettyPrint, failure)
+            case failure => throw new ZioException(cause.prettyPrint, failure)
+          }
         }
       }
     }
