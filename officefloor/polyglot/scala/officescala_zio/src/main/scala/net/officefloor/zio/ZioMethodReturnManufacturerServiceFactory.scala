@@ -40,10 +40,14 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
           }
 
           // Determine Java Class from Type
-          val classFromType: (Type, String) => Class[_] = (t, message) => t match {
-            case _ if (typeOf[Nothing].=:=(t)) => null
-            case _ if (typeOf[Any].=:=(t)) => classOf[Object]
-            case _ => mirror.runtimeClass(t.typeSymbol.asClass)
+          val classFromType: (Type, String) => Class[_] = (t, message) => {
+            if (Array(typeOf[Null], typeOf[Nothing]).exists(t.=:=(_))) {
+              null
+            } else if (Array(typeOf[Any], typeOf[AnyVal]).exists(t.=:=(_))) {
+              classOf[Object]
+            } else {
+              mirror.runtimeClass(t.typeSymbol.asClass)
+            }
           }
 
           // Translate failure/success type to Java Class
@@ -56,7 +60,7 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
           }
 
           // Provide translated result type
-          context.setTranslatedReturnClass(successClass.asInstanceOf[Class[A]])
+          context.setTranslatedReturnClass(if (successClass != null) successClass.asInstanceOf[Class[A]] else null)
 
           // Return translator
           new ZioMethodReturnTranslator[A]()
