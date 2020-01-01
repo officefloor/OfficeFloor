@@ -319,7 +319,10 @@ public class ReflectiveFunctionBuilder extends StaticManagedFunction<Indexed, In
 
 		// Invoke the method on object to get return
 		try {
-			context.setNextFunctionArgument(this.method.invoke(this.object, parameters));
+			Object result = this.method.invoke(this.object, parameters);
+			if (result != null) {
+				context.setNextFunctionArgument(result);
+			}
 		} catch (InvocationTargetException ex) {
 			// Throw cause of exception
 			throw ex.getCause();

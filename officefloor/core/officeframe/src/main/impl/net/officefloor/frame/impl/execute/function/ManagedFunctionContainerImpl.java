@@ -471,6 +471,12 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Must recheck managed objects
 			this.check = null;
 
+			// Determine if complete (failure in asynchronous flow)
+			if (this.containerState == ManagedFunctionState.COMPLETED) {
+				// Completed so undertake next
+				return this.getNextBlockToExecute();
+			}
+
 			// Function executed, so now await flow completions
 			this.containerState = ManagedFunctionState.AWAIT_FLOW_COMPLETIONS;
 
