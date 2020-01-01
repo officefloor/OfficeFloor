@@ -5,32 +5,42 @@ package net.officefloor.zio
  */
 class TypeAliasTest extends TestSpec {
 
-  "Type Alias" can "ZIO" in {
-    testType("zio", classOf[Throwable], classOf[Object])
+  it can "ZIO" in {
+    typeAlias("ZIO", classOf[Throwable], classOf[Object])
   }
 
   it can "UIO" in {
-    testType("uio", null, classOf[Object])
+    typeAlias("UIO", null, classOf[Object])
   }
 
   it can "URIO" in {
-    testType("urio", null, classOf[Object])
+    typeAlias("URIO", null, classOf[Object])
   }
 
   it can "Task" in {
-    testType("task", classOf[Throwable], classOf[Object])
+    typeAlias("Task", classOf[Throwable], classOf[Object])
   }
 
   it can "RIO" in {
-    testType("rio", classOf[Throwable], classOf[Object])
+    typeAlias("RIO", classOf[Throwable], classOf[Object])
   }
 
   it can "IO" in {
-    testType("io", classOf[Throwable], classOf[Object])
+    typeAlias("IO", classOf[Throwable], classOf[Object])
   }
 
   it can "CustomZIO" in {
-    testType("customZio", classOf[Throwable], classOf[Object])
+    typeAlias("CustomZio", classOf[Throwable], classOf[Object])
   }
+
+  def typeAlias(typeAlias: String, failureClass: Class[_], successClass: Class[_]): Unit =
+    valid("type" + typeAlias, Procedures.OBJECT, { builder =>
+      if (failureClass != null) {
+        // TODO load expected exception
+      }
+      if (successClass != null) {
+        builder.setNextArgumentType(successClass)
+      }
+    })
 
 }

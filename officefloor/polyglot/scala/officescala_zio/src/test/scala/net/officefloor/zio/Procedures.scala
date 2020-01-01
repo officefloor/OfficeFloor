@@ -3,6 +3,11 @@ package net.officefloor.zio
 import java.sql.SQLException
 
 import zio._
+import zio.blocking.Blocking
+import zio.clock.Clock
+import zio.console.Console
+import zio.random.Random
+import zio.system.System
 
 class Procedures {
 
@@ -12,26 +17,53 @@ class Procedures {
    * ========= Type Aliases ==============
    */
 
-  def zio: ZIO[Any, Throwable, Object] = zioObject
+  def typeZIO: ZIO[Any, Throwable, Object] = zioObject
 
-  def uio: UIO[Object] = zioObject
+  def typeUIO: UIO[Object] = zioObject
 
-  def urio: URIO[ZEnv, Object] = zioObject
+  def typeURIO: URIO[ZEnv, Object] = zioObject
 
-  def task: Task[Object] = zioObject
+  def typeTask: Task[Object] = zioObject
 
-  def rio: RIO[ZEnv, Object] = zioObject
+  def typeRIO: RIO[ZEnv, Object] = zioObject
 
-  def io: IO[Throwable, Object] = zioObject
+  def typeIO: IO[Throwable, Object] = zioObject
 
   type CustomZio = ZIO[ZEnv, Throwable, Object]
-  def customZio = zioObject
+  def typeCustomZio: CustomZio = zioObject
 
   /*
    * ========= Environments ==============
    */
 
-  // TODO continue testing with environments
+  type Env[R] = ZIO[R, Throwable, Object]
+
+  def envZEnv: Env[ZEnv] = zioObject
+
+  def envClock: Env[Clock] = zioObject
+
+  def envConsole: Env[Console] = zioObject
+
+  def envSystem: Env[System] = zioObject
+
+  def envRandom: Env[Random] = zioObject
+
+  def envBlocking: Env[Blocking] = zioObject
+
+  def envAny: Env[Any] = zioObject
+
+  def envAnyRef: Env[Any] = zioObject
+
+  def envNothing: Env[Nothing] = zioObject
+
+  def envObject: Env[Object] = zioObject
+
+  def envAnyVal: Env[AnyVal] = zioObject
+
+  def envInt: Env[Int] = zioObject
+
+  def envString: Env[String] = zioObject
+
 }
 
 object Procedures {

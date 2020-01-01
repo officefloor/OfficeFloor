@@ -8,39 +8,19 @@ import net.officefloor.compile.test.officefloor.CompileOfficeFloor
 import net.officefloor.plugin.section.clazz.Parameter
 import org.scalatest.FlatSpec
 
-import scala.reflect.runtime.universe._
-
 /**
  * Test spec.
  */
 trait TestSpec extends FlatSpec {
 
-  val OBJECT_CLASS = classOf[Object]
-
   /**
-   * Undertakes test of type.
-   *
-   * @param methodName   Name of method for procedure.
-   * @param failureClass Expected failure class.
-   * @param successClass Expected success class.
-   */
-  def testType(methodName: String, failureClass: Class[_], successClass: Class[_]): Unit = test(methodName, Procedures.OBJECT, { builder =>
-    if (failureClass != null) {
-      // TODO load expected exception
-    }
-    if (successClass != null) {
-      builder.setNextArgumentType(successClass)
-    }
-  })
-
-  /**
-   * Undertakes test against Procedure class.
+   * Undertakes test for valid ZIO.
    *
    * @param methodName      Name of method for procedure.
    * @param expectedSuccess Expected success.
    * @param typeBuilder     Builds the expected type.
    */
-  def test(methodName: String, expectedSuccess: Any, typeBuilder: ProcedureTypeBuilder => Unit): Unit = {
+  def valid(methodName: String, expectedSuccess: Any, typeBuilder: ProcedureTypeBuilder => Unit): Unit = {
 
     // Ensure correct type
     val builder = ProcedureLoaderUtil.createProcedureTypeBuilder(methodName, null)
@@ -69,20 +49,25 @@ trait TestSpec extends FlatSpec {
   }
 
   /**
-   * Undertake test for invalid environment.
+   * Undertakes test for invalid ZIO.
    *
-   * @param methodName  Name of method for procedure.
-   * @param runtimeType Runtime { @link Type}.
+   * @param methodName   Name of method for procedure.
+   * @param errorMessage Error message.
    */
-  def testInvalidEnvironment(methodName: String, runtimeType: Type): Unit = {
+  def invalid(methodName: String, errorMessage: String): Unit = {
     // Ensure not able to load type
     val builder = ProcedureLoaderUtil.createProcedureTypeBuilder(methodName, null)
     try {
       ProcedureLoaderUtil.validateProcedureType(builder, classOf[Procedures].getName, methodName)
       fail("Should not be successful")
     } catch {
-      case ex: AssertionFailedError => assert(ex.getMessage.contains("ZIO environment may not be custom (requiring " + runtimeType.typeSymbol.fullName + ")"))
+      case ex: AssertionFailedError => assert(ex.getMessage.contains(errorMessage))
     }
+  }
+
+  def log(msg: String): String = {
+    println(msg)
+    msg
   }
 
 }
