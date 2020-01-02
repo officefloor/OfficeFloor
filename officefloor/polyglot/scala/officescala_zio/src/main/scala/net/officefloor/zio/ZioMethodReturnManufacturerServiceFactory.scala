@@ -43,7 +43,7 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
           val classFromType: Type => Class[_] = t => {
             if (Array(typeOf[Null], typeOf[Nothing]).exists(t.=:=(_))) {
               null
-            } else if (Array(typeOf[Any], typeOf[AnyVal]).exists(t.=:=(_))) {
+            } else if (Array(typeOf[Any], typeOf[AnyVal], typeOf[AnyRef]).exists(t.=:=(_))) {
               classOf[Object]
             } else {
               mirror.runtimeClass(t.typeSymbol.asClass)
@@ -56,7 +56,12 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
 
           // Determine if exception
           if (failureClass != null) {
-            // TODO allow adding exception
+
+            // Determine exception
+            val throwableClass = if (classOf[Throwable].isAssignableFrom(failureClass)) failureClass.asInstanceOf[Class[_ <: Throwable]] else classOf[ZioException]
+
+            // Load the escalation
+            context.addEscalation(throwableClass)
           }
 
           // Provide translated result type

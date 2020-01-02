@@ -51,10 +51,10 @@ class TypeAliasTest extends TestSpec {
     typeAlias("CustomZio", classOf[Throwable], classOf[Object])
   }
 
-  def typeAlias(typeAlias: String, failureClass: Class[_], successClass: Class[_]): Unit =
+  def typeAlias(typeAlias: String, failureClass: Class[_ <: Throwable], successClass: Class[_]): Unit =
     success("type" + typeAlias, TestSpec.OBJECT, { builder =>
       if (failureClass != null) {
-        // TODO load expected exception
+        builder.addEscalationType(failureClass)
       }
       if (successClass != null) {
         builder.setNextArgumentType(successClass)

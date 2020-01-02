@@ -577,6 +577,11 @@ public class ProcedureLoaderUtil {
 		}
 
 		@Override
+		public void addEscalationType(Class<? extends Throwable> escalationType) {
+			this.addEscalationType(escalationType.getName(), escalationType);
+		}
+
+		@Override
 		public void setNextArgumentType(Class<?> nextArgumentType) {
 			this.nextArgumentType = nextArgumentType;
 		}
@@ -608,11 +613,6 @@ public class ProcedureLoaderUtil {
 		@Override
 		public ProcedureFlowType[] getFlowTypes() {
 			return this.flowTypes.toArray(new ProcedureFlowType[this.flowTypes.size()]);
-		}
-
-		@Override
-		public void addEscalationType(Class<? extends Throwable> escalationType) {
-			this.addEscalationType(escalationType.getSimpleName(), escalationType);
 		}
 
 		@Override

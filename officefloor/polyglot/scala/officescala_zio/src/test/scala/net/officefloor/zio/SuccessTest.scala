@@ -113,6 +113,7 @@ class SuccessTest extends TestSpec {
   it can "Future (async)" in {
     val currentThread = Thread.currentThread()
     test("successFutureAsync", { builder =>
+      builder.addEscalationType(classOf[ZioException])
       builder.setNextArgumentType(classOf[Thread])
     }, { _ =>
       assert(TestSpec.success != null)
@@ -138,7 +139,7 @@ class SuccessTest extends TestSpec {
   def successEffectBlocking: ZIO[Blocking, Throwable, String] = effectBlocking("EFFECT BLOCKING")
 
   it can "Effect (blocking)" in {
-    valid("EffectBlocking", "EFFECT BLOCKING", classOf[String])
+    valid("EffectBlocking", "EFFECT BLOCKING", classOf[String], classOf[Throwable])
   }
 
   def successMap: Success[String] = ZIO.succeed(1).map(v => String.valueOf(v))
@@ -179,13 +180,20 @@ class SuccessTest extends TestSpec {
   it can "Nothing" in {
     failure("successNothing", { ex =>
       assert(ex == SuccessTest.NOTHING_ESCALATION)
-    }, null)
+    }, { builder =>
+      builder.addEscalationType(classOf[ZioException])
+    })
   }
 
-  def valid(methodSuffix: String, expectedSuccess: Any, successType: Class[_]): Unit =
+  def valid(methodSuffix: String, expectedSuccess: Any, successClass: Class[_]): Unit =
+    valid(methodSuffix, expectedSuccess, successClass, classOf[ZioException])
+
+
+  def valid(methodSuffix: String, expectedSuccess: Any, successClass: Class[_], failureClass: Class[_ <: Throwable]): Unit =
     success("success" + methodSuffix, expectedSuccess, { builder =>
-      if (successType != null) {
-        builder.setNextArgumentType(successType)
+      builder.addEscalationType(failureClass)
+      if (successClass != null) {
+        builder.setNextArgumentType(successClass)
       }
     })
 

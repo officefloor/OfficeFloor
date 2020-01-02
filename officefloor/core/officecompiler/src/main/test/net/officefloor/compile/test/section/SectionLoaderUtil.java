@@ -715,7 +715,7 @@ public class SectionLoaderUtil {
 
 		@Override
 		public void addSectionEscalation(Class<?> escalationType) {
-			this.addSectionOutput(escalationType.getSimpleName(), escalationType, true);
+			this.addSectionOutput(escalationType.getName(), escalationType, true);
 		}
 
 		@Override

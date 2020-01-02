@@ -331,7 +331,7 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 
 		// Initialise the escalations
 		for (ManagedFunctionEscalationType escalationType : functionType.getEscalationTypes()) {
-			String escalationName = escalationType.getEscalationType().getName();
+			String escalationName = escalationType.getEscalationName();
 			NodeUtil.getInitialisedNode(escalationName, this.functionEscalations, this.context,
 					() -> this.context.createFunctionFlowNode(escalationName, true, this),
 					(escalation) -> escalation.initialise());

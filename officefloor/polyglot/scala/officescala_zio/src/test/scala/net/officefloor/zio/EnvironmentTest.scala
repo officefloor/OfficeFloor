@@ -103,6 +103,7 @@ class EnvironmentTest extends TestSpec {
 
   def valid(environment: String): Unit =
     success("env" + environment, TestSpec.OBJECT, { builder =>
+      builder.addEscalationType(classOf[ZioException])
       builder.setNextArgumentType(classOf[Object])
     })
 

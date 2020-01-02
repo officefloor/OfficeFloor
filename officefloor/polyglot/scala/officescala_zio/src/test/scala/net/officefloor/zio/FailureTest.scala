@@ -9,7 +9,7 @@ class FailureTest extends TestSpec {
 
   type Fail[E] = ZIO[Any, E, Object]
 
-  def failThrowable: Fail[Any] = ZIO.fail(FailureTest.THROWABLE)
+  def failThrowable: Fail[Throwable] = ZIO.fail(FailureTest.THROWABLE)
 
   it can "Throwable" in {
     valid("Throwable")
@@ -28,6 +28,14 @@ class FailureTest extends TestSpec {
   it can "Error" in {
     valid("Error", classOf[Error], { ex =>
       assert(ex == FailureTest.ERROR)
+    })
+  }
+
+  def failAny: Fail[Any] = ZIO.fail(FailureTest.THROWABLE)
+
+  it can "Any" in {
+    valid("Any", classOf[ZioException], {ex =>
+      assert(ex == FailureTest.THROWABLE)
     })
   }
 
@@ -65,13 +73,24 @@ class FailureTest extends TestSpec {
     })
   }
 
+  def failNothing: Fail[Nothing] = ZIO.fail(throw FailureTest.THROWABLE)
+
+  it can "Nothing" in {
+    valid("Nothing", null, {ex =>
+      assert(ex == FailureTest.THROWABLE)
+    })
+  }
+
   def valid(methodSuffix: String): Unit =
     valid(methodSuffix, classOf[Throwable], { ex =>
       assert(ex == FailureTest.THROWABLE)
     })
 
-  def valid(methodSuffix: String, failureType: Class[_ <: Throwable], exceptionHandler: Throwable => Unit): Unit =
+  def valid(methodSuffix: String, failureClass: Class[_ <: Throwable], exceptionHandler: Throwable => Unit): Unit =
     failure("fail" + methodSuffix, exceptionHandler, { builder =>
+      if (failureClass != null) {
+        builder.addEscalationType(failureClass)
+      }
       builder.setNextArgumentType(classOf[Object])
     })
 
