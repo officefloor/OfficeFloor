@@ -21,10 +21,10 @@ jobs:
       env: officefloor_skip_stress_tests=true officefloor_docker_available=false officefloor_gcloud_available=false
       install:
         - choco install -y jdk8 -params "source=false" -params 'installdir=c:\\java'
-        - export JAVA_HOME="/c/java"
+        - export "JAVA_HOME=/c/java"
         - choco install -y maven
-		- export PATH=$PATH:"$M2_HOME/bin"
         - export MAVEN_OPTS="-Xmx2048m"
+      script: cd officefloor/bom; /c/ProgramData/chocolatey/lib/maven/apache-maven-3.6.3/bin/mvn -B clean install
     - name: Java 11 (Linux)
       os: linux
       dist: xenial
