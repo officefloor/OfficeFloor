@@ -560,8 +560,19 @@
 					<artifactId>javacc-maven-plugin</artifactId>
 					<version>2.6</version>
 				</plugin>
-				<!-- <plugin> <groupId>com.mycila</groupId> <artifactId>license-maven-plugin</artifactId> 
-					<version>3.0</version> </plugin> -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>2.0.0</version>
+					<configuration>
+						<licenseName>agpl_v3</licenseName>
+						<copyrightOwners>Daniel Sagenschneider</copyrightOwners>
+						<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+						<emptyLineAfterHeader>true</emptyLineAfterHeader>
+						<ignoreNoFileToScan>true</ignoreNoFileToScan>
+						<failOnMissingHeader>true</failOnMissingHeader>
+					</configuration>
+				</plugin>
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-maven-plugin</artifactId>
@@ -773,15 +784,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
-				<version>2.0.0</version>
-				<configuration>
-					<licenseName>agpl_v3</licenseName>
-					<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-					<copyrightOwners>Daniel Sagenschneider</copyrightOwners>
-					<emptyLineAfterHeader>true</emptyLineAfterHeader>
-					<ignoreNoFileToScan>true</ignoreNoFileToScan>
-					<verbose>false</verbose>
-				</configuration>
 			</plugin>
 
 			<!-- Flatten to release for Maven Central release -->
@@ -1066,6 +1068,32 @@
 		</plugins>
 	</reporting>
 	<profiles>
+		<profile>
+			<id>check-release-to-maven-central</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>sonatype</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>check-file-header-licenses</id>
+								<goals>
+									<goal>check-file-header</goal>
+								</goals>
+								<phase>process-sources</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>officefloor-code-coverage</id>
 			<activation>
