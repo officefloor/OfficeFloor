@@ -86,4 +86,15 @@ public interface ManagedFunctionContext<O extends Enum<O>, F extends Enum<F>> ex
 	void doFlow(String functionName, Object parameter, FlowCallback callback)
 			throws UnknownFunctionException, InvalidParameterTypeException;
 
+	/**
+	 * Specifies the next {@link ManagedFunction} argument.
+	 * 
+	 * @param argument Argument for the next {@link ManagedFunction}.
+	 * @throws Exception If invalid argument. Typically this is not a recoverable
+	 *                   exception, so let propagate from the
+	 *                   {@link ManagedFunction} or
+	 *                   {@link AsynchronousFlowCompletion}.
+	 */
+	void setNextFunctionArgument(Object argument) throws Exception;
+
 }

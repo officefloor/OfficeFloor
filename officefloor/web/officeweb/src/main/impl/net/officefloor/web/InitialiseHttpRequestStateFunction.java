@@ -55,8 +55,7 @@ public class InitialiseHttpRequestStateFunction implements
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<InitialiseHttpRequestStateDependencies, None> context)
-			throws Throwable {
+	public void execute(ManagedFunctionContext<InitialiseHttpRequestStateDependencies, None> context) throws Throwable {
 
 		// Obtain the dependencies
 		HttpArgument arguments = (HttpArgument) context
@@ -66,9 +65,6 @@ public class InitialiseHttpRequestStateFunction implements
 
 		// Initialise the request state
 		HttpRequestStateManagedObjectSource.initialiseHttpRequestState(arguments, requestState);
-
-		// Carry on to service request
-		return null;
 	}
 
 }

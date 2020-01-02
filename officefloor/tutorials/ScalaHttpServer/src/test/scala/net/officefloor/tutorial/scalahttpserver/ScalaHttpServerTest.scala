@@ -1,7 +1,7 @@
 package net.officefloor.tutorial.scalahttpserver
 
 import org.scalatest.FlatSpec
-import net.officefloor.polyglot.scalatest.WoofRules
+import net.officefloor.scalatest.WoofRules
 
 class ScalaHttpServerTest extends FlatSpec with WoofRules {
 

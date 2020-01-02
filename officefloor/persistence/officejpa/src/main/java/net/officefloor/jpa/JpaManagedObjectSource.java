@@ -429,7 +429,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 				} catch (Throwable ex) {
 					throw new SQLException("Failing to connect " + EntityManager.class.getSimpleName(), ex);
 				}
-				return null;
 			});
 			mosContext.addStartupFunction(validateFunctionName);
 
@@ -624,7 +623,7 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 	private static class RecycleFunction extends StaticManagedFunction<Indexed, None> {
 
 		@Override
-		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+		public void execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 
 			// Obtain the entity manager
 			RecycleManagedObjectParameter<JpaManagedObject> recycle = RecycleManagedObjectParameter
@@ -653,9 +652,6 @@ public class JpaManagedObjectSource extends AbstractManagedObjectSource<Indexed,
 
 			// Reuse the connection
 			recycle.reuseManagedObject();
-
-			// Nothing further
-			return null;
 		}
 	}
 

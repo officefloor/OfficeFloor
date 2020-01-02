@@ -147,10 +147,9 @@ public class ManagedObjectFunctionFlowLinkedToProcessTest extends AbstractOffice
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<None, Indexed> context) throws Throwable {
+		public void execute(ManagedFunctionContext<None, Indexed> context) throws Throwable {
 			parameter = (Integer) context.getObject(0);
 			context.doFlow(0, "TEST", null);
-			return null;
 		}
 	}
 

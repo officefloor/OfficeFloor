@@ -17,8 +17,10 @@
  */
 package net.officefloor.frame.api.function;
 
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedFunctionLogic;
 
@@ -68,5 +70,23 @@ public interface FunctionFlowContext<F extends Enum<F>> {
 	 * @return {@link AsynchronousFlow} that must be completed.
 	 */
 	AsynchronousFlow createAsynchronousFlow();
+
+	/**
+	 * <p>
+	 * Obtains the {@link Executor} to run on another {@link Thread}.
+	 * <p>
+	 * {@link Runnable} instances provided to this {@link Executor} will always be
+	 * executed on another {@link Thread}. This allows breaking thread stack
+	 * execution.
+	 * <p>
+	 * Note that the returned {@link Executor} is a singleton per
+	 * {@link OfficeFloor}. Therefore, be careful to not tie up all its
+	 * {@link Thread} instances with blocking / long running {@link Runnable}
+	 * instances. Preference should be to use {@link ManagedFunction} instances
+	 * where appropriate {@link Thread} injection can manage execution.
+	 * 
+	 * @return {@link Executor} to run {@link Runnable} on another {@link Thread}.
+	 */
+	Executor getExecutor();
 
 }

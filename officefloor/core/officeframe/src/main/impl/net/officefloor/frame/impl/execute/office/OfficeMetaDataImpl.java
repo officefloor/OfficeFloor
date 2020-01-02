@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.office;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executor;
 
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.function.FlowCallback;
@@ -80,6 +81,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final FunctionLoop functionLoop;
 
 	/**
+	 * {@link Executor} to break the thread stack execution chain.
+	 */
+	private final Executor breakChainExecutor;
+
+	/**
 	 * {@link ManagedFunctionMetaData} of the {@link ManagedFunction} that can be
 	 * executed within the {@link Office}.
 	 */
@@ -129,6 +135,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param monitorClock             {@link MonitorClock}.
 	 * @param timer                    {@link Timer} for the {@link Office}.
 	 * @param functionLoop             {@link FunctionLoop}.
+	 * @param breakChainExecutor       {@link Executor} to break the thread stack
+	 *                                 execution chain.
 	 * @param threadLocalAwareExecutor {@link ThreadLocalAwareExecutor}.
 	 * @param executive                {@link Executive}.
 	 * @param managedExecutionFactory  {@link ManagedExecutionFactory}.
@@ -143,14 +151,15 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param profiler                 {@link Profiler}.
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager, MonitorClock monitorClock, Timer timer,
-			FunctionLoop functionLoop, ThreadLocalAwareExecutor threadLocalAwareExecutor, Executive executive,
-			ManagedExecutionFactory managedExecutionFactory, ManagedFunctionMetaData<?, ?>[] functionMetaDatas,
-			ManagedFunctionLocator functionLocator, ProcessMetaData processMetaData,
-			OfficeStartupFunction[] startupFunctions, Profiler profiler) {
+			FunctionLoop functionLoop, Executor breakChainExecutor, ThreadLocalAwareExecutor threadLocalAwareExecutor,
+			Executive executive, ManagedExecutionFactory managedExecutionFactory,
+			ManagedFunctionMetaData<?, ?>[] functionMetaDatas, ManagedFunctionLocator functionLocator,
+			ProcessMetaData processMetaData, OfficeStartupFunction[] startupFunctions, Profiler profiler) {
 		this.officeName = officeName;
 		this.monitorClock = monitorClock;
 		this.timer = timer;
 		this.functionLoop = functionLoop;
+		this.breakChainExecutor = breakChainExecutor;
 		this.threadLocalAwareExecutor = threadLocalAwareExecutor;
 		this.executive = executive;
 		this.managedExecutionFactory = managedExecutionFactory;
@@ -262,7 +271,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 					OfficeMetaDataImpl officeMetaData = OfficeMetaDataImpl.this;
 
 					// Must execute on another thread (not hold up timer thread)
-					new Thread(() -> {
+					OfficeMetaDataImpl.this.breakChainExecutor.execute(() -> {
 
 						// Execute the process
 						if (officeMetaData.threadLocalAwareExecutor != null) {
@@ -270,8 +279,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 						} else {
 							officeMetaData.functionLoop.executeFunction(function);
 						}
-
-					}).run();
+					});
 				}
 			}, delay);
 

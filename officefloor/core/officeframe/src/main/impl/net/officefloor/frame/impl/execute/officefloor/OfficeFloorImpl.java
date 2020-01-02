@@ -22,12 +22,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
+import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.function.ManagedFunctionFactory;
 import net.officefloor.frame.api.function.NameAwareManagedFunctionFactory;
 import net.officefloor.frame.api.function.OfficeAwareManagedFunctionFactory;
@@ -36,6 +40,8 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.UnknownOfficeException;
 import net.officefloor.frame.api.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.api.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.api.team.Job;
+import net.officefloor.frame.api.team.Team;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.ManagedFunctionMetaData;
@@ -79,6 +85,16 @@ public class OfficeFloorImpl implements OfficeFloor {
 	private final OfficeFloorListener[] listeners;
 
 	/**
+	 * {@link Executive}.
+	 */
+	private final Executive executive;
+
+	/**
+	 * {@link Executor} to break the thread stack execution chain.
+	 */
+	private final Executor breakChainExecutor;
+
+	/**
 	 * {@link Office} instances by their name.
 	 */
 	private Map<String, Office> offices = null;
@@ -88,10 +104,16 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * 
 	 * @param officeFloorMetaData {@link OfficeFloorMetaData}.
 	 * @param listeners           {@link OfficeFloorListener} instances.
+	 * @param executive           {@link Executive}.
+	 * @param breakChainExecutor  {@link Executor} to break the thread stack
+	 *                            execution chain.
 	 */
-	public OfficeFloorImpl(OfficeFloorMetaData officeFloorMetaData, OfficeFloorListener[] listeners) {
+	public OfficeFloorImpl(OfficeFloorMetaData officeFloorMetaData, OfficeFloorListener[] listeners,
+			Executive executive, Executor breakChainExecutor) {
 		this.officeFloorMetaData = officeFloorMetaData;
 		this.listeners = listeners;
+		this.executive = executive;
+		this.breakChainExecutor = breakChainExecutor;
 	}
 
 	/*
@@ -104,6 +126,45 @@ public class OfficeFloorImpl implements OfficeFloor {
 		// Ensure not already open
 		if (this.offices != null) {
 			throw new IllegalStateException("OfficeFloor is already open");
+		}
+
+		// Start the break chain team
+		Team breakChainTeam = this.officeFloorMetaData.getBreakChainTeam().getTeam();
+		breakChainTeam.startWorking();
+
+		// Ensure the break chain team is safe
+		Object processIdentifier = this.executive.createProcessIdentifier();
+		Thread[] isComplete = new Thread[] { null };
+		breakChainTeam.assignJob(new Job() {
+
+			@Override
+			public Object getProcessIdentifier() {
+				return processIdentifier;
+			}
+
+			@Override
+			public void run() {
+				// Capture thread
+				synchronized (isComplete) {
+					isComplete[0] = Thread.currentThread();
+					isComplete.notifyAll();
+				}
+			}
+
+			@Override
+			public void cancel(Throwable cause) {
+				this.run(); // capture thread to complete
+			}
+		});
+		this.waitOrTimeout(isComplete, () -> isComplete[0] == null,
+				(maxWaitTime) -> "Test of Break Chain team timed out after " + maxWaitTime + " milliseconds");
+		synchronized (isComplete) {
+			if (Thread.currentThread().equals(isComplete[0])) {
+				// Break chain team is re-using thread (therefore unsafe)
+				throw new IllegalStateException("Break chain " + Team.class.getSimpleName()
+						+ " is not safe.  The configured " + Team.class.getSimpleName()
+						+ " must not re-use the current Thread to run " + Job.class.getSimpleName() + "s.");
+			}
 		}
 
 		// Create the offices to open floor for work
@@ -165,7 +226,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 			} else {
 				// Run concurrently
 				concurrentStartups[0]++;
-				Thread concurrentThread = new Thread(() -> {
+				this.breakChainExecutor.execute(() -> {
 
 					// Start concurrently
 					startupProcess.run();
@@ -175,28 +236,13 @@ public class OfficeFloorImpl implements OfficeFloor {
 						concurrentStartups[0]--;
 						concurrentStartups.notify();
 					}
-				}, "STARTUP");
-				concurrentThread.setDaemon(true);
-				concurrentThread.start();
+				});
 			}
 		}
 		if (concurrentStartups[0] > 0) {
-			// Wait until concurrent start ups complete
-			long maxWaitTime = this.officeFloorMetaData.getMaxStartupWaitTime();
-			long maxTime = System.currentTimeMillis() + maxWaitTime;
-			synchronized (concurrentStartups) {
-				while (concurrentStartups[0] > 0) {
-
-					// Determine if timed out
-					if (System.currentTimeMillis() > maxTime) {
-						throw new TimeoutException(OfficeFloor.class.getSimpleName() + " took longer than "
-								+ maxWaitTime + " milliseconds to start");
-					}
-
-					// Sleep some time to check again
-					concurrentStartups.wait(100);
-				}
-			}
+			this.waitOrTimeout(concurrentStartups, () -> concurrentStartups[0] > 0,
+					(maxWaitTime) -> OfficeFloor.class.getSimpleName() + " took longer than " + maxWaitTime
+							+ " milliseconds to start");
 		}
 
 		// Invoke the startup functions for each office
@@ -223,6 +269,36 @@ public class OfficeFloorImpl implements OfficeFloor {
 					return OfficeFloorImpl.this;
 				}
 			});
+		}
+	}
+
+	/**
+	 * Waits for check to pass or times out.
+	 * 
+	 * @param lock           Lock for synchronising.
+	 * @param keepWaiting    Check to determine if keep waiting.
+	 * @param timeoutMessage Creates the timeout message.
+	 * @throws Exception If fails or times out.
+	 */
+	private void waitOrTimeout(Object lock, Supplier<Boolean> keepWaiting, Function<Long, String> timeoutMessage)
+			throws Exception {
+
+		// Calculate time to time out
+		long maxWaitTime = this.officeFloorMetaData.getMaxStartupWaitTime();
+		long maxTime = System.currentTimeMillis() + maxWaitTime;
+
+		// Maintain lock as run checks
+		synchronized (lock) {
+			while (keepWaiting.get()) {
+
+				// Determine if timed out
+				if (System.currentTimeMillis() > maxTime) {
+					throw new TimeoutException(timeoutMessage.apply(maxWaitTime));
+				}
+
+				// Sleep some time to check again
+				lock.wait(100);
+			}
 		}
 	}
 
@@ -278,6 +354,9 @@ public class OfficeFloorImpl implements OfficeFloor {
 			for (TeamManagement teamManagement : this.officeFloorMetaData.getTeams()) {
 				teamManagement.getTeam().stopWorking();
 			}
+
+			// Stop the break chain team
+			this.officeFloorMetaData.getBreakChainTeam().getTeam().stopWorking();
 
 			// Empty the managed object pools
 			for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData

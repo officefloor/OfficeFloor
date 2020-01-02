@@ -41,7 +41,7 @@ public class SendHttpChallengeFunction extends StaticManagedFunction<SendHttpCha
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Dependencies, None> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Dependencies, None> context) throws Throwable {
 
 		// Obtain the dependencies
 		HttpChallengeContext httpChallengeContext = (HttpChallengeContext) context
@@ -50,9 +50,6 @@ public class SendHttpChallengeFunction extends StaticManagedFunction<SendHttpCha
 
 		// Send the challenge
 		HttpChallengeContextManagedObjectSource.loadHttpChallenge(httpChallengeContext, connection.getResponse());
-
-		// Nothing further
-		return null;
 	}
 
 }

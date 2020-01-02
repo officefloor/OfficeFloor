@@ -18,6 +18,7 @@
 package net.officefloor.frame.impl.execute.function.asynchronous;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFunctionBuilder;
@@ -41,7 +42,7 @@ public class ThreadedAsynchronousFlowTest extends AbstractOfficeConstructTestCas
 		// Construct the functions
 		TestWork work = new TestWork();
 		ReflectiveFunctionBuilder trigger = this.constructFunction(work, "triggerAsynchronousFlow");
-		trigger.buildAsynchronousFlow();
+		trigger.buildManagedFunctionContext();
 		trigger.buildObject("MO", ManagedObjectScope.THREAD);
 		trigger.setNextFunction("servicingComplete");
 		ReflectiveFunctionBuilder servicing = this.constructFunction(work, "servicingComplete");
@@ -60,8 +61,9 @@ public class ThreadedAsynchronousFlowTest extends AbstractOfficeConstructTestCas
 
 		private volatile boolean isServicingComplete = false;
 
-		public void triggerAsynchronousFlow(AsynchronousFlow flow, TestObject object) {
-			new Thread(() -> flow.complete(() -> object.isUpdated = true)).start();
+		public void triggerAsynchronousFlow(ManagedFunctionContext<?, ?> context, TestObject object) {
+			AsynchronousFlow flow = context.createAsynchronousFlow();
+			context.getExecutor().execute(() -> flow.complete(() -> object.isUpdated = true));
 		}
 
 		public void servicingComplete(TestObject object) {

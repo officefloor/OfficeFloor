@@ -94,8 +94,6 @@ public class CombinedServerRetrieveValidateKeysSectionSource extends AbstractSec
 						// Load the validate keys
 						collector.setKeys(authority.getActiveJwtValidateKeys());
 
-						// Nothing further
-						return null;
 					}, Dependencies.class, None.class);
 			function.addObject(JwtValidateKeyCollector.class).setKey(Dependencies.JWT_VALIDATE_KEY_COLLECTOR);
 			function.addObject(JwtAuthority.class).setKey(Dependencies.JWT_AUTHORITY);

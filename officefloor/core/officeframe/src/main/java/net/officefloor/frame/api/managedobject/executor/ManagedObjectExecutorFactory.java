@@ -55,7 +55,7 @@ public class ManagedObjectExecutorFactory<F extends Enum<F>> {
 	 * Dependency keys for {@link ManagedFunction}.
 	 */
 	private static enum Dependencies {
-	RUNNABLE
+		RUNNABLE
 	}
 
 	/**
@@ -64,7 +64,6 @@ public class ManagedObjectExecutorFactory<F extends Enum<F>> {
 	private static ManagedFunctionFactory<Dependencies, None> executorManagedFunctionFactory = () -> (context) -> {
 		Runnable runnable = (Runnable) context.getObject(Dependencies.RUNNABLE);
 		runnable.run();
-		return null;
 	};
 
 	/**

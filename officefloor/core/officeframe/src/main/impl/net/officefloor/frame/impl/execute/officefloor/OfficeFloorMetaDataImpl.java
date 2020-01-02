@@ -32,6 +32,11 @@ import net.officefloor.frame.internal.structure.TeamManagement;
 public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 
 	/**
+	 * Break chain {@link TeamManagement}.
+	 */
+	private final TeamManagement breakChainTeam;
+
+	/**
 	 * Listing of {@link TeamManagement} instances.
 	 */
 	private final TeamManagement[] teams;
@@ -66,9 +71,10 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	 * @param maxStartupWaitTime           Maximum time in milliseconds to wait for
 	 *                                     {@link OfficeFloor} to start.
 	 */
-	public OfficeFloorMetaDataImpl(TeamManagement[] teams,
+	public OfficeFloorMetaDataImpl(TeamManagement breakChainTeam, TeamManagement[] teams,
 			ManagedObjectSourceInstance<?>[] managedObjectSourceInstances, OfficeMetaData[] officeMetaData,
 			long maxStartupWaitTime) {
+		this.breakChainTeam = breakChainTeam;
 		this.teams = teams;
 		this.managedObjectSourceInstances = managedObjectSourceInstances;
 		this.officeMetaData = officeMetaData;
@@ -78,6 +84,11 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	/*
 	 * ================== OfficeFloorMetaData ==========================
 	 */
+
+	@Override
+	public TeamManagement getBreakChainTeam() {
+		return this.breakChainTeam;
+	}
 
 	@Override
 	public TeamManagement[] getTeams() {

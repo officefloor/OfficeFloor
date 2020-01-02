@@ -26,9 +26,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.clock.ClockFactory;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.executive.Executive;
 import net.officefloor.frame.api.executive.TeamOversight;
@@ -56,6 +56,7 @@ import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorMetaDataImpl;
+import net.officefloor.frame.impl.execute.team.TeamExecutor;
 import net.officefloor.frame.internal.configuration.ExecutiveConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -280,12 +281,14 @@ public class RawOfficeFloorMetaDataFactory {
 		RawTeamMetaData breakTeamMetaData = rawTeamFactory.constructRawTeamMetaData(breakTeamConfiguration,
 				officeFloorName, issues);
 		TeamManagement breakChainTeamManagement = breakTeamMetaData.getTeamManagement();
-		teamListing.add(breakChainTeamManagement);
+
+		// Create the break chain executor
+		TeamExecutor breakChainExecutor = new TeamExecutor(breakChainTeamManagement.getTeam(), executive);
 
 		// Undertake OfficeFloor escalation on any team available
 		FunctionLoop officeFloorFunctionLoop = new FunctionLoopImpl(null);
 		OfficeMetaData officeFloorManagement = new OfficeMetaDataImpl("Management", null, null, null,
-				officeFloorFunctionLoop, null, null, null, null, null, null, null, null);
+				officeFloorFunctionLoop, null, null, null, null, null, null, null, null, null);
 
 		// Obtain the escalation handler for the OfficeFloor
 		EscalationHandler officeFloorEscalationHandler = configuration.getEscalationHandler();
@@ -296,10 +299,10 @@ public class RawOfficeFloorMetaDataFactory {
 		EscalationFlow officeFloorEscalation = new EscalationHandlerEscalationFlow(officeFloorEscalationHandler,
 				officeFloorManagement);
 
-		// Create the raw office floor meta-data
+		// Create the raw OfficeFloor meta-data
 		RawOfficeFloorMetaData rawMetaData = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy,
-				executionStrategies, teamRegistry, breakChainTeamManagement, threadLocalAwareExecutor,
-				managedExecutionFactory, mosRegistry, officeFloorEscalation,
+				executionStrategies, teamRegistry, breakChainTeamManagement, breakChainExecutor,
+				threadLocalAwareExecutor, managedExecutionFactory, mosRegistry, officeFloorEscalation,
 				officeFloorListeners.toArray(new OfficeFloorListener[officeFloorListeners.size()]));
 
 		// Construct the office factory
@@ -360,8 +363,8 @@ public class RawOfficeFloorMetaDataFactory {
 		}
 
 		// Create the office floor meta-data
-		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(teamListing.toArray(new TeamManagement[0]),
-				mosInstances.toArray(new ManagedObjectSourceInstance[0]),
+		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(breakChainTeamManagement,
+				teamListing.toArray(new TeamManagement[0]), mosInstances.toArray(new ManagedObjectSourceInstance[0]),
 				officeMetaDatas.toArray(new OfficeMetaData[0]), maxStartupWaitTime);
 
 		// Return the raw meta-data

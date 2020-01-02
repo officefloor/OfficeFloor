@@ -810,7 +810,7 @@ public abstract class AbstractPolyglotProcedureTest extends OfficeFrameTestCase 
 		this.setupInvokeVariables(out, var);
 
 		// Undertake test
-		this.doMultiThreadedTest(10, 10000, 10, () -> {
+		this.doMultiThreadedTest(10, 10000, 60, () -> {
 			Closure<VariableTypes> capture = new Closure<>();
 			CompileOfficeFloor.invokeProcess(this.officeFloor, "PASS.service", capture);
 			assertVariables(capture.value);

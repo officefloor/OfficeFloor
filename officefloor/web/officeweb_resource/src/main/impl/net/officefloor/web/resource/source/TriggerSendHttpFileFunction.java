@@ -40,8 +40,7 @@ public class TriggerSendHttpFileFunction extends StaticManagedFunction<None, Non
 	/**
 	 * Instantiate.
 	 * 
-	 * @param path
-	 *            Path.
+	 * @param path Path.
 	 */
 	public TriggerSendHttpFileFunction(String path) {
 		this.path = new HttpPath(path);
@@ -52,9 +51,9 @@ public class TriggerSendHttpFileFunction extends StaticManagedFunction<None, Non
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<None, None> context) {
+	public void execute(ManagedFunctionContext<None, None> context) throws Exception {
 		// Trigger send file
-		return this.path;
+		context.setNextFunctionArgument(this.path);
 	}
 
 }

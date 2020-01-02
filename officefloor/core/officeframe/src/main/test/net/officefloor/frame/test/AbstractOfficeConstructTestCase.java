@@ -289,7 +289,17 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	 * @return Name of the {@link Office} currently being constructed.
 	 */
 	public String getOfficeName() {
-		return "office-" + OFFICE_INDEX;
+		return this.getOfficeName(OFFICE_INDEX);
+	}
+
+	/**
+	 * Obtains the name of the {@link Office} for specified index.
+	 * 
+	 * @param officeIndex Index of the {@link Office}.
+	 * @return Name of the {@link Office} for the specified index.
+	 */
+	private String getOfficeName(int officeIndex) {
+		return "office-" + officeIndex;
 	}
 
 	/**
@@ -390,8 +400,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	/**
 	 * Facade method to register a {@link ManagedFunction}.
 	 * 
-	 * @param                 <O> Dependency key type.
-	 * @param                 <F> Flow key type.
+	 * @param <O>             Dependency key type.
+	 * @param <F>             Flow key type.
 	 * @param functionName    Name of the {@link ManagedFunction}.
 	 * @param functionFactory {@link ManagedFunctionFactory}.
 	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
@@ -404,8 +414,8 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	/**
 	 * Facade method to register a {@link ManagedFunction}.
 	 * 
-	 * @param              <O> Dependency key type.
-	 * @param              <F> Flow key type.
+	 * @param <O>          Dependency key type.
+	 * @param <F>          Flow key type.
 	 * @param functionName Name of the {@link ManagedFunction}.
 	 * @param function     {@link ManagedFunction}.
 	 * @return {@link ManagedFunctionBuilder} for the {@link ManagedFunction}.
@@ -427,9 +437,9 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 * 
-	 * @param                          <D> Dependency key type.
-	 * @param                          <F> Flow key type.
-	 * @param                          <MS> {@link ManagedObjectSource} type.
+	 * @param <D>                      Dependency key type.
+	 * @param <F>                      Flow key type.
+	 * @param <MS>                     {@link ManagedObjectSource} type.
 	 * @param managedObjectName        Name of the {@link ManagedObject}.
 	 * @param managedObjectSourceClass {@link ManagedObjectSource} {@link Class}.
 	 * @param managingOffice           Name of the managing {@link Office}. May be
@@ -462,9 +472,9 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 * 
-	 * @param                     <D> Dependency key type.
-	 * @param                     <F> Flow key type.
-	 * @param                     <MS> {@link ManagedObjectSource} type.
+	 * @param <D>                 Dependency key type.
+	 * @param <F>                 Flow key type.
+	 * @param <MS>                {@link ManagedObjectSource} type.
 	 * @param managedObjectName   Name of the {@link ManagedObject}.
 	 * @param managedObjectSource {@link ManagedObjectSource} instance.
 	 * @param managingOffice      Name of the managing {@link Office}. May be
@@ -607,7 +617,7 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	/**
 	 * Facade method to create a {@link Team}.
 	 * 
-	 * @param                 <TS> {@link TeamSource} type.
+	 * @param <TS>            {@link TeamSource} type.
 	 * @param teamName        Name of the {@link Team}.
 	 * @param teamSourceClass {@link TeamSource} class.
 	 * @return {@link TeamBuilder}.
@@ -664,10 +674,17 @@ public abstract class AbstractOfficeConstructTestCase extends OfficeFrameTestCas
 	public Office triggerFunction(String functionName, Object parameter, FlowCallback callback) throws Exception {
 
 		// Obtain the name of the office being constructed
-		String officeName = this.getOfficeName();
+		String officeName;
 
 		// Determine if required to construct
-		if (this.officeFloor == null) {
+		if (this.officeFloor != null) {
+			// Already opened, so assume previous office
+			officeName = this.getOfficeName(OFFICE_INDEX - 1);
+
+		} else {
+			// Opening OfficeFloor so use current Office name
+			officeName = this.getOfficeName();
+
 			// Construct the OfficeFloor
 			this.officeFloor = this.constructOfficeFloor();
 

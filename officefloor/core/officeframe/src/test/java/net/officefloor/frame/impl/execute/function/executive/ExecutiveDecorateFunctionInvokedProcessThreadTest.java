@@ -49,11 +49,16 @@ public class ExecutiveDecorateFunctionInvokedProcessThreadTest extends AbstractO
 		// Provide the executive
 		this.getOfficeFloorBuilder().setExecutive(MockExecutionSource.class);
 
+		// Open the OfficeFloor (allows start up processes to be run)
+		MockExecutionSource.isOpeningOfficeFloor = true;
+		this.constructOfficeFloor().openOfficeFloor();
+
 		// Reset
 		MockExecutionSource.executionThread = null;
 		MockExecutionSource.markThread.set(null);
 
 		// Trigger the function
+		MockExecutionSource.isOpeningOfficeFloor = false;
 		this.triggerFunction("function", null, null);
 
 		// Ensure registered
@@ -72,6 +77,8 @@ public class ExecutiveDecorateFunctionInvokedProcessThreadTest extends AbstractO
 
 	@TestSource
 	public static class MockExecutionSource extends AbstractExecutiveSource implements Executive, ExecutionStrategy {
+
+		private static boolean isOpeningOfficeFloor = true;
 
 		private static Thread executionThread = null;
 
@@ -97,6 +104,11 @@ public class ExecutiveDecorateFunctionInvokedProcessThreadTest extends AbstractO
 
 		@Override
 		public <T extends Throwable> ProcessManager manageExecution(Execution<T> execution) throws T {
+
+			// Determine if opening processes
+			if (isOpeningOfficeFloor) {
+				return execution.execute();
+			}
 
 			// Capture the execution thread
 			executionThread = Thread.currentThread();

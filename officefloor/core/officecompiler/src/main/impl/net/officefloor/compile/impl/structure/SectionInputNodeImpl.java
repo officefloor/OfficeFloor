@@ -528,7 +528,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<None, None> context) throws Throwable {
+		public void execute(ManagedFunctionContext<None, None> context) throws Throwable {
 
 			// Obtain the recycle parameter
 			RecycleManagedObjectParameter<M> parameter = RecycleManagedObjectParameter
@@ -542,9 +542,6 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 			// Enable re-use of the object
 			parameter.reuseManagedObject();
-
-			// Nothing further
-			return null;
 		}
 	}
 

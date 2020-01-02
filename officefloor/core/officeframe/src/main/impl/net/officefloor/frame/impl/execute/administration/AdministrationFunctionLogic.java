@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.administration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.administration.Administration;
@@ -87,7 +88,7 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionLogicContext context) throws Throwable {
+	public void execute(ManagedFunctionLogicContext context) throws Throwable {
 
 		// Create the administration
 		Administration<E, F, G> administration = this.metaData.getAdministrationFactory().createAdministration();
@@ -110,9 +111,6 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 				}
 			});
 		}
-
-		// No next function
-		return null;
 	}
 
 	/**
@@ -200,6 +198,11 @@ public class AdministrationFunctionLogic<E, F extends Enum<F>, G extends Enum<G>
 		@Override
 		public AsynchronousFlow createAsynchronousFlow() {
 			return this.context.createAsynchronousFlow();
+		}
+
+		@Override
+		public Executor getExecutor() {
+			return AdministrationFunctionLogic.this.metaData.getExecutor();
 		}
 
 		/**

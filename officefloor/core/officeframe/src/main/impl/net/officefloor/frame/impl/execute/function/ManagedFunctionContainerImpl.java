@@ -33,6 +33,7 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectReadyCheckI
 import net.officefloor.frame.internal.structure.ActiveAsynchronousFlow;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetLatch;
+import net.officefloor.frame.internal.structure.BlockState;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.EscalationCompletion;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -167,23 +168,23 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	/**
 	 * <p>
 	 * Owner if this {@link ManagedFunctionContainer} is a parallel
-	 * {@link ManagedFunctionContainer}.
+	 * {@link BlockState}.
 	 * <p>
-	 * This is the {@link ManagedFunctionContainer} that is executed once the graph
-	 * from this {@link ManagedFunctionContainer} is complete.
+	 * This is the {@link BlockState} that is executed once the graph from this
+	 * {@link ManagedFunctionContainer} is complete.
 	 */
-	private ManagedFunctionContainerImpl<?> parallelOwner;
+	private BlockState parallelOwner;
 
 	/**
-	 * Parallel {@link ManagedFunctionContainer} that must be executed before this
+	 * Parallel {@link BlockState} that must be executed before this
 	 * {@link ManagedFunctionContainer} may be executed.
 	 */
-	private ManagedFunctionContainerImpl<?> parallelFunction = null;
+	private BlockState parallelBlock = null;
 
 	/**
-	 * Next {@link ManagedFunctionContainer} in the sequential listing.
+	 * Next {@link BlockState} in the sequential listing.
 	 */
-	private ManagedFunctionContainerImpl<?> sequentialFunction = null;
+	private BlockState sequentialBlock = null;
 
 	/**
 	 * Optional next {@link FunctionLogic} to be executed once the
@@ -243,7 +244,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	public ManagedFunctionContainerImpl(FunctionState setupFunction, ManagedFunctionLogic managedFunctionLogic,
 			ManagedFunctionBoundManagedObjects boundManagedObjects, ManagedObjectIndex[] requiredManagedObjects,
 			boolean[] requiredGovernance, boolean isEnforceGovernance, M functionLogicMetaData,
-			ManagedFunctionContainer parallelOwner, Flow flow, boolean isUnloadManagedObjects) {
+			BlockState parallelOwner, Flow flow, boolean isUnloadManagedObjects) {
 		this.setupFunction = setupFunction;
 		this.managedFunctionLogic = managedFunctionLogic;
 		this.boundManagedObjects = boundManagedObjects;
@@ -251,7 +252,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 		this.requiredGovernance = requiredGovernance;
 		this.isEnforceGovernance = isEnforceGovernance;
 		this.functionLogicMetaData = functionLogicMetaData;
-		this.parallelOwner = (ManagedFunctionContainerImpl<?>) parallelOwner;
+		this.parallelOwner = parallelOwner;
 		this.flow = flow;
 		this.isUnloadManagedObjects = isUnloadManagedObjects;
 	}
@@ -271,22 +272,46 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	/*
+	 * ======================= BlockState =====================================
+	 */
+
+	@Override
+	public void setParallelOwner(BlockState parallelOwner) {
+		this.parallelOwner = parallelOwner;
+	}
+
+	@Override
+	public BlockState getParallelOwner() {
+		return this.parallelOwner;
+	}
+
+	@Override
+	public void setParallelBlock(BlockState parallelBlock) {
+		this.parallelBlock = parallelBlock;
+	}
+
+	@Override
+	public BlockState getParallelBlock() {
+		return this.parallelBlock;
+	}
+
+	@Override
+	public void setSequentialBlock(BlockState sequentialBlock) {
+		this.sequentialBlock = sequentialBlock;
+	}
+
+	@Override
+	public BlockState getSequentialBlock() {
+		return this.sequentialBlock;
+	}
+
+	/*
 	 * ================= ManagedFunctionContainer ============================
 	 */
 
 	@Override
 	public Flow getFlow() {
 		return this.flow;
-	}
-
-	@Override
-	public void setParallelManagedFunctionContainer(ManagedFunctionContainer container) {
-		this.loadParallelFunction((ManagedFunctionContainerImpl<?>) container);
-	}
-
-	@Override
-	public void setNextManagedFunctionContainer(ManagedFunctionContainer container) {
-		this.loadSequentialFunction((ManagedFunctionContainerImpl<?>) container);
 	}
 
 	@Override
@@ -322,8 +347,8 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	public FunctionState execute(FunctionStateContext context) throws Throwable {
 
 		// Ensure no parallel function to execute first
-		if (this.parallelFunction != null) {
-			return this.parallelFunction;
+		if (this.parallelBlock != null) {
+			return this.parallelBlock;
 		}
 
 		// Obtain the thread and process state (as used throughout method)
@@ -356,7 +381,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 			// Ensure appropriate governance in place over managed objects
 			// (Does its own check to ensure managed objects are ready)
 			if (this.requiredGovernance != null) {
-				FunctionState updateGovernance = null;
 				for (int i = 0; i < this.requiredGovernance.length; i++) {
 
 					// Determine if governance in correct state
@@ -367,22 +391,25 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 						GovernanceContainer<?> governance = threadState.getGovernanceContainer(i);
 						if (isGovernanceRequired) {
 							// Activate the governance
-							updateGovernance = Promise.then(updateGovernance, governance.activateGovernance());
+							this.loadParallelBlock(governance.activateGovernance());
 
 						} else {
 							// De-activate the governance
-							FunctionState deactivateGovernance = (this.isEnforceGovernance
-									? governance.enforceGovernance()
+							BlockState deactivateGovernance = (this.isEnforceGovernance ? governance.enforceGovernance()
 									: governance.disregardGovernance());
-							updateGovernance = Promise.then(updateGovernance, deactivateGovernance);
+							this.loadParallelBlock(deactivateGovernance);
 						}
 					}
 				}
-				if (updateGovernance != null) {
-					// Governing, so must synchronise when executing again
-					this.containerState = ManagedFunctionState.SYNCHRONISE_PROCESS_STATE;
-					return Promise.then(updateGovernance, this);
-				}
+			}
+
+			// Governance setup, so must synchronise state afterwards
+			this.containerState = ManagedFunctionState.SYNCHRONISE_PROCESS_STATE;
+
+			// Determine if require updating governance
+			FunctionState updateGovernance = this.getParallelBlockToExecute();
+			if (updateGovernance != null) {
+				return updateGovernance;
 			}
 
 		case SYNCHRONISE_PROCESS_STATE:
@@ -409,10 +436,12 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				}
 			}
 
+			// Synchronise state happening next, so must setup afterwards
+			this.containerState = ManagedFunctionState.SETUP;
+
 			// Synchronise process state to this thread (if required)
 			if (threadState != processState.getMainThreadState()) {
 				// Must synchronise, so execute function when executing again
-				this.containerState = ManagedFunctionState.SETUP;
 				return Promise.then(this.flow.createFunction(new SynchroniseProcessStateFunctionLogic(threadState)),
 						this);
 			}
@@ -437,20 +466,24 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 			// Execute the managed function
 			ManagedFunctionLogicContextImpl logicContext = new ManagedFunctionLogicContextImpl();
-			this.nextManagedFunctionParameter = this.managedFunctionLogic.execute(logicContext);
+			this.managedFunctionLogic.execute(logicContext);
 
 			// Must recheck managed objects
 			this.check = null;
+
+			// Determine if complete (failure in asynchronous flow)
+			if (this.containerState == ManagedFunctionState.COMPLETED) {
+				// Completed so undertake next
+				return this.getNextBlockToExecute();
+			}
 
 			// Function executed, so now await flow completions
 			this.containerState = ManagedFunctionState.AWAIT_FLOW_COMPLETIONS;
 
 		case AWAIT_FLOW_COMPLETIONS:
 
-			// Undertake execute functions (may be invoked by callback)
-			FunctionState executeFunctions = null;
-
 			// Wait on any new asynchronous flows
+			FunctionState executeFunctions = null;
 			ActiveAsynchronousFlow asynchronousFlow = this.awaitingAsynchronousFlowCompletions.getHead();
 			while (asynchronousFlow != null) {
 				if (!asynchronousFlow.isWaiting()) {
@@ -485,7 +518,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 			// Determine if awaiting on flow
 			if (this.awaitingFlowCompletions.getHead() != null) {
-				return this.getParallelFunctionToExecute();
+				return this.getParallelBlockToExecute();
 			}
 
 			// All callbacks completed
@@ -505,7 +538,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 									this.parallelOwner);
 
 					// Load for sequential execution
-					this.loadSequentialFunction(nextContainer);
+					this.loadSequentialBlock(nextContainer);
 				}
 
 				// Sequential function now invoked
@@ -520,7 +553,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 		case COMPLETED:
 			// Now complete, so undertake next function
-			return this.getNextFunctionToExecute();
+			return this.getNextBlockToExecute();
 
 		case FAILED:
 			throw new IllegalStateException("Should not attempt to execute "
@@ -577,14 +610,14 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 	}
 
 	/**
-	 * Cancels all downstream {@link FunctionState} instances.
+	 * Cancels this and downstream {@link BlockState} instances.
 	 * 
-	 * @param isCancelThisFunctionState <code>true</code> to cancel this
-	 *                                  {@link FunctionState}.
-	 * @return {@link FunctionState} to cancel the downstream {@link FunctionState}
-	 *         instances.
+	 * @param isCancelThis Indicates whether to cancel this
+	 *                     {@link ManagedFunctionContainer}. Note all downstream
+	 *                     {@link BlockState} instances are still cancelled.
+	 * @return Next {@link FunctionState} to handle cancel.
 	 */
-	private FunctionState cancel(boolean isCancelThisFunctionState) {
+	private FunctionState cancel(boolean isCancelThis) {
 		return new ManagedFunctionOperation() {
 			@Override
 			public FunctionState execute(FunctionStateContext context) throws Throwable {
@@ -596,17 +629,17 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				FunctionState cleanUpFunctions = null;
 
 				// Clear all the parallel functions from this node
-				if (container.parallelFunction != null) {
-					cleanUpFunctions = Promise.then(container.parallelFunction.cancel(true), cleanUpFunctions);
+				if (container.parallelBlock != null) {
+					cleanUpFunctions = Promise.then(container.parallelBlock.cancel(), cleanUpFunctions);
 				}
 
 				// Clear all the sequential functions from this node
-				if (container.sequentialFunction != null) {
-					cleanUpFunctions = Promise.then(container.sequentialFunction.cancel(true), cleanUpFunctions);
+				if (container.sequentialBlock != null) {
+					cleanUpFunctions = Promise.then(container.sequentialBlock.cancel(), cleanUpFunctions);
 				}
 
 				// Clean up this function state (if required to do so)
-				if (isCancelThisFunctionState) {
+				if (isCancelThis) {
 					cleanUpFunctions = Promise.then(cleanUpFunctions, container.complete(null, null));
 				}
 
@@ -614,64 +647,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 				return cleanUpFunctions;
 			}
 		};
-
-	}
-
-	/**
-	 * Obtains the parallel {@link FunctionState} to execute.
-	 * 
-	 * @return Parallel {@link FunctionState} to execute.
-	 */
-	private FunctionState getParallelFunctionToExecute() {
-
-		// Determine furthest parallel node
-		ManagedFunctionContainerImpl<?> currentFunction = this;
-		ManagedFunctionContainerImpl<?> nextFunction = null;
-		while ((nextFunction = currentFunction.parallelFunction) != null) {
-			currentFunction = nextFunction;
-		}
-
-		// Determine if a parallel function
-		if (currentFunction == this) {
-			// No parallel function
-			return null;
-		} else {
-			// Return the furthest parallel function
-			return currentFunction;
-		}
-	}
-
-	/**
-	 * Obtains the next {@link FunctionState} to execute.
-	 * 
-	 * @return Next {@link FunctionState} to execute.
-	 */
-	private FunctionState getNextFunctionToExecute() {
-
-		// Determine if have parallel function
-		FunctionState nextFunction = this.getParallelFunctionToExecute();
-		if (nextFunction != null) {
-			return nextFunction;
-		}
-
-		// Determine if have sequential node
-		if (this.sequentialFunction != null) {
-			nextFunction = this.sequentialFunction;
-			this.sequentialFunction = null; // avoid infinite loop
-			return nextFunction;
-		}
-
-		// Determine if have parallel owner
-		if (this.parallelOwner != null) {
-			// Returning to owner, therefore unlink parallel node
-			this.parallelOwner.parallelFunction = null;
-
-			// Parallel owner
-			return this.parallelOwner;
-		}
-
-		// No further tasks
-		return null;
 	}
 
 	/**
@@ -743,7 +718,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 						.createManagedFunction(parameter, initialFunctionMetaData, true, container);
 
 				// Load the parallel function
-				container.loadParallelFunction(parallelFunction);
+				container.loadParallelBlock(parallelFunction);
 
 			} else {
 				// Flag sequential function invoked
@@ -755,7 +730,7 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 						.createManagedFunction(parameter, initialFunctionMetaData, true, container.parallelOwner);
 
 				// Load the sequential function
-				container.loadSequentialFunction(sequentialFunction);
+				container.loadSequentialBlock(sequentialFunction);
 			}
 		}
 
@@ -783,6 +758,42 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 
 			// Return the asynchronous flow
 			return flow;
+		}
+
+		@Override
+		public void setNextFunctionArgument(Object argument) {
+
+			// Easy access to container
+			final ManagedFunctionContainerImpl<?> container = ManagedFunctionContainerImpl.this;
+
+			// Ensure to overwrite the next function argument
+			switch (container.containerState) {
+			case EXECUTE_FUNCTION:
+			case AWAIT_FLOW_COMPLETIONS:
+				break; // correct states to invoke flow
+
+			default:
+				throw new IllegalStateException(
+						"Can not override next function argument outside function/callback execution (state: "
+								+ container.containerState + ")");
+			}
+
+			// Ensure the appropriate type (null always appropriate)
+			if (argument != null) {
+				Class<?> argumentType = argument.getClass();
+				ManagedFunctionMetaData<?, ?> nextMetaData = container.functionLogicMetaData
+						.getNextManagedFunctionMetaData();
+				if (nextMetaData != null) {
+					Class<?> expectedParameterType = nextMetaData.getParameterType();
+					if ((expectedParameterType != null) && (!expectedParameterType.isAssignableFrom(argumentType))) {
+						throw new IllegalArgumentException("Next expecting " + expectedParameterType.getName()
+								+ " (provided " + argumentType.getName() + ")");
+					}
+				}
+			}
+
+			// Specify the next function argument
+			container.nextManagedFunctionParameter = argument;
 		}
 	}
 
@@ -1014,59 +1025,6 @@ public class ManagedFunctionContainerImpl<M extends ManagedFunctionLogicMetaData
 					return container;
 				}
 			};
-		}
-	}
-
-	/**
-	 * Loads a sequential {@link ManagedFunctionContainer} relative to this
-	 * {@link ManagedFunctionContainer} within the tree of
-	 * {@link ManagedFunctionContainer} instances.
-	 * 
-	 * @param sequentialFunction {@link ManagedFunctionContainer} to load to tree.
-	 */
-	private final void loadSequentialFunction(ManagedFunctionContainerImpl<?> sequentialFunction) {
-
-		// Obtain the next sequential function
-		if (this.sequentialFunction != null) {
-			// Move current sequential function to parallel function
-			this.loadParallelFunction(this.sequentialFunction);
-		}
-
-		// Set next sequential function
-		this.sequentialFunction = sequentialFunction;
-	}
-
-	/**
-	 * Loads a parallel {@link ManagedFunctionContainer} relative to this
-	 * {@link ManagedFunctionContainer} within the tree of
-	 * {@link ManagedFunctionContainer} instances.
-	 * 
-	 * @param parallelFunction {@link ManagedFunctionContainer} to load to tree.
-	 */
-	private final void loadParallelFunction(ManagedFunctionContainerImpl<?> parallelFunction) {
-
-		// Move possible next parallel function out
-		if (this.parallelFunction != null) {
-			parallelFunction.parallelFunction = this.parallelFunction;
-			this.loadParallelOwner(this.parallelFunction, parallelFunction);
-		}
-
-		// Set next parallel node
-		this.parallelFunction = parallelFunction;
-		this.loadParallelOwner(parallelFunction, this);
-	}
-
-	/**
-	 * Loads the parallel owner to the parallel {@link ManagedFunctionContainer}.
-	 * 
-	 * @param parallelFunction Parallel {@link ManagedFunctionContainer}.
-	 * @param parallelOwner    Parallel owner.
-	 */
-	private final void loadParallelOwner(ManagedFunctionContainerImpl<?> parallelFunction,
-			ManagedFunctionContainerImpl<?> parallelOwner) {
-		while (parallelFunction != null) {
-			parallelFunction.parallelOwner = parallelOwner;
-			parallelFunction = parallelFunction.sequentialFunction;
 		}
 	}
 

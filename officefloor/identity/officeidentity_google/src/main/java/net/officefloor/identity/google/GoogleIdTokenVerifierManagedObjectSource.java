@@ -134,14 +134,11 @@ public class GoogleIdTokenVerifierManagedObjectSource extends
 					// Create the Google Id Token Verifier
 					GoogleIdTokenVerifier verifier = verifierFactory.create();
 					if (verifier == null) {
-						return null; // no verifier available
+						return; // no verifier available
 					}
 
 					// Load Verifier
 					pollContext.setFinalState(verifier);
-
-					// Nothing further
-					return null;
 				});
 		loadVerifier.linkParameter(0, StatePollContext.class);
 		if (finalFactory == null) {

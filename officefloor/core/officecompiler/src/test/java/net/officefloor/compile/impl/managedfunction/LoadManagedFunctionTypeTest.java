@@ -855,10 +855,9 @@ public class LoadManagedFunctionTypeTest extends OfficeFrameTestCase {
 		ManagedFunctionEscalationType[] escalations = namespaceType.getManagedFunctionTypes()[0].getEscalationTypes();
 		assertEquals("Incorrect number of escalation", 2, escalations.length);
 		assertEquals("Incorrect first escalation type", Error.class, escalations[0].getEscalationType());
-		assertEquals("Incorrect first escalation name", Error.class.getSimpleName(),
-				escalations[0].getEscalationName());
+		assertEquals("Incorrect first escalation name", Error.class.getName(), escalations[0].getEscalationName());
 		assertEquals("Incorrect second escalation type", RuntimeException.class, escalations[1].getEscalationType());
-		assertEquals("Incorrect second escalation name", RuntimeException.class.getSimpleName(),
+		assertEquals("Incorrect second escalation name", RuntimeException.class.getName(),
 				escalations[1].getEscalationName());
 	}
 

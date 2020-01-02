@@ -48,7 +48,7 @@ public class StartApplicationHttpAuthenticateFunction<AC extends Serializable, C
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(ManagedFunctionContext<Dependencies, None> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Dependencies, None> context) throws Throwable {
 
 		// Obtain the dependencies
 		AuthenticationContext<AC, C> authenticationContext = (AuthenticationContext<AC, C>) context
@@ -57,9 +57,6 @@ public class StartApplicationHttpAuthenticateFunction<AC extends Serializable, C
 
 		// Trigger authentication
 		authenticationContext.authenticate(credentials, null);
-
-		// Nothing further
-		return null;
 	}
 
 }

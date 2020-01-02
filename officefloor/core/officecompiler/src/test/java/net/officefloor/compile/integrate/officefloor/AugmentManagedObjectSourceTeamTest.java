@@ -265,10 +265,8 @@ public class AugmentManagedObjectSourceTeamTest extends OfficeFrameTestCase {
 
 			// Configure the flow
 			ManagedObjectSourceContext<Flows> mosContext = context.getManagedObjectSourceContext();
-			mosContext.addManagedFunction("FUNCTION", () -> (functionContext) -> {
-				this.isInvoked = true;
-				return null;
-			}).setResponsibleTeam("TEAM");
+			mosContext.addManagedFunction("FUNCTION", () -> (functionContext) -> this.isInvoked = true)
+					.setResponsibleTeam("TEAM");
 			mosContext.getFlow(Flows.FLOW).linkFunction("FUNCTION");
 		}
 

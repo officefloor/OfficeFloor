@@ -75,7 +75,7 @@ public class ManagedFunctionEscalationTypeImpl
 		if (!CompileUtil.isBlank(this.label)) {
 			return this.label;
 		} else if (this.escalationType != null) {
-			return this.escalationType.getSimpleName();
+			return this.escalationType.getName();
 		} else {
 			return "escalation";
 		}

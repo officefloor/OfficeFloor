@@ -15,11 +15,9 @@
 	<description>Provides polyglot</description>
 	<modules>
 		<module>officepolyglot_test</module>
-		<module>officepolyglot_javascript</module>
-		<module>officepolyglot_kotlin</module>
-		<module>officepolyglot_scala</module>
-		<module>officepolyglot_scalatest</module>
-		<module>officepolyglot_script</module>
+		<module>kotlin</module>
+		<module>scala</module>
+		<module>script</module>
 	</modules>
 	<dependencies>
 		<dependency>

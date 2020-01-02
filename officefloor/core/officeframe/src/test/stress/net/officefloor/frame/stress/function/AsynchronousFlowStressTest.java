@@ -17,12 +17,10 @@
  */
 package net.officefloor.frame.stress.function;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import junit.framework.TestSuite;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.stress.AbstractStressTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -52,7 +50,7 @@ public class AsynchronousFlowStressTest extends AbstractStressTestCase {
 		// Register the functions
 		ReflectiveFunctionBuilder trigger = this.constructFunction(functionality, "trigger");
 		trigger.buildObject("MO", ManagedObjectScope.THREAD);
-		trigger.buildAsynchronousFlow();
+		trigger.buildManagedFunctionContext();
 		trigger.setNextFunction("nextTask");
 		context.loadOtherTeam(trigger.getBuilder());
 		ReflectiveFunctionBuilder nextTask = this.constructFunction(functionality, "nextTask");
@@ -62,17 +60,6 @@ public class AsynchronousFlowStressTest extends AbstractStressTestCase {
 
 		// Run the repeats
 		context.setInitialFunction("trigger", 1);
-	}
-
-	private final ExecutorService executor = Executors.newCachedThreadPool();
-
-	@Override
-	protected void tearDown() throws Exception {
-		try {
-			this.executor.shutdown();
-		} finally {
-			super.tearDown();
-		}
 	}
 
 	public class TestObject {
@@ -90,13 +77,14 @@ public class AsynchronousFlowStressTest extends AbstractStressTestCase {
 			this.context = context;
 		}
 
-		public void trigger(TestObject object, AsynchronousFlow flow) {
+		public void trigger(TestObject object, ManagedFunctionContext<?, ?> context) {
 
 			// Ensure appropriate initial state
 			assertEquals("Incorrect initial state", "trigger", object.value);
 
 			// Undertake asynchronous flow
-			AsynchronousFlowStressTest.this.executor.execute(() -> {
+			AsynchronousFlow flow = context.createAsynchronousFlow();
+			context.getExecutor().execute(() -> {
 				flow.complete(() -> object.value = "nextTask");
 			});
 		}

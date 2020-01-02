@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.managedfunction;
 
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.administration.Administration;
@@ -107,6 +108,11 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	private final Logger logger;
 
 	/**
+	 * {@link Executor} for {@link ManagedFunctionContext}.
+	 */
+	private final Executor executor;
+
+	/**
 	 * {@link OfficeMetaData}.
 	 */
 	private OfficeMetaData officeMetaData;
@@ -179,12 +185,14 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	 *                                      {@link AsynchronousFlow} instances.
 	 * @param logger                        {@link Logger} for
 	 *                                      {@link ManagedFunctionContext}.
+	 * @param executor                      {@link Executor} for
+	 *                                      {@link ManagedFunctionContext}.
 	 */
 	public ManagedFunctionMetaDataImpl(String functionName, ManagedFunctionFactory<O, F> functionFactory,
 			Object[] annotations, Class<?> parameterType, TeamManagement responsibleTeam,
 			ManagedObjectIndex[] functionIndexedManagedObjects, ManagedObjectMetaData<?>[] functionBoundManagedObjects,
 			boolean[] requiredGovernance, long asynchronousFlowTimeout, AssetManager asynchronousFlowsAssetManager,
-			Logger logger) {
+			Logger logger, Executor executor) {
 		this.functionName = functionName;
 		this.functionFactory = functionFactory;
 		this.annotations = annotations;
@@ -196,6 +204,7 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 		this.asynchronousFlowTimeout = asynchronousFlowTimeout;
 		this.asynchronousFlowAssetManager = asynchronousFlowsAssetManager;
 		this.logger = logger;
+		this.executor = executor;
 	}
 
 	/**
@@ -263,6 +272,11 @@ public class ManagedFunctionMetaDataImpl<O extends Enum<O>, F extends Enum<F>>
 	@Override
 	public Logger getLogger() {
 		return this.logger;
+	}
+
+	@Override
+	public Executor getExecutor() {
+		return this.executor;
 	}
 
 	@Override

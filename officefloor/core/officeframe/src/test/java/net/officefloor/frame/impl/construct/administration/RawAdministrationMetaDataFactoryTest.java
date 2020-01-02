@@ -370,7 +370,7 @@ public class RawAdministrationMetaDataFactoryTest extends OfficeFrameTestCase {
 		// Construct the meta-data
 		RawAdministrationMetaData[] rawAdministrations = new RawAdministrationMetaDataFactory(
 				this.officeMetaData.build(), new FlowMetaDataFactory(this.officeMetaData.build()),
-				new EscalationFlowFactory(this.officeMetaData.build()), this.rawOfficeMetaData.build().getTeams())
+				new EscalationFlowFactory(this.officeMetaData.build()), this.rawOfficeMetaData.build().getTeams(), null)
 						.constructRawAdministrationMetaData("Asset", "pre", configuration,
 								this.rawOfficeMetaData.build().getOfficeScopeManagedObjects(), AssetType.OFFICE,
 								OFFICE_NAME, new AssetManagerFactory(null, null, null), 1, this.issues);

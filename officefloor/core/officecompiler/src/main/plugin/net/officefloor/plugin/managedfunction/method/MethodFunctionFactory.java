@@ -49,7 +49,7 @@ public class MethodFunctionFactory implements ManagedFunctionFactory<Indexed, In
 	/**
 	 * {@link MethodReturnTranslator} or <code>null</code>.
 	 */
-	private final MethodReturnTranslator<Object, Object> returnTranslator;
+	private MethodReturnTranslator<Object, Object> returnTranslator;
 
 	/**
 	 * Initiate.
@@ -60,13 +60,20 @@ public class MethodFunctionFactory implements ManagedFunctionFactory<Indexed, In
 	 * @param method                      {@link Method} to invoke for the
 	 *                                    {@link ManagedFunction}.
 	 * @param parameters                  {@link MethodParameterFactory} instances.
-	 * @param returnTranslator            {@link MethodReturnTranslator}.
 	 */
 	public MethodFunctionFactory(MethodObjectInstanceFactory methodObjectInstanceFactory, Method method,
-			MethodParameterFactory[] parameters, MethodReturnTranslator<Object, Object> returnTranslator) {
+			MethodParameterFactory[] parameters) {
 		this.methodObjectInstanceFactory = methodObjectInstanceFactory;
 		this.method = method;
 		this.parameters = parameters;
+	}
+
+	/**
+	 * Specifies the {@link MethodReturnTranslator}.
+	 * 
+	 * @param returnTranslator {@link MethodReturnTranslator}.
+	 */
+	public void setMethodReturnTranslator(MethodReturnTranslator<Object, Object> returnTranslator) {
 		this.returnTranslator = returnTranslator;
 	}
 

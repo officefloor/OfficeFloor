@@ -17,7 +17,9 @@
  */
 package net.officefloor.plugin.managedfunction.method;
 
-import net.officefloor.frame.api.function.ManagedFunctionContext;
+import java.lang.reflect.Method;
+
+import net.officefloor.frame.api.function.ManagedFunction;
 
 /**
  * Translate the return value of the {@link MethodFunction}.
@@ -30,12 +32,12 @@ import net.officefloor.frame.api.function.ManagedFunctionContext;
 public interface MethodReturnTranslator<R, T> {
 
 	/**
-	 * Creates the parameter from the {@link ManagedFunctionContext}.
+	 * Translates the {@link Method} return value for next {@link ManagedFunction}
+	 * argument.
 	 * 
-	 * @param returnValue Return value of {@link MethodFunction}.
-	 * @return Translated return value.
+	 * @param context {@link MethodReturnTranslatorContext}.
 	 * @throws Exception If fails to translate.
 	 */
-	T translate(R returnValue) throws Exception;
+	void translate(MethodReturnTranslatorContext<R, T> context) throws Exception;
 
 }

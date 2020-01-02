@@ -82,10 +82,15 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 		ReflectiveFunctionBuilder task = this.constructFunction(work, "function");
 		task.getBuilder().setResponsibleTeam("FUNCTION_TEAM");
 
-		// Invoke the function
+		// Construct the OfficeFloor (allows startup processes to run)
+		MockExecutiveSource.isOpeningOfficeFloor = true;
 		MockExecutiveSource.isControlTeam = false;
-		MockExecutiveSource.isInterceptTeam = false;
 		MockExecutiveSource.worker = null;
+		this.constructOfficeFloor().openOfficeFloor();
+
+		// Invoke the function
+		MockExecutiveSource.isOpeningOfficeFloor = false;
+		MockExecutiveSource.isInterceptTeam = false;
 		this.invokeFunction("function", null);
 
 		// Ensure function invoked
@@ -126,6 +131,8 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 
 		private static final String TEAM_OVERSIGHT_NAME = "OVERSIGHT";
 
+		private static boolean isOpeningOfficeFloor = true;
+
 		private static boolean isControlTeam = false;
 
 		private static boolean isWrapWorker = false;
@@ -144,6 +151,13 @@ public class ExecutiveTeamTest extends AbstractOfficeConstructTestCase {
 
 		@Override
 		public Object createProcessIdentifier() {
+
+			// Create appropriate processes to start OfficeFloor
+			if (isOpeningOfficeFloor) {
+				return new Object();
+			}
+
+			// Ensure only one process created
 			assertNull("Should only create one process in test", this.processIdentifier);
 			this.processIdentifier = new Object();
 			return this.processIdentifier;

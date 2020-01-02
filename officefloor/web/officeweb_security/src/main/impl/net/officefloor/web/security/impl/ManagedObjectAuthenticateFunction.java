@@ -67,7 +67,7 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C, F ext
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Indexed, F> context) throws Throwable {
 
 		// Obtain the function authenticate context
 		FunctionAuthenticateContext<AC, C> functionAuthenticateContext = (FunctionAuthenticateContext<AC, C>) context
@@ -84,9 +84,6 @@ public class ManagedObjectAuthenticateFunction<AC extends Serializable, C, F ext
 			// Notify of failure in authentication
 			functionAuthenticateContext.accessControlChange(null, ex);
 		}
-
-		// Nothing further
-		return null;
 	}
 
 	/**

@@ -129,14 +129,11 @@ public class PayPalHttpClientManagedObjectSource
 					// Retrieve the PayPal environment
 					PayPalEnvironment environment = repository.createPayPalEnvironment();
 					if (environment == null) {
-						return null; // no environment available
+						return; // no environment available
 					}
 
 					// Load PayPal client
 					pollContext.setFinalState(new PayPalHttpClient(environment));
-
-					// Nothing further
-					return null;
 				});
 		loadPayPal.linkParameter(ConfigureDependencies.POLL_CONTEXT, StatePollContext.class);
 		loadPayPal.linkObject(ConfigureDependencies.REPOSITORY, sourceContext.addFunctionDependency(

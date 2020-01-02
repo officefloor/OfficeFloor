@@ -58,12 +58,9 @@ public class HttpFlowSecurerManagedFunction
 	/**
 	 * Instantiate.
 	 * 
-	 * @param isParameter
-	 *            Indicates that there is an argument to pass through.
-	 * @param anyRoles
-	 *            Any roles.
-	 * @param allRoles
-	 *            All roles.
+	 * @param isParameter Indicates that there is an argument to pass through.
+	 * @param anyRoles    Any roles.
+	 * @param allRoles    All roles.
 	 */
 	public HttpFlowSecurerManagedFunction(boolean isParameter, String[] anyRoles, String[] allRoles) {
 		this.isParameter = isParameter;
@@ -76,7 +73,7 @@ public class HttpFlowSecurerManagedFunction
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionContext<Indexed, Flows> context) throws Throwable {
+	public void execute(ManagedFunctionContext<Indexed, Flows> context) throws Throwable {
 
 		// Obtain the HTTP authentication
 		HttpAuthentication<?> authentication = (HttpAuthentication<?>) context.getObject(0);
@@ -97,13 +94,12 @@ public class HttpFlowSecurerManagedFunction
 
 				// Have access to secure path
 				context.doFlow(Flows.SECURE, argument, null);
-				return null;
+				return;
 			}
 		}
 
 		// No access
 		context.doFlow(Flows.INSECURE, argument, null);
-		return null;
 	}
 
 }

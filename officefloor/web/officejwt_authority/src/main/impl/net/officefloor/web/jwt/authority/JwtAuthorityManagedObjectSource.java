@@ -1028,9 +1028,6 @@ public class JwtAuthorityManagedObjectSource
 
 					// Load the keys
 					collector.setKeys(encodeKeys);
-
-					// Nothing further
-					return null;
 				});
 		retrieveEncodeKeys.linkParameter(RetrieveKeysDependencies.COLLECTOR, JwtAccessKeyCollector.class);
 		retrieveEncodeKeys.linkObject(RetrieveKeysDependencies.JWT_AUTHORITY_REPOSITORY, jwtAuthorityRepository);
@@ -1087,9 +1084,6 @@ public class JwtAuthorityManagedObjectSource
 
 					// Load the keys
 					collector.setKeys(refreshKeys);
-
-					// Nothing further
-					return null;
 				});
 		retrieveRefreshKeys.linkParameter(RetrieveKeysDependencies.COLLECTOR, JwtRefreshKeyCollector.class);
 		retrieveRefreshKeys.linkObject(RetrieveKeysDependencies.JWT_AUTHORITY_REPOSITORY, jwtAuthorityRepository);

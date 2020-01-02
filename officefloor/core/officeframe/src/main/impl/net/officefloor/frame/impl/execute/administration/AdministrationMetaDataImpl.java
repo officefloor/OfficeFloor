@@ -17,7 +17,10 @@
  */
 package net.officefloor.frame.impl.execute.administration;
 
+import java.util.concurrent.Executor;
+
 import net.officefloor.frame.api.administration.Administration;
+import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.AdministrationFactory;
 import net.officefloor.frame.api.function.AsynchronousFlow;
 import net.officefloor.frame.api.governance.Governance;
@@ -98,6 +101,11 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	private final OfficeMetaData officeMetaData;
 
 	/**
+	 * {@link Executor} for {@link AdministrationContext}.
+	 */
+	private final Executor executor;
+
+	/**
 	 * Instantiate.
 	 * 
 	 * @param administrationName           Bound name of this
@@ -118,12 +126,14 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	 *                                     index.
 	 * @param escalationProcedure          {@link EscalationProcedure}.
 	 * @param officeMetaData               {@link OfficeMetaData}.
+	 * @param executor                     {@link Executor} for
+	 *                                     {@link AdministrationContext}.
 	 */
 	public AdministrationMetaDataImpl(String administrationName, AdministrationFactory<E, F, G> administrationFactory,
 			Class<E> extensionInterface, ManagedObjectExtensionExtractorMetaData<E>[] eiMetaData,
 			TeamManagement responsibleTeam, long asynchronousFlowTimeout, AssetManager asynchronousFlowAssetManager,
 			FlowMetaData[] flowMetaData, int[] governanceIndexes, EscalationProcedure escalationProcedure,
-			OfficeMetaData officeMetaData) {
+			OfficeMetaData officeMetaData, Executor executor) {
 		this.administrationName = administrationName;
 		this.administrationFactory = administrationFactory;
 		this.extensionInterface = extensionInterface;
@@ -135,6 +145,7 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 		this.governanceIndexes = governanceIndexes;
 		this.escalationProcedure = escalationProcedure;
 		this.officeMetaData = officeMetaData;
+		this.executor = executor;
 	}
 
 	/*
@@ -208,6 +219,11 @@ public class AdministrationMetaDataImpl<E, F extends Enum<F>, G extends Enum<G>>
 	@Override
 	public int translateGovernanceIndexToThreadIndex(int governanceIndex) {
 		return this.governanceIndexes[governanceIndex];
+	}
+
+	@Override
+	public Executor getExecutor() {
+		return this.executor;
 	}
 
 }

@@ -295,7 +295,7 @@ public class RawGovernanceMetaDataTest extends OfficeFrameTestCase {
 
 		// Create the raw governance meta-data
 		RawGovernanceMetaData<?, ?> rawGovernanceMetaData = new RawGovernanceMetaDataFactory(OFFICE_NAME,
-				this.rawOfficeMetaData.build().getTeams()).createRawGovernanceMetaData(this.configuration,
+				this.rawOfficeMetaData.build().getTeams(), null).createRawGovernanceMetaData(this.configuration,
 						GOVERNANCE_INDEX, new AssetManagerFactory(null, null, null), 1, this.issues);
 		if (!isCreated) {
 			// Ensure not created

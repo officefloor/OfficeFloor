@@ -122,9 +122,8 @@ public class InputManagedObjectAvailableToManagedObjectFunctionTest extends Abst
 		 */
 
 		@Override
-		public Object execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
+		public void execute(ManagedFunctionContext<Indexed, None> context) throws Throwable {
 			this.managedObject = (InputManagedObjectSource) context.getObject(0);
-			return null;
 		}
 	}
 

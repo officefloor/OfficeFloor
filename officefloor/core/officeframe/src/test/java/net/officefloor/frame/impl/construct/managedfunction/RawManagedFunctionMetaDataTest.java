@@ -97,6 +97,14 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 	private final OfficeFloorIssues issues = this.createMock(OfficeFloorIssues.class);
 
 	/**
+	 * Initiate.
+	 */
+	public RawManagedFunctionMetaDataTest() {
+		// Provide OfficeFloor meta-data to obtain Executor
+		this.rawOfficeMetaData.setRawOfficeFloorMetaData(MockConstruct.mockRawOfficeFloorMetaData().build());
+	}
+
+	/**
 	 * Ensure issue if not {@link ManagedFunction} name.
 	 */
 	public void testNoFunctionName() {
@@ -832,7 +840,7 @@ public class RawManagedFunctionMetaDataTest extends OfficeFrameTestCase {
 		FlowMetaDataFactory flowMetaDataFactory = new FlowMetaDataFactory(officeMetaData);
 		EscalationFlowFactory escalationFlowFactory = new EscalationFlowFactory(officeMetaData);
 		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
-				flowMetaDataFactory, escalationFlowFactory, this.rawOfficeMetaData.getOfficeTeams());
+				flowMetaDataFactory, escalationFlowFactory, this.rawOfficeMetaData.getOfficeTeams(), null);
 
 		// Link the functions and load remaining state to function meta-data
 		boolean isLoaded = metaData.loadOfficeMetaData(this.officeMetaData.build(), flowMetaDataFactory,

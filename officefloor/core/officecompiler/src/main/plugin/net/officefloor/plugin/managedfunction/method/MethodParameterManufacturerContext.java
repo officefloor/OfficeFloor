@@ -18,6 +18,7 @@
 package net.officefloor.plugin.managedfunction.method;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
 
@@ -56,13 +57,6 @@ public interface MethodParameterManufacturerContext {
 	Type getParameterType();
 
 	/**
-	 * Obtains the {@link Annotation} instances for the parameter.
-	 * 
-	 * @return {@link Annotation} instances for the parameter.
-	 */
-	Annotation[] getParameterAnnotations();
-
-	/**
 	 * <p>
 	 * Obtains the parameter qualifier.
 	 * <p>
@@ -75,6 +69,38 @@ public interface MethodParameterManufacturerContext {
 	 * @return Qualifier for the parameter.
 	 */
 	String getParameterQualifier();
+
+	/**
+	 * Obtains the {@link Annotation} instances for the parameter.
+	 * 
+	 * @return {@link Annotation} instances for the parameter.
+	 */
+	Annotation[] getParameterAnnotations();
+
+	/**
+	 * Obtains the name of the {@link ManagedFunction}.
+	 * 
+	 * @return Name of the {@link ManagedFunction}.
+	 */
+	String getFunctionName();
+
+	/**
+	 * <p>
+	 * Obtains the {@link Method}.
+	 * <p>
+	 * Due to type erasure, the type information on the parameter {@link Class} may
+	 * be lost. This allows more information to be derived about the parameter.
+	 * 
+	 * @return {@link Method}.
+	 */
+	Method getMethod();
+
+	/**
+	 * Obtains the index of the parameter on the {@link Method}.
+	 * 
+	 * @return Index of the parameter on the {@link Method}.
+	 */
+	int getParameterIndex();
 
 	/**
 	 * Adds a {@link ManagedFunctionObjectTypeBuilder} to the
@@ -95,13 +121,6 @@ public interface MethodParameterManufacturerContext {
 	 * @return Index for the added {@link Flow}.
 	 */
 	int addFlow(Consumer<ManagedFunctionFlowTypeBuilder<Indexed>> builder);
-
-	/**
-	 * Obtains the name of the {@link ManagedFunction}.
-	 * 
-	 * @return Name of the {@link ManagedFunction}.
-	 */
-	String getFunctionName();
 
 	/**
 	 * <p>

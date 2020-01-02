@@ -9,7 +9,7 @@
 		<version>${revision}</version>
 	</parent>
 	<artifactId>ScalaHttpServer</artifactId>
-	<name>ScalaScript Tutorial</name>
+	<name>Scala Tutorial</name>
 	<description>Tutorial of implementing logic with Scala</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -101,12 +101,12 @@
 		</dependency>
 		<!-- START SNIPPET: tutorial -->
 		<dependency>
-			<groupId>net.officefloor.polyglot</groupId>
-			<artifactId>officepolyglot_scala</artifactId>
+			<groupId>net.officefloor.scala</groupId>
+			<artifactId>officescala</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.polyglot</groupId>
-			<artifactId>officepolyglot_scalatest</artifactId>
+			<groupId>net.officefloor.scala</groupId>
+			<artifactId>officescalatest</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<!-- END SNIPPET: tutorial -->

@@ -1029,7 +1029,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		FlowMetaDataFactory flowFactory = new FlowMetaDataFactory(officeMetaData);
 		EscalationFlowFactory escalationFactory = new EscalationFlowFactory(officeMetaData);
 		RawAdministrationMetaDataFactory rawAdminFactory = new RawAdministrationMetaDataFactory(officeMetaData,
-				flowFactory, escalationFactory, new HashMap<>());
+				flowFactory, escalationFactory, new HashMap<>(), null);
 		ManagedObjectAdministrationMetaDataFactory moAdminFactory = new ManagedObjectAdministrationMetaDataFactory(
 				rawAdminFactory, new HashMap<>(), this.rawOfficeMetaData.build().getOfficeScopeManagedObjects());
 		for (RawBoundManagedObjectMetaData bound : metaData) {

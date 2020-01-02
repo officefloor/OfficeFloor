@@ -78,10 +78,8 @@ public class HttpRedirectFunction<T>
 	/**
 	 * Instantiate.
 	 * 
-	 * @param isSecure
-	 *            Indicates if redirect to secure port.
-	 * @param pathFactory
-	 *            {@link HttpPathFactory}.
+	 * @param isSecure    Indicates if redirect to secure port.
+	 * @param pathFactory {@link HttpPathFactory}.
 	 */
 	public HttpRedirectFunction(boolean isSecure, HttpPathFactory<T> pathFactory) {
 		this.isSecure = isSecure;
@@ -103,7 +101,7 @@ public class HttpRedirectFunction<T>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object execute(ManagedFunctionContext<HttpRedirectDependencies, None> context) throws Exception {
+	public void execute(ManagedFunctionContext<HttpRedirectDependencies, None> context) throws Exception {
 
 		// Obtain the dependencies
 		T pathValues = (T) context.getObject(HttpRedirectDependencies.PATH_VALUES);
@@ -139,9 +137,6 @@ public class HttpRedirectFunction<T>
 		// Load cookie indicating redirect
 		response.getCookies().setCookie(REDIRECT_COOKIE_NAME, String.valueOf(serialisable.identifier),
 				(cookie) -> cookie.setPath(applicationPath).setSecure(this.isSecure).setHttpOnly(true));
-
-		// No further functions
-		return null;
 	}
 
 }

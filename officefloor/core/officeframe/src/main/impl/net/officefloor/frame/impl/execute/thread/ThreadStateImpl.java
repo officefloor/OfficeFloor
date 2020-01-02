@@ -154,6 +154,21 @@ public class ThreadStateImpl extends AbstractLinkedListSetEntry<ThreadState, Pro
 	}
 
 	/**
+	 * Obtains the current {@link ProcessState} identifier.
+	 * 
+	 * @return Current {@link ProcessState} identifier or <code>null</code> if
+	 *         outside management.
+	 */
+	public static Object currentProcessIdentifier() {
+
+		// Obtain the context attached to the thread
+		ActiveThreadState current = activeThreadState.get();
+
+		// Obtain the possible process identifier
+		return current == null ? null : current.threadState.getProcessState().getProcessIdentifier();
+	}
+
+	/**
 	 * Obtains the current {@link ThreadStateContext}.
 	 * 
 	 * @param fallbackThreadState Fall back {@link ThreadState} if no

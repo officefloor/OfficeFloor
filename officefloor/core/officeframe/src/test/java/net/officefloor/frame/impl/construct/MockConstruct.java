@@ -1121,7 +1121,7 @@ public class MockConstruct {
 			this.governanceName = governanceName;
 			this.extensionType = extensionType;
 			this.configuration = new GovernanceBuilderImpl<>(governanceName, extensionType, () -> null);
-			this.metaData = new GovernanceMetaDataImpl<>(governanceName, () -> null, null, 1, null, null);
+			this.metaData = new GovernanceMetaDataImpl<>(governanceName, () -> null, null, 1, null, null, null);
 		}
 
 		/**
@@ -1447,7 +1447,7 @@ public class MockConstruct {
 		 */
 		private EscalationFlow officeFloorEscalation = new EscalationFlowImpl(Throwable.class,
 				new ManagedFunctionMetaDataImpl<>("HANDLER", () -> null, null, null, null, null, null, null, 1, null,
-						null));
+						null, null));
 
 		/**
 		 * {@link RawOfficeFloorMetaData}.
@@ -1546,7 +1546,7 @@ public class MockConstruct {
 
 				// Build
 				this.built = new RawOfficeFloorMetaData(executive, defaultExecutionStrategy, executionStrategies,
-						this.teamRegistry, this.breakChainTeamManagement, this.threadLocalAwareExecutor,
+						this.teamRegistry, this.breakChainTeamManagement, null, this.threadLocalAwareExecutor,
 						this.managedExecutionFactory, mosRegistry, this.officeFloorEscalation,
 						new OfficeFloorListener[0]);
 			}
@@ -1631,8 +1631,9 @@ public class MockConstruct {
 		public ManagedFunctionMetaData<?, ?> addManagedFunction(String functionName, Class<?> parameterType) {
 			this.assertNotBuilt();
 			ManagedFunctionMetaDataImpl<?, ?> function = new ManagedFunctionMetaDataImpl<>(functionName,
-					() -> (context) -> null, new Object[0], parameterType, null, new ManagedObjectIndex[0],
-					new ManagedObjectMetaData[0], new boolean[0], 1, null, OfficeFrame.getLogger(functionName));
+					() -> (context) -> {
+					}, new Object[0], parameterType, null, new ManagedObjectIndex[0], new ManagedObjectMetaData[0],
+					new boolean[0], 1, null, OfficeFrame.getLogger(functionName), null);
 			this.functions.add(function);
 			return function;
 		}
@@ -1658,7 +1659,7 @@ public class MockConstruct {
 						}
 					}
 					functions.add(new ManagedFunctionMetaDataImpl<>(functionName, null, null, parameterType, null, null,
-							null, null, 1, null, null));
+							null, null, 1, null, null, null));
 				}
 
 				// Load the convenience functions
@@ -1670,7 +1671,7 @@ public class MockConstruct {
 				ManagedFunctionLocator functionLocator = new ManagedFunctionLocatorImpl(
 						functions.toArray(new ManagedFunctionMetaData[functions.size()]));
 				this.built = new OfficeMetaDataImpl(this.officeName, null, null, null, null, null, null, null, null,
-						functionLocator, this.processMetaData.build(), null, null);
+						null, functionLocator, this.processMetaData.build(), null, null);
 
 				// Load the office meta-data to functions
 				for (ManagedFunctionMetaDataImpl<?, ?> function : functions) {

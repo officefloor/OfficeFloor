@@ -806,7 +806,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Record
 		this.configuration.addEscalation(Exception.class, "FUNCTION");
-		this.configuration.addManagedFunction("FUNCTION", () -> (context) -> null);
+		this.configuration.addManagedFunction("FUNCTION", () -> (context) -> {
+		});
 
 		// Construct the office
 		this.replayMockObjects();

@@ -23,7 +23,10 @@ import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionObjectT
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil;
 import net.officefloor.compile.test.managedfunction.clazz.MethodManagedFunctionBuilderUtil.MethodResult;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.function.AsynchronousFlow;
+import net.officefloor.frame.api.function.AsynchronousFlowCompletion;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.function.ManagedFunctionContext;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.Qualified;
@@ -206,6 +209,14 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	public void testTranslateObject() throws Exception {
 		Closure<String> closure = new Closure<>("TEST");
 		MethodResult result = MockParameterManufacturer.run((context) -> {
+
+			// Ensure correct method
+			assertEquals("Incorrect function name", "method", context.getFunctionName());
+			assertEquals("Incorrect method", TranslateObjectFunction.class.getMethod("method", String.class),
+					context.getMethod());
+			assertEquals("Incorrect parameter index", 0, context.getParameterIndex());
+
+			// Add the object and provide translation
 			int objectIndex = context.addObject(Closure.class, null);
 			return (mc) -> {
 				@SuppressWarnings("unchecked")
@@ -234,9 +245,19 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	public void testTranslateReturn() throws Exception {
 		Closure<Class<?>> closure = new Closure<>();
 		MethodResult result = MockReturnManufacturer.run(Closure.class, String.class, (context) -> {
+
+			// Ensure correct method
+			assertEquals("Incorrect function name", "method", context.getFunctionName());
+			assertEquals("Incorrect method", TranslateReturnFunction.class.getMethod("method"), context.getMethod());
+
+			// Provide translation of class
 			closure.value = context.getReturnClass();
 			context.setTranslatedReturnClass(String.class);
-			return (returnValue) -> (String) returnValue.value;
+			return (translateContext) -> {
+				assertNotNull("Should have " + ManagedFunctionContext.class.getSimpleName(),
+						translateContext.getManagedFunctionContext());
+				translateContext.setTranslatedReturnValue((String) translateContext.getReturnValue().value);
+			};
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFunction(), "method", (type) -> {
 			type.setReturnType(String.class);
 		}, null));
@@ -254,11 +275,128 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can translate to <code>null</code> return.
+	 */
+	public void testTranslateReturnNull() throws Throwable {
+		Closure<Class<?>> closure = new Closure<>();
+		MethodResult result = MockReturnManufacturer.run(Closure.class, null, (context) -> {
+
+			// Provide translation to null
+			closure.value = context.getReturnClass();
+			context.setTranslatedReturnClass(null);
+			return (translateContext) -> translateContext.setTranslatedReturnValue(null);
+
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFunction(), "method", null, null));
+		assertEquals("Incorrect return class", Closure.class, closure.value);
+		assertNull("Should translate to null", result.getReturnValue());
+	}
+
+	/**
+	 * Ensure can asynchronously translate return value.
+	 */
+	public void testAsynchronousTranslateReturn() throws Throwable {
+		final String ASYNC_TRANSLATED_RESULT = "ASYNC";
+		Closure<Thread> thread = new Closure<>();
+		MethodResult result = MockReturnManufacturer.run(Closure.class, String.class, (context) -> {
+
+			// Provide asynchronous translate of class
+			context.setTranslatedReturnClass(String.class);
+			return (translateContext) -> {
+				AsynchronousFlow flow = translateContext.getManagedFunctionContext().createAsynchronousFlow();
+				thread.value = new Thread(() -> {
+					flow.complete(() -> translateContext.setTranslatedReturnValue(ASYNC_TRANSLATED_RESULT));
+				});
+			};
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFunction(), "method", (type) -> {
+			type.setReturnType(String.class);
+		}, null));
+
+		// Should not yet have result
+		assertNull("Should not have result", result.getReturnValue());
+
+		// Trigger asynchronous translation and wait for its completion
+		thread.value.start();
+		result.getAsynchronousFlows()[0].waitOnCompletion().run();
+
+		// Should now have result
+		assertEquals("Incorrect asynchronous translated result", ASYNC_TRANSLATED_RESULT, result.getReturnValue());
+	}
+
+	/**
+	 * Ensure can throw {@link Exception} on translating return value.
+	 */
+	public void testTranslateReturnFailure() throws Throwable {
+		MethodResult result = MockReturnManufacturer.run(Closure.class, String.class, (context) -> {
+
+			// Provide translation that fails
+			context.addEscalation(Exception.class);
+			context.setTranslatedReturnClass(String.class);
+			return (translateContext) -> {
+				assertNotNull("Should have " + ManagedFunctionContext.class.getSimpleName(),
+						translateContext.getManagedFunctionContext());
+				throw (Exception) translateContext.getReturnValue().value;
+			};
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFailureFunction(), "method", (type) -> {
+			type.addEscalation(Exception.class);
+			type.setReturnType(String.class);
+		}, null));
+		assertEquals("Incorrect translation failure", TranslateReturnFailureFunction.FAILURE, result.getFailure());
+	}
+
+	public static class TranslateReturnFailureFunction {
+
+		public static final Exception FAILURE = new Exception("TEST");
+
+		public Closure<Throwable> method() {
+			return new Closure<>(FAILURE);
+		}
+	}
+
+	/**
+	 * Ensure can throw {@link Exception} on asynchronous translating return value.
+	 */
+	public void testAsynchronousTranslateReturnFailure() throws Throwable {
+		Closure<Thread> thread = new Closure<>();
+		MethodResult result = MockReturnManufacturer.run(Closure.class, String.class, (context) -> {
+
+			// Provide translation that fails
+			context.addEscalation(Exception.class);
+			context.setTranslatedReturnClass(String.class);
+			return (translateContext) -> {
+				AsynchronousFlow flow = translateContext.getManagedFunctionContext().createAsynchronousFlow();
+				thread.value = new Thread(() -> {
+					flow.complete(() -> {
+						throw (Exception) translateContext.getReturnValue().value;
+					});
+				});
+			};
+		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFailureFunction(), "method", (type) -> {
+			type.addEscalation(Exception.class);
+			type.setReturnType(String.class);
+		}, null));
+
+		// Should not yet have result nor failure
+		assertNull("Should not have result", result.getReturnValue());
+		assertNull("Should not have failure", result.getFailure());
+
+		// Trigger asynchronous translation and wait for its completion
+		thread.value.start();
+		AsynchronousFlowCompletion completion = result.getAsynchronousFlows()[0].waitOnCompletion();
+		try {
+			completion.run();
+			fail("Should not be successful");
+		} catch (Exception ex) {
+			// Should now have result
+			assertEquals("Incorrect asynchronous translation failure", TranslateReturnFailureFunction.FAILURE, ex);
+		}
+	}
+
+	/**
 	 * Translate function on return.
 	 */
 	public void testFunctionNameReturn() throws Exception {
-		MethodResult result = MockReturnManufacturer.run(Void.class, String.class, (context) -> {
-			return (none) -> context.getFunctionName();
+		MethodResult result = MockReturnManufacturer.run(String.class, String.class, (context) -> {
+			return (translateContext) -> translateContext.setTranslatedReturnValue(context.getFunctionName());
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new FunctionNameReturnFunction(), "method", (type) -> {
 			type.setReturnType(String.class);
 		}, null));
@@ -266,8 +404,8 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	}
 
 	public static class FunctionNameReturnFunction {
-		public void method() {
-			// No return, but will translate in a value
+		public String method() {
+			return "TRANSLATED";
 		}
 	}
 
@@ -276,8 +414,9 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	 */
 	public void testReturnAnnotation() throws Exception {
 		Next annotation = ReturnAnnotationFunction.class.getMethod("method").getAnnotation(Next.class);
-		MethodResult result = MockReturnManufacturer.run(Void.class, Next.class, (context) -> {
-			return (none) -> (Next) context.getMethodAnnotations()[0];
+		MethodResult result = MockReturnManufacturer.run(String.class, Next.class, (context) -> {
+			return (translateContext) -> translateContext
+					.setTranslatedReturnValue((Next) context.getMethodAnnotations()[0]);
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new ReturnAnnotationFunction(), "method", (type) -> {
 			type.addAnnotation(annotation);
 			type.setReturnType(Next.class);
@@ -288,8 +427,8 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 	public static class ReturnAnnotationFunction {
 
 		@Next("TEST")
-		public void method() {
-			// No return, but will translate in a value
+		public String method() {
+			return "TRANSLATED";
 		}
 	}
 

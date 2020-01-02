@@ -17,6 +17,7 @@
  */
 package net.officefloor.frame.impl.execute.managedfunction;
 
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 import net.officefloor.frame.api.function.AsynchronousFlow;
@@ -85,14 +86,14 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 	 */
 
 	@Override
-	public Object execute(ManagedFunctionLogicContext context) throws Throwable {
+	public void execute(ManagedFunctionLogicContext context) throws Throwable {
 
 		// Create the manage function
 		ManagedFunction<O, F> function = functionMetaData.getManagedFunctionFactory().createManagedFunction();
 
 		// Execute the managed function
 		ManagedFunctionContextToken token = new ManagedFunctionContextToken(context);
-		return function.execute(token);
+		function.execute(token);
 	}
 
 	/**
@@ -195,6 +196,16 @@ public class ManagedFunctionLogicImpl<O extends Enum<O>, F extends Enum<F>> impl
 		@Override
 		public AsynchronousFlow createAsynchronousFlow() {
 			return this.context.createAsynchronousFlow();
+		}
+
+		@Override
+		public Executor getExecutor() {
+			return ManagedFunctionLogicImpl.this.functionMetaData.getExecutor();
+		}
+
+		@Override
+		public void setNextFunctionArgument(Object argument) {
+			this.context.setNextFunctionArgument(argument);
 		}
 	}
 

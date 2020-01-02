@@ -44,7 +44,6 @@ public class ManagedFunctionLoggerTest extends AbstractOfficeConstructTestCase {
 		Closure<Logger> logger = new Closure<>();
 		this.constructFunction(FUNCTION_NAME, () -> (context) -> {
 			logger.value = context.getLogger();
-			return null;
 		});
 
 		// Ensure provide appropriate logger

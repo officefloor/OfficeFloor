@@ -27,14 +27,10 @@ public interface ManagedFunction<O extends Enum<O>, F extends Enum<F>> {
 	/**
 	 * Executes the function.
 	 * 
-	 * @param context
-	 *            {@link ManagedFunctionContext} for the
-	 *            {@link ManagedFunction}.
-	 * @return Parameter for the next {@link ManagedFunction}. This allows
-	 *         stringing {@link ManagedFunction} instances together.
-	 * @throws Throwable
-	 *             Indicating failure of the {@link ManagedFunction}.
+	 * @param context {@link ManagedFunctionContext} for the
+	 *                {@link ManagedFunction}.
+	 * @throws Throwable Indicating failure of the {@link ManagedFunction}.
 	 */
-	Object execute(ManagedFunctionContext<O, F> context) throws Throwable;
+	void execute(ManagedFunctionContext<O, F> context) throws Throwable;
 
 }

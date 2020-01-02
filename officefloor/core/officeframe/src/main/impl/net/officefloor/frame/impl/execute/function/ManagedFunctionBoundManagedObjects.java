@@ -23,6 +23,7 @@ import net.officefloor.frame.api.managedobject.ManagedObject;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
+import net.officefloor.frame.internal.structure.BlockState;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FunctionState;
 import net.officefloor.frame.internal.structure.FunctionStateContext;
@@ -46,8 +47,8 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class ManagedFunctionBoundManagedObjects {
 
 	/**
-	 * Reduce object creation as {@link ManagedObject} instances typically bound
-	 * to {@link ThreadState} and {@link ProcessState}.
+	 * Reduce object creation as {@link ManagedObject} instances typically bound to
+	 * {@link ThreadState} and {@link ProcessState}.
 	 */
 	private static final ManagedObjectContainer[] NO_FUNCTION_BOUND_MANAGED_OBJECTS = new ManagedObjectContainer[0];
 
@@ -75,38 +76,35 @@ public class ManagedFunctionBoundManagedObjects {
 	/**
 	 * Instantiate.
 	 * 
-	 * @param managedFunctionLogic
-	 *            {@link ManagedFunctionLogic}.
-	 * @param managedObjectMetaData
-	 *            {@link ManagedObjectMetaData} of the
-	 *            {@link ManagedObjectContainer} instances bound to the
-	 *            {@link ManagedFunctionContainer}.
-	 * @param requiredManagedObjects
-	 *            {@link ManagedObjectIndex} instances to the
-	 *            {@link ManagedObject} instances that must be loaded before the
-	 *            {@link ManagedFunction} may be executed.
-	 * @param requiredGovernance
-	 *            Identifies the required activation state of the
-	 *            {@link Governance} for this {@link ManagedFunction}.
-	 * @param isEnforceGovernance
-	 *            <code>true</code> to enforce {@link Governance} on
-	 *            deactivation. <code>false</code> to disregard
-	 *            {@link Governance} on deactivation.
-	 * @param functionLogicMetaData
-	 *            {@link ManagedFunctionLogicMetaData}.
-	 * @param parallelOwner
-	 *            Parallel owner of this {@link ManagedFunctionContainer}. May
-	 *            be <code>null</code> if no owner.
-	 * @param flow
-	 *            {@link Flow} for the {@link ManagedFunctionContainer}.
-	 * @param isUnloadManagedObjects
-	 *            Indicates whether this {@link ManagedObjectContainer} is
-	 *            responsible for unloading the {@link ManagedObject} instances.
+	 * @param managedFunctionLogic   {@link ManagedFunctionLogic}.
+	 * @param managedObjectMetaData  {@link ManagedObjectMetaData} of the
+	 *                               {@link ManagedObjectContainer} instances bound
+	 *                               to the {@link ManagedFunctionContainer}.
+	 * @param requiredManagedObjects {@link ManagedObjectIndex} instances to the
+	 *                               {@link ManagedObject} instances that must be
+	 *                               loaded before the {@link ManagedFunction} may
+	 *                               be executed.
+	 * @param requiredGovernance     Identifies the required activation state of the
+	 *                               {@link Governance} for this
+	 *                               {@link ManagedFunction}.
+	 * @param isEnforceGovernance    <code>true</code> to enforce {@link Governance}
+	 *                               on deactivation. <code>false</code> to
+	 *                               disregard {@link Governance} on deactivation.
+	 * @param functionLogicMetaData  {@link ManagedFunctionLogicMetaData}.
+	 * @param parallelOwner          Parallel owner of this
+	 *                               {@link ManagedFunctionContainer}. May be
+	 *                               <code>null</code> if no owner.
+	 * @param flow                   {@link Flow} for the
+	 *                               {@link ManagedFunctionContainer}.
+	 * @param isUnloadManagedObjects Indicates whether this
+	 *                               {@link ManagedObjectContainer} is responsible
+	 *                               for unloading the {@link ManagedObject}
+	 *                               instances.
 	 */
 	public ManagedFunctionBoundManagedObjects(ManagedFunctionLogic managedFunctionLogic,
 			ManagedObjectMetaData<?>[] managedObjectMetaData, ManagedObjectIndex[] requiredManagedObjects,
 			boolean[] requiredGovernance, boolean isEnforceGovernance,
-			ManagedFunctionLogicMetaData functionLogicMetaData, ManagedFunctionContainer parallelOwner, Flow flow,
+			ManagedFunctionLogicMetaData functionLogicMetaData, BlockState parallelOwner, Flow flow,
 			boolean isUnloadManagedObjects) {
 
 		// Obtain the thread state

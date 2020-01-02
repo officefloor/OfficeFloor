@@ -25,6 +25,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
 
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.classes.OfficeFloorJavaCompiler;
 import net.officefloor.compile.managedfunction.FunctionNamespaceType;
@@ -93,7 +95,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Function
 		ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("function",
-				new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		ManagedFunctionObjectTypeBuilder<?> objectOne = function.addObject(String.class);
 		objectOne.setTypeQualifier(MockQualification.class.getName());
 		objectOne.setLabel(MockQualification.class.getName() + "-" + String.class.getName());
@@ -157,7 +159,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// function
 		ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("function",
-				new MethodFunctionFactory(null, null, null, null), null, null);
+				new MethodFunctionFactory(null, null, null), null, null);
 		function.addObject(String.class).setLabel(MockQualification.class.getName());
 
 		// Test
@@ -200,7 +202,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Function
 		ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("function",
-				new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		ManagedFunctionObjectTypeBuilder<?> objectOne = function.addObject(String.class);
 		objectOne.setTypeQualifier("MOCK_ONE");
 		objectOne.setLabel("MOCK_ONE-" + String.class.getName());
@@ -265,7 +267,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		FunctionNamespaceBuilder namespace = ManagedFunctionLoaderUtil.createManagedFunctionTypeBuilder();
 
 		// Function
-		namespace.addManagedFunctionType("function", new MethodFunctionFactory(null, null, null, null), Indexed.class,
+		namespace.addManagedFunctionType("function", new MethodFunctionFactory(null, null, null), Indexed.class,
 				Indexed.class).addAnnotation(this.createMock(MockFunctionAnnotation.class));
 
 		// Validate the namespace type
@@ -302,7 +304,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Function
 		ManagedFunctionTypeBuilder function = namespace.addManagedFunctionType("function",
-				new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		ManagedFunctionObjectTypeBuilder<?> objectOne = function.addObject(MockParameter.class);
 		objectOne.setTypeQualifier("MOCK_value");
 		objectOne.setLabel("MOCK_value-" + MockParameter.class.getName());
@@ -371,7 +373,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		// Load the functions (all depend on variable)
 		for (String methodName : new String[] { "var", "out", "in", "val" }) {
 			ManagedFunctionTypeBuilder method = namespace.addManagedFunctionType(methodName,
-					new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+					new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 			ManagedFunctionObjectTypeBuilder var = method.addObject(Var.class);
 			var.setLabel("VAR-" + variableName);
 			var.setTypeQualifier(variableName);
@@ -445,7 +447,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// functionInstanceMethod
 		ManagedFunctionTypeBuilder instanceMethod = namespace.addManagedFunctionType("functionInstanceMethod",
-				new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		instanceMethod.setReturnType(String.class);
 		instanceMethod.addObject(String.class).setLabel(String.class.getName());
 		ManagedFunctionFlowTypeBuilder<?> asynchronous = instanceMethod.addFlow();
@@ -460,27 +462,27 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// functionFailMethod
 		ManagedFunctionTypeBuilder failMethod = namespace.addManagedFunctionType("functionFailMethod",
-				new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		failMethod.addEscalation(SQLException.class);
 
 		// functionStaticMethod
 		ManagedFunctionTypeBuilder staticMethod = namespace.addManagedFunctionType("functionStaticMethod",
-				new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		staticMethod.setReturnType(Object.class);
 
 		// managedFunctionContext
 		ManagedFunctionTypeBuilder managedFunctionContext = namespace.addManagedFunctionType("managedFunctionContext",
-				new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		managedFunctionContext.setReturnType(ManagedFunctionContext.class);
 
 		// asynchronousFlow
 		ManagedFunctionTypeBuilder asynchronousFlow = namespace.addManagedFunctionType("asynchronousFlow",
-				new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		asynchronousFlow.setReturnType(AsynchronousFlow.class);
 
 		// asynchronousFlows
 		ManagedFunctionTypeBuilder asynchronousFlows = namespace.addManagedFunctionType("asynchronousFlows",
-				new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		asynchronousFlows.setReturnType(AsynchronousFlow[].class);
 
 		// Validate the namespace type
@@ -533,13 +535,13 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		this.functionContext.doFlow(PARALLEL_FLOW_INDEX, Integer.valueOf(1), null);
 		this.functionContext.doFlow(ASYNCHRONOUS_FLOW_INDEX, PARAMETER_VALUE, null);
 		this.functionContext.doFlow(SUCCESSFUL_FLOW_INDEX, null, null);
+		this.functionContext.setNextFunctionArgument(RETURN_VALUE);
 
 		// Replay the mock objects
 		this.replayMockObjects();
 
 		// Invoke the function ensuring the correct return value
-		Object returnValue = function.execute(this.functionContext);
-		assertEquals("Incorrect return value", RETURN_VALUE, returnValue);
+		function.execute(this.functionContext);
 
 		// Verify mock objects
 		this.verifyMockObjects();
@@ -587,13 +589,13 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// Record invoking method
 		MockClass.returnValue = RETURN_VALUE;
+		this.functionContext.setNextFunctionArgument(RETURN_VALUE);
 
 		// Replay the mock objects
 		this.replayMockObjects();
 
 		// Invoke the function ensuring the correct return value
-		Object returnValue = function.execute(this.functionContext);
-		assertEquals("Incorrect return value", RETURN_VALUE, returnValue);
+		function.execute(this.functionContext);
 
 		// Verify mock objects
 		this.verifyMockObjects();
@@ -608,12 +610,14 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		// Create the function
 		ManagedFunction<?, ?> function = createMockClassManagedFunction("managedFunctionContext");
 
+		// Ensure correct next argument
+		this.functionContext.setNextFunctionArgument(this.functionContext);
+
 		// Replay the mock objects
 		this.replayMockObjects();
 
 		// Invoke the function ensuring the correct return value
-		Object returnValue = function.execute(this.functionContext);
-		assertEquals("Incorrect return value", this.functionContext, returnValue);
+		function.execute(this.functionContext);
 
 		// Verify mock objects
 		this.verifyMockObjects();
@@ -631,13 +635,13 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		// Record obtain asynchronous flow
 		AsynchronousFlow flow = this.createMock(AsynchronousFlow.class);
 		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flow);
+		this.functionContext.setNextFunctionArgument(flow);
 
 		// Replay the mock objects
 		this.replayMockObjects();
 
 		// Invoke the function ensuring the correct return value
-		Object returnValue = function.execute(this.functionContext);
-		assertEquals("Incorrect return value", flow, returnValue);
+		function.execute(this.functionContext);
 
 		// Verify mock objects
 		this.verifyMockObjects();
@@ -657,16 +661,20 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 		AsynchronousFlow flowTwo = this.createMock(AsynchronousFlow.class);
 		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flowOne);
 		this.recordReturn(this.functionContext, this.functionContext.createAsynchronousFlow(), flowTwo);
+		this.functionContext.setNextFunctionArgument(new AsynchronousFlow[] { flowOne, flowTwo });
+		this.control(this.functionContext).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				AsynchronousFlow[] actualFlows = (AsynchronousFlow[]) actual[0];
+				return (flowOne == actualFlows[0]) && (flowTwo == actualFlows[1]);
+			}
+		});
 
 		// Replay the mock objects
 		this.replayMockObjects();
 
 		// Invoke the function ensuring the correct return value
-		Object returnValue = function.execute(this.functionContext);
-		assertTrue("Should be array of flows", returnValue instanceof AsynchronousFlow[]);
-		AsynchronousFlow[] flows = (AsynchronousFlow[]) returnValue;
-		assertEquals("Incorrect first flow", flowOne, flows[0]);
-		assertEquals("Incorrect second flow", flowTwo, flows[1]);
+		function.execute(this.functionContext);
 
 		// Verify mock objects
 		this.verifyMockObjects();
@@ -853,7 +861,7 @@ public class ClassManagedFunctionSourceTest extends OfficeFrameTestCase {
 
 		// function
 		ManagedFunctionTypeBuilder functionMethod = namespace.addManagedFunctionType("function",
-				new MethodFunctionFactory(null, null, null, null), Indexed.class, Indexed.class);
+				new MethodFunctionFactory(null, null, null), Indexed.class, Indexed.class);
 		functionMethod.setReturnType(Integer.class);
 		functionMethod.addObject(Integer.class).setLabel(Integer.class.getName());
 

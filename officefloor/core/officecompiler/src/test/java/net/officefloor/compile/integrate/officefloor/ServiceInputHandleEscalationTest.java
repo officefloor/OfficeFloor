@@ -58,8 +58,7 @@ public class ServiceInputHandleEscalationTest extends OfficeFrameTestCase {
 	private Throwable escalation = new Exception("CLEANUP ESCALATION");
 
 	/**
-	 * Indicates if the {@link ExternalServiceCleanupEscalationHandler} was
-	 * invoked.
+	 * Indicates if the {@link ExternalServiceCleanupEscalationHandler} was invoked.
 	 */
 	private boolean isCleanupHandlingInvoked = false;
 
@@ -206,9 +205,6 @@ public class ServiceInputHandleEscalationTest extends OfficeFrameTestCase {
 						if (ServiceInputHandleEscalationTest.this.escalation != null) {
 							throw ServiceInputHandleEscalationTest.this.escalation;
 						}
-
-						// Successful clean up
-						return null;
 					};
 				}
 			});
