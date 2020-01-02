@@ -11,7 +11,7 @@ jobs:
       dist: xenial
       language: java
       jdk: openjdk8
-      env: officefloor_skip_stress_tests=true CUSTOM_MVN_VERSION=3.6.1
+      env: officefloor_skip_stress_tests=true
       addons:
         apt:
           packages: openjfx
@@ -22,7 +22,7 @@ jobs:
       install:
         - choco install -y jdk8
         - export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_231"
-        - choco install -y maven --version=3.6.1
+        - choco install -y maven
         - export "MAVEN_OPTS=-Xmx2048m"
       script: cd officefloor/bom; /c/ProgramData/chocolatey/lib/maven/apache-maven-3.6.1/bin/mvn -B clean install
     - name: Java 11 (Linux)
