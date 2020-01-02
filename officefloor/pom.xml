@@ -17,6 +17,10 @@
 	<artifactId>officefloor</artifactId>
 	<packaging>pom</packaging>
 	<inceptionYear>2005</inceptionYear>
+	<organization>
+		<name>OfficeFloor</name>
+		<url>http://officefloor.net</url>
+	</organization>
 	<distributionManagement>
 		<site>
 			<id>repo.officefloor.sf.net</id>
@@ -556,11 +560,8 @@
 					<artifactId>javacc-maven-plugin</artifactId>
 					<version>2.6</version>
 				</plugin>
-				<plugin>
-					<groupId>com.mycila</groupId>
-					<artifactId>license-maven-plugin</artifactId>
-					<version>3.0</version>
-				</plugin>
+				<!-- <plugin> <groupId>com.mycila</groupId> <artifactId>license-maven-plugin</artifactId> 
+					<version>3.0</version> </plugin> -->
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-maven-plugin</artifactId>
@@ -753,6 +754,36 @@
 		</pluginManagement>
 		<plugins>
 
+			<plugin>
+				<!-- Allow GIT tagging via command: -->
+				<!-- Note: need to have deployment key configured for ssh access. -->
+				<!-- -->
+				<!-- mvn scm:tag -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<configuration>
+					<connectionType>developerConnection</connectionType>
+					<tag>release-${revision}</tag>
+				</configuration>
+			</plugin>
+
+			<!-- Allow updating license header of source files -->
+			<!-- -->
+			<!-- mvn license:update-file-header -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>2.0.0</version>
+				<configuration>
+					<licenseName>agpl_v3</licenseName>
+					<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+					<copyrightOwners>Daniel Sagenschneider</copyrightOwners>
+					<emptyLineAfterHeader>true</emptyLineAfterHeader>
+					<ignoreNoFileToScan>true</ignoreNoFileToScan>
+					<verbose>false</verbose>
+				</configuration>
+			</plugin>
+
 			<!-- Flatten to release for Maven Central release -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -773,87 +804,6 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 					</filesets>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<!-- Allow GIT tagging via command: -->
-				<!-- Note: need to have deployment key configured for ssh access. -->
-				<!-- -->
-				<!-- mvn scm:tag -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-scm-plugin</artifactId>
-				<configuration>
-					<connectionType>developerConnection</connectionType>
-					<tag>release-${revision}</tag>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<!-- Ensures correct licensing -->
-				<!-- -->
-				<!-- Run the following to determine files requiring correcting: -->
-				<!-- mvn -N license:check | grep -v java$ -->
-				<!-- -->
-				<!-- Run the following to fix licenses in files: -->
-				<!-- mvn -N license:format -->
-				<groupId>com.mycila</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<configuration>
-					<header>src/license/license-header.txt</header>
-					<strictCheck>true</strictCheck>
-					<aggregate>true</aggregate>
-					<properties>
-						<currentYear>${current.year}</currentYear>
-					</properties>
-					<excludes>
-						<!-- Directories to exclude -->
-						<exclude>**/META-INF/services/**</exclude>
-						<exclude>**/src/test/resources/**</exclude>
-						<exclude>**/src/auto/**</exclude>
-						<exclude>**/src/main/resources/archetype-resources/src/**
-						</exclude>
-						<!-- Extensions to exclude -->
-						<exclude>**/*.xml</exclude>
-						<exclude>**/*.xsd</exclude>
-						<exclude>**/*.exsd</exclude>
-						<exclude>**/*.txt</exclude>
-						<exclude>**/*.ofp</exclude>
-						<exclude>**/*.jks</exclude>
-						<exclude>**/*.config</exclude>
-						<exclude>**/*.properties</exclude>
-						<exclude>**/*.e4xmi</exclude>
-						<exclude>**/*.xpm</exclude>
-						<exclude>**/*.target</exclude>
-						<exclude>**/*.jj</exclude>
-						<exclude>**/*.apt</exclude>
-						<exclude>**/*.vm</exclude>
-						<exclude>**/*.xcf</exclude>
-						<exclude>**/*.odg</exclude>
-						<exclude>**/*.ogv</exclude>
-						<exclude>**/*.rcd</exclude>
-						<exclude>**/*.zip</exclude>
-						<exclude>**/*.jar</exclude>
-						<exclude>**/*.css</exclude>
-						<exclude>**/*.bsh</exclude>
-						<exclude>**/*.sh </exclude>
-						<exclude>**/*.js</exclude>
-						<exclude>**/*.jsp</exclude>
-						<exclude>**/*.log</exclude>
-						<exclude>**/*.html</exclude>
-						<exclude>**/*.htaccess</exclude>
-						<exclude>**/*.desk</exclude>
-						<exclude>**/*.section</exclude>
-						<exclude>**/*.office</exclude>
-						<exclude>**/*.officefloor</exclude>
-						<exclude>**/*.woof</exclude>
-						<exclude>**/*.objects</exclude>
-						<exclude>**/*.teams</exclude>
-					</excludes>
-					<headerDefinitions>
-						<headerDefinition>src/license/java-header-style.xml
-						</headerDefinition>
-					</headerDefinitions>
 				</configuration>
 			</plugin>
 
