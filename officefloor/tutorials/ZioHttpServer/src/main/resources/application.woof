@@ -1,0 +1,31 @@
+<woof>
+  <http-inputs>
+    <http-input path="/" method="POST" secure="false" x="43" y="239">
+      <procedure name="service"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="service" resource="net.officefloor.tutorial.ziohttpserver.ServiceLogic" source="Class" procedure="service" x="287" y="235">
+      <next>
+        <procedure name="send" />
+      </next>
+    </procedure>
+    <procedure name="send" resource="net.officefloor.tutorial.ziohttpserver.ServiceLogic" source="Class" procedure="send" x="287" y="235">
+      <next />
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>
