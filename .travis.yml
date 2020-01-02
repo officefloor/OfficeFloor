@@ -11,7 +11,7 @@ jobs:
       dist: xenial
       language: java
       jdk: openjdk8
-      env: officefloor_skip_stress_tests=true
+      env: officefloor_skip_stress_tests=true CUSTOM_MVN_VERSION=3.6.3
       addons:
         apt:
           packages: openjfx
@@ -20,8 +20,8 @@ jobs:
       language: shell
       env: officefloor_skip_stress_tests=true officefloor_docker_available=false officefloor_gcloud_available=false
       install:
-        - choco install -y jdk8
-        - export "JAVA_HOME=/c/Program Files/Java/jdk1.8.0_231"
+        - choco install -y jdk8 -params "source=false" -params 'installdir=c:\\java'
+        - export "JAVA_HOME=/c/java"
         - choco install -y maven
         - export "MAVEN_OPTS=-Xmx2048m"
       script: cd officefloor/bom; /c/ProgramData/chocolatey/lib/maven/apache-maven-3.6.1/bin/mvn -B clean install
@@ -30,5 +30,5 @@ jobs:
       dist: xenial
       language: java
       jdk: openjdk11
-      env: officefloor_skip_stress_tests=true officefloor_code_coverage=true CUSTOM_MVN_VERSION=3.6.1
+      env: officefloor_skip_stress_tests=true officefloor_code_coverage=true CUSTOM_MVN_VERSION=3.6.3
       after_success: bash <(curl -s https://codecov.io/bash)
