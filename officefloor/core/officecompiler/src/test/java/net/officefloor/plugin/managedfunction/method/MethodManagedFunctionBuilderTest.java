@@ -329,6 +329,7 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 		MethodResult result = MockReturnManufacturer.run(Closure.class, String.class, (context) -> {
 
 			// Provide translation that fails
+			context.addEscalation(Exception.class);
 			context.setTranslatedReturnClass(String.class);
 			return (translateContext) -> {
 				assertNotNull("Should have " + ManagedFunctionContext.class.getSimpleName(),
@@ -336,6 +337,7 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 				throw (Exception) translateContext.getReturnValue().value;
 			};
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFailureFunction(), "method", (type) -> {
+			type.addEscalation(Exception.class);
 			type.setReturnType(String.class);
 		}, null));
 		assertEquals("Incorrect translation failure", TranslateReturnFailureFunction.FAILURE, result.getFailure());
@@ -358,6 +360,7 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 		MethodResult result = MockReturnManufacturer.run(Closure.class, String.class, (context) -> {
 
 			// Provide translation that fails
+			context.addEscalation(Exception.class);
 			context.setTranslatedReturnClass(String.class);
 			return (translateContext) -> {
 				AsynchronousFlow flow = translateContext.getManagedFunctionContext().createAsynchronousFlow();
@@ -368,6 +371,7 @@ public class MethodManagedFunctionBuilderTest extends OfficeFrameTestCase {
 				});
 			};
 		}, () -> MethodManagedFunctionBuilderUtil.runMethod(new TranslateReturnFailureFunction(), "method", (type) -> {
+			type.addEscalation(Exception.class);
 			type.setReturnType(String.class);
 		}, null));
 

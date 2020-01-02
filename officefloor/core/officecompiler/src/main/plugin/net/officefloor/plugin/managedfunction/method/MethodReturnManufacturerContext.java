@@ -20,8 +20,12 @@ package net.officefloor.plugin.managedfunction.method;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionEscalationTypeBuilder;
+import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.function.ManagedFunction;
 import net.officefloor.frame.api.source.SourceContext;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
  * Context for the {@link MethodReturnManufacturer}.
@@ -73,6 +77,22 @@ public interface MethodReturnManufacturerContext<T> {
 	 */
 
 	Method getMethod();
+
+	/**
+	 * <p>
+	 * Adds a {@link ManagedFunctionEscalationTypeBuilder} to the
+	 * {@link ManagedFunctionTypeBuilder} definition.
+	 * <p>
+	 * It is possible the {@link MethodReturnTranslator} will throw an
+	 * {@link Escalation}. While this should be avoided, this allows registering
+	 * {@link Escalation} for being handled.
+	 * 
+	 * @param <E>            {@link Escalation} type.
+	 * @param escalationType Type to be handled by an {@link EscalationFlow}.
+	 * @return {@link ManagedFunctionEscalationTypeBuilder} to provide the
+	 *         <code>type definition</code>.
+	 */
+	<E extends Throwable> ManagedFunctionEscalationTypeBuilder addEscalation(Class<E> escalationType);
 
 	/**
 	 * Obtains the {@link SourceContext}.

@@ -644,8 +644,7 @@ public class CompileFunctionTest extends AbstractCompileTestCase {
 			ManagedFunctionTypeBuilder<Indexed, Indexed> function = namespaceBuilder.addManagedFunctionType("function",
 					new MethodFunctionFactory(
 							new DefaultConstructorMethodObjectInstanceFactory(CompileFunctionClass.class),
-							CompileFunctionClass.class.getMethod("simpleFunction"), new MethodParameterFactory[0],
-							null),
+							CompileFunctionClass.class.getMethod("simpleFunction"), new MethodParameterFactory[0]),
 					Indexed.class, Indexed.class);
 			function.addAnnotation(ANNOTATION);
 		}
