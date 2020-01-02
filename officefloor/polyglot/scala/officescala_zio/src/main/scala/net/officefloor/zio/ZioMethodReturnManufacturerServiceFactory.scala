@@ -40,14 +40,10 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
           }
 
           // Determine Java Class from Type
-          val classFromType: Type => Class[_] = t => {
-            if (Array(typeOf[Null], typeOf[Nothing]).exists(t.=:=(_))) {
-              null
-            } else if (Array(typeOf[Any], typeOf[AnyVal], typeOf[AnyRef]).exists(t.=:=(_))) {
-              classOf[Object]
-            } else {
-              mirror.runtimeClass(t.typeSymbol.asClass)
-            }
+          val classFromType: Type => Class[_] = t => t match {
+            case _ if (Array(typeOf[Null], typeOf[Nothing]).exists(t.=:=(_)))  => null
+            case _ if (Array(typeOf[Any], typeOf[AnyVal], typeOf[AnyRef]).exists(t.=:=(_))) => classOf[Object]
+            case _ => mirror.runtimeClass(t.typeSymbol.asClass)
           }
 
           // Translate failure/success type to Java Class

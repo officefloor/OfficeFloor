@@ -1,6 +1,5 @@
 package net.officefloor.zio
 
-import junit.framework.AssertionFailedError
 import net.officefloor.activity.impl.procedure.ClassProcedureSource
 import net.officefloor.activity.procedure.build.{ProcedureArchitect, ProcedureEmployer}
 import net.officefloor.activity.procedure.{ProcedureLoaderUtil, ProcedureTypeBuilder}
@@ -9,6 +8,8 @@ import net.officefloor.frame.api.manage.OfficeFloor
 import net.officefloor.plugin.section.clazz.Parameter
 import org.scalatest.FlatSpec
 import zio.ZIO
+
+import scala.util.{Failure, Try}
 
 /**
  * Test spec.
@@ -33,20 +34,6 @@ trait TestSpec extends FlatSpec {
     test(methodName, typeBuilder, { officeFloor =>
       assert(TestSpec.failure == null)
       assert(TestSpec.success == expectedSuccess)
-    })
-
-  /**
-   * Undertake test for failed ZIO.
-   *
-   * @param methodName       Name of method for procedure.
-   * @param exceptionHandler Handler of the exception.
-   * @param typeBuilder      Builds the expected type.
-   */
-  def failure(methodName: String, exceptionHandler: Throwable => Unit, typeBuilder: ProcedureTypeBuilder => Unit): Unit =
-    test(methodName, typeBuilder, { officeFloor =>
-      assert(TestSpec.success == null)
-      assert(TestSpec.failure != null)
-      exceptionHandler(TestSpec.failure)
     })
 
   /**
@@ -95,6 +82,20 @@ trait TestSpec extends FlatSpec {
   }
 
   /**
+   * Undertake test for failed ZIO.
+   *
+   * @param methodName       Name of method for procedure.
+   * @param exceptionHandler Handler of the exception.
+   * @param typeBuilder      Builds the expected type.
+   */
+  def failure(methodName: String, exceptionHandler: Throwable => Unit, typeBuilder: ProcedureTypeBuilder => Unit): Unit =
+    test(methodName, typeBuilder, { officeFloor =>
+      assert(TestSpec.success == null)
+      assert(TestSpec.failure != null)
+      exceptionHandler(TestSpec.failure)
+    })
+
+  /**
    * Undertakes test for invalid ZIO.
    *
    * @param methodName   Name of method for procedure.
@@ -103,11 +104,9 @@ trait TestSpec extends FlatSpec {
   def invalid(methodName: String, errorMessage: String): Unit = {
     // Ensure not able to load type
     val builder = ProcedureLoaderUtil.createProcedureTypeBuilder(methodName, null)
-    try {
-      ProcedureLoaderUtil.validateProcedureType(builder, this.getClass.getName, methodName)
-      fail("Should not be successful")
-    } catch {
-      case ex: AssertionFailedError => assert(ex.getMessage.contains(errorMessage))
+    Try(ProcedureLoaderUtil.validateProcedureType(builder, this.getClass.getName, methodName)) match {
+      case Failure(ex) => assert(ex.getMessage.contains(errorMessage))
+      case _ => fail("Should not be successful")
     }
   }
 

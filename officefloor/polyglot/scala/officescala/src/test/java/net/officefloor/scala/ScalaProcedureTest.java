@@ -37,8 +37,6 @@ import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.compile.WebCompileOfficeFloor;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

@@ -616,7 +616,7 @@ public class MethodManagedFunctionBuilder {
 		 * {@link Map} of {@link Throwable} type to
 		 * {@link ManagedFunctionEscalationTypeBuilder}.
 		 */
-		Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes;
+		private final Map<Class<? extends Throwable>, ManagedFunctionEscalationTypeBuilder> escalationTypes;
 
 		/**
 		 * Instantiate.
