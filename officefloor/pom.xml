@@ -573,6 +573,7 @@
 						<failOnMissingHeader>true</failOnMissingHeader>
 						<extraExtensions>
 							<scala>java</scala>
+							<vm>apt</vm>
 						</extraExtensions>
 					</configuration>
 				</plugin>
