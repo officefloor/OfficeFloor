@@ -571,6 +571,9 @@
 						<emptyLineAfterHeader>true</emptyLineAfterHeader>
 						<ignoreNoFileToScan>true</ignoreNoFileToScan>
 						<failOnMissingHeader>true</failOnMissingHeader>
+						<extraExtensions>
+							<scala>java</scala>
+						</extraExtensions>
 					</configuration>
 				</plugin>
 				<plugin>
