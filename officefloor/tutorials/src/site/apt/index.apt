@@ -108,6 +108,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ObjectifyHttpServer/index.html}Objectify}}              | Objectify for Google App Engine datastore                  | {{{http://github.com/objectify/objectify/wiki}Objectify}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./ZioHttpServer/index.html}ZIO}}                          | Using ZIO effects                                          | {{{https://zio.dev}ZIO}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
 *Dynamic web page for prototyping and simpler applications

@@ -66,4 +66,4 @@ Objectify Tutorial
 
 Next
 
-  The {{{../PrototypeHttpServer/index.html}next tutorial}} covers creating quick prototype applications.
+  The {{{../ZioHttpServer/index.html}next tutorial}} covers using ZIO effects.

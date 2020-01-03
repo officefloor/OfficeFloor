@@ -17,6 +17,10 @@
 	<artifactId>officefloor</artifactId>
 	<packaging>pom</packaging>
 	<inceptionYear>2005</inceptionYear>
+	<organization>
+		<name>OfficeFloor</name>
+		<url>http://officefloor.net</url>
+	</organization>
 	<distributionManagement>
 		<site>
 			<id>repo.officefloor.sf.net</id>
@@ -557,9 +561,17 @@
 					<version>2.6</version>
 				</plugin>
 				<plugin>
-					<groupId>com.mycila</groupId>
+					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>license-maven-plugin</artifactId>
-					<version>3.0</version>
+					<version>2.0.0</version>
+					<configuration>
+						<licenseName>agpl_v3</licenseName>
+						<copyrightOwners>Daniel Sagenschneider</copyrightOwners>
+						<addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+						<emptyLineAfterHeader>true</emptyLineAfterHeader>
+						<ignoreNoFileToScan>true</ignoreNoFileToScan>
+						<failOnMissingHeader>true</failOnMissingHeader>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
@@ -753,6 +765,27 @@
 		</pluginManagement>
 		<plugins>
 
+			<plugin>
+				<!-- Allow GIT tagging via command: -->
+				<!-- Note: need to have deployment key configured for ssh access. -->
+				<!-- -->
+				<!-- mvn scm:tag -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<configuration>
+					<connectionType>developerConnection</connectionType>
+					<tag>release-${revision}</tag>
+				</configuration>
+			</plugin>
+
+			<!-- Allow updating license header of source files -->
+			<!-- -->
+			<!-- mvn license:update-file-header -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+			</plugin>
+
 			<!-- Flatten to release for Maven Central release -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -773,87 +806,6 @@
 							<followSymlinks>false</followSymlinks>
 						</fileset>
 					</filesets>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<!-- Allow GIT tagging via command: -->
-				<!-- Note: need to have deployment key configured for ssh access. -->
-				<!-- -->
-				<!-- mvn scm:tag -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-scm-plugin</artifactId>
-				<configuration>
-					<connectionType>developerConnection</connectionType>
-					<tag>release-${revision}</tag>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<!-- Ensures correct licensing -->
-				<!-- -->
-				<!-- Run the following to determine files requiring correcting: -->
-				<!-- mvn -N license:check | grep -v java$ -->
-				<!-- -->
-				<!-- Run the following to fix licenses in files: -->
-				<!-- mvn -N license:format -->
-				<groupId>com.mycila</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<configuration>
-					<header>src/license/license-header.txt</header>
-					<strictCheck>true</strictCheck>
-					<aggregate>true</aggregate>
-					<properties>
-						<currentYear>${current.year}</currentYear>
-					</properties>
-					<excludes>
-						<!-- Directories to exclude -->
-						<exclude>**/META-INF/services/**</exclude>
-						<exclude>**/src/test/resources/**</exclude>
-						<exclude>**/src/auto/**</exclude>
-						<exclude>**/src/main/resources/archetype-resources/src/**
-						</exclude>
-						<!-- Extensions to exclude -->
-						<exclude>**/*.xml</exclude>
-						<exclude>**/*.xsd</exclude>
-						<exclude>**/*.exsd</exclude>
-						<exclude>**/*.txt</exclude>
-						<exclude>**/*.ofp</exclude>
-						<exclude>**/*.jks</exclude>
-						<exclude>**/*.config</exclude>
-						<exclude>**/*.properties</exclude>
-						<exclude>**/*.e4xmi</exclude>
-						<exclude>**/*.xpm</exclude>
-						<exclude>**/*.target</exclude>
-						<exclude>**/*.jj</exclude>
-						<exclude>**/*.apt</exclude>
-						<exclude>**/*.vm</exclude>
-						<exclude>**/*.xcf</exclude>
-						<exclude>**/*.odg</exclude>
-						<exclude>**/*.ogv</exclude>
-						<exclude>**/*.rcd</exclude>
-						<exclude>**/*.zip</exclude>
-						<exclude>**/*.jar</exclude>
-						<exclude>**/*.css</exclude>
-						<exclude>**/*.bsh</exclude>
-						<exclude>**/*.sh </exclude>
-						<exclude>**/*.js</exclude>
-						<exclude>**/*.jsp</exclude>
-						<exclude>**/*.log</exclude>
-						<exclude>**/*.html</exclude>
-						<exclude>**/*.htaccess</exclude>
-						<exclude>**/*.desk</exclude>
-						<exclude>**/*.section</exclude>
-						<exclude>**/*.office</exclude>
-						<exclude>**/*.officefloor</exclude>
-						<exclude>**/*.woof</exclude>
-						<exclude>**/*.objects</exclude>
-						<exclude>**/*.teams</exclude>
-					</excludes>
-					<headerDefinitions>
-						<headerDefinition>src/license/java-header-style.xml
-						</headerDefinition>
-					</headerDefinitions>
 				</configuration>
 			</plugin>
 
@@ -1117,6 +1069,32 @@
 	</reporting>
 	<profiles>
 		<profile>
+			<id>check-release-to-maven-central</id>
+			<activation>
+				<property>
+					<name>officefloor-deploy</name>
+					<value>sonatype</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>check-file-header-licenses</id>
+								<goals>
+									<goal>check-file-header</goal>
+								</goals>
+								<phase>process-sources</phase>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
 			<id>officefloor-code-coverage</id>
 			<activation>
 				<property>
@@ -1331,6 +1309,127 @@
 						</plugin>
 					</plugins>
 				</pluginManagement>
+			</build>
+		</profile>
+		<profile>
+			<id>scala</id>
+			<activation>
+				<file>
+					<exists>${basedir}/src/test/scala</exists>
+				</file>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-library</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.scalatest</groupId>
+					<artifactId>scalatest_2.12</artifactId>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.scalacheck</groupId>
+					<artifactId>scalacheck_2.12</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>add-source</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>add-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>src/main/scala</source>
+									</sources>
+								</configuration>
+							</execution>
+							<execution>
+								<id>add-test-source</id>
+								<phase>generate-test-sources</phase>
+								<goals>
+									<goal>add-test-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>src/test/scala</source>
+									</sources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>net.alchim31.maven</groupId>
+						<artifactId>scala-maven-plugin</artifactId>
+						<configuration>
+							<recompileMode>incremental</recompileMode>
+						</configuration>
+						<executions>
+							<execution>
+								<id>scala-compile</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>scala-test-compile</id>
+								<phase>process-test-resources</phase>
+								<goals>
+									<goal>testCompile</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<executions>
+							<!-- Only use Scala compiling -->
+							<execution>
+								<id>default-compile</id>
+								<phase>none</phase>
+							</execution>
+							<execution>
+								<id>default-testCompile</id>
+								<phase>none</phase>
+							</execution>
+							<execution>
+								<id>java-compile</id>
+								<phase>none</phase>
+							</execution>
+							<execution>
+								<id>java-test-compile</id>
+								<phase>none</phase>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.scalatest</groupId>
+						<artifactId>scalatest-maven-plugin</artifactId>
+						<configuration>
+							<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+							<junitxml>.</junitxml>
+							<filereports>WDF TestSuite.txt</filereports>
+						</configuration>
+						<executions>
+							<execution>
+								<id>test</id>
+								<goals>
+									<goal>test</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
 			</build>
 		</profile>
 	</profiles>
