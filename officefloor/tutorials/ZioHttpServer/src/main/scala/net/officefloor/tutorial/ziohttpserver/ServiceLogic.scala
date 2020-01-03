@@ -9,6 +9,7 @@ import zio.ZIO
  */
 class ServiceLogic {
 
+  // START SNIPPET: service
   def service(request: ZioRequest, repository: MessageRepository): ZIO[Any, Throwable, Message] = {
 
     // Service Logic
@@ -22,8 +23,10 @@ class ServiceLogic {
       override val messageRepository = repository
     })
   }
+  // END SNIPPET: service
 
+  // START SNIPPET: send
   def send(@Parameter message: Message, response: ObjectResponse[ZioResponse]): Unit =
     response.send(new ZioResponse(message.getContent))
-
+  // END SNIPPET: send
 }

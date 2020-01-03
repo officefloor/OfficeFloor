@@ -20,7 +20,7 @@ class MessageServiceTest extends FlatSpec {
 
   def runtime(id: Int, content: String): Runtime[InjectMessageRepository] =
     Runtime(new InjectMessageRepository {
-      override val messageRepository: MessageRepository = new TestMessageRepository(1, "Hello World")
+      override val messageRepository: MessageRepository = new TestMessageRepository(id, content)
     }, PlatformLive.Default)
 }
 // END SNIPPET: tutorial

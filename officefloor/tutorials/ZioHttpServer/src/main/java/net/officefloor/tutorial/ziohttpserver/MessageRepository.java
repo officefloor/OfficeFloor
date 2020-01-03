@@ -25,6 +25,8 @@ import org.springframework.stereotype.Repository;
  * 
  * @author Daniel Sagenschneider
  */
+// START SNIPPET: tutorial
 @Repository
 public interface MessageRepository extends CrudRepository<Message, Integer> {
 }
+// END SNIPPET: tutorial

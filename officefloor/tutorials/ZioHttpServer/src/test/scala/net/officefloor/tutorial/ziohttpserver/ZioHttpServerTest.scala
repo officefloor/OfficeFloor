@@ -6,6 +6,7 @@ import org.scalatest.FlatSpec
 /**
  * Tests the ZIO HTTP Server.
  */
+// START SNIPPET: tutorial
 class ZioHttpServerTest extends FlatSpec with WoofRules {
 
   it should "get message" in {
@@ -20,3 +21,4 @@ class ZioHttpServerTest extends FlatSpec with WoofRules {
   }
 
 }
+// END SNIPPET: tutorial

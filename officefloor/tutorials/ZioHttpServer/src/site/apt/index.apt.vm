@@ -26,13 +26,69 @@ ZIO Tutorial
   
   The effect is tested with the following code:
   
-%{snippet|id=tutorial|file=${basedir}/src/test/scala/net/officefloor/tutorial/ziohttpserver/InjectMessageRepository.scala|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/test/scala/net/officefloor/tutorial/ziohttpserver/MessageServiceTest.scala|ignoreDownloadError=false}
   
   Note: the test is not comprehensive, however, demonstrates testing the ZIO effect.
   
   
   
-*Servicing Request
+*Servicing Request with ZIO
 
   To integrate ZIO into a {{{https://sagenschneider.blogspot.com/2019/11/first-class-procedure-type-system-for.html}First-Class Procedure}} add the following to the <<<pom.xml>>>:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+  
+  This will setup the configured procedures to handle the returned ZIO from functions.
+  
+  As ZIO environments provide dependency injection, the OfficeFloor injected dependencies need to be mapped onto the required ZIO environment.  The following function demonstrates the mapping:
+  
+%{snippet|id=service|file=${basedir}/src/main/scala/net/officefloor/tutorial/ziohttpserver/ServiceLogic.scala|ignoreDownloadError=false}
+     
+  This function is configured into a procedure.  The ZIO handling by OfficeFloor then:
+  
+   [[1]] Identifies a ZIO is returned from the function
+   
+   [[1]] Confirms the ZIO does not require a custom environment.  As above, environment needs to be provided from injected dependencies
+   
+   [[1]] Unsafely runs the returned ZIO
+   
+   [[1]] Provides the success as parameter to next procedure.  Or throws any exception to be handled by configured OfficeFloor exception handlers
+   
+  This allows ZIO to be used for writing modular functions of the application.  Then lets OfficeFloor compose these functions graphically together to form the application.
+  
+  As per the WoOF configuration of the application:
+  
+[./images/ZioHttpServer-configuration.png] ZioHttpServer screen shot.
+  
+  The next configured procedure sends the message response:
+  
+%{snippet|id=send|file=${basedir}/src/main/scala/net/officefloor/tutorial/ziohttpserver/ServiceLogic.scala|ignoreDownloadError=false}
+  
+
+
+*Repository injected from Spring
+
+  To complete the code of the application, a repository implementation is required.  Given the repository needs to be dependency injected, the implementation of the repository is via Spring:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/ziohttpserver/MessageRepository.java|ignoreDownloadError=false}
+  
+  See the {{{../TransactionHttpServer/index.html}Transaction Tutorial}} for further information on configuring Spring repositories.
+
+
+
+*Testing
+
+  The following test demonstrates using ZIO to service a HTTP request:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/scala/net/officefloor/tutorial/ziohttpserver/ZioHttpServerTest.scala|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../PrototypeHttpServer/index.html}next tutorial}} covers creating quick prototype applications.
+ 
+  
+  
+  
   
