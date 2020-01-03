@@ -7,6 +7,7 @@ import zio.internal.PlatformLive
 /**
  * Tests the {@link MessageService}.
  */
+// START SNIPPET: tutorial
 class MessageServiceTest extends FlatSpec {
 
   it should "retrieve Message" in {
@@ -22,3 +23,4 @@ class MessageServiceTest extends FlatSpec {
       override val messageRepository: MessageRepository = new TestMessageRepository(1, "Hello World")
     }, PlatformLive.Default)
 }
+// END SNIPPET: tutorial

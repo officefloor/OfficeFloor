@@ -1,0 +1,38 @@
+                                               -----------------------
+                                                    ZIO Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+ZIO Tutorial
+
+  This tutorial demonstrates using {{{https://zio.dev}ZIO}}.
+
+  To focus on ZIO, this tutorial uses a simple application that retrieves a message from database via ZIO effect. 
+
+  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ZioHttpServer/${projectVersion}/ZioHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+
+
+
+*ZIO
+
+  The ZIO effect to retrieve a message from the database is the following:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/ziohttpserver/MessageService.scala|ignoreDownloadError=false}
+
+  with the following environment:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/ziohttpserver/InjectMessageRepository.scala|ignoreDownloadError=false}
+  
+  The effect is tested with the following code:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/scala/net/officefloor/tutorial/ziohttpserver/InjectMessageRepository.scala|ignoreDownloadError=false}
+  
+  Note: the test is not comprehensive, however, demonstrates testing the ZIO effect.
+  
+  
+  
+*Servicing Request
+
+  To integrate ZIO into a {{{https://sagenschneider.blogspot.com/2019/11/first-class-procedure-type-system-for.html}First-Class Procedure}} add the following to the <<<pom.xml>>>:
+  
