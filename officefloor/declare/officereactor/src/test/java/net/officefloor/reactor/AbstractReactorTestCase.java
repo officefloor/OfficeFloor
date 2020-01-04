@@ -1,20 +1,3 @@
-/*
- * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2020 Daniel Sagenschneider
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package net.officefloor.reactor;
 
 import java.util.function.Consumer;
@@ -39,17 +22,17 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * 
  * @author Daniel Sagenschneider
  */
-public class AbstractReactorTestCase extends OfficeFrameTestCase {
+public abstract class AbstractReactorTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Success.
 	 */
-	protected Object success;
+	protected static Object success;
 
 	/**
 	 * Failure.
 	 */
-	protected Throwable failure;
+	protected static Throwable failure;
 
 	/**
 	 * Undertakes test for successful value.
@@ -60,8 +43,11 @@ public class AbstractReactorTestCase extends OfficeFrameTestCase {
 	 */
 	protected void success(String methodName, Object expectedSuccess, Consumer<ProcedureTypeBuilder> typeBuilder) {
 		this.test(methodName, typeBuilder, (officeFloor) -> {
-			assertNull("Should be no failure", this.failure);
-			assertEquals("Incorrect success", expectedSuccess, this.success);
+			assertNull(
+					"Should be no failure: "
+							+ (failure == null ? "" : failure.getMessage() + " (" + failure.getClass().getName() + ")"),
+					failure);
+			assertEquals("Incorrect success", expectedSuccess, success);
 		});
 	}
 
@@ -75,9 +61,9 @@ public class AbstractReactorTestCase extends OfficeFrameTestCase {
 	protected void failure(String methodName, Consumer<Throwable> exceptionHandler,
 			Consumer<ProcedureTypeBuilder> typeBuilder) {
 		this.test(methodName, typeBuilder, (officeFloor) -> {
-			assertNull("Should be no success", this.success);
-			assertNotNull("Should be a failure", this.failure);
-			exceptionHandler.accept(this.failure);
+			assertNull("Should be no success", success);
+			assertNotNull("Should be a failure", failure);
+			exceptionHandler.accept(failure);
 		});
 	}
 
@@ -128,8 +114,8 @@ public class AbstractReactorTestCase extends OfficeFrameTestCase {
 					ClassProcedureSource.SOURCE_NAME, methodName, true, null);
 
 			// Capture success
-			OfficeSection capture = procedureArchitect.addProcedure("capture", this.getClass().getName(), "capture",
-					ClassProcedureSource.SOURCE_NAME, false, null);
+			OfficeSection capture = procedureArchitect.addProcedure("capture", this.getClass().getName(),
+					ClassProcedureSource.SOURCE_NAME, "capture", false, null);
 			officeArchitect.link(procedure.getOfficeSectionOutput(ProcedureArchitect.NEXT_OUTPUT_NAME),
 					capture.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 
@@ -140,8 +126,8 @@ public class AbstractReactorTestCase extends OfficeFrameTestCase {
 			officeArchitect.link(escalation, handle.getOfficeSectionInput(ProcedureArchitect.INPUT_NAME));
 		});
 		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
-			this.success = null;
-			this.failure = null;
+			success = null;
+			failure = null;
 			CompileOfficeFloor.invokeProcess(officeFloor, methodName + ".procedure", null);
 			testRunner.accept(officeFloor);
 		} catch (Throwable ex) {
@@ -150,11 +136,11 @@ public class AbstractReactorTestCase extends OfficeFrameTestCase {
 	}
 
 	public void capture(@Parameter Object parameter) {
-		this.success = parameter;
+		success = parameter;
 	}
 
 	public void handle(@Parameter Throwable parameter) {
-		this.failure = parameter;
+		failure = parameter;
 	}
 
 }

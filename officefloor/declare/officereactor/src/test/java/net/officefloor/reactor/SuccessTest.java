@@ -1,20 +1,3 @@
-/*
- * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2020 Daniel Sagenschneider
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package net.officefloor.reactor;
 
 import reactor.core.publisher.Mono;
@@ -26,24 +9,29 @@ import reactor.core.publisher.Mono;
  */
 public class SuccessTest extends AbstractReactorTestCase {
 
+	private static final Object object = new Object();
+
 	/**
 	 * Ensure {@link Object}.
 	 */
 	public void testObject() {
-		this.success("Object", this.object);
+		this.valid("Object", object);
 	}
 
-	private final Object object = new Object();
-
 	public Mono<Object> successObject() {
-		return Mono.just(this.object);
+		return Mono.just(object);
 	}
 
 	/**
 	 * Ensure {@link Void}.
 	 */
 	public void testVoid() {
-		this.success("Void", null);
+		this.failure("successVoid", (ex) -> {
+			assertTrue("Incorrect failure", ex instanceof NullPointerException);
+		}, (builder) -> {
+			// No return type
+			builder.addEscalationType(Throwable.class);
+		});
 	}
 
 	public Mono<Void> successVoid() {
@@ -54,7 +42,7 @@ public class SuccessTest extends AbstractReactorTestCase {
 	 * Ensure {@link String}.
 	 */
 	public void testString() {
-		this.success("String", "TEST");
+		this.valid("String", "TEST");
 	}
 
 	public Mono<String> successString() {
@@ -65,23 +53,34 @@ public class SuccessTest extends AbstractReactorTestCase {
 	 * Ensure raw.
 	 */
 	public void testRaw() {
-		this.success("Raw", this.object);
+		this.valid("Raw", object);
 	}
 
 	@SuppressWarnings("rawtypes")
 	public Mono successRaw() {
-		return Mono.just(this.object);
+		return Mono.just(object);
 	}
-	
+
 	/**
 	 * Ensure wildcard.
 	 */
 	public void testWildcard() {
-		this.success("Wildcard", this.object);
+		this.valid("Wildcard", object);
 	}
-	
+
 	public Mono<?> successWildcard() {
-		return Mono.just(this.object);
+		return Mono.just(object);
+	}
+
+	/**
+	 * Ensure <code>null</code> {@link Mono}.
+	 */
+	public void testNullMono() {
+		this.valid("NullMono", null, Integer.class);
+	}
+
+	public Mono<Integer> successNullMono() {
+		return null;
 	}
 
 	/**
@@ -90,11 +89,23 @@ public class SuccessTest extends AbstractReactorTestCase {
 	 * @param methodSuffix    Method name suffix.
 	 * @param expectedSuccess Expected success.
 	 */
-	protected void success(String methodSuffix, Object expectedSuccess) {
+	protected void valid(String methodSuffix, Object expectedSuccess) {
+		this.valid(methodSuffix, expectedSuccess, expectedSuccess == null ? null : expectedSuccess.getClass());
+	}
+
+	/**
+	 * Validate success.
+	 * 
+	 * @param methodSuffix    Method name suffix.
+	 * @param expectedSuccess Expected success.
+	 */
+	protected void valid(String methodSuffix, Object expectedSuccess, Class<?> expectedSuccessType) {
 		this.success("success" + methodSuffix, expectedSuccess, (builder) -> {
-			if (expectedSuccess != null) {
-				builder.setNextArgumentType(expectedSuccess.getClass());
+			if (expectedSuccessType != null) {
+				builder.setNextArgumentType(expectedSuccessType);
 			}
+			builder.addEscalationType(Throwable.class);
 		});
 	}
+
 }
