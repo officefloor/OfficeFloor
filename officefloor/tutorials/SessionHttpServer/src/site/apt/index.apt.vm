@@ -33,7 +33,7 @@ Session HTTP Server Tutorial
   
 [./images/SessionHttpServer-screenshot.png] SessionHttpServer screen shot.
     
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/SessionHttpServer/${projectVersion}/SessionHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SessionHttpServer}Tutorial Source}}
 
 
   

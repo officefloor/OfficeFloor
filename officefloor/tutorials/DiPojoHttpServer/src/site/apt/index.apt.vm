@@ -33,7 +33,7 @@ Dependency Injection Tutorial
   
 [./images/DiPojoHttpServer-screenshot.png] DiPojoHttpServer screen shot.
   
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DiPojoHttpServer/${projectVersion}/DiPojoHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/DiPojoHttpServer}Tutorial Source}}
 
 
 

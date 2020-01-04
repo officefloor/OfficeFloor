@@ -34,7 +34,7 @@ JavaScript, AJAX, JSON Tutorial
 
 [./images/JavaScriptApp-screenshot.png] JavaScriptApp screen shot.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/JavaScriptApp/${projectVersion}/JavaScriptApp-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JavaScriptApp}Tutorial Source}}
 
 
   

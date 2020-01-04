@@ -29,7 +29,7 @@ PayPal Tutorial
 
   This tutorial demonstrates the ease of integrating PayPal to take payments.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/PayPalHttpServer/${projectVersion}/PayPalHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/PayPalHttpServer}Tutorial Source}}
 
 
 

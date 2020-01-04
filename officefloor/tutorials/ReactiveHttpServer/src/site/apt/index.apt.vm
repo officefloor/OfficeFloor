@@ -35,7 +35,7 @@ Reactive Tutorial
 
 [./images/ReactiveHttpServer-configuration.png] ReactiveHttpServer screen shot.
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ReactiveHttpServer/${projectVersion}/ReactiveHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ReactiveHttpServer}Tutorial Source}}
 
 
 

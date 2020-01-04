@@ -33,7 +33,7 @@ Test Tutorial
     
 [./images/TestHttpServer-screenshot.png] TestHttpServer screen shot.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/TestHttpServer/${projectVersion}/TestHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/TestHttpServer}Tutorial Source}}
 
   Production quality testing would cover a lot more test scenarios for the application.  The additional scenarios have been excluded for brevity as they would follow a similar pattern as described by this tutorial.
 

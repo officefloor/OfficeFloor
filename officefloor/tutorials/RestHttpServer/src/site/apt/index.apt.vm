@@ -35,7 +35,7 @@ REST Tutorial
       
    * <<<GET /vehicle/\{id\}>>> to obtain the vehicle entry by the vehicle's identifier
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/RestHttpServer/${projectVersion}/RestHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/RestHttpServer}Tutorial Source}}
 
 
 

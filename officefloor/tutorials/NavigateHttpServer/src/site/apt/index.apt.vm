@@ -51,7 +51,7 @@ Configuring Flow Tutorial
 
 [./images/NavigateHttpServer-two-screenshot.png] NavigateHttpServer two screen shot.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/NavigateHttpServer/${projectVersion}/NavigateHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/NavigateHttpServer}Tutorial Source}}
   
 
   

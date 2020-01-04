@@ -1060,7 +1060,6 @@
 					</excludedPages>
 					<excludedLinks>
 						<excludedLink>http://sourceforge.net/projects/officefloor</excludedLink>
-						<excludedLink>http://www.officefloor.net/maven2/</excludedLink>
 						<excludedLink>//dl.acm.org/**</excludedLink>
 						<excludedLink>http://dl.acm.org/**</excludedLink>
 						<excludedLink>https://dl.acm.org/**</excludedLink>

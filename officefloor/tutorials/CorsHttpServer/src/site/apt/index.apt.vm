@@ -33,7 +33,7 @@ CORS Tutorial
 
   The example used in this tutorial is a simple end point <<<GET /path>>> that will add CORS headers. 
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/CorsHttpServer/${projectVersion}/CorsHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/CorsHttpServer}Tutorial Source}}
 
 
 

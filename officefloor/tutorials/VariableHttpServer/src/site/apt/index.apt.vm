@@ -31,7 +31,7 @@ Variable Tutorial
   
   Unlike function/method/procedures calls, variables do not need to be sent directly by the caller.  Variables can be set upstream and dependency injected anywhere downstream.  This allows a lot more flexibility to composing flows together.
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/VariableHttpServer/${projectVersion}/VariableHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/VariableHttpServer}Tutorial Source}}
 
 
 

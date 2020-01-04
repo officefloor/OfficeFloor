@@ -31,7 +31,7 @@ Logger Tutorial
 
   To focus on logging, this tutorial uses a simple application that logs the input string sent by the client. 
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/LoggerHttpServer/${projectVersion}/LoggerHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/LoggerHttpServer}Tutorial Source}}
 
 
 

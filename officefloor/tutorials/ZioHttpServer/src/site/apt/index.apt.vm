@@ -31,7 +31,7 @@ ZIO Tutorial
 
   To focus on ZIO, this tutorial uses a simple application that retrieves a message from database via ZIO effect. 
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ZioHttpServer/${projectVersion}/ZioHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ZioHttpServer}Tutorial Source}}
 
 
 

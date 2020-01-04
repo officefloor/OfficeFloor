@@ -35,7 +35,7 @@ Dependency Injection of Managed Object Tutorial
   
 [./images/DatabaseHttpServer-screenshot.png] DatabaseHttpServer screen shot.
   
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DatabaseHttpServer/${projectVersion}/DatabaseHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/DatabaseHttpServer}Tutorial Source}}
 
 
 
@@ -84,7 +84,7 @@ Dependency Injection of Managed Object Tutorial
   
   The following is the content of the template. 
 
-%{snippet|id=tutorial|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
 
   The table data is provided by the following method.
 

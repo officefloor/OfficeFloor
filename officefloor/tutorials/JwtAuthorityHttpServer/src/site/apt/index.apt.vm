@@ -37,7 +37,7 @@ JWT Authority Tutorial
    
    * <<<GET /jwks.json>>> to retrieve the JWT keys as per JWKS
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/JwtAuthorityHttpServer/${projectVersion}/JwtAuthorityHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JwtAuthorityHttpServer}Tutorial Source}}
 
 
 
