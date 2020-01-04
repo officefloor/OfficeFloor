@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -57,7 +58,8 @@
 	<build>
 		<plugins>
 			<plugin>
-				<!-- Only license tutorial and verification. Developers may use tutorial code as seed. -->
+				<!-- Only license tutorial and verification. -->
+				<!-- Developers may use tutorial code as seed. -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<configuration>
@@ -65,6 +67,14 @@
 						<root>src/site</root>
 						<root>src/test/verifier</root>
 					</roots>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- Do not deploy tutorials. Not libraries for including in projects. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
 				</configuration>
 			</plugin>
 		</plugins>
