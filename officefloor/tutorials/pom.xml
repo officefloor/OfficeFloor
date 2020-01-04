@@ -76,8 +76,7 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<!-- Only license tutorial and verification. Developers may use tutorial code as seed and not want to have to remove 
-					the license headers. -->
+				<!-- Only license tutorial and verification. Developers may use tutorial code as seed. -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<configuration>
