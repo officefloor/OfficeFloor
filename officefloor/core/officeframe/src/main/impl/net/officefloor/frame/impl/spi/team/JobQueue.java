@@ -55,8 +55,7 @@ public class JobQueue {
 	/**
 	 * Initiate.
 	 * 
-	 * @param lock
-	 *            Lock for coordinating this {@link JobQueue}.
+	 * @param lock Lock for coordinating this {@link JobQueue}.
 	 */
 	public JobQueue(Object lock) {
 		this.lock = lock;
@@ -76,8 +75,7 @@ public class JobQueue {
 	/**
 	 * Thread-safe enqueues a {@link Job} to the queue.
 	 * 
-	 * @param job
-	 *            {@link Job} to add to the queue.
+	 * @param job {@link Job} to add to the queue.
 	 */
 	public void enqueue(Job job) {
 		synchronized (this.lock) {
@@ -100,8 +98,8 @@ public class JobQueue {
 	/**
 	 * Thread-safe dequeuing the next {@link Job} to execute.
 	 * 
-	 * @return Next {@link Job} to execute or <code>null</code> if no
-	 *         {@link Job} currently available.
+	 * @return Next {@link Job} to execute or <code>null</code> if no {@link Job}
+	 *         currently available.
 	 */
 	public Job dequeue() {
 		synchronized (this.lock) {
@@ -110,14 +108,12 @@ public class JobQueue {
 	}
 
 	/**
-	 * Thread-safe dequeuing the next {@link Job} to execute. This will block
-	 * for <code>timeout</code> milliseconds for a {@link Job} to become
-	 * available.
+	 * Thread-safe dequeuing the next {@link Job} to execute. This will block for
+	 * <code>timeout</code> milliseconds for a {@link Job} to become available.
 	 * 
-	 * @param timeout
-	 *            Timeout to wait for dequeuing a {@link Job}.
-	 * @return Next {@link Job} to execute or <code>null</code> if timed out
-	 *         waiting for next {@link Job}.
+	 * @param timeout Timeout to wait for dequeuing a {@link Job}.
+	 * @return Next {@link Job} to execute or <code>null</code> if timed out waiting
+	 *         for next {@link Job}.
 	 */
 	public Job dequeue(long timeout) {
 		synchronized (this.lock) {
@@ -131,10 +127,18 @@ public class JobQueue {
 	}
 
 	/**
+	 * Wakes up waiting on a {@link Job}.
+	 */
+	public void wakeUp() {
+		synchronized (this.lock) {
+			this.lock.notify();
+		}
+	}
+
+	/**
 	 * Waits the input period of time for another {@link Job} to be added.
 	 * 
-	 * @param timeout
-	 *            Time to wait in milliseconds.
+	 * @param timeout Time to wait in milliseconds.
 	 */
 	public void waitForTask(long timeout) {
 		synchronized (this.lock) {
@@ -148,8 +152,7 @@ public class JobQueue {
 	 * <p>
 	 * Before invoking this method, the {@link #lock} must be synchronised on.
 	 * 
-	 * @param timeout
-	 *            Time to wait in milliseconds.
+	 * @param timeout Time to wait in milliseconds.
 	 */
 	private void waitForTask0(long timeout) {
 		// Wait on a job to be in queue
@@ -165,8 +168,8 @@ public class JobQueue {
 	/**
 	 * Dequeues the next {@link Job} to execute.
 	 * 
-	 * @return Next {@link Job} to execute or <code>null</code> if no
-	 *         {@link Job} to execute.
+	 * @return Next {@link Job} to execute or <code>null</code> if no {@link Job} to
+	 *         execute.
 	 */
 	private Job dequeue0() {
 
@@ -215,8 +218,7 @@ public class JobQueue {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param job
-		 *            {@link Job}.
+		 * @param job {@link Job}.
 		 */
 		public JobEntry(Job job) {
 			this.job = job;

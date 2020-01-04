@@ -68,9 +68,13 @@ public class OfficeFloorFilter implements Filter {
 	private OfficeFloor officeFloor;
 
 	/**
+	 * <p>
 	 * {@link HttpServletOfficeFloorBridge}.
+	 * <p>
+	 * Lazy initialisation of {@link Filter} could cause different {@link Thread} to
+	 * create bridge and subsequently consider it <code>null</code>.
 	 */
-	private HttpServletOfficeFloorBridge bridge;
+	private volatile HttpServletOfficeFloorBridge bridge;
 
 	/*
 	 * =============== Filter =========================

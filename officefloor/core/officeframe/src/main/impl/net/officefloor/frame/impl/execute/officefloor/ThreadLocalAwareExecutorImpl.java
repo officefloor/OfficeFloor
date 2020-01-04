@@ -44,7 +44,7 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 	private final Map<Thread, JobQueueExecutor> threadToExecutor = new ConcurrentHashMap<>();
 
 	/**
-	 * Mapping of {@link ProcessState} identiifer to {@link JobQueueExecutor}.
+	 * Mapping of {@link ProcessState} identifier to {@link JobQueueExecutor}.
 	 */
 	private final Map<Object, JobQueueExecutor> processToExecutor = new ConcurrentHashMap<>();
 
@@ -61,22 +61,20 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		// Obtain the executor for the context thread
 		Thread currentThread = Thread.currentThread();
 		JobQueueExecutor executor = this.threadToExecutor.get(currentThread);
-		boolean isWaitOnComplete;
+		
+		// Determine if must create executor for thread
+		boolean isWaitOnComplete = false;
 		if (executor == null) {
 
 			// First process for the thread
-			executor = new JobQueueExecutor(currentThread, process);
+			executor = new JobQueueExecutor(currentThread);
 			this.threadToExecutor.put(currentThread, executor);
-			this.processToExecutor.put(process.getProcessIdentifier(), executor);
 			isWaitOnComplete = true;
-
-		} else {
-
-			// Already registered executor for thread
-			executor.registerProcess(process);
-			processToExecutor.put(process.getProcessIdentifier(), executor);
-			isWaitOnComplete = false;
 		}
+		
+		// Register process to executor
+		executor.registerProcess(process);
+		this.processToExecutor.put(process.getProcessIdentifier(), executor);
 
 		// Undertake the function within context
 		loop.executeFunction(function);
@@ -145,13 +143,10 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param thread  {@link Thread}.
-		 * @param process {@link ProcessState}.
+		 * @param thread {@link Thread}.
 		 */
-		public JobQueueExecutor(Thread thread, ProcessState process) {
+		private JobQueueExecutor(Thread thread) {
 			this.thread = thread;
-			Object processIdentifier = process.getProcessIdentifier();
-			this.registeredProcessIdentifiers.put(processIdentifier, processIdentifier);
 		}
 
 		/**
@@ -161,7 +156,7 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		 */
 		private void registerProcess(ProcessState process) {
 			Object processIdentifier = process.getProcessIdentifier();
-			this.registeredProcessIdentifiers.remove(processIdentifier);
+			this.registeredProcessIdentifiers.put(processIdentifier, processIdentifier);
 		}
 
 		/**
@@ -178,6 +173,9 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 			// Indicate if complete
 			if (this.registeredProcessIdentifiers.size() == 0) {
 				this.isComplete = true;
+				
+				// Wake up job queue (allow completion)
+				this.jobQueue.wakeUp();
 			}
 		}
 

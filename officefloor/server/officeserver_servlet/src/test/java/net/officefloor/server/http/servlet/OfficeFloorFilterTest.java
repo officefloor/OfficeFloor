@@ -105,9 +105,9 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 				// Load the HTTP server
 				HttpServer server = new HttpServer(officeInput, officeFloorDeployer, context);
 
-				// Indicate the server
-				System.out.println(
-						"HTTP server implementation " + server.getHttpServerImplementation().getClass().getName());
+				// Ensure correct implementation
+				assertEquals("Incorrect HTTP server implementation", HttpServletHttpServerImplementation.class,
+						server.getHttpServerImplementation().getClass());
 
 				// Load the team marker and team
 				Singleton.load(officeFloorDeployer, new TeamMarker(), office);
@@ -185,7 +185,8 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts servicing by OfficeFloor passing through to servlet container.
 	 * 
-	 * @param path Path to request.
+	 * @param path         Path to request.
+	 * @param entitySuffix Suffix for entity.
 	 */
 	private void assertPassThroughServicing(String path) throws Exception {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
@@ -194,7 +195,7 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 			org.apache.http.HttpResponse response = client.execute(post);
 			String entity = EntityUtils.toString(response.getEntity());
 			assertEquals("Incorrect status: " + entity, 200, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect content", "SERVLET-PassThrough", entity);
+			assertEquals("Incorrect content", "SERVLET-PassThrough-END", entity);
 		}
 	}
 
@@ -349,7 +350,7 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 			for (int character = entity.read(); character != -1; character = entity.read()) {
 				buffer.write(character);
 			}
-			resp.getWriter().write("SERVLET-" + buffer.toString());
+			resp.getWriter().write("SERVLET-" + buffer.toString() + "-END");
 		}
 	}
 

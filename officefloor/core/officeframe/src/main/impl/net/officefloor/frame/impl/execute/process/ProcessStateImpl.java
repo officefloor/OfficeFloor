@@ -340,23 +340,17 @@ public class ProcessStateImpl implements ProcessState {
 						@Override
 						public FunctionState execute(FunctionStateContext context) throws Throwable {
 
-							// Notify process context complete
-							if (process.threadLocalAwareExecutor != null) {
-								process.threadLocalAwareExecutor.processComplete(process);
-							}
-
-							// Flag to profile that process complete
-							if (process.processProfiler != null) {
-								process.processProfiler.processStateCompleted();
-							}
+							// Create the process complete operation
+							FunctionState complete = new ProcessCompleteOperation();
 
 							// Invoke process callback (if specified)
+							// (Thread local aware executor to be woken up after process callback completes)
 							if (process.mainThreadCompletion != null) {
-								return process.mainThreadCompletion;
+								complete = Promise.then(process.mainThreadCompletion, complete);
 							}
 
-							// Nothing further for process
-							return null;
+							// Complete the process
+							return complete;
 						}
 					});
 				}
@@ -387,6 +381,32 @@ public class ProcessStateImpl implements ProcessState {
 		public ThreadState getThreadState() {
 			// All process operations done on main thread state
 			return ProcessStateImpl.this.mainThreadState;
+		}
+	}
+
+	/**
+	 * Completes the {@link ProcessState}.
+	 */
+	private class ProcessCompleteOperation extends ProcessOperation {
+
+		@Override
+		public FunctionState execute(FunctionStateContext context) throws Throwable {
+
+			// Easy access to process state
+			final ProcessStateImpl process = ProcessStateImpl.this;
+
+			// Notify process context complete
+			if (process.threadLocalAwareExecutor != null) {
+				process.threadLocalAwareExecutor.processComplete(process);
+			}
+
+			// Flag to profile that process complete
+			if (process.processProfiler != null) {
+				process.processProfiler.processStateCompleted();
+			}
+
+			// Nothing further, as process complete
+			return null;
 		}
 	}
 
