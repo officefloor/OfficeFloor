@@ -571,6 +571,9 @@
 						<emptyLineAfterHeader>true</emptyLineAfterHeader>
 						<ignoreNoFileToScan>true</ignoreNoFileToScan>
 						<failOnMissingHeader>true</failOnMissingHeader>
+						<excludes>
+							<exclude>auto/**</exclude>
+						</excludes>
 						<extraExtensions>
 							<scala>java</scala>
 							<vm>apt</vm>
