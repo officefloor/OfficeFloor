@@ -573,6 +573,7 @@
 						<failOnMissingHeader>true</failOnMissingHeader>
 						<excludes>
 							<exclude>auto/**</exclude>
+							<exclude>javacc/**</exclude>
 						</excludes>
 						<extraExtensions>
 							<scala>java</scala>
