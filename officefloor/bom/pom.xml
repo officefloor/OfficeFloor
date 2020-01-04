@@ -745,6 +745,14 @@
 					<exists>${basedir}/pom.xml</exists>
 				</file>
 			</activation>
+			<pluginRepositories>
+				<pluginRepository>
+					<!-- Provide access to Kotlin resources -->
+					<id>jcenter</id>
+					<name>JCenter</name>
+					<url>https://jcenter.bintray.com/</url>
+				</pluginRepository>
+			</pluginRepositories>
 			<build>
 				<pluginManagement>
 					<plugins>
@@ -876,13 +884,6 @@
 					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
-			<pluginRepositories>
-				<pluginRepository>
-					<id>jcenter</id>
-					<name>JCenter</name>
-					<url>https://jcenter.bintray.com/</url>
-				</pluginRepository>
-			</pluginRepositories>
 			<build>
 				<pluginManagement>
 					<plugins>
@@ -896,6 +897,20 @@
 									<phase>package</phase>
 									<goals>
 										<goal>doc-jar</goal>
+									</goals>
+								</execution>
+							</executions>
+						</plugin>
+						<plugin>
+							<!-- Provide Kotlin JavaDoc files -->
+							<groupId>org.jetbrains.dokka</groupId>
+							<artifactId>dokka-maven-plugin</artifactId>
+							<version>${dokka-maven-version}</version>
+							<executions>
+								<execution>
+									<phase>package</phase>
+									<goals>
+										<goal>javadocJar</goal>
 									</goals>
 								</execution>
 							</executions>
@@ -935,22 +950,8 @@
 							</execution>
 						</executions>
 					</plugin>
+					<!-- Sign artifacts (must be after sources and javadoc to sign them) -->
 					<plugin>
-						<!-- Provide Kotlin JavaDoc files -->
-						<groupId>org.jetbrains.dokka</groupId>
-						<artifactId>dokka-maven-plugin</artifactId>
-						<version>${dokka-maven-version}</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>javadocJar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<!-- Sign artifacts (must be after sources and javadoc to sign them) -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
 						<executions>

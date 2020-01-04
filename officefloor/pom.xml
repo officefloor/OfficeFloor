@@ -1530,6 +1530,11 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+						<!-- Provide Kotlin JavaDoc files (when deploying) -->
+						<groupId>org.jetbrains.dokka</groupId>
+						<artifactId>dokka-maven-plugin</artifactId>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
