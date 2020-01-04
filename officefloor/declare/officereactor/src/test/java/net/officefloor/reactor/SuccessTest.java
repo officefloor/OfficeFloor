@@ -62,6 +62,29 @@ public class SuccessTest extends AbstractReactorTestCase {
 	}
 
 	/**
+	 * Ensure raw.
+	 */
+	public void testRaw() {
+		this.success("Raw", this.object);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public Mono successRaw() {
+		return Mono.just(this.object);
+	}
+	
+	/**
+	 * Ensure wildcard.
+	 */
+	public void testWildcard() {
+		this.success("Wildcard", this.object);
+	}
+	
+	public Mono<?> successWildcard() {
+		return Mono.just(this.object);
+	}
+
+	/**
 	 * Validate success.
 	 * 
 	 * @param methodSuffix    Method name suffix.
