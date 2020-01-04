@@ -16,59 +16,6 @@
 		<basedir>${basedir}</basedir>
 		<projectVersion>${project.version}</projectVersion>
 	</properties>
-	<build>
-		<sourceDirectory>src/main/kotlin</sourceDirectory>
-		<testSourceDirectory>src/test/kotlin</testSourceDirectory>
-		<plugins>
-			<plugin>
-				<groupId>org.jetbrains.kotlin</groupId>
-				<artifactId>kotlin-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>compile</id>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>test-compile</id>
-						<goals>
-							<goal>test-compile</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<executions>
-					<!-- Only use Kotlin compiling -->
-					<execution>
-						<id>default-compile</id>
-						<phase>none</phase>
-					</execution>
-					<execution>
-						<id>default-testCompile</id>
-						<phase>none</phase>
-					</execution>
-					<execution>
-						<id>java-compile</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>java-test-compile</id>
-						<phase>test-compile</phase>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
@@ -103,40 +50,6 @@
 					<url>http://www.officefloor.net/maven2/</url>
 				</repository>
 			</repositories>
-		</profile>
-		<profile>
-			<id>kotlin-release-to-maven-central</id>
-			<activation>
-				<property>
-					<name>officefloor-deploy</name>
-					<value>sonatype</value>
-				</property>
-			</activation>
-			<pluginRepositories>
-				<pluginRepository>
-					<id>jcenter</id>
-					<name>JCenter</name>
-					<url>https://jcenter.bintray.com/</url>
-				</pluginRepository>
-			</pluginRepositories>
-			<build>
-				<plugins>
-					<plugin>
-						<!-- Provide Kotlin JavaDoc files -->
-						<groupId>org.jetbrains.dokka</groupId>
-						<artifactId>dokka-maven-plugin</artifactId>
-						<version>${dokka-maven-version}</version>
-						<executions>
-							<execution>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>javadocJar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
 		</profile>
 	</profiles>
 </project>

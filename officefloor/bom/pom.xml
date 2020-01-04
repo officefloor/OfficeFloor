@@ -876,6 +876,13 @@
 					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>jcenter</id>
+					<name>JCenter</name>
+					<url>https://jcenter.bintray.com/</url>
+				</pluginRepository>
+			</pluginRepositories>
 			<build>
 				<pluginManagement>
 					<plugins>
@@ -886,7 +893,7 @@
 							<executions>
 								<execution>
 									<id>attach-javadocs</id>
-									<phase>integration-test</phase>
+									<phase>package</phase>
 									<goals>
 										<goal>doc-jar</goal>
 									</goals>
@@ -903,7 +910,7 @@
 						<executions>
 							<execution>
 								<id>attach-sources-for-release</id>
-								<phase>post-integration-test</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jar-no-fork</goal>
 									<goal>test-jar-no-fork</goal>
@@ -921,9 +928,23 @@
 						<executions>
 							<execution>
 								<id>attach-javadoc-for-release</id>
-								<phase>post-integration-test</phase>
+								<phase>package</phase>
 								<goals>
 									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<!-- Provide Kotlin JavaDoc files -->
+						<groupId>org.jetbrains.dokka</groupId>
+						<artifactId>dokka-maven-plugin</artifactId>
+						<version>${dokka-maven-version}</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>javadocJar</goal>
 								</goals>
 							</execution>
 						</executions>
