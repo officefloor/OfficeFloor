@@ -1530,6 +1530,18 @@
 							</execution>
 						</executions>
 					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>kotlin-javadoc</id>
+			<activation>
+				<file>
+					<exists>${basedir}/src/main/kotlin</exists>
+				</file>
+			</activation>
+			<build>
+				<plugins>
 					<plugin>
 						<!-- Provide Kotlin JavaDoc files (when deploying) -->
 						<groupId>org.jetbrains.dokka</groupId>
