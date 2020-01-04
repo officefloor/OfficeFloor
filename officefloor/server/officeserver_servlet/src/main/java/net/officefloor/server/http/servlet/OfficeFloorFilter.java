@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * HttpServlet adapter for OfficeFloor HTTP Server
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+
 package net.officefloor.server.http.servlet;
 
 import java.io.IOException;
@@ -47,9 +68,13 @@ public class OfficeFloorFilter implements Filter {
 	private OfficeFloor officeFloor;
 
 	/**
+	 * <p>
 	 * {@link HttpServletOfficeFloorBridge}.
+	 * <p>
+	 * Lazy initialisation of {@link Filter} could cause different {@link Thread} to
+	 * create bridge and subsequently consider it <code>null</code>.
 	 */
-	private HttpServletOfficeFloorBridge bridge;
+	private volatile HttpServletOfficeFloorBridge bridge;
 
 	/*
 	 * =============== Filter =========================

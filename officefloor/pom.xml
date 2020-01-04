@@ -54,7 +54,7 @@
 		<ant-optional-version>1.5.3-1</ant-optional-version>
 		<asm-version>7.2</asm-version>
 		<compiler-version>3.8.1</compiler-version>
-		<current.year>2019</current.year>
+		<current.year>2020</current.year>
 		<failsafe-version>2.22.2</failsafe-version>
 		<java-lowest-version>8</java-lowest-version>
 		<jetty-version>9.4.25.v20191220</jetty-version>
@@ -571,6 +571,10 @@
 						<emptyLineAfterHeader>true</emptyLineAfterHeader>
 						<ignoreNoFileToScan>true</ignoreNoFileToScan>
 						<failOnMissingHeader>true</failOnMissingHeader>
+						<extraExtensions>
+							<scala>java</scala>
+							<vm>apt</vm>
+						</extraExtensions>
 					</configuration>
 				</plugin>
 				<plugin>

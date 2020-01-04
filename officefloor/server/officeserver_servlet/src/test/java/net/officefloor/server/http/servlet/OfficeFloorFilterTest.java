@@ -1,3 +1,24 @@
+/*-
+ * #%L
+ * HttpServlet adapter for OfficeFloor HTTP Server
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+
 package net.officefloor.server.http.servlet;
 
 import java.io.IOException;
@@ -84,9 +105,9 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 				// Load the HTTP server
 				HttpServer server = new HttpServer(officeInput, officeFloorDeployer, context);
 
-				// Indicate the server
-				System.out.println(
-						"HTTP server implementation " + server.getHttpServerImplementation().getClass().getName());
+				// Ensure correct implementation
+				assertEquals("Incorrect HTTP server implementation", HttpServletHttpServerImplementation.class,
+						server.getHttpServerImplementation().getClass());
 
 				// Load the team marker and team
 				Singleton.load(officeFloorDeployer, new TeamMarker(), office);
@@ -164,7 +185,8 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 	/**
 	 * Asserts servicing by OfficeFloor passing through to servlet container.
 	 * 
-	 * @param path Path to request.
+	 * @param path         Path to request.
+	 * @param entitySuffix Suffix for entity.
 	 */
 	private void assertPassThroughServicing(String path) throws Exception {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
@@ -173,7 +195,7 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 			org.apache.http.HttpResponse response = client.execute(post);
 			String entity = EntityUtils.toString(response.getEntity());
 			assertEquals("Incorrect status: " + entity, 200, response.getStatusLine().getStatusCode());
-			assertEquals("Incorrect content", "SERVLET-PassThrough", entity);
+			assertEquals("Incorrect content", "SERVLET-PassThrough-END", entity);
 		}
 	}
 
@@ -328,7 +350,7 @@ public class OfficeFloorFilterTest extends OfficeFrameTestCase {
 			for (int character = entity.read(); character != -1; character = entity.read()) {
 				buffer.write(character);
 			}
-			resp.getWriter().write("SERVLET-" + buffer.toString());
+			resp.getWriter().write("SERVLET-" + buffer.toString() + "-END");
 		}
 	}
 

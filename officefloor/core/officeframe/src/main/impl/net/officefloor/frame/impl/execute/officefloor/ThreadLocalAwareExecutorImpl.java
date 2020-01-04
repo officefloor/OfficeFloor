@@ -1,20 +1,24 @@
-/*
- * OfficeFloor - http://www.officefloor.net
- * Copyright (C) 2005-2018 Daniel Sagenschneider
- *
+/*-
+ * #%L
+ * OfficeFrame
+ * %%
+ * Copyright (C) 2005 - 2020 Daniel Sagenschneider
+ * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
+ * GNU General Public License for more details.
+ * 
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * #L%
  */
+
 package net.officefloor.frame.impl.execute.officefloor;
 
 import java.util.Map;
@@ -40,7 +44,7 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 	private final Map<Thread, JobQueueExecutor> threadToExecutor = new ConcurrentHashMap<>();
 
 	/**
-	 * Mapping of {@link ProcessState} identiifer to {@link JobQueueExecutor}.
+	 * Mapping of {@link ProcessState} identifier to {@link JobQueueExecutor}.
 	 */
 	private final Map<Object, JobQueueExecutor> processToExecutor = new ConcurrentHashMap<>();
 
@@ -57,22 +61,20 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		// Obtain the executor for the context thread
 		Thread currentThread = Thread.currentThread();
 		JobQueueExecutor executor = this.threadToExecutor.get(currentThread);
-		boolean isWaitOnComplete;
+		
+		// Determine if must create executor for thread
+		boolean isWaitOnComplete = false;
 		if (executor == null) {
 
 			// First process for the thread
-			executor = new JobQueueExecutor(currentThread, process);
+			executor = new JobQueueExecutor(currentThread);
 			this.threadToExecutor.put(currentThread, executor);
-			this.processToExecutor.put(process.getProcessIdentifier(), executor);
 			isWaitOnComplete = true;
-
-		} else {
-
-			// Already registered executor for thread
-			executor.registerProcess(process);
-			processToExecutor.put(process.getProcessIdentifier(), executor);
-			isWaitOnComplete = false;
 		}
+		
+		// Register process to executor
+		executor.registerProcess(process);
+		this.processToExecutor.put(process.getProcessIdentifier(), executor);
 
 		// Undertake the function within context
 		loop.executeFunction(function);
@@ -141,13 +143,10 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		/**
 		 * Instantiate.
 		 * 
-		 * @param thread  {@link Thread}.
-		 * @param process {@link ProcessState}.
+		 * @param thread {@link Thread}.
 		 */
-		public JobQueueExecutor(Thread thread, ProcessState process) {
+		private JobQueueExecutor(Thread thread) {
 			this.thread = thread;
-			Object processIdentifier = process.getProcessIdentifier();
-			this.registeredProcessIdentifiers.put(processIdentifier, processIdentifier);
 		}
 
 		/**
@@ -157,7 +156,7 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 		 */
 		private void registerProcess(ProcessState process) {
 			Object processIdentifier = process.getProcessIdentifier();
-			this.registeredProcessIdentifiers.remove(processIdentifier);
+			this.registeredProcessIdentifiers.put(processIdentifier, processIdentifier);
 		}
 
 		/**
@@ -174,6 +173,9 @@ public class ThreadLocalAwareExecutorImpl implements ThreadLocalAwareExecutor {
 			// Indicate if complete
 			if (this.registeredProcessIdentifiers.size() == 0) {
 				this.isComplete = true;
+				
+				// Wake up job queue (allow completion)
+				this.jobQueue.wakeUp();
 			}
 		}
 
