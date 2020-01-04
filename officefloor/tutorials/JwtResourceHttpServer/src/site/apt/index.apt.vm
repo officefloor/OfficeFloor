@@ -33,7 +33,7 @@ JWT Tutorial
         
    * <<<GET /resource>>> to obtain the secured resource
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/JwtResourceHttpServer/${projectVersion}/JwtResourceHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JwtResourceHttpServer}Tutorial Source}}
 
 
 

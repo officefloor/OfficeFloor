@@ -43,7 +43,7 @@ Thread Injection Tutorial
    
    * thread (pool) to look up letter encryption within the database
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/TeamHttpServer/${projectVersion}/TeamHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/TeamHttpServer}Tutorial Source}}
 
   
 

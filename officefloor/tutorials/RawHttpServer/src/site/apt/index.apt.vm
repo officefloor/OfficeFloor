@@ -33,7 +33,7 @@ Rendering Raw HTML Tutorial
   
 [./images/RawHttpServer-screenshot.png] RawHttpServer screen shot.
     
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/RawHttpServer/${projectVersion}/RawHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/RawHttpServer}Tutorial Source}}
 
 
 

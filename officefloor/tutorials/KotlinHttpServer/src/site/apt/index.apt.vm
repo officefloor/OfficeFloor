@@ -33,7 +33,7 @@ Kotlin Polyglot Tutorial
   
   As Kotlin compiles to classes, much of the existing features of WoOF can be used as is.  Furthermore, as this tutorial also demonstrates, Kotlin functions can be used.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/KotlinHttpServer/${projectVersion}/KotlinHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/KotlinHttpServer}Tutorial Source}}
 
 
 

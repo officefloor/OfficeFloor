@@ -31,7 +31,7 @@ Scala Polyglot Tutorial
   
   While the tutorial is simple, it is entirely written in Scala.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ScalaHttpServer/${projectVersion}/ScalaHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ScalaHttpServer}Tutorial Source}}
 
 
 

@@ -37,7 +37,7 @@ Objectify Tutorial
    
    * <<<GET /posts}>>> to obtain all posts
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ObjectifyHttpServer/${projectVersion}/ObjectifyHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ObjectifyHttpServer}Tutorial Source}}
 
 
 

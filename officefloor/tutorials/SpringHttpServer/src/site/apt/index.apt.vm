@@ -33,7 +33,7 @@ Spring HTTP Server Tutorial
   
 [./images/SpringHttpServer-screenshot.png] SpringHttpServer screen shot.
     
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/SpringHttpServer/${projectVersion}/SpringHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SpringHttpServer}Tutorial Source}}
 
 
 

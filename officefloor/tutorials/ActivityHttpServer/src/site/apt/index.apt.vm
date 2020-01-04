@@ -31,7 +31,7 @@ Activity Tutorial
 
   To focus on modular configuration, this tutorial uses a simple application that returns the depth of modules within modules. 
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ActivityHttpServer/${projectVersion}/ActivityHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ActivityHttpServer}Tutorial Source}}
 
 
 

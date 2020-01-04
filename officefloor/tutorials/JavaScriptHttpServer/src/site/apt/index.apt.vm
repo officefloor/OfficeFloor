@@ -35,7 +35,7 @@ JavaScript Polyglot Tutorial
 
 [./images/JavaScriptHttpServer-configuration.png] JavaScriptHttpServer screen shot.
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/JavaScriptHttpServer/${projectVersion}/JavaScriptHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JavaScriptHttpServer}Tutorial Source}}
 
 
 

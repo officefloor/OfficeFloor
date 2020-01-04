@@ -34,7 +34,7 @@ Thread Affinity Tutorial
 
 [./images/threadaffinity-screenshot.png] Thread Affinity screen shot.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ThreadAffinityHttpServer/${projectVersion}/ThreadAffinityHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ThreadAffinityHttpServer}Tutorial Source}}
 
 
   

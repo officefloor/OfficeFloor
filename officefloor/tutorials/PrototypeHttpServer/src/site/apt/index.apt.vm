@@ -33,7 +33,7 @@ Wireframe Prototype Tutorial
 
 [./images/PrototypeHttpServer-form-screenshot.png] PrototypeHttpServer form screen shot.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/PrototypeHttpServer/${projectVersion}/PrototypeHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/PrototypeHttpServer}Tutorial Source}}
 
   WoOF provides the ability to wire frame the web pages into a working prototype.  This allows users to provide feedback on the web application before any code needs to be written.  Having this feedback catches issues very early in the development life-cycle leading to reduced overall effort/cost in building the web application.
   

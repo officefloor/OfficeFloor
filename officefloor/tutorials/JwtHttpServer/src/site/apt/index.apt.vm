@@ -31,7 +31,7 @@ Combined JWT Resource and Authority Tutorial
 
   This tutorial demonstrates combining them.
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/JwtHttpServer/${projectVersion}/JwtHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/JwtHttpServer}Tutorial Source}}
 
 
 

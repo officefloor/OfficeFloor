@@ -33,7 +33,7 @@ Dynamic Rendering Tutorial
   
 [./images/DynamicHttpServer-screenshot.png] DynamicHttpServer screen shot.
     
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DynamicHttpServer/${projectVersion}/DynamicHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/DynamicHttpServer}Tutorial Source}}
 
 
 

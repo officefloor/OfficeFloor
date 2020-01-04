@@ -29,7 +29,7 @@ Deploy Tutorial
 
   This tutorial demonstrates the ease of deploying OfficeFloor applications.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DeployHttpServer/${projectVersion}/DeployHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/DeployHttpServer}Tutorial Source}}
 
 
 

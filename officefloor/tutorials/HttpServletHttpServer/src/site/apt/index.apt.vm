@@ -31,7 +31,7 @@ Servlet Container Tutorial
   
   The tutorial will demonstrate this with a simple increment service. 
   
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/HttpServletHttpServer/${projectVersion}/HttpServletHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/HttpServletHttpServer}Tutorial Source}}
 
 
 

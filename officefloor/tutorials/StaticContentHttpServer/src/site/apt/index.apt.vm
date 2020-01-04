@@ -29,7 +29,7 @@ Static Content Tutorial
 
   This tutorial demonstrates servicing static content (files) with WoOF.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/StaticContentHttpServer/${projectVersion}/StaticContentHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/StaticContentHttpServer}Tutorial Source}}
   
 
 */PUBLIC

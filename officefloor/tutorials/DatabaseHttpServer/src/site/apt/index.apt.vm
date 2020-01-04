@@ -35,7 +35,7 @@ Dependency Injection of Managed Object Tutorial
   
 [./images/DatabaseHttpServer-screenshot.png] DatabaseHttpServer screen shot.
   
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/DatabaseHttpServer/${projectVersion}/DatabaseHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/DatabaseHttpServer}Tutorial Source}}
 
 
 

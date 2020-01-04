@@ -32,23 +32,4 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
-	<profiles>
-		<profile>
-			<!-- Profile for building -->
-			<id>build-repositories</id>
-			<activation>
-				<file>
-					<exists>${basedir}/pom.xml</exists>
-				</file>
-			</activation>
-			<repositories>
-				<repository>
-					<!-- OfficeFloor repository to obtain artifacts for running the example -->
-					<id>maven2-repository.officefloor.net</id>
-					<name>OfficeFloor Repository for Maven</name>
-					<url>http://www.officefloor.net/maven2/</url>
-				</repository>
-			</repositories>
-		</profile>
-	</profiles>
 </project>

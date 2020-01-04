@@ -35,7 +35,7 @@ Interactive HTTP Server Tutorial
     
 [./images/InteractiveHttpServer-screenshot.png] InteractiveHttpServer screen shot.
   
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/InteractiveHttpServer/${projectVersion}/InteractiveHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/InteractiveHttpServer}Tutorial Source}}
   
 
 

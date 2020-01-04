@@ -33,7 +33,7 @@ Section Rendering Tutorial
   
 [./images/SectionHttpServer-screenshot.png] SectionHttpServer screen shot.
     
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/SectionHttpServer/${projectVersion}/SectionHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/SectionHttpServer}Tutorial Source}}
 
 
 

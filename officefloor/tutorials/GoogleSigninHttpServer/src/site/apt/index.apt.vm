@@ -29,7 +29,7 @@ Google Sign-in Tutorial
 
   This tutorial demonstrates {{{https://developers.google.com/identity/sign-in/web/}Google Sign-in}} integrated into WoOF.
    
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/GoogleSigninHttpServer/${projectVersion}/GoogleSigninHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/GoogleSigninHttpServer}Tutorial Source}}
 
 
 

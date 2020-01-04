@@ -33,7 +33,7 @@ Exception Handling Tutorial
   
   This tutorial also introduces the <<<@Parameter>>> annotation to allow passing an object between methods.
 
-  {{{http://sourceforge.net/projects/officefloor/files/maven/maven2/net/officefloor/tutorial/ExceptionHttpServer/${projectVersion}/ExceptionHttpServer-${projectVersion}-project.zip/download}Download Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ExceptionHttpServer}Tutorial Source}}
 
 
 
