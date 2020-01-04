@@ -84,7 +84,7 @@ Dependency Injection of Managed Object Tutorial
   
   The following is the content of the template. 
 
-%{snippet|id=tutorial|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
+%{snippet|file=${basedir}/src/main/resources/Template.woof.html|ignoreDownloadError=false}
 
   The table data is provided by the following method.
 
