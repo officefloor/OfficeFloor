@@ -572,6 +572,10 @@
 						<emptyLineAfterHeader>true</emptyLineAfterHeader>
 						<ignoreNoFileToScan>true</ignoreNoFileToScan>
 						<failOnMissingHeader>true</failOnMissingHeader>
+						<excludes>
+							<exclude>auto/**</exclude>
+							<exclude>javacc/**</exclude>
+						</excludes>
 						<extraExtensions>
 							<scala>java</scala>
 							<vm>apt</vm>
@@ -1527,6 +1531,23 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>kotlin-javadoc</id>
+			<activation>
+				<file>
+					<exists>${basedir}/src/main/kotlin</exists>
+				</file>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<!-- Provide Kotlin JavaDoc files (when deploying) -->
+						<groupId>org.jetbrains.dokka</groupId>
+						<artifactId>dokka-maven-plugin</artifactId>
 					</plugin>
 				</plugins>
 			</build>
