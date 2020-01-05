@@ -26,16 +26,11 @@ public class SuccessTest extends AbstractReactorTestCase {
 	 * Ensure {@link Void}.
 	 */
 	public void testVoid() {
-		this.failure("successVoid", (ex) -> {
-			assertTrue("Incorrect failure", ex instanceof NullPointerException);
-		}, (builder) -> {
-			// No return type
-			builder.addEscalationType(Throwable.class);
-		});
+		this.valid("Void", null);
 	}
 
 	public Mono<Void> successVoid() {
-		return Mono.just(null);
+		return Mono.empty();
 	}
 
 	/**

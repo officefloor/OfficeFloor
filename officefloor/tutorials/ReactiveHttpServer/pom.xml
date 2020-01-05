@@ -21,6 +21,10 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.reactor</groupId>
+			<artifactId>officereactor</artifactId>
+		</dependency>
 		<!-- START SNIPPET: WEBCLIENT -->
 		<dependency>
 			<groupId>net.officefloor.spring</groupId>
