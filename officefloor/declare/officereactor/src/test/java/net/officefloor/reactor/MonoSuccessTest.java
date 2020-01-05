@@ -3,11 +3,11 @@ package net.officefloor.reactor;
 import reactor.core.publisher.Mono;
 
 /**
- * Tests success.
+ * Tests success with {@link Mono}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SuccessTest extends AbstractReactorTestCase {
+public class MonoSuccessTest extends AbstractReactorTestCase {
 
 	private static final Object object = new Object();
 
@@ -91,15 +91,22 @@ public class SuccessTest extends AbstractReactorTestCase {
 	/**
 	 * Validate success.
 	 * 
-	 * @param methodSuffix    Method name suffix.
-	 * @param expectedSuccess Expected success.
+	 * @param methodSuffix        Method name suffix.
+	 * @param expectedSuccess     Expected success.
+	 * @param expectedSuccessType Expected success type.
 	 */
 	protected void valid(String methodSuffix, Object expectedSuccess, Class<?> expectedSuccessType) {
-		this.success("success" + methodSuffix, expectedSuccess, (builder) -> {
+		this.test("success" + methodSuffix, (builder) -> {
 			if (expectedSuccessType != null) {
 				builder.setNextArgumentType(expectedSuccessType);
 			}
 			builder.addEscalationType(Throwable.class);
+		}, (failure, success) -> {
+			assertNull(
+					"Should be no failure: "
+							+ (failure == null ? "" : failure.getMessage() + " (" + failure.getClass().getName() + ")"),
+					failure);
+			assertEquals("Incorrect success", expectedSuccess, success);
 		});
 	}
 

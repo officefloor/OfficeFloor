@@ -1,8 +1,8 @@
 package net.officefloor.reactor;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import junit.framework.AssertionFailedError;
 import net.officefloor.activity.impl.procedure.ClassProcedureSource;
 import net.officefloor.activity.procedure.ProcedureLoaderUtil;
 import net.officefloor.activity.procedure.ProcedureType;
@@ -27,29 +27,12 @@ public abstract class AbstractReactorTestCase extends OfficeFrameTestCase {
 	/**
 	 * Success.
 	 */
-	protected static Object success;
+	private static Object success;
 
 	/**
 	 * Failure.
 	 */
-	protected static Throwable failure;
-
-	/**
-	 * Undertakes test for successful value.
-	 * 
-	 * @param methodName      Name of method for procedure.
-	 * @param expectedSuccess Expected success.
-	 * @param typeBuilder     Builds the expected type.
-	 */
-	protected void success(String methodName, Object expectedSuccess, Consumer<ProcedureTypeBuilder> typeBuilder) {
-		this.test(methodName, typeBuilder, (officeFloor) -> {
-			assertNull(
-					"Should be no failure: "
-							+ (failure == null ? "" : failure.getMessage() + " (" + failure.getClass().getName() + ")"),
-					failure);
-			assertEquals("Incorrect success", expectedSuccess, success);
-		});
-	}
+	private static Throwable failure;
 
 	/**
 	 * Undertake test for failure.
@@ -60,7 +43,7 @@ public abstract class AbstractReactorTestCase extends OfficeFrameTestCase {
 	 */
 	protected void failure(String methodName, Consumer<Throwable> exceptionHandler,
 			Consumer<ProcedureTypeBuilder> typeBuilder) {
-		this.test(methodName, typeBuilder, (officeFloor) -> {
+		this.test(methodName, typeBuilder, (failure, success) -> {
 			assertNull("Should be no success", success);
 			assertNotNull("Should be a failure", failure);
 			exceptionHandler.accept(failure);
@@ -68,32 +51,14 @@ public abstract class AbstractReactorTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Undertake tests for invalid return type.
-	 * 
-	 * @param methodName   Name of method for procedure.
-	 * @param errorMessage Error message.
-	 */
-	protected void invalid(String methodName, String errorMessage) {
-		ProcedureTypeBuilder builder = ProcedureLoaderUtil.createProcedureTypeBuilder(methodName, null);
-		boolean isSuccessful = false;
-		try {
-			ProcedureLoaderUtil.validateProcedureType(builder, this.getClass().getName(), methodName);
-			isSuccessful = true;
-		} catch (AssertionFailedError ex) {
-
-		}
-		assertFalse("Should not be successful", isSuccessful);
-	}
-
-	/**
 	 * Runs test.
 	 * 
-	 * @param methodName  Name of method for procedure.
-	 * @param typeBuilder Builds the expected {@link ProcedureType}.
-	 * @param testRunner  Confirms result of test.
+	 * @param methodName     Name of method for procedure.
+	 * @param typeBuilder    Builds the expected {@link ProcedureType}.
+	 * @param testAssertions Confirms result of test.
 	 */
 	protected void test(String methodName, Consumer<ProcedureTypeBuilder> typeBuilder,
-			Consumer<OfficeFloor> testRunner) {
+			BiConsumer<Throwable, Object> testAssertions) {
 
 		// Ensure correct type
 		ProcedureTypeBuilder builder = ProcedureLoaderUtil.createProcedureTypeBuilder(methodName, null);
@@ -129,7 +94,7 @@ public abstract class AbstractReactorTestCase extends OfficeFrameTestCase {
 			success = null;
 			failure = null;
 			CompileOfficeFloor.invokeProcess(officeFloor, methodName + ".procedure", null);
-			testRunner.accept(officeFloor);
+			testAssertions.accept(failure, success);
 		} catch (Throwable ex) {
 			throw fail(ex);
 		}

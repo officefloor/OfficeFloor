@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
  * 
  * @author Daniel Sagenschneider
  */
-public class FailureTest extends AbstractReactorTestCase {
+public class MonoFailureTest extends AbstractReactorTestCase {
 
 	private static Throwable exception;
 
