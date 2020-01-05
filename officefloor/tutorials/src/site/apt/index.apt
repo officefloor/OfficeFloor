@@ -113,7 +113,7 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./TransactionHttpServer/index.html}Transaction}}          | Managing transactions with Governance.                     | Governance
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./ReactiveHttpServer/index.html}Reactive}}                | Using Reactive for asynchronous concurrency.               | AsynchronousFlow
+| {{{./ReactorHttpServer/index.html}Reactive}}                 | Using Reactor for reactive programming.                    | {{{https://projectreactor.io/}Reactor}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./KotlinHttpServer/index.html}Kotlin}}                    | Using Kotlin.                                              | Polyglot Kotlin
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+

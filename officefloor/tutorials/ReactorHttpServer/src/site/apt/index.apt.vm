@@ -1,0 +1,96 @@
+~~~
+~~ #%L
+~~ Reactive Tutorial
+~~ %%
+~~ Copyright (C) 2005 - 2020 Daniel Sagenschneider
+~~ %%
+~~ This program is free software: you can redistribute it and/or modify
+~~ it under the terms of the GNU Affero General Public License as published by
+~~ the Free Software Foundation, either version 3 of the License, or
+~~ (at your option) any later version.
+~~ 
+~~ This program is distributed in the hope that it will be useful,
+~~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+~~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+~~ GNU General Public License for more details.
+~~ 
+~~ You should have received a copy of the GNU Affero General Public License
+~~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+~~ #L%
+~~~
+
+                                               -----------------------
+                                                 Reactive Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Reactive Tutorial
+
+  This tutorial demonstrates using Reactive logic within WoOF.
+
+  It will use the {{{/apidocs/net/officefloor/spring/webclient/WebClientManagedObjectSource.html}WebClientManagedObjectSource}} to make an asynchronous call to another REST end point.
+  
+  To avoid having to start multiple servers, the call will be back onto a REST end point of the same server.  As such, the configuration for this tutorial is the following:
+
+[./images/ReactorHttpServer-configuration.png] ReactorHttpServer screen shot.
+   
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ReactorHttpServer}Tutorial Source}}
+
+
+
+*Server
+
+  Before getting to the Reactive logic, the Server logic that is called asynchronously is the following:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/reactorhttpserver/ServerLogic.java|ignoreDownloadError=false}
+
+  With the following response object:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/java/net/officefloor/tutorial/reactorhttpserver/ServerResponse.java|ignoreDownloadError=false}
+
+  This is very simple, however, will show how the Reactive logic can call this end point asynchronously.
+
+
+
+*Reactive logic
+
+  To enable the returned {{{https://projectreactor.io/}Reator}} types to be handled natively by OfficeFloor, add the following:
+  
+%{snippet|id=reactor|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  The following is the reactive logic to call the above server:
+  
+%{snippet|id=reactor|file=${basedir}/src/main/java/net/officefloor/tutorial/reactorhttpserver/ReactorLogic.java|ignoreDownloadError=false}
+
+  OfficeFloor subscribes to the returned <<<Mono>>>.  The success is passed as parameter to the next procedure (sending it as response):
+  
+%{snippet|id=send|file=${basedir}/src/main/java/net/officefloor/tutorial/reactorhttpserver/ReactorLogic.java|ignoreDownloadError=false}
+
+  Should the <<<Mono>>> fail, OfficeFloor will route the exception to the appropriate exception handler.  See {{{../ExceptionHttpServer/index.html}Exception Tutorial}} for more details.   
+
+
+
+*Spring WebClient
+
+  To have the Spring WebClient available, add the following:
+  
+%{snippet|id=webclient|file=${basedir}/pom.xml|ignoreDownloadError=false}
+
+  then configure as follows in <<<application.objects>>>:
+  
+%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+
+
+*Testing
+
+  The following shows invoking the reactive code that asynchronously pulls data from the server:
+  
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/reactorhttpserver/ReactorHttpServerTest.java|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../KotlinHttpServer/index.html}next tutorial}} covers Kotlin.

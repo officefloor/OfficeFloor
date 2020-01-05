@@ -39,7 +39,7 @@
 		<module>PayPalHttpServer</module>
 		<module>PrototypeHttpServer</module>
 		<module>RawHttpServer</module>
-		<module>ReactiveHttpServer</module>
+		<module>ReactorHttpServer</module>
 		<module>RestHttpServer</module>
 		<module>ScalaHttpServer</module>
 		<module>SectionHttpServer</module>

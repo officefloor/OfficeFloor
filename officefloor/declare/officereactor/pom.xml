@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.officefloor.declare</groupId>
+		<artifactId>declare</artifactId>
+		<version>${revision}</version>
+	</parent>
+	<groupId>net.officefloor.reactor</groupId>
+	<artifactId>officereactor</artifactId>
+	<name>Reactor</name>
+	<description>OfficeFloor plug-in for Reactor</description>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.activity</groupId>
+			<artifactId>officeprocedure</artifactId>
+		</dependency>
+	</dependencies>
+	<dependencyManagement>
+	</dependencyManagement>
+</project>
