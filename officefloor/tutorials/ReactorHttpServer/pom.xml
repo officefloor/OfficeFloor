@@ -21,16 +21,18 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof</artifactId>
 		</dependency>
+		<!-- START SNIPPET: reactor -->
 		<dependency>
 			<groupId>net.officefloor.reactor</groupId>
 			<artifactId>officereactor</artifactId>
 		</dependency>
-		<!-- START SNIPPET: WEBCLIENT -->
+		<!-- END SNIPPET: reactor -->
+		<!-- START SNIPPET: webclient -->
 		<dependency>
 			<groupId>net.officefloor.spring</groupId>
 			<artifactId>officespring_webclient</artifactId>
 		</dependency>
-		<!-- END SNIPPET: WEBCLIENT -->
+		<!-- END SNIPPET: webclient -->
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>woof_test</artifactId>
