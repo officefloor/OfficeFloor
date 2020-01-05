@@ -8,7 +8,7 @@
 		<artifactId>tutorials</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<artifactId>ReactiveHttpServer</artifactId>
+	<artifactId>ReactorHttpServer</artifactId>
 	<name>Reactive Tutorial</name>
 	<description>Tutorial of implementing REST</description>
 	<properties>

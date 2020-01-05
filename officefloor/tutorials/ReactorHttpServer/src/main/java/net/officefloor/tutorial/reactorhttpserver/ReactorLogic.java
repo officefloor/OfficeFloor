@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.reactivehttpserver;
+package net.officefloor.tutorial.reactorhttpserver;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -8,11 +8,11 @@ import net.officefloor.web.ObjectResponse;
 import reactor.core.publisher.Mono;
 
 /**
- * Reactive logic.
+ * Reactor logic.
  * 
  * @author Daniel Sagenschneider
  */
-public class ReactiveLogic {
+public class ReactorLogic {
 
 	// START SNIPPET: tutorial
 	public Mono<ServerResponse> reactive(WebClient client) {

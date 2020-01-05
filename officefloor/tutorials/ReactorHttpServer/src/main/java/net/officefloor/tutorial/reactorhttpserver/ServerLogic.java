@@ -1,9 +1,9 @@
-package net.officefloor.tutorial.reactivehttpserver;
+package net.officefloor.tutorial.reactorhttpserver;
 
 import net.officefloor.web.ObjectResponse;
 
 /**
- * Server logic to be called by {@link ReactiveLogic}.
+ * Server logic to be called by {@link ReactorLogic}.
  * 
  * @author Daniel Sagenschneider
  */

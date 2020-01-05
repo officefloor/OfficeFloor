@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.reactivehttpserver;
+package net.officefloor.tutorial.reactorhttpserver;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

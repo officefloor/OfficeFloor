@@ -33,9 +33,9 @@ Reactive Tutorial
   
   To avoid having to start multiple servers, the call will be back onto a REST end point of the same server.  As such, the configuration for this tutorial is the following:
 
-[./images/ReactiveHttpServer-configuration.png] ReactiveHttpServer screen shot.
+[./images/ReactorHttpServer-configuration.png] ReactorHttpServer screen shot.
    
-  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ReactiveHttpServer}Tutorial Source}}
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/ReactorHttpServer}Tutorial Source}}
 
 
 
@@ -79,7 +79,7 @@ Reactive Tutorial
 
   The following shows invoking the reactive code that asynchronously pulls data from the server:
   
-%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/reactivehttpserver/ReactiveHttpServerTest.java|ignoreDownloadError=false}
+%{snippet|id=tutorial|file=${basedir}/src/test/java/net/officefloor/tutorial/reactivehttpserver/ReactorHttpServerTest.java|ignoreDownloadError=false}
 
 
 

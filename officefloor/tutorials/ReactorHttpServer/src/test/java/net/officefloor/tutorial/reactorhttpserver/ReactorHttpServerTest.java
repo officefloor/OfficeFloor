@@ -1,4 +1,4 @@
-package net.officefloor.tutorial.reactivehttpserver;
+package net.officefloor.tutorial.reactorhttpserver;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,12 +14,12 @@ import net.officefloor.server.http.HttpClientRule;
 import net.officefloor.test.OfficeFloorRule;
 
 /**
- * Tests the {@link ReactiveLogic}.
+ * Tests the {@link ReactorLogic}.
  * 
  * @author Daniel Sagenschneider
  */
 // START SNIPPET: tutorial
-public class ReactiveHttpServerTest {
+public class ReactorHttpServerTest {
 
 	@Rule
 	public OfficeFloorRule officeFloor = new OfficeFloorRule();
