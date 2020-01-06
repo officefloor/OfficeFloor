@@ -1,13 +1,14 @@
-package net.officefloor.cats
+package net.officefloor.scala
 
-import cats.effect.{ContextShift, IO}
 import net.officefloor.frame.api.source.ServiceContext
 import net.officefloor.plugin.managedfunction.method.{MethodParameterFactory, MethodParameterManufacturer, MethodParameterManufacturerContext, MethodParameterManufacturerServiceFactory}
 
+import scala.concurrent.ExecutionContext
+
 /**
- * {@link MethodParameterManufacturerServiceFactory} for a {@link ContextShift}.
+ * {@link MethodParameterManufacturerServiceFactory} for a {@link ExecutionContext}.
  */
-class ContextShiftMethodParameterManufacturerServiceFactory extends MethodParameterManufacturerServiceFactory with MethodParameterManufacturer {
+class ExecutionContextMethodParameterManufacturerServiceFactory extends MethodParameterManufacturerServiceFactory with MethodParameterManufacturer {
 
   /*
    * ================== MethodParameterManufacturerServiceFactory ==================
@@ -20,7 +21,7 @@ class ContextShiftMethodParameterManufacturerServiceFactory extends MethodParame
    */
 
   override def createParameterFactory(context: MethodParameterManufacturerContext): MethodParameterFactory =
-    if (classOf[ContextShift[IO]].equals(context.getParameterClass)) new ContextShiftMethodParameterFactory() else null
+    if (classOf[ExecutionContext].equals(context.getParameterClass)) new ExecutionContextMethodParameterFactory() else null
 
 
 }
