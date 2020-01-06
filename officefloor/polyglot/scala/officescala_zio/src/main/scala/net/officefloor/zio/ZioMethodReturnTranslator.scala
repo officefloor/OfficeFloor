@@ -26,9 +26,9 @@ import zio.Exit.{Failure, Success}
 import zio.ZIO
 
 /**
- * ZIO {@link MethodReturnTranslator} to resolve the {@link ZIO} to its result.
+ * {@link MethodReturnTranslator} to resolve a {@link ZIO} to its success/failure.
  *
- * @tparam A Result type.
+ * @tparam A Success type.
  */
 class ZioMethodReturnTranslator[A] extends MethodReturnTranslator[ZIO[Any, _, A], A] {
 

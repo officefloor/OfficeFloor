@@ -27,6 +27,11 @@ import zio.{ZEnv, ZIO}
 
 import scala.reflect.runtime.universe._
 
+/**
+ * {@link MethodReturnManufacturerServiceFactory} for {@link ZIO}.
+ *
+ * @tparam A Success type.
+ */
 class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufacturerServiceFactory with MethodReturnManufacturer[ZIO[Any, _, A], A] {
 
   /*
