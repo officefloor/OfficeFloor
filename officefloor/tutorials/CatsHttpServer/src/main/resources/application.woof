@@ -1,0 +1,34 @@
+<woof>
+  <http-continuations>
+  </http-continuations>
+  <http-inputs>
+    <http-input path="/" method="POST" secure="false" x="28" y="40">
+      <procedure name="service"/>
+    </http-input>
+  </http-inputs>
+  <templates>
+  </templates>
+  <sections>
+  </sections>
+  <procedures>
+    <procedure name="service" resource="net.officefloor.tutorial.catshttpserver.ServiceLogic" source="Class" procedure="service" x="133" y="36">
+      <next argument-type="">
+        <procedure name="send"/>
+      </next>
+    </procedure>
+    <procedure name="send" resource="net.officefloor.tutorial.catshttpserver.ServiceLogic" source="Class" procedure="send" x="301" y="35">
+      <next argument-type="">
+      </next>
+    </procedure>
+  </procedures>
+  <securities>
+  </securities>
+  <governances>
+  </governances>
+  <resources>
+  </resources>
+  <exceptions>
+  </exceptions>
+  <starting>
+  </starting>
+</woof>

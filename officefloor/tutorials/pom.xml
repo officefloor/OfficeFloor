@@ -16,6 +16,7 @@
 	<modules>
 		<module>ActivityHttpServer</module>
 		<module>AuthenticationHttpServer</module>
+		<module>CatsHttpServer</module>
 		<module>CorsHttpServer</module>
 		<module>DatabaseHttpServer</module>
 		<module>DeployHttpServer</module>
