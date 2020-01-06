@@ -19,6 +19,7 @@
     <modules>
         <module>officescala</module>
         <module>officescalatest</module>
+        <module>officescala_cats</module>
         <module>officescala_zio</module>
     </modules>
 </project>

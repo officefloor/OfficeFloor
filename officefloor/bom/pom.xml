@@ -199,6 +199,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.scala</groupId>
+				<artifactId>officescala_cats</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.scala</groupId>
 				<artifactId>officescala_zio</artifactId>
 				<version>${revision}</version>
 			</dependency>
