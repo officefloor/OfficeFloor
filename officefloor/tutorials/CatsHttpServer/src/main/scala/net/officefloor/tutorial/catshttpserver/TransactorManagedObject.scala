@@ -11,6 +11,7 @@ import net.officefloor.frame.api.managedobject.{CoordinatingManagedObject, Objec
 /**
  * {@link CoordinatingManagedObject} for the Transactor.
  */
+// START SNIPPET: tutorial
 class TransactorManagedObject(implicit cs: ContextShift[IO]) extends CoordinatingManagedObject[Indexed] {
 
   var transactor: Transactor[IO] = null
@@ -21,5 +22,5 @@ class TransactorManagedObject(implicit cs: ContextShift[IO]) extends Coordinatin
   }
 
   override def getObject: AnyRef = transactor
-
 }
+// END SNIPPET: tutorial

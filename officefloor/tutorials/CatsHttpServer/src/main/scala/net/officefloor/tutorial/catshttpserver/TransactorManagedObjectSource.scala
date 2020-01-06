@@ -12,6 +12,7 @@ import net.officefloor.frame.api.managedobject.source.impl.{AbstractAsyncManaged
 /**
  * {@link ManagedObjectSource} for Transactor.
  */
+// START SNIPPET: tutorial
 class TransactorManagedObjectSource extends AbstractManagedObjectSource[Indexed, None] {
 
   implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
@@ -26,3 +27,4 @@ class TransactorManagedObjectSource extends AbstractManagedObjectSource[Indexed,
 
   override def getManagedObject: ManagedObject = new TransactorManagedObject()
 }
+// END SNIPPET: tutorial

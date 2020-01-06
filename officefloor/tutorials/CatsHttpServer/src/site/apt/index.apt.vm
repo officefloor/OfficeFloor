@@ -1,0 +1,89 @@
+                                               -----------------------
+                                                    Cats Tutorial 
+                                               -----------------------
+					                            Daniel Sagenschneider
+                                               -----------------------
+
+Cats Tutorial
+
+  This tutorial demonstrates using {{{https://typelevel.org/cats/}Cats}} (or more specifically {{{https://typelevel.org/cats-effect/}Cats Effect}}).
+
+  To focus on Cats, this tutorial uses a simple application that retrieves a message from database using {{{https://tpolecat.github.io/doobie/}doobie}} via Cats Effect. 
+
+  {{{https://github.com/officefloor/OfficeFloor/tree/master/officefloor/tutorials/CatsHttpServer}Tutorial Source}}
+
+
+
+*Cats with doobie
+
+  The Cats effect to retrieve a message from the database is the following:
+  
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/MessageRepository.scala|ignoreDownloadError=false}
+  
+  The effect is tested with the following code:
+  
+%{snippet|id=effect|file=${basedir}/src/test/scala/net/officefloor/tutorial/catshttpserver/CatsHttpServerTest.scala|ignoreDownloadError=false}
+  
+  Note: the test is not comprehensive, however, demonstrates testing the effect in isolation.
+  
+  
+  
+*Servicing Request with Cats / doobie
+
+  To integrate Cats into a {{{https://sagenschneider.blogspot.com/2019/11/first-class-procedure-type-system-for.html}First-Class Procedure}} add the following to the <<<pom.xml>>>:
+  
+%{snippet|id=tutorial|file=${basedir}/pom.xml|ignoreDownloadError=false}
+  
+  This will setup the configured procedures to handle the returned <<<IO>>> from functions.  In this case, the following:
+    
+%{snippet|id=service|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/ServiceLogic.scala|ignoreDownloadError=false}
+     
+  This function looks up the message in the database, creates a response and then returns the <<<IO>>>.  OfficeFloor then:
+  
+   [[1]] Identifies an IO is returned from the function
+   
+   [[1]] Unsafely runs the returned IO
+   
+   [[1]] Provides the success as parameter to next procedure.  Or throws any exception to be handled by configured OfficeFloor exception handlers
+   
+  This allows Cats Effect to be used for writing modular functions of the application.  Then lets OfficeFloor compose these functions graphically together to form the application.
+  
+  As per the WoOF configuration of the application:
+  
+[./images/CatsHttpServer-configuration.png] CatsHttpServer screen shot.
+  
+  The next configured procedure sends the response:
+  
+%{snippet|id=send|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/ServiceLogic.scala|ignoreDownloadError=false}
+  
+
+
+*Injected doobie Transactor
+
+  To enable the <<<Transactor>>> to be injected, the following is the <<<application.objects>>> configuration:
+
+%{snippet|file=${basedir}/src/main/resources/application.objects|ignoreDownloadError=false}
+
+  The <<<Connection>>> is provided by the <<<H2>>> managed object.  The <<<Transactor>>> managed object then wraps the <<<Connection>>> in a <<<Transactor>>>:
+    
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/TransactorManagedObjectSource.scala|ignoreDownloadError=false}
+
+%{snippet|id=tutorial|file=${basedir}/src/main/scala/net/officefloor/tutorial/catshttpserver/TransactorManagedObject.scala|ignoreDownloadError=false}
+  
+  Note that OfficeFloor manages the executing thread via {{{https://sagenschneider.blogspot.com/2019/02/is-spring-reactive-already-obsolete.html}Thread Injection}} so synchronous execution is preferred.
+  
+  This {{{../DatabaseHttpServer/index.html}tutorial}} provides further information on configuring managed objects.
+
+
+
+*Testing
+
+  The following test demonstrates using <<<IO>>> to service a HTTP request:
+  
+%{snippet|id=server|file=${basedir}/src/test/scala/net/officefloor/tutorial/catshttpserver/CatsHttpServerTest.scala|ignoreDownloadError=false}
+
+
+
+Next
+
+  The {{{../ZioHttpServer/index.html}next tutorial}} covers using {{{https://zio.dev}ZIO}}.

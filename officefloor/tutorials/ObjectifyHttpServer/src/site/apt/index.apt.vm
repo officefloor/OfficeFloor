@@ -87,4 +87,4 @@ Objectify Tutorial
 
 Next
 
-  The {{{../ZioHttpServer/index.html}next tutorial}} covers using ZIO effects.
+  The {{{../PayPalHttpServer/index.html}next tutorial}} covers integrating PayPal into OfficeFloor.

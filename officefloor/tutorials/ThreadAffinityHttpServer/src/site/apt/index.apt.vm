@@ -93,5 +93,4 @@ Thread Affinity Tutorial
 
 Next
 
-  The {{{../ObjectifyHttpServer/index.html}next tutorial}} covers using Objectify for the Google App Engine DataStore.
-
+  The {{{../CatsHttpServer/index.html}next tutorial}} covers using {{{https://typelevel.org/cats-effect/}Cats Effect}}.

@@ -17,10 +17,12 @@
         <projectVersion>${project.version}</projectVersion>
     </properties>
     <dependencies>
+    	<!-- START SNIPPET: tutorial -->
         <dependency>
             <groupId>net.officefloor.scala</groupId>
             <artifactId>officescala_cats</artifactId>
         </dependency>
+        <!-- END SNIPPET: tutorial -->
         <dependency>
             <groupId>org.tpolecat</groupId>
             <artifactId>doobie-h2_2.12</artifactId>

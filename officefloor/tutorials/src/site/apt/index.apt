@@ -96,6 +96,8 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./GoogleSigninHttpServer/index.html}Google Sign-in}}      | OpenID sign-in via Google                                  | Google OpenID
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
+| {{{./ObjectifyHttpServer/index.html}Objectify}}              | Objectify for Google App Engine datastore                  | {{{http://github.com/objectify/objectify/wiki}Objectify}}
+*--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./PayPalHttpServer/index.html}PayPal}}                    | Payment via PayPal                                         | PayPal
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
@@ -127,9 +129,9 @@ OfficeFloor Tutorials
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 | {{{./ThreadAffinityHttpServer/index.html}Thread Affinity}}   | Thread Affinity                                            | Executive
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./ObjectifyHttpServer/index.html}Objectify}}              | Objectify for Google App Engine datastore                  | {{{http://github.com/objectify/objectify/wiki}Objectify}}
+| {{{./CatsHttpServer/index.html}ZIO}}                         | Using Cats Effects                                         | {{{https://typelevel.org/cats-effect/}Cats Effect}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
-| {{{./ZioHttpServer/index.html}ZIO}}                          | Using ZIO effects                                          | {{{https://zio.dev}ZIO}}
+| {{{./ZioHttpServer/index.html}ZIO}}                          | Using ZIO                                                  | {{{https://zio.dev}ZIO}}
 *--------------------------------------------------------------+------------------------------------------------------------+------------------------------+
 
 
