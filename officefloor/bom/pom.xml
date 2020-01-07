@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -50,7 +51,7 @@
 		<module>../</module>
 	</modules>
 	<properties>
-		<revision>3.18.0</revision>
+		<revision>3.19.0</revision>
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
@@ -859,8 +860,10 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true" command="create" />
+										<sshexec host="shell.sourceforge.net"
+											username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true"
+											command="create" />
 									</target>
 								</configuration>
 							</execution>
@@ -875,8 +878,10 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true" command="create" />
+										<sshexec host="shell.sourceforge.net"
+											username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true"
+											command="create" />
 									</target>
 								</configuration>
 							</execution>
