@@ -51,7 +51,21 @@ class ZioMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactu
 
     // Interrogate method for ZIO return
     val method = context.getMethod
-    mirror.staticClass(method.getDeclaringClass.getName).info.member(TermName(method.getName)) match {
+
+    // Find the member on possible class
+    val clazz = mirror.staticClass(method.getDeclaringClass.getName)
+    val clazzMember = clazz.info.member(TermName(method.getName))
+    val member = clazzMember match {
+      case m: MethodSymbol => clazzMember
+      case _ => {
+        // Not on class, so determine if on module
+        val module = mirror.staticModule(method.getDeclaringClass.getName)
+        module.info.member(TermName(method.getName))
+      }
+    }
+
+    // Attempt to determine if translate
+    member match {
       case method: MethodSymbol => method.returnType.baseType(typeOf[ZIO[_, _, _]].typeSymbol) match {
         case zioReturnType: TypeRef => {
 

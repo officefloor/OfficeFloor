@@ -51,8 +51,22 @@ class IoMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactur
 
     // Interrogate method for IO return
     val method = context.getMethod
-    mirror.staticClass(method.getDeclaringClass.getName).info.member(TermName(method.getName)) match {
-      case method: MethodSymbol => method.returnType.baseType(typeOf[IO[_]].typeSymbol) match {
+
+    // Find the member on possible class
+    val clazz = mirror.staticClass(method.getDeclaringClass.getName)
+    val clazzMember = clazz.info.member(TermName(method.getName))
+    val member = clazzMember match {
+      case m: MethodSymbol => clazzMember
+      case _ => {
+        // Not on class, so determine if on module
+        val module = mirror.staticModule(method.getDeclaringClass.getName)
+        module.info.member(TermName(method.getName))
+      }
+    }
+
+    // Attempt to determine if translate
+    member match {
+      case methodSymbol: MethodSymbol => methodSymbol.returnType.baseType(typeOf[IO[_]].typeSymbol) match {
         case ioReturnType: TypeRef => {
 
           // Obtain the IO type information
@@ -60,7 +74,7 @@ class IoMethodReturnManufacturerServiceFactory[A] extends MethodReturnManufactur
 
           // Determine Java Class from Type
           val classFromType: Type => Class[_] = t => t match {
-            case _ if (Array(typeOf[Null], typeOf[Nothing]).exists(t.=:=(_)))  => null
+            case _ if (Array(typeOf[Null], typeOf[Nothing]).exists(t.=:=(_))) => null
             case _ if (Array(typeOf[Any], typeOf[AnyVal], typeOf[AnyRef]).exists(t.=:=(_))) => classOf[Object]
             case _ => mirror.runtimeClass(t.typeSymbol.asClass)
           }

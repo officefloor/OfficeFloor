@@ -206,6 +206,10 @@ class SuccessTest extends TestSpec {
     })
   }
 
+  it can "on Object" in {
+    valid("OnObject", TestSpec.OBJECT, classOf[Object])
+  }
+
   def valid(methodSuffix: String, expectedSuccess: Any, successClass: Class[_]): Unit =
     valid(methodSuffix, expectedSuccess, successClass, classOf[ZioException])
 
@@ -223,4 +227,6 @@ class SuccessTest extends TestSpec {
 object SuccessTest {
   val OPTION: Option[Object] = Some(TestSpec.OBJECT)
   val NOTHING_ESCALATION = new RuntimeException()
+
+  def successOnObject: ZIO[Any, Any, Object] = ZIO.succeed(TestSpec.OBJECT)
 }
