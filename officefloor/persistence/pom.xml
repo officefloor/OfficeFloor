@@ -24,6 +24,7 @@
 		<module>officejpa_datanucleus</module>
 		<module>officejpa_postgresql</module>
 		<module>officenosql_objectify</module>
+		<module>officer2dbc</module>
 	</modules>
 	<dependencies>
 		<dependency>
