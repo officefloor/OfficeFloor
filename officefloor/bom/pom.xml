@@ -388,6 +388,11 @@
 				<artifactId>officenosql_objectify</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officer2dbc</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Spring -->
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
