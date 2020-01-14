@@ -69,7 +69,7 @@
 		<google-appengine-version>1.9.76</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>19.1.0</graalvm-js-version>
-		<h2database-version>1.4.199</h2database-version>
+		<h2database-version>1.4.200</h2database-version>
 		<hibernate-version>5.4.3.Final</hibernate-version>
 		<hikari-version>3.3.1</hikari-version>
 		<hsqldb-version>2.5.0</hsqldb-version>
@@ -88,6 +88,7 @@
 		<netty-version>4.1.37.Final</netty-version>
 		<objectify-version>6.0.4</objectify-version>
 		<postgresql-version>42.2.6</postgresql-version>
+		<r2dbc-version>Arabba-RELEASE</r2dbc-version>
 		<reactor-version>Bismuth-RELEASE</reactor-version>
 		<scala-maven-version>4.0.2</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
@@ -387,6 +388,11 @@
 				<artifactId>officenosql_objectify</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.officefloor.persistence</groupId>
+				<artifactId>officer2dbc</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			<!-- Spring -->
 			<dependency>
 				<groupId>net.officefloor.spring</groupId>
@@ -675,6 +681,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+				<dependency>
+					<groupId>io.r2dbc</groupId>
+					<artifactId>r2dbc-bom</artifactId>
+					<version>${r2dbc-version}</version>
+					<type>pom</type>
+					<scope>import</scope>
+				</dependency>
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-core</artifactId>
