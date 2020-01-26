@@ -283,6 +283,11 @@
 			</dependency>
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_openapi</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_resource</artifactId>
 				<version>${revision}</version>
 			</dependency>
