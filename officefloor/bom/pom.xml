@@ -73,7 +73,7 @@
 		<hibernate-version>5.4.3.Final</hibernate-version>
 		<hikari-version>3.3.1</hikari-version>
 		<hsqldb-version>2.5.0</hsqldb-version>
-		<httpclient-version>4.5.9</httpclient-version>
+		<httpclient-version>4.5.11</httpclient-version>
 		<jackson-version>2.9.9</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<javax-activation-version>1.2.0</javax-activation-version>
