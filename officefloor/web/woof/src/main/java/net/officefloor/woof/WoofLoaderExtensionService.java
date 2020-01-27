@@ -191,6 +191,11 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	}
 
 	/**
+	 * Indicates if contextual load.
+	 */
+	private static boolean isContextualLoad = false;
+
+	/**
 	 * Indicates to load the {@link HttpServer}.
 	 */
 	private static boolean isLoadHttpServer = true;
@@ -236,6 +241,9 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 	 */
 	public static <R, E extends Throwable> R contextualLoad(WoofLoaderRunnable<R, E> runnable) throws E {
 		try {
+
+			// Flag that contextual load
+			isContextualLoad = true;
 
 			// Undertake runnable
 			return runnable.run(new WoofLoaderRunnableContext() {
@@ -288,6 +296,7 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 
 		} finally {
 			// Reset
+			isContextualLoad = false;
 			isLoadHttpServer = true;
 			isLoadTeams = true;
 			isLoadWoof = true;
@@ -312,7 +321,9 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 		}
 
 		// Indicate loading WoOF
-		System.out.println("Extending OfficeFloor with WoOF");
+		if (!isContextualLoad) {
+			System.out.println("Extending OfficeFloor with WoOF");
+		}
 
 		// Obtain the office
 		DeployedOffice office = officeFloorDeployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
