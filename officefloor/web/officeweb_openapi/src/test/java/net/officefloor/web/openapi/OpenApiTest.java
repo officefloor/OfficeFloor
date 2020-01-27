@@ -12,10 +12,10 @@ import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.woof.compile.CompileWoof;
+import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 
 /**
@@ -32,12 +32,13 @@ public class OpenApiTest extends OfficeFrameTestCase {
 		CompileWoof compiler = new CompileWoof();
 		compiler.web((context) -> {
 			context.link(false, "/", GetService.class);
+			context.link(false, "/another", GetService.class);
 		});
 		try (MockWoofServer server = compiler.open()) {
 
 			// Ensure service request
-			MockHttpResponse response = server.send(MockHttpServer.mockRequest());
-			response.assertResponse(200, "\"TEST\"");
+			MockWoofResponse response = server.send(MockHttpServer.mockRequest());
+			response.assertJson(200, new Parent());
 
 			// Ensure can obtain swagger JSON
 			response = server.send(MockHttpServer.mockRequest("/swagger.json"));
@@ -51,8 +52,8 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	}
 
 	public static class GetService {
-		public void service(ObjectResponse<String> response) {
-			response.send("TEST");
+		public void service(ObjectResponse<Parent> response) {
+			response.send(new Parent());
 		}
 	}
 

@@ -31,12 +31,15 @@ import java.util.Set;
 import java.util.function.Function;
 
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
@@ -58,6 +61,8 @@ import net.officefloor.web.accept.AcceptNegotiatorBuilderImpl;
 import net.officefloor.web.build.AcceptNegotiatorBuilder;
 import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpInput;
+import net.officefloor.web.build.HttpInputExplorer;
+import net.officefloor.web.build.HttpInputExplorerContext;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectParserServiceFactory;
 import net.officefloor.web.build.HttpObjectResponderFactory;
@@ -68,6 +73,7 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.build.WebInterceptServiceFactory;
 import net.officefloor.web.response.ObjectResponseManagedObjectSource;
 import net.officefloor.web.response.ObjectResponseManagedObjectSource.DefaultHttpObjectResponder;
+import net.officefloor.web.route.WebRouterBuilder;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource;
@@ -198,6 +204,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * {@link HttpObjectResponderFactory} instances.
 	 */
 	private final List<HttpObjectResponderFactory> objectResponderFactories = new LinkedList<>();
+
+	/**
+	 * {@link HttpInputExplorer} instances.
+	 */
+	private final List<HttpInputExplorer> httpInputExplorers = new LinkedList<>();
 
 	/**
 	 * Default {@link HttpObjectResponderServiceFactory}.
@@ -449,6 +460,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
+	public void addHttpInputExplorer(HttpInputExplorer explorer) {
+		this.httpInputExplorers.add(explorer);
+	}
+
+	@Override
 	public void reroute(OfficeFlowSourceNode flowSourceNode) {
 		this.officeArchitect.link(flowSourceNode, this.routingSection.getOfficeSectionInput(HANDLER_INPUT_NAME));
 	}
@@ -676,6 +692,64 @@ public class WebArchitectEmployer implements WebArchitect {
 				}
 			}
 		});
+
+		// Load explorers of HTTP inputs
+		OfficeSectionInput handleInput = this.routingSection.getOfficeSectionInput(WebArchitect.HANDLER_INPUT_NAME);
+		for (HttpInputExplorer explorer : this.httpInputExplorers) {
+			handleInput.addExecutionExplorer((explore) -> {
+
+				// Obtain the handling managed functions for each HTTP input
+				ExecutionManagedFunction route = explore.getManagedFunction(
+						Node.qualify(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
+				Map<String, ExecutionManagedFunction> inputHandlers = new HashMap<>();
+				for (ManagedFunctionFlowType<?> flowType : route.getManagedFunctionType().getFlowTypes()) {
+					inputHandlers.put(flowType.getFlowName(), route.getManagedFunction(flowType));
+				}
+
+				// Allow exploring the input
+				for (HttpInputImpl input : this.inputs) {
+					ExecutionManagedFunction inputHandler = inputHandlers.get(input.routeInput.getOutputName());
+					explorer.explore(new HttpInputExplorerContext() {
+
+						@Override
+						public ExecutionManagedFunction getManagedFunction(String functionName) {
+							return explore.getManagedFunction(functionName);
+						}
+
+						@Override
+						public ExecutionManagedFunction getInitialManagedFunction() {
+							return inputHandler;
+						}
+
+						@Override
+						public boolean isSecure() {
+							return input.isSecure;
+						}
+
+						@Override
+						public HttpMethod getHttpMethod() {
+							return input.httpMethod;
+						}
+
+						@Override
+						public String getContextPath() {
+							return WebArchitectEmployer.this.contextPath;
+						}
+
+						@Override
+						public String getRoutePath() {
+							return input.applicationPath;
+						}
+
+						@Override
+						public String getApplicationPath() {
+							return WebRouterBuilder.getContextQualifiedPath(WebArchitectEmployer.this.contextPath,
+									input.applicationPath);
+						}
+					});
+				}
+			});
+		}
 
 		// Chain in the servicer instances
 		OfficeFlowSourceNode chainOutput = this.routingSection

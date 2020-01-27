@@ -29,9 +29,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.HttpCookie;
+import java.util.HashMap;
+import java.util.Map;
 
 import lombok.Data;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.test.issues.MockCompilerIssues;
@@ -41,6 +44,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.EntityUtil;
 import net.officefloor.server.http.HttpException;
@@ -53,6 +57,7 @@ import net.officefloor.server.http.mock.MockHttpRequestBuilder;
 import net.officefloor.server.http.mock.MockHttpResponse;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.build.HttpInput;
+import net.officefloor.web.build.HttpInputExplorerContext;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectParserServiceFactory;
@@ -1342,6 +1347,68 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		@Next("chain")
 		public void pass(ServerHttpConnection connection) throws IOException {
 			connection.getResponse().getEntityWriter().write("pass - ");
+		}
+	}
+
+	/**
+	 * Ensure can explore handling of {@link HttpInput}.
+	 */
+	public void testHttpInputExplorer() throws Exception {
+
+		// Capture the inputs that can be explored
+		Map<String, HttpInputExplorerContext> inputs = new HashMap<>();
+
+		// Configure the server
+		this.compile.web((context) -> {
+
+			// Provide some inputs to explore
+			context.link(false, "/one", HttpInputExploreOneSection.class);
+			context.link(true, "POST", "/two", HttpInputExploreTwoSection.class);
+
+			// Capture exploring
+			context.getWebArchitect().addHttpInputExplorer((explore) -> {
+				inputs.put(explore.getRoutePath(), explore);
+			});
+
+			// Provide dependencies
+			Singleton.load(context.getOfficeArchitect(), "TEST");
+			Singleton.load(context.getOfficeArchitect(), Integer.valueOf(1));
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure each input is able to be explored
+		this.assertExploredHttpInput(inputs.get("/one"), false, HttpMethod.GET, "/one", "GET_/one.service",
+				String.class);
+		this.assertExploredHttpInput(inputs.get("/two"), true, HttpMethod.POST, "/two", "POST_/two.service",
+				Integer.class);
+		assertEquals("Should only be two inputs", 2, inputs.size());
+	}
+
+	private void assertExploredHttpInput(HttpInputExplorerContext context, boolean isSecure, HttpMethod httpMethod,
+			String routePath, String functionName, Class<?> objectType) {
+		String suffix = " (" + routePath + ")";
+		assertNotNull("No input explored" + suffix, context);
+		assertEquals("Incorrect secure" + suffix, isSecure, context.isSecure());
+		assertEquals("Incorrect HTTP method" + suffix, httpMethod, context.getHttpMethod());
+		assertEquals("Incorrect context path", this.contextPath, context.getContextPath());
+		assertEquals("Incorrect route path", routePath, context.getRoutePath());
+		assertEquals("Incorrect application path" + suffix, this.contextUrl("", routePath),
+				context.getApplicationPath());
+		ExecutionManagedFunction function = context.getInitialManagedFunction();
+		assertEquals("Incorrect function name" + suffix, functionName, function.getManagedFunctionName());
+		assertEquals("Incorrect object type" + suffix, objectType,
+				function.getManagedFunctionType().getObjectTypes()[1].getObjectType());
+	}
+
+	public static class HttpInputExploreOneSection {
+		public void service(String value) {
+			// test method
+		}
+	}
+
+	public static class HttpInputExploreTwoSection {
+		public void service(Integer value) {
+			// test method
 		}
 	}
 

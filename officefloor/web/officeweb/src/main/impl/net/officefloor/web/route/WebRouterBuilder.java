@@ -57,6 +57,29 @@ public class WebRouterBuilder {
 	}
 
 	/**
+	 * Obtains the context qualified path.
+	 * 
+	 * @param contextPath Context path. May be <code>null</code>.
+	 * @param path        Path.
+	 * @return Context qualified path.
+	 */
+	public static String getContextQualifiedPath(String contextPath, String path) {
+
+		// Ignore / at end of path
+		if ((!"/".equals(path)) && (path.endsWith("/"))) {
+			path = path.substring(0, path.length() - 1);
+		}
+
+		// Include the context path
+		if (contextPath != null) {
+			path = contextPath + path;
+		}
+
+		// Return the context qualified path
+		return path;
+	}
+
+	/**
 	 * Context path.
 	 */
 	private final String contextPath;
@@ -88,15 +111,8 @@ public class WebRouterBuilder {
 		// Keep track of input path
 		final String inputPath = path;
 
-		// Ignore / at end of path
-		if ((!"/".equals(path)) && (path.endsWith("/"))) {
-			path = path.substring(0, path.length() - 1);
-		}
-
-		// Include the context path
-		if (this.contextPath != null) {
-			path = this.contextPath + path;
-		}
+		// Obtain the context qualified path
+		path = getContextQualifiedPath(this.contextPath, path);
 
 		// Parse out the static segments and parameters from path
 		List<HttpInputPathSegment> segments = new ArrayList<>();

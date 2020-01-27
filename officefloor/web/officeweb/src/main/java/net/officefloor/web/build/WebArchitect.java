@@ -238,6 +238,13 @@ public abstract interface WebArchitect {
 	HttpInput getHttpInput(boolean isSecure, String httpMethodName, String applicationPath);
 
 	/**
+	 * Adds a {@link HttpInputExplorer}.
+	 * 
+	 * @param explorer {@link HttpInputExplorer}.
+	 */
+	void addHttpInputExplorer(HttpInputExplorer explorer);
+
+	/**
 	 * <p>
 	 * Runs the {@link ServerHttpConnection} through routing again.
 	 * <p>
