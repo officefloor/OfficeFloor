@@ -14,7 +14,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.compile.CompileWebExtension;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -29,43 +29,48 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain swagger specification.
 	 */
-	public void testOpenApi() throws Exception {
-		CompileWoof compiler = new CompileWoof();
-		compiler.web((context) -> {
-
-			// Provide response only
+	public void testAllMethods() throws Exception {
+		this.doOpenApiTest((context) -> {
 			for (HttpMethod httpMethod : HttpMethod.values()) {
-				context.link(false, httpMethod.name(), "/response/only", ResponseOnlyService.class);
+				context.link(false, httpMethod.name(), "/methods/all", NoOpService.class);
 			}
-
-			// Path parameter
-			
 		});
-		try (MockWoofServer server = compiler.open()) {
+	}
 
-			// Ensure service request
-			MockWoofResponse response = server.send(MockHttpServer.mockRequest("/response/only"));
-			response.assertJson(200, new Parent());
-
-			// Ensure can obtain swagger JSON
-			response = server.send(MockHttpServer.mockRequest("/swagger.json"));
-			assertEquals("Should find swagger", 200, response.getStatus().getStatusCode());
-
-			// TODO Verify correct OpenAPI specification
-			String spec = response.getEntity(null);
-			System.out.println(spec);
-
-			// Verify the specification
-			OpenAPI api = Json.mapper().readValue(spec, OpenAPI.class);
-			PathItem item = api.getPaths().get("/");
-			item.getGet();
+	public static class NoOpService {
+		public void service() {
+			// no operation
 		}
 	}
 
-	public static class ResponseOnlyService {
-		public void service(ObjectResponse<Parent> response) {
-			response.send(new Parent());
+	/**
+	 * Undertakes the OpenAPI test.
+	 * 
+	 * @param extension {@link CompileWebExtension}.
+	 */
+	private void doOpenApiTest(CompileWebExtension extension) throws Exception {
+		CompileWoof compiler = new CompileWoof();
+		compiler.web(extension);
+		try (MockWoofServer server = compiler.open()) {
+
+			// Ensure can obtain swagger JSON
+			MockWoofResponse response = server.send(MockHttpServer.mockRequest("/swagger.json"));
+			assertEquals("Should find swagger", 200, response.getStatus().getStatusCode());
+
+			// Obtain the expected specification
+			String testName = this.getName();
+			String expectedFileName = testName.substring("test".length()) + ".json";
+			String expectedJson = this.getFileContents(this.findFile(this.getClass(), expectedFileName));
+
+			// Round trip for better comparison
+			OpenAPI expectedApi = Json.mapper().readValue(expectedJson, OpenAPI.class);
+			expectedJson = Json.pretty(expectedApi);
+
+			// Ensure correct result
+			String spec = response.getEntity(null);
+			assertEquals("Incorrect content", expectedJson, spec);
 		}
+
 	}
 
 	public void _testResolvedModel() throws Exception {

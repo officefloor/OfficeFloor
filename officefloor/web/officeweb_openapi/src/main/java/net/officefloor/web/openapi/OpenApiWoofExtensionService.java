@@ -105,6 +105,8 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 				// Ignore method
 			}
 		});
+		
+		
 
 		// Serve up the Open API
 		OfficeArchitect office = context.getOfficeArchitect();

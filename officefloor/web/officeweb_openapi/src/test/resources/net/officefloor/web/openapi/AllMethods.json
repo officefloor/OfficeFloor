@@ -1,0 +1,15 @@
+{
+  "openapi" : "3.0.1",
+  "paths" : {
+    "/methods/all" : {
+      "get" : { },
+      "put" : { },
+      "post" : { },
+      "delete" : { },
+      "options" : { },
+      "head" : { },
+      "patch" : { },
+      "trace" : { }
+    }
+  }
+}
