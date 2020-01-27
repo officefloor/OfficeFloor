@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.PathItem.HttpMethod;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -28,16 +29,22 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain swagger specification.
 	 */
-	public void testGet() throws Exception {
+	public void testOpenApi() throws Exception {
 		CompileWoof compiler = new CompileWoof();
 		compiler.web((context) -> {
-			context.link(false, "/", GetService.class);
-			context.link(false, "/another", GetService.class);
+
+			// Provide response only
+			for (HttpMethod httpMethod : HttpMethod.values()) {
+				context.link(false, httpMethod.name(), "/response/only", ResponseOnlyService.class);
+			}
+
+			// Path parameter
+			
 		});
 		try (MockWoofServer server = compiler.open()) {
 
 			// Ensure service request
-			MockWoofResponse response = server.send(MockHttpServer.mockRequest());
+			MockWoofResponse response = server.send(MockHttpServer.mockRequest("/response/only"));
 			response.assertJson(200, new Parent());
 
 			// Ensure can obtain swagger JSON
@@ -45,19 +52,23 @@ public class OpenApiTest extends OfficeFrameTestCase {
 			assertEquals("Should find swagger", 200, response.getStatus().getStatusCode());
 
 			// TODO Verify correct OpenAPI specification
-			OpenAPI api = Json.mapper().readValue(response.getEntity(), OpenAPI.class);
+			String spec = response.getEntity(null);
+			System.out.println(spec);
+
+			// Verify the specification
+			OpenAPI api = Json.mapper().readValue(spec, OpenAPI.class);
 			PathItem item = api.getPaths().get("/");
 			item.getGet();
 		}
 	}
 
-	public static class GetService {
+	public static class ResponseOnlyService {
 		public void service(ObjectResponse<Parent> response) {
 			response.send(new Parent());
 		}
 	}
 
-	public void testResolvedModel() throws Exception {
+	public void _testResolvedModel() throws Exception {
 		AnnotatedType type = new AnnotatedType(Parent.class);
 		type.setResolveAsRef(true);
 		ResolvedSchema schema = ModelConverters.getInstance().readAllAsResolvedSchema(type);

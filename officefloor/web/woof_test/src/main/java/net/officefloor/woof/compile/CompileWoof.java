@@ -70,9 +70,6 @@ public class CompileWoof {
 	public MockWoofServer open() throws Exception {
 		return MockWoofServer.open((context, compiler) -> {
 
-			// All configuration via test
-			context.notLoad();
-
 			// Load the configurations
 			for (CompileOfficeFloorExtension extension : this.officeFloorExtensions) {
 				compiler.officeFloor(extension);
