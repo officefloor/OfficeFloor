@@ -91,7 +91,7 @@
 		<r2dbc-version>Arabba-RELEASE</r2dbc-version>
 		<reactor-version>Bismuth-RELEASE</reactor-version>
 		<scala-maven-version>4.0.2</scala-maven-version>
-		<scala-version>2.12.8</scala-version>
+		<scala-version>2.13.1</scala-version>
 		<scalacheck-version>1.14.3</scalacheck-version>
 		<scalatest-maven-version>2.0.0</scalatest-maven-version>
 		<scalatest-version>3.2.0-SNAP10</scalatest-version>
