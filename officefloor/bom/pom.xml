@@ -57,10 +57,10 @@
 		<ant-jsch-version>1.10.5</ant-jsch-version>
 		<affinity-version>3.1.11</affinity-version>
 		<commons-codec-version>1.12</commons-codec-version>
-		<commons-text-version>1.7</commons-text-version>
+		<commons-text-version>1.8</commons-text-version>
 		<datanucleus-version>5.2.1</datanucleus-version>
 		<docker-client-version>8.16.0</docker-client-version>
-		<dokka-maven-version>0.9.18</dokka-maven-version>
+		<dokka-maven-version>0.10.0</dokka-maven-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
 		<eclipse-persistence-jpa-version>2.7.4</eclipse-persistence-jpa-version>
 		<flatten-maven-version>1.1.0</flatten-maven-version>
@@ -70,10 +70,10 @@
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>19.1.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
-		<hibernate-version>5.4.3.Final</hibernate-version>
+		<hibernate-version>5.4.10.Final</hibernate-version>
 		<hikari-version>3.3.1</hikari-version>
 		<hsqldb-version>2.5.0</hsqldb-version>
-		<httpclient-version>4.5.9</httpclient-version>
+		<httpclient-version>4.5.11</httpclient-version>
 		<jackson-version>2.9.9</jackson-version>
 		<javadoc-version>3.0.1</javadoc-version>
 		<javax-activation-version>1.2.0</javax-activation-version>
@@ -82,17 +82,17 @@
 		<jsonwebtoken-version>0.10.6</jsonwebtoken-version>
 		<junit-version>4.12</junit-version>
 		<lombok-version>1.18.8</lombok-version>
-		<kotlin-version>1.3.41</kotlin-version>
+		<kotlin-version>1.3.61</kotlin-version>
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
-		<netty-version>4.1.37.Final</netty-version>
+		<netty-version>4.1.45.Final</netty-version>
 		<objectify-version>6.0.4</objectify-version>
-		<postgresql-version>42.2.6</postgresql-version>
+		<postgresql-version>42.2.9</postgresql-version>
 		<r2dbc-version>Arabba-RELEASE</r2dbc-version>
 		<reactor-version>Bismuth-RELEASE</reactor-version>
 		<scala-maven-version>4.0.2</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
-		<scalacheck-version>1.14.0</scalacheck-version>
+		<scalacheck-version>1.14.3</scalacheck-version>
 		<scalatest-maven-version>2.0.0</scalatest-maven-version>
 		<scalatest-version>3.2.0-SNAP10</scalatest-version>
 		<servlet-version>4.0.1</servlet-version>
@@ -508,7 +508,7 @@
 			<dependency>
 				<groupId>org.glassfish.jersey.inject</groupId>
 				<artifactId>jersey-hk2</artifactId>
-				<version>2.29</version>
+				<version>2.30</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jersey.bundles.repackaged</groupId>
@@ -686,13 +686,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-				<dependency>
-					<groupId>io.r2dbc</groupId>
-					<artifactId>r2dbc-bom</artifactId>
-					<version>${r2dbc-version}</version>
-					<type>pom</type>
-					<scope>import</scope>
-				</dependency>
+			<dependency>
+				<groupId>io.r2dbc</groupId>
+				<artifactId>r2dbc-bom</artifactId>
+				<version>${r2dbc-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-core</artifactId>
@@ -735,6 +735,11 @@
 					<groupId>org.jetbrains.kotlin</groupId>
 					<artifactId>kotlin-maven-plugin</artifactId>
 					<version>${kotlin-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jetbrains.dokka</groupId>
+					<artifactId>dokka-maven-plugin</artifactId>
+					<version>${dokka-maven-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>

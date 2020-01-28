@@ -106,6 +106,10 @@ header a.link-button {
 	padding: 2em;
 }
 
+.videocenter {
+    text-align: center;
+}
+
 .inversion-of-control-image {
 	width: 21em;
 	height: 21em;
