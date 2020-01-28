@@ -681,13 +681,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-				<dependency>
-					<groupId>io.r2dbc</groupId>
-					<artifactId>r2dbc-bom</artifactId>
-					<version>${r2dbc-version}</version>
-					<type>pom</type>
-					<scope>import</scope>
-				</dependency>
+			<dependency>
+				<groupId>io.r2dbc</groupId>
+				<artifactId>r2dbc-bom</artifactId>
+				<version>${r2dbc-version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-core</artifactId>
@@ -730,6 +730,11 @@
 					<groupId>org.jetbrains.kotlin</groupId>
 					<artifactId>kotlin-maven-plugin</artifactId>
 					<version>${kotlin-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jetbrains.dokka</groupId>
+					<artifactId>dokka-maven-plugin</artifactId>
+					<version>${dokka-maven-version}</version>
 				</plugin>
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>
