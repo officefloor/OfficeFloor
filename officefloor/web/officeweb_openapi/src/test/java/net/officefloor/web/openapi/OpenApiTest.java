@@ -11,10 +11,19 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.PathItem.HttpMethod;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.parameters.CookieParameter;
+import io.swagger.v3.oas.models.parameters.HeaderParameter;
+import io.swagger.v3.oas.models.parameters.PathParameter;
+import io.swagger.v3.oas.models.parameters.QueryParameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockHttpServer;
+import net.officefloor.web.HttpCookieParameter;
+import net.officefloor.web.HttpHeaderParameter;
+import net.officefloor.web.HttpPathParameter;
+import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.compile.CompileWebExtension;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofResponse;
@@ -30,7 +39,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to obtain swagger specification.
 	 */
-	public void testAllMethods() throws Exception {
+	public void testAllMethods() {
 		this.doOpenApiTest((context) -> {
 			for (HttpMethod httpMethod : HttpMethod.values()) {
 				context.link(false, httpMethod.name(), "/methods/all", NoOpService.class);
@@ -45,40 +54,114 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can provide {@link PathParameter}.
+	 */
+	public void testPathParameter() {
+		this.doOpenApiTest((context) -> context.link(false, "/path/{parameter}", PathParameterService.class));
+	}
+
+	public static class PathParameterService {
+		public void service(@HttpPathParameter("parameter") String parameter) {
+			// no operation
+		}
+	}
+
+	/**
+	 * Ensure can provide {@link QueryParameter}.
+	 */
+	public void testQueryParameter() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", QueryParameterService.class));
+	}
+
+	public static class QueryParameterService {
+		public void service(@HttpQueryParameter("query") String parameter) {
+			// no operation
+		}
+	}
+
+	/**
+	 * Ensure can provide {@link HeaderParameter}.
+	 */
+	public void testHeaderParameter() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", HeaderParameterService.class));
+	}
+
+	public static class HeaderParameterService {
+		public void service(@HttpHeaderParameter("headers") String parameter) {
+			// no operation
+		}
+	}
+
+	/**
+	 * Ensure can provide {@link CookieParameter}.
+	 */
+	public void testCookieParameter() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", CookieParameterService.class));
+	}
+
+	public static class CookieParameterService {
+		public void service(@HttpCookieParameter("cookie") String parameter) {
+			// no operation
+		}
+	}
+
+	/**
+	 * Ensure can provide {@link RequestBody}.
+	 */
+	public void testRequestBody() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", RequestBodyService.class));
+	}
+
+	public static class Request {
+		public String getMessage() {
+			return "MOCK";
+		}
+	}
+
+	public static class RequestBodyService {
+		public void service(Request request) {
+			// no operation
+		}
+	}
+
+	/**
 	 * Undertakes the OpenAPI test.
 	 * 
 	 * @param extension {@link CompileWebExtension}.
 	 */
-	private void doOpenApiTest(CompileWebExtension extension) throws Exception {
-		CompileWoof compiler = new CompileWoof();
-		compiler.web(extension);
-		try (MockWoofServer server = compiler.open()) {
-			
-			// Obtain the expected specification
-			String testName = this.getName();
-			String expectedFileName = testName.substring("test".length()) + ".json";
-			String expectedContent = this.getFileContents(this.findFile(this.getClass(), expectedFileName));
+	private void doOpenApiTest(CompileWebExtension extension) {
+		try {
+			CompileWoof compiler = new CompileWoof();
+			compiler.web(extension);
+			try (MockWoofServer server = compiler.open()) {
 
-			// Translate to YAML and JSON (round trip for better comparison)
-			OpenAPI expectedApi = Json.mapper().readValue(expectedContent, OpenAPI.class);
+				// Obtain the expected specification
+				String testName = this.getName();
+				String expectedFileName = testName.substring("test".length()) + ".json";
+				String expectedContent = this.getFileContents(this.findFile(this.getClass(), expectedFileName));
 
-			// Ensure correct JSON
-			MockWoofResponse response = server.send(MockHttpServer.mockRequest("/openapi.json"));
-			assertEquals("Should find OpenAPI JSON", 200, response.getStatus().getStatusCode());
-			String expectedJson = Json.pretty(expectedApi);
-			String actualJson = response.getEntity(null);
-			this.printMessage(actualJson);
-			assertEquals("Incorrect JSON", expectedJson, actualJson);
+				// Translate to YAML and JSON (round trip for better comparison)
+				OpenAPI expectedApi = Json.mapper().readValue(expectedContent, OpenAPI.class);
 
-			// Ensure correct YAML
-			response = server.send(MockHttpServer.mockRequest("/openapi.yaml"));
-			assertEquals("Should find OpenAPI YAML", 200, response.getStatus().getStatusCode());
-			String expectedYaml = Yaml.pretty(expectedApi);
-			String actualYaml = response.getEntity(null);
-			this.printMessage(actualYaml);
-			assertEquals("Incorrect YAML", expectedYaml, actualYaml);
+				// Ensure correct JSON
+				MockWoofResponse response = server.send(MockHttpServer.mockRequest("/openapi.json"));
+				assertEquals("Should find OpenAPI JSON", 200, response.getStatus().getStatusCode());
+				String expectedJson = Json.pretty(expectedApi);
+				String actualJson = response.getEntity(null);
+				this.printMessage(actualJson);
+				assertEquals("Incorrect JSON", expectedJson, actualJson);
+
+				// Ensure correct YAML
+				response = server.send(MockHttpServer.mockRequest("/openapi.yaml"));
+				assertEquals("Should find OpenAPI YAML", 200, response.getStatus().getStatusCode());
+				String expectedYaml = Yaml.pretty(expectedApi);
+				String actualYaml = response.getEntity(null);
+				this.printMessage(actualYaml);
+				assertEquals("Incorrect YAML", expectedYaml, actualYaml);
+			}
+		} catch (Exception ex) {
+			throw fail(ex);
 		}
-
 	}
 
 	public void _testResolvedModel() throws Exception {
