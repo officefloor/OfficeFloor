@@ -58,7 +58,7 @@
 		<affinity-version>3.1.11</affinity-version>
 		<commons-codec-version>1.12</commons-codec-version>
 		<commons-text-version>1.8</commons-text-version>
-		<datanucleus-version>5.2.1</datanucleus-version>
+		<datanucleus-version>5.2.3</datanucleus-version>
 		<docker-client-version>8.16.0</docker-client-version>
 		<dokka-maven-version>0.10.0</dokka-maven-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
