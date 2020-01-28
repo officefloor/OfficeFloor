@@ -4,6 +4,7 @@ import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.converter.ResolvedSchema;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -52,23 +53,30 @@ public class OpenApiTest extends OfficeFrameTestCase {
 		CompileWoof compiler = new CompileWoof();
 		compiler.web(extension);
 		try (MockWoofServer server = compiler.open()) {
-
-			// Ensure can obtain swagger JSON
-			MockWoofResponse response = server.send(MockHttpServer.mockRequest("/swagger.json"));
-			assertEquals("Should find swagger", 200, response.getStatus().getStatusCode());
-
+			
 			// Obtain the expected specification
 			String testName = this.getName();
 			String expectedFileName = testName.substring("test".length()) + ".json";
-			String expectedJson = this.getFileContents(this.findFile(this.getClass(), expectedFileName));
+			String expectedContent = this.getFileContents(this.findFile(this.getClass(), expectedFileName));
 
-			// Round trip for better comparison
-			OpenAPI expectedApi = Json.mapper().readValue(expectedJson, OpenAPI.class);
-			expectedJson = Json.pretty(expectedApi);
+			// Translate to YAML and JSON (round trip for better comparison)
+			OpenAPI expectedApi = Json.mapper().readValue(expectedContent, OpenAPI.class);
 
-			// Ensure correct result
-			String spec = response.getEntity(null);
-			assertEquals("Incorrect content", expectedJson, spec);
+			// Ensure correct JSON
+			MockWoofResponse response = server.send(MockHttpServer.mockRequest("/openapi.json"));
+			assertEquals("Should find OpenAPI JSON", 200, response.getStatus().getStatusCode());
+			String expectedJson = Json.pretty(expectedApi);
+			String actualJson = response.getEntity(null);
+			this.printMessage(actualJson);
+			assertEquals("Incorrect JSON", expectedJson, actualJson);
+
+			// Ensure correct YAML
+			response = server.send(MockHttpServer.mockRequest("/openapi.yaml"));
+			assertEquals("Should find OpenAPI YAML", 200, response.getStatus().getStatusCode());
+			String expectedYaml = Yaml.pretty(expectedApi);
+			String actualYaml = response.getEntity(null);
+			this.printMessage(actualYaml);
+			assertEquals("Incorrect YAML", expectedYaml, actualYaml);
 		}
 
 	}
