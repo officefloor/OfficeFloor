@@ -86,7 +86,7 @@
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.45.Final</netty-version>
-		<objectify-version>6.0.4</objectify-version>
+		<objectify-version>6.0.6</objectify-version>
 		<postgresql-version>42.2.9</postgresql-version>
 		<r2dbc-version>Arabba-RELEASE</r2dbc-version>
 		<reactor-version>Bismuth-RELEASE</reactor-version>
