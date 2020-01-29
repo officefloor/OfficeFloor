@@ -55,10 +55,10 @@
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
-		<affinity-version>3.1.11</affinity-version>
+		<affinity-version>3.2.2</affinity-version>
 		<commons-codec-version>1.12</commons-codec-version>
 		<commons-text-version>1.8</commons-text-version>
-		<datanucleus-version>5.2.1</datanucleus-version>
+		<datanucleus-version>5.2.3</datanucleus-version>
 		<docker-client-version>8.16.0</docker-client-version>
 		<dokka-maven-version>0.10.0</dokka-maven-version>
 		<eclipse-persistence-version>2.2.1</eclipse-persistence-version>
@@ -66,7 +66,7 @@
 		<flatten-maven-version>1.1.0</flatten-maven-version>
 		<flyway-version>5.2.4</flyway-version>
 		<google-api-version>1.30.2</google-api-version>
-		<google-appengine-version>1.9.76</google-appengine-version>
+		<google-appengine-version>1.9.78</google-appengine-version>
 		<gpg-version>1.6</gpg-version>
 		<graalvm-js-version>19.1.0</graalvm-js-version>
 		<h2database-version>1.4.200</h2database-version>
@@ -86,7 +86,7 @@
 		<maven-site-version>3.7.1</maven-site-version>
 		<maven-source-version>3.0.1</maven-source-version>
 		<netty-version>4.1.45.Final</netty-version>
-		<objectify-version>6.0.4</objectify-version>
+		<objectify-version>6.0.6</objectify-version>
 		<postgresql-version>42.2.9</postgresql-version>
 		<r2dbc-version>Arabba-RELEASE</r2dbc-version>
 		<reactor-version>Bismuth-RELEASE</reactor-version>
