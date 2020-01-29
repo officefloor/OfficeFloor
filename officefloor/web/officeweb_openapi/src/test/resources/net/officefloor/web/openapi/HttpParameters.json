@@ -5,7 +5,7 @@
 			"get": {
 				"parameters": [
 					{
-						"name": "one",
+						"name": "One",
 						"in": "path",
 						"required" : true,
 						"schema": {
@@ -13,7 +13,7 @@
 						}
 					},
 					{
-						"name": "two",
+						"name": "Two",
 						"in": "query",
 						"schema": {
 							"type": "string"

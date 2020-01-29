@@ -8,24 +8,30 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.core.converter.ResolvedSchema;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.CookieParameter;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -40,9 +46,15 @@ import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpCookieParameter;
 import net.officefloor.web.HttpHeaderParameter;
+import net.officefloor.web.HttpObject;
+import net.officefloor.web.HttpParameters;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
+import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.value.load.ValueLoaderFactory;
+import net.officefloor.web.value.load.ValueLoaderSource;
+import net.officefloor.web.value.load.ValueName;
 import net.officefloor.woof.WoofContext;
 import net.officefloor.woof.WoofExtensionService;
 
@@ -127,7 +139,7 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 				// Ignore method
 			}
 
-			// Determine the parameters
+			// Register parameters only once
 			Map<String, Parameter> parameters = new HashMap<>();
 			BiConsumer<String, Supplier<Parameter>> addParameter = (name, factory) -> {
 				Parameter parameter = parameters.get(name);
@@ -138,7 +150,10 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 					operation.addParametersItem(parameter);
 				}
 			};
-			ManagedFunctionType<?, ?> type = explore.getInitialManagedFunction().getManagedFunctionType();
+
+			// Determine the parameters
+			ExecutionManagedFunction managedFunction = explore.getInitialManagedFunction();
+			ManagedFunctionType<?, ?> type = managedFunction.getManagedFunctionType();
 			for (ManagedFunctionObjectType<?> objectType : type.getObjectTypes()) {
 
 				// Include possible path parameter
@@ -169,6 +184,64 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 					addParameter.accept(paramName, () -> new CookieParameter().name(paramName));
 				}
 
+				// Include possible HTTP Parameters
+				if (objectType.getAnnotation(HttpParameters.class) != null) {
+
+					// Obtain the HTTP parameter names
+					Class<?> httpParametersType = objectType.getObjectType();
+					ValueLoaderSource loaderSource = new ValueLoaderSource(httpParametersType, false, new HashMap<>(),
+							null);
+					ValueLoaderFactory<?> loaderFactory = loaderSource.sourceValueLoaderFactory(httpParametersType);
+					ValueName[] names = loaderFactory.getValueNames();
+
+					// Load names in sorted order
+					Arrays.sort(names, (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName()));
+					for (ValueName name : names) {
+						String paramName = name.getName();
+						HttpValueLocation location = name.getLocation();
+						if (location == null) {
+							// Attempt to default location
+							location = (explore.getRoutePath().toLowerCase()
+									.contains("{" + paramName.toLowerCase() + "}")) ? HttpValueLocation.PATH
+											: HttpValueLocation.QUERY;
+						}
+						switch (location) {
+						case PATH:
+							addParameter.accept(paramName, () -> new PathParameter().name(paramName));
+							break;
+						case ENTITY:
+						case QUERY:
+							addParameter.accept(paramName, () -> new QueryParameter().name(paramName));
+							break;
+						case HEADER:
+							addParameter.accept(paramName, () -> new HeaderParameter().name(paramName));
+							break;
+						case COOKIE:
+							addParameter.accept(paramName, () -> new CookieParameter().name(paramName));
+							break;
+						default:
+							throw new IllegalStateException(
+									"Unknown  " + HttpValueLocation.class.getSimpleName() + " " + location);
+						}
+					}
+				}
+
+				// Include possible HTTP Object
+				if (objectType.getAnnotation(HttpObject.class) != null) {
+
+					// Obtain the request body schema
+					Class<?> httpObjectType = objectType.getObjectType();
+					ResolvedSchema resolvedSchema = ModelConverters.getInstance()
+							.readAllAsResolvedSchema(httpObjectType);
+
+					// Add the request body
+					Content content = new Content();
+
+					// TODO provide registered object parsers
+					content.addMediaType("application/json", new MediaType().schema(resolvedSchema.schema));
+
+					operation.requestBody(new RequestBody().content(content));
+				}
 			}
 		});
 

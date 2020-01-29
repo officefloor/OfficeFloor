@@ -23,11 +23,9 @@ package net.officefloor.web;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 import net.officefloor.compile.impl.util.CompileUtil;
@@ -616,7 +614,6 @@ public class WebArchitectEmployer implements WebArchitect {
 		}
 
 		// Load in-line configured dependencies
-		final Set<Class<?>> httpParameters = new HashSet<>();
 		this.officeArchitect.addManagedFunctionAugmentor((context) -> {
 			ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
 			for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
@@ -645,11 +642,7 @@ public class WebArchitectEmployer implements WebArchitect {
 						httpParametersAnnotation = (HttpParametersAnnotation) annotation;
 					}
 					if (httpParametersAnnotation != null) {
-						// Load as HTTP parameters (only once)
-						if (!httpParameters.contains(objectType)) {
-							this.addHttpRequestObject(objectType, true);
-							httpParameters.add(objectType);
-						}
+						this.addHttpRequestObject(objectType, true);
 					}
 
 					// HTTP object

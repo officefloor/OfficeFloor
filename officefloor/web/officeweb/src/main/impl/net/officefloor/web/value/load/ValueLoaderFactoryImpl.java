@@ -21,9 +21,8 @@
 
 package net.officefloor.web.value.load;
 
-import net.officefloor.web.value.load.StatelessValueLoader;
-import net.officefloor.web.value.load.ValueLoader;
-import net.officefloor.web.value.load.ValueLoaderFactory;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@link ValueLoaderFactory} implementation.
@@ -40,8 +39,7 @@ public class ValueLoaderFactoryImpl<T> implements ValueLoaderFactory<T> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param delegate
-	 *            Delegate {@link StatelessValueLoader} to load values.
+	 * @param delegate Delegate {@link StatelessValueLoader} to load values.
 	 */
 	public ValueLoaderFactoryImpl(StatelessValueLoader delegate) {
 		this.delegate = delegate;
@@ -55,6 +53,17 @@ public class ValueLoaderFactoryImpl<T> implements ValueLoaderFactory<T> {
 	public ValueLoader createValueLoader(T object) throws Exception {
 		// Create and return the new value loader
 		return new ValueLoaderImpl(object, this.delegate);
+	}
+
+	@Override
+	public ValueName[] getValueNames() {
+
+		// Load the values
+		List<ValueName> valueNames = new ArrayList<>();
+		this.delegate.visitValueNames((name) -> valueNames.add(name), null, null);
+
+		// Return the value names
+		return valueNames.toArray(new ValueName[valueNames.size()]);
 	}
 
 }

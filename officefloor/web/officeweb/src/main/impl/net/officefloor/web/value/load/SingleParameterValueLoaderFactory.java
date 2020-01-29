@@ -22,13 +22,12 @@
 package net.officefloor.web.value.load;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.build.HttpValueLocation;
-import net.officefloor.web.value.load.PropertyKey;
-import net.officefloor.web.value.load.StatelessValueLoader;
-import net.officefloor.web.value.load.StatelessValueLoaderFactory;
 
 /**
  * {@link StatelessValueLoaderFactory} to load a string parameter.
@@ -50,10 +49,8 @@ public class SingleParameterValueLoaderFactory implements StatelessValueLoaderFa
 	/**
 	 * Initiate.
 	 * 
-	 * @param propertyName
-	 *            Property name.
-	 * @param methodName
-	 *            {@link Method} name.
+	 * @param propertyName Property name.
+	 * @param methodName   {@link Method} name.
 	 */
 	public SingleParameterValueLoaderFactory(String propertyName, String methodName) {
 		this.propertyName = propertyName;
@@ -80,6 +77,7 @@ public class SingleParameterValueLoaderFactory implements StatelessValueLoaderFa
 
 		// Return the new value loader
 		return new StatelessValueLoader() {
+
 			@Override
 			public void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
 					Map<PropertyKey, Object> state) throws HttpException {
@@ -91,6 +89,12 @@ public class SingleParameterValueLoaderFactory implements StatelessValueLoaderFa
 
 				// Load the value
 				ValueLoaderSource.loadValue(object, loaderMethod, value);
+			}
+
+			@Override
+			public void visitValueNames(Consumer<ValueName> visitor, String namePrefix,
+					List<StatelessValueLoader> visitedLoaders) {
+				visitor.accept(new ValueName(namePrefix, loaderLocation));
 			}
 		};
 	}

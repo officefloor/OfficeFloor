@@ -3,12 +3,14 @@
 	"paths": {
 		"/path": {
 			"get": {
-				"content": {
-					"application/json": {
-						"schema": {
-							"properties": {
-								"message": {
-									"type": "string"
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"message": {
+										"type": "string"
+									}
 								}
 							}
 						}

@@ -2,24 +2,15 @@ package net.officefloor.web.openapi;
 
 import java.io.Serializable;
 
-import io.swagger.v3.core.converter.AnnotatedType;
-import io.swagger.v3.core.converter.ModelConverters;
-import io.swagger.v3.core.converter.ResolvedSchema;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.PathItem.HttpMethod;
-import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.parameters.CookieParameter;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
-import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.oas.models.responses.ApiResponses;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpCookieParameter;
@@ -179,7 +170,8 @@ public class OpenApiTest extends OfficeFrameTestCase {
 				assertEquals("Should find OpenAPI JSON", 200, response.getStatus().getStatusCode());
 				String expectedJson = Json.pretty(expectedApi);
 				String actualJson = response.getEntity(null);
-				this.printMessage(actualJson);
+				this.printMessage("EXPECTED:\n" + expectedJson);
+				this.printMessage("JSON:\n" + actualJson);
 				assertEquals("Incorrect JSON", expectedJson, actualJson);
 
 				// Ensure correct YAML
@@ -187,61 +179,11 @@ public class OpenApiTest extends OfficeFrameTestCase {
 				assertEquals("Should find OpenAPI YAML", 200, response.getStatus().getStatusCode());
 				String expectedYaml = Yaml.pretty(expectedApi);
 				String actualYaml = response.getEntity(null);
-				this.printMessage(actualYaml);
+				this.printMessage("YAML:\n" + actualYaml);
 				assertEquals("Incorrect YAML", expectedYaml, actualYaml);
 			}
 		} catch (Exception ex) {
 			throw fail(ex);
-		}
-	}
-
-	public void _testResolvedModel() throws Exception {
-		AnnotatedType type = new AnnotatedType(Parent.class);
-		type.setResolveAsRef(true);
-		ResolvedSchema schema = ModelConverters.getInstance().readAllAsResolvedSchema(type);
-
-		OpenAPI api = new OpenAPI();
-		Paths paths = new Paths();
-		api.setPaths(paths);
-
-		Operation get = new Operation();
-		get.setDescription("Description");
-
-		ApiResponses responses = new ApiResponses();
-		ApiResponse response = new ApiResponse();
-		response.description("RESPONSE");
-		responses.addApiResponse("200", response);
-		get.setResponses(responses);
-
-		Operation post = new Operation();
-		post.setDescription("POST");
-
-		PathItem pathItem = new PathItem();
-		pathItem.get(get);
-		pathItem.post(post);
-		paths.addPathItem("/hi", pathItem);
-
-		Components components = new Components();
-		api.setComponents(components);
-		components.setSchemas(schema.referencedSchemas);
-		System.out.println(Json.pretty(api));
-	}
-
-	public static class Parent {
-
-		public String getMessage() {
-			return "test";
-		}
-
-		public Child getChild() {
-			return new Child();
-		}
-	}
-
-	public static class Child {
-
-		public String getAnswer() {
-			return "answer";
 		}
 	}
 
