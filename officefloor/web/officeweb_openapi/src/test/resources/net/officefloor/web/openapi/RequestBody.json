@@ -1,0 +1,20 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/path": {
+			"get": {
+				"content": {
+					"application/json": {
+						"schema": {
+							"properties": {
+								"message": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

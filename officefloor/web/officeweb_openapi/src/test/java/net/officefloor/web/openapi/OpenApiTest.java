@@ -1,5 +1,7 @@
 package net.officefloor.web.openapi;
 
+import java.io.Serializable;
+
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.converter.ResolvedSchema;
@@ -22,6 +24,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpCookieParameter;
 import net.officefloor.web.HttpHeaderParameter;
+import net.officefloor.web.HttpObject;
+import net.officefloor.web.HttpParameters;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.compile.CompileWebExtension;
@@ -106,12 +110,39 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can describe {@link HttpParameters} object.
+	 */
+	public void testHttpParameters() {
+		this.doOpenApiTest((context) -> context.link(false, "/path/{one}", ParametersService.class));
+	}
+
+	@HttpParameters
+	public static class Parameters implements Serializable {
+		private static final long serialVersionUID = 1L;
+
+		public void setOne(String one) {
+			// no operation
+		}
+
+		public void setTwo(String two) {
+			// no operation
+		}
+	}
+
+	public static class ParametersService {
+		public void service(Parameters parameters) {
+			// no operation
+		}
+	}
+
+	/**
 	 * Ensure can provide {@link RequestBody}.
 	 */
 	public void testRequestBody() {
 		this.doOpenApiTest((context) -> context.link(false, "/path", RequestBodyService.class));
 	}
 
+	@HttpObject
 	public static class Request {
 		public String getMessage() {
 			return "MOCK";
