@@ -78,7 +78,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	}
 
 	public static class QueryParameterService {
-		public void service(@HttpQueryParameter("query") String parameter) {
+		public void service(@HttpQueryParameter("parameter") String parameter) {
 			// no operation
 		}
 	}
@@ -91,7 +91,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	}
 
 	public static class HeaderParameterService {
-		public void service(@HttpHeaderParameter("headers") String parameter) {
+		public void service(@HttpHeaderParameter("parameter") String parameter) {
 			// no operation
 		}
 	}
@@ -104,7 +104,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	}
 
 	public static class CookieParameterService {
-		public void service(@HttpCookieParameter("cookie") String parameter) {
+		public void service(@HttpCookieParameter("parameter") String parameter) {
 			// no operation
 		}
 	}

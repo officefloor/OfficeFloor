@@ -708,7 +708,16 @@ public class WebArchitectEmployer implements WebArchitect {
 
 				// Allow exploring the input
 				for (HttpInputImpl input : this.inputs) {
+
+					// Obtain the input handler
 					ExecutionManagedFunction inputHandler = inputHandlers.get(input.routeInput.getOutputName());
+					if (input.routeInput.getHttpInputPath().isPathParameters()) {
+						// Step over initialise path parameters function
+						inputHandler = inputHandler.getNextManagedFunction();
+					}
+
+					// Allow exploring input
+					final ExecutionManagedFunction finalInputHandler = inputHandler;
 					explorer.explore(new HttpInputExplorerContext() {
 
 						@Override
@@ -718,7 +727,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
 						@Override
 						public ExecutionManagedFunction getInitialManagedFunction() {
-							return inputHandler;
+							return finalInputHandler;
 						}
 
 						@Override

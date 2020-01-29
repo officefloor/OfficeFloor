@@ -1,8 +1,12 @@
 package net.officefloor.web.openapi;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
@@ -10,6 +14,14 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.CookieParameter;
+import io.swagger.v3.oas.models.parameters.HeaderParameter;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.PathParameter;
+import io.swagger.v3.oas.models.parameters.QueryParameter;
+import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
+import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
@@ -26,6 +38,10 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.ServerHttpConnection;
+import net.officefloor.web.HttpCookieParameter;
+import net.officefloor.web.HttpHeaderParameter;
+import net.officefloor.web.HttpPathParameter;
+import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.woof.WoofContext;
 import net.officefloor.woof.WoofExtensionService;
@@ -109,6 +125,50 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 				break;
 			default:
 				// Ignore method
+			}
+
+			// Determine the parameters
+			Map<String, Parameter> parameters = new HashMap<>();
+			BiConsumer<String, Supplier<Parameter>> addParameter = (name, factory) -> {
+				Parameter parameter = parameters.get(name);
+				if (parameter == null) {
+					parameter = factory.get();
+					parameter.schema(new Schema<String>().type("string"));
+					parameters.put(name, parameter);
+					operation.addParametersItem(parameter);
+				}
+			};
+			ManagedFunctionType<?, ?> type = explore.getInitialManagedFunction().getManagedFunctionType();
+			for (ManagedFunctionObjectType<?> objectType : type.getObjectTypes()) {
+
+				// Include possible path parameter
+				HttpPathParameter pathParam = objectType.getAnnotation(HttpPathParameter.class);
+				if (pathParam != null) {
+					String paramName = pathParam.value();
+					addParameter.accept(paramName, () -> new PathParameter().name(paramName));
+				}
+
+				// Include possible query parameter
+				HttpQueryParameter queryParam = objectType.getAnnotation(HttpQueryParameter.class);
+				if (queryParam != null) {
+					String paramName = queryParam.value();
+					addParameter.accept(paramName, () -> new QueryParameter().name(paramName));
+				}
+
+				// Include possible header parameter
+				HttpHeaderParameter headerParam = objectType.getAnnotation(HttpHeaderParameter.class);
+				if (headerParam != null) {
+					String paramName = headerParam.value();
+					addParameter.accept(paramName, () -> new HeaderParameter().name(paramName));
+				}
+
+				// Include possible cookie parameter
+				HttpCookieParameter cookieParam = objectType.getAnnotation(HttpCookieParameter.class);
+				if (cookieParam != null) {
+					String paramName = cookieParam.value();
+					addParameter.accept(paramName, () -> new CookieParameter().name(paramName));
+				}
+
 			}
 		});
 

@@ -1413,6 +1413,38 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can explore with {@link HttpPathParameter}.
+	 */
+	public void testHttpInputWithPathParameter() throws Exception {
+
+		// Capture the input
+		Closure<HttpInputExplorerContext> explorer = new Closure<>();
+
+		// Configure the server
+		this.compile.web((context) -> {
+
+			// Provide some inputs to explore
+			context.link(false, "/path/{parameter}", HttpInputWithPathParameterSection.class);
+
+			// Capture exploring
+			context.getWebArchitect().addHttpInputExplorer((explore) -> {
+				explorer.value = explore;
+			});
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Ensure correct method
+		assertExploredHttpInput(explorer.value, false, HttpMethod.GET, "/path/{parameter}",
+				"GET_/path/{parameter}.service", String.class);
+	}
+
+	public static class HttpInputWithPathParameterSection {
+		public void service(@HttpPathParameter("parameter") String parameter) {
+			// no operation
+		}
+	}
+
+	/**
 	 * Adds the context path to the path.
 	 * 
 	 * @param server Server details (e.g. http://officefloor.net:80 ).
