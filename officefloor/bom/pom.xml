@@ -55,7 +55,7 @@
 		<ant-version>1.10.5</ant-version>
 		<antrun-version>1.8</antrun-version>
 		<ant-jsch-version>1.10.5</ant-jsch-version>
-		<affinity-version>3.1.11</affinity-version>
+		<affinity-version>3.2.2</affinity-version>
 		<commons-codec-version>1.12</commons-codec-version>
 		<commons-text-version>1.8</commons-text-version>
 		<datanucleus-version>5.2.3</datanucleus-version>
