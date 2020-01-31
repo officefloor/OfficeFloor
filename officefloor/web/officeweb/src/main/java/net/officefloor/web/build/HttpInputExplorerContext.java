@@ -45,4 +45,11 @@ public interface HttpInputExplorerContext extends ExecutionExplorerContext {
 	 */
 	String getApplicationPath();
 
+	/**
+	 * Obtains the {@link HttpObjectParserFactory} instances.
+	 * 
+	 * @return {@link HttpObjectParserFactory} instances.
+	 */
+	HttpObjectParserFactory[] getHttpObjectParserFactories();
+
 }

@@ -1,5 +1,6 @@
 package net.officefloor.web.openapi;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import io.swagger.v3.core.util.Json;
@@ -11,7 +12,13 @@ import io.swagger.v3.oas.models.parameters.HeaderParameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.clazz.Qualified;
+import net.officefloor.server.http.HttpException;
+import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
 import net.officefloor.web.HttpCookieParameter;
 import net.officefloor.web.HttpHeaderParameter;
@@ -19,6 +26,11 @@ import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpParameters;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
+import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.build.HttpObjectParser;
+import net.officefloor.web.build.HttpObjectParserFactory;
+import net.officefloor.web.build.HttpObjectResponder;
+import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.compile.CompileWebExtension;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofResponse;
@@ -144,6 +156,153 @@ public class OpenApiTest extends OfficeFrameTestCase {
 		public void service(Request request) {
 			// no operation
 		}
+	}
+
+	/**
+	 * Ensure handle alternate {@link RequestBody} format.
+	 */
+	public void testAlternateRequestContentType() {
+		this.doOpenApiTest((context) -> {
+			context.link(false, "/path", RequestBodyService.class);
+			context.getWebArchitect().addHttpObjectParser(new MockHttpObjectParserFactory<>());
+		});
+	}
+
+	private static class MockHttpObjectParserFactory<P> implements HttpObjectParserFactory, HttpObjectParser<P> {
+
+		@Override
+		public String getContentType() {
+			return "mock/test";
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> HttpObjectParser<T> createHttpObjectParser(Class<T> objectClass) throws Exception {
+			return (HttpObjectParser<T>) this;
+		}
+
+		@Override
+		public Class<P> getObjectType() {
+			fail("Should not be required");
+			return null;
+		}
+
+		@Override
+		public P parse(ServerHttpConnection connection) throws HttpException {
+			fail("Should not require to parse");
+			return null;
+		}
+	}
+
+	/**
+	 * Ensure can provide {@link ApiResponse}.
+	 */
+	public void testResponse() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", ResponseService.class));
+	}
+
+	public static class Response {
+		public String getResult() {
+			return "MOCK";
+		}
+	}
+
+	public static class ResponseService {
+		public void service(ObjectResponse<Response> responder) {
+			// no operation
+		}
+	}
+
+	/**
+	 * Ensure can provide alternate status {@link ApiResponse}.
+	 */
+	public void testAlternateStatusResposne() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", AlternateStatusResponseService.class));
+	}
+
+	public static class AlternateStatusResponseService {
+
+		// TODO provide status qualifier to object response
+		public void service(@Qualified("418") ObjectResponse<Response> responder) {
+			// no operation
+		}
+	}
+
+	/**
+	 * Ensure handle alternate {@link ApiResponse} format.
+	 */
+	public void testAlternateResponseContentType() {
+		this.doOpenApiTest((context) -> {
+			context.link(false, "/path", ResponseService.class);
+			context.getWebArchitect().addHttpObjectResponder(new MockHttpObjectResponderFactory<>());
+		});
+	}
+
+	public static class MockHttpObjectResponderFactory<P>
+			implements HttpObjectResponderFactory, HttpObjectResponder<P> {
+
+		@Override
+		public String getContentType() {
+			return "mock/test";
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> HttpObjectResponder<T> createHttpObjectResponder(Class<T> objectType) {
+			return (HttpObjectResponder<T>) this;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <E extends Throwable> HttpObjectResponder<E> createHttpEscalationResponder(Class<E> escalationType) {
+			return (HttpObjectResponder<E>) this;
+		}
+
+		@Override
+		public Class<P> getObjectType() {
+			fail("Should not be required");
+			return null;
+		}
+
+		@Override
+		public void send(P object, ServerHttpConnection connection) throws IOException {
+			fail("Should no require to send");
+		}
+	}
+
+	/**
+	 * Ensure that can explore graph of {@link ExecutionManagedFunction} instances.
+	 */
+	public void testExploreGraphOfManagedFunctions() {
+		fail("TODO implement exploring graph");
+	}
+
+	/**
+	 * Ensure handles recursive graph of {@link ExecutionManagedFunction} instances.
+	 */
+	public void testExploreRecursiveGraph() {
+		fail("TODO implement exploring graph");
+	}
+
+	/**
+	 * Ensure explore {@link Escalation} instances for failed responses.
+	 */
+	public void testHandleEscalations() {
+		fail("TODO implement exploring escalation hanlding for failed responses");
+	}
+
+	/**
+	 * Ensure can handle <code>BASIC</code> security.
+	 */
+	public void testBasicSecurity() {
+		fail("TODO handle basic security");
+	}
+
+	/**
+	 * Ensure can handle <code>Bearer</code> security.
+	 */
+	public void testBearerSecurity() {
+		fail("TODO handle bearer security");
 	}
 
 	/**

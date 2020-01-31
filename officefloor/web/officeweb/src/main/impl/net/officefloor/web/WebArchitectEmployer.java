@@ -711,6 +711,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
 					// Allow exploring input
 					final ExecutionManagedFunction finalInputHandler = inputHandler;
+					final WebArchitectEmployer employer = this; // easy access
 					explorer.explore(new HttpInputExplorerContext() {
 
 						@Override
@@ -747,6 +748,18 @@ public class WebArchitectEmployer implements WebArchitect {
 						public String getApplicationPath() {
 							return WebRouterBuilder.getContextQualifiedPath(WebArchitectEmployer.this.contextPath,
 									input.applicationPath);
+						}
+
+						@Override
+						public HttpObjectParserFactory[] getHttpObjectParserFactories() {
+							if (employer.singletonObjectParserList.size() == 0) {
+								return new HttpObjectParserFactory[] { employer.officeSourceContext
+										.loadService(employer.defaultHttpObjectParserServiceFactory) };
+							} else {
+								return WebArchitectEmployer.this.singletonObjectParserList.toArray(
+										new HttpObjectParserFactory[WebArchitectEmployer.this.singletonObjectParserList
+												.size()]);
+							}
 						}
 					});
 				}

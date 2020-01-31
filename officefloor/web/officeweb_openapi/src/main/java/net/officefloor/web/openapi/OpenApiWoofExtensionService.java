@@ -50,6 +50,7 @@ import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpParameters;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
+import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.value.load.ValueLoaderFactory;
@@ -226,6 +227,9 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 					}
 				}
 
+				// Obtain the HTTP Object Parsers
+				HttpObjectParserFactory[] objectParserFactories = explore.getHttpObjectParserFactories();
+
 				// Include possible HTTP Object
 				if (objectType.getAnnotation(HttpObject.class) != null) {
 
@@ -237,10 +241,24 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 					// Add the request body
 					Content content = new Content();
 
-					// TODO provide registered object parsers
-					content.addMediaType("application/json", new MediaType().schema(resolvedSchema.schema));
+					// Load the handled content types
+					for (HttpObjectParserFactory objectParserFactory : objectParserFactories) {
 
-					operation.requestBody(new RequestBody().content(content));
+						// Determine if can handle object type
+						boolean isHandleHttpObject;
+						try {
+							isHandleHttpObject = objectParserFactory.createHttpObjectParser(httpObjectType) != null;
+						} catch (Exception ex) {
+							isHandleHttpObject = false;
+						}
+
+						// Able to handle input of type
+						if (isHandleHttpObject) {
+							content.addMediaType(objectParserFactory.getContentType(),
+									new MediaType().schema(resolvedSchema.schema));
+							operation.requestBody(new RequestBody().content(content));
+						}
+					}
 				}
 			}
 		});

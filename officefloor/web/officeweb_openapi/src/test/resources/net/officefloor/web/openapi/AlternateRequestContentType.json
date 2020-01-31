@@ -1,0 +1,22 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/path": {
+			"get": {
+				"requestBody": {
+					"content": {
+						"mock/test": {
+							"schema": {
+								"properties": {
+									"message": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
