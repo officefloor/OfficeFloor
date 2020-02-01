@@ -52,4 +52,11 @@ public interface HttpInputExplorerContext extends ExecutionExplorerContext {
 	 */
 	HttpObjectParserFactory[] getHttpObjectParserFactories();
 
+	/**
+	 * Obtains the {@link HttpObjectResponderFactory} instances.
+	 * 
+	 * @return {@link HttpObjectResponderFactory} instances.
+	 */
+	HttpObjectResponderFactory[] getHttpObjectResponderFactories();
+
 }

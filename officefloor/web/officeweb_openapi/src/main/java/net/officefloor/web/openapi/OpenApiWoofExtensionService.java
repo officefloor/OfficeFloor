@@ -44,6 +44,7 @@ import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.PrivateSource;
 import net.officefloor.server.http.HttpResponse;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpCookieParameter;
 import net.officefloor.web.HttpHeaderParameter;
@@ -53,6 +54,7 @@ import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.build.HttpObjectParserFactory;
+import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.value.load.ValueLoaderFactory;
@@ -142,6 +144,10 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 				// Ignore method
 			}
 
+			// Obtain the HTTP Object Parsers and Responders
+			HttpObjectParserFactory[] objectParserFactories = explore.getHttpObjectParserFactories();
+			HttpObjectResponderFactory[] objectResponderFactories = explore.getHttpObjectResponderFactories();
+
 			// Determine the parameters
 			Map<String, Parameter> parameters = new HashMap<>();
 			ExecutionManagedFunction managedFunction = explore.getInitialManagedFunction();
@@ -226,9 +232,6 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 					}
 				}
 
-				// Obtain the HTTP Object Parsers
-				HttpObjectParserFactory[] objectParserFactories = explore.getHttpObjectParserFactories();
-
 				// Include possible HTTP Object
 				if (objectType.getAnnotation(HttpObject.class) != null) {
 
@@ -264,21 +267,50 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 				Class<?> objectClass = objectType.getObjectType();
 				if (ObjectResponse.class.equals(objectClass)) {
 
-					// Obtain the response type
+					// Obtain the response information
+					int statusCode;
+					Class<?> responseType;
 					ObjectResponseAnnotation responseAnnotation = objectType
 							.getAnnotation(ObjectResponseAnnotation.class);
-					Class<?> responseType = responseAnnotation != null ? responseAnnotation.getResponseType()
-							: Object.class;
+					if (responseAnnotation != null) {
+						// Use specific information of response
+						statusCode = responseAnnotation.getStatusCode();
+						responseType = responseAnnotation.getResponseType();
+					} else {
+						// Use defaults
+						statusCode = HttpStatus.OK.getStatusCode();
+						responseType = Object.class;
+					}
 
 					// Obtain the response schema
 					ResolvedSchema resolvedSchema = ModelConverters.getInstance().readAllAsResolvedSchema(responseType);
 
-					// Include the response
-					ApiResponses responses = new ApiResponses();
-					operation.setResponses(responses);
-					Content content = new Content();
-					content.put("application/json", new MediaType().schema(resolvedSchema.schema));
-					responses.addApiResponse("200", new ApiResponse().content(content));
+					// Lazy add responses
+					ApiResponses responses = operation.getResponses();
+					if (responses == null) {
+						responses = new ApiResponses();
+						operation.setResponses(responses);
+					}
+
+					// Load the response content types
+					for (HttpObjectResponderFactory objectResponderFactory : objectResponderFactories) {
+
+						// Determine if can send object type
+						boolean isHandleResponse;
+						try {
+							isHandleResponse = objectResponderFactory.createHttpObjectResponder(responseType) != null;
+						} catch (Exception ex) {
+							isHandleResponse = false;
+						}
+
+						// Able to send response
+						if (isHandleResponse) {
+							Content content = new Content();
+							content.put(objectResponderFactory.getContentType(),
+									new MediaType().schema(resolvedSchema.schema));
+							responses.addApiResponse(String.valueOf(statusCode), new ApiResponse().content(content));
+						}
+					}
 				}
 			}
 		});

@@ -740,7 +740,7 @@ public class WebArchitectEmployer implements WebArchitect {
 
 						@Override
 						public String getContextPath() {
-							return WebArchitectEmployer.this.contextPath;
+							return employer.contextPath;
 						}
 
 						@Override
@@ -760,9 +760,19 @@ public class WebArchitectEmployer implements WebArchitect {
 								return new HttpObjectParserFactory[] { employer.officeSourceContext
 										.loadService(employer.defaultHttpObjectParserServiceFactory) };
 							} else {
-								return WebArchitectEmployer.this.singletonObjectParserList.toArray(
-										new HttpObjectParserFactory[WebArchitectEmployer.this.singletonObjectParserList
-												.size()]);
+								return employer.singletonObjectParserList.toArray(
+										new HttpObjectParserFactory[employer.singletonObjectParserList.size()]);
+							}
+						}
+
+						@Override
+						public HttpObjectResponderFactory[] getHttpObjectResponderFactories() {
+							if (employer.objectResponderFactories.size() == 0) {
+								return new HttpObjectResponderFactory[] { employer.officeSourceContext
+										.loadService(employer.defaultHttpObjectResponderServiceFactory) };
+							} else {
+								return employer.objectResponderFactories.toArray(
+										new HttpObjectResponderFactory[employer.objectResponderFactories.size()]);
 							}
 						}
 					});

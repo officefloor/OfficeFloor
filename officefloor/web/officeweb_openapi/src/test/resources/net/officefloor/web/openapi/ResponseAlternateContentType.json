@@ -1,0 +1,25 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/path": {
+			"get": {
+				"responses": {
+					"200": {
+						"content": {
+							"mock/test": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"result": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

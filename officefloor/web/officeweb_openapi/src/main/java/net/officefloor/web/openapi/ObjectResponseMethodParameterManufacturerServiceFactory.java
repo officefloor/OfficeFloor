@@ -1,5 +1,6 @@
 package net.officefloor.web.openapi;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -8,6 +9,8 @@ import net.officefloor.plugin.managedfunction.method.MethodParameterFactory;
 import net.officefloor.plugin.managedfunction.method.MethodParameterManufacturer;
 import net.officefloor.plugin.managedfunction.method.MethodParameterManufacturerContext;
 import net.officefloor.plugin.managedfunction.method.MethodParameterManufacturerServiceFactory;
+import net.officefloor.server.http.HttpStatus;
+import net.officefloor.web.HttpResponse;
 import net.officefloor.web.ObjectResponse;
 
 /**
@@ -38,6 +41,15 @@ public class ObjectResponseMethodParameterManufacturerServiceFactory
 		// Load the parameter type as annotation
 		if (ObjectResponse.class.equals(context.getParameterClass())) {
 
+			// Determine the status code
+			int statusCode = HttpStatus.OK.getStatusCode();
+			for (Annotation annotation : context.getParameterAnnotations()) {
+				if (annotation instanceof HttpResponse) {
+					HttpResponse httpResponse = (HttpResponse) annotation;
+					statusCode = httpResponse.status();
+				}
+			}
+
 			// Determine response type (defaulting to Object if can not determine)
 			Class<?> responseClass = Object.class;
 			Type type = context.getParameterType();
@@ -53,7 +65,7 @@ public class ObjectResponseMethodParameterManufacturerServiceFactory
 			}
 
 			// Add the object response annotation
-			context.addDefaultDependencyAnnotation(new ObjectResponseAnnotation(responseClass));
+			context.addDefaultDependencyAnnotation(new ObjectResponseAnnotation(statusCode, responseClass));
 		}
 
 		// Continue to inject the dependency

@@ -17,7 +17,6 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.clazz.Qualified;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -27,6 +26,7 @@ import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpParameters;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
+import net.officefloor.web.HttpResponse;
 import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
@@ -174,9 +174,35 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can provide complex {@link RequestBody}.
+	 */
+	public void testRequestComplexBody() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", RequestComplexBodyService.class));
+	}
+
+	@HttpObject
+	public static class ComplexRequest {
+		public RequestChild getChild() {
+			return new RequestChild();
+		}
+	}
+
+	public static class RequestChild {
+		public String getMessage() {
+			return "MOCK";
+		}
+	}
+
+	public static class RequestComplexBodyService {
+		public void service(ComplexRequest request) {
+			// no operation
+		}
+	}
+
+	/**
 	 * Ensure handle alternate {@link RequestBody} format.
 	 */
-	public void testAlternateRequestContentType() {
+	public void testRequestBodyAlternateContentType() {
 		this.doOpenApiTest((context) -> {
 			context.link(false, "/path", RequestBodyService.class);
 			context.getWebArchitect().addHttpObjectParser(new MockHttpObjectParserFactory<>());
@@ -229,16 +255,39 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can provide complex {@link ApiResponse}.
+	 */
+	public void testResponseComplex() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", ResponseComplexService.class));
+	}
+
+	public static class ComplexResponse {
+		public ResponseChild getChild() {
+			return new ResponseChild();
+		}
+	}
+
+	public static class ResponseChild {
+		public String getResult() {
+			return "MOCK";
+		}
+	}
+
+	public static class ResponseComplexService {
+		public void service(ObjectResponse<ComplexResponse> responder) {
+			// no operation
+		}
+	}
+
+	/**
 	 * Ensure can provide alternate status {@link ApiResponse}.
 	 */
-	public void testAlternateStatusResponse() {
+	public void testResponseAlternateStatus() {
 		this.doOpenApiTest((context) -> context.link(false, "/path", AlternateStatusResponseService.class));
 	}
 
 	public static class AlternateStatusResponseService {
-
-		// TODO provide status qualifier to object response
-		public void service(@Qualified("418") ObjectResponse<Response> responder) {
+		public void service(@HttpResponse(status = 418) ObjectResponse<Response> responder) {
 			// no operation
 		}
 	}
@@ -246,7 +295,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure handle alternate {@link ApiResponse} format.
 	 */
-	public void testAlternateResponseContentType() {
+	public void testResponseAlternateContentType() {
 		this.doOpenApiTest((context) -> {
 			context.link(false, "/path", ResponseService.class);
 			context.getWebArchitect().addHttpObjectResponder(new MockHttpObjectResponderFactory<>());

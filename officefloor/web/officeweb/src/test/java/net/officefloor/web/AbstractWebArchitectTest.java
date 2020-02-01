@@ -1383,6 +1383,10 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		// Capture the inputs that can be explored
 		Map<String, HttpInputExplorerContext> inputs = new HashMap<>();
 
+		// Capture the factories
+		Closure<HttpObjectParserFactory[]> parserFactories = new Closure<>();
+		Closure<HttpObjectResponderFactory[]> responderFactories = new Closure<>();
+
 		// Configure the server
 		this.compile.web((context) -> {
 
@@ -1393,6 +1397,8 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 			// Capture exploring
 			context.getWebArchitect().addHttpInputExplorer((explore) -> {
 				inputs.put(explore.getRoutePath(), explore);
+				parserFactories.value = explore.getHttpObjectParserFactories();
+				responderFactories.value = explore.getHttpObjectResponderFactories();
 			});
 
 			// Provide dependencies
@@ -1407,6 +1413,13 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		this.assertExploredHttpInput(inputs.get("/two"), true, HttpMethod.POST, "/two", "POST_/two.service",
 				Integer.class);
 		assertEquals("Should only be two inputs", 2, inputs.size());
+
+		// Ensure correct factories
+		assertEquals("Incorrect number of parser factories", 1, parserFactories.value.length);
+		assertEquals("Incorrect parser factory", "registered/object", parserFactories.value[0].getContentType());
+		assertEquals("Incorrect number of responder factories", 1, responderFactories.value.length);
+		assertEquals("Incorrect responder factory", "registered/response",
+				responderFactories.value[0].getContentType());
 	}
 
 	private void assertExploredHttpInput(HttpInputExplorerContext context, boolean isSecure, HttpMethod httpMethod,
