@@ -21,6 +21,8 @@
 
 package net.officefloor.compile.test.managedfunction;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Assert;
 
 import net.officefloor.compile.OfficeFloorCompiler;
@@ -288,22 +290,28 @@ public class ManagedFunctionLoaderUtil {
 		for (int d = 0; d < eDependencies.length; d++) {
 			ManagedFunctionObjectType<?> eDependency = eDependencies[d];
 			ManagedFunctionObjectType<?> aDependency = aDependencies[d];
+			String suffix = " (function=" + eFunction.getFunctionName() + ", dependency=" + d + ")";
 
 			// Verify the dependency
-			Assert.assertEquals(
-					"Incorrect dependency key (function=" + eFunction.getFunctionName() + ", dependency=" + d + ")",
-					eDependency.getKey(), aDependency.getKey());
-			Assert.assertEquals(
-					"Incorrect dependency type (function=" + eFunction.getFunctionName() + ", dependency=" + d + ")",
-					eDependency.getObjectType(), aDependency.getObjectType());
-			Assert.assertEquals("Incorrect dependency qualifier (function=" + eFunction.getFunctionName()
-					+ ", dependency=" + d + ")", eDependency.getTypeQualifier(), aDependency.getTypeQualifier());
-			Assert.assertEquals(
-					"Incorrect dependency index (function=" + eFunction.getFunctionName() + ", dependency=" + d + ")",
-					eDependency.getIndex(), aDependency.getIndex());
-			Assert.assertEquals(
-					"Incorrect dependency name (function=" + eFunction.getFunctionName() + ", dependency=" + d + ")",
-					eDependency.getObjectName(), aDependency.getObjectName());
+			Assert.assertEquals("Incorrect dependency" + suffix, eDependency.getKey(), aDependency.getKey());
+			Assert.assertEquals("Incorrect dependency type" + suffix, eDependency.getObjectType(),
+					aDependency.getObjectType());
+			Assert.assertEquals("Incorrect dependency qualifier" + suffix, eDependency.getTypeQualifier(),
+					aDependency.getTypeQualifier());
+			Assert.assertEquals("Incorrect dependency index" + suffix, eDependency.getIndex(), aDependency.getIndex());
+			Assert.assertEquals("Incorrect dependency name" + suffix, eDependency.getObjectName(),
+					aDependency.getObjectName());
+
+			// Verify annotations
+			Object[] eObjectAnnotations = eDependency.getAnnotations();
+			Object[] aObjectAnnotations = aDependency.getAnnotations();
+			assertEquals("Incorrect number of annotations" + suffix, eObjectAnnotations.length,
+					aObjectAnnotations.length);
+			for (int a = 0; a < eObjectAnnotations.length; a++) {
+				// Match annotation on type
+				Assert.assertEquals("Incorrect annotation type" + suffix, eObjectAnnotations[a].getClass(),
+						(aObjectAnnotations[a] == null ? null : aObjectAnnotations[a].getClass()));
+			}
 		}
 
 		// Verify the flows

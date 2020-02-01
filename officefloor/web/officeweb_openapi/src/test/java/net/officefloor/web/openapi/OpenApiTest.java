@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.PathItem.HttpMethod;
 import io.swagger.v3.oas.models.parameters.CookieParameter;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
@@ -108,6 +109,20 @@ public class OpenApiTest extends OfficeFrameTestCase {
 
 	public static class CookieParameterService {
 		public void service(@HttpCookieParameter("parameter") String parameter) {
+			// no operation
+		}
+	}
+
+	/**
+	 * Ensure can annotate {@link Parameter}.
+	 */
+	public void testAnnotatedParameter() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", AnnotatedParameterService.class));
+	}
+
+	public static class AnnotatedParameterService {
+		public void service(
+				@io.swagger.v3.oas.annotations.Parameter(description = "DESCRIPTION", required = true, example = "EXAMPLE") @HttpQueryParameter("parameter") String parameter) {
 			// no operation
 		}
 	}
@@ -216,7 +231,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can provide alternate status {@link ApiResponse}.
 	 */
-	public void testAlternateStatusResposne() {
+	public void testAlternateStatusResponse() {
 		this.doOpenApiTest((context) -> context.link(false, "/path", AlternateStatusResponseService.class));
 	}
 

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 import io.swagger.v3.core.converter.ModelConverters;
@@ -25,6 +24,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -50,6 +51,7 @@ import net.officefloor.web.HttpObject;
 import net.officefloor.web.HttpParameters;
 import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
+import net.officefloor.web.ObjectResponse;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
@@ -140,19 +142,8 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 				// Ignore method
 			}
 
-			// Register parameters only once
-			Map<String, Parameter> parameters = new HashMap<>();
-			BiConsumer<String, Supplier<Parameter>> addParameter = (name, factory) -> {
-				Parameter parameter = parameters.get(name);
-				if (parameter == null) {
-					parameter = factory.get();
-					parameter.schema(new Schema<String>().type("string"));
-					parameters.put(name, parameter);
-					operation.addParametersItem(parameter);
-				}
-			};
-
 			// Determine the parameters
+			Map<String, Parameter> parameters = new HashMap<>();
 			ExecutionManagedFunction managedFunction = explore.getInitialManagedFunction();
 			ManagedFunctionType<?, ?> type = managedFunction.getManagedFunctionType();
 			for (ManagedFunctionObjectType<?> objectType : type.getObjectTypes()) {
@@ -161,28 +152,32 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 				HttpPathParameter pathParam = objectType.getAnnotation(HttpPathParameter.class);
 				if (pathParam != null) {
 					String paramName = pathParam.value();
-					addParameter.accept(paramName, () -> new PathParameter().name(paramName));
+					this.addParameter(paramName, () -> new PathParameter().name(paramName), objectType, operation,
+							parameters);
 				}
 
 				// Include possible query parameter
 				HttpQueryParameter queryParam = objectType.getAnnotation(HttpQueryParameter.class);
 				if (queryParam != null) {
 					String paramName = queryParam.value();
-					addParameter.accept(paramName, () -> new QueryParameter().name(paramName));
+					this.addParameter(paramName, () -> new QueryParameter().name(paramName), objectType, operation,
+							parameters);
 				}
 
 				// Include possible header parameter
 				HttpHeaderParameter headerParam = objectType.getAnnotation(HttpHeaderParameter.class);
 				if (headerParam != null) {
 					String paramName = headerParam.value();
-					addParameter.accept(paramName, () -> new HeaderParameter().name(paramName));
+					this.addParameter(paramName, () -> new HeaderParameter().name(paramName), objectType, operation,
+							parameters);
 				}
 
 				// Include possible cookie parameter
 				HttpCookieParameter cookieParam = objectType.getAnnotation(HttpCookieParameter.class);
 				if (cookieParam != null) {
 					String paramName = cookieParam.value();
-					addParameter.accept(paramName, () -> new CookieParameter().name(paramName));
+					this.addParameter(paramName, () -> new CookieParameter().name(paramName), objectType, operation,
+							parameters);
 				}
 
 				// Include possible HTTP Parameters
@@ -208,17 +203,21 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 						}
 						switch (location) {
 						case PATH:
-							addParameter.accept(paramName, () -> new PathParameter().name(paramName));
+							this.addParameter(paramName, () -> new PathParameter().name(paramName), objectType,
+									operation, parameters);
 							break;
 						case ENTITY:
 						case QUERY:
-							addParameter.accept(paramName, () -> new QueryParameter().name(paramName));
+							this.addParameter(paramName, () -> new QueryParameter().name(paramName), objectType,
+									operation, parameters);
 							break;
 						case HEADER:
-							addParameter.accept(paramName, () -> new HeaderParameter().name(paramName));
+							this.addParameter(paramName, () -> new HeaderParameter().name(paramName), objectType,
+									operation, parameters);
 							break;
 						case COOKIE:
-							addParameter.accept(paramName, () -> new CookieParameter().name(paramName));
+							this.addParameter(paramName, () -> new CookieParameter().name(paramName), objectType,
+									operation, parameters);
 							break;
 						default:
 							throw new IllegalStateException(
@@ -260,6 +259,27 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 						}
 					}
 				}
+
+				// Include possible Object Responder
+				Class<?> objectClass = objectType.getObjectType();
+				if (ObjectResponse.class.equals(objectClass)) {
+
+					// Obtain the response type
+					ObjectResponseAnnotation responseAnnotation = objectType
+							.getAnnotation(ObjectResponseAnnotation.class);
+					Class<?> responseType = responseAnnotation != null ? responseAnnotation.getResponseType()
+							: Object.class;
+
+					// Obtain the response schema
+					ResolvedSchema resolvedSchema = ModelConverters.getInstance().readAllAsResolvedSchema(responseType);
+
+					// Include the response
+					ApiResponses responses = new ApiResponses();
+					operation.setResponses(responses);
+					Content content = new Content();
+					content.put("application/json", new MediaType().schema(resolvedSchema.schema));
+					responses.addApiResponse("200", new ApiResponse().content(content));
+				}
 			}
 		});
 
@@ -272,6 +292,44 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 
 		// Serve the YAML
 		office.link(web.getHttpInput(false, YAML_PATH).getInput(), service.getOfficeSectionInput(YAML));
+	}
+
+	/**
+	 * Add {@link Parameter}.
+	 * 
+	 * @param name       Name.
+	 * @param factory    Factory to create {@link Parameter}.
+	 * @param objectType {@link ManagedFunctionObjectType} for the
+	 *                   {@link Parameter}.
+	 * @param operation  {@link Operation}.
+	 * @param parameters Existing {@link Parameter} instances by name.
+	 */
+	private void addParameter(String name, Supplier<Parameter> factory, ManagedFunctionObjectType<?> objectType,
+			Operation operation, Map<String, Parameter> parameters) {
+		Parameter parameter = parameters.get(name);
+		if (parameter == null) {
+
+			// Create the parameter
+			parameter = factory.get();
+
+			// Always String
+			parameter.schema(new Schema<String>().type("string"));
+
+			// Add in OpenAPI annotated information
+			io.swagger.v3.oas.annotations.Parameter documentation = objectType
+					.getAnnotation(io.swagger.v3.oas.annotations.Parameter.class);
+			if (documentation != null) {
+				parameter.setDescription(documentation.description());
+				if (documentation.required()) {
+					parameter.setRequired(true);
+				}
+				parameter.setExample(documentation.example());
+			}
+
+			// Include the parameter
+			parameters.put(name, parameter);
+			operation.addParametersItem(parameter);
+		}
 	}
 
 	/**
