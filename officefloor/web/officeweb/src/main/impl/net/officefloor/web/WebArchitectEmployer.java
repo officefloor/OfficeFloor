@@ -52,6 +52,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpRouteSectionSource.Interception;
 import net.officefloor.web.HttpRouteSectionSource.Redirect;
 import net.officefloor.web.HttpRouteSectionSource.RouteInput;
@@ -507,19 +508,16 @@ public class WebArchitectEmployer implements WebArchitect {
 						new HttpRequestStateManagedObjectSource(argumentParsers))
 				.addOfficeManagedObject("HTTP_REQUEST_STATE", ManagedObjectScope.PROCESS);
 
+		// Create the object response registrator
+		ObjectResponseRegistrator objectResponseRegistrator = new ObjectResponseRegistrator();
+
 		// Configure the object responder (if configured factories)
 		if ((this.objectResponderFactories.size() > 0) || (this.defaultHttpObjectResponderServiceFactory != null)) {
 
-			// Create the default object responder
-			DefaultHttpObjectResponder defaultHttpObjectResponder = () -> this.defaultHttpObjectResponderServiceFactory != null
-					? this.officeSourceContext.loadService(this.defaultHttpObjectResponderServiceFactory)
-					: null;
+			// Register the default object responder
+			ObjectResponseManagedObjectSource objectResponseMos = objectResponseRegistrator.registerObjectResponse(200);
 
-			// Add the object responder
-			ObjectResponseManagedObjectSource objectResponseMos = new ObjectResponseManagedObjectSource(
-					this.objectResponderFactories, defaultHttpObjectResponder);
-			this.officeArchitect.addOfficeManagedObjectSource("OBJECT_RESPONSE", objectResponseMos)
-					.addOfficeManagedObject("OBJECT_RESPONSE", ManagedObjectScope.PROCESS);
+			// Use it to handle escalations
 			this.routing.setHttpEscalationHandler(objectResponseMos);
 		}
 
@@ -682,6 +680,12 @@ public class WebArchitectEmployer implements WebArchitect {
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpContentParameter.class,
 							HttpContentParameterAnnotation.class, HttpValueLocation.ENTITY, objectType, context,
 							(rawAnnotation) -> new HttpContentParameterAnnotation(rawAnnotation));
+
+					// Load the qualified object responses
+					if (annotation instanceof HttpResponse) {
+						HttpResponse httpResponse = (HttpResponse) annotation;
+						objectResponseRegistrator.registerObjectResponse(httpResponse.status());
+					}
 				}
 			}
 		});
@@ -951,6 +955,81 @@ public class WebArchitectEmployer implements WebArchitect {
 								: " with values type " + parameterTypeName),
 						ex);
 			}
+		}
+	}
+
+	/**
+	 * Creates the necessary {@link ObjectResponse} instances.
+	 */
+	private class ObjectResponseRegistrator {
+
+		/**
+		 * {@link DefaultHttpObjectResponder}.
+		 */
+		private DefaultHttpObjectResponder defaultHttpObjectResponder;
+
+		/**
+		 * Registered {@link ObjectResponseManagedObjectSource} instances by their
+		 * {@link HttpStatus}.
+		 */
+		private Map<Integer, ObjectResponseManagedObjectSource> objectResponses = new HashMap<>();
+
+		/**
+		 * Obtains the {@link DefaultHttpObjectResponder}.
+		 * 
+		 * @return {@link DefaultHttpObjectResponder} or <code>null</code> if not
+		 *         configured.
+		 */
+		private DefaultHttpObjectResponder getDefaultHttpObjectResponder() {
+
+			// Easy access
+			WebArchitectEmployer employer = WebArchitectEmployer.this;
+
+			// Lazy load the default HTTP object responder
+			if (this.defaultHttpObjectResponder == null) {
+				this.defaultHttpObjectResponder = () -> employer.defaultHttpObjectResponderServiceFactory != null
+						? employer.officeSourceContext.loadService(employer.defaultHttpObjectResponderServiceFactory)
+						: null;
+
+			}
+			return this.defaultHttpObjectResponder;
+		}
+
+		/**
+		 * Registers an {@link ObjectResponse} for injection.
+		 * 
+		 * @param statusCode {@link HttpStatus} for the {@link ObjectResponse}.
+		 * @return Registered {@link ObjectResponseManagedObjectSource} for the
+		 *         {@link HttpStatus}.
+		 */
+		private ObjectResponseManagedObjectSource registerObjectResponse(int statusCode) {
+
+			// Easy access
+			WebArchitectEmployer employer = WebArchitectEmployer.this;
+
+			// Lazy register the object response
+			ObjectResponseManagedObjectSource objectResponseMos = this.objectResponses.get(statusCode);
+			if (objectResponseMos == null) {
+
+				// Create the object response
+				objectResponseMos = new ObjectResponseManagedObjectSource(HttpStatus.getHttpStatus(statusCode),
+						employer.objectResponderFactories, this.getDefaultHttpObjectResponder());
+				OfficeManagedObject managedObject = employer.officeArchitect
+						.addOfficeManagedObjectSource("OBJECT_RESPONSE_" + statusCode, objectResponseMos)
+						.addOfficeManagedObject("OBJECT_RESPONSE_" + statusCode, ManagedObjectScope.PROCESS);
+				managedObject.addTypeQualification(String.valueOf(statusCode), ObjectResponse.class.getName());
+
+				// OK status is default response
+				if (statusCode == HttpStatus.OK.getStatusCode()) {
+					managedObject.addTypeQualification(null, ObjectResponse.class.getName());
+				}
+
+				// Register the object response
+				this.objectResponses.put(statusCode, objectResponseMos);
+			}
+
+			// Return the object response
+			return objectResponseMos;
 		}
 	}
 

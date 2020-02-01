@@ -809,6 +809,31 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can different status for {@link ObjectResponse}.
+	 */
+	public void testStatusForObjectResponse() throws Exception {
+
+		// Configure the server
+		this.compile.web((context) -> {
+			context.link(false, "GET", "/path/{param}", StatusForObjectResponseSection.class);
+			context.getWebArchitect().addHttpObjectResponder(new MockObjectResponderFactory());
+		});
+		this.officeFloor = this.compile.compileAndOpenOfficeFloor();
+
+		// Send request
+		MockHttpResponse response = this.server
+				.send(this.mockRequest("/path/create").header("accept", "application/mock"));
+		response.assertResponse(201, "{value=\"OBJECT create\"}", "content-type", "application/mock");
+	}
+
+	public static class StatusForObjectResponseSection {
+		public void service(PathParameter param,
+				@net.officefloor.web.HttpResponse(status = 201) ObjectResponse<String> response) {
+			response.send("OBJECT " + param.param);
+		}
+	}
+
+	/**
 	 * Ensure can send escalation.
 	 */
 	public void testResponseObjectEscalation() throws Exception {
