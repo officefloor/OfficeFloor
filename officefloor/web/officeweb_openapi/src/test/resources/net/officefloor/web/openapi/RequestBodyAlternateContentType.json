@@ -18,5 +18,17 @@
 				}
 			}
 		}
+	},
+	"components": {
+		"schemas": {
+			"Request": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				}
+			}
+		}
 	}
 }

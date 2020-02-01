@@ -11,6 +11,7 @@ import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.core.converter.ResolvedSchema;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -26,6 +27,8 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
@@ -94,8 +97,20 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 		// Obtain the web architect
 		WebArchitect web = context.getWebArchitect();
 
-		// Provide configuration of Open API
+		// Create the root
 		OpenAPI openApi = new OpenAPI();
+
+		// Enable access to re-used schemas
+		Supplier<Components> getComponents = () -> {
+			Components components = openApi.getComponents();
+			if (components == null) {
+				components = new Components();
+				openApi.setComponents(components);
+			}
+			return components;
+		};
+
+		// Provide the paths
 		Paths paths = new Paths();
 		openApi.setPaths(paths);
 		web.addHttpInputExplorer((explore) -> {
@@ -148,171 +163,13 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 			HttpObjectParserFactory[] objectParserFactories = explore.getHttpObjectParserFactories();
 			HttpObjectResponderFactory[] objectResponderFactories = explore.getHttpObjectResponderFactories();
 
-			// Determine the parameters
-			Map<String, Parameter> parameters = new HashMap<>();
+			// Recursive explore graph, loading path specification
 			ExecutionManagedFunction managedFunction = explore.getInitialManagedFunction();
-			ManagedFunctionType<?, ?> type = managedFunction.getManagedFunctionType();
-			for (ManagedFunctionObjectType<?> objectType : type.getObjectTypes()) {
-
-				// Include possible path parameter
-				HttpPathParameter pathParam = objectType.getAnnotation(HttpPathParameter.class);
-				if (pathParam != null) {
-					String paramName = pathParam.value();
-					this.addParameter(paramName, () -> new PathParameter().name(paramName), objectType, operation,
-							parameters);
-				}
-
-				// Include possible query parameter
-				HttpQueryParameter queryParam = objectType.getAnnotation(HttpQueryParameter.class);
-				if (queryParam != null) {
-					String paramName = queryParam.value();
-					this.addParameter(paramName, () -> new QueryParameter().name(paramName), objectType, operation,
-							parameters);
-				}
-
-				// Include possible header parameter
-				HttpHeaderParameter headerParam = objectType.getAnnotation(HttpHeaderParameter.class);
-				if (headerParam != null) {
-					String paramName = headerParam.value();
-					this.addParameter(paramName, () -> new HeaderParameter().name(paramName), objectType, operation,
-							parameters);
-				}
-
-				// Include possible cookie parameter
-				HttpCookieParameter cookieParam = objectType.getAnnotation(HttpCookieParameter.class);
-				if (cookieParam != null) {
-					String paramName = cookieParam.value();
-					this.addParameter(paramName, () -> new CookieParameter().name(paramName), objectType, operation,
-							parameters);
-				}
-
-				// Include possible HTTP Parameters
-				if (objectType.getAnnotation(HttpParameters.class) != null) {
-
-					// Obtain the HTTP parameter names
-					Class<?> httpParametersType = objectType.getObjectType();
-					ValueLoaderSource loaderSource = new ValueLoaderSource(httpParametersType, false, new HashMap<>(),
-							null);
-					ValueLoaderFactory<?> loaderFactory = loaderSource.sourceValueLoaderFactory(httpParametersType);
-					ValueName[] names = loaderFactory.getValueNames();
-
-					// Load names in sorted order
-					Arrays.sort(names, (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName()));
-					for (ValueName name : names) {
-						String paramName = name.getName();
-						HttpValueLocation location = name.getLocation();
-						if (location == null) {
-							// Attempt to default location
-							location = (explore.getRoutePath().toLowerCase()
-									.contains("{" + paramName.toLowerCase() + "}")) ? HttpValueLocation.PATH
-											: HttpValueLocation.QUERY;
-						}
-						switch (location) {
-						case PATH:
-							this.addParameter(paramName, () -> new PathParameter().name(paramName), objectType,
-									operation, parameters);
-							break;
-						case ENTITY:
-						case QUERY:
-							this.addParameter(paramName, () -> new QueryParameter().name(paramName), objectType,
-									operation, parameters);
-							break;
-						case HEADER:
-							this.addParameter(paramName, () -> new HeaderParameter().name(paramName), objectType,
-									operation, parameters);
-							break;
-						case COOKIE:
-							this.addParameter(paramName, () -> new CookieParameter().name(paramName), objectType,
-									operation, parameters);
-							break;
-						default:
-							throw new IllegalStateException(
-									"Unknown  " + HttpValueLocation.class.getSimpleName() + " " + location);
-						}
-					}
-				}
-
-				// Include possible HTTP Object
-				if (objectType.getAnnotation(HttpObject.class) != null) {
-
-					// Obtain the request body schema
-					Class<?> httpObjectType = objectType.getObjectType();
-					ResolvedSchema resolvedSchema = ModelConverters.getInstance()
-							.readAllAsResolvedSchema(httpObjectType);
-
-					// Add the request body
-					Content content = new Content();
-
-					// Load the handled content types
-					for (HttpObjectParserFactory objectParserFactory : objectParserFactories) {
-
-						// Determine if can handle object type
-						boolean isHandleHttpObject;
-						try {
-							isHandleHttpObject = objectParserFactory.createHttpObjectParser(httpObjectType) != null;
-						} catch (Exception ex) {
-							isHandleHttpObject = false;
-						}
-
-						// Able to handle input of type
-						if (isHandleHttpObject) {
-							content.addMediaType(objectParserFactory.getContentType(),
-									new MediaType().schema(resolvedSchema.schema));
-							operation.requestBody(new RequestBody().content(content));
-						}
-					}
-				}
-
-				// Include possible Object Responder
-				Class<?> objectClass = objectType.getObjectType();
-				if (ObjectResponse.class.equals(objectClass)) {
-
-					// Obtain the response information
-					int statusCode;
-					Class<?> responseType;
-					ObjectResponseAnnotation responseAnnotation = objectType
-							.getAnnotation(ObjectResponseAnnotation.class);
-					if (responseAnnotation != null) {
-						// Use specific information of response
-						statusCode = responseAnnotation.getStatusCode();
-						responseType = responseAnnotation.getResponseType();
-					} else {
-						// Use defaults
-						statusCode = HttpStatus.OK.getStatusCode();
-						responseType = Object.class;
-					}
-
-					// Obtain the response schema
-					ResolvedSchema resolvedSchema = ModelConverters.getInstance().readAllAsResolvedSchema(responseType);
-
-					// Lazy add responses
-					ApiResponses responses = operation.getResponses();
-					if (responses == null) {
-						responses = new ApiResponses();
-						operation.setResponses(responses);
-					}
-
-					// Load the response content types
-					for (HttpObjectResponderFactory objectResponderFactory : objectResponderFactories) {
-
-						// Determine if can send object type
-						boolean isHandleResponse;
-						try {
-							isHandleResponse = objectResponderFactory.createHttpObjectResponder(responseType) != null;
-						} catch (Exception ex) {
-							isHandleResponse = false;
-						}
-
-						// Able to send response
-						if (isHandleResponse) {
-							Content content = new Content();
-							content.put(objectResponderFactory.getContentType(),
-									new MediaType().schema(resolvedSchema.schema));
-							responses.addApiResponse(String.valueOf(statusCode), new ApiResponse().content(content));
-						}
-					}
-				}
-			}
+			Map<String, Parameter> parameters = new HashMap<>();
+			this.recursiveLoadManagedFunction(
+					managedFunction, (node) -> this.loadManagedFunction(node, explore.getRoutePath(), operation,
+							parameters, objectParserFactories, objectResponderFactories, getComponents),
+					new HashSet<>());
 		});
 
 		// Serve up the Open API
@@ -324,6 +181,248 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 
 		// Serve the YAML
 		office.link(web.getHttpInput(false, YAML_PATH).getInput(), service.getOfficeSectionInput(YAML));
+	}
+
+	/**
+	 * Loads the specific {@link ExecutionManagedFunction}.
+	 */
+	@FunctionalInterface
+	private static interface LoadManagedFunction {
+		void load(ExecutionManagedFunction managedFunction) throws Exception;
+	}
+
+	/**
+	 * Recursively loads the {@link ExecutionManagedFunction} graph.
+	 * 
+	 * @param managedFunction Root {@link ExecutionManagedFunction}.
+	 * @param loader          Loads the specific {@link ExecutionManagedFunction}.
+	 * @param visited         Names of the visited {@link ExecutionManagedFunction}
+	 *                        instances.
+	 * @throws Exception If fails to load graph.
+	 */
+	private void recursiveLoadManagedFunction(ExecutionManagedFunction managedFunction, LoadManagedFunction loader,
+			Set<String> visited) throws Exception {
+
+		// Determine if already visited
+		String name = managedFunction.getManagedFunctionName();
+		if (visited.contains(name)) {
+			return; // already visited
+		}
+		visited.add(name); // now visiting
+
+		// Load the managed function
+		loader.load(managedFunction);
+
+		// Recursively explore rest of graph
+		ManagedFunctionType<?, ?> type = managedFunction.getManagedFunctionType();
+		for (ManagedFunctionFlowType<?> flowType : type.getFlowTypes()) {
+			ExecutionManagedFunction flowManagedFunction = managedFunction.getManagedFunction(flowType);
+			this.recursiveLoadManagedFunction(flowManagedFunction, loader, visited);
+		}
+		ExecutionManagedFunction nextManagedFunction = managedFunction.getNextManagedFunction();
+		if (nextManagedFunction != null) {
+			this.recursiveLoadManagedFunction(nextManagedFunction, loader, visited);
+		}
+		for (ManagedFunctionEscalationType escalationType : type.getEscalationTypes()) {
+			ExecutionManagedFunction escalateManagedFunction = managedFunction.getManagedFunction(escalationType);
+			this.recursiveLoadManagedFunction(escalateManagedFunction, loader, visited);
+		}
+	}
+
+	/**
+	 * Loads the {@link ExecutionManagedFunction}.
+	 * 
+	 * @param managedFunction          {@link ExecutionManagedFunction}.
+	 * @param routePath                Route path.
+	 * @param operation                {@link Operation}.
+	 * @param parameters               {@link Parameter} instances by name.
+	 * @param objectParserFactories    {@link HttpObjectParserFactory} instances.
+	 * @param objectResponderFactories {@link HttpObjectResponderFactory} instances.
+	 * @param getComponents            Obtains the {@link Components}.
+	 * @throws Exception If fails to load the {@link ExecutionManagedFunction}.
+	 */
+	private void loadManagedFunction(ExecutionManagedFunction managedFunction, String routePath, Operation operation,
+			Map<String, Parameter> parameters, HttpObjectParserFactory[] objectParserFactories,
+			HttpObjectResponderFactory[] objectResponderFactories, Supplier<Components> getComponents)
+			throws Exception {
+
+		// Load managed function specification
+		ManagedFunctionType<?, ?> type = managedFunction.getManagedFunctionType();
+		for (ManagedFunctionObjectType<?> objectType : type.getObjectTypes()) {
+
+			// Include possible path parameter
+			HttpPathParameter pathParam = objectType.getAnnotation(HttpPathParameter.class);
+			if (pathParam != null) {
+				String paramName = pathParam.value();
+				this.addParameter(paramName, () -> new PathParameter().name(paramName), objectType, operation,
+						parameters);
+			}
+
+			// Include possible query parameter
+			HttpQueryParameter queryParam = objectType.getAnnotation(HttpQueryParameter.class);
+			if (queryParam != null) {
+				String paramName = queryParam.value();
+				this.addParameter(paramName, () -> new QueryParameter().name(paramName), objectType, operation,
+						parameters);
+			}
+
+			// Include possible header parameter
+			HttpHeaderParameter headerParam = objectType.getAnnotation(HttpHeaderParameter.class);
+			if (headerParam != null) {
+				String paramName = headerParam.value();
+				this.addParameter(paramName, () -> new HeaderParameter().name(paramName), objectType, operation,
+						parameters);
+			}
+
+			// Include possible cookie parameter
+			HttpCookieParameter cookieParam = objectType.getAnnotation(HttpCookieParameter.class);
+			if (cookieParam != null) {
+				String paramName = cookieParam.value();
+				this.addParameter(paramName, () -> new CookieParameter().name(paramName), objectType, operation,
+						parameters);
+			}
+
+			// Include possible HTTP Parameters
+			if (objectType.getAnnotation(HttpParameters.class) != null) {
+
+				// Obtain the HTTP parameter names
+				Class<?> httpParametersType = objectType.getObjectType();
+				ValueLoaderSource loaderSource = new ValueLoaderSource(httpParametersType, false, new HashMap<>(),
+						null);
+				ValueLoaderFactory<?> loaderFactory = loaderSource.sourceValueLoaderFactory(httpParametersType);
+				ValueName[] names = loaderFactory.getValueNames();
+
+				// Load names in sorted order
+				Arrays.sort(names, (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName()));
+				for (ValueName name : names) {
+					String paramName = name.getName();
+					HttpValueLocation location = name.getLocation();
+					if (location == null) {
+						// Attempt to default location
+						location = (routePath.toLowerCase().contains("{" + paramName.toLowerCase() + "}"))
+								? HttpValueLocation.PATH
+								: HttpValueLocation.QUERY;
+					}
+					switch (location) {
+					case PATH:
+						this.addParameter(paramName, () -> new PathParameter().name(paramName), objectType, operation,
+								parameters);
+						break;
+					case ENTITY:
+					case QUERY:
+						this.addParameter(paramName, () -> new QueryParameter().name(paramName), objectType, operation,
+								parameters);
+						break;
+					case HEADER:
+						this.addParameter(paramName, () -> new HeaderParameter().name(paramName), objectType, operation,
+								parameters);
+						break;
+					case COOKIE:
+						this.addParameter(paramName, () -> new CookieParameter().name(paramName), objectType, operation,
+								parameters);
+						break;
+					default:
+						throw new IllegalStateException(
+								"Unknown  " + HttpValueLocation.class.getSimpleName() + " " + location);
+					}
+				}
+			}
+
+			// Include possible HTTP Object
+			if (objectType.getAnnotation(HttpObject.class) != null) {
+
+				// Obtain the request body schema
+				Class<?> httpObjectType = objectType.getObjectType();
+				ResolvedSchema resolvedSchema = ModelConverters.getInstance().readAllAsResolvedSchema(httpObjectType);
+
+				// Add the request body
+				Content content = new Content();
+
+				// Load the handled content types
+				boolean isIncludeHttpObject = false;
+				for (HttpObjectParserFactory objectParserFactory : objectParserFactories) {
+
+					// Determine if can handle object type
+					boolean isHandleHttpObject;
+					try {
+						isHandleHttpObject = objectParserFactory.createHttpObjectParser(httpObjectType) != null;
+					} catch (Exception ex) {
+						isHandleHttpObject = false;
+					}
+
+					// Able to handle input of type
+					if (isHandleHttpObject) {
+						content.addMediaType(objectParserFactory.getContentType(),
+								new MediaType().schema(resolvedSchema.schema));
+						operation.requestBody(new RequestBody().content(content));
+						isIncludeHttpObject = true;
+					}
+				}
+
+				// Ensure referenced schemas are included
+				if (isIncludeHttpObject) {
+					resolvedSchema.referencedSchemas
+							.forEach((key, schema) -> getComponents.get().addSchemas(key, schema));
+				}
+			}
+
+			// Include possible Object Responder
+			Class<?> objectClass = objectType.getObjectType();
+			if (ObjectResponse.class.equals(objectClass)) {
+
+				// Obtain the response information
+				int statusCode;
+				Class<?> responseType;
+				ObjectResponseAnnotation responseAnnotation = objectType.getAnnotation(ObjectResponseAnnotation.class);
+				if (responseAnnotation != null) {
+					// Use specific information of response
+					statusCode = responseAnnotation.getStatusCode();
+					responseType = responseAnnotation.getResponseType();
+				} else {
+					// Use defaults
+					statusCode = HttpStatus.OK.getStatusCode();
+					responseType = Object.class;
+				}
+
+				// Obtain the response schema
+				ResolvedSchema resolvedSchema = ModelConverters.getInstance().readAllAsResolvedSchema(responseType);
+
+				// Lazy add responses
+				ApiResponses responses = operation.getResponses();
+				if (responses == null) {
+					responses = new ApiResponses();
+					operation.setResponses(responses);
+				}
+
+				// Load the response content types
+				boolean isIncludeResponse = false;
+				for (HttpObjectResponderFactory objectResponderFactory : objectResponderFactories) {
+
+					// Determine if can send object type
+					boolean isHandleResponse;
+					try {
+						isHandleResponse = objectResponderFactory.createHttpObjectResponder(responseType) != null;
+					} catch (Exception ex) {
+						isHandleResponse = false;
+					}
+
+					// Able to send response
+					if (isHandleResponse) {
+						Content content = new Content();
+						content.put(objectResponderFactory.getContentType(),
+								new MediaType().schema(resolvedSchema.schema));
+						responses.addApiResponse(String.valueOf(statusCode), new ApiResponse().content(content));
+						isIncludeResponse = true;
+					}
+				}
+
+				// Ensure referenced schemas are included
+				if (isIncludeResponse) {
+					resolvedSchema.referencedSchemas
+							.forEach((key, schema) -> getComponents.get().addSchemas(key, schema));
+				}
+			}
+		}
 	}
 
 	/**

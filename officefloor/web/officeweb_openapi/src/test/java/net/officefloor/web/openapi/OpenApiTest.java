@@ -2,6 +2,7 @@ package net.officefloor.web.openapi;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.sql.SQLException;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
@@ -17,6 +18,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.mock.MockHttpServer;
@@ -337,22 +340,100 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure that can explore graph of {@link ExecutionManagedFunction} instances.
 	 */
-	public void testExploreGraphOfManagedFunctions() {
-		fail("TODO implement exploring graph");
+	public void testExploreGraph() {
+		this.doOpenApiTest((context) -> context.link(false, "/path", ExploreGraphService.class));
+	}
+
+	@FlowInterface
+	public static interface Flows {
+		void flow();
+	}
+
+	@FlowInterface
+	public static interface FurtherFlows {
+		void furtherFlow();
+	}
+
+	public static class ExploreGraphService {
+
+		@Next("next")
+		public void service(Flows flows) throws IOException {
+			// no operation
+		}
+
+		public void flow(FurtherFlows flows, @HttpQueryParameter("flow") String parameter) {
+			// no operation
+		}
+
+		public void furtherFlow(@HttpQueryParameter("furtherFlow") String parameter) {
+			// no operation
+		}
+
+		@Next("furtherNext")
+		public void next(@HttpQueryParameter("next") String parameter) {
+			// no operation
+		}
+
+		public void furtherNext(@HttpQueryParameter("furtherNext") String parameter) {
+			// no operation
+		}
+
+		public void handleIoException(@net.officefloor.plugin.section.clazz.Parameter IOException exception,
+				@HttpQueryParameter("exception") String parameter) throws SQLException {
+			// no operation
+		}
+
+		public void handleSqlException(@net.officefloor.plugin.section.clazz.Parameter SQLException exception,
+				@HttpQueryParameter("furtherException") String parameter) {
+			// no operation
+		}
 	}
 
 	/**
 	 * Ensure handles recursive graph of {@link ExecutionManagedFunction} instances.
 	 */
 	public void testExploreRecursiveGraph() {
-		fail("TODO implement exploring graph");
+		this.doOpenApiTest((context) -> context.link(false, "/path", ExploreRecursiveGraphService.class));
+	}
+
+	@FlowInterface
+	public static interface RecursiveFlows {
+		void service();
+	}
+
+	public static class ExploreRecursiveGraphService {
+
+		@Next("recursive")
+		public void service() {
+			// no operation
+		}
+
+		@Next("next")
+		public void recursive(Flows flows, @net.officefloor.plugin.section.clazz.Parameter SQLException exception)
+				throws IOException {
+			// no operation
+		}
+
+		public void flow(RecursiveFlows flows, @HttpQueryParameter("flow") String parameter) {
+			// no operation
+		}
+
+		@Next("service")
+		public void next(@HttpQueryParameter("next") String parameter) {
+			// no operation
+		}
+
+		public void handle(@net.officefloor.plugin.section.clazz.Parameter IOException exception,
+				@HttpQueryParameter("exception") String parameter) throws SQLException {
+			// no operation
+		}
 	}
 
 	/**
 	 * Ensure explore {@link Escalation} instances for failed responses.
 	 */
 	public void testHandleEscalations() {
-		fail("TODO implement exploring escalation hanlding for failed responses");
+		fail("TODO implement exploring escalation handling for failed responses");
 	}
 
 	/**

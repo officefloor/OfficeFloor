@@ -8,8 +8,8 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"message": {
-										"type": "string"
+									"child": {
+										"$ref": "#/components/schemas/RequestChild"
 									}
 								}
 							}
@@ -21,7 +21,15 @@
 	},
 	"components": {
 		"schemas": {
-			"Request": {
+			"ComplexRequest": {
+				"type": "object",
+				"properties": {
+					"child": {
+						"$ref": "#/components/schemas/RequestChild"
+					}
+				}
+			},
+			"RequestChild": {
 				"type": "object",
 				"properties": {
 					"message": {

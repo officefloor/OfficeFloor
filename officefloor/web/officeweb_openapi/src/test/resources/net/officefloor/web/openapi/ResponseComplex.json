@@ -4,14 +4,14 @@
 		"/path": {
 			"get": {
 				"responses": {
-					"418": {
+					"200": {
 						"content": {
 							"application/json": {
 								"schema": {
 									"type": "object",
 									"properties": {
-										"result": {
-											"type": "string"
+										"child": {
+											"$ref": "#/components/schemas/ResponseChild"
 										}
 									}
 								}
@@ -24,7 +24,15 @@
 	},
 	"components": {
 		"schemas": {
-			"Response": {
+			"ComplexResponse": {
+				"type": "object",
+				"properties": {
+					"child": {
+						"$ref": "#/components/schemas/ResponseChild"
+					}
+				}
+			},
+			"ResponseChild": {
 				"type": "object",
 				"properties": {
 					"result": {
