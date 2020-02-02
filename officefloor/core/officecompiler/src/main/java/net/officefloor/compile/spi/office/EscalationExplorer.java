@@ -21,22 +21,20 @@
 
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
-
 /**
- * {@link EscalationProcedure} of {@link Escalation} to the {@link Office}.
+ * Explorer of an escalation trees.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeEscalation extends OfficeFlowSourceNode {
+public interface EscalationExplorer {
 
 	/**
-	 * Obtains the type of escalation.
+	 * Explores the escalation tree for the added {@link OfficeEscalation}
+	 * instances.
 	 * 
-	 * @return Type of escalation.
+	 * @param context {@link EscalationExplorerContext}.
+	 * @throws Exception If failure in exploring the {@link OfficeEscalation}.
 	 */
-	String getOfficeEscalationType();
+	void explore(EscalationExplorerContext context) throws Exception;
 
 }

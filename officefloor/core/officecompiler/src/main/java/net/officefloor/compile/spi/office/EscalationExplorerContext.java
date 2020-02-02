@@ -21,16 +21,12 @@
 
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
-
 /**
- * {@link EscalationProcedure} of {@link Escalation} to the {@link Office}.
+ * Context for the {@link EscalationExplorer}.
  * 
  * @author Daniel Sagenschneider
  */
-public interface OfficeEscalation extends OfficeFlowSourceNode {
+public interface EscalationExplorerContext extends ExecutionExplorerContext {
 
 	/**
 	 * Obtains the type of escalation.

@@ -53,11 +53,9 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds a {@link OfficeInput}.
 	 * 
-	 * @param inputName
-	 *            Name of the {@link OfficeInput}.
-	 * @param parameterType
-	 *            Fully qualified type name of the parameter to this
-	 *            {@link OfficeInput}.
+	 * @param inputName     Name of the {@link OfficeInput}.
+	 * @param parameterType Fully qualified type name of the parameter to this
+	 *                      {@link OfficeInput}.
 	 * @return Added {@link OfficeInput}.
 	 */
 	OfficeInput addOfficeInput(String inputName, String parameterType);
@@ -65,11 +63,9 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds a {@link OfficeOutput}.
 	 * 
-	 * @param outputName
-	 *            Name of the {@link OfficeOutput}.
-	 * @param argumentType
-	 *            Fully qualified type name of the argument from this
-	 *            {@link OfficeOutput}.
+	 * @param outputName   Name of the {@link OfficeOutput}.
+	 * @param argumentType Fully qualified type name of the argument from this
+	 *                     {@link OfficeOutput}.
 	 * @return Added {@link OfficeOutput}.
 	 */
 	OfficeOutput addOfficeOutput(String outputName, String argumentType);
@@ -77,10 +73,8 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeObject}.
 	 * 
-	 * @param officeObjectName
-	 *            Name of the {@link OfficeObject}.
-	 * @param objectType
-	 *            Object type.
+	 * @param officeObjectName Name of the {@link OfficeObject}.
+	 * @param objectType       Object type.
 	 * @return Added {@link OfficeObject}.
 	 */
 	OfficeObject addOfficeObject(String officeObjectName, String objectType);
@@ -88,8 +82,7 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeTeam}.
 	 * 
-	 * @param officeTeamName
-	 *            Name of the {@link OfficeTeam}.
+	 * @param officeTeamName Name of the {@link OfficeTeam}.
 	 * @return Added {@link OfficeTeam}.
 	 */
 	OfficeTeam addOfficeTeam(String officeTeamName);
@@ -97,12 +90,10 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeSection}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSourceClassName
-	 *            Fully qualified class name of the {@link SectionSource}.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
+	 * @param sectionName            Name of the {@link OfficeSection}.
+	 * @param sectionSourceClassName Fully qualified class name of the
+	 *                               {@link SectionSource}.
+	 * @param sectionLocation        Location of the {@link OfficeSection}.
 	 * @return Added {@link OfficeSection}.
 	 */
 	OfficeSection addOfficeSection(String sectionName, String sectionSourceClassName, String sectionLocation);
@@ -110,12 +101,9 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeSection}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 * @param sectionSource
-	 *            {@link SectionSource} instance to use.
-	 * @param sectionLocation
-	 *            Location of the {@link OfficeSection}.
+	 * @param sectionName     Name of the {@link OfficeSection}.
+	 * @param sectionSource   {@link SectionSource} instance to use.
+	 * @param sectionLocation Location of the {@link OfficeSection}.
 	 * @return Added {@link OfficeSection}.
 	 */
 	OfficeSection addOfficeSection(String sectionName, SectionSource sectionSource, String sectionLocation);
@@ -123,8 +111,7 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Obtains the {@link OfficeSection}.
 	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
+	 * @param sectionName Name of the {@link OfficeSection}.
 	 * @return {@link OfficeSection}.
 	 */
 	OfficeSection getOfficeSection(String sectionName);
@@ -133,26 +120,24 @@ public interface OfficeArchitect extends SourceIssues {
 	 * Adds an {@link OfficeSectionTransformer} to transform the
 	 * {@link OfficeSection} instances of the {@link Office}.
 	 * 
-	 * @param transformer
-	 *            {@link OfficeSectionTransformer}.
+	 * @param transformer {@link OfficeSectionTransformer}.
 	 */
 	void addOfficeSectionTransformer(OfficeSectionTransformer transformer);
 
 	/**
 	 * Adds a {@link ManagedFunctionAugmentor}.
 	 * 
-	 * @param managedFunctionAugmentor
-	 *            {@link ManagedFunctionAugmentor}.
+	 * @param managedFunctionAugmentor {@link ManagedFunctionAugmentor}.
 	 */
 	void addManagedFunctionAugmentor(ManagedFunctionAugmentor managedFunctionAugmentor);
 
 	/**
 	 * Adds a {@link OfficeManagedObjectSource}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeManagedObjectSource}.
-	 * @param managedObjectSourceClassName
-	 *            Fully qualified class name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceName      Name of the
+	 *                                     {@link OfficeManagedObjectSource}.
+	 * @param managedObjectSourceClassName Fully qualified class name of the
+	 *                                     {@link ManagedObjectSource}.
 	 * @return Added {@link OfficeManagedObjectSource}.
 	 */
 	OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName,
@@ -161,10 +146,8 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds a {@link OfficeManagedObjectSource}.
 	 * 
-	 * @param managedObjectSourceName
-	 *            Name of the {@link OfficeManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance to use.
+	 * @param managedObjectSourceName Name of the {@link OfficeManagedObjectSource}.
+	 * @param managedObjectSource     {@link ManagedObjectSource} instance to use.
 	 * @return Added {@link OfficeManagedObjectSource}.
 	 */
 	OfficeManagedObjectSource addOfficeManagedObjectSource(String managedObjectSourceName,
@@ -173,11 +156,10 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeManagedObjectPool}.
 	 * 
-	 * @param managedObjectPoolName
-	 *            Name of the {@link OfficeManagedObjectPool}.
-	 * @param managedObjectPoolSourceClassName
-	 *            Fully qualified class name of the
-	 *            {@link ManagedObjectPoolSource}.
+	 * @param managedObjectPoolName            Name of the
+	 *                                         {@link OfficeManagedObjectPool}.
+	 * @param managedObjectPoolSourceClassName Fully qualified class name of the
+	 *                                         {@link ManagedObjectPoolSource}.
 	 * @return Added {@link OfficeManagedObjectPool}.
 	 */
 	OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName, String managedObjectPoolSourceClassName);
@@ -185,10 +167,9 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeManagedObjectPool}.
 	 * 
-	 * @param managedObjectPoolName
-	 *            Name of the {@link OfficeManagedObjectPool}.
-	 * @param managedObjectPoolSource
-	 *            {@link ManagedObjectPoolSource} instance to use.
+	 * @param managedObjectPoolName   Name of the {@link OfficeManagedObjectPool}.
+	 * @param managedObjectPoolSource {@link ManagedObjectPoolSource} instance to
+	 *                                use.
 	 * @return {@link OfficeManagedObjectPool}.
 	 */
 	OfficeManagedObjectPool addManagedObjectPool(String managedObjectPoolName,
@@ -197,10 +178,9 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeSupplier}.
 	 * 
-	 * @param supplierName
-	 *            Name of the {@link OfficeSupplier}.
-	 * @param supplierSourceClassName
-	 *            Fully qualified class name of the {@link SupplierSource}.
+	 * @param supplierName            Name of the {@link OfficeSupplier}.
+	 * @param supplierSourceClassName Fully qualified class name of the
+	 *                                {@link SupplierSource}.
 	 * @return {@link OfficeSupplier}.
 	 */
 	OfficeSupplier addSupplier(String supplierName, String supplierSourceClassName);
@@ -208,10 +188,8 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeSupplier}.
 	 * 
-	 * @param supplierName
-	 *            Name of the {@link OfficeSupplier}.
-	 * @param supplierSource
-	 *            {@link SupplierSource} instance to use.
+	 * @param supplierName   Name of the {@link OfficeSupplier}.
+	 * @param supplierSource {@link SupplierSource} instance to use.
 	 * @return {@link OfficeFloorSupplier}.
 	 */
 	OfficeSupplier addSupplier(String supplierName, SupplierSource supplierSource);
@@ -219,10 +197,9 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds a {@link OfficeGovernance}.
 	 * 
-	 * @param governanceName
-	 *            Name of the {@link OfficeGovernance}.
-	 * @param governanceSourceClassName
-	 *            Fully qualified class name of the {@link GovernanceSource}.
+	 * @param governanceName            Name of the {@link OfficeGovernance}.
+	 * @param governanceSourceClassName Fully qualified class name of the
+	 *                                  {@link GovernanceSource}.
 	 * @return Added {@link OfficeGovernance}.
 	 */
 	OfficeGovernance addOfficeGovernance(String governanceName, String governanceSourceClassName);
@@ -230,10 +207,8 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeGovernance}.
 	 * 
-	 * @param governanceName
-	 *            Name of the {@link OfficeGovernance}.
-	 * @param governanceSource
-	 *            {@link GovernanceSource} instance to use.
+	 * @param governanceName   Name of the {@link OfficeGovernance}.
+	 * @param governanceSource {@link GovernanceSource} instance to use.
 	 * @return Added {@link OfficeGovernance}.
 	 */
 	OfficeGovernance addOfficeGovernance(String governanceName, GovernanceSource<?, ?> governanceSource);
@@ -241,11 +216,10 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeAdministration}.
 	 * 
-	 * @param administrationName
-	 *            Name of the {@link OfficeAdministration}.
-	 * @param administrationSourceClassName
-	 *            Fully qualified class name of the
-	 *            {@link AdministrationSource}.
+	 * @param administrationName            Name of the
+	 *                                      {@link OfficeAdministration}.
+	 * @param administrationSourceClassName Fully qualified class name of the
+	 *                                      {@link AdministrationSource}.
 	 * @return Added {@link OfficeAdministration}.
 	 */
 	OfficeAdministration addOfficeAdministration(String administrationName, String administrationSourceClassName);
@@ -253,10 +227,8 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeAdministration}.
 	 * 
-	 * @param administrationName
-	 *            Name of the {@link OfficeAdministration}.
-	 * @param administrationSource
-	 *            {@link AdministrationSource} instance to use.
+	 * @param administrationName   Name of the {@link OfficeAdministration}.
+	 * @param administrationSource {@link AdministrationSource} instance to use.
 	 * @return Added {@link OfficeAdministration}.
 	 */
 	OfficeAdministration addOfficeAdministration(String administrationName,
@@ -265,17 +237,23 @@ public interface OfficeArchitect extends SourceIssues {
 	/**
 	 * Adds an {@link OfficeEscalation}.
 	 * 
-	 * @param escalationTypeName
-	 *            Type of {@link Escalation}.
+	 * @param escalationTypeName Type of {@link Escalation}.
 	 * @return Added {@link OfficeEscalation}.
 	 */
 	OfficeEscalation addOfficeEscalation(String escalationTypeName);
 
 	/**
+	 * Adds an {@link EscalationExplorer} for the execution tree from the added
+	 * {@link OfficeEscalation} instances.
+	 * 
+	 * @param escalationExplorer {@link EscalationExplorer}.
+	 */
+	void addOfficeEscalationExplorer(EscalationExplorer escalationExplorer);
+
+	/**
 	 * Adds an {@link OfficeStart}.
 	 * 
-	 * @param startName
-	 *            Name of the {@link OfficeStart}.
+	 * @param startName Name of the {@link OfficeStart}.
 	 * @return Added {@link OfficeStart}.
 	 */
 	OfficeStart addOfficeStart(String startName);
@@ -284,10 +262,8 @@ public interface OfficeArchitect extends SourceIssues {
 	 * Links the {@link OfficeManagedObjectSource} to be pooled by the
 	 * {@link OfficeManagedObjectPool}.
 	 * 
-	 * @param managedObjectSource
-	 *            {@link OfficeManagedObjectSource}.
-	 * @param managedObjectPool
-	 *            {@link OfficeManagedObjectPool}.
+	 * @param managedObjectSource {@link OfficeManagedObjectSource}.
+	 * @param managedObjectPool   {@link OfficeManagedObjectPool}.
 	 */
 	void link(OfficeManagedObjectSource managedObjectSource, OfficeManagedObjectPool managedObjectPool);
 
@@ -295,10 +271,8 @@ public interface OfficeArchitect extends SourceIssues {
 	 * Links the {@link OfficeFlowSourceNode} to be undertaken by the
 	 * {@link OfficeFlowSinkNode}.
 	 * 
-	 * @param flowSourceNode
-	 *            {@link OfficeFlowSourceNode}.
-	 * @param flowSinkNode
-	 *            {@link OfficeFlowSinkNode}.
+	 * @param flowSourceNode {@link OfficeFlowSourceNode}.
+	 * @param flowSinkNode   {@link OfficeFlowSinkNode}.
 	 */
 	void link(OfficeFlowSourceNode flowSourceNode, OfficeFlowSinkNode flowSinkNode);
 
@@ -306,20 +280,16 @@ public interface OfficeArchitect extends SourceIssues {
 	 * Links the {@link OfficeDependencyRequireNode} to be fulfilled by the
 	 * {@link OfficeDependencyObjectNode}.
 	 * 
-	 * @param dependencyRequiredNode
-	 *            {@link OfficeDependencyRequireNode}.
-	 * @param dependencyObjectNode
-	 *            {@link OfficeDependencyObjectNode}.
+	 * @param dependencyRequiredNode {@link OfficeDependencyRequireNode}.
+	 * @param dependencyObjectNode   {@link OfficeDependencyObjectNode}.
 	 */
 	void link(OfficeDependencyRequireNode dependencyRequiredNode, OfficeDependencyObjectNode dependencyObjectNode);
 
 	/**
 	 * Links the {@link OfficeResponsibility} to the {@link OfficeTeam}.
 	 * 
-	 * @param responsibility
-	 *            {@link OfficeResponsibility}.
-	 * @param officeTeam
-	 *            {@link OfficeTeam}.
+	 * @param responsibility {@link OfficeResponsibility}.
+	 * @param officeTeam     {@link OfficeTeam}.
 	 */
 	void link(OfficeResponsibility responsibility, OfficeTeam officeTeam);
 
