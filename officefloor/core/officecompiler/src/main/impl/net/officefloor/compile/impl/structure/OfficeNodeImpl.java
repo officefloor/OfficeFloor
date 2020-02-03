@@ -84,6 +84,9 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.AugmentedFunctionObject;
+import net.officefloor.compile.spi.office.EscalationExplorer;
+import net.officefloor.compile.spi.office.EscalationExplorerContext;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentor;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeAdministration;
@@ -254,6 +257,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	 * {@link EscalationNode} instances by their {@link OfficeEscalation} type.
 	 */
 	private final Map<String, EscalationNode> escalations = new HashMap<String, EscalationNode>();
+
+	/**
+	 * {@link EscalationExplorer} instances.
+	 */
+	private final List<EscalationExplorer> escalationExplorers = new LinkedList<>();
 
 	/**
 	 * {@link OfficeStartNode} instances by their {@link OfficeStart} name.
@@ -953,9 +961,68 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 				.forEachOrdered((section) -> section.loadManagedFunctionNodes(managedFunctions));
 
 		// Run execution explorers for the sections (in deterministic order)
-		return this.sections.values().stream()
+		boolean isSectionsExplored = this.sections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
 				.allMatch((section) -> section.runExecutionExplorers(managedFunctions, compileContext));
+
+		// Run explorers for the esclations (in deterministic order)
+		boolean isEscalationsExplored = this.escalations.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeEscalationType(), b.getOfficeEscalationType()))
+				.allMatch((escalation) -> {
+
+					// Run the execution explorer
+					ExecutionManagedFunction initialFunction = null;
+					for (EscalationExplorer explorer : this.escalationExplorers) {
+
+						// Lazy obtain function servicing this section input
+						if (initialFunction == null) {
+							ManagedFunctionNode functionNode = LinkUtil.retrieveTarget(escalation,
+									ManagedFunctionNode.class, this.context.getCompilerIssues());
+							if (functionNode != null) {
+								initialFunction = functionNode.createExecutionManagedFunction(compileContext);
+							}
+						}
+
+						// Explore from the escalation
+						try {
+							final ExecutionManagedFunction finalInitialFunction = initialFunction;
+							explorer.explore(new EscalationExplorerContext() {
+
+								@Override
+								public String getOfficeEscalationType() {
+									return escalation.getOfficeEscalationType();
+								}
+
+								@Override
+								public ExecutionManagedFunction getManagedFunction(String functionName) {
+
+									// Obtain the managed function node
+									ManagedFunctionNode function = managedFunctions.get(functionName);
+									if (function == null) {
+										return null;
+									}
+
+									// Create and return the execution managed function
+									return function.createExecutionManagedFunction(compileContext);
+								}
+
+								@Override
+								public ExecutionManagedFunction getInitialManagedFunction() {
+									return finalInitialFunction;
+								}
+							});
+						} catch (Throwable ex) {
+							this.context.getCompilerIssues().addIssue(this,
+									"Failure in exploring escalation " + escalation.getOfficeEscalationType(), ex);
+						}
+					}
+
+					// As here, successfully explored
+					return true;
+				});
+
+		// Indicate successfully run explorers
+		return isSectionsExplored && isEscalationsExplored;
 	}
 
 	@Override
@@ -1277,6 +1344,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		return NodeUtil.getInitialisedNode(escalationTypeName, this.escalations, this.context,
 				() -> this.context.createEscalationNode(escalationTypeName, this),
 				(escalation) -> escalation.initialise());
+	}
+
+	@Override
+	public void addOfficeEscalationExplorer(EscalationExplorer escalationExplorer) {
+		this.escalationExplorers.add(escalationExplorer);
 	}
 
 	@Override
