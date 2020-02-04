@@ -88,7 +88,7 @@
 		<netty-version>4.1.45.Final</netty-version>
 		<objectify-version>6.0.6</objectify-version>
 		<postgresql-version>42.2.9</postgresql-version>
-		<r2dbc-version>Arabba-RELEASE</r2dbc-version>
+		<r2dbc-version>Arabba-SR2</r2dbc-version>
 		<reactor-version>Bismuth-RELEASE</reactor-version>
 		<scala-maven-version>4.0.2</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
