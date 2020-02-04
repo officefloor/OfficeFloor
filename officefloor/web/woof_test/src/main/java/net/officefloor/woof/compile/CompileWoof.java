@@ -35,6 +35,11 @@ public class CompileWoof {
 	private final List<CompileWebExtension> webExtensions = new LinkedList<>();
 
 	/**
+	 * {@link CompileWoofExtension} instances.
+	 */
+	private final List<CompileWoofExtension> woofExtensions = new LinkedList<>();
+
+	/**
 	 * Adds a {@link CompileOfficeFloorExtension}.
 	 * 
 	 * @param extension {@link CompileOfficeFloorExtension}.
@@ -59,6 +64,15 @@ public class CompileWoof {
 	 */
 	public void web(CompileWebExtension extension) {
 		this.webExtensions.add(extension);
+	}
+
+	/**
+	 * Adds a {@link CompileWoofExtension}.
+	 * 
+	 * @param extension {@link CompileWoofExtension}.
+	 */
+	public void woof(CompileWoofExtension extension) {
+		this.woofExtensions.add(extension);
 	}
 
 	/**
@@ -88,6 +102,13 @@ public class CompileWoof {
 					WebArchitect webArchitect = web.getWebArchitect();
 					CompileWebContext webContext = new CompileWebContextImpl(compileOfficeContext[0], webArchitect);
 					extension.extend(webContext);
+				});
+			}
+
+			// Load the WoOF extension
+			for (CompileWoofExtension extension : this.woofExtensions) {
+				context.extend((extendContext) -> {
+					extension.extend(extendContext);
 				});
 			}
 		});

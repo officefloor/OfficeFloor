@@ -14,10 +14,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<build>
-		<plugins>
-		</plugins>
-	</build>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -31,6 +27,11 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>officejwt</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

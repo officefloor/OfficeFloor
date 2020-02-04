@@ -60,6 +60,7 @@ import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.value.load.ValueLoaderFactory;
 import net.officefloor.web.value.load.ValueLoaderSource;
 import net.officefloor.web.value.load.ValueName;
@@ -96,6 +97,10 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 
 		// Obtain the web architect
 		WebArchitect web = context.getWebArchitect();
+		
+		// Obtain the security architect
+		HttpSecurityArchitect security = context.getHttpSecurityArchitect();
+		
 
 		// Create the root
 		OpenAPI openApi = new OpenAPI();
@@ -225,7 +230,9 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 		}
 		for (ManagedFunctionEscalationType escalationType : type.getEscalationTypes()) {
 			ExecutionManagedFunction escalateManagedFunction = managedFunction.getManagedFunction(escalationType);
-			this.recursiveLoadManagedFunction(escalateManagedFunction, loader, visited);
+			if (escalateManagedFunction != null) {
+				this.recursiveLoadManagedFunction(escalateManagedFunction, loader, visited);
+			}
 		}
 	}
 

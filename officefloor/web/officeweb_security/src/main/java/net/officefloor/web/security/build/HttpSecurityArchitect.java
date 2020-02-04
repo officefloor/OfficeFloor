@@ -93,7 +93,7 @@ public interface HttpSecurityArchitect {
 	 * @return {@link HttpSecurer}.
 	 */
 	HttpSecurer createHttpSecurer(HttpSecurable securable);
-
+	
 	/**
 	 * Informs the {@link WebArchitect} of the necessary security. This is to be
 	 * invoked once all security is configured.

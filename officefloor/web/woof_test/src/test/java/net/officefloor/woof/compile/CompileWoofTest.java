@@ -2,6 +2,7 @@ package net.officefloor.woof.compile;
 
 import net.officefloor.compile.test.officefloor.CompileOfficeExtension;
 import net.officefloor.compile.test.officefloor.CompileOfficeFloorExtension;
+import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.managedobject.singleton.Singleton;
 import net.officefloor.server.http.HttpMethod;
@@ -35,6 +36,27 @@ public class CompileWoofTest extends OfficeFrameTestCase {
 	public static class ServiceLink {
 		public void service(Payload request, ObjectResponse<Payload> response) {
 			response.send(new Payload("RESPONSE " + request.getMessage()));
+		}
+	}
+
+	/**
+	 * Ensure can extend WoOF.
+	 */
+	public void testWoofExtension() throws Exception {
+		CompileWoof compiler = new CompileWoof();
+		Closure<Boolean> isRun = new Closure<>(false);
+		compiler.woof((context) -> {
+			assertNotNull("Should have Office architect", context.getOfficeArchitect());
+			assertNotNull("Should have Office context", context.getOfficeExtensionContext());
+			assertNotNull("Should have Web architect", context.getWebArchitect());
+			assertNotNull("Should have HTTP Security architect", context.getHttpSecurityArchitect());
+			assertNotNull("Should have Procedure architect", context.getProcedureArchitect());
+			assertNotNull("Should have Resource architect", context.getHttpResourceArchitect());
+			assertNotNull("Should have Web templater", context.getWebTemplater());
+			isRun.value = true;
+		});
+		try (MockWoofServer server = compiler.open()) {
+			assertTrue("Should run WoOF extension", isRun.value);
 		}
 	}
 

@@ -1,0 +1,40 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/basic": {
+			"get": {
+				"security": [{
+					"BASIC": []
+				}]
+			}
+		},
+		"/jwt": {
+			"get": {
+				"security": [{
+					"JWT": []
+				}]
+			}
+		},
+		"/both": {
+			"get": {
+				"security": [{
+					"BASIC": []
+				},{
+					"JWT": []
+				}]
+			}
+		}
+	},
+	"components": {
+		"securitySchemas": {
+			"BASIC": {
+				"type": "http",
+				"scheme": "basic"
+			},
+			"JWT": {
+				"type": "http",
+				"scheme": "bearer"
+			}
+		}
+	}
+}

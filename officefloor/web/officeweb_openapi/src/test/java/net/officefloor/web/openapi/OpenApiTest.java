@@ -16,9 +16,14 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.clazz.FlowInterface;
+import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -36,7 +41,14 @@ import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectResponder;
 import net.officefloor.web.build.HttpObjectResponderFactory;
+import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebExtension;
+import net.officefloor.web.jwt.JwtHttpSecuritySource;
+import net.officefloor.web.security.HttpAccess;
+import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityBuilder;
+import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
+import net.officefloor.web.security.store.MockCredentialStoreManagedObjectSource;
 import net.officefloor.woof.compile.CompileWoof;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -47,6 +59,11 @@ import net.officefloor.woof.mock.MockWoofServer;
  * @author Daniel Sagenschneider
  */
 public class OpenApiTest extends OfficeFrameTestCase {
+
+	/**
+	 * {@link CompileWoof}.
+	 */
+	private final CompileWoof compiler = new CompileWoof();
 
 	/**
 	 * Ensure able to obtain swagger specification.
@@ -444,21 +461,110 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	 * Ensure explore {@link Escalation} instances for failed responses.
 	 */
 	public void testHandleEscalations() {
-		fail("TODO implement exploring escalation handling for failed responses");
+		this.doOpenApiTest((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			OfficeSection section = context.addSection("SECTION", HandleEscalationsSection.class);
+			office.link(context.getWebArchitect().getHttpInput(false, "/path").getInput(),
+					section.getOfficeSectionInput("service"));
+			for (Class<?> escalationClass : new Class<?>[] { IOException.class, SQLException.class,
+					RuntimeException.class, Error.class, Throwable.class }) {
+				office.link(office.addOfficeEscalation(escalationClass.getName()),
+						section.getOfficeSectionInput(escalationClass.getSimpleName()));
+			}
+		});
+	}
+
+	public static class HandleEscalationsSection {
+		public void service() throws SQLException {
+			// no operation
+		}
+
+		// Should not be included as non-thrown checked exception
+		public void IOException(@HttpQueryParameter("IOException") String parameter) {
+			// no operation
+		}
+
+		public void SQLException(@HttpQueryParameter("SQLException") String parameter) {
+			// no operation
+		}
+
+		public void RuntimeException(@HttpQueryParameter("RuntimeException") String parameter) {
+			// no operation
+		}
+
+		public void Error(@HttpQueryParameter("Error") String parameter) {
+			// no operation
+		}
+
+		public void Throwable(@HttpQueryParameter("Throwable") String parameter) {
+			// no operation
+		}
 	}
 
 	/**
-	 * Ensure can handle <code>BASIC</code> security.
+	 * Ensure can handle <code>BASIC</code> and <code>Bearer</code> security.
 	 */
-	public void testBasicSecurity() {
-		fail("TODO handle basic security");
+	public void testSecurity() {
+		this.compiler.woof((context) -> {
+			OfficeArchitect office = context.getOfficeArchitect();
+			HttpSecurityArchitect security = context.getHttpSecurityArchitect();
+
+			// Setup BASIC
+			HttpSecurityBuilder basic = security.addHttpSecurity("BASIC", new BasicHttpSecuritySource());
+			basic.addProperty(BasicHttpSecuritySource.PROPERTY_REALM, "test");
+			basic.addContentType("application/*");
+			office.addOfficeManagedObjectSource("CREDENTIALS", MockCredentialStoreManagedObjectSource.class.getName())
+					.addOfficeManagedObject("CREDENTIALS", ManagedObjectScope.THREAD);
+
+			// Setup JWT
+			HttpSecurityBuilder jwt = security.addHttpSecurity("JWT", new JwtHttpSecuritySource<>());
+			jwt.addProperty(JwtHttpSecuritySource.PROPERTY_CLAIMS_CLASS, Claims.class.getName());
+			OfficeSectionInput handleJwt = office
+					.addOfficeSection("HANDLE", ClassSectionSource.class.getName(), HandleJwt.class.getName())
+					.getOfficeSectionInput("handle");
+			for (JwtHttpSecuritySource.Flows flow : JwtHttpSecuritySource.Flows.values()) {
+				office.link(jwt.getOutput(flow.name()), handleJwt);
+			}
+		});
+		this.doOpenApiTest((context) -> {
+			// Configure different paths (with different security)
+			OfficeArchitect office = context.getOfficeArchitect();
+			WebArchitect web = context.getWebArchitect();
+			OfficeSection section = context.addSection("SECTION", SecuritySection.class);
+			for (String service : new String[] { "basic", "jwt", "both", "insecure" }) {
+				office.link(web.getHttpInput(false, "/" + service).getInput(), section.getOfficeSectionInput(service));
+			}
+		});
 	}
 
-	/**
-	 * Ensure can handle <code>Bearer</code> security.
-	 */
-	public void testBearerSecurity() {
-		fail("TODO handle bearer security");
+	public static class Claims {
+	}
+
+	public static class HandleJwt {
+		public void handle() {
+			// no operation
+		}
+	}
+
+	public static class SecuritySection {
+		@HttpAccess(withHttpSecurity = "BASIC")
+		public void basic(@HttpQueryParameter("BASIC") String parameter) {
+			// no operation
+		}
+
+		@HttpAccess(withHttpSecurity = "JWT")
+		public void jwt(@HttpQueryParameter("JWT") String parameter) {
+			// no operation
+		}
+
+		@HttpAccess
+		public void both(@HttpQueryParameter("BOTH") String parameter) {
+			// no operation
+		}
+
+		public void insecure(@HttpQueryParameter("INSECURE") String parameter) {
+			// no operation
+		}
 	}
 
 	/**
@@ -468,9 +574,8 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	 */
 	private void doOpenApiTest(CompileWebExtension extension) {
 		try {
-			CompileWoof compiler = new CompileWoof();
-			compiler.web(extension);
-			try (MockWoofServer server = compiler.open()) {
+			this.compiler.web(extension);
+			try (MockWoofServer server = this.compiler.open()) {
 
 				// Obtain the expected specification
 				String testName = this.getName();
