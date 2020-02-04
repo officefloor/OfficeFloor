@@ -64,11 +64,6 @@ import net.officefloor.plugin.section.clazz.SectionInterface;
 public class ExecutionExplorerTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link CompileOfficeFloor}.
-	 */
-	private final CompileOfficeFloor compile = new CompileOfficeFloor();
-
-	/**
 	 * Ensure can explore a single {@link ManagedFunction}.
 	 */
 	public void testSingleFunction() throws Exception {
@@ -355,8 +350,9 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 	 * @param explorer  {@link ExecutionExplorer}.
 	 */
 	private void doExplore(CompileExecutionExtension extension, ExecutionExplorer explorer) throws Exception {
+		CompileOfficeFloor compile = new CompileOfficeFloor();
 		Closure<Boolean> isExplored = new Closure<>(false);
-		this.compile.office((compileContext) -> {
+		compile.office((compileContext) -> {
 
 			// Run the extension, with exploration
 			OfficeSectionInput input = extension.extend(compileContext);
@@ -371,7 +367,7 @@ public class ExecutionExplorerTest extends OfficeFrameTestCase {
 				isExplored.value = true;
 			});
 		});
-		this.compile.compileAndOpenOfficeFloor();
+		compile.compileAndOpenOfficeFloor();
 		assertTrue("Should have explored execution tree", isExplored.value);
 	}
 

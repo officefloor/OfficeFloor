@@ -59,6 +59,7 @@ import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.managedobject.ManagedObjectDependency;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.ExecutionManagedObject;
+import net.officefloor.compile.spi.office.ExecutionObjectExplorer;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeManagedObjectDependency;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectDependency;
@@ -642,6 +643,12 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	public OfficeManagedObjectDependency getOfficeManagedObjectDependency(String managedObjectDependencyName) {
 		return NodeUtil.getNode(managedObjectDependencyName, this.dependencies,
 				() -> this.context.createManagedObjectDependencyNode(managedObjectDependencyName, this));
+	}
+
+	@Override
+	public void addExecutionExplorer(ExecutionObjectExplorer executionObjectExplorer) {
+		// TODO implement OfficeManagedObject.addExecutionExplorer
+		throw new UnsupportedOperationException("TODO implement OfficeManagedObject.addExecutionExplorer");
 	}
 
 	/*
