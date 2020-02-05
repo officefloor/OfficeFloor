@@ -23,10 +23,14 @@
 					"JWT": []
 				}]
 			}
+		},
+		"/insecure": {
+			"get": {
+			}
 		}
 	},
 	"components": {
-		"securitySchemas": {
+		"securitySchemes": {
 			"BASIC": {
 				"type": "http",
 				"scheme": "basic"

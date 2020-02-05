@@ -505,6 +505,9 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	 * Ensure can handle <code>BASIC</code> and <code>Bearer</code> security.
 	 */
 	public void testSecurity() {
+
+		this.setVerbose(true);
+
 		this.compiler.woof((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			HttpSecurityArchitect security = context.getHttpSecurityArchitect();
@@ -548,21 +551,21 @@ public class OpenApiTest extends OfficeFrameTestCase {
 
 	public static class SecuritySection {
 		@HttpAccess(withHttpSecurity = "BASIC")
-		public void basic(@HttpQueryParameter("BASIC") String parameter) {
+		public void basic() {
 			// no operation
 		}
 
 		@HttpAccess(withHttpSecurity = "JWT")
-		public void jwt(@HttpQueryParameter("JWT") String parameter) {
+		public void jwt() {
 			// no operation
 		}
 
 		@HttpAccess
-		public void both(@HttpQueryParameter("BOTH") String parameter) {
+		public void both() {
 			// no operation
 		}
 
-		public void insecure(@HttpQueryParameter("INSECURE") String parameter) {
+		public void insecure() {
 			// no operation
 		}
 	}

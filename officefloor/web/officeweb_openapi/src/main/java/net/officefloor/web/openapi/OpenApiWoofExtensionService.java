@@ -3,6 +3,8 @@ package net.officefloor.web.openapi;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -27,6 +29,8 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
@@ -60,7 +64,9 @@ import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
+import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.value.load.ValueLoaderFactory;
 import net.officefloor.web.value.load.ValueLoaderSource;
 import net.officefloor.web.value.load.ValueName;
@@ -97,10 +103,13 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 
 		// Obtain the web architect
 		WebArchitect web = context.getWebArchitect();
-		
-		// Obtain the security architect
+
+		// Explore HTTP security
 		HttpSecurityArchitect security = context.getHttpSecurityArchitect();
-		
+		List<String> allHttpSecurityNames = new LinkedList<>();
+		security.addHttpSecurityExplorer((explore) -> {
+			allHttpSecurityNames.add(explore.getHttpSecurityName());
+		});
 
 		// Create the root
 		OpenAPI openApi = new OpenAPI();
@@ -168,12 +177,16 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 			HttpObjectParserFactory[] objectParserFactories = explore.getHttpObjectParserFactories();
 			HttpObjectResponderFactory[] objectResponderFactories = explore.getHttpObjectResponderFactories();
 
+			// Obtain all the HTTP security names
+			allHttpSecurityNames.sort(String.CASE_INSENSITIVE_ORDER);
+			String[] httpSecurityNames = allHttpSecurityNames.toArray(new String[allHttpSecurityNames.size()]);
+
 			// Recursive explore graph, loading path specification
 			ExecutionManagedFunction managedFunction = explore.getInitialManagedFunction();
 			Map<String, Parameter> parameters = new HashMap<>();
-			this.recursiveLoadManagedFunction(
-					managedFunction, (node) -> this.loadManagedFunction(node, explore.getRoutePath(), operation,
-							parameters, objectParserFactories, objectResponderFactories, getComponents),
+			this.recursiveLoadManagedFunction(managedFunction,
+					(node) -> this.loadManagedFunction(node, explore.getRoutePath(), operation, parameters,
+							objectParserFactories, objectResponderFactories, httpSecurityNames, getComponents),
 					new HashSet<>());
 		});
 
@@ -245,16 +258,36 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 	 * @param parameters               {@link Parameter} instances by name.
 	 * @param objectParserFactories    {@link HttpObjectParserFactory} instances.
 	 * @param objectResponderFactories {@link HttpObjectResponderFactory} instances.
+	 * @param allHttpSecurityNames     All {@link HttpSecurity} names.
 	 * @param getComponents            Obtains the {@link Components}.
 	 * @throws Exception If fails to load the {@link ExecutionManagedFunction}.
 	 */
 	private void loadManagedFunction(ExecutionManagedFunction managedFunction, String routePath, Operation operation,
 			Map<String, Parameter> parameters, HttpObjectParserFactory[] objectParserFactories,
-			HttpObjectResponderFactory[] objectResponderFactories, Supplier<Components> getComponents)
-			throws Exception {
+			HttpObjectResponderFactory[] objectResponderFactories, String[] allHttpSecurityNames,
+			Supplier<Components> getComponents) throws Exception {
+
+		// Obtain the type
+		ManagedFunctionType<?, ?> type = managedFunction.getManagedFunctionType();
+
+		// Register security
+		HttpAccess httpAccess = type.getAnnotation(HttpAccess.class);
+		if (httpAccess != null) {
+
+			// Add the security requirement
+			String httpSecurityName = httpAccess.withHttpSecurity();
+			if (!CompileUtil.isBlank(httpSecurityName)) {
+				// Must use specific security
+				operation.addSecurityItem(new SecurityRequirement().addList(httpSecurityName));
+			} else {
+				// Any security provides access
+				for (String securityName : allHttpSecurityNames) {
+					operation.addSecurityItem(new SecurityRequirement().addList(securityName));
+				}
+			}
+		}
 
 		// Load managed function specification
-		ManagedFunctionType<?, ?> type = managedFunction.getManagedFunctionType();
 		for (ManagedFunctionObjectType<?> objectType : type.getObjectTypes()) {
 
 			// Include possible path parameter
