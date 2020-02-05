@@ -36,7 +36,7 @@ public class ExecutionObjectExplorerTest extends OfficeFrameTestCase {
 			return Singleton.load(context.getOfficeArchitect(), "OBJECT");
 		}, (context) -> {
 			ExecutionManagedObject mo = context.getInitialManagedObject();
-			assertEquals("Incorrect managed object", "OFFICE.OBJECT", mo.getManagedObjectName());
+			assertEquals("Incorrect managed object", "OFFICE.String", mo.getManagedObjectName());
 		});
 	}
 
@@ -57,7 +57,7 @@ public class ExecutionObjectExplorerTest extends OfficeFrameTestCase {
 			ManagedObjectDependencyType<?>[] dependencyTypes = mo.getManagedObjectType().getDependencyTypes();
 			assertEquals("Incorrect number of dependencies", 1, dependencyTypes.length);
 			ExecutionManagedObject dependency = mo.getManagedObject(dependencyTypes[0]);
-			assertEquals("Incorrect dependency", "OFFICE.DEPENDENCY", dependency.getManagedObjectName());
+			assertEquals("Incorrect dependency", "OFFICE.String", dependency.getManagedObjectName());
 		});
 	}
 
@@ -74,7 +74,7 @@ public class ExecutionObjectExplorerTest extends OfficeFrameTestCase {
 			OfficeArchitect office = context.getOfficeArchitect();
 			OfficeManagedObjectSource mos = office.addOfficeManagedObjectSource("OBJECT",
 					ClassManagedObjectSource.class.getName());
-			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, DependencyObject.class.getName());
+			mos.addProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME, FlowObject.class.getName());
 			OfficeSection section = context.addSection("SECTION", FlowSection.class);
 			office.link(mos.getOfficeManagedObjectFlow("function"), section.getOfficeSectionInput("service"));
 			return mos.addOfficeManagedObject("OBJECT", ManagedObjectScope.THREAD);

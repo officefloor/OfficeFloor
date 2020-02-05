@@ -954,18 +954,23 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	@Override
 	public boolean runExecutionExplorers(CompileContext compileContext) {
 
+		// Run explores for objects (in deterministic order)
+		boolean isObjectsExplored = this.managedObjects.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getBoundManagedObjectName(), b.getBoundManagedObjectName()))
+				.allMatch((managedObject) -> managedObject.runExecutionExplorers(compileContext));
+
 		// Create the map of all managed functions
 		Map<String, ManagedFunctionNode> managedFunctions = new HashMap<>();
 		this.sections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
 				.forEachOrdered((section) -> section.loadManagedFunctionNodes(managedFunctions));
 
-		// Run execution explorers for the sections (in deterministic order)
+		// Run explorers for the sections (in deterministic order)
 		boolean isSectionsExplored = this.sections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
 				.allMatch((section) -> section.runExecutionExplorers(managedFunctions, compileContext));
 
-		// Run explorers for the esclations (in deterministic order)
+		// Run explorers for the escalations (in deterministic order)
 		boolean isEscalationsExplored = this.escalations.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeEscalationType(), b.getOfficeEscalationType()))
 				.allMatch((escalation) -> {
@@ -1022,7 +1027,7 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 				});
 
 		// Indicate successfully run explorers
-		return isSectionsExplored && isEscalationsExplored;
+		return isObjectsExplored && isSectionsExplored && isEscalationsExplored;
 	}
 
 	@Override
