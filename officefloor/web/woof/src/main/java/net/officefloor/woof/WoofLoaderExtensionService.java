@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
 
 import net.officefloor.activity.procedure.build.ProcedureArchitect;
 import net.officefloor.activity.procedure.build.ProcedureEmployer;
@@ -555,10 +554,8 @@ public class WoofLoaderExtensionService implements OfficeFloorExtensionService, 
 
 		// Load the woof extensions
 		if (isLoadWoofExtensions) {
-			ClassLoader classLoader = context.getClassLoader();
-			ServiceLoader<WoofExtensionService> extensionServiceLoader = ServiceLoader.load(WoofExtensionService.class,
-					classLoader);
-			Iterator<WoofExtensionService> extensionIterator = extensionServiceLoader.iterator();
+			Iterator<WoofExtensionService> extensionIterator = context
+					.loadOptionalServices(WoofExtensionServiceFactory.class).iterator();
 			while (extensionIterator.hasNext()) {
 
 				// Obtain the next extension service

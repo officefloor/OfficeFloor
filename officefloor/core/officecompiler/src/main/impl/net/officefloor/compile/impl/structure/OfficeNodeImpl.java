@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
@@ -109,6 +108,7 @@ import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionServiceFactory;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -548,8 +548,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeExtensionService> extensionServices = new ArrayList<>();
-		for (OfficeExtensionService extensionService : ServiceLoader.load(OfficeExtensionService.class,
-				context.getClassLoader())) {
+		for (OfficeExtensionService extensionService : context
+				.loadOptionalServices(OfficeExtensionServiceFactory.class)) {
 			extensionServices.add(extensionService);
 		}
 

@@ -21,14 +21,12 @@
 
 package net.officefloor.compile;
 
-import java.util.ServiceLoader;
-
 import net.officefloor.frame.api.team.source.TeamSource;
 
 /**
  * <p>
- * {@link ServiceLoader} service to plug-in an {@link TeamSource} {@link Class}
- * alias by including the extension {@link TeamSource} jar on the class path.
+ * Service to plug-in an {@link TeamSource} {@link Class} alias by including the
+ * extension {@link TeamSource} jar on the class path.
  * <p>
  * {@link OfficeFloorCompiler#addTeamSourceAlias(String, Class)} will be invoked
  * for each found {@link TeamSourceService}.

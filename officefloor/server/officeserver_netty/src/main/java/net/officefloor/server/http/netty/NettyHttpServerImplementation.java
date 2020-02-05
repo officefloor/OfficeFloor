@@ -23,7 +23,6 @@ package net.officefloor.server.http.netty;
 
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
 import io.netty.buffer.ByteBuf;
@@ -39,6 +38,7 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.ProcessManager;
+import net.officefloor.frame.api.source.ServiceFactory;
 import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpHeader;
 import net.officefloor.server.http.HttpHeaderValue;
@@ -100,7 +100,7 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 	private ExternalServiceInput<ServerHttpConnection, ProcessAwareServerHttpConnectionManagedObject> serviceInput;
 
 	/**
-	 * Default constructor required for {@link ServiceLoader}.
+	 * Default constructor required for {@link ServiceFactory}.
 	 */
 	public NettyHttpServerImplementation() {
 		super(getMaxRequestEntityLength());
