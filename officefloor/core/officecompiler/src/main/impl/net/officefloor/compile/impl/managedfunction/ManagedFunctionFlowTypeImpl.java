@@ -57,8 +57,7 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
 	/**
 	 * Initiate.
 	 * 
-	 * @param index
-	 *            Index of this {@link ManagedFunctionFlowType}.
+	 * @param index Index of this {@link ManagedFunctionFlowType}.
 	 */
 	public ManagedFunctionFlowTypeImpl(int index) {
 		this.index = index;
@@ -71,7 +70,9 @@ public class ManagedFunctionFlowTypeImpl<F extends Enum<F>>
 	@Override
 	public void setKey(F key) {
 		this.key = key;
-		this.index = key.ordinal();
+		if (key != null) {
+			this.index = key.ordinal();
+		}
 	}
 
 	@Override

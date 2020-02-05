@@ -23,21 +23,26 @@ package net.officefloor.web.security.build;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.util.LoadTypeError;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.managedfunction.source.FunctionNamespaceBuilder;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSourceContext;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionTypeBuilder;
 import net.officefloor.compile.spi.managedfunction.source.impl.AbstractManagedFunctionSource;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
+import net.officefloor.compile.spi.office.ExecutionManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministration;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeEscalation;
@@ -163,6 +168,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 	private final List<HttpSecurerBuilderImpl> securers = new LinkedList<>();
 
 	/**
+	 * {@link HttpSecurityExplorer} instances.
+	 */
+	private final List<HttpSecurityExplorer> explorers = new LinkedList<>();
+
+	/**
 	 * Index of the next section to ensure unique names.
 	 */
 	private int nextSectionIndex = 1;
@@ -239,6 +249,11 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		HttpSecurerBuilderImpl builder = new HttpSecurerBuilderImpl(securable, null);
 		HttpSecurityArchitectEmployer.this.securers.add(builder);
 		return builder;
+	}
+
+	@Override
+	public void addHttpSecurityExplorer(HttpSecurityExplorer explorer) {
+		this.explorers.add(explorer);
 	}
 
 	@Override
@@ -739,9 +754,13 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void build(OfficeManagedObject httpChallengeContext) {
 
+			// Easy access to employer and this
+			final HttpSecurityArchitectEmployer employer = HttpSecurityArchitectEmployer.this;
+			final HttpSecurityBuilderImpl<A, AC, C, O, F> securityBuilder = this;
+
 			// Create the HTTP Security loader
-			HttpSecurityLoader loader = new HttpSecurityLoaderImpl(HttpSecurityArchitectEmployer.this.officeArchitect,
-					HttpSecurityArchitectEmployer.this.officeSourceContext, this.name);
+			HttpSecurityLoader loader = new HttpSecurityLoaderImpl(employer.officeArchitect,
+					employer.officeSourceContext, this.name);
 
 			// Load the security type
 			this.type = loader.loadHttpSecurityType(this.source, this.properties);
@@ -762,10 +781,10 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			this.security = this.source.sourceHttpSecurity(this);
 
 			// Obtain easy access to office architect
-			OfficeArchitect office = HttpSecurityArchitectEmployer.this.officeArchitect;
+			OfficeArchitect office = employer.officeArchitect;
 
 			// Determine if require type qualification (as multiple securities)
-			boolean isRequireTypeQualification = (HttpSecurityArchitectEmployer.this.securities.size() > 1);
+			boolean isRequireTypeQualification = (employer.securities.size() > 1);
 
 			// Add the authentication context managed object
 			String authenticationContextName = this.name + "_AuthenticationContext";
@@ -843,16 +862,53 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 			String executionName = this.name + "_HttpSecurityExecuteContext";
 			OfficeManagedObjectSource executeMos = office.addOfficeManagedObjectSource(executionName,
 					new HttpSecurityExecuteManagedObjectSource<>(this.source, this.type));
-			executeMos.addOfficeManagedObject(executionName, ManagedObjectScope.PROCESS);
 			for (HttpSecurityFlowType<?> flowType : this.type.getFlowTypes()) {
-				office.link(executeMos.getOfficeManagedObjectFlow(flowType.getKey().name()), this.section
+				office.link(executeMos.getOfficeManagedObjectFlow(flowType.getFlowName()), this.section
 						.getOfficeSectionInput(HttpSecuritySectionSource.INPUT_FLOW_PREFIX + flowType.getFlowName()));
 			}
+
+			// Provide execution managed object and register exploring
+			OfficeManagedObject executeMo = executeMos.addOfficeManagedObject(executionName,
+					ManagedObjectScope.PROCESS);
+			executeMo.addExecutionExplorer((explore) -> {
+				for (HttpSecurityExplorer explorer : employer.explorers) {
+					explorer.explore(new HttpSecurityExplorerContext() {
+
+						@Override
+						public String getHttpSecurityName() {
+							return securityBuilder.name;
+						}
+
+						@Override
+						public HttpSecuritySource<?, ?, ?, ?, ?> getHttpSecuritySource() {
+							return securityBuilder.source;
+						}
+
+						@Override
+						public HttpSecurityType<?, ?, ?, ?, ?> getHttpSecurityType() {
+							return securityBuilder.type;
+						}
+
+						@Override
+						public ExecutionManagedFunction getManagedFunction(HttpSecurityFlowType<?> flowType) {
+							ExecutionManagedObject managedObject = explore.getInitialManagedObject();
+							ManagedObjectFlowType<?> moFlowType = this.getType(flowType.getFlowName(),
+									managedObject.getManagedObjectType().getFlowTypes(), (type) -> type.getFlowName());
+							return managedObject.getManagedFunction(moFlowType);
+						}
+
+						private <T> T getType(String name, T[] types, Function<T, String> nameExtractor) {
+							return Arrays.asList(types).stream().filter(type -> name.equals(nameExtractor.apply(type)))
+									.findFirst().orElse(null);
+						}
+					});
+				}
+			});
 
 			// Provide application credentials linking
 			Class<C> credentialsType = this.type.getCredentialsType();
 			if (credentialsType != null) {
-				HttpSecurityArchitectEmployer.this.webArchitect
+				employer.webArchitect
 						.reroute(this.section.getOfficeSectionOutput(HttpSecuritySectionSource.OUTPUT_RECONTINUE));
 			}
 
@@ -891,7 +947,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 				@Override
 				public OfficeManagedObject getHttpAuthentication() {
-					return HttpSecurityBuilderImpl.this.httpAuthentication;
+					return securityBuilder.httpAuthentication;
 				}
 
 				@Override
@@ -901,7 +957,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 				@Override
 				public OfficeManagedObject getHttpAccessControl() {
-					return HttpSecurityBuilderImpl.this.httpAccessControl;
+					return securityBuilder.httpAccessControl;
 				}
 
 				@Override
@@ -931,14 +987,14 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 					// Obtain the dependency to link
 					OfficeManagedObject dependent = dependencyType.getOfficeManagedObject(dependencyContext);
 					if (dependent == null) {
-						HttpSecurityArchitectEmployer.this.officeArchitect
+						employer.officeArchitect
 								.addIssue("No dependency for " + dependencyName + " of supporting object "
 										+ supportingManagedObjectType.getSupportingManagedObjectName());
 						continue NEXT_DEPENDENCY;
 					}
 
 					// Link the dependency
-					HttpSecurityArchitectEmployer.this.officeArchitect.link(dependency, dependent);
+					employer.officeArchitect.link(dependency, dependent);
 				}
 			}
 		}

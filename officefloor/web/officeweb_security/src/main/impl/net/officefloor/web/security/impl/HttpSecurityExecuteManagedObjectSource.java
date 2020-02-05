@@ -21,6 +21,10 @@
 
 package net.officefloor.web.security.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.function.FlowCallback;
 import net.officefloor.frame.api.manage.ProcessManager;
@@ -82,9 +86,17 @@ public class HttpSecurityExecuteManagedObjectSource<F extends Enum<F>> extends A
 		context.setObjectClass(HttpSecurityExecuteManagedObjectSource.class);
 
 		// Load the flows
-		for (HttpSecurityFlowType<?> flowType : this.securityType.getFlowTypes()) {
+		List<HttpSecurityFlowType<?>> sortedFlowTypes = Arrays.asList(this.securityType.getFlowTypes());
+		Collections.sort(sortedFlowTypes, (a, b) -> a.getIndex() - b.getIndex());
+		for (HttpSecurityFlowType<?> flowType : sortedFlowTypes) {
 			F flowKey = (F) flowType.getKey();
-			context.addFlow(flowKey, flowType.getArgumentType());
+			Labeller<F> labeller;
+			if (flowKey != null) {
+				labeller = context.addFlow(flowKey, flowType.getArgumentType());
+			} else {
+				labeller = context.addFlow(flowType.getArgumentType());
+			}
+			labeller.setLabel(flowType.getFlowName());
 		}
 	}
 
