@@ -43,7 +43,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
-import net.officefloor.jdbc.test.ValidateConnectionDecoratorFactory;
+import net.officefloor.jdbc.test.ValidateConnections;
 
 /**
  * Abstract {@link Connection} {@link TestCase}.
@@ -127,7 +127,7 @@ public abstract class AbstractConnectionTestCase extends OfficeFrameTestCase {
 			int startupAdditionalConnections) throws Throwable {
 
 		// Obtain connection count to setup test
-		int setupCount = ValidateConnectionDecoratorFactory.getConnectionsRegisteredCount();
+		int setupCount = ValidateConnections.getConnectionsRegisteredCount();
 
 		// Open the OfficeFloor
 		HikariDataSourceFactory.dataSource = null;
@@ -145,13 +145,13 @@ public abstract class AbstractConnectionTestCase extends OfficeFrameTestCase {
 
 		// Ensure no connections created and pool open
 		assertEquals("Compiling should not open connection", setupCount,
-				ValidateConnectionDecoratorFactory.getConnectionsRegisteredCount());
+				ValidateConnections.getConnectionsRegisteredCount());
 		assertFalse("DataSource should be open", HikariDataSourceFactory.dataSource.isClosed());
 
 		// Open the OfficeFloor (should increment connection for connectivity test)
 		officeFloor.openOfficeFloor();
 		assertEquals("Should use connection for connectivity test", setupCount + 1 + startupAdditionalConnections,
-				ValidateConnectionDecoratorFactory.getConnectionsRegisteredCount());
+				ValidateConnections.getConnectionsRegisteredCount());
 		assertFalse("DataSource should still be open", HikariDataSourceFactory.dataSource.isClosed());
 
 		// Should close DataSource if implements AutoCloseable

@@ -46,11 +46,9 @@ import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.decorate.ConnectionDecorator;
-import net.officefloor.jdbc.decorate.ConnectionDecoratorFactory;
-import net.officefloor.jdbc.decorate.ConnectionDecoratorService;
+import net.officefloor.jdbc.decorate.ConnectionDecoratorServiceFactory;
 import net.officefloor.jdbc.decorate.PooledConnectionDecorator;
-import net.officefloor.jdbc.decorate.PooledConnectionDecoratorFactory;
-import net.officefloor.jdbc.decorate.PooledConnectionDecoratorService;
+import net.officefloor.jdbc.decorate.PooledConnectionDecoratorServiceFactory;
 
 /**
  * Abstract {@link ManagedObjectSource} for {@link Connection}.
@@ -86,9 +84,8 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 		// Obtain the decorator factories
 		List<ConnectionDecorator> decoratorList = new ArrayList<>();
-		for (ConnectionDecoratorFactory decoratorFactory : context
-				.loadOptionalServices(ConnectionDecoratorService.class)) {
-			decoratorList.add(decoratorFactory.createConnectionDecorator(context));
+		for (ConnectionDecorator decorator : context.loadOptionalServices(ConnectionDecoratorServiceFactory.class)) {
+			decoratorList.add(decorator);
 		}
 		ConnectionDecorator[] decorators = decoratorList.toArray(new ConnectionDecorator[decoratorList.size()]);
 
@@ -210,9 +207,9 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 		// Obtain the decorator factories
 		List<PooledConnectionDecorator> decoratorList = new ArrayList<>();
-		for (PooledConnectionDecoratorFactory decoratorFactory : context
-				.loadOptionalServices(PooledConnectionDecoratorService.class)) {
-			decoratorList.add(decoratorFactory.createPooledConnectionDecorator(context));
+		for (PooledConnectionDecorator decorator : context
+				.loadOptionalServices(PooledConnectionDecoratorServiceFactory.class)) {
+			decoratorList.add(decorator);
 		}
 		PooledConnectionDecorator[] decorators = decoratorList
 				.toArray(new PooledConnectionDecorator[decoratorList.size()]);

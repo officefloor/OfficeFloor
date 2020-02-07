@@ -23,35 +23,26 @@ package net.officefloor.jdbc.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.sql.PooledConnection;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.frame.api.source.SourceContext;
-import net.officefloor.jdbc.decorate.ConnectionDecorator;
-import net.officefloor.jdbc.decorate.ConnectionDecoratorFactory;
-import net.officefloor.jdbc.decorate.PooledConnectionDecorator;
-import net.officefloor.jdbc.decorate.PooledConnectionDecoratorFactory;
-import net.officefloor.jdbc.decorate.PooledConnectionDecoratorService;
+import net.officefloor.jdbc.decorate.ConnectionDecoratorServiceFactory;
 
 /**
- * {@link ConnectionDecoratorFactory} to validate all created {@link Connection}
- * and {@link PooledConnection} instances are closed on closing
- * {@link OfficeFloor}.
+ * {@link ConnectionDecoratorServiceFactory} to validate all created
+ * {@link Connection} and {@link PooledConnection} instances are closed on
+ * closing {@link OfficeFloor}.
  * 
  * @author Daniel Sagenschneider
  */
-public class ValidateConnectionDecoratorFactory implements ConnectionDecoratorFactory, ConnectionDecorator,
-		PooledConnectionDecoratorFactory, PooledConnectionDecoratorService, PooledConnectionDecorator {
+public class ValidateConnections {
 
 	/**
 	 * Listing of {@link Connection} instances created.
@@ -146,72 +137,26 @@ public class ValidateConnectionDecoratorFactory implements ConnectionDecoratorFa
 		assertEquals(invalidMessage, 0, openConnections.size() + openPooledConnections.size());
 	}
 
-	/*
-	 * ================== ConnectionDecoratorFactory ===========================
+	/**
+	 * Adds {@link Connection}.
+	 * 
+	 * @param connection {@link Connection}.
+	 * @return {@link Connection}.
 	 */
-
-	@Override
-	public ConnectionDecorator createConnectionDecorator(SourceContext context) throws Exception {
-		return this;
-	}
-
-	/*
-	 * ===================== ConnectionDecorator ===============================
-	 */
-
-	@Override
-	public Connection decorate(Connection connection) {
+	public static Connection addConnection(Connection connection) {
 		connections.push(connection);
 		return connection;
 	}
 
-	/*
-	 * =============== PooledConnectionDecoratorFactory =========================
+	/**
+	 * Adds a {@link PooledConnection}.
+	 * 
+	 * @param connection {@link PooledConnection}.
+	 * @return {@link PooledConnection}.
 	 */
-
-	@Override
-	public PooledConnectionDecoratorFactory createService(ServiceContext context) throws Throwable {
-		return this;
-	}
-
-	@Override
-	public PooledConnectionDecorator createPooledConnectionDecorator(SourceContext context) throws Exception {
-		return this;
-	}
-
-	/*
-	 * ================== PooledConnectionDecorator ==============================
-	 */
-
-	@Override
-	public PooledConnection decorate(PooledConnection connection) {
-
-		// Wrap connection to determine if closed
-		AtomicBoolean isClosed = new AtomicBoolean(false);
-		PooledConnection wrapped = (PooledConnection) Proxy.newProxyInstance(this.getClass().getClassLoader(),
-				new Class[] { PooledConnection.class, PooledConnectionClosed.class }, (object, method, args) -> {
-
-					// Handle whether closed
-					switch (method.getName()) {
-					case "close":
-						isClosed.set(true);
-						break; // carry on to close connection
-
-					case "isClosed":
-						return isClosed.get();
-
-					default:
-						break;
-					}
-
-					// Invoke the method
-					return connection.getClass().getMethod(method.getName(), method.getParameterTypes())
-							.invoke(connection, args);
-				});
-
-		// Load wrapped connection (so can determine when closed)
-		pooledConnections.push(wrapped);
-		return wrapped;
+	public static PooledConnection addConnection(PooledConnection connection) {
+		pooledConnections.push(connection);
+		return connection;
 	}
 
 	/**
