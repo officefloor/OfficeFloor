@@ -51,7 +51,7 @@ import org.eclipse.aether.resolution.ArtifactResult;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.web.war.WarAwareClassLoaderFactory;
-import net.officefloor.woof.WoofLoaderExtensionService;
+import net.officefloor.woof.WoofLoaderSettings;
 
 /**
  * Enables viewing WoOF configurations.
@@ -102,8 +102,8 @@ public class ViewWoofMojo extends AbstractMojo {
 	/**
 	 * Path to configuration within the {@link MavenProject} / {@link Artifact}.
 	 */
-	@Parameter(property = "path", required = false, defaultValue = WoofLoaderExtensionService.APPLICATION_WOOF)
-	private String path = WoofLoaderExtensionService.APPLICATION_WOOF;
+	@Parameter(property = "path", required = false, defaultValue = WoofLoaderSettings.APPLICATION_WOOF)
+	private String path = WoofLoaderSettings.APPLICATION_WOOF;
 
 	/*
 	 * =================== AbstractMojo =================

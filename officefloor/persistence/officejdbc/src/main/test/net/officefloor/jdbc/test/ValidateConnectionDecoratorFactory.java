@@ -35,11 +35,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.sql.PooledConnection;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.SourceContext;
 import net.officefloor.jdbc.decorate.ConnectionDecorator;
 import net.officefloor.jdbc.decorate.ConnectionDecoratorFactory;
 import net.officefloor.jdbc.decorate.PooledConnectionDecorator;
 import net.officefloor.jdbc.decorate.PooledConnectionDecoratorFactory;
+import net.officefloor.jdbc.decorate.PooledConnectionDecoratorService;
 
 /**
  * {@link ConnectionDecoratorFactory} to validate all created {@link Connection}
@@ -49,7 +51,7 @@ import net.officefloor.jdbc.decorate.PooledConnectionDecoratorFactory;
  * @author Daniel Sagenschneider
  */
 public class ValidateConnectionDecoratorFactory implements ConnectionDecoratorFactory, ConnectionDecorator,
-		PooledConnectionDecoratorFactory, PooledConnectionDecorator {
+		PooledConnectionDecoratorFactory, PooledConnectionDecoratorService, PooledConnectionDecorator {
 
 	/**
 	 * Listing of {@link Connection} instances created.
@@ -166,6 +168,11 @@ public class ValidateConnectionDecoratorFactory implements ConnectionDecoratorFa
 	/*
 	 * =============== PooledConnectionDecoratorFactory =========================
 	 */
+
+	@Override
+	public PooledConnectionDecoratorFactory createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public PooledConnectionDecorator createPooledConnectionDecorator(SourceContext context) throws Exception {

@@ -38,6 +38,7 @@ import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.frame.api.build.OfficeFloorEvent;
 import net.officefloor.frame.api.build.OfficeFloorListener;
 import net.officefloor.frame.api.manage.ProcessManager;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.api.source.ServiceFactory;
 import net.officefloor.server.http.DateHttpHeaderClock;
 import net.officefloor.server.http.HttpHeader;
@@ -47,6 +48,7 @@ import net.officefloor.server.http.HttpResponseWriter;
 import net.officefloor.server.http.HttpServer;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
+import net.officefloor.server.http.HttpServerImplementationFactory;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.HttpVersion;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -62,7 +64,7 @@ import net.officefloor.server.stream.impl.ByteSequence;
  * @author Daniel Sagenschneider
  */
 public class NettyHttpServerImplementation extends AbstractNettyHttpServer
-		implements HttpServerImplementation, OfficeFloorListener {
+		implements HttpServerImplementation, HttpServerImplementationFactory, OfficeFloorListener {
 
 	/**
 	 * Obtains the maximum request entity length.
@@ -109,6 +111,11 @@ public class NettyHttpServerImplementation extends AbstractNettyHttpServer
 	/*
 	 * ================== HttpServerImplementation ==================
 	 */
+
+	@Override
+	public HttpServerImplementation createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public void configureHttpServer(HttpServerImplementationContext context) {
