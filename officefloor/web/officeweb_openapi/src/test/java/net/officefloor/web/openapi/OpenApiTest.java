@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem.HttpMethod;
 import io.swagger.v3.oas.models.parameters.CookieParameter;
 import io.swagger.v3.oas.models.parameters.HeaderParameter;
@@ -505,9 +506,6 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	 * Ensure can handle <code>BASIC</code> and <code>Bearer</code> security.
 	 */
 	public void testSecurity() {
-
-		this.setVerbose(true);
-
 		this.compiler.woof((context) -> {
 			OfficeArchitect office = context.getOfficeArchitect();
 			HttpSecurityArchitect security = context.getHttpSecurityArchitect();
@@ -568,6 +566,13 @@ public class OpenApiTest extends OfficeFrameTestCase {
 		public void insecure() {
 			// no operation
 		}
+	}
+
+	/**
+	 * Ensure able to extend {@link Operation}.
+	 */
+	public void testExtendOperation() throws Exception {
+		fail("TODO implement");
 	}
 
 	/**

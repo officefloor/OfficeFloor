@@ -1,1 +1,1 @@
-net.officefloor.web.openapi.ObjectResponseMethodParameterManufacturerServiceFactory
+net.officefloor.web.openapi.response.ObjectResponseMethodParameterManufacturerServiceFactory

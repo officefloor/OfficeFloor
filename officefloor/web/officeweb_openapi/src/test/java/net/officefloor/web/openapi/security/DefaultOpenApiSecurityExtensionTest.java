@@ -2,7 +2,6 @@ package net.officefloor.web.openapi.security;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.web.jwt.JwtHttpSecuritySource;
-import net.officefloor.web.openapi.OpenApiSecurityExtension;
 import net.officefloor.web.security.scheme.BasicHttpSecuritySource;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 

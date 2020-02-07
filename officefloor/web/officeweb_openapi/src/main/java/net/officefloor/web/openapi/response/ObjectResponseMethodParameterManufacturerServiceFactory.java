@@ -1,4 +1,4 @@
-package net.officefloor.web.openapi;
+package net.officefloor.web.openapi.response;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;

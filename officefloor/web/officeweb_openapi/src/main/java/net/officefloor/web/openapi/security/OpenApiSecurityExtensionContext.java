@@ -1,4 +1,4 @@
-package net.officefloor.web.openapi;
+package net.officefloor.web.openapi.security;
 
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import net.officefloor.web.security.build.HttpSecurityExplorerContext;

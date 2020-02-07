@@ -3,9 +3,6 @@ package net.officefloor.web.openapi.security;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.security.SecurityScheme.Type;
 import net.officefloor.frame.api.source.ServiceContext;
-import net.officefloor.web.openapi.OpenApiSecurityExtension;
-import net.officefloor.web.openapi.OpenApiSecurityExtensionContext;
-import net.officefloor.web.openapi.OpenApiSecurityExtensionServiceFactory;
 import net.officefloor.web.spi.security.HttpSecuritySource;
 
 /**

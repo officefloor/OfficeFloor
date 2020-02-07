@@ -1,4 +1,4 @@
-package net.officefloor.web.openapi;
+package net.officefloor.web.openapi.response;
 
 import net.officefloor.web.HttpResponse;
 import net.officefloor.web.ObjectResponse;

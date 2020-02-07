@@ -1,4 +1,4 @@
-package net.officefloor.web.openapi;
+package net.officefloor.web.openapi.security;
 
 import net.officefloor.frame.api.source.ServiceFactory;
 
