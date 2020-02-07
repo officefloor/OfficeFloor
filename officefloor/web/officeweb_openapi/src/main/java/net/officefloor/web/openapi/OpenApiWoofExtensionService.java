@@ -1,9 +1,9 @@
 package net.officefloor.web.openapi;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +30,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
@@ -50,6 +51,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.source.PrivateSource;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.server.http.HttpResponse;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
@@ -66,19 +68,21 @@ import net.officefloor.web.build.HttpValueLocation;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
+import net.officefloor.web.security.build.HttpSecurityExplorerContext;
 import net.officefloor.web.spi.security.HttpSecurity;
 import net.officefloor.web.value.load.ValueLoaderFactory;
 import net.officefloor.web.value.load.ValueLoaderSource;
 import net.officefloor.web.value.load.ValueName;
 import net.officefloor.woof.WoofContext;
 import net.officefloor.woof.WoofExtensionService;
+import net.officefloor.woof.WoofExtensionServiceFactory;
 
 /**
  * {@link WoofExtensionService} to configure OpenAPI specification.
  * 
  * @author Daniel Sagenschneider
  */
-public class OpenApiWoofExtensionService implements WoofExtensionService {
+public class OpenApiWoofExtensionService implements WoofExtensionService, WoofExtensionServiceFactory {
 
 	/**
 	 * Name to link the JSON servicing.
@@ -95,6 +99,11 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 	 */
 
 	@Override
+	public WoofExtensionService createService(ServiceContext context) throws Throwable {
+		return this;
+	}
+
+	@Override
 	public void extend(WoofContext context) throws Exception {
 
 		final String JSON_PATH = "/openapi.json";
@@ -103,13 +112,6 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 
 		// Obtain the web architect
 		WebArchitect web = context.getWebArchitect();
-
-		// Explore HTTP security
-		HttpSecurityArchitect security = context.getHttpSecurityArchitect();
-		List<String> allHttpSecurityNames = new LinkedList<>();
-		security.addHttpSecurityExplorer((explore) -> {
-			allHttpSecurityNames.add(explore.getHttpSecurityName());
-		});
 
 		// Create the root
 		OpenAPI openApi = new OpenAPI();
@@ -123,6 +125,34 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 			}
 			return components;
 		};
+
+		// Load the security extensions
+		List<OpenApiSecurityExtension> securityExtensions = new ArrayList<>();
+		for (OpenApiSecurityExtension extension : context.getOfficeExtensionContext()
+				.loadOptionalServices(OpenApiSecurityExtensionServiceFactory.class)) {
+			securityExtensions.add(extension);
+		}
+
+		// Explore HTTP security loading security schemes
+		HttpSecurityArchitect security = context.getHttpSecurityArchitect();
+		Set<String> allHttpSecurityNames = new HashSet<>();
+		security.addHttpSecurityExplorer((explore) -> {
+			for (OpenApiSecurityExtension extension : securityExtensions) {
+				extension.extend(new OpenApiSecurityExtensionContext() {
+
+					@Override
+					public HttpSecurityExplorerContext getHttpSecurity() {
+						return explore;
+					}
+
+					@Override
+					public void addSecurityScheme(String securityName, SecurityScheme scheme) {
+						getComponents.get().addSecuritySchemes(securityName, scheme);
+						allHttpSecurityNames.add(securityName);
+					}
+				});
+			}
+		});
 
 		// Provide the paths
 		Paths paths = new Paths();
@@ -178,8 +208,8 @@ public class OpenApiWoofExtensionService implements WoofExtensionService {
 			HttpObjectResponderFactory[] objectResponderFactories = explore.getHttpObjectResponderFactories();
 
 			// Obtain all the HTTP security names
-			allHttpSecurityNames.sort(String.CASE_INSENSITIVE_ORDER);
 			String[] httpSecurityNames = allHttpSecurityNames.toArray(new String[allHttpSecurityNames.size()]);
+			Arrays.sort(httpSecurityNames, String.CASE_INSENSITIVE_ORDER);
 
 			// Recursive explore graph, loading path specification
 			ExecutionManagedFunction managedFunction = explore.getInitialManagedFunction();
