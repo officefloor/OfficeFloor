@@ -61,7 +61,9 @@ public class Viewer extends Application {
 	public static void main(String[] args) throws Exception {
 
 		// Obtain the arguments (ensuring path specified)
-		String[] runArgs = (args.length == 0) ? new String[] { WoofLoaderSettings.APPLICATION_WOOF } : args;
+		String[] runArgs = (args.length == 0)
+				? new String[] { WoofLoaderSettings.getWoofLoaderConfiguration().getApplicationWoofPath() }
+				: args;
 
 		// Run the application (using the provided class loader)
 		launch(runArgs);
@@ -136,7 +138,7 @@ public class Viewer extends Application {
 		stage.setWidth(1600);
 		stage.setHeight(1200);
 		stage.show();
-		
+
 		// Activate
 		this.domain.activate();
 	}
