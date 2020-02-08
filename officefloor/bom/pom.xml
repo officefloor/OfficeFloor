@@ -89,7 +89,7 @@
 		<objectify-version>6.0.6</objectify-version>
 		<postgresql-version>42.2.9</postgresql-version>
 		<r2dbc-version>Arabba-RELEASE</r2dbc-version>
-		<reactor-version>Bismuth-RELEASE</reactor-version>
+		<reactor-version>Dysprosium-SR4</reactor-version>
 		<scala-maven-version>4.0.2</scala-maven-version>
 		<scala-version>2.12.8</scala-version>
 		<scalacheck-version>1.14.3</scalacheck-version>
