@@ -3,6 +3,8 @@ package net.officefloor.web.openapi;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
@@ -16,6 +18,8 @@ import io.swagger.v3.oas.models.parameters.PathParameter;
 import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.SecurityScheme.Type;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -45,6 +49,9 @@ import net.officefloor.web.build.HttpObjectResponderFactory;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.compile.CompileWebExtension;
 import net.officefloor.web.jwt.JwtHttpSecuritySource;
+import net.officefloor.web.openapi.operation.OpenApiOperationBuilder;
+import net.officefloor.web.openapi.operation.OpenApiOperationContext;
+import net.officefloor.web.openapi.operation.OpenApiOperationFunctionContext;
 import net.officefloor.web.security.HttpAccess;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityBuilder;
@@ -576,7 +583,29 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	 * Ensure able to extend {@link Operation}.
 	 */
 	public void testExtendOperation() throws Exception {
-		fail("TODO implement");
+		try {
+			MockOpenApiOperationExtension.operationBuilder = new MockOperationBuilder();
+			this.doOpenApiTest((context) -> {
+				context.link(false, "/path", NoOpService.class);
+			});
+		} finally {
+			MockOpenApiOperationExtension.operationBuilder = null;
+		}
+	}
+
+	private static class MockOperationBuilder implements OpenApiOperationBuilder {
+
+		@Override
+		public void buildInManagedFunction(OpenApiOperationFunctionContext context) throws Exception {
+			context.getOrAddSecurityRequirement("EXTEND");
+		}
+
+		@Override
+		public void buildComplete(OpenApiOperationContext context) throws Exception {
+			Map<String, SecurityScheme> securities = new HashMap<>();
+			securities.put("EXTEND", new SecurityScheme().type(Type.HTTP).scheme("extend"));
+			context.getComponents().setSecuritySchemes(securities);
+		}
 	}
 
 	/**

@@ -241,6 +241,15 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 			}
 		});
 
+		// Provide completion
+		office.addOfficeCompletionExplorer(() -> {
+			for (OperationBuilder operationBuilder : operationBuilders) {
+				for (OpenApiOperationBuilder builder : operationBuilder.builders) {
+					builder.buildComplete(operationBuilder.builderContext);
+				}
+			}
+		});
+
 		// Serve up the Open API
 		OfficeSection service = office.addOfficeSection("OPEN_API", new OpenApiSectionSource(openApi), null);
 

@@ -25,16 +25,26 @@ public class ExecutionOrderTest extends OfficeFrameTestCase {
 		Closure<Boolean> isObjectsExplored = new Closure<>(false);
 		Closure<Boolean> isFunctionsExplored = new Closure<>(false);
 		Closure<Boolean> isEscalationsExplored = new Closure<>(false);
+		Closure<Boolean> isCompletionExplored = new Closure<>(false);
 		compiler.office((context) -> {
 			// Add out of order to confirm order
 			OfficeArchitect office = context.getOfficeArchitect();
 
-			// Add escalation (to be last)
+			// Add completion
+			office.addOfficeCompletionExplorer(() -> {
+				assertTrue("Objects explored before complete", isObjectsExplored.value);
+				assertTrue("Functions explore before complete", isFunctionsExplored.value);
+				assertFalse("Escalations explore before complete", isCompletionExplored.value);
+				isCompletionExplored.value = true;
+			});
+
+			// Add escalation (to be third)
 			OfficeEscalation escalation = office.addOfficeEscalation(Exception.class.getName());
 			office.link(escalation, context.addSection("HANDLER", MockSection.class).getOfficeSectionInput("service"));
 			office.addOfficeEscalationExplorer((explore) -> {
 				assertTrue("Objects explored before escalations", isObjectsExplored.value);
 				assertTrue("Functions explore before escalations", isFunctionsExplored.value);
+				assertFalse("Copmletion explore after escalations", isCompletionExplored.value);
 				isEscalationsExplored.value = true;
 			});
 
@@ -43,6 +53,7 @@ public class ExecutionOrderTest extends OfficeFrameTestCase {
 			managedObject.addExecutionExplorer((explore) -> {
 				assertFalse("Functions explored after objects", isFunctionsExplored.value);
 				assertFalse("Escalations explored after objects", isEscalationsExplored.value);
+				assertFalse("Copmletion explore after objects", isCompletionExplored.value);
 				isObjectsExplored.value = true;
 			});
 
@@ -51,12 +62,13 @@ public class ExecutionOrderTest extends OfficeFrameTestCase {
 			input.addExecutionExplorer((explore) -> {
 				assertTrue("Objects explored before functions", isObjectsExplored.value);
 				assertFalse("Escalations explored after functions", isEscalationsExplored.value);
+				assertFalse("Copmletion explore after functions", isCompletionExplored.value);
 				isFunctionsExplored.value = true;
 			});
 		});
 		try (OfficeFloor officeFloor = compiler.compileAndOpenOfficeFloor()) {
-			assertTrue("Should execute escalations (and subsequently objects and functions)",
-					isEscalationsExplored.value);
+			assertTrue("Should execute completion (and subsequently objects, functions and escalations)",
+					isCompletionExplored.value);
 		}
 	}
 

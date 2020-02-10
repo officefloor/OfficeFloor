@@ -83,6 +83,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.AugmentedFunctionObject;
+import net.officefloor.compile.spi.office.CompletionExplorer;
 import net.officefloor.compile.spi.office.EscalationExplorer;
 import net.officefloor.compile.spi.office.EscalationExplorerContext;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
@@ -262,6 +263,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	 * {@link EscalationExplorer} instances.
 	 */
 	private final List<EscalationExplorer> escalationExplorers = new LinkedList<>();
+
+	/**
+	 * {@link CompletionExplorer} instances.
+	 */
+	private final List<CompletionExplorer> completionExplorers = new LinkedList<>();
 
 	/**
 	 * {@link OfficeStartNode} instances by their {@link OfficeStart} name.
@@ -1026,8 +1032,22 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 					return true;
 				});
 
+		// Run explorers for completion
+		boolean isCompletionExplored = this.completionExplorers.stream().allMatch((explorer) -> {
+
+			// Explore the completion
+			try {
+				explorer.complete();
+			} catch (Throwable ex) {
+				this.context.getCompilerIssues().addIssue(this, "Failed in exploring completion", ex);
+			}
+
+			// As here, successfully explored
+			return true;
+		});
+
 		// Indicate successfully run explorers
-		return isObjectsExplored && isSectionsExplored && isEscalationsExplored;
+		return isObjectsExplored && isSectionsExplored && isEscalationsExplored && isCompletionExplored;
 	}
 
 	@Override
@@ -1354,6 +1374,11 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	@Override
 	public void addOfficeEscalationExplorer(EscalationExplorer escalationExplorer) {
 		this.escalationExplorers.add(escalationExplorer);
+	}
+
+	@Override
+	public void addOfficeCompletionExplorer(CompletionExplorer completionExplorer) {
+		this.completionExplorers.add(completionExplorer);
 	}
 
 	@Override

@@ -251,6 +251,14 @@ public interface OfficeArchitect extends SourceIssues {
 	void addOfficeEscalationExplorer(EscalationExplorer escalationExplorer);
 
 	/**
+	 * Adds a {@link CompletionExplorer} to be notified of completion of exploring
+	 * the execution tree.
+	 * 
+	 * @param completionExplorer {@link CompletionExplorer}.
+	 */
+	void addOfficeCompletionExplorer(CompletionExplorer completionExplorer);
+
+	/**
 	 * Adds an {@link OfficeStart}.
 	 * 
 	 * @param startName Name of the {@link OfficeStart}.
