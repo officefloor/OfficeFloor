@@ -532,7 +532,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 			OfficeArchitect office = context.getOfficeArchitect();
 			WebArchitect web = context.getWebArchitect();
 			OfficeSection section = context.addSection("SECTION", SecuritySection.class);
-			for (String service : new String[] { "basic", "jwt", "both", "insecure" }) {
+			for (String service : new String[] { "basic", "jwt", "claims", "both", "insecure" }) {
 				office.link(web.getHttpInput(false, "/" + service).getInput(), section.getOfficeSectionInput(service));
 			}
 		});
@@ -555,6 +555,10 @@ public class OpenApiTest extends OfficeFrameTestCase {
 
 		@HttpAccess(withHttpSecurity = "JWT")
 		public void jwt() {
+			// no operation
+		}
+
+		public void claims(Claims claims) {
 			// no operation
 		}
 

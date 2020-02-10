@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
@@ -88,6 +89,13 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 			securityExtensions.add(extension);
 		}
 
+		// Load the operation extensions
+		List<OpenApiOperationExtension> operationExtensions = new ArrayList<>();
+		for (OpenApiOperationExtension extension : context.getOfficeExtensionContext()
+				.loadOptionalServices(OpenApiOperationExtensionServiceFactory.class)) {
+			operationExtensions.add(extension);
+		}
+
 		// Explore HTTP security loading security schemes
 		HttpSecurityArchitect security = context.getHttpSecurityArchitect();
 		Set<String> allHttpSecurityNames = new HashSet<>();
@@ -105,19 +113,17 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 						getComponents(openApi).addSecuritySchemes(securityName, scheme);
 						allHttpSecurityNames.add(securityName);
 					}
+
+					@Override
+					public void addOperationExtension(OpenApiOperationExtension extension) {
+						operationExtensions.add(extension);
+					}
 				});
 			}
 		});
 
-		// Create the default operation builder
-		OpenApiOperationBuilder defaultOperationBuilder = new DefaultOpenApiOperationBuilder();
-
-		// Load the operation extensions
-		List<OpenApiOperationExtension> operationExtensions = new ArrayList<>();
-		for (OpenApiOperationExtension extension : context.getOfficeExtensionContext()
-				.loadOptionalServices(OpenApiOperationExtensionServiceFactory.class)) {
-			operationExtensions.add(extension);
-		}
+		// Listing of operation builders
+		List<OperationBuilder> operationBuilders = new ArrayList<>();
 
 		// Provide the paths
 		Paths paths = new Paths();
@@ -177,6 +183,9 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 			OpenApiOperationContextImpl builderContext = new OpenApiOperationContextImpl(explore, openApi, path,
 					operation, httpSecurityNames);
 
+			// Create the default operation builder
+			DefaultOpenApiOperationBuilder defaultOperationBuilder = new DefaultOpenApiOperationBuilder();
+
 			// Create the builders (default always first)
 			List<OpenApiOperationBuilder> builders = new ArrayList<>();
 			builders.add(defaultOperationBuilder);
@@ -187,14 +196,52 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 				}
 			}
 
+			// Create and register the operation builder
+			OperationBuilder operationBuilder = new OperationBuilder(defaultOperationBuilder, builderContext,
+					builders.toArray(new OpenApiOperationBuilder[builders.size()]));
+			operationBuilders.add(operationBuilder);
+
 			// Recursive explore graph, loading path specification
 			ExecutionManagedFunction managedFunction = explore.getInitialManagedFunction();
-			this.recursiveLoadManagedFunction(managedFunction,
-					builders.toArray(new OpenApiOperationBuilder[builders.size()]), builderContext, new HashSet<>());
+			this.recursiveLoadManagedFunction(managedFunction, operationBuilder, new HashSet<>());
+		});
+
+		// Provide additional exception handling information
+		OfficeArchitect office = context.getOfficeArchitect();
+		office.addOfficeEscalationExplorer((explore) -> {
+
+			// Obtain the escalation class
+			String escalationType = explore.getOfficeEscalationType();
+			Class<?> escalationClass = context.getOfficeExtensionContext().loadClass(escalationType);
+
+			// Determine if operation builder requires escalation
+			for (OperationBuilder operationBuilder : operationBuilders) {
+
+				// Determine if load escalation
+				boolean isLoadEscalation = false;
+				if ((RuntimeException.class.isAssignableFrom(escalationClass))
+						|| (Error.class.isAssignableFrom(escalationClass))) {
+					isLoadEscalation = true; // unchecked, so always include
+				} else {
+					// Determine if unhandled escalation
+					INCLUDED: for (Class<?> unhandledEscalationType : operationBuilder.defaultOperationBuilder
+							.getUnhandledEsclationTypes()) {
+						if (escalationClass.isAssignableFrom(unhandledEscalationType)) {
+							isLoadEscalation = true;
+							break INCLUDED;
+						}
+					}
+				}
+
+				// Load escalation (if include)
+				if (isLoadEscalation) {
+					ExecutionManagedFunction managedFunction = explore.getInitialManagedFunction();
+					this.recursiveLoadManagedFunction(managedFunction, operationBuilder, new HashSet<>());
+				}
+			}
 		});
 
 		// Serve up the Open API
-		OfficeArchitect office = context.getOfficeArchitect();
 		OfficeSection service = office.addOfficeSection("OPEN_API", new OpenApiSectionSource(openApi), null);
 
 		// Serve the JSON
@@ -217,8 +264,7 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 	 * @throws Exception If fails to load graph.
 	 */
 	private void recursiveLoadManagedFunction(ExecutionManagedFunction managedFunction,
-			OpenApiOperationBuilder[] builders, OpenApiOperationContextImpl builderContext, Set<String> visited)
-			throws Exception {
+			OperationBuilder operationBuilder, Set<String> visited) throws Exception {
 
 		// Determine if already visited
 		String name = managedFunction.getManagedFunctionName();
@@ -228,25 +274,70 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 		visited.add(name); // now visiting
 
 		// Load the managed function
-		builderContext.managedFunction = managedFunction;
-		for (OpenApiOperationBuilder builder : builders) {
-			builder.buildInManagedFunction(builderContext);
-		}
+		operationBuilder.buildInManagedObject(managedFunction);
 
 		// Recursively explore rest of graph
 		ManagedFunctionType<?, ?> type = managedFunction.getManagedFunctionType();
 		for (ManagedFunctionFlowType<?> flowType : type.getFlowTypes()) {
 			ExecutionManagedFunction flowManagedFunction = managedFunction.getManagedFunction(flowType);
-			this.recursiveLoadManagedFunction(flowManagedFunction, builders, builderContext, visited);
+			this.recursiveLoadManagedFunction(flowManagedFunction, operationBuilder, visited);
 		}
 		ExecutionManagedFunction nextManagedFunction = managedFunction.getNextManagedFunction();
 		if (nextManagedFunction != null) {
-			this.recursiveLoadManagedFunction(nextManagedFunction, builders, builderContext, visited);
+			this.recursiveLoadManagedFunction(nextManagedFunction, operationBuilder, visited);
 		}
 		for (ManagedFunctionEscalationType escalationType : type.getEscalationTypes()) {
 			ExecutionManagedFunction escalateManagedFunction = managedFunction.getManagedFunction(escalationType);
 			if (escalateManagedFunction != null) {
-				this.recursiveLoadManagedFunction(escalateManagedFunction, builders, builderContext, visited);
+				this.recursiveLoadManagedFunction(escalateManagedFunction, operationBuilder, visited);
+			}
+		}
+	}
+
+	/**
+	 * Builds the {@link Operation}.
+	 */
+	private static class OperationBuilder {
+
+		/**
+		 * Default {@link OpenApiOperationBuilder}.
+		 */
+		private final DefaultOpenApiOperationBuilder defaultOperationBuilder;
+
+		/**
+		 * {@link OpenApiOperationContextImpl}.
+		 */
+		private final OpenApiOperationContextImpl builderContext;
+
+		/**
+		 * {@link OpenApiOperationBuilder}
+		 */
+		private final OpenApiOperationBuilder[] builders;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param defaultOperationBuilder {@link DefaultOpenApiOperationBuilder}.
+		 * @param builderContext          {@link OpenApiOperationContextImpl}.
+		 * @param builders                {@link OpenApiOperationBuilder} instances.
+		 */
+		private OperationBuilder(DefaultOpenApiOperationBuilder defaultOperationBuilder,
+				OpenApiOperationContextImpl builderContext, OpenApiOperationBuilder[] builders) {
+			this.defaultOperationBuilder = defaultOperationBuilder;
+			this.builderContext = builderContext;
+			this.builders = builders;
+		}
+
+		/**
+		 * Builds in the {@link ExecutionManagedFunction}.
+		 * 
+		 * @param managedFunction {@link ExecutionManagedFunction}.
+		 * @throws Exception If fails to build in {@link ExecutionManagedFunction}.
+		 */
+		private void buildInManagedObject(ExecutionManagedFunction managedFunction) throws Exception {
+			builderContext.managedFunction = managedFunction;
+			for (OpenApiOperationBuilder builder : builders) {
+				builder.buildInManagedFunction(builderContext);
 			}
 		}
 	}
@@ -351,6 +442,30 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 
 			// As here, parameter not exist
 			return null;
+		}
+
+		@Override
+		public SecurityRequirement getOrAddSecurityRequirement(String securityName) {
+
+			// Ensure have security list
+			List<SecurityRequirement> requirements = this.operation.getSecurity();
+			if (requirements == null) {
+				requirements = new ArrayList<>();
+				this.operation.setSecurity(requirements);
+			}
+
+			// Search for requirement
+			for (SecurityRequirement requirement : requirements) {
+				if (requirement.containsKey(securityName)) {
+					return requirement;
+				}
+			}
+
+			// As here, security requirement not exist, so add and return
+			SecurityRequirement requirement = new SecurityRequirement();
+			requirement.put(securityName, new ArrayList<>());
+			this.operation.addSecurityItem(requirement);
+			return requirement;
 		}
 
 		@Override

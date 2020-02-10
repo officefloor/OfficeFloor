@@ -15,6 +15,13 @@
 				}]
 			}
 		},
+		"/claims": {
+			"get": {
+				"security": [{
+					"JWT": []
+				}]
+			}
+		},
 		"/both": {
 			"get": {
 				"security": [{

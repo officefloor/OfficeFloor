@@ -5,7 +5,7 @@
 			"get": {
 				"parameters": [
 					{
-						"name": "SQLException",
+						"name": "Error",
 						"in": "query",
 						"schema": {
 							"type": "string"
@@ -19,14 +19,14 @@
 						}
 					},
 					{
-						"name": "Error",
+						"name": "Throwable",
 						"in": "query",
 						"schema": {
 							"type": "string"
 						}
 					},
 					{
-						"name": "Throwable",
+						"name": "SQLException",
 						"in": "query",
 						"schema": {
 							"type": "string"

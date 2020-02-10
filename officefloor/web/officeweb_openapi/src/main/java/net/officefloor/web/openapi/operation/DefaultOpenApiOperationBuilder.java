@@ -2,6 +2,8 @@ package net.officefloor.web.openapi.operation;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import io.swagger.v3.core.converter.ModelConverters;
@@ -18,10 +20,12 @@ import io.swagger.v3.oas.models.parameters.QueryParameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpCookieParameter;
 import net.officefloor.web.HttpHeaderParameter;
@@ -46,6 +50,20 @@ import net.officefloor.web.value.load.ValueName;
  */
 public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 
+	/**
+	 * Listing of unhandled {@link Escalation} types.
+	 */
+	private final List<Class<?>> unhandledEscalations = new LinkedList<>();
+
+	/**
+	 * Obtains the listing of unhandled {@link Escalation} types.
+	 * 
+	 * @return Listing of unhandled {@link Escalation} types.
+	 */
+	public Class<?>[] getUnhandledEsclationTypes() {
+		return this.unhandledEscalations.toArray(new Class[this.unhandledEscalations.size()]);
+	}
+
 	/*
 	 * ================== OpenApiOperationBuilder ========================
 	 */
@@ -54,7 +72,8 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 	public void buildInManagedFunction(OpenApiOperationFunctionContext context) throws Exception {
 
 		// Obtain the type
-		ManagedFunctionType<?, ?> type = context.getManagedFunction().getManagedFunctionType();
+		ExecutionManagedFunction managedFunction = context.getManagedFunction();
+		ManagedFunctionType<?, ?> type = managedFunction.getManagedFunctionType();
 
 		// Obtain the operation
 		Operation operation = context.getOperation();
@@ -67,11 +86,11 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 			String httpSecurityName = httpAccess.withHttpSecurity();
 			if (!CompileUtil.isBlank(httpSecurityName)) {
 				// Must use specific security
-				operation.addSecurityItem(new SecurityRequirement().addList(httpSecurityName));
+				context.getOrAddSecurityRequirement(httpSecurityName);
 			} else {
 				// Any security provides access
 				for (String securityName : context.getAllSecurityNames()) {
-					operation.addSecurityItem(new SecurityRequirement().addList(securityName));
+					context.getOrAddSecurityRequirement(securityName);
 				}
 			}
 		}
@@ -252,6 +271,15 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 					resolvedSchema.referencedSchemas
 							.forEach((key, schema) -> context.getComponents().addSchemas(key, schema));
 				}
+			}
+		}
+
+		// Determine if escalated exception (no handler managed function)
+		for (ManagedFunctionEscalationType escalationType : type.getEscalationTypes()) {
+			if (managedFunction.getManagedFunction(escalationType) == null) {
+
+				// Add unhandled escalation
+				this.unhandledEscalations.add(escalationType.getEscalationType());
 			}
 		}
 	}
