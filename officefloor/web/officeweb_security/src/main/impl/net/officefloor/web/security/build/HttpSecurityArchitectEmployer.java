@@ -914,6 +914,7 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 
 			// Provide the supporting managed objects
 			Map<HttpSecuritySupportingManagedObjectType, OfficeManagedObject> dependencies = new HashMap<>();
+			Map<Class<?>, List<OfficeManagedObject>> supportingByType = new HashMap<>();
 			for (HttpSecuritySupportingManagedObjectType supportingManagedObjectType : this.type
 					.getSupportingManagedObjectTypes()) {
 
@@ -929,13 +930,28 @@ public class HttpSecurityArchitectEmployer implements HttpSecurityArchitect {
 				OfficeManagedObject supportingManagedObject = supportingManagedObjectSource
 						.addOfficeManagedObject(supportingManagedObjectName, supportingManagedObjectScope);
 				if (isRequireTypeQualification) {
-					supportingManagedObject.addTypeQualification(this.name,
-							supportingManagedObjectType.getObjectType().getName());
+					Class<?> objectType = supportingManagedObjectType.getObjectType();
+					supportingManagedObject.addTypeQualification(this.name, objectType.getName());
+
+					// Register for unique
+					List<OfficeManagedObject> supporting = supportingByType.get(objectType);
+					if (supporting == null) {
+						supporting = new LinkedList<>();
+						supportingByType.put(objectType, supporting);
+					}
+					supporting.add(supportingManagedObject);
 				}
 
 				// Register the dependency
 				dependencies.put(supportingManagedObjectType, supportingManagedObject);
 			}
+
+			// Unique supporting managed objects loaded without type qualification
+			supportingByType.forEach((objectType, supporting) -> {
+				if (supporting.size() == 1) {
+					supporting.get(0).addTypeQualification(null, objectType.getName());
+				}
+			});
 
 			// Create the dependency context
 			HttpSecuritySupportingManagedObjectDependencyContext dependencyContext = new HttpSecuritySupportingManagedObjectDependencyContext() {
