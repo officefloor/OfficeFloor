@@ -3,6 +3,7 @@
 	"paths": {
 		"/path": {
 			"get": {
+				"summary": "TEST DESCRIPTION",
 				"description": "TEST DESCRIPTION"
 			}
 		}

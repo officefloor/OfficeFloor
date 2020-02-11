@@ -59,4 +59,11 @@ public interface HttpInputExplorerContext extends ExecutionExplorerContext {
 	 */
 	HttpObjectResponderFactory[] getHttpObjectResponderFactories();
 
+	/**
+	 * Obtains the documentation describing the {@link HttpInput}.
+	 * 
+	 * @return Documentation describing the {@link HttpInput}.
+	 */
+	String getDocumentation();
+
 }

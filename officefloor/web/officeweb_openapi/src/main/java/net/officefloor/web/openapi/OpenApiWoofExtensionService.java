@@ -184,7 +184,7 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 					operation, httpSecurityNames);
 
 			// Create the default operation builder
-			DefaultOpenApiOperationBuilder defaultOperationBuilder = new DefaultOpenApiOperationBuilder();
+			DefaultOpenApiOperationBuilder defaultOperationBuilder = new DefaultOpenApiOperationBuilder(builderContext);
 
 			// Create the builders (default always first)
 			List<OpenApiOperationBuilder> builders = new ArrayList<>();

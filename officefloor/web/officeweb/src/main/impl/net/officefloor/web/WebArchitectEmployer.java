@@ -775,6 +775,11 @@ public class WebArchitectEmployer implements WebArchitect {
 										new HttpObjectResponderFactory[employer.objectResponderFactories.size()]);
 							}
 						}
+
+						@Override
+						public String getDocumentation() {
+							return input.documentation;
+						}
 					});
 				}
 			});
@@ -878,6 +883,11 @@ public class WebArchitectEmployer implements WebArchitect {
 		private final OfficeFlowSourceNode input;
 
 		/**
+		 * Documentation.
+		 */
+		private String documentation = null;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param isSecure        Indicates if secure.
@@ -906,6 +916,11 @@ public class WebArchitectEmployer implements WebArchitect {
 		@Override
 		public OfficeFlowSourceNode getInput() {
 			return this.input;
+		}
+
+		@Override
+		public void setDocumentation(String documentation) {
+			this.documentation = documentation;
 		}
 	}
 

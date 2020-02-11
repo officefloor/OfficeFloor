@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import io.swagger.v3.core.converter.ModelConverters;
@@ -62,6 +63,32 @@ public class DefaultOpenApiOperationBuilder implements OpenApiOperationBuilder {
 	 */
 	public Class<?>[] getUnhandledEsclationTypes() {
 		return this.unhandledEscalations.toArray(new Class[this.unhandledEscalations.size()]);
+	}
+
+	/**
+	 * Instantiate.
+	 * 
+	 * @param context {@link OpenApiOperationContext}.
+	 */
+	public DefaultOpenApiOperationBuilder(OpenApiOperationContext context) {
+
+		// Provide possible description
+		String description = context.getHttpInput().getDocumentation();
+		if ((description != null) && (description.trim().length() > 0)) {
+
+			// Determine summary
+			int sentenceDelimit = description.indexOf('.');
+			int newLineDelimit = description.indexOf('\n');
+			Function<Integer, Integer> handleNotFound = (position) -> position < 0 ? Integer.MAX_VALUE : position;
+			int delimit = Math.min(handleNotFound.apply(sentenceDelimit), handleNotFound.apply(newLineDelimit));
+			int summaryLength = Math.min(description.length(), delimit);
+			String summary = description.substring(0, summaryLength);
+
+			// Provide description
+			Operation operation = context.getOperation();
+			operation.setSummary(summary);
+			operation.setDescription(description);
+		}
 	}
 
 	/*

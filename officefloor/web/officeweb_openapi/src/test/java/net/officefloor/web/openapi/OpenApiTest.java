@@ -41,7 +41,6 @@ import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.HttpResponse;
 import net.officefloor.web.ObjectResponse;
-import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.HttpObjectParser;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectResponder;
@@ -93,10 +92,27 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to provide path description.
 	 */
-	public void testPathDescription() {
+	public void testDescription() {
 		this.doOpenApiTest((context) -> {
-			HttpInput input = context.link(false, "/path", NoOpService.class);
-			// input.setDocumentation("TEST DESCRIPTION");
+			context.link(false, "/path", NoOpService.class).setDocumentation("TEST DESCRIPTION");
+		});
+	}
+
+	/**
+	 * Ensure able to extract path summary by newline.
+	 */
+	public void testSummaryByNewLine() {
+		this.doOpenApiTest((context) -> {
+			context.link(false, "/path", NoOpService.class).setDocumentation("TEST\n Not summary. DESCRIPTION");
+		});
+	}
+
+	/**
+	 * Ensure able to extract path summary by period.
+	 */
+	public void testSummaryByPeriod() {
+		this.doOpenApiTest((context) -> {
+			context.link(false, "/path", NoOpService.class).setDocumentation("TEST. Not summary\n DESCRIPTION");
 		});
 	}
 

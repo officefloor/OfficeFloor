@@ -1391,8 +1391,10 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		this.compile.web((context) -> {
 
 			// Provide some inputs to explore
-			context.link(false, "/one", HttpInputExploreOneSection.class);
-			context.link(true, "POST", "/two", HttpInputExploreTwoSection.class);
+			context.link(false, "/one", HttpInputExploreOneSection.class)
+					.setDocumentation("HTTP Continuation description");
+			context.link(true, "POST", "/two", HttpInputExploreTwoSection.class)
+					.setDocumentation("HTTP Input description");
 
 			// Capture exploring
 			context.getWebArchitect().addHttpInputExplorer((explore) -> {
@@ -1409,9 +1411,9 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure each input is able to be explored
 		this.assertExploredHttpInput(inputs.get("/one"), false, HttpMethod.GET, "/one", "GET_/one.service",
-				String.class);
+				String.class, "HTTP Continuation description");
 		this.assertExploredHttpInput(inputs.get("/two"), true, HttpMethod.POST, "/two", "POST_/two.service",
-				Integer.class);
+				Integer.class, "HTTP Input description");
 		assertEquals("Should only be two inputs", 2, inputs.size());
 
 		// Ensure correct factories
@@ -1423,7 +1425,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 	}
 
 	private void assertExploredHttpInput(HttpInputExplorerContext context, boolean isSecure, HttpMethod httpMethod,
-			String routePath, String functionName, Class<?> objectType) {
+			String routePath, String functionName, Class<?> objectType, String documentation) {
 		String suffix = " (" + routePath + ")";
 		assertNotNull("No input explored" + suffix, context);
 		assertEquals("Incorrect secure" + suffix, isSecure, context.isSecure());
@@ -1436,6 +1438,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect function name" + suffix, functionName, function.getManagedFunctionName());
 		assertEquals("Incorrect object type" + suffix, objectType,
 				function.getManagedFunctionType().getObjectTypes()[1].getObjectType());
+		assertEquals("Incorrect documentation" + suffix, documentation, context.getDocumentation());
 	}
 
 	public static class HttpInputExploreOneSection {
@@ -1473,7 +1476,7 @@ public abstract class AbstractWebArchitectTest extends OfficeFrameTestCase {
 
 		// Ensure correct method
 		assertExploredHttpInput(explorer.value, false, HttpMethod.GET, "/path/{parameter}",
-				"GET_/path/{parameter}.service", String.class);
+				"GET_/path/{parameter}.service", String.class, null);
 	}
 
 	public static class HttpInputWithPathParameterSection {
