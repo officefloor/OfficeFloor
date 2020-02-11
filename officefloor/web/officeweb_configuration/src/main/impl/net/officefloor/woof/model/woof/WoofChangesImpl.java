@@ -723,8 +723,7 @@ public class WoofChangesImpl implements WoofChanges {
 			public void apply() {
 				DocumentationModel documentation = null;
 				if (!CompileUtil.isBlank(description)) {
-					documentation = new DocumentationModel();
-					documentation.setDescription(description);
+					documentation = new DocumentationModel(description);
 				}
 				continuation.setDocumentation(documentation);
 			}
@@ -938,8 +937,7 @@ public class WoofChangesImpl implements WoofChanges {
 			public void apply() {
 				DocumentationModel documentation = null;
 				if (!CompileUtil.isBlank(description)) {
-					documentation = new DocumentationModel();
-					documentation.setDescription(description);
+					documentation = new DocumentationModel(description);
 				}
 				input.setDocumentation(documentation);
 			}
