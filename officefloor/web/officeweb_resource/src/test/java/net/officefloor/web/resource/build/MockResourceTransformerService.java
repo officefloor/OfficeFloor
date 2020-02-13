@@ -42,6 +42,11 @@ import net.officefloor.web.resource.spi.ResourceTransformerService;
 public class MockResourceTransformerService
 		implements ResourceTransformerService, ResourceTransformerFactory, ResourceTransformer {
 
+	/**
+	 * Resource path.
+	 */
+	public String resourcePath = null;
+
 	/*
 	 * ================== ResourceTransformerService ================
 	 */
@@ -71,6 +76,9 @@ public class MockResourceTransformerService
 
 	@Override
 	public void transform(ResourceTransformerContext context) throws IOException {
+
+		// Capture the resource path
+		this.resourcePath = context.getPath();
 
 		// Obtain the resource to transform
 		Path resource = context.getResource();

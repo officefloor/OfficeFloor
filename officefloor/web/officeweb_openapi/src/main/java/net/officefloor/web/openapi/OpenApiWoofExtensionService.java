@@ -1,9 +1,13 @@
 package net.officefloor.web.openapi;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import io.swagger.v3.oas.models.Components;
@@ -32,6 +36,8 @@ import net.officefloor.web.openapi.section.OpenApiSectionSource;
 import net.officefloor.web.openapi.security.OpenApiSecurityExtension;
 import net.officefloor.web.openapi.security.OpenApiSecurityExtensionContext;
 import net.officefloor.web.openapi.security.OpenApiSecurityExtensionServiceFactory;
+import net.officefloor.web.resource.build.HttpResourceArchitect;
+import net.officefloor.web.resource.build.HttpResourcesBuilder;
 import net.officefloor.web.security.build.HttpSecurityArchitect;
 import net.officefloor.web.security.build.HttpSecurityExplorerContext;
 import net.officefloor.woof.WoofContext;
@@ -260,6 +266,39 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 		// Serve the YAML
 		office.link(web.getHttpInput(false, YAML_PATH).getInput(),
 				service.getOfficeSectionInput(OpenApiSectionSource.YAML));
+
+		// Load the verison of Swagger UI
+		String swaggerVersion;
+		try (InputStream swaggerVersionInput = context.getOfficeExtensionContext()
+				.getResource("META-INF/maven/org.webjars.npm/swagger-ui-dist/pom.properties")) {
+			Properties properties = new Properties();
+			properties.load(swaggerVersionInput);
+			swaggerVersion = properties.getProperty("version");
+		}
+
+		// Provide Swagger UI
+		HttpResourceArchitect resource = context.getHttpResourceArchitect();
+		HttpResourcesBuilder swaggerResourcesBuilder = resource
+				.addHttpResources("classpath:META-INF/resources/webjars/swagger-ui-dist/" + swaggerVersion);
+		swaggerResourcesBuilder.setContextPath("/swagger");
+		swaggerResourcesBuilder.addResourceTransformer((transform) -> {
+			// Determine if index.html
+			if (transform.getPath().equals("/index.html")) {
+
+				// Obtain the raw content
+				Path rawIndexHtml = transform.getResource();
+				String rawContent = Files.readString(rawIndexHtml);
+
+				// Provide appropriate URL to OpenApi
+				String applicationContent = rawContent.toString().replace("https://petstore.swagger.io/v2/swagger.json",
+						"/openapi.json");
+
+				// Write the content
+				Path applicationIndexHtml = transform.createFile();
+				Files.writeString(applicationIndexHtml, applicationContent);
+				transform.setTransformedResource(applicationIndexHtml);
+			}
+		});
 	}
 
 	/**

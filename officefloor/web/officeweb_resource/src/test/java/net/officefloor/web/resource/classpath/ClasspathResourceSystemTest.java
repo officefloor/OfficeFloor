@@ -132,8 +132,15 @@ public class ClasspathResourceSystemTest extends AbstractHttpResourceStoreTestCa
 	}
 
 	@Override
-	protected Class<ClasspathResourceSystemService> getResourceSystemService() {
-		return ClasspathResourceSystemService.class;
+	protected Class<DefaultConstructorClasspathResourceSystemFactory> getResourceSystemService() {
+		return DefaultConstructorClasspathResourceSystemFactory.class;
+	}
+
+	public static class DefaultConstructorClasspathResourceSystemFactory extends ClasspathResourceSystemFactory {
+
+		public DefaultConstructorClasspathResourceSystemFactory() {
+			super(Thread.currentThread().getContextClassLoader());
+		}
 	}
 
 }
