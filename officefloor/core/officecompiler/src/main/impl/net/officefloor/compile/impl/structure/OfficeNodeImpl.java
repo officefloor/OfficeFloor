@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
@@ -84,6 +83,10 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.governance.source.GovernanceSource;
 import net.officefloor.compile.spi.office.AugmentedFunctionObject;
+import net.officefloor.compile.spi.office.CompletionExplorer;
+import net.officefloor.compile.spi.office.EscalationExplorer;
+import net.officefloor.compile.spi.office.EscalationExplorerContext;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentor;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeAdministration;
@@ -106,6 +109,7 @@ import net.officefloor.compile.spi.office.OfficeStart;
 import net.officefloor.compile.spi.office.OfficeSupplier;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionServiceFactory;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -254,6 +258,16 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	 * {@link EscalationNode} instances by their {@link OfficeEscalation} type.
 	 */
 	private final Map<String, EscalationNode> escalations = new HashMap<String, EscalationNode>();
+
+	/**
+	 * {@link EscalationExplorer} instances.
+	 */
+	private final List<EscalationExplorer> escalationExplorers = new LinkedList<>();
+
+	/**
+	 * {@link CompletionExplorer} instances.
+	 */
+	private final List<CompletionExplorer> completionExplorers = new LinkedList<>();
 
 	/**
 	 * {@link OfficeStartNode} instances by their {@link OfficeStart} name.
@@ -540,8 +554,8 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 
 		// Obtain the extension services (ensuring all are available)
 		List<OfficeExtensionService> extensionServices = new ArrayList<>();
-		for (OfficeExtensionService extensionService : ServiceLoader.load(OfficeExtensionService.class,
-				context.getClassLoader())) {
+		for (OfficeExtensionService extensionService : context
+				.loadOptionalServices(OfficeExtensionServiceFactory.class)) {
 			extensionServices.add(extensionService);
 		}
 
@@ -946,16 +960,94 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 	@Override
 	public boolean runExecutionExplorers(CompileContext compileContext) {
 
+		// Run explores for objects (in deterministic order)
+		boolean isObjectsExplored = this.managedObjects.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getBoundManagedObjectName(), b.getBoundManagedObjectName()))
+				.allMatch((managedObject) -> managedObject.runExecutionExplorers(compileContext));
+
 		// Create the map of all managed functions
 		Map<String, ManagedFunctionNode> managedFunctions = new HashMap<>();
 		this.sections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
 				.forEachOrdered((section) -> section.loadManagedFunctionNodes(managedFunctions));
 
-		// Run execution explorers for the sections (in deterministic order)
-		return this.sections.values().stream()
+		// Run explorers for the sections (in deterministic order)
+		boolean isSectionsExplored = this.sections.values().stream()
 				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeSectionName(), b.getOfficeSectionName()))
 				.allMatch((section) -> section.runExecutionExplorers(managedFunctions, compileContext));
+
+		// Run explorers for the escalations (in deterministic order)
+		boolean isEscalationsExplored = this.escalations.values().stream()
+				.sorted((a, b) -> CompileUtil.sortCompare(a.getOfficeEscalationType(), b.getOfficeEscalationType()))
+				.allMatch((escalation) -> {
+
+					// Run the execution explorer
+					ExecutionManagedFunction initialFunction = null;
+					for (EscalationExplorer explorer : this.escalationExplorers) {
+
+						// Lazy obtain function servicing this section input
+						if (initialFunction == null) {
+							ManagedFunctionNode functionNode = LinkUtil.retrieveTarget(escalation,
+									ManagedFunctionNode.class, this.context.getCompilerIssues());
+							if (functionNode != null) {
+								initialFunction = functionNode.createExecutionManagedFunction(compileContext);
+							}
+						}
+
+						// Explore from the escalation
+						try {
+							final ExecutionManagedFunction finalInitialFunction = initialFunction;
+							explorer.explore(new EscalationExplorerContext() {
+
+								@Override
+								public String getOfficeEscalationType() {
+									return escalation.getOfficeEscalationType();
+								}
+
+								@Override
+								public ExecutionManagedFunction getManagedFunction(String functionName) {
+
+									// Obtain the managed function node
+									ManagedFunctionNode function = managedFunctions.get(functionName);
+									if (function == null) {
+										return null;
+									}
+
+									// Create and return the execution managed function
+									return function.createExecutionManagedFunction(compileContext);
+								}
+
+								@Override
+								public ExecutionManagedFunction getInitialManagedFunction() {
+									return finalInitialFunction;
+								}
+							});
+						} catch (Throwable ex) {
+							this.context.getCompilerIssues().addIssue(this,
+									"Failure in exploring escalation " + escalation.getOfficeEscalationType(), ex);
+						}
+					}
+
+					// As here, successfully explored
+					return true;
+				});
+
+		// Run explorers for completion
+		boolean isCompletionExplored = this.completionExplorers.stream().allMatch((explorer) -> {
+
+			// Explore the completion
+			try {
+				explorer.complete();
+			} catch (Throwable ex) {
+				this.context.getCompilerIssues().addIssue(this, "Failed in exploring completion", ex);
+			}
+
+			// As here, successfully explored
+			return true;
+		});
+
+		// Indicate successfully run explorers
+		return isObjectsExplored && isSectionsExplored && isEscalationsExplored && isCompletionExplored;
 	}
 
 	@Override
@@ -1277,6 +1369,16 @@ public class OfficeNodeImpl implements OfficeNode, ManagedFunctionVisitor {
 		return NodeUtil.getInitialisedNode(escalationTypeName, this.escalations, this.context,
 				() -> this.context.createEscalationNode(escalationTypeName, this),
 				(escalation) -> escalation.initialise());
+	}
+
+	@Override
+	public void addOfficeEscalationExplorer(EscalationExplorer escalationExplorer) {
+		this.escalationExplorers.add(escalationExplorer);
+	}
+
+	@Override
+	public void addOfficeCompletionExplorer(CompletionExplorer completionExplorer) {
+		this.completionExplorers.add(completionExplorer);
 	}
 
 	@Override

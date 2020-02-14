@@ -21,6 +21,7 @@
 		<module>officeweb</module>
 		<module>officeweb_configuration</module>
 		<module>officeweb_executive</module>
+		<module>officeweb_openapi</module>
 		<module>officeweb_resource</module>
 		<module>officeweb_security</module>
 		<module>officeweb_template</module>

@@ -22,13 +22,16 @@
 package net.officefloor.spring;
 
 import net.officefloor.compile.SupplierSourceService;
+import net.officefloor.compile.SupplierSourceServiceFactory;
+import net.officefloor.frame.api.source.ServiceContext;
 
 /**
  * Spring {@link SupplierSourceService}.
  * 
  * @author Daniel Sagenschneider
  */
-public class SpringSupplierSourceService implements SupplierSourceService<SpringSupplierSource> {
+public class SpringSupplierSourceService
+		implements SupplierSourceService<SpringSupplierSource>, SupplierSourceServiceFactory {
 
 	/**
 	 * Alias name for the {@link SpringSupplierSource}.
@@ -38,6 +41,11 @@ public class SpringSupplierSourceService implements SupplierSourceService<Spring
 	/*
 	 * =================== SupplierSourceService ========================
 	 */
+
+	@Override
+	public SupplierSourceService<?> createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public String getSupplierSourceAlias() {

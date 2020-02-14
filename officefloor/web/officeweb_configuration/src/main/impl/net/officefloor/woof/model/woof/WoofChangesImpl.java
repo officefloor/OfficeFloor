@@ -709,6 +709,33 @@ public class WoofChangesImpl implements WoofChanges {
 	}
 
 	@Override
+	public Change<WoofHttpContinuationModel> addDocumentation(WoofHttpContinuationModel continuation,
+			String description) {
+
+		// Obtain the existing documentation
+		DocumentationModel existingDocumentation = continuation.getDocumentation();
+
+		// Return change to add documentation
+		return new AbstractChange<WoofHttpContinuationModel>(continuation,
+				((existingDocumentation == null ? "Add" : "Change") + " HTTP Continuation Documentation")) {
+
+			@Override
+			public void apply() {
+				DocumentationModel documentation = null;
+				if (!CompileUtil.isBlank(description)) {
+					documentation = new DocumentationModel(description);
+				}
+				continuation.setDocumentation(documentation);
+			}
+
+			@Override
+			public void revert() {
+				continuation.setDocumentation(existingDocumentation);
+			}
+		};
+	}
+
+	@Override
 	public Change<WoofHttpContinuationModel> refactorHttpContinuation(WoofHttpContinuationModel continuation,
 			String applicationPath, boolean isSecure) {
 
@@ -892,6 +919,32 @@ public class WoofChangesImpl implements WoofChanges {
 			@Override
 			public void revert() {
 				WoofChangesImpl.this.model.removeWoofHttpInput(path);
+			}
+		};
+	}
+
+	@Override
+	public Change<WoofHttpInputModel> addDocumentation(WoofHttpInputModel input, String description) {
+
+		// Obtain the existing documentation
+		DocumentationModel existingDocumentation = input.getDocumentation();
+
+		// Return change to add documentation
+		return new AbstractChange<WoofHttpInputModel>(input,
+				((existingDocumentation == null ? "Add" : "Change") + " HTTP Input Documentation")) {
+
+			@Override
+			public void apply() {
+				DocumentationModel documentation = null;
+				if (!CompileUtil.isBlank(description)) {
+					documentation = new DocumentationModel(description);
+				}
+				input.setDocumentation(documentation);
+			}
+
+			@Override
+			public void revert() {
+				input.setDocumentation(existingDocumentation);
 			}
 		};
 	}

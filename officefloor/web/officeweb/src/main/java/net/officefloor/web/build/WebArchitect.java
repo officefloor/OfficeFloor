@@ -22,7 +22,6 @@
 package net.officefloor.web.build;
 
 import java.lang.annotation.Annotation;
-import java.util.ServiceLoader;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
@@ -62,7 +61,7 @@ public abstract interface WebArchitect {
 	 * <p>
 	 * Manually adds a {@link HttpObjectParserFactory}.
 	 * <p>
-	 * Typically these should be configured via {@link ServiceLoader}, so can be
+	 * Typically these should be configured via {@link HttpObjectParserServiceFactory}, so can be
 	 * plugged in as required.
 	 * 
 	 * @param objectParserFactory {@link HttpObjectParserFactory}.
@@ -236,6 +235,13 @@ public abstract interface WebArchitect {
 	 * @return {@link HttpInput}.
 	 */
 	HttpInput getHttpInput(boolean isSecure, String httpMethodName, String applicationPath);
+
+	/**
+	 * Adds a {@link HttpInputExplorer}.
+	 * 
+	 * @param explorer {@link HttpInputExplorer}.
+	 */
+	void addHttpInputExplorer(HttpInputExplorer explorer);
 
 	/**
 	 * <p>

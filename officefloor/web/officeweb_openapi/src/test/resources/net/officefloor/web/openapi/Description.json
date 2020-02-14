@@ -1,0 +1,11 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/path": {
+			"get": {
+				"summary": "TEST DESCRIPTION",
+				"description": "TEST DESCRIPTION"
+			}
+		}
+	}
+}

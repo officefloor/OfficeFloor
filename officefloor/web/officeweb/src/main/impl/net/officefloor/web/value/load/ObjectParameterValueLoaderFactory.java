@@ -22,7 +22,9 @@
 package net.officefloor.web.value.load;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.build.HttpValueLocation;
@@ -72,16 +74,11 @@ public class ObjectParameterValueLoaderFactory implements StatelessValueLoaderFa
 	/**
 	 * Initiate.
 	 * 
-	 * @param propertyName
-	 *            Property name.
-	 * @param methodName
-	 *            {@link Method} name.
-	 * @param objectType
-	 *            Object type.
-	 * @param objectInstantiator
-	 *            {@link ObjectInstantiator}.
-	 * @param propertyKeyFactory
-	 *            {@link PropertyKeyFactory}.
+	 * @param propertyName       Property name.
+	 * @param methodName         {@link Method} name.
+	 * @param objectType         Object type.
+	 * @param objectInstantiator {@link ObjectInstantiator}.
+	 * @param propertyKeyFactory {@link PropertyKeyFactory}.
 	 */
 	public ObjectParameterValueLoaderFactory(String propertyName, String methodName, Class<?> objectType,
 			ObjectInstantiator objectInstantiator, PropertyKeyFactory propertyKeyFactory) {
@@ -95,8 +92,7 @@ public class ObjectParameterValueLoaderFactory implements StatelessValueLoaderFa
 	/**
 	 * Specifies the {@link StatelessValueLoader}.
 	 * 
-	 * @param valueLoader
-	 *            {@link StatelessValueLoader}.
+	 * @param valueLoader {@link StatelessValueLoader}.
 	 */
 	public void setValueLoader(StatelessValueLoader valueLoader) {
 		this.valueLoader = valueLoader;
@@ -119,6 +115,7 @@ public class ObjectParameterValueLoaderFactory implements StatelessValueLoaderFa
 
 		// Return the value loader
 		return new StatelessValueLoader() {
+
 			@Override
 			public void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
 					Map<PropertyKey, Object> state) throws HttpException {
@@ -153,6 +150,12 @@ public class ObjectParameterValueLoaderFactory implements StatelessValueLoaderFa
 				// Load the remaining object
 				ObjectParameterValueLoaderFactory.this.valueLoader.loadValue(parameter, name, nameIndex, value,
 						location, state);
+			}
+
+			@Override
+			public void visitValueNames(Consumer<ValueName> visitor, String namePrefix,
+					List<StatelessValueLoader> visitedLoaders) {
+				ObjectParameterValueLoaderFactory.this.valueLoader.visitValueNames(visitor, namePrefix, visitedLoaders);
 			}
 		};
 	}

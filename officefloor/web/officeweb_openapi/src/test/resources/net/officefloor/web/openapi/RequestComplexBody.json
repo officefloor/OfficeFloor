@@ -1,0 +1,42 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/path": {
+			"get": {
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"child": {
+										"$ref": "#/components/schemas/RequestChild"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"ComplexRequest": {
+				"type": "object",
+				"properties": {
+					"child": {
+						"$ref": "#/components/schemas/RequestChild"
+					}
+				}
+			},
+			"RequestChild": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	}
+}

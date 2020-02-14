@@ -86,6 +86,11 @@ public class ObjectResponseManagedObjectSource
 	}
 
 	/**
+	 * Response {@link HttpStatus}.
+	 */
+	private final HttpStatus httpStatus;
+
+	/**
 	 * {@link List} of {@link HttpObjectResponderFactory} instances.
 	 */
 	private final List<HttpObjectResponderFactory> objectResponderFactoriesList;
@@ -113,13 +118,16 @@ public class ObjectResponseManagedObjectSource
 	/**
 	 * Instantiate.
 	 * 
+	 * @param statusCode                 Response status code.
 	 * @param objectResponderFactories   {@link List} of
 	 *                                   {@link HttpObjectResponderFactory}
 	 *                                   instances.
 	 * @param defaultHttpObjectResponder {@link DefaultHttpObjectResponder}.
 	 */
-	public ObjectResponseManagedObjectSource(List<HttpObjectResponderFactory> objectResponderFactories,
+	public ObjectResponseManagedObjectSource(HttpStatus httpStatus,
+			List<HttpObjectResponderFactory> objectResponderFactories,
 			DefaultHttpObjectResponder defaultHttpObjectResponder) {
+		this.httpStatus = httpStatus;
 		this.objectResponderFactoriesList = objectResponderFactories;
 		this.defaultHttpObjectResponder = defaultHttpObjectResponder;
 	}
@@ -263,6 +271,9 @@ public class ObjectResponseManagedObjectSource
 					throw new HttpException(HttpStatus.NOT_ACCEPTABLE,
 							ObjectResponseManagedObjectSource.this.notAcceptableHeaders, null);
 				}
+
+				// Provide response status
+				this.connection.getResponse().setStatus(ObjectResponseManagedObjectSource.this.httpStatus);
 
 				// Handle the object
 				handleObject(object, this.contentTypeCache, OBJECT_RESPONDER_FACTORY, this.connection);

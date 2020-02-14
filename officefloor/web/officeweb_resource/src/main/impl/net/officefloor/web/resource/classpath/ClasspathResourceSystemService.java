@@ -21,11 +21,8 @@
 
 package net.officefloor.web.resource.classpath;
 
-import java.io.IOException;
-
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.web.resource.spi.ResourceSystem;
-import net.officefloor.web.resource.spi.ResourceSystemContext;
 import net.officefloor.web.resource.spi.ResourceSystemFactory;
 import net.officefloor.web.resource.spi.ResourceSystemService;
 
@@ -35,12 +32,7 @@ import net.officefloor.web.resource.spi.ResourceSystemService;
  * 
  * @author Daniel Sagenschneider
  */
-public class ClasspathResourceSystemService implements ResourceSystemFactory, ResourceSystemService {
-
-	/**
-	 * Protocol name.
-	 */
-	public static final String PROTOCOL_NAME = "classpath";
+public class ClasspathResourceSystemService implements ResourceSystemService {
 
 	/*
 	 * ====================== ResourceSystemService =======================
@@ -48,21 +40,7 @@ public class ClasspathResourceSystemService implements ResourceSystemFactory, Re
 
 	@Override
 	public ResourceSystemFactory createService(ServiceContext context) throws Throwable {
-		return this;
-	}
-
-	/*
-	 * ===================== ResourceSystemFactory =======================
-	 */
-
-	@Override
-	public String getProtocolName() {
-		return PROTOCOL_NAME;
-	}
-
-	@Override
-	public ResourceSystem createResourceSystem(ResourceSystemContext context) throws IOException {
-		return new ClasspathResourceSystem(context);
+		return new ClasspathResourceSystemFactory(context.getClassLoader());
 	}
 
 }

@@ -56,8 +56,8 @@ import net.officefloor.web.build.HttpInput;
 import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.woof.WoOF;
-import net.officefloor.woof.WoofLoaderExtensionService;
-import net.officefloor.woof.WoofLoaderExtensionService.WoofLoaderRunnableContext;
+import net.officefloor.woof.WoofLoaderSettings;
+import net.officefloor.woof.WoofLoaderSettings.WoofLoaderRunnableContext;
 
 /**
  * <p>
@@ -207,7 +207,7 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 			throws Exception {
 
 		// Undertake compiling
-		return WoofLoaderExtensionService.contextualLoad((loadContext) -> {
+		return WoofLoaderSettings.contextualLoad((loadContext) -> {
 
 			// Compile the OfficeFloor to run the server
 			CompileOfficeFloor compiler = new CompileOfficeFloor();
@@ -236,7 +236,7 @@ public class MockWoofServer extends MockHttpServer implements AutoCloseable {
 			throws Exception {
 
 		// Undertake compiling (without HTTP Server loading)
-		return WoofLoaderExtensionService.contextualLoad((loadContext) -> {
+		return WoofLoaderSettings.contextualLoad((loadContext) -> {
 
 			// Mock the HTTP Server, so do not load
 			loadContext.notLoadHttpServer();

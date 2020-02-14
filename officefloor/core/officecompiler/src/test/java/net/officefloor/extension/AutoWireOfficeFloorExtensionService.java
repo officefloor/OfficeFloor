@@ -24,7 +24,9 @@ package net.officefloor.extension;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionContext;
 import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionService;
+import net.officefloor.compile.spi.officefloor.extension.OfficeFloorExtensionServiceFactory;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.source.ServiceContext;
 
 /**
  * Provides means to auto-wire aspects of the {@link OfficeFloor} within
@@ -32,7 +34,8 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel Sagenschneider
  */
-public class AutoWireOfficeFloorExtensionService implements OfficeFloorExtensionService {
+public class AutoWireOfficeFloorExtensionService
+		implements OfficeFloorExtensionService, OfficeFloorExtensionServiceFactory {
 
 	/**
 	 * Indicates whether to auto-wire the objects.
@@ -69,6 +72,11 @@ public class AutoWireOfficeFloorExtensionService implements OfficeFloorExtension
 	/*
 	 * =================== OfficeFloorExtensionService ===================
 	 */
+
+	@Override
+	public OfficeFloorExtensionService createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public void extendOfficeFloor(OfficeFloorDeployer officeFloorDeployer, OfficeFloorExtensionContext context)

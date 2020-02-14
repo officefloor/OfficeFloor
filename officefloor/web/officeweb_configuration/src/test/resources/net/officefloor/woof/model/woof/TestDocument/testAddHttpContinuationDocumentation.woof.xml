@@ -1,0 +1,25 @@
+<woof>
+
+	<http-continuations>
+		<http-continuation path="/one">
+			<documentation>
+				<description>Added documentation</description>
+			</documentation>
+		</http-continuation>
+		<http-continuation path="/two">
+			<documentation>
+				<description>Existing HTTP continuation description</description>
+			</documentation>
+		</http-continuation>
+	</http-continuations>
+
+	<http-inputs>
+		<http-input path="/one" method="POST" />
+		<http-input path="/two" method="POST">
+			<documentation>
+				<description>Existing HTTP input description</description>
+			</documentation>
+		</http-input>
+	</http-inputs>
+
+</woof>

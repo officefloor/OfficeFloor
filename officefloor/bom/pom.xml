@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -98,6 +97,8 @@
 		<servlet-version>4.0.1</servlet-version>
 		<slf4j-version>1.7.30</slf4j-version>
 		<spring-version>2.1.6.RELEASE</spring-version>
+		<swagger.version>2.1.1</swagger.version>
+		<swagger-ui.version>3.25.0</swagger-ui.version>
 		<tika-version>1.21</tika-version>
 		<undertow-version>2.0.28.Final</undertow-version>
 		<wagon-ssh-version>3.2.0</wagon-ssh-version>
@@ -279,6 +280,11 @@
 			<dependency>
 				<groupId>net.officefloor.web</groupId>
 				<artifactId>officeweb_executive</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.officefloor.web</groupId>
+				<artifactId>officeweb_openapi</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -693,6 +699,16 @@
 				<artifactId>tika-core</artifactId>
 				<version>${tika-version}</version>
 			</dependency>
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-core</artifactId>
+				<version>${swagger.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.npm</groupId>
+				<artifactId>swagger-ui-dist</artifactId>
+				<version>${swagger-ui.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -878,10 +894,8 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
+										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true" command="create" />
 									</target>
 								</configuration>
 							</execution>
@@ -896,10 +910,8 @@
 									<target>
 										<echo>Creating SourceForge shell for
 											${sourceforge.shell.username}</echo>
-										<sshexec host="shell.sourceforge.net"
-											username="${sourceforge.shell.username}"
-											password="${sourceforge.shell.password}" verbose="true"
-											command="create" />
+										<sshexec host="shell.sourceforge.net" username="${sourceforge.shell.username}"
+											password="${sourceforge.shell.password}" verbose="true" command="create" />
 									</target>
 								</configuration>
 							</execution>

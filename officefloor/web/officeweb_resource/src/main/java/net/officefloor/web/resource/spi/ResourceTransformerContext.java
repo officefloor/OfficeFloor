@@ -36,6 +36,13 @@ import net.officefloor.web.resource.HttpFile;
 public interface ResourceTransformerContext {
 
 	/**
+	 * Obtains the path identifying the resource.
+	 * 
+	 * @return Path identifying the resource.
+	 */
+	String getPath();
+
+	/**
 	 * Obtains the {@link Path} to the resource being transformed.
 	 * 
 	 * @return {@link Path} to the resource being transformed.
@@ -46,12 +53,11 @@ public interface ResourceTransformerContext {
 	 * <p>
 	 * Creates a new file.
 	 * <p>
-	 * All files required for transform should be created via this method. This
-	 * is to ensure the files are managed.
+	 * All files required for transform should be created via this method. This is
+	 * to ensure the files are managed.
 	 * 
 	 * @return {@link Path} to the new file.
-	 * @throws IOException
-	 *             If fails to create the new file.
+	 * @throws IOException If fails to create the new file.
 	 */
 	Path createFile() throws IOException;
 
@@ -66,9 +72,8 @@ public interface ResourceTransformerContext {
 	 * <p>
 	 * Obtains the {@link Charset} for the resource.
 	 * <p>
-	 * Typically this is the {@link Charset} of the backing
-	 * {@link ResourceSystem}. However, it may be changed by a previous
-	 * {@link ResourceTransformer}.
+	 * Typically this is the {@link Charset} of the backing {@link ResourceSystem}.
+	 * However, it may be changed by a previous {@link ResourceTransformer}.
 	 * 
 	 * @return {@link Charset} for the resource.
 	 */
@@ -78,13 +83,12 @@ public interface ResourceTransformerContext {
 	 * Allows specifying a new <code>Content-Type</code> for the transformed
 	 * resource.
 	 * 
-	 * @param contentType
-	 *            <code>Content-Type</code> for the transformed resource. This
-	 *            needs to include the {@link Charset} parameter if required.
-	 * @param charset
-	 *            {@link Charset} for the {@link HttpFile}. May be
-	 *            <code>null</code> to use/reset to the default {@link Charset}
-	 *            of the {@link ResourceSystem}.
+	 * @param contentType <code>Content-Type</code> for the transformed resource.
+	 *                    This needs to include the {@link Charset} parameter if
+	 *                    required.
+	 * @param charset     {@link Charset} for the {@link HttpFile}. May be
+	 *                    <code>null</code> to use/reset to the default
+	 *                    {@link Charset} of the {@link ResourceSystem}.
 	 */
 	void setContentType(HttpHeaderValue contentType, Charset charset);
 
@@ -99,11 +103,10 @@ public interface ResourceTransformerContext {
 	/**
 	 * Specifies the <code>Content-Encoding</code> for the transformed resource.
 	 * 
-	 * @param contentEncoding
-	 *            <code>Content-Encoding</code> for the transformed resource.
-	 * @throws IOException
-	 *             If <code>Content-Encoding</code> already specified by another
-	 *             {@link ResourceTransformer}.
+	 * @param contentEncoding <code>Content-Encoding</code> for the transformed
+	 *                        resource.
+	 * @throws IOException If <code>Content-Encoding</code> already specified by
+	 *                     another {@link ResourceTransformer}.
 	 * 
 	 * @see #getContentEncoding()
 	 */
@@ -116,8 +119,7 @@ public interface ResourceTransformerContext {
 	 * This is optional to invoke. Should a transform not be applied, then this
 	 * should not be invoked.
 	 * 
-	 * @param resource
-	 *            {@link Path} to the transformed resource.
+	 * @param resource {@link Path} to the transformed resource.
 	 */
 	void setTransformedResource(Path resource);
 

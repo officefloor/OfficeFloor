@@ -1185,6 +1185,43 @@ public class HttpSecurityArchitectTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure uniquely typed {@link HttpSecuritySupportingManagedObject}
+	 * dependencies are registered unqualified.
+	 */
+	public void testUniqueSupportingManagedObjectNotQualifiedOnMultipleSecurities() throws Throwable {
+
+		// Compile and open
+		this.compile((context, security) -> {
+
+			// Configure security with clashing names (so requires qualifying)
+			security.addHttpSecurity("one", new MockSupportedHttpSecuritySource("one"))
+					.addProperty(MockSupportedHttpSecuritySource.PROPERTY_REALM, "test");
+			security.addHttpSecurity("two", new MockChallengeHttpSecuritySource())
+					.addProperty(MockChallengeHttpSecuritySource.PROPERTY_REALM, "test");
+
+			// Add the section
+			context.addSection("section", UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection.class);
+		});
+
+		// Ensure the supporting object is available
+		UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection.supporting = null;
+		CompileOfficeFloor.invokeProcess(this.officeFloor, "section.service", null);
+		assertNotNull("Should have supporting object",
+				UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection.supporting);
+		assertEquals("Incorrect supporting object", "one",
+				UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection.supporting.identifier);
+	}
+
+	public static class UniqueSupportingManagedObjectNotQualifiedOnMultipleSecuritiesSection {
+
+		private static MockIdentifiedSupportingObject supporting;
+
+		public void service(MockIdentifiedSupportingObject object) {
+			supporting = object;
+		}
+	}
+
+	/**
 	 * Ensure can link {@link HttpSecuritySupportingManagedObject} dependencies.
 	 */
 	public void testSupportingManagedObjectDependencies() throws Throwable {

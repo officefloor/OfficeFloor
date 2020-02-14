@@ -26,7 +26,9 @@ import org.junit.runners.model.Statement;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionServiceFactory;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.test.Closure;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
@@ -37,7 +39,8 @@ import net.officefloor.plugin.section.clazz.Parameter;
  * 
  * @author Daniel Sagenschneider
  */
-public class OfficeFloorRuleTest extends OfficeFrameTestCase implements OfficeExtensionService {
+public class OfficeFloorRuleTest extends OfficeFrameTestCase
+		implements OfficeExtensionService, OfficeExtensionServiceFactory {
 
 	/**
 	 * Flags to load the {@link Office}.
@@ -127,6 +130,11 @@ public class OfficeFloorRuleTest extends OfficeFrameTestCase implements OfficeEx
 	/*
 	 * =================== OfficeExtensionService =====================
 	 */
+
+	@Override
+	public OfficeExtensionService createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {

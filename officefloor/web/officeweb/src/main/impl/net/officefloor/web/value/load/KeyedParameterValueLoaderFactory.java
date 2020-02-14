@@ -22,7 +22,9 @@
 package net.officefloor.web.value.load;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.officefloor.server.http.HttpException;
 import net.officefloor.web.build.HttpValueLocation;
@@ -47,10 +49,8 @@ public class KeyedParameterValueLoaderFactory implements StatelessValueLoaderFac
 	/**
 	 * Initiate.
 	 * 
-	 * @param propertyName
-	 *            Property name.
-	 * @param methodName
-	 *            {@link Method} name.
+	 * @param propertyName Property name.
+	 * @param methodName   {@link Method} name.
 	 */
 	public KeyedParameterValueLoaderFactory(String propertyName, String methodName) {
 		this.propertyName = propertyName;
@@ -77,6 +77,7 @@ public class KeyedParameterValueLoaderFactory implements StatelessValueLoaderFac
 
 		// Return the new value loader
 		return new StatelessValueLoader() {
+
 			@Override
 			public void loadValue(Object object, String name, int nameIndex, String value, HttpValueLocation location,
 					Map<PropertyKey, Object> state) throws HttpException {
@@ -96,6 +97,13 @@ public class KeyedParameterValueLoaderFactory implements StatelessValueLoaderFac
 				// Load the value
 				ValueLoaderSource.loadValue(object, loaderMethod, key, value);
 			}
+
+			@Override
+			public void visitValueNames(Consumer<ValueName> visitor, String namePrefix,
+					List<StatelessValueLoader> visistedLoaders) {
+				visitor.accept(new ValueName(namePrefix + "{}", loaderLocation));
+			}
 		};
 	}
+
 }
