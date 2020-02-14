@@ -1,6 +1,9 @@
 package net.officefloor.web.openapi;
 
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -352,7 +355,12 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 
 					// Obtain the raw content
 					Path rawIndexHtml = transform.getResource();
-					String rawContent = Files.readString(rawIndexHtml);
+					StringWriter rawContent = new StringWriter();
+					try (Reader reader = Files.newBufferedReader(rawIndexHtml)) {
+						for (int character = reader.read(); character != -1; character = reader.read()) {
+							rawContent.write(character);
+						}
+					}
 
 					// Provide appropriate URL to OpenApi
 					String applicationContent = rawContent.toString()
@@ -360,7 +368,9 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 
 					// Write the content
 					Path applicationIndexHtml = transform.createFile();
-					Files.writeString(applicationIndexHtml, applicationContent);
+					try (Writer writer = Files.newBufferedWriter(applicationIndexHtml)) {
+						writer.write(applicationContent);
+					}
 					transform.setTransformedResource(applicationIndexHtml);
 				}
 			});
