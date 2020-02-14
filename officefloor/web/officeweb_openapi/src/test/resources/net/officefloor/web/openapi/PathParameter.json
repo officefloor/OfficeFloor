@@ -1,0 +1,19 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/path/{parameter}": {
+			"get": {
+				"parameters": [
+					{
+						"name": "parameter",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		}
+	}
+}

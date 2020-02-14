@@ -27,7 +27,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,9 +46,9 @@ import net.officefloor.jdbc.datasource.ConnectionPoolDataSourceFactory;
 import net.officefloor.jdbc.datasource.DataSourceFactory;
 import net.officefloor.jdbc.datasource.DefaultDataSourceFactory;
 import net.officefloor.jdbc.decorate.ConnectionDecorator;
-import net.officefloor.jdbc.decorate.ConnectionDecoratorFactory;
+import net.officefloor.jdbc.decorate.ConnectionDecoratorServiceFactory;
 import net.officefloor.jdbc.decorate.PooledConnectionDecorator;
-import net.officefloor.jdbc.decorate.PooledConnectionDecoratorFactory;
+import net.officefloor.jdbc.decorate.PooledConnectionDecoratorServiceFactory;
 
 /**
  * Abstract {@link ManagedObjectSource} for {@link Connection}.
@@ -85,10 +84,8 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 		// Obtain the decorator factories
 		List<ConnectionDecorator> decoratorList = new ArrayList<>();
-		ServiceLoader<ConnectionDecoratorFactory> decoratorFactories = ServiceLoader
-				.load(ConnectionDecoratorFactory.class, context.getClassLoader());
-		for (ConnectionDecoratorFactory decoratorFactory : decoratorFactories) {
-			decoratorList.add(decoratorFactory.createConnectionDecorator(context));
+		for (ConnectionDecorator decorator : context.loadOptionalServices(ConnectionDecoratorServiceFactory.class)) {
+			decoratorList.add(decorator);
 		}
 		ConnectionDecorator[] decorators = decoratorList.toArray(new ConnectionDecorator[decoratorList.size()]);
 
@@ -210,10 +207,9 @@ public abstract class AbstractConnectionManagedObjectSource extends AbstractMana
 
 		// Obtain the decorator factories
 		List<PooledConnectionDecorator> decoratorList = new ArrayList<>();
-		ServiceLoader<PooledConnectionDecoratorFactory> decoratorFactories = ServiceLoader
-				.load(PooledConnectionDecoratorFactory.class, context.getClassLoader());
-		for (PooledConnectionDecoratorFactory decoratorFactory : decoratorFactories) {
-			decoratorList.add(decoratorFactory.createPooledConnectionDecorator(context));
+		for (PooledConnectionDecorator decorator : context
+				.loadOptionalServices(PooledConnectionDecoratorServiceFactory.class)) {
+			decoratorList.add(decorator);
 		}
 		PooledConnectionDecorator[] decorators = decoratorList
 				.toArray(new PooledConnectionDecorator[decoratorList.size()]);

@@ -29,7 +29,7 @@ import net.officefloor.gef.bridge.EnvironmentBridge;
 import net.officefloor.gef.ide.editor.AbstractAdaptedIdeEditor;
 import net.officefloor.gef.ide.editor.AbstractConfigurableItem;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.woof.WoofLoaderExtensionService;
+import net.officefloor.woof.WoofLoaderSettings;
 import net.officefloor.woof.model.woof.WoofChanges;
 import net.officefloor.woof.model.woof.WoofChangesImpl;
 import net.officefloor.woof.model.woof.WoofModel;
@@ -64,7 +64,7 @@ public class WoofEditor extends AbstractAdaptedIdeEditor<WoofModel, WoofEvent, W
 
 	@Override
 	public String fileName() {
-		return WoofLoaderExtensionService.APPLICATION_WOOF;
+		return WoofLoaderSettings.getWoofLoaderConfiguration().getApplicationWoofPath();
 	}
 
 	@Override

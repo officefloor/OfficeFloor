@@ -25,6 +25,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.section.OfficeSectionManagedObjectType;
 import net.officefloor.compile.section.TypeQualification;
 import net.officefloor.compile.spi.office.ExecutionManagedObject;
+import net.officefloor.compile.spi.office.ExecutionObjectExplorer;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
@@ -97,6 +98,15 @@ public interface ManagedObjectNode extends DependentObjectNode, BoundManagedObje
 	 * @param compileContext {@link CompileContext}.
 	 */
 	void autoWireDependencies(AutoWirer<LinkObjectNode> autoWirer, OfficeNode office, CompileContext compileContext);
+
+	/**
+	 * Runs the {@link ExecutionObjectExplorer} instances for the
+	 * {@link ManagedObject}.
+	 * 
+	 * @param compileContext {@link CompileContext}.
+	 * @return <code>true</code> if successfully explored execution.
+	 */
+	boolean runExecutionExplorers(CompileContext compileContext);
 
 	/**
 	 * Creates the {@link ExecutionManagedObject} for this

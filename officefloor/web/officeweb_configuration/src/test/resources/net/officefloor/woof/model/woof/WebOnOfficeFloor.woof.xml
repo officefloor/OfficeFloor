@@ -23,6 +23,7 @@
 
 	<http-continuations>
 		<http-continuation path="/pathA" secure="true" x="100" y="101">
+			<documentation><description>HTTP CONTINUATION DOCUMENTATION</description></documentation>
 			<section name="SECTION_A" input="INPUT_A" />
 			<template path="/templateB" />
 			<security name="SECURITY_A" />
@@ -35,6 +36,7 @@
 
 	<http-inputs>
 		<http-input path="/pathC" method="POST" secure="true" x="200" y="201">
+			<documentation><description>HTTP INPUT DOCUMENTATION</description></documentation>
 			<section name="SECTION_B" input="INPUT_0" />
 			<template path="/templateA" />
 			<security name="SECURITY_B" />

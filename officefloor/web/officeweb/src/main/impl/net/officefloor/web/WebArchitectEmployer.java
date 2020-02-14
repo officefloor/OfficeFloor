@@ -23,20 +23,21 @@ package net.officefloor.web;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.Node;
+import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionObjectType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.section.OfficeSectionInputType;
 import net.officefloor.compile.section.OfficeSectionOutputType;
 import net.officefloor.compile.section.OfficeSectionType;
+import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.ManagedFunctionAugmentorContext;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeFlowSinkNode;
@@ -51,6 +52,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.plugin.section.clazz.ClassSectionSource;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpRequest;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpRouteSectionSource.Interception;
 import net.officefloor.web.HttpRouteSectionSource.Redirect;
 import net.officefloor.web.HttpRouteSectionSource.RouteInput;
@@ -58,6 +60,8 @@ import net.officefloor.web.accept.AcceptNegotiatorBuilderImpl;
 import net.officefloor.web.build.AcceptNegotiatorBuilder;
 import net.officefloor.web.build.HttpArgumentParser;
 import net.officefloor.web.build.HttpInput;
+import net.officefloor.web.build.HttpInputExplorer;
+import net.officefloor.web.build.HttpInputExplorerContext;
 import net.officefloor.web.build.HttpObjectParserFactory;
 import net.officefloor.web.build.HttpObjectParserServiceFactory;
 import net.officefloor.web.build.HttpObjectResponderFactory;
@@ -68,6 +72,7 @@ import net.officefloor.web.build.WebArchitect;
 import net.officefloor.web.build.WebInterceptServiceFactory;
 import net.officefloor.web.response.ObjectResponseManagedObjectSource;
 import net.officefloor.web.response.ObjectResponseManagedObjectSource.DefaultHttpObjectResponder;
+import net.officefloor.web.route.WebRouterBuilder;
 import net.officefloor.web.session.HttpSessionManagedObjectSource;
 import net.officefloor.web.session.object.HttpSessionObjectManagedObjectSource;
 import net.officefloor.web.state.HttpApplicationObjectManagedObjectSource;
@@ -198,6 +203,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	 * {@link HttpObjectResponderFactory} instances.
 	 */
 	private final List<HttpObjectResponderFactory> objectResponderFactories = new LinkedList<>();
+
+	/**
+	 * {@link HttpInputExplorer} instances.
+	 */
+	private final List<HttpInputExplorer> httpInputExplorers = new LinkedList<>();
 
 	/**
 	 * Default {@link HttpObjectResponderServiceFactory}.
@@ -449,6 +459,11 @@ public class WebArchitectEmployer implements WebArchitect {
 	}
 
 	@Override
+	public void addHttpInputExplorer(HttpInputExplorer explorer) {
+		this.httpInputExplorers.add(explorer);
+	}
+
+	@Override
 	public void reroute(OfficeFlowSourceNode flowSourceNode) {
 		this.officeArchitect.link(flowSourceNode, this.routingSection.getOfficeSectionInput(HANDLER_INPUT_NAME));
 	}
@@ -493,19 +508,16 @@ public class WebArchitectEmployer implements WebArchitect {
 						new HttpRequestStateManagedObjectSource(argumentParsers))
 				.addOfficeManagedObject("HTTP_REQUEST_STATE", ManagedObjectScope.PROCESS);
 
+		// Create the object response registrator
+		ObjectResponseRegistrator objectResponseRegistrator = new ObjectResponseRegistrator();
+
 		// Configure the object responder (if configured factories)
 		if ((this.objectResponderFactories.size() > 0) || (this.defaultHttpObjectResponderServiceFactory != null)) {
 
-			// Create the default object responder
-			DefaultHttpObjectResponder defaultHttpObjectResponder = () -> this.defaultHttpObjectResponderServiceFactory != null
-					? this.officeSourceContext.loadService(this.defaultHttpObjectResponderServiceFactory)
-					: null;
+			// Register the default object responder
+			ObjectResponseManagedObjectSource objectResponseMos = objectResponseRegistrator.registerObjectResponse(200);
 
-			// Add the object responder
-			ObjectResponseManagedObjectSource objectResponseMos = new ObjectResponseManagedObjectSource(
-					this.objectResponderFactories, defaultHttpObjectResponder);
-			this.officeArchitect.addOfficeManagedObjectSource("OBJECT_RESPONSE", objectResponseMos)
-					.addOfficeManagedObject("OBJECT_RESPONSE", ManagedObjectScope.PROCESS);
+			// Use it to handle escalations
 			this.routing.setHttpEscalationHandler(objectResponseMos);
 		}
 
@@ -600,7 +612,6 @@ public class WebArchitectEmployer implements WebArchitect {
 		}
 
 		// Load in-line configured dependencies
-		final Set<Class<?>> httpParameters = new HashSet<>();
 		this.officeArchitect.addManagedFunctionAugmentor((context) -> {
 			ManagedFunctionType<?, ?> functionType = context.getManagedFunctionType();
 			for (ManagedFunctionObjectType<?> functionParameterType : functionType.getObjectTypes()) {
@@ -629,11 +640,7 @@ public class WebArchitectEmployer implements WebArchitect {
 						httpParametersAnnotation = (HttpParametersAnnotation) annotation;
 					}
 					if (httpParametersAnnotation != null) {
-						// Load as HTTP parameters (only once)
-						if (!httpParameters.contains(objectType)) {
-							this.addHttpRequestObject(objectType, true);
-							httpParameters.add(objectType);
-						}
+						this.addHttpRequestObject(objectType, true);
 					}
 
 					// HTTP object
@@ -673,9 +680,110 @@ public class WebArchitectEmployer implements WebArchitect {
 					WebArchitectEmployer.this.loadInlineHttpArgument(annotation, HttpContentParameter.class,
 							HttpContentParameterAnnotation.class, HttpValueLocation.ENTITY, objectType, context,
 							(rawAnnotation) -> new HttpContentParameterAnnotation(rawAnnotation));
+
+					// Load the qualified object responses
+					if (annotation instanceof HttpResponse) {
+						HttpResponse httpResponse = (HttpResponse) annotation;
+						objectResponseRegistrator.registerObjectResponse(httpResponse.status());
+					}
 				}
 			}
 		});
+
+		// Load explorers of HTTP inputs
+		OfficeSectionInput handleInput = this.routingSection.getOfficeSectionInput(WebArchitect.HANDLER_INPUT_NAME);
+		for (HttpInputExplorer explorer : this.httpInputExplorers) {
+			handleInput.addExecutionExplorer((explore) -> {
+
+				// Obtain the handling managed functions for each HTTP input
+				ExecutionManagedFunction route = explore.getManagedFunction(
+						Node.qualify(WebArchitect.HANDLER_SECTION_NAME, WebArchitect.HANDLER_INPUT_NAME));
+				Map<String, ExecutionManagedFunction> inputHandlers = new HashMap<>();
+				for (ManagedFunctionFlowType<?> flowType : route.getManagedFunctionType().getFlowTypes()) {
+					inputHandlers.put(flowType.getFlowName(), route.getManagedFunction(flowType));
+				}
+
+				// Allow exploring the input
+				for (HttpInputImpl input : this.inputs) {
+
+					// Obtain the input handler
+					ExecutionManagedFunction inputHandler = inputHandlers.get(input.routeInput.getOutputName());
+					if (input.routeInput.getHttpInputPath().isPathParameters()) {
+						// Step over initialise path parameters function
+						inputHandler = inputHandler.getNextManagedFunction();
+					}
+
+					// Allow exploring input
+					final ExecutionManagedFunction finalInputHandler = inputHandler;
+					final WebArchitectEmployer employer = this; // easy access
+					explorer.explore(new HttpInputExplorerContext() {
+
+						@Override
+						public ExecutionManagedFunction getManagedFunction(String functionName) {
+							return explore.getManagedFunction(functionName);
+						}
+
+						@Override
+						public ExecutionManagedFunction getInitialManagedFunction() {
+							return finalInputHandler;
+						}
+
+						@Override
+						public boolean isSecure() {
+							return input.isSecure;
+						}
+
+						@Override
+						public HttpMethod getHttpMethod() {
+							return input.httpMethod;
+						}
+
+						@Override
+						public String getContextPath() {
+							return employer.contextPath;
+						}
+
+						@Override
+						public String getRoutePath() {
+							return input.applicationPath;
+						}
+
+						@Override
+						public String getApplicationPath() {
+							return WebRouterBuilder.getContextQualifiedPath(WebArchitectEmployer.this.contextPath,
+									input.applicationPath);
+						}
+
+						@Override
+						public HttpObjectParserFactory[] getHttpObjectParserFactories() {
+							if (employer.singletonObjectParserList.size() == 0) {
+								return new HttpObjectParserFactory[] { employer.officeSourceContext
+										.loadService(employer.defaultHttpObjectParserServiceFactory) };
+							} else {
+								return employer.singletonObjectParserList.toArray(
+										new HttpObjectParserFactory[employer.singletonObjectParserList.size()]);
+							}
+						}
+
+						@Override
+						public HttpObjectResponderFactory[] getHttpObjectResponderFactories() {
+							if (employer.objectResponderFactories.size() == 0) {
+								return new HttpObjectResponderFactory[] { employer.officeSourceContext
+										.loadService(employer.defaultHttpObjectResponderServiceFactory) };
+							} else {
+								return employer.objectResponderFactories.toArray(
+										new HttpObjectResponderFactory[employer.objectResponderFactories.size()]);
+							}
+						}
+
+						@Override
+						public String getDocumentation() {
+							return input.documentation;
+						}
+					});
+				}
+			});
+		}
 
 		// Chain in the servicer instances
 		OfficeFlowSourceNode chainOutput = this.routingSection
@@ -775,6 +883,11 @@ public class WebArchitectEmployer implements WebArchitect {
 		private final OfficeFlowSourceNode input;
 
 		/**
+		 * Documentation.
+		 */
+		private String documentation = null;
+
+		/**
 		 * Instantiate.
 		 * 
 		 * @param isSecure        Indicates if secure.
@@ -803,6 +916,11 @@ public class WebArchitectEmployer implements WebArchitect {
 		@Override
 		public OfficeFlowSourceNode getInput() {
 			return this.input;
+		}
+
+		@Override
+		public void setDocumentation(String documentation) {
+			this.documentation = documentation;
 		}
 	}
 
@@ -862,6 +980,81 @@ public class WebArchitectEmployer implements WebArchitect {
 								: " with values type " + parameterTypeName),
 						ex);
 			}
+		}
+	}
+
+	/**
+	 * Creates the necessary {@link ObjectResponse} instances.
+	 */
+	private class ObjectResponseRegistrator {
+
+		/**
+		 * {@link DefaultHttpObjectResponder}.
+		 */
+		private DefaultHttpObjectResponder defaultHttpObjectResponder;
+
+		/**
+		 * Registered {@link ObjectResponseManagedObjectSource} instances by their
+		 * {@link HttpStatus}.
+		 */
+		private Map<Integer, ObjectResponseManagedObjectSource> objectResponses = new HashMap<>();
+
+		/**
+		 * Obtains the {@link DefaultHttpObjectResponder}.
+		 * 
+		 * @return {@link DefaultHttpObjectResponder} or <code>null</code> if not
+		 *         configured.
+		 */
+		private DefaultHttpObjectResponder getDefaultHttpObjectResponder() {
+
+			// Easy access
+			WebArchitectEmployer employer = WebArchitectEmployer.this;
+
+			// Lazy load the default HTTP object responder
+			if (this.defaultHttpObjectResponder == null) {
+				this.defaultHttpObjectResponder = () -> employer.defaultHttpObjectResponderServiceFactory != null
+						? employer.officeSourceContext.loadService(employer.defaultHttpObjectResponderServiceFactory)
+						: null;
+
+			}
+			return this.defaultHttpObjectResponder;
+		}
+
+		/**
+		 * Registers an {@link ObjectResponse} for injection.
+		 * 
+		 * @param statusCode {@link HttpStatus} for the {@link ObjectResponse}.
+		 * @return Registered {@link ObjectResponseManagedObjectSource} for the
+		 *         {@link HttpStatus}.
+		 */
+		private ObjectResponseManagedObjectSource registerObjectResponse(int statusCode) {
+
+			// Easy access
+			WebArchitectEmployer employer = WebArchitectEmployer.this;
+
+			// Lazy register the object response
+			ObjectResponseManagedObjectSource objectResponseMos = this.objectResponses.get(statusCode);
+			if (objectResponseMos == null) {
+
+				// Create the object response
+				objectResponseMos = new ObjectResponseManagedObjectSource(HttpStatus.getHttpStatus(statusCode),
+						employer.objectResponderFactories, this.getDefaultHttpObjectResponder());
+				OfficeManagedObject managedObject = employer.officeArchitect
+						.addOfficeManagedObjectSource("OBJECT_RESPONSE_" + statusCode, objectResponseMos)
+						.addOfficeManagedObject("OBJECT_RESPONSE_" + statusCode, ManagedObjectScope.PROCESS);
+				managedObject.addTypeQualification(String.valueOf(statusCode), ObjectResponse.class.getName());
+
+				// OK status is default response
+				if (statusCode == HttpStatus.OK.getStatusCode()) {
+					managedObject.addTypeQualification(null, ObjectResponse.class.getName());
+				}
+
+				// Register the object response
+				this.objectResponses.put(statusCode, objectResponseMos);
+			}
+
+			// Return the object response
+			return objectResponseMos;
 		}
 	}
 

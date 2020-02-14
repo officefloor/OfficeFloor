@@ -752,6 +752,20 @@ public class ManagedFunctionNodeImpl implements ManagedFunctionNode {
 		}
 
 		@Override
+		public ExecutionManagedFunction getNextManagedFunction() {
+
+			// Obtain the next managed function node
+			ManagedFunctionNode function = LinkUtil.findTarget(this.node, ManagedFunctionNode.class,
+					this.node.context.getCompilerIssues());
+			if (function == null) {
+				return null;
+			}
+
+			// Return the execution managed function
+			return function.createExecutionManagedFunction(this.compileContext);
+		}
+
+		@Override
 		public ExecutionManagedFunction getManagedFunction(ManagedFunctionEscalationType escalationType) {
 
 			// Obtain the escalation

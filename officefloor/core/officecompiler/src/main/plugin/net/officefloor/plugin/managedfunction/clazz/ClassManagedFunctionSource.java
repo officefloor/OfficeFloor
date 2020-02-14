@@ -24,8 +24,10 @@ package net.officefloor.plugin.managedfunction.clazz;
 import java.lang.reflect.Method;
 
 import net.officefloor.compile.ManagedFunctionSourceService;
+import net.officefloor.compile.ManagedFunctionSourceServiceFactory;
 import net.officefloor.compile.spi.managedfunction.source.ManagedFunctionSource;
 import net.officefloor.frame.api.function.ManagedFunction;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.plugin.managedfunction.method.AbstractFunctionManagedFunctionSource;
 
 /**
@@ -35,11 +37,16 @@ import net.officefloor.plugin.managedfunction.method.AbstractFunctionManagedFunc
  * @author Daniel Sagenschneider
  */
 public class ClassManagedFunctionSource extends AbstractFunctionManagedFunctionSource
-		implements ManagedFunctionSourceService<ClassManagedFunctionSource> {
+		implements ManagedFunctionSourceService<ClassManagedFunctionSource>, ManagedFunctionSourceServiceFactory {
 
 	/*
 	 * =================== ManagedFunctionSourceService ===================
 	 */
+
+	@Override
+	public ManagedFunctionSourceService<?> createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public String getManagedFunctionSourceAlias() {

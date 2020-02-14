@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import net.officefloor.compile.AdministrationSourceService;
+import net.officefloor.compile.AdministrationSourceServiceFactory;
 import net.officefloor.compile.spi.administration.source.AdministrationSource;
 import net.officefloor.compile.spi.administration.source.AdministrationSourceContext;
 import net.officefloor.compile.spi.administration.source.impl.AbstractAdministrationSource;
@@ -39,6 +40,7 @@ import net.officefloor.frame.api.administration.AdministrationContext;
 import net.officefloor.frame.api.administration.GovernanceManager;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.governance.Governance;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.plugin.clazz.ClassFlowBuilder;
 import net.officefloor.plugin.clazz.ClassFlowParameterFactory;
@@ -52,7 +54,8 @@ import net.officefloor.plugin.clazz.Sequence;
  * @author Daniel Sagenschneider
  */
 public class ClassAdministrationSource extends AbstractAdministrationSource<Object, Indexed, Indexed>
-		implements AdministrationSourceService<Object, Indexed, Indexed, ClassAdministrationSource> {
+		implements AdministrationSourceService<Object, Indexed, Indexed, ClassAdministrationSource>,
+		AdministrationSourceServiceFactory {
 
 	/**
 	 * Property name providing the {@link Class} name.
@@ -90,6 +93,11 @@ public class ClassAdministrationSource extends AbstractAdministrationSource<Obje
 	/*
 	 * =================== AdministrationSourceService ===================
 	 */
+
+	@Override
+	public AdministrationSourceService<?, ?, ?, ?> createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	public String getAdministrationSourceAlias() {

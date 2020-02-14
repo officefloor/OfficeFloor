@@ -24,16 +24,15 @@ package net.officefloor.server.http.servlet;
 import javax.servlet.Filter;
 
 import net.officefloor.compile.impl.ApplicationOfficeFloorSource;
-import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
-import net.officefloor.compile.spi.office.extension.OfficeExtensionService;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ExternalServiceInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.frame.impl.spi.team.ThreadLocalAwareTeamSource;
 import net.officefloor.server.http.HttpServerImplementation;
 import net.officefloor.server.http.HttpServerImplementationContext;
+import net.officefloor.server.http.HttpServerImplementationFactory;
 import net.officefloor.server.http.HttpServerLocation;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedObject;
@@ -43,18 +42,18 @@ import net.officefloor.server.http.impl.ProcessAwareServerHttpConnectionManagedO
  *
  * @author Daniel Sagenschneider
  */
-public class HttpServletHttpServerImplementation implements HttpServerImplementation, OfficeExtensionService {
-
-	/**
-	 * {@link ThreadLocal} {@link Bridge}.
-	 */
-	private static final ThreadLocal<Bridge> threadLocalBridge = new ThreadLocal<>();
+public class HttpServletHttpServerImplementation implements HttpServerImplementation, HttpServerImplementationFactory {
 
 	/**
 	 * Name of the {@link ThreadLocalAwareTeamSource} to provide synchronous
 	 * blocking servicing to work within {@link Filter} chain.
 	 */
-	private static final String SYNC_TEAM_NAME = "_servlet_sync_team_";
+	public static final String SYNC_TEAM_NAME = "_servlet_sync_team_";
+
+	/**
+	 * {@link ThreadLocal} {@link Bridge}.
+	 */
+	private static final ThreadLocal<Bridge> threadLocalBridge = new ThreadLocal<>();
 
 	/**
 	 * Provides context to load the {@link HttpServletHttpServerImplementation}.
@@ -99,9 +98,23 @@ public class HttpServletHttpServerImplementation implements HttpServerImplementa
 		}
 	}
 
+	/**
+	 * Indicates if running within the {@link OfficeFloorFilter}.
+	 * 
+	 * @return <code>true</code> if running within {@link OfficeFloorFilter}.
+	 */
+	public static boolean isWithinOfficeFloorFilter() {
+		return threadLocalBridge.get() != null;
+	}
+
 	/*
 	 * ===================== HttpServerImplementation ====================
 	 */
+
+	@Override
+	public HttpServerImplementation createService(ServiceContext context) throws Throwable {
+		return this;
+	}
 
 	@Override
 	@SuppressWarnings("rawtypes")
@@ -132,33 +145,6 @@ public class HttpServletHttpServerImplementation implements HttpServerImplementa
 		// Register team to the office
 		DeployedOffice office = deployer.getDeployedOffice(ApplicationOfficeFloorSource.OFFICE_NAME);
 		deployer.link(office.getDeployedOfficeTeam(SYNC_TEAM_NAME), team);
-	}
-
-	/*
-	 * ===================== OfficeExtensionService ======================
-	 */
-
-	@Override
-	public void extendOffice(OfficeArchitect officeArchitect, OfficeExtensionContext context) throws Exception {
-
-		/*
-		 * Only extend if running within filter.
-		 * 
-		 * Note: running via MockWoofServerRule causes failure as:
-		 * 
-		 * - above configure HTTP server is not run (loading team)
-		 * 
-		 * - below team is configured without type for auto-wiring
-		 * 
-		 * - therefore, when teams added the below team fails the rule
-		 */
-		Bridge bridge = threadLocalBridge.get();
-		if (bridge == null) {
-			return;
-		}
-
-		// Add the team
-		officeArchitect.addOfficeTeam(SYNC_TEAM_NAME);
 	}
 
 }

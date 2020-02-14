@@ -43,6 +43,11 @@ public class ExampleModel {
 	 * Text.
 	 */
 	public String text = "T";
+	
+	/**
+	 * Multi-line text.
+	 */
+	public String multilineText = "One\nTwo\nThree\nFour";
 
 	/**
 	 * Flag.

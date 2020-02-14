@@ -40,6 +40,16 @@ import net.officefloor.web.resource.spi.FileCacheService;
 public class TemporaryDirectoryFileCacheService implements FileCacheService, FileCacheFactory {
 
 	/**
+	 * Escapes the file path.
+	 * 
+	 * @param filePath File path.
+	 * @return Escaped file path.
+	 */
+	private static String escapeFilePath(String filePath) {
+		return filePath.replace('/', '_');
+	}
+
+	/**
 	 * Directory {@link FileAttribute}.
 	 */
 	private static final FileAttribute<?>[] DIRECTORY_ATTRIBUTES = OfficeFloorFileAttributes
@@ -81,13 +91,11 @@ public class TemporaryDirectoryFileCacheService implements FileCacheService, Fil
 		/**
 		 * Instantiate with the name of {@link FileCache}.
 		 * 
-		 * @param name
-		 *            Name of {@link FileCache}.
-		 * @throws IOException
-		 *             If fails to create {@link FileCache}.
+		 * @param name Name of {@link FileCache}.
+		 * @throws IOException If fails to create {@link FileCache}.
 		 */
 		public TemporaryDirectoryFileCache(String name) throws IOException {
-			this.tempDirectory = Files.createTempDirectory(name + "-", DIRECTORY_ATTRIBUTES);
+			this.tempDirectory = Files.createTempDirectory(escapeFilePath(name) + "-", DIRECTORY_ATTRIBUTES);
 		}
 
 		/*
@@ -96,14 +104,14 @@ public class TemporaryDirectoryFileCacheService implements FileCacheService, Fil
 
 		@Override
 		public Path createFile(String name) throws IOException {
-			String suffix = name.replace('/', '_');
+			String suffix = escapeFilePath(name);
 			Path file = Files.createTempFile(this.tempDirectory, null, "-" + suffix, DIRECTORY_ATTRIBUTES);
 			return file;
 		}
 
 		@Override
 		public Path createDirectory(String name) throws IOException {
-			String prefix = name.replace('/', '_');
+			String prefix = escapeFilePath(name);
 			Path directory = Files.createTempDirectory(this.tempDirectory, prefix + "-", FILE_ATTRIBUTES);
 			return directory;
 		}

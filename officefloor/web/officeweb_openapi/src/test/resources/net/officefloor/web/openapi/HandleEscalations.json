@@ -1,0 +1,39 @@
+{
+	"openapi": "3.0.1",
+	"paths": {
+		"/path": {
+			"get": {
+				"parameters": [
+					{
+						"name": "Error",
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "RuntimeException",
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "Throwable",
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "SQLException",
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		}
+	}
+}

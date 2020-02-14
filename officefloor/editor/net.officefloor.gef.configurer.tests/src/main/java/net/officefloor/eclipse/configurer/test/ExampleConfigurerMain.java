@@ -106,6 +106,13 @@ public class ExampleConfigurerMain extends AbstractConfigurerApplication {
 			}
 		}).setValue(this.log((model, value) -> model.text = value));
 
+		// Configure multi-line text (non-editable)
+		builder.text("Multiline Label").multiline(true).init((model) -> model.multilineText);
+
+		// Configure multi-line text (editable)
+		builder.text("Multiline Text").multiline(true).init((model) -> model.multilineText)
+				.setValue(this.log((model, value) -> model.multilineText = value));
+
 		// Optional based on text
 		OptionalBuilder<ExampleModel> textOptionalBuilder = builder.optional((model) -> !"hide".equals(model.text));
 		textOptionalBuilder.text("Optional Text").init((model) -> model.text)

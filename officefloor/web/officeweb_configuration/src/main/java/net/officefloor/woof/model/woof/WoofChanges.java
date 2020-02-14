@@ -65,6 +65,16 @@ public interface WoofChanges {
 	Change<WoofHttpContinuationModel> addHttpContinuation(String applicationPath, boolean isSecure);
 
 	/**
+	 * Documents the {@link WoofHttpContinuationModel}.
+	 * 
+	 * @param continuation  {@link WoofHttpContinuationModel} to have documentation.
+	 * @param documentation Documentation for the {@link WoofHttpContinuationModel}.
+	 * @return {@link Change} to provide documentation to the
+	 *         {@link WoofHttpContinuationModel}.
+	 */
+	Change<WoofHttpContinuationModel> addDocumentation(WoofHttpContinuationModel continuation, String documentation);
+
+	/**
 	 * Refactors the {@link WoofHttpContinuationModel}.
 	 * 
 	 * @param continuation    {@link WoofHttpContinuationModel} to be refactored.
@@ -104,6 +114,16 @@ public interface WoofChanges {
 	 * @return {@link Change} to add a {@link WoofHttpInputModel}.
 	 */
 	Change<WoofHttpInputModel> addHttpInput(String applicationPath, String httpMethodName, boolean isSecure);
+
+	/**
+	 * Documents the {@link WoofHttpInputModel}.
+	 * 
+	 * @param input         {@link WoofHttpInputModel} to have documentation.
+	 * @param documentation Documentation for the {@link WoofHttpInputModel}.
+	 * @return {@link Change} to provide documentation to the
+	 *         {@link WoofHttpInputModel}.
+	 */
+	Change<WoofHttpInputModel> addDocumentation(WoofHttpInputModel input, String documentation);
 
 	/**
 	 * Refactors the {@link WoofHttpInputModel}.
