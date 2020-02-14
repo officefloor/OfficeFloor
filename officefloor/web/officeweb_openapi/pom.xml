@@ -25,7 +25,6 @@
 		<dependency>
 			<groupId>org.webjars.npm</groupId>
 			<artifactId>swagger-ui-dist</artifactId>
-			<version>3.25.0</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

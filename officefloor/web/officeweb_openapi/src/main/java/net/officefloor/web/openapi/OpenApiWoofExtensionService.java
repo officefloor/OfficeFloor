@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Function;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -21,9 +22,11 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import net.officefloor.compile.managedfunction.ManagedFunctionEscalationType;
 import net.officefloor.compile.managedfunction.ManagedFunctionFlowType;
 import net.officefloor.compile.managedfunction.ManagedFunctionType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.ExecutionManagedFunction;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.extension.OfficeExtensionContext;
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.web.build.HttpInputExplorerContext;
 import net.officefloor.web.build.WebArchitect;
@@ -52,6 +55,48 @@ import net.officefloor.woof.WoofExtensionServiceFactory;
 public class OpenApiWoofExtensionService implements WoofExtensionService, WoofExtensionServiceFactory {
 
 	/**
+	 * {@link Property} name to disable OpenAPI. This is useful for different
+	 * environments to be configured differently.
+	 */
+	public static final String PROPERTY_DISABLE_OPEN_API = "openapi.disable";
+
+	/**
+	 * {@link Property} name for the OpenAPI JSON path.
+	 */
+	public static final String PROPERTY_JSON_PATH = "openapi.json.path";
+
+	/**
+	 * Default JSON path.
+	 */
+	public static final String DEFAULT_JSON_PATH = "/openapi.json";
+
+	/**
+	 * {@link Property} name for the OpenAPI YAML path.
+	 */
+	public static final String PROPERTY_YAML_PATH = "openapi.yaml.path";
+
+	/**
+	 * Default YAML path.
+	 */
+	public static final String DEFAULT_YAML_PATH = "/openapi.yaml";
+
+	/**
+	 * {@link Property} name to disable Swagger UI. This is useful to only expose
+	 * the OpenAPI specifications, as Swagger UI likely hosted elsewhere.
+	 */
+	public static final String PROPERTY_DISABLE_SWAGGER = "swagger.ui.disable";
+
+	/**
+	 * {@link Property} name for the Swagger UI path.
+	 */
+	public static final String PROPERTY_SWAGGER_PATH = "swagger.ui.path";
+
+	/**
+	 * Default swagger path.
+	 */
+	public static final String DEFAULT_SWAGGER_PATH = "/swagger";
+
+	/**
 	 * Obtains or adds the {@link Components} from the {@link OpenAPI}
 	 * 
 	 * @param openApi {@link OpenAPI}.
@@ -78,9 +123,21 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 	@Override
 	public void extend(WoofContext context) throws Exception {
 
-		final String JSON_PATH = "/openapi.json";
-		final String YAML_PATH = "/openapi.yaml";
-		final Set<String> SELF_REGISTERED_PATHS = new HashSet<>(Arrays.asList(JSON_PATH, YAML_PATH));
+		// Obtain the office context
+		OfficeExtensionContext officeContext = context.getOfficeExtensionContext();
+
+		// Determine if provide OpenAPI
+		boolean isDisableOpenApi = Boolean
+				.parseBoolean(officeContext.getProperty(PROPERTY_DISABLE_OPEN_API, Boolean.FALSE.toString()));
+		if (isDisableOpenApi) {
+			return; // don't extend, as disabled
+		}
+
+		// Load the paths
+		final String openApiJsonPath = officeContext.getProperty(PROPERTY_JSON_PATH, DEFAULT_JSON_PATH);
+		final String openApiYamlPath = officeContext.getProperty(PROPERTY_YAML_PATH, DEFAULT_YAML_PATH);
+		final String swaggerPath = officeContext.getProperty(PROPERTY_SWAGGER_PATH, DEFAULT_SWAGGER_PATH);
+		final Set<String> SELF_REGISTERED_PATHS = new HashSet<>(Arrays.asList(openApiJsonPath, openApiYamlPath));
 
 		// Obtain the web architect
 		WebArchitect web = context.getWebArchitect();
@@ -90,14 +147,14 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 
 		// Load the security extensions
 		List<OpenApiSecurityExtension> securityExtensions = new ArrayList<>();
-		for (OpenApiSecurityExtension extension : context.getOfficeExtensionContext()
+		for (OpenApiSecurityExtension extension : officeContext
 				.loadOptionalServices(OpenApiSecurityExtensionServiceFactory.class)) {
 			securityExtensions.add(extension);
 		}
 
 		// Load the operation extensions
 		List<OpenApiOperationExtension> operationExtensions = new ArrayList<>();
-		for (OpenApiOperationExtension extension : context.getOfficeExtensionContext()
+		for (OpenApiOperationExtension extension : officeContext
 				.loadOptionalServices(OpenApiOperationExtensionServiceFactory.class)) {
 			operationExtensions.add(extension);
 		}
@@ -218,7 +275,7 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 
 			// Obtain the escalation class
 			String escalationType = explore.getOfficeEscalationType();
-			Class<?> escalationClass = context.getOfficeExtensionContext().loadClass(escalationType);
+			Class<?> escalationClass = officeContext.loadClass(escalationType);
 
 			// Determine if operation builder requires escalation
 			for (OperationBuilder operationBuilder : operationBuilders) {
@@ -259,46 +316,55 @@ public class OpenApiWoofExtensionService implements WoofExtensionService, WoofEx
 		// Serve up the Open API
 		OfficeSection service = office.addOfficeSection("OPEN_API", new OpenApiSectionSource(openApi), null);
 
+		// Transform path for configuration
+		Function<String, String> transformPath = (path) -> path.startsWith("/") ? path : "/" + path;
+
 		// Serve the JSON
-		office.link(web.getHttpInput(false, JSON_PATH).getInput(),
+		office.link(web.getHttpInput(false, transformPath.apply(openApiJsonPath)).getInput(),
 				service.getOfficeSectionInput(OpenApiSectionSource.JSON));
 
 		// Serve the YAML
-		office.link(web.getHttpInput(false, YAML_PATH).getInput(),
+		office.link(web.getHttpInput(false, transformPath.apply(openApiYamlPath)).getInput(),
 				service.getOfficeSectionInput(OpenApiSectionSource.YAML));
 
-		// Load the verison of Swagger UI
-		String swaggerVersion;
-		try (InputStream swaggerVersionInput = context.getOfficeExtensionContext()
-				.getResource("META-INF/maven/org.webjars.npm/swagger-ui-dist/pom.properties")) {
-			Properties properties = new Properties();
-			properties.load(swaggerVersionInput);
-			swaggerVersion = properties.getProperty("version");
-		}
+		// Determine if disable Swagger UI
+		boolean isDisableSwagger = Boolean
+				.parseBoolean(officeContext.getProperty(PROPERTY_DISABLE_SWAGGER, Boolean.FALSE.toString()));
+		if (!isDisableSwagger) {
 
-		// Provide Swagger UI
-		HttpResourceArchitect resource = context.getHttpResourceArchitect();
-		HttpResourcesBuilder swaggerResourcesBuilder = resource
-				.addHttpResources("classpath:META-INF/resources/webjars/swagger-ui-dist/" + swaggerVersion);
-		swaggerResourcesBuilder.setContextPath("/swagger");
-		swaggerResourcesBuilder.addResourceTransformer((transform) -> {
-			// Determine if index.html
-			if (transform.getPath().equals("/index.html")) {
-
-				// Obtain the raw content
-				Path rawIndexHtml = transform.getResource();
-				String rawContent = Files.readString(rawIndexHtml);
-
-				// Provide appropriate URL to OpenApi
-				String applicationContent = rawContent.toString().replace("https://petstore.swagger.io/v2/swagger.json",
-						"/openapi.json");
-
-				// Write the content
-				Path applicationIndexHtml = transform.createFile();
-				Files.writeString(applicationIndexHtml, applicationContent);
-				transform.setTransformedResource(applicationIndexHtml);
+			// Load the version of Swagger UI
+			String swaggerVersion;
+			try (InputStream swaggerVersionInput = officeContext
+					.getResource("META-INF/maven/org.webjars.npm/swagger-ui-dist/pom.properties")) {
+				Properties properties = new Properties();
+				properties.load(swaggerVersionInput);
+				swaggerVersion = properties.getProperty("version");
 			}
-		});
+
+			// Provide Swagger UI
+			HttpResourceArchitect resource = context.getHttpResourceArchitect();
+			HttpResourcesBuilder swaggerResourcesBuilder = resource
+					.addHttpResources("classpath:META-INF/resources/webjars/swagger-ui-dist/" + swaggerVersion);
+			swaggerResourcesBuilder.setContextPath(swaggerPath);
+			swaggerResourcesBuilder.addResourceTransformer((transform) -> {
+				// Determine if index.html
+				if (transform.getPath().equals("/index.html")) {
+
+					// Obtain the raw content
+					Path rawIndexHtml = transform.getResource();
+					String rawContent = Files.readString(rawIndexHtml);
+
+					// Provide appropriate URL to OpenApi
+					String applicationContent = rawContent.toString()
+							.replace("https://petstore.swagger.io/v2/swagger.json", openApiJsonPath);
+
+					// Write the content
+					Path applicationIndexHtml = transform.createFile();
+					Files.writeString(applicationIndexHtml, applicationContent);
+					transform.setTransformedResource(applicationIndexHtml);
+				}
+			});
+		}
 	}
 
 	/**

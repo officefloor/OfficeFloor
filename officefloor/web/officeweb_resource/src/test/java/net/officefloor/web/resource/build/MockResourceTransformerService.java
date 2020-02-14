@@ -27,6 +27,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.Assert;
 
 import net.officefloor.frame.api.source.ServiceContext;
 import net.officefloor.web.resource.spi.ResourceTransformer;
@@ -46,6 +50,11 @@ public class MockResourceTransformerService
 	 * Resource path.
 	 */
 	public String resourcePath = null;
+
+	/**
+	 * Set of existing transformed paths.
+	 */
+	private Set<String> transformedPaths = new HashSet<>();
 
 	/*
 	 * ================== ResourceTransformerService ================
@@ -79,6 +88,11 @@ public class MockResourceTransformerService
 
 		// Capture the resource path
 		this.resourcePath = context.getPath();
+
+		// Ensure path only transformed once
+		Assert.assertFalse("Should only transform path once: " + this.resourcePath,
+				this.transformedPaths.contains(this.resourcePath));
+		this.transformedPaths.add(this.resourcePath);
 
 		// Obtain the resource to transform
 		Path resource = context.getResource();

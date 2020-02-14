@@ -167,7 +167,7 @@ public class OpenApiSectionSource extends AbstractSectionSource {
 						ServerHttpConnection connection = (ServerHttpConnection) managedFunctionContext
 								.getObject(Dependencies.SERVER_HTTP_CONNECTION);
 						HttpResponse response = connection.getResponse();
-						response.setContentType("application/json", null);
+						response.setContentType("application/yaml", null);
 						response.getEntityWriter().write(yamlContent);
 
 					}, Dependencies.class, None.class);
