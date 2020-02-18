@@ -221,6 +221,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 	public static class TagService {
 		@Tag(name = "NAME", description = "DESCRIPTION")
 		public void service() {
+			// no operation
 		}
 	}
 
@@ -238,6 +239,7 @@ public class OpenApiTest extends OfficeFrameTestCase {
 		@Tag(name = "THREE", description = "Third")
 		@Tag(name = "THREE")
 		public void service() {
+			// no operation
 		}
 	}
 
